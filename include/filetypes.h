@@ -32,7 +32,7 @@ namespace alice
     {
         auto name = boost::filesystem::path{filename}.stem().string();
         auto ln = std::make_shared<logic_network>(std::move(name));
-        lorina::read_verilog(filename, verilog_parser(ln));
+        lorina::read_verilog(filename, verilog_parser{ln});
 
         cmd.store<logic_network_ptr>().extend();
 
@@ -49,6 +49,7 @@ namespace alice
      */
     ALICE_WRITE_FILE(fcn_cell_layout_ptr, qca, fcl, filename, cmd)
     {
+        (void)cmd; // fix compiler warning
         qca::write(fcl, filename);
     }
 }

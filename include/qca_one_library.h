@@ -24,27 +24,27 @@ public:
      * doing so. That means, construction of a qca_one_library object can fail with an exception. This is intended!
      * See commands.h for details on usage.
      */
-    qca_one_library(fcn_gate_layout_ptr fgl);
+    explicit qca_one_library(fcn_gate_layout_ptr&& fgl);
     /**
-     * Default copy constructor.
+     * Copy constructor is not available.
      */
-    qca_one_library(const qca_one_library& qol) noexcept = default;
+    qca_one_library(const qca_one_library& qol) = delete;
     /**
-     * Default move constructor.
+     * Move constructor is not available.
      */
-    qca_one_library(qca_one_library&& qol) noexcept = default;
+    qca_one_library(qca_one_library&& qol) = delete;
     /**
      * Default destructor.
      */
     ~qca_one_library() override = default;
     /**
-     * Default assignment operator.
+     * Assignment operator is not available.
      */
-    qca_one_library& operator=(const qca_one_library& rhs) noexcept = default;
+    qca_one_library& operator=(const qca_one_library& rhs) = delete;
     /**
-     * Default move operator.
+     * Move operator is not available.
      */
-    qca_one_library& operator=(qca_one_library&& rhs) noexcept = default;
+    qca_one_library& operator=(qca_one_library&& rhs) = delete;
     /**
      * Overrides the corresponding function in fcn_gate_library. Given a tile t, this function takes all necessary
      * information from the stored grid into accout to choose the correct fcn_gate representation for that tile. May it

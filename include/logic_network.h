@@ -53,17 +53,17 @@ public:
      */
     explicit logic_network(std::string&& name) noexcept;
     /**
-     * Copy constructor. Keeps track of the primary input and output references.
+     * Copy constructor.
      */
     logic_network(const logic_network& ln) noexcept;
     /**
-     * Move constructor. Keeps track of the primary input and output references.
+     * Move constructor.
      */
     logic_network(logic_network&& ln) noexcept;
     /**
      * Default destructor.
      */
-    ~logic_network() = default;
+    ~logic_network() override = default;
     /**
      * Assignment operator is not available.
      */
@@ -142,7 +142,7 @@ public:
      * @return get_edge(args).
      */
     template <typename... ARGS>
-    auto get_edge(ARGS&& ... args) const noexcept
+    auto get_edge(ARGS&&... args) const noexcept
     {
         return bidirectional_graph::get_edge(std::forward<ARGS>(args)...);
     }
@@ -238,7 +238,7 @@ public:
      */
     auto vertices(const bool ios = false, const bool consts = false) const noexcept
     {
-        auto logic_selector = [=](const vertex _v) -> bool
+        auto logic_selector = [this, ios = ios, consts = consts](const vertex _v) -> bool
         {
             // do neither return consts nor I/Os
             if (!ios && !consts)
@@ -267,7 +267,7 @@ public:
      */
     auto adjacent_vertices(const vertex v, const bool ios = false, const bool consts = false) const noexcept
     {
-        auto logic_selector = [=](const vertex _v) -> bool
+        auto logic_selector = [this, ios = ios, consts = consts](const vertex _v) -> bool
         {
             // do neither return consts nor I/Os
             if (!ios && !consts)
@@ -296,7 +296,7 @@ public:
      */
     auto inv_adjacent_vertices(const vertex v, const bool ios = false, const bool consts = false) const noexcept
     {
-        auto logic_selector = [=](const vertex _v) -> bool
+        auto logic_selector = [this, ios = ios, consts = consts](const vertex _v) -> bool
         {
             // do neither return consts nor I/Os
             if (!ios && !consts)
@@ -336,7 +336,7 @@ public:
      */
     auto edges(const bool ios = false, const bool consts = false) const noexcept
     {
-        auto logic_selector = [=](const edge& _e) -> bool
+        auto logic_selector = [this, ios = ios, consts = consts](const edge& _e) -> bool
         {
             auto _s = source(_e), _t = target(_e);
             // do neither return consts nor I/Os
@@ -366,7 +366,7 @@ public:
      */
     auto out_edges(const vertex v, const bool ios = false, const bool consts = false) const noexcept
     {
-        auto logic_selector = [=](const edge& _e) -> bool
+        auto logic_selector = [this, ios = ios, consts = consts](const edge& _e) -> bool
         {
             auto _t = target(_e);
             // do neither return consts nor I/Os
@@ -396,7 +396,7 @@ public:
      */
     auto in_edges(const vertex v, const bool ios = false, const bool consts = false) const noexcept
     {
-        auto logic_selector = [=](const edge& _e) -> bool
+        auto logic_selector = [this, ios = ios, consts = consts](const edge& _e) -> bool
         {
             auto _s = source(_e);
             // do neither return consts nor I/Os
@@ -608,9 +608,9 @@ private:
      */
     port_map io_port_map{};
     /**
-     * Pointers to the constant nodes 1 and 0.
+     * Pointers to the constant nodes 0 and 1.
      */
-    std::unique_ptr<vertex> one, zero;
+    std::unique_ptr<vertex> zero, one;
 };
 
 using logic_network_ptr = std::shared_ptr<logic_network>;

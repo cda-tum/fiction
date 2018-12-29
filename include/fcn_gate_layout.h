@@ -8,6 +8,7 @@
 #include "fcn_layout.h"
 #include "logic_network.h"
 #include "directions.h"
+#include "energy_model.h"
 #include <boost/optional.hpp>
 #include <boost/bimap.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
@@ -109,27 +110,27 @@ public:
      *
      * @param ln Pointer to a logic network whose elements should be assigned to this layout.
      */
-    fcn_gate_layout(logic_network_ptr ln) noexcept;
+    explicit fcn_gate_layout(logic_network_ptr ln) noexcept;
     /**
-     * Default copy constructor.
+     * Copy constructor is not available.
      */
-    fcn_gate_layout(const fcn_gate_layout& fgl) noexcept = default;
+    fcn_gate_layout(const fcn_gate_layout& fgl) = delete;
     /**
      * Default move constructor.
      */
-    fcn_gate_layout(fcn_gate_layout&& fgl) noexcept = default;
+    fcn_gate_layout(fcn_gate_layout&& fgl) = default;
     /**
      * Default destructor.
      */
-    ~fcn_gate_layout() = default;
+    ~fcn_gate_layout() override = default;
     /**
-     * Default assignment operator.
+     * Assignment operator is not available.
      */
-    fcn_gate_layout& operator=(const fcn_gate_layout& rhs) noexcept = default;
+    fcn_gate_layout& operator=(const fcn_gate_layout& rhs) = delete;
     /**
-     * Default move operator.
+     * Move operator is not available.
      */
-    fcn_gate_layout& operator=(fcn_gate_layout&& rhs) noexcept = default;
+    fcn_gate_layout& operator=(fcn_gate_layout&& rhs) = delete;
 
     /**
      * Function alias for get_vertices using perfect forwarding and the name tiles to fit naming in fcn_gate_layout.
@@ -153,7 +154,7 @@ public:
     auto incoming_clocked_tiles(const tile& t) const noexcept
     {
         return surrounding_2d(t) |
-               iter::filter([&](const tile& _t)
+               iter::filter([this, t = t](const tile& _t)
                             {
                                 if (!tile_clocking(t) || !tile_clocking(_t))
                                     return false;
@@ -172,7 +173,7 @@ public:
     auto outgoing_clocked_tiles(const tile& t) const noexcept
     {
         return surrounding_2d(t) |
-               iter::filter([&](const tile& _t)
+               iter::filter([this, t = t](const tile& _t)
                             {
                                 if (!tile_clocking(t) || !tile_clocking(_t))
                                     return false;
@@ -383,8 +384,7 @@ public:
      */
     auto crossing_count() const noexcept
     {
-        return std::count_if(crossing_layers().begin(), crossing_layers().end(),
-                             [&](const tile& _t){return !is_free_tile(_t);});
+        return std::count_if(e_map.cbegin(), e_map.cend(), [this](auto& te){return te.first[Z] != GROUND;});
     }
     /**
      * Assigns tile t with input directions d. The given directions will be added to the existing ones.
@@ -602,8 +602,8 @@ public:
                 min_y{min_y},
                 max_x{max_x},
                 max_y{max_y},
-                x_size{max_x - min_x},
-                y_size{max_y - min_y}
+                x_size{max_x == 0u && min_x == 0u ? 0u : (max_x - min_x) + 1u},
+                y_size{max_y == 0u && min_y == 0u ? 0u : (max_y - min_y) + 1u}
         {}
         /**
          * Corners of bounding box.
@@ -636,6 +636,17 @@ public:
      * all maps would not work properly anymore.
      */
     void shrink_to_fit() noexcept;
+    /**
+     * Energy information slow (25 GHz) and fast (100 GHz).
+     */
+    using energy_info = std::pair<float, float>;
+    /**
+     * Calculates energy dissipation of the layout by taking into account the energy model proposed by Frank Sill Torres
+     * et al. in TCAD 2018. Information about slow clocking (25 GHz) and fast clocking (100 GHz) energy is returned.
+     *
+     * @return An std::pair containing slow and fast energy dissipation in meV.
+     */
+    energy_info calculate_energy() const noexcept;
     /**
      * Prints the assigned logic operations and edges to the given std::ostream channel. A textual representation of
      * assigned objects is used as provided by the type operations. Currently only one crossing layer can be represented

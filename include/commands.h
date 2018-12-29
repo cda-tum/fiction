@@ -103,14 +103,12 @@ namespace alice
             }
 
             // perform exact P&R
-            exact_pr pr{s.current(), std::move(config)};
+            exact_pr pr{std::move(s.current()), std::move(config)};
             auto result = pr.perform_place_and_route();
-
-            auto l = pr.get_layout();
 
             if (result.success)
             {
-                store<fcn_gate_layout_ptr>().extend() = pr.get_layout();
+                store<fcn_gate_layout_ptr>().extend() = std::move(pr.get_layout());
                 pr_result = result.json;
             }
             else
@@ -187,12 +185,12 @@ namespace alice
             }
 
             // perform heuristic P&R
-            orthogonal_pr pr{s.current()};
+            orthogonal_pr pr{std::move(s.current())};
             auto result = pr.perform_place_and_route();
 
             if (result.success)
             {
-                store<fcn_gate_layout_ptr>().extend() = pr.get_layout();
+                store<fcn_gate_layout_ptr>().extend() = std::move(pr.get_layout());
                 pr_result = result.json;
             }
             else
@@ -258,7 +256,7 @@ namespace alice
             try
             {
                 if (library == 0u)
-                    lib = std::make_shared<qca_one_library>(s.current());
+                    lib = std::make_shared<qca_one_library>(std::move(s.current()));
                 // else if (library == 1u)
                     // more libraries go here
                 else
@@ -276,7 +274,7 @@ namespace alice
             fcn_cell_layout_ptr fcl = nullptr;
             try
             {
-                fcl = std::make_shared<fcn_cell_layout>(lib);
+                fcl = std::make_shared<fcn_cell_layout>(std::move(lib));
             }
             catch (...)
             {
@@ -285,7 +283,7 @@ namespace alice
             }
 
             // store new layout
-            store<fcn_cell_layout_ptr>().extend() = fcl;
+            store<fcn_cell_layout_ptr>().extend() = std::move(fcl);
         }
 
     private:

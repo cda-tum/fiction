@@ -445,10 +445,10 @@ public:
      */
     vertices_t topological_sort() const noexcept
     {
-        vertices_t topoOrder;
-        boost::topological_sort(graph, std::back_inserter(topoOrder));
+        vertices_t topo_order;
+        boost::topological_sort(graph, std::back_inserter(topo_order));
 
-        return topoOrder;
+        return topo_order;
     }
 //    /**
 //     * Determines whether the stored graph is planar i.e. whether it does not contain a Kuratowski subgraph.

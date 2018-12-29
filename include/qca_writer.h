@@ -25,7 +25,6 @@ namespace qca
                                              "[#TYPE:QCADDesignObject]\n[#TYPE:QCADStretchyObject]\n"
                                              "grid_spacing=20.000000\n[#TYPE:QCADSubstrate]\n[#TYPE:QCADLayer]\n";
 
-//    constexpr const char* OPEN_DESIGN = "[TYPE:DESIGN]\n";
     constexpr const char* CLOSE_DESIGN = "[#TYPE:DESIGN]";  // no new line to use std::endl to flush stream
     constexpr const char* OPEN_QCAD_LAYER = "[TYPE:QCADLayer]\n";
     constexpr const char* CLOSE_QCAD_LAYER = "[#TYPE:QCADLayer]\n";

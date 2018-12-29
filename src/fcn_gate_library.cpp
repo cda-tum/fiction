@@ -5,18 +5,20 @@
 #include "fcn_gate_library.h"
 
 
-fcn_gate_library::fcn_gate_library(fcn_gate_layout_ptr fgl, const fcn::technology tech, const fcn::tile_size size) noexcept
+fcn_gate_library::fcn_gate_library(std::string&& name, fcn_gate_layout_ptr&& fgl,
+                                   const fcn::technology tech, const fcn::tile_size size) noexcept
         :
-        layout{fgl},
+        name{std::move(name)},
+        layout{std::move(fgl)},
         technology{tech},
         tile_size{size},
         x_size{static_cast<std::size_t>(size)},
         y_size{static_cast<std::size_t>(size)},
         empty_gate{fcn_gate(y_size, std::vector<fcn::cell_type>(x_size, fcn::EMPTY_CELL))},
-        p_router{std::make_shared<port_router>(fgl, tech, size)}
+        p_router{std::make_shared<port_router>(layout, tech, size)}
 {}
 
-fcn_gate_library::~fcn_gate_library() {}
+fcn_gate_library::~fcn_gate_library() = default;
 
 fcn_gate fcn_gate_library::rotate_90(const fcn_gate& g) const noexcept
 {
@@ -50,6 +52,11 @@ fcn_gate fcn_gate_library::merge(const std::vector<fcn_gate>& gates) const noexc
     }
 
     return merged;
+}
+
+std::string fcn_gate_library::get_name() const noexcept
+{
+    return name;
 }
 
 fcn_gate_layout_ptr fcn_gate_library::get_layout() const noexcept
@@ -101,7 +108,6 @@ fcn_gate fcn_gate_library::reverse_columns(const fcn_gate& g) const noexcept
 
     std::for_each(std::begin(rev_cols), std::end(rev_cols),
                   [](auto& i) {std::reverse(std::begin(i), std::end(i));});
-
     return rev_cols;
 }
 

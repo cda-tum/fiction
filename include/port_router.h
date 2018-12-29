@@ -111,7 +111,7 @@ public:
         /**
          * Standard constructor.
          */
-        port_list(std::set<port> inp, std::set<port> out) : inp{inp}, out{out} {}
+        port_list(std::set<port> inp, std::set<port> out) : inp{std::move(inp)}, out{std::move(out)} {}
         /**
          * Input and output positions.
          */

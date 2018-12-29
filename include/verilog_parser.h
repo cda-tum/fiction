@@ -149,6 +149,7 @@ public:
      */
     void on_clock_assign(const std::vector<std::pair<std::string, bool>>& edges, const std::string& lhs, const std::pair<std::string, bool>& rhs) const override
     {
+        (void)edges; // fix compiler warning
         auto reg = signals[lhs];
         auto sig = signals[rhs.first];
         ln->create_edge(rhs.second ? ln->create_not(sig) : sig, reg);

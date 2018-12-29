@@ -8,31 +8,31 @@
 fcn_gate_layout::fcn_gate_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocking, logic_network_ptr ln) noexcept
         :
         fcn_layout(std::move(lengths), std::move(clocking)),
-        network(ln)
+        network(std::move(ln))
 {}
 
 fcn_gate_layout::fcn_gate_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme&& clocking, logic_network_ptr ln) noexcept
         :
         fcn_layout(fcn_dimension_xyz{lengths[X], lengths[Y], 2}, std::move(clocking)),
-        network(ln)
+        network(std::move(ln))
 {}
 
 fcn_gate_layout::fcn_gate_layout(fcn_dimension_xy&& lengths, logic_network_ptr ln) noexcept
         :
         fcn_layout(fcn_dimension_xyz{lengths[X], lengths[Y], 2}, std::move(open_4_clocking)),
-        network(ln)
+        network(std::move(ln))
 {}
 
 fcn_gate_layout::fcn_gate_layout(fcn_clocking_scheme&& clocking, logic_network_ptr ln) noexcept
         :
         fcn_layout(fcn_dimension_xyz{2, 2, 2}, std::move(clocking)),
-        network(ln)
+        network(std::move(ln))
 {}
 
 fcn_gate_layout::fcn_gate_layout(logic_network_ptr ln) noexcept
         :
         fcn_layout(fcn_dimension_xyz{2, 2, 2}, std::move(open_4_clocking)),
-        network(ln)
+        network(std::move(ln))
 {}
 
 bool fcn_gate_layout::is_border_tile(const tile& t) const noexcept
@@ -592,8 +592,7 @@ std::vector<std::string> fcn_gate_layout::get_inp_names(const tile& t) const noe
     }
     else
     {
-        auto v = get_logic_vertex(t);
-        if (v)
+        if (auto v = get_logic_vertex(t))
         {
             for (auto&& iav : network->inv_adjacent_vertices(*v, true))
             {
@@ -617,8 +616,7 @@ std::vector<std::string> fcn_gate_layout::get_out_names(const tile& t) const noe
     }
     else
     {
-        auto v = get_logic_vertex(t);
-        if (v)
+        if (auto v = get_logic_vertex(t))
         {
             for (auto&& av : network->adjacent_vertices(*v, true))
             {
@@ -723,6 +721,79 @@ void fcn_gate_layout::shrink_to_fit() noexcept
     resize(fcn_dimension_xyz{bb.max_x + 1, bb.max_y + 1, z()});
 }
 
+fcn_gate_layout::energy_info fcn_gate_layout::calculate_energy() const noexcept
+{
+    float slow_energy = 0.0f, fast_energy = 0.0f;
+
+    auto num_wires = wire_count();
+    auto num_crossings = crossing_count();
+
+    // adding wire energy (subtract 2 wires for each crossing)
+    slow_energy += (num_wires - num_crossings * 2) * energy::WIRE_SLOW;
+    fast_energy += (num_wires - num_crossings * 2) * energy::WIRE_FAST;
+
+    // adding crossing energy
+    slow_energy += num_crossings * energy::CROSSING_SLOW;
+    fast_energy += num_crossings * energy::CROSSING_FAST;
+
+    // counting gates
+    auto num_inv_s = 0u, num_inv_b = 0u, num_and = 0u, num_or = 0u, num_maj = 0u, num_fan_out = 0u;
+
+    for (auto&& tv : v_map.left)
+    {
+        auto t = tv.first;
+        switch (get_op(t))
+        {
+            case operation::NOT:
+            {
+                // inputs are opposite to outputs --> straight inverter
+                if (get_tile_inp_dirs(t) == layout::opposite(get_tile_out_dirs(t)))
+                    ++num_inv_s;
+                else  // else bent inverter
+                    ++num_inv_b;
+                break;
+            }
+            case operation::AND:
+                ++num_and;
+                break;
+            case operation::OR:
+                ++num_or;
+                break;
+            case operation::MAJ:
+                ++num_maj;
+                break;
+            case operation::F1O2:
+            case operation::F1O3:  // TODO do 1-3-Fan-outs have the same energy dissipation?
+                ++num_fan_out;
+                break;
+            default:
+                break;
+        }
+    }
+
+    // adding inverter energy
+    slow_energy += num_inv_s * energy::INVERTER_STRAIGHT_SLOW + num_inv_b * energy::INVERTER_BENT_SLOW;
+    fast_energy += num_inv_s * energy::INVERTER_STRAIGHT_FAST + num_inv_b * energy::INVERTER_BENT_FAST;
+
+    // adding conjunction energy
+    slow_energy += num_and * energy::AND_SLOW;
+    fast_energy += num_and * energy::AND_FAST;
+
+    // adding disjunction energy
+    slow_energy += num_or * energy::OR_SLOW;
+    fast_energy += num_or * energy::OR_FAST;
+
+    // adding majority energy
+    slow_energy += num_maj * energy::MAJORITY_SLOW;
+    fast_energy += num_maj * energy::MAJORITY_FAST;
+
+    // adding fan-out energy
+    slow_energy += num_fan_out * energy::FANOUT_SLOW;
+    fast_energy += num_fan_out * energy::FANOUT_FAST;
+
+    return std::make_pair(slow_energy, fast_energy);
+}
+
 void fcn_gate_layout::write_layout(std::ostream& os, bool io_color, bool clk_color) const noexcept
 {
     // empty layout
@@ -756,12 +827,18 @@ void fcn_gate_layout::write_layout(std::ostream& os, bool io_color, bool clk_col
                 ops[i][j] = str(o);
 
             // determine outgoing directions
-            if (is_tile_out_dir(t1, layout::DIR_E) || is_tile_out_dir(t2, layout::DIR_E))
+            if ((is_tile_out_dir(t1, layout::DIR_E) && is_tile_out_dir(tile{j + 1, i, GROUND}, layout::DIR_W)) ||
+                (is_tile_out_dir(t2, layout::DIR_E) && is_tile_out_dir(tile{j + 1, i, GROUND + 1}, layout::DIR_W)))
+                x_dirs[i][j] = "↔";
+            else if (is_tile_out_dir(t1, layout::DIR_E) || is_tile_out_dir(t2, layout::DIR_E))
                 x_dirs[i][j] = "→";
             if ((is_tile_out_dir(t1, layout::DIR_W) || is_tile_out_dir(t2, layout::DIR_W)) && j > 0u) // safety check to prevent SEGFAULT
                 x_dirs[i][j - 1u] = "←";
 
-            if (is_tile_out_dir(t1, layout::DIR_N) || is_tile_out_dir(t2, layout::DIR_N))
+            if ((is_tile_out_dir(t1, layout::DIR_N) && is_tile_out_dir(tile{j, i - 1, GROUND}, layout::DIR_S)) ||
+                (is_tile_out_dir(t2, layout::DIR_N) && is_tile_out_dir(tile{j, i - 1, GROUND + 1}, layout::DIR_S)))
+                y_dirs[i][j] = "↕";
+            else if (is_tile_out_dir(t1, layout::DIR_N) || is_tile_out_dir(t2, layout::DIR_N))
                 y_dirs[i][j] = "↑";
             if (is_tile_out_dir(t1, layout::DIR_S) || is_tile_out_dir(t2, layout::DIR_S))
                 y_dirs[i + 1u][j] = "↓";
@@ -772,7 +849,7 @@ void fcn_gate_layout::write_layout(std::ostream& os, bool io_color, bool clk_col
     const char* INP_COLOR = "\033[38;5;28m";
     // Escape color sequence for output colors (red).
     const char* OUT_COLOR = "\033[38;5;166m";
-    // Escape color sequence for latch colors (inverse).
+    // Escape color sequence for latch colors (yellow on black).
     const char* LATCH_COLOR = "\033[48;5;232;38;5;226m";
     // Escape color sequence for resetting colors.
     const char* COLOR_RESET = "\033[0m";
@@ -797,7 +874,7 @@ void fcn_gate_layout::write_layout(std::ostream& os, bool io_color, bool clk_col
 
             if (clk_color && tile_clocking(t))
                 os << CLOCK_COLORS[*tile_clocking(t)];
-            if (io_color && (get_latch(t) > 0))
+            if (io_color && (get_latch(t) > 0u))
                 os << LATCH_COLOR;
             if (io_color && is_pi(t))
                 os << INP_COLOR;

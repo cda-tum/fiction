@@ -21,13 +21,13 @@ fcn_cell_layout::fcn_cell_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme
         name{name}
 {}
 
-fcn_cell_layout::fcn_cell_layout(fcn_gate_library_ptr library)
+fcn_cell_layout::fcn_cell_layout(fcn_gate_library_ptr&& lib)
         :
-        fcn_layout(fcn_dimension_xyz{library->get_layout()->x() * library->gate_x_size(),
-                                     library->get_layout()->y() * library->gate_y_size(),
-                                     library->get_layout()->z()},
-                   std::move(library->get_layout()->clocking)),
-        library(library),
+        fcn_layout(fcn_dimension_xyz{lib->get_layout()->x() * lib->gate_x_size(),
+                                     lib->get_layout()->y() * lib->gate_y_size(),
+                                     lib->get_layout()->z()},
+                   std::move(lib->get_layout()->clocking)),
+        library(std::move(lib)),
         technology{library->get_technology()},
         name{library->get_layout()->get_name()}
 {
@@ -84,7 +84,7 @@ fcn::cell_mode fcn_cell_layout::get_cell_mode(const cell& c) const noexcept
 
 void fcn_cell_layout::assign_cell_name(const cell& c, const std::string& n) noexcept
 {
-    if (n == "")
+    if (n.empty())
         name_map.erase(c);
     else
         name_map[c] = n;
@@ -180,6 +180,50 @@ std::string fcn_cell_layout::get_name() const noexcept
     return name;
 }
 
+void fcn_cell_layout::write_layout(std::ostream& os, bool io_color) const noexcept
+{
+    // Escape color sequence for input colors (green).
+    const char* INP_COLOR = "\033[38;5;28m";
+    // Escape color sequence for output colors (red).
+    const char* OUT_COLOR = "\033[38;5;166m";
+    // Escape color sequence for latch colors (yellow on black).
+    const char* LATCH_COLOR = "\033[48;5;232;38;5;226m";
+    // Escape color sequence for resetting colors.
+    const char* COLOR_RESET = "\033[0m";
+
+    for (auto y_pos : iter::range(y()))
+    {
+        for (auto x_pos : iter::range(x()))
+        {
+            cell c{x_pos, y_pos, GROUND};
+
+            auto type_0 = get_cell_type(c);
+            auto type_1 = get_cell_type(above(c));
+
+            // is crossing
+            if (type_1 != fcn::EMPTY_CELL)
+                os << std::string(1u, type_1);
+            else
+            {
+                if (io_color && get_latch(c) > 0u)
+                    os << LATCH_COLOR;
+                if (io_color && type_0 == fcn::INPUT_CELL)
+                    os << INP_COLOR;
+                else if (io_color && type_0 == fcn::OUTPUT_CELL)
+                    os << OUT_COLOR;
+
+                os << (type_0 == fcn::NORMAL_CELL ? "▢" : std::string(1u, type_0)) << COLOR_RESET;
+            }
+        }
+        os << std::endl;
+    }
+
+    // print legend
+    if (io_color)
+        std::cout << std::endl << "Legend: " << LATCH_COLOR << "L" << COLOR_RESET << ", "
+                  << INP_COLOR << "I" << COLOR_RESET << ", " << OUT_COLOR << "O" << COLOR_RESET << std::endl;
+}
+
 void fcn_cell_layout::map_irregular_clocking()
 {
     auto layout = library->get_layout();
@@ -189,8 +233,7 @@ void fcn_cell_layout::map_irregular_clocking()
         std::size_t x = c[X] / library->gate_x_size(), y = c[Y] / library->gate_y_size();
         auto t = (*layout)(x, y);
 
-        auto clk = layout->tile_clocking(t);
-        if (clk)
+        if (auto clk = layout->tile_clocking(t))
             assign_clocking(c, *clk);
     }
 }

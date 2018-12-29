@@ -37,12 +37,11 @@ public:
     /**
      * Standard constructor.
      *
-     * @param ln Netlist.
-     * @param config Configuration object storing all flags and so on.
+     * @param ln Logic network.
      */
-    place_route(std::shared_ptr<logic_network> ln)
+    explicit place_route(std::shared_ptr<logic_network>&& ln)
             :
-            network{ln}
+            network{std::move(ln)}
     {}
     /**
      * Default destructor. Declared as virtual to manage memory correctly.
@@ -68,7 +67,7 @@ public:
      * Starts the P&R process. This function need to be overridden by each sub-class.
      * It returns a PRResult from which one can extract all crucial information about the process.
      *
-     * @return PRResult containing placed and routed layout as well as statistical information.
+     * @return pr_result containing placed and routed layout as well as statistical information.
      */
     virtual pr_result perform_place_and_route() = 0;
     /**
@@ -92,11 +91,11 @@ public:
 
 protected:
     /**
-     * Netlist to be mapped to a layout.
+     * Logic network to be mapped to a layout.
      */
     logic_network_ptr network = nullptr;
     /**
-     * Actual layout to which a netlist should be mapped.
+     * Actual layout to which a logic network should be mapped.
      */
     fcn_gate_layout_ptr layout = nullptr;
     /**

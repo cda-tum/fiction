@@ -6,7 +6,7 @@
 
 port_router::port_router(fcn_gate_layout_ptr fgl, const fcn::technology t, const fcn::tile_size s)
         :
-        layout{fgl},
+        layout{std::move(fgl)},
         tech{t},
         size{s}
 {}

@@ -4,9 +4,9 @@
 
 #include "orthogonal_pr.h"
 
-orthogonal_pr::orthogonal_pr(std::shared_ptr<logic_network> ln)
+orthogonal_pr::orthogonal_pr(std::shared_ptr<logic_network>&& ln)
         :
-        place_route(ln)
+        place_route(std::move(ln))
 {}
 
 orthogonal_pr::jdfs_ordering orthogonal_pr::jdfs_order() const
@@ -19,9 +19,9 @@ orthogonal_pr::jdfs_ordering orthogonal_pr::jdfs_order() const
     auto vertices = network->vertices();
     // initialize all vertices undiscovered
     std::for_each(vertices.begin(), vertices.end(),
-                  [&](const logic_network::vertex _v){discovered.emplace(_v, false);});
+                  [&discovered](const logic_network::vertex _v){discovered.emplace(_v, false);});
     // helper function to check is a given vertex has already been discovered
-    const auto is_discovered = [&](const logic_network::vertex _v){return discovered[_v];};
+    const auto is_discovered = [&discovered](const logic_network::vertex _v){return discovered[_v];};
 
     // joint depth first search
     const std::function<void(const logic_network::vertex)>
@@ -34,13 +34,13 @@ orthogonal_pr::jdfs_ordering orthogonal_pr::jdfs_order() const
             discovered[_v] = true;
             ordering.push_back(_v);
 
-            for (auto&& ao : network->adjacent_vertices(_v) | iter::filterfalse(is_discovered))
-                jdfs(ao);
+            for (auto&& av : network->adjacent_vertices(_v) | iter::filterfalse(is_discovered))
+                jdfs(av);
         }
     };
 
     // call joint dfs for each vertex without predecessors
-    for (auto&& root : network->vertices() | iter::filter([&](const logic_network::vertex _v)
+    for (auto&& root : network->vertices() | iter::filter([this](const logic_network::vertex _v)
                                                             {return network->in_degree(_v) == 0u;}))
         jdfs(root);
 
@@ -51,13 +51,13 @@ orthogonal_pr::red_blue_coloring orthogonal_pr::find_rb_coloring(const jdfs_orde
 {
     red_blue_coloring rb_coloring{};
 
-    const auto contrary = [&](const rb_color _c){return _c == rb_color::RED ? rb_color::BLUE : rb_color::RED;};
+    const auto contrary = [](const rb_color _c){return _c == rb_color::RED ? rb_color::BLUE : rb_color::RED;};
 
     // range of logic edges
     auto edges = network->edges();
     // color all edges white initially
     std::for_each(edges.begin(), edges.end(),
-                  [&](const logic_network::edge& _e){rb_coloring.emplace(_e, rb_color::WHITE);});
+                  [&rb_coloring](const logic_network::edge& _e){rb_coloring.emplace(_e, rb_color::WHITE);});
 
     const std::function<void(const logic_network::edge&, const rb_color)>
             apply = [&](const logic_network::edge& _e, const rb_color _c)
@@ -85,9 +85,10 @@ orthogonal_pr::red_blue_coloring orthogonal_pr::find_rb_coloring(const jdfs_orde
         auto ie = network->in_edges(v);
         // if any ingoing edge is BLUE, color them all in BLUE, and RED otherwise
         auto color = std::any_of(ie.begin(), ie.end(),
-                                 [&](const logic_network::edge& _e){return rb_coloring[_e] == rb_color::BLUE;}) ?
-                                                                           rb_color::BLUE :
-                                                                           rb_color::RED;
+                                 [&rb_coloring](const logic_network::edge& _e)
+                                               {return rb_coloring[_e] == rb_color::BLUE;}) ?
+                     rb_color::BLUE :
+                     rb_color::RED;
 
         for (auto&& e : ie)
             apply(e, color);
@@ -109,14 +110,18 @@ void orthogonal_pr::orthogonal_embedding(red_blue_coloring& rb_coloring, const j
      * Function to set the direction of tiles where the names of current_tile and previous_tile refer to information
      * flow direction.
      */
-    const auto assign_wire_dir = [&](const fcn_gate_layout::tile& current_tile, const fcn_gate_layout::tile& previous_tile,
-                                     const layout::directions dir, const logic_network::edge& e)
+    const auto assign_wire_dir = [this](const fcn_gate_layout::tile& current_tile, const fcn_gate_layout::tile& previous_tile,
+                                        const layout::directions dir, const logic_network::edge& e)
     {
-        auto t1 = (layout->has_logic_edge(current_tile, e) || layout->is_gate_tile(current_tile)) ? current_tile : layout->above(current_tile);
+        auto t1 = (layout->has_logic_edge(current_tile, e) ||
+                   layout->is_gate_tile(current_tile)) ? current_tile : layout->above(current_tile);
+
         layout->assign_wire_inp_dir(t1, e, layout::opposite(dir));
         layout->assign_tile_inp_dir(t1, layout::opposite(dir));
 
-        auto t2 = (layout->has_logic_edge(previous_tile, e) || layout->is_gate_tile(previous_tile)) ? previous_tile : layout->above(previous_tile);
+        auto t2 = (layout->has_logic_edge(previous_tile, e) ||
+                   layout->is_gate_tile(previous_tile)) ? previous_tile : layout->above(previous_tile);
+
         layout->assign_wire_out_dir(t2, e, dir);
         layout->assign_tile_out_dir(t2, dir);
     };
@@ -192,8 +197,8 @@ void orthogonal_pr::orthogonal_embedding(red_blue_coloring& rb_coloring, const j
                 wire_east(pre_t, t, in_e);
 
                 // assign operation directions
-                assign_wire_dir(fcn_gate_layout::tile{pre_t[X] + 1, pre_t[Y], GROUND}, pre_t, layout::DIR_E, in_e);
-                assign_wire_dir(t, fcn_gate_layout::tile{t[X] - 1, t[Y], GROUND}, layout::DIR_E, in_e);
+                assign_wire_dir({pre_t[X] + 1, pre_t[Y], GROUND}, pre_t, layout::DIR_E, in_e);
+                assign_wire_dir(t, {t[X] - 1, t[Y], GROUND}, layout::DIR_E, in_e);
 
                 ++x_helper;
             }
@@ -210,8 +215,8 @@ void orthogonal_pr::orthogonal_embedding(red_blue_coloring& rb_coloring, const j
                 wire_south(pre_t, t, in_e);
 
                 // assign operation directions
-                assign_wire_dir(fcn_gate_layout::tile{pre_t[X], pre_t[Y] + 1, GROUND}, pre_t, layout::DIR_S, in_e);
-                assign_wire_dir(t, fcn_gate_layout::tile{t[X], t[Y] - 1, GROUND}, layout::DIR_S, in_e);
+                assign_wire_dir({pre_t[X], pre_t[Y] + 1, GROUND}, pre_t, layout::DIR_S, in_e);
+                assign_wire_dir(t, {t[X], t[Y] - 1, GROUND}, layout::DIR_S, in_e);
 
                 ++y_helper;
             }
@@ -254,8 +259,8 @@ void orthogonal_pr::orthogonal_embedding(red_blue_coloring& rb_coloring, const j
             {
                 // determine x-position
                 auto max_x = *std::max_element(evp.begin(), evp.end(),
-                                               [&](const std::pair<logic_network::edge, logic_network::vertex>& ev1,
-                                                   const std::pair<logic_network::edge, logic_network::vertex>& ev2)
+                                               [&pos](const std::pair<logic_network::edge, logic_network::vertex>& ev1,
+                                                      const std::pair<logic_network::edge, logic_network::vertex>& ev2)
                                                {return pos[ev1.second][X] <= pos[ev2.second][X];});
 
                 auto const x_pos = pos[max_x.second][X];
@@ -293,20 +298,20 @@ void orthogonal_pr::orthogonal_embedding(red_blue_coloring& rb_coloring, const j
                     // horizontal connection first
                     wire_east(pre_t, (bending_wire ? fcn_gate_layout::tile{t[X] + 1, pre_t[Y], GROUND} : t), pre_e);
 
-                    assign_wire_dir(fcn_gate_layout::tile{pre_t[X] + 1, pre_t[Y], GROUND}, pre_t, layout::DIR_E, pre_e);
+                    assign_wire_dir({pre_t[X] + 1, pre_t[Y], GROUND}, pre_t, layout::DIR_E, pre_e);
 
                     // vertical connection will only be needed if wire has a bend
                     if (bending_wire)
                     {
                         // assign vertical connection
-                        wire_south(fcn_gate_layout::tile{t[X], pre_t[Y], GROUND}, t, pre_e);
+                        wire_south({t[X], pre_t[Y], GROUND}, t, pre_e);
                         // assign direction
-                        assign_wire_dir(t, fcn_gate_layout::tile{t[X], t[Y] - 1, GROUND}, layout::DIR_S, pre_e);
+                        assign_wire_dir(t, {t[X], t[Y] - 1, GROUND}, layout::DIR_S, pre_e);
                     }
                     else
                     {
                         // assign direction
-                        assign_wire_dir(t, fcn_gate_layout::tile{t[X] - 1, t[Y], GROUND}, layout::DIR_E, pre_e);
+                        assign_wire_dir(t, {t[X] - 1, t[Y], GROUND}, layout::DIR_E, pre_e);
                     }
                 }
                 else  // edge is blue
@@ -317,20 +322,20 @@ void orthogonal_pr::orthogonal_embedding(red_blue_coloring& rb_coloring, const j
                     // vertical connection first
                     wire_south(pre_t, (bending_wire ? fcn_gate_layout::tile{pre_t[X], t[Y] + 1, GROUND} : t), pre_e);
 
-                    assign_wire_dir(fcn_gate_layout::tile{pre_t[X], pre_t[Y] + 1, GROUND}, pre_t, layout::DIR_S, pre_e);
+                    assign_wire_dir({pre_t[X], pre_t[Y] + 1, GROUND}, pre_t, layout::DIR_S, pre_e);
 
                     // horizontal connection will only be needed if wire has a bend
                     if (bending_wire)
                     {
                         // assign horizontal connection
-                        wire_east(fcn_gate_layout::tile{pre_t[X], t[Y], GROUND}, t, pre_e);
+                        wire_east({pre_t[X], t[Y], GROUND}, t, pre_e);
                         // assign direction
-                        assign_wire_dir(t, fcn_gate_layout::tile{t[X] - 1, t[Y], GROUND}, layout::DIR_E, pre_e);
+                        assign_wire_dir(t, {t[X] - 1, t[Y], GROUND}, layout::DIR_E, pre_e);
                     }
                     else
                     {
                         // assign direction
-                        assign_wire_dir(t, fcn_gate_layout::tile{t[X], t[Y] - 1, GROUND}, layout::DIR_S, pre_e);
+                        assign_wire_dir(t, {t[X], t[Y] - 1, GROUND}, layout::DIR_S, pre_e);
                     }
                 }
             }
@@ -356,8 +361,8 @@ orthogonal_pr::pr_result orthogonal_pr::perform_place_and_route()
     }
     catch (...)
     {
-        return pr_result{false, nlohmann::json{{"Runtime", calc_runtime(start, chrono::now())}}};
+        return pr_result{false, nlohmann::json{{"runtime", calc_runtime(start, chrono::now())}}};
     }
 
-    return pr_result{true, nlohmann::json{{"Runtime", calc_runtime(start, chrono::now())}}};
+    return pr_result{true, nlohmann::json{{"runtime", calc_runtime(start, chrono::now())}}};
 }

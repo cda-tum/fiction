@@ -74,6 +74,8 @@ namespace alice
     ALICE_LOG_STORE_STATISTICS(fcn_gate_layout_ptr, layout)
     {
         auto bb = layout->determine_bounding_box();
+        auto energy = layout->calculate_energy();
+
         return nlohmann::json
         {
             {"name", layout->get_name()},
@@ -94,7 +96,13 @@ namespace alice
             {"gate tiles", layout->gate_count()},
             {"wire tiles", layout->wire_count()},
             {"crossings", layout->crossing_count()},
-            {"latches", layout->latch_count()}
+            {"latches", layout->latch_count()},
+            {"energy (meV, QCA)",
+             {
+                {"slow (25 GHz)", energy.first},
+                {"fast (100 GHz)", energy.second}
+             }
+            }
         };
     }
 
@@ -103,6 +111,11 @@ namespace alice
      * FCN cell layouts.
      */
     ALICE_ADD_STORE(fcn_cell_layout_ptr, "cell_layout", "c", "cell layout", "cell layouts")
+
+    ALICE_PRINT_STORE(fcn_cell_layout_ptr, os, layout)
+    {
+        layout->write_layout(os);
+    }
 
     ALICE_DESCRIBE_STORE(fcn_cell_layout_ptr, layout)
     {

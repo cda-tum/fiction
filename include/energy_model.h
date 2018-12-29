@@ -37,13 +37,13 @@ namespace energy
      */
     constexpr float INVERTER_STRAIGHT_FAST = 1.19f;
     /**
-     * Energy consumption (slow) of a curved inverter.
+     * Energy consumption (slow) of a bent inverter.
      */
-    constexpr float INVERTER_CURVED_SLOW = 0.10f;
+    constexpr float INVERTER_BENT_SLOW = 0.10f;
     /**
-     * Energy consumption (fast) of a curved inverter.
+     * Energy consumption (fast) of a bent inverter.
      */
-    constexpr float INVERTER_CURVED_FAST = 0.84f;
+    constexpr float INVERTER_BENT_FAST = 0.84f;
     /**
      * Energy consumption (slow) of a crossing.
      */

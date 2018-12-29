@@ -20,6 +20,47 @@
  */
 class orthogonal_pr : public place_route
 {
+public:
+    /**
+     * Standard constructor.
+     *
+     * @param ln Logic network.
+     */
+    explicit orthogonal_pr(std::shared_ptr<logic_network>&& ln);
+    /**
+     * Default Destructor.
+     */
+    ~orthogonal_pr() override = default;
+    /**
+     * Copy constructor is not available.
+     */
+    orthogonal_pr(const orthogonal_pr& rhs) = delete;
+    /**
+     * Move constructor is not available.
+     */
+    orthogonal_pr(orthogonal_pr&& rhs) = delete;
+    /**
+     * Assignment operator is not available.
+     */
+    orthogonal_pr& operator=(const orthogonal_pr& rhs) = delete;
+    /**
+     * Move assignment operator is not available.
+     */
+    orthogonal_pr& operator=(orthogonal_pr&& rhs) = delete;
+    /**
+     * Starts the P&R process. Computes the jdfs ordering of the stored logic network first and colors the
+     * edges accordingly using an red-blue-coloring algorithm so that all incoming edges of a
+     * vertex have the same color and all outgoing edges have different colors. P&R is then
+     * performed using orthogonal graph drawing where the vertices are placed in jdfs order
+     * so that each blue edges leads downwards and each red edge leads rightwards.
+     *
+     * Information flow is from top left to bottom right. The resulting clocking scheme is diagonal.
+     *
+     * Returns a pr_result eventually.
+     *
+     * @return pr_result containing placed and routed layout as well as some statistical information.
+     */
+    pr_result perform_place_and_route() override;
 private:
     /**
      * Colors used for a red-blue-coloring of 3-graphs.
@@ -63,47 +104,6 @@ private:
      * @param jdfs Stores orderings, DFS tree, etc.
      */
     void orthogonal_embedding(red_blue_coloring& rb_coloring, const jdfs_ordering& jdfs);
-public:
-    /**
-     * Standard constructor.
-     *
-     * @param ln Logic network.
-     */
-    orthogonal_pr(std::shared_ptr<logic_network> ln);
-    /**
-     * Default Destructor.
-     */
-    ~orthogonal_pr() override = default;
-    /**
-     * Copy constructor is not available.
-     */
-    orthogonal_pr(const orthogonal_pr& rhs) = delete;
-    /**
-     * Move constructor is not available.
-     */
-    orthogonal_pr(orthogonal_pr&& rhs) = delete;
-    /**
-     * Assignment operator is not available.
-     */
-    orthogonal_pr& operator=(const orthogonal_pr& rhs) = delete;
-    /**
-     * Move assignment operator is not available.
-     */
-    orthogonal_pr& operator=(orthogonal_pr&& rhs) = delete;
-    /**
-     * Starts the P&R process. Computes the jdfs ordering of the stored logic network first and colors the
-     * edges accordingly using an red-blue-coloring algorithm so that all incoming edges of a
-     * vertex have the same color and all outgoing edges have different colors. P&R is then
-     * performed using orthogonal graph drawing where the vertices are placed in jdfs order
-     * so that each blue edges leads downwards and each red edge leads rightwards.
-     *
-     * Information flow is from top left to bottom right. The resulting clocking scheme is diagonal.
-     *
-     * Returns a pr_result eventually.
-     *
-     * @return pr_result containing placed and routed layout as well as some statistical information.
-     */
-    pr_result perform_place_and_route() override;
 };
 
 

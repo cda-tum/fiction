@@ -29,7 +29,7 @@ public:
      * @param ln Logic network.
      * @param config Configuration object storing all the bounds, flags, and so on.
      */
-    exact_pr(std::shared_ptr<logic_network> ln, exact_pr_config&& config);
+    exact_pr(std::shared_ptr<logic_network>&& ln, exact_pr_config&& config);
     /**
      * Default Destructor.
      */

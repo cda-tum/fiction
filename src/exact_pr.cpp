@@ -5,11 +5,11 @@
 #include "exact_pr.h"
 
 
-exact_pr::exact_pr(std::shared_ptr<logic_network> ln, exact_pr_config&& config)
+exact_pr::exact_pr(std::shared_ptr<logic_network>&& ln, exact_pr_config&& config)
         :
-        place_route(ln),
+        place_route(std::move(ln)),
         config{config},
-        lower_bound{static_cast<unsigned>(ln->vertex_count())},
+        lower_bound{static_cast<unsigned>(network->vertex_count())},
         solver{ctx}
 {
     network->update_index_maps();
@@ -52,7 +52,7 @@ place_route::pr_result exact_pr::perform_place_and_route()
                         auto stop = chrono::now();
                         assign_layout();
 
-                        return pr_result{true, nlohmann::json{{"Runtime", calc_runtime(start, stop)}}};
+                        return pr_result{true, nlohmann::json{{"runtime", calc_runtime(start, stop)}}};
                     }
                     default:
                         break;
@@ -64,19 +64,19 @@ place_route::pr_result exact_pr::perform_place_and_route()
                 time_left = time_left - time_elapsed > 0u ? static_cast<unsigned>(time_left - time_elapsed) : 0u;
 
                 if (!time_left)
-                    throw z3::exception("Timeout");
+                    throw z3::exception("timeout");
 
                 set_timeout(time_left);
                 round = chrono::now();
             }
             catch (const z3::exception&)
             {
-                return pr_result{false, nlohmann::json{{"Runtime", calc_runtime(start, chrono::now())}}};
+                return pr_result{false, nlohmann::json{{"runtime", calc_runtime(start, chrono::now())}}};
             }
         }
     }
 
-    return pr_result{false, nlohmann::json{{"Runtime", calc_runtime(start, chrono::now())}}};
+    return pr_result{false, nlohmann::json{{"runtime", calc_runtime(start, chrono::now())}}};
 }
 
 void exact_pr::set_timeout(const unsigned t)
@@ -156,7 +156,7 @@ void exact_pr::initialize_tp_map()
 
 void exact_pr::initialize_vcl_map()
 {
-    auto initialize = [&](const logic_vertex _v) -> void
+    auto initialize = [this](const logic_vertex _v) -> void
     {
         const auto v_i = network->index(_v);
         z3_expr_proxy ep{ctx.real_const(boost::str(boost::format("vcl_%d") % v_i).c_str())};
@@ -551,9 +551,9 @@ void exact_pr::assign_pi_clockings()
 void exact_pr::fanin_length()
 {
     using logic_edge_path = logic_network::edge_path;
-    auto define_length = [&](const logic_vertex v) -> void
+    auto define_length = [this](const logic_vertex _v) -> void
     {
-        auto paths = network->get_all_paths(v, config.io_wires);
+        auto paths = network->get_all_paths(_v, config.io_wires);
         if (paths.empty())
             return;
 
@@ -568,7 +568,7 @@ void exact_pr::fanin_length()
 
             // respect number of vertices as an offset to path length
             // this works because every vertex must be placed
-            int offset = static_cast<int>(p.size() - max_length);
+            auto offset = static_cast<int>(p.size() - max_length);
             if (offset)
                 path_length.push_back(ctx.real_val(offset));
 
@@ -750,7 +750,7 @@ void exact_pr::define_number_of_connections()
 
 void exact_pr::enforce_border_io()
 {
-    auto assign_border = [&](const logic_vertex _v)
+    auto assign_border = [this](const logic_vertex _v)
     {
         for (auto&& t : layout->ground_layer())
         {

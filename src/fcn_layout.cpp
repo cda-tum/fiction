@@ -35,14 +35,14 @@ fcn_layout::fcn_layout() noexcept
         clocking(open_4_clocking)
 {}
 
-fcn_layout::~fcn_layout() {}
+fcn_layout::~fcn_layout() = default;
 
 void fcn_layout::resize(fcn_dimension_xyz&& lengths) noexcept
 {
     if (lengths[X] < 2 || lengths[Y] < 2 || lengths[Z] < 2)
         std::cerr << "NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs." << std::endl;
 
-    resize_grid(lengths);
+    resize_grid(std::move(lengths));
 }
 
 void fcn_layout::resize(fcn_dimension_xy&& lengths) noexcept
@@ -183,19 +183,19 @@ fcn_layout::face fcn_layout::yz_slice::z_stack::operator[](const std::size_t z)
 fcn_layout::yz_slice::z_stack::operator face()
 {
     if (fgl->x() >= x_value && fgl->y() >= y_value) // fgl->z() >= GROUND is true by definition
-        return face{x_value, y_value, GROUND};
+        return {x_value, y_value, GROUND};
 
     throw std::out_of_range("Given indices are located outside of layout bounds.");
 }
 
 fcn_layout::yz_slice::z_stack fcn_layout::yz_slice::operator[](const std::size_t y) const
 {
-    return z_stack{x_value, y, fgl};
+    return {x_value, y, fgl};
 }
 
 fcn_layout::yz_slice fcn_layout::operator[](const std::size_t x) const
 {
-    return yz_slice(x, this);
+    return {x, this};
 }
 
 fcn_layout::face fcn_layout::operator()(const std::size_t x, const std::size_t y, const std::size_t z) const

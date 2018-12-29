@@ -157,7 +157,7 @@ namespace qca
             cell_name = cell_type == fcn::CONST_0_CELL ? "-1.00" :
                         cell_type == fcn::CONST_1_CELL ? "1.00"  : cell_name;
             // if cell has a name
-            if (cell_name != "")
+            if (!cell_name.empty())
             {
                 // open label
                 file << OPEN_QCAD_LABEL;

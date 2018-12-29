@@ -42,8 +42,8 @@ If you are on *Ubuntu*, you should be fine installing them with this command:
 sudo apt-get install git g++ cmake libboost-all-dev python libreadline-dev
 ```
 
-Note that there is no guarantee that your system lacks some required packages which are not listed here! CMake will
-inform you about missing dependencies during the build process.
+Note that there is no guarantee that your system does not lack some required packages which are not listed here!
+CMake will inform you about missing dependencies during the build process.
 
 Check out the git project (and all of its submodules) using the following command:
 
@@ -54,32 +54,36 @@ git clone https://github.com/marcelwa/fiction.git --recursive
 Several third-party libraries will be cloned within the `libs/` folder. The `cmake` build process will take care of
 them automatically.
 
+Should you have cloned the repository before, `git submodule update --init --recursive` will fetch the latest version of
+all external modules used.
+
 Afterwards, *fiction* is ready to be built. Simply enter the following commands:
 
 ```sh
 cd fiction
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j4
+cmake ..
+make
 ```
 
-Note that this process may take a while!
+This process may take a while!
 
 You have the choice to change the `cmake` call to `cmake -DCMAKE_BUILD_TYPE=Debug ..` if you prefer building with debug
-information. Note that this will have a significant negative impact on the runtime.
+information. The build mode can also be toggled via the `ccmake` CLI. Note that building with debug information will
+have a significant negative impact on the runtime.
 
 ### Troubleshooting
 
-On some older CMake systems, it might be necessary to type
+On some CMake systems, it might be necessary to type
 
 ```sh
-make z3 -j4
-make -j4
+make z3
+make fiction
 ```
 
-after the `cmake` call to guarantee the correct order of build steps. Try this if the initial call leads to some kind
-of error messages revolving around Z3.
+after the `cmake` call instead of just `make` to guarantee the correct order of build steps. Try this if the initial
+call leads to some kind of error messages revolving around Z3.
 
 ## Usage
 
@@ -89,6 +93,8 @@ following. To get some information about the available commands, run `fiction` w
 ```sh
 ./fiction --help
 ```
+Starting the interactive mode by entering `./fiction` greets the user with a prompt. Again, input of `help` produces a
+list of available commands. You can generate a plain text documentation by entering `help --docs <filename>`. 
 
 ### Preface
 
@@ -108,9 +114,8 @@ netlists in the `benchmarks` folder.
 
 ### Stores
 
-Starting the interactive mode by entering `./fiction` greets the user with a prompt. Again, input of `help` produces a
-list of available commands. Enter `read_verilog <filename>` to read a logic network into a store. The content of the
-logic network store can be briefly viewed by entering `store -w` whereas `print -w` writes a
+When you are in interactive mode, enter `read_verilog <filename>` to read a logic network into a store. The content of
+the logic network store can be briefly viewed by entering `store -w` whereas `print -w` writes a
 [Graphviz](https://www.graphviz.org/) dot file of the current network to the standard output. Arbitrarily many logic
 networks can be held in store from which the latest is always the active one. Change active network with `set -w <n>`
 where you replace `<n>` by the number of the store element you want to activate.
@@ -143,9 +148,9 @@ simple textual representation can be viewed by entering `print -g`.
 To synthesize a gate layout to a cell level one, type `gate_to_cell`, where the `-l` flag indicates the gate library to
 use. Currently, only QCA-ONE is available which is the default setting. Cell layouts are also saved in stores which can
 be accessed by typing `store -c`. Due to significantly larger size of cell layouts compared to gate layouts, the
-`write -c` command to print layouts to the terminal is not implemented.
+`print -c` command to write layouts to the terminal should be used carefully.
 
-Nevertheless, use `write_qca <filename>.qca` to create a QCADesigner file for running physical simulations. 
+Nevertheless, you can use `write_qca <filename>.qca` to create a QCADesigner file for running physical simulations. 
 
 ### Automation by scripting
 
@@ -165,6 +170,8 @@ write_qca c17.qca
 which can be executed by `./fiction -ef c17_synth.fs -l c17_log.json` where statistics are to be logged in a JSON file
 called `c17_log.json`.
 
+These scripts can also be nested. Use `< script.fs` within a *fiction script* to load `script.fs` in that very position.
+
 Additionally, *fiction* can also be part of a bash script. Consider the following snippet
 
 ```sh
@@ -175,8 +182,9 @@ done
 ```
 
 where the for-loop iterates over all Verilog files in the `../benchmarks/TOY/` folder. Using the flag `-c`, a
-semicolon-separated list of commands can be entered in *fiction*. In this case, the files are to be read in a store, placed
-and routed using the `ortho` algorithm, synthesized to cell level, and written as QCA using their original file name.
+semicolon-separated list of commands can be entered in *fiction*. In this case, the files are to be read in a store,
+placed and routed using the `ortho` algorithm, synthesized to cell level, and written as QCA using their original file
+name.
 
 ## Uninstall
 

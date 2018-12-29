@@ -75,9 +75,9 @@ public:
      * Standard constructor. Creates an FCN cell layout from a gate library that is associated with a fcn_gate_layout.
      * All tiles from the stored gate layout will be mapped to cells using the library.
      *
-     * @param library FCN gate library to use for mapping operations.
+     * @param lib FCN gate library to use for mapping operations.
      */
-    fcn_cell_layout(fcn_gate_library_ptr library);
+    explicit fcn_cell_layout(fcn_gate_library_ptr&& lib);
     /**
      * Default copy constructor.
      */
@@ -210,6 +210,15 @@ public:
      * @return Name of the layout.
      */
     std::string get_name() const noexcept;
+    /**
+     * Prints the assigned cell types to the given std::ostream channel. A textual representation is used for
+     * visualization. Currently only one crossing layer can be represented correctly. This is more of a debug function
+     * and unsuitable for large layouts.
+     *
+     * @param os An std::ostream channel to write the textual representation of this layout into.
+     * @param io_color Flag to indicate features like PI/PO should be printed with color escape.
+     */
+    void write_layout(std::ostream& os = std::cout, bool io_color = true) const noexcept;
 
 private:
     /**

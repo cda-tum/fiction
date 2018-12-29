@@ -99,9 +99,9 @@ public:
      *
      * @param lengths A DIMENSIONS-dimensional array that specifies sizes of each dimension in the grid.
      */
-    void resize_grid(boost::array<std::size_t, DIMENSIONS> lengths) noexcept
+    void resize_grid(boost::array<std::size_t, DIMENSIONS>&& lengths) noexcept
     {
-        grid = std::make_unique<grid_container>(lengths);
+        grid = std::make_unique<grid_container>(std::move(lengths));
     }
 
 

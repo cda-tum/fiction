@@ -30,11 +30,13 @@ public:
      * Default constructor. Needs a gate layout to map from, a technology specifying cells to map and information about
      * tile sizes in that gate library.
      *
+     * @param name Name of the gate library.
      * @param fgl Layout to map from.
      * @param tech Technology to use for cell types.
      * @param size Size of a single gate.
      */
-    fcn_gate_library(fcn_gate_layout_ptr fgl, const fcn::technology tech, const fcn::tile_size size) noexcept;
+    fcn_gate_library(std::string&& name, fcn_gate_layout_ptr&& fgl,
+                     const fcn::technology tech, const fcn::tile_size size) noexcept;
     /**
      * Copy constructor is not available.
      */
@@ -94,6 +96,12 @@ public:
      */
     fcn_gate merge(const std::vector<fcn_gate>& gates) const noexcept;
     /**
+     * Returns library's name.
+     *
+     * @return name.
+     */
+    std::string get_name() const noexcept;
+    /**
      * Returns pointer to the stored layout.
      *
      * @return layout.
@@ -152,6 +160,10 @@ protected:
      * @return fcn_gate with reversed rows.
      */
     fcn_gate reverse_rows(const fcn_gate& g) const noexcept;
+    /**
+     * Name of this library.
+     */
+    const std::string name;
     /**
      * Pointer to fcn_gate_layout to map from.
      */

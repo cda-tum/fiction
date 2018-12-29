@@ -1,0 +1,6 @@
+benchmarks/* linguist-vendored
+benchmarks/TOY/* linguist-vendored
+benchmarks/ISCAS89/* linguist-vendored
+benchmarks/EPFL/* linguist-vendored
+benchmarks/ITC99/* linguist-vendored
+*.v linguist-detectable=false

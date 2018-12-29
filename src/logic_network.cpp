@@ -7,22 +7,33 @@
 logic_network::logic_network(std::string&& name) noexcept
         :
         bidirectional_graph(),
-        name(name)
+        name(std::move(name))
 {
-    one  = std::make_unique<vertex>(add_vertex(operation::ONE));
     zero = std::make_unique<vertex>(add_vertex(operation::ZERO));
+    one  = std::make_unique<vertex>(add_vertex(operation::ONE));
 }
 
 logic_network::logic_network(const logic_network& ln) noexcept
         :
         bidirectional_graph(ln),
-        name(ln.name)
-{}
+        name{ln.name},
+        pi_set{ln.pi_set},
+        po_set{ln.po_set},
+        io_port_map{ln.io_port_map}
+{
+    zero = std::make_unique<vertex>(vertex(0));
+    one  = std::make_unique<vertex>(vertex(1));
+}
 
 logic_network::logic_network(logic_network&& ln) noexcept
         :
-        bidirectional_graph(ln),
-        name(std::move(ln.name))
+        bidirectional_graph(std::move(ln)),
+        name{std::move(ln.name)},
+        pi_set{std::move(ln.pi_set)},
+        po_set{std::move(ln.po_set)},
+        io_port_map{std::move(ln.io_port_map)},
+        zero{std::move(ln.zero)},
+        one{std::move(ln.one)}
 {}
 
 logic_network::num_vertices_t logic_network::vertex_count(const bool ios, const bool consts) const noexcept
@@ -230,14 +241,14 @@ std::vector<logic_network::edge_path> logic_network::get_all_paths(const vertex 
 
 void logic_network::substitute() noexcept
 {
-    auto reduce_gate_inputs = [&]()
+    auto reduce_gate_inputs = []()
     {
         // TODO when lorina supports multi-input gates
     };
 
-    auto decompose = [&]()
+    auto decompose = [this]()
     {
-        auto decompose_xor = [&](const vertex v_XOR)
+        auto decompose_xor = [this](const vertex v_XOR)
         {
             auto v_FO_1  = add_vertex(operation::F1O2);
             auto v_FO_2  = add_vertex(operation::F1O2);
@@ -267,7 +278,7 @@ void logic_network::substitute() noexcept
         };
 
         auto lvs = vertices();
-        auto is_composed_vertex = [&](const vertex _v){return get_op(_v) == operation::XOR /* || ... */;};
+        auto is_composed_vertex = [this](const vertex _v){return get_op(_v) == operation::XOR /* || ... */;};
 
         auto comp_vertex = std::find_if(lvs.begin(), lvs.end(), is_composed_vertex);
         while (comp_vertex != lvs.end())
@@ -280,15 +291,15 @@ void logic_network::substitute() noexcept
         }
     };
 
-    auto add_fan_outs = [&]()
+    auto add_fan_outs = [this]()
     {
         for (auto&& v : get_vertices())
         {
             if (get_out_degree(v) > 1u && get_op(v) != operation::F1O2)
             {
                 auto predecessor = v;
-                std::vector<vertex> vv;
-                std::vector<edge> ve;
+                std::vector<vertex> vv{};
+                std::vector<edge> ve{};
                 for (auto&& ae : out_edges(v, true, true))
                 {
                     vv.push_back(target(ae));

@@ -103,7 +103,7 @@ public:
      *
      * @param clocking Clocking scheme defining possible data flow.
      */
-    fcn_layout(fcn_clocking_scheme&& clocking) noexcept;
+    explicit fcn_layout(fcn_clocking_scheme&& clocking) noexcept;
     /**
      * Standard constructor. Creates a FCN layout of size 2 x 2 x 2 with an open clocking scheme.
      * NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs.
@@ -111,9 +111,9 @@ public:
      */
     fcn_layout() noexcept;
     /**
-     * Default copy constructor.
+     * Copy constructor is not available.
      */
-    fcn_layout(const fcn_layout& fl) noexcept = default;
+    fcn_layout(const fcn_layout& fl) = delete;
     /**
      * Default move constructor.
      */
@@ -123,13 +123,13 @@ public:
      */
     virtual ~fcn_layout() = 0;
     /**
-     * Default assignment operator.
+     * Assignment operator is not available.
      */
-    fcn_layout& operator=(const fcn_layout& rhs) noexcept = default;
+    fcn_layout& operator=(const fcn_layout& rhs) = delete;
     /**
-     * Default move operator.
+     * Move operator is not available.
      */
-    fcn_layout& operator=(fcn_layout&& rhs) noexcept = default;
+    fcn_layout& operator=(fcn_layout&& rhs) = delete;
     /**
      * Resizes the layout to the dimensions given. The fcn_layout object will not be re-constructed by this
      * function! All maps and other attributes stay untouched.
@@ -274,7 +274,7 @@ public:
      */
     auto surrounding_2d(const face& f) const noexcept
     {
-        return get_adjacent_vertices(f) | iter::filter([&](const face& _f){return f[Z] == _f[Z];});
+        return get_adjacent_vertices(f) | iter::filter([f = f](const face& _f){return f[Z] == _f[Z];});
     }
     /**
      * Returns a range of all faces in ground layer. For layouts with z == 1, this function is equivalent to get_faces.
@@ -302,7 +302,7 @@ public:
      */
     auto layer_n(const std::size_t n) const noexcept
     {
-        return get_vertices() | iter::filter([n](const face& _f){return _f[Z] == n;});
+        return get_vertices() | iter::filter([n = n](const face& _f){return _f[Z] == n;});
     }
     /**
      * Function alias for distance with euclidean metric using perfect forwarding and the name euclidean_distance to fit
@@ -544,7 +544,7 @@ protected:
              *
              * @return Face at position (x, y, 0).
              */
-            operator face();
+            explicit operator face();
 
         private:
             /**
