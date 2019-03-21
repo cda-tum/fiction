@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(fiction
         LANGUAGES CXX
-        VERSION 0.1.1)
+        VERSION 0.2.0)
 
 # C++14
 set(CMAKE_CXX_STANDARD 14)
@@ -18,12 +18,10 @@ endif()
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 
 # Include header files
-include_directories(include/)
+include_directories(src/algo/ src/io/ src/tech/ src/topo/ src/util/)
 
 # Find source files
-file(GLOB SOURCES src/*.cpp)
-# Find header files
-file(GLOB HEADERS include/*.h)
+file(GLOB_RECURSE SOURCES src/*.cpp src/*.h)
 
 # Require Boost libraries
 find_package(Boost COMPONENTS system filesystem REQUIRED)
@@ -64,7 +62,7 @@ add_subdirectory(${LIB_PREFIX}/alice/)
 add_subdirectory(${LIB_PREFIX}/lorina/)
 
 # build executable
-add_executable(fiction ${SOURCES} ${HEADERS})
+add_executable(fiction ${SOURCES})
 add_dependencies(fiction z3)
 
 # link against Boost, Z3, alice, and lorina

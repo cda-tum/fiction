@@ -1,4 +1,3 @@
-#include "filetypes.h"
 #include "stores.h"
 #include "commands.h"
 #include <alice/alice.hpp>
