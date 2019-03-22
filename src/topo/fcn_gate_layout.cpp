@@ -427,7 +427,11 @@ fcn_gate_layout::path_info fcn_gate_layout::signal_delay(const tile& t, delay_ca
             infos.push_back(signal_delay(cur_t, dc));
 
         path_info dominant_path{};
-        if (infos.size() == 1) // size cannot be 0
+
+		if (is_pi(t))	// primary input in the circuit
+			infos.push_back({ 1, (*tile_clocking(t) + (num_clocks() - 1)) % num_clocks(), 0 });
+
+		if (infos.size() == 1) // size cannot be 0
             dominant_path = infos.front();
         else  // fetch highest delay and difference
         {
@@ -463,13 +467,11 @@ std::pair<std::size_t, std::size_t> fcn_gate_layout::critical_path_length_and_th
         throughput = std::max_element(dc.begin(), dc.end(),
                 [](const auto& i1, const auto& i2){return i1.second.diff < i2.second.diff;})->second.diff;
 
-
     // give throughput in cycles, not in phases
     throughput /= num_clocks();
 
-    // if all paths are synchronized
-    if (throughput == 0)
-        throughput = 1;
+	// get from cycle difference to throughput
+	++throughput;
 
     return std::make_pair(critical_path, throughput);
 }
