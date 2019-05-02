@@ -94,16 +94,6 @@ protected:
     using edge_index_t   = std::size_t;
     using vertex_index_t = std::size_t;
 
-
-    // ************************************************************
-    // ************************ Attributes ************************
-    // ************************************************************
-
-    using edge_index_map = std::unordered_map<edge_t, edge_index_t, boost::hash<edge_t>>;
-    /**
-     * Associates edges with indices.
-     */
-    edge_index_map ei_map;
     
 public:
     // ************************************************************
@@ -404,17 +394,6 @@ public:
         return boost::in_degree(v, graph);
     }
     /**
-     * Updates the indices stored for each edge. This function only needs to be called when the graph was manipulated.
-     */
-    void update_edge_index_map() noexcept
-    {
-        ei_map.clear();
-
-        auto i = 0u;
-        for (auto&& e : get_edges())
-            ei_map[e] = i++;
-    }
-    /**
      * Returns a stored vertex_index for the given vertex_t. May lead to unexpected behavior when
      * property_vertex_index_map and the vertices are out of sync.
      *
@@ -425,17 +404,6 @@ public:
     {
         auto param = get(boost::vertex_index, graph);
         return param[v];
-    }
-    /**
-     * Returns a stored edge_index for the given edge_t. May lead to unexpected behavior when property_edge_index_map
-     * and the edges are out of sync.
-     *
-     * @param e Edge whose stored index is desired.
-     * @return Stored index of edge e.
-     */
-    edge_index_t get_index(const edge_t& e) const
-    {
-        return ei_map.at(e);
     }
     /**
      * Sorts the graph topologically. Throws a not_a_dag exception if

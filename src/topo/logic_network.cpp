@@ -511,11 +511,6 @@ void logic_network::write_network(std::ostream& os) noexcept
     os << graph.str() << std::endl;
 }
 
-void logic_network::update_index_maps() noexcept
-{
-    update_edge_index_map();
-}
-
 void logic_network::increment_op_counter(const operation o) noexcept
 {
     ++operation_counter[o];

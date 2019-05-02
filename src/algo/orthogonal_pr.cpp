@@ -4,10 +4,11 @@
 
 #include "orthogonal_pr.h"
 
-orthogonal_pr::orthogonal_pr(std::shared_ptr<logic_network>&& ln, const unsigned n)
+orthogonal_pr::orthogonal_pr(logic_network_ptr ln, const unsigned n, const bool io)
         :
         place_route(std::move(ln)),
-        phases{n}
+        phases{n},
+        io_ports{io}
 {}
 
 orthogonal_pr::pr_result orthogonal_pr::perform_place_and_route()
@@ -22,7 +23,7 @@ orthogonal_pr::pr_result orthogonal_pr::perform_place_and_route()
 
     // get joint DFS ordering
     auto jDFS = jdfs_order();
-    // compute a red-blue-coloring for the netlist
+    // compute a red-blue-coloring for the network
     auto rbColoring = find_rb_coloring(jDFS);
 
     try
@@ -45,7 +46,7 @@ orthogonal_pr::jdfs_ordering orthogonal_pr::jdfs_order() const
     // store discovery of nodes
     std::unordered_map<logic_network::vertex, bool> discovered{};
     // range of logic vertices
-    auto vertices = network->vertices();
+    auto vertices = network->vertices(io_ports);
     // initialize all vertices undiscovered
     std::for_each(vertices.begin(), vertices.end(),
                   [&discovered](const logic_network::vertex _v){discovered.emplace(_v, false);});
@@ -56,21 +57,21 @@ orthogonal_pr::jdfs_ordering orthogonal_pr::jdfs_order() const
     const std::function<void(const logic_network::vertex)>
             jdfs = [&](const logic_network::vertex _v)
     {
-        auto iav = network->inv_adjacent_vertices(_v);
+        auto iav = network->inv_adjacent_vertices(_v, io_ports);
         // if all predecessors are yet discovered
         if (std::all_of(iav.begin(), iav.end(), is_discovered))
         {
             discovered[_v] = true;
             ordering.push_back(_v);
 
-            for (auto&& av : network->adjacent_vertices(_v) | iter::filterfalse(is_discovered))
+            for (auto&& av : network->adjacent_vertices(_v, io_ports) | iter::filterfalse(is_discovered))
                 jdfs(av);
         }
     };
 
     // call joint dfs for each vertex without predecessors
-    for (auto&& root : network->vertices() | iter::filter([this](const logic_network::vertex _v)
-                                                            {return network->in_degree(_v) == 0u;}))
+    for (auto&& root : network->vertices(io_ports) | iter::filter([this](const logic_network::vertex _v)
+                                                                  {return network->in_degree(_v, io_ports) == 0u;}))
         jdfs(root);
 
     return ordering;
@@ -83,7 +84,7 @@ orthogonal_pr::red_blue_coloring orthogonal_pr::find_rb_coloring(const jdfs_orde
     const auto contrary = [](const rb_color _c){return _c == rb_color::RED ? rb_color::BLUE : rb_color::RED;};
 
     // range of logic edges
-    auto edges = network->edges();
+    auto edges = network->edges(io_ports);
     // color all edges white initially
     std::for_each(edges.begin(), edges.end(),
                   [&rb_coloring](const logic_network::edge& _e){rb_coloring.emplace(_e, rb_color::WHITE);});
@@ -96,13 +97,13 @@ orthogonal_pr::red_blue_coloring orthogonal_pr::find_rb_coloring(const jdfs_orde
 
         rb_coloring[_e] = _c;
 
-        for (auto&& oe : network->out_edges(network->source(_e)))
+        for (auto&& oe : network->out_edges(network->source(_e), io_ports))
         {
             if (oe != _e)
                 apply(oe, contrary(_c));
         }
 
-        for (auto&& ie : network->in_edges(network->target(_e)))
+        for (auto&& ie : network->in_edges(network->target(_e), io_ports))
         {
             if (ie != _e)
                 apply(ie, _c);
@@ -111,7 +112,7 @@ orthogonal_pr::red_blue_coloring orthogonal_pr::find_rb_coloring(const jdfs_orde
 
     for (auto&& v : jdfs | iter::reversed)
     {
-        auto ie = network->in_edges(v);
+        auto ie = network->in_edges(v, io_ports);
         // if any ingoing edge is BLUE, color them all in BLUE, and RED otherwise
         auto color = std::any_of(ie.begin(), ie.end(),
                                  [&rb_coloring](const logic_network::edge& _e)
@@ -129,10 +130,10 @@ orthogonal_pr::red_blue_coloring orthogonal_pr::find_rb_coloring(const jdfs_orde
 void orthogonal_pr::orthogonal_embedding(red_blue_coloring& rb_coloring, const jdfs_ordering& jdfs)
 {
     // create layout with x = v, y = v, where v is the number of vertices in the network
-    // therefore, the layout needs to be shrinked to fit in the end
-    layout = std::make_shared<fcn_gate_layout>(fcn_dimension_xy{network->vertex_count(), network->vertex_count()},
-                                               phases == 3 ? std::move(diagonal_3_clocking) :
-                                                             std::move(diagonal_4_clocking), network);
+    // therefore, the layout needs to be shrunk to fit in the end
+    layout = std::make_shared<fcn_gate_layout>(fcn_dimension_xy{network->vertex_count(io_ports), network->vertex_count(io_ports)},
+                                               phases == 3 ? std::move(twoddwave_3_clocking) :
+                                                             std::move(twoddwave_4_clocking), network);
     // cache map storing information about where vertices were placed on the layout
     std::unordered_map<logic_network::vertex, fcn_gate_layout::tile> pos;
 
@@ -198,19 +199,20 @@ void orthogonal_pr::orthogonal_embedding(red_blue_coloring& rb_coloring, const j
     for (auto& v : jdfs)
     {
         // if operation has no predecessors, add 1 row and 1 column to the grid
-        if (network->in_degree(v) == 0u)
+        if (network->in_degree(v, io_ports) == 0u)
         {
             fcn_gate_layout::tile t{x_helper, y_helper, GROUND};
-            layout->assign_logic_vertex(t, v, network->pre_pi(v), network->post_po(v));
+            layout->assign_logic_vertex(t, v, io_ports ? network->is_pi(v) : network->pre_pi(v),
+                                              io_ports ? network->is_po(v) : network->post_po(v));
             pos.emplace(v, t);
 
             ++x_helper; ++y_helper;
         }
         // if operation has one predecessor, add either 1 row or 1 column
-        else if (network->in_degree(v) == 1u)
+        else if (network->in_degree(v, io_ports) == 1u)
         {
             // incoming edge
-            auto in_e = *network->in_edges(v).begin();
+            auto in_e = *network->in_edges(v, io_ports).begin();
             // predecessor tile
             const auto pre_t = pos[network->source(in_e)];
 
@@ -221,7 +223,8 @@ void orthogonal_pr::orthogonal_embedding(red_blue_coloring& rb_coloring, const j
                 const auto y_pos = pre_t[Y];
 
                 fcn_gate_layout::tile t{x_helper, y_pos, GROUND};
-                layout->assign_logic_vertex(t, v, network->pre_pi(v), network->post_po(v));
+                layout->assign_logic_vertex(t, v, io_ports ? network->is_pi(v) : network->pre_pi(v),
+                                                  io_ports ? network->is_po(v) : network->post_po(v));
                 pos.emplace(v, t);
 
                 wire_east(pre_t, t, in_e);
@@ -239,7 +242,8 @@ void orthogonal_pr::orthogonal_embedding(red_blue_coloring& rb_coloring, const j
                 const auto x_pos = pre_t[X];
 
                 fcn_gate_layout::tile t{x_pos, y_helper, GROUND};
-                layout->assign_logic_vertex(t, v, network->pre_pi(v), network->post_po(v));
+                layout->assign_logic_vertex(t, v, io_ports ? network->is_pi(v) : network->pre_pi(v),
+                                                  io_ports ? network->is_po(v) : network->post_po(v));
                 pos.emplace(v, t);
 
                 wire_south(pre_t, t, in_e);
@@ -254,7 +258,7 @@ void orthogonal_pr::orthogonal_embedding(red_blue_coloring& rb_coloring, const j
         // operation has two predecessors
         else
         {
-            auto ep = network->in_edges(v).begin();
+            auto ep = network->in_edges(v, io_ports).begin();
             // incoming edge 1
             const auto e1 = *ep;
             ++ep;
@@ -306,7 +310,8 @@ void orthogonal_pr::orthogonal_embedding(red_blue_coloring& rb_coloring, const j
             }
 
             // place operation
-            layout->assign_logic_vertex(t, v, network->pre_pi(v), network->post_po(v));
+            layout->assign_logic_vertex(t, v, io_ports ? network->is_pi(v) : network->pre_pi(v),
+                                              io_ports ? network->is_po(v) : network->post_po(v));
             pos.emplace(v, t);
 
             // do routing dependent on colors

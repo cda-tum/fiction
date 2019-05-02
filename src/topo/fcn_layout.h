@@ -75,7 +75,7 @@ public:
     /**
      * Alias for a number that represents delay of a latch face in clock phases (1/n clock cycles).
      */
-    using latch_delay = unsigned;
+    using latch_delay = std::size_t;
     /**
      * Standard constructor. Creates an FCN layout by the means of an array determining its size
      * as well as a clocking scheme defining its data flow possibilities.

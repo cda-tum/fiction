@@ -199,11 +199,12 @@ public:
      *
      * @param c Location of top left corner cell of gate g.
      * @param g FCN gate to be assigned to a region starting in the top left corner at cell c.
+     * @param l A latch delay in phases.
      * @param inp_names Names for PI ports. Each input cell occurring in g will take the next name from this vector.
      * @param out_names Names for PO ports. Each output cell occurring in g will take the next name from this vector.
      */
-    void assign_gate(const cell& c, const fcn_gate& g, const std::vector<std::string>& inp_names = {},
-                     const std::vector<std::string>& out_names = {});
+    void assign_gate(const cell& c, const fcn_gate& g, const latch_delay l = 0,
+                     const std::vector<std::string>& inp_names = {}, const std::vector<std::string>& out_names = {});
     /**
      * Returns library pointer.
      *

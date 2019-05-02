@@ -5,6 +5,7 @@
 #ifndef FICTION_COMMANDS_H
 #define FICTION_COMMANDS_H
 
+#include "version.h"
 #include "verilog_parser.h"
 #include "exact_pr.h"
 #include "orthogonal_pr.h"
@@ -18,6 +19,35 @@
 
 namespace alice
 {
+    /**
+     * Outputs version and build information.
+     */
+    class version_command : public command
+    {
+    public:
+        /**
+         * Standard constructor. Adds descriptive information, options, and flags.
+         *
+         * @param env alice::environment that specifies stores etc.
+         */
+        explicit version_command(const environment::ptr& env)
+                :
+                command(env, "Outputs the version string as well as build time and date.")
+        {}
+
+    protected:
+        /**
+         * Function to perform the version print call.
+         */
+        void execute() override
+        {
+            env->out() << VERSION << " - compiled on " << COMPILED_DATE << " at " << COMPILED_TIME << std::endl;
+        }
+    };
+
+    ALICE_ADD_COMMAND(version, "General")
+
+
     /**
      * Shorthand for all read commands. Chooses the proper function by the file ending.
      *
@@ -56,11 +86,23 @@ namespace alice
          */
         void execute() override
         {
+            // checks for extension validity
+            auto is_valid_extension = [](const auto& _f) -> bool
+            {
+                const std::vector<std::string> extensions{{".v"}};
+                return std::any_of(extensions.cbegin(), extensions.cend(),
+                                   [&_f](const auto& _e) { return boost::filesystem::extension(_f) == _e; });
+            };
+
             // check for for given file's properties
             if (boost::filesystem::exists(filename))
             {
                 if (boost::filesystem::is_regular_file(filename))
-                    paths.push_back(filename);
+                {
+                    // collect valid files only
+                    if (is_valid_extension(filename))
+                        paths.push_back(filename);
+                }
 
                 else if (boost::filesystem::is_directory(filename))
                 {
@@ -69,8 +111,8 @@ namespace alice
                     {
                         if (boost::filesystem::is_regular_file(file))
                         {
-                            // parse Verilog files only
-                            if (boost::filesystem::extension(file) == ".v")
+                            // collect valid files only
+                            if (is_valid_extension(file))
                                 paths.push_back(file.path().string());
                         }
                     }
@@ -88,21 +130,27 @@ namespace alice
                 { return boost::filesystem::file_size(f1) >= boost::filesystem::file_size(f2); });
             }
 
-            // read all Verilog files
+            // handle collected files
             for (const auto& f : paths)
             {
-                auto name = boost::filesystem::path{f}.stem().string();
-                auto ln = std::make_shared<logic_network>(std::move(name));
+                // parse Verilog
+                if (boost::filesystem::extension(f) == ".v")
+                {
+                    auto name = boost::filesystem::path{f}.stem().string();
+                    auto ln = std::make_shared<logic_network>(std::move(name));
 
-                lorina::diagnostic_engine diag{};
-                if (lorina::read_verilog(f, verilog_parser{ln}, &diag) == lorina::return_code::success)
-                {
-                    store<logic_network_ptr>().extend() = std::move(ln);
+                    lorina::diagnostic_engine diag{};
+                    if (lorina::read_verilog(f, verilog_parser{ln}, &diag) == lorina::return_code::success)
+                    {
+                        store<logic_network_ptr>().extend() = std::move(ln);
+                    }
+                    else
+                    {
+                        env->out() << "[e] parsing error in " << f << std::endl;
+                    }
                 }
-                else
-                {
-                    env->out() << "[e] parsing error in " << f << std::endl;
-                }
+                // parse ...
+                // else if (boost::filesystem::extension(f) == ...)
             }
 
             // reset flags, necessary for some reason... alice bug?
@@ -174,6 +222,7 @@ namespace alice
             // reset flags, necessary for some reason... alice bug?
             cell = false; gate = false; network = false;
         }
+
     private:
         /**
          * Stores to clear.
@@ -201,12 +250,10 @@ namespace alice
                 command(env, "Performs exact placement and routing of the current logic network in store. "
                              "A minimum FCN layout will be found that meets all given constraints.")
         {
+            add_option("--clocking_scheme,-s", clocking,
+                       "Clocking scheme to be used {OPEN3, OPEN4, 2DDWAVE3, 2DDWAVE4, USE, RES, BANCS}", true);
             add_option("--upper_bound,-u", config.upper_bound,
                        "Number of FCN gate tiles to use at maximum");
-            add_option("--clocking_scheme,-s", clocking,
-                       "Clocking scheme to be used {OPEN=0, USE=1, DIAGONAL=2, RES=3}", true);
-            add_option("--clock_numbers,-n", phases,
-                       "Number of clock phases to be used {3 or 4}", true);
             add_option("--limit_crossings,-c", config.crossings_limit,
                        "Maximum number of tiles to use for crossings");
             add_option("--limit_wires,-w", config.wire_limit,
@@ -216,14 +263,14 @@ namespace alice
 
             add_flag("--crossings,-x", config.crossings,
                      "Enable second layer for wire crossings");
+            add_flag("--io_ports,-i", config.io_ports,
+                     "Route extra wires to balance I/O port paths");
+            add_flag("--border_io,-b", config.border_io,
+                     "Enforce primary I/O to be placed at the layout's borders");
             add_flag("--path_discrepancy,-p", config.path_discrepancy,
                      "Allow a discrepancy in fan-in paths (area vs. throughput)");
             add_flag("--artificial_latch,-a", config.artificial_latch,
                      "Allow clocked latch delays to balance fan-in paths");
-            add_flag("--io_wires,-i", config.io_wires,
-                     "Route extra wires to balance I/O port paths");
-            add_flag("--border_io,-b", config.border_io,
-                     "Enforce primary I/O to be placed at the layout's borders");
             add_flag("--fixed_size,-f", config.fixed_size,
                      "Execute only one run with upper_bound given as a fixed size");
         }
@@ -234,55 +281,38 @@ namespace alice
          */
         void execute() override
         {
-            auto s = store<logic_network_ptr>();
+            auto& s = store<logic_network_ptr>();
 
             // error case: empty logic network store
             if (s.empty())
             {
-                env->out() << "[e] no logic network in store" << std::endl;
+                env->out() << "[w] no logic network in store" << std::endl;
+                reset_flags();
                 return;
             }
 
-            if (phases == 3 && clocking == 1)
+            // error case: -f is set but -u is not
+            if (this->is_set("fixed_size") && !this->is_set("upper_bound"))
             {
-                env->out() << "[e] 3-phase USE clocking aka BANCS is not supported" << std::endl;
-                return;
-            }
-
-            if (phases == 3 && clocking == 4)
-            {
-                env->out() << "[e] 3-phase RES clocking is not supported" << std::endl;
+                env->out() << "[e] -u must be defined as well when -f is used" << std::endl;
+                reset_flags();
                 return;
             }
 
             // choose clocking
-            if (phases == 3)
+            if (auto clk = get_clocking_scheme(clocking))
             {
-                config.scheme = std::make_shared<fcn_clocking_scheme>
-                        (std::vector<fcn_clocking_scheme>{{open_3_clocking,
-                                                           fcn_clocking_scheme{fcn_clock::cutout{}, 3u, false},
-                                                           diagonal_3_clocking,
-                                                           fcn_clocking_scheme{fcn_clock::cutout{}, 3u, false}
-                                                         }}[clocking]);
+                config.scheme = std::make_shared<fcn_clocking_scheme>(*clk);
             }
-            else if (phases == 4)
-            {
-                config.scheme = std::make_shared<fcn_clocking_scheme>
-                        (std::vector<fcn_clocking_scheme>{{open_4_clocking,
-                                                           use_4_clocking,
-                                                           diagonal_4_clocking,
-                                                           res_4_clocking
-                                                          }}[clocking]);
-            }
-            // error case: phases out of range
             else
             {
-                env->out() << "[e] only 3- and 4-phase clocking schemes are supported" << std::endl;
+                env->out() << "[e] \"" << clocking << "\" does not refer to a supported clocking scheme" << std::endl;
+                reset_flags();
                 return;
             }
 
             // perform exact P&R
-            exact_pr pr{std::move(s.current()), std::move(config)};
+            exact_pr pr{s.current(), std::move(config)};
             auto result = pr.perform_place_and_route();
 
             if (result.success)
@@ -291,11 +321,11 @@ namespace alice
                 pr_result = result.json;
             }
             else
-                env->out() << "[e] impossible to place and route the specified network within the given "
+                env->out() << "[e] impossible to place and route " << s.current()->get_name() << " within the given "
                               "parameters" << std::endl;
 
-            // reset flags, necessary for some reason... alice bug?
-            config = exact_pr_config{};
+
+            reset_flags();
         }
         /**
          * Logs the resulting information in a log file.
@@ -306,6 +336,14 @@ namespace alice
         {
             return pr_result;
         }
+        /**
+         * Reset all flags. Necessary for some reason... alice bug?
+         */
+        void reset_flags()
+        {
+            config = exact_pr_config{};
+            clocking = "OPEN4";
+        }
 
     private:
         /**
@@ -313,13 +351,9 @@ namespace alice
          */
         exact_pr_config config{};
         /**
-         * Identifier of clocking scheme to use (0=OPEN, 1=USE, 2=DIAGONAL).
+         * Identifier of clocking scheme to use.
          */
-        unsigned clocking = 0u;
-        /**
-         * Number of clock phases to use. 3 and 4 are supported.
-         */
-        unsigned phases = 4u;
+        std::string clocking = "OPEN4";
         /**
          * Resulting logging information.
          */
@@ -349,6 +383,8 @@ namespace alice
         {
             add_option("--clock_numbers,-n", phases,
                        "Number of clock phases to be used {3 or 4}", true);
+            add_flag("--io_ports,-i", io_ports,
+                     "Place designated I/O ports too");
         }
 
     protected:
@@ -357,23 +393,25 @@ namespace alice
          */
         void execute() override
         {
-            auto s = store<logic_network_ptr>();
+            auto& s = store<logic_network_ptr>();
 
             // error case: empty logic network store
             if (s.empty())
             {
-                env->out() << "[e] no logic network in store" << std::endl;
+                env->out() << "[w] no logic network in store" << std::endl;
+                reset_flags();
                 return;
             }
             // error case: phases out of range
             if (phases != 3u && phases != 4u)
             {
                 env->out() << "[e] only 3- and 4-phase clocking schemes are supported" << std::endl;
+                reset_flags();
                 return;
             }
 
             // perform heuristic P&R
-            orthogonal_pr pr{std::move(s.current()), phases};
+            orthogonal_pr pr{s.current(), phases, io_ports};
             auto result = pr.perform_place_and_route();
 
             if (result.success)
@@ -382,10 +420,9 @@ namespace alice
                 pr_result = result.json;
             }
             else
-                env->out() << "[e] impossible to place and route the specified network" << std::endl;
+                env->out() << "[e] impossible to place and route " << s.current()->get_name() << std::endl;
 
-            // reset flags, necessary for some reason... alice bug?
-            phases = 4u;
+            reset_flags();
         }
         /**
          * Logs the resulting information in a log file.
@@ -396,12 +433,24 @@ namespace alice
         {
             return pr_result;
         }
+        /**
+         * Reset all flags. Necessary for some reason... alice bug?
+         */
+        void reset_flags()
+        {
+            phases = 4u;
+            io_ports = false;
+        }
 
     private:
         /**
          * Number of clock phases to use. 3 and 4 are supported.
          */
         unsigned phases = 4u;
+        /**
+         * Flag to indicate that designated I/O ports should be placed.
+         */
+        bool io_ports = false;
         /**
          * Resulting logging information.
          */
@@ -434,11 +483,11 @@ namespace alice
 
     protected:
         /**
-         * Function to perform the P&R call. Generates an FCN gate layout.
+         * Function to perform the conversion call. Generates an fcn_cell_layout.
          */
         void execute() override
         {
-            auto s = store<fcn_gate_layout_ptr>();
+            auto& s = store<fcn_gate_layout_ptr>();
 
             // error case: empty gate layout store
             if (s.empty())
@@ -448,10 +497,11 @@ namespace alice
             }
 
             fcn_gate_library_ptr lib = nullptr;
+            std::string lib_name{};
             try
             {
                 if (library == 0u)
-                    lib = std::make_shared<qca_one_library>(std::move(s.current()));
+                    lib = std::make_shared<qca_one_library>(s.current());
                 // else if (library == 1u)
                     // more libraries go here
                 else
@@ -459,10 +509,12 @@ namespace alice
                     env->out() << "[e] identifier " << library << " does not refer to a supported gate library" << std::endl;
                     return;
                 }
+
+                lib_name = lib->get_name();
             }
             catch (...)
             {
-                env->out() << "[e] could not assign directions in gate layout to cell ports" << std::endl;
+                env->out() << "[e] could not assign directions in " << s.current()->get_name() << " to cell ports" << std::endl;
                 return;
             }
 
@@ -473,7 +525,8 @@ namespace alice
             }
             catch (...)
             {
-                env->out() << "[e] mapping to cell layout with the given library was not successful" << std::endl;
+                env->out() << "[e] mapping " << s.current()->get_name() << " to a cell layout using the "
+                    << lib_name << " library was not successful" << std::endl;
                 return;
             }
 
@@ -514,7 +567,7 @@ namespace alice
 
     protected:
         /**
-         * Function to perform the P&R call. Generates an FCN gate layout.
+         * Function to perform the output print call. Generates a QCADesigner file.
          */
         void execute() override
         {

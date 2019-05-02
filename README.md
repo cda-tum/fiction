@@ -25,11 +25,11 @@ More technologies and libraries are to come!
 An [exact approach](http://www.informatik.uni-bremen.de/agra/doc/konf/2018DATE_ExactMethodforDesignExplorationOfQCA.pdf)
 in terms of circuit area is provided which is the first one ever in the field of FCN circuits.
 It is based on Satisfiability Modulo Theories (SMT) and utilizes the solver engine [Z3](https://github.com/Z3Prover/z3)
-by Microsoft Research. It is only feasable for small circuits but provides the best results.
+by Microsoft Research. It is only feasible for small circuits but provides the best results.
 
 Additionally, a [scalable method](http://www.informatik.uni-bremen.de/agra/doc/konf/2019_ASP-DAC_Scalable_Design_for_Field-coupled_Nanocomputing_Circuits.pdf)
 is implemented which is based on Orthogonal Graph Drawing (OGD). It has a huge runtime advantage compared to the SMT technique.
-Though, its results are not optimal in terms of area. It is feasable even for larger circuits and provides results real quick.
+Though, its results are not optimal in terms of area. It is feasible even for larger circuits and provides results real quick.
 
 This is ongoing research but more algorithms are to come!
 
@@ -49,7 +49,7 @@ CMake will inform you about missing dependencies during the build process.
 Check out the git project (and all of its submodules) using the following command:
 
 ```sh
-git clone https://github.com/marcelwa/fiction.git --recursive
+git clone https://gitlab.informatik.uni-bremen.de/m_walter/fiction.git --recursive
 ```
 
 Several third-party libraries will be cloned within the `libs/` folder. The `cmake` build process will take care of
@@ -150,7 +150,7 @@ parse all parsable files within that given directory powered by the [lorina](htt
 by Heinz Riener. The flag `-s` allows prior sorting. The content of the logic network store can be briefly viewed by
 entering `store -w` whereas `print -w` writes a [Graphviz](https://www.graphviz.org/) dot file of the current network
 to the standard output. Arbitrarily many logic networks can be held in store from which the latest is always the
-active one. Change active network with `set -w <n>` where you replace `<n>` by the number of the store element you
+active one. Change active network with `current -w <n>` where you replace `<n>` by the number of the store element you
 want to activate.
 
 ### Placement & Routing
@@ -163,19 +163,19 @@ and route the current network on 25 FCN tiles, utilizing crossings (`-x`) and ar
 balancing I/O paths to internally synchronize the circuit using designated pins (`-i`) plus routing all I/Os to the
 grid borders for easier access (`-b`).
 
-Additionally, you can provide a pre-defined clocking scheme to prune the search space. Doing so by option `-s` expects a
-number where `0` represents default open clocking, `1` is
-[USE](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7219390), `2` is a simple diagonal scheme, and `3` is the
-[RES](https://www.tandfonline.com/doi/pdf/10.1080/21681724.2019.1570551?needAccess=true) clocking. Additionally,
-a number of clock phases to use can be specified by utilizing the `-n` flag. Currently, only 3- and 4-phase clockings
-are supported. Additional clocking schemes can be implemented in the header file `fcn_clocking_scheme.h`.
+Additionally, you can provide a pre-defined clocking scheme to prune the search space with option `-s`. Possible schemes
+besides the default open clocking, are [2DDWave](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1717097),
+[USE](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7219390),
+[RES](https://www.tandfonline.com/doi/pdf/10.1080/21681724.2019.1570551?needAccess=true), and
+[BANCS](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8533251&tag=1). For detailed information on usage see
+`exact -h`. Additional clocking schemes can be implemented in the header file `fcn_clocking_scheme.h`.
 
 Calls to `ortho` are not expecting flags. This algorithm based on orthogonal graph drawing produces layouts in much
 shorter time. Though their quality in terms of area is far from optimum. Plus, for physical implementation, it might be
 necessary to route primary inputs/outputs to the grid borders by hand.
 
 Generated FCN gate layouts are also saved in stores. Entering `store -g` shows a list of all gate layouts available.
-Statistical informations about store elements can be printed using command `ps`. For a gate layout, a call to `ps -g`
+Statistical information about store elements can be printed using command `ps`. For a gate layout, a call to `ps -g`
 could for instance output the following.
 ```
 c17 - 5 × 7, #G: 18, #W: 18, #C: 3, #L: 0, CP: 11, TP: 1/1
@@ -205,7 +205,7 @@ in store. If you want to just generate the SVG file without opening it in your s
 Alternatively, open the exported file with a different program by using `show -c --program "\"google-chrome\" {}"` for
 instance to open it with your Chrome browser. Note, that this behavior is platform dependent and might not work properly
 under your system. For more information see `show --help` or the full
-[Alice documentation](https://libalice.readthedocs.io/en/latest/index.html).
+[alice documentation](https://libalice.readthedocs.io/en/latest/index.html).
 
 The used color scheme is based on the one known from [QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/).
 
@@ -232,8 +232,12 @@ which can be executed by `./fiction -ef c17_synth.fs -l c17_log.json` where stat
 called `c17_log.json`.
 
 These scripts can also be nested. Use `< script.fs` within a *fiction script* to load `script.fs` in that very position.
+A script called `shortcuts.fs` has been placed in the top level folder. It can be loaded on start-up by calling
+`./fiction -if ../shortcuts.fs` in the build folder. This makes predefined commands and flows available as shortcuts.
+Try `synth xibs use` for instance to perform the whole flow of layouting (utilizing `USE` clocking) and physical
+synthesis down to cell level including visual representation.
 
-Additionally, *fiction* can also be part of a bash script. Consider the following snippet
+Additionally, *fiction* itself can be part of a bash script. Consider the following snippet
 
 ```sh
 for filepath in ../benchmarks/TOY/*.v; do

@@ -624,12 +624,6 @@ public:
      */
     void substitute() noexcept;
     /**
-     * Re-assigns indices to the vertices and edges. Only needed if index() functions are to be called and only once
-     * until the graph gets structurally manipulated the next time. Note that by calling this function, indices might
-     * change!
-     */
-    void update_index_maps() noexcept;
-    /**
      * Writes a Graphviz (https://www.graphviz.org/) dot representation of the logic_network to the given ostream.
      * Incorporates the logic function names.
      *

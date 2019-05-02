@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(fiction
         LANGUAGES CXX
-        VERSION 0.2.0)
+        VERSION 0.2.1)
 
 # C++14
 set(CMAKE_CXX_STANDARD 14)
@@ -22,6 +22,10 @@ include_directories(src/algo/ src/io/ src/tech/ src/topo/ src/util/)
 
 # Find source files
 file(GLOB_RECURSE SOURCES src/*.cpp src/*.h)
+# Add configuration file
+configure_file(src/util/version.h.in util/version.h)
+# Include configuration file
+include_directories(${PROJECT_BINARY_DIR}/util/)
 
 # Require Boost libraries
 find_package(Boost COMPONENTS system filesystem REQUIRED)
@@ -30,7 +34,7 @@ if(Boost_FOUND)
     link_directories(${Boost_LIBRARY_DIRS})
 endif()
 
-# custom install prefix for libraries
+# Custom install prefix for libraries
 set(LIB_PREFIX ${CMAKE_SOURCE_DIR}/libs)
 
 # Clone, build and locally install Z3
@@ -49,21 +53,21 @@ ExternalProject_Add(z3
         LOG_INSTALL       1
         LOG_BUILD         1)
 
-# include Z3
+# Include Z3
 include_directories(${Z3_DIR}/include/)
 
-# include cppitertools
+# Include cppitertools
 include_directories(${LIB_PREFIX}/cppitertools/)
 
-# include alice
+# Include alice
 add_subdirectory(${LIB_PREFIX}/alice/)
 
-# include lorina
+# Include lorina
 add_subdirectory(${LIB_PREFIX}/lorina/)
 
-# build executable
+# Build executable
 add_executable(fiction ${SOURCES})
 add_dependencies(fiction z3)
 
-# link against Boost, Z3, alice, and lorina
+# Link against Boost, Z3, alice, and lorina
 target_link_libraries(fiction ${Boost_LIBRARIES} ${Z3_DIR}/lib/libz3.so alice lorina)

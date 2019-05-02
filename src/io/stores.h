@@ -174,8 +174,7 @@ namespace alice
     {
         try
         {
-            const auto simple = cmd.is_set("simple");
-            os << svg::generate_svg_string(element, simple) << std::endl;
+            os << svg::generate_svg_string(element, cmd.is_set("simple")) << std::endl;
         }
         catch (const std::invalid_argument& e)
         {

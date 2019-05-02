@@ -44,31 +44,31 @@ bool fcn_gate_layout::is_border_tile(const tile& t) const noexcept
 layout::directions fcn_gate_layout::closest_border(const tile& t) const noexcept
 {
     // tile is on the left side of the layout
-    if (t[X] <= x() / 2)
+    if (t[X] < x() / 2)
     {
         // tile is on the upper side of the layout
-        if (t[Y] <= y() / 2)
+        if (t[Y] < y() / 2)
         {
-            return t[X] <= t[Y] ? layout::DIR_W : layout::DIR_N;
+            return t[X] < t[Y] ? layout::DIR_W : layout::DIR_N;
         }
         // tile is on the lower side of the layout
         else
         {
-            return t[X] <= y() - t[Y] ? layout::DIR_W : layout::DIR_S;
+            return t[X] < y() - t[Y] ? layout::DIR_W : layout::DIR_S;
         }
     }
     // tile is on the right side of the layout
     else
     {
         // tile is on the upper side of the layout
-        if (t[Y] <= y() / 2)
+        if (t[Y] < y() / 2)
         {
-            return x() - t[X] <= t[Y] ? layout::DIR_E : layout::DIR_N;
+            return x() - t[X] < t[Y] ? layout::DIR_E : layout::DIR_N;
         }
             // tile is on the lower side of the layout
         else
         {
-            return x() - t[X] <= y() - t[Y] ? layout::DIR_E : layout::DIR_S;
+            return x() - t[X] < y() - t[Y] ? layout::DIR_E : layout::DIR_S;
         }
     }
 }
@@ -78,7 +78,7 @@ boost::optional<fcn_clock::zone> fcn_gate_layout::tile_clocking(const tile& t) c
     if (clocking.regular)
     {
         auto x = t[X], y = t[Y];
-        return clocking.scheme[y % clocking.num_clocks][x % clocking.num_clocks];
+        return clocking.scheme[y % clocking.cutout_y][x % clocking.cutout_x];
     }
     else  // irregular clocking accesses clocking map
     {
@@ -269,125 +269,154 @@ void fcn_gate_layout::clear_tile(const tile& t) noexcept
 
 bool fcn_gate_layout::is_free_tile(const tile& t) const noexcept
 {
-    return !get_logic_vertex(t) && !is_wire_tile(t);
+    return !is_gate_tile(t) && !is_wire_tile(t);
 }
 
-std::vector<fcn_gate_layout::tile> fcn_gate_layout::outgoing_information_flow_tiles(const tile& t) const noexcept
+boost::optional<fcn_gate_layout::gate_or_wire> fcn_gate_layout::is_data_flow(const gate_or_wire& gw, const tile& at, const bool out) const noexcept
 {
-    std::vector<tile> oift{}; // outgoing information flow tiles
+    // if a gate was passed as gw
+    if (auto v1 = boost::get<logic_network::vertex>(&gw))
+    {
+        // if at is a gate as well
+        if (auto v2 = get_logic_vertex(at))
+        {
+            // if connection v1 -> v2 or v2 -> v1 exists respectively
+            if (out ? network->get_edge(*v1, *v2) : network->get_edge(*v2, *v1))
+                return gate_or_wire{*v2};
+        }
+        // if at is a wire tile instead
+        for (auto& e2 : get_logic_edges(at))
+        {
+            // if v1 is the source/target of e2
+            if (out ? (network->source(e2) == *v1) : (network->target(e2) == *v1))
+                return gate_or_wire{e2};
+        }
+    }
+    // if a wire was passed as gw
+    if (auto e1 = boost::get<logic_network::edge>(&gw))
+    {
+        // if v2 is a gate tile
+        if (auto v2 = get_logic_vertex(at))
+        {
+            // if v2 is the target/source of e1
+            if (out ? (network->target(*e1) == *v2) : (network->source(*e1) == *v2))
+                return gate_or_wire{*v2};
+        }
+        // if at is a wire tile instead
+        if (has_logic_edge(at, *e1))
+            return gate_or_wire{*e1};
+    }
 
-    auto v = get_logic_vertex(t);
-    auto edges = get_logic_edges(t);
+    // no information flow from t1 to at or non-matching arguments
+    return boost::none;
+}
+
+boost::optional<fcn_gate_layout::gate_or_wire> fcn_gate_layout::is_out_data_flow(const gate_or_wire& gw, const tile& at) const noexcept
+{
+    return is_data_flow(gw, at, true);
+}
+
+boost::optional<fcn_gate_layout::gate_or_wire> fcn_gate_layout::is_in_data_flow(const gate_or_wire& gw, const tile& at) const noexcept
+{
+    return is_data_flow(gw, at, false);
+}
+
+bool fcn_gate_layout::is_data_flow(const tile& t1, const tile& t2) const noexcept
+{
+    if (auto v = get_logic_vertex(t1))
+    {
+        return static_cast<bool>(is_out_data_flow({*v}, t2));
+    }
+    else if (is_wire_tile(t1))
+    {
+        for (const auto& e : get_logic_edges(t1))
+        {
+            if (is_out_data_flow({e}, t2))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+std::vector<std::pair<fcn_gate_layout::tile, fcn_gate_layout::gate_or_wire>> fcn_gate_layout::outgoing_data_flow(const tile& t, const gate_or_wire& gw) const noexcept
+{
+    std::vector<std::pair<tile, gate_or_wire>> odf{}; // outgoing data flow
 
     // for all outgoing clocked tiles
-    for (auto&& _t : outgoing_clocked_tiles(t))
+    for (auto&& oct : outgoing_clocked_tiles(t))
     {
-        // if t got assigned a vertex
-        if (v)
+        for (const auto& at : std::vector<tile>{{oct, above(oct), below(oct)}})
         {
-            // for all adjacent logic vertices
-            for (auto&& av : network->adjacent_vertices(*v, true))
+            if (is_tile_out_dir(t, get_bearing(t, at)))
             {
-                // check the tile plus above and below for matches
-                if (has_logic_vertex(_t, av))
-                    oift.push_back(_t);
-                if (has_logic_vertex(above(_t), av))
-                    oift.push_back(above(_t));
-                if (has_logic_vertex(below(_t), av))
-                    oift.push_back(below(_t));
-            }
-            // for all adjacent logic edges
-            for (auto&& ae : network->out_edges(*v, true))
-            {
-                // check the tile plus above and below for matches
-                if (has_logic_edge(_t, ae))
-                    oift.push_back(_t);
-                if (has_logic_edge(above(_t), ae))
-                    oift.push_back(above(_t));
-                if (has_logic_edge(below(_t), ae))
-                    oift.push_back(below(_t));
-            }
-        }
-        // if t got assigned edges instead
-        else
-        {
-            for (auto& e : edges)
-            {
-                // check if there is edge's target
-                const auto tgt = network->target(e);
-                if (has_logic_vertex(_t, tgt) || has_logic_edge(_t, e))
-                    oift.push_back(_t);
-                if (has_logic_vertex(above(_t), tgt) || has_logic_edge(above(_t), e))
-                    oift.push_back(above(_t));
-                if (has_logic_vertex(below(_t), tgt) || has_logic_edge(below(_t), e))
-                    oift.push_back(below(_t));
+                if (auto target = is_out_data_flow(gw, at))
+                    odf.push_back(std::make_pair(at, *target));
             }
         }
     }
 
-    // remove duplicates. vector is sorted due to order of pushing
-    oift.erase(std::unique(oift.begin(), oift.end()), oift.end());
+    // sort and remove duplicates
+    std::sort(odf.begin(), odf.end());
+    odf.erase(std::unique(odf.begin(), odf.end()), odf.end());
 
-    return oift;
+    return odf;
 }
 
-std::vector<fcn_gate_layout::tile> fcn_gate_layout::incoming_information_flow_tiles(const tile& t) const noexcept
+std::vector<fcn_gate_layout::tile> fcn_gate_layout::outgoing_data_flow(const tile& t) const noexcept
 {
-    std::vector<tile> iift{}; // incoming information flow tiles
+    std::vector<tile> odf{}; // outgoing data flow
 
-    auto v = get_logic_vertex(t);
-    auto edges = get_logic_edges(t);
+    for (auto&& oct : outgoing_clocked_tiles(t))
+    {
+        for (const auto& at : std::vector<tile>{{oct, above(oct), below(oct)}})
+        {
+            if (is_data_flow(t, at) && is_tile_out_dir(t, get_bearing(t, at)))
+                odf.push_back(at);
+        }
+    }
+
+    return odf;
+}
+
+std::vector<std::pair<fcn_gate_layout::tile, fcn_gate_layout::gate_or_wire>> fcn_gate_layout::incoming_data_flow(const tile& t, const gate_or_wire& gw) const noexcept
+{
+    std::vector<std::pair<tile, gate_or_wire>> idf{}; // incoming data flow
 
     // for all incoming clocked tiles
-    for (auto&& _t : incoming_clocked_tiles(t))
+    for (auto&& ict : incoming_clocked_tiles(t))
     {
-        // if t got assigned a vertex
-        if (v)
+        for (const auto& iat : std::vector<tile>{{ict, above(ict), below(ict)}})
         {
-            // for all inversely adjacent logic vertices
-            for (auto&& iav : network->inv_adjacent_vertices(*v, true))
+            if (is_tile_inp_dir(t, get_bearing(t, iat)))
             {
-                // check the tile plus above and below for matches
-                if (has_logic_vertex(_t, iav))
-                    iift.push_back(_t);
-                if (has_logic_vertex(above(_t), iav))
-                    iift.push_back(above(_t));
-                if (has_logic_vertex(below(_t), iav))
-                    iift.push_back(below(_t));
-            }
-            // for all inversely adjacent logic edges
-            for (auto&& iae : network->in_edges(*v, true))
-            {
-                // check the tile plus above and below for matches
-                if (has_logic_edge(_t, iae))
-                    iift.push_back(_t);
-                if (has_logic_edge(above(_t), iae))
-                    iift.push_back(above(_t));
-                if (has_logic_edge(below(_t), iae))
-                    iift.push_back(below(_t));
-            }
-        }
-        // if t got assigned edges instead
-        else
-        {
-            for (auto& e : edges)
-            {
-                // check if there is edge's source
-                const auto src = network->source(e);
-                if (has_logic_vertex(_t, src) || has_logic_edge(_t, e))
-                    iift.push_back(_t);
-                if (has_logic_vertex(above(_t), src) || has_logic_edge(above(_t), e))
-                    iift.push_back(above(_t));
-                if (has_logic_vertex(below(_t), src) || has_logic_edge(below(_t), e))
-                    iift.push_back(below(_t));
+                if (auto source = is_in_data_flow(gw, iat))
+                    idf.push_back(std::make_pair(iat, *source));
             }
         }
     }
 
-    // remove duplicates. vector is sorted due to order of pushing
-    iift.erase(std::unique(iift.begin(), iift.end()), iift.end());
+    // sort and remove duplicates
+    std::sort(idf.begin(), idf.end());
+    idf.erase(std::unique(idf.begin(), idf.end()), idf.end());
 
-    return iift;
+    return idf;
+}
+
+std::vector<fcn_gate_layout::tile> fcn_gate_layout::incoming_data_flow(const tile& t) const noexcept
+{
+    std::vector<tile> idf{}; // incoming data flow
+
+    for (auto&& ict : incoming_clocked_tiles(t))
+    {
+        for (const auto& iat : std::vector<tile>{{ict, above(ict), below(ict)}})
+        {
+            if (is_data_flow(iat, t) && is_tile_inp_dir(t, get_bearing(t, iat)))
+                idf.push_back(iat);
+        }
+    }
+
+    return idf;
 }
 
 operation fcn_gate_layout::get_op(const tile& t) const noexcept
@@ -409,34 +438,34 @@ operation fcn_gate_layout::get_op(const tile& t) const noexcept
     }
 }
 
-fcn_gate_layout::path_info fcn_gate_layout::signal_delay(const tile& t, delay_cache& dc) const noexcept
+fcn_gate_layout::path_info fcn_gate_layout::signal_delay(const tile& t, const gate_or_wire& gw, delay_cache& dc) const noexcept
 {
     if (is_free_tile(t))
         return {};
 
-    auto iift = incoming_information_flow_tiles(t);
-    if (iift.empty())
+    auto idf = incoming_data_flow(t, gw);
+    if (idf.empty())
         return {1, *tile_clocking(t), 0};
-    else if (dc.count(t)) // cache hit
+    else if (dc.count(t))  // cache hit
         return dc.at(t);
-    else // cache miss
+    else  // cache miss
     {
         // fetch information about all incoming paths
         std::vector<path_info> infos{};
-        for (const auto& cur_t : iift)
-            infos.push_back(signal_delay(cur_t, dc));
+        for (const auto& cur_t : idf)
+            infos.push_back(signal_delay(cur_t.first, cur_t.second, dc));
 
         path_info dominant_path{};
 
-		if (is_pi(t))	// primary input in the circuit
-			infos.push_back({ 1, (*tile_clocking(t) + (num_clocks() - 1)) % num_clocks(), 0 });
+        if (is_pi(t))  // primary input in the circuit
+            infos.push_back({1, (*tile_clocking(t) + (num_clocks() - 1)) % num_clocks(), 0});
 
-		if (infos.size() == 1) // size cannot be 0
+        if (infos.size() == 1)  // size cannot be 0
             dominant_path = infos.front();
         else  // fetch highest delay and difference
         {
             // sort by path length
-            std::sort(infos.begin(), infos.end(), [](const auto& i1, const auto& i2){return i1.length < i2.length;});
+            std::sort(infos.begin(), infos.end(), [](const auto& i1, const auto& i2) { return i1.length < i2.length; });
 
             dominant_path.length = infos.back().length;
             dominant_path.delay = infos.back().delay;
@@ -460,18 +489,18 @@ std::pair<std::size_t, std::size_t> fcn_gate_layout::critical_path_length_and_th
     delay_cache dc{};
     std::size_t critical_path = 0;
     for (auto&& po : get_pos())
-        critical_path = std::max(signal_delay(po, dc).length, critical_path);
+        critical_path = std::max(signal_delay(po, gate_or_wire{*get_logic_vertex(po)}, dc).length, critical_path);
 
     std::size_t throughput = 0;
     if (!dc.empty())
         throughput = std::max_element(dc.begin(), dc.end(),
-                [](const auto& i1, const auto& i2){return i1.second.diff < i2.second.diff;})->second.diff;
+                                      [](const auto& i1, const auto& i2) { return i1.second.diff < i2.second.diff; })->second.diff;
 
     // give throughput in cycles, not in phases
     throughput /= num_clocks();
 
-	// get from cycle difference to throughput
-	++throughput;
+    // convert cycle difference to throughput
+    ++throughput;
 
     return std::make_pair(critical_path, throughput);
 }
@@ -819,7 +848,7 @@ fcn_gate_layout::bounding_box fcn_gate_layout::determine_bounding_box() const no
 void fcn_gate_layout::shrink_to_fit() noexcept
 {
     auto bb = determine_bounding_box();
-    resize(fcn_dimension_xyz{bb.max_x + 1, bb.max_y + 1, z()});
+    resize(fcn_dimension_xyz{std::max(bb.max_x + 1, 2ul), std::max(bb.max_y + 1, 2ul), z()});  // incorporate BGL bug
 }
 
 fcn_gate_layout::energy_info fcn_gate_layout::calculate_energy() const noexcept

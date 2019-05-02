@@ -46,7 +46,7 @@ namespace svg
                 {
                     // If this is called, then there is no tile for the current cell yet
                     // It also makes sure that all required tiles are created
-                    coord_to_latch_tile[tile_coords] = std::make_tuple(tile, clockzone, latch_delay);
+                    coord_to_latch_tile[tile_coords] = std::make_tuple(latch, clockzone, latch_delay);
                 }
             }
             else
@@ -182,10 +182,10 @@ namespace svg
             double x_pos = starting_offset_latch_x + coord.first * tile_distance;
             double y_pos = starting_offset_latch_y + coord.second * tile_distance;
 
-            descr = fmt::format(descr, x_pos, y_pos, tile_colors[czone_up], tile_colors[czone_lo], cell_descriptions,
+            descr = fmt::format(descr, x_pos, y_pos, tile_colors[czone_lo], tile_colors[czone_up], cell_descriptions,
                                 text_colors[czone_up], simple ? "" : std::to_string(czone_up + 1),
                                 text_colors[czone_lo],
-                                simple ? "" : fmt::format("{} (+{})", czone_lo + 1, latch_delay));
+                                simple ? "" : std::to_string(czone_lo + 1));
 
             tile_descriptions << descr;
         }

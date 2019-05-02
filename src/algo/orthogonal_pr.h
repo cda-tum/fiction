@@ -26,8 +26,9 @@ public:
      *
      * @param ln Logic network.
      * @param n Number of clock phases.
+     * @param io Flag to indicate use of I/O ports.
      */
-    orthogonal_pr(std::shared_ptr<logic_network>&& ln, const unsigned n);
+    orthogonal_pr(logic_network_ptr ln, const unsigned n, const bool io = false);
     /**
      * Default Destructor.
      */
@@ -67,6 +68,10 @@ private:
      * Number of clock phases to use in the diagonal clocking scheme.
      */
     const unsigned phases;
+    /**
+     * Flag to indicate that designated I/O ports should be routed too.
+     */
+    const bool io_ports;
     /**
      * Colors used for a red-blue-coloring of 3-graphs.
      */

@@ -10,11 +10,12 @@
 #include "directions.h"
 #include "energy_model.h"
 #include <boost/optional.hpp>
+#include <boost/variant.hpp>
 #include <boost/bimap.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
 
 /**
- * Represents layouts of field coupled nanocomputing (FCN) devices on a gate level abstraction. Inherits from fcn_layout
+ * Represents layouts of field-coupled nanocomputing (FCN) devices on a gate level abstraction. Inherits from fcn_layout
  * so it is a 3-dimensional grid-like structure as well. Faces are called tiles in a gate layout. Tiles can be occupied
  * by either an operation like AND, OR, NOT, fan-outs, special PI/PO ports or buffers (which make the tile a gate tile),
  * or multiple edges (which makes the tile a wire tile). All operations and edges are associated with a logic_network
@@ -356,21 +357,85 @@ public:
      */
     bool is_free_tile(const tile& t) const noexcept;
     /**
-     * Returns a vector of tiles containing the ones with outgoing data flow with respect to the given tile t which have
-     * a subsequent logic vertex or logic edge assigned with respect to the network.
-     *
-     * @param t Tile whose outgoing information flow tiles are desired.
-     * @return A vector of all outgoing information flow tiles to t.
+     * A variant of either a gate or a wire necessary for data flow.
      */
-    std::vector<tile> outgoing_information_flow_tiles(const tile& t) const noexcept;
+    using gate_or_wire = boost::variant<logic_network::vertex, logic_network::edge>;
+private:
+    /**
+     * Checks if there is a valid data flow from given gate_or_wire to given tile at or vice versa. A data flow is
+     * characterized by a vertex to edge, edge to edge, or edge to vertex connection according to the stored
+     * logic_network. The respective target element is returned if there is one. boost::none otherwise.
+     *
+     * @param gw Gate or wire as starting/ending point of data flow.
+     * @param at Adjacent tile of data flow to check.
+     * @param out Flag to determine direction of data flow to check. True: gw -> at. False: at -> gw.
+     * @return Target gate_or_wire element iff data flows from gw to at or at to gw according to network.
+     *         boost::none otherwise.
+     */
+    boost::optional<gate_or_wire> is_data_flow(const gate_or_wire& gw, const tile& at, const bool out) const noexcept;
+public:
+    /**
+     * Public proxy for outgoing is_data_flow without the weird bool flag. For information see is_data_flow.
+     */
+    boost::optional<gate_or_wire> is_out_data_flow(const gate_or_wire& gw, const tile& at) const noexcept;
+    /**
+     * Public proxy for incoming is_data_flow without the weird bool flag. For information see is_data_flow.
+     */
+    boost::optional<gate_or_wire> is_in_data_flow(const gate_or_wire& gw, const tile& at) const noexcept;
+    /**
+     * Generic version of the proxies above that only returns true iff there is any data flow from given tile t1 to
+     * given tile t2.
+     *
+     * This function is recommended only if no concrete data path should be followed but rather one is interested in all
+     * data flows from t1 to t2. Otherwise, is_out/in_data_flow should be used.
+     *
+     * @param t1 Source tile of data flow.
+     * @param t2 Target tile of data flow.
+     * @return True iff there is any data flow from t1 to t2.
+     */
+    bool is_data_flow(const tile& t1, const tile& t2) const noexcept;
+    /**
+     * Returns a vector of pairs of tiles and gate_or_wire elements containing the ones with outgoing data flow with
+     * respect to the given tile t which have a subsequent logic vertex or logic edge assigned with respect to gw and
+     * the network.
+     *
+     * @param t Tile whose outgoing data flow tiles are desired.
+     * @param gw Gate or wire as a starting point of data flow.
+     * @return A vector of all outgoing data flow tiles and the gate or wire targets to t.
+     */
+    std::vector<std::pair<tile, gate_or_wire>> outgoing_data_flow(const tile& t, const gate_or_wire& gw) const noexcept;
+    /**
+     * Returns a vector of tiles containing the ones with outgoing data flow with respect to the given tile t which have
+     * a subsequent logic vertex or logic edge assigned.
+     *
+     * This function is recommended only if no concrete data path should be followed but rather one is interested in all
+     * data flows from a tile. Otherwise, the other overload should be used.
+     *
+     * @param t Tile whose outgoing data flow tiles are desired.
+     * @return A vector of all outgoing data flow tiles to t.
+     */
+    std::vector<tile> outgoing_data_flow(const tile& t) const noexcept;
+    /**
+     * Returns a vector of pairs of tiles and gate_or_wire elements containing the ones with incoming data flow with
+     * respect to the given tile t which have a preceeding logic vertex or logic edge assigned with respect to gw and
+     * the network.
+     *
+     * @param t Tile whose incoming data flow tiles are desired.
+     * @param gw Gate or wire as an end point of data flow.
+     * @return A vector of all incoming data flow tiles and the gate or wire targets to t.
+     */
+    std::vector<std::pair<tile, gate_or_wire>> incoming_data_flow(const tile& t, const gate_or_wire& gw) const noexcept;
     /**
      * Returns a vector of tiles containing the ones with incoming data flow with respect to the given tile t which have
-     * a preceeding logic vertex or logic edge assigned with respect to the network.
+     * a preceeding logic vertex or logic edge assigned.
      *
-     * @param t Tile whose incoming information flow tiles are desired.
-     * @return A vector of all incoming information flow tiles to t.
+     * This function is recommended only if no concrete data path should be followed but rather one is interested in all
+     * data flows to a tile. Otherwise, the other overload should be used.
+     *
+     * @param t Tile whose incoming data flow tiles are desired.
+     * @return A vector of all incoming data flow tiles to t.
      */
-    std::vector<tile> incoming_information_flow_tiles(const tile& t) const noexcept;
+    std::vector<tile> incoming_data_flow(const tile& t) const noexcept;
     /**
      * Returns the operation assigned to tile t. If no operation has been set, op::NONE is returned.
      * Note that op::W is returned if a logic edge has been assigned to t.
@@ -413,7 +478,7 @@ public:
     struct path_info
     {
         /**
-         * Captures absolute path length, signal delay (first clocknumber plays a role), and delay differences.
+         * Captures absolute path length, signal delay (first clock number plays a role), and delay differences.
          */
         std::size_t length = 0, delay = 0, diff = 0;
     };
@@ -430,10 +495,11 @@ public:
      * anyways. This way, the cache is just a slight memory overhead but significantly reduces runtime.
      *
      * @param t Tile whose number of tiles on the longest path from any PI is desired.
+     * @param gw Gate or wire assigned to tile t to trace the signal path.
      * @param dc A cache structure to avoid re-computations of paths.
      * @return Number of tiles in the longest path from a PI to t in several configurations.
      */
-    path_info signal_delay(const tile& t, delay_cache& dc) const noexcept;
+    path_info signal_delay(const tile& t, const gate_or_wire& gw, delay_cache& dc) const noexcept;
     /**
      * Returns the length of the longest path from any PI to any PO, i.e. the highest signal delay in tiles as the first
      * return value.

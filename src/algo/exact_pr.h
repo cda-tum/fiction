@@ -29,7 +29,7 @@ public:
      * @param ln Logic network.
      * @param config Configuration object storing all the bounds, flags, and so on.
      */
-    exact_pr(std::shared_ptr<logic_network>&& ln, exact_pr_config&& config);
+    exact_pr(logic_network_ptr ln, exact_pr_config&& config);
     /**
      * Default Destructor.
      */
@@ -72,7 +72,7 @@ private:
      */
     using layout_tile_index  = fcn_gate_layout::tile_index;
     using logic_vertex_index = logic_network::vertex_index;
-    using logic_edge_index   = logic_network::edge_index;
+    using logic_edge_index   = std::pair<logic_vertex_index, logic_vertex_index>;
     /**
      * Shortcuts for hashes.
      */

@@ -24,7 +24,7 @@ public:
      * doing so. That means, construction of a qca_one_library object can fail with an exception. This is intended!
      * See commands.h for details on usage.
      */
-    explicit qca_one_library(fcn_gate_layout_ptr&& fgl);
+    explicit qca_one_library(fcn_gate_layout_ptr fgl);
     /**
      * Copy constructor is not available.
      */
@@ -47,7 +47,7 @@ public:
     qca_one_library& operator=(qca_one_library&& rhs) = delete;
     /**
      * Overrides the corresponding function in fcn_gate_library. Given a tile t, this function takes all necessary
-     * information from the stored grid into accout to choose the correct fcn_gate representation for that tile. May it
+     * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
      * @param t Tile to be realized in QCA-ONE.

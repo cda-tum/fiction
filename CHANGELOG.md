@@ -3,6 +3,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## v0.2.1 - 2019-05-02
+*Fiction is art and art is the triumph over chaos.* &mdash; John Cheever
+
+### Added
+- Support for BANCS clocking and integration in `exact`
+- Name strings for `fcn_clocking_scheme` objects and corresponding name-based look-up
+- Version and build information accessible within the code by including `version.h`
+- Parameter `-i` for command `ortho`
+- `shortcuts.fs` with predefined flows
+- `benchmarks/MAJ/` folder with some TOY benchmarks using MAJ gates
+
+### Changed
+- Calls to `exact -s` now need to name the desired clocking, e.g. `exact -s use` (case insensitive)
+- `incoming`/`outgoing_information_flow_tiles` have been renamed to `incoming`/`outgoing_data_flow` and handle multi wires now
+- Renamed diagonal clocking schemes to 2DDWAVE and gave proper credit.
+- More verbose error messages
+
+### Fixed
+- TP calculation for layouts without designated I/O pins (thanks to Mario Kneidinger!)
+- I/O port orientation of PI/PO gates using QCA-ONE library
+- Usage of non-PI/PO MAJ gates in QCA-ONE library
+- Visualization of clock latches in `show -c` (thanks to Gregor Kuhn!)
+- Multi direction assignment to wires and gates in `exact` leading to physically impossible layouts
+- `shrink_to_fit` in `fcn_gate_layout` incorporates the BGL bug now. Minimum size in each dimension is 2.
+For more information, see <https://svn.boost.org/trac10/ticket/11735>
+- Parameters for `exact` no longer get stuck once set
+
+### Removed
+- Parameter `-n` for `exact`
+
 ## v0.2.0 - 2019-03-21
 *Fiction reveals the truth that reality obscures.* &mdash; Jessamyn West
 ### Added
@@ -22,8 +52,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `write_qca` is now called `qca` and handles file names automatically if necessary
 - `-u` is not a required parameter for `exact` anymore
 - Richer output for `print -w`
-- Included latest bugfixes for [Alice](https://github.com/msoeken/alice)
-- Included latest update for [Lorina](https://github.com/hriener/lorina)
+- Included latest bugfixes for [alice](https://github.com/msoeken/alice)
+- Included latest update for [lorina](https://github.com/hriener/lorina)
 
 ### Fixed
 - Starting layout size for calls to `exact -i` was too low and has been corrected

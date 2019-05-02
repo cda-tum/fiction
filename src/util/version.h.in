@@ -1,0 +1,21 @@
+//
+// Created by marcel on 05.04.19.
+//
+
+#ifndef FICTION_VERSION_H_IN
+#define FICTION_VERSION_H_IN
+
+/**
+ * Version string.
+ */
+constexpr const char* VERSION = "@CMAKE_PROJECT_NAME@ v@PROJECT_VERSION@";
+/**
+ * Compiled at the stored date.
+ */
+constexpr const char* COMPILED_DATE = __DATE__;
+/**
+ * Compiled at the stored time.
+ */
+constexpr const char* COMPILED_TIME = __TIME__;
+
+#endif //FICTION_VERSION_H_IN

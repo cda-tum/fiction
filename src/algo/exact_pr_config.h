@@ -43,7 +43,7 @@ struct exact_pr_config
     /**
      * Flag to indicate that designated wires should be routed to balance I/O port paths.
      */
-    bool io_wires = false;
+    bool io_ports = false;
     /**
      * Flag to indicate that I/Os should be placed at the grid's border.
      */

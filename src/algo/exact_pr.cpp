@@ -5,14 +5,13 @@
 #include "exact_pr.h"
 
 
-exact_pr::exact_pr(std::shared_ptr<logic_network>&& ln, exact_pr_config&& config)
+exact_pr::exact_pr(logic_network_ptr ln, exact_pr_config&& config)
         :
         place_route(std::move(ln)),
         config{config},
-        lower_bound{static_cast<unsigned>(network->vertex_count(config.io_wires))},
+        lower_bound{static_cast<unsigned>(network->vertex_count(config.io_ports))},
         solver{ctx}
 {
-    network->update_index_maps();
     layout = std::make_shared<fcn_gate_layout>(std::move(*config.scheme), network);
     initialize_vcl_map();
     set_timeout(config.timeout);
@@ -91,7 +90,7 @@ void exact_pr::initialize_tv_map()
     for (auto&& t : layout->ground_layer())
     {
         const auto t_i = layout->index(t);
-        for (auto&& v : network->vertices(config.io_wires))
+        for (auto&& v : network->vertices(config.io_ports))
         {
             const auto v_i = network->index(v);
             z3_expr_proxy ep{ctx.bool_const(boost::str(boost::format("tv_%d_%d") % t_i % v_i).c_str())};
@@ -105,11 +104,11 @@ void exact_pr::initialize_te_map()
     for (auto&& t : layout->ground_layer())
     {
         const auto t_i = layout->index(t);
-        for (auto&& e : network->edges(config.io_wires))
+        for (auto&& e : network->edges(config.io_ports))
         {
-            const auto e_i = network->index(e);
-            z3_expr_proxy ep{ctx.bool_const(boost::str(boost::format("te_%d_%d") % t_i % e_i).c_str())};
-            te_map.emplace(std::make_pair(t_i, e_i), ep);
+            const auto src = network->index(network->source(e)), tgt = network->index(network->target(e));
+            z3_expr_proxy ep{ctx.bool_const(boost::str(boost::format("te_%d_(%d,%d)") % t_i % src % tgt).c_str())};
+            te_map.emplace(std::make_pair(t_i, std::make_pair(src, tgt)), ep);
         }
     }
 }
@@ -163,7 +162,7 @@ void exact_pr::initialize_vcl_map()
         vcl_map.emplace(v_i, ep);
     };
 
-    if (config.io_wires)
+    if (config.io_ports)
     {
         for (auto&& v : network->get_pis())
             initialize(v);
@@ -205,7 +204,8 @@ z3::expr exact_pr::get_tv(const layout_tile& t, const logic_vertex v)
 
 z3::expr exact_pr::get_te(const layout_tile& t, const logic_edge& e)
 {
-    return te_map.at(std::make_pair(layout->index(t), network->index(e)))[0u];
+    return te_map.at(std::make_pair(layout->index(t), std::make_pair(network->index(network->source(e)),
+                                                                     network->index(network->target(e)))))[0u];
 }
 
 z3::expr exact_pr::get_tc(const layout_tile& t1, const layout_tile& t2)
@@ -266,13 +266,13 @@ void exact_pr::restrict_tile_elements()
         if (config.crossings)
         {
             z3::expr_vector tv{ctx};
-            for (auto&& v : network->vertices(config.io_wires))
+            for (auto&& v : network->vertices(config.io_ports))
                 tv.push_back(get_tv(t, v));
 
             solver.add(z3::atmost(tv, 1u));
 
             z3::expr_vector te{ctx};
-            for (auto&& e : network->edges(config.io_wires))
+            for (auto&& e : network->edges(config.io_ports))
                 te.push_back(get_te(t, e));
 
             solver.add(z3::atmost(te, 2u));
@@ -280,10 +280,10 @@ void exact_pr::restrict_tile_elements()
         else
         {
             z3::expr_vector ve{ctx};
-            for (auto&& v : network->vertices(config.io_wires))
+            for (auto&& v : network->vertices(config.io_ports))
                 ve.push_back(get_tv(t, v));
 
-            for (auto&& e : network->edges(config.io_wires))
+            for (auto&& e : network->edges(config.io_ports))
                 ve.push_back(get_te(t, e));
 
             solver.add(z3::atmost(ve, 1u));
@@ -293,7 +293,7 @@ void exact_pr::restrict_tile_elements()
 
 void exact_pr::restrict_vertices()
 {
-    for (auto&& v : network->vertices(config.io_wires))
+    for (auto&& v : network->vertices(config.io_ports))
     {
         z3::expr_vector ve{ctx};
         for (auto&& t : layout->ground_layer())
@@ -333,7 +333,7 @@ void exact_pr::restrict_latches()
 
         // tiles without wires cannot have latches
         z3::expr_vector te{ctx};
-        for (auto&& e : network->edges(config.io_wires))
+        for (auto&& e : network->edges(config.io_ports))
             te.push_back(get_te(t, e));
         solver.add(z3::implies(z3::atmost(te, 0u), l == zero));
     }
@@ -346,11 +346,11 @@ void exact_pr::define_adjacent_vertex_tiles()
 {
     for (auto&& t : layout->ground_layer())
     {
-        for (auto&& v : (network->vertices(config.io_wires)))
+        for (auto&& v : (network->vertices(config.io_ports)))
         {
             auto co = get_tv(t, v);
             z3::expr_vector conj{ctx};
-            for (auto&& av : network->adjacent_vertices(v, config.io_wires))
+            for (auto&& av : network->adjacent_vertices(v, config.io_ports))
             {
                 auto ev = network->get_edge(v, av).get();
                 z3::expr_vector disj{ctx};
@@ -383,11 +383,11 @@ void exact_pr::define_inv_adjacent_vertex_tiles()
 {
     for (auto&& t : layout->ground_layer())
     {
-        for (auto&& v : network->vertices(config.io_wires))
+        for (auto&& v : network->vertices(config.io_ports))
         {
             auto co = get_tv(t, v);
             z3::expr_vector conj{ctx};
-            for (auto&& iav : network->inv_adjacent_vertices(v, config.io_wires))
+            for (auto&& iav : network->inv_adjacent_vertices(v, config.io_ports))
             {
                 auto iev = network->get_edge(iav, v).get();
                 z3::expr_vector disj{ctx};
@@ -420,7 +420,7 @@ void exact_pr::define_adjacent_edge_tiles()
 {
     for (auto&& t : layout->ground_layer())
     {
-        for (auto&& e : network->edges(config.io_wires))
+        for (auto&& e : network->edges(config.io_ports))
         {
             auto te = network->target(e);
             z3::expr_vector disj{ctx};
@@ -450,7 +450,7 @@ void exact_pr::define_inv_adjacent_edge_tiles()
 {
     for (auto&& t : layout->ground_layer())
     {
-        for (auto&& e : network->edges(config.io_wires))
+        for (auto&& e : network->edges(config.io_ports))
         {
             auto se = network->source(e);
             z3::expr_vector disj{ctx};
@@ -533,7 +533,7 @@ void exact_pr::assign_pi_clockings()
         }
     };
 
-    if (config.io_wires)
+    if (config.io_ports)
     {
         for (auto&& v : network->get_pis())
             assign(v);
@@ -553,7 +553,7 @@ void exact_pr::fanin_length()
     using logic_edge_path = logic_network::edge_path;
     auto define_length = [this](const logic_vertex _v) -> void
     {
-        auto paths = network->get_all_paths(_v, config.io_wires);
+        auto paths = network->get_all_paths(_v, config.io_ports);
         if (paths.empty())
             return;
 
@@ -576,9 +576,9 @@ void exact_pr::fanin_length()
             {
                 // respect clock zone of PI if one is involved
                 auto s = network->source(e);
-                if (config.io_wires && network->is_pi(s))
+                if (config.io_ports && network->is_pi(s))
                     path_length.push_back(get_vcl(s));
-                else if (!config.io_wires)
+                else if (!config.io_ports)
                 {
                     if (network->pre_pi(s))
                         path_length.push_back(get_vcl(s));
@@ -591,7 +591,7 @@ void exact_pr::fanin_length()
         solver.add(mk_eq(all_path_lengths));
     };
 
-    if (config.io_wires)
+    if (config.io_ports)
     {
         for (auto&& po : network->get_pos())
             define_length(po);
@@ -612,15 +612,15 @@ void exact_pr::prevent_insufficiencies()
     {
         if (layout->is_regularly_clocked())
         {
-            for (auto&& v : network->vertices(config.io_wires))
+            for (auto&& v : network->vertices(config.io_ports))
             {
                 // if vertex v has more adjacent or inversely adjacent elements than tile t
-                if (layout->out_degree(t) < static_cast<unsigned>(network->out_degree(v, config.io_wires)) ||
-                        layout->in_degree(t) < static_cast<unsigned>(network->in_degree(v, config.io_wires)))
+                if (layout->out_degree(t) < static_cast<unsigned>(network->out_degree(v, config.io_ports)) ||
+                        layout->in_degree(t) < static_cast<unsigned>(network->in_degree(v, config.io_ports)))
                     solver.add(not get_tv(t, v));
             }
 
-            for (auto&& e : network->edges(config.io_wires))
+            for (auto&& e : network->edges(config.io_ports))
             {
                 // if tile t has no adjacent or inversely adjacent tiles
                 if (layout->out_degree(t) == 0 || layout->in_degree(t) == 0)
@@ -632,11 +632,11 @@ void exact_pr::prevent_insufficiencies()
             auto surrounding_tiles = layout->surrounding_2d(t);
             auto tile_degree = std::distance(surrounding_tiles.begin(), surrounding_tiles.end());
 
-            for (auto&& v : network->vertices(config.io_wires))
+            for (auto&& v : network->vertices(config.io_ports))
             {
                 // in an irregular clocking scheme, not so strict restrictions can be made
-                if (tile_degree < static_cast<unsigned>(network->out_degree(v, config.io_wires) +
-                        network->in_degree(v, config.io_wires)))
+                if (tile_degree < static_cast<unsigned>(network->out_degree(v, config.io_ports) +
+                        network->in_degree(v, config.io_ports)))
                     solver.add(not get_tv(t, v));
             }
         }
@@ -693,11 +693,11 @@ void exact_pr::define_number_of_connections()
 
         z3::expr_vector ow{ctx};
 
-        for (auto&& v : network->vertices(config.io_wires))
+        for (auto&& v : network->vertices(config.io_ports))
         {
             auto tv   = get_tv(t1, v);
-            auto aon  = static_cast<unsigned>(network->out_degree(v, config.io_wires));
-            auto iaon = static_cast<unsigned>(network->in_degree(v, config.io_wires));
+            auto aon  = static_cast<unsigned>(network->out_degree(v, config.io_ports));
+            auto iaon = static_cast<unsigned>(network->in_degree(v, config.io_ports));
 
             ow.push_back(tv);
 
@@ -709,7 +709,7 @@ void exact_pr::define_number_of_connections()
         }
 
         z3::expr_vector wv{ctx};
-        for (auto&& e : network->edges(config.io_wires))
+        for (auto&& e : network->edges(config.io_ports))
         {
             auto te = get_te(t1, e);
 
@@ -728,9 +728,11 @@ void exact_pr::define_number_of_connections()
         if (config.crossings)
         {
             if (!acc.empty())
-                solver.add(z3::implies(z3::atleast(wv, 2u), z3::atleast(acc, 2u) and z3::atmost(acc, 2u)));
+                solver.add(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
+                        z3::atleast(acc, 2u) and z3::atmost(acc, 2u)));
             if (!iacc.empty())
-                solver.add(z3::implies(z3::atleast(wv, 2u), z3::atleast(iacc, 2u) and z3::atmost(iacc, 2u)));
+                solver.add(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
+                        z3::atleast(iacc, 2u) and z3::atmost(iacc, 2u)));
         }
 
         // collect all variables representing paths t -> t' and t' -> t
@@ -744,7 +746,7 @@ void exact_pr::define_number_of_connections()
 
         // if tile t is empty, there must not be any connection or path from or to tile t established
         if (!ow.empty() && !ccp.empty())
-            solver.add(z3::implies(z3::atmost(ow, 0u), z3::atmost(ccp, 0u)));
+            solver.add(z3::atmost(ow, 0u) == z3::atmost(ccp, 0u));
     }
 }
 
@@ -761,7 +763,7 @@ void exact_pr::enforce_border_io()
         }
     };
 
-    if (config.io_wires)
+    if (config.io_ports)
     {
         for (auto&& pi : network->get_pis())
             assign_border(pi);
@@ -785,7 +787,7 @@ void exact_pr::enforce_border_io()
 
 void exact_pr::limit_wire_length()
 {
-    for (auto&& e : network->edges(config.io_wires))
+    for (auto&& e : network->edges(config.io_ports))
     {
         z3::expr_vector ve{ctx};
         for (auto&& t : layout->ground_layer())
@@ -801,7 +803,7 @@ void exact_pr::limit_crossings()
     for (auto&& t : layout->ground_layer())
     {
         z3::expr_vector wv{ctx};
-        for (auto&& e : network->edges(config.io_wires))
+        for (auto&& e : network->edges(config.io_ports))
             wv.push_back(get_te(t, e));
 
         crossings_counter.push_back(z3::ite(z3::atleast(wv, 2u), ctx.real_val(1), ctx.real_val(0)));
@@ -853,7 +855,7 @@ void exact_pr::generate_smt_instance()
     if (config.crossings && config.crossings_limit)
         limit_crossings();
 
-//        std::cout << solver.assertions() << std::endl;
+//    std::cout << solver.assertions() << std::endl;
 
 }
 
@@ -865,14 +867,14 @@ void exact_pr::assign_layout()
     for (auto&& t : layout->ground_layer())
     {
         auto element_placed = false;
-        for (auto&& v : network->vertices(config.io_wires))
+        for (auto&& v : network->vertices(config.io_ports))
         {
             // if vertex v is set to tile t
             if (mdl.eval(get_tv(t, v)).bool_value() == Z3_L_TRUE)
             {
                 // check for I/Os
                 bool pi, po;
-                if (config.io_wires)
+                if (config.io_ports)
                 {
                     pi = network->is_pi(v);
                     po = network->is_po(v);
@@ -895,7 +897,7 @@ void exact_pr::assign_layout()
             continue;
 
         // assign edges to tiles
-        for (auto&& e : network->edges(config.io_wires))
+        for (auto&& e : network->edges(config.io_ports))
         {
             // if edge e is set to tile t
             if (mdl.eval(get_te(t, e)).bool_value() == Z3_L_TRUE)
@@ -928,40 +930,26 @@ void exact_pr::assign_layout()
             // if connection t1 -> t2 is established
             if (mdl.eval(get_tc(t1, t2)).bool_value() == Z3_L_TRUE)
             {
-                if (!layout->is_wire_tile(layout->above(t1)))
-                {
-                    for (auto& e : layout->get_logic_edges(t1))
-                        layout->assign_wire_out_dir(t1, e, layout->get_bearing(t1, t2));
-                    layout->assign_tile_out_dir(t1, layout->get_bearing(t1, t2));
-                }
-                if (!layout->is_wire_tile(layout->above(t2)))
-                {
-                    for (auto& e : layout->get_logic_edges(t2))
-                        layout->assign_wire_inp_dir(t2, e, layout->get_bearing(t2, t1));
-                    layout->assign_tile_inp_dir(t2, layout->get_bearing(t2, t1));
-                }
-            }
-        }
-    }
+                layout_tile _t1, _t2;
+                if (layout->is_data_flow(t1, t2))
+                { _t1 = t1; _t2 = t2; }
+                else if (layout->is_data_flow(t1, layout->above(t2)))
+                { _t1 = t1; _t2 = layout->above(t2); }
+                else if (layout->is_data_flow(layout->above(t1), t2))
+                { _t1 = layout->above(t1); _t2 = t2; }
+                else if (layout->is_data_flow(layout->above(t1), layout->above(t2)))
+                { _t1 = layout->above(t1); _t2 = layout->above(t2); }
 
-    // using tiles() here because now really all tiles will be assigned
-    for (auto&& t1 : layout->tiles())
-    {
-        // iterate over all adjacent tiles to which a subsequent vertex or edge was assigned
-        for (auto&& t2 : layout->outgoing_information_flow_tiles(t1))
-        {
-            // if connection has been established, assign direction
-            for (auto& e : layout->get_logic_edges(t1))
-                layout->assign_wire_out_dir(t1, e, layout->get_bearing(t1, t2));
-            layout->assign_tile_out_dir(t1, layout->get_bearing(t1, t2));
-        }
-        // iterate over all adjacent tiles to which a preceding vertex or edge was assigned
-        for (auto&& t2 : layout->incoming_information_flow_tiles(t1))
-        {
-            // if connection has been established, assign direction
-            for (auto& e : layout->get_logic_edges(t1))
-                layout->assign_wire_inp_dir(t1, e, layout->get_bearing(t1, t2));
-            layout->assign_tile_inp_dir(t1, layout->get_bearing(t1, t2));
+                // assign outgoing directions
+                for (auto& e : layout->get_logic_edges(_t1))
+                    layout->assign_wire_out_dir(_t1, e, layout->get_bearing(_t1, _t2));
+                layout->assign_tile_out_dir(_t1, layout->get_bearing(_t1, _t2));
+
+                // assign incoming directions
+                for (auto& e : layout->get_logic_edges(_t2))
+                    layout->assign_wire_inp_dir(_t2, e, layout->get_bearing(_t2, _t1));
+                layout->assign_tile_inp_dir(_t2, layout->get_bearing(_t2, _t1));
+            }
         }
     }
 

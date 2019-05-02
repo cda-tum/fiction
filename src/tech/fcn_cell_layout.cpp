@@ -133,8 +133,8 @@ boost::optional<fcn_clock::zone> fcn_cell_layout::cell_clocking(const cell& c) c
     }
 }
 
-void fcn_cell_layout::assign_gate(const cell& c, const fcn_gate& g, const std::vector<std::string>& inp_names,
-                                  const std::vector<std::string>& out_names)
+void fcn_cell_layout::assign_gate(const cell& c, const fcn_gate& g, const latch_delay l,
+                                  const std::vector<std::string>& inp_names, const std::vector<std::string>& out_names)
 {
     auto start_x = c[X];
     auto start_y = c[Y];
@@ -150,6 +150,7 @@ void fcn_cell_layout::assign_gate(const cell& c, const fcn_gate& g, const std::v
             const auto type = g[y][x];
 
             assign_cell_type(pos, type);
+            assign_latch(pos, l);
 
             if (type == fcn::INPUT_CELL)
             {
@@ -265,9 +266,8 @@ void fcn_cell_layout::map_layout()
         if (layout->is_free_tile(t))
             continue;
 
-        auto gate = library->set_up_gate(t);
-        assign_gate(cell{t[X] * library->gate_x_size(), t[Y] * library->gate_y_size(), t[Z]}, gate,
-                    layout->get_inp_names(t), layout->get_out_names(t));
+        assign_gate(cell{t[X] * library->gate_x_size(), t[Y] * library->gate_y_size(), t[Z]}, library->set_up_gate(t),
+                    layout->get_latch(t), layout->get_inp_names(t), layout->get_out_names(t));
     }
 
     assign_vias();
