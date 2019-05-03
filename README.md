@@ -49,7 +49,7 @@ CMake will inform you about missing dependencies during the build process.
 Check out the git project (and all of its submodules) using the following command:
 
 ```sh
-git clone https://gitlab.informatik.uni-bremen.de/m_walter/fiction.git --recursive
+git clone --recursive https://github.com/marcelwa/fiction.git
 ```
 
 Several third-party libraries will be cloned within the `libs/` folder. The `cmake` build process will take care of
