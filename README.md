@@ -449,6 +449,8 @@ If you use *fiction* in your work, I would appreciate if you cited
 }
 ```
 
+The [paper](./bib/paper.pdf) and an overview [poster](./bib/poster.pdf) are also shipped with this repository.
+
 Furthermore, if the aforementioned physical design techniques are helpful for you, please find corresponding
 citations for the [exact approach](https://ieeexplore.ieee.org/document/8342060)
 ([BibTeX](https://scholar.googleusercontent.com/scholar.bib?q=info:4sV4HLtAl5MJ:scholar.google.com/&output=citation&scisig=AAGBfm0AAAAAXNVeLMDWESEscPWEEn-IZ3Cg_8q9ph6i&scisf=4&ct=citation&cd=-1))
