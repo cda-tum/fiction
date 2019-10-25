@@ -10,6 +10,7 @@ script:
 - mkdir build
 - cd build
 - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPYTHON_EXECUTABLE=$(which $PY_CMD) ..
+- travis_wait make z3
 - make fiction
 
 matrix:
