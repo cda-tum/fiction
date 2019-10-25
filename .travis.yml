@@ -46,17 +46,3 @@ matrix:
         packages:
           - clang-7
     env: COMPILER=clang++-7
-    
-  # ubuntu 18.04 gcc/g++7
-  - os: linux
-    dist: bionic
-    sudo: required
-    compiler: gcc
-    env: COMPILER=g++-7
-    
-  # ubuntu 18.04 clang/clang++7
-  - os: linux
-    dist: bionic
-    sudo: required
-    compiler: clang
-    env: COMPILER=clang++-7
