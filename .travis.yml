@@ -1,7 +1,6 @@
 language: cpp
 
-install: 
-  - sudo apt update -qq
+before_script:
   # install boost libraries
   - sudo apt install -qq libboost-all-dev
 
