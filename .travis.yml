@@ -4,7 +4,6 @@ install:
   - sudo apt update -qq
   # install boost libraries
   - sudo apt install -qq libboost-all-dev
-  - sudo apt install python3
 
 script:
 - mkdir build
@@ -13,9 +12,15 @@ script:
 - make fiction
 
 matrix:
-  include:
-  # latest ubuntu with g++7
+ include:
   - os: linux
-    dist: bionic
+    dist: trusty
+    sudo: required
     compiler: gcc
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-7
     env: COMPILER=g++-7
