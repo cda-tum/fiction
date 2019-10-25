@@ -1,0 +1,15 @@
+language: cpp
+
+script:
+- mkdir build
+- cd build
+- cmake -DCMAKE_CXX_COMPILER=$COMPILER ..
+- make fiction
+
+matrix:
+  include:
+  # latest ubuntu with g++7
+  - os: linux
+    dist: bionic
+    compiler: gcc
+    env: COMPILER=g++-7
