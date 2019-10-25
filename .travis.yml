@@ -3,11 +3,13 @@ language: cpp
 before_script:
   # install boost libraries
   - sudo apt install -qq libboost-all-dev
+  - pyenv global $(pyenv whence 2to3)  # activate all python versions
+  - PY_CMD=python3
 
 script:
 - mkdir build
 - cd build
-- cmake -DCMAKE_CXX_COMPILER=$COMPILER ..
+- cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPYTHON_EXECUTABLE=$(which $PY_CMD) ..
 - make fiction
 
 matrix:
