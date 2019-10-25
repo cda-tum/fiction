@@ -1,5 +1,11 @@
 language: cpp
 
+install: 
+  - sudo apt update -qq
+  # install boost libraries
+  - sudo apt install -qq libboost-all-dev
+  - sudo apt install python3
+
 script:
 - mkdir build
 - cd build
