@@ -32,17 +32,3 @@ matrix:
         packages:
           - g++-7
     env: COMPILER=g++-7
-    
-  # ubuntu 16.04 clang/clang++7
-  - os: linux
-    dist: xenial
-    sudo: required
-    compiler: clang
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-xenial-7
-        packages:
-          - clang-7
-    env: COMPILER=clang++-7
