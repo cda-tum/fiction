@@ -19,7 +19,7 @@ script:
 - mkdir build
 - cd build
 # restore cache if it exists
-- [ ! -f $HOME/.cache/z3 ] || mv $HOME/.cache/z3 ./
+- ([ ! -f $HOME/.cache/z3 ] || mv $HOME/.cache/z3 ./)
 # set compiler, python executable, and Z3 build verbosity
 - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPYTHON_EXECUTABLE=$(which $PY_CMD) -DBUILD_Z3_VERBOSE=TRUE ..
 # build Z3 (takes some time) and cache it
