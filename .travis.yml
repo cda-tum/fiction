@@ -25,7 +25,7 @@ script:
 # build Z3 (takes some time) and cache it
 - make -j2 z3
 - mkdir -p $HOME/.cache
-- mv z3/ $HOME/.cache/
+- mv -n z3/ $HOME/.cache/
 # build fiction
 - make -j2 fiction
 # run integration tests
