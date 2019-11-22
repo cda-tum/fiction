@@ -7,10 +7,19 @@
 
 #include "bidirectional_graph.h"
 #include "operations.h"
+#include "fmt/format.h"
+#include "fmt/ostream.h"
 #include <boost/bimap.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
-#include <boost/format.hpp>
+#include <boost/filesystem.hpp>
 #include <itertools.hpp>
+#include <mockturtle/networks/mig.hpp>
+#include <mockturtle/views/names_view.hpp>
+#include <mockturtle/views/topo_view.hpp>
+#include <mockturtle/io/verilog_reader.hpp>
+#include <mockturtle/io/aiger_reader.hpp>
+#include <mockturtle/algorithms/simulation.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 
 /**
  * Special graph structure with annotated vertices representing a logic_network. Each vertex holds a function from
@@ -25,8 +34,8 @@
  *
  * There are more functions returning ranges of vertices. They work analogously.
  *
- * logic_networks have "hidden" PI/PO and CONST0/CONST1 vertices which are excluded from normal iteration. To iterate
- * over them too, use the respective flags in the call of vertices() and other functions.
+ * logic_networks have "hidden" PI/PO vertices which are excluded from normal iteration. To iterate over them too, use
+ * the respective flag in the call of vertices() and other functions.
  *
  * This class is heavily used by fcn_gate_layout to model gate and wire tiles.
  */
@@ -37,42 +46,35 @@ public:
      * vertex_t of logic_networks are called vertices for convenience.
      */
     using vertex = vertex_t;
-    using vertex_index = std::size_t;
     /**
      * edge_t of logic_networks are called edges for convenience.
      */
     using edge = edge_t;
-    using edge_index = std::size_t;
     /**
      * A sequence of edges can be used as a path.
      */
     using edge_path = edges_t;
     /**
+     * Alias for an MIG network wrapped in a view for port names. Used as a logic description.
+     */
+    using mig_nt = mockturtle::names_view<mockturtle::mig_network>;
+    /**
      * Standard constructor. Creates an empty logic network.
+     */
+    explicit logic_network() noexcept;
+    /**
+     * Standard constructor. Creates a named empty logic network.
      *
      * @param name Path name from which the logic network was created.
      */
     explicit logic_network(std::string&& name) noexcept;
     /**
-     * Copy constructor.
+     * Standard constructor. Creates a named logic network from an MIG.
+     *
+     * @param mig MIG network representing a Boolean function.
+     * @param name Path name from which the logic network was created.
      */
-    logic_network(const logic_network& ln) noexcept;
-    /**
-     * Move constructor.
-     */
-    logic_network(logic_network&& ln) noexcept;
-    /**
-     * Default destructor.
-     */
-    ~logic_network() override = default;
-    /**
-     * Assignment operator is not available.
-     */
-    logic_network& operator=(const logic_network& rhs) noexcept = delete;
-    /**
-     * Move assignment operator is not available.
-     */
-    logic_network& operator=(logic_network&& rhs) noexcept = delete;
+    logic_network(mig_nt&& mig, std::string&& name) noexcept;
     /**
      * Function alias for add_edge using perfect forwarding and the name create_edge to fit naming in logic_network.
      *
@@ -154,35 +156,14 @@ public:
      * @param name Name associated with the input port.
      * @return Created vertex.
      */
-    vertex create_pi(const std::string& name) noexcept;
+    vertex create_pi(const std::string& name = "") noexcept;
     /**
      * Creates a primary output vertex in the network.
      *
+     * @param a Input signal to the newly created PO.
      * @param name Name associated with the output port.
-     * @return Created vertex.
      */
-    void create_po(const vertex a, const std::string& name) noexcept;
-    /**
-     * Returns a constant vertex of the network with respect to value.
-     * True = 1, False = 0.
-     *
-     * @param value Flag to indicate polarity of the constant vertex.
-     * @return ONE iff value == true, ZERO iff value == false.
-     */
-    vertex get_constant(bool value) const noexcept;
-    /**
-     * Creates a buffer element in the network with the given vertex as input signal.
-     *
-     * @param a Input signal to the newly created buffer.
-     * @return The created buffer vertex.
-     */
-    vertex create_buf(const vertex a) noexcept;
-    /**
-     * Creates a buffer element in the network without an input signal.
-     *
-     * @return The created buffer vertex.
-     */
-    vertex create_buf() noexcept;
+    void create_po(const vertex a, const std::string& name = "") noexcept;
     /**
      * Creates a NOT gate in the network with the given vertex as input signal.
      *
@@ -207,14 +188,6 @@ public:
      */
     vertex create_or(const vertex a, const vertex b) noexcept;
     /**
-     * Creates an XOR gate in the network with the given vertices as input signals.
-     *
-     * @param a Input signal 1 to the newly created exclusive disjunction.
-     * @param b Input signal 2 to the newly created exclusive disjunction.
-     * @return The created exclusive disjunction vertex.
-     */
-    vertex create_xor(const vertex a, const vertex b) noexcept;
-    /**
      * Creates a MAJ gate in the network with the given vertices as input signals.
      *
      * @param a Input signal 1 to the newly created majority.
@@ -231,223 +204,143 @@ public:
      */
     vertex create_balance_vertex(const edge& e) noexcept;
     /**
-     * Returns a range of vertices in the network. The range can be parameterized to specify whether I/Os or constants
-     * should be included.
+     * Returns a range of vertices in the network. The range can be parameterized to specify whether I/Os should be
+     * included.
      *
      * @param ios Flag to indicate that I/Os should be included in the range.
-     * @param consts Flag to indicate that constants should be included in the range.
-     * @return Range of vertices that might include I/Os or constants depending on parameters.
+     * @return Range of vertices that might include I/Os depending on parameters.
      */
-    auto vertices(const bool ios = false, const bool consts = false) const noexcept
+    auto vertices(const bool ios = false) const noexcept
     {
-        auto logic_selector = [this, ios = ios, consts = consts](const vertex _v) -> bool
+        auto logic_selector = [this, ios = ios](const vertex _v) -> bool
         {
-            // do neither return consts nor I/Os
-            if (!ios && !consts)
-                return is_io(_v) || is_const(_v);
-            // do not return consts
-            if (ios && !consts)
-                return is_const(_v);
-            // do not return I/Os
-            if (!ios && consts)
-                return is_io(_v);
-
-            // else return all vertices
-            return false;
+            return ios ? false : is_io(_v);
         };
 
         return get_vertices() | iter::filterfalse(logic_selector);
     }
     /**
      * Returns a range of vertices adjacent to the given vertex v. The range can be parameterized to specify whether
-     * I/Os or constants should be included.
+     * I/Os should be included.
      *
      * @param v Vertex whose adjacent vertices are desired.
      * @param ios Flag to indicate that I/Os should be included in the range.
-     * @param consts Flag to indicate that constants should be included in the range.
-     * @return Range of vertices adjacent to v that might include I/Os or constants depending on parameters.
+     * @return Range of vertices adjacent to v that might include I/Os depending on parameters.
      */
-    auto adjacent_vertices(const vertex v, const bool ios = false, const bool consts = false) const noexcept
+    auto adjacent_vertices(const vertex v, const bool ios = false) const noexcept
     {
-        auto logic_selector = [this, ios = ios, consts = consts](const vertex _v) -> bool
+        auto logic_selector = [this, ios = ios](const vertex _v)->bool
         {
-            // do neither return consts nor I/Os
-            if (!ios && !consts)
-                return is_io(_v) || is_const(_v);
-            // do not return consts
-            if (ios && !consts)
-                return is_const(_v);
-            // do not return I/Os
-            if (!ios && consts)
-                return is_io(_v);
-
-            // else return all vertices
-            return false;
+            return ios ? false : is_io(_v);
         };
 
         return get_adjacent_vertices(v) | iter::filterfalse(logic_selector);
     }
     /**
      * Returns a range of vertices inversely adjacent to the given vertex v. The range can be parameterized to specify
-     * whether I/Os or constants should be included.
+     * whether I/Os should be included.
      *
      * @param v Vertex whose inversely adjacent vertices are desired.
      * @param ios Flag to indicate that I/Os should be included in the range.
-     * @param consts Flag to indicate that constants should be included in the range.
-     * @return Range of vertices inversely adjacent to v that might include I/Os or constants depending on parameters.
+     * @return Range of vertices inversely adjacent to v that might include I/Os depending on parameters.
      */
-    auto inv_adjacent_vertices(const vertex v, const bool ios = false, const bool consts = false) const noexcept
+    auto inv_adjacent_vertices(const vertex v, const bool ios = false) const noexcept
     {
-        auto logic_selector = [this, ios = ios, consts = consts](const vertex _v) -> bool
+        auto logic_selector = [this, ios = ios](const vertex _v)->bool
         {
-            // do neither return consts nor I/Os
-            if (!ios && !consts)
-                return is_io(_v) || is_const(_v);
-            // do not return consts
-            if (ios && !consts)
-                return is_const(_v);
-            // do not return I/Os
-            if (!ios && consts)
-                return is_io(_v);
-
-            // else return all vertices
-            return false;
+            return ios ? false : is_io(_v);
         };
 
         return get_inv_adjacent_vertices(v) | iter::filterfalse(logic_selector);
     }
     /**
-     * Returns the number of vertices in the network. The function can be parameterized to specify whether I/Os or
-     * constants should be included.
+     * Returns the number of vertices in the network. The function can be parameterized to specify whether I/Os should
+     * be included.
      *
-     * Calculation is performed as #V [- #I - #O] [- 2] (brackets denote options no parentheses), where the 2 represents
-     * constants ONE and ZERO. Therefore, no other constant vertices should be added to the network.
+     * Calculation is performed as #V [- #I - #O] (brackets denote options).
      *
      * @param ios Flag to indicate that I/Os should be counted as vertices.
-     * @param consts Flag to indicate that consts should be counted as vertices.
      * @return Number of vertices with respect to the flags.
      */
-    num_vertices_t vertex_count(const bool ios = false, const bool consts = false) const noexcept;
+    num_vertices_t vertex_count(const bool ios = false) const noexcept;
     /**
      * Returns a range of edges in the network. The range can be parameterized to specify whether edges leading towards
-     * or from I/Os or constants should be included.
+     * or from I/Os should be included.
      *
      * @param ios Flag to indicate that edges leading towards or from I/Os should be included in the range.
-     * @param consts Flag to indicate that edges leading toward or from constants should be included in the range.
-     * @return Range of edges that might include such leading towards or from I/Os or constants depending on parameters.
+     * @return Range of edges that might include such leading towards or from I/Os depending on parameters.
      */
-    auto edges(const bool ios = false, const bool consts = false) const noexcept
+    auto edges(const bool ios = false) const noexcept
     {
-        auto logic_selector = [this, ios = ios, consts = consts](const edge& _e) -> bool
+        auto logic_selector = [this, ios = ios](const edge& _e) -> bool
         {
-            auto _s = source(_e), _t = target(_e);
-            // do neither return consts nor I/Os
-            if (!ios && !consts)
-                return is_io(_s) || is_io(_t) || is_const(_s) || is_const(_t);
-            // do not return consts
-            if (ios && !consts)
-                return is_const(_s) || is_const(_t);
-            // do not return I/Os
-            if (!ios && consts)
-                return is_io(_s) || is_io(_t);
-
-            // else return all vertices
-            return false;
+            return ios ? false : is_io(source(_e)) || is_io(target(_e));
         };
 
         return get_edges() | iter::filterfalse(logic_selector);
     }
     /**
      * Returns a range of edges outgoing from the given vertex v. The range can be parameterized to specify whether
-     * edges leading towards I/Os or constants should be included.
+     * edges leading towards I/Os should be included.
      *
      * @param v Vertex whose outgoing edges are desired.
      * @param ios Flag to indicate that edges leading towards I/Os should be included in the range.
-     * @param consts Flag to indicate that edges leading towards constants should be included in the range.
-     * @return Range of edges outgoing from v that might include edges towards I/Os or constants depending on parameters.
+     * @return Range of edges outgoing from v that might include edges towards I/Os depending on parameters.
      */
-    auto out_edges(const vertex v, const bool ios = false, const bool consts = false) const noexcept
+    auto out_edges(const vertex v, const bool ios = false) const noexcept
     {
-        auto logic_selector = [this, ios = ios, consts = consts](const edge& _e) -> bool
+        auto logic_selector = [this, ios = ios](const edge& _e)->bool
         {
-            auto _t = target(_e);
-            // do neither return consts nor I/Os
-            if (!ios && !consts)
-                return is_io(_t) || is_const(_t);
-            // do not return consts
-            if (ios && !consts)
-                return is_const(_t);
-            // do not return I/Os
-            if (!ios && consts)
-                return is_io(_t);
-
-            // else return all vertices
-            return false;
+            return ios ? false :is_io(target(_e));
         };
 
         return get_out_edges(v) | iter::filterfalse(logic_selector);
     }
     /**
      * Returns a range of edges incoming to the given vertex v. The range can be parameterized to specify whether
-     * edges coming from I/Os or constants should be included.
+     * edges coming from I/Os should be included.
      *
      * @param v Vertex whose incoming edges are desired.
      * @param ios Flag to indicate that edges coming from I/Os should be included in the range.
-     * @param consts Flag to indicate that edges coming from constants should be included in the range.
-     * @return Range of edges incoming to v that might include edges from I/Os or constants depending on parameters.
+     * @return Range of edges incoming to v that might include edges from I/Os depending on parameters.
      */
-    auto in_edges(const vertex v, const bool ios = false, const bool consts = false) const noexcept
+    auto in_edges(const vertex v, const bool ios = false) const noexcept
     {
-        auto logic_selector = [this, ios = ios, consts = consts](const edge& _e) -> bool
+        auto logic_selector = [this, ios = ios](const edge& _e)->bool
         {
-            auto _s = source(_e);
-            // do neither return consts nor I/Os
-            if (!ios && !consts)
-                return is_io(_s) || is_const(_s);
-            // do not return consts
-            if (ios && !consts)
-                return is_const(_s);
-            // do not return I/Os
-            if (!ios && consts)
-                return is_io(_s);
-
-            // else return all vertices
-            return false;
+            return ios ? false : is_io(source(_e));
         };
 
         return get_in_edges(v) | iter::filterfalse(logic_selector);
     }
     /**
      * Returns the number of edges in the network. The function can be parameterized to specify whether edges connecting
-     * I/Os or constants should be included.
+     * I/Os should be included.
      *
-     * Calculation is performed as #E [- #I - #O] [- #1 - #0] (brackets denote options no parentheses).
+     * Calculation is performed as #E [- #I - #O] (brackets denote options).
      *
      * @param ios Flag to indicate that I/Os should be counted as edges.
-     * @param consts Flag to indicate that consts should be counted as edges.
      * @return Number of edges with respect to the flags.
      */
-    num_edges_t edge_count(const bool ios = false, const bool consts = false) const noexcept;
+    num_edges_t edge_count(const bool ios = false) const noexcept;
     /**
      * Returns the number of outgoing edges of the given vertex v. The function can be parameterized to specify whether
-     * edges to I/Os or constants should be included.
+     * edges to I/Os should be included.
      *
      * @param v Vertex whose out degree is desired.
      * @param ios Flag to indicate that edges to I/Os should be counted.
-     * @param consts Flag to indicate that edges to constants should be counted.
      * @return Number of v's outgoing edges with respect to the flags.
      */
-    degree_t out_degree(const vertex v, const bool ios = false, const bool consts = false) const noexcept;
+    degree_t out_degree(const vertex v, const bool ios = false) const noexcept;
     /**
      * Returns the number of incoming edges of the given vertex v. The function can be parameterized to specify whether
-     * edges from I/Os or constants should be included.
+     * edges from I/Os should be included.
      *
      * @param v Vertex whose in degree is desired.
      * @param ios Flag to indicate that edges from I/Os should be counted.
-     * @param consts Flag to indicate that edges from constants should be counted.
      * @return Number of v's incoming edges with respect to the flags.
      */
-    degree_t in_degree(const vertex v, const bool ios = false, const bool consts = false) const noexcept;
+    degree_t in_degree(const vertex v, const bool ios = false) const noexcept;
     /**
      * Assigns vertex v with operation o.
      *
@@ -481,7 +374,7 @@ public:
      *
      * @return Number of PIs as an unsigned integral type.
      */
-    auto pi_count() const noexcept
+    auto num_pis() const noexcept
     {
         return pi_set.size();
     }
@@ -513,7 +406,7 @@ public:
      *
      * @return Number of POs as an unsigned integral type.
      */
-    auto po_count() const noexcept
+    auto num_pos() const noexcept
     {
         return po_set.size();
     }
@@ -534,23 +427,6 @@ public:
      */
     bool is_io(const vertex v) const noexcept;
     /**
-     * Returns true iff given vertex v is an explicit ONE or ZERO node.
-     *
-     * @param v Vertex to test for const-ness.
-     * @return True iff v is const.
-     */
-    bool is_const(const vertex v) const noexcept;
-    /**
-     * Returns the number of constant signals in the network. Note that the number of const vertices always should be 2.
-     * They can have multiple edges leading to other vertices though.
-     *
-     * @return Number of edges coming from constant vertices.
-     */
-    auto const_count() const noexcept
-    {
-        return out_degree(*zero, true, true) + out_degree(*one, true, true);
-    }
-    /**
      * Returns the number of operations of given type in the network.
      *
      * @param o Type of operation whose count is desired.
@@ -559,35 +435,35 @@ public:
     std::size_t operation_count(const operation o) const noexcept;
     /**
      * Checks whether the network only contains MAJ and NOT logic vertices. As non-logic vertices,
-     * fan-outs, buffers, and auxiliary wire vertices are accepted as well.
+     * fan-outs, and auxiliary wire vertices are accepted as well.
      *
      * @return True iff network is an Majority-Inverter-Graph.
      */
     bool is_MIG() const noexcept;
     /**
      * Checks whether the network only contains AND and NOT logic vertices. As non-logic vertices,
-     * fan-outs, buffers, and auxiliary wire vertices are accepted as well.
+     * fan-outs, and auxiliary wire vertices are accepted as well.
      *
      * @return True iff network is an AND-Inverter-Graph.
      */
     bool is_AIG() const noexcept;
     /**
      * Checks whether the network only contains OR and NOT logic vertices. As non-logic vertices,
-     * fan-outs, buffers, and auxiliary wire vertices are accepted as well.
+     * fan-outs, and auxiliary wire vertices are accepted as well.
      *
      * @return True iff network is an OR-Inverter-Graph.
      */
     bool is_OIG() const noexcept;
     /**
      * Checks whether the network only contains AND, OR, and NOT logic vertices. As non-logic vertices,
-     * fan-outs, buffers, and auxiliary wire vertices are accepted as well.
+     * fan-outs, and auxiliary wire vertices are accepted as well.
      *
      * @return True iff network is an AND-OR-Inverter-Graph.
      */
     bool is_AOIG() const noexcept;
     /**
      * Checks whether the network only contains MAJ, AND, OR, and NOT logic vertices. As non-logic vertices,
-     * fan-outs, buffers, and auxiliary wire vertices are accepted as well.
+     * fan-outs, and auxiliary wire vertices are accepted as well.
      *
      * @return True iff network is an Majority-AND-OR-Inverter-Graph.
      */
@@ -608,26 +484,43 @@ public:
     std::string get_name() const noexcept;
     /**
      * Returns a vector of all possible paths to reach the given vertex within the logic_network. Function can be
-     * parameterized to define whether I/Os or constants should be considered as well.
+     * parameterized to define whether I/Os should be considered as well.
      *
      * Each vertex without predecessors is considered a terminal and a path is defined as a sequence of edges.
      *
      * @param v Vertex to which all paths should lead.
      * @param ios Flag to indicate that I/Os should be considered as path elements.
-     * @param consts Flag to indicate that constants should be considered as path elements.
      * @return A vector of all possible edge paths leading from terminals to v.
      */
-    std::vector<edge_path> get_all_paths(const vertex v, const bool ios = false, const bool consts = false) noexcept;
+    std::vector<edge_path> get_all_paths(const vertex v, const bool ios = false) noexcept;
     /**
-     * Substitutes all connections that exceed allowed incoming degree for certain operations, i.e. 1-NOT, 1-BUF, 2-AND,
-     * 2-OR, 2-XOR, 3-MAJ, and decomposes XOR into AND/OR/NOT vertices.
+     * Computes truth tables for each primary output in the network.
+     *
+     * @return Vector of truth tables.
      */
-    void substitute() noexcept;
+    std::vector<kitty::dynamic_truth_table> simulate() const;
+    /**
+     * Strategies for breaking down gates in a depth first or breadth first way. Depth creates deeper networks, while
+     * breadth creates wider ranks.
+     */
+    enum substitution_strategy { BREADTH, DEPTH };
+    /**
+     * Substitutes multi-outputs of gate vertices and replaces them with fan-out ones. That is, connections become
+     * "gates". Some algorithms require fan-out vertices explicitly and will break down networks if needed. Others might
+     * be able to handle both.
+     *
+     * @param degree Maximum number of outputs a fan-out vertex is allowed to have. Currently, there are different
+     *               operation types for them, F1O2 and F1O3, which means, only 2 and 3 are supported.
+     * @param stgy Strategy to align fan-outs. They can form a balanced tree (BREADTH) or a DFS tree (DEPTH).
+     * @param threshold Maximum number of outputs an AND/OR/MAJ gate can have before substitution applies.
+     */
+    void substitute_fan_outs(const std::size_t degree = 2u, const substitution_strategy stgy = substitution_strategy::BREADTH,
+                             const std::size_t threshold = 1u) noexcept;
     /**
      * Writes a Graphviz (https://www.graphviz.org/) dot representation of the logic_network to the given ostream.
      * Incorporates the logic function names.
      *
-     * @param os Channel into which the graphviz representation should be written.
+     * @param os Channel into which the Graphviz representation should be written.
      */
     void write_network(std::ostream& os = std::cout) noexcept;
 private:
@@ -636,9 +529,13 @@ private:
      */
     const std::string name;
     /**
-     * Alias for a hash set that holds vertices to represent PI/PO ports.
+     * Boolean function representation as an MIG network.
      */
-    using primary_set = std::unordered_set<vertex, boost::hash<vertex>>;
+    mig_nt mig;
+    /**
+     * Alias for a set that holds vertices to represent PI/PO ports.
+     */
+    using primary_set = std::set<vertex>;
     /**
      * Stores vertices that are marked as PIs/POs. Helper functions for access save memory.
      */
@@ -647,7 +544,7 @@ private:
      * Alias for a bidirectional hash map of vertices to names specifying port nodes in the network.
      */
     using port_map = boost::bimap<boost::bimaps::unordered_set_of<vertex, boost::hash<vertex>>,
-            boost::bimaps::unordered_set_of<std::string, boost::hash<std::string>>>;
+                                  boost::bimaps::unordered_set_of<std::string, boost::hash<std::string>>>;
     /**
      * Stores I/O port names.
      */
@@ -656,10 +553,6 @@ private:
      * Counts the operations the network is composed of.
      */
     std::vector<std::size_t> operation_counter;
-    /**
-     * Pointers to the constant nodes 0 and 1.
-     */
-    std::unique_ptr<vertex> zero, one;
     /**
      * Increases the operation counter of the given operation by 1.
      *
@@ -672,8 +565,13 @@ private:
      * @param o Operation type to decrement.
      */
     void decrement_op_counter(const operation o) noexcept;
+    /**
+     * Uses the stored logic description to (re-)initialize the network structure.
+     */
+    void initialize_network_from_logic() noexcept;
 };
 
 using logic_network_ptr = std::shared_ptr<logic_network>;
+
 
 #endif //FICTION_LOGIC_NETWORK_H

@@ -7,7 +7,7 @@ module top (
     \a41 , \a42 , \a43 , \a44 , \a45 , \a46 , \a47 , \a48 ,
     \a49 , \a50 , \a51 , \a52 , \a53 , \a54 , \a55 , \a56 ,
     \a57 , \a58 , \a59 , \a60 , \a61 , \a62 , \a63 ,
-    \asquared0 , \asquared1 , \asquared2 , \asquared3 ,
+    \asquared2 , \asquared3 ,
     \asquared4 , \asquared5 , \asquared6 , \asquared7 ,
     \asquared8 , \asquared9 , \asquared10 , \asquared11 ,
     \asquared12 , \asquared13 , \asquared14 , \asquared15 ,
@@ -47,7 +47,7 @@ module top (
     \a40 , \a41 , \a42 , \a43 , \a44 , \a45 , \a46 , \a47 ,
     \a48 , \a49 , \a50 , \a51 , \a52 , \a53 , \a54 , \a55 ,
     \a56 , \a57 , \a58 , \a59 , \a60 , \a61 , \a62 , \a63 ;
-  output \asquared0 , \asquared1 , \asquared2 , \asquared3 ,
+  output \asquared2 , \asquared3 ,
     \asquared4 , \asquared5 , \asquared6 , \asquared7 ,
     \asquared8 , \asquared9 , \asquared10 , \asquared11 ,
     \asquared12 , \asquared13 , \asquared14 , \asquared15 ,
@@ -20482,8 +20482,6 @@ module top (
   assign \asquared126  = ~n18673 & ~n18674;
   assign n18676 = \a63  & ~n18672;
   assign \asquared127  = n9792 | n18676;
-  assign \asquared1  = 0;
-  assign \asquared0  = \a0 ;
 endmodule
 
 

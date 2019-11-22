@@ -8,8 +8,8 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <optional>
 #include <unordered_map>
-#include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
 
 namespace fcn_clock
@@ -83,11 +83,37 @@ namespace fcn_clock
          {{2, 3, 0, 1}},
          {{3, 0, 1, 2}}
     }};
+    /**
+     * Representing a 3-phase adaption of the clocking originally introduced in "A device architecture for computing
+     * with quantum dots" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE 1997. As it is used in
+     * "ToPoliNano" (https://topolinano.polito.it/), it is referred to by that name in fiction to differentiate it
+     * better from 2DDWave.
+     */
+    const cutout topolinano_3 =
+    {{
+         {{0, 1, 2}},
+         {{0, 1, 2}},
+         {{0, 1, 2}}
+    }};
+    /**
+     * Representing a linear 4-phase 1D clocking as originally introduced in "A device architecture for computing with
+     * quantum dots" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE 1997. As it is used in "ToPoliNano"
+     * (https://topolinano.polito.it/), it is referred to by that name in fiction to differentiate it better from
+     * 2DDWave.
+     */
+    const cutout topolinano_4 =
+    {{
+         {{0, 1, 2, 3}},
+         {{0, 1, 2, 3}},
+         {{0, 1, 2, 3}},
+         {{0, 1, 2, 3}}
+    }};
 }
 
 /**
- * Class representing a clocking scheme for tile-based FCN layouts. It holds a cutout of the whole
- * scheme. All the other tiles can be calculated from that.
+ * Class representing a clocking scheme for tile-based FCN layouts. It holds a cutout of the whole scheme.
+ * Clocking values for all the other tiles can be extrapolated based on the cutout. Names of clocking schemes should
+ * be unique so that they can be referred to via their name strings (until there is a better way of doing so).
  */
 class fcn_clocking_scheme
 {
@@ -126,8 +152,7 @@ public:
      * @param n Number of different clocks.
      * @param r Flag to indicate clocking as regular.
      */
-    fcn_clocking_scheme(const std::string& name, const fcn_clock::cutout& c, const fcn_clock::number n, const bool r);
-
+    fcn_clocking_scheme(const std::string& name, const fcn_clock::cutout& c, const fcn_clock::number n, const bool r) noexcept;
     /**
      * Move constructor.
      * Initializes a clocking scheme with the given cutout.
@@ -137,27 +162,7 @@ public:
      * @param n Number of different clocks.
      * @param r Flag to indicate clocking as regular.
      */
-    fcn_clocking_scheme(std::string&& name, fcn_clock::cutout&& c, fcn_clock::number&& n, bool&& r);
-    /**
-     * Default copy constructor.
-     */
-    fcn_clocking_scheme(const fcn_clocking_scheme& s) = default;
-    /**
-     * Default move constructor.
-     */
-    fcn_clocking_scheme(fcn_clocking_scheme&& s) = default;
-    /**
-     * Default destructor.
-     */
-    ~fcn_clocking_scheme() = default;
-    /**
-     * Assignment operator is not available.
-     */
-    fcn_clocking_scheme& operator=(const fcn_clocking_scheme& rhs) = delete;
-    /**
-     * Move assignment operator is not available.
-     */
-    fcn_clocking_scheme& operator=(fcn_clocking_scheme&& rhs) = delete;
+    fcn_clocking_scheme(std::string&& name, fcn_clock::cutout&& c, fcn_clock::number&& n, bool&& r) noexcept;
 };
 
 /**
@@ -189,12 +194,20 @@ static fcn_clocking_scheme res_4_clocking{"RES", fcn_clock::res_4, 4u, true};
  */
 static fcn_clocking_scheme bancs_3_clocking{"BANCS", fcn_clock::bancs_3, 3u, true};
 /**
+ * Pre-defined 3 x 3 ToPoliNano clocking instance.
+ */
+static fcn_clocking_scheme topolinano_3_clocking{"TOPOLINANO3", fcn_clock::topolinano_3, 3u, true};
+/**
+ * Pre-defined 4 x 4 ToPoliNano clocking instance.
+ */
+static fcn_clocking_scheme topolinano_4_clocking{"TOPOLINANO4", fcn_clock::topolinano_4, 4u, true};
+/**
  * Looks up a clocking scheme by its name. String comparison happens case-insensitive.
  *
  * @param name Name of desired clocking scheme.
- * @return Clocking scheme called name or boost::none if no string matches name.
+ * @return Clocking scheme called name or std::nullopt if no string matches name.
  */
-boost::optional<fcn_clocking_scheme> get_clocking_scheme(const std::string& name);
+std::optional<fcn_clocking_scheme> get_clocking_scheme(const std::string& name) noexcept;
 
 
 #endif //FICTION_FCN_CLOCKING_SCHEME_H

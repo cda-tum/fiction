@@ -218,7 +218,7 @@ fcn_gate qca_one_library::set_up_gate(const fcn_gate_layout::tile& t)
         case operation::NOT:
         {
             auto ports = p_router->get_ports(t, *layout->get_logic_vertex(t));
-            auto inv = inverter_map.at(ports);
+            auto inv = inverter_map[ports];
 
             if (layout->is_pi(t))
                 inv = mark_cell(inv, opposite(*ports.out.cbegin()), fcn::cell_mark::INPUT);
@@ -253,11 +253,10 @@ fcn_gate qca_one_library::set_up_gate(const fcn_gate_layout::tile& t)
         }
         case operation::MAJ:
         {
-            auto dirs = layout->get_unused_tile_dirs(t);
             // no need to rotate majority
             auto maj = majority;
 
-            if (dirs.count() == 0)
+            if (auto dirs = layout->get_unused_tile_dirs(t); dirs.count() == 0)
                 return maj;
             else if (dirs.count() == 1)
                 return mark_1_io(maj, dirs);
@@ -306,11 +305,12 @@ fcn_gate qca_one_library::set_up_gate(const fcn_gate_layout::tile& t)
         }
         case operation::F1O3:
         {
-            auto dirs = layout->get_unused_tile_dirs(t);
             // no need to rotate F1O3
             auto fan_out = fan_out_1_3;
 
-            if (dirs == layout::DIR_NESW)
+            if (auto dirs = layout->get_unused_tile_dirs(t); dirs.count() == 1)
+                return mark_1_io(fan_out, dirs);
+            else if (dirs == layout::DIR_NESW)
                 return mark_4_io_fan_out(fan_out);
             else
                 return fan_out;
@@ -344,10 +344,44 @@ fcn_gate qca_one_library::set_up_gate(const fcn_gate_layout::tile& t)
         case operation::W:
         {
             std::vector <fcn_gate> wires;
-            for (auto& e : layout->get_logic_edges(t))
+            if (layout->is_gate_tile(t))
             {
-                auto ports = p_router->get_ports(t, e);
-                wires.push_back(wire_map.at(ports));
+                if (layout->is_pi(t))
+                {
+                    if (layout->is_tile_out_dir(t, layout::DIR_N))
+                        return primary_input_port;
+                    else if (layout->is_tile_out_dir(t, layout::DIR_E))
+                        return rotate_90(primary_input_port);
+                    else if (layout->is_tile_out_dir(t, layout::DIR_S))
+                        return rotate_180(primary_input_port);
+                    else if (layout->is_tile_out_dir(t, layout::DIR_W))
+                        return rotate_270(primary_input_port);
+                }
+                else if (layout->is_po(t))
+                {
+                    if (layout->is_tile_inp_dir(t, layout::DIR_N))
+                        return primary_output_port;
+                    else if (layout->is_tile_inp_dir(t, layout::DIR_E))
+                        return rotate_90(primary_output_port);
+                    else if (layout->is_tile_inp_dir(t, layout::DIR_S))
+                        return rotate_180(primary_output_port);
+                    else if (layout->is_tile_inp_dir(t, layout::DIR_W))
+                        return rotate_270(primary_output_port);
+                }
+                else
+                {
+                    auto v = *layout->get_logic_vertex(t);
+                    auto ports = p_router->get_ports(t, v);
+                    wires.push_back(wire_map[ports]);
+                }
+            }
+            else
+            {
+                for (auto& e : layout->get_logic_edges(t))
+                {
+                    auto ports = p_router->get_ports(t, e);
+                    wires.push_back(wire_map[ports]);
+                }
             }
 
             return merge(wires);
@@ -358,13 +392,13 @@ fcn_gate qca_one_library::set_up_gate(const fcn_gate_layout::tile& t)
         }
         default:
         {
-            throw std::invalid_argument("Gate type not listed in library.");
+            throw std::invalid_argument("gate type not listed in library");
         }
     }
-    throw std::invalid_argument("Unsupported gate/direction combination.");
+    throw std::invalid_argument("unsupported gate/direction combination");
 }
 
-qca_one_library::port qca_one_library::dir_to_port(const layout::directions d) const
+fcn_gate_library::port qca_one_library::dir_to_port(const layout::directions d) const
 {
     if (d == layout::DIR_N)
         return {2, 0};
@@ -375,28 +409,5 @@ qca_one_library::port qca_one_library::dir_to_port(const layout::directions d) c
     else if (d == layout::DIR_W)
         return {0, 2};
 
-    throw std::invalid_argument("Given direction does not have a single port equivalence.");
-}
-
-qca_one_library::port qca_one_library::opposite(const port& p) const
-{
-    if (p == port(2, 0))
-        return {2, 4};
-    else if (p == port(4, 2))
-        return {0, 2};
-    else if (p == port(2, 4))
-        return {2, 0};
-    else if (p == port(0, 2))
-        return {4, 2};
-
-    throw std::invalid_argument("Given port is not located on tile's border.");
-}
-
-fcn_gate qca_one_library::mark_cell(const fcn_gate& g, const port& p, const fcn::cell_mark mark) const noexcept
-{
-    auto marked_gate = g;
-
-    marked_gate[p.y][p.x] = static_cast<fcn::cell_type>(mark);
-
-    return marked_gate;
+    throw std::invalid_argument("given direction does not have a single port equivalence.");
 }

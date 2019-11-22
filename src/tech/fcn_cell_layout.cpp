@@ -24,7 +24,9 @@ fcn_cell_layout::fcn_cell_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme
 fcn_cell_layout::fcn_cell_layout(fcn_gate_library_ptr&& lib)
         :
         fcn_layout(fcn_dimension_xyz{lib->get_layout()->x() * lib->gate_x_size(),
-                                     lib->get_layout()->y() * lib->gate_y_size(),
+                                     lib->get_layout()->y() * lib->gate_y_size() +
+                                     (lib->get_layout()->is_vertically_shifted() ?
+                                     lib->gate_y_size() / 2 : 0),  // add half a tile in y direction if layout is vertically shifted
                                      lib->get_layout()->z()},
                    std::move(lib->get_layout()->clocking)),
         library(std::move(lib)),
@@ -40,18 +42,27 @@ fcn_cell_layout::fcn_cell_layout(fcn_gate_library_ptr&& lib)
 void fcn_cell_layout::assign_cell_type(const cell& c, const fcn::cell_type t) noexcept
 {
     if (t == fcn::EMPTY_CELL)
+    {
         type_map.erase(c);
-    else
-        type_map[c] = t;
+        pi_set.erase(c);
+        po_set.erase(c);
+        return;
+    }
+    else if (t == fcn::INPUT_CELL)
+        pi_set.insert(c);
+    else if (t == fcn::OUTPUT_CELL)
+        po_set.insert(c);
+
+    type_map[c] = t;
 }
 
 fcn::cell_type fcn_cell_layout::get_cell_type(const cell& c) const noexcept
 {
-    try
+    if (auto it = type_map.find(c); it != type_map.end())
     {
-        return type_map.at(c);
+        return it->second;
     }
-    catch (const std::out_of_range&)
+    else
     {
         return fcn::EMPTY_CELL;
     }
@@ -72,11 +83,11 @@ void fcn_cell_layout::assign_cell_mode(const cell& c, const fcn::cell_mode m) no
 
 fcn::cell_mode fcn_cell_layout::get_cell_mode(const cell& c) const noexcept
 {
-    try
+    if (auto it = mode_map.find(c); it != mode_map.end())
     {
-        return mode_map.at(c);
+        return it->second;
     }
-    catch (const std::out_of_range&)
+    else
     {
         return fcn::cell_mode::NORMAL;
     }
@@ -92,11 +103,11 @@ void fcn_cell_layout::assign_cell_name(const cell& c, const std::string& n) noex
 
 std::string fcn_cell_layout::get_cell_name(const cell& c) const noexcept
 {
-    try
+    if (auto it = name_map.find(c); it != name_map.end())
     {
-        return name_map.at(c);
+        return it->second;
     }
-    catch (const std::out_of_range&)
+    else
     {
         return "";
     }
@@ -113,22 +124,22 @@ std::size_t fcn_cell_layout::cell_count() const noexcept
     return type_map.size();
 }
 
-boost::optional<fcn_clock::zone> fcn_cell_layout::cell_clocking(const cell& c) const noexcept
+std::optional<fcn_clock::zone> fcn_cell_layout::cell_clocking(const cell& c) const noexcept
 {
     if (clocking.regular)
     {
         std::size_t x = c[X] / library->gate_x_size(), y = c[Y] / library->gate_y_size();
-        return clocking.scheme[y % clocking.num_clocks][x % clocking.num_clocks];
+        return clocking.scheme[y % clocking.cutout_y][x % clocking.cutout_x];
     }
     else  // irregular clocking accesses clocking map
     {
-        try
+        if (auto it = c_map.find(get_ground(c)); it != c_map.end())
         {
-            return c_map.at(get_ground(c));
+            return it->second;
         }
-        catch (const std::out_of_range&)
+        else
         {
-            return boost::none;
+            return std::nullopt;
         }
     }
 }
@@ -142,9 +153,9 @@ void fcn_cell_layout::assign_gate(const cell& c, const fcn_gate& g, const latch_
 
     auto inp_counter = 0u, out_counter = 0u;
 
-    for (auto y = 0u; y < g.size(); ++y)
+    for (auto y = 0ul; y < g.size(); ++y)
     {
-        for (auto x = 0u; x < g[y].size(); ++x)
+        for (auto x = 0ul; x < g[y].size(); ++x)
         {
             const auto pos = cell{start_x + x, start_y + y, layer};
             const auto type = g[y][x];
@@ -179,6 +190,100 @@ fcn::technology fcn_cell_layout::get_technology() const noexcept
 std::string fcn_cell_layout::get_name() const noexcept
 {
     return name;
+}
+
+std::size_t fcn_cell_layout::magcad_magnet_count() const noexcept
+{
+    if (technology != fcn::technology::INML)
+        return 0ul;
+
+    auto num_inv_cells = std::count_if(type_map.cbegin(), type_map.cend(),
+            [](const auto _ct){ return _ct.second == fcn::inml::INVERTER_MAGNET; });
+
+    return cell_count() + num_inv_cells / 4;
+}
+
+fcn_layout::bounding_box fcn_cell_layout::determine_bounding_box() const noexcept
+{
+    // calculate min_x
+    std::size_t min_x = 0u;
+    for (std::size_t x = 0u; x < this->x(); ++x)
+    {
+        bool elem_found = false;
+        for (std::size_t y = 0u; y < this->y(); ++y)
+        {
+            if (!this->is_free_cell(cell{x, y, GROUND}) || !this->is_free_cell(cell{x, y, 1}))
+            {
+                elem_found = true;
+                break;
+            }
+        }
+
+        min_x = x;
+        if (elem_found)
+            break;
+    }
+
+    // calculate min_y
+    std::size_t min_y = 0u;
+    for (std::size_t y = 0u; y < this->y(); ++y)
+    {
+        bool elem_found = false;
+        for (std::size_t x = 0u; x < this->x(); ++x)
+        {
+            if (!this->is_free_cell(cell{x, y, GROUND}) || !this->is_free_cell(cell{x, y, 1}))
+            {
+                elem_found = true;
+                break;
+            }
+        }
+
+        min_y = y;
+        if (elem_found)
+            break;
+    }
+
+    // calculate max_x
+    std::size_t max_x = this->x() - 1;
+    for (auto x = static_cast<long>(this->x()) - 1; x >= 0; --x)
+    {
+        bool elem_found = false;
+        for (std::size_t y = 0u; y < this->y(); ++y)
+        {
+            if (!this->is_free_cell(cell{static_cast<std::size_t>(x), y, GROUND}) ||
+                !this->is_free_cell(cell{static_cast<std::size_t>(x), y, 1}))
+            {
+                elem_found = true;
+                break;
+            }
+        }
+
+        max_x = static_cast<std::size_t>(x);
+        if (elem_found)
+            break;
+    }
+
+    // calculate max_y
+    std::size_t max_y = this->y() - 1;
+    for (auto y = static_cast<long>(this->y()) - 1; y >= 0; --y)
+    {
+        bool elem_found = false;
+        for (std::size_t x = 0u; x < this->x(); ++x)
+        {
+            if (!this->is_free_cell(cell{x, static_cast<std::size_t>(y), GROUND}) ||
+                !this->is_free_cell(cell{x, static_cast<std::size_t>(y), 1}))
+            {
+                elem_found = true;
+                break;
+            }
+        }
+
+        max_y = static_cast<std::size_t>(y);
+        if (elem_found)
+            break;
+    }
+
+    return bounding_box{min_x, min_y, max_x, max_y};
 }
 
 void fcn_cell_layout::write_layout(std::ostream& os, bool io_color) const noexcept
@@ -216,26 +321,25 @@ void fcn_cell_layout::write_layout(std::ostream& os, bool io_color) const noexce
                 os << (type_0 == fcn::NORMAL_CELL ? "▢" : std::string(1u, type_0)) << COLOR_RESET;
             }
         }
-        os << std::endl;
+        os << '\n';
     }
 
     // print legend
     if (io_color)
-        std::cout << std::endl << "Legend: " << LATCH_COLOR << "L" << COLOR_RESET << ", "
-                  << INP_COLOR << "I" << COLOR_RESET << ", " << OUT_COLOR << "O" << COLOR_RESET << std::endl;
+        os << "\nLegend: " << LATCH_COLOR << "L" << COLOR_RESET << ", "
+           << INP_COLOR << "I" << COLOR_RESET << ", " << OUT_COLOR << "O" << COLOR_RESET << std::endl;
 }
 
-void fcn_cell_layout::map_irregular_clocking()
+void fcn_cell_layout::map_irregular_clocking() noexcept
 {
     auto layout = library->get_layout();
 
     for (auto&& c : this->ground_layer())
     {
         std::size_t x = c[X] / library->gate_x_size(), y = c[Y] / library->gate_y_size();
-        auto t = (*layout)(x, y);
 
-        if (auto clk = layout->tile_clocking(t))
-            assign_clocking(c, *clk);
+        if (auto t = fcn_gate_layout::tile{x, y, GROUND}; auto clk = layout->tile_clocking(t))
+            assign_clocking(c, clk.value_or(0));
     }
 }
 
@@ -243,9 +347,9 @@ void fcn_cell_layout::assign_vias() noexcept
 {
     for (auto&& c : crossing_layers() | iter::filterfalse([this](const cell& _c){return is_free_cell(_c);}))
     {
-        auto surrounding = surrounding_2d(c) | iter::filterfalse([this](const cell& _c){return is_free_cell(_c);});
         // if number of surrounding cells is 1 or less, it is a via cell
-        if (std::distance(surrounding.begin(), surrounding.end()) <= 1u)
+        if (auto surrounding = surrounding_2d(c) | iter::filterfalse([this](const cell& _c)
+                { return is_free_cell(_c); }); std::distance(surrounding.begin(), surrounding.end()) <= 1u)
         {
             // change mode to via
             assign_cell_mode(c, fcn::cell_mode::VERTICAL);
@@ -253,6 +357,25 @@ void fcn_cell_layout::assign_vias() noexcept
             auto ground_via = cell{c[X], c[Y], GROUND};
             assign_cell_type(ground_via, fcn::NORMAL_CELL);
             assign_cell_mode(ground_via, fcn::cell_mode::VERTICAL);
+        }
+    }
+}
+
+void fcn_cell_layout::optimize() noexcept
+{
+    // no optimizations for QCA layouts
+    if (technology == fcn::technology::QCA)
+        return;
+
+    if (technology == fcn::technology::INML)
+    {
+        if (is_clocking("TOPOLINANO3") || is_clocking("TOPOLINANO4"))
+        {
+            // optimize slight cosmetic issues in the ToPoliNano library mapping
+            clean_up_topolinano();
+            // optimize wires that can be cut; those occur due to row-layout emulation by shifted tile-layouts
+            cut_optimization();
+            shrink_to_fit();
         }
     }
 }
@@ -266,9 +389,14 @@ void fcn_cell_layout::map_layout()
         if (layout->is_free_tile(t))
             continue;
 
-        assign_gate(cell{t[X] * library->gate_x_size(), t[Y] * library->gate_y_size(), t[Z]}, library->set_up_gate(t),
-                    layout->get_latch(t), layout->get_inp_names(t), layout->get_out_names(t));
+        assign_gate({t[X] * library->gate_x_size(),
+                     t[Y] * library->gate_y_size() + (layout->is_vertically_shifted() && (is_odd_column(t)) ?
+                     library->gate_y_size() / 2 : 0), technology == fcn::technology::INML ? GROUND : t[Z]},
+                    library->set_up_gate(t), layout->get_latch(t), layout->get_inp_names(t), layout->get_out_names(t));
     }
 
-    assign_vias();
+    if (technology == fcn::technology::QCA)
+        assign_vias();
+
+    optimize();
 }

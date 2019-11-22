@@ -5,14 +5,14 @@ module top (
     \alu_op0 , \alu_op1 , \alu_op2 , \alu_op_ext0 ,
     \alu_op_ext1 , \alu_op_ext2 , \alu_op_ext3 , halt, reg_write,
     sel_pc_opA, sel_pc_opB, beqz, bnez, bgez, bltz, jump, Cin, invA, invB,
-    sign, mem_write, sel_wb  );
+    mem_write, sel_wb  );
   input  \opcode0 , \opcode1 , \opcode2 , \opcode3 , \opcode4 ,
     \op_ext0 , \op_ext1 ;
   output \sel_reg_dst0 , \sel_reg_dst1 , \sel_alu_opB0 ,
     \sel_alu_opB1 , \alu_op0 , \alu_op1 , \alu_op2 ,
     \alu_op_ext0 , \alu_op_ext1 , \alu_op_ext2 , \alu_op_ext3 ,
     halt, reg_write, sel_pc_opA, sel_pc_opB, beqz, bnez, bgez, bltz, jump,
-    Cin, invA, invB, sign, mem_write, sel_wb;
+    Cin, invA, invB, mem_write, sel_wb;
   wire n35, n36, n37, n38, n39, n40, n41, n42, n43, n44, n45, n46, n47, n48,
     n50, n51, n52, n53, n54, n55, n56, n57, n58, n59, n60, n61, n63, n64,
     n65, n66, n67, n68, n69, n71, n72, n73, n74, n75, n76, n77, n78, n80,
@@ -199,7 +199,6 @@ module top (
   assign n206 = ~\opcode1  & ~n205;
   assign n207 = ~\opcode2  & ~n206;
   assign sel_wb = ~\opcode2  & ~n207;
-  assign sign = 1;
 endmodule
 
 

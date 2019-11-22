@@ -9,32 +9,67 @@
 #include "fcn_gate_layout.h"
 #include "fcn_cell_layout.h"
 #include "svg_writer.h"
-#include <boost/format.hpp>
+#include "fmt/format.h"
+#include "fmt/ostream.h"
 #include <alice/alice.hpp>
+#include <kitty/dynamic_truth_table.hpp>
+#include <kitty/print.hpp>
 
 namespace alice
 {
     /**
+     * Truth tables.
+     *
+     * Parts of this code are originally from: https://github.com/msoeken/cirkit/blob/cirkit3/cli/stores/tt.hpp.
+     */
+    ALICE_ADD_STORE(kitty::dynamic_truth_table, "truth_table", "t", "truth table", "truth tables")
+
+    ALICE_DESCRIBE_STORE(kitty::dynamic_truth_table, tt)
+    {
+        if (tt.num_vars() <= 6)
+            return fmt::format("{} vars, hex: {}, bin: {}", tt.num_vars(), kitty::to_hex(tt), kitty::to_binary(tt));
+        else
+            return fmt::format("{} vars, (description omitted due to truth table size)", tt.num_vars());
+    }
+
+    ALICE_PRINT_STORE_STATISTICS(kitty::dynamic_truth_table, os, tt)
+    {
+        if (tt.num_vars() <= 6)
+            os << fmt::format(" {} vars, hex: {}, bin: {}", tt.num_vars(), kitty::to_hex(tt), kitty::to_binary(tt)) << std::endl;
+        else
+            os << fmt::format(" {} vars, (description omitted due to truth table size)", tt.num_vars()) << std::endl;
+    }
+
+    ALICE_LOG_STORE_STATISTICS(kitty::dynamic_truth_table, tt)
+    {
+        return
+        {
+            {"vars",   tt.num_vars()},
+            {"hex",    kitty::to_hex(tt)},
+            {"binary", kitty::to_binary(tt)}
+        };
+    }
+
+    ALICE_PRINT_STORE(kitty::dynamic_truth_table, os, tt)
+    {
+        os << fmt::format(" {} vars, hex: {}, bin: {}", tt.num_vars(), kitty::to_hex(tt), kitty::to_binary(tt)) << std::endl;
+    }
+
+
+    /**
      * Logic networks.
      */
-    ALICE_ADD_STORE(logic_network_ptr, "network", "w", "logic network", "logic networks")
-
-    ALICE_PRINT_STORE(logic_network_ptr, os, ln)
-    {
-        ln->write_network(os);
-    }
+    ALICE_ADD_STORE(logic_network_ptr, "network", "n", "logic network", "logic networks")
 
     ALICE_DESCRIBE_STORE(logic_network_ptr, ln)
     {
-        return boost::str(boost::format("%s - I/O: %d/%d, #V: %d")
-                          % ln->get_name() % ln->pi_count() % ln->po_count() % ln->vertex_count());
+        return fmt::format("{} - I/O: {}/{}, #V: {}", ln->get_name(), ln->num_pis(), ln->num_pos(), ln->vertex_count());
     }
 
     ALICE_PRINT_STORE_STATISTICS(logic_network_ptr, os, ln)
     {
-        os << boost::str(boost::format("%s - I/O: %d/%d, #V: %d")
-                         % ln->get_name() % ln->pi_count()
-                         % ln->po_count() % ln->vertex_count()) << std::endl;
+        os << fmt::format(" {} - I/O: {}/{}, #V: {}", ln->get_name(), ln->num_pis(),
+                          ln->num_pos(), ln->vertex_count()) << std::endl;
     }
 
     ALICE_LOG_STORE_STATISTICS(logic_network_ptr, ln)
@@ -42,10 +77,37 @@ namespace alice
         return nlohmann::json
         {
             {"name", ln->get_name()},
-            {"inputs", ln->pi_count()},
-            {"outputs", ln->po_count()},
-            {"vertices", ln->vertex_count()}
+            {"inputs", ln->num_pis()},
+            {"outputs", ln->num_pos()},
+            {"vertices", ln->vertex_count()},
+            {"ANDs", ln->operation_count(operation::AND)},
+            {"ORs", ln->operation_count(operation::OR)},
+            {"INVs", ln->operation_count(operation::NOT)},
+            {"fan-outs", ln->operation_count(operation::F1O2) + ln->operation_count(operation::F1O3)},
+            {"MAJs", ln->operation_count(operation::MAJ)},
+            {"wires", ln->operation_count(operation::W)}
         };
+    }
+
+    template<>
+    bool can_show<logic_network_ptr>(std::string& extension, [[maybe_unused]] command& cmd)
+    {
+        extension = "dot";
+
+        return true;
+    }
+
+    template<>
+    void show<logic_network_ptr>(std::ostream& os, const logic_network_ptr& element, const command& cmd)  // const & for pointer because alice says so...
+    {
+        try
+        {
+            element->write_network(os);
+        }
+        catch (const std::invalid_argument& e)
+        {
+            cmd.env->out() << "[e] " << e.what() << std::endl;
+        }
     }
 
 
@@ -61,28 +123,26 @@ namespace alice
 
     ALICE_DESCRIBE_STORE(fcn_gate_layout_ptr, layout)
     {
-        return boost::str(boost::format("%s - %d × %d") % layout->get_name() % layout->x() % layout->y());
+        return fmt::format("{} - {} × {}", layout->get_name(), layout->x(), layout->y());
     }
 
     ALICE_PRINT_STORE_STATISTICS(fcn_gate_layout_ptr, os, layout)
     {
-        auto cp_tp = layout->critical_path_length_and_throughput();
-        os << boost::str(boost::format("%s - %d × %d, #G: %d, #W: %d, #C: %d, #L: %d, CP: %d, TP: 1/%d")
-                         % layout->get_name() % layout->x() % layout->y()
-                         % layout->gate_count() % layout->wire_count()
-                         % layout->crossing_count() % layout->latch_count()
-                         % cp_tp.first % cp_tp.second) << std::endl;
+        auto [cp, tp] = layout->critical_path_length_and_throughput();
+        os << fmt::format(" {} - {} × {}, #G: {}, #W: {}, #C: {}, #L: {}, CP: {}, TP: 1/{}", layout->get_name(),
+                          layout->x(), layout->y(), layout->gate_count(), layout->wire_count(),
+                          layout->crossing_count(), layout->latch_count(), cp, tp) << std::endl;
     }
 
     ALICE_LOG_STORE_STATISTICS(fcn_gate_layout_ptr, layout)
     {
         auto area = layout->x() * layout->y();
         auto bb = layout->determine_bounding_box();
-        auto energy = layout->calculate_energy();
+        auto [slow, fast] = layout->calculate_energy();
         auto gate_tiles = layout->gate_count();
         auto wire_tiles = layout->wire_count();
         auto crossings  = layout->crossing_count();
-        auto cp_tp = layout->critical_path_length_and_throughput();
+        auto [cp, tp] = layout->critical_path_length_and_throughput();
 
         return nlohmann::json
         {
@@ -106,12 +166,12 @@ namespace alice
             {"free tiles", area - (gate_tiles + wire_tiles - crossings)},  // free tiles in ground layer
             {"crossings", crossings},
             {"latches", layout->latch_count()},
-            {"critical path", cp_tp.first},
-            {"throughput", "1/" + std::to_string(cp_tp.second)},
+            {"critical path", cp},
+            {"throughput", "1/" + std::to_string(tp)},
             {"energy (meV, QCA)",
              {
-                {"slow (25 GHz)", energy.first},
-                {"fast (100 GHz)", energy.second}
+                {"slow (25 GHz)", slow},
+                {"fast (100 GHz)", fast}
              }
             }
         };
@@ -130,19 +190,19 @@ namespace alice
 
     ALICE_DESCRIBE_STORE(fcn_cell_layout_ptr, layout)
     {
-        return boost::str(boost::format("%s (%s) - %d × %d")
-                          % layout->get_name() % layout->get_technology() % layout->x() % layout->y());
+        return fmt::format("{} ({}) - {} × {}", layout->get_name(), layout->get_technology(), layout->x(), layout->y());
     }
 
     ALICE_PRINT_STORE_STATISTICS(fcn_cell_layout_ptr, os, layout)
     {
-        os << boost::str(boost::format("%s (%s) - %d × %d, #Cells: %d")
-                         % layout->get_name() % fcn::to_string(layout->get_technology()) % layout->x()
-                         % layout->y() % layout->cell_count()) << std::endl;
+        os << fmt::format(" {} ({}) - {} × {}, #Cells: {}", layout->get_name(), fcn::to_string(layout->get_technology()),
+                          layout->x(), layout->y(), layout->cell_count()) << std::endl;
     }
 
     ALICE_LOG_STORE_STATISTICS(fcn_cell_layout_ptr, layout)
     {
+        auto bb = layout->determine_bounding_box();
+
         return nlohmann::json
         {
             {"name", layout->get_name()},
@@ -152,6 +212,13 @@ namespace alice
                 {"x-size", layout->x()},
                 {"y-size", layout->y()},
                 {"area", layout->x() * layout->y()}
+             }
+            },
+            {"bounding box",
+             {
+               {"x-size", bb.x_size},
+               {"y-size", bb.y_size},
+               {"area", bb.area()}
              }
             },
             {"cells", layout->cell_count()}
@@ -172,6 +239,13 @@ namespace alice
     template<>
     void show<fcn_cell_layout_ptr>(std::ostream& os, const fcn_cell_layout_ptr& element, const command& cmd)  // const & for pointer because alice says so...
     {
+        if (auto tech = element->get_technology(); tech != fcn::technology::QCA)
+        {
+            cmd.env->out() << "[w] currently, only QCA layouts can be shown, but " << element->get_name() << " is an "
+                           << tech << " layout" << std::endl;
+            return;
+        }
+
         try
         {
             os << svg::generate_svg_string(element, cmd.is_set("simple")) << std::endl;

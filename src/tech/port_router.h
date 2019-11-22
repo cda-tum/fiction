@@ -25,27 +25,7 @@ public:
     /**
      * Default constructor.
      */
-    port_router(fcn_gate_layout_ptr fgl, const fcn::technology t, const fcn::tile_size s);
-    /**
-     * Copy constructor is not available.
-     */
-    port_router(const port_router& pr) noexcept = delete;
-    /**
-     * Move constructor is not available.
-     */
-    port_router(port_router&& pr) noexcept = delete;
-    /**
-     * Default destructor.
-     */
-    ~port_router() = default;
-    /**
-     * Assignment operator is not available.
-     */
-    port_router& operator=(const port_router& rhs) noexcept = delete;
-    /**
-     * Move assignment operator is not available.
-     */
-    port_router& operator=(port_router&& rhs) noexcept = delete;
+    port_router(fcn_gate_layout_ptr fgl, const fcn::technology t, const fcn::tile_size s) noexcept;
     /**
      * Computes the I/O ports for all gate and wire tiles in the stored layout.
      * Throws exceptions if routing with the given technology is impossible.
@@ -149,7 +129,7 @@ public:
      * @param v Logic vertex assigned as gate to t.
      * @return Ports for gate tile specified by t and v.
      */
-    port_list get_ports(const fcn_gate_layout::tile t, const logic_network::vertex v) const;
+    port_list get_ports(const fcn_gate_layout::tile t, const logic_network::vertex v) noexcept;
     /**
      * Returns the ports for given wire specified by logic edge e on tile t. Throws std::out_of_range if e was not
      * assigned to t.
@@ -158,7 +138,7 @@ public:
      * @param e Logic edge assigned as wire to t.
      * @return Ports for wire specified by t and e.
      */
-    port_list get_ports(const fcn_gate_layout::tile t, const logic_network::edge& e) const;
+    port_list get_ports(const fcn_gate_layout::tile t, const logic_network::edge& e) noexcept;
 private:
     /**
      * Layout whose ports should be routed.
@@ -194,6 +174,10 @@ private:
      * Computes ports for QCA technology with tile size of 5 x 5.
      */
     void compute_qca_5x5_ports();
+    /**
+     * Computes ports for QCA technology with tile size of 4 x 4.
+     */
+    void compute_inml_4x4_ports();
 };
 
 using port_router_ptr = std::shared_ptr<port_router>;

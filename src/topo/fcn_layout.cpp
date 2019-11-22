@@ -5,42 +5,51 @@
 #include "fcn_layout.h"
 
 
-fcn_layout::fcn_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocking) noexcept
+fcn_layout::fcn_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocking, offset o) noexcept
         :
         grid_graph(lengths),
-        clocking(std::move(clocking))
+        clocking(std::move(clocking)),
+        shift(o)
 {
     if (lengths[X] < 2 || lengths[Y] < 2 || lengths[Z] < 2)
-        std::cerr << "NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs." << std::endl;
+        std::cerr << "[w] due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs." << std::endl;
 }
 
-fcn_layout::fcn_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme&& clocking) noexcept
+fcn_layout::fcn_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme&& clocking, offset o) noexcept
         :
         grid_graph(fcn_dimension_xyz{lengths[X], lengths[Y], 2}),
-        clocking(std::move(clocking))
+        clocking(std::move(clocking)),
+        shift(o)
 {
     if (lengths[X] < 2 || lengths[Y] < 2)
-        std::cerr << "NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs." << std::endl;
+        std::cerr << "[w] due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs." << std::endl;
 }
 
-fcn_layout::fcn_layout(fcn_clocking_scheme&& clocking) noexcept
+fcn_layout::fcn_layout(fcn_clocking_scheme&& clocking, offset o) noexcept
         :
         grid_graph(fcn_dimension_xyz{2, 2, 2}),
-        clocking(std::move(clocking))
+        clocking(std::move(clocking)),
+        shift(o)
 {}
 
 fcn_layout::fcn_layout() noexcept
         :
         grid_graph(fcn_dimension_xyz{2, 2, 2}),
-        clocking(open_4_clocking)
+        clocking(open_4_clocking),
+        shift(offset::NONE)
 {}
 
 fcn_layout::~fcn_layout() = default;
 
+bool fcn_layout::is_vertically_shifted() const noexcept
+{
+    return shift == offset::VERTICAL;
+}
+
 void fcn_layout::resize(fcn_dimension_xyz&& lengths) noexcept
 {
     if (lengths[X] < 2 || lengths[Y] < 2 || lengths[Z] < 2)
-        std::cerr << "NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs." << std::endl;
+        std::cerr << "[w] due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs." << std::endl;
 
     resize_grid(std::move(lengths));
 }
@@ -48,6 +57,26 @@ void fcn_layout::resize(fcn_dimension_xyz&& lengths) noexcept
 void fcn_layout::resize(fcn_dimension_xy&& lengths) noexcept
 {
     resize(fcn_dimension_xyz{lengths[X], lengths[Y], 2});
+}
+
+bool fcn_layout::is_even_row(const face& f) const noexcept
+{
+    return f[Y] % 2 == 0;
+}
+
+bool fcn_layout::is_odd_row(const face& f) const noexcept
+{
+    return f[Y] % 2 == 1;
+}
+
+bool fcn_layout::is_even_column(const face& f) const noexcept
+{
+    return f[X] % 2 == 0;
+}
+
+bool fcn_layout::is_odd_column(const face& f) const noexcept
+{
+    return f[X] % 2 == 1;
 }
 
 fcn_layout::face fcn_layout::north(const face& f) const noexcept
@@ -78,6 +107,70 @@ fcn_layout::face fcn_layout::above(const face& f) const noexcept
 fcn_layout::face fcn_layout::below(const face& f) const noexcept
 {
     return previous(f, Z);
+}
+
+std::optional<fcn_layout::face> fcn_layout::north_east(const face& f) const noexcept
+{
+    auto e = east(f);
+    if (e == f)
+        return std::nullopt;
+
+    if (is_vertically_shifted() && is_odd_column(f))
+        return e;
+
+    auto ne = north(e);
+    if (ne == e)
+        return std::nullopt;
+
+    return ne;
+}
+
+std::optional<fcn_layout::face> fcn_layout::north_west(const face& f) const noexcept
+{
+    auto w = west(f);
+    if (w == f)
+        return std::nullopt;
+
+    if (is_vertically_shifted() && is_odd_column(f))
+        return w;
+
+    auto nw = north(w);
+    if (nw == w)
+        return std::nullopt;
+
+    return nw;
+}
+
+std::optional<fcn_layout::face> fcn_layout::south_east(const face& f) const noexcept
+{
+    auto e = east(f);
+    if (e == f)
+        return std::nullopt;
+
+    if (is_vertically_shifted() && is_even_column(f))
+        return e;
+
+    auto se = south(e);
+    if (se == e)
+        return std::nullopt;
+
+    return se;
+}
+
+std::optional<fcn_layout::face> fcn_layout::south_west(const face& f) const noexcept
+{
+    auto w = west(f);
+    if (w == f)
+        return std::nullopt;
+
+    if (is_vertically_shifted() && is_even_column(f))
+        return w;
+
+    auto sw = south(w);
+    if (sw == w)
+        return std::nullopt;
+
+    return sw;
 }
 
 fcn_layout::ground fcn_layout::get_ground(const face& f) const noexcept
@@ -113,9 +206,9 @@ fcn_layout::face fcn_layout::random_face(const std::size_t n) const noexcept
     std::mt19937 rgen(std::random_device{}());
     std::uniform_int_distribution<std::size_t> dist(0, x() * y()); // distribution in range [0, x * y]
 
-    auto idx = dist(rgen);
-    std::size_t col = idx % y();
-    std::size_t row = idx / y();
+    const auto idx = dist(rgen);
+    const std::size_t col = idx % x();
+    const std::size_t row = idx / x();
 
     return face{col, row, n};
 }
@@ -135,6 +228,11 @@ bool fcn_layout::is_regularly_clocked() const noexcept
     return clocking.regular;
 }
 
+bool fcn_layout::is_clocking(std::string&& name) const noexcept
+{
+    return clocking.name == name;
+}
+
 void fcn_layout::assign_clocking(const face& f, const fcn_clock::number c) noexcept
 {
     if (!clocking.regular && c <= clocking.num_clocks)
@@ -144,6 +242,16 @@ void fcn_layout::assign_clocking(const face& f, const fcn_clock::number c) noexc
 void fcn_layout::assign_clocking(const face_index f, const fcn_clock::number c) noexcept
 {
     assign_clocking(get_vertex(f), c);
+}
+
+bool fcn_layout::is_pi(const face& f) const noexcept
+{
+    return pi_set.count(f) > 0u;
+}
+
+bool fcn_layout::is_po(const face& f) const noexcept
+{
+    return po_set.count(f) > 0u;
 }
 
 void fcn_layout::assign_latch(const face& f, const latch_delay l) noexcept
@@ -156,11 +264,11 @@ void fcn_layout::assign_latch(const face& f, const latch_delay l) noexcept
 
 fcn_layout::latch_delay fcn_layout::get_latch(const face& f) const noexcept
 {
-    try
+    if (auto it = l_map.find(get_ground(f)); it != l_map.end())
     {
-        return l_map.at(get_ground(f));
+        return it->second;
     }
-    catch (const std::out_of_range&)
+    else
     {
         return 0u;
     }
@@ -169,59 +277,30 @@ fcn_layout::latch_delay fcn_layout::get_latch(const face& f) const noexcept
 std::vector<std::string> fcn_layout::latch_str_reprs() const noexcept
 {
     std::vector<std::string> reprs{};
-    for (const auto& l : l_map)
+    for (const auto& [t, l] : l_map)
     {
         std::stringstream ss{};
-        ss << "l@" << l.first << "=" << l.second;
+        ss << "l@" << t << "=" << l;
         reprs.push_back(ss.str());
     }
 
     return reprs;
 }
 
-fcn_layout::yz_slice::yz_slice(const std::size_t x, const fcn_layout* const ptr) noexcept
-        :
-        x_value(x),
-        fgl(std::move(ptr))
-{}
-
-fcn_layout::yz_slice::z_stack::z_stack(const std::size_t x, const std::size_t y, const fcn_layout* const ptr) noexcept
-        :
-        x_value(x),
-        y_value(y),
-        fgl(std::move(ptr))
-{}
-
-fcn_layout::face fcn_layout::yz_slice::z_stack::operator[](const std::size_t z)
+bool fcn_layout::is_border(const face& f, const std::optional<bounding_box>& bb) const noexcept
 {
-    if (fgl->x() >= x_value && fgl->y() >= y_value && fgl->z() >= z)
-        return face{x_value, y_value, z};
-
-    throw std::out_of_range("Given indices are located outside of layout bounds.");
+    if (bb)  // bounding box given, do calculations based on that
+    {
+        return (f[X] == (*bb).min_x) || (f[Y] == (*bb).min_y) || (f[X] == (*bb).max_x) || (f[Y] == (*bb).max_y);
+    }
+    else  // no bounding box given, use layout's borders
+    {
+        return (f[X] == 0) || (f[Y] == 0) || (f[X] == x() - 1) || (f[Y] == y() - 1);
+    }
 }
 
-fcn_layout::yz_slice::z_stack::operator face()
+void fcn_layout::shrink_to_fit() noexcept
 {
-    if (fgl->x() >= x_value && fgl->y() >= y_value) // fgl->z() >= GROUND is true by definition
-        return {x_value, y_value, GROUND};
-
-    throw std::out_of_range("Given indices are located outside of layout bounds.");
-}
-
-fcn_layout::yz_slice::z_stack fcn_layout::yz_slice::operator[](const std::size_t y) const
-{
-    return {x_value, y, fgl};
-}
-
-fcn_layout::yz_slice fcn_layout::operator[](const std::size_t x) const
-{
-    return {x, this};
-}
-
-fcn_layout::face fcn_layout::operator()(const std::size_t x, const std::size_t y, const std::size_t z) const
-{
-    if (this->x() >= x && this->y() >= y && this->z() >= z)
-        return face{x, y, z};
-
-    throw std::out_of_range("Given indices are located outside of layout bounds.");
+    auto bb = determine_bounding_box();
+    resize(fcn_dimension_xyz{std::max(bb.max_x + 1, std::size_t{2}), std::max(bb.max_y + 1, std::size_t{2}), z()});  // incorporate BGL bug
 }

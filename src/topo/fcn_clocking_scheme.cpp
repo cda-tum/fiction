@@ -5,7 +5,7 @@
 #include "fcn_clocking_scheme.h"
 
 
-fcn_clocking_scheme::fcn_clocking_scheme(const std::string& name, const fcn_clock::cutout& c, const fcn_clock::number n, const bool r)
+fcn_clocking_scheme::fcn_clocking_scheme(const std::string& name, const fcn_clock::cutout& c, const fcn_clock::number n, const bool r) noexcept
         :
         name(name),
         scheme(c),
@@ -15,7 +15,7 @@ fcn_clocking_scheme::fcn_clocking_scheme(const std::string& name, const fcn_cloc
         cutout_x(cutout_y ? scheme[0].size() : 0)
 {}
 
-fcn_clocking_scheme::fcn_clocking_scheme(std::string&& name, fcn_clock::cutout&& c, fcn_clock::number&& n, bool&& r)
+fcn_clocking_scheme::fcn_clocking_scheme(std::string&& name, fcn_clock::cutout&& c, fcn_clock::number&& n, bool&& r) noexcept
         :
         name(std::move(name)),
         scheme(std::move(c)),
@@ -25,7 +25,7 @@ fcn_clocking_scheme::fcn_clocking_scheme(std::string&& name, fcn_clock::cutout&&
         cutout_x(cutout_y ? scheme[0].size() : 0)
 {}
 
-boost::optional<fcn_clocking_scheme> get_clocking_scheme(const std::string& name)
+std::optional<fcn_clocking_scheme> get_clocking_scheme(const std::string& name) noexcept
 {
     static const std::unordered_map<std::string, fcn_clocking_scheme> scheme_lookup
     {{
@@ -38,14 +38,16 @@ boost::optional<fcn_clocking_scheme> get_clocking_scheme(const std::string& name
         { "USE", use_4_clocking },
         { "RES", res_4_clocking },
         { "BANCS", bancs_3_clocking },
+        { "TOPOLINANO3", topolinano_3_clocking },
+        { "TOPOLINANO4", topolinano_4_clocking }
     }};
 
-    try
+    if (auto it = scheme_lookup.find(boost::to_upper_copy(name)); it != scheme_lookup.end())
     {
-        return scheme_lookup.at(boost::to_upper_copy(name));
+        return it->second;
     }
-    catch (...)
+    else
     {
-        return boost::none;
+        return std::nullopt;
     }
 }

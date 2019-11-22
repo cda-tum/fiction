@@ -11,13 +11,7 @@ module top (
     \dest_y15 , \dest_y16 , \dest_y17 , \dest_y18 , \dest_y19 ,
     \dest_y20 , \dest_y21 , \dest_y22 , \dest_y23 , \dest_y24 ,
     \dest_y25 , \dest_y26 , \dest_y27 , \dest_y28 , \dest_y29 ,
-    \outport0 , \outport1 , \outport2 , \outport3 , \outport4 ,
-    \outport5 , \outport6 , \outport7 , \outport8 , \outport9 ,
-    \outport10 , \outport11 , \outport12 , \outport13 ,
-    \outport14 , \outport15 , \outport16 , \outport17 ,
-    \outport18 , \outport19 , \outport20 , \outport21 ,
-    \outport22 , \outport23 , \outport24 , \outport25 ,
-    \outport26 , \outport27 , \outport28 , \outport29   );
+    \outport0 , \outport1 , \outport2 );
   input  \dest_x0 , \dest_x1 , \dest_x2 , \dest_x3 , \dest_x4 ,
     \dest_x5 , \dest_x6 , \dest_x7 , \dest_x8 , \dest_x9 ,
     \dest_x10 , \dest_x11 , \dest_x12 , \dest_x13 , \dest_x14 ,
@@ -30,13 +24,7 @@ module top (
     \dest_y15 , \dest_y16 , \dest_y17 , \dest_y18 , \dest_y19 ,
     \dest_y20 , \dest_y21 , \dest_y22 , \dest_y23 , \dest_y24 ,
     \dest_y25 , \dest_y26 , \dest_y27 , \dest_y28 , \dest_y29 ;
-  output \outport0 , \outport1 , \outport2 , \outport3 , \outport4 ,
-    \outport5 , \outport6 , \outport7 , \outport8 , \outport9 ,
-    \outport10 , \outport11 , \outport12 , \outport13 ,
-    \outport14 , \outport15 , \outport16 , \outport17 ,
-    \outport18 , \outport19 , \outport20 , \outport21 ,
-    \outport22 , \outport23 , \outport24 , \outport25 ,
-    \outport26 , \outport27 , \outport28 , \outport29 ;
+  output \outport0 , \outport1 , \outport2 ;
   wire n92, n93, n94, n95, n96, n97, n98, n99, n100, n101, n102, n103, n104,
     n105, n106, n107, n108, n109, n110, n111, n112, n113, n114, n115, n116,
     n117, n118, n119, n120, n121, n122, n123, n124, n125, n126, n127, n128,
@@ -316,33 +304,6 @@ module top (
   assign n346 = \dest_y0  & n345;
   assign n347 = ~n339 & ~n346;
   assign \outport2  = ~\outport0  & ~n347;
-  assign \outport3  = 0;
-  assign \outport4  = 0;
-  assign \outport5  = 0;
-  assign \outport6  = 0;
-  assign \outport7  = 0;
-  assign \outport8  = 0;
-  assign \outport9  = 0;
-  assign \outport10  = 0;
-  assign \outport11  = 0;
-  assign \outport12  = 0;
-  assign \outport13  = 0;
-  assign \outport14  = 0;
-  assign \outport15  = 0;
-  assign \outport16  = 0;
-  assign \outport17  = 0;
-  assign \outport18  = 0;
-  assign \outport19  = 0;
-  assign \outport20  = 0;
-  assign \outport21  = 0;
-  assign \outport22  = 0;
-  assign \outport23  = 0;
-  assign \outport24  = 0;
-  assign \outport25  = 0;
-  assign \outport26  = 0;
-  assign \outport27  = 0;
-  assign \outport28  = 0;
-  assign \outport29  = 0;
 endmodule
 
 

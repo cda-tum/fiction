@@ -12,7 +12,7 @@ std::ostream& operator<<(std::ostream& os, const operation o) noexcept
 
 std::string str(const operation o) noexcept
 {
-    switch(o)
+    switch (o)
     {
         case operation::NONE:
             return "▢";
@@ -34,12 +34,6 @@ std::string str(const operation o) noexcept
             return "I";
         case operation::PO:
             return "O";
-        case operation::ONE:
-            return "1";
-        case operation::ZERO:
-            return "0";
-        case operation::BUF:
-            return "B";
         default:
             return "X";
     }
@@ -63,20 +57,12 @@ std::string name_str(const operation o) noexcept
             return "F1O2";
         case operation::F1O3:
             return "F1O3";
-        case operation::XOR:
-            return "XOR";
         case operation::W:
             return "WIRE";
         case operation::PI:
             return "PI";
         case operation::PO:
             return "PO";
-        case operation::ONE:
-            return "ONE";
-        case operation::ZERO:
-            return "ZERO";
-        case operation::BUF:
-            return "BUF";
         default:
             return "X";
     }

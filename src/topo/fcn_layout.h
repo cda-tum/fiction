@@ -7,7 +7,9 @@
 
 #include "grid_graph.h"
 #include "fcn_clocking_scheme.h"
+#include <algorithm>
 #include <random>
+#include <set>
 #include <unordered_map>
 #include <itertools.hpp>
 #include <boost/functional/hash.hpp>
@@ -77,6 +79,13 @@ public:
      */
     using latch_delay = std::size_t;
     /**
+     * An offset shifts the layout's faces either vertically or horizontally. While in a non-shifted layout,
+     * face {0,1,0}'s adjacent face in eastern direction would be {1,1,0} for instance, in a vertically shifted
+     * layout, every odd row is moved downwards by half a face, meaning that {0,1,0} has the two western adjacent faces
+     * {1,0,0} and {1,1,0}. This works analogously for horizontally shifted layouts.
+     */
+    enum class offset { NONE, VERTICAL /*, HORIZONTAL */ };
+    /**
      * Standard constructor. Creates an FCN layout by the means of an array determining its size
      * as well as a clocking scheme defining its data flow possibilities.
      *
@@ -85,8 +94,9 @@ public:
      * NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs.
      * See https://svn.boost.org/trac10/ticket/11735 for details.
      * @param clocking Clocking scheme defining possible data flow.
+     * @param o Offset for face shift in vertical or horizontal direction.
      */
-    fcn_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocking) noexcept;
+    fcn_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocking, offset o = offset::NONE) noexcept;
     /**
      * Standard constructor. Creates an FCN layout by the means of an array determining its size
      * as well as a clocking scheme defining its data flow possibilities.
@@ -95,16 +105,18 @@ public:
      * NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs.
      * See https://svn.boost.org/trac10/ticket/11735 for details.
      * @param clocking Clocking scheme defining possible data flow.
+     * @param o Offset for face shift in vertical or horizontal direction.
      */
-    fcn_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme&& clocking) noexcept;
+    fcn_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme&& clocking, offset o = offset::NONE) noexcept;
     /**
      * Standard constructor. Creates a FCN layout of size 2 x 2 x 2 with the given clocking scheme.
      * NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs.
      * See https://svn.boost.org/trac10/ticket/11735 for details.
      *
      * @param clocking Clocking scheme defining possible data flow.
+     * @param o Offset for face shift in vertical or horizontal direction.
      */
-    explicit fcn_layout(fcn_clocking_scheme&& clocking) noexcept;
+    explicit fcn_layout(fcn_clocking_scheme&& clocking, offset o = offset::NONE) noexcept;
     /**
      * Standard constructor. Creates a FCN layout of size 2 x 2 x 2 with an open clocking scheme.
      * NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs.
@@ -112,25 +124,15 @@ public:
      */
     fcn_layout() noexcept;
     /**
-     * Copy constructor is not available.
-     */
-    fcn_layout(const fcn_layout& fl) = delete;
-    /**
-     * Default move constructor.
-     */
-    fcn_layout(fcn_layout&& fl) = default;
-    /**
      * Pure virtual destructor for polymorphism.
      */
     virtual ~fcn_layout() = 0;
     /**
-     * Assignment operator is not available.
+     * Returns true iff the layout has a vertical offset.
+     *
+     * @return True iff the layout has a vertical shift..
      */
-    fcn_layout& operator=(const fcn_layout& rhs) = delete;
-    /**
-     * Move operator is not available.
-     */
-    fcn_layout& operator=(fcn_layout&& rhs) = delete;
+    bool is_vertically_shifted() const noexcept;
     /**
      * Resizes the layout to the dimensions given. The fcn_layout object will not be re-constructed by this
      * function! All maps and other attributes stay untouched.
@@ -156,6 +158,34 @@ public:
      * @param lengths 2-dimensional array defining sizes of dimensions (x, y) where no crossing layer is given.
      */
     void resize(fcn_dimension_xy&& lengths) noexcept;
+    /**
+     * Returns true iff f is located in an even numbered row.
+     *
+     * @param f Face whose row number is to check.
+     * @return True if f[Y] is even.
+     */
+    bool is_even_row(const face& f) const noexcept;
+    /**
+     * Returns true iff f is located in an odd numbered row.
+     *
+     * @param f Face whose row number is to check.
+     * @return True if f[Y] is odd.
+     */
+    bool is_odd_row(const face& f) const noexcept;
+    /**
+     * Returns true iff f is located in an even numbered column.
+     *
+     * @param f Face whose column number is to check.
+     * @return True if f[X] is even.
+     */
+    bool is_even_column(const face& f) const noexcept;
+    /**
+     * Returns true iff f is located in an odd numbered column.
+     *
+     * @param f Face whose column number is to check.
+     * @return True if f[X] is odd.
+     */
+    bool is_odd_column(const face& f) const noexcept;
     /**
      * Returns the face north of a given face f i.e. the face whose y-dimension is lower by 1.
      * If f's y-dimension is already at minimum, f is returned instead.
@@ -204,6 +234,38 @@ public:
      * @return Face below f.
      */
     face below(const face& f) const noexcept;
+    /**
+     * Returns the north-eastern face of the given face f if there is one. This takes shifted layouts into account and
+     * therefore returns std::nullopt if no such face exists.
+     *
+     * @param f Face whose north-eastern adjacent face is desired.
+     * @return North-eastern face of f or std::nullopt if such a face does not exist.
+     */
+    std::optional<face> north_east(const face& f) const noexcept;
+    /**
+     * Returns the north-western face of the given face f if there is one. This takes shifted layouts into account and
+     * therefore returns std::nullopt if no such face exists.
+     *
+     * @param f Face whose north-western adjacent face is desired.
+     * @return North-western face of f or std::nullopt if such a face does not exist.
+     */
+    std::optional<face> north_west(const face& f) const noexcept;
+    /**
+     * Returns the south-eastern face of the given face f if there is one. This takes shifted layouts into account and
+     * therefore returns std::nullopt if no such face exists.
+     *
+     * @param f Face whose south-eastern adjacent face is desired.
+     * @return South-eastern face of f or std::nullopt if such a face does not exist.
+     */
+    std::optional<face> south_east(const face& f) const noexcept;
+    /**
+     * Returns the south-western face of the given face f if there is one. This takes shifted layouts into account and
+     * therefore returns std::nullopt if no such face exists.
+     *
+     * @param f Face whose south-western adjacent face is desired.
+     * @return South-western face of f or std::nullopt if such a face does not exist.
+     */
+    std::optional<face> south_west(const face& f) const noexcept;
     /**
      * Returns the face in ground layer below the given one f regardless of its z-dimension.
      *
@@ -254,17 +316,39 @@ public:
         return get_index(std::forward<ARGS>(args)...);
     }
     /**
-     * Function alias for get_adjacent_vertices using perfect forwarding and the name surrounding_3d to fit naming in
-     * fcn_layout.
+     * Returns a range of all surrounding faces to f including the ones in higher/lower levels directly above/below f.
      *
-     * @tparam ARGS Stack of argument types.
-     * @param args Stack of arguments.
-     * @return get_adjacent_vertices(args).
+     * @param f Face whose surrounding counterparts are desired.
+     * @return All faces adjacent to f in all directions.
      */
-    template <typename... ARGS>
-    auto surrounding_3d(ARGS&&... args) const noexcept
+    auto surrounding_3d(const face& f) const noexcept
     {
-        return get_adjacent_vertices(std::forward<ARGS>(args)...);
+        std::vector<face> surrounding;
+        if (is_vertically_shifted())
+        {
+            if (is_even_column(f))
+            {
+                if (auto ne = north_east(f); ne)
+                    surrounding.push_back(*ne);
+                if (auto nw = north_west(f); nw)
+                    surrounding.push_back(*nw);
+            }
+            else  // odd row
+            {
+                if (auto se = south_east(f); se)
+                    surrounding.push_back(*se);
+                if (auto sw = south_west(f); sw)
+                    surrounding.push_back(*sw);
+            }
+        }
+//        else if (shift == offset::HORIZONTAL)
+//        {
+//
+//        }
+
+        auto av = get_adjacent_vertices(f);
+        std::copy(av.begin(), av.end(), std::back_inserter(surrounding));
+        return surrounding;
     }
     /**
      * Returns a range of all surrounding faces to f in that very layer. For layouts with z == 1, this function
@@ -275,7 +359,7 @@ public:
      */
     auto surrounding_2d(const face& f) const noexcept
     {
-        return get_adjacent_vertices(f) | iter::filter([f = f](const face& _f){return f[Z] == _f[Z];});
+        return surrounding_3d(f) | iter::filter([f = f](const face& _f){return f[Z] == _f[Z];});
     }
     /**
      * Returns a range of all faces in ground layer. For layouts with z == 1, this function is equivalent to get_faces.
@@ -363,6 +447,13 @@ public:
      */
     bool is_regularly_clocked() const noexcept;
     /**
+     * Returns true iff stored clocking's name string is equal to given string.
+     *
+     * @param name Name of clocking scheme to test for.
+     * @return name == clocking.name.
+     */
+    bool is_clocking(std::string&& name) const noexcept;
+    /**
      * Assigns a clock number c to the given face f. The clock number will only be assigned if the stored clocking
      * scheme is irregular and if c <= clocking.num_clocks hold. Otherwise, this function does nothing.
      *
@@ -378,6 +469,38 @@ public:
      * @param c Clock number to assign to face f.
      */
     void assign_clocking(const face_index f, const fcn_clock::number c) noexcept;
+    /**
+     * Returns whether or not given face f is a PI port.
+     *
+     * @param f Face whose assigned PI port should be checked.
+     * @return true iff f is a PI port.
+     */
+    bool is_pi(const face& f) const noexcept;
+    /**
+     * Returns a range of all faces flagged as primary input in the layout.
+     *
+     * @return range_t of all primary input faces.
+     */
+    auto get_pis() const noexcept
+    {
+        return range_t<primary_set::const_iterator>{{pi_set.cbegin(), pi_set.cend()}};
+    }
+    /**
+     * Returns whether or not given face f is a PO port.
+     *
+     * @param f Face whose assigned PO port should be checked.
+     * @return true iff f is a PO port.
+     */
+    bool is_po(const face& f) const noexcept;
+    /**
+     * Returns a range of all faces flagged as primary output in the layout.
+     *
+     * @return range_t of all primary output faces.
+     */
+    auto get_pos() const noexcept
+    {
+        return range_t<primary_set::const_iterator>{{po_set.cbegin(), po_set.cend()}};
+    }
     /**
      * Assigns a latch delay to a given face in the layout. The delay is given in clock phases (i.e. fractions of clock
      * cycles). The latch is virtually added on the clock number (modulo num_clocks()) for information propagation
@@ -418,12 +541,76 @@ public:
      * @return Vector of string representations of the assigned latches.
      */
     std::vector<std::string> latch_str_reprs() const noexcept;
+    /**
+     * Represents a bounding box surrounding the elements assigned to the layout's faces. Helps to determine the "real"
+     * size of a layout.
+     */
+    struct bounding_box
+    {
+        /**
+         * Standard constructor. Defines corner points and calculates size.
+         */
+        bounding_box(std::size_t min_x, std::size_t min_y, std::size_t max_x, std::size_t max_y)
+                :
+                min_x{min_x},
+                min_y{min_y},
+                max_x{max_x},
+                max_y{max_y},
+                x_size{max_x == 0u && min_x == 0u ? 0u : (max_x - min_x) + 1u},
+                y_size{max_y == 0u && min_y == 0u ? 0u : (max_y - min_y) + 1u}
+        {}
+
+        /**
+         * Corners of bounding box.
+         */
+        const std::size_t min_x, min_y, max_x, max_y;
+        /**
+         * Size in x- and y-dimension.
+         */
+        const std::size_t x_size, y_size;
+
+        /**
+         * Returns area of bounding box.
+         *
+         * @return x-size * y-size.
+         */
+        std::size_t area() const noexcept
+        {
+            return x_size * y_size;
+        }
+    };
+    /**
+     * Determines the layout's bounding box i.e. the area in which elements are placed. Helps to determine the
+     * "real" size of a layout.
+     *
+     * @return Bounding box.
+     */
+    virtual bounding_box determine_bounding_box() const noexcept = 0;
+    /**
+     * Returns whether the given face f is located at the layout borders where x or y are either minimal or maximal.
+     * A bounding box object can be given to indicate that instead checks should be made based on that one.
+     *
+     * @param f Face to check for border location.
+     * @param bb Bonding box to use instead of layout dimensions.
+     * @return True iff f is located at one of layout's or bb's borders, false otherwise.
+     */
+    bool is_border(const face& f, const std::optional<bounding_box>& bb = std::nullopt) const noexcept;
+    /**
+     * Resizes the layout so that all empty rows and columns on the right and bottom side are removed respectively.
+     * No rows and columns on the left and top are affected because that would change indices of all tiles and therefore
+     * all maps would not work properly anymore.
+     */
+    void shrink_to_fit() noexcept;
 
 protected:
     /**
      * Clocking scheme representing possible data flow.
      */
     fcn_clocking_scheme clocking;
+    /**
+     * Determines layout's row/column face shift.
+     */
+    const offset shift = offset::NONE;
     /**
      * Alias for a hash map that assigns clock zones to faces. Used for irregular clocking schemes only.
      */
@@ -432,6 +619,14 @@ protected:
      * Stores a mapping face -> clock number for irregular clocking schemes. Helper functions for access save memory.
      */
     clocking_map c_map{};
+    /**
+     * Alias for a set that holds faces to represent PI/PO ports.
+     */
+    using primary_set = std::set<face>;
+    /**
+     * Stores faces that are marked as PIs/POs.
+     */
+    primary_set pi_set{}, po_set{};
     /**
      * Alias for a hash map that assigns a certain delay to a face.
      */
@@ -449,170 +644,6 @@ protected:
      * by adding a latch with l == 6 (4 + 2) to hold data for one cycle and 2 phases.
      */
     latch_map l_map{};
-
-    /**
-     * This class is a proxy only needed for operator[][][] overloading on fcn_layouts. Since the layouts are
-     * structured in a way that (x, y, z) represents coordinates order, operator[] on layouts substitutes the
-     * x-coordinate first. This means, only a slice of dimension y and z with fixed x-value remains.
-     */
-    class yz_slice
-    {
-    public:
-        /**
-         * Default constructor is not available.
-         */
-        yz_slice() = delete;
-        /**
-         * Standard constructor gets a x-dimension as well as a smart pointer to the actual fcn_layout it was
-         * called on. This is necessary to actually address the slices.
-         *
-         * @param x x-dimension value of the calling operator[].
-         * @param ptr Pointer to the layout this slice belongs to.
-         */
-        yz_slice(const std::size_t x, const fcn_layout* const ptr) noexcept;
-        /**
-         * Copy constructor is not available.
-         */
-        yz_slice(const yz_slice& yzs) = delete;
-        /**
-          * Default move constructor.
-          */
-        yz_slice(yz_slice&& yzs) = default;
-        /**
-         * Default destructor.
-         */
-        ~yz_slice() = default;
-        /**
-          * Assignment operator is not available.
-          */
-        yz_slice& operator=(const yz_slice& rhs) = delete;
-        /**
-          * Move assignment operator is not available.
-          */
-        yz_slice& operator=(yz_slice&& rhs) = delete;
-
-    private:
-        /**
-         * Stores the x-dimension value of the calling operator[] in the fcn_layout.
-         */
-        const std::size_t x_value;
-        /**
-         * Pointer to the layout this slice belongs to.
-         */
-        const fcn_layout* const fgl = nullptr;
-        /**
-         * Another proxy for operator[][] overloading on yz_slice working by the same mechanism. When invoking
-         * operator[] on a yz_slice, the y-dimension becomes specified which means that only a "stack" of
-         * faces in the z-dimension remains. This class also supports implicit conversion to a face by
-         * assuming that if only two operator[]s are called on the layout, the caller may want to have a
-         * face in ground level. So implicit conversion returns (x, y, 0).
-         */
-        class z_stack
-        {
-        public:
-            /**
-             * Default constructor is not available.
-             */
-            z_stack() = delete;
-            /**
-             * Standard constructor gets a x- and y-dimension together with a smart pointer to the actual
-             * fcn_layout it was called on. This is necessary to actually address the stacks.
-             *
-             * @param x x-dimension value of the calling operator[].
-             * @param y y-dimension value of the calling operator[].
-             * @param ptr Pointer to the layout this stack belongs to.
-             */
-            z_stack(const std::size_t x, const std::size_t y, const fcn_layout* const ptr) noexcept;
-            /**
-             * Copy constructor is not available.
-             */
-            z_stack(const z_stack& yzs) = delete;
-            /**
-             * Default move constructor.
-             */
-            z_stack(z_stack&& yzs) = default;
-            /**
-             * Default destructor.
-             */
-            ~z_stack() = default;
-            /**
-             * Assignment operator is not available.
-             */
-            z_stack& operator=(const z_stack& rhs) = delete;
-            /**
-             * Move assignment operator is not available.
-             */
-            z_stack& operator=(z_stack&& rhs) = delete;
-            /**
-             * Overload of operator[] to access faces in the layout. This last proxy stage returns the actual face at
-             * position (x, y, z) or boost::none if it is located outside of the layout boundaries.
-             *
-             * @param z z-dimension of the desired face.
-             * @return Face at position (x, y, z) or boost::none if it is located outside of layout's boundaries.
-             */
-            face operator[](const std::size_t z);
-            /**
-             * Overloaded operator for implicit type conversion. If only two operator[] calls are performed on the
-             * layout object, it is assumed that the desired face is located in ground layer. So a call of layout[x][y]
-             * returns the face at position (x, y, 0). This behavior is realized by the implicit type conversion
-             * conducted by this function. Note that a std::out_of_range will be thrown if (x, y, 0) is located out of
-             * the layout's boundaries.
-             *
-             * @return Face at position (x, y, 0).
-             */
-            explicit operator face();
-
-        private:
-            /**
-             * Stores the x-dimension value of the calling operator[] in the fcn_layout.
-             */
-            const std::size_t x_value;
-            /**
-             * Stores the y-dimension value of the calling operator[] in the yz_slice.
-             */
-            const std::size_t y_value;
-            /**
-             * Pointer to the layout this stack belongs to.
-             */
-            const fcn_layout* const fgl = nullptr;
-        };
-
-    public:
-        /**
-         * Overload of operator[] to access faces in the layout. This first proxy stage returns a z_stack proxy object
-         * onto which the third and final call of operator[] can be performed to finally return the actual face.
-         *
-         * @param y y-dimension of the desired face.
-         * @return A proxy object namely a z_stack onto which consecutive calls of operator[] can be performed.
-         */
-        z_stack operator[](const std::size_t y) const;
-    };
-
-public:
-    /**
-     * Overload of operator[] to access faces in the layout. Several proxy objects are needed in order to implement
-     * the desired functionality properly. A call to a layout object should look like this: layout[x][y][z]. So first
-     * call returns a yz_slice onto which second call is conducted which returns a z_stack onto which the third call is
-     * executed which then returns the actual face. In case (x, y, z) lay outside the layout bounds, an
-     * std::out_of_range object is thrown. Also layout[x][y] can be called to refer to the face at position (x, y, 0)
-     * i.e. a face in ground layer. This works by overloading operator face() on z_stack. Sometimes a static_cast<face>
-     * is needed for this to work.
-     *
-     * @param x x-dimension of the desired face.
-     * @return A proxy object namely a yz_slice onto which consecutive calls of operator[] can be performed.
-     */
-    yz_slice operator[](const std::size_t x) const;
-    /**
-     * Overload for operator(x, y, z) to access faces in the layout. No proxy objects are needed so this non-array-like
-     * implementation has a performance advantage over operator[][][] and should be preferred. The other one just exists
-     * for intuition reasons.
-     *
-     * @param x x-dimension of the desired face.
-     * @param y y-dimension of the desired face.
-     * @param z z-dimension of the desired face.
-     * @return face at position (x, y, z).
-     */
-    face operator()(const std::size_t x, const std::size_t y, const std::size_t z = GROUND) const;
 };
 
 

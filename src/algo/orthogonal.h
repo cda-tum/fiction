@@ -2,13 +2,13 @@
 // Created by marcel on 13.07.17.
 //
 
-#ifndef FICTION_ORTHOGONAL_PR_H
-#define FICTION_ORTHOGONAL_PR_H
+#ifndef FICTION_ORTHOGONAL_H
+#define FICTION_ORTHOGONAL_H
 
-#include "place_route.h"
+#include "physical_design.h"
 
 /**
- * A heuristic P&R approach based on orthogonal graph drawing. A slight modification of
+ * A heuristic physical design approach based on orthogonal graph drawing. A slight modification of
  * Therese C. Biedl's improved algorithm for drawing of 3-graphs is used because the original
  * one works for undirected graphs only. Modification includes using directions of the logic network
  * directly instead of relabeling the edges according to its DFS tree, ordering the vertices
@@ -17,8 +17,11 @@
  * The algorithm works in linear time O(2|V| + |E|). Produced layout has a size of x * y, where
  * x + y = |V| - |PI| + 1. This is because each vertex leads to either one extra row or column
  * except for those without predecessors which create both.
+ *
+ * This is a proof of concept implementation for a scalable physical design approach for FCN.
+ * It is not meant to be used for arranging fabricable circuits, as area is far from being optimal.
  */
-class orthogonal_pr : public place_route
+class orthogonal : public physical_design
 {
 public:
     /**
@@ -27,42 +30,23 @@ public:
      * @param ln Logic network.
      * @param n Number of clock phases.
      * @param io Flag to indicate use of I/O ports.
+     * @param border Flag to indicate that I/O ports should be routed to the layout's borders.
      */
-    orthogonal_pr(logic_network_ptr ln, const unsigned n, const bool io = false);
+    orthogonal(logic_network_ptr ln, const unsigned n, const bool io = false, const bool border = false);
     /**
-     * Default Destructor.
-     */
-    ~orthogonal_pr() override = default;
-    /**
-     * Copy constructor is not available.
-     */
-    orthogonal_pr(const orthogonal_pr& rhs) = delete;
-    /**
-     * Move constructor is not available.
-     */
-    orthogonal_pr(orthogonal_pr&& rhs) = delete;
-    /**
-     * Assignment operator is not available.
-     */
-    orthogonal_pr& operator=(const orthogonal_pr& rhs) = delete;
-    /**
-     * Move assignment operator is not available.
-     */
-    orthogonal_pr& operator=(orthogonal_pr&& rhs) = delete;
-    /**
-     * Starts the P&R process. Computes the jdfs ordering of the stored logic network first and colors the
+     * Starts the physical design process. Computes the jdfs ordering of the stored logic network first and colors the
      * edges accordingly using an red-blue-coloring algorithm so that all incoming edges of a
-     * vertex have the same color and all outgoing edges have different colors. P&R is then
+     * vertex have the same color and all outgoing edges have different colors. Physical design is then
      * performed using orthogonal graph drawing where the vertices are placed in jdfs order
      * so that each blue edges leads downwards and each red edge leads rightwards.
      *
      * Information flow is from top left to bottom right. The resulting clocking scheme is diagonal.
      *
-     * Returns a pr_result eventually.
+     * Returns a pd_result eventually.
      *
-     * @return pr_result containing placed and routed layout as well as some statistical information.
+     * @return Result type containing statistical information about the process.
      */
-    pr_result perform_place_and_route() override;
+    pd_result operator()() override;
 private:
     /**
      * Number of clock phases to use in the diagonal clocking scheme.
@@ -72,6 +56,10 @@ private:
      * Flag to indicate that designated I/O ports should be routed too.
      */
     const bool io_ports;
+    /**
+     * Flag to indicate that designated I/O ports should be routed to the layout's borders.
+     */
+    const bool border_ios;
     /**
      * Colors used for a red-blue-coloring of 3-graphs.
      */
@@ -87,8 +75,8 @@ private:
     /**
      * Traverses the stored logic network in a joint DFS way and returns an ordering corresponding to the traversing.
      * Joint DFS is a self developed traversing algorithm used for making Biedl's graph drawing algorithm on 3-Graphs
-     * working for directed graphs as well with respect to the QCA technology constraints. (Ignoring directions of
-     * graphs leads to valid placements but to contradictions in the QCA clocking as well.)
+     * working for directed graphs as well with respect to FCN technology constraints. (Ignoring directions of
+     * graphs leads to valid placements but to contradictions in the FCN clocking as well.)
      *
      * This traversing starts at a PI and performs DFS but will not visit nodes who have undiscovered predecessors.
      * This process is then repeated for each other PI as well. Eventually all nodes will have been visited.
@@ -106,6 +94,10 @@ private:
      */
     red_blue_coloring find_rb_coloring(const jdfs_ordering& jdfs) const noexcept;
     /**
+     * Elongates the I/O wires so that the pins are located at the layout's borders.
+     */
+    void elongate_ios() const noexcept;
+    /**
      * Computes a placement and a routing for the stored logic network with respect to the given red-blue-coloring.
      * It is mapped to an adequate layout which is stored within the class.
      * The improved algorithm for drawing 3-graphs by Biedl is used with a modification to work for directed graphs.
@@ -117,4 +109,4 @@ private:
 };
 
 
-#endif //FICTION_ORTHOGONAL_PR_H
+#endif //FICTION_ORTHOGONAL_H

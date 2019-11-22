@@ -2,25 +2,24 @@
 // Created by marcel on 09.03.17.
 //
 
-#ifndef FICTION_EXACT_PR_H
-#define FICTION_EXACT_PR_H
+#ifndef FICTION_EXACT_H
+#define FICTION_EXACT_H
 
-#include "place_route.h"
-#include "exact_pr_config.h"
-#include <boost/format.hpp>
+#include "physical_design.h"
+#include "exact_pd_config.h"
+#include "fmt/format.h"
 #include <z3++.h>
 
 /**
- * An exact P&R approach using SMT solving. This class handles the incremental solver calls and
- * evaluation of the model. The pr_result holds extra statistical information about the solving
- * process.
+ * An exact physical design approach using SMT solving. This class handles the incremental solver calls and
+ * evaluation of the model. The result type holds extra statistical information about the solving process.
  *
  * The SMT instance works with a single layer of variables even though it is possible to allow
  * crossings in the solution. The reduced number of variables saves a considerable amount of
  * runtime. That's why most for-loops iterate over layout->get_ground_layer_tiles() even
  * though it will be mapped to a 3-dimensional layout afterwards.
  */
-class exact_pr : public place_route
+class exact : public physical_design
 {
 public:
     /**
@@ -29,36 +28,16 @@ public:
      * @param ln Logic network.
      * @param config Configuration object storing all the bounds, flags, and so on.
      */
-    exact_pr(logic_network_ptr ln, exact_pr_config&& config);
+    exact(logic_network_ptr ln, exact_pd_config&& config);
     /**
-     * Default Destructor.
-     */
-    ~exact_pr() override = default;
-    /**
-     * Copy constructor is not available.
-     */
-    exact_pr(const exact_pr& rhs) = delete;
-    /**
-     * Move constructor is not available.
-     */
-    exact_pr(exact_pr&& rhs) = delete;
-    /**
-     * Assignment operator is not available.
-     */
-    exact_pr& operator=(const exact_pr& rhs) = delete;
-    /**
-     * Move assignment operator is not available.
-     */
-    exact_pr& operator=(exact_pr&& rhs) = delete;
-    /**
-     * Starts the P&R process. Builds the SMT instance and tries to fulfill it. The layout size will be
+     * Starts the physical design process. Builds the SMT instance and tries to fulfill it. The layout size will be
      * incremented after each UNSAT result until the given upper bound is reached.
      *
-     * Returns a PRResult eventually.
+     * Returns a pd_result eventually.
      *
-     * @return PRResult containing placed and routed layout as well as some statistical information.
+     * @return Result type containing statistical information about the process.
      */
-    place_route::pr_result perform_place_and_route() override;
+    pd_result operator()() override;
 
 private:
     /**
@@ -71,12 +50,11 @@ private:
      * Shortcuts for indices.
      */
     using layout_tile_index  = fcn_gate_layout::tile_index;
-    using logic_vertex_index = logic_network::vertex_index;
-    using logic_edge_index   = std::pair<logic_vertex_index, logic_vertex_index>;
+    using logic_edge_index   = std::pair<logic_vertex, logic_vertex>;
     /**
      * Shortcuts for hashes.
      */
-    using tile_vertex_hash = boost::hash<std::pair<layout_tile_index, logic_vertex_index>>;
+    using tile_vertex_hash = boost::hash<std::pair<layout_tile_index, logic_vertex>>;
     using tile_edge_hash   = boost::hash<std::pair<layout_tile_index, logic_edge_index>>;
     using tile_tile_hash   = boost::hash<std::pair<layout_tile_index, layout_tile_index>>;
     /**
@@ -87,7 +65,7 @@ private:
     /**
      * Alias for a map to access Z3 constants associated with layout tiles.
      */
-    using tile_vertex_map = std::unordered_map<std::pair<layout_tile_index, logic_vertex_index>, z3_expr_proxy, tile_vertex_hash>;
+    using tile_vertex_map = std::unordered_map<std::pair<layout_tile_index, logic_vertex>, z3_expr_proxy, tile_vertex_hash>;
     /**
      * Alias for a map to access Z3 constants associated with layout tile edges.
      */
@@ -101,9 +79,14 @@ private:
      */
     using tile_path_map = std::unordered_map<std::pair<layout_tile_index, layout_tile_index>, z3_expr_proxy, tile_tile_hash>;
     /**
+     * Alias for a map to access Z3 constants associated with tile crossings used to distinguish multi-wires and
+     * crossings during the solver phase.
+     */
+    using tile_crossing_map = std::unordered_map<layout_tile_index, z3_expr_proxy>;
+    /**
      * Alias for a map to access Z3 constants associated with input vertex clocking zones.
      */
-    using vertex_clock_map = std::unordered_map<logic_vertex_index, z3_expr_proxy>;
+    using vertex_clock_map = std::unordered_map<logic_vertex, z3_expr_proxy>;
     /**
      * Alias for a map to access Z3 constants associated with tile clock zones. Used to symbolically represent an open
      * clocking so that the SMT solver is free to assign clock zones.
@@ -116,13 +99,13 @@ private:
     using tile_latch_map = std::unordered_map<layout_tile_index, z3_expr_proxy>;
 
     /**
-     * Arguments, flags, and options for the P&R process stored in one configuration object.
+     * Arguments, flags, and options for the physical design process stored in one configuration object.
      */
-    const exact_pr_config config;
+    const exact_pd_config config;
     /**
      * Lower bound for the number of layout tiles.
      */
-    const unsigned lower_bound;
+    std::size_t lower_bound;
     /**
      * Context for all Z3 variables used by this instance.
      */
@@ -148,6 +131,10 @@ private:
      */
     tile_path_map tp_map{};
     /**
+     * Maps layout tiles to Z3 constants.
+     */
+    tile_crossing_map tx_map{};
+    /**
      * Maps input vertex clock zones to Z3 constants.
      */
     vertex_clock_map vcl_map{};
@@ -169,43 +156,49 @@ private:
     /**
      * Initializes tv_map using layout, netlist and context.
      *
-     * Creates t * v many variables.
+     * Creates t * v many boolean variables.
      */
     void initialize_tv_map();
     /**
      * Initializes te_map using layout, netlist and context.
      *
-     * Creates t * e many variables.
+     * Creates t * e many boolean variables.
      */
     void initialize_te_map();
     /**
      * Initializes tc_map using layout and context.
      *
-     * Creates one variable for each connection on the layout.
+     * Creates one boolean variable for each connection on the layout.
      */
     void initialize_tc_map();
     /**
      * Initializes tp_map using layout and context.
      *
-     * Creates t^2 many variables.
+     * Creates t^2 many boolean variables.
      */
     void initialize_tp_map();
     /**
+     * Initializes tx_map using layout and context.
+     *
+     * Creates t many boolean variables.
+     */
+    void initialize_tx_map();
+    /**
      * Initializes vcl_map using netlist and context.
      *
-     * Creates v many variables.
+     * Creates v many real variables.
      */
     void initialize_vcl_map();
     /**
      * Initializes tcl_map using layout and context.
      *
-     * Creates t many variables.
+     * Creates t many real variables.
      */
     void initialize_tcl_map();
     /**
      * Initializes tl_map using layout and context.
      *
-     * Creates t many variables
+     * Creates t many int variables
      */
     void initialize_tl_map();
     /**
@@ -216,7 +209,7 @@ private:
      * @param v vertex to be considered.
      * @return First (and only) element from the vector in map found by the keys.
      */
-    z3::expr get_tv(const layout_tile& t, const logic_vertex v);
+    z3::expr get_tv(const layout_tile& t, const logic_vertex v) noexcept;
     /**
      * Workaround helper function for getting the variable from a tile_edge_map
      * corresponding to a given tile and edge.
@@ -225,7 +218,7 @@ private:
      * @param e edge to be considered.
      * @return First (and only) element from the vector in map found by the keys.
      */
-    z3::expr get_te(const layout_tile& t, const logic_edge& e);
+    z3::expr get_te(const layout_tile& t, const logic_edge& e) noexcept;
     /**
      * Workaround helper function for getting the variable from a tile_connection_map
      * corresponding to two given tiles.
@@ -234,7 +227,7 @@ private:
      * @param t2 Second tile to be considered.
      * @return First (and only) element from the vector in map found by the keys.
      */
-    z3::expr get_tc(const layout_tile& t1, const layout_tile& t2);
+    z3::expr get_tc(const layout_tile& t1, const layout_tile& t2) noexcept;
     /**
      * Workaround helper function for getting the variable from a tile_path_map
      * corresponding to two given tiles.
@@ -243,7 +236,15 @@ private:
      * @param t2 Second tile to be considered.
      * @return First (and only) element from the vector in map found by the keys.
      */
-    z3::expr get_tp(const layout_tile& t1, const layout_tile& t2);
+    z3::expr get_tp(const layout_tile& t1, const layout_tile& t2) noexcept;
+    /**
+     * Workaround helper function for getting the variable from a tile_crossing_map
+     * corresponding to a given tile.
+     *
+     * @param t Tile to be considered.
+     * @return First (and only) element from the vector in map found by the key.
+     */
+    z3::expr get_tx(const layout_tile& t) noexcept;
     /**
      * Workaround helper function for getting the variable from a vertex_clock_map
      * corresponding to a given vertex.
@@ -251,7 +252,7 @@ private:
      * @param v vertex to be considered.
      * @return First (and only) element from the vector in map found by the key.
      */
-    z3::expr get_vcl(const logic_vertex v);
+    z3::expr get_vcl(const logic_vertex v) noexcept;
     /**
      * Workaround helper function for getting the variable from a tile_clock_map
      * corresponding to a given tile.
@@ -259,7 +260,7 @@ private:
      * @param t tile to be considered.
      * @return First (and only) element from the vector in map found by the key.
      */
-    z3::expr get_tcl(const layout_tile& t);
+    z3::expr get_tcl(const layout_tile& t) noexcept;
     /**
      * Workaround helper function for getting the variable from a tile_latch_map
      * corresponding to a given tile.
@@ -267,7 +268,7 @@ private:
      * @param t tile to be considered.
      * @return First (and only) element from the vector in map found by the key.
      */
-    z3::expr get_tl(const layout_tile& t);
+    z3::expr get_tl(const layout_tile& t) noexcept;
     /**
      * Helper function for generating an equality of an arbitrary number of expressions.
      *
@@ -365,6 +366,10 @@ private:
      */
     void define_number_of_connections();
     /**
+     * Takes the hierarchy into account if the clocking scheme is feed-back-free.
+     */
+    void utilize_hierarchical_information();
+    /**
      * Adds constraints to the solver to position the primary inputs and primary outputs at
      * the layout's borders.
      */
@@ -379,6 +384,18 @@ private:
      */
     void limit_crossings();
     /**
+     * Adds constraints to the solver to minimize the number of crossing tiles to be used.
+     */
+    void minimize_crossings();
+    /**
+     * Adds constraints to the solver to enforce that no bend inverters are used.
+     */
+    void enforce_straight_inverters();
+    /**
+     * Adds constraints to the solver to enforce topology-specific restrictions.
+     */
+    void topology_specific_constraints();
+    /**
      * Generates the SMT instance and adds it to the solver.
      */
     void generate_smt_instance();
@@ -389,4 +406,4 @@ private:
 };
 
 
-#endif //FICTION_EXACT_PR_H
+#endif //FICTION_EXACT_H

@@ -3,13 +3,70 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## v0.3.0 - 2019-11-22
+*Sometimes, fiction was so powerful that it even had reverberations in the real world.* &mdash; Delphine de Vigan
+
+### Added
+- Support for iNML technology using [ToPoliNano](https://topolinano.polito.it/)'s gate library and clocking scheme. Thanks to Umberto Garlando for cooperating with me on this project!
+- Support for vertically shifted `fcn_layout`s to emulate column-based clocking schemes
+- Enhanced `logic_network` by incorporating [mockturtle](https://github.com/lsils/mockturtle) for logic representation
+- Truth table store (mnemonic `-t`) and command `tt`. Thanks to Mathias Soeken for granting permission to use code from [CirKit](https://github.com/msoeken/cirkit)!
+- Command `simulate` to compute `truth_table`s for `logic_network` and `fcn_gate_layout` objects. Thanks to Mathias Soeken for granting permission to use code from [CirKit](https://github.com/msoeken/cirkit)!
+- Command `akers` to perform Akers' Majority synthesis to generate a `logic_network` from a `truth_table`
+- Command `random` to generate random `logic_network` objects
+- Command `check` to verify structural integrity of designed `fcn_gate_layout` objects
+- Command `gates` to list gate counts for each vertex type in the current `logic_network`
+- Command `fanouts` to substitute high-degree inputs into fan-out vertices in `logic_network`s using a given strategy
+- Command `balance` to subdivide `logic_network` edges to equalize path lengths by inserting auxiliary wire vertices
+- Command `qcc` to write `iNML` `cell_layout`s to component files readable by [ToPoliNano and MagCAD](https://topolinano.polito.it/) 
+- Capability to enforce straight inverter gates in `exact` with flag `-n`
+- Capability to minimize the number of used crossing tiles in `exact` with flag `-m`
+- Capability to parse AIGER (`*.aig`) files using `read`
+- Parameter `-b` for `ortho`
+- Progress bars for `exact` and `ortho`
+- `show -n` to display `logic_network` objects
+- Several convenience functions in the core data structures for easier access
+- An overview [paper](./bib/paper.pdf) and a [poster](./bib/poster.pdf) about the features of *fiction*. Please find citation information in the [README](./README.md#references)
+
+### Changed
+- Moved to C++17
+- Moved to version 1.0 of [cppitertools](https://github.com/ryanhaining/cppitertools)
+- Included latest updates for [alice](https://github.com/msoeken/alice)
+- Switched `logic_network`'s CLI mnemonic to `-n` as it is no longer reserved by `alice`
+- Renamed `pi`/`po_count` to `num_pis`/`pos`
+- `read` does no longer substitute fan-outs automatically, `exact` and `ortho` do it instead if the user did not call `fanouts`
+- `exact --path_discrepancy/-p` has been renamed to `exact --desynchronize/-d` to express its use case better
+- `exact --timeout/-t` expects its parameter in seconds instead of milliseconds now
+- `exact --fixed_size/-f` expects its own parameter instead of using `--upper_bound`'s one
+- Renamed `version.h` to `version_info.h` 
+- Renamed *Placement & Routing* to *Physical Design* where appropriate to match the documentation
+
+### Fixed
+- Segfault when using `ortho -i` with certain compilers in release mode
+- Missing input ports for 3-output fan-out gates in QCA-ONE library
+- Wire vertices not handled properly by QCA-ONE library
+- Wrong clocking look-up for `BANCS` clocking in `fcn_cell_layout`
+- Tile directions when assigning and dissociating multiple edges
+- `fcn_layout::random_face`'s index to coordinate mapping (thanks to Till Schlechtweg!)
+- Format issues with benchmark files
+- Constant outputs of some benchmark files
+- Additionally, there are several performance improvements in core data structures and algorithms
+
+### Removed
+- Submodule `lorina` as it is included in `mockturtle`
+- `verilog_parser.h` as `mockturtle` comes with its own one
+- `print -n` as it is replaced by `show -n`
+- `operation::BUF`; use `operation::W` instead
+- `operation::CONST0`, `operation::CONST1`, and `operation::XOR`
+- `operator[x][y][z]` for `fcn_layout`s as it was slow and therefore not used; use `face/tile/cell{x,y,z}` instead
+
 ## v0.2.1 - 2019-05-02
 *Fiction is art and art is the triumph over chaos.* &mdash; John Cheever
 
 ### Added
 - Support for BANCS clocking and integration in `exact`
 - Name strings for `fcn_clocking_scheme` objects and corresponding name-based look-up
-- Version and build information accessible within the code by including `version.h`
+- Version and build information accessible within the code by including `util/version.h`
 - Parameter `-i` for command `ortho`
 - `shortcuts.fs` with predefined flows
 - `benchmarks/MAJ/` folder with some TOY benchmarks using MAJ gates
@@ -17,7 +74,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 - Calls to `exact -s` now need to name the desired clocking, e.g. `exact -s use` (case insensitive)
 - `incoming`/`outgoing_information_flow_tiles` have been renamed to `incoming`/`outgoing_data_flow` and handle multi wires now
-- Renamed diagonal clocking schemes to 2DDWAVE and gave proper credit.
+- Renamed diagonal clocking schemes to 2DDWAVE and gave proper credit
 - More verbose error messages
 
 ### Fixed
@@ -72,7 +129,7 @@ For more information, see <https://svn.boost.org/trac10/ticket/11735>
 - *linguist* flags in `.gitattributes` to prevent benchmark files from being viewed as source code
 
 ### Changed
-- Moved to version 0.4 of [Alice](https://github.com/msoeken/alice)
+- Moved to version 0.4 of [alice](https://github.com/msoeken/alice)
 - Moved to version 4.8.4 of [Z3](https://github.com/Z3Prover/z3)
 - `fcn_gate_library` objects now have name strings
 - `print -g` now displays incorrectly assigned directions by bidirectional arrows
@@ -89,4 +146,4 @@ For more information, see <https://svn.boost.org/trac10/ticket/11735>
 ## v0.1.0 - 2018-10-29
 *Let there be a fiction*
 
-This is the initial release. Please find a feature overview in the README.
+This is the initial release. Please find a feature overview in the [README](README.md).

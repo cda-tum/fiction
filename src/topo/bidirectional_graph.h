@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <cmath>
 #include <chrono>
+#include <optional>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/properties.hpp>
 #include <boost/graph/graph_traits.hpp>
@@ -21,7 +22,6 @@
 #include <boost/graph/gursoy_atun_layout.hpp>
 #include <boost/graph/boyer_myrvold_planar_test.hpp>
 #include <boost/graph/graphviz.hpp>
-#include <boost/optional.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/random/linear_congruential.hpp>
 
@@ -122,10 +122,6 @@ public:
      * @param g Graph to be moved.
      */
     bidirectional_graph(bidirectional_graph&& g) noexcept : graph(std::move(g.get_graph())) {}
-    /**
-     * Default destructor.
-     */
-    virtual ~bidirectional_graph() = default;
 
 
     // ************************************************************
@@ -179,7 +175,13 @@ public:
     {
         boost::remove_edge(e, graph);
     }
-
+    /**
+     * Re-initializes an empty graph container.
+     */
+    void clear_graph()
+    {
+        graph = graph_container();
+    }
 
     // ************************************************************
     // ************************ Properties ************************
@@ -307,13 +309,13 @@ public:
      * @param v2 Target vertex.
      * @return Optional containing edge from v1 to v2.
      */
-    boost::optional<edge_t> get_edge(const vertex_t v1, const vertex_t v2) const noexcept
+    std::optional<edge_t> get_edge(const vertex_t v1, const vertex_t v2) const noexcept
     {
-        auto e = boost::edge(v1, v2, graph);
-        if (!e.second)
-            return boost::none;
+        auto [e, b] = boost::edge(v1, v2, graph);
+        if (!b)
+            return std::nullopt;
 
-        return e.first;
+        return e;
     }
     /**
      * Returns a range containing the outgoing edges of the given vertex.
@@ -394,11 +396,10 @@ public:
         return boost::in_degree(v, graph);
     }
     /**
-     * Returns a stored vertex_index for the given vertex_t. May lead to unexpected behavior when
-     * property_vertex_index_map and the vertices are out of sync.
+     * Returns a vertex_index_t for the given vertex_t.
      *
-     * @param v Vertex whose stored index is desired.
-     * @return Stored index of vertex v.
+     * @param v Vertex whose index is desired.
+     * @return Index of vertex v.
      */
     vertex_index_t get_index(const vertex_t v) const
     {

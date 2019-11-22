@@ -9,10 +9,13 @@
 #include "logic_network.h"
 #include "directions.h"
 #include "energy_model.h"
-#include <boost/optional.hpp>
-#include <boost/variant.hpp>
+#include <optional>
+#include <variant>
 #include <boost/bimap.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
+
+
+#include <mockturtle/io/write_dot.hpp>
 
 /**
  * Represents layouts of field-coupled nanocomputing (FCN) devices on a gate level abstraction. Inherits from fcn_layout
@@ -63,6 +66,10 @@ public:
      */
     friend class fcn_cell_layout;
     /**
+     * Granting access to private data members for design_checker.
+     */
+    friend class design_checker;
+    /**
      * Standard constructor. Creates an FCN gate layout by the means of an array determining its size
      * as well as a clocking scheme defining its data flow possibilities.
      *
@@ -72,8 +79,9 @@ public:
      * See https://svn.boost.org/trac10/ticket/11735 for details.
      * @param clocking Clocking scheme defining possible data flow.
      * @param ln Pointer to a logic network whose elements should be assigned to this layout.
+     * @param o Offset for tile shift in vertical or horizontal direction.
      */
-    fcn_gate_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocking, logic_network_ptr ln) noexcept;
+    fcn_gate_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocking, logic_network_ptr ln, offset o = offset::NONE) noexcept;
     /**
      * Standard constructor. Creates an FCN gate layout by the means of an array determining its size
      * as well as a clocking scheme defining its data flow possibilities.
@@ -83,8 +91,9 @@ public:
      * See https://svn.boost.org/trac10/ticket/11735 for details.
      * @param clocking Clocking scheme defining possible data flow.
      * @param ln Pointer to a logic network whose elements should be assigned to this layout.
+     * @param o Offset for tile shift in vertical or horizontal direction.
      */
-    fcn_gate_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme&& clocking, logic_network_ptr ln) noexcept;
+    fcn_gate_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme&& clocking, logic_network_ptr ln, offset o = offset::NONE) noexcept;
     /**
      * Standard constructor. Creates an FCN gate layout by the means of an array determining its size
      * as well as a clocking scheme defining its data flow possibilities.
@@ -93,8 +102,9 @@ public:
      * NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs.
      * See https://svn.boost.org/trac10/ticket/11735 for details.
      * @param ln Pointer to a logic network whose elements should be assigned to this layout.
+     * @param o Offset for tile shift in vertical or horizontal direction.
      */
-    fcn_gate_layout(fcn_dimension_xy&& lengths, logic_network_ptr ln) noexcept;
+    fcn_gate_layout(fcn_dimension_xy&& lengths, logic_network_ptr ln, offset o = offset::NONE) noexcept;
     /**
      * Standard constructor. Creates a FCN gate layout of size 2 x 2 x 2 with the given clocking scheme.
      * NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs.
@@ -102,37 +112,18 @@ public:
      *
      * @param clocking Clocking scheme defining possible data flow.
      * @param ln Pointer to a logic network whose elements should be assigned to this layout.
+     * @param o Offset for tile shift in vertical or horizontal direction.
      */
-    fcn_gate_layout(fcn_clocking_scheme&& clocking, logic_network_ptr ln) noexcept;
+    fcn_gate_layout(fcn_clocking_scheme&& clocking, logic_network_ptr ln, offset o = offset::NONE) noexcept;
     /**
      * Standard constructor. Creates a FCN gate layout of size 2 x 2 x 2 with an empty clocking.
      * NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs.
      * See https://svn.boost.org/trac10/ticket/11735 for details.
      *
      * @param ln Pointer to a logic network whose elements should be assigned to this layout.
+     * @param o Offset for tile shift in vertical or horizontal direction.
      */
-    explicit fcn_gate_layout(logic_network_ptr ln) noexcept;
-    /**
-     * Copy constructor is not available.
-     */
-    fcn_gate_layout(const fcn_gate_layout& fgl) = delete;
-    /**
-     * Default move constructor.
-     */
-    fcn_gate_layout(fcn_gate_layout&& fgl) = default;
-    /**
-     * Default destructor.
-     */
-    ~fcn_gate_layout() override = default;
-    /**
-     * Assignment operator is not available.
-     */
-    fcn_gate_layout& operator=(const fcn_gate_layout& rhs) = delete;
-    /**
-     * Move operator is not available.
-     */
-    fcn_gate_layout& operator=(fcn_gate_layout&& rhs) = delete;
-
+    explicit fcn_gate_layout(logic_network_ptr ln, offset o = offset::NONE) noexcept;
     /**
      * Function alias for get_vertices using perfect forwarding and the name tiles to fit naming in fcn_gate_layout.
      *
@@ -158,6 +149,24 @@ public:
         return random_face(std::forward<ARGS>(args)...);
     }
     /**
+     * Returns true if t2's clock number plus latch number is one less modulo maximum clock number of t1's clock number,
+     * i.e. if t2 can feed information to t1.
+     *
+     * @param t1 Source tile.
+     * @param t2 Target tile.
+     * @return True iff data flow from t2 to t1 is possible.
+     */
+    bool is_incoming_clocked(const tile& t1, const tile& t2) const noexcept;
+    /**
+     * Returns true if t2's clock number plus latch number is one higher modulo maximum clock number of t1's clock
+     * number, i.e. if t1 can feed information to t2.
+     *
+     * @param t1 Source tile.
+     * @param t2 Target tile.
+     * @return True iff data flow from t1 to t2 is possible.
+     */
+    bool is_outgoing_clocked(const tile& t1, const tile& t2) const noexcept;
+    /**
      * Returns a range of all surrounding tiles to t whose clock number plus latch number is one less modulo maximum
      * clock number and which are placed in the same layer, i.e. all tiles which can feed information to t.
      *
@@ -167,14 +176,7 @@ public:
     auto incoming_clocked_tiles(const tile& t) const noexcept
     {
         return surrounding_2d(t) |
-               iter::filter([this, t = t](const tile& _t)
-                            {
-                                if (!tile_clocking(t) || !tile_clocking(_t))
-                                    return false;
-
-                                return static_cast<fcn_clock::zone>((*tile_clocking(_t) + get_latch(_t) + 1) %
-                                                                 clocking.num_clocks) == *tile_clocking(t);
-                            });
+               iter::filter([this, t = t](const tile& _t){ return is_incoming_clocked(t, _t); });
     }
     /**
      * Returns a range of all surrounding tiles to t whose clock number plus latch number is one higher modulo maximum
@@ -186,14 +188,7 @@ public:
     auto outgoing_clocked_tiles(const tile& t) const noexcept
     {
         return surrounding_2d(t) |
-               iter::filter([this, t = t](const tile& _t)
-                            {
-                                if (!tile_clocking(t) || !tile_clocking(_t))
-                                    return false;
-
-                                return static_cast<fcn_clock::zone>((*tile_clocking(t) + get_latch(t) + 1) %
-                                                       clocking.num_clocks) == *tile_clocking(_t);
-                            });
+               iter::filter([this, t = t](const tile& _t) { return is_outgoing_clocked(t, _t); });
     }
     /**
      * Returns the number of tiles that are able to pass information to the given tile t within the same layer, i.e. the
@@ -220,13 +215,15 @@ public:
         return std::distance(outgoing.begin(), outgoing.end());
     }
     /**
-     * Returns whether the given tile t is located at the layout borders where x or y are either minimal or maximal.
-     * This is equivalent to checking if the number of surrounding tiles in the same layer is less than 4.
+     * Returns in_degree + out_degree of the given tile, i.e. the number of all tiles usable for information flow.
      *
-     * @param t Tile to check for border location.
-     * @return True iff t is located at one of layout's borders, false otherwise.
+     * @param t Tile whose degree is desired.
+     * @return Degree of tile t, i.e. the sum of in_degree and out_degree of tile t.
      */
-    bool is_border_tile(const tile& t) const noexcept;
+    auto degree(const tile& t) const noexcept
+    {
+        return in_degree(t) + out_degree(t);
+    }
     /**
      * Returns direction to closest border. Only a single direction is returned even if multiple borders are the same
      * distance.
@@ -238,21 +235,21 @@ public:
     /**
      * Determines the given tile's clock number by consulting the stored clocking cutout in case of regular clockings,
      * and looks up in the clocking map if clocking is irregular. If no entry has been stored for irregular clockings
-     * yet, boost::none is returned.
+     * yet, std::nullopt is returned.
      *
      * @param t Tile whose clock number is desired.
      * @return Clock number of t.
      */
-    boost::optional<fcn_clock::zone> tile_clocking(const tile& t) const noexcept;
+    std::optional<fcn_clock::zone> tile_clocking(const tile& t) const noexcept;
     /**
      * Determines the given index' tile's clock number by consulting the stored clocking cutout in case of regular
      * clockings, and looks up in the clocking map if clocking is irregular. If no entry has been stored for irregular
-     * clockings yet, boost::none is returned.
+     * clockings yet, std::nullopt is returned.
      *
      * @param t Tile index whose tile's clock number is desired.
      * @return Clock number of t's tile.
      */
-    boost::optional<fcn_clock::zone> tile_clocking(const tile_index t) const noexcept;
+    std::optional<fcn_clock::zone> tile_clocking(const tile_index t) const noexcept;
     /**
      * Assigns tile t with logic_network::vertex v.
      *
@@ -267,12 +264,12 @@ public:
      */
     void dissociate_logic_vertex(const tile& t) noexcept;
     /**
-     * Returns the logic_network::vertex assigned to tile t iff there is one. Returns boost::none otherwise.
+     * Returns the logic_network::vertex assigned to tile t iff there is one. Returns std::nullopt otherwise.
      *
      * @param t Tile whose assigned logic vertex is desired.
-     * @return Vertex associated with t iff there is one, boost::none otherwise.
+     * @return Vertex associated with t iff there is one, std::nullopt otherwise.
      */
-    boost::optional<logic_network::vertex> get_logic_vertex(const tile& t) const noexcept;
+    std::optional<logic_network::vertex> get_logic_vertex(const tile& t) const noexcept;
     /**
      * Checks whether a logic vertex is assigned to given tile t at all.
      *
@@ -289,12 +286,12 @@ public:
      */
     bool has_logic_vertex(const tile& t, const logic_network::vertex v) const noexcept;
     /**
-     * Returns the tile to which logic_network::vertex v is assigned iff there is one. Returns boost::none otherwise.
+     * Returns the tile to which logic_network::vertex v is assigned iff there is one. Returns std::nullopt otherwise.
      *
      * @param v Logic vertex whose tile is desired.
-     * @return Tile associated with v iff there is one, boost::none otherwise.
+     * @return Tile associated with v iff there is one, std::nullopt otherwise.
      */
-    boost::optional<tile> get_logic_tile(const logic_network::vertex v) const noexcept;
+    std::optional<tile> get_logic_tile(const logic_network::vertex v) const noexcept;
     /**
      * Assigns tile t with logic_network::edge e.
      *
@@ -356,166 +353,6 @@ public:
      * @return True, iff tile t has no logic vertex or logic edge assigned to it.
      */
     bool is_free_tile(const tile& t) const noexcept;
-    /**
-     * A variant of either a gate or a wire necessary for data flow.
-     */
-    using gate_or_wire = boost::variant<logic_network::vertex, logic_network::edge>;
-private:
-    /**
-     * Checks if there is a valid data flow from given gate_or_wire to given tile at or vice versa. A data flow is
-     * characterized by a vertex to edge, edge to edge, or edge to vertex connection according to the stored
-     * logic_network. The respective target element is returned if there is one. boost::none otherwise.
-     *
-     * @param gw Gate or wire as starting/ending point of data flow.
-     * @param at Adjacent tile of data flow to check.
-     * @param out Flag to determine direction of data flow to check. True: gw -> at. False: at -> gw.
-     * @return Target gate_or_wire element iff data flows from gw to at or at to gw according to network.
-     *         boost::none otherwise.
-     */
-    boost::optional<gate_or_wire> is_data_flow(const gate_or_wire& gw, const tile& at, const bool out) const noexcept;
-public:
-    /**
-     * Public proxy for outgoing is_data_flow without the weird bool flag. For information see is_data_flow.
-     */
-    boost::optional<gate_or_wire> is_out_data_flow(const gate_or_wire& gw, const tile& at) const noexcept;
-    /**
-     * Public proxy for incoming is_data_flow without the weird bool flag. For information see is_data_flow.
-     */
-    boost::optional<gate_or_wire> is_in_data_flow(const gate_or_wire& gw, const tile& at) const noexcept;
-    /**
-     * Generic version of the proxies above that only returns true iff there is any data flow from given tile t1 to
-     * given tile t2.
-     *
-     * This function is recommended only if no concrete data path should be followed but rather one is interested in all
-     * data flows from t1 to t2. Otherwise, is_out/in_data_flow should be used.
-     *
-     * @param t1 Source tile of data flow.
-     * @param t2 Target tile of data flow.
-     * @return True iff there is any data flow from t1 to t2.
-     */
-    bool is_data_flow(const tile& t1, const tile& t2) const noexcept;
-    /**
-     * Returns a vector of pairs of tiles and gate_or_wire elements containing the ones with outgoing data flow with
-     * respect to the given tile t which have a subsequent logic vertex or logic edge assigned with respect to gw and
-     * the network.
-     *
-     * @param t Tile whose outgoing data flow tiles are desired.
-     * @param gw Gate or wire as a starting point of data flow.
-     * @return A vector of all outgoing data flow tiles and the gate or wire targets to t.
-     */
-    std::vector<std::pair<tile, gate_or_wire>> outgoing_data_flow(const tile& t, const gate_or_wire& gw) const noexcept;
-    /**
-     * Returns a vector of tiles containing the ones with outgoing data flow with respect to the given tile t which have
-     * a subsequent logic vertex or logic edge assigned.
-     *
-     * This function is recommended only if no concrete data path should be followed but rather one is interested in all
-     * data flows from a tile. Otherwise, the other overload should be used.
-     *
-     * @param t Tile whose outgoing data flow tiles are desired.
-     * @return A vector of all outgoing data flow tiles to t.
-     */
-    std::vector<tile> outgoing_data_flow(const tile& t) const noexcept;
-    /**
-     * Returns a vector of pairs of tiles and gate_or_wire elements containing the ones with incoming data flow with
-     * respect to the given tile t which have a preceeding logic vertex or logic edge assigned with respect to gw and
-     * the network.
-     *
-     * @param t Tile whose incoming data flow tiles are desired.
-     * @param gw Gate or wire as an end point of data flow.
-     * @return A vector of all incoming data flow tiles and the gate or wire targets to t.
-     */
-    std::vector<std::pair<tile, gate_or_wire>> incoming_data_flow(const tile& t, const gate_or_wire& gw) const noexcept;
-    /**
-     * Returns a vector of tiles containing the ones with incoming data flow with respect to the given tile t which have
-     * a preceeding logic vertex or logic edge assigned.
-     *
-     * This function is recommended only if no concrete data path should be followed but rather one is interested in all
-     * data flows to a tile. Otherwise, the other overload should be used.
-     *
-     * @param t Tile whose incoming data flow tiles are desired.
-     * @return A vector of all incoming data flow tiles to t.
-     */
-    std::vector<tile> incoming_data_flow(const tile& t) const noexcept;
-    /**
-     * Returns the operation assigned to tile t. If no operation has been set, op::NONE is returned.
-     * Note that op::W is returned if a logic edge has been assigned to t.
-     *
-     * @param t Tile whose assigned operation is desired.
-     * @return Operation associated with t.
-     */
-    operation get_op(const tile& t) const noexcept;
-    /**
-     * Returns the number of tiles that are assigned with logic vertices.
-     *
-     * @return Number of gates in the layout.
-     */
-    auto gate_count() const noexcept
-    {
-        return v_map.size();
-    }
-    /**
-     * Returns the number of tiles that are assigned with logic edges. Note that wire tiles in higher layers are counted
-     * additionally, i.e. a crossing over another wire inherently counts as two wire tiles.
-     *
-     * @return Number of wires in the layout.
-     */
-    auto wire_count() const noexcept
-    {
-        return e_map.size();
-    }
-    /**
-     * Returns the number of logic edges assigned to tiles above ground layer.
-     *
-     * @return Number of logic_network::edge assignments above ground layer.
-     */
-    auto crossing_count() const noexcept
-    {
-        return std::count_if(e_map.cbegin(), e_map.cend(), [](auto& te){return te.first[Z] != GROUND;});
-    }
-    /**
-     * Container to store statistical information about paths.
-     */
-    struct path_info
-    {
-        /**
-         * Captures absolute path length, signal delay (first clock number plays a role), and delay differences.
-         */
-        std::size_t length = 0, delay = 0, diff = 0;
-    };
-    /**
-     * Alias for a cache structure to store delay and throughput values to avoid re-computations.
-     */
-    using delay_cache = std::unordered_map<tile, path_info, boost::hash<tile>>;
-    /**
-     * Returns the number of tiles of the longest path in the layout from a primary input to t. Information is stored in
-     * a wrapper struct that comes with path length in tiles (length), path length in tiles starting with clock zone of
-     * PI (delay), and the delay differences leading to t (diff). If t is an empty tile, all those values are 0.
-     *
-     * A delay cache is used to store partial results. It caches gate values only, because wires are only computed once
-     * anyways. This way, the cache is just a slight memory overhead but significantly reduces runtime.
-     *
-     * @param t Tile whose number of tiles on the longest path from any PI is desired.
-     * @param gw Gate or wire assigned to tile t to trace the signal path.
-     * @param dc A cache structure to avoid re-computations of paths.
-     * @return Number of tiles in the longest path from a PI to t in several configurations.
-     */
-    path_info signal_delay(const tile& t, const gate_or_wire& gw, delay_cache& dc) const noexcept;
-    /**
-     * Returns the length of the longest path from any PI to any PO, i.e. the highest signal delay in tiles as the first
-     * return value.
-     *
-     * Returns the lowest signal throughput of all gates as the second one. It is given as 1/x where only x is returned,
-     * i.e. a high x means a low throughput. For this sake, throughput for a gate is given as the difference in signal
-     * path lengths of all its longest input paths. Throughput of the layout is the largest of those differences. Since
-     * they are multiples of num_clocks() by definition of signal_delay(t, true), the result is divided by num_clocks()
-     * to be left with the reduction in cycles instead of phases.
-     *
-     * This function returns both because both can (and should) be computed at once since it uses the same data and is
-     * costly to calculate.
-     *
-     * @return Pair of length of the critical path and throughput of the layout (1/x where only x is returned).
-     */
-    std::pair<std::size_t, std::size_t> critical_path_length_and_throughput() const noexcept;
     /**
      * Assigns tile t with input directions d. The given directions will be added to the existing ones.
      * Use this to assign directions to gates or tiles in general. If explicit wires should be assigned with directions,
@@ -654,9 +491,17 @@ public:
     bool is_wire_dir(const tile& t, const logic_network::edge& e, const layout::directions& d) const noexcept;
     /**
      * Returns spatial connectivity of the two given tiles i.e. the direction in which t2 can be reached by t1.
-     * t1 and t2 do not have to be located in the same layer and do not have to be adjacent.
-     * If both X- and Y-location are different, i.e. they are not straightly reachable, DIR::NONE is returned.
+     * t1 and t2 do not have to be located in the same layer but do have to be adjacent.
+     *
+     * For non-shifted layouts:
+     * If both X- and Y-location are different, i.e. they are not straightly reachable, DIR_NONE is returned.
      * Only possible return values are: DIR_N, DIR_E, DIR_S, DIR_W, DIR_NONE.
+     *
+     * For vertically shifted layouts:
+     * Due to the overlap, eastern and western adjacent tiles will always be addressed with two directions. That is, a
+     * tile t2 can be north-east of tile t1 for instance which means leaving t1 in the upper east half would lead to t2.
+     * For out of reach cases, DIR_NONE is returned here as well.
+     * Only possible return values are: DIR_N, DIR_S, DIR_NE, DIR_ES, DIR_NW, DIR_SW, DIR_NONE.
      *
      * @param t1 Source tile.
      * @param t2 Target tile.
@@ -664,37 +509,182 @@ public:
      */
     layout::directions get_bearing(const tile& t1, const tile& t2) const noexcept;
     /**
-     * Returns whether or not given tile t is a PI port.
-     *
-     * @param t Tile whose assigned PI port should be checked.
-     * @return true iff t is a PI port.
+     * A variant of either a gate or a wire necessary for data flow.
      */
-    bool is_pi(const tile& t) const noexcept;
+    using gate_or_wire = std::variant<logic_network::vertex, logic_network::edge>;
     /**
-     * Returns a range of all tiles flagged as primary input in the layout.
-     *
-     * @return range_t of all primary input tiles.
+     * A tile associated with its assigned gate or wire.
      */
-    auto get_pis() const noexcept
+    using tile_assignment = std::pair<tile, gate_or_wire>;
+private:
+    /**
+     * Checks if there is a valid data flow from given gate_or_wire to given tile at or vice versa. A data flow is
+     * characterized by a vertex to edge, edge to edge, or edge to vertex connection according to the stored
+     * logic_network. The respective target element is returned if there is one. std::nullopt otherwise.
+     *
+     * @param gw Gate or wire as starting/ending point of data flow.
+     * @param at Adjacent tile of data flow to check.
+     * @param out Flag to determine direction of data flow to check. True: gw -> at. False: at -> gw.
+     * @return Target gate_or_wire element iff data flows from gw to at or at to gw according to network.
+     *         std::nullopt otherwise.
+     */
+    std::optional<gate_or_wire> is_data_flow(const gate_or_wire& gw, const tile& at, const bool out) const noexcept;
+public:
+    /**
+     * Public proxy for outgoing is_data_flow without the weird bool flag. For information see is_data_flow.
+     */
+    std::optional<gate_or_wire> is_out_data_flow(const gate_or_wire& gw, const tile& at) const noexcept;
+    /**
+     * Public proxy for incoming is_data_flow without the weird bool flag. For information see is_data_flow.
+     */
+    std::optional<gate_or_wire> is_in_data_flow(const gate_or_wire& gw, const tile& at) const noexcept;
+    /**
+     * Generic version of the proxies above that only returns true iff there is any data flow from given tile t1 to
+     * given tile t2.
+     *
+     * This function is recommended only if no concrete data path should be followed but rather one is interested in all
+     * data flows from t1 to t2. Otherwise, is_out/in_data_flow should be used.
+     *
+     * @param t1 Source tile of data flow.
+     * @param t2 Target tile of data flow.
+     * @return True iff there is any data flow from t1 to t2.
+     */
+    bool is_data_flow(const tile& t1, const tile& t2) const noexcept;
+    /**
+     * Returns a vector of pairs of tiles and gate_or_wire elements containing the ones with outgoing data flow with
+     * respect to the given tile t which have a subsequent logic vertex or logic edge assigned with respect to gw and
+     * the network.
+     *
+     * @param t Tile whose outgoing data flow tiles are desired.
+     * @param gw Gate or wire as a starting point of data flow.
+     * @return A vector of all outgoing data flow tiles and the gate or wire targets to t.
+     */
+    std::vector<std::pair<tile, gate_or_wire>> outgoing_data_flow(const tile& t, const gate_or_wire& gw) const noexcept;
+    /**
+     * Returns a vector of tiles containing the ones with outgoing data flow with respect to the given tile t which have
+     * a subsequent logic vertex or logic edge assigned.
+     *
+     * This function is recommended only if no concrete data path should be followed but rather one is interested in all
+     * data flows from a tile. Otherwise, the other overload should be used.
+     *
+     * @param t Tile whose outgoing data flow tiles are desired.
+     * @return A vector of all outgoing data flow tiles to t.
+     */
+    std::vector<tile> outgoing_data_flow(const tile& t) const noexcept;
+    /**
+     * Returns a vector of pairs of tiles and gate_or_wire elements containing the ones with incoming data flow with
+     * respect to the given tile t which have a preceeding logic vertex or logic edge assigned with respect to gw and
+     * the network.
+     *
+     * @param t Tile whose incoming data flow tiles are desired.
+     * @param gw Gate or wire as an end point of data flow.
+     * @return A vector of all incoming data flow tiles and the gate or wire targets to t.
+     */
+    std::vector<std::pair<tile, gate_or_wire>> incoming_data_flow(const tile& t, const gate_or_wire& gw) const noexcept;
+    /**
+     * Returns a vector of tiles containing the ones with incoming data flow with respect to the given tile t which have
+     * a preceeding logic vertex or logic edge assigned.
+     *
+     * This function is recommended only if no concrete data path should be followed but rather one is interested in all
+     * data flows to a tile. Otherwise, the other overload should be used.
+     *
+     * @param t Tile whose incoming data flow tiles are desired.
+     * @return A vector of all incoming data flow tiles to t.
+     */
+    std::vector<tile> incoming_data_flow(const tile& t) const noexcept;
+    /**
+     * Returns the operation assigned to tile t. If no operation has been set, op::NONE is returned.
+     * Note that op::W is returned if a logic edge has been assigned to t.
+     *
+     * @param t Tile whose assigned operation is desired.
+     * @return Operation associated with t.
+     */
+    operation get_op(const tile& t) const noexcept;
+    /**
+     * Returns the number of tiles that are assigned with logic vertices.
+     *
+     * @return Number of gates in the layout.
+     */
+    auto gate_count() const noexcept
     {
-        return range_t<primary_set::const_iterator>{std::make_pair(pi_set.begin(), pi_set.end())};
+        return v_map.size();
     }
     /**
-     * Returns whether or not given tile t is a PO port.
+     * Returns the number of tiles that are assigned with logic edges. Note that wire tiles in higher layers are counted
+     * additionally, i.e. a crossing over another wire inherently counts as two wire tiles.
      *
-     * @param t Tile whose assigned PO port should be checked.
-     * @return true iff t is a PO port.
+     * @return Number of wires in the layout.
      */
-    bool is_po(const tile& t) const noexcept;
-    /**
-     * Returns a range of all tiles flagged as primary output in the layout.
-     *
-     * @return range_t of all primary output tiles.
-     */
-    auto get_pos() const noexcept
+    auto wire_count() const noexcept
     {
-        return range_t<primary_set::const_iterator>{std::make_pair(po_set.begin(), po_set.end())};
+        return e_map.size();
     }
+    /**
+     * Returns the number of logic edges assigned to tiles above ground layer.
+     *
+     * @return Number of logic_network::edge assignments above ground layer.
+     */
+    auto crossing_count() const noexcept
+    {
+        return std::count_if(e_map.cbegin(), e_map.cend(), [](auto& te){return te.first[Z] != GROUND;});
+    }
+    /**
+     * Container to store statistical information about paths.
+     */
+    struct path_info
+    {
+        /**
+         * Captures absolute path length, signal delay (first clock number plays a role), and delay differences.
+         */
+        std::size_t length = 0, delay = 0, diff = 0;
+    };
+    /**
+     * Alias for a cache structure to store delay and throughput values to avoid re-computations.
+     */
+    using delay_cache = std::unordered_map<tile, path_info, boost::hash<tile>>;
+    /**
+     * Returns the number of tiles of the longest path in the layout from a primary input to t. Information is stored in
+     * a wrapper struct that comes with path length in tiles (length), path length in tiles starting with clock zone of
+     * PI (delay), and the delay differences leading to t (diff). If t is an empty tile, all those values are 0.
+     *
+     * A delay cache is used to store partial results. It caches gate values only, because wires are only computed once
+     * anyways. This way, the cache is just a slight memory overhead but significantly reduces runtime.
+     *
+     * @param t Tile whose number of tiles on the longest path from any PI is desired.
+     * @param gw Gate or wire assigned to tile t to trace the signal path.
+     * @param dc A cache structure to avoid re-computations of paths.
+     * @return Number of tiles in the longest path from a PI to t in several configurations.
+     */
+    path_info signal_delay(const tile& t, const gate_or_wire& gw, delay_cache& dc) const noexcept;
+    /**
+     * Returns the length of the longest path from any PI to any PO, i.e. the highest signal delay in tiles as the first
+     * return value.
+     *
+     * Returns the lowest signal throughput of all gates as the second one. It is given as 1/x where only x is returned,
+     * i.e. a high x means a low throughput. For this sake, throughput for a gate is given as the difference in signal
+     * path lengths of all its longest input paths. Throughput of the layout is the largest of those differences. Since
+     * they are multiples of num_clocks() by definition of signal_delay(t, true), the result is divided by num_clocks()
+     * to be left with the reduction in cycles instead of phases.
+     *
+     * This function returns both because both can (and should) be computed at once since it uses the same data and is
+     * costly to calculate.
+     *
+     * @return Pair of length of the critical path and throughput of the layout (1/x where only x is returned).
+     */
+    std::pair<std::size_t, std::size_t> critical_path_length_and_throughput() const noexcept;
+    /**
+     * Reconstructs a logic description by tracing the placed elements on the layout.
+     * Note that this might not be equivalent to the stored logic network if the physical design messed up.
+     *
+     * @return Logic description that is realized by the grid.
+     */
+    logic_network::mig_nt extract() const noexcept;
+    /**
+     * Computes truth tables for each primary output in the layout.
+     *
+     * @return Vector of truth tables.
+     */
+    std::vector<kitty::dynamic_truth_table> simulate() const;
     /**
      * Tries to fetch input port names of the given tile t. If t itself does not have a PI operation, its predecessors
      * are investigated to find port names.
@@ -712,60 +702,24 @@ public:
      */
     std::vector<std::string> get_out_names(const tile& t) const noexcept;
     /**
+     * Returns true iff all I/Os are realized by designated I/O pins.
+     *
+     * @return True, iff no I/O is an implicit gate pin.
+     */
+    bool has_io_pins() const noexcept;
+    /**
      * Returns the associated network's stored file path name.
      *
      * @return The associated network's stored file path name.
      */
     std::string get_name() const noexcept;
     /**
-     * Represents a bounding box surrounding the elements assigned to the layout's tiles. Helps to determine the "real"
-     * size of a layout.
-     */
-    struct bounding_box
-    {
-        /**
-         * Standard constructor. Defines corner points and calculates size.
-         */
-        bounding_box(std::size_t min_x, std::size_t min_y, std::size_t max_x, std::size_t max_y)
-                :
-                min_x{min_x},
-                min_y{min_y},
-                max_x{max_x},
-                max_y{max_y},
-                x_size{max_x == 0u && min_x == 0u ? 0u : (max_x - min_x) + 1u},
-                y_size{max_y == 0u && min_y == 0u ? 0u : (max_y - min_y) + 1u}
-        {}
-        /**
-         * Corners of bounding box.
-         */
-        const std::size_t min_x, min_y, max_x, max_y;
-        /**
-         * Size in x- and y-dimension.
-         */
-        const std::size_t x_size, y_size;
-        /**
-         * Returns area of bounding box.
-         *
-         * @return x-size * y-size.
-         */
-        std::size_t area() const noexcept
-        {
-            return x_size * y_size;
-        }
-    };
-    /**
      * Determines the layout's bounding box i.e. the area in which logic elements are placed. Helps to determine the
      * "real" size of a layout.
      *
      * @return Bounding box.
      */
-    bounding_box determine_bounding_box() const noexcept;
-    /**
-     * Resizes the layout so that all empty rows and columns on the right and bottom side are removed respectively.
-     * No rows and columns on the left and top are affected because that would change indices of all tiles and therefore
-     * all maps would not work properly anymore.
-     */
-    void shrink_to_fit() noexcept;
+    bounding_box determine_bounding_box() const noexcept override;
     /**
      * Energy information slow (25 GHz) and fast (100 GHz).
      */
@@ -834,14 +788,6 @@ private:
      * Helper functions for access save memory.
      */
     edge_direction_map edge_inp_dir_map{}, edge_out_dir_map{};
-    /**
-     * Alias for a hash set that holds tiles to represent PI/PO ports.
-     */
-    using primary_set = std::unordered_set<tile, boost::hash<tile>>;
-    /**
-     * Stores tiles that are marked as PIs/POs. Helper functions for access save memory.
-     */
-    primary_set pi_set{}, po_set{};
 };
 
 using fcn_gate_layout_ptr = std::shared_ptr<fcn_gate_layout>;

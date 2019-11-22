@@ -16,19 +16,15 @@
  * MAJ  : Ternary majority.
  * F1O2 : 1-to-2 Fan-out.
  * F1O3 : 1-to-3 Fan-out.
- * XOR  : Binary exclusive disjunction.
  * W    : (Multi-)Wire.
  * PI   : Primary input node.
  * PO   : Primary output node.
- * ONE  : 1-constant.
- * ZERO : 0-constant.
- * BUF  : Buffer element.
  */
-enum operation { NONE = 0u, AND, OR, NOT, MAJ, F1O2, F1O3, XOR, W, PI, PO, ONE, ZERO, BUF };
+enum operation { NONE = 0u, AND, OR, NOT, MAJ, F1O2, F1O3, W, PI, PO };
 /**
  * Number of different supported operations.
  */
-constexpr const std::size_t OP_COUNT = 14ul;
+constexpr const std::size_t OP_COUNT = 10ul;
 /**
  * Writes the given operation o to the given ostream channel as a text symbol as it could be used
  * in grid representations.
