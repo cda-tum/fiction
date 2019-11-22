@@ -1,12 +1,12 @@
 [submodule "libs/alice"]
 	path = libs/alice
 	url = https://github.com/marcelwa/alice.git
-[submodule "libs/lorina"]
-	path = libs/lorina
-	url = https://github.com/marcelwa/lorina.git
 [submodule "libs/cppitertools"]
 	path = libs/cppitertools
 	url = https://github.com/marcelwa/cppitertools.git
 [submodule "libs/z3"]
 	path = libs/z3
 	url = https://github.com/marcelwa/z3.git
+[submodule "libs/mockturtle"]
+	path = libs/mockturtle
+	url = https://github.com/marcelwa/mockturtle.git

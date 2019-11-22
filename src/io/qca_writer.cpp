@@ -25,7 +25,7 @@ namespace qca
             auto y_pos = cell[Y] * CELL_DISTANCE + X_Y_OFFSET;
             file << X_POS << x_pos << '\n';
             file << Y_POS << y_pos << '\n';
-            file << B_SELECTED << FALSE << '\n';
+            file << B_SELECTED << SELECTED_FALSE << '\n';
 
             // supports colors for 4 clocks only
             unsigned red, green, blue;
@@ -33,7 +33,7 @@ namespace qca
             { red = COLOR_MIN; green = COLOR_MIN; blue = COLOR_MAX; }
             else if (cell_type == fcn::OUTPUT_CELL)
             { red = COLOR_MAX; green = COLOR_MAX; blue = COLOR_MIN; }
-            else if (cell_type == fcn::CONST_0_CELL || cell_type == fcn::CONST_1_CELL)
+            else if (cell_type == fcn::qca::CONST_0_CELL || cell_type == fcn::qca::CONST_1_CELL)
             { red = COLOR_MAX; green = COLOR_HALF; blue = COLOR_MIN; }
             else
             {
@@ -46,7 +46,7 @@ namespace qca
                     default: break;
                 }
             }
-            file << boost::str(boost::format(COLOR) % red % green % blue);
+            file << fmt::format(COLOR, red, green, blue);
 
 
             file << BOUNDING_BOX_X << x_pos - CELL_SIZE / 2.0f << '\n';
@@ -87,8 +87,8 @@ namespace qca
                     file << CELL_FUNCTION_NORMAL;
                     break;
                 }
-                case fcn::CONST_0_CELL:
-                case fcn::CONST_1_CELL:
+                case fcn::qca::CONST_0_CELL:
+                case fcn::qca::CONST_1_CELL:
                 {
                     file << CELL_FUNCTION_FIXED;
                     break;
@@ -127,13 +127,13 @@ namespace qca
 
                     // determine charge
                     file << CHARGE;
-                    if (cell_type != fcn::CONST_0_CELL && cell_type != fcn::CONST_1_CELL)
+                    if (cell_type != fcn::qca::CONST_0_CELL && cell_type != fcn::qca::CONST_1_CELL)
                         file << CHARGE_8;
-                    else if ((cell_type == fcn::CONST_0_CELL && std::abs(i + j) == 2) ||
-                             (cell_type == fcn::CONST_1_CELL && std::abs(i + j) == 0))
+                    else if ((cell_type == fcn::qca::CONST_0_CELL && std::abs(i + j) == 2) ||
+                             (cell_type == fcn::qca::CONST_1_CELL && std::abs(i + j) == 0))
                         file << CHARGE_1;
-                    else if ((cell_type == fcn::CONST_0_CELL && std::abs(i + j) == 0) ||
-                             (cell_type == fcn::CONST_1_CELL && std::abs(i + j) == 2))
+                    else if ((cell_type == fcn::qca::CONST_0_CELL && std::abs(i + j) == 0) ||
+                             (cell_type == fcn::qca::CONST_1_CELL && std::abs(i + j) == 2))
                         file << CHARGE_0;
                     file << '\n';
 
@@ -152,12 +152,10 @@ namespace qca
                 }
             }
 
-            auto cell_name = fcl->get_cell_name(cell);
-            // override cell_name if cell is constant
-            cell_name = cell_type == fcn::CONST_0_CELL ? "-1.00" :
-                        cell_type == fcn::CONST_1_CELL ? "1.00"  : cell_name;
-            // if cell has a name
-            if (!cell_name.empty())
+            // override cell_name if cell is constant; if cell has a name
+            if (auto cell_name = cell_type == fcn::qca::CONST_0_CELL ? "-1.00" :
+                                 cell_type == fcn::qca::CONST_1_CELL ?  "1.00" : fcl->get_cell_name(cell);
+                !cell_name.empty())
             {
                 // open label
                 file << OPEN_QCAD_LABEL;
@@ -166,8 +164,8 @@ namespace qca
 
                 file << X_POS << x_pos << '\n';
                 file << Y_POS << y_pos - LABEL_Y_OFFSET << '\n';
-                file << B_SELECTED << FALSE << '\n';
-                file << boost::str(boost::format(COLOR) % red % green % blue);
+                file << B_SELECTED << SELECTED_FALSE << '\n';
+                file << fmt::format(COLOR, red, green, blue);
                 file << BOUNDING_BOX_X << x_pos - BB_X_OFFSET << '\n';
                 file << BOUNDING_BOX_Y << y_pos - BB_Y_OFFSET << '\n';
                 file << BOUNDING_BOX_CX << cell_name.size() * CHARACTER_WIDTH + BB_CX_OFFSET << '\n';

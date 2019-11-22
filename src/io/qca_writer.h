@@ -9,7 +9,8 @@
 #include <itertools.hpp>
 #include <iostream>
 #include <string>
-#include <boost/format.hpp>
+#include "fmt/format.h"
+#include "fmt/ostream.h"
 
 namespace qca
 {
@@ -45,10 +46,10 @@ namespace qca
     constexpr const char* PSZ = "psz=";
     constexpr const char* B_SELECTED = "bSelected=";
 
-    constexpr const char* TRUE = "TRUE";
-    constexpr const char* FALSE = "FALSE";
+    constexpr const char* SELECTED_TRUE = "TRUE";
+    constexpr const char* SELECTED_FALSE = "FALSE";
 
-    constexpr const char* COLOR = "clr.red=%d\nclr.green=%d\nclr.blue=%d\n";
+    constexpr const char* COLOR = "clr.red={}\nclr.green={}\nclr.blue={}\n";
 
     constexpr const char* BOUNDING_BOX_X = "bounding_box.xWorld=";
     constexpr const char* BOUNDING_BOX_Y = "bounding_box.yWorld=";

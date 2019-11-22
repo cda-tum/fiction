@@ -7,15 +7,14 @@ module i2c (
     pi050, pi051, pi052, pi053, pi054, pi055, pi056, pi057, pi058, pi059,
     pi060, pi061, pi062, pi063, pi064, pi065, pi066, pi067, pi068, pi069,
     pi070, pi071, pi072, pi073, pi074, pi075, pi076, pi077, pi078, pi079,
-    pi080, pi081, pi082, pi083, pi084, pi085, pi086, pi087, pi088, pi089,
+    pi080, pi081, pi082, pi084, pi085, pi086, pi087, pi088, pi089,
     pi090, pi091, pi092, pi093, pi094, pi095, pi096, pi097, pi098, pi099,
-    pi100, pi101, pi102, pi103, pi104, pi105, pi106, pi107, pi108, pi109,
+    pi100, pi106, pi109,
     pi110, pi111, pi112, pi113, pi114, pi115, pi116, pi117, pi118, pi119,
-    pi120, pi121, pi122, pi123, pi124, pi125, pi126, pi127, pi128, pi129,
-    pi130, pi131, pi132, pi133, pi134, pi135, pi136, pi137, pi138, pi139,
+    pi120, pi122, pi123, pi124, pi125, pi126, pi127, pi129,
+    pi131, pi132, pi133, pi134, pi135, pi136, pi137, pi138, pi139,
     pi140, pi141, pi142, pi143, pi144, pi145, pi146,
-    po000, po001, po002, po003, po004, po005, po006, po007, po008, po009,
-    po010, po011, po012, po013, po014, po015, po016, po017, po018, po019,
+    po015, po016, po017, po018, po019,
     po020, po021, po022, po023, po024, po025, po026, po027, po028, po029,
     po030, po031, po032, po033, po034, po035, po036, po037, po038, po039,
     po040, po041, po042, po043, po044, po045, po046, po047, po048, po049,
@@ -28,7 +27,7 @@ module i2c (
     po110, po111, po112, po113, po114, po115, po116, po117, po118, po119,
     po120, po121, po122, po123, po124, po125, po126, po127, po128, po129,
     po130, po131, po132, po133, po134, po135, po136, po137, po138, po139,
-    po140, po141  );
+    po140, po141 );
   input  pi000, pi001, pi002, pi003, pi004, pi005, pi006, pi007, pi008,
     pi009, pi010, pi011, pi012, pi013, pi014, pi015, pi016, pi017, pi018,
     pi019, pi020, pi021, pi022, pi023, pi024, pi025, pi026, pi027, pi028,
@@ -37,15 +36,14 @@ module i2c (
     pi049, pi050, pi051, pi052, pi053, pi054, pi055, pi056, pi057, pi058,
     pi059, pi060, pi061, pi062, pi063, pi064, pi065, pi066, pi067, pi068,
     pi069, pi070, pi071, pi072, pi073, pi074, pi075, pi076, pi077, pi078,
-    pi079, pi080, pi081, pi082, pi083, pi084, pi085, pi086, pi087, pi088,
+    pi079, pi080, pi081, pi082, pi084, pi085, pi086, pi087, pi088,
     pi089, pi090, pi091, pi092, pi093, pi094, pi095, pi096, pi097, pi098,
-    pi099, pi100, pi101, pi102, pi103, pi104, pi105, pi106, pi107, pi108,
+    pi099, pi100, pi106,
     pi109, pi110, pi111, pi112, pi113, pi114, pi115, pi116, pi117, pi118,
-    pi119, pi120, pi121, pi122, pi123, pi124, pi125, pi126, pi127, pi128,
-    pi129, pi130, pi131, pi132, pi133, pi134, pi135, pi136, pi137, pi138,
+    pi119, pi120, pi122, pi123, pi124, pi125, pi126, pi127,
+    pi129, pi131, pi132, pi133, pi134, pi135, pi136, pi137, pi138,
     pi139, pi140, pi141, pi142, pi143, pi144, pi145, pi146;
-  output po000, po001, po002, po003, po004, po005, po006, po007, po008, po009,
-    po010, po011, po012, po013, po014, po015, po016, po017, po018, po019,
+  output  po015, po016, po017, po018, po019,
     po020, po021, po022, po023, po024, po025, po026, po027, po028, po029,
     po030, po031, po032, po033, po034, po035, po036, po037, po038, po039,
     po040, po041, po042, po043, po044, po045, po046, po047, po048, po049,
@@ -1512,21 +1510,6 @@ module i2c (
   assign po140 = ~pi129 & ~n1629;
   assign n1631 = ~pi126 & pi132;
   assign po141 = pi133 & n1631;
-  assign po012 = 1;
-  assign po000 = pi108;
-  assign po001 = pi083;
-  assign po002 = pi104;
-  assign po003 = pi103;
-  assign po004 = pi102;
-  assign po005 = pi105;
-  assign po006 = pi107;
-  assign po007 = pi101;
-  assign po008 = pi126;
-  assign po009 = pi121;
-  assign po010 = pi001;
-  assign po011 = pi000;
-  assign po013 = pi130;
-  assign po014 = pi128;
 endmodule
 
 

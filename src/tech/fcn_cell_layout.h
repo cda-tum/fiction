@@ -79,26 +79,6 @@ public:
      */
     explicit fcn_cell_layout(fcn_gate_library_ptr&& lib);
     /**
-     * Default copy constructor.
-     */
-    fcn_cell_layout(const fcn_cell_layout& fcl) noexcept = default;
-    /**
-     * Default move constructor.
-     */
-    fcn_cell_layout(fcn_cell_layout&& fcl) = default;
-    /**
-     * Default destructor.
-     */
-    ~fcn_cell_layout() = default;
-    /**
-     * Default assignment operator.
-     */
-    fcn_cell_layout& operator=(const fcn_cell_layout& rhs) noexcept = default;
-    /**
-     * Default move operator.
-     */
-    fcn_cell_layout& operator=(fcn_cell_layout&& rhs) noexcept = default;
-    /**
      * Function alias for get_vertices using perfect forwarding and the name cells to fit naming in fcn_cell_layout.
      *
      * @tparam ARGS Stack of argument types.
@@ -118,7 +98,7 @@ public:
      * @return random_face(args).
      */
     template<typename... ARGS>
-    auto random_cell(ARGS&& ... args) const noexcept
+    auto random_cell(ARGS&&... args) const noexcept
     {
         return random_face(std::forward<ARGS>(args)...);
     }
@@ -187,12 +167,12 @@ public:
     /**
      * Determines the given cell's clock number by consulting the stored clocking cutout in case of regular clockings,
      * while taking library's gate size into account, and looks up in the clocking map if clocking is irregular. If no
-     * entry has been stored for irregular clockings yet, boost::none is returned.
+     * entry has been stored for irregular clockings yet, std::nullopt is returned.
      *
      * @param c Cell whose clock number is desired.
      * @return Clock number of c.
      */
-    boost::optional<fcn_clock::zone> cell_clocking(const cell& c) const noexcept;
+    std::optional<fcn_clock::zone> cell_clocking(const cell& c) const noexcept;
     /**
      * Assigns an FCN gate to a region beginning with cell c in the top left corner (lowest x, y position). The gate
      * then spans to the bottom right corner (highest x, y position).
@@ -224,6 +204,20 @@ public:
      */
     std::string get_name() const noexcept;
     /**
+     * Calculates the number of magnets for an iNML layout like MagCAD (https://topolinano.polito.it/) would do it.
+     * If the layout is not an iNML one, 0 is returned.
+     *
+     * @return Number of magnets as counted by MagCAD if layout is an iNML one, 0 otherwise.
+     */
+    std::size_t magcad_magnet_count() const noexcept;
+    /**
+     * Determines the layout's bounding box i.e. the area in which cells are placed. Helps to determine the
+     * "real" size of a layout.
+     *
+     * @return Bounding box.
+     */
+    bounding_box determine_bounding_box() const noexcept override;
+    /**
      * Prints the assigned cell types to the given std::ostream channel. A textual representation is used for
      * visualization. Currently only one crossing layer can be represented correctly. This is more of a debug function
      * and unsuitable for large layouts.
@@ -242,6 +236,10 @@ private:
      * Technology which is used for the cells in this layout.
      */
     fcn::technology technology;
+    /**
+     * Layout name.
+     */
+    std::string name;
     /*
      * Alias for a hash map that assigns cell types to cells.
      */
@@ -264,18 +262,14 @@ private:
      */
     using cell_name_map = std::unordered_map<cell, std::string, boost::hash<cell>>;
     /**
-     * Stores a mapping cell -> std::string. Helper function for access save memory.
+     * Stores a mapping cell -> std::string. Helper functions for access save memory.
      */
     cell_name_map name_map{};
-    /**
-     * Layout name.
-     */
-    std::string name;
     /**
      * Maps a non-regular clocking taken from a fcn_gate_layout to the cell-level. Therefore, the library's tile size
      * has to be taken into account.
      */
-    void map_irregular_clocking();
+    void map_irregular_clocking() noexcept;
     /**
      * Determines via cells in the current layout's crossing layer and marks them accordingly. This also includes
      * creating via cells in bottom layer to transport information correctly. A middle (via) layer is not needed and
@@ -283,11 +277,34 @@ private:
      */
     void assign_vias() noexcept;
     /**
+     * Removes bumps and straightens input and output wires.
+     * This optimization function is designed to be used with iNML layouts clocked with one of the ToPoliNano clocking
+     * schemes. Due to the shifted tile layouts, which emulate row-wise clocking in a tile-based fashion, wire bumps can
+     * occur when mapping to a cell level layout. This function removes them and thereby creates a more pleasing looking
+     * layout that even saves a few magnets.
+     *
+     * Implemented in optimization.cpp.
+     */
+    void clean_up_topolinano() noexcept;
+    /**
+     * Tries to find cuts in a layout to optimize depth.
+     * A cut is defined as a set of horizontal cell sequences (wires) in different y-positions that can be removed to
+     * seperate the layout into two non-connected blocks that can be merged together seamlessly.
+     */
+    void cut_optimization() noexcept;
+    /**
+     * Optimizes the structure of the cell layout if needed. This can include cosmetics or cost reductions that cannot
+     * be done on gate level. This function will be called by map_layout when mapping from an fcn_gate_layout.
+     * This function needs to respect the technology and library of the layout.
+     */
+    void optimize() noexcept;
+    /**
      * Maps all operations of the given fcn_gate_layout to cell level using the stored library.
      */
     void map_layout();
 };
 
 using fcn_cell_layout_ptr = std::shared_ptr<fcn_cell_layout>;
+
 
 #endif //FICTION_FCN_CELL_LAYOUT_H

@@ -18,8 +18,6 @@ fcn_gate_library::fcn_gate_library(std::string&& name, fcn_gate_layout_ptr&& fgl
         p_router{std::make_shared<port_router>(layout, tech, size)}
 {}
 
-fcn_gate_library::~fcn_gate_library() = default;
-
 fcn_gate fcn_gate_library::rotate_90(const fcn_gate& g) const noexcept
 {
     return reverse_columns(transpose(g));
@@ -118,6 +116,39 @@ fcn_gate fcn_gate_library::reverse_rows(const fcn_gate& g) const noexcept
     std::reverse(std::begin(rev_rows), std::end(rev_rows));
 
     return rev_rows;
+}
+
+fcn_gate fcn_gate_library::mark_cell(const fcn_gate& g, const port& p, const fcn::cell_mark mark) const noexcept
+{
+    auto marked_gate = g;
+
+    marked_gate[p.y][p.x] = static_cast<fcn::cell_type>(mark);
+
+    return marked_gate;
+}
+
+fcn_gate_library::port fcn_gate_library::opposite(const port& p) const
+{
+    using port_port_map = std::unordered_map<port, port, boost::hash<port>>;
+    static const port_port_map pp_map =
+    {
+        // QCA 5x5 ports
+        {port(2, 0), port(2, 4)},
+        {port(4, 2), port(0, 2)},
+        {port(2, 4), port(2, 0)},
+        {port(0, 2), port(4, 2)},
+        // iNML 4x4 ports
+        {port(0, 0), port(3, 0)},
+        {port(0, 1), port(3, 1)},
+        {port(0, 2), port(3, 2)},
+        {port(0, 3), port(3, 3)},
+        {port(3, 0), port(0, 0)},
+        {port(3, 1), port(0, 1)},
+        {port(3, 2), port(0, 2)},
+        {port(3, 3), port(0, 3)},
+    };
+
+    return pp_map.at(p);
 }
 
 std::ostream& operator<<(std::ostream& os, const fcn_gate& g)

@@ -26,26 +26,6 @@ public:
      */
     explicit qca_one_library(fcn_gate_layout_ptr fgl);
     /**
-     * Copy constructor is not available.
-     */
-    qca_one_library(const qca_one_library& qol) = delete;
-    /**
-     * Move constructor is not available.
-     */
-    qca_one_library(qca_one_library&& qol) = delete;
-    /**
-     * Default destructor.
-     */
-    ~qca_one_library() override = default;
-    /**
-     * Assignment operator is not available.
-     */
-    qca_one_library& operator=(const qca_one_library& rhs) = delete;
-    /**
-     * Move operator is not available.
-     */
-    qca_one_library& operator=(qca_one_library&& rhs) = delete;
-    /**
      * Overrides the corresponding function in fcn_gate_library. Given a tile t, this function takes all necessary
      * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
@@ -54,6 +34,10 @@ public:
      * @return QCA-ONE gate representation of t including I/Os, rotation, cost cells, etc.
      */
     fcn_gate set_up_gate(const fcn_gate_layout::tile& t) override;
+    /**
+     * Virtual destructor.
+     */
+    virtual ~qca_one_library() = default;
 
 private:
 
@@ -61,7 +45,7 @@ private:
     // ************************** Gates ***************************
     // ************************************************************
 
-    const fcn_gate inverter_straight =
+    const fcn_gate straight_inverter =
     {{
          {' ', ' ', 'x', ' ', ' '},
          {' ', 'x', 'x', 'x', ' '},
@@ -70,7 +54,7 @@ private:
          {' ', ' ', 'x', ' ', ' '}
     }};
 
-    const fcn_gate inverter_bent =
+    const fcn_gate bent_inverter =
     {{
          {' ', ' ', 'x', ' ', ' '},
          {' ', ' ', 'x', ' ', ' '},
@@ -253,19 +237,6 @@ private:
          {' ', ' ', ' ', ' ', ' '},
          {' ', ' ', ' ', ' ', ' '}
     }};
-
-    /**
-     * Shortcut for a list of ports.
-     */
-    using ports = port_router::port_list;
-    /**
-     * Shortcut for a single port.
-     */
-    using port = port_router::port;
-    /**
-     * Alias for a map of ports to fcn_gates. Used to identify rotation quickly.
-     */
-    using port_gate_map = std::unordered_map<ports, fcn_gate, boost::hash<ports>>;
     /**
      * Lookup table for wire rotations. Maps ports to corresponding wires.
      */
@@ -311,29 +282,29 @@ private:
     port_gate_map inverter_map =
     {
         // straight inverters
-        {{{port(2, 0)}, {port(2, 4)}}, inverter_straight},
-        {{{port(4, 2)}, {port(0, 2)}}, rotate_90(inverter_straight)},
-        {{{port(2, 4)}, {port(2, 0)}}, rotate_180(inverter_straight)},
-        {{{port(0, 2)}, {port(4, 2)}}, rotate_270(inverter_straight)},
+        {{{port(2, 0)}, {port(2, 4)}}, straight_inverter},
+        {{{port(4, 2)}, {port(0, 2)}}, rotate_90(straight_inverter)},
+        {{{port(2, 4)}, {port(2, 0)}}, rotate_180(straight_inverter)},
+        {{{port(0, 2)}, {port(4, 2)}}, rotate_270(straight_inverter)},
         // without outputs
-        {{{port(2, 0)}, {}}, inverter_straight},
-        {{{port(4, 2)}, {}}, rotate_90(inverter_straight)},
-        {{{port(2, 4)}, {}}, rotate_180(inverter_straight)},
-        {{{port(0, 2)}, {}}, rotate_270(inverter_straight)},
+        {{{port(2, 0)}, {}}, straight_inverter},
+        {{{port(4, 2)}, {}}, rotate_90(straight_inverter)},
+        {{{port(2, 4)}, {}}, rotate_180(straight_inverter)},
+        {{{port(0, 2)}, {}}, rotate_270(straight_inverter)},
         // without inputs
-        {{{}, {port(2, 4)}}, inverter_straight},
-        {{{}, {port(0, 2)}}, rotate_90(inverter_straight)},
-        {{{}, {port(2, 0)}}, rotate_180(inverter_straight)},
-        {{{}, {port(4, 2)}}, rotate_270(inverter_straight)},
+        {{{}, {port(2, 4)}}, straight_inverter},
+        {{{}, {port(0, 2)}}, rotate_90(straight_inverter)},
+        {{{}, {port(2, 0)}}, rotate_180(straight_inverter)},
+        {{{}, {port(4, 2)}}, rotate_270(straight_inverter)},
         // bent inverters
-        {{{port(2, 0)}, {port(4, 2)}}, inverter_bent},
-        {{{port(4, 2)}, {port(2, 0)}}, inverter_bent},
-        {{{port(4, 2)}, {port(2, 4)}}, rotate_90(inverter_bent)},
-        {{{port(2, 4)}, {port(4, 2)}}, rotate_90(inverter_bent)},
-        {{{port(0, 2)}, {port(2, 4)}}, rotate_180(inverter_bent)},
-        {{{port(2, 4)}, {port(0, 2)}}, rotate_180(inverter_bent)},
-        {{{port(2, 0)}, {port(0, 2)}}, rotate_270(inverter_bent)},
-        {{{port(0, 2)}, {port(2, 0)}}, rotate_270(inverter_bent)}
+        {{{port(2, 0)}, {port(4, 2)}}, bent_inverter},
+        {{{port(4, 2)}, {port(2, 0)}}, bent_inverter},
+        {{{port(4, 2)}, {port(2, 4)}}, rotate_90(bent_inverter)},
+        {{{port(2, 4)}, {port(4, 2)}}, rotate_90(bent_inverter)},
+        {{{port(0, 2)}, {port(2, 4)}}, rotate_180(bent_inverter)},
+        {{{port(2, 4)}, {port(0, 2)}}, rotate_180(bent_inverter)},
+        {{{port(2, 0)}, {port(0, 2)}}, rotate_270(bent_inverter)},
+        {{{port(0, 2)}, {port(2, 0)}}, rotate_270(bent_inverter)}
     };
     /**
      * Returns the port equivalent of the given direction. Only single directions are accepted.
@@ -342,22 +313,6 @@ private:
      * @return Port of direction d.
      */
     port dir_to_port(const layout::directions d) const;
-    /**
-     * Returns the opposite of a port. Only border ports are accepted.
-     *
-     * @param p Port whose opposite counterpart is desired.
-     * @return Opposite port to p.
-     */
-    port opposite(const port& p) const;
-    /**
-     * Applies given mark to given fcn_gate g at given port p.
-     *
-     * @param g Gate to apply mark to.
-     * @param p Port specifying where to apply the mark.
-     * @param mark Mark to be applied
-     * @return Marked fcn_gate.
-     */
-    fcn_gate mark_cell(const fcn_gate& g, const port& p, const fcn::cell_mark mark) const noexcept;
 };
 
 

@@ -2,11 +2,15 @@
 // Created by marcel on 12.07.17.
 //
 
-#ifndef FICTION_PLACE_ROUTE_H
-#define FICTION_PLACE_ROUTE_H
+#ifndef FICTION_PHYSICAL_DESIGN_H
+#define FICTION_PHYSICAL_DESIGN_H
 
 #include "fcn_gate_layout.h"
-#include "json.hpp"
+#include "network_hierarchy.h"
+#include "mockturtle/utils/stopwatch.hpp"
+#include "mockturtle/utils/progress_bar.hpp"
+#include "nlohmann/json.hpp"
+#include <boost/predef/os/windows.h>
 #include <vector>
 #include <map>
 #include <unordered_map>
@@ -14,20 +18,19 @@
 #include <unordered_set>
 #include <utility>
 #include <string>
-#include <chrono>
 #include <itertools.hpp>
 
 /**
- * Abstract class that specifies an interface for place and route algorithms.
+ * Abstract class that specifies an interface for physical design algorithms.
  */
-class place_route
+class physical_design
 {
 
 protected:
     /**
-     * Result type for placement and routing approaches.
+     * Result type for physical design approaches.
      */
-    struct pr_result
+    struct pd_result
     {
         bool success = false;
         nlohmann::json json;
@@ -39,43 +42,23 @@ public:
      *
      * @param ln Logic network.
      */
-    explicit place_route(std::shared_ptr<logic_network>&& ln)
+    explicit physical_design(std::shared_ptr<logic_network>&& ln)
             :
             network{std::move(ln)}
     {}
     /**
-     * Default destructor. Declared as virtual to manage memory correctly.
-     */
-    virtual ~place_route() = default;
-    /**
-     * Copy constructor is not available.
-     */
-    place_route(const place_route& rhs) = delete;
-    /**
-     * Move constructor is not available.
-     */
-    place_route(place_route&& rhs) = delete;
-    /**
-     * Assignment operator is not available.
-     */
-    place_route& operator=(const place_route& rhs) = delete;
-    /**
-     * Move assignment operator is not available.
-     */
-    place_route& operator=(place_route&& rhs) = delete;
-    /**
-     * Starts the P&R process. This function need to be overridden by each sub-class.
-     * It returns a PRResult from which one can extract all crucial information about the process.
+     * Starts a physical design process. This function need to be overridden by each sub-class.
+     * It returns a pd_result from which one can extract statistical information about the process.
      *
-     * @return pr_result containing placed and routed layout as well as statistical information.
+     * @return Result type containing statistical information.
      */
-    virtual pr_result perform_place_and_route() = 0;
+    virtual pd_result operator()() = 0;
     /**
      * Returns the stored layout.
      *
      * @return The stored layout.
      */
-    std::shared_ptr<fcn_gate_layout> get_layout() noexcept
+    fcn_gate_layout_ptr get_layout() noexcept
     {
         return layout;
     }
@@ -84,7 +67,7 @@ public:
      *
      * @return The stored logic network.
      */
-    std::shared_ptr<logic_network> get_logic_network() noexcept
+    logic_network_ptr get_logic_network() noexcept
     {
         return network;
     }
@@ -94,6 +77,10 @@ protected:
      * Logic network to be mapped to a layout.
      */
     logic_network_ptr network = nullptr;
+    /**
+     * Network hierarchy for certain algorithms.
+     */
+    network_hierarchy_ptr hierarchy = nullptr;
     /**
      * Actual layout to which a logic network should be mapped.
      */
@@ -128,22 +115,7 @@ protected:
 
         return vs;
     }
-    /**
-     * Alias for chrono's system clock.
-     */
-    using chrono = std::chrono::system_clock;
-    /**
-     * Calculates the runtime in milliseconds passed between two time points.
-     *
-     * @param b Begin of time measurement.
-     * @param e End of time measurement.
-     * @return Time duration in milliseconds between b and e.
-     */
-    auto calc_runtime(const chrono::time_point b, const chrono::time_point e) const noexcept
-    {
-        return std::chrono::duration_cast<std::chrono::milliseconds>(e - b).count();
-    }
 };
 
 
-#endif //FICTION_PLACE_ROUTE_H
+#endif //FICTION_PHYSICAL_DESIGN_H

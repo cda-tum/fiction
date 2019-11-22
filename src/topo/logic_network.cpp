@@ -4,72 +4,59 @@
 
 #include "logic_network.h"
 
+
+logic_network::logic_network() noexcept
+        :
+        bidirectional_graph(),
+        name{""},
+        operation_counter(OP_COUNT, 0ul)
+{}
+
 logic_network::logic_network(std::string&& name) noexcept
         :
         bidirectional_graph(),
-        name(std::move(name)),
+        name{std::move(name)},
         operation_counter(OP_COUNT, 0ul)
-{
-    zero = std::make_unique<vertex>(create_logic_vertex(operation::ZERO));
-    one  = std::make_unique<vertex>(create_logic_vertex(operation::ONE));
-}
-
-logic_network::logic_network(const logic_network& ln) noexcept
-        :
-        bidirectional_graph(ln),
-        name{ln.name},
-        pi_set{ln.pi_set},
-        po_set{ln.po_set},
-        io_port_map{ln.io_port_map},
-        operation_counter{ln.operation_counter}
-{
-    zero = std::make_unique<vertex>(vertex(0));
-    one  = std::make_unique<vertex>(vertex(1));
-}
-
-logic_network::logic_network(logic_network&& ln) noexcept
-        :
-        bidirectional_graph(std::move(ln)),
-        name{std::move(ln.name)},
-        pi_set{std::move(ln.pi_set)},
-        po_set{std::move(ln.po_set)},
-        io_port_map{std::move(ln.io_port_map)},
-        operation_counter{std::move(ln.operation_counter)},
-        zero{std::move(ln.zero)},
-        one{std::move(ln.one)}
 {}
 
-logic_network::num_vertices_t logic_network::vertex_count(const bool ios, const bool consts) const noexcept
+
+logic_network::logic_network(mig_nt&& mig, std::string&& name) noexcept
+        :
+        bidirectional_graph(),
+        name{std::move(name)},
+        mig{std::move(mig)},
+        operation_counter(OP_COUNT, 0ul)
+{
+    initialize_network_from_logic();
+}
+
+logic_network::num_vertices_t logic_network::vertex_count(const bool ios) const noexcept
 {
     auto count = get_vertex_count();
     if (!ios)
-        count -= (pi_count() + po_count());
-    if (!consts)
-        count -= 2;
+        count -= (num_pis() + num_pos());
 
     return count;
 }
 
-logic_network::num_edges_t logic_network::edge_count(const bool ios, const bool consts) const noexcept
+logic_network::num_edges_t logic_network::edge_count(const bool ios) const noexcept
 {
     auto count = get_edge_count();
     if (!ios)
-        count -= (pi_count() + po_count());
-    if (!consts)
-        count -= const_count();
+        count -= (num_pis() + num_pos());
 
     return count;
 }
 
-logic_network::degree_t logic_network::out_degree(const vertex v, const bool ios, const bool consts) const noexcept
+logic_network::degree_t logic_network::out_degree(const vertex v, const bool ios) const noexcept
 {
-    auto out = out_edges(v, ios, consts);
+    auto out = out_edges(v, ios);
     return static_cast<degree_t>(std::distance(out.begin(), out.end()));
 }
 
-logic_network::degree_t logic_network::in_degree(const vertex v, const bool ios, const bool consts) const noexcept
+logic_network::degree_t logic_network::in_degree(const vertex v, const bool ios) const noexcept
 {
-    auto in = in_edges(v, ios, consts);
+    auto in = in_edges(v, ios);
     return static_cast<degree_t>(std::distance(in.begin(), in.end()));
 }
 
@@ -102,24 +89,6 @@ void logic_network::create_po(const vertex a, const std::string& name) noexcept
     io_port_map.insert(port_map::value_type(v, name));
 }
 
-logic_network::vertex logic_network::get_constant(bool value) const noexcept
-{
-    return value ? *one : *zero;
-}
-
-logic_network::vertex logic_network::create_buf(const vertex a) noexcept
-{
-    auto v = create_buf();
-    add_edge(a, v);
-
-    return v;
-}
-
-logic_network::vertex logic_network::create_buf() noexcept
-{
-    return create_logic_vertex(operation::BUF);
-}
-
 logic_network::vertex logic_network::create_not(const vertex a) noexcept
 {
     auto v = create_logic_vertex(operation::NOT);
@@ -140,15 +109,6 @@ logic_network::vertex logic_network::create_and(const vertex a, const vertex b) 
 logic_network::vertex logic_network::create_or(const vertex a, const vertex b) noexcept
 {
     auto v = create_logic_vertex(operation::OR);
-    add_edge(a, v);
-    add_edge(b, v);
-
-    return v;
-}
-
-logic_network::vertex logic_network::create_xor(const vertex a, const vertex b) noexcept
-{
-    auto v = create_logic_vertex(operation::XOR);
     add_edge(a, v);
     add_edge(b, v);
 
@@ -214,11 +174,6 @@ bool logic_network::is_io(const vertex v) const noexcept
     return get_op(v) == operation::PI || get_op(v) == operation::PO;
 }
 
-bool logic_network::is_const(const vertex v) const noexcept
-{
-    return get_op(v) == operation::ONE || get_op(v) == operation::ZERO;
-}
-
 std::size_t logic_network::operation_count(const operation o) const noexcept
 {
     return operation_counter[o];
@@ -237,9 +192,6 @@ bool logic_network::is_MIG() const noexcept
             case operation::W:
             case operation::PI:
             case operation::PO:
-            case operation::ONE:
-            case operation::ZERO:
-            case operation::BUF:
                 continue;
             default:
             {
@@ -265,9 +217,6 @@ bool logic_network::is_AIG() const noexcept
             case operation::W:
             case operation::PI:
             case operation::PO:
-            case operation::ONE:
-            case operation::ZERO:
-            case operation::BUF:
                 continue;
             default:
             {
@@ -293,9 +242,6 @@ bool logic_network::is_OIG() const noexcept
             case operation::W:
             case operation::PI:
             case operation::PO:
-            case operation::ONE:
-            case operation::ZERO:
-            case operation::BUF:
                 continue;
             default:
             {
@@ -322,9 +268,6 @@ bool logic_network::is_AOIG() const noexcept
             case operation::W:
             case operation::PI:
             case operation::PO:
-            case operation::ONE:
-            case operation::ZERO:
-            case operation::BUF:
                 continue;
             default:
             {
@@ -352,9 +295,6 @@ bool logic_network::is_MAOIG() const noexcept
             case operation::W:
             case operation::PI:
             case operation::PO:
-            case operation::ONE:
-            case operation::ZERO:
-            case operation::BUF:
                 continue;
             default:
             {
@@ -369,11 +309,11 @@ bool logic_network::is_MAOIG() const noexcept
 
 std::string logic_network::get_port_name(const vertex v) const noexcept
 {
-    try
+    if (auto it = io_port_map.left.find(v); it != io_port_map.left.end())
     {
-        return io_port_map.left.at(v);
+        return it->second;
     }
-    catch (const std::out_of_range&)
+    else
     {
         return "";
     }
@@ -384,15 +324,15 @@ std::string logic_network::get_name() const noexcept
     return name;
 }
 
-std::vector<logic_network::edge_path> logic_network::get_all_paths(const vertex v, const bool ios, const bool consts) noexcept
+std::vector<logic_network::edge_path> logic_network::get_all_paths(const vertex v, const bool ios) noexcept
 {
     if (get_in_degree(v) == 0u)
         return std::vector<edge_path>{edge_path{}};
 
     std::vector<edge_path> paths{};
-    for (auto&& e : in_edges(v, ios, consts))
+    for (auto&& e : in_edges(v, ios))
     {
-        auto ps = get_all_paths(source(e), ios, consts);
+        auto ps = get_all_paths(source(e), ios);
         for (auto& p : ps)
             p.push_back(e);
 
@@ -402,113 +342,100 @@ std::vector<logic_network::edge_path> logic_network::get_all_paths(const vertex 
     return paths;
 }
 
-void logic_network::substitute() noexcept
+std::vector<kitty::dynamic_truth_table> logic_network::simulate() const
 {
-    auto reduce_gate_inputs = []()
+    return mockturtle::simulate<kitty::dynamic_truth_table>(mig,
+            mockturtle::default_simulator<kitty::dynamic_truth_table>(mig.num_pis()));
+}
+
+void logic_network::substitute_fan_outs(const std::size_t degree, const substitution_strategy stgy, const std::size_t threshold) noexcept
+{
+    auto connect = [&, this](std::vector<vertex> targets) -> std::vector<vertex>
     {
-        // TODO when lorina supports multi-input gates
-    };
+        std::vector<vertex> new_targets;
 
-    auto decompose = [this]()
-    {
-        auto decompose_xor = [this](const vertex v_XOR)
+        while (!targets.empty())
         {
-            auto v_FO_1  = create_logic_vertex(operation::F1O2);
-            auto v_FO_2  = create_logic_vertex(operation::F1O2);
-            auto v_AND_1 = create_logic_vertex(operation::AND);
-            auto v_AND_2 = create_logic_vertex(operation::AND);
-            auto v_NOT   = create_logic_vertex(operation::NOT);
-            auto v_OR    = create_logic_vertex(operation::OR);
-
-            add_edge(v_FO_1, v_AND_1);
-            add_edge(v_FO_1, v_OR);
-            add_edge(v_FO_2, v_AND_1);
-            add_edge(v_FO_2, v_OR);
-            add_edge(v_AND_1, v_NOT);
-            add_edge(v_NOT, v_AND_2);
-            add_edge(v_OR, v_AND_2);
-
-            auto iaop = get_inv_adjacent_vertices(v_XOR);
-            auto iao = iaop.begin();
-            add_edge(*iao, v_FO_1);
-            ++iao;
-            add_edge(*iao, v_FO_2);
-
-            for (auto&& ao : get_adjacent_vertices(v_XOR))
-                add_edge(v_AND_2, ao);
-
-            remove_logic_vertex(v_XOR);
-        };
-
-        auto lvs = vertices();
-        auto is_composed_vertex = [this](const vertex _v){return get_op(_v) == operation::XOR /* || ... */;};
-
-        auto comp_vertex = std::find_if(lvs.begin(), lvs.end(), is_composed_vertex);
-        while (comp_vertex != lvs.end())
-        {
-            if (get_op(*comp_vertex) == operation::XOR)
-                decompose_xor(*comp_vertex);
-            // else if (get_op(*comp_vertex) == operation:: ...)
-
-            comp_vertex = std::find_if(lvs.begin(), lvs.end(), is_composed_vertex);
-        }
-    };
-
-    auto add_fan_outs = [this]()
-    {
-        for (auto&& v : get_vertices())
-        {
-            if (get_out_degree(v) > 1u && get_op(v) != operation::F1O2)
+            if (targets.size() == 1)
             {
-                auto predecessor = v;
-                std::vector<vertex> vv{};
-                std::vector<edge> ve{};
-                for (auto&& ae : out_edges(v, true, true))
-                {
-                    vv.push_back(target(ae));
-                    ve.push_back(ae);
-                }
+                new_targets.push_back(targets.front());
+                return new_targets;
+            }
 
-                for (auto i : iter::range(vv.size()))
-                {
-                    if (i + 1 == vv.size())
-                        add_edge(predecessor, vv[i]);
-                    else
-                    {
-                        auto fan_out = create_logic_vertex(operation::F1O2);
+            auto fan_out_degree = std::min(targets.size(), degree);
 
-                        add_edge(predecessor, fan_out);
-                        add_edge(fan_out, vv[i]);
+            auto fo = create_logic_vertex(fan_out_degree == 2 ? operation::F1O2 : operation::F1O3);
+            std::for_each(targets.end() - fan_out_degree, targets.end(), [_fo = fo, this](auto v){ add_edge(_fo, v); });
 
-                        predecessor = fan_out;
-                    }
-                }
-                for (auto& e : ve)
-                    remove_edge(e);
+            if (stgy == substitution_strategy::BREADTH)
+            {
+                new_targets.push_back(fo);
+                targets.erase(targets.end() - fan_out_degree, targets.end());
+                continue;
+            }
+            else if (stgy == substitution_strategy::DEPTH)
+            {
+                std::copy(targets.begin(), targets.end() - fan_out_degree, std::back_inserter(new_targets));
+                new_targets.push_back(fo);
+                return new_targets;
             }
         }
+
+        return new_targets;
     };
 
-    reduce_gate_inputs();
-    decompose();
-    add_fan_outs();
+    for (auto&& v : vertices(true) | iter::filterfalse([this](const auto _v)
+                                            { return get_op(_v) == operation::F1O2 || get_op(_v) == operation::F1O3; }))
+    {
+        std::size_t specific_threshold = (get_op(v) == operation::NOT || get_op(v) == operation::PI) ? 1 : threshold;
+
+        if (get_out_degree(v) > specific_threshold)
+        {
+            auto oe = out_edges(v, true);
+            std::vector<edge> edges(oe.begin(), oe.end());
+            // remove the last (specific_threshold - 1) elements which won't be substituted
+            edges.erase(edges.end() - (specific_threshold - 1), edges.end());
+
+            std::vector<vertex> targets{};
+            // figure out targets and remove edges which will be substituted
+            std::for_each(edges.begin(), edges.end(),
+                    [this, &targets](auto _oe){ targets.push_back(target(_oe)); remove_edge(_oe); });
+
+            while (targets.size() > 1)
+            {
+                targets = connect(targets);
+            }
+
+            add_edge(v, targets.front());
+        }
+    }
 }
 
 void logic_network::write_network(std::ostream& os) noexcept
 {
-    std::stringstream graph{};
+    os << "digraph G {\n";
 
-    graph << "digraph G {\n";
+    for (auto&& v : vertices())
+        os << fmt::format("{} [label=<<B>{}</B><br/>{}>];\n", v, v, name_str(get_op(v)));
 
-    for (auto&& v : vertices(true, true))
-        graph << boost::str(boost::format("%d [label=<<B>%d</B><br/>%s>];\n") % v % v % name_str(get_op(v)));
+    for (auto&& pi : get_pis())
+        os << fmt::format("{} [label=<<B>{}</B><br/>{}>,shape=invtriangle,color=green];\n", pi, pi, get_port_name(pi));
 
-    for (auto&& e : edges(true, true))
-        graph << boost::str(boost::format("%d->%d;\n") % source(e) % target(e));
+    for (auto&& po : get_pos())
+        os << fmt::format("{} [label=<<B>{}</B><br/>{}>,shape=triangle,color=red];\n", po, po, get_port_name(po));
 
-    graph << "}\n";
+    os << "{ rank = same; ";
+    for (auto&& pi : get_pis())
+        os << pi << "; ";
+    os << "}\n{ rank = same; ";
+    for (auto&& po : get_pos())
+        os << po << "; ";
+    os << "}\n";
 
-    os << graph.str() << std::endl;
+    for (auto&& e : edges(true))
+        os << fmt::format("{}->{};\n", source(e), target(e));
+
+    os << "}\n" << std::endl;
 }
 
 void logic_network::increment_op_counter(const operation o) noexcept
@@ -519,4 +446,76 @@ void logic_network::increment_op_counter(const operation o) noexcept
 void logic_network::decrement_op_counter(const operation o) noexcept
 {
     --operation_counter[o];
+}
+
+void logic_network::initialize_network_from_logic() noexcept
+{
+    clear_graph();
+
+    mockturtle::topo_view<mig_nt> topo_mig(mig);
+    std::unordered_map<typename mockturtle::topo_view<mig_nt>::node, vertex> node_to_vertex{};
+
+    std::size_t pi_c = 0ul, po_c = 0ul;
+
+    // create PIs
+    topo_mig.foreach_pi([&](const auto& pi)
+    {
+        const auto s = topo_mig.make_signal(topo_mig.node_to_index(pi));
+        const std::string port_name = topo_mig.has_name(s) ? topo_mig.get_name(s) : fmt::format("pi{}", pi_c++);
+
+        node_to_vertex.emplace(pi, create_pi(port_name));
+    });
+    // create gates
+    topo_mig.foreach_gate([&](const auto& g)
+    {
+        // figure out gate type and predecessors
+        enum class gate_type { MAJ, AND, OR };
+        gate_type g_t = gate_type::MAJ;
+
+        std::vector<vertex> predecessors{};
+        topo_mig.foreach_fanin(g, [&](const auto& f)
+        {
+            const auto f_n = topo_mig.get_node(f);
+            if (topo_mig.is_constant(f_n))
+            {
+                assert(g_t == gate_type::MAJ && "MIG nodes must not have more than one constant input");
+                g_t = topo_mig.is_complemented(f) ? gate_type::OR : gate_type::AND;
+            }
+            else
+            {
+                predecessors.push_back(topo_mig.is_complemented(f) ? create_not(node_to_vertex.at(f_n)) : node_to_vertex.at(f_n));
+            }
+        });
+        // create gate vertex
+        switch (g_t)
+        {
+            case gate_type::MAJ:
+            {
+                node_to_vertex.emplace(g, create_maj(predecessors[0], predecessors[1], predecessors[2]));
+                break;
+            }
+            case gate_type::AND:
+            {
+                node_to_vertex.emplace(g, create_and(predecessors[0], predecessors[1]));
+                break;
+            }
+            case gate_type::OR:
+            {
+                node_to_vertex.emplace(g, create_or(predecessors[0], predecessors[1]));
+                break;
+            }
+        }
+    });
+    // create POs
+    topo_mig.foreach_po([&](const auto& po, auto i)
+    {
+        const std::string port_name = topo_mig.has_output_name(i) ? topo_mig.get_output_name(i) : fmt::format("po{}", po_c++);
+
+        const auto po_n = topo_mig.get_node(po);
+
+        if (topo_mig.is_constant(po_n))
+            std::cout << "[w] omitted constant output " << port_name << std::endl;
+        else
+            create_po(topo_mig.is_complemented(po) ? create_not(node_to_vertex.at(po_n)) : node_to_vertex.at(po_n), port_name);
+    });
 }

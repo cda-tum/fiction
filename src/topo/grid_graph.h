@@ -69,10 +69,6 @@ public:
     // ************************************************************
 
     /**
-     * Default standard constructor.
-     */
-    grid_graph() = default;
-    /**
      * Initializes a grid of dimension DIMENSIONS with the sizes in each dimension as specified by lengths.
      *
      * @param lengths A DIMENSIONS-dimensional array that specifies sizes of each dimension in the grid.
@@ -81,18 +77,6 @@ public:
             :
             grid(std::make_unique<grid_container>(lengths))
     {}
-    /**
-     * Default copy constructor.
-     */
-    grid_graph(const grid_graph& g) noexcept = default;
-    /**
-     * Default move constructor.
-     */
-    grid_graph(grid_graph&& g) noexcept = default;
-    /**
-     * Default destructor.
-     */
-    virtual ~grid_graph() = default;
     /**
      * Resizes an already constructed grid_graph object so that only the stored grid_container is affected but
      * the overall object stays the same. The new grid_container will be initialized with the given lengths.
@@ -194,7 +178,7 @@ public:
     /**
      * Returns a range of all adjacent vertices to the given vertex v, i.e. all vertices u for which v -> u holds.
      *
-     * @param v Vertex whose adjacencies are desired.
+     * @param v Vertex whose adjacent ones are desired.
      * @return All adjacent vertices to v.
      */
     range_t<adjacency_iter> get_adjacent_vertices(const vertex_t& v) const noexcept
@@ -208,13 +192,13 @@ public:
      * @param v2 Target vertex.
      * @return Optional containing edge from v1 to v2.
      */
-    boost::optional<edge_t> get_edge(const vertex_t& v1, const vertex_t& v2) const noexcept
+    std::optional<edge_t> get_edge(const vertex_t& v1, const vertex_t& v2) const noexcept
     {
-        auto e = edge(v1, v2, *grid);
-        if (!e.second)
-            return boost::none;
+        auto [e, b] = edge(v1, v2, *grid);
+        if (!b)
+            return std::nullopt;
 
-        return e.first;
+        return e;
     }
     /**
      * Returns the edge from given vertex index v1 to given vertex index v2 if there exists one.
@@ -223,7 +207,7 @@ public:
      * @param v2 Target vertex.
      * @return Optional containing edge from v1 to v2.
      */
-    boost::optional<edge_t> get_edge(const vertex_index_t v1, const vertex_index_t v2) const noexcept
+    std::optional<edge_t> get_edge(const vertex_index_t v1, const vertex_index_t v2) const noexcept
     {
         return get_edge(get_vertex(v1), get_vertex(v2));
     }
@@ -321,7 +305,7 @@ public:
     class euclidean_metric : public boost::astar_heuristic<filtered_grid, double>
     {
     public:
-        euclidean_metric(vertex_t target) : target(target) {};
+        explicit euclidean_metric(vertex_t target) : target(target) {};
 
         double operator()(vertex_t v)
         {
@@ -340,7 +324,7 @@ public:
     class manhattan_metric : public boost::astar_heuristic<filtered_grid, int>
     {
     public:
-        manhattan_metric(vertex_t target) : target(target) {};
+        explicit manhattan_metric(vertex_t target) : target(target) {};
 
         double operator()(vertex_t v)
         {
@@ -368,21 +352,30 @@ public:
     {
         return metric(target)(source);
     }
-
-    // ************************************************************
-    // ************************ Operators *************************
-    // ************************************************************
-
-    /**
-     * Assignment operator is not available.
-     */
-    grid_graph& operator=(const grid_graph& rhs) noexcept = delete;
-    /**
-     * Move assignment operator is not available.
-     */
-    grid_graph& operator=(grid_graph&& rhs) noexcept = delete;
 };
 
+/**
+ * Cheated overload for the vertex_t type to actually print grid elements nicely.
+ *
+ * @tparam DIMENSIONS Template parameter determining grid's dimension.
+ * @param v Vertex to create a string representation for.
+ * @return String representation of v.
+ */
+template <std::size_t DIMENSIONS>
+std::string to_string(const boost::array<std::size_t, DIMENSIONS>& v)
+{
+    std::stringstream repr{};
+    repr << "{";
+    for (auto i = 0u; i < DIMENSIONS; ++i)
+    {
+        repr << v[i];
+        if (i != DIMENSIONS - 1)
+            repr << ",";
+    }
+    repr << "}";
+
+    return repr.str();
+}
 /**
  * Cheated overload for the vertex_t type to actually print grid elements nicely.
  *
@@ -417,22 +410,7 @@ template <std::size_t DIMENSIONS>
 std::ostream& operator<<(std::ostream& os, const std::pair<boost::array<std::size_t, DIMENSIONS>,
                                                            boost::array<std::size_t, DIMENSIONS>>& e)
 {
-    os << "{";
-    for (auto i = 0u; i < DIMENSIONS; ++i)
-    {
-        os << e.first[i];
-        if (i != DIMENSIONS - 1)
-            os << ",";
-    }
-    os << "} -> {";
-    for (auto i = 0u; i < DIMENSIONS; ++i)
-    {
-        os << e.second[i];
-        if (i != DIMENSIONS - 1)
-            os << ",";
-    }
-    os << "}";
-
+    os << e.first << " -> " << e.second;
     return os;
 }
 

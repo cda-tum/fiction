@@ -38,28 +38,28 @@ namespace svg
 
             if (latch_delay)
             {
-                try
+                if (auto it = coord_to_latch_cells.find(tile_coords); it != coord_to_latch_cells.end())
                 {
-                    current_cells = coord_to_latch_cells.at(tile_coords);
+                    current_cells = it->second;
                 }
-                catch (...)
+                else
                 {
                     // If this is called, then there is no tile for the current cell yet
                     // It also makes sure that all required tiles are created
-                    coord_to_latch_tile[tile_coords] = std::make_tuple(latch, clockzone, latch_delay);
+                    coord_to_latch_tile[tile_coords] = {latch, clockzone, latch_delay};
                 }
             }
             else
             {
-                try
+                if (auto it = coord_to_cells.find(tile_coords); it != coord_to_cells.end())
                 {
-                    current_cells = coord_to_cells.at(tile_coords);
+                    current_cells = it->second;
                 }
-                catch (...)
+                else
                 {
                     // If this is called, then there is no tile for the current cell yet
                     // It also makes sure that all required tiles are created
-                    coord_to_tile[tile_coords] = std::make_pair(tile, clockzone);
+                    coord_to_tile[tile_coords] = {tile, clockzone};
                 }
             }
 
@@ -107,13 +107,13 @@ namespace svg
                     cell_description = simple ? simple_cell : cell;
                     break;
                 }
-                case fcn::CONST_0_CELL:
+                case fcn::qca::CONST_0_CELL:
                 {
                     cell_color = "#000000";
                     cell_description = simple ? simple_cell : const0;
                     break;
                 }
-                case fcn::CONST_1_CELL:
+                case fcn::qca::CONST_1_CELL:
                 {
                     cell_color = "#000000";
                     cell_description = simple ? simple_cell : const1;
@@ -150,16 +150,15 @@ namespace svg
 
         // All cell-descriptions are done and tiles have been created
         // Associate tiles with cell-descriptions now; coordinates of tiles are used for tile- and cell-descriptions
-        for (const auto& ct : coord_to_tile)
+        for (const auto& [coord, tdscr] : coord_to_tile)
         {
-            auto coord = ct.first;
-            auto descr = ct.second.first;
-            auto czone = ct.second.second;
+            auto [x, y] = coord;
+            auto [descr, czone] = tdscr;
 
-            auto cell_descriptions = coord_to_cells.at(coord);
+            auto cell_descriptions = coord_to_cells[coord];
 
-            double x_pos = starting_offset_tile_x + coord.first  * tile_distance;
-            double y_pos = starting_offset_tile_y + coord.second * tile_distance;
+            double x_pos = starting_offset_tile_x + x * tile_distance;
+            double y_pos = starting_offset_tile_y + y * tile_distance;
 
             descr = fmt::format(descr, x_pos, y_pos, tile_colors[czone], cell_descriptions,
                                 simple ? "" : text_colors[czone],
@@ -169,25 +168,24 @@ namespace svg
         }
 
         // Add the descriptions of latch-tiles to the whole image
-        for (const auto& ct : coord_to_latch_tile)
+        for (const auto& [coord, ldscr] : coord_to_latch_tile)
         {
-            auto coord = ct.first;
-            auto descr = std::get<0>(ct.second);
-            auto czone_up = std::get<1>(ct.second);
-            auto latch_delay = std::get<2>(ct.second);
+            auto [x, y] = coord;
+            auto [descr, czone_up, latch_delay] = ldscr;
             auto czone_lo = czone_up + latch_delay % fcl->num_clocks();
 
-            auto cell_descriptions = coord_to_latch_cells.at(coord);
+            auto cell_descriptions = coord_to_latch_cells[coord];
 
-            double x_pos = starting_offset_latch_x + coord.first * tile_distance;
-            double y_pos = starting_offset_latch_y + coord.second * tile_distance;
+            double x_pos = starting_offset_latch_x + x * tile_distance;
+            double y_pos = starting_offset_latch_y + y * tile_distance;
 
-            descr = fmt::format(descr, x_pos, y_pos, tile_colors[czone_lo], tile_colors[czone_up], cell_descriptions,
-                                text_colors[czone_up], simple ? "" : std::to_string(czone_up + 1),
-                                text_colors[czone_lo],
-                                simple ? "" : std::to_string(czone_lo + 1));
+            auto t_descr = fmt::format(descr, x_pos, y_pos, tile_colors[czone_lo], tile_colors[czone_up],
+                                       cell_descriptions,
+                                       text_colors[czone_up], simple ? "" : std::to_string(czone_up + 1),
+                                       text_colors[czone_lo],
+                                       simple ? "" : std::to_string(czone_lo + 1));
 
-            tile_descriptions << descr;
+            tile_descriptions << t_descr;
         }
 
         std::size_t length_x = fcl->x() / fcl->get_library()->gate_x_size();
@@ -196,7 +194,7 @@ namespace svg
         double viewbox_x = 2 * viewbox_distance + length_x * tile_distance;
         double viewbox_y = 2 * viewbox_distance + length_y * tile_distance;
 
-        return fmt::format(header, boost::lexical_cast<std::string>(viewbox_x),
-                                   boost::lexical_cast<std::string>(viewbox_y), tile_descriptions.str());
+        return fmt::format(header, fiction::VERSION, fiction::REPO, boost::lexical_cast<std::string>(viewbox_x),
+                           boost::lexical_cast<std::string>(viewbox_y), tile_descriptions.str());
     }
 }

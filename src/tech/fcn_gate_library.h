@@ -38,26 +38,6 @@ public:
     fcn_gate_library(std::string&& name, fcn_gate_layout_ptr&& fgl,
                      const fcn::technology tech, const fcn::tile_size size) noexcept;
     /**
-     * Copy constructor is not available.
-     */
-    fcn_gate_library(const fcn_gate_library& fgl) noexcept = delete;
-    /**
-     * Move constructor is not available.
-     */
-    fcn_gate_library(fcn_gate_library&& fgl) noexcept = delete;
-    /**
-     * Pure virtual destructor.
-     */
-    virtual ~fcn_gate_library() = 0;
-    /**
-     * Assignment operator is not available.
-     */
-    fcn_gate_library& operator=(const fcn_gate_library& rhs) noexcept = delete;
-    /**
-     * Move assignment operator is not available.
-     */
-    fcn_gate_library& operator=(fcn_gate_library&& rhs) noexcept = delete;
-    /**
      * Pure virtual function. Need to be implemented by inheriting gate library. Returns a gate fulfilling all
      * requirements with respect to rotation and I/O marks in the given tile t. This function should be the only one
      * necessary to be called by a user.
@@ -140,6 +120,18 @@ public:
 
 protected:
     /**
+     * Shortcut for a single port.
+     */
+    using port = port_router::port;
+    /**
+     * Shortcut for a list of ports.
+     */
+    using ports = port_router::port_list;
+    /**
+     * Alias for a map of ports to fcn_gates. Used to identify rotation quickly.
+     */
+    using port_gate_map = std::unordered_map<ports, fcn_gate, boost::hash<ports>>;
+    /**
      * Transposes the given fcn_gate.
      *
      * @param g fcn_gate to transpose.
@@ -160,6 +152,22 @@ protected:
      * @return fcn_gate with reversed rows.
      */
     fcn_gate reverse_rows(const fcn_gate& g) const noexcept;
+    /**
+     * Applies given mark to given fcn_gate g at given port p.
+     *
+     * @param g Gate to apply mark to.
+     * @param p Port specifying where to apply the mark.
+     * @param mark Mark to be applied
+     * @return Marked fcn_gate.
+     */
+    fcn_gate mark_cell(const fcn_gate& g, const port& p, const fcn::cell_mark mark) const noexcept;
+    /**
+     * Returns the opposite of a port. Only border ports are accepted.
+     *
+     * @param p Port whose opposite counterpart is desired.
+     * @return Opposite port to p.
+     */
+    port opposite(const port& p) const;
     /**
      * Name of this library.
      */

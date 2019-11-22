@@ -6,16 +6,18 @@
 #define FICTION_FCN_TECHNOLOGY_H
 
 #include <iostream>
+#include <string>
 
 namespace fcn
 {
     /**
      * Supported technology types:
      * - Qunatum-dot Cellular Automata (QCA)
-     * (- Nanomagnet Logic (NML))
+     * - In-plane Nanomagnet Logic (iNML)
+     * (- Perpendicular Nanomagnet Logic (pNML))
      * (- Dangling Bonds (DB))
      */
-    enum class technology { QCA /*, NML, DB */ };
+    enum class technology { QCA, INML /*, DB */ };
     /**
      * Overload for the stream operator on fcn::technology to print a string representation.
      *
@@ -33,10 +35,10 @@ namespace fcn
     std::string to_string(const technology tech);
     /**
      * Supported tile sizes for available technologies.
-     * - QCA: (3 x 3,) 5 x 5
-     * (- NML: 3 x 3)
+     * - QCA: 5 x 5
+     * - iNML: 4 x 4
      */
-    enum class tile_size : std::size_t { /* THREE_X_THREE = 3u, */ FIVE_X_FIVE = 5u };
+    enum class tile_size : std::size_t { /* THREE_X_THREE = 3u, */ FOUR_X_FOUR = 4u, FIVE_X_FIVE = 5u };
 }
 
 #endif //FICTION_FCN_TECHNOLOGY_H

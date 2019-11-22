@@ -20,10 +20,10 @@ namespace fcn
             {
                 return "QCA";
             }
-//            case technology::NML:
-//            {
-//                return "NML";
-//            }
+            case technology::INML:
+            {
+                return "iNML";
+            }
             default:
             {
                 return "?";
