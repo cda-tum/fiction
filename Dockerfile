@@ -7,7 +7,7 @@ FROM alpine:latest
         cmake cmake-doc extra-cmake-modules extra-cmake-modules-doc \
     #
     # Install packages needed to build fiction
-        git g++ cmake python readline-dev
+        git g++ cmake boost-dev python readline-dev
 
 # Clone the repository with the submodules
 RUN git clone --recursive https://github.com/marcelwa/fiction.git
