@@ -232,8 +232,18 @@ docker build .
 in the directory that contains the Dockerfile.
 
 This can take a while, as it downloads the necessary alpine image file, build tools, clones the repository, and
-builds fiction. Especially building the Z3 solver takes a while. If everything finishes successfully, you can
-fetch the ID of your newly created image via the command
+builds fiction. Especially building the Z3 solver takes a while. There is an optional build argument to run the make command 
+in parallel with `--build-arg NUMBER_OF_JOBS=<#>`, where `<#>` has to be replaced with the desired number of jobs. 
+If you don't provide an argument, it runs sequentially with only one job. What value to use depends on your system and how 
+much resources are allocated to Docker. Reasonable values that should run on most systems without problems are values between 2-8. 
+
+```sh
+docker build --build-arg NUMBER_OF_JOBS=<#> .
+```
+
+If your build fails, try using a lower value or the default setting. 
+
+If everything finishes successfully, you can fetch the ID of your newly created image via the command
 
 ```sh
 docker images

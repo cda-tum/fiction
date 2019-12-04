@@ -1,5 +1,8 @@
 FROM alpine:latest
 
+# Optional argument to run the "make" command in parallel with the specified NUMBER_OF_JOBS
+ARG NUMBER_OF_JOBS=1
+
 # Configure apt and install packages
     RUN apk add --no-cache \
     # Install cmake with its dependencies
@@ -19,7 +22,7 @@ WORKDIR /fiction
 RUN mkdir build \
     && cd build \
     && cmake .. \
-    && make
+    && make -j${NUMBER_OF_JOBS}
 
 # Automatically start fiction when started in interactive mode
 CMD ["./build/fiction"]
