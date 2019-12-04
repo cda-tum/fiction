@@ -1,8 +1,6 @@
 language: cpp
 
-cache: # see https://docs.travis-ci.com/user/caching/
-- directories:
-  - $HOME/.cache
+cache: ccache
 
 before_install:
   # fix linkage error with clang
@@ -18,16 +16,10 @@ script:
 # create build folder
 - mkdir build
 - cd build
-# restore cache if it exists
-- ([ ! -f $HOME/.cache/z3 ] || mv $HOME/.cache/z3 ./)
 # set compiler, python executable, and Z3 build verbosity
 - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPYTHON_EXECUTABLE=$(which $PY_CMD) -DBUILD_Z3_VERBOSE=TRUE ..
-# build Z3 (takes some time) and cache it
-- make -j2 z3
-- mkdir -p $HOME/.cache
-- mv -n z3/ $HOME/.cache/
 # build fiction
-- make -j2 fiction
+- make -j2
 # run integration tests
 - ./fiction -ef ../test/integration.fc -l log.json
 
