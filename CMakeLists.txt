@@ -53,7 +53,11 @@ set(Z3_DIR ${CMAKE_BINARY_DIR}/z3)
 
 if (UNIX)
     # Require Python interpreter
-    find_package(Python COMPONENTS Interpreter)
+    if (${CMAKE_VERSION} VERSION_LESS "3.12.0")
+        find_package(PythonInterp)  # deprecated since CMake 3.12, but works far better
+    else ()
+        find_package(Python COMPONENTS Interpreter)
+    endif ()
     # Add option to compile Z3 with verbose output
     option(BUILD_Z3_VERBOSE "Output status and warnings during Z3 build" OFF)
     # Use /dev/null to silence Z3. Not elegant but efficient
@@ -67,7 +71,7 @@ if (UNIX)
         set(Z3_LIB_FLAG --staticlib)
         set(Z3_LINK_TARGET libz3.a)
     else ()
-         set(Z3_LINK_TARGET libz3.so)
+        set(Z3_LINK_TARGET libz3.so)
     endif ()
 
     # include and library paths
