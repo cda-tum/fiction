@@ -166,6 +166,50 @@ The `mockturtle` library is also used to provide functionality for generating ne
 See the section about [logic networks](#circuit-specifications-in-terms-of-logic-networks) for more information about network
 generation and manipulation.
 
+## Docker
+
+Docker can be used to build an image to run *fiction* or to use it for development purposes on Windows and Linux. Make sure you have [Docker](https://www.docker.com/) installed and if you are on Windows, that you switched to Linux containers.
+
+If Docker is set up correctly you can download the [Dockerfile](https://github.com/marcelwa/fiction/blob/master/Dockerfile) and build the image, which automatically clones the repository and builds fiction. After the download, change to the directory which contains the Dockerfile and build it with 
+
+```sh
+docker build .
+```
+
+This can take a while, as it downloads the necessary alpine image file, build tools, clones the repository and builds fiction. Especially building z3 can take a while. If everything finishes successfully, you can get the ID of your newly created image with the command
+
+```sh
+docker images
+```
+
+Then you can run your image interactively with the following command, where {Image-ID} has to be replaced with your ID.
+
+```sh
+docker run -it {Image-ID}
+```
+This starts the image in a new container and automatically launches *fiction*, which waits for commands. You can quit with the command `quit`. If you don't want to automatically start *fiction* and instead connect via shell, use the following command
+
+```sh
+docker run -it {Image-ID} /bin/sh
+```
+
+You will be in the directory `/fiction` which contains the git repository and in the directory `fiction/build` are all build files and the *fiction* executable. 
+
+Once the container is created, you shouldn't run the image every time you use it, since this always creates a new container. Instead, just reuse the already created container. You can see your docker containers with the command
+
+```sh
+docker ps -a
+```
+And then start a container and attach to it with the command
+
+```sh
+docker start -ai {Container-ID}
+```
+
+Depending on what `run` command you used, this may or may not automatically start *fiction*. You can use the same parameter with `docker start` as with `docker run` to switch between shell and *fiction*.
+
+You can also use the container for development purposes, which depends on how you are used to develop with containers. One way would be to use Visual Studio Code with the Remote-Containers extension. You can either attach Visual Studio Code to an already running container, if you used the previous steps (make sure the container is running, to do this check if the container is listed when you enter `docker ps`, if not, start it first with `docker start {Container-ID}`) or you can let Visual Studio Code build its own container. For further information, look at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).
+
 ## Building process
 
 Git, g++, cmake and the Boost libraries are necessary in order to build *fiction*. Since a Python interpreter and
