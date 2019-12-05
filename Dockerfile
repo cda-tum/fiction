@@ -12,7 +12,7 @@ ARG NUMBER_OF_JOBS=1
     # Install packages needed to build fiction
         git g++ cmake boost-dev python readline-dev
 
-# Clone the repository with the submodules
+# Clone the repository including submodules
 RUN git clone --recursive https://github.com/marcelwa/fiction.git
 
 # Create fiction directory in root
