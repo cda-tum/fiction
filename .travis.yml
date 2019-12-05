@@ -17,7 +17,7 @@ before_script:
 
 script:
 # create build folder
-- mkdir build
+- mkdir -p build
 - cd build
 # set compiler, python executable, and Z3 build verbosity
 - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPYTHON_EXECUTABLE=$(which $PY_CMD) -DBUILD_Z3_VERBOSE=TRUE ..
