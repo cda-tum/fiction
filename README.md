@@ -240,10 +240,7 @@ docker build --build-arg NUMBER_OF_JOBS=<#> .
 ```
 where `<#>` is the desired maximum number of jobs. Which value is prudent to use depends on your system and the
 resources allocated by Docker. Reasonable values that should run on most systems without problems are values
-between `2` and `8`.  If your build fails, try using a lower value or the default setting. 
-where `<#>` is the desired maximum number of jobs.
-Which value is prudent to use depends on your system and the resources allocated by Docker. Reasonable values that
-should run on most systems without problems are values between `2` and `8`. 
+between `2` and `8`.  If your build fails, try using a lower value or the default setting.
 
 If everything finishes successfully, you can fetch the ID of your newly created image via the command
 
