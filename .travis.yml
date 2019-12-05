@@ -32,9 +32,6 @@ matrix:
     compiler: gcc
     addons:
       apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - boost-latest
         packages:
           - libboost-all-dev
     
@@ -45,8 +42,5 @@ matrix:
     compiler: clang
     addons:
       apt:
-        sources:
-          - ubuntu-toolchain-r-test
-          - boost-latest
         packages:
           - libboost-all-dev
