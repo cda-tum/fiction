@@ -3,7 +3,7 @@ language: cpp
 cache:
   directories:
     # cache Z3 build
-    - z3/
+    - build/z3/
 
 before_install:
   # fix linkage error with clang
