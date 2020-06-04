@@ -600,7 +600,7 @@ void exact::smt_handler::global_synchronization() noexcept
     {
         for (const auto& t : check_point->added_tiles)
         {
-            if (t[X] > layout->num_clocks() - 1 || t[Y] > layout->num_clocks() - 1)
+            if (t[X] > layout->num_clocks() - 1u || t[Y] > layout->num_clocks() - 1u)
                 solver->add(not get_tv(t, _v));
         }
     };

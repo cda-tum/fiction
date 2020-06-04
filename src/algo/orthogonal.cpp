@@ -16,15 +16,19 @@ orthogonal::orthogonal(logic_network_ptr ln, const unsigned n, const bool io, co
 
 physical_design::pd_result orthogonal::operator()()
 {
+    nlohmann::json log{};
+
     if (!network->is_AOIG())
     {
         std::cout << "[e] logic network has to be an AOIG" << std::endl;
-        return pd_result{false, nlohmann::json{{"runtime (s)", 0.0}}};
+        log["runtime (s)"] = 0.0;
+        return pd_result{false, log};
     }
     if (network->operation_count(operation::F1O3) > 0)
     {
         std::cout << "[e] 3-output fan-outs cannot be handled" << std::endl;
-        return pd_result{false, nlohmann::json{{"runtime (s)", 0.0}}};
+        log["runtime (s)"] = 0.0;
+        return pd_result{false, log};
     }
 
     mockturtle::stopwatch<>::duration time{0};
@@ -40,7 +44,8 @@ physical_design::pd_result orthogonal::operator()()
         orthogonal_embedding(rbColoring, jDFS);
     }  // stopwatch stops here
 
-    return pd_result{true, nlohmann::json{{"runtime (s)", mockturtle::to_seconds(time)}}};
+    log["runtime (s)"] = mockturtle::to_seconds(time);
+    return pd_result{true, log};
 }
 
 orthogonal::jdfs_ordering orthogonal::jdfs_order() const

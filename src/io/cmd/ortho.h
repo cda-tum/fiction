@@ -108,7 +108,7 @@ namespace alice
         /**
          * Resulting logging information.
          */
-        nlohmann::json pd_result;
+        nlohmann::json pd_result{};
 
         /**
          * Reset all flags. Necessary for some reason... alice bug?
