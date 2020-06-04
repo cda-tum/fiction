@@ -24,7 +24,7 @@ script:
 # build fiction
 - make -j2
 # run integration tests
-- ./fiction -ef ../test/integration.fc -l log.json
+- ./fiction -ef ../test/integration.fc
 
 matrix:
  include:
