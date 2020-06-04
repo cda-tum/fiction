@@ -20,7 +20,7 @@ clear
 
 read ../benchmarks/ISCAS85/c1355.v
 ps -n
-ortho
+ortho -i
 energy
 ps -g
 cell
