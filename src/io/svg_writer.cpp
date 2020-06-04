@@ -11,55 +11,55 @@ namespace svg
         // Collects ALL tile-descriptions
         std::stringstream tile_descriptions{};
 
-        // Used for generating tile-descriptions with information about the tile's coordinates and clockzone
+        // Used for generating tile-descriptions with information about the tile's coordinates and clock zone
         // It is needed because cells may not be in "tile-order" when read from cell-layout
         coord_to_tile_mapping coord_to_tile{};
         coord_to_cell_list_mapping coord_to_cells{};
         coord_to_latch_mapping coord_to_latch_tile{};
         coord_to_cell_list_mapping coord_to_latch_cells{};
 
-        // Used to determine the color of cells, tiles and text based on its clockzone
+        // Used to determine the color of cells, tiles and text based on its clock zone
         std::vector<std::string>
-            cell_colors{{clockzone_1_cell, clockzone_2_cell, clockzone_3_cell, clockzone_4_cell}},
-            tile_colors{{clockzone_1_tile, clockzone_2_tile, clockzone_3_tile, clockzone_4_tile}},
-            text_colors{{clockzone_12_text, clockzone_12_text, clockzone_34_text, clockzone_34_text}};
+            cell_colors{{clock_zone_1_cell, clock_zone_2_cell, clock_zone_3_cell, clock_zone_4_cell}},
+            tile_colors{{clock_zone_1_tile, clock_zone_2_tile, clock_zone_3_tile, clock_zone_4_tile}},
+            text_colors{{clock_zone_12_text, clock_zone_12_text, clock_zone_34_text, clock_zone_34_text}};
 
         // Adds all non-empty cells from the layout to their correct tiles; it generates the "body"
         // of all the tile-descriptions to be used later
         for (const auto& c : fcl->cells() | iter::filterfalse([fcl](const fcn_cell_layout::cell& _c)
                                                               { return fcl->is_free_cell(_c); }))
         {
-            std::size_t clockzone = *fcl->cell_clocking(c);
-            auto tile_coords = std::make_pair(static_cast<std::size_t>(ceil(c[X] / fcl->get_library()->gate_x_size())),
-                                              static_cast<std::size_t>(ceil(c[Y] / fcl->get_library()->gate_y_size())));
+            auto clock_zone = *fcl->cell_clocking(c);
+            auto tile_coords = std::make_pair(static_cast<coord_t>(ceil(c[X] / fcl->get_library()->gate_x_size())),
+                                              static_cast<coord_t>(ceil(c[Y] / fcl->get_library()->gate_y_size())));
 
-            std::size_t latch_delay = fcl->get_latch(c);
+            auto latch_delay = fcl->get_latch(c);
             std::string current_cells;
 
             if (latch_delay)
             {
-                if (auto it = coord_to_latch_cells.find(tile_coords); it != coord_to_latch_cells.end())
+                if (auto latch_it = coord_to_latch_cells.find(tile_coords); latch_it != coord_to_latch_cells.end())
                 {
-                    current_cells = it->second;
+                    current_cells = latch_it->second;
                 }
                 else
                 {
                     // If this is called, then there is no tile for the current cell yet
                     // It also makes sure that all required tiles are created
-                    coord_to_latch_tile[tile_coords] = {latch, clockzone, latch_delay};
+                    coord_to_latch_tile[tile_coords] = {latch, clock_zone, latch_delay};
                 }
             }
             else
             {
-                if (auto it = coord_to_cells.find(tile_coords); it != coord_to_cells.end())
+                if (auto cell_it = coord_to_cells.find(tile_coords); cell_it != coord_to_cells.end())
                 {
-                    current_cells = it->second;
+                    current_cells = cell_it->second;
                 }
                 else
                 {
                     // If this is called, then there is no tile for the current cell yet
                     // It also makes sure that all required tiles are created
-                    coord_to_tile[tile_coords] = {tile, clockzone};
+                    coord_to_tile[tile_coords] = {tile, clock_zone};
                 }
             }
 
@@ -71,7 +71,7 @@ namespace svg
                     break;
                 case fcn::NORMAL_CELL:
                 {
-                    cell_color = latch_delay ? clockzone_latch_cell : cell_colors[clockzone];
+                    cell_color = latch_delay ? clock_zone_latch_cell : cell_colors[clock_zone];
                     if (simple)
                     {
                         cell_description = simple_cell;
@@ -127,8 +127,8 @@ namespace svg
 
 
             // Represent the x- and y-coordinates inside the c's tile
-            std::size_t in_tile_x = c[X] % fcl->get_library()->gate_x_size();
-            std::size_t in_tile_y = c[Y] % fcl->get_library()->gate_y_size();
+            coord_t in_tile_x = c[X] % fcl->get_library()->gate_x_size();
+            coord_t in_tile_y = c[Y] % fcl->get_library()->gate_y_size();
 
             // Current cell-description can now be appended to the description of all cells in the current tile
             if (latch_delay)
@@ -160,11 +160,11 @@ namespace svg
             double x_pos = starting_offset_tile_x + x * tile_distance;
             double y_pos = starting_offset_tile_y + y * tile_distance;
 
-            descr = fmt::format(descr, x_pos, y_pos, tile_colors[czone], cell_descriptions,
-                                simple ? "" : text_colors[czone],
-                                simple ? "" : std::to_string(czone + 1));
+            auto c_descr = fmt::format(descr, x_pos, y_pos, tile_colors[czone], cell_descriptions,
+                                       simple ? "" : text_colors[czone],
+                                       simple ? "" : std::to_string(czone + 1));
 
-            tile_descriptions << descr;
+            tile_descriptions << c_descr;
         }
 
         // Add the descriptions of latch-tiles to the whole image
@@ -188,8 +188,8 @@ namespace svg
             tile_descriptions << t_descr;
         }
 
-        std::size_t length_x = fcl->x() / fcl->get_library()->gate_x_size();
-        std::size_t length_y = fcl->y() / fcl->get_library()->gate_y_size();
+        coord_t length_x = fcl->x() / fcl->get_library()->gate_x_size();
+        coord_t length_y = fcl->y() / fcl->get_library()->gate_y_size();
 
         double viewbox_x = 2 * viewbox_distance + length_x * tile_distance;
         double viewbox_y = 2 * viewbox_distance + length_y * tile_distance;

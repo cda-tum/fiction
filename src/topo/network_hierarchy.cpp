@@ -32,7 +32,7 @@ void network_hierarchy::set_level(const logic_network::vertex v, const level l) 
 
 network_hierarchy::level network_hierarchy::get_level(const logic_network::vertex v) const noexcept
 {
-    if (auto it = l_map.find(v); it != l_map.end())
+    if (auto it = l_map.find(v); it != l_map.cend())
     {
         return it->second;
     }
@@ -52,7 +52,7 @@ void network_hierarchy::set_inv_level(const logic_network::vertex v, const level
 
 network_hierarchy::level network_hierarchy::get_inv_level(const logic_network::vertex v) const noexcept
 {
-    if (auto it = il_map.find(v); it != il_map.end())
+    if (auto it = il_map.find(v); it != il_map.cend())
     {
         return it->second;
     }
@@ -78,7 +78,7 @@ logic_network::vertex network_hierarchy::subdivide_edge(const logic_network::edg
 
 std::optional<logic_network::edge> network_hierarchy::get_balance_edge(const logic_network::vertex v) const noexcept
 {
-    if (auto it = b_map.find(v); it != b_map.end())
+    if (auto it = b_map.find(v); it != b_map.cend())
     {
         return it->second;
     }
@@ -102,7 +102,7 @@ void network_hierarchy::balance_paths() noexcept
             });
 
     // subdivide them
-    std::for_each(unbalanced.begin(), unbalanced.end(),
+    std::for_each(unbalanced.cbegin(), unbalanced.cend(),
             [this](auto& e)
             {
                 auto level_diff = static_cast<long int>(get_level(network->target(e))) -
@@ -131,11 +131,11 @@ void network_hierarchy::unify_inv_input_ranks() noexcept
 
 void network_hierarchy::store_balance_edge(const logic_network::vertex v, const logic_network::edge& e) noexcept
 {
-    if (auto it_s = b_map.find(network->source(e)); it_s != b_map.end())
+    if (auto it_s = b_map.find(network->source(e)); it_s != b_map.cend())
     {
         b_map[v] = it_s->second;
     }
-    else if (auto it_t = b_map.find(network->target(e)); it_t != b_map.end())
+    else if (auto it_t = b_map.find(network->target(e)); it_t != b_map.cend())
     {
         b_map[v] = it_t->second;
     }
@@ -157,20 +157,21 @@ void network_hierarchy::levelize() noexcept
             jdfs = [&](const logic_network::vertex _v)
     {
         auto iav = network->inv_adjacent_vertices(_v, true);
+        const std::vector<logic_network::vertex> iavv(iav.begin(), iav.end());
         // if all predecessors are yet discovered
-        if (std::all_of(iav.begin(), iav.end(), is_discovered))
+        if (std::all_of(iavv.begin(), iavv.end(), is_discovered))
         {
             discovered[_v] = true;
 
             // determine predecessor's maximum level
-            auto pre_l = std::max_element(iav.begin(), iav.end(),
+            auto pre_l = std::max_element(iavv.cbegin(), iavv.cend(),
                                           [this](const logic_network::vertex _v1, const logic_network::vertex _v2)
                                           {
                                               return get_level(_v1) < get_level(_v2);
                                           });
 
             // if there are no predecessors, level of current vertex is 0, else it is one higher than theirs
-            set_level(_v, pre_l != iav.end() ? std::max(get_level(_v), get_level(*pre_l) + 1u) : 0u);
+            set_level(_v, pre_l != iavv.cend() ? std::max(get_level(_v), get_level(*pre_l) + 1u) : 0u);
 
             for (auto&& av : network->adjacent_vertices(_v, true) | iter::filterfalse(is_discovered))
                 jdfs(av);
@@ -191,20 +192,21 @@ void network_hierarchy::levelize() noexcept
             inv_jdfs = [&](const logic_network::vertex _v)
     {
         auto av = network->adjacent_vertices(_v, true);
+        const std::vector<logic_network::vertex> avv(av.begin(), av.end());
         // if all predecessors are yet discovered
-        if (std::all_of(av.begin(), av.end(), is_inv_discovered))
+        if (std::all_of(avv.cbegin(), avv.cend(), is_inv_discovered))
         {
             inv_discovered[_v] = true;
 
             // determine successor's maximum level
-            auto post_l = std::max_element(av.begin(), av.end(),
+            auto post_l = std::max_element(avv.cbegin(), avv.cend(),
                                           [this](const logic_network::vertex _v1, const logic_network::vertex _v2)
                                           {
                                               return get_inv_level(_v1) < get_inv_level(_v2);
                                           });
 
             // if there are no successors, level of current vertex is 0, else it is one higher than theirs
-            set_inv_level(_v, post_l != av.end() ? std::max(get_inv_level(_v), get_inv_level(*post_l) + 1u) : 0u);
+            set_inv_level(_v, post_l != avv.cend() ? std::max(get_inv_level(_v), get_inv_level(*post_l) + 1u) : 0u);
 
             for (auto&& iav : network->inv_adjacent_vertices(_v, true) | iter::filterfalse(is_inv_discovered))
                 inv_jdfs(iav);

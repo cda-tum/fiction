@@ -24,7 +24,7 @@ public:
     /**
      * Levels are numbers of ranks.
      */
-    using level = std::size_t;
+    using level = uint32_t;
     /**
      * Standard constructor. Creates a network hierarchy from the given pointer to a logic_network ln. Furthermore, it
      * can be specified whether primary inputs/outputs and constants should be taken into account for all further
@@ -35,7 +35,7 @@ public:
      * @param store_original_edges Indicates that for each inserted balance vertex, its original subdivided edge should
      *                             be stored so that it can be accessed later.
      */
-    network_hierarchy(logic_network_ptr ln, const bool store_original_edges = true) noexcept;
+    explicit network_hierarchy(logic_network_ptr ln, const bool store_original_edges = true) noexcept;
     /**
      * Returns the height of the hierarchy, i.e. the highest stored level value.
      *

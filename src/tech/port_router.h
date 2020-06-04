@@ -39,11 +39,11 @@ public:
         /**
          * Standard constructor.
          */
-        port(std::size_t x, std::size_t y) : x{x}, y{y} {}
+        port(coord_t x, coord_t y) : x{x}, y{y} {}
         /**
          * Positions.
          */
-        std::size_t x, y;
+        coord_t x, y;
         /**
          * Comparator for set insertion.
          *

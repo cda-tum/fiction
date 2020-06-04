@@ -20,11 +20,11 @@ script:
 - mkdir -p build
 - cd build
 # set compiler, python executable, and Z3 build verbosity
-- cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPYTHON_EXECUTABLE=$(which $PY_CMD) -DBUILD_Z3_VERBOSE=TRUE ..
+- cmake -DCMAKE_CXX_COMPILER=$COMPILER -DPYTHON_EXECUTABLE=$(which $PY_CMD) -DBUILD_Z3_VERBOSE=TRUE -DENABLE_PROGRESS_BARS=OFF ..
 # build fiction
 - make -j2
 # run integration tests
-- ./fiction -ef ../test/integration.fc -l log.json
+- ./fiction -ef ../test/integration.fc
 
 matrix:
  include:

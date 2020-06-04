@@ -10,6 +10,9 @@ namespace qca
     {
         std::ofstream file(filename, std::ofstream::out);
 
+        if (!file.is_open())
+            throw std::ofstream::failure("could not open file");
+
         std::vector<fcn_cell_layout::cell> via_layer_cells{};
 
         auto write_cell = [&](const fcn_cell_layout::cell cell) -> void

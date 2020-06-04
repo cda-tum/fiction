@@ -38,7 +38,7 @@ namespace fcn
      * - QCA: 5 x 5
      * - iNML: 4 x 4
      */
-    enum class tile_size : std::size_t { /* THREE_X_THREE = 3u, */ FOUR_X_FOUR = 4u, FIVE_X_FIVE = 5u };
+    enum class tile_size : uint8_t { /* THREE_X_THREE = 3u, */ FOUR_X_FOUR = 4u, FIVE_X_FIVE = 5u };
 }
 
 #endif //FICTION_FCN_TECHNOLOGY_H

@@ -34,9 +34,11 @@ void fcn_cell_layout::clean_up_topolinano() noexcept
                         if (get_cell_type(s) != fcn::inml::INVERTER_MAGNET)
                         {
                             assign_cell_type(s, get_cell_type(hc));
+                            assign_cell_mode(s, get_cell_mode(hc));
                             assign_cell_name(s, get_cell_name(hc));
                         }
                         assign_cell_type(hc, fcn::EMPTY_CELL);
+                        assign_cell_mode(hc, fcn::cell_mode::NORMAL);
                         assign_cell_name(hc, "");
                     }
 
@@ -58,8 +60,10 @@ void fcn_cell_layout::clean_up_topolinano() noexcept
                     {
                         const auto n = north(hc);
                         assign_cell_type(n, get_cell_type(hc));
+                        assign_cell_mode(n, get_cell_mode(hc));
                         assign_cell_name(n, get_cell_name(hc));
                         assign_cell_type(hc, fcn::EMPTY_CELL);
+                        assign_cell_mode(hc, fcn::cell_mode::NORMAL);
                         assign_cell_name(hc, "");
                     }
 
@@ -233,7 +237,11 @@ void fcn_cell_layout::cut_optimization() noexcept
         }
 
         for (const auto& _c : cut)
+        {
             assign_cell_type(_c, fcn::EMPTY_CELL);
+            assign_cell_mode(_c, fcn::cell_mode::NORMAL);
+            assign_cell_name(_c, "");
+        }
 
         return true;
     };
@@ -247,8 +255,14 @@ void fcn_cell_layout::cut_optimization() noexcept
                 if (auto source = cell{x, y, GROUND}; !is_free_cell(source))
                 {
                     auto target = cell{x - library->gate_x_size(), y, GROUND};
+                    // copy cell to new position
                     assign_cell_type(target, get_cell_type(source));
+                    assign_cell_mode(target, get_cell_mode(source));
+                    assign_cell_name(target, get_cell_name(source));
+                    // remove cell from old position
                     assign_cell_type(source, fcn::EMPTY_CELL);
+                    assign_cell_mode(source, fcn::cell_mode::NORMAL);
+                    assign_cell_name(source, "");
                 }
             }
         }
@@ -260,7 +274,7 @@ void fcn_cell_layout::cut_optimization() noexcept
         cut_found = false;
         for (auto&& y : iter::range(y()))
         {
-            for (std::size_t x = 0u; x < this->x(); ++x)
+            for (coord_t x = 0u; x < this->x(); ++x)
             {
                 if (auto c = find_cut_wire(cell{x, y, GROUND}, false); c)
                 {

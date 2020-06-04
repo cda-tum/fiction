@@ -90,9 +90,12 @@ namespace alice
     }
 
     template<>
-    bool can_show<logic_network_ptr>(std::string& extension, [[maybe_unused]] command& cmd)
+    bool can_show<logic_network_ptr>(std::string& extension, command& cmd)
     {
         extension = "dot";
+
+        cmd.add_flag("--simple,-s", "Less detailed visualization "
+                                    "(structural information only)")->group("logic_network (-n) / cell_layout (-c)");
 
         return true;
     }
@@ -102,7 +105,14 @@ namespace alice
     {
         try
         {
-            element->write_network(os);
+            if (cmd.is_set("simple"))
+            {
+                element->write_simple_dot(os);
+            }
+            else
+            {
+                element->write_dot(os);
+            }
         }
         catch (const std::invalid_argument& e)
         {
@@ -138,7 +148,6 @@ namespace alice
     {
         auto area = layout->x() * layout->y();
         auto bb = layout->determine_bounding_box();
-        auto [slow, fast] = layout->calculate_energy();
         auto gate_tiles = layout->gate_count();
         auto wire_tiles = layout->wire_count();
         auto crossings  = layout->crossing_count();
@@ -167,13 +176,7 @@ namespace alice
             {"crossings", crossings},
             {"latches", layout->latch_count()},
             {"critical path", cp},
-            {"throughput", "1/" + std::to_string(tp)},
-            {"energy (meV, QCA)",
-             {
-                {"slow (25 GHz)", slow},
-                {"fast (100 GHz)", fast}
-             }
-            }
+            {"throughput", "1/" + std::to_string(tp)}
         };
     }
 
@@ -226,12 +229,9 @@ namespace alice
     }
 
     template<>
-    bool can_show<fcn_cell_layout_ptr>(std::string& extension, command& cmd)
+    bool can_show<fcn_cell_layout_ptr>(std::string& extension, [[maybe_unused]] command& cmd)
     {
         extension = "svg";
-
-        cmd.add_flag("--simple,-s", "Less detailed visualization "
-                                    "(recommended for large layouts)")->group("cell_layout (-c)");
 
         return true;
     }

@@ -29,7 +29,7 @@ namespace alice
          */
         explicit check_command(const environment::ptr& env)
                 :
-                command(env, "Performs various design rule checks on the current gate layout in store.\n"
+                command(env, "Performs various design rule checks on the current gate layout in store. "
                              "A full report can be logged and a summary is printed to standard output.")
         {
             add_option("--wire_limit,-w", wire_limit,

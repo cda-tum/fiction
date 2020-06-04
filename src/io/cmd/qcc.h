@@ -29,7 +29,7 @@ namespace alice
          */
         explicit qcc_command(const environment::ptr& env)
                 :
-                command(env, "Generates a ToPoliNano/MagCAD component file for the current iNML cell layout in store.\n"
+                command(env, "Generates a ToPoliNano/MagCAD component file for the current iNML cell layout in store. "
                              "ToPoliNano can reuse the component in hierarchical layouts while MagCAD is able to "
                              "perform physical simulations.")
         {

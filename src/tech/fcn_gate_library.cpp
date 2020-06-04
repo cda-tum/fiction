@@ -12,8 +12,8 @@ fcn_gate_library::fcn_gate_library(std::string&& name, fcn_gate_layout_ptr&& fgl
         layout{std::move(fgl)},
         technology{tech},
         tile_size{size},
-        x_size{static_cast<std::size_t>(size)},
-        y_size{static_cast<std::size_t>(size)},
+        x_size{static_cast<gate_size_t>(size)},
+        y_size{static_cast<gate_size_t>(size)},
         empty_gate{fcn_gate(y_size, std::vector<fcn::cell_type>(x_size, fcn::EMPTY_CELL))},
         p_router{std::make_shared<port_router>(layout, tech, size)}
 {}
@@ -72,12 +72,12 @@ fcn::tile_size fcn_gate_library::get_tile_size() const noexcept
     return tile_size;
 }
 
-std::size_t fcn_gate_library::gate_x_size() const noexcept
+fcn_gate_library::gate_size_t fcn_gate_library::gate_x_size() const noexcept
 {
     return x_size;
 }
 
-std::size_t fcn_gate_library::gate_y_size() const noexcept
+fcn_gate_library::gate_size_t fcn_gate_library::gate_y_size() const noexcept
 {
     return y_size;
 }

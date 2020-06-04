@@ -142,42 +142,42 @@ fcn_gate qca_one_library::set_up_gate(const fcn_gate_layout::tile& t)
         {
             if (unused == layout::DIR_NE)
             {
-                if (layout->is_free_tile(layout->north(t)) || layout->closest_border(t) == layout::DIR_N)
+                if (layout->closest_border(t) == layout::DIR_N)
                     return mark_1_io(rotate_90(g), layout::DIR_N);
                 else
                     return mark_1_io(g, layout::DIR_E);
             }
             else if (unused == layout::DIR_NS)
             {
-                if (layout->is_free_tile(layout->north(t)) || layout->closest_border(t) == layout::DIR_N)
+                if (layout->closest_border(t) == layout::DIR_N)
                     return mark_1_io(rotate_180(g), layout::DIR_N);
                 else
                     return mark_1_io(g, layout::DIR_S);
             }
             else if (unused == layout::DIR_NW)
             {
-                if (layout->is_free_tile(layout->north(t)) || layout->closest_border(t) == layout::DIR_N)
+                if (layout->closest_border(t) == layout::DIR_N)
                     return mark_1_io(rotate_270(g), layout::DIR_N);
                 else
                     return mark_1_io(g, layout::DIR_W);
             }
             else if (unused == layout::DIR_EW)
             {
-                if (layout->is_free_tile(layout->east(t)) || layout->closest_border(t) == layout::DIR_E)
+                if (layout->closest_border(t) == layout::DIR_E)
                     return mark_1_io(rotate_270(g), layout::DIR_E);
                 else
                     return mark_1_io(rotate_90(g), layout::DIR_W);
             }
             else if (unused == layout::DIR_ES)
             {
-                if (layout->is_free_tile(layout->east(t)) || layout->closest_border(t) == layout::DIR_E)
+                if (layout->closest_border(t) == layout::DIR_E)
                     return mark_1_io(rotate_180(g), layout::DIR_E);
                 else
                     return mark_1_io(rotate_90(g), layout::DIR_S);
             }
             else if (unused == layout::DIR_SW)
             {
-                if (layout->is_free_tile(layout->south(t)) || layout->closest_border(t) == layout::DIR_S)
+                if (layout->closest_border(t) == layout::DIR_S)
                     return mark_1_io(rotate_270(g), layout::DIR_S);
                 else
                     return mark_1_io(rotate_180(g), layout::DIR_W);
@@ -218,7 +218,7 @@ fcn_gate qca_one_library::set_up_gate(const fcn_gate_layout::tile& t)
         case operation::NOT:
         {
             auto ports = p_router->get_ports(t, *layout->get_logic_vertex(t));
-            auto inv = inverter_map[ports];
+            auto inv = inverter_map.at(ports);
 
             if (layout->is_pi(t))
                 inv = mark_cell(inv, opposite(*ports.out.cbegin()), fcn::cell_mark::INPUT);
@@ -317,29 +317,25 @@ fcn_gate qca_one_library::set_up_gate(const fcn_gate_layout::tile& t)
         }
         case operation::PI:
         {
-            if (layout->is_tile_out_dir(t, layout::DIR_N))
-                return primary_input_port;
-            else if (layout->is_tile_out_dir(t, layout::DIR_E))
+            if (layout->is_tile_out_dir(t, layout::DIR_E))
                 return rotate_90(primary_input_port);
             else if (layout->is_tile_out_dir(t, layout::DIR_S))
                 return rotate_180(primary_input_port);
             else if (layout->is_tile_out_dir(t, layout::DIR_W))
                 return rotate_270(primary_input_port);
 
-            throw std::invalid_argument("PI has unsupported directions.");
+            return primary_input_port;
         }
         case operation::PO:
         {
-            if (layout->is_tile_inp_dir(t, layout::DIR_N))
-                return primary_output_port;
-            else if (layout->is_tile_inp_dir(t, layout::DIR_E))
+            if (layout->is_tile_inp_dir(t, layout::DIR_E))
                 return rotate_90(primary_output_port);
             else if (layout->is_tile_inp_dir(t, layout::DIR_S))
                 return rotate_180(primary_output_port);
             else if (layout->is_tile_inp_dir(t, layout::DIR_W))
                 return rotate_270(primary_output_port);
 
-            throw std::invalid_argument("PI has unsupported directions.");
+            return primary_output_port;
         }
         case operation::W:
         {
@@ -348,31 +344,31 @@ fcn_gate qca_one_library::set_up_gate(const fcn_gate_layout::tile& t)
             {
                 if (layout->is_pi(t))
                 {
-                    if (layout->is_tile_out_dir(t, layout::DIR_N))
-                        return primary_input_port;
-                    else if (layout->is_tile_out_dir(t, layout::DIR_E))
+                    if (layout->is_tile_out_dir(t, layout::DIR_E))
                         return rotate_90(primary_input_port);
                     else if (layout->is_tile_out_dir(t, layout::DIR_S))
                         return rotate_180(primary_input_port);
                     else if (layout->is_tile_out_dir(t, layout::DIR_W))
                         return rotate_270(primary_input_port);
+
+                    return primary_input_port;
                 }
                 else if (layout->is_po(t))
                 {
-                    if (layout->is_tile_inp_dir(t, layout::DIR_N))
-                        return primary_output_port;
-                    else if (layout->is_tile_inp_dir(t, layout::DIR_E))
+                    if (layout->is_tile_inp_dir(t, layout::DIR_E))
                         return rotate_90(primary_output_port);
                     else if (layout->is_tile_inp_dir(t, layout::DIR_S))
                         return rotate_180(primary_output_port);
                     else if (layout->is_tile_inp_dir(t, layout::DIR_W))
                         return rotate_270(primary_output_port);
+
+                    return primary_output_port;
                 }
                 else
                 {
                     auto v = *layout->get_logic_vertex(t);
                     auto ports = p_router->get_ports(t, v);
-                    wires.push_back(wire_map[ports]);
+                    wires.push_back(wire_map.at(ports));
                 }
             }
             else
@@ -380,7 +376,7 @@ fcn_gate qca_one_library::set_up_gate(const fcn_gate_layout::tile& t)
                 for (auto& e : layout->get_logic_edges(t))
                 {
                     auto ports = p_router->get_ports(t, e);
-                    wires.push_back(wire_map[ports]);
+                    wires.push_back(wire_map.at(ports));
                 }
             }
 

@@ -29,6 +29,10 @@ struct exact_pd_config
      */
     std::size_t fixed_size = 0ul;
     /**
+     * Number of threads to use for exploring the possible dimensions.
+     */
+    std::size_t num_threads = 1ul;
+    /**
      * Flag to indicate that a vertically shifted layout should be created. See fcn_layout::offset.
      */
     bool vertical_offset = false;
@@ -36,18 +40,10 @@ struct exact_pd_config
      * Flag to indicate that crossings should be used.
      */
     bool crossings = false;
-//    /**
-//     * Flag to indicate that multi-wires should be used.
-//     */
-//    bool multi_wires = false;
     /**
-     * Maximum number of crossing zones to use. If value is 0, the number of crossings is unbounded.
+     * Flag to indicate that the number of used crossing tiles should be minimized.
      */
-    unsigned crossings_limit = 0u;
-    /**
-     * Maximum number of wire elements to use to connect two operations on the grid.
-     */
-    unsigned wire_limit = 0u;
+    bool minimize_wires = false;
     /**
      * Flag to indicate that the number of used crossing tiles should be minimized.
      */
@@ -67,7 +63,7 @@ struct exact_pd_config
     /**
      * Flag to indicate that artificial clock latch delays should be used to balance paths.
      */
-    bool artificial_latches = false;
+    bool clock_latches = false;
     /**
      * Flag to indicate that only straight inverters should be used (instead of bend ones).
      */

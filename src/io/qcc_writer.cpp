@@ -66,6 +66,9 @@ namespace qcc
 
         std::ofstream file(filename, std::ofstream::out);
 
+        if (!file.is_open())
+            throw std::ofstream::failure("could not open file");
+
         file << fmt::format(VERSION_HEADER, fiction::VERSION, fiction::REPO);
         file << fmt::format(OPEN_QCA_COMPONENT, fcn::to_string(fcl->get_technology()), LIBRARY_NAME,
                 comp_name ? boost::filesystem::path{filename}.stem().string() : fcl->get_name(),

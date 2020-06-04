@@ -59,6 +59,10 @@ public:
      */
     using mig_nt = mockturtle::names_view<mockturtle::mig_network>;
     /**
+     * Granting equivalence_checker access to private data members.
+     */
+    friend class equivalence_checker;
+    /**
      * Standard constructor. Creates an empty logic network.
      */
     explicit logic_network() noexcept;
@@ -214,7 +218,7 @@ public:
     {
         auto logic_selector = [this, ios = ios](const vertex _v) -> bool
         {
-            return ios ? false : is_io(_v);
+            return !ios && is_io(_v);
         };
 
         return get_vertices() | iter::filterfalse(logic_selector);
@@ -229,9 +233,9 @@ public:
      */
     auto adjacent_vertices(const vertex v, const bool ios = false) const noexcept
     {
-        auto logic_selector = [this, ios = ios](const vertex _v)->bool
+        auto logic_selector = [this, ios = ios](const vertex _v) -> bool
         {
-            return ios ? false : is_io(_v);
+            return !ios && is_io(_v);
         };
 
         return get_adjacent_vertices(v) | iter::filterfalse(logic_selector);
@@ -246,9 +250,9 @@ public:
      */
     auto inv_adjacent_vertices(const vertex v, const bool ios = false) const noexcept
     {
-        auto logic_selector = [this, ios = ios](const vertex _v)->bool
+        auto logic_selector = [this, ios = ios](const vertex _v) -> bool
         {
-            return ios ? false : is_io(_v);
+            return !ios && is_io(_v);
         };
 
         return get_inv_adjacent_vertices(v) | iter::filterfalse(logic_selector);
@@ -274,7 +278,7 @@ public:
     {
         auto logic_selector = [this, ios = ios](const edge& _e) -> bool
         {
-            return ios ? false : is_io(source(_e)) || is_io(target(_e));
+            return !ios && (is_io(source(_e)) || is_io(target(_e)));
         };
 
         return get_edges() | iter::filterfalse(logic_selector);
@@ -289,9 +293,9 @@ public:
      */
     auto out_edges(const vertex v, const bool ios = false) const noexcept
     {
-        auto logic_selector = [this, ios = ios](const edge& _e)->bool
+        auto logic_selector = [this, ios = ios](const edge& _e) -> bool
         {
-            return ios ? false :is_io(target(_e));
+            return !ios && is_io(target(_e));
         };
 
         return get_out_edges(v) | iter::filterfalse(logic_selector);
@@ -306,9 +310,9 @@ public:
      */
     auto in_edges(const vertex v, const bool ios = false) const noexcept
     {
-        auto logic_selector = [this, ios = ios](const edge& _e)->bool
+        auto logic_selector = [this, ios = ios](const edge& _e) -> bool
         {
-            return ios ? false : is_io(source(_e));
+            return !ios && is_io(source(_e));
         };
 
         return get_in_edges(v) | iter::filterfalse(logic_selector);
@@ -432,7 +436,7 @@ public:
      * @param o Type of operation whose count is desired.
      * @return Number of operations of type o in the network.
      */
-    std::size_t operation_count(const operation o) const noexcept;
+    uint64_t operation_count(const operation o) const noexcept;
     /**
      * Checks whether the network only contains MAJ and NOT logic vertices. As non-logic vertices,
      * fan-outs, and auxiliary wire vertices are accepted as well.
@@ -522,7 +526,14 @@ public:
      *
      * @param os Channel into which the Graphviz representation should be written.
      */
-    void write_network(std::ostream& os = std::cout) noexcept;
+    void write_dot(std::ostream& os = std::cout) noexcept;
+    /**
+     * Writes a less detailed Graphviz (https://www.graphviz.org/) dot representation of the logic_network to the given
+     * ostream. Incorporates the logic function names.
+     *
+     * @param os Channel into which the Graphviz representation should be written.
+     */
+    void write_simple_dot(std::ostream& os = std::cout) noexcept;
 private:
     /**
      * Path name from which the logic_network was created.
@@ -552,7 +563,7 @@ private:
     /**
      * Counts the operations the network is composed of.
      */
-    std::vector<std::size_t> operation_counter;
+    std::vector<uint64_t> operation_counter;
     /**
      * Increases the operation counter of the given operation by 1.
      *

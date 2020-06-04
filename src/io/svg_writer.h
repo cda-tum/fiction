@@ -34,17 +34,17 @@ namespace svg
     constexpr const int starting_offset_latch_cell_y = -41;
 
     // Colors
-    constexpr const char *clockzone_1_cell = "86e291";
-    constexpr const char *clockzone_2_cell = "ffa5fa";
-    constexpr const char *clockzone_3_cell = "00c8bc";
-    constexpr const char *clockzone_4_cell = "ffffff";
-    constexpr const char *clockzone_latch_cell = "ffe33a";
-    constexpr const char *clockzone_1_tile = "ffffff";
-    constexpr const char *clockzone_2_tile = "bfbfbf";
-    constexpr const char *clockzone_3_tile = "7f7f7f";
-    constexpr const char *clockzone_4_tile = "3f3f3f";
-    constexpr const char *clockzone_12_text = "000000";
-    constexpr const char *clockzone_34_text = "ffffff";
+    constexpr const char *clock_zone_1_cell = "86e291";
+    constexpr const char *clock_zone_2_cell = "ffa5fa";
+    constexpr const char *clock_zone_3_cell = "00c8bc";
+    constexpr const char *clock_zone_4_cell = "ffffff";
+    constexpr const char *clock_zone_latch_cell = "ffe33a";
+    constexpr const char *clock_zone_1_tile = "ffffff";
+    constexpr const char *clock_zone_2_tile = "bfbfbf";
+    constexpr const char *clock_zone_3_tile = "7f7f7f";
+    constexpr const char *clock_zone_4_tile = "3f3f3f";
+    constexpr const char *clock_zone_12_text = "000000";
+    constexpr const char *clock_zone_34_text = "ffffff";
     constexpr const char *pi_cell = "008dc8";
     constexpr const char *po_cell = "e28686";
 
@@ -89,7 +89,7 @@ namespace svg
                                  "<text\n"
                                  "y=\"179.25412\"\n"
                                  "x=\"288.74234\"\n"
-                                 "style=\"font-style:normal;font-weight:normal;font-size:12.5px;line-height:125%;font-family:'Noto Sans';fill:#{4};stroke:none;\"\n"
+                                 "style=\"font-style:normal;font-weight:normal;font-size:14.5px;line-height:125%;font-family:'Noto Sans';fill:#{4};stroke:none;\"\n"
                                  "xml:space=\"preserve\"><tspan\n"
                                  "y=\"179.25412\"\n"
                                  "x=\"288.74234\">{5}</tspan></text>\n"
@@ -118,14 +118,14 @@ namespace svg
                                   "<text\n"
                                   "y=\"86.340652\"\n"
                                   "x=\"504.43588\"\n"
-                                  "style=\"font-style:normal;font-weight:normal;font-size:12.5px;line-height:125%;font-family:'Noto Sans';letter-spacing:0px;word-spacing:0px;fill:#{};fill-opacity:1;\"\n"
+                                  "style=\"font-style:normal;font-weight:normal;font-size:14.5px;line-height:125%;font-family:'Noto Sans';letter-spacing:0px;word-spacing:0px;fill:#{};fill-opacity:1;\"\n"
                                   "xml:space=\"preserve\"><tspan\n"
                                   "y=\"86.340652\"\n"
                                   "x=\"504.43588\">{}</tspan></text>\n"
                                   "<text\n"
                                   "y=\"178.27962\"\n"
                                   "x=\"596.48468\"\n"
-                                  "style=\"font-style:normal;font-weight:normal;font-size:12.5px;line-height:125%;font-family:'Noto Sans';letter-spacing:0px;word-spacing:0px;fill:#{};fill-opacity:1;\"\n"
+                                  "style=\"font-style:normal;font-weight:normal;font-size:14.5px;line-height:125%;font-family:'Noto Sans';letter-spacing:0px;word-spacing:0px;fill:#{};fill-opacity:1;\"\n"
                                   "xml:space=\"preserve\"><tspan\n"
                                   "y=\"178.27962\"\n"
                                   "x=\"596.48468\">{}</tspan></text>\n"
@@ -281,13 +281,13 @@ namespace svg
     /**
      * Alias for a tile coordinate.
      */
-    using coordinate = std::pair<std::size_t, std::size_t>;
+    using coordinate = std::pair<coord_t, coord_t>;
     /**
-     * Alias for an SVG description of a tile containing also its clockzone.
+     * Alias for an SVG description of a tile containing also its clock zone.
      */
-    using tile_description = std::pair<std::string, std::size_t>;
+    using tile_description = std::pair<std::string, fcn_clock::zone>;
     /**
-     * Maps coordinates of tiles to their string representation and their clockzone.
+     * Maps coordinates of tiles to their string representation and their clock zone.
      */
     using coord_to_tile_mapping = std::unordered_map<coordinate, tile_description, boost::hash<coordinate>>;
     /**
@@ -295,11 +295,11 @@ namespace svg
      */
     using coord_to_cell_list_mapping = std::unordered_map<coordinate, std::string, boost::hash<coordinate>>;
     /**
-     * Alias for an SVG description of a latch tile containing also its clockzone and its offset.
+     * Alias for an SVG description of a latch tile containing also its clock zone and its offset.
      */
-    using svg_latch = std::tuple<std::string, std::size_t, std::size_t>;
+    using svg_latch = std::tuple<std::string, fcn_clock::zone, fcn_layout::latch_delay>;
     /**
-     * Maps coordinates of latch tiles to tuples containing their string representation, their clockzone,
+     * Maps coordinates of latch tiles to tuples containing their string representation, their clock zone,
      * and their latch offset.
      */
     using coord_to_latch_mapping = std::unordered_map<coordinate, svg_latch, boost::hash<coordinate>>;

@@ -56,7 +56,7 @@ public:
      * @param tech Technology which should be used for this layout.
      * @param name Layout's name.
      */
-    fcn_cell_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocking,
+    fcn_cell_layout(const fcn_dimension_xyz& lengths, fcn_clocking_scheme clocking,
                     fcn::technology tech, const std::string& name) noexcept;
     /**
      * Standard constructor. Creates an FCN cell layout by the means of an array determining its size
@@ -69,7 +69,7 @@ public:
      * @param tech Technology which should be used for this layout.
      * @param Layout's name.
      */
-    fcn_cell_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme&& clocking,
+    fcn_cell_layout(const fcn_dimension_xy& lengths, fcn_clocking_scheme clocking,
                     fcn::technology tech, const std::string& name) noexcept;
     /**
      * Standard constructor. Creates an FCN cell layout from a gate library that is associated with a fcn_gate_layout.

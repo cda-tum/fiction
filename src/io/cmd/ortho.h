@@ -29,7 +29,7 @@ namespace alice
          */
         explicit ortho_command(const environment::ptr& env)
                 :
-                command(env, "Performs scalable placement and routing of the current logic network in store.\n"
+                command(env, "Performs scalable placement and routing of the current logic network in store. "
                              "An FCN layout that is not minimal will be found in reasonable runtime.")
         {
             add_option("--clock_numbers,-n", phases,
@@ -108,7 +108,7 @@ namespace alice
         /**
          * Resulting logging information.
          */
-        nlohmann::json pd_result;
+        nlohmann::json pd_result{};
 
         /**
          * Reset all flags. Necessary for some reason... alice bug?

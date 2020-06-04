@@ -29,7 +29,7 @@ class grid_graph
 {
     /**
      * Grid graph data structure. The template parameter determines its dimension while
-     * std::size_t is used to address vertices and edges.
+     * uint64_t is used to address vertices and edges.
      */
     using grid_container = boost::grid_graph<DIMENSIONS>;
 
@@ -73,7 +73,7 @@ public:
      *
      * @param lengths A DIMENSIONS-dimensional array that specifies sizes of each dimension in the grid.
      */
-    explicit grid_graph(const boost::array<std::size_t, DIMENSIONS>& lengths) noexcept
+    explicit grid_graph(const boost::array<uint64_t, DIMENSIONS>& lengths) noexcept
             :
             grid(std::make_unique<grid_container>(lengths))
     {}
@@ -83,9 +83,9 @@ public:
      *
      * @param lengths A DIMENSIONS-dimensional array that specifies sizes of each dimension in the grid.
      */
-    void resize_grid(boost::array<std::size_t, DIMENSIONS>&& lengths) noexcept
+    void resize_grid(const boost::array<uint64_t, DIMENSIONS>& lengths) noexcept
     {
-        grid = std::make_unique<grid_container>(std::move(lengths));
+        grid = std::make_unique<grid_container>(lengths);
     }
 
 
@@ -108,7 +108,7 @@ public:
      *
      * @return Number of dimensions, i.e. value of DIMENSIONS.
      */
-    std::size_t dimensions() const noexcept
+    uint64_t dimensions() const noexcept
     {
         return grid->dimensions();
     }
@@ -118,7 +118,7 @@ public:
      * @param dimension Dimension whose size is desired.
      * @return Size of dimension.
      */
-    num_vertices_t length(std::size_t dimension) const noexcept
+    num_vertices_t length(uint64_t dimension) const noexcept
     {
         return grid->length(dimension);
     }
@@ -130,7 +130,7 @@ public:
      * @param step Distance i.e. step size to take to reach next vertex.
      * @return Vertex found at given specifications.
      */
-    vertex_t next(const vertex_t& v, const std::size_t dimension, const unsigned long step = 1u) const noexcept
+    vertex_t next(const vertex_t& v, const uint64_t dimension, const unsigned long step = 1u) const noexcept
     {
         return grid->next(v, dimension, step);
     }
@@ -142,7 +142,7 @@ public:
      * @param step Distance i.e. step size to take to reach previous vertex.
      * @return Vertex found at given specifications.
      */
-    vertex_t previous(const vertex_t& v, const std::size_t dimension, const unsigned long step = 1u) const noexcept
+    vertex_t previous(const vertex_t& v, const uint64_t dimension, const unsigned long step = 1u) const noexcept
     {
         return grid->previous(v, dimension, step);
     }
@@ -361,8 +361,8 @@ public:
  * @param v Vertex to create a string representation for.
  * @return String representation of v.
  */
-template <std::size_t DIMENSIONS>
-std::string to_string(const boost::array<std::size_t, DIMENSIONS>& v)
+template <uint64_t DIMENSIONS>
+std::string to_string(const boost::array<uint64_t, DIMENSIONS>& v)
 {
     std::stringstream repr{};
     repr << "{";
@@ -384,8 +384,8 @@ std::string to_string(const boost::array<std::size_t, DIMENSIONS>& v)
  * @param v Vertex to write into os.
  * @return os after appending v.
  */
-template <std::size_t DIMENSIONS>
-std::ostream& operator<<(std::ostream& os, const boost::array<std::size_t, DIMENSIONS>& v)
+template <uint64_t DIMENSIONS>
+std::ostream& operator<<(std::ostream& os, const boost::array<uint64_t, DIMENSIONS>& v)
 {
     os << "{";
     for (auto i = 0u; i < DIMENSIONS; ++i)
@@ -406,9 +406,9 @@ std::ostream& operator<<(std::ostream& os, const boost::array<std::size_t, DIMEN
  * @param e Edge to write into os.
  * @return os after appending e.
  */
-template <std::size_t DIMENSIONS>
-std::ostream& operator<<(std::ostream& os, const std::pair<boost::array<std::size_t, DIMENSIONS>,
-                                                           boost::array<std::size_t, DIMENSIONS>>& e)
+template <uint64_t DIMENSIONS>
+std::ostream& operator<<(std::ostream& os, const std::pair<boost::array<uint64_t, DIMENSIONS>,
+                                                           boost::array<uint64_t, DIMENSIONS>>& e)
 {
     os << e.first << " -> " << e.second;
     return os;

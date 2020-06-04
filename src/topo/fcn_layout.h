@@ -16,29 +16,46 @@
 
 
 /**
- * Alias for boost::array needed for constructor call.
+ * Alias for a coordinate.
  */
-using fcn_dimension_xyz = boost::array<std::size_t, 3>;
+using coord_t = uint64_t;
 /**
  * Alias for boost::array needed for constructor call.
  */
-using fcn_dimension_xy = boost::array<std::size_t, 2>;
+using fcn_dimension_xyz = boost::array<coord_t, 3>;
+/**
+ * Alias for boost::array needed for constructor call.
+ */
+using fcn_dimension_xy = boost::array<coord_t, 2>;
+/**
+ * Alias for a layer.
+ */
+using layer_t = uint8_t;
 /**
  * Constant referring to ground layer.
  */
-constexpr const std::size_t GROUND = 0u;
+constexpr const layer_t GROUND = 0u;
 /**
  * Constant referring to x-dimension value of faces.
  */
-constexpr const std::size_t X = 0u;
+constexpr const layer_t X = 0u;
 /**
  * Constant referring to y-dimension value of faces.
  */
-constexpr const std::size_t Y = 1u;
+constexpr const layer_t Y = 1u;
 /**
  * Constant referring to z-dimension value of faces.
  */
-constexpr const std::size_t Z = 2u;
+constexpr const layer_t Z = 2u;
+/**
+ * Returns the area covered by a size specification.
+ *
+ * @tparam Dimension type.
+ * @param dim Layout size specification.
+ * @return X * Y.
+ */
+template <typename T>
+coord_t area(const T& dim) noexcept { return dim[X] * dim[Y]; }
 /**
  * Represents general layouts for Field-coupled Nanocomputing (FCN) devices on an arbitrary abstraction level.
  * Layouts are always 3-dimensional grid-like structures consisting of faces. Each face is addressed by a 3-tuple
@@ -73,11 +90,11 @@ public:
     /**
      * Alias for a face in ground layer. Since clocking is identical in all layers, third dimension can be neglected.
      */
-    using ground = boost::array<std::size_t, 2u>;
+    using ground = boost::array<coord_t, 2u>;
     /**
      * Alias for a number that represents delay of a latch face in clock phases (1/n clock cycles).
      */
-    using latch_delay = std::size_t;
+    using latch_delay = uint8_t;
     /**
      * An offset shifts the layout's faces either vertically or horizontally. While in a non-shifted layout,
      * face {0,1,0}'s adjacent face in eastern direction would be {1,1,0} for instance, in a vertically shifted
@@ -96,7 +113,7 @@ public:
      * @param clocking Clocking scheme defining possible data flow.
      * @param o Offset for face shift in vertical or horizontal direction.
      */
-    fcn_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocking, offset o = offset::NONE) noexcept;
+    fcn_layout(const fcn_dimension_xyz& lengths, fcn_clocking_scheme&& clocking, offset o = offset::NONE) noexcept;
     /**
      * Standard constructor. Creates an FCN layout by the means of an array determining its size
      * as well as a clocking scheme defining its data flow possibilities.
@@ -107,7 +124,7 @@ public:
      * @param clocking Clocking scheme defining possible data flow.
      * @param o Offset for face shift in vertical or horizontal direction.
      */
-    fcn_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme&& clocking, offset o = offset::NONE) noexcept;
+    fcn_layout(const fcn_dimension_xy& lengths, fcn_clocking_scheme&& clocking, offset o = offset::NONE) noexcept;
     /**
      * Standard constructor. Creates a FCN layout of size 2 x 2 x 2 with the given clocking scheme.
      * NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs.
@@ -145,7 +162,7 @@ public:
      * @param lengths 3-dimensional array defining sizes of each dimension (x, y, z) where z - 1 determines the number
      * of crossing layers.
      */
-    void resize(fcn_dimension_xyz&& lengths) noexcept;
+    void resize(const fcn_dimension_xyz& lengths) noexcept;
     /**
      * Resizes the layout to the dimensions given. The fcn_layout object will not be re-constructed by this
      * function! All maps and other attributes stay untouched.
@@ -157,7 +174,7 @@ public:
      *
      * @param lengths 2-dimensional array defining sizes of dimensions (x, y) where no crossing layer is given.
      */
-    void resize(fcn_dimension_xy&& lengths) noexcept;
+    void resize(const fcn_dimension_xy& lengths) noexcept;
     /**
      * Returns true iff f is located in an even numbered row.
      *
@@ -278,19 +295,19 @@ public:
      *
      * @return x-dimension.
      */
-    std::size_t x() const noexcept;
+    coord_t x() const noexcept;
     /**
      * Returns the layout's y-dimension.
      *
      * @return y-dimension.
      */
-    std::size_t y() const noexcept;
+    coord_t y() const noexcept;
     /**
      * Returns the layout's z-dimension.
      *
      * @return z-dimension.
      */
-    std::size_t z() const noexcept;
+    coord_t z() const noexcept;
     /**
      * Function alias for get_vertex using perfect forwarding and the name get_by_index to fit naming in fcn_layout.
      *
@@ -385,7 +402,7 @@ public:
      *
      * @return All faces in nth layer, i.e. where z-value == n.
      */
-    auto layer_n(const std::size_t n) const noexcept
+    auto layer_n(const layer_t n) const noexcept
     {
         return get_vertices() | iter::filter([n = n](const face& _f){return _f[Z] == n;});
     }
@@ -401,7 +418,7 @@ public:
      * @param n Layer from which the face should be sampled.
      * @return Randomly sampled face from layer n.
      */
-    face random_face(const std::size_t n) const noexcept;
+    face random_face(const layer_t n) const noexcept;
     /**
      * Function alias for distance with euclidean metric using perfect forwarding and the name euclidean_distance to fit
      * naming in fcn_layout.
@@ -433,7 +450,7 @@ public:
      *
      * @return Area of layout.
      */
-    std::size_t area() const noexcept;
+    coord_t area() const noexcept;
     /**
      * Returns the number of clock zones in this layout.
      *
@@ -550,7 +567,7 @@ public:
         /**
          * Standard constructor. Defines corner points and calculates size.
          */
-        bounding_box(std::size_t min_x, std::size_t min_y, std::size_t max_x, std::size_t max_y)
+        bounding_box(coord_t min_x, coord_t min_y, coord_t max_x, coord_t max_y)
                 :
                 min_x{min_x},
                 min_y{min_y},
@@ -563,18 +580,18 @@ public:
         /**
          * Corners of bounding box.
          */
-        const std::size_t min_x, min_y, max_x, max_y;
+        const coord_t min_x, min_y, max_x, max_y;
         /**
          * Size in x- and y-dimension.
          */
-        const std::size_t x_size, y_size;
+        const coord_t x_size, y_size;
 
         /**
          * Returns area of bounding box.
          *
          * @return x-size * y-size.
          */
-        std::size_t area() const noexcept
+        coord_t area() const noexcept
         {
             return x_size * y_size;
         }
@@ -586,6 +603,42 @@ public:
      * @return Bounding box.
      */
     virtual bounding_box determine_bounding_box() const noexcept = 0;
+    /**
+     * Returns whether the given face f is located at the layout's northern border where y is minimal.
+     * A bounding box object can be given to indicate that instead the check should be made based on that one.
+     *
+     * @param f Face to check for border location.
+     * @param bb Bonding box to use instead of layout dimensions.
+     * @return True iff f is located at the layout's or bb's northern border, false otherwise.
+     */
+    bool is_northern_border(const face& f, const std::optional<bounding_box>& bb = std::nullopt) const noexcept;
+    /**
+     * Returns whether the given face f is located at the layout's eastern border where x is maximal.
+     * A bounding box object can be given to indicate that instead the check should be made based on that one.
+     *
+     * @param f Face to check for border location.
+     * @param bb Bonding box to use instead of layout dimensions.
+     * @return True iff f is located at the layout's or bb's eastern border, false otherwise.
+     */
+    bool is_eastern_border(const face& f, const std::optional<bounding_box>& bb = std::nullopt) const noexcept;
+    /**
+     * Returns whether the given face f is located at the layout's southern border where y is maximal.
+     * A bounding box object can be given to indicate that instead the check should be made based on that one.
+     *
+     * @param f Face to check for border location.
+     * @param bb Bonding box to use instead of layout dimensions.
+     * @return True iff f is located at the layout's or bb's southern border, false otherwise.
+     */
+    bool is_southern_border(const face& f, const std::optional<bounding_box>& bb = std::nullopt) const noexcept;
+    /**
+     * Returns whether the given face f is located at the layout's western border where x is minimal.
+     * A bounding box object can be given to indicate that instead the check should be made based on that one.
+     *
+     * @param f Face to check for border location.
+     * @param bb Bonding box to use instead of layout dimensions.
+     * @return True iff f is located at the layout's or bb's western border, false otherwise.
+     */
+    bool is_western_border(const face& f, const std::optional<bounding_box>& bb = std::nullopt) const noexcept;
     /**
      * Returns whether the given face f is located at the layout borders where x or y are either minimal or maximal.
      * A bounding box object can be given to indicate that instead checks should be made based on that one.

@@ -16,15 +16,19 @@ orthogonal::orthogonal(logic_network_ptr ln, const unsigned n, const bool io, co
 
 physical_design::pd_result orthogonal::operator()()
 {
+    nlohmann::json log{};
+
     if (!network->is_AOIG())
     {
         std::cout << "[e] logic network has to be an AOIG" << std::endl;
-        return pd_result{false, nlohmann::json{{"runtime (s)", 0.0}}};
+        log["runtime (s)"] = 0.0;
+        return pd_result{false, log};
     }
     if (network->operation_count(operation::F1O3) > 0)
     {
         std::cout << "[e] 3-output fan-outs cannot be handled" << std::endl;
-        return pd_result{false, nlohmann::json{{"runtime (s)", 0.0}}};
+        log["runtime (s)"] = 0.0;
+        return pd_result{false, log};
     }
 
     mockturtle::stopwatch<>::duration time{0};
@@ -40,7 +44,8 @@ physical_design::pd_result orthogonal::operator()()
         orthogonal_embedding(rbColoring, jDFS);
     }  // stopwatch stops here
 
-    return pd_result{true, nlohmann::json{{"runtime (s)", mockturtle::to_seconds(time)}}};
+    log["runtime (s)"] = mockturtle::to_seconds(time);
+    return pd_result{true, log};
 }
 
 orthogonal::jdfs_ordering orthogonal::jdfs_order() const
@@ -81,7 +86,7 @@ orthogonal::red_blue_coloring orthogonal::find_rb_coloring(const jdfs_ordering& 
 
     const auto contrary = [](const rb_color _c){return _c == rb_color::RED ? rb_color::BLUE : rb_color::RED;};
 
-#if !(__WINDOWS__)
+#if (PROGRESS_BARS)
     // initialize a progress bar
     mockturtle::progress_bar coloring_bar{static_cast<uint32_t>(network->edge_count(io_ports)),
                                           "[i] pre-processing: |{0}|"};
@@ -114,7 +119,7 @@ orthogonal::red_blue_coloring orthogonal::find_rb_coloring(const jdfs_ordering& 
                 apply(ie, _c);
         }
 
-#if !(__WINDOWS__)
+#if (PROGRESS_BARS)
         // update progress
         coloring_bar(++bar_counter);
 #endif
@@ -137,6 +142,55 @@ orthogonal::red_blue_coloring orthogonal::find_rb_coloring(const jdfs_ordering& 
     return rb_coloring;
 }
 
+fcn_dimension_xy orthogonal::determine_layout_size(const red_blue_coloring& rb_coloring) const noexcept
+{
+    coord_t horizontal = 0ul, vertical = 0ul;
+
+    for (auto&& v : network->vertices(io_ports))
+    {
+        if (auto degree = network->in_degree(v, io_ports); degree == 0)
+        {
+            ++horizontal; ++vertical;
+        }
+        else if (degree == 1)
+        {
+            // incoming edge
+            auto in_e = *network->in_edges(v, io_ports).begin();
+            if (rb_coloring.at(in_e) == rb_color::RED)
+                ++horizontal;
+            else
+                ++vertical;
+        }
+        else if (degree == 2)
+        {
+            auto ep = network->in_edges(v, io_ports).begin();
+            // incoming edge 1
+            const auto e1 = *ep;
+            ++ep;
+            // incoming edge 2
+            const auto e2 = *ep;
+
+            // both edges are red
+            if (auto same_color = rb_coloring.at(e1) == rb_coloring.at(e2); same_color && rb_coloring.at(e1) == rb_color::RED)
+            {
+                ++horizontal;
+            }
+            // both edges are blue
+            else if (same_color && rb_coloring.at(e1) == rb_color::BLUE)
+            {
+                ++vertical;
+            }
+            // edges are differently colored
+            else
+            {
+                ++horizontal; ++vertical;
+            }
+        }
+    }
+
+    return {horizontal, vertical};
+}
+
 void orthogonal::elongate_ios() const noexcept
 {
     // elongate PIs
@@ -152,14 +206,18 @@ void orthogonal::elongate_ios() const noexcept
 
         auto new_pi = fcn_gate_layout::tile{0, pi[Y], GROUND};
         auto pi_x = pi[X];
+        auto out_dir = layout->get_tile_out_dirs(pi);
+
+        layout->assign_logic_edge(pi, e);
+        layout->assign_wire_inp_dir(pi, e, layout::DIR_W);
+        layout->assign_wire_out_dir(pi, e, out_dir);
 
         // place PI at the border
-        layout->clear_tile(pi);
         layout->assign_logic_vertex(new_pi, *v, true);
         layout->assign_tile_out_dir(new_pi, layout::DIR_E);
 
         // elongate wire respectively
-        for (auto i = 1ul; i <= pi_x; ++i)
+        for (auto i = 1ul; i <= pi_x - 1; ++i)
         {
             auto wire_tile = fcn_gate_layout::tile{i, pi[Y], GROUND};
             if (!layout->is_free_tile(wire_tile))
@@ -184,14 +242,18 @@ void orthogonal::elongate_ios() const noexcept
 
         auto new_po = fcn_gate_layout::tile{layout->x() - 1, po[Y], GROUND};
         auto po_x = po[X];
+        auto inp_dir = layout->get_tile_inp_dirs(po);
+
+        layout->assign_logic_edge(po, e);
+        layout->assign_wire_inp_dir(po, e, inp_dir);
+        layout->assign_wire_out_dir(po, e, layout::DIR_E);
 
         // place PO at the border
-        layout->clear_tile(po);
         layout->assign_logic_vertex(new_po, *v, false, true);
         layout->assign_tile_inp_dir(new_po, layout::DIR_W);
 
         // elongate wire respectively
-        for (auto i = po_x; i < layout->x() - 1; ++i)
+        for (auto i = po_x + 1; i < layout->x() - 1; ++i)
         {
             auto wire_tile = fcn_gate_layout::tile{i, po[Y], GROUND};
             if (!layout->is_free_tile(wire_tile))
@@ -208,14 +270,13 @@ void orthogonal::orthogonal_embedding(red_blue_coloring& rb_coloring, const jdfs
 {
     // create layout with x = v, y = v, where v is the number of vertices in the network
     // therefore, the layout needs to be shrunk to fit in the end
-    layout = std::make_shared<fcn_gate_layout>(fcn_dimension_xy{network->vertex_count(io_ports),
-                                                                network->vertex_count(io_ports)},
+    layout = std::make_shared<fcn_gate_layout>(determine_layout_size(rb_coloring),
                                                phases == 3 ? std::move(twoddwave_3_clocking) :
                                                              std::move(twoddwave_4_clocking), network);
     // cache map storing information about where vertices were placed on the layout
     std::unordered_map<logic_network::vertex, fcn_gate_layout::tile> pos;
 
-#if !(__WINDOWS__)
+#if (PROGRESS_BARS)
     // initialize a progress bar
     mockturtle::progress_bar layout_bar{static_cast<uint32_t>(jdfs.size()), "[i] arranging layout: |{0}|"};
     uint32_t bar_counter = 0u;
@@ -454,22 +515,11 @@ void orthogonal::orthogonal_embedding(red_blue_coloring& rb_coloring, const jdfs
             }
         }
 
-#if !(__WINDOWS__)
+#if (PROGRESS_BARS)
         // update progress
         layout_bar(++bar_counter);
 #endif
     }
-
-#if !(__WINDOWS__)
-    // remove layout progress bar
-    layout_bar.done();
-
-    // progress bar for postprocessing, will be removed automatically when running out of scope
-    mockturtle::progress_bar post_bar{"[i] post-processing"};
-    post_bar(true);
-#endif
-
-    layout->shrink_to_fit();
 
     if (io_ports && border_ios)
         elongate_ios();

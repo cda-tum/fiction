@@ -174,7 +174,7 @@ bool logic_network::is_io(const vertex v) const noexcept
     return get_op(v) == operation::PI || get_op(v) == operation::PO;
 }
 
-std::size_t logic_network::operation_count(const operation o) const noexcept
+uint64_t logic_network::operation_count(const operation o) const noexcept
 {
     return operation_counter[o];
 }
@@ -411,7 +411,7 @@ void logic_network::substitute_fan_outs(const std::size_t degree, const substitu
     }
 }
 
-void logic_network::write_network(std::ostream& os) noexcept
+void logic_network::write_dot(std::ostream& os) noexcept
 {
     os << "digraph G {\n";
 
@@ -423,6 +423,42 @@ void logic_network::write_network(std::ostream& os) noexcept
 
     for (auto&& po : get_pos())
         os << fmt::format("{} [label=<<B>{}</B><br/>{}>,shape=triangle,color=red];\n", po, po, get_port_name(po));
+
+    os << "{ rank = same; ";
+    for (auto&& pi : get_pis())
+        os << pi << "; ";
+    os << "}\n{ rank = same; ";
+    for (auto&& po : get_pos())
+        os << po << "; ";
+    os << "}\n";
+
+    for (auto&& e : edges(true))
+        os << fmt::format("{}->{};\n", source(e), target(e));
+
+    os << "}\n" << std::endl;
+}
+
+void logic_network::write_simple_dot(std::ostream& os) noexcept
+{
+    os << "digraph G {\nnode[label=\"\",style=filled,shape=circle];\n";
+
+    for (auto&& v : vertices())
+    {
+        if (auto op = get_op(v); op == operation::W)
+        {
+            os << fmt::format("{} [shape=point,fillcolor=black,width=0.2,height=0.2];\n", v, name_str(op));
+        }
+        else
+        {
+            os << fmt::format("{} [fillcolor=white];\n", v, name_str(op));
+        }
+    }
+
+    for (auto&& pi : get_pis())
+        os << fmt::format("{} [shape=invtriangle,fillcolor=black];\n", pi, pi, get_port_name(pi));
+
+    for (auto&& po : get_pos())
+        os << fmt::format("{} [shape=triangle,fillcolor=black];\n", po, po, get_port_name(po));
 
     os << "{ rank = same; ";
     for (auto&& pi : get_pis())
@@ -455,7 +491,7 @@ void logic_network::initialize_network_from_logic() noexcept
     mockturtle::topo_view<mig_nt> topo_mig(mig);
     std::unordered_map<typename mockturtle::topo_view<mig_nt>::node, vertex> node_to_vertex{};
 
-    std::size_t pi_c = 0ul, po_c = 0ul;
+    auto pi_c = 0ul, po_c = 0ul;
 
     // create PIs
     topo_mig.foreach_pi([&](const auto& pi)
@@ -468,18 +504,17 @@ void logic_network::initialize_network_from_logic() noexcept
     // create gates
     topo_mig.foreach_gate([&](const auto& g)
     {
-        // figure out gate type and predecessors
-        enum class gate_type { MAJ, AND, OR };
-        gate_type g_t = gate_type::MAJ;
+        // figure out MAJ type (MAJ, AND, OR) and predecessors
+        operation maj_op = operation::MAJ;
 
         std::vector<vertex> predecessors{};
-        topo_mig.foreach_fanin(g, [&](const auto& f)
+        topo_mig.foreach_fanin(g, [&](const mockturtle::topo_view<mig_nt>::signal& f) -> void
         {
             const auto f_n = topo_mig.get_node(f);
             if (topo_mig.is_constant(f_n))
             {
-                assert(g_t == gate_type::MAJ && "MIG nodes must not have more than one constant input");
-                g_t = topo_mig.is_complemented(f) ? gate_type::OR : gate_type::AND;
+                assert(maj_op == operation::MAJ && "MIG nodes must not have more than one constant input");
+                maj_op = topo_mig.is_complemented(f) ? operation::OR : operation::AND;
             }
             else
             {
@@ -487,21 +522,25 @@ void logic_network::initialize_network_from_logic() noexcept
             }
         });
         // create gate vertex
-        switch (g_t)
+        switch (maj_op)
         {
-            case gate_type::MAJ:
+            case operation::MAJ:
             {
                 node_to_vertex.emplace(g, create_maj(predecessors[0], predecessors[1], predecessors[2]));
                 break;
             }
-            case gate_type::AND:
+            case operation::AND:
             {
                 node_to_vertex.emplace(g, create_and(predecessors[0], predecessors[1]));
                 break;
             }
-            case gate_type::OR:
+            case operation::OR:
             {
                 node_to_vertex.emplace(g, create_or(predecessors[0], predecessors[1]));
+                break;
+            }
+            default:  // cannot occur
+            {
                 break;
             }
         }

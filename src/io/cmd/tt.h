@@ -30,14 +30,14 @@ namespace alice
          */
         explicit tt_command(const environment::ptr& env)
                 :
-                command(env, "Creates a truth table from the given hex or binary string or from an expression.\n"
+                command(env, "Creates a truth table from the given hex or binary string or from an expression. "
                              "An expression E is a constant 0 or 1, or a variable a, b, ..., p, the negation of an "
-                             "expression !E, the conjunction\nof multiple expressions (E...E), the disjunction of "
-                             "multiple expressions {E...E}, the exclusive OR of multiple\nexpressions [E...E], or the "
-                             "majority of three expressions <EEE>. Examples are [(ab)(!ac)] to describe\nif-then-else, "
+                             "expression !E, the conjunction of multiple expressions (E...E), the disjunction of "
+                             "multiple expressions {E...E}, the exclusive OR of multiple expressions [E...E], or the "
+                             "majority of three expressions <EEE>. Examples are [(ab)(!ac)] to describe if-then-else, "
                              "or !{!a!b} to describe the application of De Morgan’s law to (ab). The size of the truth "
-                             "table must fit\nthe largest variable in the expression, e.g., if c is the largest "
-                             "variable, then the truth table have at least\nthree variables.")
+                             "table must fit the largest variable in the expression, e.g., if c is the largest "
+                             "variable, then the truth table have at least three variables.")
         {
             add_option("table,--table", table,
                        "Truth table (prefix with 0x to parse as hexadecimal)");

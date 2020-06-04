@@ -91,8 +91,8 @@ protected:
     using adjacency_iter     = typename graph_container::adjacency_iterator;
     using inv_adjacency_iter = typename graph_container::inv_adjacency_iterator;
 
-    using edge_index_t   = std::size_t;
-    using vertex_index_t = std::size_t;
+    using edge_index_t   = uint64_t;
+    using vertex_index_t = uint64_t;
 
     
 public:

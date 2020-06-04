@@ -30,7 +30,7 @@ namespace alice
          */
         explicit qca_command(const environment::ptr& env)
                 :
-                command(env, "Generates a QCADesigner file for the current QCA cell layout in store.\n"
+                command(env, "Generates a QCADesigner file for the current QCA cell layout in store. "
                              "QCADesigner can be used to perform physical simulations.")
         {
             add_option("filename", filename,
@@ -78,8 +78,7 @@ namespace alice
             }
             catch (...)
             {
-                env->out() << "[e] an error occurred while the file was being written; it could be corrupted"
-                           << std::endl;
+                env->out() << "[e] an error occurred while the file was being written; it could be corrupted" << std::endl;
             }
         }
 

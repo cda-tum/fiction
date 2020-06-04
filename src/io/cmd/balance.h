@@ -28,9 +28,9 @@ namespace alice
                 :
                 command(env,
                         "Subdivides edges of the current logic network in store so that all paths leading to "
-                        "any vertex have the same length.\nTherefore, balance wire vertices are inserted. This does not "
-                        "respect possible crossings in the network.\nAlso, if a mapping from balance vertices to the "
-                        "original subdivided edges is needed, one should call the hierarchy\nwithin an algorithm instead "
+                        "any vertex have the same length. Therefore, balance wire vertices are inserted. This does not "
+                        "respect possible crossings in the network. Also, if a mapping from balance vertices to the "
+                        "original subdivided edges is needed, one should call the hierarchy within an algorithm instead "
                         "of using this command because that information is lost after destruction of the hierarchy "
                         "object.")
         {

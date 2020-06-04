@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(fiction
         LANGUAGES CXX
-        VERSION 0.3.0)
+        VERSION 0.3.1)
 
 # C++17
 set(CMAKE_CXX_STANDARD 17)
@@ -11,7 +11,7 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /w /O2")
 else ()
-    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wpedantic -Wno-unknown-pragmas -Wno-mismatched-tags -Wno-gnu-anonymous-struct -Wno-nested-anon-types -g")
+    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wpedantic -Wno-unknown-pragmas -Wno-mismatched-tags -Wno-gnu-anonymous-struct -Wno-nested-anon-types -g -fms-extensions")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -w -O3")
 endif ()
 
@@ -21,6 +21,14 @@ if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
 endif ()
 # Set the possible values of build type for cmake-gui
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+
+# Enable progress bars
+if (NOT WIN32)
+    option(ENABLE_PROGRESS_BARS "Enable animated progress bars in command line" ON)
+    if (ENABLE_PROGRESS_BARS)
+        add_definitions(-DPROGRESS_BARS)
+    endif ()
+endif()
 
 # Include header files
 include_directories(src/algo/ src/io/ src/io/cmd/ src/tech/ src/topo/ src/util/)
@@ -55,8 +63,10 @@ if (UNIX)
     # Require Python interpreter
     if (${CMAKE_VERSION} VERSION_LESS "3.12.0")
         find_package(PythonInterp)  # deprecated since CMake 3.12, but works far better
+        set(Z3_PYTHON ${PYTHON_EXECUTABLE})
     else ()
         find_package(Python COMPONENTS Interpreter)
+        set(Z3_PYTHON ${Python_EXECUTABLE})
     endif ()
     # Add option to compile Z3 with verbose output
     option(BUILD_Z3_VERBOSE "Output status and warnings during Z3 build" OFF)
@@ -71,7 +81,11 @@ if (UNIX)
         set(Z3_LIB_FLAG --staticlib)
         set(Z3_LINK_TARGET libz3.a)
     else ()
-        set(Z3_LINK_TARGET libz3.so)
+        if (APPLE)
+            set(Z3_LINK_TARGET libz3.dylib)
+        else ()
+            set(Z3_LINK_TARGET libz3.so)
+        endif ()
     endif ()
 
     # include and library paths
@@ -82,7 +96,7 @@ if (UNIX)
     add_custom_command(
             OUTPUT ${Z3_LIB_DIR}/${Z3_LINK_TARGET}
             PRE_BUILD
-            COMMAND ${Python_EXECUTABLE} scripts/mk_make.py -s --prefix=${Z3_DIR} ${Z3_LIB_FLAG} ${Z3_OUTPUT_CHANNEL}
+            COMMAND ${Z3_PYTHON} scripts/mk_make.py -s --prefix=${Z3_DIR} ${Z3_LIB_FLAG} ${Z3_OUTPUT_CHANNEL}
             COMMAND $(MAKE) -C build ${Z3_OUTPUT_CHANNEL}
             COMMAND $(MAKE) -C build install ${Z3_OUTPUT_CHANNEL}
             WORKING_DIRECTORY ${LIB_PREFIX}/z3/)
@@ -96,7 +110,7 @@ elseif (WIN32)
     set(Z3_LINK_TARGET libz3.lib)
     set(Z3_INCLUDE_DIR "${LIB_PREFIX}/z3/src/api" CACHE PATH "Path to Z3's custom include directory")
     set(Z3_LIB_DIR     "${LIB_PREFIX}/z3/build" CACHE PATH "Path to Z3's custom library directory")
-	include_directories(${Z3_INCLUDE_DIR}/c++)
+    include_directories(${Z3_INCLUDE_DIR}/c++)
 endif ()
 
 # Include Z3
@@ -118,4 +132,4 @@ if (UNIX)
 endif ()
 
 # Link against Boost, Z3, alice, and lorina
-target_link_libraries(fiction ${Boost_LIBRARIES} ${Z3_LIB_DIR}/${Z3_LINK_TARGET} alice mockturtle)
+target_link_libraries(fiction ${Boost_FILESYSTEM_LIBRARIES} ${Boost_SYSTEM_LIBRARIES} ${Z3_LIB_DIR}/${Z3_LINK_TARGET} alice mockturtle)
