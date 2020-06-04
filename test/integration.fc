@@ -18,7 +18,7 @@ ps -c
 show -c --silent --delete
 clear
 
-read ../benchmarks/ISCAS85/c1355.v
+read ../benchmarks/ISCAS85/c880.v
 ps -n
 ortho -i
 energy
