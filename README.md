@@ -149,6 +149,7 @@ Cell-level layouts:
 
 - Circuit dimension in cells
 - Number of cells
+- Area usage in nm²
 
 Learn more about [benchmarking and scripting](#benchmarking-and-scripting).
 
@@ -156,16 +157,15 @@ Learn more about [benchmarking and scripting](#benchmarking-and-scripting).
 
 *fiction* focuses on physical design, i.e. placement, routing, and timing, of circuits and takes logic synthesis for granted. As
 described [later](#preface), the tool [ABC](https://github.com/berkeley-abc/abc) for example could be used to generate synthesized
-logic networks which can be entered in *fiction* as circuit specifications.
+logic networks which can be passed to *fiction* as circuit specifications.
 
 However, *fiction* makes use of the logic network library [mockturtle](https://github.com/lsils/mockturtle) by Mathias Soeken which
-comes with various logic synthesis and optimization algorithms. The reader might feel free to make use of them prior to physical
+comes with various logic synthesis and optimization algorithms. The reader may feel free to make use of them prior to physical
 design in order to obtain optimized layouts.
 
 The `mockturtle` library is also used to provide functionality for generating networks from truth tables as well as random networks. 
 See the section about [logic networks](#circuit-specifications-in-terms-of-logic-networks) for more information about network
 generation and manipulation.
-
 
 ## Building process
 
@@ -419,6 +419,7 @@ When in *fiction*'s interactive mode, one can enter `read <filename>` to read a 
 The content of the logic network store can be briefly viewed by entering `store -n`. A more detailed breakdown can be
 printed by command `gates`. Command `show -n` writes a [Graphviz](https://www.graphviz.org/) `.dot` file of the
 current network and opens it with the user's standard viewer (like e.g. [xdot](https://github.com/jrfonseca/xdot.py)).
+Use flag `-s` to generate a less detailed version that only represents structural information.
 
 #### Truth tables
 
@@ -494,10 +495,21 @@ The most important ones are
 - Enable wire crossings (`-x`)
 - Enable designated I/O ports (`-i`)
 - Route all I/Os to the layout's borders (`-b`)
-- Allow artificial clock latches (`-a`)
 - Allow for de-synchronized circuits (`-d`)
+- Allow artificial clock latches (`-l`)
+- Enable parallelism (`-a ...` / `-A`)
 
 See `exact -h` for a full list.
+
+Recommended settings include the use of I/O pins located at the layout borders for better integration (`-ib`). Most
+networks are not realizable without crossings enabled (`-x`). Specifying a clocking scheme **significantly** speeds up
+the process. 2DDWave allows for the strictest constraints and thereby finds a solution the quickest (`-s 2ddwave`).
+However, for high input degree networks, no valid solution exists when border I/Os are to be used unless global
+synchronization is disabled (`-d`). Generally, solutions are found the fastest with the following settings: Crossings
+enabled, de-synchronization enabled, and 2DDWave clocking given (`-xds 2ddwave`). Multi-threading can sometimes speed up
+the process especially for large networks (`-a ...`). Note that the more threads are being used, the less information
+can be shared across the individual solver runs which destroys the benefits of incremental solving and thereby,
+comparatively, slows down each run.
 
 #### OGD-based (`ortho`)
 
@@ -510,7 +522,7 @@ For more information, see [the paper](https://dl.acm.org/citation.cfm?id=3287705
 
 This scalable approach only works on logic networks which are AOIGs (MAJ gates do not work). The clocking scheme is fixed to
 [2DDWave](https://ieeexplore.ieee.org/document/1717097) and the algorithm can only be slightly parameterized
-(see `ortho -h`).
+(see `ortho -h`). The recommended setting is `ortho -b`.
 
 ### Design rule checking (`check`)
 
@@ -528,7 +540,32 @@ this functionality not just simulates the associated logic network, but investig
 can also be simulated for comparison by using `simulate -n`.
 
 Timing information, and thereby global synchronization, is not respected here. Use `ps -g` to get details about the layout's
-throughput (TP) and thereby, the amount of clock cycles the PIs need to be stalled to generate the simulated outputs. 
+throughput (TP) and thereby, the amount of clock cycles the PIs need to be stalled to generate the simulated outputs.
+
+### Equivalence checking (`equiv`)
+
+Performs logical and delay equivalence checks of gate layouts against a specification. That can either be its own
+associated logic network or another gate layout (`-g <index>`). Three cases are to be distinguished:
+
+1. The gate layout performs a different functionality under at least one input pattern than its specification.
+The layout is **not** equivalent to its specification.
+2. The gate layout performs the same functionality like its specification and has a throughput of `1/1`.
+The layout is **strongly** equivalent to its specification.
+3. The gate layout performs the same functionality like its specification and has a throughput of `1/x`, where `x > 1`.
+The layout is **weakly** equivalent to its specification.
+
+Logical equivalence is checked with a SAT solver by extracting a logic description from the topological structure of
+the gate layout and transforming it to CNF via Tseitin transformation.
+For more information, see [the paper](http://www.informatik.uni-bremen.de/agra/doc/konf/2020_DAC_Verification_for_Field-coupled_Nanocomputing_Circuits.pdf)
+([PDF](http://www.informatik.uni-bremen.de/agra/doc/konf/2020_DAC_Verification_for_Field-coupled_Nanocomputing_Circuits.pdf)).
+
+### Energy dissipation (`energy`)
+
+A [physical model](https://ieeexplore.ieee.org/document/8246526) for calculating the energy dissipation on the gate-level
+abstraction using the [QCA-ONE library](https://ieeexplore.ieee.org/document/7538997/) has been proposed. Thereby, information
+about the cells' function within a gate can be utilized to obtain switching energy consumption. The respective value can be
+printed using command `energy`. Note that this assumes that the gate-level layout can be physically synthesized using the
+QCA-ONE gate library.
 
 ### Physical synthesis (`cell`)
 
@@ -545,11 +582,37 @@ Nevertheless, one can use `qca <filename>` to create a [QCADesigner](https://wal
 `qcc <filename>` to create a file usable by ToPoliNano and MagCAD for running physical simulations. If no filename is
 given, the stored layout name will be used and the file will be written to the current folder.
 
+### Area usage (`area`)
+
+Based on the physical implementation, the actual size of a single FCN cell changes. Therefore, dimensions are typically
+given in abstract tiles and cells. If one however desires physical measures, command `area` can provide these. Given
+width and height of a single cell as well as horizontal and vertical spacing (each in nm), the area of a `cell_layout`
+is printed in nm².
+
+If no information about such values is given, *fiction* uses default technology-depended lengths taken from
+[QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/) and [NMLSim](https://dl.acm.org/citation.cfm?doid=3338852.3339856)
+respectively. These are
+
+#### QCA (default QCADesigner settings)
+
+- width = 18nm
+- height = 18nm
+- hspace = 2nm
+- vspace = 2nm
+
+#### iNML (default NMLSim settings)
+
+- width = 50nm
+- height = 100nm
+- hspace = 10nm
+- vspace = 10nm
+ 
+
 ### SVG export (`show -c`)
 
 QCA cell-level layouts can be exported as scalable vector graphics (`.svg` files) using the command `show -c`. This will
-immediately open the standard SVG program immediately to give a more sophisticated visual representation of the
-current cell layout in store. If one wants to just generate the SVG file without opening it in the standard viewer,
+immediately open your standard SVG program to give a more sophisticated visual representation of the current cell layout
+in store. If one wants to just generate the SVG file without opening it in the standard viewer,
 `show -c <filename>.svg --silent` can be used.
 
 Alternatively, open the exported file with a different program by using `show -c --program "\"google-chrome\" {}"` for
@@ -571,7 +634,7 @@ the following called `c17_synth.fs`
 
 ```sh
 read ../benchmarks/ISCAS85/c17.v
-exact -xibs 2ddwave4
+exact -xibs 2ddwave
 ps -g
 cell
 show -c
@@ -584,9 +647,9 @@ show -c
 which can be executed by `./fiction -ef c17_synth.fs -l c17_log.json` where statistics are to be logged in a JSON file
 called `c17_log.json`.  The following table presents the results.
 
-| `exact -xibs 2ddwave4`                                               |  `exact -ds use`                                                |
+| `exact -xibs 2ddwave`                                               |  `exact -ds use`                                                |
 |:--------------------------------------------------------------------:|:---------------------------------------------------------------:|
-|<img src="img/compare1.png" alt="exact -xibs 2ddwave4" width="300"/>  | <img src="img/compare2.png" alt="exact -ds use" width="300"/>   |
+|<img src="img/compare1.png" alt="exact -xibs 2ddwave" width="300"/>  | <img src="img/compare2.png" alt="exact -ds use" width="300"/>   |
 | ```c17 - 5 × 7, #G: 18, #W: 18, #C: 3, #L: 0, CP: 11, TP: 1/1```     | ```c17 - 4 × 5, #G: 11, #W: 7, #C: 0, #L: 0, CP: 13, TP: 1/3``` |
 
 
@@ -606,7 +669,7 @@ done
 ```
 
 where the for-loop iterates over all Verilog files in the `../benchmarks/TOY/` folder. Using the flag `-c`, a
-semicolon-separated list of commands can be entered in *fiction*. In this case, the files are to be read in a store,
+semicolon-separated list of commands can be passed to *fiction*. In this case, the files are to be read in a store,
 designed using the `ortho` algorithm, synthesized to cell-level, and written as QCA using their original file
 name.
 
@@ -625,10 +688,11 @@ If you use *fiction* in your work, I would appreciate if you cited
 
 ```tex
 @misc{fiction,
-  author = {Marcel Walter and Robert Wille and Frank Sill Torres and Daniel Gro{\ss}e and Rolf Drechsler},
+  author = {Walter, Marcel and Wille, Robert and Sill Torres, Frank and Gro{\ss}e, Daniel and Drechsler, Rolf},
   title = {{fiction: An Open Source Framework for the Design of Field-coupled Nanocomputing Circuits}},
   archivePrefix = {arXiv}, 
   eprint = {1905.02477},
+  note = {arXiv:1905.02477},
   year = {2019},
   month = {May}
 }
@@ -643,7 +707,7 @@ and the [scalable method](https://dl.acm.org/citation.cfm?id=3287705)
 ([BibTeX](https://scholar.googleusercontent.com/scholar.bib?q=info:q_5SZf8jCP0J:scholar.google.com/&output=citation&scisig=AAGBfm0AAAAAXNVeTetPuxrHHCntTQFhw0TaYhjIIIYP&scisf=4&ct=citation&cd=-1))
 online.
 
-The *fiction* framework is part of my PhD Thesis entitled "Layout of Large Scale Field-coupled Nanocomputing Circuits"
+The *fiction* framework is part of my PhD Thesis entitled "Design Automation for Field-coupled Nanotechnologies"
 (working title). Please find my publication list [here](http://www.informatik.uni-bremen.de/agra/eng/pub.php?search=Marcel%20Walter).
 
 ## Acknowledgments
@@ -651,9 +715,13 @@ The *fiction* framework is part of my PhD Thesis entitled "Layout of Large Scale
 I would like to thank my co-authors for countless helpful discussions and support with this framework. Also, I thank
 Gregor Kuhn for implementing the SVG export and for reporting troublesome bugs, Mario Kneidinger for code
 contributions, setting up the Dockerfile and corresponding documentation, pointing out the Visual Studio resources
-and documentation inconsistencies on my side, and Till Schlechtweg for reporting bugs.
-I thank Umberto Garlando who traveled hundreds of kilometers to explain his work to me and without whom, the iNML implementation would not have been possible.
-Also, I thank Mathias Soeken for letting me use parts of his code and for his patience answering dozens of my technical questions.
+and documentation inconsistencies on my side, Till Schlechtweg for reporting bugs, and Fabrizio Riente for pointing out
+compiler issues under certain platforms.
+I thank Umberto Garlando who traveled hundreds of kilometers to discuss his work with me, and without whom, the iNML
+implementation would not have been possible.
+Also, I thank Mathias Soeken for letting me use parts of his code and for his patience answering dozens of my technical
+questions, as well as Alan Mishchenko for sharing his knowledge about incremental satisfiability solving with me, and,
+last but not least, Nikolaj Bjorner for implementing my feature requests into the Z3 solver.
 
 Last but not least, I thank the committee of the ISVLSI 2019 for decorating *fiction* with the **Best Research Demo Award**. A
 [press release](https://www.dfki.de/web/news/detail/News/mehr-als-nur-fiktion-entwurfswerkzeug-fuer-nanotechnologie-fiction-mit-best-research-demo-award-ausg/)

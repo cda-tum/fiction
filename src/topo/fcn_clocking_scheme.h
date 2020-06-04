@@ -17,7 +17,7 @@ namespace fcn_clock
     /**
      * Alias for clock zones used for layout tiles.
      */
-    using zone = std::size_t;
+    using zone = uint8_t;
     /**
      * Alias for the number of different clocks in a scheme.
      */

@@ -6,7 +6,7 @@
 
 std::ostream& operator<<(std::ostream& os, const operation o) noexcept
 {
-    os << str(o);
+    os << str(o).c_str();
     return os;
 }
 
@@ -26,6 +26,7 @@ std::string str(const operation o) noexcept
         case operation::MAJ:
             return "M";
         case operation::F1O2:
+        case operation::F1O3:
             return "Y";
         case operation::W:
             return "=";

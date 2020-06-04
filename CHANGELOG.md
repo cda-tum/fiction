@@ -3,6 +3,52 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## v0.3.1 - 2020-06-04
+*There is no doubt fiction makes a better job of the truth.* &mdash; Doris Lessing
+
+### Added
+- Command `equiv` for logical and delay equivalence checking of `fcn_gate_layout`s against a specification
+- Command `energy` to print and log energy dissipation of current `fcn_gate_layout` based on a physical model for the QCA-ONE library
+- Command `area` to print and log area usage in nm²
+- Parameter `-a` and flag `-A` to enable asynchronous parallelism for `exact`
+- Flag `--minimize_wires/-w` for `exact` to compute the minimum amount of wire segments needed
+- Flag `-s` for `show -n` for less detailed visualization of `logic_network` objects
+- `Dockerfile` and instructions for how to create an image using [Docker](https://www.docker.com/) (thanks to Mario Kneidinger!)
+- CMake option to toggle animated progress bars on command line
+
+### Changed
+- `exact` has been completely reworked to utilize true incremental SMT solving without push/pop mechanics (thanks to Alan Mishchenko for the inspiration!)
+- `exact --artificial_latches/-a` has been renamed to `exact --clock_latches/-l`
+- `exact -m` has been renamed to `exact -c`
+- Standard resolves for clocking scheme names to their commonly used variants, e.g., `2DDWave` becomes `2DDWave4`
+- Energy dissipation will no longer be logged using command `ps -g`; use new command `energy` instead
+- Command `cell` can be found in command class `Technology` now
+- Increased font size of clock numbers in SVG files by 2pt for better readability
+- Changed constructor parameter types for core data structures (network and layouts)
+- Changed `std::size_t` to fixed-size data types in lots of places
+- Use library caching for *Travis* builds to speed up build time
+- Moved to the latest releases of all libraries
+
+### Fixed
+- Runtime logging in `exact`
+- Performance issues in `ortho`
+- Python detection in CMake under different versions
+- `ortho -b` losing bent wire connections
+- `fcn_layout::random_face`'s index to coordinate mapping again, but for real now (thanks to Till Schlechtweg!)
+- `logic_network`s are deep-copied for each physical design call now to secure them from external changes
+- Gates and wires without directions assigned are mapped to standard rotations using QCA-ONE library now
+- Rotation issues with border gate-pin I/Os using QCA-ONE library
+- 3-output fan-outs are correctly printed as fan-outs when using `print -g` now
+- Testing `ofstream`'s for `is_open` in writers now (thanks to DeepCode!)
+- Several compiler issues under MacOS and Windows (thanks to Umberto Garlando and Fabrizio Riente for pointing them out!)
+- Z3 build script error under Unix with CMake version <= 3.12.0
+- Z3 linking on MacOS (thanks to Daniel Staack!)
+- bibTeX citation information correctly handles last names and arXiv prefixes now
+
+### Removed
+- `exact --limit_crossings/-c` and `exact --limit_wires/-w` as they have been replaced by respective optimization flags
+- Legends in `print -g/-c`
+
 ## v0.3.0 - 2019-11-22
 *Sometimes, fiction was so powerful that it even had reverberations in the real world.* &mdash; Delphine de Vigan
 
@@ -92,6 +138,7 @@ For more information, see <https://svn.boost.org/trac10/ticket/11735>
 
 ## v0.2.0 - 2019-03-21
 *Fiction reveals the truth that reality obscures.* &mdash; Jessamyn West
+
 ### Added
 - Export `fcn_cell_layout` objects as SVG using `show -c`. See README for more information
 - `ps -g` displays and logs critical path and throughput of `fcn_gate_layout` objects
@@ -122,6 +169,7 @@ For more information, see <https://svn.boost.org/trac10/ticket/11735>
 
 ## v0.1.1 - 2018-12-29
 *Literature is a luxury; fiction is a necessity.* &mdash; G. K. Chesterton
+
 ### Added
 - Technology-specific energy model for `fcn_gate_layout`; supports QCA thus far
 - Support for `print -c` to write a textual representation of `fcn_cell_layout` objects

@@ -5,18 +5,18 @@
 #include "fcn_cell_layout.h"
 
 
-fcn_cell_layout::fcn_cell_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocking,
+fcn_cell_layout::fcn_cell_layout(const fcn_dimension_xyz& lengths, fcn_clocking_scheme clocking,
                                  fcn::technology tech, const std::string& name) noexcept
         :
-        fcn_layout(std::move(lengths), std::move(clocking)),
+        fcn_layout(lengths, std::move(clocking)),
         technology{tech},
         name{name}
 {}
 
-fcn_cell_layout::fcn_cell_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme&& clocking,
+fcn_cell_layout::fcn_cell_layout(const fcn_dimension_xy& lengths, fcn_clocking_scheme clocking,
                                  fcn::technology tech, const std::string& name) noexcept
         :
-        fcn_layout(std::move(lengths), std::move(clocking)),
+        fcn_layout(lengths, std::move(clocking)),
         technology{tech},
         name{name}
 {}
@@ -128,7 +128,7 @@ std::optional<fcn_clock::zone> fcn_cell_layout::cell_clocking(const cell& c) con
 {
     if (clocking.regular)
     {
-        std::size_t x = c[X] / library->gate_x_size(), y = c[Y] / library->gate_y_size();
+        coord_t x = c[X] / library->gate_x_size(), y = c[Y] / library->gate_y_size();
         return clocking.scheme[y % clocking.cutout_y][x % clocking.cutout_x];
     }
     else  // irregular clocking accesses clocking map
@@ -206,11 +206,11 @@ std::size_t fcn_cell_layout::magcad_magnet_count() const noexcept
 fcn_layout::bounding_box fcn_cell_layout::determine_bounding_box() const noexcept
 {
     // calculate min_x
-    std::size_t min_x = 0u;
-    for (std::size_t x = 0u; x < this->x(); ++x)
+    coord_t min_x = 0u;
+    for (coord_t x = 0u; x < this->x(); ++x)
     {
         bool elem_found = false;
-        for (std::size_t y = 0u; y < this->y(); ++y)
+        for (coord_t y = 0u; y < this->y(); ++y)
         {
             if (!this->is_free_cell(cell{x, y, GROUND}) || !this->is_free_cell(cell{x, y, 1}))
             {
@@ -225,11 +225,11 @@ fcn_layout::bounding_box fcn_cell_layout::determine_bounding_box() const noexcep
     }
 
     // calculate min_y
-    std::size_t min_y = 0u;
-    for (std::size_t y = 0u; y < this->y(); ++y)
+    coord_t min_y = 0u;
+    for (coord_t y = 0u; y < this->y(); ++y)
     {
         bool elem_found = false;
-        for (std::size_t x = 0u; x < this->x(); ++x)
+        for (coord_t x = 0u; x < this->x(); ++x)
         {
             if (!this->is_free_cell(cell{x, y, GROUND}) || !this->is_free_cell(cell{x, y, 1}))
             {
@@ -244,41 +244,41 @@ fcn_layout::bounding_box fcn_cell_layout::determine_bounding_box() const noexcep
     }
 
     // calculate max_x
-    std::size_t max_x = this->x() - 1;
+    coord_t max_x = this->x() - 1;
     for (auto x = static_cast<long>(this->x()) - 1; x >= 0; --x)
     {
         bool elem_found = false;
-        for (std::size_t y = 0u; y < this->y(); ++y)
+        for (coord_t y = 0u; y < this->y(); ++y)
         {
-            if (!this->is_free_cell(cell{static_cast<std::size_t>(x), y, GROUND}) ||
-                !this->is_free_cell(cell{static_cast<std::size_t>(x), y, 1}))
+            if (!this->is_free_cell(cell{static_cast<coord_t>(x), y, GROUND}) ||
+                !this->is_free_cell(cell{static_cast<coord_t>(x), y, 1}))
             {
                 elem_found = true;
                 break;
             }
         }
 
-        max_x = static_cast<std::size_t>(x);
+        max_x = static_cast<coord_t>(x);
         if (elem_found)
             break;
     }
 
     // calculate max_y
-    std::size_t max_y = this->y() - 1;
+    coord_t max_y = this->y() - 1;
     for (auto y = static_cast<long>(this->y()) - 1; y >= 0; --y)
     {
         bool elem_found = false;
-        for (std::size_t x = 0u; x < this->x(); ++x)
+        for (coord_t x = 0u; x < this->x(); ++x)
         {
-            if (!this->is_free_cell(cell{x, static_cast<std::size_t>(y), GROUND}) ||
-                !this->is_free_cell(cell{x, static_cast<std::size_t>(y), 1}))
+            if (!this->is_free_cell(cell{x, static_cast<coord_t>(y), GROUND}) ||
+                !this->is_free_cell(cell{x, static_cast<coord_t>(y), 1}))
             {
                 elem_found = true;
                 break;
             }
         }
 
-        max_y = static_cast<std::size_t>(y);
+        max_y = static_cast<coord_t>(y);
         if (elem_found)
             break;
     }
@@ -323,11 +323,8 @@ void fcn_cell_layout::write_layout(std::ostream& os, bool io_color) const noexce
         }
         os << '\n';
     }
-
-    // print legend
-    if (io_color)
-        os << "\nLegend: " << LATCH_COLOR << "L" << COLOR_RESET << ", "
-           << INP_COLOR << "I" << COLOR_RESET << ", " << OUT_COLOR << "O" << COLOR_RESET << std::endl;
+    // flush stream
+    os << std::endl;
 }
 
 void fcn_cell_layout::map_irregular_clocking() noexcept
@@ -336,7 +333,7 @@ void fcn_cell_layout::map_irregular_clocking() noexcept
 
     for (auto&& c : this->ground_layer())
     {
-        std::size_t x = c[X] / library->gate_x_size(), y = c[Y] / library->gate_y_size();
+        coord_t x = c[X] / library->gate_x_size(), y = c[Y] / library->gate_y_size();
 
         if (auto t = fcn_gate_layout::tile{x, y, GROUND}; auto clk = layout->tile_clocking(t))
             assign_clocking(c, clk.value_or(0));

@@ -43,7 +43,7 @@ namespace alice
                 :
                 command(env,
                         "Reads one Verilog or AIGER file or a directory of those and creates logic network objects "
-                        "which will be put into the respective store.\nIn a directory, only files with extension "
+                        "which will be put into the respective store. In a directory, only files with extension "
                         "'.v' and '.aig' are considered.")
         {
             add_option("filename", filename,

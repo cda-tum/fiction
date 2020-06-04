@@ -5,25 +5,25 @@
 #include "fcn_gate_layout.h"
 
 
-fcn_gate_layout::fcn_gate_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocking, logic_network_ptr ln, offset o) noexcept
+fcn_gate_layout::fcn_gate_layout(const fcn_dimension_xyz& lengths, fcn_clocking_scheme clocking, logic_network_ptr ln, offset o) noexcept
         :
-        fcn_layout(std::move(lengths), std::move(clocking), o),
+        fcn_layout(lengths, std::move(clocking), o),
         network(std::move(ln))
 {}
 
-fcn_gate_layout::fcn_gate_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme&& clocking, logic_network_ptr ln, offset o) noexcept
+fcn_gate_layout::fcn_gate_layout(const fcn_dimension_xy& lengths, fcn_clocking_scheme clocking, logic_network_ptr ln, offset o) noexcept
         :
         fcn_layout(fcn_dimension_xyz{lengths[X], lengths[Y], 2}, std::move(clocking), o),
         network(std::move(ln))
 {}
 
-fcn_gate_layout::fcn_gate_layout(fcn_dimension_xy&& lengths, logic_network_ptr ln, offset o) noexcept
+fcn_gate_layout::fcn_gate_layout(const fcn_dimension_xy& lengths, logic_network_ptr ln, offset o) noexcept
         :
         fcn_layout(fcn_dimension_xyz{lengths[X], lengths[Y], 2}, std::move(open_4_clocking), o),
         network(std::move(ln))
 {}
 
-fcn_gate_layout::fcn_gate_layout(fcn_clocking_scheme&& clocking, logic_network_ptr ln, offset o) noexcept
+fcn_gate_layout::fcn_gate_layout(fcn_clocking_scheme clocking, logic_network_ptr ln, offset o) noexcept
         :
         fcn_layout(fcn_dimension_xyz{2, 2, 2}, std::move(clocking), o),
         network(std::move(ln))
@@ -34,6 +34,16 @@ fcn_gate_layout::fcn_gate_layout(logic_network_ptr ln, offset o) noexcept
         fcn_layout(fcn_dimension_xyz{2, 2, 2}, std::move(open_4_clocking), o),
         network(std::move(ln))
 {}
+
+std::optional<fcn_gate_layout::tile> fcn_gate_layout::random_gate() const noexcept
+{
+    std::mt19937 rgen(std::random_device{}());
+    std::uniform_int_distribution<coord_t> dist(0, v_map.left.size() - 1); // distribution in range [0, |G|]
+
+    const auto rnd_it = std::next(std::begin(v_map.left), dist(rgen));
+
+    return rnd_it == v_map.left.end() ? std::nullopt : std::make_optional(rnd_it->first);
+}
 
 bool fcn_gate_layout::is_incoming_clocked(const tile& t1, const tile& t2) const noexcept
 {
@@ -81,9 +91,9 @@ layout::directions fcn_gate_layout::closest_border(const tile& t) const noexcept
         // tile is on the upper side of the layout
         if (t[Y] < y() / 2)
         {
-            return x() - t[X] < t[Y] ? layout::DIR_E : layout::DIR_N;
+            return x() - t[X] <= t[Y] ? layout::DIR_E : layout::DIR_N;
         }
-            // tile is on the lower side of the layout
+        // tile is on the lower side of the layout
         else
         {
             return x() - t[X] < y() - t[Y] ? layout::DIR_E : layout::DIR_S;
@@ -711,7 +721,7 @@ fcn_gate_layout::path_info fcn_gate_layout::signal_delay(const tile& t, const ga
         path_info dominant_path{};
 
         if (is_pi(t))  // primary input in the circuit
-            infos.push_back({1, (*tile_clocking(t) + (num_clocks() - 1)) % num_clocks(), 0});
+            infos.push_back({1, static_cast<std::size_t>((*tile_clocking(t) + (num_clocks() - 1)) % num_clocks()), 0});
 
         if (infos.size() == 1)  // size cannot be 0
             dominant_path = infos.front();
@@ -971,14 +981,19 @@ std::string fcn_gate_layout::get_name() const noexcept
     return network->get_name();
 }
 
+logic_network_ptr fcn_gate_layout::get_network() const noexcept
+{
+    return network;
+}
+
 fcn_layout::bounding_box fcn_gate_layout::determine_bounding_box() const noexcept
 {
     // calculate min_x
-    std::size_t min_x = 0u;
-    for (std::size_t x = 0u; x < this->x(); ++x)
+    coord_t min_x = 0u;
+    for (coord_t x = 0u; x < this->x(); ++x)
     {
         bool elem_found = false;
-        for (std::size_t y = 0u; y < this->y(); ++y)
+        for (coord_t y = 0u; y < this->y(); ++y)
         {
             if (!this->is_free_tile(tile{x, y, GROUND}) || !this->is_free_tile(tile{x, y, 1}))
             {
@@ -993,11 +1008,11 @@ fcn_layout::bounding_box fcn_gate_layout::determine_bounding_box() const noexcep
     }
 
     // calculate min_y
-    std::size_t min_y = 0u;
-    for (std::size_t y = 0u; y < this->y(); ++y)
+    coord_t min_y = 0u;
+    for (coord_t y = 0u; y < this->y(); ++y)
     {
         bool elem_found = false;
-        for (std::size_t x = 0u; x < this->x(); ++x)
+        for (coord_t x = 0u; x < this->x(); ++x)
         {
             if (!this->is_free_tile(tile{x, y, GROUND}) || !this->is_free_tile(tile{x, y, 1}))
             {
@@ -1012,41 +1027,41 @@ fcn_layout::bounding_box fcn_gate_layout::determine_bounding_box() const noexcep
     }
 
     // calculate max_x
-    std::size_t max_x = this->x() - 1;
+    coord_t max_x = this->x() - 1;
     for (auto x = static_cast<long>(this->x()) - 1; x >= 0; --x)
     {
         bool elem_found = false;
-        for (std::size_t y = 0u; y < this->y(); ++y)
+        for (coord_t y = 0u; y < this->y(); ++y)
         {
-            if (!this->is_free_tile(tile{static_cast<std::size_t>(x), y, GROUND}) ||
-                    !this->is_free_tile(tile{static_cast<std::size_t>(x), y, 1}))
+            if (!this->is_free_tile(tile{static_cast<coord_t>(x), y, GROUND}) ||
+                    !this->is_free_tile(tile{static_cast<coord_t>(x), y, 1}))
             {
                 elem_found = true;
                 break;
             }
         }
 
-        max_x = static_cast<std::size_t>(x);
+        max_x = static_cast<coord_t>(x);
         if (elem_found)
             break;
     }
 
     // calculate max_y
-    std::size_t max_y = this->y() - 1;
+    coord_t max_y = this->y() - 1;
     for (auto y = static_cast<long>(this->y()) - 1; y >= 0; --y)
     {
         bool elem_found = false;
-        for (std::size_t x = 0u; x < this->x(); ++x)
+        for (coord_t x = 0u; x < this->x(); ++x)
         {
-            if (!this->is_free_tile(tile{x, static_cast<std::size_t>(y), GROUND}) ||
-                    !this->is_free_tile(tile{x, static_cast<std::size_t>(y), 1}))
+            if (!this->is_free_tile(tile{x, static_cast<coord_t>(y), GROUND}) ||
+                    !this->is_free_tile(tile{x, static_cast<coord_t>(y), 1}))
             {
                 elem_found = true;
                 break;
             }
         }
 
-        max_y = static_cast<std::size_t>(y);
+        max_y = static_cast<coord_t>(y);
         if (elem_found)
             break;
     }
@@ -1054,16 +1069,16 @@ fcn_layout::bounding_box fcn_gate_layout::determine_bounding_box() const noexcep
     return bounding_box{min_x, min_y, max_x, max_y};
 }
 
-fcn_gate_layout::energy_info fcn_gate_layout::calculate_energy() const noexcept
+energy::info fcn_gate_layout::calculate_energy() const noexcept
 {
-    float slow_energy = 0.0f, fast_energy = 0.0f;
+    double slow_energy = 0.0, fast_energy = 0.0;
 
     auto num_wires = wire_count();
     auto num_crossings = crossing_count();
 
     // adding wire energy (subtract 2 wires for each crossing)
-    slow_energy += static_cast<float>(num_wires - num_crossings * 2) * energy::WIRE_SLOW;
-    fast_energy += static_cast<float>(num_wires - num_crossings * 2) * energy::WIRE_FAST;
+    slow_energy += static_cast<double>(num_wires - num_crossings * 2) * energy::WIRE_SLOW;
+    fast_energy += static_cast<double>(num_wires - num_crossings * 2) * energy::WIRE_FAST;
 
     // adding crossing energy
     slow_energy += num_crossings * energy::CROSSING_SLOW;
@@ -1230,16 +1245,6 @@ void fcn_gate_layout::write_layout(std::ostream& os, bool io_color, bool clk_col
 
         ++r_ctr;
     }
-
-    // print legend
-    if (io_color || clk_color)
-        os << "\nLegend: ";
-    if (clk_color)
-        os << CLOCK_COLORS[0] << "0" << COLOR_RESET << ", " << CLOCK_COLORS[1] << "1" << COLOR_RESET << ", "
-           << CLOCK_COLORS[2] << "2" << COLOR_RESET << ", " << CLOCK_COLORS[3] << "3" << COLOR_RESET << ", ";
-    if (io_color)
-        os << LATCH_COLOR << "L" << COLOR_RESET << ", " << INP_COLOR << "I" << COLOR_RESET << ", "
-           << OUT_COLOR << "O" << COLOR_RESET;
-    if (io_color || clk_color)
-        os << std::endl;
+    // flush stream
+    os << std::endl;
 }

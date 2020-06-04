@@ -52,23 +52,31 @@ public:
     /**
      * Vertices of FCN gate layouts are called tiles.
      */
-    using tile = vertex_t;
+    using tile = face;
     /**
      * Same for tile_indices.
      */
-    using tile_index = vertex_index_t;
+    using tile_index = face_index;
     /**
      * Same for tile_paths.
      */
     using tile_path = vertex_path;
     /**
-     * Granting access to private data members for fcn_cell_layout.
+     * Alias for a tile degree.
+     */
+    using degree_t = uint8_t;
+    /**
+     * Granting fcn_cell_layout access to private data members.
      */
     friend class fcn_cell_layout;
     /**
-     * Granting access to private data members for design_checker.
+     * Granting design_checker access to private data members.
      */
     friend class design_checker;
+    /**
+     * Granting equivalence_checker access to private data members.
+     */
+    friend class equivalence_checker;
     /**
      * Standard constructor. Creates an FCN gate layout by the means of an array determining its size
      * as well as a clocking scheme defining its data flow possibilities.
@@ -81,7 +89,7 @@ public:
      * @param ln Pointer to a logic network whose elements should be assigned to this layout.
      * @param o Offset for tile shift in vertical or horizontal direction.
      */
-    fcn_gate_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocking, logic_network_ptr ln, offset o = offset::NONE) noexcept;
+    fcn_gate_layout(const fcn_dimension_xyz& lengths, fcn_clocking_scheme clocking, logic_network_ptr ln, offset o = offset::NONE) noexcept;
     /**
      * Standard constructor. Creates an FCN gate layout by the means of an array determining its size
      * as well as a clocking scheme defining its data flow possibilities.
@@ -93,7 +101,7 @@ public:
      * @param ln Pointer to a logic network whose elements should be assigned to this layout.
      * @param o Offset for tile shift in vertical or horizontal direction.
      */
-    fcn_gate_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme&& clocking, logic_network_ptr ln, offset o = offset::NONE) noexcept;
+    fcn_gate_layout(const fcn_dimension_xy& lengths, fcn_clocking_scheme clocking, logic_network_ptr ln, offset o = offset::NONE) noexcept;
     /**
      * Standard constructor. Creates an FCN gate layout by the means of an array determining its size
      * as well as a clocking scheme defining its data flow possibilities.
@@ -104,7 +112,7 @@ public:
      * @param ln Pointer to a logic network whose elements should be assigned to this layout.
      * @param o Offset for tile shift in vertical or horizontal direction.
      */
-    fcn_gate_layout(fcn_dimension_xy&& lengths, logic_network_ptr ln, offset o = offset::NONE) noexcept;
+    fcn_gate_layout(const fcn_dimension_xy& lengths, logic_network_ptr ln, offset o = offset::NONE) noexcept;
     /**
      * Standard constructor. Creates a FCN gate layout of size 2 x 2 x 2 with the given clocking scheme.
      * NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs.
@@ -114,7 +122,7 @@ public:
      * @param ln Pointer to a logic network whose elements should be assigned to this layout.
      * @param o Offset for tile shift in vertical or horizontal direction.
      */
-    fcn_gate_layout(fcn_clocking_scheme&& clocking, logic_network_ptr ln, offset o = offset::NONE) noexcept;
+    fcn_gate_layout(fcn_clocking_scheme clocking, logic_network_ptr ln, offset o = offset::NONE) noexcept;
     /**
      * Standard constructor. Creates a FCN gate layout of size 2 x 2 x 2 with an empty clocking.
      * NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs.
@@ -148,6 +156,13 @@ public:
     {
         return random_face(std::forward<ARGS>(args)...);
     }
+    /**
+     * Samples a random tile from the layout that has a gate assigned. Due to the fact that gates are stored in a hash
+     * map, this function has complexity O(|G|), where G is the set of gates assigned.
+     *
+     * @return Randomly sampled gate tile if any gate was assigned.
+     */
+    std::optional<tile> random_gate() const noexcept;
     /**
      * Returns true if t2's clock number plus latch number is one less modulo maximum clock number of t1's clock number,
      * i.e. if t2 can feed information to t1.
@@ -200,7 +215,7 @@ public:
     auto in_degree(const tile& t) const noexcept
     {
         auto incoming = incoming_clocked_tiles(t);
-        return std::distance(incoming.begin(), incoming.end());
+        return static_cast<degree_t>(std::distance(incoming.begin(), incoming.end()));
     }
     /**
      * Returns the number of tiles within the same layer the given tile t is able to pass information to, i.e. the
@@ -212,7 +227,7 @@ public:
     auto out_degree(const tile& t) const noexcept
     {
         auto outgoing = outgoing_clocked_tiles(t);
-        return std::distance(outgoing.begin(), outgoing.end());
+        return static_cast<degree_t>(std::distance(outgoing.begin(), outgoing.end()));
     }
     /**
      * Returns in_degree + out_degree of the given tile, i.e. the number of all tiles usable for information flow.
@@ -714,6 +729,12 @@ public:
      */
     std::string get_name() const noexcept;
     /**
+     * Returns a pointer to the associated network.
+     *
+     * @return A pointer to the associated network.
+     */
+    logic_network_ptr get_network() const noexcept;
+    /**
      * Determines the layout's bounding box i.e. the area in which logic elements are placed. Helps to determine the
      * "real" size of a layout.
      *
@@ -721,16 +742,12 @@ public:
      */
     bounding_box determine_bounding_box() const noexcept override;
     /**
-     * Energy information slow (25 GHz) and fast (100 GHz).
-     */
-    using energy_info = std::pair<float, float>;
-    /**
      * Calculates energy dissipation of the layout by taking into account the energy model proposed by Frank Sill Torres
      * et al. in TCAD 2018. Information about slow clocking (25 GHz) and fast clocking (100 GHz) energy is returned.
      *
      * @return An std::pair containing slow and fast energy dissipation in meV.
      */
-    energy_info calculate_energy() const noexcept;
+    energy::info calculate_energy() const noexcept;
     /**
      * Prints the assigned logic operations and edges to the given std::ostream channel. A textual representation of
      * assigned objects is used as provided by the type operations. Currently only one crossing layer can be represented

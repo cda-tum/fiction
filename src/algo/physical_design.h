@@ -10,7 +10,7 @@
 #include "mockturtle/utils/stopwatch.hpp"
 #include "mockturtle/utils/progress_bar.hpp"
 #include "nlohmann/json.hpp"
-#include <boost/predef/os/windows.h>
+#include <algorithm>
 #include <vector>
 #include <map>
 #include <unordered_map>
@@ -44,7 +44,7 @@ public:
      */
     explicit physical_design(std::shared_ptr<logic_network>&& ln)
             :
-            network{std::move(ln)}
+            network{std::make_shared<logic_network>(*ln)}
     {}
     /**
      * Starts a physical design process. This function need to be overridden by each sub-class.
@@ -78,43 +78,9 @@ protected:
      */
     logic_network_ptr network = nullptr;
     /**
-     * Network hierarchy for certain algorithms.
-     */
-    network_hierarchy_ptr hierarchy = nullptr;
-    /**
      * Actual layout to which a logic network should be mapped.
      */
     fcn_gate_layout_ptr layout = nullptr;
-    /**
-     * Constructs all possible layout dimensions with n layout tiles by factorization.
-     * NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs.
-     * See https://svn.boost.org/trac10/ticket/11735 for details.
-     *
-     * @param n Number of layout tiles.
-     * @return All possible layout dimensions with n layout tiles.
-     */
-    std::vector<fcn_dimension_xy> factorize(const unsigned n) const noexcept
-    {
-        std::vector<fcn_dimension_xy> vs;
-
-        for (auto i = 1u; i <= std::sqrt(n); ++i)
-        {
-            if (n % i == 0)
-            {
-                auto x = i;
-                auto y = n / i;
-
-                if (x > 1 && y > 1) // workaround for BGL bug
-                {
-                    vs.emplace_back(fcn_dimension_xy{x, y});
-                    if (x != y)
-                        vs.emplace_back(fcn_dimension_xy{y, x});
-                }
-            }
-        }
-
-        return vs;
-    }
 };
 
 

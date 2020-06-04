@@ -19,7 +19,10 @@
 #include "cmd/exact.h"
 #include "cmd/ortho.h"
 #include "cmd/check.h"
+#include "cmd/equiv.h"
+#include "cmd/energy.h"
 #include "cmd/cell.h"
+#include "cmd/area.h"
 #include "cmd/qca.h"
 #include "cmd/qcc.h"
 

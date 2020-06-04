@@ -30,7 +30,7 @@ namespace alice
         explicit cell_command(const environment::ptr& env)
                 :
                 command(env,
-                        "Compiles the current gate layout in store down to a cell-level layout.\nA gate library must be "
+                        "Compiles the current gate layout in store down to a cell-level layout. A gate library must be "
                         "specified in order to instruct the algorithm how to map gate tiles to cell blocks.")
         {
             add_option("--library,-l", library,
@@ -141,7 +141,7 @@ namespace alice
         }
     };
 
-    ALICE_ADD_COMMAND(cell, "Mapping")
+    ALICE_ADD_COMMAND(cell, "Technology")
 }
 
 

@@ -9,16 +9,16 @@
 #include <random>
 #include <boost/graph/topology.hpp>
 
-template <std::size_t D, class R = std::mt19937>
+template <uint64_t D, class R = std::mt19937>
 class grid_topology : public boost::convex_topology<D>
 {
-    using distribution = std::uniform_int_distribution<std::size_t>;
+    using distribution = std::uniform_int_distribution<uint64_t>;
 
 public:
     using point_type = typename boost::convex_topology<D>::point_type;
     using point_difference_type = typename boost::convex_topology<D>::point_difference_type;
 
-    explicit grid_topology(std::size_t edge_length)
+    explicit grid_topology(uint64_t edge_length)
             :
             edge_length(edge_length)
     {
@@ -26,7 +26,7 @@ public:
         distr = std::make_shared<distribution>(0, edge_length);
     }
 
-    grid_topology(R& generator, std::size_t edge_length)
+    grid_topology(R& generator, uint64_t edge_length)
             :
             edge_length(edge_length)
     {
@@ -84,9 +84,9 @@ public:
         return p;
     }
 
-    std::size_t distance_from_boundary(point_type a) const
+    uint64_t distance_from_boundary(point_type a) const
     {
-        std::size_t dist = std::abs(edge_length - a[0]);
+        uint64_t dist = std::abs(edge_length - a[0]);
         for (auto i = 1u; i < D; ++i)
             dist = std::min(dist, std::abs(edge_length - a[i]));
 
@@ -97,7 +97,7 @@ public:
     {
         point_type p{};
         for (auto i = 0u; i < D; ++i)
-            p[i] = static_cast<std::size_t>(edge_length / 2);
+            p[i] = static_cast<uint64_t>(edge_length / 2);
 
         return p;
     }
@@ -121,7 +121,7 @@ public:
     }
 
 private:
-    std::size_t edge_length;
+    uint64_t edge_length;
     std::shared_ptr<R> rand = nullptr;
     std::shared_ptr<distribution> distr = nullptr;
 };

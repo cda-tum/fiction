@@ -1,5 +1,5 @@
 //
-// Created by marcel on 24.10.19.
+// Created by marcel on 06.01.20.
 //
 
 #ifndef FICTION_CMD_EXACT_H
@@ -10,6 +10,7 @@
 #include "fcn_gate_layout.h"
 #include "fcn_clocking_scheme.h"
 #include "logic_network.h"
+#include <thread>
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
 
@@ -30,7 +31,7 @@ namespace alice
          */
         explicit exact_command(const environment::ptr& env)
                 :
-                command(env, "Performs exact placement and routing of the current logic network in store.\n"
+                command(env, "Performs exact placement and routing of the current logic network in store. "
                              "A minimum FCN layout will be found that meets all given constraints.")
         {
             add_option("--clk_scheme,-s", clocking,
@@ -39,13 +40,13 @@ namespace alice
                        "Number of FCN gate tiles to use at maximum");
             add_option("--fixed_size,-f", config.fixed_size,
                        "Execute only one iteration with the given number of tiles");
-            add_option("--limit_crossings,-c", config.crossings_limit,
-                       "Maximum number of tiles to use for crossings");
-            add_option("--limit_wires,-w", config.wire_limit,
-                       "Maximum number of tiles to use for wires");
             add_option("--timeout,-t", config.timeout,
                        "Timeout in seconds");
+            add_option("--asynchronous,-a", config.num_threads,
+                       "Number of layout dimensions to examine in parallel");
 
+            add_flag("--asynchronous_max,-A",
+                     "Examine as many layout dimensions in parallel as threads are available");
             add_flag("--crossings,-x", config.crossings,
                      "Enable wire crossings");
             add_flag("--io_ports,-i", config.io_ports,
@@ -55,11 +56,13 @@ namespace alice
             add_flag("--straight_inverters,-n", config.straight_inverters,
                      "Enforce NOT gates to be routed non-bending only");
             add_flag("--desynchronize,-d", config.desynchronize,
-                     "Do not enforce fan-in path balancing (area vs. throughput)");
-            add_flag("--artificial_latches,-a", config.artificial_latches,
-                     "Allow clocked latch delays to balance fan-in paths (runtime expensive!)");
-            add_flag("--minimize_crossings,-m", config.minimize_crossings,
-                     "Minimize the number of crossing tiles to be used (runtime expensive!)");
+                     "Do not enforce fan-in path balancing (reduces area and throughput, speeds up runtime)");
+            add_flag("--minimize_wires,-w", config.minimize_wires,
+                     "Minimize the number of wire tiles to be used (slightly runtime expensive)");
+            add_flag("--minimize_crossings,-c", config.minimize_crossings,
+                     "Minimize the number of crossing tiles to be used (slightly runtime expensive)");
+            add_flag("--clock_latches,-l", config.clock_latches,
+                     "Allow clock latches to satisfy global synchronization (runtime expensive!)");
         }
 
     protected:
@@ -86,7 +89,7 @@ namespace alice
                 reset_flags();
                 return;
             }
-                // set the value of fixed_size as the upper bound if set
+            // set the value of fixed_size as the upper bound if set
             else if (this->is_set("fixed_size"))
             {
                 config.upper_bound = config.fixed_size;
@@ -109,13 +112,27 @@ namespace alice
                 config.topolinano = true;
                 config.vertical_offset = true;
             }
-                // if clocking is a 2DDwave one, set a respective flag
+            // if clocking is a 2DDwave one, set a respective flag
             else if (config.scheme->name == "2DDWAVE3" || config.scheme->name == "2DDWAVE4")
+            {
                 config.twoddwave = true;
+            }
 
-            // convert timeout seconds to milliseconds and double the result to compensate for stopwatch running at
-            // twice the speed for a reason that I do not understand
-            config.timeout *= 2000;
+            // fetch number of threads available on the system
+            if (this->is_set("asynchronous_max"))
+            {
+                if (auto threads_available = std::thread::hardware_concurrency(); threads_available == 0)
+                {
+                    env->out() << "[w] could not detect the number of available threads on your system" << std::endl;
+                }
+                else
+                {
+                    config.num_threads = threads_available;
+                }
+            }
+
+            // convert timeout seconds to milliseconds
+            config.timeout *= 1000;
 
             // perform exact physical design
             exact physical_design{s.current(), std::move(config)};
@@ -126,9 +143,10 @@ namespace alice
                 pd_result = result.json;
             }
             else
-                env->out() << "[e] impossible to place and route " << s.current()->get_name() << " within the given "
-                                                                                                 "parameters"
-                           << std::endl;
+            {
+                env->out() << "[e] impossible to place and route " << s.current()->get_name()
+                           << " within the given parameters" << std::endl;
+            }
 
             reset_flags();
         }

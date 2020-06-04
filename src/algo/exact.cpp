@@ -1,5 +1,5 @@
 //
-// Created by marcel on 09.03.17.
+// Created by marcel on 06.01.20.
 //
 
 #include "exact.h"
@@ -8,393 +8,376 @@
 exact::exact(logic_network_ptr ln, exact_pd_config&& config)
         :
         physical_design(std::move(ln)),
-        config{config},
-        solver{ctx}
+        config{config}
 {
-    layout = std::make_shared<fcn_gate_layout>(std::move(*config.scheme), network,
-            config.vertical_offset ? fcn_layout::offset::VERTICAL : fcn_layout::offset::NONE);
-    network->substitute_fan_outs();
+    // OPEN clocking and RES support fan-out of outdegree 3
+    auto fan_out_degree = config.scheme->name == "OPEN3" ||
+                          config.scheme->name == "OPEN4" ||
+                          config.scheme->name == "RES" ? 3u : 2u;
 
-    hierarchy = std::make_shared<network_hierarchy>(network, false);
-    hierarchy->unify_output_ranks();
-    hierarchy->unify_inv_input_ranks();
+    network->substitute_fan_outs(fan_out_degree);
 
-    lower_bound = network->vertex_count(config.io_ports);
-
-    if (!config.desynchronize && !config.topolinano)
-        initialize_vcl_map();
-
-    set_timeout(config.timeout);
+    lower_bound = std::max(static_cast<unsigned long>(network->vertex_count(config.io_ports)), 4ul);  // incorporating BGL bug
+    dit = dimension_iterator{config.fixed_size ? config.fixed_size : lower_bound};
 }
 
 physical_design::pd_result exact::operator()()
 {
-    mockturtle::stopwatch<>::duration time{0};
-
-    for (auto i = config.fixed_size ? config.fixed_size : lower_bound; i <= config.upper_bound; ++i) // <= to prevent overflow
+    if (config.num_threads > 1)
     {
-
-#if !(__WINDOWS__)
-        mockturtle::progress_bar bar("[i] examining layout dimensions: {:>2} × {:<2}");
-#endif
-
-        for (auto& dimension : factorize(i))
-        {
-            // ToPoliNano optimization: skip all dimensions where X <= levels + number of fan-outs - 1 and
-            // Y < maximum of number of PIs and number of POs; this should not be too restrictive
-            if (config.topolinano)
-            {
-                if (dimension[X] <= hierarchy->height() + network->operation_count(operation::F1O2) - 1 ||
-                    dimension[Y] < std::max(network->num_pis(), network->num_pos()))
-                    continue;
-            }
-
-            mockturtle::stopwatch stop{time};
-
-#if !(__WINDOWS__)
-            bar(dimension[X], dimension[Y]);
-#endif
-
-            layout->resize(std::move(dimension));
-
-            initialize_tv_map();
-            initialize_te_map();
-            initialize_tc_map();
-
-            if (!config.topolinano && !config.twoddwave)  // linear schemes; no cycles by definition
-                initialize_tp_map();
-
-            if (!layout->is_regularly_clocked())
-                initialize_tcl_map();
-
-            if (config.artificial_latches && !config.desynchronize)
-                initialize_tl_map();
-
-            try
-            {
-                solver.push();
-                generate_smt_instance();
-
-                switch (solver.check())
-                {
-                    case z3::sat:
-                    {
-                        assign_layout();
-
-                        stop.~stopwatch();
-                        return pd_result{true, nlohmann::json{{"runtime (s)", mockturtle::to_seconds(time)}}};
-                    }
-                    default:
-                        break;
-                }
-                solver.pop();
-
-                stop.~stopwatch();
-
-                auto time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
-                auto time_left = (config.timeout - time_elapsed > 0 ? static_cast<unsigned>(config.timeout - time_elapsed) : 0u);
-
-                if (!time_left)
-                    throw z3::exception("timeout");
-
-                set_timeout(time_left);
-            }
-            catch (const z3::exception&)
-            {
-                return pd_result{false, nlohmann::json{{"runtime (s)", mockturtle::to_seconds(time)}}};
-            }
-        }
-    }
-
-    return pd_result{false, nlohmann::json{{"runtime (s)", mockturtle::to_seconds(time)}}};
-}
-
-void exact::set_timeout(const unsigned t)
-{
-    z3::params p{ctx};
-    p.set("timeout", t);
-    solver.set(p);
-}
-
-void exact::initialize_tv_map()
-{
-    for (auto&& t : layout->ground_layer())
-    {
-        const auto t_i = layout->index(t);
-        for (auto&& v : network->vertices(config.io_ports))
-        {
-            z3_expr_proxy ep{ctx.bool_const(fmt::format("tv_{}_{}", t_i, v).c_str())};
-            tv_map.emplace(std::make_pair(t_i, v), ep);
-        }
-    }
-}
-
-void exact::initialize_te_map()
-{
-    for (auto&& t : layout->ground_layer())
-    {
-        const auto t_i = layout->index(t);
-        for (auto&& e : network->edges(config.io_ports))
-        {
-            const auto src = network->source(e), tgt = network->target(e);
-            z3_expr_proxy ep{ctx.bool_const(fmt::format("te_{}_({},{})", t_i, src, tgt).c_str())};
-            te_map.emplace(std::make_pair(t_i, std::make_pair(src, tgt)), ep);
-        }
-    }
-}
-
-void exact::initialize_tc_map()
-{
-    for (auto&& t1 : layout->ground_layer())
-    {
-        if (const auto t1_i = layout->index(t1); layout->is_regularly_clocked())
-        {
-            for (auto&& t2 : layout->outgoing_clocked_tiles(t1))
-            {
-                const auto t2_i = layout->index(t2);
-                z3_expr_proxy ep{ctx.bool_const(fmt::format("tc_{}_{}", t1_i, t2_i).c_str())};
-                tc_map.emplace(std::make_pair(t1_i, t2_i), ep);
-            }
-        }
-        else  // irregular clocking
-        {
-            for (auto&& t2 : layout->surrounding_2d(t1))
-            {
-                const auto t2_i = layout->index(t2);
-                z3_expr_proxy ep{ctx.bool_const(fmt::format("tc_{}_{}", t1_i, t2_i).c_str())};
-                tc_map.emplace(std::make_pair(t1_i, t2_i), ep);
-            }
-        }
-    }
-}
-
-void exact::initialize_tp_map()
-{
-    for (auto&& t1 : layout->ground_layer())
-    {
-        const auto t1_i = layout->index(t1);
-        for (auto&& t2 : layout->ground_layer())
-        {
-            const auto t2_i = layout->index(t2);
-            z3_expr_proxy v{ctx.bool_const(fmt::format("tp_{}_{}", t1_i, t2_i).c_str())};
-            tp_map.emplace(std::make_pair(t1_i, t2_i), v);
-        }
-    }
-}
-
-void exact::initialize_vcl_map()
-{
-    auto initialize = [this](const logic_vertex _v) -> void
-    {
-        z3_expr_proxy ep{ctx.real_const(fmt::format("vcl_{}", _v).c_str())};
-        vcl_map.emplace(_v, ep);
-    };
-
-    if (config.io_ports)
-    {
-        for (auto&& v : network->get_pis())
-            initialize(v);
+       return run_asynchronously();
     }
     else
     {
-        for (auto&& pi : network->get_pis())
+        return run_synchronously();
+    }
+}
+
+exact::smt_handler::smt_handler(ctx_ptr ctx, fcn_gate_layout_ptr fgl, const exact_pd_config& c) noexcept
+        :
+        ctx{std::move(ctx)},
+        layout{std::move(fgl)},
+        network{layout->get_network()},
+        hierarchy{std::make_shared<network_hierarchy>(network,false)},
+        config{c}
+{
+    hierarchy->unify_output_ranks();
+    hierarchy->unify_inv_input_ranks();
+}
+
+bool exact::smt_handler::skippable(const fcn_dimension_xy& dim) const noexcept
+{
+    // OPEN clocking optimization: rotated dimensions don't need to be explored
+    if (!layout->is_regularly_clocked())
+    {
+        if (dim[X] != dim[Y] && dim[X] == layout->y() && dim[Y] == layout->x())
+            return true;
+    }
+    // ToPoliNano optimization: skip all dimensions where X <= levels + number of fan-outs - 1 and
+    // Y < maximum of number of PIs and number of POs; this should not be too restrictive
+    else if (config.topolinano)
+    {
+        if (dim[X] <= hierarchy->height() + network->operation_count(operation::F1O2) - 1 ||
+            dim[Y] < std::max(network->num_pis(), network->num_pos()))
+            return true;
+    }
+
+    return false;
+}
+
+void exact::smt_handler::update(const fcn_dimension_xy& dim) noexcept
+{
+    layout->resize(dim);
+    check_point = std::make_shared<solver_check_point>(fetch_solver(dim));
+    ++lc;
+    solver = check_point->state->solver;
+}
+
+void exact::smt_handler::set_timeout(const unsigned t)
+{
+    z3::params p{*ctx};
+    p.set("timeout", t);
+    solver->set(p);
+}
+
+bool exact::smt_handler::is_satisfiable()
+{
+    generate_smt_instance();
+
+    switch (solver->check(check_point->assumptions))
+    {
+        case z3::sat:
         {
-            for (auto&& v : network->adjacent_vertices(pi))
-                initialize(v);
+            // TODO out-of-solver constraints and maybe going back into solver
+
+            // optimize the generated result
+            if (auto opt = optimize(); opt != nullptr)
+            {
+                opt->check();
+                assign_layout(opt->get_model());
+            }
+            else
+            {
+                assign_layout(solver->get_model());
+            }
+
+            return true;
+        }
+        default:
+        {
+            return false;
         }
     }
 }
 
-void exact::initialize_tx_map()
+void exact::smt_handler::store_solver_state(const fcn_dimension_xy& dim) noexcept
 {
-    for (auto&& t : layout->ground_layer())
+    solver_tree[dim] = check_point->state;
+}
+
+z3::expr exact::smt_handler::get_lit_e() noexcept
+{
+    return ctx->bool_const(fmt::format("lit_e_{}", lc).c_str());
+}
+
+z3::expr exact::smt_handler::get_lit_s() noexcept
+{
+    return ctx->bool_const(fmt::format("lit_s_{}", lc).c_str());
+}
+
+exact::smt_handler::solver_check_point exact::smt_handler::fetch_solver(const fcn_dimension_xy& dim) noexcept
+{
+    const auto create_assumptions = [this](const solver_state& state)->z3::expr_vector
     {
-        const auto t_i = layout->index(t);
-        z3_expr_proxy ep{ctx.bool_const(fmt::format("tx_{}", t_i).c_str())};
-        tcl_map.emplace(t_i, ep);
+        z3::expr_vector assumptions{*ctx};
+        assumptions.push_back(state.lit.s);
+        assumptions.push_back(state.lit.e);
+
+        return assumptions;
+    };
+
+    // does a solver state for a layout of dimension of size x - 1 * y exist?
+    if (auto it_x = solver_tree.find({dim[X] - 1, dim[Y]}); it_x != solver_tree.end())
+    {
+        // gather additional y-tiles and updated tiles
+        std::set<layout_tile> added_tiles{}, updated_tiles{};
+        for (auto&& y : iter::range(dim[Y]))
+        {
+            added_tiles.emplace(layout_tile{dim[X] - 1, y, GROUND});
+            updated_tiles.emplace(layout_tile{dim[X] - 2, y, GROUND});
+        }
+
+        // deep-copy solver state
+        const auto state = it_x->second;
+        solver_state new_state = {state->solver, {get_lit_e(), state->lit.s}};
+
+        // reset eastern constraints
+        new_state.solver->add(not state->lit.e);
+
+        // remove solver
+        solver_tree.erase(it_x);
+
+        return {std::make_shared<solver_state>(new_state), added_tiles, updated_tiles, create_assumptions(new_state)};
+    }
+    else
+    {
+        // does a solver state for a layout of dimension of size x * y - 1 exist?
+        if (auto it_y = solver_tree.find({dim[X], dim[Y] - 1}); it_y != solver_tree.end())
+        {
+            // gather additional x-tiles
+            std::set<layout_tile> added_tiles{}, updated_tiles{};
+            for (auto&& x : iter::range(dim[X]))
+            {
+                added_tiles.emplace(layout_tile{x, dim[Y] - 1, GROUND});
+                updated_tiles.emplace(layout_tile{x, dim[Y] - 2, GROUND});
+            }
+
+            // deep-copy solver state
+            const auto state = it_y->second;
+            solver_state new_state = {state->solver, {state->lit.e, get_lit_s()}};
+
+            // reset southern constraints
+            new_state.solver->add(not state->lit.s);
+
+            // remove solver
+            solver_tree.erase(it_y);
+
+            return {std::make_shared<solver_state>(new_state), added_tiles, updated_tiles,
+                    create_assumptions(new_state)};
+        }
+        else  // no existing solver state; create a new one
+        {
+            // all tiles are additional ones
+            std::set<layout_tile> added_tiles{};
+            for (auto&& y : iter::range(dim[Y]))
+            {
+                for (auto&& x : iter::range(dim[X]))
+                    added_tiles.emplace(layout_tile{x, y, GROUND});
+            }
+
+            // create new state
+            solver_state new_state{std::make_shared<z3::solver>(*ctx), {get_lit_e(), get_lit_s()}};
+
+            return {std::make_shared<solver_state>(new_state), added_tiles, {}, create_assumptions(new_state)};
+        }
     }
 }
 
-void exact::initialize_tcl_map()
+bool exact::smt_handler::is_added_tile(const layout_tile& t) const noexcept
 {
-    for (auto&& t : layout->ground_layer())
-    {
-        const auto t_i = layout->index(t);
-        z3_expr_proxy ep{ctx.real_const(fmt::format("tcl_{}", t_i).c_str())};
-        tcl_map.emplace(t_i, ep);
-    }
+    return check_point->added_tiles.count(t);
 }
 
-void exact::initialize_tl_map()
+bool exact::smt_handler::is_updated_tile(const layout_tile& t) const noexcept
 {
-    for (auto&& t : layout->ground_layer())
-    {
-        const auto t_i = layout->index(t);
-        z3_expr_proxy ep{ctx.int_const(fmt::format("tl_{}", t_i).c_str())};
-        tl_map.emplace(t_i, ep);
-    }
+    return check_point->updated_tiles.count(t);
 }
 
-z3::expr exact::get_tv(const layout_tile& t, const logic_vertex v) noexcept
+exact::smt_handler::assumption_literals& exact::smt_handler::lit() const noexcept
 {
-    return tv_map[{layout->index(t), v}][0u];
+    return check_point->state->lit;
 }
 
-z3::expr exact::get_te(const layout_tile& t, const logic_edge& e) noexcept
+z3::expr exact::smt_handler::get_tv(const layout_tile& t, const logic_vertex v) noexcept
 {
-    return te_map[{layout->index(t), {network->source(e), network->target(e)}}][0u];
+    return ctx->bool_const(fmt::format("tv_({},{})_{}", t[X], t[Y], v).c_str());
 }
 
-z3::expr exact::get_tc(const layout_tile& t1, const layout_tile& t2) noexcept
+z3::expr exact::smt_handler::get_te(const layout_tile& t, const logic_edge& e) noexcept
 {
-    return tc_map[{layout->index(t1), layout->index(t2)}][0u];
+    return ctx->bool_const(fmt::format("te_({},{})_({},{})",
+            t[X], t[Y],network->source(e), network->target(e)).c_str());
 }
 
-z3::expr exact::get_tp(const layout_tile& t1, const layout_tile& t2) noexcept
+z3::expr exact::smt_handler::get_tc(const layout_tile& t1, const layout_tile& t2) noexcept
 {
-    return tp_map[{layout->index(t1), layout->index(t2)}][0u];
+    return ctx->bool_const(fmt::format("tc_({},{})_({},{})", t1[X], t1[Y], t2[X], t2[Y]).c_str());
 }
 
-z3::expr exact::get_tx(const layout_tile& t) noexcept
+z3::expr exact::smt_handler::get_tp(const layout_tile& t1, const layout_tile& t2) noexcept
 {
-    return tx_map[layout->index(t)][0u];
+    return ctx->bool_const(fmt::format("tp_({},{})_({},{})", t1[X], t1[Y], t2[X], t2[Y]).c_str());
 }
 
-z3::expr exact::get_vcl(const logic_vertex v) noexcept
+z3::expr exact::smt_handler::get_vcl(const logic_vertex v) noexcept
 {
-    return vcl_map[v][0u];
+    return ctx->int_const(fmt::format("vcl_{}", v).c_str());
 }
 
-z3::expr exact::get_tcl(const layout_tile& t) noexcept
+z3::expr exact::smt_handler::get_tcl(const layout_tile& t) noexcept
 {
-    return tcl_map[layout->index(t)][0u];
+    return ctx->int_const(fmt::format("tcl_({},{})", t[X], t[Y]).c_str());
 }
 
-z3::expr exact::get_tl(const layout_tile& t) noexcept
+z3::expr exact::smt_handler::get_tl(const layout_tile& t) noexcept
 {
-    return tl_map[layout->index(t)][0u];
+    return ctx->int_const(fmt::format("tl_({},{})", t[X], t[Y]).c_str());
 }
 
-z3::expr exact::mk_eq(const z3::expr_vector& v) const noexcept
+z3::expr exact::smt_handler::mk_eq(const z3::expr_vector& v) const noexcept
 {
-    z3::expr_vector eq{v.ctx()};
-    for (int i : iter::range(1u, v.size()))
+    z3::expr_vector eq{*ctx};
+    for (int&& i : iter::range(1u, v.size()))
         eq.push_back(v[i - 1] == v[i]);
 
     return z3::mk_and(eq);
 }
 
-void exact::tile_ite_counters(const logic_edge& e, z3::expr_vector& ve) noexcept
+z3::expr exact::smt_handler::mk_as(const z3::expr& constraint, const z3::expr& lit) const noexcept
 {
-    z3::expr one  = ctx.real_val(1u);
-    z3::expr zero = ctx.real_val(0u);
+    return z3::implies(lit, constraint);
+}
 
-    z3::expr num_phases = ctx.real_val(static_cast<unsigned>(layout->num_clocks()));
+z3::expr exact::smt_handler::mk_as_if_se(const z3::expr& constraint, const layout_tile& t) const noexcept
+{
+    if (auto east = layout->is_eastern_border(t), south = layout->is_southern_border(t); east && south)
+    {
+        return mk_as(constraint, lit().e and lit().s);
+    }
+    else
+    {
+        if (east)
+        {
+            return mk_as(constraint, lit().e);
+        }
+        else if (south)
+        {
+            return mk_as(constraint, lit().s);
+        }
+        else
+        {
+            return constraint;
+        }
+    }
+}
+
+void exact::smt_handler::tile_ite_counters(const logic_edge& e, z3::expr_vector& ve) noexcept
+{
+    z3::expr one  = ctx->real_val(1u);
+    z3::expr zero = ctx->real_val(0u);
+
+    z3::expr num_phases = ctx->real_val(static_cast<unsigned>(layout->num_clocks()));
 
     for (auto&& t : layout->ground_layer())
     {
         // an artificial latch variable counts as an extra 1 clock cycle (n clock phases)
-        if (config.artificial_latches)
+        if (config.clock_latches)
             ve.push_back(z3::ite(get_te(t, e), get_tl(t) * num_phases + one, zero));
         else
             ve.push_back(z3::ite(get_te(t, e), one, zero));
     }
 }
 
-void exact::restrict_tile_elements()
+void exact::smt_handler::restrict_tile_elements() noexcept
 {
-    for (auto&& t : layout->ground_layer())
+    for (const auto& t : check_point->added_tiles)
     {
-        if (config.crossings /* || config.multi_wires */)
+        if (config.crossings)
         {
-            z3::expr_vector tv{ctx};
+            z3::expr_vector tv{*ctx};
             for (auto&& v : network->vertices(config.io_ports))
                 tv.push_back(get_tv(t, v));
 
-            solver.add(z3::atmost(tv, 1u));
+            if (!tv.empty())
+                solver->add(z3::atmost(tv, 1u));
 
-            z3::expr_vector te{ctx};
+            z3::expr_vector te{*ctx};
             for (auto&& e : network->edges(config.io_ports))
                 te.push_back(get_te(t, e));
 
-            solver.add(z3::atmost(te, 2u));
+            if (!te.empty())
+                solver->add(z3::atmost(te, 2u));
         }
         else
         {
-            z3::expr_vector ve{ctx};
+            z3::expr_vector ve{*ctx};
             for (auto&& v : network->vertices(config.io_ports))
                 ve.push_back(get_tv(t, v));
 
             for (auto&& e : network->edges(config.io_ports))
                 ve.push_back(get_te(t, e));
 
-            solver.add(z3::atmost(ve, 1u));
+            if (!ve.empty())
+                solver->add(z3::atmost(ve, 1u));
         }
     }
 }
 
-void exact::restrict_vertices()
+void exact::smt_handler::restrict_vertices() noexcept
 {
     for (auto&& v : network->vertices(config.io_ports))
     {
-        z3::expr_vector ve{ctx};
+        z3::expr_vector ve{*ctx};
         for (auto&& t : layout->ground_layer())
             ve.push_back(get_tv(t, v));
 
-        solver.add(z3::atleast(ve, 1u));
-        solver.add(z3::atmost(ve, 1u));
+        // use a tracking literal to disable constraints in case of UNSAT
+        solver->add(mk_as(z3::atleast(ve, 1u), lit().e and lit().s));
+        solver->add(z3::atmost(ve, 1u));
     }
 }
 
-void exact::restrict_clocks()
+void exact::smt_handler::restrict_clocks() noexcept
 {
-    for (auto&& t : layout->ground_layer())
+    for (const auto& t : check_point->added_tiles)
     {
         auto cl = get_tcl(t);
-
-        z3::expr_vector ve{ctx};
-        for (auto i : iter::range(layout->num_clocks()))
-            ve.push_back(cl == ctx.real_val(static_cast<unsigned>(i)));
-
-        solver.add(z3::mk_or(ve));
+        solver->add(ctx->int_val(0) <= cl);
+        solver->add(cl < ctx->int_val(static_cast<unsigned>(layout->num_clocks())));
     }
 }
 
-void exact::restrict_latches()
+void exact::smt_handler::define_adjacent_vertex_tiles() noexcept
 {
-    auto zero = ctx.real_val(0u);
-
-    z3::expr_vector ve{ctx};
-    for (auto&& t : layout->ground_layer())
+    for (auto&& t : iter::chain(check_point->added_tiles, check_point->updated_tiles))
     {
-        auto l = get_tl(t);
-        ve.push_back(l);
-
-        // latches must be positive
-        solver.add(l >= zero);
-
-        // tiles without wires cannot have latches
-        z3::expr_vector te{ctx};
-        for (auto&& e : network->edges(config.io_ports))
-            te.push_back(get_te(t, e));
-        solver.add(z3::implies(z3::atmost(te, 0u), l == zero));
-    }
-
-    // minimize number of latches
-    solver.minimize(z3::sum(ve));
-}
-
-void exact::define_adjacent_vertex_tiles()
-{
-    for (auto&& t : layout->ground_layer())
-    {
-        for (auto&& v : (network->vertices(config.io_ports)))
+        for (auto&& v : network->vertices(config.io_ports))
         {
             auto tv = get_tv(t, v);
-            z3::expr_vector conj{ctx};
+            z3::expr_vector conj{*ctx};
             for (auto&& ae : network->out_edges(v, config.io_ports))
             {
-                z3::expr_vector disj{ctx};
+                z3::expr_vector disj{*ctx};
 
                 if (auto tgt = network->target(ae); layout->is_regularly_clocked())
                 {
@@ -406,7 +389,7 @@ void exact::define_adjacent_vertex_tiles()
                     for (auto&& at : layout->surrounding_2d(t))
                     {
                         // clocks must differ by 1
-                        auto mod = z3::mod(get_tcl(at) - get_tcl(t), layout->num_clocks()) == ctx.real_val(1u);
+                        auto mod = z3::mod(get_tcl(at) - get_tcl(t), layout->num_clocks()) == ctx->int_val(1);
                         disj.push_back(((get_tv(at, tgt) or get_te(at, ae)) and mod) and get_tc(t, at));
                     }
                 }
@@ -415,22 +398,24 @@ void exact::define_adjacent_vertex_tiles()
                     conj.push_back(z3::mk_or(disj));
             }
             if (!conj.empty())
-                solver.add(z3::implies(tv, z3::mk_and(conj)));
+            {
+                solver->add(mk_as_if_se(z3::implies(tv, z3::mk_and(conj)), t));
+            }
         }
     }
 }
 
-void exact::define_inv_adjacent_vertex_tiles()
+void exact::smt_handler::define_inv_adjacent_vertex_tiles() noexcept
 {
-    for (auto&& t : layout->ground_layer())
+    for (auto&& t : iter::chain(check_point->added_tiles, check_point->updated_tiles))
     {
         for (auto&& v : network->vertices(config.io_ports))
         {
             auto tv = get_tv(t, v);
-            z3::expr_vector conj{ctx};
+            z3::expr_vector conj{*ctx};
             for (auto&& iae : network->in_edges(v, config.io_ports))
             {
-                z3::expr_vector disj{ctx};
+                z3::expr_vector disj{*ctx};
 
                 if (auto src = network->source(iae); layout->is_regularly_clocked())
                 {
@@ -442,7 +427,7 @@ void exact::define_inv_adjacent_vertex_tiles()
                     for (auto&& iat : layout->surrounding_2d(t))
                     {
                         // clocks must differ by 1
-                        auto mod = z3::mod(get_tcl(t) - get_tcl(iat), layout->num_clocks()) == ctx.real_val(1u);
+                        auto mod = z3::mod(get_tcl(t) - get_tcl(iat), layout->num_clocks()) == ctx->int_val(1);
                         disj.push_back(((get_tv(iat, src) or get_te(iat, iae)) and mod) and get_tc(iat, t));
                     }
                 }
@@ -451,19 +436,21 @@ void exact::define_inv_adjacent_vertex_tiles()
                     conj.push_back(z3::mk_or(disj));
             }
             if (!conj.empty())
-                solver.add(z3::implies(tv, z3::mk_and(conj)));
+            {
+                solver->add(mk_as_if_se(z3::implies(tv, z3::mk_and(conj)), t));
+            }
         }
     }
 }
 
-void exact::define_adjacent_edge_tiles()
+void exact::smt_handler::define_adjacent_edge_tiles() noexcept
 {
-    for (auto&& t : layout->ground_layer())
+    for (auto&& t : iter::chain(check_point->added_tiles, check_point->updated_tiles))
     {
         for (auto&& e : network->edges(config.io_ports))
         {
             auto te = network->target(e);
-            z3::expr_vector disj{ctx};
+            z3::expr_vector disj{*ctx};
 
             if (layout->is_regularly_clocked())
             {
@@ -475,25 +462,27 @@ void exact::define_adjacent_edge_tiles()
                 for (auto&& at : layout->surrounding_2d(t))
                 {
                     // clocks must differ by 1
-                    auto mod = z3::mod(get_tcl(at) - get_tcl(t), layout->num_clocks()) == ctx.real_val(1u);
+                    auto mod = z3::mod(get_tcl(at) - get_tcl(t), layout->num_clocks()) == ctx->int_val(1);
                     disj.push_back(((get_tv(at, te) or get_te(at, e)) and mod) and get_tc(t, at));
                 }
             }
 
             if (!disj.empty())
-                solver.add(z3::implies(get_te(t, e), z3::mk_or(disj)));
+            {
+                solver->add(mk_as_if_se(z3::implies(get_te(t, e), z3::mk_or(disj)), t));
+            }
         }
     }
 }
 
-void exact::define_inv_adjacent_edge_tiles()
+void exact::smt_handler::define_inv_adjacent_edge_tiles() noexcept
 {
-    for (auto&& t : layout->ground_layer())
+    for (auto&& t : iter::chain(check_point->added_tiles, check_point->updated_tiles))
     {
         for (auto&& e : network->edges(config.io_ports))
         {
             auto se = network->source(e);
-            z3::expr_vector disj{ctx};
+            z3::expr_vector disj{*ctx};
 
             if (layout->is_regularly_clocked())
             {
@@ -505,35 +494,45 @@ void exact::define_inv_adjacent_edge_tiles()
                 for (auto&& iat : layout->surrounding_2d(t))
                 {
                     // clocks must differ by 1
-                    auto mod = z3::mod(get_tcl(t) - get_tcl(iat), layout->num_clocks()) == ctx.real_val(1u);
+                    auto mod = z3::mod(get_tcl(t) - get_tcl(iat), layout->num_clocks()) == ctx->int_val(1);
                     disj.push_back(((get_tv(iat, se) or get_te(iat, e)) and mod) and get_tc(iat, t));
                 }
             }
 
             if (!disj.empty())
-                solver.add(z3::implies(get_te(t, e), z3::mk_or(disj)));
+            {
+                solver->add(mk_as_if_se(z3::implies(get_te(t, e), z3::mk_or(disj)), t));
+            }
         }
     }
 }
 
-void exact::establish_sub_paths()
+void exact::smt_handler::establish_sub_paths() noexcept
 {
     for (auto&& t : layout->ground_layer())
     {
         if (layout->is_regularly_clocked())
         {
             for (auto&& at : layout->outgoing_clocked_tiles(t))
-                solver.add(z3::implies(get_tc(t, at), get_tp(t, at)));
+            {
+                // if neither t nor at are in added_tiles, the constraint exists already
+                if (is_added_tile(t) || is_added_tile(at))
+                    solver->add(z3::implies(get_tc(t, at), get_tp(t, at)));
+            }
         }
         else  // irregular clocking
         {
             for (auto&& at : layout->surrounding_2d(t))
-                solver.add(z3::implies(get_tc(t, at), get_tp(t, at)));
+            {
+                // if neither t nor at are in added_tiles, the constraint exists already
+                if (is_added_tile(t) || is_added_tile(at))
+                    solver->add(z3::implies(get_tc(t, at), get_tp(t, at)));
+            }
         }
     }
 }
 
-void exact::establish_transitive_paths()
+void exact::smt_handler::establish_transitive_paths() noexcept
 {
     for (auto&& t1 : layout->ground_layer())
     {
@@ -547,51 +546,67 @@ void exact::establish_transitive_paths()
                 if (layout->index(t2) == layout->index(t3))
                     continue;
 
-                solver.add(z3::implies(get_tp(t1, t2) and get_tp(t2, t3), get_tp(t1, t3)));
+                // if neither t1 nor t2 nor t3 are in added_tiles, the constraint exists already
+                if (is_added_tile(t1) || is_added_tile(t2) || is_added_tile(t3))
+                    solver->add(z3::implies(get_tp(t1, t2) and get_tp(t2, t3), get_tp(t1, t3)));
             }
         }
     }
 }
 
-void exact::eliminate_cycles()
+void exact::smt_handler::eliminate_cycles() noexcept
 {
-    for (auto&& t : layout->ground_layer())
-        solver.add(not get_tp(t, t));
+    for (const auto& t : check_point->added_tiles)
+        solver->add(not get_tp(t, t));
 }
 
-void exact::assign_pi_clockings()
+void exact::smt_handler::assign_pi_clockings() noexcept
 {
     auto assign = [&](const logic_vertex _v) -> void
     {
         auto cl = get_vcl(_v);
-        for (auto&& t : layout->ground_layer())
+        for (const auto& t : check_point->added_tiles)
         {
             if (layout->is_regularly_clocked())
-                solver.add(z3::implies(get_tv(t, _v), cl == ctx.real_val(static_cast<unsigned>(*layout->tile_clocking(t)))));
+                solver->add(z3::implies(get_tv(t, _v), cl == ctx->int_val(static_cast<unsigned>(*layout->tile_clocking(t)))));
             else  // irregular clocking
-                solver.add(z3::implies(get_tv(t, _v), cl == get_tcl(t)));
+                solver->add(z3::implies(get_tv(t, _v), cl == get_tcl(t)));
         }
     };
 
-    if (config.io_ports)
+    if (!(config.twoddwave && config.border_io))
     {
-        for (auto&& v : network->get_pis())
-            assign(v);
-    }
-    else
-    {
-        for (auto&& pi : network->get_pis())
+        if (config.io_ports)
         {
-            for (auto&& v : network->adjacent_vertices(pi))
+            for (auto&& v : network->get_pis())
                 assign(v);
+        }
+        else
+        {
+            for (auto&& pi : network->get_pis())
+            {
+                for (auto&& v : network->adjacent_vertices(pi))
+                    assign(v);
+            }
         }
     }
 }
 
-void exact::fanin_length()
+// TODO only add to recheck instance after a solution has already been found or perform out-of-solver checks
+void exact::smt_handler::global_synchronization() noexcept
 {
+    // restrict PIs to the first c x c tiles of the layout
+    const auto restrict_entry_tiles = [this](const logic_vertex _v) -> void
+    {
+        for (const auto& t : check_point->added_tiles)
+        {
+            if (t[X] > layout->num_clocks() - 1 || t[Y] > layout->num_clocks() - 1)
+                solver->add(not get_tv(t, _v));
+        }
+    };
+
     using logic_edge_path = logic_network::edge_path;
-    auto define_length = [this](const logic_vertex _v) -> void
+    const auto define_length = [this](const logic_vertex _v) -> void
     {
         auto paths = network->get_all_paths(_v, config.io_ports);
         if (paths.empty())
@@ -601,15 +616,15 @@ void exact::fanin_length()
                                            [](const logic_edge_path& p1, const logic_edge_path& p2)
                                            {return p1.size() < p2.size();})->size();
 
-        z3::expr_vector all_path_lengths{ctx};
+        z3::expr_vector all_path_lengths{*ctx};
         for (auto& p : paths)
         {
-            z3::expr_vector path_length{ctx};
+            z3::expr_vector path_length{*ctx};
 
             // respect number of vertices as an offset to path length
             // this works because every vertex must be placed
             if (int offset = static_cast<int>(p.size() - max_length); offset)
-                path_length.push_back(ctx.real_val(offset));
+                path_length.push_back(ctx->real_val(offset));
 
             for (auto& e : p)
             {
@@ -626,189 +641,258 @@ void exact::fanin_length()
             }
             all_path_lengths.push_back(z3::sum(path_length));
         }
-        solver.add(mk_eq(all_path_lengths));
+
+        // use a tracking literal to disable constraints in case of UNSAT
+        solver->add(mk_as(mk_eq(all_path_lengths), lit().e and lit().s));
     };
 
-    if (config.io_ports)
+    // much simpler but equisatisfiable version of the constraint for 2DDWave clocking with border I/Os
+    if (config.twoddwave && config.border_io)
     {
-        for (auto&& po : network->get_pos())
-            define_length(po);
+        if (config.io_ports)
+        {
+            for (auto&& pi : network->get_pis())
+                restrict_entry_tiles(pi);
+        }
+        else
+        {
+            for (auto&& pi : network->get_pis())
+            {
+                for (auto&& v : network->adjacent_vertices(pi))
+                    restrict_entry_tiles(v);
+            }
+        }
     }
+    // normal version for all other configurations
     else
     {
-        for (auto&& po : network->get_pos())
+        if (config.io_ports)
         {
-            for (auto&& v : network->inv_adjacent_vertices(po))
-                define_length(v);
+            for (auto&& po : network->get_pos())
+                define_length(po);
+        }
+        else
+        {
+            for (auto&& po : network->get_pos())
+            {
+                for (auto&& v : network->inv_adjacent_vertices(po))
+                    define_length(v);
+            }
         }
     }
 }
 
-void exact::prevent_insufficiencies()
+void exact::smt_handler::prevent_insufficiencies() noexcept
 {
-    for (auto&& t : layout->ground_layer())
+//    for (auto&& t : iter::chain(check_point->added_tiles, check_point->updated_tiles))
+    for (auto&& t : layout->tiles())
     {
+        if (!layout->is_eastern_border(t) && !layout->is_southern_border(t) && !is_updated_tile(t))
+            continue;
+
         if (layout->is_regularly_clocked())
         {
             for (auto&& v : network->vertices(config.io_ports))
             {
                 // if vertex v has more adjacent or inversely adjacent elements than tile t
-                if (layout->out_degree(t) < static_cast<unsigned>(network->out_degree(v, config.io_ports)) ||
-                        layout->in_degree(t) < static_cast<unsigned>(network->in_degree(v, config.io_ports)))
-                    solver.add(not get_tv(t, v));
+                if (layout->out_degree(t) < network->out_degree(v, config.io_ports) ||
+                        layout->in_degree(t) < network->in_degree(v, config.io_ports))
+                {
+                    // if t is at eastern/southern border, its adjacencies might change
+                    if (layout->is_eastern_border(t) || layout->is_southern_border(t))
+                    {
+                        // add restriction as assumption only
+                        check_point->assumptions.push_back(not get_tv(t, v));
+                    }
+                    else if (is_updated_tile(t))  // nothing's about to change here
+                    {
+                        // add hard constraint
+                        solver->add(not get_tv(t, v));
+                    }
+                }
             }
 
             for (auto&& e : network->edges(config.io_ports))
             {
                 // if tile t has no adjacent or inversely adjacent tiles
                 if (layout->out_degree(t) == 0 || layout->in_degree(t) == 0)
-                    solver.add(not get_te(t, e));
+                {
+                    // if t is at eastern/southern border, its adjacencies might change
+                    if (layout->is_eastern_border(t) || layout->is_southern_border(t))
+                    {
+                        // add restriction as assumption only
+                        check_point->assumptions.push_back(not get_te(t, e));
+                    }
+                    else if (is_updated_tile(t)) // nothing's about to change here
+                    {
+                        // add hard constraint
+                        solver->add(not get_te(t, e));
+                    }
+                }
             }
         }
         else  // irregular clocking
         {
             auto surrounding_tiles = layout->surrounding_2d(t);
-            auto tile_degree = std::distance(surrounding_tiles.begin(), surrounding_tiles.end());
+            auto tile_degree = static_cast<fcn_gate_layout::degree_t>(std::distance(surrounding_tiles.begin(),
+                                                                      surrounding_tiles.end()));
 
             for (auto&& v : network->vertices(config.io_ports))
             {
                 // in an irregular clocking scheme, not so strict restrictions can be made
-                if (tile_degree < static_cast<unsigned>(network->out_degree(v, config.io_ports) +
-                        network->in_degree(v, config.io_ports)))
-                    solver.add(not get_tv(t, v));
+                if (tile_degree < network->out_degree(v, config.io_ports) + network->in_degree(v, config.io_ports))
+                {
+                    // if t is at eastern/southern border, its adjacencies might change
+                    if (layout->is_eastern_border(t) || layout->is_southern_border(t))
+                    {
+                        // add restriction as assumption only
+                        check_point->assumptions.push_back(not get_tv(t, v));
+                    }
+                    else  // nothing's about to change here
+                    {
+                        // add hard constraint
+                        solver->add(not get_tv(t, v));
+                    }
+                }
             }
+            // cannot restrict wires because each tile has degree >= 2 in an irregular clocking
         }
     }
 }
 
-void exact::define_number_of_connections()
+void exact::smt_handler::define_number_of_connections() noexcept
 {
-    for (auto&& t1 : layout->ground_layer())
+    for (auto&& t : iter::chain(check_point->added_tiles, check_point->updated_tiles))
     {
-        z3::expr_vector tcc{ctx};
+        z3::expr_vector tcc{*ctx};
 
-        // collect all variables representing connections t -> t'
-        z3::expr_vector acc{ctx};
+        // collect (inverse) connection variables
+        z3::expr_vector acc{*ctx};
+        z3::expr_vector iacc{*ctx};
         if (layout->is_regularly_clocked())
         {
-            for (auto&& at : layout->outgoing_clocked_tiles(t1))
+            for (auto&& at : layout->outgoing_clocked_tiles(t))
             {
-                auto tc = get_tc(t1, at);
+                auto tc = get_tc(t, at);
                 acc.push_back(tc);
                 tcc.push_back(tc);
+            }
+
+            for (auto&& iat : layout->incoming_clocked_tiles(t))
+            {
+                auto itc = get_tc(iat, t);
+                iacc.push_back(itc);
+                tcc.push_back(itc);
             }
         }
         else  // irregular clocking
         {
-            for (auto&& at : layout->surrounding_2d(t1))
+            for (auto&& at : layout->surrounding_2d(t))
             {
-                auto tc = get_tc(t1, at);
+                auto tc = get_tc(t, at);
                 acc.push_back(tc);
                 tcc.push_back(tc);
+
+                auto itc = get_tc(at, t);
+                iacc.push_back(itc);
+                tcc.push_back(itc);
             }
         }
 
-        // collect all variables representing connections t' -> t
-        z3::expr_vector iacc{ctx};
-        if (layout->is_regularly_clocked())
-        {
-            for (auto&& iat : layout->incoming_clocked_tiles(t1))
-            {
-                auto tc = get_tc(iat, t1);
-                iacc.push_back(tc);
-                tcc.push_back(tc);
-            }
-        }
-        else  // irregular clocking
-        {
-            for (auto&& iat : layout->surrounding_2d(t1))
-            {
-                auto tc = get_tc(iat, t1);
-                iacc.push_back(tc);
-                tcc.push_back(tc);
-            }
-        }
-
-        z3::expr_vector ow{ctx};
+        z3::expr_vector ow{*ctx};
 
         for (auto&& v : network->vertices(config.io_ports))
         {
-            auto tv   = get_tv(t1, v);
-            auto aon  = static_cast<unsigned>(network->out_degree(v, config.io_ports));
-            auto iaon = static_cast<unsigned>(network->in_degree(v, config.io_ports));
+            auto tv   = get_tv(t, v);
+            auto aon  = network->out_degree(v, config.io_ports);
+            auto iaon = network->in_degree(v, config.io_ports);
 
             ow.push_back(tv);
 
             // if vertex v is assigned to a tile, the number of connections need to correspond
             if (!acc.empty())
-                solver.add(z3::implies(tv, z3::atleast(acc, aon) and z3::atmost(acc, aon)));
+            {
+                solver->add(mk_as_if_se(z3::implies(tv, z3::atleast(acc, aon) and z3::atmost(acc, aon)), t));
+            }
             if (!iacc.empty())
-                solver.add(z3::implies(tv, z3::atleast(iacc, iaon) and z3::atmost(iacc, iaon)));
+            {
+                solver->add(mk_as_if_se(z3::implies(tv, z3::atleast(iacc, iaon) and z3::atmost(iacc, iaon)), t));
+            }
         }
 
-        z3::expr_vector wv{ctx};
+        z3::expr_vector wv{*ctx};
         for (auto&& e : network->edges(config.io_ports))
         {
-            auto te = get_te(t1, e);
-
+            auto te = get_te(t, e);
             ow.push_back(te);
             wv.push_back(te);
         }
-        // if there is any edge assigned to a tile, the number of connections need to correspond
-        if (!acc.empty())
-            solver.add(z3::implies(z3::atleast(wv, 1u) and z3::atmost(wv, 1u),
-                                   z3::atleast(acc, 1u) and z3::atmost(acc, 1u)));
-        if (!iacc.empty())
-            solver.add(z3::implies(z3::atleast(wv, 1u) and z3::atmost(wv, 1u),
-                                   z3::atleast(iacc, 1u) and z3::atmost(iacc, 1u)));
 
-        // if crossings are allowed, there must be exactly two connections in each direction for two assigned edges
-        if (config.crossings)
+        // if there is any edge assigned to a tile, the number of connections need to correspond
+        if (!wv.empty())
         {
             if (!acc.empty())
-                solver.add(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
-                           z3::atleast(acc, 2u) and z3::atmost(acc, 2u)));
-            if (!iacc.empty())
-                solver.add(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
-                           z3::atleast(iacc, 2u) and z3::atmost(iacc, 2u)));
-        }
-//        // crossing are not allowed, but multi-wires are: there can be one or two connections for two assigned edges
-//        else if (config.multi_wires)
-//        {
-//            if (!acc.empty())
-//                solver.add(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
-//                                       z3::atleast(acc, 1u) and z3::atmost(acc, 2u)));
-//            if (!iacc.empty())
-//                solver.add(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
-//                                       z3::atleast(iacc, 1u) and z3::atmost(iacc, 2u)));
-//        }
-
-        // if tile t is empty, there must not be any connection from or to tile t established
-        if (!ow.empty() && !tcc.empty())
-            solver.add(z3::atmost(ow, 0u) == z3::atmost(tcc, 0u));
-
-        if (!config.topolinano && !config.twoddwave)  // linear schemes; no path constraints needed
-        {
-            z3::expr_vector ccp{ctx};
-
-            // collect all variables representing paths t -> t' and t' -> t
-            for (auto&& t2 : layout->ground_layer())
             {
-                ccp.push_back(get_tp(t1, t2));
-                // add symmetrical path only if t1 != t2
-                if (layout->index(t1) != layout->index(t2))
-                    ccp.push_back(get_tp(t2, t1));
+                solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 1u) and z3::atmost(wv, 1u),
+                                                    z3::atleast(acc, 1u) and z3::atmost(acc, 1u)), t));
+            }
+            if (!iacc.empty())
+            {
+                solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 1u) and z3::atmost(wv, 1u),
+                                                    z3::atleast(iacc, 1u) and z3::atmost(iacc, 1u)), t));
             }
 
-            // if tile t is empty, there must not be any connection or path from or to tile t established
-            if (!ow.empty() && !ccp.empty())
-                solver.add(z3::atmost(ow, 0u) == z3::atmost(ccp, 0u));
+            // if crossings are allowed, there must be exactly four connections (one in each direction) for two assigned edges
+            if (config.crossings)
+            {
+                if (!acc.empty())
+                {
+                    solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
+                                                        z3::atleast(acc, 2u) and z3::atmost(acc, 2u)), t));
+                }
+                if (!iacc.empty())
+                {
+                    solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
+                                                        z3::atleast(iacc, 2u) and z3::atmost(iacc, 2u)), t));
+                }
+            }
+        }
+
+        // if tile t is empty, there must not be any connection from or to tile t established
+        if (ow.size() > 1 && !tcc.empty())  // test for > 1 to exclude single-vertex networks from this constraint
+        {
+            solver->add(mk_as_if_se(z3::atmost(ow, 0u) == z3::atmost(tcc, 0u), t));
+        }
+    }
+
+    // lacking connections for irregular clocking
+    if (!layout->is_regularly_clocked())
+    {
+        z3::expr_vector ccp{*ctx};
+
+        // iterate over added_tiles only here to not duplicate constraints
+        for (const auto& t : check_point->added_tiles)
+        {
+            z3::expr_vector ow{*ctx};
+            for (auto&& v : network->vertices(config.io_ports))
+            {
+                ow.push_back(get_tv(t, v));
+            }
+            for (auto&& e : network->edges(config.io_ports))
+            {
+                ow.push_back(get_te(t, e));
+            }
+
+            // if tile t is empty, the clock number does not matter and can be fixed to 0
+            if (!ow.empty())
+                solver->add(z3::implies(z3::atmost(ow, 0u), get_tcl(t) == ctx->int_val(0)));
         }
     }
 }
 
-void exact::utilize_hierarchical_information()
+void exact::smt_handler::utilize_hierarchical_information() noexcept
 {
+    // symmetry breaking for ToPoliNano clocking
     if (config.topolinano)
     {
         // restrict vertex placement according to their hierarchy level
@@ -821,140 +905,136 @@ void exact::utilize_hierarchical_information()
                 auto oe = network->out_edges(v, config.io_ports);
                 auto ie = network->in_edges(v, config.io_ports);
 
-                // cannot be placed with too little distance to left border
+                // cannot be placed with too little distance to western border
                 for (auto column : iter::range(l))
                 {
                     for (auto row : iter::range(layout->y()))
                     {
-                        auto t = layout_tile{column, row, GROUND};
-                        solver.add(not get_tv(t, v));
+                        if (auto t = layout_tile{column, row, GROUND}; is_added_tile(t))
+                        {
+                            solver->add(not get_tv(t, v));
 
-                        // same for the outgoing edges
-                        for (auto&& e : oe)
-                            solver.add(not get_te(t, e));
+                            // same for the outgoing edges
+                            for (auto&& e : oe)
+                                solver->add(not get_te(t, e));
+                        }
                     }
                 }
 
-                // cannot be placed with too little distance to right border
+                // cannot be placed with too little distance to eastern border
                 for (auto column : iter::range(layout->x() - il, layout->x()))
                 {
                     for (auto row : iter::range(layout->y()))
                     {
                         auto t = layout_tile{column, row, GROUND};
-                        solver.add(not get_tv(t, v));
+
+                        // use assumptions here because the south-east corner moves away in the following iterations
+                        check_point->assumptions.push_back(not get_tv(t, v));
 
                         // same for the incoming edges
                         for (auto&& e : ie)
-                            solver.add(not get_te(t, e));
+                            check_point->assumptions.push_back(not get_te(t, e));
                     }
+                }
+            }
+        }
+    }
+    // symmetry breaking for 2DDWave clocking
+    else if (config.twoddwave)
+    {
+        // restrict vertex placement according to their hierarchy level
+        if (config.io_ports && config.border_io)
+        {
+            for (auto&& v : network->vertices(config.io_ports))
+            {
+                auto l = hierarchy->get_level(v);
+                auto il = hierarchy->get_inv_level(v);
+                auto oe = network->out_edges(v, config.io_ports);
+                auto ie = network->in_edges(v, config.io_ports);
+
+                // cannot be placed with too little distance to north-west corner
+                for (const auto& t : check_point->added_tiles)
+                {
+                    if (t[X] + t[Y] < l)
+                    {
+                        solver->add(not get_tv(t, v));
+
+                        // same for the outgoing edges
+                        for (auto&& e : oe)
+                            solver->add(not get_te(t, e));
+                    }
+                    // cannot be placed with too little distance to south-east corner
+                    if (layout->x() - 1 - t[X] + layout->y() - 1 - t[Y] < il)
+                    {
+                        // use assumptions here because the south-east corner moves away in the following iterations
+                        check_point->assumptions.push_back(not get_tv(t, v));
+
+                        // same for the incoming edges
+                        for (auto&& e : ie)
+                            check_point->assumptions.push_back(not get_te(t, e));
+                    }
+
                 }
             }
         }
     }
 }
 
-void exact::enforce_border_io()
+void exact::smt_handler::enforce_border_io() noexcept
 {
     auto assign_border = [this](const logic_vertex _v)
     {
-        for (auto&& t : layout->ground_layer())
+        for (auto&& t : iter::chain(check_point->added_tiles, check_point->updated_tiles))
         {
-            if (layout->is_border(t))
-                continue;
-
-            solver.add(not get_tv(t, _v));
+            if (!layout->is_border(t))
+                solver->add(not get_tv(t, _v));
         }
     };
 
-    auto assign_left = [this](const logic_vertex _v)
+    auto assign_west = [this](const logic_vertex _v)
     {
-        for (auto&& t : layout->ground_layer())
+        // no need to iterate over updated_tiles, because nothing changes there
+        for (const auto& t : check_point->added_tiles)
         {
-            if (t[X] == 0)
-                continue;
-
-            solver.add(not get_tv(t, _v));
+            if (!layout->is_western_border(t))
+                solver->add(not get_tv(t, _v));
         }
     };
 
-    auto assign_right = [this](const logic_vertex _v)
+    auto assign_east = [this](const logic_vertex _v)
     {
-        for (auto&& t : layout->ground_layer())
+        for (auto&& t : iter::chain(check_point->added_tiles, check_point->updated_tiles))
         {
-            if (t[X] == layout->x() - 1)
-                continue;
-
-            solver.add(not get_tv(t, _v));
+            if (!layout->is_eastern_border(t))
+                solver->add(not get_tv(t, _v));
         }
     };
 
     if (config.io_ports)
     {
         for (auto&& pi : network->get_pis())
-            config.topolinano ? assign_left(pi) : assign_border(pi);
+            config.topolinano ? assign_west(pi) : assign_border(pi);
         for (auto&& po : network->get_pos())
-            config.topolinano ? assign_right(po) : assign_border(po);
+            config.topolinano ? assign_east(po) : assign_border(po);
     }
     else
     {
         for (auto&& pi : network->get_pis())
         {
             for (auto&& v : network->adjacent_vertices(pi))
-                config.topolinano ? assign_left(v) : assign_border(v);
+                config.topolinano ? assign_west(v) : assign_border(v);
         }
         for (auto&& po : network->get_pos())
         {
             for (auto&& v : network->inv_adjacent_vertices(po))
-                config.topolinano ? assign_right(v) : assign_border(v);
+                config.topolinano ? assign_east(v) : assign_border(v);
         }
     }
 }
 
-void exact::limit_wire_length()
+void exact::smt_handler::enforce_straight_inverters() noexcept
 {
-    for (auto&& e : network->edges(config.io_ports))
-    {
-        z3::expr_vector ve{ctx};
-        for (auto&& t : layout->ground_layer())
-            ve.push_back(get_te(t, e));
-
-        solver.add(z3::atmost(ve, config.wire_limit));
-    }
-}
-
-void exact::limit_crossings()
-{
-    z3::expr_vector crossings_counter{ctx};
-    for (auto&& t : layout->ground_layer())
-    {
-        z3::expr_vector wv{ctx};
-        for (auto&& e : network->edges(config.io_ports))
-            wv.push_back(get_te(t, e));
-
-        crossings_counter.push_back(z3::ite(z3::atleast(wv, 2u), ctx.real_val(1u), ctx.real_val(0u)));
-    }
-
-    solver.add(z3::sum(crossings_counter) <= ctx.real_val(config.crossings_limit));
-}
-
-void exact::minimize_crossings()
-{
-    z3::expr_vector crossings_counter{ctx};
-    for (auto&& t : layout->ground_layer())
-    {
-        z3::expr_vector wv{ctx};
-        for (auto&& e : network->edges(config.io_ports))
-            wv.push_back(get_te(t, e));
-
-        crossings_counter.push_back(z3::ite(z3::atleast(wv, 2u), ctx.real_val(1u), ctx.real_val(0u)));
-    }
-
-    solver.minimize(z3::sum(crossings_counter));
-}
-
-void exact::enforce_straight_inverters()
-{
-    for (auto&& t : layout->ground_layer())
+    for (auto&& t : iter::chain(check_point->added_tiles, check_point->updated_tiles))
     {
         for (auto&& inv : network->vertices())
         {
@@ -962,8 +1042,8 @@ void exact::enforce_straight_inverters()
             if (network->get_op(inv) != operation::NOT)
                 continue;
 
-            // I/Os are always straight, so they can be skipped as well
-            if (network->pre_pi(inv) || network->post_po(inv))
+            // I/Os inverters are always straight, so they can be skipped as well
+            if (!config.io_ports && (network->pre_pi(inv) || network->post_po(inv)))
                 continue;
 
             auto n = layout->north(t), e = layout->east(t),
@@ -973,7 +1053,7 @@ void exact::enforce_straight_inverters()
                  sw = layout->south_west(t), nw = layout->north_west(t);
 
             // vector to store possible direction combinations
-            z3::expr_vector ve{ctx};
+            z3::expr_vector ve{*ctx};
 
             if (layout->is_regularly_clocked())
             {
@@ -1077,18 +1157,37 @@ void exact::enforce_straight_inverters()
             if (!ve.empty())
             {
                 // inverter can be placed here; enforce any of the direction combinations found possible above
-                solver.add(z3::implies(get_tv(t, inv), z3::mk_or(ve)));
+                solver->add(mk_as_if_se(z3::implies(get_tv(t, inv), z3::mk_or(ve)), t));
             }
             else
             {
                 // inverter cannot be placed here, add constraint to avoid this case and speed up solving
-                solver.add(not get_tv(t, inv));
+                solver->add(mk_as_if_se(not get_tv(t, inv), t));
             }
         }
     }
 }
 
-void exact::topology_specific_constraints()
+void exact::smt_handler::restrict_clock_latches() noexcept
+{
+    auto zero = ctx->int_val(0u);
+
+    for (const auto& t : check_point->added_tiles)
+    {
+        // latches must be positive
+        auto l = get_tl(t);
+        solver->add(l >= zero);
+
+        // tiles without wires cannot have latches
+        z3::expr_vector te{*ctx};
+        for (auto&& e : network->edges(config.io_ports))
+            te.push_back(get_te(t, e));
+
+        solver->add(z3::implies(z3::atmost(te, 0u), l == zero));
+    }
+}
+
+void exact::smt_handler::topology_specific_constraints() noexcept
 {
     if (config.topolinano && config.vertical_offset)
     {
@@ -1109,7 +1208,8 @@ void exact::topology_specific_constraints()
                 {
                     for (auto&& at : layout->outgoing_clocked_tiles(t))
                     {
-                        solver.add(z3::implies(get_tv(t, fo), not get_tv(at, afo)));
+                        if (is_added_tile(at))
+                            solver->add(z3::implies(get_tv(t, fo), not get_tv(at, afo)));
                     }
                 }
             }
@@ -1119,24 +1219,24 @@ void exact::topology_specific_constraints()
                 continue;
 
             // enforce north-western input
-            for (auto&& t : layout->ground_layer())
+            for (const auto& t : check_point->added_tiles)
             {
                 // if fo gets placed here, its predecessor must be on the north-western tile
                 if (auto nw = layout->north_west(t); nw)
                 {
-                    solver.add(z3::implies(get_tv(t, fo), get_tc(*nw, t)));
+                    solver->add(z3::implies(get_tv(t, fo), get_tc(*nw, t)));
 
-                    // additionally, no crossing can preceed a fan-out
-                    z3::expr_vector wv{ctx};
+                    // additionally, no crossing can precede a fan-out
+                    z3::expr_vector wv{*ctx};
                     for (auto&& e : network->edges(config.io_ports))
                         wv.push_back(get_te(*nw, e));
 
-                    solver.add(z3::implies(get_tv(t, fo), z3::atmost(wv, 1u)));
+                    solver->add(z3::implies(get_tv(t, fo), z3::atmost(wv, 1u)));
                 }
                 // if tile t doesn't have a north-western adjacent tile, fo cannot be placed here
                 else
                 {
-                    solver.add(not get_tv(t, fo));
+                    solver->add(not get_tv(t, fo));
                 }
             }
         }
@@ -1162,7 +1262,8 @@ void exact::topology_specific_constraints()
                 {
                     for (auto&& at : layout->outgoing_clocked_tiles(t))
                     {
-                        solver.add(z3::implies(get_tv(t, v1), not get_tv(at, v2)));
+                        if (is_added_tile(at))
+                            solver->add(z3::implies(get_tv(t, v1), not get_tv(at, v2)));
                     }
                 }
             }
@@ -1174,45 +1275,88 @@ void exact::topology_specific_constraints()
                 if (auto ne = layout->north_east(t); !ne)
                 {
                     // no north-eastern tile, do not place v1 here
-                    solver.add(not get_tv(t, v1));
+                    check_point->assumptions.push_back(not get_tv(t, v1));
                 }
                 else if (ne)
                 {
                     // north-eastern tile exists, do not create a crossing here
-                    z3::expr_vector wv{ctx};
+                    z3::expr_vector wv{*ctx};
                     for (auto&& e : network->edges(config.io_ports))
                         wv.push_back(get_te(*ne, e));
 
-                    solver.add(z3::implies(get_tv(t, v1), z3::atmost(wv, 1u)));
+                    solver->add(z3::implies(get_tv(t, v1), z3::atmost(wv, 1u)));
                 }
                 if (auto se = layout->south_east(t); se)
                 {
                     // south-eastern tile exists, do not route a connection here
-                    solver.add(z3::implies(get_tv(t, v1), not get_tc(t, *se)));
+                    if (is_added_tile(*se))
+                        solver->add(z3::implies(get_tv(t, v1), not get_tc(t, *se)));
                 }
             }
         }
     }
 }
 
-void exact::generate_smt_instance()
+void exact::smt_handler::minimize_wires(optimize_ptr optimize) noexcept
 {
-    // layout constraints
+    z3::expr_vector wire_counter{*ctx};
+    for (auto&& t : layout->ground_layer())
+    {
+        for (auto&& e : network->edges(config.io_ports))
+            wire_counter.push_back(z3::ite(get_te(t, e), ctx->real_val(1u), ctx->real_val(0u)));
+    }
+
+    optimize->minimize(z3::sum(wire_counter));
+}
+
+void exact::smt_handler::minimize_crossings(optimize_ptr optimize) noexcept
+{
+    z3::expr_vector crossings_counter{*ctx};
+    for (auto&& t : layout->ground_layer())
+    {
+        z3::expr_vector wv{*ctx};
+        for (auto&& e : network->edges(config.io_ports))
+            wv.push_back(get_te(t, e));
+
+        crossings_counter.push_back(z3::ite(z3::atleast(wv, 2u), ctx->real_val(1u), ctx->real_val(0u)));
+    }
+
+    optimize->minimize(z3::sum(crossings_counter));
+}
+
+void exact::smt_handler::minimize_clock_latches(optimize_ptr optimize) noexcept
+{
+    z3::expr_vector latch_counter{*ctx};
+    for (auto&& t : layout->ground_layer())
+    {
+        latch_counter.push_back(get_tl(t));
+    }
+
+    optimize->minimize(z3::sum(latch_counter));
+}
+
+void exact::smt_handler::generate_smt_instance() noexcept
+{
+    // placement constraints
     restrict_tile_elements();
     restrict_vertices();
 
-    // open clocking
-    if (!layout->is_regularly_clocked())
-        restrict_clocks();
-
-    if (config.artificial_latches && !config.desynchronize)
-        restrict_latches();
-
-    // adjacency constraints
+    // local synchronization constraints
     define_adjacent_vertex_tiles();
     define_inv_adjacent_vertex_tiles();
     define_adjacent_edge_tiles();
     define_inv_adjacent_edge_tiles();
+
+    // global synchronization constraints
+    if (!config.desynchronize && !config.topolinano)
+    {
+        assign_pi_clockings();
+        global_synchronization();
+    }
+
+    // open clocking scheme constraints
+    if (!layout->is_regularly_clocked())
+        restrict_clocks();
 
     // path/cycle constraints
     if (!config.topolinano && !config.twoddwave)  // linear schemes; no cycles by definition
@@ -1222,49 +1366,64 @@ void exact::generate_smt_instance()
         eliminate_cycles();
     }
 
-    // crossings constraints
-    if (config.crossings)
-    {
-        if (config.crossings_limit)
-            limit_crossings();
-
-        if (config.minimize_crossings)
-            minimize_crossings();
-    }
-
-    // fan-in constraints
-    if (!config.desynchronize && !config.topolinano)
-    {
-        assign_pi_clockings();
-        fanin_length();
-    }
+    // I/O pin constraints
+    if (config.border_io)
+        enforce_border_io();
 
     // straight inverter constraints
     if (config.straight_inverters)
         enforce_straight_inverters();
 
-    // backdoor constraints
+    // clock latch constraints
+    if (config.clock_latches && !config.desynchronize)
+        restrict_clock_latches();
+
+    // topology-specific constraints
+    topology_specific_constraints();
+
+    // symmetry breaking constraints
     prevent_insufficiencies();
     define_number_of_connections();
     utilize_hierarchical_information();
-
-    // physical restrictions and limitations constraints
-    if (config.border_io)
-        enforce_border_io();
-
-    if (config.wire_limit)
-        limit_wire_length();
-
-    topology_specific_constraints();
-
-//    std::cout << solver.assertions() << std::endl;
-
 }
 
-void exact::assign_layout()
+exact::optimize_ptr exact::smt_handler::optimize() noexcept
 {
-    auto mdl = solver.get_model();
+    if (auto wires = config.minimize_wires, cross = config.minimize_crossings,
+                latch = config.clock_latches && !config.desynchronize; !wires && !cross && !latch)
+    {
+        return nullptr;
+    }
+    else
+    {
+        auto optimize = std::make_shared<z3::optimize>(*ctx);
 
+        // add all solver constraints
+        for (const auto& e : solver->assertions())
+            optimize->add(e);
+
+        // add assumptions as constraints, too, because optimize::check with assumptions is broken
+        for (const auto& e : check_point->assumptions)
+            optimize->add(e);
+
+        // wire minimization constraints
+        if (wires)
+            minimize_wires(optimize);
+
+        // crossing minimization constraints
+        if (cross)
+            minimize_crossings(optimize);
+
+        // clock latches minimization constraints
+        if (latch)
+            minimize_clock_latches(optimize);
+
+        return optimize;
+    }
+}
+
+void exact::smt_handler::assign_layout(const z3::model& model) noexcept
+{
     // assign vertices to tiles
     for (auto&& t : layout->ground_layer())
     {
@@ -1272,7 +1431,7 @@ void exact::assign_layout()
         for (auto&& v : network->vertices(config.io_ports))
         {
             // if vertex v is set to tile t
-            if (mdl.eval(get_tv(t, v)).bool_value() == Z3_L_TRUE)
+            if (model.eval(get_tv(t, v)).bool_value() == Z3_L_TRUE)
             {
                 // if this is a balance vertex
                 if (auto b = hierarchy->get_balance_edge(v); b)
@@ -1310,7 +1469,7 @@ void exact::assign_layout()
         for (auto&& e : network->edges(config.io_ports))
         {
             // if edge e is set to tile t
-            if (mdl.eval(get_te(t, e)).bool_value() == Z3_L_TRUE)
+            if (model.eval(get_te(t, e)).bool_value() == Z3_L_TRUE)
             {
                 // there is already an edge in ground level
                 if (layout->is_wire_tile(t))
@@ -1328,7 +1487,7 @@ void exact::assign_layout()
     if (!layout->is_regularly_clocked())
     {
         for (auto&& t : layout->ground_layer())
-            layout->assign_clocking(t, static_cast<fcn_clock::zone>(mdl.eval(get_tcl(t), true).get_numeral_int()));
+            layout->assign_clocking(t, static_cast<fcn_clock::zone>(model.eval(get_tcl(t), true).get_numeral_int()));
     }  // from now on, a clocking scheme is assigned and no distinction between regular and irregular must be made
 
 
@@ -1338,7 +1497,7 @@ void exact::assign_layout()
         for (auto&& t2 : layout->outgoing_clocked_tiles(t1))
         {
             // if connection t1 -> t2 is established
-            if (mdl.eval(get_tc(t1, t2)).bool_value() == Z3_L_TRUE)
+            if (model.eval(get_tc(t1, t2)).bool_value() == Z3_L_TRUE)
             {
                 layout_tile _t1, _t2;
                 if (layout->is_data_flow(t1, t2))
@@ -1385,10 +1544,243 @@ void exact::assign_layout()
     }
 
     // assign artificial latches if there were any in use
-    if (config.artificial_latches)
+    if (config.clock_latches)
     {
         for (auto&& t : layout->ground_layer())
             layout->assign_latch(t, static_cast<fcn_gate_layout::latch_delay>
-                                    (mdl.eval(get_tl(t), true).get_numeral_int()) * layout->num_clocks());
+                                    (model.eval(get_tl(t), true).get_numeral_int()) * layout->num_clocks());
     }
+}
+
+void exact::update_timeout(smt_handler& handler, mockturtle::stopwatch<>::duration time) const
+{
+    auto time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
+    auto time_left = (config.timeout - time_elapsed > 0 ? static_cast<unsigned>(config.timeout - time_elapsed) : 0u);
+
+    if (!time_left)
+        throw z3::exception("timeout");
+
+    handler.set_timeout(time_left);
+}
+
+fcn_gate_layout_ptr exact::explore_asynchronously(const unsigned t_num, std::shared_ptr<std::vector<thread_info>> ti_list) noexcept
+{
+    // timeout measurement
+    mockturtle::stopwatch<>::duration time{0};
+
+    auto ctx = std::make_shared<z3::context>();
+    auto layout_sketch = std::make_shared<fcn_gate_layout>(*config.scheme, network, config.vertical_offset ?
+                                                                                    fcn_layout::offset::VERTICAL :
+                                                                                    fcn_layout::offset::NONE);
+    smt_handler handler{ctx,layout_sketch, config};
+    (*ti_list)[t_num].ctx = ctx;
+
+    while (true)
+    {
+        fcn_dimension_xy dimension;
+
+        // mutually exclusive access to the dimension iterator
+        {
+            std::lock_guard<std::mutex> guard(dit_mutex);
+
+            ++dit;
+            dimension = *dit;  // operations ++ and * are split to prevent a vector copy construction
+        }
+
+        if (area(dimension) > config.upper_bound)
+            return nullptr;
+
+        if (handler.skippable(dimension))
+            continue;
+
+        // mutually exclusive access to the result dimension
+        {
+            std::lock_guard<std::mutex> guard(rd_mutex);
+
+            // a result is available already
+            if (result_dimension)
+            {
+                // stop working if its area is smaller or equal to the one currently at hand
+                if (area(*result_dimension) <= area(dimension))
+                    return nullptr;
+            }
+        }
+
+        // update dimension in the thread_info list and the handler
+        (*ti_list)[t_num].worker_dimension = dimension;
+        handler.update(dimension);
+
+        try
+        {
+            mockturtle::stopwatch stop{time};
+
+            if (handler.is_satisfiable())  // found a layout
+            {
+                // mutually exclusive access to the result_dimension
+                {
+                    std::lock_guard<std::mutex> guard(rd_mutex);
+
+                    // update the result_dimension if there is none
+                    if (!result_dimension)
+                    {
+                        result_dimension = dimension;
+                    }
+                    else  // or if the own one is smaller
+                    {
+                        if (area(*result_dimension) > area(dimension))
+                            result_dimension = dimension;
+                        else
+                            return nullptr;
+                    }
+                }
+
+                // interrupt other threads that are working on higher dimensions
+                for (const auto& ti : *ti_list)
+                {
+                    if (area(dimension) <= area(ti.worker_dimension))
+                        ti.ctx->interrupt();
+                }
+
+                return layout_sketch;
+            }
+            else  // no layout with this dimension possible
+            {
+                // One could assume that interrupting other threads that are working on real smaller (not bigger in
+                // any dimension) layouts could be beneficial here. However, testing revealed that this code was hardly
+                // ever triggered and if it was, it impacted performance negatively because no solver state could be
+                // stored that could positively influence performance of later SMT calls
+
+                handler.store_solver_state(dimension);
+            }
+        }
+        catch (const z3::exception&)  // timed out or interrupted
+        {
+            return nullptr;
+        }
+
+        update_timeout(handler, time);
+    }
+
+    // unreachable code, but compiler complains if it's not there
+    return nullptr;
+}
+
+exact::pd_result exact::run_asynchronously() noexcept
+{
+    mockturtle::stopwatch<>::duration time{0};
+
+    {
+        mockturtle::stopwatch stop{time};
+
+        using fut_layout = std::future<fcn_gate_layout_ptr>;
+        std::vector<fut_layout> fut(config.num_threads);
+        auto ti_list = std::make_shared<std::vector<thread_info>>(config.num_threads);
+
+#if (PROGRESS_BARS)
+        mockturtle::progress_bar thread_bar("[i] examining layout dimensions using {} threads");
+        thread_bar(config.num_threads);
+
+        auto post_toggle = false;
+        mockturtle::progress_bar post_bar("[i] some layout has been found; waiting for threads examining smaller dimensions to complete");
+#endif
+
+        for (auto&& i : iter::range(config.num_threads))
+        {
+            fut[i] = std::async(std::launch::async, &exact::explore_asynchronously, this, i, ti_list);
+        }
+
+        // wait for all tasks to finish running (can be made much prettier in C++20...)
+        for (auto still_running = true; still_running; )
+        {
+            still_running = false;
+            for (auto&& i : iter::range(config.num_threads))
+            {
+                using namespace std::chrono_literals;
+                if (fut[i].wait_for(10ms) == std::future_status::timeout)
+                {
+                    still_running = true;
+                }
+#if (PROGRESS_BARS)
+                else if (!post_toggle)
+                {
+                    thread_bar.done();
+                    post_bar(true);
+                    post_toggle = true;
+                }
+#endif
+            }
+        }
+
+        if (result_dimension)
+        {
+            auto result_dim_val = *result_dimension;
+            // extract the layout from the futures
+            for (auto& f : fut)
+            {
+                if (auto l = f.get(); l != nullptr)
+                {
+                    // in case multiple returned, get the actual winner
+                    if (l->x() == result_dim_val[X] && l->y() == result_dim_val[Y])
+                        layout = l;
+                }
+            }
+        }
+    }
+
+    return pd_result{result_dimension.has_value(), nlohmann::json{{"runtime (s)", mockturtle::to_seconds(time)}}};
+}
+
+exact::pd_result exact::run_synchronously() noexcept
+{
+    mockturtle::stopwatch<>::duration time{0};
+
+    auto layout_sketch = std::make_shared<fcn_gate_layout>(*config.scheme, network, config.vertical_offset ?
+                                                                                    fcn_layout::offset::VERTICAL :
+                                                                                    fcn_layout::offset::NONE);
+    smt_handler handler{std::make_shared<z3::context>(), layout_sketch, config};
+
+    for (; dit <= config.upper_bound; ++dit)  // <= to prevent overflow
+    {
+
+#if (PROGRESS_BARS)
+        mockturtle::progress_bar bar("[i] examining layout dimensions: {:>2} × {:<2}");
+#endif
+
+        auto dimension = *dit;
+
+        if (handler.skippable(dimension))
+            continue;
+
+#if (PROGRESS_BARS)
+        bar(dimension[X], dimension[Y]);
+#endif
+
+        handler.update(dimension);
+
+        try
+        {
+            auto sat = mockturtle::call_with_stopwatch(time, [&handler]
+            {
+                return handler.is_satisfiable();
+            });
+
+            if (sat)
+            {
+                layout = layout_sketch;
+                return pd_result{true, nlohmann::json{{"runtime (s)", mockturtle::to_seconds(time)}}};
+            }
+            else
+            {
+                handler.store_solver_state(dimension);
+            }
+
+            update_timeout(handler, time);
+        }
+        catch (const z3::exception&)
+        {
+            return pd_result{false, nlohmann::json{{"runtime (s)", mockturtle::to_seconds(time)}}};
+        }
+    }
+
+    return pd_result{false, nlohmann::json{{"runtime (s)", mockturtle::to_seconds(time)}}};
 }

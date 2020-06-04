@@ -94,6 +94,14 @@ private:
      */
     red_blue_coloring find_rb_coloring(const jdfs_ordering& jdfs) const noexcept;
     /**
+     * Calculates the resulting layout dimension from the given red_blue_coloring. The layout will have size X * Y where
+     * X = #RED + #WHITE + #PI, Y = #BLUE + #WHITE + #PI.
+     *
+     * @param rb_coloring The coloring to consider.
+     * @return The resulting layout dimension calculated from the given rb_coloring.
+     */
+    fcn_dimension_xy determine_layout_size(const red_blue_coloring& rb_coloring) const noexcept;
+    /**
      * Elongates the I/O wires so that the pins are located at the layout's borders.
      */
     void elongate_ios() const noexcept;

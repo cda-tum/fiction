@@ -27,6 +27,10 @@ class fcn_gate_library
 {
 public:
     /**
+     * Alias for gate size.
+     */
+    using gate_size_t = uint8_t;
+    /**
      * Default constructor. Needs a gate layout to map from, a technology specifying cells to map and information about
      * tile sizes in that gate library.
      *
@@ -104,13 +108,13 @@ public:
      *
      * @return x_size.
      */
-    std::size_t gate_x_size() const noexcept;
+    gate_size_t gate_x_size() const noexcept;
     /**
      * Returns vertical size of gate blocks.
      *
      * @return y_size.
      */
-    std::size_t gate_y_size() const noexcept;
+    gate_size_t gate_y_size() const noexcept;
     /**
      * Returns pointer the port router.
      *
@@ -187,11 +191,11 @@ protected:
     /**
      * X-size of gates.
      */
-    const std::size_t x_size;
+    const gate_size_t x_size;
     /**
      * Y-size of gates.
      */
-    const std::size_t y_size;
+    const gate_size_t y_size;
     /**
      * Single empty gate in given technology and tile_size. Used as a blue print to create new ones in merge and
      * transpose for example.

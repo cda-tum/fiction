@@ -27,7 +27,7 @@ namespace alice
                 :
                 command(env,
                         "Substitutes high-degree outputs of gate vertices of the current logic network in store "
-                        "and replaces them with fan-out nodes.\nSome algorithms require fan-out vertices explicitly and "
+                        "and replaces them with fan-out nodes. Some algorithms require fan-out vertices explicitly and "
                         "will break down networks if needed. Others might be able to handle both.")
         {
             add_option("--degree,-d", degree,

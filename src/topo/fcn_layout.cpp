@@ -5,7 +5,7 @@
 #include "fcn_layout.h"
 
 
-fcn_layout::fcn_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocking, offset o) noexcept
+fcn_layout::fcn_layout(const fcn_dimension_xyz& lengths, fcn_clocking_scheme&& clocking, offset o) noexcept
         :
         grid_graph(lengths),
         clocking(std::move(clocking)),
@@ -15,7 +15,7 @@ fcn_layout::fcn_layout(fcn_dimension_xyz&& lengths, fcn_clocking_scheme&& clocki
         std::cerr << "[w] due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs." << std::endl;
 }
 
-fcn_layout::fcn_layout(fcn_dimension_xy&& lengths, fcn_clocking_scheme&& clocking, offset o) noexcept
+fcn_layout::fcn_layout(const fcn_dimension_xy& lengths, fcn_clocking_scheme&& clocking, offset o) noexcept
         :
         grid_graph(fcn_dimension_xyz{lengths[X], lengths[Y], 2}),
         clocking(std::move(clocking)),
@@ -46,15 +46,15 @@ bool fcn_layout::is_vertically_shifted() const noexcept
     return shift == offset::VERTICAL;
 }
 
-void fcn_layout::resize(fcn_dimension_xyz&& lengths) noexcept
+void fcn_layout::resize(const fcn_dimension_xyz& lengths) noexcept
 {
     if (lengths[X] < 2 || lengths[Y] < 2 || lengths[Z] < 2)
         std::cerr << "[w] due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs." << std::endl;
 
-    resize_grid(std::move(lengths));
+    resize_grid(lengths);
 }
 
-void fcn_layout::resize(fcn_dimension_xy&& lengths) noexcept
+void fcn_layout::resize(const fcn_dimension_xy& lengths) noexcept
 {
     resize(fcn_dimension_xyz{lengths[X], lengths[Y], 2});
 }
@@ -178,17 +178,17 @@ fcn_layout::ground fcn_layout::get_ground(const face& f) const noexcept
     return ground{f[X], f[Y]};
 }
 
-std::size_t fcn_layout::x() const noexcept
+coord_t fcn_layout::x() const noexcept
 {
     return length(X);
 }
 
-std::size_t fcn_layout::y() const noexcept
+coord_t fcn_layout::y() const noexcept
 {
     return length(Y);
 }
 
-std::size_t fcn_layout::z() const noexcept
+coord_t fcn_layout::z() const noexcept
 {
     return length(Z);
 }
@@ -196,24 +196,19 @@ std::size_t fcn_layout::z() const noexcept
 fcn_layout::face fcn_layout::random_face() const noexcept
 {
     std::mt19937 rgen(std::random_device{}());
-    std::uniform_int_distribution<std::size_t> dist(0, get_vertex_count() - 1); // distribution in range [0, |V|]
+    std::uniform_int_distribution<coord_t> dist(0, get_vertex_count() - 1); // distribution in range [0, |V|]
 
     return get_by_index(dist(rgen));
 }
 
-fcn_layout::face fcn_layout::random_face(const std::size_t n) const noexcept
+fcn_layout::face fcn_layout::random_face(const layer_t n) const noexcept
 {
-    std::mt19937 rgen(std::random_device{}());
-    std::uniform_int_distribution<std::size_t> dist(0, x() * y()); // distribution in range [0, x * y]
+    const auto f = random_face();
 
-    const auto idx = dist(rgen);
-    const std::size_t col = idx % x();
-    const std::size_t row = idx / x();
-
-    return face{col, row, n};
+    return face{f[X], f[Y], n};
 }
 
-std::size_t fcn_layout::area() const noexcept
+coord_t fcn_layout::area() const noexcept
 {
     return x() * y();
 }
@@ -287,20 +282,61 @@ std::vector<std::string> fcn_layout::latch_str_reprs() const noexcept
     return reprs;
 }
 
-bool fcn_layout::is_border(const face& f, const std::optional<bounding_box>& bb) const noexcept
+bool fcn_layout::is_northern_border(const face& f, const std::optional<bounding_box>& bb) const noexcept
 {
     if (bb)  // bounding box given, do calculations based on that
     {
-        return (f[X] == (*bb).min_x) || (f[Y] == (*bb).min_y) || (f[X] == (*bb).max_x) || (f[Y] == (*bb).max_y);
+        return f[Y] == (*bb).min_y;
     }
-    else  // no bounding box given, use layout's borders
+    else  // no bounding box given, use layout's border
     {
-        return (f[X] == 0) || (f[Y] == 0) || (f[X] == x() - 1) || (f[Y] == y() - 1);
+        return f[Y] == 0;
     }
+}
+
+bool fcn_layout::is_eastern_border(const face& f, const std::optional<bounding_box>& bb) const noexcept
+{
+    if (bb)  // bounding box given, do calculations based on that
+    {
+        return f[X] == (*bb).max_x;
+    }
+    else  // no bounding box given, use layout's border
+    {
+        return f[X] == x() - 1;
+    }
+}
+
+bool fcn_layout::is_southern_border(const face& f, const std::optional<bounding_box>& bb) const noexcept
+{
+    if (bb)  // bounding box given, do calculations based on that
+    {
+        return f[Y] == (*bb).max_y;
+    }
+    else  // no bounding box given, use layout's border
+    {
+        return f[Y] == y() - 1;
+    }
+}
+
+bool fcn_layout::is_western_border(const face& f, const std::optional<bounding_box>& bb) const noexcept
+{
+    if (bb)  // bounding box given, do calculations based on that
+    {
+        return f[X] == (*bb).min_x;
+    }
+    else  // no bounding box given, use layout's border
+    {
+        return f[X] == 0;
+    }
+}
+
+bool fcn_layout::is_border(const face& f, const std::optional<bounding_box>& bb) const noexcept
+{
+    return is_northern_border(f, bb) || is_eastern_border(f, bb) || is_southern_border(f, bb) || is_western_border(f, bb);
 }
 
 void fcn_layout::shrink_to_fit() noexcept
 {
     auto bb = determine_bounding_box();
-    resize(fcn_dimension_xyz{std::max(bb.max_x + 1, std::size_t{2}), std::max(bb.max_y + 1, std::size_t{2}), z()});  // incorporate BGL bug
+    resize(fcn_dimension_xyz{std::max(bb.max_x + 1, coord_t{2}), std::max(bb.max_y + 1, coord_t{2}), z()});  // incorporate BGL bug
 }

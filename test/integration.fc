@@ -21,8 +21,10 @@ clear
 read ../benchmarks/ISCAS85/c1355.v
 ps -n
 ortho
+energy
 ps -g
 cell
+area
 show -c --silent -s
 
 random -n 10 -g 50 -m
@@ -45,10 +47,12 @@ exact -xibs 2ddwave4
 print -g
 simulate -g
 cell -l 0
+area
 qca
 exact -xibs topolinano3
 check -w 2
 cell -l 1
+area
 print -c
 simulate -g
 qcc
@@ -56,10 +60,13 @@ store -c
 
 read ../benchmarks/TOY/HA.v
 simulate -n
-exact -xms use
+exact -xiws use
 ps -g
-exact -xds res
+equiv
+exact -xids res
 ps -g
-exact -xbs bancs
+equiv
+exact -xibs bancs
 ps -g
+equiv
 store -g

@@ -24,7 +24,7 @@ enum operation { NONE = 0u, AND, OR, NOT, MAJ, F1O2, F1O3, W, PI, PO };
 /**
  * Number of different supported operations.
  */
-constexpr const std::size_t OP_COUNT = 10ul;
+constexpr const uint8_t OP_COUNT = 10ul;
 /**
  * Writes the given operation o to the given ostream channel as a text symbol as it could be used
  * in grid representations.

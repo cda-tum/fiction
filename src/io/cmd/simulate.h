@@ -69,13 +69,14 @@ namespace alice
                     env->out() << "[w] no gate layout in store" << std::endl;
                     return;
                 }
-                if (!gls.current()->has_io_pins())
-                {
-                    env->out() << "[w] gate layout must have designated I/O pins for simulation" << std::endl;
-                    return;
-                }
 
                 const auto fgl = gls.current();
+
+                if (!fgl->has_io_pins())
+                {
+                    env->out() << "[w] " << fgl->get_name() << " must have designated I/O pins for simulation" << std::endl;
+                    return;
+                }
 
                 // store PO names
                 for (auto&& po : fgl->get_pos() | iter::sorted([&fgl](const auto& _t1, const auto& _t2)
