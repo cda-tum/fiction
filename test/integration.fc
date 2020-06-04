@@ -11,21 +11,16 @@ balance -u
 gates
 
 read ../benchmarks/ISCAS85/c432.v
+ps -n
 ortho -b
+ps -g
 check
+energy
 cell
 ps -c
+area
 show -c --silent --delete
 clear
-
-read ../benchmarks/ISCAS85/c1355.v
-ps -n
-ortho
-energy
-ps -g
-cell
-area
-show -c --silent -s
 
 random -n 10 -g 50 -m
 ps -n
