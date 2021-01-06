@@ -13,8 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `tt_reader` for reading truth tables from a [file format used by Alan Mishchenko](https://people.eecs.berkeley.edu/~alanmi/temp5/)
 
 ### Changed
-- `exact --asynchronous/-a` has been renamed to `exact --async/-a` and
-`exact --asynchronous_max/-A` has been renamed to `exact --async_max`
+- `exact --asynchronous/-a` has been renamed to `exact --async/-a` and `exact --asynchronous_max/-A` has been renamed to `exact --async_max`
 - outsourced Verilog and AIGER file handling into a distinct `network_reader` class so that it can be used in custom experiments
 
 ### Fixed

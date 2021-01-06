@@ -146,8 +146,6 @@ if (ENABLE_MUGEN)
     add_custom_target(glucose_syrup
             ALL
             DEPENDS ${PROJECT_BINARY_DIR}/glucose-syrup)
-            
-    # include_directories(${Python3_INCLUDE_DIRS})
 endif ()
 
 # Build executable
