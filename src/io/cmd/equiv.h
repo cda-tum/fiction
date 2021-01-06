@@ -66,7 +66,7 @@ protected:
         // check whether an index was given
         if (this->is_set("gate_layout"))
         {
-            if (gli == s.current_index())
+            if (static_cast<int>(gli) == s.current_index())
             {
                 std::cout << "[w] comparison against self" << std::endl;
                 reset_flags();
@@ -143,7 +143,7 @@ private:
     /**
      * Index of gate layout that current gate layout is to be compared against.
      */
-    int gli = -1;
+    unsigned gli = -1;
     /**
      * Stores the result of the last equivalence check for easier access to result and logging data.
      */
@@ -154,7 +154,7 @@ private:
      */
     void reset_flags()
     {
-        gli = -1;
+        gli = 0;
     }
 };
 

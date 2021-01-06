@@ -8,7 +8,7 @@ namespace qca
 {
     void write(fcn_cell_layout_ptr fcl, const std::string& filename)
     {
-        std::ofstream file(filename, std::ofstream::out);
+        std::ofstream file(filename, std::ios::out);
 
         if (!file.is_open())
             throw std::ofstream::failure("could not open file");

@@ -151,6 +151,8 @@ public:
     /**
      * Removes the given vertex from the network.
      *
+     * NOTE that this might invalidate mappings as all node IDs will be recomputed.
+     *
      * @param v Vertex to remove.
      */
     void remove_logic_vertex(const vertex v) noexcept;
@@ -164,10 +166,16 @@ public:
     /**
      * Creates a primary output vertex in the network.
      *
+     * @param name Name associated with the output port.
+     */
+    vertex create_po(const std::string& name = "") noexcept;
+    /**
+     * Creates a primary output vertex in the network and connects it to the given input signal.
+     *
      * @param a Input signal to the newly created PO.
      * @param name Name associated with the output port.
      */
-    void create_po(const vertex a, const std::string& name = "") noexcept;
+    vertex create_po(const vertex a, const std::string& name = "") noexcept;
     /**
      * Creates a NOT gate in the network with the given vertex as input signal.
      *
@@ -526,14 +534,18 @@ public:
      *
      * @param os Channel into which the Graphviz representation should be written.
      */
-    void write_dot(std::ostream& os = std::cout) noexcept;
+    void write_dot(std::ostream& os = std::cout) const noexcept;
     /**
      * Writes a less detailed Graphviz (https://www.graphviz.org/) dot representation of the logic_network to the given
      * ostream. Incorporates the logic function names.
      *
      * @param os Channel into which the Graphviz representation should be written.
      */
-    void write_simple_dot(std::ostream& os = std::cout) noexcept;
+    void write_simple_dot(std::ostream& os = std::cout) const noexcept;
+    /**
+     * Re-initializes an empty logic network.
+     */
+    void clear_network() noexcept;
 private:
     /**
      * Path name from which the logic_network was created.

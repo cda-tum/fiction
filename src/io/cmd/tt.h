@@ -7,8 +7,8 @@
 
 
 #include <alice/alice.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <cctype>
 #include <string>
 

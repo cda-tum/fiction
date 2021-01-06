@@ -11,13 +11,15 @@
 #include "mockturtle/utils/progress_bar.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
-#include <vector>
 #include <map>
-#include <unordered_map>
 #include <set>
+#include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
-#include <string>
+#include <vector>
+#include <boost/functional/hash/hash.hpp>
+#include <boost/predef/os/windows.h>
 #include <itertools.hpp>
 
 /**
@@ -37,6 +39,10 @@ protected:
     };
 
 public:
+    /**
+     * Default constructor for cases in which no logic network shall be passed.
+     */
+    physical_design() = default;
     /**
      * Standard constructor.
      *

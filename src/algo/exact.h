@@ -107,11 +107,11 @@ private:
          * @param fgl The gate layout pointer that is going to contain the created layout.
          * @param c The configurations to respect in the SMT instance generation process.
          */
-        explicit smt_handler(ctx_ptr ctx, fcn_gate_layout_ptr fgl, const exact_pd_config& c) noexcept;
+        smt_handler(ctx_ptr ctx, fcn_gate_layout_ptr fgl, const exact_pd_config& c) noexcept;
         /**
          * Evaluates a given dimension regarding the stored configurations whether it can be skipped, i.e. does not
-         * need to be explored by the SMT solver. The better this function is, the less UNSAT instances can be skipped
-         * without losing the optimality guaranty. This function should never be overly restrictive!
+         * need to be explored by the SMT solver. The better this function is, the more UNSAT instances can be skipped
+         * without losing the optimality guarantee. This function should never be overly restrictive!
          *
          * @param dim Dimension to evaluate.
          * @return True if dim can safely be skipped because it is UNSAT anyways.

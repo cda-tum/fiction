@@ -340,3 +340,11 @@ void fcn_layout::shrink_to_fit() noexcept
     auto bb = determine_bounding_box();
     resize(fcn_dimension_xyz{std::max(bb.max_x + 1, coord_t{2}), std::max(bb.max_y + 1, coord_t{2}), z()});  // incorporate BGL bug
 }
+
+void fcn_layout::clear_layout() noexcept
+{
+    c_map.clear();
+    pi_set.clear();
+    po_set.clear();
+    l_map.clear();
+}

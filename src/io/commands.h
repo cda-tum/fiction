@@ -17,6 +17,7 @@
 #include "cmd/simulate.h"
 #include "cmd/akers.h"
 #include "cmd/exact.h"
+#include "cmd/onepass.h"
 #include "cmd/ortho.h"
 #include "cmd/check.h"
 #include "cmd/equiv.h"
