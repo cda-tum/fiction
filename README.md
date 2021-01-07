@@ -1,6 +1,7 @@
 # Let there be a fiction
 
 [![Build Status](https://travis-ci.com/marcelwa/fiction.svg?branch=master)](https://travis-ci.com/marcelwa/fiction)
+[![deepcode](https://www.deepcode.ai/api/gh/badge?key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF0Zm9ybTEiOiJnaCIsIm93bmVyMSI6Im1hcmNlbHdhIiwicmVwbzEiOiJmaWN0aW9uIiwiaW5jbHVkZUxpbnQiOmZhbHNlLCJhdXRob3JJZCI6MTU1MTUsImlhdCI6MTYxMDAxNTE1OH0.CGPNrF5TRz3lojNPfCoM_dOBS8Qxm8aZ1IzlvHfbRA0)](https://www.deepcode.ai/app/gh/marcelwa/fiction/_/dashboard?utm_content=gh%2Fmarcelwa%2Ffiction)
 
 This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
 in C++17 using the [EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). *fiction* focuses on the
