@@ -10,7 +10,7 @@ ARG NUMBER_OF_JOBS=1
         cmake cmake-doc extra-cmake-modules extra-cmake-modules-doc \
     #
     # Install packages needed to build fiction
-        git g++ cmake boost-dev python readline-dev
+        git g++ cmake boost-dev python3 python3-dev readline-dev zlib-dev
 
 # Clone the repository including submodules
 RUN git clone --recursive https://github.com/marcelwa/fiction.git

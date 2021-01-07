@@ -224,8 +224,9 @@ public:
      *
      * @param os An std::ostream channel to write the textual representation of this layout into.
      * @param io_color Flag to indicate features like PI/PO should be printed with color escape.
+     * @param clk_color Flag to indicate that clock zones should be printed with color escape. Can look weird.
      */
-    void write_layout(std::ostream& os = std::cout, bool io_color = true) const noexcept;
+    void write_layout(std::ostream& os = std::cout, const bool io_color = true, const bool clk_color = false) const noexcept;
 
 private:
     /**

@@ -80,8 +80,11 @@ void port_router::compute_qca_5x5_ports()
                 p.inp.emplace(0u, 2u);
 
             // NONE (WEST)
-            if (layout->get_tile_inp_dirs(t) == layout::DIR_NONE)
-                p.inp.emplace(0u, 2u);
+            if (auto op = layout->get_op(t); op != operation::NOT && op != operation::W)
+            {
+                if (layout->get_tile_inp_dirs(t) == layout::DIR_NONE)
+                    p.inp.emplace(0u, 2u);
+            }
 
             // determine outgoing connector ports
             if (layout->is_tile_out_dir(t, layout::DIR_N))
@@ -94,8 +97,11 @@ void port_router::compute_qca_5x5_ports()
                 p.out.emplace(0u, 2u);
 
             // NONE (EAST)
-            if (layout->get_tile_inp_dirs(t) == layout::DIR_NONE)
-                p.out.emplace(4u, 2u);
+            if (auto op = layout->get_op(t); op != operation::NOT && op != operation::W)
+            {
+                if (layout->get_tile_out_dirs(t) == layout::DIR_NONE)
+                    p.out.emplace(4u, 2u);
+            }
 
             // assign connector ports
             g_ports[std::make_pair(t, *layout->get_logic_vertex(t))] = p;

@@ -8,3 +8,4 @@ build/
 *.synctex.gz
 /.vs
 *.json
+__pycache__

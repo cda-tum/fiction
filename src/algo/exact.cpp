@@ -127,7 +127,7 @@ z3::expr exact::smt_handler::get_lit_s() noexcept
 
 exact::smt_handler::solver_check_point exact::smt_handler::fetch_solver(const fcn_dimension_xy& dim) noexcept
 {
-    const auto create_assumptions = [this](const solver_state& state)->z3::expr_vector
+    const auto create_assumptions = [this](const solver_state& state) -> z3::expr_vector
     {
         z3::expr_vector assumptions{*ctx};
         assumptions.push_back(state.lit.s);
@@ -684,7 +684,6 @@ void exact::smt_handler::global_synchronization() noexcept
 
 void exact::smt_handler::prevent_insufficiencies() noexcept
 {
-//    for (auto&& t : iter::chain(check_point->added_tiles, check_point->updated_tiles))
     for (auto&& t : layout->tiles())
     {
         if (!layout->is_eastern_border(t) && !layout->is_southern_border(t) && !is_updated_tile(t))
@@ -1681,7 +1680,7 @@ exact::pd_result exact::run_asynchronously() noexcept
         thread_bar(config.num_threads);
 
         auto post_toggle = false;
-        mockturtle::progress_bar post_bar("[i] some layout has been found; waiting for threads examining smaller dimensions to complete");
+        mockturtle::progress_bar post_bar("[i] some layout has been found; waiting for threads examining smaller dimensions to terminate");
 #endif
 
         for (auto&& i : iter::range(config.num_threads))

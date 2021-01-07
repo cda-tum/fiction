@@ -3,6 +3,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## v0.3.2 - 2021-01-06
+*Sometimes fiction is more easily understood than true events.* &mdash; Young-ha Kim
+
+### Added
+- Command `onepass` for a combined SAT-based logic synthesis and physical design using [Mugen](https://github.com/whaaswijk/mugen). Thanks to Winston Haaswijk for cooperating with me on this project!
+- SVG output for irregular (cell-based) clocked `fcn_cell_layout`s (thanks to Gregor Kuhn!)
+- `csv_writer` for conveniently formatting experiments' results
+- `tt_reader` for reading truth tables from a [file format used by Alan Mishchenko](https://people.eecs.berkeley.edu/~alanmi/temp5/)
+
+### Changed
+- `exact --asynchronous/-a` has been renamed to `exact --async/-a` and `exact --asynchronous_max/-A` has been renamed to `exact --async_max`
+- outsourced Verilog and AIGER file handling into a distinct `network_reader` class so that it can be used in custom experiments
+
+### Fixed
+- `Docker` build that broke down due to updates to `mockturtle` and `bill`
+
 ## v0.3.1 - 2020-06-04
 *There is no doubt fiction makes a better job of the truth.* &mdash; Doris Lessing
 
@@ -30,9 +46,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Moved to the latest releases of all libraries
 
 ### Fixed
+- Python detection in CMake under different versions
 - Runtime logging in `exact`
 - Performance issues in `ortho`
-- Python detection in CMake under different versions
+- SEGFAULTS caused by `ortho` on large networks when compiling with gcc
 - `ortho -b` losing bent wire connections
 - `fcn_layout::random_face`'s index to coordinate mapping again, but for real now (thanks to Till Schlechtweg!)
 - `logic_network`s are deep-copied for each physical design call now to secure them from external changes

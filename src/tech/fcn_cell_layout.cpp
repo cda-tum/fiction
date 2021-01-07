@@ -286,8 +286,15 @@ fcn_layout::bounding_box fcn_cell_layout::determine_bounding_box() const noexcep
     return bounding_box{min_x, min_y, max_x, max_y};
 }
 
-void fcn_cell_layout::write_layout(std::ostream& os, bool io_color) const noexcept
+void fcn_cell_layout::write_layout(std::ostream& os, const bool io_color, const bool clk_color) const noexcept
 {
+    // empty layout
+    if (!area())
+    {
+        os << "[i] empty layout" << std::endl;
+        return;
+    }
+
     // Escape color sequence for input colors (green).
     const char* INP_COLOR = "\033[38;5;28m";
     // Escape color sequence for output colors (red).
@@ -296,6 +303,12 @@ void fcn_cell_layout::write_layout(std::ostream& os, bool io_color) const noexce
     const char* LATCH_COLOR = "\033[48;5;232;38;5;226m";
     // Escape color sequence for resetting colors.
     const char* COLOR_RESET = "\033[0m";
+    // Escape color sequences for clock background colors (white to dark grey).
+    std::vector<const char*> CLOCK_COLORS{{"\033[48;5;255;38;5;232m",  // white tile, black text
+                                           "\033[48;5;248;38;5;232m",  // light grey tile, black text
+                                           "\033[48;5;240;38;5;255m",  // grey tile, white text
+                                           "\033[48;5;236;38;5;255m"   // dark grey tile, white text
+                                          }};
 
     for (auto y_pos : iter::range(y()))
     {
@@ -305,6 +318,9 @@ void fcn_cell_layout::write_layout(std::ostream& os, bool io_color) const noexce
 
             auto type_0 = get_cell_type(c);
             auto type_1 = get_cell_type(above(c));
+
+            if (clk_color && cell_clocking(c))
+                os << CLOCK_COLORS[*cell_clocking(c)];
 
             // is crossing
             if (type_1 != fcn::EMPTY_CELL)

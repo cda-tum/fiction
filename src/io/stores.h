@@ -140,17 +140,17 @@ namespace alice
     {
         auto [cp, tp] = layout->critical_path_length_and_throughput();
         os << fmt::format(" {} - {} × {}, #G: {}, #W: {}, #C: {}, #L: {}, CP: {}, TP: 1/{}", layout->get_name(),
-                          layout->x(), layout->y(), layout->gate_count(), layout->wire_count(),
-                          layout->crossing_count(), layout->latch_count(), cp, tp) << std::endl;
+                          layout->x(), layout->y(), layout->gate_count(true), layout->wire_count(true),
+                          layout->crossing_count(true), layout->latch_count(), cp, tp) << std::endl;
     }
 
     ALICE_LOG_STORE_STATISTICS(fcn_gate_layout_ptr, layout)
     {
         auto area = layout->x() * layout->y();
         auto bb = layout->determine_bounding_box();
-        auto gate_tiles = layout->gate_count();
-        auto wire_tiles = layout->wire_count();
-        auto crossings  = layout->crossing_count();
+        auto gate_tiles = layout->gate_count(true);
+        auto wire_tiles = layout->wire_count(true);
+        auto crossings  = layout->crossing_count(true);
         auto [cp, tp] = layout->critical_path_length_and_throughput();
 
         return nlohmann::json
@@ -176,7 +176,7 @@ namespace alice
             {"crossings", crossings},
             {"latches", layout->latch_count()},
             {"critical path", cp},
-            {"throughput", "1/" + std::to_string(tp)}
+            {"throughput", fmt::format("1/{}", tp)}
         };
     }
 

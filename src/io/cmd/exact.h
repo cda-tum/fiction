@@ -35,17 +35,17 @@ namespace alice
                              "A minimum FCN layout will be found that meets all given constraints.")
         {
             add_option("--clk_scheme,-s", clocking,
-                       "Clocking scheme to be used {OPEN[3|4], 2DDWAVE[3|4], USE, RES, BANCS, TOPOLINANO[3|4]}", true);
+                       "Clocking scheme to use {OPEN[3|4], 2DDWAVE[3|4], USE, RES, BANCS, TOPOLINANO[3|4]}", true);
             add_option("--upper_bound,-u", config.upper_bound,
                        "Number of FCN gate tiles to use at maximum");
             add_option("--fixed_size,-f", config.fixed_size,
                        "Execute only one iteration with the given number of tiles");
             add_option("--timeout,-t", config.timeout,
                        "Timeout in seconds");
-            add_option("--asynchronous,-a", config.num_threads,
+            add_option("--async,-a", config.num_threads,
                        "Number of layout dimensions to examine in parallel");
 
-            add_flag("--asynchronous_max,-A",
+            add_flag("--async_max,",
                      "Examine as many layout dimensions in parallel as threads are available");
             add_flag("--crossings,-x", config.crossings,
                      "Enable wire crossings");
@@ -119,11 +119,11 @@ namespace alice
             }
 
             // fetch number of threads available on the system
-            if (this->is_set("asynchronous_max"))
+            if (this->is_set("async_max"))
             {
                 if (auto threads_available = std::thread::hardware_concurrency(); threads_available == 0)
                 {
-                    env->out() << "[w] could not detect the number of available threads on your system" << std::endl;
+                    env->out() << "[w] could not detect the number of threads available to your system" << std::endl;
                 }
                 else
                 {
@@ -131,7 +131,7 @@ namespace alice
                 }
             }
 
-            // convert timeout seconds to milliseconds
+            // convert timeout entered in seconds to milliseconds
             config.timeout *= 1000;
 
             // perform exact physical design

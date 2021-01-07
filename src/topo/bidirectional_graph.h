@@ -6,7 +6,6 @@
 #define FICTION_BIDIRECTIONAL_GRAPH_H
 
 #include "range.h"
-#include "grid_topology.h"
 #include <iostream>
 #include <iterator>
 #include <utility>

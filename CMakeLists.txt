@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(fiction
         LANGUAGES CXX
-        VERSION 0.3.1)
+        VERSION 0.3.2)
 
 # C++17
 set(CMAKE_CXX_STANDARD 17)
@@ -30,6 +30,12 @@ if (NOT WIN32)
     endif ()
 endif()
 
+# Enable Mugen
+option(ENABLE_MUGEN "Enable the usage of Mugen, a Python3 library by Winston Haaswijk for FCN one-pass synthesis, and its dependencies" ON)
+if (ENABLE_MUGEN)
+    add_definitions(-DMUGEN)
+endif ()
+
 # Include header files
 include_directories(src/algo/ src/io/ src/io/cmd/ src/tech/ src/topo/ src/util/)
 
@@ -53,11 +59,18 @@ else ()
 	link_directories(${Boost_CUSTOM_LIBRARY_DIRS})
 endif ()
 
+# Add option to compile libraries with verbose output
+option(BUILD_LIBS_VERBOSE "Output status and warnings during library build" OFF)
+# Use /dev/null to silence libraries. Not elegant but efficient
+if (NOT BUILD_LIBS_VERBOSE)
+    set(LIB_OUTPUT_CHANNEL > /dev/null)
+endif ()
+
 # Custom install prefix for libraries
 set(LIB_PREFIX ${CMAKE_SOURCE_DIR}/libs)
 
 # Set up a directory for Z3 solver
-set(Z3_DIR ${CMAKE_BINARY_DIR}/z3)
+set(Z3_DIR ${PROJECT_BINARY_DIR}/z3)
 
 if (UNIX)
     # Require Python interpreter
@@ -65,14 +78,8 @@ if (UNIX)
         find_package(PythonInterp)  # deprecated since CMake 3.12, but works far better
         set(Z3_PYTHON ${PYTHON_EXECUTABLE})
     else ()
-        find_package(Python COMPONENTS Interpreter)
-        set(Z3_PYTHON ${Python_EXECUTABLE})
-    endif ()
-    # Add option to compile Z3 with verbose output
-    option(BUILD_Z3_VERBOSE "Output status and warnings during Z3 build" OFF)
-    # Use /dev/null to silence Z3. Not elegant but efficient
-    if (NOT BUILD_Z3_VERBOSE)
-        set(Z3_OUTPUT_CHANNEL > /dev/null)
+        find_package(Python3 COMPONENTS Interpreter Development)
+        set(Z3_PYTHON ${Python3_EXECUTABLE})
     endif ()
 
     # Add option to build Z3 as a static library
@@ -96,9 +103,9 @@ if (UNIX)
     add_custom_command(
             OUTPUT ${Z3_LIB_DIR}/${Z3_LINK_TARGET}
             PRE_BUILD
-            COMMAND ${Z3_PYTHON} scripts/mk_make.py -s --prefix=${Z3_DIR} ${Z3_LIB_FLAG} ${Z3_OUTPUT_CHANNEL}
-            COMMAND $(MAKE) -C build ${Z3_OUTPUT_CHANNEL}
-            COMMAND $(MAKE) -C build install ${Z3_OUTPUT_CHANNEL}
+            COMMAND ${Z3_PYTHON} scripts/mk_make.py -s --prefix=${Z3_DIR} ${Z3_LIB_FLAG} ${LIB_OUTPUT_CHANNEL}
+            COMMAND $(MAKE) -C build ${LIB_OUTPUT_CHANNEL}
+            COMMAND $(MAKE) -C build install ${LIB_OUTPUT_CHANNEL}
             WORKING_DIRECTORY ${LIB_PREFIX}/z3/)
 
     # Make sure Z3's custom build commands are actually being executed
@@ -125,11 +132,28 @@ add_subdirectory(${LIB_PREFIX}/alice/)
 # Include mockturtle
 add_subdirectory(${LIB_PREFIX}/mockturtle/)
 
+# Build glucose-syrup-4.1-parallel if Mugen is enabled
+if (ENABLE_MUGEN)
+    add_custom_command(
+            OUTPUT ${PROJECT_BINARY_DIR}/glucose-syrup
+            PRE_BUILD
+            COMMAND make ${LIB_OUTPUT_CHANNEL}
+            COMMAND mv glucose-syrup ${PROJECT_BINARY_DIR}/glucose-syrup ${LIB_OUTPUT_CHANNEL}
+            COMMAND make clean ${LIB_OUTPUT_CHANNEL}
+            WORKING_DIRECTORY ${LIB_PREFIX}/mugen/glucose-syrup-4.1/parallel/)
+
+    # Make sure glucose's custom build commands are actually being executed
+    add_custom_target(glucose_syrup
+            ALL
+            DEPENDS ${PROJECT_BINARY_DIR}/glucose-syrup)
+endif ()
+
 # Build executable
 add_executable(fiction ${SOURCES})
 if (UNIX)
     add_dependencies(fiction z3)
 endif ()
 
-# Link against Boost, Z3, alice, and lorina
-target_link_libraries(fiction ${Boost_FILESYSTEM_LIBRARIES} ${Boost_SYSTEM_LIBRARIES} ${Z3_LIB_DIR}/${Z3_LINK_TARGET} alice mockturtle)
+# Link against Boost, Z3, alice, lorina, and pybind11
+target_link_libraries(fiction PRIVATE ${Boost_FILESYSTEM_LIBRARIES} ${Boost_SYSTEM_LIBRARIES}
+                                      ${Z3_LIB_DIR}/${Z3_LINK_TARGET} alice mockturtle pybind11::embed ${Python3_LIBRARIES})

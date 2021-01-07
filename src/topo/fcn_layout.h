@@ -36,6 +36,10 @@ using layer_t = uint8_t;
  */
 constexpr const layer_t GROUND = 0u;
 /**
+ * Constant referring to crossing layer.
+ */
+constexpr const layer_t CROSSING = 1u;
+/**
  * Constant referring to x-dimension value of faces.
  */
 constexpr const layer_t X = 0u;
@@ -654,6 +658,10 @@ public:
      * all maps would not work properly anymore.
      */
     void shrink_to_fit() noexcept;
+    /**
+     * Clears all maps and sets stored in the layout.
+     */
+    void clear_layout() noexcept;
 
 protected:
     /**

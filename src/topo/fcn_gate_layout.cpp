@@ -995,7 +995,7 @@ fcn_layout::bounding_box fcn_gate_layout::determine_bounding_box() const noexcep
         bool elem_found = false;
         for (coord_t y = 0u; y < this->y(); ++y)
         {
-            if (!this->is_free_tile(tile{x, y, GROUND}) || !this->is_free_tile(tile{x, y, 1}))
+            if (!this->is_free_tile(tile{x, y, GROUND}) || !this->is_free_tile(tile{x, y, CROSSING}))
             {
                 elem_found = true;
                 break;
@@ -1014,7 +1014,7 @@ fcn_layout::bounding_box fcn_gate_layout::determine_bounding_box() const noexcep
         bool elem_found = false;
         for (coord_t x = 0u; x < this->x(); ++x)
         {
-            if (!this->is_free_tile(tile{x, y, GROUND}) || !this->is_free_tile(tile{x, y, 1}))
+            if (!this->is_free_tile(tile{x, y, GROUND}) || !this->is_free_tile(tile{x, y, CROSSING}))
             {
                 elem_found = true;
                 break;
@@ -1034,7 +1034,7 @@ fcn_layout::bounding_box fcn_gate_layout::determine_bounding_box() const noexcep
         for (coord_t y = 0u; y < this->y(); ++y)
         {
             if (!this->is_free_tile(tile{static_cast<coord_t>(x), y, GROUND}) ||
-                    !this->is_free_tile(tile{static_cast<coord_t>(x), y, 1}))
+                    !this->is_free_tile(tile{static_cast<coord_t>(x), y, CROSSING}))
             {
                 elem_found = true;
                 break;
@@ -1054,7 +1054,7 @@ fcn_layout::bounding_box fcn_gate_layout::determine_bounding_box() const noexcep
         for (coord_t x = 0u; x < this->x(); ++x)
         {
             if (!this->is_free_tile(tile{x, static_cast<coord_t>(y), GROUND}) ||
-                    !this->is_free_tile(tile{x, static_cast<coord_t>(y), 1}))
+                    !this->is_free_tile(tile{x, static_cast<coord_t>(y), CROSSING}))
             {
                 elem_found = true;
                 break;
@@ -1142,7 +1142,7 @@ energy::info fcn_gate_layout::calculate_energy() const noexcept
     return {slow_energy, fast_energy};
 }
 
-void fcn_gate_layout::write_layout(std::ostream& os, bool io_color, bool clk_color) const noexcept
+void fcn_gate_layout::write_layout(std::ostream& os, const bool io_color, const bool clk_color) const noexcept
 {
     // empty layout
     if (!area())
@@ -1247,4 +1247,15 @@ void fcn_gate_layout::write_layout(std::ostream& os, bool io_color, bool clk_col
     }
     // flush stream
     os << std::endl;
+}
+
+void fcn_gate_layout::clear_layout() noexcept
+{
+    fcn_layout::clear_layout();
+    v_map.clear();
+    e_map.clear();
+    inp_dir_map.clear();
+    out_dir_map.clear();
+    edge_inp_dir_map.clear();
+    edge_out_dir_map.clear();
 }

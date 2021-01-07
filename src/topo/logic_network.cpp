@@ -69,6 +69,11 @@ logic_network::vertex logic_network::create_logic_vertex(const operation o) noex
 void logic_network::remove_logic_vertex(const vertex v) noexcept
 {
     decrement_op_counter(get_op(v));
+
+    pi_set.erase(v);
+    po_set.erase(v);
+    io_port_map.left.erase(v);
+
     remove_vertex(v);
 }
 
@@ -81,12 +86,21 @@ logic_network::vertex logic_network::create_pi(const std::string& name) noexcept
     return v;
 }
 
-void logic_network::create_po(const vertex a, const std::string& name) noexcept
+logic_network::vertex logic_network::create_po(const std::string& name) noexcept
 {
     auto v = create_logic_vertex(operation::PO);
-    add_edge(a, v);
     po_set.emplace(v);
     io_port_map.insert(port_map::value_type(v, name));
+
+    return v;
+}
+
+logic_network::vertex logic_network::create_po(const vertex a, const std::string& name) noexcept
+{
+    auto v = create_po(name);
+    add_edge(a, v);
+
+    return v;
 }
 
 logic_network::vertex logic_network::create_not(const vertex a) noexcept
@@ -411,7 +425,7 @@ void logic_network::substitute_fan_outs(const std::size_t degree, const substitu
     }
 }
 
-void logic_network::write_dot(std::ostream& os) noexcept
+void logic_network::write_dot(std::ostream& os) const noexcept
 {
     os << "digraph G {\n";
 
@@ -438,7 +452,7 @@ void logic_network::write_dot(std::ostream& os) noexcept
     os << "}\n" << std::endl;
 }
 
-void logic_network::write_simple_dot(std::ostream& os) noexcept
+void logic_network::write_simple_dot(std::ostream& os) const noexcept
 {
     os << "digraph G {\nnode[label=\"\",style=filled,shape=circle];\n";
 
@@ -474,6 +488,14 @@ void logic_network::write_simple_dot(std::ostream& os) noexcept
     os << "}\n" << std::endl;
 }
 
+void logic_network::clear_network() noexcept
+{
+    clear_graph();
+
+    for (auto i = 0u; i < OP_COUNT; ++i)
+        operation_counter[i] = 0;
+}
+
 void logic_network::increment_op_counter(const operation o) noexcept
 {
     ++operation_counter[o];
@@ -486,7 +508,7 @@ void logic_network::decrement_op_counter(const operation o) noexcept
 
 void logic_network::initialize_network_from_logic() noexcept
 {
-    clear_graph();
+    clear_network();
 
     mockturtle::topo_view<mig_nt> topo_mig(mig);
     std::unordered_map<typename mockturtle::topo_view<mig_nt>::node, vertex> node_to_vertex{};

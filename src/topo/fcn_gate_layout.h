@@ -14,9 +14,6 @@
 #include <boost/bimap.hpp>
 #include <boost/bimap/unordered_set_of.hpp>
 
-
-#include <mockturtle/io/write_dot.hpp>
-
 /**
  * Represents layouts of field-coupled nanocomputing (FCN) devices on a gate level abstraction. Inherits from fcn_layout
  * so it is a 3-dimensional grid-like structure as well. Faces are called tiles in a gate layout. Tiles can be occupied
@@ -620,9 +617,13 @@ public:
      *
      * @return Number of gates in the layout.
      */
-    auto gate_count() const noexcept
+    auto gate_count(const bool ignore_wire_vertices = false) const noexcept
     {
-        return v_map.size();
+        if (ignore_wire_vertices)
+            return static_cast<std::size_t>(std::count_if(v_map.left.begin(), v_map.left.end(),
+                    [this](const auto& v){ return get_op(v.first) != operation::W; }));
+        else
+            return v_map.size();
     }
     /**
      * Returns the number of tiles that are assigned with logic edges. Note that wire tiles in higher layers are counted
@@ -630,18 +631,26 @@ public:
      *
      * @return Number of wires in the layout.
      */
-    auto wire_count() const noexcept
+    auto wire_count(const bool count_wire_vertices = false) const noexcept
     {
-        return e_map.size();
+        if (count_wire_vertices)
+            return static_cast<std::size_t>(std::count_if(v_map.left.begin(), v_map.left.end(),
+                    [this](const auto& v){ return get_op(v.first) == operation::W; }));
+        else
+            return e_map.size();
     }
     /**
      * Returns the number of logic edges assigned to tiles above ground layer.
      *
      * @return Number of logic_network::edge assignments above ground layer.
      */
-    auto crossing_count() const noexcept
+    auto crossing_count(const bool count_wire_vertices = false) const noexcept
     {
-        return std::count_if(e_map.cbegin(), e_map.cend(), [](auto& te){return te.first[Z] != GROUND;});
+        if (count_wire_vertices)
+            return std::count_if(v_map.left.begin(), v_map.left.end(),
+                    [this](const auto& v) { return v.first[Z] != GROUND && get_op(v.first) == operation::W; });
+        else
+            return std::count_if(e_map.cbegin(), e_map.cend(), [](auto& te){return te.first[Z] != GROUND;});
     }
     /**
      * Container to store statistical information about paths.
@@ -757,7 +766,11 @@ public:
      * @param io_color Flag to indicate features like PI/PO should be printed with color escape.
      * @param clk_color Flag to indicate that clock zones should be printed with color escape. Can look weird.
      */
-    void write_layout(std::ostream& os = std::cout, bool io_color = true, bool clk_color = false) const noexcept;
+    void write_layout(std::ostream& os = std::cout, const bool io_color = true, const bool clk_color = false) const noexcept;
+    /**
+     * Clears all maps and sets stored in the layout.
+     */
+    void clear_layout() noexcept;
 
 private:
     /**
