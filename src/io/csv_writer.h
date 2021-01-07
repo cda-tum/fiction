@@ -54,7 +54,9 @@ private:
     template<typename T>
     const char* add_delimiter(T&& arg)
     {
-        file << arg;
+        if (file.is_open())
+            file << arg;
+
         return DELIMITER;
     }
 };

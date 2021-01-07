@@ -121,7 +121,7 @@ public:
     }
 
 private:
-    uint64_t edge_length;
+    int64_t edge_length;
     std::shared_ptr<R> rand = nullptr;
     std::shared_ptr<distribution> distr = nullptr;
 };
