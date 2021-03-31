@@ -16,7 +16,7 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /w /O2")
 else ()
-    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wpedantic -Wno-unknown-pragmas -Wno-mismatched-tags -Wno-gnu-anonymous-struct -Wno-nested-anon-types -g -fms-extensions")
+    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wpedantic -Wno-unknown-pragmas -Wno-mismatched-tags -Wno-gnu-anonymous-struct -Wno-nested-anon-types -g -fms-extensions -fsanitize=address,undefined")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -w -O3")
     # Enable coverage for gcc/clang
     if (ENABLE_COVERAGE)
