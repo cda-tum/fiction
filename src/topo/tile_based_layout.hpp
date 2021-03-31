@@ -18,6 +18,11 @@ namespace fiction
         };
     };
 
+    constexpr bool operator==(const lcoord64_t& coord1, const lcoord64_t& coord2)
+    {
+        return coord1.x == coord2.x && coord1.y == coord2.y && coord1.z == coord2.z;
+    }
+
     template <class Ntk>
     struct layout_node : public Ntk::node
     {
@@ -42,6 +47,23 @@ namespace fiction
         using storage = typename Ntk::storage;
         using node = layout_node<Ntk>;
         using signal = typename Ntk::signal;
+
+        template<class X, class Y, class Z>
+        constexpr lcoord64_t tile(X x, Y y, Z z) const
+        {
+            lcoord64_t coord{};
+            coord.x = x;
+            coord.y = y;
+            coord.z = z;
+
+            return coord;
+        }
+
+        template<class X, class Y>
+        constexpr lcoord64_t tile(X x, Y y) const
+        {
+            return tile(x, y, 0);
+        }
 
         tile_based_layout()
                 :
