@@ -5,6 +5,11 @@ project(fiction
 
 # C++17
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Testing
+option(FICTION_TEST "Build tests" OFF)
+option(ENABLE_COVERAGE "Enable coverage reporting for gcc/clang" OFF)
 
 # Set debug and release build options
 if (MSVC)
@@ -13,6 +18,10 @@ if (MSVC)
 else ()
     set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wpedantic -Wno-unknown-pragmas -Wno-mismatched-tags -Wno-gnu-anonymous-struct -Wno-nested-anon-types -g -fms-extensions")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -w -O3")
+    # Enable coverage for gcc/clang
+    if (ENABLE_COVERAGE)
+        add_compile_options(-O0 -g --coverage -fprofile-arcs -ftest-coverage)
+    endif ()
 endif ()
 
 # Set release mode to default
@@ -45,6 +54,12 @@ file(GLOB_RECURSE SOURCES src/*.cpp src/*.h)
 configure_file(src/util/version_info.h.in util/version_info.h)
 # Include configuration file
 include_directories(${PROJECT_BINARY_DIR}/util/)
+
+# Include tests
+if (FICTION_TEST)
+    enable_testing()
+    add_subdirectory(test)
+endif ()
 
 # Require Boost libraries
 find_package(Boost COMPONENTS system filesystem)
