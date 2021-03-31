@@ -6,6 +6,7 @@ foreach (FILE IN LISTS FILENAMES)
     set(TEST_NAME test_${NAME})
     get_filename_component(NAME ${FILE} NAME_WE)
     add_executable(${TEST_NAME} ${FILE} ${DEFINE_TEST_HEADER})
+    target_link_libraries(${TEST_NAME} mockturtle)
     add_test(NAME ${NAME} COMMAND ${TEST_NAME})
 
 #    if (ENABLE_COVERAGE)
