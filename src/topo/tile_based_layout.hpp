@@ -5,34 +5,41 @@
 #ifndef FICTION_TILE_BASED_LAYOUT_HPP
 #define FICTION_TILE_BASED_LAYOUT_HPP
 
+#include <mockturtle/traits.hpp>
 
 namespace fiction
 {
-    union lcoord64_t
+    struct tile
     {
-        struct
+        // could use MSB for dead indicator
+        uint64_t z: 2;
+        uint64_t y: 31;
+        uint64_t x: 31;
+
+        template<class X, class Y, class Z>
+        constexpr tile(X x, Y y, Z z) : z{z}, y{y}, x{x} {}
+
+        template<class X, class Y>
+        constexpr tile(X x, Y y) : z{0}, y{y}, x{x} {}
+
+        constexpr bool operator==(const tile& other) const
         {
-            uint64_t z: 2;
-            uint64_t y: 31;
-            uint64_t x: 31;
-        };
+            return x == other.x && y == other.y && z == other.z;
+        }
     };
 
-    constexpr bool operator==(const lcoord64_t& coord1, const lcoord64_t& coord2)
-    {
-        return coord1.x == coord2.x && coord1.y == coord2.y && coord1.z == coord2.z;
-    }
+    using aspect_ratio = tile;
 
     template <class Ntk>
     struct layout_node : public Ntk::node
     {
-        lcoord64_t coord;
+        tile t{0, 0, 0};
 
         bool operator==(layout_node const& other) const
         {
-            coord.x == other.coord.x &&
-            coord.y == other.coord.y &&
-            coord.z == other.coord.z &&
+            t.x == other.t.x &&
+            t.y == other.t.y &&
+            t.z == other.t.z &&
             this->Ntk::node == other.Ntk::node;
         }
     };
@@ -48,27 +55,12 @@ namespace fiction
         using node = layout_node<Ntk>;
         using signal = typename Ntk::signal;
 
-        template<class X, class Y, class Z>
-        constexpr lcoord64_t tile(X x, Y y, Z z) const
-        {
-            lcoord64_t coord{};
-            coord.x = x;
-            coord.y = y;
-            coord.z = z;
-
-            return coord;
-        }
-
-        template<class X, class Y>
-        constexpr lcoord64_t tile(X x, Y y) const
-        {
-            return tile(x, y, 0);
-        }
-
-        tile_based_layout()
+        explicit tile_based_layout(const aspect_ratio& aspect_ratio)
                 :
-                Ntk()
+                Ntk(),
+                aspect_ratio{aspect_ratio}
         {
+            static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
         }
 
 #pragma endregion
@@ -76,6 +68,7 @@ namespace fiction
 #pragma region Primary I / O and constants
 
     private:
+        aspect_ratio aspect_ratio;
     };
 }
 
