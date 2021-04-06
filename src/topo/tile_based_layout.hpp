@@ -71,7 +71,7 @@ class tile_based_layout : public Ntk
 #pragma endregion
 
   private:
-    aspect_ratio aspect_ratio;
+    fiction::aspect_ratio aspect_ratio;
 };
 
 }  // namespace fiction
