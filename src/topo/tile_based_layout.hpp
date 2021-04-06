@@ -17,11 +17,14 @@ struct tile
     uint64_t x : 31;
 
     template <class X, class Y, class Z>
-    constexpr tile(X x, Y y, Z z) : z{z}, y{y}, x{x}
+    constexpr tile(X x, Y y, Z z) :
+            z{static_cast<uint64_t>(z)},
+            y{static_cast<uint64_t>(y)},
+            x{static_cast<uint64_t>(x)}
     {}
 
     template <class X, class Y>
-    constexpr tile(X x, Y y) : z{0}, y{y}, x{x}
+    constexpr tile(X x, Y y) : z{static_cast<uint64_t>(0)}, y{static_cast<uint64_t>(y)}, x{static_cast<uint64_t>(x)}
     {}
 
     constexpr bool operator==(const tile& other) const

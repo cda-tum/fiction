@@ -8,8 +8,4 @@ foreach (FILE IN LISTS FILENAMES)
     add_executable(${TEST_NAME} ${FILE} ${DEFINE_TEST_HEADER})
     target_link_libraries(${TEST_NAME} mockturtle)
     add_test(NAME ${NAME} COMMAND ${TEST_NAME})
-
-#    if (ENABLE_COVERAGE)
-#        target_link_libraries(${TEST_NAME} gcov)
-#    endif ()
 endforeach ()
