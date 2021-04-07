@@ -10,7 +10,9 @@ if(ENABLE_CPPCHECK)
         --enable=all
         --inline-suppr
         --inconclusive
-        -i)
+        -i
+        ${CMAKE_SOURCE_DIR}/libs/
+        ${CMAKE_BINARY_DIR}/z3/)
   else()
     message(SEND_ERROR "cppcheck requested but executable not found")
   endif()
