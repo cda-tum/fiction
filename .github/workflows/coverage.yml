@@ -67,5 +67,7 @@ jobs:
       run: ctest -C $BUILD_TYPE
 
     - name: Coverage report
-        steps:
-          - uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v1
+      with:
+        env_vars: ${{matrix.os}}
+        verbose: true
