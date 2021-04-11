@@ -25,8 +25,6 @@ jobs:
         exclude:
           - os: ubuntu-18.04
             compiler: clang++-10
-          - os: ubuntu-18.04
-            compiler: clang++-9
 
     steps:
     - uses: actions/checkout@v2
@@ -56,7 +54,7 @@ jobs:
       id: cache-z3
       with:
         path: ${{github.workspace}}/build/z3
-        key: z3
+        key: ${{matrix.os}}_${{matrix.compiler}}
 
     - name: Build
       working-directory: ${{github.workspace}}/build
