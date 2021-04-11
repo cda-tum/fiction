@@ -76,13 +76,13 @@ add_subdirectory(${LIB_PREFIX})
 # Require Boost libraries
 find_package(Boost COMPONENTS system filesystem)
 if (Boost_FOUND)
-	include_directories(${Boost_INCLUDE_DIRS})
+	include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 	link_directories(${Boost_LIBRARY_DIRS})
 else ()
 	message(STATUS "Please configure Boost_CUSTOM_INCLUDE_DIRS and Boost_CUSTOM_LIBRARY_DIRS manually.")
 	set(Boost_CUSTOM_INCLUDE_DIRS "" CACHE PATH "Boost include path")
 	set(Boost_CUSTOM_LIBRARY_DIRS "" CACHE PATH "Boost library path")
-	include_directories(${Boost_CUSTOM_INCLUDE_DIRS})
+	include_directories(SYSTEM ${Boost_CUSTOM_INCLUDE_DIRS})
 	link_directories(${Boost_CUSTOM_LIBRARY_DIRS})
 endif ()
 
@@ -141,14 +141,14 @@ elseif (WIN32)
     set(Z3_LINK_TARGET libz3.lib)
     set(Z3_INCLUDE_DIR "${LIB_PREFIX}/z3/src/api" CACHE PATH "Path to Z3's custom include directory")
     set(Z3_LIB_DIR     "${LIB_PREFIX}/z3/build" CACHE PATH "Path to Z3's custom library directory")
-    include_directories(${Z3_INCLUDE_DIR}/c++)
+    include_directories(SYSTEM ${Z3_INCLUDE_DIR}/c++)
 endif ()
 
 # Include Z3
-include_directories(${Z3_INCLUDE_DIR}/)
+include_directories(SYSTEM ${Z3_INCLUDE_DIR}/)
 
 # Include cppitertools
-include_directories(${LIB_PREFIX}/cppitertools/)
+include_directories(SYSTEM ${LIB_PREFIX}/cppitertools/)
 
 # Build executable
 add_executable(fiction ${SOURCES})
