@@ -71,3 +71,4 @@ jobs:
       with:
         env_vars: ${{matrix.os}}
         verbose: true
+        gcov_path_exclude: ${{github.workspace}}/libs/
