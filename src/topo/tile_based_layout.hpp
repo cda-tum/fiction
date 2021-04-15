@@ -6,11 +6,13 @@
 #define FICTION_TILE_BASED_LAYOUT_HPP
 
 #include <map>
+#include <optional>
 #include <ostream>
 #include <set>
 #include <vector>
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/networks/detail/foreach.hpp>
 
@@ -106,7 +108,7 @@ class tile_based_layout : public Ntk
 
 #pragma region Primary I / O and constants
 
-    signal create_pi(const tile& t, std::string const& name = std::string())
+    signal create_pi_tile(const tile& t, std::string const& name = std::string())
     {
         static_assert(mockturtle::has_create_pi_v<Ntk>, "Ntk does not implement the create_pi function");
 
@@ -117,7 +119,7 @@ class tile_based_layout : public Ntk
         return s;
     }
 
-    void create_po(const tile& t, signal const& f, std::string const& name = std::string())
+    void create_po_tile(const tile& t, signal const& f, std::string const& name = std::string())
     {
         static_assert(mockturtle::has_create_po_v<Ntk>, "Ntk does not implement the create_po function");
 
@@ -128,6 +130,117 @@ class tile_based_layout : public Ntk
 
 #pragma endregion
 
+#pragma region Create unary functions
+
+    signal create_buf_tile(const tile& t, signal const& a)
+    {
+        static_assert(mockturtle::has_create_buf_v<Ntk>, "Ntk does not implement the create_buf function");
+
+        auto s = Ntk::create_buf(a);
+        assign_signal(t, s);
+
+        return s;
+    }
+
+    signal create_not_tile(const tile& t, signal const& a)
+    {
+        static_assert(mockturtle::has_create_not_v<Ntk>, "Ntk does not implement the create_not function");
+
+        auto s = Ntk::create_not(a);
+        assign_signal(t, s);
+
+        return s;
+    }
+
+#pragma endregion
+
+#pragma region Create binary functions
+
+    signal create_and_tile(const tile& t, signal a, signal b)
+    {
+        static_assert(mockturtle::has_create_and_v<Ntk>, "Ntk does not implement the create_and function");
+
+        auto s = Ntk::create_and(a, b);
+        assign_node(t, Ntk::get_node(s));
+
+        return s;
+    }
+
+    signal create_or_tile(const tile& t, signal a, signal b)
+    {
+        static_assert(mockturtle::has_create_or_v<Ntk>, "Ntk does not implement the create_or function");
+
+        auto s = Ntk::create_or(a, b);
+        assign_node(t, Ntk::get_node(s));
+
+        return s;
+    }
+
+#pragma endregion
+
+#pragma region Createy ternary functions
+
+    signal create_maj_tile(const tile& t, signal a, signal b, signal c)
+    {
+        static_assert(mockturtle::has_create_maj_v<Ntk>, "Ntk does not implement the create_maj function");
+
+        auto s = Ntk::create_maj(a, b, c);
+        assign_node(t, Ntk::get_node(s));
+
+        return s;
+    }
+
+#pragma endregion
+
+#pragma region Functional properties
+
+    [[nodiscard]] std::optional<kitty::dynamic_truth_table> tile_function(const tile& t) const
+    {
+        static_assert(mockturtle::has_node_function_v<Ntk>, "Ntk does not implement the node_function function");
+
+        if (auto n = get_tile_node(t); n)
+        {
+            return Ntk::node_function(*n);
+        }
+
+        return std::nullopt;
+    }
+
+#pragma endregion
+
+#pragma region Nodes and signals
+
+    [[nodiscard]] std::optional<node> get_tile_node(const tile& t) const
+    {
+        if (auto it = l_storage->tile_node_map.find(t); it != l_storage->tile_node_map.end())
+        {
+            return it->second;
+        }
+
+        return std::nullopt;
+    }
+
+    [[nodiscard]] std::optional<tile> get_node_tile(const node& n) const
+    {
+        if (auto it = l_storage->node_tile_map.find(n); it != l_storage->node_tile_map.end())
+        {
+            return it->second;
+        }
+
+        return std::nullopt;
+    }
+
+    [[nodiscard]] std::set<signal> get_tile_signals(const tile& t) const
+    {
+        if (auto it = l_storage->tile_signal_map.find(t); it != l_storage->tile_signal_map.end())
+        {
+            return it->second;
+        }
+
+        return {};
+    }
+
+#pragma endregion
 
 #pragma region tile iterators
 
