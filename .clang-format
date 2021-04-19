@@ -46,11 +46,11 @@ DisableFormat: false
 FixNamespaceComments: true
 IncludeBlocks: Regroup
 IncludeCategories:
-  - Regex: '"[[:alnum:].]+"'
+  - Regex: '"[a-zA-Z0-9_]+.+"$'
     Priority: 1
-  - Regex: '<(alice|mockturtle|kitty|bill|nlohmann|fmt|z3)\/[[:alnum:].]+)>'
+  - Regex: '<(alice|mockturtle|kitty|bill|nlohmann|fmt|z3)\/[a-zA-Z0-9_]+.+>$'
     Priority: 2
-  - Regex: '<[[:alnum:].]+>'
+  - Regex: '<[a-zA-Z0-9_]+>$'
     Priority: 3
 IndentCaseLabels: true
 IndentWidth: 4

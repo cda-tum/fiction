@@ -2,16 +2,16 @@
 // Created by marcel on 31.03.21.
 //
 
-#include "catch.hpp"
+#include "tile_based_layout.hpp"
 
-#include <iostream>
-#include <set>
+#include "catch.hpp"
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/traits.hpp>
 
-#include <tile_based_layout.hpp>
+#include <iostream>
+#include <set>
 
 using namespace fiction;
 
@@ -109,7 +109,7 @@ TEST_CASE("Tile iteration", "[tile-based]")
     }
 }
 
-template<class Lyt>
+template <class Lyt>
 static void creation_and_usage_of_constants()
 {
     // adapted from mockturtle/test/networks/*.cpp
@@ -231,48 +231,50 @@ static void creation_and_usage_of_primary_inputs()
 
     CHECK(layout.num_pis() == 3);
 
-    layout.foreach_pi_tile([&](auto t, auto i) {
-        switch (i)
+    layout.foreach_pi_tile(
+        [&](auto t, auto i)
         {
-            case 0:
+            switch (i)
             {
-                CHECK(t == tile{0, 0});
-                auto n = layout.get_tile_node(t);
-                REQUIRE(n);
-                CHECK(*n == layout.get_node(a));
-                auto tn = layout.get_node_tile(*n);
-                REQUIRE(tn);
-                CHECK(*tn == t);
+                case 0:
+                {
+                    CHECK(t == tile{0, 0});
+                    auto n = layout.get_tile_node(t);
+                    REQUIRE(n);
+                    CHECK(*n == layout.get_node(a));
+                    auto tn = layout.get_node_tile(*n);
+                    REQUIRE(tn);
+                    CHECK(*tn == t);
 
-                break;
+                    break;
+                }
+
+                case 1:
+                {
+                    CHECK(t == tile{1, 0});
+                    auto n = layout.get_tile_node(t);
+                    REQUIRE(n);
+                    CHECK(*n == layout.get_node(b));
+                    auto tn = layout.get_node_tile(*n);
+                    REQUIRE(tn);
+                    CHECK(*tn == t);
+
+                    break;
+                }
+                case 2:
+                {
+                    CHECK(t == tile{0, 1});
+                    auto n = layout.get_tile_node(t);
+                    REQUIRE(n);
+                    CHECK(*n == layout.get_node(c));
+                    auto tn = layout.get_node_tile(*n);
+                    REQUIRE(tn);
+                    CHECK(*tn == t);
+
+                    break;
+                }
             }
-
-            case 1:
-            {
-                CHECK(t == tile{1, 0});
-                auto n = layout.get_tile_node(t);
-                REQUIRE(n);
-                CHECK(*n == layout.get_node(b));
-                auto tn = layout.get_node_tile(*n);
-                REQUIRE(tn);
-                CHECK(*tn == t);
-
-                break;
-            }
-            case 2:
-            {
-                CHECK(t == tile{0, 1});
-                auto n = layout.get_tile_node(t);
-                REQUIRE(n);
-                CHECK(*n == layout.get_node(c));
-                auto tn = layout.get_node_tile(*n);
-                REQUIRE(tn);
-                CHECK(*tn == t);
-
-                break;
-            }
-        }
-    });
+        });
 }
 
 TEST_CASE("Creation and usage of primary inputs", "[tile-based]")
@@ -321,44 +323,48 @@ static void creation_and_usage_of_primary_outputs()
     CHECK(layout.size() == 2);
     CHECK(layout.num_pos() == 3);
 
-    layout.foreach_po([&](auto s, auto i) {
-        switch (i)
+    layout.foreach_po(
+        [&](auto s, auto i)
         {
-            case 0: CHECK(s == c0); break;
-            case 1: CHECK(s == x1); break;
-            case 2: CHECK(s == !x1); break;
-        }
-    });
+            switch (i)
+            {
+                case 0: CHECK(s == c0); break;
+                case 1: CHECK(s == x1); break;
+                case 2: CHECK(s == !x1); break;
+            }
+        });
 
-    layout.foreach_po_tile([&](auto t, auto i) {
-        switch (i)
+    layout.foreach_po_tile(
+        [&](auto t, auto i)
         {
-            case 0:
+            switch (i)
             {
-                CHECK(t == tile{1, 0});
-                auto s = layout.get_tile_signals(t);
-                REQUIRE(s.size() == 1);
-                CHECK(*s.begin() == c0);
-                break;
+                case 0:
+                {
+                    CHECK(t == tile{1, 0});
+                    auto s = layout.get_tile_signals(t);
+                    REQUIRE(s.size() == 1);
+                    CHECK(*s.begin() == c0);
+                    break;
+                }
+                case 1:
+                {
+                    CHECK(t == tile{0, 1});
+                    auto s = layout.get_tile_signals(t);
+                    REQUIRE(s.size() == 1);
+                    CHECK(*s.begin() == x1);
+                    break;
+                }
+                case 2:
+                {
+                    CHECK(t == tile{1, 1});
+                    auto s = layout.get_tile_signals(t);
+                    REQUIRE(s.size() == 1);
+                    CHECK(*s.begin() == !x1);
+                    break;
+                }
             }
-            case 1:
-            {
-                CHECK(t == tile{0, 1});
-                auto s = layout.get_tile_signals(t);
-                REQUIRE(s.size() == 1);
-                CHECK(*s.begin() == x1);
-                break;
-            }
-            case 2:
-            {
-                CHECK(t == tile{1, 1});
-                auto s = layout.get_tile_signals(t);
-                REQUIRE(s.size() == 1);
-                CHECK(*s.begin() == !x1);
-                break;
-            }
-        }
-    });
+        });
 }
 
 TEST_CASE("Creation and usage of primary outputs", "[tile-based]")

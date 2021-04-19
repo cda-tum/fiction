@@ -7,16 +7,16 @@
 
 #include "range.h"
 
+#include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
+#include <mockturtle/networks/detail/foreach.hpp>
+#include <mockturtle/traits.hpp>
+
 #include <map>
 #include <optional>
 #include <ostream>
 #include <set>
 #include <vector>
-
-#include <fmt/format.h>
-#include <kitty/dynamic_truth_table.hpp>
-#include <mockturtle/networks/detail/foreach.hpp>
-#include <mockturtle/traits.hpp>
 
 namespace fiction
 {
@@ -37,7 +37,7 @@ struct tile
     {}
 
     template <class X, class Y>
-    constexpr tile(X x, Y y) : z{static_cast<uint64_t>(0)}, y{static_cast<uint64_t>(y)}, x{static_cast<uint64_t>(x)}
+    constexpr tile(X x, Y y) : z{static_cast<uint64_t>(0ul)}, y{static_cast<uint64_t>(y)}, x{static_cast<uint64_t>(x)}
     {}
 
     constexpr bool operator==(const tile& other) const
@@ -115,7 +115,7 @@ class tile_based_layout : public Ntk
 
 #pragma region Primary I / O and constants
 
-    signal create_pi_tile(const tile& t, std::string const& name = std::string())
+    signal create_pi_tile(const tile& t, const std::string& name = std::string())
     {
         static_assert(mockturtle::has_create_pi_v<Ntk>, "Ntk does not implement the create_pi function");
 
@@ -126,7 +126,7 @@ class tile_based_layout : public Ntk
         return s;
     }
 
-    void create_po_tile(const tile& t, signal const& f, std::string const& name = std::string())
+    void create_po_tile(const tile& t, const signal& f, const std::string& name = std::string())
     {
         static_assert(mockturtle::has_create_po_v<Ntk>, "Ntk does not implement the create_po function");
 
@@ -137,7 +137,7 @@ class tile_based_layout : public Ntk
 
 #pragma endregion
 
-#pragma region Create unary functions
+#pragma region Create function tiles
 
     signal create_buf_tile(const tile& t, signal const& a)
     {
@@ -159,10 +159,6 @@ class tile_based_layout : public Ntk
         return s;
     }
 
-#pragma endregion
-
-#pragma region Create binary functions
-
     signal create_and_tile(const tile& t, signal a, signal b)
     {
         static_assert(mockturtle::has_create_and_v<Ntk>, "Ntk does not implement the create_and function");
@@ -183,10 +179,6 @@ class tile_based_layout : public Ntk
         return s;
     }
 
-#pragma endregion
-
-#pragma region Createy ternary functions
-
     signal create_maj_tile(const tile& t, signal a, signal b, signal c)
     {
         static_assert(mockturtle::has_create_maj_v<Ntk>, "Ntk does not implement the create_maj function");
@@ -195,6 +187,32 @@ class tile_based_layout : public Ntk
         assign_node(t, Ntk::get_node(s));
 
         return s;
+    }
+
+    template <class OtherNtk, class... Signals>
+    signal create_tile(const OtherNtk& other_ntk, const typename OtherNtk::node& other_node, const tile& t,
+                       Signals... signals)
+    {
+        static_assert(mockturtle::has_is_and_v<OtherNtk>, "OtherNtk does not implement the is_and function");
+        static_assert(mockturtle::has_is_or_v<OtherNtk>, "OtherNtk does not implement the is_or function");
+        static_assert(mockturtle::has_is_maj_v<OtherNtk>, "OtherNtk does not implement the is_maj function");
+
+        static_assert(mockturtle::has_create_and_v<Ntk>, "Ntk does not implement the create_and function");
+        static_assert(mockturtle::has_create_or_v<Ntk>, "Ntk does not implement the create_or function");
+        static_assert(mockturtle::has_create_maj_v<Ntk>, "Ntk does not implement the create_maj function");
+
+        if (other_ntk.is_and(other_node))
+        {
+            return create_and_tile(t, signals...);
+        }
+        if (other_ntk.is_or(other_node))
+        {
+            return create_or_tile(t, signals...);
+        }
+        if (other_ntk.is_maj(other_node))
+        {
+            return create_maj_tile(t, signals...);
+        }
     }
 
 #pragma endregion
