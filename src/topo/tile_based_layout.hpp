@@ -11,6 +11,8 @@
 #include <set>
 #include <vector>
 
+#include "range.h"
+
 #include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/traits.hpp>
@@ -98,7 +100,7 @@ class tile_based_layout : public Ntk
 
     explicit tile_based_layout(const aspect_ratio& aspect_ratio) :
             Ntk(),
-            ratio{aspect_ratio},
+            dimension{aspect_ratio},
             l_storage{std::make_shared<layout_storage>()}
     {
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
@@ -256,10 +258,24 @@ class tile_based_layout : public Ntk
         mockturtle::detail::foreach_element(l_storage->outputs.cbegin(), l_storage->outputs.cend(), fn);
     }
 
+    [[nodiscard]] auto tiles(const tile& start = {}, const tile& stop = {}) const
+    {
+        return range_t{std::make_pair(tile_iterator{dimension, start}, tile_iterator{dimension, stop})};
+    }
+
+    [[nodiscard]] auto ground_tiles(const tile& start = {}, const tile& stop = {}) const
+    {
+        assert(start.z == 0 && stop.z == 0);
+
+        auto ground_layer = aspect_ratio{dimension.x, dimension.y, 1};
+
+        return range_t{std::make_pair(tile_iterator{ground_layer, start}, tile_iterator{ground_layer, stop})};
+    }
+
 #pragma endregion
 
   private:
-    aspect_ratio ratio;
+    aspect_ratio dimension;
 
     struct layout_storage
     {
@@ -283,6 +299,94 @@ class tile_based_layout : public Ntk
     {
         l_storage->tile_signal_map[t].insert(s);
     }
+
+    // TODO think about PI/PO tiles
+    void clear_tile(const tile& t)
+    {
+        if (auto it = l_storage->tile_node_map.find(t); it != l_storage->tile_signal_map.end())
+        {
+            // remove node-tile
+            l_storage->node_tile_map.erase(it->second);
+            // remove tile-node
+            l_storage->tile_node_map.erase(it);
+        }
+
+        // remove signals
+        l_storage->tile_signal_map.erase(t);
+    }
+
+    class tile_iterator
+    {
+      public:
+
+        constexpr explicit tile_iterator(const aspect_ratio& dimension, const tile& t = {}) noexcept :
+                dimension{dimension},
+                t{t}
+        {}
+
+        constexpr tile_iterator& operator++() noexcept
+        {
+            ++t.x;
+
+            if (t.x >= dimension.x)
+            {
+                t.x = 0;
+
+                ++t.y;
+                if (t.y >= dimension.y)
+                {
+                    t.y = 0;
+
+                    ++t.z;
+                    if (t.z >= dimension.z)
+                    {
+                        t = dimension;
+                    }
+                }
+            }
+
+            return *this;
+        }
+        
+        constexpr tile_iterator operator++(int) noexcept
+        {
+            auto result{*this};
+
+            ++(*this);
+
+            return result;
+        }
+
+        constexpr tile operator*() const
+        {
+            return t;
+        }
+
+        constexpr bool operator==(const tile_iterator& other) const
+        {
+            return (t == other.t);
+        }
+
+        constexpr bool operator!=(const tile_iterator& other) const
+        {
+            return !(*this == other);
+        }
+
+        constexpr bool operator<(const tile_iterator& other) const
+        {
+            return (t < other.t);
+        }
+
+        constexpr bool operator<=(const tile_iterator& other) const
+        {
+            return (t <= other.t);
+        }
+
+      private:
+        const aspect_ratio dimension;
+
+        tile t;
+    };
 };
 
 }  // namespace fiction

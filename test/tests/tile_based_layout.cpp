@@ -5,9 +5,12 @@
 #include "catch.hpp"
 
 #include <iostream>
+#include <set>
+
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/traits.hpp>
+
 #include <tile_based_layout.hpp>
 
 using namespace fiction;
@@ -47,6 +50,63 @@ TEST_CASE("Tiles", "[tile-based")
     CHECK(t1 >= t2);
     CHECK(t2 < t1);
     CHECK(t2 <= t1);
+}
+
+template <class Lyt>
+static void tile_iteration()
+{
+    REQUIRE(mockturtle::is_network_type_v<Lyt>);
+
+    typename Lyt::aspect_ratio ar{50, 50, 2};
+
+    Lyt layout{ar};
+
+    std::set<tile> visited{};
+
+    for (auto&& t : layout.tiles())
+    {
+        CHECK(t < ar);
+
+        // no tile is visited twice
+        CHECK(visited.count(t) == 0);
+        visited.insert(t);
+    }
+
+    typename Lyt::aspect_ratio ar_ground{ar.x, ar.y, 1};
+
+    for (auto&& t : layout.ground_tiles())
+    {
+        // iteration stays in ground layer
+        CHECK(t.z == 0);
+        CHECK(t < ar_ground);
+    }
+
+    tile start{42, 20}, stop{25, 40};
+
+    for (auto&& t : layout.tiles(start, stop))
+    {
+        CHECK(t.z == 0);
+        // iteration stays in between the bounds
+        CHECK(t >= start);
+        CHECK(t < stop);
+    }
+}
+
+TEST_CASE("Tile iteration", "[tile-based]")
+{
+    SECTION("AIG layouts")
+    {
+        using aig_layout = tile_based_layout<mockturtle::aig_network>;
+
+        tile_iteration<aig_layout>();
+    }
+
+    SECTION("MIG layouts")
+    {
+        using mig_layout = tile_based_layout<mockturtle::mig_network>;
+
+        tile_iteration<mig_layout>();
+    }
 }
 
 template<class Lyt>
