@@ -5,18 +5,18 @@
 #ifndef FICTION_TILE_BASED_LAYOUT_HPP
 #define FICTION_TILE_BASED_LAYOUT_HPP
 
+#include "range.h"
+
 #include <map>
 #include <optional>
 #include <ostream>
 #include <set>
 #include <vector>
 
-#include "range.h"
-
 #include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
-#include <mockturtle/traits.hpp>
 #include <mockturtle/networks/detail/foreach.hpp>
+#include <mockturtle/traits.hpp>
 
 namespace fiction
 {
@@ -52,13 +52,18 @@ struct tile
 
     constexpr bool operator<(const tile& other) const
     {
-        if (z < other.z) return true;
+        if (z < other.z)
+            return true;
 
         if (z == other.z)
         {
-            if (y < other.y) return true;
+            if (y < other.y)
+                return true;
 
-            if (y == other.y) { return x < other.x; }
+            if (y == other.y)
+            {
+                return x < other.x;
+            }
         }
 
         return false;
@@ -318,7 +323,6 @@ class tile_based_layout : public Ntk
     class tile_iterator
     {
       public:
-
         constexpr explicit tile_iterator(const aspect_ratio& dimension, const tile& t = {}) noexcept :
                 dimension{dimension},
                 t{t}
@@ -347,7 +351,7 @@ class tile_based_layout : public Ntk
 
             return *this;
         }
-        
+
         constexpr tile_iterator operator++(int) noexcept
         {
             auto result{*this};

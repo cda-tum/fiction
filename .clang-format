@@ -11,7 +11,7 @@ ConstructorInitializerAllOnOneLineOrOnePerLine: true
 AllowShortBlocksOnASingleLine: Empty
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: Empty
-AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: All
 AllowShortLoopsOnASingleLine: true
 AlwaysBreakTemplateDeclarations: Yes
@@ -29,7 +29,9 @@ BraceWrapping:
   AfterExternBlock: true
   BeforeCatch: true
   BeforeElse: true
-  IndentBraces: true
+  BeforeLambdaBody: true
+  BeforeWhile: false
+  IndentBraces: false
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
@@ -43,6 +45,13 @@ Cpp11BracedListStyle: true
 DisableFormat: false
 FixNamespaceComments: true
 IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '"[[:alnum:].]+"'
+    Priority: 1
+  - Regex: '<(alice|mockturtle|kitty|bill|nlohmann|fmt|z3)\/[[:alnum:].]+)>'
+    Priority: 2
+  - Regex: '<[[:alnum:].]+>'
+    Priority: 3
 IndentCaseLabels: true
 IndentWidth: 4
 Language: Cpp
@@ -65,7 +74,6 @@ SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: c++17
-TabWidth: 4
 UseTab: Never
 
 ...
