@@ -49,7 +49,7 @@ struct coord_t
             x{static_cast<uint64_t>((t << 33) >> 33)}
     {}
 
-    explicit operator uint64_t() const
+    explicit constexpr operator uint64_t() const
     {
         return (((((((0ull | d) << 1) | z) << 31) | y) << 31) | x);
     }
