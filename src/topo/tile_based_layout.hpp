@@ -5,13 +5,18 @@
 #ifndef FICTION_TILE_BASED_LAYOUT_HPP
 #define FICTION_TILE_BASED_LAYOUT_HPP
 
+#include "coordinate.hpp"
 #include "range.h"
 
-#include <fmt/format.h>
+#include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/detail/foreach.hpp>
+#include <mockturtle/networks/storage.hpp>
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/truth_table_cache.hpp>
 
+#include <cstdint>
+#include <iterator>
 #include <map>
 #include <optional>
 #include <ostream>
@@ -20,249 +25,264 @@
 
 namespace fiction
 {
-struct tile
-{
-    // could use MSB for dead indicator
-    uint64_t z : 2;
-    uint64_t y : 31;
-    uint64_t x : 31;
 
-    constexpr tile() : z{static_cast<uint64_t>(0ul)}, y{static_cast<uint64_t>(0ul)}, x{static_cast<uint64_t>(0ul)} {}
-
-    template <class X, class Y, class Z>
-    constexpr tile(X x, Y y, Z z) :
-            z{static_cast<uint64_t>(z)},
-            y{static_cast<uint64_t>(y)},
-            x{static_cast<uint64_t>(x)}
-    {}
-
-    template <class X, class Y>
-    constexpr tile(X x, Y y) : z{static_cast<uint64_t>(0ul)}, y{static_cast<uint64_t>(y)}, x{static_cast<uint64_t>(x)}
-    {}
-
-    constexpr bool operator==(const tile& other) const
-    {
-        return x == other.x && y == other.y && z == other.z;
-    }
-
-    constexpr bool operator!=(const tile& other) const
-    {
-        return !(*this == other);
-    }
-
-    constexpr bool operator<(const tile& other) const
-    {
-        if (z < other.z)
-            return true;
-
-        if (z == other.z)
-        {
-            if (y < other.y)
-                return true;
-
-            if (y == other.y)
-            {
-                return x < other.x;
-            }
-        }
-
-        return false;
-    }
-
-    constexpr bool operator>(const tile& other) const
-    {
-        return other < *this;
-    }
-
-    constexpr bool operator<=(const tile& other) const
-    {
-        return !(*this > other);
-    }
-
-    constexpr bool operator>=(const tile& other) const
-    {
-        return !(*this < other);
-    }
-};
-
-std::ostream& operator<<(std::ostream& os, const tile& t)
-{
-    os << fmt::format("({},{},{})", t.x, t.y, t.z);
-    return os;
-}
-
-template <class Ntk>
-class tile_based_layout : public Ntk
+class tile_based_layout
 {
   public:
 #pragma region Types and constructors
 
-    using base_type    = tile_based_layout<Ntk>;
-    using storage      = typename Ntk::storage;
-    using node         = typename Ntk::node;
-    using signal       = typename Ntk::signal;
-    using aspect_ratio = tile;
+    using tile         = coord_t;
+    using aspect_ratio = coord_t;
 
-    explicit tile_based_layout(const aspect_ratio& aspect_ratio) :
-            Ntk(),
-            dimension{aspect_ratio},
-            l_storage{std::make_shared<layout_storage>()}
+    template <class AspectRatio, class Node, class Tile>
+    struct tile_based_layout_storage_data
     {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
+        AspectRatio dimension;
+
+        mockturtle::truth_table_cache<kitty::dynamic_truth_table> cache;
+
+        std::map<Tile, Node> tile_node_map{};
+        std::map<Node, Tile> node_tile_map{};
+
+        uint32_t trav_id = 0u;
+
+        const Tile const0{0x8000000000000000ull};
+        const Tile const1{0xc000000000000000ull};
+    };
+
+    /*! \brief tile-based layout node
+     *
+     * `data[0].h1`: Fan-out size
+     * `data[0].h2`: Application-specific value
+     * `data[1].h1`: Function literal in truth table cache
+     * `data[2].h2`: Visited flags
+     */
+    struct tile_based_layout_storage_node : mockturtle::mixed_fanin_node<2>
+    {
+        bool operator==(tile_based_layout_storage_node const& other) const
+        {
+            return data[1].h1 == other.data[1].h1 && children == other.children;
+        }
+    };
+
+    static constexpr auto min_fanin_size = 1;
+    static constexpr auto max_fanin_size = 3;
+
+    using base_type = tile_based_layout;
+    using node      = uint64_t;
+    using signal    = uint64_t;
+
+    /*! \brief tile-based layout storage container */
+    using tile_based_layout_storage =
+        mockturtle::storage<tile_based_layout_storage_node, tile_based_layout_storage_data<aspect_ratio, node, signal>>;
+
+    using storage = std::shared_ptr<tile_based_layout_storage>;
+
+    explicit tile_based_layout(const aspect_ratio& aspect_ratio) : strg{std::make_shared<tile_based_layout_storage>()}
+    {
+        strg->data.dimension = aspect_ratio;
+        initialize_truth_table_cache();
     }
+
+    explicit tile_based_layout(std::shared_ptr<tile_based_layout_storage> storage) : strg{std::move(storage)} {}
 
 #pragma endregion
 
 #pragma region Primary I / O and constants
 
-    signal create_pi_tile(const tile& t, const std::string& name = std::string())
+    [[nodiscard]] signal get_constant(bool value = false) const noexcept
     {
-        static_assert(mockturtle::has_create_pi_v<Ntk>, "Ntk does not implement the create_pi function");
-
-        auto s = Ntk::create_pi(name);
-        assign_node(t, Ntk::get_node(s));
-        l_storage->inputs.emplace_back(t);
-
-        return s;
+        // const0 = (1,0,0,0), const1 = (1,1,0,0)
+        return value ? strg->data.const1 : strg->data.const0;
     }
 
-    void create_po_tile(const tile& t, const signal& f, const std::string& name = std::string())
+    [[nodiscard]] static bool is_constant(node const& n)
     {
-        static_assert(mockturtle::has_create_po_v<Ntk>, "Ntk does not implement the create_po function");
+        return n <= 1;
+    }
 
-        Ntk::create_po(f, name);
-        assign_signal(t, f);
-        l_storage->outputs.emplace_back(t);
+    signal create_pi([[maybe_unused]] const std::string& name = std::string(), const tile& t = {})
+    {
+        const auto n = strg->nodes.size();
+        strg->nodes.emplace_back();     // empty node data
+        strg->nodes[n].data[1].h1 = 2;  // assign identity function
+        strg->inputs.emplace_back(n);
+        assign_node(t, n);
+
+        return static_cast<signal>(t);
+    }
+
+    void create_po(const signal& f, [[maybe_unused]] const std::string& name = std::string(), const tile& t = {})
+    {
+        const auto n = strg->nodes.size();
+        strg->nodes.emplace_back();     // empty node data
+        strg->nodes[n].data[1].h1 = 2;  // assign identity function
+        strg->outputs.emplace_back(n);  // TODO this line currently saves the created output node instead of its tile
+                                        // TODO (signal). This might break stuff in mockturtle's algorithms.
+                                        // TODO Reevaluate storing the tile instead!
+        assign_node(t, n);
+
+        /* increase ref-count to children */
+        strg->nodes[get_node(f)].data[0].h1++;
+    }
+
+    [[nodiscard]] bool is_pi(const node& n) const
+    {
+        bool found = false;
+        mockturtle::detail::foreach_element(strg->inputs.begin(), strg->inputs.end(),
+                                            [&found, &n](auto const& node)
+                                            {
+                                                if (node == n)
+                                                {
+                                                    found = true;
+                                                    return false;
+                                                }
+                                                return true;
+                                            });
+        return found;
     }
 
 #pragma endregion
 
 #pragma region Create function tiles
 
-    signal create_buf_tile(const tile& t, signal const& a)
+    signal create_buf(signal const& a, const tile& t = {})
     {
-        static_assert(mockturtle::has_create_buf_v<Ntk>, "Ntk does not implement the create_buf function");
-
-        auto s = Ntk::create_buf(a);
-        assign_signal(t, s);
-
-        return s;
+        return create_node_from_literal({a}, 2, t);
     }
 
-    signal create_not_tile(const tile& t, signal const& a)
+    signal create_not(signal const& a, const tile& t = {})
     {
-        static_assert(mockturtle::has_create_not_v<Ntk>, "Ntk does not implement the create_not function");
-
-        auto s = Ntk::create_not(a);
-        assign_signal(t, s);
-
-        return s;
+        return create_node_from_literal({a}, 3, t);
     }
 
-    signal create_and_tile(const tile& t, signal a, signal b)
+    signal create_and(signal a, signal b, const tile& t = {})
     {
-        static_assert(mockturtle::has_create_and_v<Ntk>, "Ntk does not implement the create_and function");
-
-        auto s = Ntk::create_and(a, b);
-        assign_node(t, Ntk::get_node(s));
-
-        return s;
+        return create_node_from_literal({a, b}, 4, t);
     }
 
-    signal create_or_tile(const tile& t, signal a, signal b)
+    signal create_or(signal a, signal b, const tile& t = {})
     {
-        static_assert(mockturtle::has_create_or_v<Ntk>, "Ntk does not implement the create_or function");
-
-        auto s = Ntk::create_or(a, b);
-        assign_node(t, Ntk::get_node(s));
-
-        return s;
+        return create_node_from_literal({a, b}, 6, t);
     }
 
-    signal create_maj_tile(const tile& t, signal a, signal b, signal c)
+    signal create_xor(signal a, signal b, const tile& t = {})
     {
-        static_assert(mockturtle::has_create_maj_v<Ntk>, "Ntk does not implement the create_maj function");
-
-        auto s = Ntk::create_maj(a, b, c);
-        assign_node(t, Ntk::get_node(s));
-
-        return s;
+        return create_node_from_literal({a, b}, 8, t);
     }
 
-    template <class OtherNtk, class... Signals>
-    signal create_tile(const OtherNtk& other_ntk, const typename OtherNtk::node& other_node, const tile& t,
-                       Signals... signals)
+    signal create_maj(signal a, signal b, signal c, const tile& t = {})
     {
-        static_assert(mockturtle::has_is_and_v<OtherNtk>, "OtherNtk does not implement the is_and function");
-        static_assert(mockturtle::has_is_or_v<OtherNtk>, "OtherNtk does not implement the is_or function");
-        static_assert(mockturtle::has_is_maj_v<OtherNtk>, "OtherNtk does not implement the is_maj function");
+        return create_node_from_literal({a, b, c}, 10, t);
+    }
 
-        static_assert(mockturtle::has_create_and_v<Ntk>, "Ntk does not implement the create_and function");
-        static_assert(mockturtle::has_create_or_v<Ntk>, "Ntk does not implement the create_or function");
-        static_assert(mockturtle::has_create_maj_v<Ntk>, "Ntk does not implement the create_maj function");
-
-        if (other_ntk.is_and(other_node))
+    signal create_node(const std::vector<signal>& children, const kitty::dynamic_truth_table& function,
+                       const tile& t = {})
+    {
+        if (children.empty())
         {
-            return create_and_tile(t, signals...);
+            return {};
         }
-        if (other_ntk.is_or(other_node))
-        {
-            return create_or_tile(t, signals...);
-        }
-        if (other_ntk.is_maj(other_node))
-        {
-            return create_maj_tile(t, signals...);
-        }
+        return create_node_from_literal(children, strg->data.cache.insert(function), t);
     }
 
 #pragma endregion
 
 #pragma region Functional properties
 
-    [[nodiscard]] std::optional<kitty::dynamic_truth_table> tile_function(const tile& t) const
+    [[nodiscard]] kitty::dynamic_truth_table node_function(const node& n) const
     {
-        static_assert(mockturtle::has_node_function_v<Ntk>, "Ntk does not implement the node_function function");
+        return strg->data.cache[strg->nodes[n].data[1].h1];
+    }
 
-        if (auto n = get_tile_node(t); n)
-        {
-            return Ntk::node_function(*n);
-        }
+#pragma endregion
 
-        return std::nullopt;
+#pragma region Structural properties
+
+    [[nodiscard]] auto size() const
+    {
+        return static_cast<uint32_t>(strg->nodes.size() - 2);
+    }
+
+    [[nodiscard]] auto num_pis() const
+    {
+        return strg->inputs.size();
+    }
+
+    [[nodiscard]] auto num_pos() const
+    {
+        return strg->outputs.size();
+    }
+
+    // TODO num_gates und num_wires mitführen
+    [[nodiscard]] auto num_gates() const
+    {
+        return static_cast<uint32_t>(strg->data.tile_node_map.size() - strg->inputs.size() - strg->outputs.size());
     }
 
 #pragma endregion
 
 #pragma region Nodes and signals
 
-    [[nodiscard]] std::optional<node> get_tile_node(const tile& t) const
+    [[nodiscard]] node get_node(const signal& f) const
     {
-        if (auto it = l_storage->tile_node_map.find(t); it != l_storage->tile_node_map.end())
+        if (auto it = strg->data.tile_node_map.find(f); it != strg->data.tile_node_map.end())
         {
             return it->second;
         }
 
-        return std::nullopt;
+        return 0;
     }
 
-    [[nodiscard]] std::optional<tile> get_node_tile(const node& n) const
+    [[nodiscard]] node get_node(const tile& t) const
     {
-        if (auto it = l_storage->node_tile_map.find(n); it != l_storage->node_tile_map.end())
-        {
-            return it->second;
-        }
-
-        return std::nullopt;
+        return get_node(static_cast<signal>(t));
     }
 
-    [[nodiscard]] std::set<signal> get_tile_signals(const tile& t) const
+    [[nodiscard]] tile get_tile(const node& n) const noexcept
     {
-        if (auto it = l_storage->tile_signal_map.find(t); it != l_storage->tile_signal_map.end())
+        if (auto it = strg->data.node_tile_map.find(n); it != strg->data.node_tile_map.end())
         {
-            return it->second;
+            return static_cast<tile>(it->second);
         }
 
         return {};
+    }
+
+    [[nodiscard]] static bool is_complemented([[maybe_unused]] const signal& f)
+    {
+        return false;
+    }
+
+    // TODO if no PI / PO assigned and function literal > 2
+    [[nodiscard]] bool is_gate_tile(const tile& t) const noexcept
+    {
+        if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
+        {
+            return strg->nodes[it->second].data[1].h1 > 2;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    // TODO if no PI / PO assigned and function literal == 2
+    [[nodiscard]] bool is_wire_tile(const tile& t) const noexcept
+    {
+        if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
+        {
+            return strg->nodes[it->second].data[1].h1 == 2;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    [[nodiscard]] bool is_empty_tile(const tile& t) const noexcept
+    {
+        return !is_gate_tile(t) && !is_wire_tile(t);
     }
 
 #pragma endregion
@@ -270,145 +290,171 @@ class tile_based_layout : public Ntk
 #pragma region tile iterators
 
     template <typename Fn>
-    void foreach_pi_tile(Fn&& fn) const
+    void foreach_pi(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(l_storage->inputs.cbegin(), l_storage->inputs.cend(), fn);
+        mockturtle::detail::foreach_element(strg->inputs.cbegin(), strg->inputs.cend(), fn);
     }
 
     template <typename Fn>
-    void foreach_po_tile(Fn&& fn) const
+    void foreach_po(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(l_storage->outputs.cbegin(), l_storage->outputs.cend(), fn);
+        using IteratorType = decltype(strg->outputs.begin());
+        mockturtle::detail::foreach_element_transform<IteratorType, uint32_t>(
+            strg->outputs.begin(), strg->outputs.end(), [](const auto& o) { return o.index; }, fn);
     }
 
     [[nodiscard]] auto tiles(const tile& start = {}, const tile& stop = {}) const
     {
-        return range_t{std::make_pair(tile_iterator{dimension, start}, tile_iterator{dimension, stop})};
+        return range_t{
+            std::make_pair(coord_iterator{strg->data.dimension, start}, coord_iterator{strg->data.dimension, stop})};
     }
 
     [[nodiscard]] auto ground_tiles(const tile& start = {}, const tile& stop = {}) const
     {
         assert(start.z == 0 && stop.z == 0);
 
-        auto ground_layer = aspect_ratio{dimension.x, dimension.y, 1};
+        auto ground_layer = aspect_ratio{strg->data.dimension.x, strg->data.dimension.y, 1};
 
-        return range_t{std::make_pair(tile_iterator{ground_layer, start}, tile_iterator{ground_layer, stop})};
+        return range_t{std::make_pair(coord_iterator{ground_layer, start}, coord_iterator{ground_layer, stop})};
+    }
+
+#pragma endregion
+
+#pragma region Custom node values
+
+    void clear_values() const
+    {
+        std::for_each(strg->nodes.begin(), strg->nodes.end(), [](auto& n) { n.data[0].h2 = 0; });
+    }
+
+    [[nodiscard]] uint32_t value(node const& n) const
+    {
+        return strg->nodes[n].data[0].h2;
+    }
+
+    void set_value(node const& n, uint32_t v) const
+    {
+        strg->nodes[n].data[0].h2 = v;
+    }
+
+    uint32_t incr_value(node const& n) const
+    {
+        return static_cast<uint32_t>(strg->nodes[n].data[0].h2++);
+    }
+
+    uint32_t decr_value(node const& n) const
+    {
+        return static_cast<uint32_t>(--strg->nodes[n].data[0].h2);
+    }
+
+#pragma endregion
+
+#pragma region Visited flags
+
+    void clear_visited() const
+    {
+        std::for_each(strg->nodes.begin(), strg->nodes.end(), [](auto& n) { n.data[1].h2 = 0; });
+    }
+
+    [[nodiscard]] auto visited(node const& n) const
+    {
+        return strg->nodes[n].data[1].h2;
+    }
+
+    void set_visited(node const& n, uint32_t v) const
+    {
+        strg->nodes[n].data[1].h2 = v;
+    }
+
+    [[nodiscard]] uint32_t trav_id() const
+    {
+        return strg->data.trav_id;
+    }
+
+    void incr_trav_id() const
+    {
+        ++strg->data.trav_id;
     }
 
 #pragma endregion
 
   private:
-    aspect_ratio dimension;
+    storage strg;
 
-    struct layout_storage
+    inline void initialize_truth_table_cache()
     {
-        std::vector<tile> inputs{}, outputs{};
+        /* reserve the second node for constant 1 */
+        strg->nodes.emplace_back();
 
-        std::map<tile, node> tile_node_map{};
-        std::map<node, tile> node_tile_map{};
+        kitty::dynamic_truth_table tt_zero(0);
+        strg->data.cache.insert(tt_zero);
 
-        std::map<tile, std::set<signal>> tile_signal_map{};
-    };
+        strg->nodes[0].data[1].h1 = 0;
+        strg->nodes[1].data[1].h1 = 1;
 
-    std::shared_ptr<layout_storage> l_storage;
+        /* reserve some truth tables for nodes */
+        const auto create_and_cache = [this](const auto& literal, auto n)
+        {
+            kitty::dynamic_truth_table tt(n);
+            kitty::create_from_words(tt, &literal, &literal + 1);
+            strg->data.cache.insert(tt);
+        };
+
+        static constexpr const uint64_t lit_not = 0x1, lit_and = 0x8, lit_or = 0xe, lit_xor = 0x6, lit_maj = 0xe8;
+
+        create_and_cache(lit_not, 1);  // since NOT is not normal, its complement, i.e., the identity, is stored
+        create_and_cache(lit_and, 2);
+        create_and_cache(lit_or, 2);
+        create_and_cache(lit_xor, 2);
+        create_and_cache(lit_maj, 3);
+    }
 
     void assign_node(const tile& t, const node& n)
     {
-        l_storage->tile_node_map[t] = n;
-        l_storage->node_tile_map[n] = t;
+        if (!t.is_dead())
+        {
+            strg->data.tile_node_map[static_cast<signal>(t)] = n;
+            strg->data.node_tile_map[n] = static_cast<signal>(t);
+        }
     }
 
-    void assign_signal(const tile& t, const signal& s)
+    signal create_node_from_literal(const std::vector<signal>& children, uint32_t literal, const tile& t)
     {
-        l_storage->tile_signal_map[t].insert(s);
+        storage::element_type::node_type node_data;
+        std::copy(children.begin(), children.end(), std::back_inserter(node_data.children));
+        node_data.data[1].h1 = literal;
+
+        if (auto it = strg->hash.find(node_data); it != strg->hash.end())
+        {
+            return static_cast<signal>(get_tile(it->second));
+        }
+
+        const auto n = strg->nodes.size();
+        strg->nodes.push_back(node_data);
+        strg->hash[node_data] = n;
+
+        /* increase ref-count to children */
+        for (const auto& c : children) { strg->nodes[get_node(c)].data[0].h1++; }
+
+        set_value(n, 0);
+
+        assign_node(t, n);
+
+        //        for (auto const& fn : _events->on_add) { fn(n); }
+
+        return static_cast<signal>(t);
     }
 
-    // TODO think about PI/PO tiles
     void clear_tile(const tile& t)
     {
-        if (auto it = l_storage->tile_node_map.find(t); it != l_storage->tile_signal_map.end())
+        if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
         {
             // remove node-tile
-            l_storage->node_tile_map.erase(it->second);
+            strg->data.node_tile_map.erase(it->second);
             // remove tile-node
-            l_storage->tile_node_map.erase(it);
+            strg->data.tile_node_map.erase(it);
         }
-
-        // remove signals
-        l_storage->tile_signal_map.erase(t);
     }
-
-    class tile_iterator
-    {
-      public:
-        constexpr explicit tile_iterator(const aspect_ratio& dimension, const tile& t = {}) noexcept :
-                dimension{dimension},
-                t{t}
-        {}
-
-        constexpr tile_iterator& operator++() noexcept
-        {
-            ++t.x;
-
-            if (t.x >= dimension.x)
-            {
-                t.x = 0;
-
-                ++t.y;
-                if (t.y >= dimension.y)
-                {
-                    t.y = 0;
-
-                    ++t.z;
-                    if (t.z >= dimension.z)
-                    {
-                        t = dimension;
-                    }
-                }
-            }
-
-            return *this;
-        }
-
-        constexpr tile_iterator operator++(int) noexcept
-        {
-            auto result{*this};
-
-            ++(*this);
-
-            return result;
-        }
-
-        constexpr tile operator*() const
-        {
-            return t;
-        }
-
-        constexpr bool operator==(const tile_iterator& other) const
-        {
-            return (t == other.t);
-        }
-
-        constexpr bool operator!=(const tile_iterator& other) const
-        {
-            return !(*this == other);
-        }
-
-        constexpr bool operator<(const tile_iterator& other) const
-        {
-            return (t < other.t);
-        }
-
-        constexpr bool operator<=(const tile_iterator& other) const
-        {
-            return (t <= other.t);
-        }
-
-      private:
-        const aspect_ratio dimension;
-
-        tile t;
-    };
 };
 
 }  // namespace fiction

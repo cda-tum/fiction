@@ -1,0 +1,203 @@
+//
+// Created by marcel on 01.05.21.
+//
+
+#ifndef FICTION_COORDINATE_HPP
+#define FICTION_COORDINATE_HPP
+
+#include <fmt/format.h>
+
+#include <cstdint>
+#include <iostream>
+
+namespace fiction
+{
+struct coord_t
+{
+    uint64_t d : 1;  // MSB as dead indicator
+    uint64_t z : 1;
+    uint64_t y : 31;
+    uint64_t x : 31;
+
+    constexpr coord_t() :
+            d{static_cast<uint64_t>(1ul)},  // default-constructed coord_ts are dead
+            z{static_cast<uint64_t>(0ul)},
+            y{static_cast<uint64_t>(0ul)},
+            x{static_cast<uint64_t>(0ul)}
+    {}
+
+    template <class X, class Y, class Z>
+    constexpr coord_t(X x, Y y, Z z) :
+            d{static_cast<uint64_t>(0ul)},
+            z{static_cast<uint64_t>(z)},
+            y{static_cast<uint64_t>(y)},
+            x{static_cast<uint64_t>(x)}
+    {}
+
+    template <class X, class Y>
+    constexpr coord_t(X x, Y y) :
+            d{static_cast<uint64_t>(0ul)},
+            z{static_cast<uint64_t>(0ul)},
+            y{static_cast<uint64_t>(y)},
+            x{static_cast<uint64_t>(x)}
+    {}
+
+    constexpr explicit coord_t(const uint64_t t) :
+            d{static_cast<uint64_t>(t >> 63)},
+            z{static_cast<uint64_t>((t << 1) >> 63)},
+            y{static_cast<uint64_t>((t << 2) >> 33)},
+            x{static_cast<uint64_t>((t << 33) >> 33)}
+    {}
+
+    explicit operator uint64_t() const
+    {
+        return (((((((0ull | d) << 1) | z) << 31) | y) << 31) | x);
+    }
+
+    [[nodiscard]] constexpr bool is_dead() const
+    {
+        return static_cast<bool>(d);
+    }
+
+    constexpr bool operator==(const coord_t& other) const
+    {
+        return x == other.x && y == other.y && z == other.z;
+    }
+
+    constexpr bool operator==(const uint64_t& other) const
+    {
+        return static_cast<uint64_t>(*this) == other;
+    }
+
+    constexpr bool operator!=(const coord_t& other) const
+    {
+        return !(*this == other);
+    }
+
+    constexpr bool operator<(const coord_t& other) const
+    {
+        if (z < other.z)
+            return true;
+
+        if (z == other.z)
+        {
+            if (y < other.y)
+                return true;
+
+            if (y == other.y)
+            {
+                return x < other.x;
+            }
+        }
+
+        return false;
+    }
+
+    constexpr bool operator>(const coord_t& other) const
+    {
+        return other < *this;
+    }
+
+    constexpr bool operator<=(const coord_t& other) const
+    {
+        return !(*this > other);
+    }
+
+    constexpr bool operator>=(const coord_t& other) const
+    {
+        return !(*this < other);
+    }
+};
+
+class coord_iterator
+{
+  public:
+    constexpr explicit coord_iterator(const coord_t& dimension, const coord_t& coord = {}) noexcept :
+            dimension{dimension},
+            coord{coord}
+    {}
+
+    constexpr coord_iterator& operator++() noexcept
+    {
+        ++coord.x;
+
+        if (coord.x >= dimension.x)
+        {
+            coord.x = 0;
+
+            ++coord.y;
+            if (coord.y >= dimension.y)
+            {
+                coord.y = 0;
+
+                ++coord.z;
+                if (coord.z >= dimension.z)
+                {
+                    coord = dimension;
+                }
+            }
+        }
+
+        return *this;
+    }
+
+    constexpr const coord_iterator operator++(int) noexcept
+    {
+        const auto result{*this};
+
+        ++(*this);
+
+        return result;
+    }
+
+    constexpr coord_t operator*() const
+    {
+        return coord;
+    }
+
+    constexpr bool operator==(const coord_iterator& other) const
+    {
+        return (coord == other.coord);
+    }
+
+    constexpr bool operator!=(const coord_iterator& other) const
+    {
+        return !(*this == other);
+    }
+
+    constexpr bool operator<(const coord_iterator& other) const
+    {
+        return (coord < other.coord);
+    }
+
+    constexpr bool operator<=(const coord_iterator& other) const
+    {
+        return (coord <= other.coord);
+    }
+
+  private:
+    const coord_t dimension;
+
+    coord_t coord;
+};
+
+std::ostream& operator<<(std::ostream& os, const coord_t& t)
+{
+    os << fmt::format("({},{},{})", t.x, t.y, t.z);
+    return os;
+}
+
+}  // namespace fiction
+
+namespace std
+{
+// make coord_iterator compatible with STL iterator categories
+template <>
+struct iterator_traits<fiction::coord_iterator>
+{
+    using iterator_category = std::forward_iterator_tag;
+    using value_type        = fiction::coord_t;
+};
+}  // namespace std
+
+#endif  // FICTION_COORDINATE_HPP
