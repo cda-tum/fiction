@@ -1,6 +1,9 @@
 ﻿---
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveBitFields: true
+AlignConsecutiveMacros: true
 AlignEscapedNewlines: Left
 AlignOperands: Align
 AlignTrailingComments: true

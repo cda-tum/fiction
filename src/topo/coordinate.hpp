@@ -20,15 +20,15 @@ struct coord_t
     uint64_t x : 31;
 
     constexpr coord_t() :
-            d{static_cast<uint64_t>(1ul)},  // default-constructed coord_ts are dead
-            z{static_cast<uint64_t>(0ul)},
-            y{static_cast<uint64_t>(0ul)},
-            x{static_cast<uint64_t>(0ul)}
+            d{static_cast<uint64_t>(1ull)},  // default-constructed coord_ts are dead
+            z{static_cast<uint64_t>(0ull)},
+            y{static_cast<uint64_t>(0ull)},
+            x{static_cast<uint64_t>(0ull)}
     {}
 
     template <class X, class Y, class Z>
     constexpr coord_t(X x, Y y, Z z) :
-            d{static_cast<uint64_t>(0ul)},
+            d{static_cast<uint64_t>(0ull)},
             z{static_cast<uint64_t>(z)},
             y{static_cast<uint64_t>(y)},
             x{static_cast<uint64_t>(x)}
@@ -36,8 +36,8 @@ struct coord_t
 
     template <class X, class Y>
     constexpr coord_t(X x, Y y) :
-            d{static_cast<uint64_t>(0ul)},
-            z{static_cast<uint64_t>(0ul)},
+            d{static_cast<uint64_t>(0ull)},
+            z{static_cast<uint64_t>(0ull)},
             y{static_cast<uint64_t>(y)},
             x{static_cast<uint64_t>(x)}
     {}

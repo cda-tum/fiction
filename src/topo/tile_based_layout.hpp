@@ -5,6 +5,7 @@
 #ifndef FICTION_TILE_BASED_LAYOUT_HPP
 #define FICTION_TILE_BASED_LAYOUT_HPP
 
+#include "clocking_scheme.hpp"
 #include "coordinate.hpp"
 #include "range.h"
 
@@ -17,10 +18,10 @@
 
 #include <cstdint>
 #include <iterator>
-#include <map>
 #include <optional>
 #include <ostream>
 #include <set>
+#include <unordered_map>
 #include <vector>
 
 namespace fiction
@@ -39,10 +40,12 @@ class tile_based_layout
     {
         AspectRatio dimension;
 
+        std::shared_ptr<clocking_scheme<coord_t>> clocking;
+
         mockturtle::truth_table_cache<kitty::dynamic_truth_table> cache;
 
-        std::map<Tile, Node> tile_node_map{};
-        std::map<Node, Tile> node_tile_map{};
+        std::unordered_map<Tile, Node> tile_node_map{};
+        std::unordered_map<Node, Tile> node_tile_map{};
 
         uint32_t trav_id = 0u;
 
@@ -81,6 +84,15 @@ class tile_based_layout
     explicit tile_based_layout(const aspect_ratio& aspect_ratio) : strg{std::make_shared<tile_based_layout_storage>()}
     {
         strg->data.dimension = aspect_ratio;
+        strg->data.clocking  = std::make_shared<clocking_scheme<coord_t>>(open_4_clocking);
+        initialize_truth_table_cache();
+    }
+
+    tile_based_layout(const aspect_ratio& aspect_ratio, const clocking_scheme<tile>& scheme) :
+            strg{std::make_shared<tile_based_layout_storage>()}
+    {
+        strg->data.dimension = aspect_ratio;
+        strg->data.clocking  = std::make_shared<clocking_scheme<coord_t>>(scheme);
         initialize_truth_table_cache();
     }
 
@@ -320,6 +332,35 @@ class tile_based_layout
 
 #pragma endregion
 
+#pragma region clocking
+
+    void assign_clocking(const tile& t, const clocking_scheme<tile>::zone z) noexcept
+    {
+        strg->data.clocking->override_clock_zone(t, z);
+    }
+
+    [[nodiscard]] clocking_scheme<tile>::zone tile_clocking(const tile& t) const noexcept
+    {
+        return (*strg->data.clocking)(t);
+    }
+
+    [[nodiscard]] clocking_scheme<tile>::number num_clocks() const noexcept
+    {
+        return strg->data.clocking->num_clocks;
+    }
+
+    [[nodiscard]] bool is_regularly_clocked() const noexcept
+    {
+        return strg->data.clocking->is_regular();
+    }
+
+    [[nodiscard]] bool is_clocking(std::string&& name) const noexcept
+    {
+        return *strg->data.clocking == name;
+    }
+
+#pragma endregion
+
 #pragma region Custom node values
 
     void clear_values() const
@@ -414,6 +455,7 @@ class tile_based_layout
         if (!t.is_dead())
         {
             strg->data.tile_node_map[static_cast<signal>(t)] = n;
+
             strg->data.node_tile_map[n] = static_cast<signal>(t);
         }
     }

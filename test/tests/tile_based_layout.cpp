@@ -10,6 +10,8 @@
 
 #include <map>
 #include <set>
+#include <type_traits>
+
 
 using namespace fiction;
 
@@ -361,4 +363,37 @@ TEST_CASE("Creation of ternary operations", "[tile-based]")
 
     CHECK(layout.is_gate_tile({1, 1}));
     CHECK(!layout.is_wire_tile({1, 1}));
+}
+
+TEST_CASE("Clocking", "[tile-based]")
+{
+    REQUIRE(mockturtle::is_network_type_v<tile_based_layout>);
+    REQUIRE(mockturtle::has_create_pi_v<tile_based_layout>);
+    REQUIRE(mockturtle::has_num_pis_v<tile_based_layout>);
+    REQUIRE(mockturtle::has_create_and_v<tile_based_layout>);
+
+    tile_based_layout layout{tile_based_layout::aspect_ratio{2, 2, 1}, twoddwave_4_clocking};
+
+    auto x1 = layout.create_pi("x1", {1, 0});
+    auto x2 = layout.create_pi("x2", {0, 1});
+
+    auto a1 = layout.create_and(x1, x2, {1, 1});
+
+    CHECK(layout.is_regularly_clocked());
+    CHECK(layout.tile_clocking({0, 0}) == 0);
+    CHECK(layout.tile_clocking({1, 0}) == 1);
+    CHECK(layout.tile_clocking({0, 1}) == 1);
+    CHECK(layout.tile_clocking({1, 1}) == 2);
+
+    CHECK(layout.num_clocks() == 4);
+    CHECK(layout.is_clocking(clock_name::twoddwave4));
+
+    layout.assign_clocking(static_cast<tile_based_layout::tile>(x1), 2);
+    layout.assign_clocking(static_cast<tile_based_layout::tile>(x2), 2);
+    layout.assign_clocking(static_cast<tile_based_layout::tile>(a1), 3);
+
+    CHECK(layout.tile_clocking({0, 0}) == 0);
+    CHECK(layout.tile_clocking({1, 0}) == 2);
+    CHECK(layout.tile_clocking({0, 1}) == 2);
+    CHECK(layout.tile_clocking({1, 1}) == 3);
 }
