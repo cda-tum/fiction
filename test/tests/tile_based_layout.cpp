@@ -148,6 +148,76 @@ TEST_CASE("Tile iteration", "[tile-based]")
     layout.foreach_tile(check3, start, stop);
 }
 
+TEST_CASE("Cardinal operations", "[tile-based]")
+{
+    tile_based_layout::aspect_ratio ar{10, 10, 1};
+
+    tile_based_layout layout{ar};
+    
+    auto nt = layout.north({5, 5});
+    CHECK(!nt.is_dead());
+    CHECK(nt == tile_based_layout::tile{5, 4});
+    nt = layout.north({5, 0});
+    CHECK(!nt.is_dead());
+    CHECK(nt == tile_based_layout::tile{5, 0});
+    CHECK(layout.is_border(nt));
+    CHECK(layout.is_northern_border(nt));
+    CHECK(layout.is_ground_layer(nt));
+
+    auto et = layout.east({5, 5});
+    CHECK(!et.is_dead());
+    CHECK(et == tile_based_layout::tile{6, 5});
+    et = layout.east({10, 5});
+    CHECK(!et.is_dead());
+    CHECK(et == tile_based_layout::tile{10, 5});
+    CHECK(layout.is_border(et));
+    CHECK(layout.is_eastern_border(et));
+    CHECK(layout.is_ground_layer(et));
+    et = layout.east({11, 5});
+    CHECK(et.is_dead());
+
+    auto st = layout.south({5, 5});
+    CHECK(!st.is_dead());
+    CHECK(st == tile_based_layout::tile{5, 6});
+    st = layout.south({5, 10});
+    CHECK(!st.is_dead());
+    CHECK(st == tile_based_layout::tile{5, 10});
+    CHECK(layout.is_border(st));
+    CHECK(layout.is_southern_border(st));
+    CHECK(layout.is_ground_layer(st));
+    st = layout.south({5, 11});
+    CHECK(st.is_dead());
+
+    auto wt = layout.west({5, 5});
+    CHECK(!wt.is_dead());
+    CHECK(wt == tile_based_layout::tile{4, 5});
+    wt = layout.west({0, 5});
+    CHECK(!wt.is_dead());
+    CHECK(wt == tile_based_layout::tile{0, 5});
+    CHECK(layout.is_border(wt));
+    CHECK(layout.is_western_border(wt));
+    CHECK(layout.is_ground_layer(wt));
+
+    auto at = layout.above({5, 5, 0});
+    CHECK(!at.is_dead());
+    CHECK(at == tile_based_layout::tile{5, 5, 1});
+    at = layout.above({5, 5, 1});
+    CHECK(!at.is_dead());
+    CHECK(at == tile_based_layout::tile{5, 5, 1});
+    CHECK(layout.is_crossing_layer(at));
+    CHECK(!layout.is_border(at));
+//    at = layout.above({5, 5, 2});
+//    CHECK(at.is_dead());
+
+    auto bt = layout.below({5, 5, 1});
+    CHECK(!bt.is_dead());
+    CHECK(bt == tile_based_layout::tile{5, 5, 0});
+    bt = layout.below({5, 5, 0});
+    CHECK(!bt.is_dead());
+    CHECK(bt == tile_based_layout::tile{5, 5, 0});
+    CHECK(layout.is_ground_layer(bt));
+}
+
 TEST_CASE("Creation and usage of constants", "[tile-based]")
 {
     // adapted from mockturtle/test/networks/*.cpp

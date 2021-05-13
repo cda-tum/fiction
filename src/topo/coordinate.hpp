@@ -109,14 +109,20 @@ struct coord_t
     }
 };
 
+std::ostream& operator<<(std::ostream& os, const coord_t& t)
+{
+    os << fmt::format("({},{},{})", t.x, t.y, t.z);
+    return os;
+}
+
 class coord_iterator
 {
   public:
     using value_type = coord_t;
 
-    constexpr explicit coord_iterator(const coord_t& dimension, const coord_t& coord = {}) noexcept :
+    constexpr explicit coord_iterator(const coord_t& dimension, const coord_t& start = {}) noexcept :
             dimension{dimension},
-            coord{coord}
+            coord{start.is_dead() ? coord_t{0, 0} : start}
     {}
 
     constexpr coord_iterator& operator++() noexcept
@@ -182,13 +188,6 @@ class coord_iterator
 
     coord_t coord;
 };
-
-std::ostream& operator<<(std::ostream& os, const coord_t& t)
-{
-    os << fmt::format("({},{},{})", t.x, t.y, t.z);
-    return os;
-}
-
 }  // namespace fiction
 
 namespace std
