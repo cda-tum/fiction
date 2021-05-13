@@ -16,6 +16,7 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/truth_table_cache.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <iterator>
 #include <optional>
@@ -124,7 +125,7 @@ class tile_based_layout
         return static_cast<signal>(t);
     }
 
-    void create_po(const signal& f, [[maybe_unused]] const std::string& name = std::string(), const tile& t = {})
+    signal create_po(const signal& f, [[maybe_unused]] const std::string& name = std::string(), const tile& t = {})
     {
         const auto n = strg->nodes.size();
         strg->nodes.emplace_back();     // empty node data
@@ -136,22 +137,19 @@ class tile_based_layout
 
         /* increase ref-count to children */
         strg->nodes[get_node(f)].data[0].h1++;
+
+        return static_cast<signal>(t);
     }
 
     [[nodiscard]] bool is_pi(const node& n) const
     {
-        bool found = false;
-        mockturtle::detail::foreach_element(strg->inputs.begin(), strg->inputs.end(),
-                                            [&found, &n](auto const& node)
-                                            {
-                                                if (node == n)
-                                                {
-                                                    found = true;
-                                                    return false;
-                                                }
-                                                return true;
-                                            });
-        return found;
+        return std::find(strg->inputs.cbegin(), strg->inputs.cend(), n) != strg->inputs.cend();
+    }
+
+    [[nodiscard]] bool is_po(const node& n) const
+    {
+        return std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
+                            [&n](const auto& p) { return p.index == n; }) != strg->outputs.cend();
     }
 
 #pragma endregion
@@ -299,7 +297,7 @@ class tile_based_layout
 
 #pragma endregion
 
-#pragma region tile iterators
+#pragma region iterators
 
     template <typename Fn>
     void foreach_pi(Fn&& fn) const
@@ -321,6 +319,13 @@ class tile_based_layout
             std::make_pair(coord_iterator{strg->data.dimension, start}, coord_iterator{strg->data.dimension, stop})};
     }
 
+    template <typename Fn>
+    void foreach_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
+    {
+        mockturtle::detail::foreach_element(coord_iterator{strg->data.dimension, start},
+                                            coord_iterator{strg->data.dimension, stop}, fn);
+    }
+
     [[nodiscard]] auto ground_tiles(const tile& start = {}, const tile& stop = {}) const
     {
         assert(start.z == 0 && stop.z == 0);
@@ -328,6 +333,17 @@ class tile_based_layout
         auto ground_layer = aspect_ratio{strg->data.dimension.x, strg->data.dimension.y, 1};
 
         return range_t{std::make_pair(coord_iterator{ground_layer, start}, coord_iterator{ground_layer, stop})};
+    }
+
+    template <typename Fn>
+    void foreach_ground_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
+    {
+        assert(start.z == 0 && stop.z == 0);
+
+        auto ground_layer = aspect_ratio{strg->data.dimension.x, strg->data.dimension.y, 1};
+
+        mockturtle::detail::foreach_element(coord_iterator{ground_layer, start},
+                                            coord_iterator{ground_layer, stop}, fn);
     }
 
 #pragma endregion

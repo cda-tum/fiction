@@ -78,7 +78,7 @@ TEST_CASE("Tile iteration", "[tile-based]")
 
     std::set<tile_based_layout::tile> visited{};
 
-    for (auto&& t : layout.tiles())
+    const auto check1 = [&visited, &ar, &layout](const auto& t)
     {
         CHECK(t < ar);
         CHECK(layout.is_empty_tile(t));
@@ -86,26 +86,66 @@ TEST_CASE("Tile iteration", "[tile-based]")
         // no tile is visited twice
         CHECK(visited.count(t) == 0);
         visited.insert(t);
+    };
+
+    for (auto&& t : layout.tiles())
+    {
+        check1(t);
     }
+
+    visited.clear();
+
+    layout.foreach_tile(check1);
+
+    visited.clear();
 
     tile_based_layout::aspect_ratio ar_ground{ar.x, ar.y, 0};
 
-    for (auto&& t : layout.ground_tiles())
+    const auto check2 = [&visited, &ar_ground](const auto& t)
     {
         // iteration stays in ground layer
         CHECK(t.z == 0);
         CHECK(t < ar_ground);
+
+        // no tile is visited twice
+        CHECK(visited.count(t) == 0);
+        visited.insert(t);
+
+    };
+
+    for (auto&& t : layout.ground_tiles())
+    {
+        check2(t);
     }
+
+    visited.clear();
+
+    layout.foreach_ground_tile(check2);
+
+    visited.clear();
 
     tile_based_layout::tile start{42, 20}, stop{25, 40};
 
-    for (auto&& t : layout.tiles(start, stop))
+    const auto check3 = [&visited, &start, &stop](const auto& t)
     {
         CHECK(t.z == 0);
         // iteration stays in between the bounds
         CHECK(t >= start);
         CHECK(t < stop);
+
+        // no tile is visited twice
+        CHECK(visited.count(t) == 0);
+        visited.insert(t);
+    };
+
+    for (auto&& t : layout.tiles(start, stop))
+    {
+        check3(t);
     }
+
+    visited.clear();
+
+    layout.foreach_tile(check3, start, stop);
 }
 
 TEST_CASE("Creation and usage of constants", "[tile-based]")
@@ -153,6 +193,7 @@ TEST_CASE("Creation and usage of primary inputs", "[tile-based]")
     tile_based_layout layout{tile_based_layout::aspect_ratio{2, 2, 1}};
 
     auto a = layout.create_pi("a", {0, 0});
+    CHECK(layout.is_pi(layout.get_node(a)));
 
     CHECK(layout.size() == 1);
     CHECK(layout.num_pis() == 1);
@@ -162,6 +203,9 @@ TEST_CASE("Creation and usage of primary inputs", "[tile-based]")
 
     auto b = layout.create_pi("b", {1, 0});
     auto c = layout.create_pi("c", {0, 1});
+
+    CHECK(layout.is_pi(layout.get_node(b)));
+    CHECK(layout.is_pi(layout.get_node(c)));
 
     CHECK(layout.num_pis() == 3);
 
@@ -178,6 +222,7 @@ TEST_CASE("Creation and usage of primary inputs", "[tile-based]")
                 CHECK(tn == t);
             };
 
+            CHECK(layout.is_pi(pi));
             CHECK(!layout.is_gate_tile(static_cast<tile_based_layout::tile>(pi)));
 
             switch (i)
@@ -225,8 +270,11 @@ TEST_CASE("Creation and usage of primary outputs", "[tile-based]")
     CHECK(layout.num_pis() == 1);
     CHECK(layout.num_pos() == 0);
 
-    layout.create_po(x1, "f1", tile_based_layout::tile{0, 1});
-    layout.create_po(!x1, "f2", tile_based_layout::tile{1, 1});
+    const auto f1 = layout.create_po(x1, "f1", tile_based_layout::tile{0, 1});
+    const auto f2 = layout.create_po(!x1, "f2", tile_based_layout::tile{1, 1});
+
+    CHECK(layout.is_po(layout.get_node(f1)));
+    CHECK(layout.is_po(layout.get_node(f2)));
 
     CHECK(layout.size() == 3);
     CHECK(layout.num_pos() == 2);
@@ -244,6 +292,7 @@ TEST_CASE("Creation and usage of primary outputs", "[tile-based]")
                 CHECK(tn == t);
             };
 
+            CHECK(layout.is_po(po));
             CHECK(!layout.is_gate_tile(static_cast<tile_based_layout::tile>(po)));
 
             switch (i)
@@ -284,6 +333,9 @@ TEST_CASE("Creation of unary operations", "[tile-based]")
     auto f2 = layout.create_not(x1, {0, 1});
 
     CHECK(layout.size() == 3);
+
+    auto x2 = layout.create_pi("x2", {1, 1});
+    CHECK(layout.is_pi(layout.get_node(x2)));
 
     auto f1n  = layout.get_node(f1);
     auto t10n = layout.get_node(static_cast<tile_based_layout::signal>(tile_based_layout::tile{1, 0}));

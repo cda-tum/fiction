@@ -112,6 +112,8 @@ struct coord_t
 class coord_iterator
 {
   public:
+    using value_type = coord_t;
+
     constexpr explicit coord_iterator(const coord_t& dimension, const coord_t& coord = {}) noexcept :
             dimension{dimension},
             coord{coord}
