@@ -76,7 +76,7 @@ jobs:
     - name: Setup and run lcov
       run: |
         sudo apt-get install lcov
-        lcov -t "result" -o lcov.info -c -d .
+        lcov -t "result" -o lcov.info -c -d ${{github.workspace}}/build/
         lcov -e lcov.info "${{github.workspace}}/src*" -o lcov_filtered.info
         lcov -l lcov_filtered.info
 
