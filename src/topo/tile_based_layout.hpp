@@ -173,6 +173,42 @@ class tile_based_layout
         return t.z > 0ull;
     }
 
+    template <typename Container>
+    Container surrounding_2d(const tile& t) const noexcept
+    {
+        Container c{};
+
+        const auto add_if_not_t = [&c, &t](const auto& cardinal)
+        {
+            if (cardinal != t)
+                c.insert(c.end(), cardinal);
+        };
+
+        add_if_not_t(north(t));
+        add_if_not_t(east(t));
+        add_if_not_t(south(t));
+        add_if_not_t(west(t));
+
+        return c;
+    }
+
+    template <typename Container>
+    Container surrounding_3d(const tile& t) const noexcept
+    {
+        auto c = surrounding_2d<Container>(t);
+
+        const auto add_if_not_t = [&c, &t](const auto& cardinal)
+        {
+            if (cardinal != t)
+                c.insert(c.end(), cardinal);
+        };
+
+        add_if_not_t(above(t));
+        add_if_not_t(below(t));
+
+        return c;
+    }
+
 #pragma endregion
 
 #pragma region iterators

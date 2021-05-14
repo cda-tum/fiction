@@ -9,7 +9,6 @@
 #include <map>
 #include <set>
 
-
 using namespace fiction;
 
 TEST_CASE("Tiles", "[tile-based")
@@ -83,17 +82,14 @@ TEST_CASE("Tile iteration", "[tile-based]")
     const auto check1 = [&visited, &ar](const auto& t)
     {
         CHECK(t <= ar);
-//        CHECK(layout.is_empty_tile(t));
+        //        CHECK(layout.is_empty_tile(t));
 
         // no tile is visited twice
         CHECK(visited.count(t) == 0);
         visited.insert(t);
     };
 
-    for (auto&& t : layout.tiles())
-    {
-        check1(t);
-    }
+    for (auto&& t : layout.tiles()) { check1(t); }
     CHECK(visited.size() == 200);
 
     visited.clear();
@@ -114,13 +110,9 @@ TEST_CASE("Tile iteration", "[tile-based]")
         // no tile is visited twice
         CHECK(visited.count(t) == 0);
         visited.insert(t);
-
     };
 
-    for (auto&& t : layout.ground_tiles())
-    {
-        check2(t);
-    }
+    for (auto&& t : layout.ground_tiles()) { check2(t); }
     CHECK(visited.size() == 100);
 
     visited.clear();
@@ -144,10 +136,7 @@ TEST_CASE("Tile iteration", "[tile-based]")
         visited.insert(t);
     };
 
-    for (auto&& t : layout.tiles(start, stop))
-    {
-        check3(t);
-    }
+    for (auto&& t : layout.tiles(start, stop)) { check3(t); }
     CHECK(visited.size() == 23);
 
     visited.clear();
@@ -161,7 +150,7 @@ TEST_CASE("Cardinal operations", "[tile-based]")
     tile_based_layout::aspect_ratio ar{10, 10, 1};
 
     tile_based_layout layout{ar};
-    
+
     auto nt = layout.north({5, 5});
     CHECK(!nt.is_dead());
     CHECK(nt == tile_based_layout::tile{5, 4});
@@ -214,8 +203,8 @@ TEST_CASE("Cardinal operations", "[tile-based]")
     CHECK(at == tile_based_layout::tile{5, 5, 1});
     CHECK(layout.is_crossing_layer(at));
     CHECK(!layout.is_border(at));
-//    at = layout.above({5, 5, 2});
-//    CHECK(at.is_dead());
+    //    at = layout.above({5, 5, 2});
+    //    CHECK(at.is_dead());
 
     auto bt = layout.below({5, 5, 1});
     CHECK(!bt.is_dead());
@@ -224,4 +213,14 @@ TEST_CASE("Cardinal operations", "[tile-based]")
     CHECK(!bt.is_dead());
     CHECK(bt == tile_based_layout::tile{5, 5, 0});
     CHECK(layout.is_ground_layer(bt));
+
+    auto s1_2d = layout.surrounding_2d<std::set<tile_based_layout::tile>>({5, 5});
+    auto s2_2d = std::set<tile_based_layout::tile>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
+
+    CHECK(s1_2d == s2_2d);
+
+    auto s1_3d = layout.surrounding_3d<std::set<tile_based_layout::tile>>({5, 5});
+    auto s2_3d = std::set<tile_based_layout::tile>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}, {5, 5, 1}}};
+
+    CHECK(s1_3d == s2_3d);
 }
