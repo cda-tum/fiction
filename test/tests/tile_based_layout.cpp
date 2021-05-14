@@ -20,7 +20,7 @@ TEST_CASE("Tiles", "[tile-based")
     auto t0 = tile_based_layout::tile{0, 0, 0};
     CHECK(!t0.is_dead());
 
-    CHECK(t0 == td);
+    CHECK(t0 != td);
 
     auto t1 = tile_based_layout::tile{1, 2, 0};
     auto t2 = tile_based_layout::tile{1, 2};
