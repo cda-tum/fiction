@@ -69,7 +69,7 @@ class tile_based_layout
 
 #pragma region cardinal operations
 
-    [[nodiscard]] static constexpr tile north(const tile& t) noexcept
+    [[nodiscard]] constexpr tile north(const tile& t) const noexcept
     {
         if (t.y == 0ull)
             return t;
@@ -104,7 +104,7 @@ class tile_based_layout
         return st;
     }
 
-    [[nodiscard]] static constexpr tile west(const tile& t) noexcept
+    [[nodiscard]] constexpr tile west(const tile& t) const noexcept
     {
         if (t.x == 0ull)
             return t;
@@ -127,7 +127,7 @@ class tile_based_layout
         return at;
     }
 
-    [[nodiscard]] static constexpr tile below(const tile& t) noexcept
+    [[nodiscard]] constexpr tile below(const tile& t) const noexcept
     {
         if (t.z == 0ull)
             return t;
@@ -138,7 +138,7 @@ class tile_based_layout
         return bt;
     }
 
-    [[nodiscard]] static constexpr bool is_northern_border(const tile& t) noexcept
+    [[nodiscard]] constexpr bool is_northern_border(const tile& t) const noexcept
     {
         return t.y == 0ull;
     }
@@ -153,7 +153,7 @@ class tile_based_layout
         return t.y == y();
     }
 
-    [[nodiscard]] static constexpr bool is_western_border(const tile& t) noexcept
+    [[nodiscard]] constexpr bool is_western_border(const tile& t) const noexcept
     {
         return t.x == 0ull;
     }
@@ -163,12 +163,12 @@ class tile_based_layout
         return is_northern_border(t) || is_eastern_border(t) || is_southern_border(t) || is_western_border(t);
     }
 
-    [[nodiscard]] static constexpr bool is_ground_layer(const tile& t) noexcept
+    [[nodiscard]] constexpr bool is_ground_layer(const tile& t) const noexcept
     {
         return t.z == 0ull;
     }
 
-    [[nodiscard]] static constexpr bool is_crossing_layer(const tile& t) noexcept
+    [[nodiscard]] constexpr bool is_crossing_layer(const tile& t) const noexcept
     {
         return t.z > 0ull;
     }
@@ -179,23 +179,27 @@ class tile_based_layout
 
     [[nodiscard]] auto tiles(const tile& start = {}, const tile& stop = {}) const
     {
-        return range_t{std::make_pair(coord_iterator{strg->dimension, start}, coord_iterator{strg->dimension, stop})};
+        return range_t{
+            std::make_pair(coord_iterator{strg->dimension, start.is_dead() ? tile{0, 0} : start},
+                           coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop})};
     }
 
     template <typename Fn>
     void foreach_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
     {
-        mockturtle::detail::foreach_element(coord_iterator{strg->dimension, start},
-                                            coord_iterator{strg->dimension, stop}, fn);
+        mockturtle::detail::foreach_element(
+            coord_iterator{strg->dimension, start.is_dead() ? tile{0, 0} : start},
+            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, fn);
     }
 
     [[nodiscard]] auto ground_tiles(const tile& start = {}, const tile& stop = {}) const
     {
         assert(start.z == 0 && stop.z == 0);
 
-        auto ground_layer = aspect_ratio{x(), y(), 1};
+        auto ground_layer = aspect_ratio{x(), y(), 0};
 
-        return range_t{std::make_pair(coord_iterator{ground_layer, start}, coord_iterator{ground_layer, stop})};
+        return range_t{std::make_pair(coord_iterator{ground_layer, start.is_dead() ? tile{0, 0} : start},
+                                      coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop})};
     }
 
     template <typename Fn>
@@ -203,10 +207,11 @@ class tile_based_layout
     {
         assert(start.z == 0 && stop.z == 0);
 
-        auto ground_layer = aspect_ratio{x(), y(), 1};
+        auto ground_layer = aspect_ratio{x(), y(), 0};
 
-        mockturtle::detail::foreach_element(coord_iterator{ground_layer, start}, coord_iterator{ground_layer, stop},
-                                            fn);
+        mockturtle::detail::foreach_element(
+            coord_iterator{ground_layer, start.is_dead() ? tile{0, 0} : start},
+            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
     }
 
 #pragma endregion

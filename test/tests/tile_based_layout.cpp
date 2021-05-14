@@ -52,6 +52,11 @@ TEST_CASE("Tiles", "[tile-based")
     CHECK(t2 < t1);
     CHECK(t2 <= t1);
 
+    auto t3 = tile_based_layout::tile{0, 0, 1};
+
+    CHECK(t1 < t3);
+    CHECK(t2 < t3);
+
     std::map<uint64_t, tile_based_layout::tile> tile_repr{
         {0x8000000000000000, tile_based_layout::tile{}},
         {0x0000000000000000, tile_based_layout::tile{0, 0, 0}},
@@ -69,7 +74,7 @@ TEST_CASE("Tiles", "[tile-based")
 
 TEST_CASE("Tile iteration", "[tile-based]")
 {
-    tile_based_layout::aspect_ratio ar{50, 50, 1};
+    tile_based_layout::aspect_ratio ar{9, 9, 1};
 
     tile_based_layout layout{ar};
 
@@ -77,7 +82,7 @@ TEST_CASE("Tile iteration", "[tile-based]")
 
     const auto check1 = [&visited, &ar](const auto& t)
     {
-        CHECK(t < ar);
+        CHECK(t <= ar);
 //        CHECK(layout.is_empty_tile(t));
 
         // no tile is visited twice
@@ -89,10 +94,12 @@ TEST_CASE("Tile iteration", "[tile-based]")
     {
         check1(t);
     }
+    CHECK(visited.size() == 200);
 
     visited.clear();
 
     layout.foreach_tile(check1);
+    CHECK(visited.size() == 200);
 
     visited.clear();
 
@@ -102,7 +109,7 @@ TEST_CASE("Tile iteration", "[tile-based]")
     {
         // iteration stays in ground layer
         CHECK(t.z == 0);
-        CHECK(t < ar_ground);
+        CHECK(t <= ar_ground);
 
         // no tile is visited twice
         CHECK(visited.count(t) == 0);
@@ -114,14 +121,16 @@ TEST_CASE("Tile iteration", "[tile-based]")
     {
         check2(t);
     }
+    CHECK(visited.size() == 100);
 
     visited.clear();
 
     layout.foreach_ground_tile(check2);
+    CHECK(visited.size() == 100);
 
     visited.clear();
 
-    tile_based_layout::tile start{42, 20}, stop{25, 40};
+    tile_based_layout::tile start{2, 2}, stop{5, 4};
 
     const auto check3 = [&visited, &start, &stop](const auto& t)
     {
@@ -139,10 +148,12 @@ TEST_CASE("Tile iteration", "[tile-based]")
     {
         check3(t);
     }
+    CHECK(visited.size() == 23);
 
     visited.clear();
 
     layout.foreach_tile(check3, start, stop);
+    CHECK(visited.size() == 23);
 }
 
 TEST_CASE("Cardinal operations", "[tile-based]")

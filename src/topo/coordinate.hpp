@@ -59,9 +59,14 @@ struct coord_t
         return static_cast<bool>(d);
     }
 
+    [[nodiscard]] constexpr coord_t get_dead() const
+    {
+        return coord_t{static_cast<uint64_t>(*this) | static_cast<uint64_t>(coord_t{})};
+    }
+
     constexpr bool operator==(const coord_t& other) const
     {
-        return x == other.x && y == other.y && z == other.z;
+        return d == other.d && z == other.z && y == other.y && x == other.x;
     }
 
     constexpr bool operator==(const uint64_t& other) const
@@ -120,30 +125,33 @@ class coord_iterator
   public:
     using value_type = coord_t;
 
-    constexpr explicit coord_iterator(const coord_t& dimension, const coord_t& start = {}) noexcept :
+    constexpr explicit coord_iterator(const coord_t& dimension, const coord_t& start) noexcept :
             dimension{dimension},
-            coord{start.is_dead() ? coord_t{0, 0} : start}
+            coord{start}
     {}
 
     constexpr coord_iterator& operator++() noexcept
     {
-        ++coord.x;
-
-        if (coord.x >= dimension.x)
+        if (coord != dimension)
         {
-            coord.x = 0;
+            ++coord.x;
 
-            ++coord.y;
-            if (coord.y >= dimension.y)
+            if (coord.x > dimension.x)
             {
-                coord.y = 0;
+                coord.x = 0;
 
-                ++coord.z;
-                if (coord.z >= dimension.z)
+                ++coord.y;
+                if (coord.y > dimension.y)
                 {
-                    coord = dimension;
+                    coord.y = 0;
+
+                    ++coord.z;
                 }
             }
+        }
+        else
+        {
+            coord = coord.get_dead();
         }
 
         return *this;
