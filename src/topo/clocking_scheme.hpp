@@ -27,9 +27,9 @@ class clocking_scheme
     explicit clocking_scheme(const std::string_view& name, clock_function fn, const number n = 4,
                              const bool r = true) noexcept :
             name{name},
-            fn{std::move(fn)},
             num_clocks{n},
-            regular{r}
+            regular{r},
+            fn{std::move(fn)}
     {}
 
     zone operator()(Signal s) const noexcept
@@ -94,7 +94,7 @@ namespace clock_function
 /**
  * Representing an irregular clocking that always returns the standard clock. It is intended to be overridden.
  */
-const clocking_scheme<coord_t>::clock_function open = [](coord_t s) noexcept
+const clocking_scheme<coord_t>::clock_function open = []([[maybe_unused]] coord_t s) noexcept
 { return clocking_scheme<coord_t>::zone{}; };
 /**
  * Representing a 3-phase adoption of the 2DDWave clocking as defined in "Clocking and Cell Placement for QCA" by
@@ -203,11 +203,13 @@ static const clocking_scheme<coord_t> open_4_clocking{clock_name::open4, clock_f
 /**
  * Pre-defined 3-phase 2DDWave clocking instance.
  */
-static const clocking_scheme<coord_t> twoddwave_3_clocking{clock_name::twoddwave3, clock_function::twoddwave_3, 3u, true};
+static const clocking_scheme<coord_t> twoddwave_3_clocking{clock_name::twoddwave3, clock_function::twoddwave_3, 3u,
+                                                           true};
 /**
  * Pre-defined 4-phase 2DDWave clocking instance.
  */
-static const clocking_scheme<coord_t> twoddwave_4_clocking{clock_name::twoddwave4, clock_function::twoddwave_4, 4u, true};
+static const clocking_scheme<coord_t> twoddwave_4_clocking{clock_name::twoddwave4, clock_function::twoddwave_4, 4u,
+                                                           true};
 /**
  * Pre-defined 4-phase USE clocking instance.
  */
@@ -223,11 +225,13 @@ static const clocking_scheme<coord_t> bancs_3_clocking{clock_name::bancs, clock_
 /**
  * Pre-defined 3-phase ToPoliNano clocking instance.
  */
-static const clocking_scheme<coord_t> topolinano_3_clocking{clock_name::topolinano3, clock_function::topolinano_3, 3u, true};
+static const clocking_scheme<coord_t> topolinano_3_clocking{clock_name::topolinano3, clock_function::topolinano_3, 3u,
+                                                            true};
 /**
  * Pre-defined 4-phase ToPoliNano clocking instance.
  */
-static const clocking_scheme<coord_t> topolinano_4_clocking{clock_name::topolinano4, clock_function::topolinano_4, 4u, true};
+static const clocking_scheme<coord_t> topolinano_4_clocking{clock_name::topolinano4, clock_function::topolinano_4, 4u,
+                                                            true};
 
 template <typename Signal>
 std::optional<clocking_scheme<Signal>> get_clocking_scheme(const std::string& name) noexcept
