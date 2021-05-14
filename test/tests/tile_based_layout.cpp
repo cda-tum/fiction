@@ -214,13 +214,8 @@ TEST_CASE("Cardinal operations", "[tile-based]")
     CHECK(bt == tile_based_layout::tile{5, 5, 0});
     CHECK(layout.is_ground_layer(bt));
 
-    auto s1_2d = layout.surrounding_2d<std::set<tile_based_layout::tile>>({5, 5});
-    auto s2_2d = std::set<tile_based_layout::tile>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
+    auto s1 = layout.adjacent_tiles<std::set<tile_based_layout::tile>>({5, 5});
+    auto s2 = std::set<tile_based_layout::tile>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
 
-    CHECK(s1_2d == s2_2d);
-
-    auto s1_3d = layout.surrounding_3d<std::set<tile_based_layout::tile>>({5, 5});
-    auto s2_3d = std::set<tile_based_layout::tile>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}, {5, 5, 1}}};
-
-    CHECK(s1_3d == s2_3d);
+    CHECK(s1 == s2);
 }

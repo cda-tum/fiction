@@ -67,7 +67,7 @@ class tile_based_layout
 
 #pragma endregion
 
-#pragma region cardinal operations
+#pragma region Cardinal operations
 
     [[nodiscard]] constexpr tile north(const tile& t) const noexcept
     {
@@ -173,45 +173,9 @@ class tile_based_layout
         return t.z > 0ull;
     }
 
-    template <typename Container>
-    Container surrounding_2d(const tile& t) const noexcept
-    {
-        Container c{};
-
-        const auto add_if_not_t = [&c, &t](const auto& cardinal)
-        {
-            if (cardinal != t)
-                c.insert(c.end(), cardinal);
-        };
-
-        add_if_not_t(north(t));
-        add_if_not_t(east(t));
-        add_if_not_t(south(t));
-        add_if_not_t(west(t));
-
-        return c;
-    }
-
-    template <typename Container>
-    Container surrounding_3d(const tile& t) const noexcept
-    {
-        auto c = surrounding_2d<Container>(t);
-
-        const auto add_if_not_t = [&c, &t](const auto& cardinal)
-        {
-            if (cardinal != t)
-                c.insert(c.end(), cardinal);
-        };
-
-        add_if_not_t(above(t));
-        add_if_not_t(below(t));
-
-        return c;
-    }
-
 #pragma endregion
 
-#pragma region iterators
+#pragma region Iteration
 
     [[nodiscard]] auto tiles(const tile& start = {}, const tile& stop = {}) const
     {
@@ -248,6 +212,25 @@ class tile_based_layout
         mockturtle::detail::foreach_element(
             coord_iterator{ground_layer, start.is_dead() ? tile{0, 0} : start},
             coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
+    }
+
+    template <typename Container>
+    Container adjacent_tiles(const tile& t) const noexcept
+    {
+        Container c{};
+
+        const auto add_if_not_t = [&c, &t](const auto& cardinal)
+        {
+            if (cardinal != t)
+                c.insert(c.end(), cardinal);
+        };
+
+        add_if_not_t(north(t));
+        add_if_not_t(east(t));
+        add_if_not_t(south(t));
+        add_if_not_t(west(t));
+
+        return c;
     }
 
 #pragma endregion

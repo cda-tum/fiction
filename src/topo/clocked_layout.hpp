@@ -7,6 +7,11 @@
 
 #include "clocking_scheme.hpp"
 
+#include <algorithm>
+#include <cstdint>
+#include <iterator>
+#include <set>
+
 namespace fiction
 {
 
@@ -19,6 +24,8 @@ class clocked_layout : public TileBasedLayout
     using tile = typename TileBasedLayout::tile;
 
     using clocking_scheme_t = clocking_scheme<tile>;
+
+    using degree_t = uint8_t;
 
     struct clocked_layout_storage
     {
@@ -47,7 +54,7 @@ class clocked_layout : public TileBasedLayout
 
 #pragma endregion
 
-#pragma region clocking
+#pragma region Clocking
 
     void assign_clocking(const tile& t, const typename clocking_scheme_t::zone z) noexcept
     {
@@ -92,6 +99,55 @@ class clocked_layout : public TileBasedLayout
         return static_cast<typename clocking_scheme_t::zone>(
                    (tile_clocking(t1) + static_cast<typename clocking_scheme_t::zone>(1)) % num_clocks()) ==
                tile_clocking(t2);
+    }
+
+#pragma endregion
+
+#pragma region Iteration
+
+    template <typename Container>
+    [[nodiscard]] Container incoming_clocked_tiles(const tile& t) const noexcept
+    {
+        auto adj = TileBasedLayout::template adjacent_tiles<Container>(t);
+
+        Container incoming{};
+
+        std::copy_if(std::cbegin(adj), std::cend(adj), std::inserter(incoming, std::cend(incoming)),
+                     [this, &t](const auto& ct) { return is_incoming_clocked(t, ct); });
+
+        return incoming;
+    }
+
+    template <typename Container>
+    [[nodiscard]] Container outgoing_clocked_tiles(const tile& t) const noexcept
+    {
+        auto adj = TileBasedLayout::template adjacent_tiles<Container>(t);
+
+        Container outgoing{};
+
+        std::copy_if(std::cbegin(adj), std::cend(adj), std::inserter(outgoing, std::cend(outgoing)),
+                     [this, &t](const auto& ct) { return is_outgoing_clocked(t, ct); });
+
+        return outgoing;
+    }
+
+#pragma endregion
+
+#pragma region Structural properties
+
+    degree_t in_degree(const tile& t) const noexcept
+    {
+        return static_cast<degree_t>(incoming_clocked_tiles<std::set<tile>>(t).size());
+    }
+
+    degree_t out_degree(const tile& t) const noexcept
+    {
+        return static_cast<degree_t>(outgoing_clocked_tiles<std::set<tile>>(t).size());
+    }
+
+    degree_t degree(const tile& t) const noexcept
+    {
+        return static_cast<degree_t>(in_degree(t) + out_degree(t));
     }
 
 #pragma endregion

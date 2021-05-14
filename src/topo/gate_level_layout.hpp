@@ -286,7 +286,7 @@ class gate_level_layout : public ClockedLayout
 
 #pragma endregion
 
-#pragma region iterators
+#pragma region Iteration
 
     template <typename Fn>
     void foreach_pi(Fn&& fn) const
