@@ -12,6 +12,7 @@
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/networks/storage.hpp>
+#include <mockturtle/utils/algorithm.hpp>
 #include <mockturtle/utils/truth_table_cache.hpp>
 
 #include <algorithm>
@@ -117,7 +118,7 @@ class gate_level_layout : public ClockedLayout
         return static_cast<signal>(t);
     }
 
-    signal create_po(const signal& f, [[maybe_unused]] const std::string& name = std::string(), const tile& t = {})
+    signal create_po(const signal& s, [[maybe_unused]] const std::string& name = std::string(), const tile& t = {})
     {
         const auto n = strg->nodes.size();
         strg->nodes.emplace_back();     // empty node data
@@ -128,7 +129,7 @@ class gate_level_layout : public ClockedLayout
         assign_node(t, n);
 
         /* increase ref-count to children */
-        strg->nodes[get_node(f)].data[0].h1++;
+        strg->nodes[get_node(s)].data[0].h1++;
 
         return static_cast<signal>(t);
     }
@@ -230,9 +231,9 @@ class gate_level_layout : public ClockedLayout
 
 #pragma region Nodes and signals
 
-    [[nodiscard]] node get_node(const signal& f) const noexcept
+    [[nodiscard]] node get_node(const signal& s) const noexcept
     {
-        if (auto it = strg->data.tile_node_map.find(f); it != strg->data.tile_node_map.end())
+        if (auto it = strg->data.tile_node_map.find(s); it != strg->data.tile_node_map.end())
         {
             return it->second;
         }
@@ -255,35 +256,29 @@ class gate_level_layout : public ClockedLayout
         return {};
     }
 
-    [[nodiscard]] bool is_complemented([[maybe_unused]] const signal& f) const noexcept
+    [[nodiscard]] bool is_complemented([[maybe_unused]] const signal& s) const noexcept
     {
         return false;
     }
 
     // TODO if no PI / PO assigned and function literal > 2
-    [[nodiscard]] bool is_gate_tile(const tile& t) const noexcept
+    [[nodiscard]] bool is_gate(const node n) const noexcept
     {
-        if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
-        {
-            return strg->nodes[it->second].data[1].h1 > 2;
-        }
-        else
-        {
-            return false;
-        }
+        return strg->nodes[n].data[1].h1 > 2;
     }
 
     // TODO if no PI / PO assigned and function literal == 2
+    [[nodiscard]] bool is_wire(const node n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 2;
+    }
+    [[nodiscard]] bool is_gate_tile(const tile& t) const noexcept
+    {
+        return is_gate(get_node(static_cast<signal>(t)));
+    }
     [[nodiscard]] bool is_wire_tile(const tile& t) const noexcept
     {
-        if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
-        {
-            return strg->nodes[it->second].data[1].h1 == 2;
-        }
-        else
-        {
-            return false;
-        }
+        return is_wire(get_node(static_cast<signal>(t)));
     }
 
     [[nodiscard]] bool is_empty_tile(const tile& t) const noexcept
@@ -307,6 +302,29 @@ class gate_level_layout : public ClockedLayout
         using IteratorType = decltype(strg->outputs.begin());
         mockturtle::detail::foreach_element_transform<IteratorType, uint32_t>(
             strg->outputs.begin(), strg->outputs.end(), [](const auto& o) { return o.index; }, fn);
+    }
+
+    template <typename Fn>
+    void foreach_node(Fn&& fn) const
+    {
+        auto r = mockturtle::range<uint64_t>(strg->nodes.size());
+        mockturtle::detail::foreach_element(r.begin(), r.end(), fn);
+    }
+
+    template <typename Fn>
+    void foreach_gate(Fn&& fn) const
+    {
+        auto r = mockturtle::range<uint64_t>(2u, strg->nodes.size());  // start from 2 to avoid constants
+        mockturtle::detail::foreach_element_if(
+            r.begin(), r.end(), [this](const auto n) { return is_gate(n); }, fn);
+    }
+
+    template <typename Fn>
+    void foreach_wire(Fn&& fn) const
+    {
+        auto r = mockturtle::range<uint64_t>(2u, strg->nodes.size());  // start from 2 to avoid constants
+        mockturtle::detail::foreach_element_if(
+            r.begin(), r.end(), [this](const auto n) { return is_wire(n); }, fn);
     }
 
 #pragma endregion

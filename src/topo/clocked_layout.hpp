@@ -24,6 +24,7 @@ class clocked_layout : public TileBasedLayout
     using tile = typename TileBasedLayout::tile;
 
     using clocking_scheme_t = clocking_scheme<tile>;
+    using clock_zone_t      = typename clocking_scheme_t::zone;
 
     using degree_t = uint8_t;
 

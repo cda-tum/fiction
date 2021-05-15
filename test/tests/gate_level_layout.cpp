@@ -2,24 +2,22 @@
 // Created by marcel on 31.03.21.
 //
 
-#include "tile_based_layout.hpp"
 #include "gate_level_layout.hpp"
-#include "clocked_layout.hpp"
 
 #include "catch.hpp"
+#include "clocked_layout.hpp"
+#include "tile_based_layout.hpp"
 
 #include <mockturtle/traits.hpp>
 
 #include <type_traits>
 
-
 using namespace fiction;
-
 
 TEST_CASE("Creation and usage of constants", "[gate-level]")
 {
-    // adapted from mockturtle/test/networks/*.cpp
-    
+    // adapted from mockturtle/test/networks/klut.cpp
+
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
@@ -51,7 +49,7 @@ TEST_CASE("Creation and usage of constants", "[gate-level]")
 
 TEST_CASE("Creation and usage of primary inputs", "[gate-level]")
 {
-    // adapted from mockturtle/test/networks/*.cpp
+    // adapted from mockturtle/test/networks/klut.cpp
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
 
@@ -98,6 +96,7 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level]")
 
             CHECK(layout.is_pi(pi));
             CHECK(!layout.is_gate_tile(static_cast<gate_layout::tile>(pi)));
+            CHECK(!layout.is_gate(layout.get_node(static_cast<gate_layout::tile>(pi))));
 
             switch (i)
             {
@@ -126,7 +125,7 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level]")
 
 TEST_CASE("Creation and usage of primary outputs", "[gate-level]")
 {
-    // adapted from mockturtle/test/networks/*.cpp
+    // adapted from mockturtle/test/networks/klut.cpp
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
 
@@ -173,6 +172,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level]")
 
             CHECK(layout.is_po(po));
             CHECK(!layout.is_gate_tile(static_cast<gate_layout::tile>(po)));
+            CHECK(!layout.is_gate(layout.get_node(static_cast<gate_layout::tile>(po))));
 
             switch (i)
             {
@@ -194,7 +194,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level]")
 
 TEST_CASE("Creation of unary operations", "[gate-level]")
 {
-    // adapted from mockturtle/test/networks/*.cpp
+    // adapted from mockturtle/test/networks/klut.cpp
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
 
@@ -214,6 +214,8 @@ TEST_CASE("Creation of unary operations", "[gate-level]")
     auto f2 = layout.create_not(x1, {0, 1});
 
     CHECK(layout.size() == 3);
+    CHECK(layout.num_gates() == 1);
+    CHECK(layout.num_wires() == 2);
 
     auto x2 = layout.create_pi("x2", {1, 1});
     CHECK(layout.is_pi(layout.get_node(x2)));
@@ -228,16 +230,20 @@ TEST_CASE("Creation of unary operations", "[gate-level]")
 
     CHECK(!layout.is_empty_tile({1, 0}));
     CHECK(!layout.is_gate_tile({1, 0}));
+    CHECK(!layout.is_gate(layout.get_node({1, 0})));
     CHECK(layout.is_wire_tile({1, 0}));
+    CHECK(layout.is_wire(layout.get_node({1, 0})));
 
     CHECK(!layout.is_empty_tile({0, 1}));
     CHECK(layout.is_gate_tile({0, 1}));
+    CHECK(layout.is_gate(layout.get_node({0, 1})));
     CHECK(!layout.is_wire_tile({0, 1}));
+    CHECK(!layout.is_wire(layout.get_node({0, 1})));
 }
 
 TEST_CASE("Creation of binary operations", "[gate-level]")
 {
-    // adapted from mockturtle/test/networks/*.cpp
+    // adapted from mockturtle/test/networks/klut.cpp
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
 
@@ -266,14 +272,20 @@ TEST_CASE("Creation of binary operations", "[gate-level]")
     CHECK(layout.is_gate_tile({0, 0}));
     CHECK(layout.is_gate_tile({1, 1}));
 
+    CHECK(layout.is_gate(layout.get_node({0, 0})));
+    CHECK(layout.is_gate(layout.get_node({1, 1})));
+
     CHECK(!layout.is_wire_tile({0, 0}));
     CHECK(!layout.is_wire_tile({1, 1}));
+
+    CHECK(!layout.is_wire(layout.get_node({0, 0})));
+    CHECK(!layout.is_wire(layout.get_node({1, 1})));
 }
 
 TEST_CASE("Creation of ternary operations", "[gate-level]")
 {
-    // adapted from mockturtle/test/networks/*.cpp
-    
+    // adapted from mockturtle/test/networks/klut.cpp
+
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
@@ -283,9 +295,9 @@ TEST_CASE("Creation of ternary operations", "[gate-level]")
 
     gate_layout layout{tile_based_layout::aspect_ratio{2, 3, 1}};
 
-    auto x1 = layout.create_pi("x1",{1, 0});
-    auto x2 = layout.create_pi("x2",{0, 1});
-    auto x3 = layout.create_pi("x3",{1, 2});
+    auto x1 = layout.create_pi("x1", {1, 0});
+    auto x2 = layout.create_pi("x2", {0, 1});
+    auto x3 = layout.create_pi("x3", {1, 2});
 
     CHECK(layout.num_pis() == 3);
 
@@ -301,5 +313,144 @@ TEST_CASE("Creation of ternary operations", "[gate-level]")
     CHECK(layout.get_node({1, 1}) == layout.get_node(m));
 
     CHECK(layout.is_gate_tile({1, 1}));
+    CHECK(layout.is_gate(layout.get_node({1, 1})));
     CHECK(!layout.is_wire_tile({1, 1}));
+    CHECK(!layout.is_wire(layout.get_node({1, 1})));
+}
+
+TEST_CASE("node and signal iteration", "[gate-level]")
+{
+    // adapted from mockturtle/test/networks/klut.cpp
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+
+    REQUIRE(mockturtle::has_foreach_node_v<gate_layout>);
+    REQUIRE(mockturtle::has_foreach_pi_v<gate_layout>);
+    REQUIRE(mockturtle::has_foreach_po_v<gate_layout>);
+
+    gate_layout layout{tile_based_layout::aspect_ratio{3, 1, 0}, open_4_clocking};
+
+    layout.assign_clocking({2, 0}, static_cast<typename gate_layout::clock_zone_t>(0));
+    layout.assign_clocking({1, 0}, static_cast<typename gate_layout::clock_zone_t>(1));
+    layout.assign_clocking({0, 0}, static_cast<typename gate_layout::clock_zone_t>(2));
+
+    layout.assign_clocking({1, 1}, static_cast<typename gate_layout::clock_zone_t>(0));
+    layout.assign_clocking({2, 1}, static_cast<typename gate_layout::clock_zone_t>(1));
+    layout.assign_clocking({3, 1}, static_cast<typename gate_layout::clock_zone_t>(2));
+
+    const auto x1 = layout.create_pi("x1", {2, 0});
+    const auto x2 = layout.create_pi("x2", {1, 1});
+    const auto f1 = layout.create_and(x1, x2, {1, 0});
+    const auto f2 = layout.create_and(x2, x1, {2, 1});
+    layout.create_po(f1, "f1", {0, 0});
+    layout.create_po(f2, "f2", {3, 1});
+
+    CHECK(layout.size() == 6);
+
+    /* iterate over nodes */
+    uint32_t mask{0}, counter{0};
+    layout.foreach_node(
+        [&](auto n, auto i)
+        {
+            mask |= (1 << n);
+            counter += i;
+        });
+    CHECK(mask == 255);
+    CHECK(counter == 28);
+
+    mask = 0;
+    layout.foreach_node([&](auto n) { mask |= (1 << n); });
+    CHECK(mask == 255);
+
+    mask = counter = 0;
+    layout.foreach_node(
+        [&](auto n, auto i)
+        {
+            mask |= (1 << n);
+            counter += i;
+            return false;
+        });
+    CHECK(mask == 1);
+    CHECK(counter == 0);
+
+    mask = 0;
+    layout.foreach_node(
+        [&](auto n)
+        {
+            mask |= (1 << n);
+            return false;
+        });
+    CHECK(mask == 1);
+
+    /* iterate over PIs */
+    mask = counter = 0;
+    layout.foreach_pi(
+        [&](auto n, auto i)
+        {
+            mask |= (1 << n);
+            counter += i;
+        });
+    CHECK(mask == 12);
+    CHECK(counter == 1);
+
+    mask = 0;
+    layout.foreach_pi([&](auto n) { mask |= (1 << n); });
+    CHECK(mask == 12);
+
+    mask = counter = 0;
+    layout.foreach_pi(
+        [&](auto n, auto i)
+        {
+            mask |= (1 << n);
+            counter += i;
+            return false;
+        });
+    CHECK(mask == 4);
+    CHECK(counter == 0);
+
+    mask = 0;
+    layout.foreach_pi(
+        [&](auto n)
+        {
+            mask |= (1 << n);
+            return false;
+        });
+    CHECK(mask == 4);
+
+    // TODO s innerhalb der foreach_po war layout.get_node(s), da mockturtle nicht davon ausgeht, dass POs nodes sind
+
+    /* iterate over POs */
+    mask = counter = 0;
+    layout.foreach_po(
+        [&](auto s, auto i)
+        {
+            mask |= (1 << s);
+            counter += i;
+        });
+    CHECK(mask == 192);
+    CHECK(counter == 1);
+
+    mask = 0;
+    layout.foreach_po([&](auto s) { mask |= (1 << s); });
+    CHECK(mask == 192);
+
+    mask = counter = 0;
+    layout.foreach_po(
+        [&](auto s, auto i)
+        {
+            mask |= (1 << s);
+            counter += i;
+            return false;
+        });
+    CHECK(mask == 64);
+    CHECK(counter == 0);
+
+    mask = 0;
+    layout.foreach_po(
+        [&](auto s)
+        {
+            mask |= (1 << s);
+            return false;
+        });
+    CHECK(mask == 64);
 }
