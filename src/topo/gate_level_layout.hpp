@@ -33,12 +33,15 @@ class gate_level_layout : public ClockedLayout
     template <typename Node, typename Tile>
     struct gate_level_layout_storage_data
     {
-        mockturtle::truth_table_cache<kitty::dynamic_truth_table> cache;
+        mockturtle::truth_table_cache<kitty::dynamic_truth_table> fn_cache;
 
         std::unordered_map<Tile, Node> tile_node_map{};
         std::unordered_map<Node, Tile> node_tile_map{};
 
-        uint32_t trav_id = 0u;
+        uint32_t num_gates = 0ull;
+        uint32_t num_wires = 0ull;
+
+        uint32_t trav_id = 0ul;
 
         const Tile const0{0x8000000000000000ull};
         const Tile const1{0xc000000000000000ull};
@@ -98,7 +101,7 @@ class gate_level_layout : public ClockedLayout
         return value ? strg->data.const1 : strg->data.const0;
     }
 
-    [[nodiscard]] static bool is_constant(node const& n)
+    [[nodiscard]] bool is_constant(node const& n) const noexcept
     {
         return n <= 1;
     }
@@ -130,12 +133,12 @@ class gate_level_layout : public ClockedLayout
         return static_cast<signal>(t);
     }
 
-    [[nodiscard]] bool is_pi(const node& n) const
+    [[nodiscard]] bool is_pi(const node& n) const noexcept
     {
         return std::find(strg->inputs.cbegin(), strg->inputs.cend(), n) != strg->inputs.cend();
     }
 
-    [[nodiscard]] bool is_po(const node& n) const
+    [[nodiscard]] bool is_po(const node& n) const noexcept
     {
         return std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
                             [&n](const auto& p) { return p.index == n; }) != strg->outputs.cend();
@@ -182,7 +185,7 @@ class gate_level_layout : public ClockedLayout
         {
             return {};
         }
-        return create_node_from_literal(children, strg->data.cache.insert(function), t);
+        return create_node_from_literal(children, strg->data.fn_cache.insert(function), t);
     }
 
 #pragma endregion
@@ -191,39 +194,43 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] kitty::dynamic_truth_table node_function(const node& n) const
     {
-        return strg->data.cache[strg->nodes[n].data[1].h1];
+        return strg->data.fn_cache[strg->nodes[n].data[1].h1];
     }
 
 #pragma endregion
 
 #pragma region Structural properties
 
-    [[nodiscard]] auto size() const
+    [[nodiscard]] auto size() const noexcept
     {
         return static_cast<uint32_t>(strg->nodes.size() - 2);
     }
 
-    [[nodiscard]] auto num_pis() const
+    [[nodiscard]] auto num_pis() const noexcept
     {
         return strg->inputs.size();
     }
 
-    [[nodiscard]] auto num_pos() const
+    [[nodiscard]] auto num_pos() const noexcept
     {
         return strg->outputs.size();
     }
 
-    // TODO num_gates und num_wires mitführen
-    [[nodiscard]] auto num_gates() const
+    [[nodiscard]] auto num_gates() const noexcept
     {
-        return static_cast<uint32_t>(strg->data.tile_node_map.size() - strg->inputs.size() - strg->outputs.size());
+        return strg->data.num_gates;
+    }
+
+    [[nodiscard]] auto num_wires() const noexcept
+    {
+        return strg->data.num_wires;
     }
 
 #pragma endregion
 
 #pragma region Nodes and signals
 
-    [[nodiscard]] node get_node(const signal& f) const
+    [[nodiscard]] node get_node(const signal& f) const noexcept
     {
         if (auto it = strg->data.tile_node_map.find(f); it != strg->data.tile_node_map.end())
         {
@@ -233,7 +240,7 @@ class gate_level_layout : public ClockedLayout
         return 0;
     }
 
-    [[nodiscard]] node get_node(const tile& t) const
+    [[nodiscard]] node get_node(const tile& t) const noexcept
     {
         return get_node(static_cast<signal>(t));
     }
@@ -248,7 +255,7 @@ class gate_level_layout : public ClockedLayout
         return {};
     }
 
-    [[nodiscard]] static bool is_complemented([[maybe_unused]] const signal& f)
+    [[nodiscard]] bool is_complemented([[maybe_unused]] const signal& f) const noexcept
     {
         return false;
     }
@@ -306,7 +313,7 @@ class gate_level_layout : public ClockedLayout
 
 #pragma region Custom node values
 
-    void clear_values() const
+    void clear_values() const noexcept
     {
         std::for_each(strg->nodes.begin(), strg->nodes.end(), [](auto& n) { n.data[0].h2 = 0; });
     }
@@ -371,7 +378,7 @@ class gate_level_layout : public ClockedLayout
         strg->nodes.emplace_back();
 
         kitty::dynamic_truth_table tt_zero(0);
-        strg->data.cache.insert(tt_zero);
+        strg->data.fn_cache.insert(tt_zero);
 
         strg->nodes[0].data[1].h1 = 0;
         strg->nodes[1].data[1].h1 = 1;
@@ -381,7 +388,7 @@ class gate_level_layout : public ClockedLayout
         {
             kitty::dynamic_truth_table tt(static_cast<uint32_t>(n));
             kitty::create_from_words(tt, &literal, &literal + 1);
-            strg->data.cache.insert(tt);
+            strg->data.fn_cache.insert(tt);
         };
 
         static constexpr const uint64_t lit_not = 0x1, lit_and = 0x8, lit_or = 0xe, lit_xor = 0x6, lit_maj = 0xe8;
@@ -400,6 +407,16 @@ class gate_level_layout : public ClockedLayout
             strg->data.tile_node_map[static_cast<signal>(t)] = n;
 
             strg->data.node_tile_map[n] = static_cast<signal>(t);
+
+            // keep track of number of gates and wire segments
+            if (strg->nodes[n].data[1].h1 == 2)
+            {
+                strg->data.num_wires++;
+            }
+            else
+            {
+                strg->data.num_gates++;
+            }
         }
     }
 
@@ -430,7 +447,7 @@ class gate_level_layout : public ClockedLayout
         return static_cast<signal>(t);
     }
 
-    void clear_tile(const tile& t)
+    void clear_tile(const tile& t) noexcept
     {
         if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
         {

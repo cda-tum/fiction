@@ -70,6 +70,7 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level]")
     CHECK(layout.size() == 1);
     CHECK(layout.num_pis() == 1);
     CHECK(layout.num_gates() == 0);
+    CHECK(layout.num_wires() == 1);
 
     CHECK(std::is_same_v<std::decay_t<decltype(a)>, gate_layout::signal>);
 
@@ -80,6 +81,7 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level]")
     CHECK(layout.is_pi(layout.get_node(c)));
 
     CHECK(layout.num_pis() == 3);
+    CHECK(layout.num_wires() == 3);
 
     layout.foreach_pi(
         [&](auto pi, auto i)
@@ -154,6 +156,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level]")
 
     CHECK(layout.size() == 3);
     CHECK(layout.num_pos() == 2);
+    CHECK(layout.num_wires() == 3);
 
     layout.foreach_po(
         [&](auto po, auto i)
