@@ -641,4 +641,9 @@ TEST_CASE("Clocking lookup", "[clocking scheme]")
     check({"bancs", "BANCS", "BaNCs", "banCS"}, clock_name::bancs);
     check({"topolinano3", "TOPOLINANO3", "ToPoliNano3", "topolinano"}, clock_name::topolinano3);
     check({"topolinano4", "TOPOLINANO4", "ToPoliNano4"}, clock_name::topolinano4);
+
+    CHECK(!get_clocking_scheme<coord_t>("").has_value());
+    CHECK(!get_clocking_scheme<coord_t>("TwoDDWave").has_value());
+    CHECK(!get_clocking_scheme<coord_t>("BNCS").has_value());
+    CHECK(!get_clocking_scheme<coord_t>("ToPolino").has_value());
 }

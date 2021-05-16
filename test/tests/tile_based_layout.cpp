@@ -8,6 +8,7 @@
 
 #include <map>
 #include <set>
+#include <sstream>
 
 using namespace fiction;
 
@@ -69,6 +70,10 @@ TEST_CASE("Tiles", "[tile-based")
         CHECK(repr == static_cast<uint64_t>(tile));
         CHECK(tile_based_layout::tile{repr} == tile);
     }
+
+    std::ostringstream os{};
+    os << tile_based_layout::tile{3, 2, 1};
+    CHECK(os.str() == "(3,2,1)");
 }
 
 TEST_CASE("Tile iteration", "[tile-based]")
@@ -203,8 +208,10 @@ TEST_CASE("Cardinal operations", "[tile-based]")
     CHECK(at == tile_based_layout::tile{5, 5, 1});
     CHECK(layout.is_crossing_layer(at));
     CHECK(!layout.is_border(at));
-    //    at = layout.above({5, 5, 2});
-    //    CHECK(at.is_dead());
+    // cover corner case
+    tile_based_layout planar_layout{{1, 1, 0}};
+    at = planar_layout.above({1, 1, 1});
+    CHECK(at.is_dead());
 
     auto bt = layout.below({5, 5, 1});
     CHECK(!bt.is_dead());
