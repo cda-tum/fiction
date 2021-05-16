@@ -123,9 +123,7 @@ class gate_level_layout : public ClockedLayout
         const auto n = strg->nodes.size();
         strg->nodes.emplace_back();     // empty node data
         strg->nodes[n].data[1].h1 = 2;  // assign identity function
-        strg->outputs.emplace_back(n);  // TODO this line currently saves the created output node instead of its tile
-        // TODO (signal). This might break stuff in mockturtle's algorithms.
-        // TODO Reevaluate storing the tile instead!
+        strg->outputs.emplace_back(static_cast<signal>(t));
         assign_node(t, n);
 
         /* increase ref-count to children */
@@ -139,10 +137,20 @@ class gate_level_layout : public ClockedLayout
         return std::find(strg->inputs.cbegin(), strg->inputs.cend(), n) != strg->inputs.cend();
     }
 
+    [[nodiscard]] bool is_pi_tile(const tile& t) const noexcept
+    {
+        return is_pi(get_node(t));
+    }
+
     [[nodiscard]] bool is_po(const node& n) const noexcept
     {
         return std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
-                            [&n](const auto& p) { return p.index == n; }) != strg->outputs.cend();
+                            [this, &n](const auto& p) { return this->get_node(p.index) == n; }) != strg->outputs.cend();
+    }
+
+    [[nodiscard]] bool is_po_tile(const tile& t) const noexcept
+    {
+        return is_po(get_node(t));
     }
 
 #pragma endregion

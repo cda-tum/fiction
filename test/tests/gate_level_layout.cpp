@@ -95,6 +95,7 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level]")
             };
 
             CHECK(layout.is_pi(pi));
+            CHECK(layout.is_pi_tile(layout.get_tile(pi)));
             CHECK(!layout.is_gate_tile(static_cast<gate_layout::tile>(pi)));
             CHECK(!layout.is_gate(layout.get_node(static_cast<gate_layout::tile>(pi))));
 
@@ -162,15 +163,14 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level]")
         {
             const auto check = [&layout, &po](auto c)
             {
-                auto t = layout.get_tile(po);
-                CHECK(t == c);
-                auto n = layout.get_node(static_cast<gate_layout::signal>(t));
-                CHECK(n == po);
+                CHECK(static_cast<gate_layout::tile>(po) == c);
+                auto n  = layout.get_node(po);
                 auto tn = layout.get_tile(n);
-                CHECK(tn == t);
+                CHECK(tn == static_cast<gate_layout::tile>(po));
             };
 
-            CHECK(layout.is_po(po));
+            CHECK(layout.is_po(layout.get_node(po)));
+            CHECK(layout.is_po_tile(static_cast<gate_layout::tile>(po)));
             CHECK(!layout.is_gate_tile(static_cast<gate_layout::tile>(po)));
             CHECK(!layout.is_gate(layout.get_node(static_cast<gate_layout::tile>(po))));
 
@@ -417,28 +417,26 @@ TEST_CASE("node and signal iteration", "[gate-level]")
         });
     CHECK(mask == 4);
 
-    // TODO s innerhalb der foreach_po war layout.get_node(s), da mockturtle nicht davon ausgeht, dass POs nodes sind
-
     /* iterate over POs */
     mask = counter = 0;
     layout.foreach_po(
         [&](auto s, auto i)
         {
-            mask |= (1 << s);
+            mask |= (1 << layout.get_node(s));
             counter += i;
         });
     CHECK(mask == 192);
     CHECK(counter == 1);
 
     mask = 0;
-    layout.foreach_po([&](auto s) { mask |= (1 << s); });
+    layout.foreach_po([&](auto s) { mask |= (1 << layout.get_node(s)); });
     CHECK(mask == 192);
 
     mask = counter = 0;
     layout.foreach_po(
         [&](auto s, auto i)
         {
-            mask |= (1 << s);
+            mask |= (1 << layout.get_node(s));
             counter += i;
             return false;
         });
@@ -449,7 +447,7 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_po(
         [&](auto s)
         {
-            mask |= (1 << s);
+            mask |= (1 << layout.get_node(s));
             return false;
         });
     CHECK(mask == 64);
