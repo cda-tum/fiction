@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <set>
 #include <unordered_map>
 #include <vector>
 
@@ -127,7 +128,9 @@ class gate_level_layout : public ClockedLayout
         assign_node(t, n);
 
         /* increase ref-count to children */
-        strg->nodes[get_node(s)].data[0].h1++;
+        auto child = get_node(s);
+        strg->nodes[child].data[0].h1++;
+        strg->nodes[n].children.push_back(child);
 
         return static_cast<signal>(t);
     }
@@ -233,6 +236,16 @@ class gate_level_layout : public ClockedLayout
     [[nodiscard]] auto num_wires() const noexcept
     {
         return strg->data.num_wires;
+    }
+
+    [[nodiscard]] auto fanin_size(node const& n) const
+    {
+        return static_cast<uint32_t>(incoming_data_flow<std::set<tile>>(get_tile(n)).size());
+    }
+
+    [[nodiscard]] auto fanout_size(node const& n) const
+    {
+        return static_cast<uint32_t>(outgoing_data_flow<std::set<tile>>(get_tile(n)).size());
     }
 
 #pragma endregion
@@ -471,6 +484,38 @@ class gate_level_layout : public ClockedLayout
         //        for (auto const& fn : _events->on_add) { fn(n); }
 
         return static_cast<signal>(t);
+    }
+
+    [[nodiscard]] bool is_child(const node& n, const signal& s) const noexcept
+    {
+        const auto& node_data = strg->nodes[n];
+        return std::find(node_data.children.cbegin(), node_data.children.cend(), s) != node_data.children.cend();
+    }
+
+    template <typename Container>
+    [[nodiscard]] Container incoming_data_flow(const tile& t) const noexcept
+    {
+        auto incoming = ClockedLayout::template incoming_clocked_tiles<Container>(t);
+
+        Container data_flow{};
+
+        std::copy_if(std::cbegin(incoming), std::cend(incoming), std::inserter(data_flow, std::cend(data_flow)),
+                     [this, &t](const auto& dt) { return is_child(get_node(t), static_cast<signal>(dt)); });
+
+        return incoming;
+    }
+
+    template <typename Container>
+    [[nodiscard]] Container outgoing_data_flow(const tile& t) const noexcept
+    {
+        auto outgoing = ClockedLayout::template outgoing_clocked_tiles<Container>(t);
+
+        Container data_flow{};
+
+        std::copy_if(std::cbegin(outgoing), std::cend(outgoing), std::inserter(data_flow, std::cend(data_flow)),
+                     [this, &t](const auto& dt) { return is_child(get_node(dt), static_cast<signal>(t)); });
+
+        return outgoing;
     }
 
     void clear_tile(const tile& t) noexcept

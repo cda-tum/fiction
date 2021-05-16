@@ -340,10 +340,10 @@ TEST_CASE("node and signal iteration", "[gate-level]")
 
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {1, 1});
-    const auto f1 = layout.create_and(x1, x2, {1, 0});
-    const auto f2 = layout.create_and(x2, x1, {2, 1});
-    layout.create_po(f1, "f1", {0, 0});
-    layout.create_po(f2, "f2", {3, 1});
+    const auto a1 = layout.create_and(x1, x2, {1, 0});
+    const auto a2 = layout.create_and(x2, x1, {2, 1});
+    layout.create_po(a1, "f1", {0, 0});
+    layout.create_po(a2, "f2", {3, 1});
 
     CHECK(layout.size() == 6);
 
@@ -381,6 +381,76 @@ TEST_CASE("node and signal iteration", "[gate-level]")
             return false;
         });
     CHECK(mask == 1);
+
+    /* iterate over gates */
+    mask = counter = 0;
+    layout.foreach_gate(
+        [&](auto n, auto i)
+        {
+            mask |= (1 << n);
+            counter += i;
+        });
+    CHECK(mask == 48);
+    CHECK(counter == 1);
+
+    mask = 0;
+    layout.foreach_gate([&](auto n) { mask |= (1 << n); });
+    CHECK(mask == 48);
+
+    mask = counter = 0;
+    layout.foreach_gate(
+        [&](auto n, auto i)
+        {
+            mask |= (1 << n);
+            counter += i;
+            return false;
+        });
+    CHECK(mask == 16);
+    CHECK(counter == 0);
+
+    mask = 0;
+    layout.foreach_gate(
+        [&](auto n)
+        {
+            mask |= (1 << n);
+            return false;
+        });
+    CHECK(mask == 16);
+
+    /* iterate over wires */
+    mask = counter = 0;
+    layout.foreach_wire(
+        [&](auto n, auto i)
+        {
+            mask |= (1 << n);
+            counter += i;
+        });
+    CHECK(mask == 204);
+    CHECK(counter == 6);
+
+    mask = 0;
+    layout.foreach_wire([&](auto n) { mask |= (1 << n); });
+    CHECK(mask == 204);
+
+    mask = counter = 0;
+    layout.foreach_wire(
+        [&](auto n, auto i)
+        {
+            mask |= (1 << n);
+            counter += i;
+            return false;
+        });
+    CHECK(mask == 4);
+    CHECK(counter == 0);
+
+    mask = 0;
+    layout.foreach_wire(
+        [&](auto n)
+        {
+            mask |= (1 << n);
+            return false;
+        });
+    CHECK(mask == 4);
 
     /* iterate over PIs */
     mask = counter = 0;
@@ -451,4 +521,52 @@ TEST_CASE("node and signal iteration", "[gate-level]")
             return false;
         });
     CHECK(mask == 64);
+}
+
+TEST_CASE("Structural properties", "[gate-level]")
+{
+    // adapted from mockturtle/test/networks/klut.cpp
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+
+    REQUIRE(mockturtle::has_size_v<gate_layout>);
+    REQUIRE(mockturtle::has_num_pis_v<gate_layout>);
+    REQUIRE(mockturtle::has_num_pos_v<gate_layout>);
+    REQUIRE(mockturtle::has_num_gates_v<gate_layout>);
+    REQUIRE(mockturtle::has_fanin_size_v<gate_layout>);
+    REQUIRE(mockturtle::has_fanout_size_v<gate_layout>);
+
+    gate_layout layout{tile_based_layout::aspect_ratio{3, 1, 0}, open_4_clocking};
+
+    layout.assign_clocking({2, 0}, static_cast<typename gate_layout::clock_zone_t>(0));
+    layout.assign_clocking({1, 0}, static_cast<typename gate_layout::clock_zone_t>(1));
+    layout.assign_clocking({0, 0}, static_cast<typename gate_layout::clock_zone_t>(2));
+
+    layout.assign_clocking({1, 1}, static_cast<typename gate_layout::clock_zone_t>(0));
+    layout.assign_clocking({2, 1}, static_cast<typename gate_layout::clock_zone_t>(1));
+    layout.assign_clocking({3, 1}, static_cast<typename gate_layout::clock_zone_t>(2));
+
+    const auto x1 = layout.create_pi("x1", {2, 0});
+    const auto x2 = layout.create_pi("x2", {1, 1});
+    const auto a1 = layout.create_and(x1, x2, {1, 0});
+    const auto a2 = layout.create_and(x2, x1, {2, 1});
+    const auto f1 = layout.create_po(a1, "f1", {0, 0});
+    const auto f2 = layout.create_po(a2, "f2", {3, 1});
+
+    CHECK(layout.size() == 6);
+    CHECK(layout.num_pis() == 2);
+    CHECK(layout.num_pos() == 2);
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.fanin_size(layout.get_node(x1)) == 0);
+    CHECK(layout.fanin_size(layout.get_node(x2)) == 0);
+    CHECK(layout.fanin_size(layout.get_node(a1)) == 2);
+    CHECK(layout.fanin_size(layout.get_node(a2)) == 2);
+    CHECK(layout.fanin_size(layout.get_node(f1)) == 1);
+    CHECK(layout.fanin_size(layout.get_node(f2)) == 1);
+    CHECK(layout.fanout_size(layout.get_node(x1)) == 2);
+    CHECK(layout.fanout_size(layout.get_node(x2)) == 2);
+    CHECK(layout.fanout_size(layout.get_node(a1)) == 1);
+    CHECK(layout.fanout_size(layout.get_node(a2)) == 1);
+    CHECK(layout.fanout_size(layout.get_node(f1)) == 0);
+    CHECK(layout.fanout_size(layout.get_node(f2)) == 0);
 }
