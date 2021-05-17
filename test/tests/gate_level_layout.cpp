@@ -389,8 +389,8 @@ TEST_CASE("create nodes and compute their functions", "[gate-level]")
 
     CHECK(layout.size() == 3);
 
-    const auto const0  = layout.create_node({}, tt_const0);
-    const auto const1  = layout.create_node({}, ~tt_const0);
+    const auto const0 = layout.create_node({}, tt_const0);
+    const auto const1 = layout.create_node({}, ~tt_const0);
     CHECK(const0 == layout.get_constant(false));
     CHECK(const1 == layout.get_constant(true));
 
@@ -739,4 +739,76 @@ TEST_CASE("Structural properties", "[gate-level]")
     CHECK(layout.fanout_size(layout.get_node(n1)) == 1);
     CHECK(layout.fanout_size(layout.get_node(f1)) == 0);
     CHECK(layout.fanout_size(layout.get_node(f2)) == 0);
+}
+
+TEST_CASE("Custom node values", "[gate-level]")
+{
+    // adapted from mockturtle/test/networks/klut.cpp
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+
+    REQUIRE(mockturtle::has_clear_values_v<gate_layout>);
+    REQUIRE(mockturtle::has_value_v<gate_layout>);
+    REQUIRE(mockturtle::has_set_value_v<gate_layout>);
+    REQUIRE(mockturtle::has_incr_value_v<gate_layout>);
+    REQUIRE(mockturtle::has_decr_value_v<gate_layout>);
+
+    gate_layout layout{tile_based_layout::aspect_ratio{3, 1, 0}};
+
+    const auto x1 = layout.create_pi("x1", {2, 0});
+    const auto x2 = layout.create_pi("x2", {1, 1});
+    const auto a1 = layout.create_and(x1, x2, {1, 0});
+    const auto a2 = layout.create_and(x2, x1, {2, 1});
+    layout.create_po(a1, "f1", {0, 0});
+    layout.create_po(a2, "f2", {3, 1});
+
+    CHECK(layout.size() == 6);
+
+    layout.clear_values();
+    layout.foreach_node(
+        [&](auto n)
+        {
+            CHECK(layout.value(n) == 0);
+            layout.set_value(n, static_cast<uint32_t>(n));
+            CHECK(layout.value(n) == n);
+            CHECK(layout.incr_value(n) == n);
+            CHECK(layout.value(n) == n + 1);
+            CHECK(layout.decr_value(n) == n);
+            CHECK(layout.value(n) == n);
+        });
+    layout.clear_values();
+    layout.foreach_node([&](auto n) { CHECK(layout.value(n) == 0); });
+}
+
+TEST_CASE("Visited values", "[gate-level]")
+{
+    // adapted from mockturtle/test/networks/klut.cpp
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+
+    REQUIRE(mockturtle::has_clear_visited_v<gate_layout>);
+    REQUIRE(mockturtle::has_visited_v<gate_layout>);
+    REQUIRE(mockturtle::has_set_visited_v<gate_layout>);
+
+    gate_layout layout{tile_based_layout::aspect_ratio{3, 1, 0}};
+
+    const auto x1 = layout.create_pi("x1", {2, 0});
+    const auto x2 = layout.create_pi("x2", {1, 1});
+    const auto a1 = layout.create_and(x1, x2, {1, 0});
+    const auto a2 = layout.create_and(x2, x1, {2, 1});
+    layout.create_po(a1, "f1", {0, 0});
+    layout.create_po(a2, "f2", {3, 1});
+
+    CHECK(layout.size() == 6);
+
+    layout.clear_visited();
+    layout.foreach_node(
+        [&](auto n)
+        {
+            CHECK(layout.visited(n) == 0);
+            layout.set_visited(n, static_cast<uint32_t>(n));
+            CHECK(layout.visited(n) == n);
+        });
+    layout.clear_visited();
+    layout.foreach_node([&](auto n) { CHECK(layout.visited(n) == 0); });
 }
