@@ -197,8 +197,10 @@ class gate_level_layout : public ClockedLayout
     {
         if (children.empty())
         {
-            return {};
+            assert(function.num_vars() == 0u);
+            return get_constant(!kitty::is_const0(function));
         }
+
         return create_node_from_literal(children, strg->data.fn_cache.insert(function), t);
     }
 

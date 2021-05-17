@@ -326,6 +326,8 @@ TEST_CASE("compute functions from AND and NOT gates", "[gate-level]")
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
 
+    REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
+
     gate_layout layout{tile_based_layout::aspect_ratio{3, 1, 0}, open_4_clocking};
 
     layout.assign_clock_number({2, 0}, static_cast<typename gate_layout::clock_number_t>(0));
@@ -354,6 +356,65 @@ TEST_CASE("compute functions from AND and NOT gates", "[gate-level]")
 
     CHECK(sim_n1 == ~xs[0]);
     CHECK(sim_a1 == (xs[0] & xs[1]));
+}
+
+TEST_CASE("create nodes and compute their functions", "[gate-level]")
+{
+    // adapted from mockturtle/test/networks/klut.cpp
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+
+    REQUIRE(mockturtle::has_create_node_v<gate_layout>);
+    REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
+
+    gate_layout layout{tile_based_layout::aspect_ratio{3, 2, 0}, open_4_clocking};
+
+    layout.assign_clock_number({2, 0}, static_cast<typename gate_layout::clock_number_t>(0));
+    layout.assign_clock_number({1, 1}, static_cast<typename gate_layout::clock_number_t>(0));
+    layout.assign_clock_number({3, 1}, static_cast<typename gate_layout::clock_number_t>(0));
+
+    layout.assign_clock_number({1, 0}, static_cast<typename gate_layout::clock_number_t>(1));
+    layout.assign_clock_number({2, 1}, static_cast<typename gate_layout::clock_number_t>(1));
+
+    layout.assign_clock_number({0, 0}, static_cast<typename gate_layout::clock_number_t>(2));
+    layout.assign_clock_number({2, 2}, static_cast<typename gate_layout::clock_number_t>(2));
+
+    const auto a = layout.create_pi("a", {1, 1});
+    const auto b = layout.create_pi("b", {2, 0});
+    const auto c = layout.create_pi("c", {3, 1});
+
+    kitty::dynamic_truth_table tt_maj(3u), tt_xor(2u), tt_const0(0u);
+    kitty::create_from_hex_string(tt_maj, "e8");
+    kitty::create_from_hex_string(tt_xor, "6");
+
+    CHECK(layout.size() == 3);
+
+    const auto const0  = layout.create_node({}, tt_const0);
+    const auto const1  = layout.create_node({}, ~tt_const0);
+    CHECK(const0 == layout.get_constant(false));
+    CHECK(const1 == layout.get_constant(true));
+
+    const auto n_maj = layout.create_node({a, b, c}, tt_maj, {2, 1});
+    const auto n_xor = layout.create_node({a, b}, tt_xor, {1, 0});
+
+    layout.create_po(n_maj, "f1", {2, 2});
+    layout.create_po(n_xor, "f2", {0, 0});
+
+    CHECK(layout.size() == 7);
+
+    std::vector<kitty::dynamic_truth_table> xs;
+    xs.emplace_back(3u);
+    xs.emplace_back(3u);
+    xs.emplace_back(3u);
+    kitty::create_nth_var(xs[0], 0);
+    kitty::create_nth_var(xs[1], 1);
+    kitty::create_nth_var(xs[2], 2);
+
+    const auto sim_maj = layout.compute(layout.get_node(n_maj), xs.begin(), xs.end());
+    const auto sim_xor = layout.compute(layout.get_node(n_xor), xs.begin(), xs.begin() + 2);
+
+    CHECK(sim_maj == kitty::ternary_majority(xs[0], xs[1], xs[2]));
+    CHECK(sim_xor == (xs[0] ^ xs[1]));
 }
 
 TEST_CASE("node and signal iteration", "[gate-level]")
