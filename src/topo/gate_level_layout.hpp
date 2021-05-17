@@ -536,14 +536,8 @@ class gate_level_layout : public ClockedLayout
         std::copy(children.begin(), children.end(), std::back_inserter(node_data.children));
         node_data.data[1].h1 = literal;
 
-        if (auto it = strg->hash.find(node_data); it != strg->hash.end())
-        {
-            return static_cast<signal>(get_tile(it->second));
-        }
-
         const auto n = strg->nodes.size();
         strg->nodes.push_back(node_data);
-        strg->hash[node_data] = n;
 
         /* increase ref-count to children */
         for (const auto& c : children) { strg->nodes[get_node(c)].data[0].h1++; }
