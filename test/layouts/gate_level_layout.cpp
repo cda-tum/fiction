@@ -31,13 +31,13 @@ TEST_CASE("Creation and usage of constants", "[gate-level]")
 
     gate_layout layout{tile_based_layout::aspect_ratio{2, 2, 1}};
 
-    CHECK(layout.size() == 0);
+    CHECK(layout.size() == 2);
 
     const auto c0 = layout.get_constant(false);
     CHECK(layout.is_constant(layout.get_node(c0)));
     CHECK(!layout.is_pi(layout.get_node(c0)));
 
-    CHECK(layout.size() == 0);
+    CHECK(layout.size() == 2);
     CHECK(std::is_same_v<std::decay_t<decltype(c0)>, gate_layout::signal>);
     CHECK(layout.get_node(c0) == 0);
     CHECK(!layout.is_complemented(c0));
@@ -67,7 +67,7 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level]")
     auto a = layout.create_pi("a", {0, 0});
     CHECK(layout.is_pi(layout.get_node(a)));
 
-    CHECK(layout.size() == 1);
+    CHECK(layout.size() == 3);
     CHECK(layout.num_pis() == 1);
     CHECK(layout.num_gates() == 0);
     CHECK(layout.num_wires() == 1);
@@ -144,7 +144,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level]")
 
     const auto x1 = layout.create_pi("x1", gate_layout::tile{0, 0});
 
-    CHECK(layout.size() == 1);
+    CHECK(layout.size() == 3);
     CHECK(layout.num_pis() == 1);
     CHECK(layout.num_pos() == 0);
 
@@ -156,7 +156,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level]")
 
     CHECK(layout.is_empty_tile({1, 0}));
 
-    CHECK(layout.size() == 3);
+    CHECK(layout.size() == 5);
     CHECK(layout.num_pos() == 2);
     CHECK(layout.num_wires() == 3);
 
@@ -173,8 +173,8 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level]")
 
             CHECK(layout.is_po(layout.get_node(po)));
             CHECK(layout.is_po_tile(static_cast<gate_layout::tile>(po)));
-            CHECK(!layout.is_gate_tile(static_cast<gate_layout::tile>(po)));
-            CHECK(!layout.is_gate(layout.get_node(static_cast<gate_layout::tile>(po))));
+            CHECK(layout.is_gate_tile(static_cast<gate_layout::tile>(po)));
+            CHECK(layout.is_gate(layout.get_node(static_cast<gate_layout::tile>(po))));
 
             switch (i)
             {
@@ -210,12 +210,12 @@ TEST_CASE("Creation of unary operations", "[gate-level]")
 
     auto x1 = layout.create_pi("x1", {0, 0});
 
-    CHECK(layout.size() == 1);
+    CHECK(layout.size() == 3);
 
     auto f1 = layout.create_buf(x1, {1, 0});
     auto f2 = layout.create_not(x1, {0, 1});
 
-    CHECK(layout.size() == 3);
+    CHECK(layout.size() == 5);
     CHECK(layout.num_gates() == 1);
     CHECK(layout.num_wires() == 2);
 
@@ -231,8 +231,8 @@ TEST_CASE("Creation of unary operations", "[gate-level]")
     CHECK(f2n == t01n);
 
     CHECK(!layout.is_empty_tile({1, 0}));
-    CHECK(!layout.is_gate_tile({1, 0}));
-    CHECK(!layout.is_gate(layout.get_node({1, 0})));
+    CHECK(layout.is_gate_tile({1, 0}));
+    CHECK(layout.is_gate(layout.get_node({1, 0})));
     CHECK(layout.is_wire_tile({1, 0}));
     CHECK(layout.is_wire(layout.get_node({1, 0})));
 
@@ -266,7 +266,7 @@ TEST_CASE("Creation of binary operations", "[gate-level]")
 
     CHECK(a != o);
     CHECK(layout.num_gates() == 2);
-    CHECK(layout.size() == 4);
+    CHECK(layout.size() == 6);
 
     CHECK(layout.get_node({0, 0}) == layout.get_node(a));
     CHECK(layout.get_node({1, 1}) == layout.get_node(o));
@@ -310,7 +310,7 @@ TEST_CASE("Creation of ternary operations", "[gate-level]")
     CHECK(x3 != m);
 
     CHECK(layout.num_gates() == 1);
-    CHECK(layout.size() == 4);
+    CHECK(layout.size() == 6);
 
     CHECK(layout.get_node({1, 1}) == layout.get_node(m));
 
@@ -387,7 +387,7 @@ TEST_CASE("create nodes and compute their functions", "[gate-level]")
     kitty::create_from_hex_string(tt_maj, "e8");
     kitty::create_from_hex_string(tt_xor, "6");
 
-    CHECK(layout.size() == 3);
+    CHECK(layout.size() == 5);
 
     const auto const0 = layout.create_node({}, tt_const0);
     const auto const1 = layout.create_node({}, ~tt_const0);
@@ -400,7 +400,7 @@ TEST_CASE("create nodes and compute their functions", "[gate-level]")
     layout.create_po(n_maj, "f1", {2, 2});
     layout.create_po(n_xor, "f2", {0, 0});
 
-    CHECK(layout.size() == 7);
+    CHECK(layout.size() == 9);
 
     std::vector<kitty::dynamic_truth_table> xs;
     xs.emplace_back(3u);
@@ -446,7 +446,7 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.create_po(a1, "f1", {0, 0});
     layout.create_po(a2, "f2", {3, 1});
 
-    CHECK(layout.size() == 6);
+    CHECK(layout.size() == 8);
 
     /* iterate over nodes */
     uint32_t mask{0}, counter{0};
@@ -491,12 +491,12 @@ TEST_CASE("node and signal iteration", "[gate-level]")
             mask |= (1 << n);
             counter += i;
         });
-    CHECK(mask == 48);
-    CHECK(counter == 1);
+    CHECK(mask == 240);
+    CHECK(counter == 6);
 
     mask = 0;
     layout.foreach_gate([&](auto n) { mask |= (1 << n); });
-    CHECK(mask == 48);
+    CHECK(mask == 240);
 
     mask = counter = 0;
     layout.foreach_gate(
@@ -723,7 +723,7 @@ TEST_CASE("Structural properties", "[gate-level]")
     const auto f1 = layout.create_po(a1, "f1", {0, 0});
     const auto f2 = layout.create_po(n1, "f2", {3, 1});
 
-    CHECK(layout.size() == 6);
+    CHECK(layout.size() == 8);
     CHECK(layout.num_pis() == 2);
     CHECK(layout.num_pos() == 2);
     CHECK(layout.num_gates() == 2);
@@ -762,7 +762,7 @@ TEST_CASE("Custom node values", "[gate-level]")
     layout.create_po(a1, "f1", {0, 0});
     layout.create_po(a2, "f2", {3, 1});
 
-    CHECK(layout.size() == 6);
+    CHECK(layout.size() == 8);
 
     layout.clear_values();
     layout.foreach_node(
@@ -799,7 +799,7 @@ TEST_CASE("Visited values", "[gate-level]")
     layout.create_po(a1, "f1", {0, 0});
     layout.create_po(a2, "f2", {3, 1});
 
-    CHECK(layout.size() == 6);
+    CHECK(layout.size() == 8);
 
     layout.clear_visited();
     layout.foreach_node(

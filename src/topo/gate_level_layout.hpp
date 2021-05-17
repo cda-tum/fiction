@@ -111,6 +111,11 @@ class gate_level_layout : public ClockedLayout
         return n <= 1;
     }
 
+    [[nodiscard]] bool constant_value(node const& n) const noexcept
+    {
+        return n == 1;
+    }
+
     signal create_pi([[maybe_unused]] const std::string& name = std::string(), const tile& t = {})
     {
         const auto n = strg->nodes.size();
@@ -219,7 +224,7 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] auto size() const noexcept
     {
-        return static_cast<uint32_t>(strg->nodes.size() - 2);
+        return static_cast<uint32_t>(strg->nodes.size());
     }
 
     [[nodiscard]] auto num_pis() const noexcept
@@ -286,13 +291,21 @@ class gate_level_layout : public ClockedLayout
         return false;
     }
 
-    // TODO if no PI / PO assigned and function literal > 2
-    [[nodiscard]] bool is_gate(const node n) const noexcept
+    [[nodiscard]] uint32_t node_to_index(node const& n) const noexcept
     {
-        return strg->nodes[n].data[1].h1 > 2;
+        return static_cast<uint32_t>(n);
     }
 
-    // TODO if no PI / PO assigned and function literal == 2
+    [[nodiscard]] node index_to_node(const uint32_t index) const noexcept
+    {
+        return index;
+    }
+
+    [[nodiscard]] bool is_gate(const node n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 >= 2 && !is_pi(n);
+    }
+
     [[nodiscard]] bool is_wire(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 2;

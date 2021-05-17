@@ -1,12 +1,7 @@
 include_directories(catch2)
 
 set(DEFINE_TEST_HEADER test.cpp)
-file(GLOB_RECURSE FILENAMES tests/*.cpp)
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-    option(ENABLE_COVERAGE "Enable coverage reporting for gcc/clang" FALSE)
-endif ()
-
+file(GLOB_RECURSE FILENAMES layouts/*.cpp)
 
 foreach (FILE IN LISTS FILENAMES)
     get_filename_component(NAME ${FILE} NAME_WE)
