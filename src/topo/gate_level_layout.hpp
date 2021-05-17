@@ -12,6 +12,7 @@
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/networks/storage.hpp>
+#include <mockturtle/traits.hpp>
 #include <mockturtle/utils/algorithm.hpp>
 #include <mockturtle/utils/truth_table_cache.hpp>
 
@@ -129,10 +130,9 @@ class gate_level_layout : public ClockedLayout
         strg->outputs.emplace_back(static_cast<signal>(t));
         assign_node(t, n);
 
-        /* increase ref-count to children */
-        auto child = get_node(s);
-        strg->nodes[child].data[0].h1++;
-        strg->nodes[n].children.push_back(child);
+        /* increase ref-count to child */
+        strg->nodes[get_node(s)].data[0].h1++;
+        strg->nodes[n].children.push_back(s);
 
         return static_cast<signal>(t);
     }
@@ -378,6 +378,49 @@ class gate_level_layout : public ClockedLayout
 
 #pragma endregion
 
+#pragma region Simulate values
+
+    template <typename Iterator>
+    mockturtle::iterates_over_t<Iterator, bool> compute(node const& n, Iterator begin, Iterator end) const
+    {
+        uint32_t index{0};
+        while (begin != end)
+        {
+            index <<= 1;
+            index ^= *begin++ ? 1 : 0;
+        }
+
+        return kitty::get_bit(strg->data.cache[strg->nodes[n].data[1].h1], index);
+    }
+
+    template <typename Iterator>
+    mockturtle::iterates_over_truth_table_t<Iterator> compute(node const& n, Iterator begin, Iterator end) const
+    {
+        std::vector<typename Iterator::value_type> tts{begin, end};
+
+        const auto num_fanin = fanin_size(n);
+        assert(tts.size() == num_fanin);
+        assert(num_fanin != 0ul);
+
+        /* resulting truth table has the same size as any of the children */
+        auto       result  = tts.front().construct();
+        const auto gate_tt = strg->data.fn_cache[strg->nodes[n].data[1].h1];
+
+        for (uint32_t i = 0ul; i < static_cast<uint32_t>(result.num_bits()); ++i)
+        {
+            uint32_t pattern = 0ul;
+            for (auto j = 0ul; j < num_fanin; ++j) { pattern |= kitty::get_bit(tts[j], i) << j; }
+
+            if (kitty::get_bit(gate_tt, pattern))
+            {
+                kitty::set_bit(result, i);
+            }
+        }
+
+        return result;
+    }
+#pragma endregion
+
 #pragma region Custom node values
 
     void clear_values() const noexcept
@@ -530,7 +573,7 @@ class gate_level_layout : public ClockedLayout
         std::copy_if(std::cbegin(incoming), std::cend(incoming), std::inserter(data_flow, std::cend(data_flow)),
                      [this, &t](const auto& dt) { return is_child(get_node(t), static_cast<signal>(dt)); });
 
-        return incoming;
+        return data_flow;
     }
 
     template <typename Container>
@@ -543,7 +586,7 @@ class gate_level_layout : public ClockedLayout
         std::copy_if(std::cbegin(outgoing), std::cend(outgoing), std::inserter(data_flow, std::cend(data_flow)),
                      [this, &t](const auto& dt) { return is_child(get_node(dt), static_cast<signal>(t)); });
 
-        return outgoing;
+        return data_flow;
     }
 
     void clear_tile(const tile& t) noexcept

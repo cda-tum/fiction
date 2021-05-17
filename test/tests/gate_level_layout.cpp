@@ -8,6 +8,8 @@
 #include "clocked_layout.hpp"
 #include "tile_based_layout.hpp"
 
+#include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/traits.hpp>
 
 #include <type_traits>
@@ -318,6 +320,42 @@ TEST_CASE("Creation of ternary operations", "[gate-level]")
     CHECK(!layout.is_wire(layout.get_node({1, 1})));
 }
 
+TEST_CASE("compute functions from AND and NOT gates", "[gate-level]")
+{
+    // adapted from mockturtle/test/networks/klut.cpp
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+
+    gate_layout layout{tile_based_layout::aspect_ratio{3, 1, 0}, open_4_clocking};
+
+    layout.assign_clock_number({2, 0}, static_cast<typename gate_layout::clock_number_t>(0));
+    layout.assign_clock_number({1, 0}, static_cast<typename gate_layout::clock_number_t>(1));
+    layout.assign_clock_number({0, 0}, static_cast<typename gate_layout::clock_number_t>(2));
+
+    layout.assign_clock_number({1, 1}, static_cast<typename gate_layout::clock_number_t>(0));
+    layout.assign_clock_number({2, 1}, static_cast<typename gate_layout::clock_number_t>(1));
+    layout.assign_clock_number({3, 1}, static_cast<typename gate_layout::clock_number_t>(2));
+
+    const auto x1 = layout.create_pi("x1", {2, 0});
+    const auto x2 = layout.create_pi("x2", {1, 1});
+    const auto a1 = layout.create_and(x1, x2, {1, 0});
+    const auto n1 = layout.create_not(x2, {2, 1});
+    layout.create_po(a1, "f1", {0, 0});
+    layout.create_po(n1, "f2", {3, 1});
+
+    std::vector<kitty::dynamic_truth_table> xs;
+    xs.emplace_back(3u);
+    xs.emplace_back(3u);
+    kitty::create_nth_var(xs[0], 0);
+    kitty::create_nth_var(xs[1], 1);
+
+    const auto sim_n1 = layout.compute(layout.get_node(n1), xs.begin(), xs.begin() + 1);
+    const auto sim_a1 = layout.compute(layout.get_node(a1), xs.begin(), xs.end());
+
+    CHECK(sim_n1 == ~xs[0]);
+    CHECK(sim_a1 == (xs[0] & xs[1]));
+}
+
 TEST_CASE("node and signal iteration", "[gate-level]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
@@ -620,9 +658,9 @@ TEST_CASE("Structural properties", "[gate-level]")
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {1, 1});
     const auto a1 = layout.create_and(x1, x2, {1, 0});
-    const auto a2 = layout.create_and(x2, x1, {2, 1});
+    const auto n1 = layout.create_not(x2, {2, 1});
     const auto f1 = layout.create_po(a1, "f1", {0, 0});
-    const auto f2 = layout.create_po(a2, "f2", {3, 1});
+    const auto f2 = layout.create_po(n1, "f2", {3, 1});
 
     CHECK(layout.size() == 6);
     CHECK(layout.num_pis() == 2);
@@ -631,13 +669,13 @@ TEST_CASE("Structural properties", "[gate-level]")
     CHECK(layout.fanin_size(layout.get_node(x1)) == 0);
     CHECK(layout.fanin_size(layout.get_node(x2)) == 0);
     CHECK(layout.fanin_size(layout.get_node(a1)) == 2);
-    CHECK(layout.fanin_size(layout.get_node(a2)) == 2);
+    CHECK(layout.fanin_size(layout.get_node(n1)) == 1);
     CHECK(layout.fanin_size(layout.get_node(f1)) == 1);
     CHECK(layout.fanin_size(layout.get_node(f2)) == 1);
-    CHECK(layout.fanout_size(layout.get_node(x1)) == 2);
+    CHECK(layout.fanout_size(layout.get_node(x1)) == 1);
     CHECK(layout.fanout_size(layout.get_node(x2)) == 2);
     CHECK(layout.fanout_size(layout.get_node(a1)) == 1);
-    CHECK(layout.fanout_size(layout.get_node(a2)) == 1);
+    CHECK(layout.fanout_size(layout.get_node(n1)) == 1);
     CHECK(layout.fanout_size(layout.get_node(f1)) == 0);
     CHECK(layout.fanout_size(layout.get_node(f2)) == 0);
 }
