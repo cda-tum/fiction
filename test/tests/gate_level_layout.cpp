@@ -330,13 +330,13 @@ TEST_CASE("node and signal iteration", "[gate-level]")
 
     gate_layout layout{tile_based_layout::aspect_ratio{3, 1, 0}, open_4_clocking};
 
-    layout.assign_clocking({2, 0}, static_cast<typename gate_layout::clock_zone_t>(0));
-    layout.assign_clocking({1, 0}, static_cast<typename gate_layout::clock_zone_t>(1));
-    layout.assign_clocking({0, 0}, static_cast<typename gate_layout::clock_zone_t>(2));
+    layout.assign_clock_number({2, 0}, static_cast<typename gate_layout::clock_number_t>(0));
+    layout.assign_clock_number({1, 0}, static_cast<typename gate_layout::clock_number_t>(1));
+    layout.assign_clock_number({0, 0}, static_cast<typename gate_layout::clock_number_t>(2));
 
-    layout.assign_clocking({1, 1}, static_cast<typename gate_layout::clock_zone_t>(0));
-    layout.assign_clocking({2, 1}, static_cast<typename gate_layout::clock_zone_t>(1));
-    layout.assign_clocking({3, 1}, static_cast<typename gate_layout::clock_zone_t>(2));
+    layout.assign_clock_number({1, 1}, static_cast<typename gate_layout::clock_number_t>(0));
+    layout.assign_clock_number({2, 1}, static_cast<typename gate_layout::clock_number_t>(1));
+    layout.assign_clock_number({3, 1}, static_cast<typename gate_layout::clock_number_t>(2));
 
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {1, 1});
@@ -538,13 +538,12 @@ TEST_CASE("Structural properties", "[gate-level]")
 
     gate_layout layout{tile_based_layout::aspect_ratio{3, 1, 0}, open_4_clocking};
 
-    layout.assign_clocking({2, 0}, static_cast<typename gate_layout::clock_zone_t>(0));
-    layout.assign_clocking({1, 0}, static_cast<typename gate_layout::clock_zone_t>(1));
-    layout.assign_clocking({0, 0}, static_cast<typename gate_layout::clock_zone_t>(2));
-
-    layout.assign_clocking({1, 1}, static_cast<typename gate_layout::clock_zone_t>(0));
-    layout.assign_clocking({2, 1}, static_cast<typename gate_layout::clock_zone_t>(1));
-    layout.assign_clocking({3, 1}, static_cast<typename gate_layout::clock_zone_t>(2));
+    layout.assign_clock_number({2, 0}, static_cast<typename gate_layout::clock_number_t>(0));
+    layout.assign_clock_number({1, 0}, static_cast<typename gate_layout::clock_number_t>(1));
+    layout.assign_clock_number({0, 0}, static_cast<typename gate_layout::clock_number_t>(2));
+    layout.assign_clock_number({1, 1}, static_cast<typename gate_layout::clock_number_t>(0));
+    layout.assign_clock_number({2, 1}, static_cast<typename gate_layout::clock_number_t>(1));
+    layout.assign_clock_number({3, 1}, static_cast<typename gate_layout::clock_number_t>(2));
 
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {1, 1});

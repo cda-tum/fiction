@@ -16,33 +16,33 @@
 
 namespace fiction
 {
-template <typename Signal>
+template <typename ClockZone>
 class clocking_scheme
 {
   public:
-    using zone           = uint8_t;
-    using number         = uint8_t;
-    using clock_function = std::function<zone(Signal)>;
+    using clock_zone     = ClockZone;
+    using clock_number   = uint8_t;
+    using clock_function = std::function<clock_number(ClockZone)>;
 
-    explicit clocking_scheme(const std::string_view& name, clock_function fn, const number n = 4,
+    explicit clocking_scheme(const std::string_view& name, clock_function fn, const clock_number cn = 4,
                              const bool r = true) noexcept :
             name{name},
-            num_clocks{n},
+            num_clocks{cn},
             regular{r},
             fn{std::move(fn)}
     {}
 
-    zone operator()(Signal s) const noexcept
+    clock_number operator()(ClockZone cz) const noexcept
     {
         if (regular)
-            return fn(s);
+            return fn(cz);
 
-        if (auto it = override.find(static_cast<uint64_t>(s)); it != override.end())
+        if (auto it = override.find(static_cast<uint64_t>(cz)); it != override.end())
         {
             return it->second;
         }
 
-        return fn(s);
+        return fn(cz);
     }
 
     bool operator==(const std::string& n) const noexcept
@@ -55,11 +55,11 @@ class clocking_scheme
         return regular;
     }
 
-    void override_clock_zone(const Signal& s, const zone z) noexcept
+    void override_clock_number(const ClockZone& cz, const clock_number cn) noexcept
     {
         regular = false;
 
-        override[static_cast<uint64_t>(s)] = z % num_clocks;
+        override[static_cast<uint64_t>(cz)] = cn % num_clocks;
     }
     /**
      * Name of the clocking scheme.
@@ -68,7 +68,7 @@ class clocking_scheme
     /**
      * Number of different clocks in this scheme.
      */
-    const number num_clocks;
+    const clock_number num_clocks;
 
   private:
     /**
@@ -76,15 +76,16 @@ class clocking_scheme
      */
     bool regular;
     /**
-     * A function that determines clock zones for given signals.
+     * A function that determines clock numbers for given zones.
      */
     const clock_function fn;
     /**
      * Alias for a hash map that overrides clock zones.
      */
-    using clocking_map = std::unordered_map<uint64_t, zone>;
+    using clocking_map = std::unordered_map<uint64_t, clock_number>;
     /**
-     * Stores mappings Signal -> zone to override clock zones.
+     * Stores mappings ClockZone -> clock_number to override clock zones.
+     * ClockZone must be convertible to uint64_t.
      */
     clocking_map override{};
 };
@@ -94,29 +95,29 @@ namespace clock_function
 /**
  * Representing an irregular clocking that always returns the standard clock. It is intended to be overridden.
  */
-const clocking_scheme<coord_t>::clock_function open = []([[maybe_unused]] coord_t s) noexcept
-{ return clocking_scheme<coord_t>::zone{}; };
+const clocking_scheme<coord_t>::clock_function open = []([[maybe_unused]] coord_t cz) noexcept
+{ return clocking_scheme<coord_t>::clock_number{}; };
 /**
  * Representing a 3-phase adoption of the 2DDWave clocking as defined in "Clocking and Cell Placement for QCA" by
  * V. Vankamamidi, M. Ottavi, and F. Lombardi in IEEE Conference on Nanotechnology 2006.
  */
-const clocking_scheme<coord_t>::clock_function twoddwave_3 = [](coord_t s) noexcept
+const clocking_scheme<coord_t>::clock_function twoddwave_3 = [](coord_t cz) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::zone, 3>, 3> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 3>, 3> cutout{
         {{{0, 1, 2}}, {{1, 2, 0}}, {{2, 0, 1}}}};
 
-    return cutout[s.y % 3][s.x % 3];
+    return cutout[cz.y % 3][cz.x % 3];
 };
 /**
  * Representing the original 2DDWave clocking as defined in "Clocking and Cell Placement for QCA" by V. Vankamamidi,
  * M. Ottavi, and F. Lombardi in IEEE Conference on Nanotechnology 2006.
  */
-const clocking_scheme<coord_t>::clock_function twoddwave_4 = [](coord_t s) noexcept
+const clocking_scheme<coord_t>::clock_function twoddwave_4 = [](coord_t cz) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::zone, 4>, 4> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 4>, 4> cutout{
         {{{0, 1, 2, 3}}, {{1, 2, 3, 0}}, {{2, 3, 0, 1}}, {{3, 0, 1, 2}}}};
 
-    return cutout[s.y % 4][s.x % 4];
+    return cutout[cz.y % 4][cz.x % 4];
 };
 /**
  * Representing the USE clocking as defined in "USE: A Universal, Scalable, and Efficient Clocking Scheme for QCA"
@@ -124,7 +125,7 @@ const clocking_scheme<coord_t>::clock_function twoddwave_4 = [](coord_t s) noexc
  */
 const clocking_scheme<coord_t>::clock_function use_4 = [](coord_t s) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::zone, 4>, 4> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 4>, 4> cutout{
         {{{0, 1, 2, 3}}, {{3, 2, 1, 0}}, {{2, 3, 0, 1}}, {{1, 0, 3, 2}}}};
 
     return cutout[s.y % 4][s.x % 4];
@@ -134,23 +135,23 @@ const clocking_scheme<coord_t>::clock_function use_4 = [](coord_t s) noexcept
  * Mrinal Goswami, Anindan Mondal, Mahabub Hasan Mahalat, Bibhash Sen, and Biplab K. Sikdar in International Journal
  * of Electronics Letters 2019.
  */
-const clocking_scheme<coord_t>::clock_function res_4 = [](coord_t s) noexcept
+const clocking_scheme<coord_t>::clock_function res_4 = [](coord_t cz) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::zone, 4>, 4> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 4>, 4> cutout{
         {{{3, 0, 1, 2}}, {{0, 1, 0, 3}}, {{1, 2, 3, 0}}, {{0, 3, 2, 1}}}};
 
-    return cutout[s.y % 4][s.x % 4];
+    return cutout[cz.y % 4][cz.x % 4];
 };
 /**
  * Representing the BANCS clocking as defined in "BANCS: Bidirectional Alternating Nanomagnetic Clocking Scheme" by
  * Ruan Evangelista Formigoni, Omar P. Vilela Neto, and Jose Augusto M. Nacif in SBCCI 2018.
  */
-const clocking_scheme<coord_t>::clock_function bancs_3 = [](coord_t s) noexcept
+const clocking_scheme<coord_t>::clock_function bancs_3 = [](coord_t cz) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::zone, 3>, 6> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 3>, 6> cutout{
         {{{0, 1, 2}}, {{2, 1, 0}}, {{2, 0, 1}}, {{1, 0, 2}}, {{1, 2, 0}}, {{0, 2, 1}}}};
 
-    return cutout[s.y % 6][s.x % 3];
+    return cutout[cz.y % 6][cz.x % 3];
 };
 /**
  * Representing a 3-phase adaption of the clocking originally introduced in "A device architecture for computing
@@ -158,24 +159,24 @@ const clocking_scheme<coord_t>::clock_function bancs_3 = [](coord_t s) noexcept
  * "ToPoliNano" (https://topolinano.polito.it/), it is referred to by that name in fiction to differentiate it
  * from 2DDWave.
  */
-const clocking_scheme<coord_t>::clock_function topolinano_3 = [](coord_t s) noexcept
+const clocking_scheme<coord_t>::clock_function topolinano_3 = [](coord_t cz) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::zone, 3>, 3> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 3>, 3> cutout{
         {{{0, 1, 2}}, {{0, 1, 2}}, {{0, 1, 2}}}};
 
-    return cutout[s.y % 3][s.x % 3];
+    return cutout[cz.y % 3][cz.x % 3];
 };
 /**
  * Representing a linear 4-phase 1D clocking as originally introduced in "A device architecture for computing with
  * quantum dots" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE 1997. As it is used in "ToPoliNano"
  * (https://topolinano.polito.it/), it is referred to by that name in fiction to differentiate it from 2DDWave.
  */
-const clocking_scheme<coord_t>::clock_function topolinano_4 = [](coord_t s) noexcept
+const clocking_scheme<coord_t>::clock_function topolinano_4 = [](coord_t cz) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::zone, 4>, 4> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 4>, 4> cutout{
         {{{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}}};
 
-    return cutout[s.y % 4][s.x % 4];
+    return cutout[cz.y % 4][cz.x % 4];
 };
 }  // namespace clock_function
 
@@ -233,10 +234,10 @@ static const clocking_scheme<coord_t> topolinano_3_clocking{clock_name::topolina
 static const clocking_scheme<coord_t> topolinano_4_clocking{clock_name::topolinano4, clock_function::topolinano_4, 4u,
                                                             true};
 
-template <typename Signal>
-std::optional<clocking_scheme<Signal>> get_clocking_scheme(const std::string& name) noexcept
+template <typename ClockZone>
+std::optional<clocking_scheme<ClockZone>> get_clocking_scheme(const std::string& name) noexcept
 {
-    if constexpr (std::is_same_v<Signal, coord_t>)
+    if constexpr (std::is_same_v<ClockZone, coord_t>)
     {
         static const std::unordered_map<std::string, clocking_scheme<coord_t>> scheme_lookup{
             {clock_name::open3, open_3_clocking},

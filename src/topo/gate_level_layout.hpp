@@ -495,7 +495,7 @@ class gate_level_layout : public ClockedLayout
     template <typename Container>
     [[nodiscard]] Container incoming_data_flow(const tile& t) const noexcept
     {
-        auto incoming = ClockedLayout::template incoming_clocked_tiles<Container>(t);
+        auto incoming = ClockedLayout::template incoming_clocked_zones<Container>(t);
 
         Container data_flow{};
 
@@ -508,7 +508,7 @@ class gate_level_layout : public ClockedLayout
     template <typename Container>
     [[nodiscard]] Container outgoing_data_flow(const tile& t) const noexcept
     {
-        auto outgoing = ClockedLayout::template outgoing_clocked_tiles<Container>(t);
+        auto outgoing = ClockedLayout::template outgoing_clocked_zones<Container>(t);
 
         Container data_flow{};
 

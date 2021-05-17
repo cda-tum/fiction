@@ -497,13 +497,13 @@ TEST_CASE("3-phase open clocking", "[clocking scheme]")
     CHECK(open_clocking(coord_t{3, 2}) == 0);
     CHECK(open_clocking(coord_t{3, 3}) == 0);
 
-    open_clocking.override_clock_zone(coord_t{0, 0}, 0);
-    open_clocking.override_clock_zone(coord_t{0, 1}, 1);
-    open_clocking.override_clock_zone(coord_t{0, 2}, 2);
-    open_clocking.override_clock_zone(coord_t{0, 3}, 3);
-    open_clocking.override_clock_zone(coord_t{0, 4}, 4);
-    open_clocking.override_clock_zone(coord_t{0, 5}, 5);
-    open_clocking.override_clock_zone(coord_t{0, 6}, 6);
+    open_clocking.override_clock_number(coord_t{0, 0}, 0);
+    open_clocking.override_clock_number(coord_t{0, 1}, 1);
+    open_clocking.override_clock_number(coord_t{0, 2}, 2);
+    open_clocking.override_clock_number(coord_t{0, 3}, 3);
+    open_clocking.override_clock_number(coord_t{0, 4}, 4);
+    open_clocking.override_clock_number(coord_t{0, 5}, 5);
+    open_clocking.override_clock_number(coord_t{0, 6}, 6);
 
     CHECK(!open_clocking.is_regular());
 
@@ -551,13 +551,13 @@ TEST_CASE("4-phase open clocking", "[clocking scheme]")
     CHECK(open_clocking(coord_t{3, 2}) == 0);
     CHECK(open_clocking(coord_t{3, 3}) == 0);
 
-    open_clocking.override_clock_zone(coord_t{0, 0}, 0);
-    open_clocking.override_clock_zone(coord_t{0, 1}, 1);
-    open_clocking.override_clock_zone(coord_t{0, 2}, 2);
-    open_clocking.override_clock_zone(coord_t{0, 3}, 3);
-    open_clocking.override_clock_zone(coord_t{0, 4}, 4);
-    open_clocking.override_clock_zone(coord_t{0, 5}, 5);
-    open_clocking.override_clock_zone(coord_t{0, 6}, 6);
+    open_clocking.override_clock_number(coord_t{0, 0}, 0);
+    open_clocking.override_clock_number(coord_t{0, 1}, 1);
+    open_clocking.override_clock_number(coord_t{0, 2}, 2);
+    open_clocking.override_clock_number(coord_t{0, 3}, 3);
+    open_clocking.override_clock_number(coord_t{0, 4}, 4);
+    open_clocking.override_clock_number(coord_t{0, 5}, 5);
+    open_clocking.override_clock_number(coord_t{0, 6}, 6);
 
     CHECK(!open_clocking.is_regular());
 
@@ -588,16 +588,16 @@ TEST_CASE("Override clocking", "[clocking scheme]")
 
     CHECK(twoddwave_clocking.is_regular());
 
-    twoddwave_clocking.override_clock_zone(coord_t{0, 0}, 0);
+    twoddwave_clocking.override_clock_number(coord_t{0, 0}, 0);
 
     CHECK(!twoddwave_clocking.is_regular());
 
-    twoddwave_clocking.override_clock_zone(coord_t{0, 1}, 1);
-    twoddwave_clocking.override_clock_zone(coord_t{0, 2}, 2);
-    twoddwave_clocking.override_clock_zone(coord_t{0, 3}, 3);
-    twoddwave_clocking.override_clock_zone(coord_t{0, 4}, 4);
-    twoddwave_clocking.override_clock_zone(coord_t{0, 5}, 5);
-    twoddwave_clocking.override_clock_zone(coord_t{0, 6}, 6);
+    twoddwave_clocking.override_clock_number(coord_t{0, 1}, 1);
+    twoddwave_clocking.override_clock_number(coord_t{0, 2}, 2);
+    twoddwave_clocking.override_clock_number(coord_t{0, 3}, 3);
+    twoddwave_clocking.override_clock_number(coord_t{0, 4}, 4);
+    twoddwave_clocking.override_clock_number(coord_t{0, 5}, 5);
+    twoddwave_clocking.override_clock_number(coord_t{0, 6}, 6);
 
     CHECK(twoddwave_clocking(coord_t{0, 0}) == 0);
     CHECK(twoddwave_clocking(coord_t{0, 1}) == 1);

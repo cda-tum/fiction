@@ -21,10 +21,10 @@ class clocked_layout : public TileBasedLayout
   public:
 #pragma region Types and constructors
 
-    using tile = typename TileBasedLayout::tile;
+    using clock_zone = typename TileBasedLayout::tile;
 
-    using clocking_scheme_t = clocking_scheme<tile>;
-    using clock_zone_t      = typename clocking_scheme_t::zone;
+    using clocking_scheme_t = clocking_scheme<clock_zone>;
+    using clock_number_t    = typename clocking_scheme_t::clock_number;
 
     using degree_t = uint8_t;
 
@@ -57,17 +57,17 @@ class clocked_layout : public TileBasedLayout
 
 #pragma region Clocking
 
-    void assign_clocking(const tile& t, const typename clocking_scheme_t::zone z) noexcept
+    void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
     {
-        strg->clocking->override_clock_zone(t, z);
+        strg->clocking->override_clock_number(cz, cn);
     }
 
-    [[nodiscard]] typename clocking_scheme_t::zone tile_clocking(const tile& t) const noexcept
+    [[nodiscard]] clock_number_t get_clock_number(const clock_zone& cz) const noexcept
     {
-        return (*strg->clocking)(t);
+        return (*strg->clocking)(cz);
     }
 
-    [[nodiscard]] typename clocking_scheme_t::number num_clocks() const noexcept
+    [[nodiscard]] clock_number_t num_clocks() const noexcept
     {
         return strg->clocking->num_clocks;
     }
@@ -77,29 +77,27 @@ class clocked_layout : public TileBasedLayout
         return strg->clocking->is_regular();
     }
 
-    [[nodiscard]] bool is_clocking(std::string&& name) const noexcept
+    [[nodiscard]] bool is_clocking_scheme(std::string&& name) const noexcept
     {
         return *strg->clocking == name;
     }
 
-    [[nodiscard]] bool is_incoming_clocked(const tile& t1, const tile& t2) const noexcept
+    [[nodiscard]] bool is_incoming_clocked(const clock_zone& cz1, const clock_zone& cz2) const noexcept
     {
-        if (t1 == t2)
+        if (cz1 == cz2)
             return false;
 
-        return static_cast<typename clocking_scheme_t::zone>(
-                   (tile_clocking(t2) + static_cast<typename clocking_scheme_t::zone>(1)) % num_clocks()) ==
-               tile_clocking(t1);
+        return static_cast<clock_number_t>((get_clock_number(cz2) + static_cast<clock_number_t>(1)) % num_clocks()) ==
+               get_clock_number(cz1);
     }
 
-    [[nodiscard]] bool is_outgoing_clocked(const tile& t1, const tile& t2) const noexcept
+    [[nodiscard]] bool is_outgoing_clocked(const clock_zone& cz1, const clock_zone& cz2) const noexcept
     {
-        if (t1 == t2)
+        if (cz1 == cz2)
             return false;
 
-        return static_cast<typename clocking_scheme_t::zone>(
-                   (tile_clocking(t1) + static_cast<typename clocking_scheme_t::zone>(1)) % num_clocks()) ==
-               tile_clocking(t2);
+        return static_cast<clock_number_t>((get_clock_number(cz1) + static_cast<clock_number_t>(1)) % num_clocks()) ==
+               get_clock_number(cz2);
     }
 
 #pragma endregion
@@ -107,27 +105,27 @@ class clocked_layout : public TileBasedLayout
 #pragma region Iteration
 
     template <typename Container>
-    [[nodiscard]] Container incoming_clocked_tiles(const tile& t) const noexcept
+    [[nodiscard]] Container incoming_clocked_zones(const clock_zone& cz) const noexcept
     {
-        auto adj = TileBasedLayout::template adjacent_tiles<Container>(t);
+        auto adj = TileBasedLayout::template adjacent_tiles<Container>(cz);
 
         Container incoming{};
 
         std::copy_if(std::cbegin(adj), std::cend(adj), std::inserter(incoming, std::cend(incoming)),
-                     [this, &t](const auto& ct) { return is_incoming_clocked(t, ct); });
+                     [this, &cz](const auto& ct) { return is_incoming_clocked(cz, ct); });
 
         return incoming;
     }
 
     template <typename Container>
-    [[nodiscard]] Container outgoing_clocked_tiles(const tile& t) const noexcept
+    [[nodiscard]] Container outgoing_clocked_zones(const clock_zone& cz) const noexcept
     {
-        auto adj = TileBasedLayout::template adjacent_tiles<Container>(t);
+        auto adj = TileBasedLayout::template adjacent_tiles<Container>(cz);
 
         Container outgoing{};
 
         std::copy_if(std::cbegin(adj), std::cend(adj), std::inserter(outgoing, std::cend(outgoing)),
-                     [this, &t](const auto& ct) { return is_outgoing_clocked(t, ct); });
+                     [this, &cz](const auto& ct) { return is_outgoing_clocked(cz, ct); });
 
         return outgoing;
     }
@@ -136,19 +134,19 @@ class clocked_layout : public TileBasedLayout
 
 #pragma region Structural properties
 
-    degree_t in_degree(const tile& t) const noexcept
+    degree_t in_degree(const clock_zone& cz) const noexcept
     {
-        return static_cast<degree_t>(incoming_clocked_tiles<std::set<tile>>(t).size());
+        return static_cast<degree_t>(incoming_clocked_zones<std::set<clock_zone>>(cz).size());
     }
 
-    degree_t out_degree(const tile& t) const noexcept
+    degree_t out_degree(const clock_zone& cz) const noexcept
     {
-        return static_cast<degree_t>(outgoing_clocked_tiles<std::set<tile>>(t).size());
+        return static_cast<degree_t>(outgoing_clocked_zones<std::set<clock_zone>>(cz).size());
     }
 
-    degree_t degree(const tile& t) const noexcept
+    degree_t degree(const clock_zone& cz) const noexcept
     {
-        return static_cast<degree_t>(in_degree(t) + out_degree(t));
+        return static_cast<degree_t>(in_degree(cz) + out_degree(cz));
     }
 
 #pragma endregion
