@@ -43,7 +43,7 @@ TEST_CASE("Creation and usage of constants", "[gate-level]")
     const auto c1 = layout.get_constant(true);
     CHECK(layout.is_constant(layout.get_node(c1)));
 
-    CHECK(layout.get_node(c1) == 0);
+    CHECK(layout.get_node(c1) == 1);
     CHECK(!layout.is_complemented(c1));
 }
 
@@ -327,6 +327,8 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     REQUIRE(mockturtle::has_foreach_node_v<gate_layout>);
     REQUIRE(mockturtle::has_foreach_pi_v<gate_layout>);
     REQUIRE(mockturtle::has_foreach_po_v<gate_layout>);
+    REQUIRE(mockturtle::has_foreach_fanin_v<gate_layout>);
+    REQUIRE(mockturtle::has_foreach_fanout_v<gate_layout>);
 
     gate_layout layout{tile_based_layout::aspect_ratio{3, 1, 0}, open_4_clocking};
 
@@ -521,6 +523,76 @@ TEST_CASE("node and signal iteration", "[gate-level]")
             return false;
         });
     CHECK(mask == 64);
+
+    /* iterate over fanins */
+    mask = counter = 0;
+    layout.foreach_fanin(layout.get_node(a1),
+                         [&](auto s, auto i)
+                         {
+                             mask |= (1 << layout.get_node(s));
+                             counter += i;
+                         });
+    CHECK(mask == 12);
+    CHECK(counter == 1);
+
+    mask = 0;
+    layout.foreach_fanin(layout.get_node(a1), [&](auto s) { mask |= (1 << layout.get_node(s)); });
+    CHECK(mask == 12);
+
+    mask = counter = 0;
+    layout.foreach_fanin(layout.get_node(a1),
+                         [&](auto s, auto i)
+                         {
+                             mask |= (1 << layout.get_node(s));
+                             counter += i;
+                             return false;
+                         });
+    CHECK(mask == 4);
+    CHECK(counter == 0);
+
+    mask = 0;
+    layout.foreach_fanin(layout.get_node(a1),
+                         [&](auto s)
+                         {
+                             mask |= (1 << layout.get_node(s));
+                             return false;
+                         });
+    CHECK(mask == 4);
+
+    /* iterate over fanouts */
+    mask = counter = 0;
+    layout.foreach_fanout(layout.get_node(a2),
+                          [&](auto s, auto i)
+                          {
+                              mask |= (1 << layout.get_node(s));
+                              counter += i;
+                          });
+    CHECK(mask == 128);
+    CHECK(counter == 0);
+
+    mask = 0;
+    layout.foreach_fanout(layout.get_node(a2), [&](auto s) { mask |= (1 << layout.get_node(s)); });
+    CHECK(mask == 128);
+
+    mask = counter = 0;
+    layout.foreach_fanout(layout.get_node(a2),
+                          [&](auto s, auto i)
+                          {
+                              mask |= (1 << layout.get_node(s));
+                              counter += i;
+                              return false;
+                          });
+    CHECK(mask == 128);
+    CHECK(counter == 0);
+
+    mask = 0;
+    layout.foreach_fanout(layout.get_node(a2),
+                          [&](auto s)
+                          {
+                              mask |= (1 << layout.get_node(s));
+                              return false;
+                          });
+    CHECK(mask == 128);
 }
 
 TEST_CASE("Structural properties", "[gate-level]")

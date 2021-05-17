@@ -37,16 +37,18 @@ class gate_level_layout : public ClockedLayout
     {
         mockturtle::truth_table_cache<kitty::dynamic_truth_table> fn_cache;
 
-        std::unordered_map<Tile, Node> tile_node_map{};
-        std::unordered_map<Node, Tile> node_tile_map{};
+        const Tile const0{0x8000000000000000ull};
+        const Tile const1{0xc000000000000000ull};
+
+        std::unordered_map<Tile, Node> tile_node_map{
+            {{const0, static_cast<Node>(0ull)}, {const1, static_cast<Node>(1ull)}}};
+        std::unordered_map<Node, Tile> node_tile_map{
+            {{static_cast<Node>(0ull), const0}, {static_cast<Node>(1ull), const1}}};
 
         uint32_t num_gates = 0ull;
         uint32_t num_wires = 0ull;
 
         uint32_t trav_id = 0ul;
-
-        const Tile const0{0x8000000000000000ull};
-        const Tile const1{0xc000000000000000ull};
     };
 
     /*! \brief gate-level layout node
@@ -346,6 +348,32 @@ class gate_level_layout : public ClockedLayout
         auto r = mockturtle::range<uint64_t>(2u, strg->nodes.size());  // start from 2 to avoid constants
         mockturtle::detail::foreach_element_if(
             r.begin(), r.end(), [this](const auto n) { return is_wire(n); }, fn);
+    }
+
+    template <typename Fn>
+    void foreach_fanin(node const& n, Fn&& fn) const
+    {
+        if (n <= 1)  // const-0 or const-1
+            return;
+
+        const auto fanin = incoming_data_flow<std::set<tile>>(get_tile(n));
+
+        using IteratorType = decltype(fanin.cbegin());
+        mockturtle::detail::foreach_element_transform<IteratorType, uint32_t>(
+            fanin.cbegin(), fanin.cend(), [](const auto& t) { return static_cast<signal>(t); }, fn);
+    }
+
+    template <typename Fn>
+    void foreach_fanout(node const& n, Fn&& fn) const
+    {
+        if (n <= 1)  // const-0 or const-1
+            return;
+
+        const auto fanout = outgoing_data_flow<std::set<tile>>(get_tile(n));
+
+        using IteratorType = decltype(fanout.cbegin());
+        mockturtle::detail::foreach_element_transform<IteratorType, uint32_t>(
+            fanout.cbegin(), fanout.cend(), [](const auto& t) { return static_cast<signal>(t); }, fn);
     }
 
 #pragma endregion
