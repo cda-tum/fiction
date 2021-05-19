@@ -156,70 +156,77 @@ TEST_CASE("Cardinal operations", "[tile-based]")
 
     tile_based_layout layout{ar};
 
-    auto nt = layout.north({5, 5});
-    CHECK(!nt.is_dead());
-    CHECK(nt == tile_based_layout::tile{5, 4});
-    nt = layout.north({5, 0});
-    CHECK(!nt.is_dead());
-    CHECK(nt == tile_based_layout::tile{5, 0});
-    CHECK(layout.is_border(nt));
-    CHECK(layout.is_northern_border(nt));
-    CHECK(layout.is_ground_layer(nt));
+    const auto check = [&](const auto& t, const auto& at1, const auto& at2, const auto& b, const auto& bt)
+    {
+        CHECK(!at1.is_dead());
+        CHECK(at1 == at2);
+        CHECK(layout.is_adjacent_of(t, at1));
+        CHECK(layout.is_adjacent_of(at1, t));
 
-    auto et = layout.east({5, 5});
-    CHECK(!et.is_dead());
-    CHECK(et == tile_based_layout::tile{6, 5});
-    et = layout.east({10, 5});
-    CHECK(!et.is_dead());
-    CHECK(et == tile_based_layout::tile{10, 5});
-    CHECK(layout.is_border(et));
-    CHECK(layout.is_eastern_border(et));
-    CHECK(layout.is_ground_layer(et));
-    et = layout.east({11, 5});
-    CHECK(et.is_dead());
+        CHECK(layout.is_border(b));
+        CHECK(!bt.is_dead());
+        CHECK(b == bt);
+        CHECK(layout.is_ground_layer(bt));
+        CHECK(layout.is_border(bt));
+    };
 
-    auto st = layout.south({5, 5});
-    CHECK(!st.is_dead());
-    CHECK(st == tile_based_layout::tile{5, 6});
-    st = layout.south({5, 10});
-    CHECK(!st.is_dead());
-    CHECK(st == tile_based_layout::tile{5, 10});
-    CHECK(layout.is_border(st));
-    CHECK(layout.is_southern_border(st));
-    CHECK(layout.is_ground_layer(st));
-    st = layout.south({5, 11});
-    CHECK(st.is_dead());
+    auto t = tile_based_layout::tile{5, 5};
 
-    auto wt = layout.west({5, 5});
-    CHECK(!wt.is_dead());
-    CHECK(wt == tile_based_layout::tile{4, 5});
-    wt = layout.west({0, 5});
-    CHECK(!wt.is_dead());
-    CHECK(wt == tile_based_layout::tile{0, 5});
-    CHECK(layout.is_border(wt));
-    CHECK(layout.is_western_border(wt));
-    CHECK(layout.is_ground_layer(wt));
+    auto nt = tile_based_layout::tile{5, 4};
+    auto bnt = tile_based_layout::tile{5, 0};
 
-    auto at = layout.above({5, 5, 0});
+    check(t, layout.north(t), nt, bnt, layout.north(bnt));
+    CHECK(layout.is_north_of(t, nt));
+    CHECK(layout.is_northern_border(bnt));
+
+
+    auto et  = tile_based_layout::tile{6, 5};
+    auto bet = tile_based_layout::tile{10, 5};
+
+    check(t, layout.east(t), et, bet, layout.east(bet));
+    CHECK(layout.is_east_of(t, et));
+    CHECK(layout.is_eastern_border(bet));
+
+    
+    auto st  = tile_based_layout::tile{5, 6};
+    auto bst = tile_based_layout::tile{5, 10};
+
+    check(t, layout.south(t), st, bst, layout.south(bst));
+    CHECK(layout.is_south_of(t, st));
+    CHECK(layout.is_southern_border(bst));
+
+    
+    auto wt  = tile_based_layout::tile{4, 5};
+    auto bwt = tile_based_layout::tile{0, 5};
+
+    check(t, layout.west(t), wt, bwt, layout.west(bwt));
+    CHECK(layout.is_west_of(t, wt));
+    CHECK(layout.is_western_border(bwt));
+
+    
+    auto at  = tile_based_layout::tile{5, 5, 1};
+    auto bat  = layout.above(at);
+
     CHECK(!at.is_dead());
-    CHECK(at == tile_based_layout::tile{5, 5, 1});
-    at = layout.above({5, 5, 1});
-    CHECK(!at.is_dead());
-    CHECK(at == tile_based_layout::tile{5, 5, 1});
-    CHECK(layout.is_crossing_layer(at));
+    CHECK(layout.is_above_of(t, at));
+    CHECK(at == bat);
+    CHECK(layout.is_crossing_layer(bat));
     CHECK(!layout.is_border(at));
+
     // cover corner case
     tile_based_layout planar_layout{{1, 1, 0}};
-    at = planar_layout.above({1, 1, 1});
-    CHECK(at.is_dead());
+    auto dat = planar_layout.above({1, 1, 1});
+    CHECK(dat.is_dead());
 
-    auto bt = layout.below({5, 5, 1});
+    auto bt = layout.below(at);
+    auto bbt = layout.below(bt);
+
     CHECK(!bt.is_dead());
-    CHECK(bt == tile_based_layout::tile{5, 5, 0});
-    bt = layout.below({5, 5, 0});
-    CHECK(!bt.is_dead());
-    CHECK(bt == tile_based_layout::tile{5, 5, 0});
-    CHECK(layout.is_ground_layer(bt));
+    CHECK(bt == t);
+    CHECK(layout.is_below_of(at, bt));
+    CHECK(!bbt.is_dead());
+    CHECK(bt == bbt);
+    CHECK(layout.is_ground_layer(bbt));
 
     auto s1 = layout.adjacent_tiles<std::set<tile_based_layout::tile>>({5, 5});
     auto s2 = std::set<tile_based_layout::tile>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};

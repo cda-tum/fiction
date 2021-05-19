@@ -741,6 +741,64 @@ TEST_CASE("Structural properties", "[gate-level]")
     CHECK(layout.fanout_size(layout.get_node(f2)) == 0);
 }
 
+TEST_CASE("Functional properties", "[gate-level]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+
+    REQUIRE(mockturtle::has_is_and_v<gate_layout>);
+    REQUIRE(mockturtle::has_is_or_v<gate_layout>);
+    REQUIRE(mockturtle::has_is_maj_v<gate_layout>);
+    REQUIRE(mockturtle::has_is_xor_v<gate_layout>);
+
+    gate_layout layout{tile_based_layout::aspect_ratio{2, 3, 0}};
+
+    layout.assign_clock_number({0, 0}, static_cast<typename gate_layout::clock_number_t>(0));
+    layout.assign_clock_number({1, 0}, static_cast<typename gate_layout::clock_number_t>(0));
+    layout.assign_clock_number({2, 0}, static_cast<typename gate_layout::clock_number_t>(0));
+
+    layout.assign_clock_number({0, 1}, static_cast<typename gate_layout::clock_number_t>(1));
+    layout.assign_clock_number({1, 1}, static_cast<typename gate_layout::clock_number_t>(1));
+    layout.assign_clock_number({2, 1}, static_cast<typename gate_layout::clock_number_t>(1));
+
+    layout.assign_clock_number({0, 2}, static_cast<typename gate_layout::clock_number_t>(2));
+    layout.assign_clock_number({1, 2}, static_cast<typename gate_layout::clock_number_t>(2));
+    layout.assign_clock_number({2, 2}, static_cast<typename gate_layout::clock_number_t>(3));
+
+    layout.assign_clock_number({0, 3}, static_cast<typename gate_layout::clock_number_t>(3));
+    layout.assign_clock_number({1, 3}, static_cast<typename gate_layout::clock_number_t>(3));
+    layout.assign_clock_number({2, 3}, static_cast<typename gate_layout::clock_number_t>(3));
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {1, 0});
+    const auto x3 = layout.create_pi("x3", {2, 0});
+
+    const auto a = layout.create_and(x1, x2, {0, 1});
+    const auto o = layout.create_or(x1, x2, {1, 1});
+    const auto x = layout.create_xor(x1, x2, {2, 1});
+
+    const auto m = layout.create_maj(x1, x2, x3, {0, 2});
+    const auto f = layout.create_buf(m, {1, 2});
+    const auto w = layout.create_buf(f, {2, 2});
+
+    const auto n  = layout.create_not(w, {2, 3});
+    const auto po = layout.create_po(f, "po", {1, 3});
+
+    CHECK(layout.is_pi(layout.get_node(x1)));
+    CHECK(layout.is_pi(layout.get_node(x2)));
+    CHECK(layout.is_pi(layout.get_node(x3)));
+
+    CHECK(layout.is_and(layout.get_node(a)));
+    CHECK(layout.is_or(layout.get_node(o)));
+    CHECK(layout.is_xor(layout.get_node(x)));
+
+    CHECK(layout.is_maj(layout.get_node(m)));
+    CHECK(layout.is_fanout(layout.get_node(f)));
+    CHECK(layout.is_wire(layout.get_node(w)));
+
+    CHECK(layout.is_negation(layout.get_node(n)));
+    CHECK(layout.is_po(layout.get_node(po)));
+}
+
 TEST_CASE("Custom node values", "[gate-level]")
 {
     // adapted from mockturtle/test/networks/klut.cpp

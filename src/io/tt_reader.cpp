@@ -25,7 +25,7 @@ std::optional<kitty::dynamic_truth_table> tt_reader::next()
     // remove the 0x prefix
     auto table = elements[pos].substr(2u);
     // determine number of truth table variables
-    uint32_t num_vars = std::log2(table.size() << 2u);
+    auto num_vars = static_cast<uint32_t>(std::log2(table.size() << 2ul));
     // create truth table
     kitty::dynamic_truth_table tt{num_vars};
     kitty::create_from_hex_string(tt, table);

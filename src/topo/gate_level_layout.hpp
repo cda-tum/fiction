@@ -310,10 +310,42 @@ class gate_level_layout : public ClockedLayout
     {
         return strg->nodes[n].data[1].h1 == 2;
     }
+
+    [[nodiscard]] bool is_negation(const node n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 3;
+    }
+
+    [[nodiscard]] bool is_and(node const n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 4;
+    }
+
+    [[nodiscard]] bool is_or(node const n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 6;
+    }
+
+    [[nodiscard]] bool is_xor(node const n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 8;
+    }
+
+    [[nodiscard]] bool is_maj(node const n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 10;
+    }
+
+    [[nodiscard]] bool is_fanout(const node n) const noexcept
+    {
+        return is_wire(n) && fanout_size(n) > 1;
+    }
+
     [[nodiscard]] bool is_gate_tile(const tile& t) const noexcept
     {
         return is_gate(get_node(static_cast<signal>(t)));
     }
+
     [[nodiscard]] bool is_wire_tile(const tile& t) const noexcept
     {
         return is_wire(get_node(static_cast<signal>(t)));
