@@ -45,22 +45,22 @@ class tile_based_layout
 
 #pragma region Structural properties
 
-    [[nodiscard]] constexpr uint64_t x() const noexcept
+    [[nodiscard]] uint64_t x() const noexcept
     {
         return strg->dimension.x;
     }
 
-    [[nodiscard]] constexpr uint64_t y() const noexcept
+    [[nodiscard]] uint64_t y() const noexcept
     {
         return strg->dimension.y;
     }
 
-    [[nodiscard]] constexpr uint64_t z() const noexcept
+    [[nodiscard]] uint64_t z() const noexcept
     {
         return strg->dimension.z;
     }
 
-    [[nodiscard]] constexpr uint64_t area() const noexcept
+    [[nodiscard]] uint64_t area() const noexcept
     {
         return x() * y();
     }
@@ -80,7 +80,7 @@ class tile_based_layout
         return nt;
     }
 
-    [[nodiscard]] constexpr tile east(const tile& t) const noexcept
+    [[nodiscard]] tile east(const tile& t) const noexcept
     {
         auto et = t;
 
@@ -92,7 +92,7 @@ class tile_based_layout
         return et;
     }
 
-    [[nodiscard]] constexpr tile south(const tile& t) const noexcept
+    [[nodiscard]] tile south(const tile& t) const noexcept
     {
         auto st = t;
 
@@ -115,7 +115,7 @@ class tile_based_layout
         return wt;
     }
 
-    [[nodiscard]] constexpr tile above(const tile& t) const noexcept
+    [[nodiscard]] tile above(const tile& t) const noexcept
     {
         auto at = t;
 
@@ -143,12 +143,12 @@ class tile_based_layout
         return t1 != t2 && north(t1) == t2;
     }
 
-    [[nodiscard]] constexpr bool is_east_of(const tile& t1, const tile& t2) const noexcept
+    [[nodiscard]] bool is_east_of(const tile& t1, const tile& t2) const noexcept
     {
         return t1 != t2 && east(t1) == t2;
     }
 
-    [[nodiscard]] constexpr bool is_south_of(const tile& t1, const tile& t2) const noexcept
+    [[nodiscard]] bool is_south_of(const tile& t1, const tile& t2) const noexcept
     {
         return t1 != t2 && south(t1) == t2;
     }
@@ -158,12 +158,12 @@ class tile_based_layout
         return t1 != t2 && west(t1) == t2;
     }
 
-    [[nodiscard]] constexpr bool is_adjacent_of(const tile& t1, const tile& t2) const noexcept
+    [[nodiscard]] bool is_adjacent_of(const tile& t1, const tile& t2) const noexcept
     {
         return is_north_of(t1, t2) || is_east_of(t1, t2) || is_south_of(t1, t2) || is_west_of(t1, t2);
     }
 
-    [[nodiscard]] constexpr bool is_above_of(const tile& t1, const tile& t2) const noexcept
+    [[nodiscard]] bool is_above_of(const tile& t1, const tile& t2) const noexcept
     {
         return t1 != t2 && above(t1) == t2;
     }
@@ -178,12 +178,12 @@ class tile_based_layout
         return t.y == 0ull;
     }
 
-    [[nodiscard]] constexpr bool is_eastern_border(const tile& t) const noexcept
+    [[nodiscard]] bool is_eastern_border(const tile& t) const noexcept
     {
         return t.x == x();
     }
 
-    [[nodiscard]] constexpr bool is_southern_border(const tile& t) const noexcept
+    [[nodiscard]] bool is_southern_border(const tile& t) const noexcept
     {
         return t.y == y();
     }
@@ -193,7 +193,7 @@ class tile_based_layout
         return t.x == 0ull;
     }
 
-    [[nodiscard]] constexpr bool is_border(const tile& t) const noexcept
+    [[nodiscard]] bool is_border(const tile& t) const noexcept
     {
         return is_northern_border(t) || is_eastern_border(t) || is_southern_border(t) || is_western_border(t);
     }
