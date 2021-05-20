@@ -1,7 +1,8 @@
 include_directories(catch2)
 
 set(DEFINE_TEST_HEADER test.cpp)
-file(GLOB_RECURSE FILENAMES layouts/*.cpp)
+file(GLOB_RECURSE FILENAMES */*.cpp)
+list(FILTER SOURCES EXCLUDE REGEX "catch2/*")
 
 foreach (FILE IN LISTS FILENAMES)
     get_filename_component(NAME ${FILE} NAME_WE)
