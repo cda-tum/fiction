@@ -2,8 +2,8 @@ name: Coverage CI
 
 on:
   push:
-    branches:
-      - v0.4.0
+    branches-ignore:
+      - master
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
