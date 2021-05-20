@@ -14,6 +14,7 @@
 #include <alice/alice.hpp>
 #include <kitty/print.hpp>
 
+#include <type_traits>
 #include <variant>
 
 namespace alice
@@ -60,8 +61,10 @@ ALICE_DESCRIBE_STORE(fiction::logic_network_t, ln)
 {
     const auto describe = [](auto&& net)
     {
-        return fmt::format("{} - I/O: {}/{}, gates: {}, level: {}", net->get_network_name(), net->num_pis(),
-                           net->num_pos(), net->num_gates(), net->depth());
+        using Ntk = typename std::decay_t<decltype(net)>::element_type;
+
+        return fmt::format("{} ({}) - I/O: {}/{}, gates: {}, level: {}", net->get_network_name(),
+                           fiction::ntk_type_name<Ntk>, net->num_pis(), net->num_pos(), net->num_gates(), net->depth());
     };
 
     return std::visit(describe, ln);
@@ -71,8 +74,10 @@ ALICE_PRINT_STORE_STATISTICS(fiction::logic_network_t, os, ln)
 {
     const auto print_statistics = [&os](auto&& net)
     {
-        fmt::print(os, "{} - I/O: {}/{}, gates: {}, level: {}", net->get_network_name(), net->num_pis(), net->num_pos(),
-                   net->num_gates(), net->depth());
+        using Ntk = typename std::decay_t<decltype(net)>::element_type;
+
+        fmt::print(os, "{} ({}) - I/O: {}/{}, gates: {}, level: {}\n", net->get_network_name(),
+                   fiction::ntk_type_name<Ntk>, net->num_pis(), net->num_pos(), net->num_gates(), net->depth());
     };
 
     std::visit(print_statistics, ln);
@@ -82,11 +87,11 @@ ALICE_LOG_STORE_STATISTICS(fiction::logic_network_t, ln)
 {
     const auto log_statistics = [](auto&& net)
     {
-        return nlohmann::json{{"name", net->get_network_name()},
-                              {"inputs", net->num_pis()},
-                              {"outputs", net->num_pos()},
-                              {"gates", net->num_gates()},
-                              {"level", net->depth()}};
+        using Ntk = typename std::decay_t<decltype(net)>::element_type;
+
+        return nlohmann::json{{"name", net->get_network_name()}, {"type", fiction::ntk_type_name<Ntk>},
+                              {"inputs", net->num_pis()},        {"outputs", net->num_pos()},
+                              {"gates", net->num_gates()},       {"level", net->depth()}};
     };
 
     return std::visit(log_statistics, ln);
@@ -147,8 +152,8 @@ ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
     // TODO crossings, latches, critical path, throughput
     const auto print_statistics = [&os](auto&& lyt)
     {
-        return fmt::print(os, "{} - {} × {}, gates: {}, wires: {}", lyt->get_network_name(), lyt->x() + 1, lyt->y() + 1,
-                          lyt->num_gates(), lyt->num_wires());
+        return fmt::print(os, "{} - {} × {}, gates: {}, wires: {}\n", lyt->get_network_name(), lyt->x() + 1,
+                          lyt->y() + 1, lyt->num_gates(), lyt->num_wires());
     };
 
     std::visit(print_statistics, layout);

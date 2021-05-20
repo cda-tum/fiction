@@ -13,7 +13,7 @@
 //#include "cmd/fanouts.h"
 //#include "cmd/balance.h"
 #include "cmd/tt.h"
-//#include "cmd/random.h"
+#include "cmd/random.h"
 //#include "cmd/simulate.h"
 #include "cmd/akers.h"
 //#include "cmd/exact.h"

@@ -42,7 +42,7 @@ class read_command : public command
     {
         add_option("filename", filename, "Filename or directory")->required();
         add_flag("--aig,-a", "Parse networks as AIG");
-        //        add_flag("--mig,-m", "Parse networks as MIG");
+        add_flag("--mig,-m", "Parse networks as MIG");
         add_flag("--sort,-s", sort, "Sort networks in given directory by vertex count prior to storing them");
     }
 
@@ -57,24 +57,31 @@ class read_command : public command
             for (const auto& ln : reader.get_networks(sort)) store<fiction::logic_network_t>().extend() = ln;
         };
 
-        try
+        if (!is_set("aig") && !is_set("mig"))
         {
-            if (is_set("aig"))
-            {
-                fiction::network_reader<fiction::aig_ptr> reader{filename, env->out()};
-
-                store_nets(reader);
-            }
-            //            else if (is_set("mig"))
-            //            {
-            //                auto network_reader<fiction::mig_ptr> reader{filename, env->out()};
-            //
-            //                store_nets(reader);
-            //            }
+            env->out() << "[e] at least one network type must be specified" << std::endl;
         }
-        catch (...)
+        else
         {
-            env->out() << "[e] no networks were read" << std::endl;
+            try
+            {
+                if (is_set("aig"))
+                {
+                    fiction::network_reader<fiction::aig_ptr> reader{filename, env->out()};
+
+                    store_nets(reader);
+                }
+                if (is_set("mig"))
+                {
+                    fiction::network_reader<fiction::mig_ptr> reader{filename, env->out()};
+
+                    store_nets(reader);
+                }
+            }
+            catch (...)
+            {
+                env->out() << "[e] no networks were read" << std::endl;
+            }
         }
 
         // reset flags, necessary for some reason... alice bug?
