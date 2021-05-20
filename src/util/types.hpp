@@ -8,6 +8,7 @@
 #include "clocked_layout.hpp"
 #include "gate_level_layout.hpp"
 #include "tile_based_layout.hpp"
+#include "topology_network.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/io/write_dot.hpp>
@@ -42,11 +43,17 @@ using mig_ptr = std::shared_ptr<mig_nt>;
 
 constexpr const char* mig_name = "MIG";
 
-using logic_network_t = std::variant<aig_ptr, mig_ptr>;
+using top_nt  = mockturtle::names_view<mockturtle::depth_view<fiction::topology_network>>;
+using top_ptr = std::shared_ptr<top_nt>;
+
+constexpr const char* top_name = "TOP";
+
+using logic_network_t = std::variant<aig_ptr, mig_ptr, top_ptr>;
 
 template <class Ntk>
 inline constexpr const char* ntk_type_name = std::is_same_v<Ntk, fiction::aig_nt> ? fiction::aig_name :
                                              std::is_same_v<Ntk, fiction::mig_nt> ? fiction::mig_name :
+                                             std::is_same_v<Ntk, fiction::top_nt> ? fiction::top_name :
                                                                                     "?";
 
 /**

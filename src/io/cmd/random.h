@@ -44,7 +44,7 @@ class random_command : public command
      */
     void execute() override
     {
-        if (!is_set("aig") && !is_set("mig"))
+        if (!is_set("aig") && !is_set("mig") && !is_set("top"))
         {
             env->out() << "[e] at least one network type must be specified" << std::endl;
         }
@@ -57,6 +57,10 @@ class random_command : public command
             if (is_set("mig"))
             {
                 generate<fiction::mig_nt, true>();
+            }
+            if (is_set("top"))
+            {
+                generate<fiction::top_nt, true>();
             }
         }
 

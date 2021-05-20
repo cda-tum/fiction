@@ -113,7 +113,8 @@ void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_netwo
     {
         try
         {
-            mockturtle::write_dot(*net, os);
+            using Ntk = typename std::decay_t<decltype(net)>::element_type;
+            mockturtle::write_dot(*net, os, mockturtle::gate_dot_drawer<Ntk>());
         }
         catch (const std::invalid_argument& e)
         {

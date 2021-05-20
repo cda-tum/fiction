@@ -43,6 +43,7 @@ class read_command : public command
         add_option("filename", filename, "Filename or directory")->required();
         add_flag("--aig,-a", "Parse networks as AIG");
         add_flag("--mig,-m", "Parse networks as MIG");
+        add_flag("--top,-t", "Parse networks as Topology network");
         add_flag("--sort,-s", sort, "Sort networks in given directory by vertex count prior to storing them");
     }
 
@@ -57,7 +58,7 @@ class read_command : public command
             for (const auto& ln : reader.get_networks(sort)) store<fiction::logic_network_t>().extend() = ln;
         };
 
-        if (!is_set("aig") && !is_set("mig"))
+        if (!is_set("aig") && !is_set("mig") && !is_set("top"))
         {
             env->out() << "[e] at least one network type must be specified" << std::endl;
         }
@@ -74,6 +75,12 @@ class read_command : public command
                 if (is_set("mig"))
                 {
                     fiction::network_reader<fiction::mig_ptr> reader{filename, env->out()};
+
+                    store_nets(reader);
+                }
+                if (is_set("top"))
+                {
+                    fiction::network_reader<fiction::top_ptr> reader{filename, env->out()};
 
                     store_nets(reader);
                 }
