@@ -103,10 +103,10 @@ const clocking_scheme<coord_t>::clock_function open = []([[maybe_unused]] coord_
  */
 const clocking_scheme<coord_t>::clock_function twoddwave_3 = [](coord_t cz) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 3>, 3> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 3u>, 3u> cutout{
         {{{0, 1, 2}}, {{1, 2, 0}}, {{2, 0, 1}}}};
 
-    return cutout[cz.y % 3][cz.x % 3];
+    return cutout[cz.y % 3ul][cz.x % 3ul];
 };
 /**
  * Representing the original 2DDWave clocking as defined in "Clocking and Cell Placement for QCA" by V. Vankamamidi,
@@ -114,10 +114,10 @@ const clocking_scheme<coord_t>::clock_function twoddwave_3 = [](coord_t cz) noex
  */
 const clocking_scheme<coord_t>::clock_function twoddwave_4 = [](coord_t cz) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 4>, 4> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 4u>, 4u> cutout{
         {{{0, 1, 2, 3}}, {{1, 2, 3, 0}}, {{2, 3, 0, 1}}, {{3, 0, 1, 2}}}};
 
-    return cutout[cz.y % 4][cz.x % 4];
+    return cutout[cz.y % 4ul][cz.x % 4ul];
 };
 /**
  * Representing the USE clocking as defined in "USE: A Universal, Scalable, and Efficient Clocking Scheme for QCA"
@@ -125,10 +125,10 @@ const clocking_scheme<coord_t>::clock_function twoddwave_4 = [](coord_t cz) noex
  */
 const clocking_scheme<coord_t>::clock_function use_4 = [](coord_t s) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 4>, 4> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 4u>, 4u> cutout{
         {{{0, 1, 2, 3}}, {{3, 2, 1, 0}}, {{2, 3, 0, 1}}, {{1, 0, 3, 2}}}};
 
-    return cutout[s.y % 4][s.x % 4];
+    return cutout[s.y % 4ul][s.x % 4ul];
 };
 /**
  * Representing the RES clocking as defined in "An efficient clocking scheme for quantum-dot cellular automata" by
@@ -137,10 +137,10 @@ const clocking_scheme<coord_t>::clock_function use_4 = [](coord_t s) noexcept
  */
 const clocking_scheme<coord_t>::clock_function res_4 = [](coord_t cz) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 4>, 4> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 4u>, 4u> cutout{
         {{{3, 0, 1, 2}}, {{0, 1, 0, 3}}, {{1, 2, 3, 0}}, {{0, 3, 2, 1}}}};
 
-    return cutout[cz.y % 4][cz.x % 4];
+    return cutout[cz.y % 4ul][cz.x % 4ul];
 };
 /**
  * Representing the BANCS clocking as defined in "BANCS: Bidirectional Alternating Nanomagnetic Clocking Scheme" by
@@ -148,10 +148,10 @@ const clocking_scheme<coord_t>::clock_function res_4 = [](coord_t cz) noexcept
  */
 const clocking_scheme<coord_t>::clock_function bancs_3 = [](coord_t cz) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 3>, 6> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 3u>, 6u> cutout{
         {{{0, 1, 2}}, {{2, 1, 0}}, {{2, 0, 1}}, {{1, 0, 2}}, {{1, 2, 0}}, {{0, 2, 1}}}};
 
-    return cutout[cz.y % 6][cz.x % 3];
+    return cutout[cz.y % 6ul][cz.x % 3ul];
 };
 /**
  * Representing a 3-phase adaption of the clocking originally introduced in "A device architecture for computing
@@ -161,10 +161,10 @@ const clocking_scheme<coord_t>::clock_function bancs_3 = [](coord_t cz) noexcept
  */
 const clocking_scheme<coord_t>::clock_function topolinano_3 = [](coord_t cz) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 3>, 3> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 3u>, 3u> cutout{
         {{{0, 1, 2}}, {{0, 1, 2}}, {{0, 1, 2}}}};
 
-    return cutout[cz.y % 3][cz.x % 3];
+    return cutout[cz.y % 3ul][cz.x % 3ul];
 };
 /**
  * Representing a linear 4-phase 1D clocking as originally introduced in "A device architecture for computing with
@@ -173,10 +173,10 @@ const clocking_scheme<coord_t>::clock_function topolinano_3 = [](coord_t cz) noe
  */
 const clocking_scheme<coord_t>::clock_function topolinano_4 = [](coord_t cz) noexcept
 {
-    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 4>, 4> cutout{
+    constexpr std::array<std::array<clocking_scheme<coord_t>::clock_number, 4u>, 4u> cutout{
         {{{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}}};
 
-    return cutout[cz.y % 4][cz.x % 4];
+    return cutout[cz.y % 4ul][cz.x % 4ul];
 };
 }  // namespace clock_function
 

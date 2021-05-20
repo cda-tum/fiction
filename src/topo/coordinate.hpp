@@ -126,22 +126,22 @@ class coord_iterator
     using value_type = coord_t;
 
     constexpr explicit coord_iterator(const coord_t& dimension, const coord_t& start) noexcept :
-            dimension{dimension},
+            aspect_ratio{dimension},
             coord{start}
     {}
 
     constexpr coord_iterator& operator++() noexcept
     {
-        if (coord != dimension)
+        if (coord != aspect_ratio)
         {
             ++coord.x;
 
-            if (coord.x > dimension.x)
+            if (coord.x > aspect_ratio.x)
             {
                 coord.x = 0;
 
                 ++coord.y;
-                if (coord.y > dimension.y)
+                if (coord.y > aspect_ratio.y)
                 {
                     coord.y = 0;
 
@@ -192,7 +192,7 @@ class coord_iterator
     }
 
   private:
-    const coord_t dimension;
+    const coord_t aspect_ratio;
 
     coord_t coord;
 };

@@ -45,22 +45,22 @@ class tile_based_layout
 
 #pragma region Structural properties
 
-    [[nodiscard]] uint64_t x() const noexcept
+    [[nodiscard]] constexpr uint64_t x() const noexcept
     {
         return strg->dimension.x;
     }
 
-    [[nodiscard]] uint64_t y() const noexcept
+    [[nodiscard]] constexpr uint64_t y() const noexcept
     {
         return strg->dimension.y;
     }
 
-    [[nodiscard]] uint64_t z() const noexcept
+    [[nodiscard]] constexpr uint64_t z() const noexcept
     {
         return strg->dimension.z;
     }
 
-    [[nodiscard]] uint64_t area() const noexcept
+    [[nodiscard]] constexpr uint64_t area() const noexcept
     {
         return x() * y();
     }

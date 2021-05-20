@@ -38,7 +38,7 @@ class network_reader
         constexpr const char* AIG_EXT     = ".aig";
 
         // checks for extension validity
-        constexpr auto is_valid_extension = [&](const auto& p) -> bool
+        auto is_valid_extension = [&](const auto& p) -> bool
         {
             constexpr std::array<const char*, 2> extensions{VERILOG_EXT, AIG_EXT};
             return std::any_of(extensions.cbegin(), extensions.cend(),
@@ -141,7 +141,8 @@ class network_reader
 
         try
         {
-            if (lorina::diagnostic_engine diag{}; rfun(file, Reader{ntk}, &diag) == lorina::return_code::success)
+            lorina::text_diagnostics client{};
+            if (lorina::diagnostic_engine diag{&client}; rfun(file, Reader{ntk}, &diag) == lorina::return_code::success)
             {
                 const auto name = std::filesystem::path{file}.stem().string();
                 networks.push_back(std::make_shared<Ntk>(ntk, name));
