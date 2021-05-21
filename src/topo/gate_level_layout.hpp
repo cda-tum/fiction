@@ -11,6 +11,7 @@
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/detail/foreach.hpp>
+#include <mockturtle/networks/events.hpp>
 #include <mockturtle/networks/storage.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/algorithm.hpp>
@@ -74,6 +75,8 @@ class gate_level_layout : public ClockedLayout
     using node      = uint64_t;
     using signal    = uint64_t;
 
+    using event_storage = std::shared_ptr<mockturtle::network_events<base_type>>;
+
     /*! \brief tile-based layout storage container */
     using gate_level_layout_storage =
         mockturtle::storage<gate_level_layout_storage_node, gate_level_layout_storage_data<node, signal>>;
@@ -82,19 +85,24 @@ class gate_level_layout : public ClockedLayout
 
     explicit gate_level_layout(const typename ClockedLayout::aspect_ratio& aspect_ratio) :
             ClockedLayout(aspect_ratio),
-            strg{std::make_shared<gate_level_layout_storage>()}
+            strg{std::make_shared<gate_level_layout_storage>()},
+            evnts{std::make_shared<typename event_storage::element_type>()}
     {
         initialize_truth_table_cache();
     }
 
     gate_level_layout(const typename ClockedLayout::aspect_ratio& aspect_ratio, const clocking_scheme<tile>& scheme) :
             ClockedLayout(aspect_ratio, scheme),
-            strg{std::make_shared<gate_level_layout_storage>()}
+            strg{std::make_shared<gate_level_layout_storage>()},
+            evnts{std::make_shared<typename event_storage::element_type>()}
     {
         initialize_truth_table_cache();
     }
 
-    explicit gate_level_layout(std::shared_ptr<gate_level_layout_storage> storage) : strg{std::move(storage)} {}
+    explicit gate_level_layout(std::shared_ptr<gate_level_layout_storage> storage) :
+            strg{std::move(storage)},
+            evnts{std::make_shared<typename event_storage::element_type>()}
+    {}
 
 #pragma endregion
 
@@ -161,6 +169,11 @@ class gate_level_layout : public ClockedLayout
     [[nodiscard]] bool is_po_tile(const tile& t) const noexcept
     {
         return is_po(get_node(t));
+    }
+
+    [[nodiscard]] bool is_combinational() const noexcept
+    {
+        return true;
     }
 
 #pragma endregion
@@ -423,6 +436,18 @@ class gate_level_layout : public ClockedLayout
             fanout.cbegin(), fanout.cend(), [](const auto& t) { return static_cast<signal>(t); }, fn);
     }
 
+    template <typename Fn>
+    void foreach_ci(Fn&& fn) const
+    {
+        foreach_pi(fn);
+    }
+
+    template <typename Fn>
+    void foreach_co(Fn&& fn) const
+    {
+        foreach_po(fn);
+    }
+
 #pragma endregion
 
 #pragma region Simulate values
@@ -526,8 +551,17 @@ class gate_level_layout : public ClockedLayout
 
 #pragma endregion
 
+#pragma region General methods
+    auto& events() const
+    {
+        return *evnts;
+    }
+#pragma endregion
+
   private:
     storage strg;
+
+    event_storage evnts;
 
     inline void initialize_truth_table_cache()
     {
@@ -593,7 +627,7 @@ class gate_level_layout : public ClockedLayout
 
         assign_node(t, n);
 
-        //        for (auto const& fn : _events->on_add) { fn(n); }
+        for (auto const& fn : evnts->on_add) { (*fn)(n); }
 
         return static_cast<signal>(t);
     }

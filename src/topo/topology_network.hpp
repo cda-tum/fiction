@@ -51,6 +51,40 @@ class topology_network : public mockturtle::klut_network
     }
 
 #pragma endregion
+
+#pragma region Structural properties
+
+    [[nodiscard]] bool is_and(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 4;
+    }
+
+    [[nodiscard]] bool is_or(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 6;
+    }
+
+    [[nodiscard]] bool is_xor(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 12;
+    }
+
+    [[nodiscard]] bool is_maj(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 14;
+    }
+
+    [[nodiscard]] bool is_ite(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 16;
+    }
+
+    [[nodiscard]] bool is_xor3(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 18;
+    }
+
+#pragma endregion
 };
 
 }  // namespace fiction
