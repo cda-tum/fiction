@@ -354,6 +354,11 @@ class gate_level_layout : public ClockedLayout
         return is_wire(n) && fanout_size(n) > 1;
     }
 
+    [[nodiscard]] bool is_function(node const& n) const
+    {
+        return n > 1;
+    }
+
     [[nodiscard]] bool is_gate_tile(const tile& t) const noexcept
     {
         return is_gate(get_node(static_cast<signal>(t)));

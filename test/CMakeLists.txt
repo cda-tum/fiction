@@ -1,4 +1,4 @@
-include_directories(catch2)
+include_directories(catch2 blueprints)
 
 set(DEFINE_TEST_HEADER test.cpp)
 file(GLOB_RECURSE FILENAMES */*.cpp)

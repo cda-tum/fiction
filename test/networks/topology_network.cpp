@@ -446,43 +446,43 @@ TEST_CASE("structural properties of a topology network", "[topo]")
     CHECK(topo.fanout_size(topo.get_node(f2)) == 1);
 }
 
-//TEST_CASE("Node functions of a topology network", "[topo]")
-//{
-//    topology_network topo;
-//
-//    CHECK(mockturtle::has_is_and_v<topology_network>);
-//    CHECK(mockturtle::has_is_or_v<topology_network>);
-//    CHECK(mockturtle::has_is_or_v<topology_network>);
-//    CHECK(mockturtle::has_is_xor_v<topology_network>);
-//    CHECK(mockturtle::has_is_maj_v<topology_network>);
-//    CHECK(mockturtle::has_is_ite_v<topology_network>);
-//    CHECK(mockturtle::has_is_xor3_v<topology_network>);
-//
-//    const auto x1 = topo.create_pi();
-//    const auto x2 = topo.create_pi();
-//    const auto x3 = topo.create_pi();
-//
-//    const auto and_signal  = topo.create_and(x1, x2);
-//    const auto or_signal   = topo.create_or(x1, x2);
-//    const auto xor2_signal = topo.create_xor(x1, x2);
-//    const auto maj_signal  = topo.create_maj(x1, x2, x3);
-//    const auto ite_signal  = topo.create_ite(x1, x2, x3);
-//    const auto xor3_signal = topo.create_xor3(x1, x2, x3);
-//
-//    topo.create_po(and_signal);
-//    topo.create_po(or_signal);
-//    topo.create_po(xor2_signal);
-//    topo.create_po(maj_signal);
-//    topo.create_po(ite_signal);
-//    topo.create_po(xor3_signal);
-//
-//    CHECK(topo.is_and(topo.get_node(and_signal)));
-//    CHECK(topo.is_or(topo.get_node(or_signal)));
-//    CHECK(topo.is_xor(topo.get_node(xor2_signal)));
-//    CHECK(topo.is_maj(topo.get_node(maj_signal)));
-//    CHECK(topo.is_ite(topo.get_node(ite_signal)));
-//    CHECK(topo.is_xor3(topo.get_node(xor3_signal)));
-//}
+TEST_CASE("Node functions of a topology network", "[topo]")
+{
+    topology_network topo;
+
+    CHECK(mockturtle::has_is_and_v<topology_network>);
+    CHECK(mockturtle::has_is_or_v<topology_network>);
+    CHECK(mockturtle::has_is_or_v<topology_network>);
+    CHECK(mockturtle::has_is_xor_v<topology_network>);
+    CHECK(mockturtle::has_is_maj_v<topology_network>);
+    CHECK(mockturtle::has_is_ite_v<topology_network>);
+    CHECK(mockturtle::has_is_xor3_v<topology_network>);
+
+    const auto x1 = topo.create_pi();
+    const auto x2 = topo.create_pi();
+    const auto x3 = topo.create_pi();
+
+    const auto and_signal  = topo.create_and(x1, x2);
+    const auto or_signal   = topo.create_or(x1, x2);
+    const auto xor2_signal = topo.create_xor(x1, x2);
+    const auto maj_signal  = topo.create_maj(x1, x2, x3);
+    const auto ite_signal  = topo.create_ite(x1, x2, x3);
+    const auto xor3_signal = topo.create_xor3(x1, x2, x3);
+
+    topo.create_po(and_signal);
+    topo.create_po(or_signal);
+    topo.create_po(xor2_signal);
+    topo.create_po(maj_signal);
+    topo.create_po(ite_signal);
+    topo.create_po(xor3_signal);
+
+    CHECK(topo.is_and(topo.get_node(and_signal)));
+    CHECK(topo.is_or(topo.get_node(or_signal)));
+    CHECK(topo.is_xor(topo.get_node(xor2_signal)));
+    CHECK(topo.is_maj(topo.get_node(maj_signal)));
+    CHECK(topo.is_ite(topo.get_node(ite_signal)));
+    CHECK(topo.is_xor3(topo.get_node(xor3_signal)));
+}
 
 TEST_CASE("node and signal iteration in a topology network", "[topo]")
 {
