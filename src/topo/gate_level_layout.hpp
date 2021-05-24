@@ -72,7 +72,7 @@ class gate_level_layout : public ClockedLayout
     static constexpr auto max_fanin_size = 3;
 
     using base_type = gate_level_layout;
-    using node      = uint64_t;
+    using node      = uint32_t;
     using signal    = uint64_t;
 
     using event_storage = std::shared_ptr<mockturtle::network_events<base_type>>;
@@ -126,7 +126,7 @@ class gate_level_layout : public ClockedLayout
 
     signal create_pi([[maybe_unused]] const std::string& name = std::string(), const tile& t = {})
     {
-        const auto n = strg->nodes.size();
+        const auto n = static_cast<node>(strg->nodes.size());
         strg->nodes.emplace_back();     // empty node data
         strg->nodes[n].data[1].h1 = 2;  // assign identity function
         strg->inputs.emplace_back(n);
@@ -137,7 +137,7 @@ class gate_level_layout : public ClockedLayout
 
     signal create_po(const signal& s, [[maybe_unused]] const std::string& name = std::string(), const tile& t = {})
     {
-        const auto n = strg->nodes.size();
+        const auto n = static_cast<node>(strg->nodes.size());
         strg->nodes.emplace_back();     // empty node data
         strg->nodes[n].data[1].h1 = 2;  // assign identity function
         strg->outputs.emplace_back(static_cast<signal>(t));
@@ -376,28 +376,30 @@ class gate_level_layout : public ClockedLayout
     template <typename Fn>
     void foreach_pi(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(strg->inputs.cbegin(), strg->inputs.cend(), fn);
+        using IteratorType = decltype(strg->inputs.cbegin());
+        mockturtle::detail::foreach_element_transform<IteratorType, node>(
+            strg->inputs.cbegin(), strg->inputs.cend(), [](const auto& i) { return static_cast<node>(i); }, fn);
     }
 
     template <typename Fn>
     void foreach_po(Fn&& fn) const
     {
         using IteratorType = decltype(strg->outputs.begin());
-        mockturtle::detail::foreach_element_transform<IteratorType, uint32_t>(
+        mockturtle::detail::foreach_element_transform<IteratorType, signal>(
             strg->outputs.begin(), strg->outputs.end(), [](const auto& o) { return o.index; }, fn);
     }
 
     template <typename Fn>
     void foreach_node(Fn&& fn) const
     {
-        auto r = mockturtle::range<uint64_t>(strg->nodes.size());
+        auto r = mockturtle::range<node>(static_cast<node>(strg->nodes.size()));
         mockturtle::detail::foreach_element(r.begin(), r.end(), fn);
     }
 
     template <typename Fn>
     void foreach_gate(Fn&& fn) const
     {
-        auto r = mockturtle::range<uint64_t>(2u, strg->nodes.size());  // start from 2 to avoid constants
+        auto r = mockturtle::range<node>(2u, static_cast<node>(strg->nodes.size()));  // start from 2 to avoid constants
         mockturtle::detail::foreach_element_if(
             r.begin(), r.end(), [this](const auto n) { return is_gate(n); }, fn);
     }
@@ -405,7 +407,7 @@ class gate_level_layout : public ClockedLayout
     template <typename Fn>
     void foreach_wire(Fn&& fn) const
     {
-        auto r = mockturtle::range<uint64_t>(2u, strg->nodes.size());  // start from 2 to avoid constants
+        auto r = mockturtle::range<node>(2u, static_cast<node>(strg->nodes.size()));  // start from 2 to avoid constants
         mockturtle::detail::foreach_element_if(
             r.begin(), r.end(), [this](const auto n) { return is_wire(n); }, fn);
     }
@@ -419,7 +421,7 @@ class gate_level_layout : public ClockedLayout
         const auto fanin = incoming_data_flow<std::set<tile>>(get_tile(n));
 
         using IteratorType = decltype(fanin.cbegin());
-        mockturtle::detail::foreach_element_transform<IteratorType, uint32_t>(
+        mockturtle::detail::foreach_element_transform<IteratorType, signal>(
             fanin.cbegin(), fanin.cend(), [](const auto& t) { return static_cast<signal>(t); }, fn);
     }
 
@@ -432,7 +434,7 @@ class gate_level_layout : public ClockedLayout
         const auto fanout = outgoing_data_flow<std::set<tile>>(get_tile(n));
 
         using IteratorType = decltype(fanout.cbegin());
-        mockturtle::detail::foreach_element_transform<IteratorType, uint32_t>(
+        mockturtle::detail::foreach_element_transform<IteratorType, signal>(
             fanout.cbegin(), fanout.cend(), [](const auto& t) { return static_cast<signal>(t); }, fn);
     }
 
@@ -617,7 +619,7 @@ class gate_level_layout : public ClockedLayout
         std::copy(children.begin(), children.end(), std::back_inserter(node_data.children));
         node_data.data[1].h1 = literal;
 
-        const auto n = strg->nodes.size();
+        const auto n = static_cast<node>(strg->nodes.size());
         strg->nodes.push_back(node_data);
 
         /* increase ref-count to children */
