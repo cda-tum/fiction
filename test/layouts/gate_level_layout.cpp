@@ -4,9 +4,9 @@
 
 #include "gate_level_layout.hpp"
 
+#include "blueprints/layout_blueprints.hpp"
 #include "catch.hpp"
 #include "clocked_layout.hpp"
-#include "layout_blueprints.hpp"
 #include "tile_based_layout.hpp"
 
 #include <kitty/constructors.hpp>
