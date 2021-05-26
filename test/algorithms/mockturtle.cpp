@@ -2,10 +2,10 @@
 // Created by marcel on 17.05.21.
 //
 
+#include "blueprints/layout_blueprints.hpp"
 #include "catch.hpp"
 #include "clocked_layout.hpp"
 #include "gate_level_layout.hpp"
-#include "layout_blueprints.hpp"
 #include "tile_based_layout.hpp"
 
 #include <kitty/constructors.hpp>
@@ -37,7 +37,7 @@ TEST_CASE("Simulation", "[mockturtle]")
     auto and_or_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
         and_or_layout,
         mockturtle::default_simulator<kitty::dynamic_truth_table>(static_cast<unsigned>(and_or_layout.num_pis())));
-    
+
     REQUIRE(and_or_tts.size() == 2);
     CHECK(and_or_tts[0] == tt_and);
     CHECK(and_or_tts[1] == tt_or);

@@ -48,5 +48,22 @@ Ntk maj4_network()
     return ntk;
 }
 
+template <typename Ntk>
+Ntk unbalanced_and_inv_network()
+{
+    Ntk ntk{};
+
+    const auto a = ntk.create_pi("a");
+    const auto b = ntk.create_pi("b");
+
+    const auto n = ntk.create_not(b);
+    const auto f = ntk.create_and(a, n);
+
+    ntk.create_po(f, "f");
+
+    return ntk;
+}
+
 }  // namespace blueprints
+
 #endif  // FICTION_NETWORK_BLUEPRINTS_HPP

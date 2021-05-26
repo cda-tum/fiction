@@ -5,10 +5,12 @@
 #ifndef FICTION_LAYOUT_BLUEPRINTS_HPP
 #define FICTION_LAYOUT_BLUEPRINTS_HPP
 
+#include "catch.hpp"
 #include "clocking_scheme.hpp"
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+#include <mockturtle/traits.hpp>
 
 namespace blueprints
 {
@@ -133,4 +135,5 @@ GateLyt non_structural_all_function_gate_layout() noexcept
 }
 
 }  // namespace blueprints
+
 #endif  // FICTION_LAYOUT_BLUEPRINTS_HPP

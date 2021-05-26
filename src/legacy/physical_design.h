@@ -6,10 +6,11 @@
 #define FICTION_PHYSICAL_DESIGN_H
 
 #include "fcn_gate_layout.h"
-#include "network_hierarchy.h"
-#include "mockturtle/utils/stopwatch.hpp"
 #include "mockturtle/utils/progress_bar.hpp"
+#include "mockturtle/utils/stopwatch.hpp"
+#include "network_hierarchy.hpp"
 #include "nlohmann/json.hpp"
+
 #include <algorithm>
 #include <map>
 #include <set>
@@ -18,6 +19,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+
 #include <boost/functional/hash/hash.hpp>
 #include <boost/predef/os/windows.h>
 #include <itertools.hpp>

@@ -4,19 +4,17 @@
 
 #include "network_conversion.hpp"
 
+#include "blueprints/layout_blueprints.hpp"
+#include "blueprints/network_blueprints.hpp"
 #include "catch.hpp"
 #include "clocked_layout.hpp"
+#include "equivalence_checking.hpp"
 #include "gate_level_layout.hpp"
-#include "layout_blueprints.hpp"
-#include "network_blueprints.hpp"
 #include "tile_based_layout.hpp"
 #include "topology_network.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
-#include <mockturtle/algorithms/equivalence_checking.hpp>
-#include <mockturtle/algorithms/miter.hpp>
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/networks/klut.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/traits.hpp>
@@ -25,46 +23,33 @@
 
 using namespace fiction;
 
-template <typename Ntk1, typename Ntk2>
-void check_eq(Ntk1 ntk1, Ntk2 ntk2)
-{
-    auto miter = mockturtle::miter<mockturtle::klut_network>(ntk1, ntk2);
-
-    REQUIRE(miter.has_value());
-
-    auto eq = mockturtle::equivalence_checking(*miter);
-
-    REQUIRE(eq.has_value());
-    CHECK(*eq);
-}
-
 template <typename Ntk>
 void to_x(Ntk ntk)
 {
     SECTION("MIG")
     {
-        auto converted_mig = convert<mockturtle::mig_network>(ntk);
+        auto converted_mig = convert_network<mockturtle::mig_network>(ntk);
 
         check_eq(ntk, converted_mig);
     }
 
     SECTION("AIG")
     {
-        auto converted_aig = convert<mockturtle::aig_network>(ntk);
+        auto converted_aig = convert_network<mockturtle::aig_network>(ntk);
 
         check_eq(ntk, converted_aig);
     }
 
     SECTION("XAG")
     {
-        auto converted_xag = convert<mockturtle::xag_network>(ntk);
+        auto converted_xag = convert_network<mockturtle::xag_network>(ntk);
 
         check_eq(ntk, converted_xag);
     }
 
     SECTION("TOP")
     {
-        auto converted_top = convert<topology_network>(ntk);
+        auto converted_top = convert_network<topology_network>(ntk);
 
         check_eq(ntk, converted_top);
     }
