@@ -23,6 +23,12 @@ void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest,
     if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> &&
                   mockturtle::has_set_name_v<NtkDest>)
     {
+        static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrcSrc is not a network type");
+        static_assert(mockturtle::has_foreach_node_v<NtkSrc>, "NtkSrc does not implement the foreach_node function");
+        static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin function");
+        static_assert(mockturtle::has_foreach_po_v<NtkSrc>, "NtkSrc does not implement the foreach_po function");
+        static_assert(mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node function");
+
         const auto restore_signal_name = [&ntk_src, &ntk_dest, &old2new](const auto& f)
         {
             if (ntk_src.has_name(f))
