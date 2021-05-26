@@ -15,7 +15,7 @@ namespace fiction::debug
 {
 
 template <typename Ntk>
-void write_dot_network(const Ntk& ntk, std::string name = "ntk", std::filesystem::path p = {"./"})
+void write_dot_network(const Ntk& ntk, const std::string& name = "ntk", const std::filesystem::path& p = {"./"})
 {
     std::ofstream file{p / (name + ".dot")};
 
