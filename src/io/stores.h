@@ -13,6 +13,7 @@
 
 #include <alice/alice.hpp>
 #include <kitty/print.hpp>
+#include <mockturtle/views/depth_view.hpp>
 
 #include <type_traits>
 #include <variant>
@@ -63,8 +64,11 @@ ALICE_DESCRIBE_STORE(fiction::logic_network_t, ln)
     {
         using Ntk = typename std::decay_t<decltype(net)>::element_type;
 
+        mockturtle::depth_view depth_net{*net};
+
         return fmt::format("{} ({}) - I/O: {}/{}, gates: {}, level: {}", net->get_network_name(),
-                           fiction::ntk_type_name<Ntk>, net->num_pis(), net->num_pos(), net->num_gates(), net->depth());
+                           fiction::ntk_type_name<Ntk>, net->num_pis(), net->num_pos(), net->num_gates(),
+                           depth_net.depth());
     };
 
     return std::visit(describe, ln);
@@ -76,8 +80,10 @@ ALICE_PRINT_STORE_STATISTICS(fiction::logic_network_t, os, ln)
     {
         using Ntk = typename std::decay_t<decltype(net)>::element_type;
 
+        mockturtle::depth_view depth_net{*net};
+
         fmt::print(os, "{} ({}) - I/O: {}/{}, gates: {}, level: {}\n", net->get_network_name(),
-                   fiction::ntk_type_name<Ntk>, net->num_pis(), net->num_pos(), net->num_gates(), net->depth());
+                   fiction::ntk_type_name<Ntk>, net->num_pis(), net->num_pos(), net->num_gates(), depth_net.depth());
     };
 
     std::visit(print_statistics, ln);
@@ -89,9 +95,11 @@ ALICE_LOG_STORE_STATISTICS(fiction::logic_network_t, ln)
     {
         using Ntk = typename std::decay_t<decltype(net)>::element_type;
 
+        mockturtle::depth_view depth_net{*net};
+
         return nlohmann::json{{"name", net->get_network_name()}, {"type", fiction::ntk_type_name<Ntk>},
                               {"inputs", net->num_pis()},        {"outputs", net->num_pos()},
-                              {"gates", net->num_gates()},       {"level", net->depth()}};
+                              {"gates", net->num_gates()},       {"level", depth_net.depth()}};
     };
 
     return std::visit(log_statistics, ln);
@@ -113,8 +121,11 @@ void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_netwo
     {
         try
         {
-            using Ntk = typename std::decay_t<decltype(net)>::element_type;
-            mockturtle::write_dot(*net, os, mockturtle::gate_dot_drawer<Ntk>());
+            mockturtle::depth_view depth_net{*net};
+
+            using Ntk = typename std::decay_t<decltype(depth_net)>;
+
+            mockturtle::write_dot(depth_net, os, mockturtle::gate_dot_drawer<Ntk>());
         }
         catch (const std::invalid_argument& e)
         {
@@ -153,8 +164,10 @@ ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
     // TODO crossings, latches, critical path, throughput
     const auto print_statistics = [&os](auto&& lyt)
     {
-        return fmt::print(os, "{} - {} × {}, gates: {}, wires: {}\n", lyt->get_network_name(), lyt->x() + 1,
-                          lyt->y() + 1, lyt->num_gates(), lyt->num_wires());
+        mockturtle::depth_view depth_lyt{*lyt};
+
+        return fmt::print(os, "{} - {} × {}, gates: {}, wires: {}, CP: {}\n", lyt->get_network_name(), lyt->x() + 1,
+                          lyt->y() + 1, lyt->num_gates(), lyt->num_wires(), depth_lyt.depth());
     };
 
     std::visit(print_statistics, layout);
@@ -164,11 +177,13 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
 {
     const auto log_statistics = [](auto&& lyt)
     {
+        mockturtle::depth_view depth_lyt{*lyt};
+
         return nlohmann::json{
             {"name", lyt->get_network_name()},
             {"inputs", lyt->num_pis()},
             {"outputs", lyt->num_pos()},
-            {"gates", lyt->num_gates()}
+            {"gates", lyt->num_gates()},
             // {"layout", {{"x-size", layout->x() + 1}, {"y-size", layout->y() + 1}, {"area", area}}},
             // {"bounding box", {{"x-size", bb.x_size}, {"y-size", bb.y_size}, {"area", bb.area()}}},
             // {"gate tiles", gate_tiles},
@@ -176,7 +191,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             // {"free tiles", area - (gate_tiles + wire_tiles - crossings)},  // free tiles in ground layer
             // {"crossings", crossings},
             // {"latches", layout->latch_count()},
-            // {"critical path", cp},
+            {"critical path", depth_lyt.depth()}
             // {"throughput", fmt::format("1/{}", tp)}};
         };
     };

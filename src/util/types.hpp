@@ -14,7 +14,6 @@
 #include <mockturtle/io/write_dot.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
-#include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/names_view.hpp>
 
 #include <variant>
@@ -33,17 +32,17 @@ using truth_table_t = tt_ptr;
 /**
  * Logic networks.
  */
-using aig_nt  = mockturtle::names_view<mockturtle::depth_view<mockturtle::aig_network>>;
+using aig_nt  = mockturtle::names_view<mockturtle::aig_network>;
 using aig_ptr = std::shared_ptr<aig_nt>;
 
 constexpr const char* aig_name = "AIG";
 
-using mig_nt  = mockturtle::names_view<mockturtle::depth_view<mockturtle::mig_network>>;
+using mig_nt  = mockturtle::names_view<mockturtle::mig_network>;
 using mig_ptr = std::shared_ptr<mig_nt>;
 
 constexpr const char* mig_name = "MIG";
 
-using top_nt  = mockturtle::names_view<mockturtle::depth_view<fiction::topology_network>>;
+using top_nt  = mockturtle::names_view<fiction::topology_network>;
 using top_ptr = std::shared_ptr<top_nt>;
 
 constexpr const char* top_name = "TOP";
