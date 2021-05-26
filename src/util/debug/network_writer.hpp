@@ -5,11 +5,13 @@
 #ifndef FICTION_NETWORK_WRITER_HPP
 #define FICTION_NETWORK_WRITER_HPP
 
+#include "dot_drawers.hpp"
+
 #include <mockturtle/io/write_dot.hpp>
 
 #include <filesystem>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 namespace fiction::debug
 {
@@ -19,7 +21,7 @@ void write_dot_network(const Ntk& ntk, const std::string& name = "ntk", const st
 {
     std::ofstream file{p / (name + ".dot")};
 
-    mockturtle::write_dot(ntk, file, mockturtle::gate_dot_drawer<Ntk>{});
+    mockturtle::write_dot(ntk, file, fiction::topology_dot_drawer<Ntk, true>{});
 
     file.close();
 }

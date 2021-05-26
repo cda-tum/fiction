@@ -5,43 +5,41 @@
 #ifndef FICTION_VERSION_H
 #define FICTION_VERSION_H
 
-
 #include "version_info.h"
+
 #include <alice/alice.hpp>
 #include <fmt/format.h>
 
-
 namespace alice
 {
+/**
+ * Outputs version and build information.
+ */
+class version_command : public command
+{
+  public:
     /**
-     * Outputs version and build information.
+     * Standard constructor. Adds descriptive information, options, and flags.
+     *
+     * @param env alice::environment that specifies stores etc.
      */
-    class version_command : public command
+    explicit version_command(const environment::ptr& env) :
+            command(env, "Outputs the version string as well as build time and date.")
+    {}
+
+  protected:
+    /**
+     * Function to perform the version print call.
+     */
+    void execute() override
     {
-    public:
-        /**
-         * Standard constructor. Adds descriptive information, options, and flags.
-         *
-         * @param env alice::environment that specifies stores etc.
-         */
-        explicit version_command(const environment::ptr& env)
-                :
-                command(env, "Outputs the version string as well as build time and date.")
-        {}
+        env->out() << fmt::format("[i] {} - compiled on {} at {}", fiction::VERSION, fiction::COMPILED_DATE,
+                                  fiction::COMPILED_TIME)
+                   << std::endl;
+    }
+};
 
-    protected:
-        /**
-         * Function to perform the version print call.
-         */
-        void execute() override
-        {
-            env->out() << fmt::format("[i] {} - compiled on {} at {}", fiction::VERSION,
-                                      fiction::COMPILED_DATE, fiction::COMPILED_TIME) << std::endl;
-        }
-    };
+ALICE_ADD_COMMAND(version, "General")
+}  // namespace alice
 
-    ALICE_ADD_COMMAND(version, "General")
-}
-
-
-#endif //FICTION_VERSION_H
+#endif  // FICTION_VERSION_H

@@ -5,10 +5,11 @@
 #ifndef FICTION_PRINT_LAYOUT_HPP
 #define FICTION_PRINT_LAYOUT_HPP
 
-#include "fmt/color.h"
-#include "fmt/format.h"
-#include "fmt/ostream.h"
 #include "types.hpp"
+
+#include <fmt/color.h>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 
 #include <array>
 #include <string>

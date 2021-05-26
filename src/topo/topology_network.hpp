@@ -54,6 +54,21 @@ class topology_network : public mockturtle::klut_network
 
 #pragma region Structural properties
 
+    [[nodiscard]] bool is_buf(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 2 && !is_pi(n);
+    }
+
+    [[nodiscard]] bool is_fanout(const node n) const noexcept
+    {
+        return is_buf(n) && fanout_size(n) > 1;
+    }
+
+    [[nodiscard]] bool is_inv(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 3;
+    }
+
     [[nodiscard]] bool is_and(node const& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 4;

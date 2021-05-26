@@ -8,6 +8,7 @@
 #include "types.hpp"
 
 #include <alice/alice.hpp>
+#include <kitty/print.hpp>
 #include <mockturtle/algorithms/akers_synthesis.hpp>
 #include <mockturtle/algorithms/cleanup.hpp>
 

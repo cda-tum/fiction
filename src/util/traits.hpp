@@ -38,6 +38,34 @@ template <class Ntk>
 inline constexpr bool has_is_buf_v = has_is_buf<Ntk>::value;
 #pragma endregion
 
+#pragma region has_is_inv
+template <class Ntk, class = void>
+struct has_is_inv : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_inv<Ntk, std::void_t<decltype(std::declval<Ntk>().is_inv(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_inv_v = has_is_inv<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_fanout
+template <class Ntk, class = void>
+struct has_is_fanout : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_fanout<Ntk, std::void_t<decltype(std::declval<Ntk>().is_fanout(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_fanout_v = has_is_fanout<Ntk>::value;
+#pragma endregion
+
 // TODO is_topology_network
 
 }  // namespace fiction

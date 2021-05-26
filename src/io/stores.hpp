@@ -2,16 +2,17 @@
 // Created by marcel on 16.07.18.
 //
 
-#ifndef FICTION_STORES_H
-#define FICTION_STORES_H
+#ifndef FICTION_STORES_HPP
+#define FICTION_STORES_HPP
 
 #include "types.hpp"
 //#include "svg_writer.h"
-#include "fmt/format.h"
-#include "fmt/ostream.h"
+#include "dot_drawers.hpp"
 #include "print_layout.hpp"
 
 #include <alice/alice.hpp>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <kitty/print.hpp>
 #include <mockturtle/views/depth_view.hpp>
 
@@ -110,12 +111,13 @@ bool can_show<fiction::logic_network_t>(std::string& extension, [[maybe_unused]]
 {
     extension = "dot";
 
+    cmd.add_flag("--indexes,-i", "Show node indexes")->group("logic_network (-n)");
+
     return true;
 }
 
 template <>
-void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_network_t& element,
-                                    const command& cmd)  // const & for pointer because alice says so...
+void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_network_t& element, const command& cmd)
 {
     const auto show_net = [&os, &cmd](auto&& net)
     {
@@ -125,7 +127,14 @@ void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_netwo
 
             using Ntk = typename std::decay_t<decltype(depth_net)>;
 
-            mockturtle::write_dot(depth_net, os, mockturtle::gate_dot_drawer<Ntk>());
+            if (cmd.is_set("indexes"))
+            {
+                mockturtle::write_dot(depth_net, os, fiction::topology_dot_drawer<Ntk, true>());
+            }
+            else
+            {
+                mockturtle::write_dot(depth_net, os, fiction::topology_dot_drawer<Ntk, false>());
+            }
         }
         catch (const std::invalid_argument& e)
         {
@@ -266,4 +275,4 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
 
 }  // namespace alice
 
-#endif  // FICTION_STORES_H
+#endif  // FICTION_STORES_HPP
