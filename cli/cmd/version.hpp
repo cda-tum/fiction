@@ -5,7 +5,7 @@
 #ifndef FICTION_VERSION_HPP
 #define FICTION_VERSION_HPP
 
-#include "version_info.hpp"
+#include "utils/version_info.hpp"
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>

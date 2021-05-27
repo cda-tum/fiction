@@ -1,7 +1,7 @@
-file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/cli/*.cpp)
+SET(SOURCES ${PROJECT_SOURCE_DIR}/cli/fiction.cpp)
 
 # Include configuration file
-include_directories(${PROJECT_BINARY_DIR}/utils/)
+include_directories(${PROJECT_BINARY_DIR}/include/)
 
 # Build executable
 add_executable(fiction ${SOURCES})
