@@ -49,16 +49,19 @@ if (NOT WIN32)
 endif ()
 
 # Include header files
-include_directories(src/algo/ src/io/ src/io/cmd/ src/tech/ src/topo/ src/util/)
+#include_directories(include/)
+add_subdirectory(${CMAKE_SOURCE_DIR}/include)
+add_subdirectory(${CMAKE_SOURCE_DIR}/cli)
 
 # Find source files
-file(GLOB_RECURSE SOURCES src/*.cpp src/*.h)
-list(FILTER SOURCES EXCLUDE REGEX "src/legacy/*")  # TODO remove when legacy code has been reworked
-
-# Add configuration file
-configure_file(src/util/version_info.h.in util/version_info.h)
-# Include configuration file
-include_directories(${PROJECT_BINARY_DIR}/util/)
+#file(GLOB_RECURSE SOURCES src/*.cpp src/*.h)
+#file(GLOB_RECURSE SOURCES cli/*.cpp)
+#list(FILTER SOURCES EXCLUDE REGEX "src/legacy/*")  # TODO remove when legacy code has been reworked
+#
+## Add configuration file
+#configure_file(include/fiction/util/version_info.hpp.in util/version_info.hpp)
+## Include configuration file
+#include_directories(${PROJECT_BINARY_DIR}/util/)
 
 # Testing
 option(FICTION_TEST "Build tests" OFF)
@@ -73,8 +76,3 @@ endif ()
 # Include libraries
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs)
 
-# Build executable
-add_executable(fiction ${SOURCES})
-
-# Link against Z3, alice, lorina, and pybind11
-target_link_libraries(fiction PRIVATE project_options project_warnings alice mockturtle)

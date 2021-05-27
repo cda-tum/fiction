@@ -9,6 +9,7 @@
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
+#include <mockturtle/networks/klut.hpp>
 
 template <typename Ntk1, typename Ntk2>
 void check_eq(Ntk1 ntk1, Ntk2 ntk2)

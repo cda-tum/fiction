@@ -2,12 +2,12 @@
 // Created by marcel on 31.03.21.
 //
 
-#include "gate_level_layout.hpp"
-
-#include "blueprints/layout_blueprints.hpp"
 #include "catch.hpp"
-#include "clocked_layout.hpp"
-#include "tile_based_layout.hpp"
+#include "utils/blueprints/layout_blueprints.hpp"
+
+#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/tile_based_layout.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>

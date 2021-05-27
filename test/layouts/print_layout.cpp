@@ -2,13 +2,12 @@
 // Created by marcel on 19.05.21.
 //
 
-
-#include "gate_level_layout.hpp"
-
 #include "catch.hpp"
-#include "clocked_layout.hpp"
-#include "print_layout.hpp"
-#include "tile_based_layout.hpp"
+
+#include <fiction/io/print_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/tile_based_layout.hpp>
 
 #include <sstream>
 

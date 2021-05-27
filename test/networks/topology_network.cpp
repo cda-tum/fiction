@@ -4,7 +4,7 @@
 
 // This file is based on mockturtle/test/networks/klut.cpp
 
-#include "topology_network.hpp"
+#include <fiction/networks/topology_network.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>

@@ -2,9 +2,9 @@
 // Created by marcel on 31.03.21.
 //
 
-#include "tile_based_layout.hpp"
-
 #include "catch.hpp"
+
+#include <fiction/layouts/tile_based_layout.hpp>
 
 #include <map>
 #include <set>
@@ -172,13 +172,12 @@ TEST_CASE("Cardinal operations", "[tile-based]")
 
     auto t = tile_based_layout::tile{5, 5};
 
-    auto nt = tile_based_layout::tile{5, 4};
+    auto nt  = tile_based_layout::tile{5, 4};
     auto bnt = tile_based_layout::tile{5, 0};
 
     check(t, layout.north(t), nt, bnt, layout.north(bnt));
     CHECK(layout.is_north_of(t, nt));
     CHECK(layout.is_northern_border(bnt));
-
 
     auto et  = tile_based_layout::tile{6, 5};
     auto bet = tile_based_layout::tile{10, 5};
@@ -187,7 +186,6 @@ TEST_CASE("Cardinal operations", "[tile-based]")
     CHECK(layout.is_east_of(t, et));
     CHECK(layout.is_eastern_border(bet));
 
-    
     auto st  = tile_based_layout::tile{5, 6};
     auto bst = tile_based_layout::tile{5, 10};
 
@@ -195,7 +193,6 @@ TEST_CASE("Cardinal operations", "[tile-based]")
     CHECK(layout.is_south_of(t, st));
     CHECK(layout.is_southern_border(bst));
 
-    
     auto wt  = tile_based_layout::tile{4, 5};
     auto bwt = tile_based_layout::tile{0, 5};
 
@@ -203,9 +200,8 @@ TEST_CASE("Cardinal operations", "[tile-based]")
     CHECK(layout.is_west_of(t, wt));
     CHECK(layout.is_western_border(bwt));
 
-    
     auto at  = tile_based_layout::tile{5, 5, 1};
-    auto bat  = layout.above(at);
+    auto bat = layout.above(at);
 
     CHECK(!at.is_dead());
     CHECK(layout.is_above_of(t, at));
@@ -215,10 +211,10 @@ TEST_CASE("Cardinal operations", "[tile-based]")
 
     // cover corner case
     tile_based_layout planar_layout{{1, 1, 0}};
-    auto dat = planar_layout.above({1, 1, 1});
+    auto              dat = planar_layout.above({1, 1, 1});
     CHECK(dat.is_dead());
 
-    auto bt = layout.below(at);
+    auto bt  = layout.below(at);
     auto bbt = layout.below(bt);
 
     CHECK(!bt.is_dead());

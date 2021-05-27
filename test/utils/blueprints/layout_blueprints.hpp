@@ -6,7 +6,8 @@
 #define FICTION_LAYOUT_BLUEPRINTS_HPP
 
 #include "catch.hpp"
-#include "clocking_scheme.hpp"
+
+#include <fiction/layouts/clocking_scheme.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>

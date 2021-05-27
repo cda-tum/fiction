@@ -2,16 +2,16 @@
 // Created by marcel on 21.05.21.
 //
 
-#include "network_conversion.hpp"
-
-#include "blueprints/layout_blueprints.hpp"
-#include "blueprints/network_blueprints.hpp"
 #include "catch.hpp"
-#include "clocked_layout.hpp"
-#include "equivalence_checking.hpp"
-#include "gate_level_layout.hpp"
-#include "tile_based_layout.hpp"
-#include "topology_network.hpp"
+#include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/blueprints/network_blueprints.hpp"
+#include "utils/equivalence_checking.hpp"
+
+#include <fiction/algorithms/network_conversion.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/networks/topology_network.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
