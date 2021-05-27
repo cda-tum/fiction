@@ -75,10 +75,14 @@ class network_balancing_impl
                                        {
                                            const auto fn = ntk_topo.get_node(f);
 
-                                           const auto level_diff = ntk_depth.level(n) - ntk_depth.level(fn) - 1;
-
                                            auto child = old2new[fn];
-                                           insert_buf_chain(balanced, level_diff, child);
+
+                                           // do not balance constants
+                                           if (!ntk_topo.is_constant(fn))
+                                           {
+                                               const auto level_diff = ntk_depth.level(n) - ntk_depth.level(fn) - 1;
+                                               insert_buf_chain(balanced, level_diff, child);
+                                           }
 
                                            children.push_back(child);
                                        });
@@ -137,10 +141,15 @@ class is_balanced_impl
                                   [this, &n](const auto& f)
                                   {
                                       const auto fn = ntk.get_node(f);
-                                      if (const auto level_diff = ntk_depth.level(n) - ntk_depth.level(fn) - 1;
-                                          level_diff > 0)
+
+                                      // skip constants
+                                      if (!ntk.is_constant(fn))
                                       {
-                                          balanced = false;
+                                          if (const auto level_diff = ntk_depth.level(n) - ntk_depth.level(fn) - 1;
+                                              level_diff > 0)
+                                          {
+                                              balanced = false;
+                                          }
                                       }
 
                                       return balanced;
