@@ -15,7 +15,7 @@
 namespace alice
 {
 /**
- * Creates a hierarchy of the current logic network in store and performs a path balancing.
+ * Creates a new topology network of the current logic network in store and performs a path balancing.
  */
 class balance_command : public command
 {
@@ -26,13 +26,11 @@ class balance_command : public command
      * @param env alice::environment that specifies stores etc.
      */
     explicit balance_command(const environment::ptr& env) :
-            command(env,
-                    "Subdivides edges of the current logic network in store so that all paths leading to "
-                    "any vertex have the same length. Therefore, balance wire vertices are inserted. This does not "
-                    "respect possible crossings in the network. Also, if a mapping from balance vertices to the "
-                    "original subdivided edges is needed, one should call the hierarchy within an algorithm instead "
-                    "of using this command because that information is lost after destruction of the hierarchy "
-                    "object.")
+            command(
+                env,
+                "Creates a new topology network from the current logic network in store. All paths in the new network "
+                "that are leading to any common node will have the same length. This is realized by inserting buffer "
+                "nodes. This does not respect possible crossings in the network.")
     {
         add_flag("--unify_outputs,-u", ps.unify_outputs,
                  "Additionally, push all primary outputs down to the same level");
@@ -40,7 +38,7 @@ class balance_command : public command
 
   protected:
     /**
-     * Function to perform the balance call. Inserts wire vertices to equalize paths.
+     * Function to perform the balancing call. Inserts buffer nodes to equalize path lengths.
      */
     void execute() override
     {
