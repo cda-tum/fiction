@@ -1,4 +1,4 @@
-name: Ubuntu CI
+name: macOS CI
 
 on:
   push:
@@ -13,16 +13,13 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ ubuntu-20.04, ubuntu-18.04 ]
-        compiler: [ g++-9, g++-10, clang++-9, clang++-10 ]
+        os: [ macos-10.15 ]  # macos-11 when supported
+        compiler: [ g++-9, g++-10, clang++ ]  # clang++12
 
     name: ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
 
     steps:
-      - name: Install the respective compiler
-        run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}}
-
       - name: Clone Repository
         uses: actions/checkout@v2
         with:
@@ -50,7 +47,7 @@ jobs:
         working-directory: ${{github.workspace}}/build
         shell: bash
 
-        run: cmake --build . --config $BUILD_TYPE -j2
+        run: cmake --build . --config $BUILD_TYPE -j3  # macOS runners provide 3 cores
 
       - name: Test
         working-directory: ${{github.workspace}}/build
