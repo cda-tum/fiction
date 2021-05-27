@@ -14,7 +14,7 @@
 #include "cmd/balance.hpp"
 #include "cmd/tt.hpp"
 #include "cmd/random.hpp"
-//#include "cmd/simulate.hpp"
+#include "cmd/simulate.hpp"
 #include "cmd/akers.hpp"
 //#include "cmd/exact.hpp"
 //#include "cmd/onepass.hpp"

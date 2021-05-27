@@ -42,11 +42,11 @@ class convert_network_impl
                     const auto fn         = ntk_topo.get_node(f);
                     const auto tgt_signal = old2new[fn];
 
-                    if (ntk_topo.is_constant(fn))
+                    if (const auto cval = ntk_topo.constant_value(fn); ntk_topo.is_constant(fn))
                     {
-                        children.emplace_back(ntk_topo.is_complemented(f) ?
-                                                  old2new[ntk_topo.get_constant(!ntk_topo.constant_value(fn))] :
-                                                  tgt_signal);
+                        // switch constant node polarity rather than inserting an inverter node
+                        children.emplace_back(ntk_topo.is_complemented(f) ? old2new[ntk_topo.get_constant(!cval)] :
+                                                                            tgt_signal);
                     }
                     else
                     {
