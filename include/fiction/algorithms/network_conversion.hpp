@@ -35,13 +35,25 @@ class convert_network_impl
         {
             std::vector<typename NtkDest::signal> children{};
 
-            ntk_topo.foreach_fanin(n,
-                                   [this, &ntk_dest, &old2new, &children](const auto& f)
-                                   {
-                                       const auto tgt_signal = old2new[ntk_topo.get_node(f)];
-                                       children.emplace_back(
-                                           ntk_topo.is_complemented(f) ? ntk_dest.create_not(tgt_signal) : tgt_signal);
-                                   });
+            ntk_topo.foreach_fanin(
+                n,
+                [this, &ntk_dest, &old2new, &children](const auto& f)
+                {
+                    const auto fn         = ntk_topo.get_node(f);
+                    const auto tgt_signal = old2new[fn];
+
+                    if (ntk_topo.is_constant(fn))
+                    {
+                        children.emplace_back(ntk_topo.is_complemented(f) ?
+                                                  old2new[ntk_topo.get_constant(!ntk_topo.constant_value(fn))] :
+                                                  tgt_signal);
+                    }
+                    else
+                    {
+                        children.emplace_back(ntk_topo.is_complemented(f) ? ntk_dest.create_not(tgt_signal) :
+                                                                            tgt_signal);
+                    }
+                });
 
             return children;
         };
