@@ -36,7 +36,7 @@ jobs:
         shell: bash
         working-directory: ${{github.workspace}}/build
 
-        run: cmake $GITHUB_WORKSPACE -G "${{matrix.env}}" -A x64 -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DFICTION_TEST=OFF -DWARNINGS_AS_ERRORS=OFF
+        run: cmake $GITHUB_WORKSPACE -G "${{matrix.env}}" -A x64 -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DFICTION_TEST=ON -DWARNINGS_AS_ERRORS=OFF
 
       #      - name: Cache Z3
       #        uses: actions/cache@v2
@@ -47,12 +47,6 @@ jobs:
 
       - name: Build
         working-directory: ${{github.workspace}}/build
-
-#        shell: cmd
-#
-#        run: |
-#          "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe" fiction.sln
-
         shell: bash
 
         run: cmake --build . --config $BUILD_TYPE -j2
