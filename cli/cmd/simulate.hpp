@@ -55,23 +55,6 @@ class simulate_command : public command
         tables.clear();
         po_names.clear();
 
-        const auto get_name = [](auto&& net_or_lyt) -> std::string { return net_or_lyt->get_network_name(); };
-
-        const auto store_po_names = [this](auto&& net_or_lyt)
-        {
-            net_or_lyt->foreach_po(
-                [this, &net_or_lyt](const auto& _, auto i) {
-                    po_names.emplace_back(net_or_lyt->has_output_name(i) ? net_or_lyt->get_output_name(i) :
-                                                                           fmt::format("po{}", i));
-                });
-        };
-
-        const auto simulate = [this](auto&& net_or_lyt)
-        {
-            tables = mockturtle::simulate<fiction::tt>(
-                *net_or_lyt, mockturtle::default_simulator<fiction::tt>(static_cast<unsigned>(net_or_lyt->num_pis())));
-        };
-
         if (is_set("gate_layout"))
         {
             auto& gls = store<fiction::gate_layout_t>();
@@ -83,26 +66,7 @@ class simulate_command : public command
                 return;
             }
 
-            const auto layout = gls.current();
-
-            //            if (!fgl->has_io_pins())
-            //            {
-            //                env->out() << "[w] " << fgl->get_name() << " must have designated I/O pins for simulation"
-            //                << std::endl; return;
-            //            }
-
-            std::visit(store_po_names, layout);
-
-            try
-            {
-                std::visit(simulate, layout);
-            }
-            catch (const std::bad_alloc&)
-            {
-                env->out() << "[e] " << std::visit(get_name, layout) << " has too many inputs to store its truth table"
-                           << std::endl;
-                return;
-            }
+            perform_simulation(gls.current());
         }
         else if (is_set("network"))
         {
@@ -115,20 +79,7 @@ class simulate_command : public command
                 return;
             }
 
-            const auto network = lns.current();
-
-            std::visit(store_po_names, network);
-
-            try
-            {
-                std::visit(simulate, network);
-            }
-            catch (const std::bad_alloc&)
-            {
-                env->out() << "[e] " << std::visit(get_name, network) << " has too many inputs to store its truth table"
-                           << std::endl;
-                return;
-            }
+            perform_simulation(lns.current());
         }
 
         auto& tts = store<fiction::truth_table_t>();
@@ -175,6 +126,41 @@ class simulate_command : public command
      * Stores PO names in order.
      */
     std::vector<std::string> po_names;
+
+    template <typename NetOrLyt>
+    void perform_simulation(const NetOrLyt& network_or_layout)
+    {
+
+        const auto get_name = [](auto&& net_or_lyt) -> std::string { return net_or_lyt->get_network_name(); };
+
+        const auto store_po_names = [this](auto&& net_or_lyt)
+        {
+            net_or_lyt->foreach_po(
+                [this, &net_or_lyt]([[maybe_unused]] const auto& po, auto i) {
+                    po_names.emplace_back(net_or_lyt->has_output_name(i) ? net_or_lyt->get_output_name(i) :
+                                                                           fmt::format("po{}", i));
+                });
+        };
+
+        const auto simulate = [this](auto&& net_or_lyt)
+        {
+            tables = mockturtle::simulate<fiction::tt>(
+                *net_or_lyt, mockturtle::default_simulator<fiction::tt>(static_cast<unsigned>(net_or_lyt->num_pis())));
+        };
+
+        std::visit(store_po_names, network_or_layout);
+
+        try
+        {
+            std::visit(simulate, network_or_layout);
+        }
+        catch (const std::bad_alloc&)
+        {
+            env->out() << "[e] " << std::visit(get_name, network_or_layout)
+                       << " has too many inputs to store its truth table" << std::endl;
+            return;
+        }
+    }
 };
 
 ALICE_ADD_COMMAND(simulate, "Logic")
