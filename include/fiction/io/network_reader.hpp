@@ -40,7 +40,7 @@ class network_reader
         // checks for extension validity
         auto is_valid_extension = [&](const auto& p) -> bool
         {
-            constexpr std::array<const char*, 2> extensions{{VERILOG_EXT, AIG_EXT}};
+            std::array<const char*, 2> extensions{{VERILOG_EXT, AIG_EXT}};
             return std::any_of(extensions.cbegin(), extensions.cend(),
                                [&p](const auto& valid) { return std::filesystem::path(p).extension() == valid; });
         };
