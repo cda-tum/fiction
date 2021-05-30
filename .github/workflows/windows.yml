@@ -13,7 +13,7 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ windows-2019 ] # windows-2016, 
+        os: [ windows-2019 ] # windows-2016,
         include:
 #          - os: windows-2016
 #            env: "Visual Studio 15 2017"
@@ -35,7 +35,7 @@ jobs:
       - name: Configure CMake
         # Use a bash shell so we can use the same syntax for environment variable
         # access regardless of the host operating system
-        shell: bash
+#        shell: bash
         working-directory: ${{github.workspace}}/build
 
         run: cmake $GITHUB_WORKSPACE -G "${{matrix.env}}" -A x64 -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DFICTION_TEST=ON -DWARNINGS_AS_ERRORS=OFF
