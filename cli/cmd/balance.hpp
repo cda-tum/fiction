@@ -53,10 +53,10 @@ class balance_command : public command
             return;
         }
 
-        const auto balance = [this](auto&& net)
+        const auto perform_balancing = [this](auto&& net)
         { return std::make_shared<fiction::top_nt>(fiction::network_balancing<fiction::top_nt>(*net, ps)); };
 
-        s.extend() = std::visit(balance, s.current());
+        s.extend() = std::visit(perform_balancing, s.current());
 
         ps = {};
     }

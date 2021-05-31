@@ -13,6 +13,19 @@ namespace fiction
 class topology_network : public mockturtle::klut_network
 {
   public:
+#pragma region Primary I / O and functions
+
+    [[nodiscard]] bool is_po(node const& n) const
+    {
+        const auto end = _storage->outputs.begin() + _storage->data.num_pos;
+
+        return std::find_if(_storage->outputs.begin(), end,
+                            [this, &n](const auto& p)
+                            { return this->get_node(p.index) == n; }) != _storage->outputs.end();
+    }
+
+#pragma endregion
+
 #pragma region Create unary functions
 
     /**

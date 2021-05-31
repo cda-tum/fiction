@@ -3,14 +3,10 @@
 //
 
 #include "catch.hpp"
-#include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking.hpp"
 
 #include <fiction/algorithms/network_balancing.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/topology_network.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>

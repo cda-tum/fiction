@@ -6,13 +6,13 @@
 #define FICTION_NETWORK_BALANCING_HPP
 
 #include "../traits.hpp"
-#include "../utils/debug/network_writer.hpp"
 #include "network_conversion.hpp"
 
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/depth_view.hpp>
+#include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
 #include <functional>

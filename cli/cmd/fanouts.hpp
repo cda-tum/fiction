@@ -5,104 +5,81 @@
 #ifndef FICTION_FANOUTS_HPP
 #define FICTION_FANOUTS_HPP
 
+#include <fiction/algorithms/fanout_substitution.hpp>
+#include <fiction/types.hpp>
 
-#include "logic_network.h"
 #include <alice/alice.hpp>
-
 
 namespace alice
 {
+/**
+ * Substitutes multi-outputs of gate vertices and replaces them with fan-out ones.
+ */
+class fanouts_command : public command
+{
+  public:
     /**
-     * Substitutes multi-outputs of gate vertices and replaces them with fan-out ones.
+     * Standard constructor. Adds descriptive information, options, and flags.
+     *
+     * @param env alice::environment that specifies stores etc.
      */
-    class fanouts_command : public command
+    explicit fanouts_command(const environment::ptr& env) :
+            command(env, "Substitutes high-degree outputs of gates of the current logic network in store "
+                         "and replaces them with fan-out nodes. Some algorithms require fan-out nodes explicitly and "
+                         "will break down networks if needed. Others might be able to handle both.")
     {
-    public:
-        /**
-         * Standard constructor. Adds descriptive information, options, and flags.
-         *
-         * @param env alice::environment that specifies stores etc.
-         */
-        explicit fanouts_command(const environment::ptr& env)
-                :
-                command(env,
-                        "Substitutes high-degree outputs of gate vertices of the current logic network in store "
-                        "and replaces them with fan-out nodes. Some algorithms require fan-out vertices explicitly and "
-                        "will break down networks if needed. Others might be able to handle both.")
+        add_option("--degree,-d", ps.degree, "Maximum number of outputs a fan-out node can have", true)
+            ->set_type_name("{2, 3}");
+        add_option("--strategy,-s", ps.strategy,
+                   "Chain fan-outs in a balanced tree (breadth) or a DFS tree (depth) fashion", true)
+            ->set_type_name("{breadth=0, depth=1}");
+        add_option("--threshold,-t", ps.threshold,
+                   "Maximum number of outputs any gate can have before substitution applies", true);
+    }
+
+  protected:
+    /**
+     * Function to perform the fanouts call. Substitutes high-degree outputs and replaces them by fan-out vertices.
+     */
+    void execute() override
+    {
+        auto& s = store<fiction::logic_network_t>();
+
+        // error case: empty logic network store
+        if (s.empty())
         {
-            add_option("--degree,-d", degree,
-                       "Maximum number of outputs a fan-out "
-                       "vertex can have", true)->set_type_name("{2, 3}");
-            add_option("--strategy,-s", strategy,
-                       "Chain fan-outs in a balanced tree (breadth) "
-                       "or a DFS tree (depth) fashion", true)->set_type_name("{breadth=0, depth=1}");
-            add_option("--threshold,-t", threshold,
-                       "Maximum number of outputs an AND/OR/MAJ gate can have before "
-                       "substitution applies", true);
+            env->out() << "[w] no logic network in store" << std::endl;
+            ps = {};
+            return;
         }
 
-    protected:
-        /**
-         * Function to perform the fanouts call. Substitutes high-degree outputs and replaces them by fan-out vertices.
-         */
-        void execute() override
+        if (ps.degree < 2 || ps.degree > 3)
         {
-            auto& s = store<logic_network_ptr>();
-
-            // error case: empty logic network store
-            if (s.empty())
-            {
-                env->out() << "[w] no logic network in store" << std::endl;
-                reset_flags();
-                return;
-            }
-
-            if (degree < 2 || degree > 3)
-            {
-                env->out() << "[w] " << degree << " outputs per fan-out are not supported" << std::endl;
-                reset_flags();
-                return;
-            }
-
-            if (strategy != 0 && strategy != 1)
-            {
-                env->out() << "[w] " << strategy << " does not refer to a valid strategy" << std::endl;
-                reset_flags();
-                return;
-            }
-
-            s.current()->substitute_fan_outs(degree, strategy, threshold);
-
-            reset_flags();
+            env->out() << "[w] " << ps.degree << " outputs per fan-out are not supported" << std::endl;
+            ps = {};
+            return;
         }
 
-    private:
-        /**
-         * Maximum output degree of each fan-out gate.
-         */
-        std::size_t degree = 2u;
-        /**
-         * Decomposition strategy (DEPTH vs. BREADTH).
-         */
-        logic_network::substitution_strategy strategy = logic_network::substitution_strategy::BREADTH;
-        /**
-         * Maximum number of outputs an AND/OR/MAJ gate is allowed to have before substitution applies.
-         */
-        std::size_t threshold = 1u;
-
-        /**
-         * Reset all flags. Necessary for some reason... alice bug?
-         */
-        void reset_flags()
+        if (ps.strategy != 0 && ps.strategy != 1)
         {
-            degree = 2u;
-            strategy = logic_network::substitution_strategy::BREADTH;
-            threshold = 1u;
+            env->out() << "[w] " << ps.strategy << " does not refer to a valid strategy" << std::endl;
+            ps = {};
+            return;
         }
-    };
 
-    ALICE_ADD_COMMAND(fanouts, "Logic")
-}
+        const auto perform_substitution = [this](auto&& net)
+        { return std::make_shared<fiction::top_nt>(fiction::fanout_substitution<fiction::top_nt>(*net, ps)); };
 
+        s.extend() = std::visit(perform_substitution, s.current());
 
-#endif //FICTION_FANOUTS_HPP
+        ps = {};
+    }
+
+  private:
+    fiction::fanout_substitution_params ps{};
+};
+
+ALICE_ADD_COMMAND(fanouts, "Logic")
+}  // namespace alice
+
+#endif  // FICTION_FANOUTS_HPP

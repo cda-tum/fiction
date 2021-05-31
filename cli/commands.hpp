@@ -10,7 +10,7 @@
 #include "cmd/clear.hpp"
 #include "cmd/read.hpp"
 //#include "cmd/gates.hpp"
-//#include "cmd/fanouts.hpp"
+#include "cmd/fanouts.hpp"
 #include "cmd/balance.hpp"
 #include "cmd/tt.hpp"
 #include "cmd/random.hpp"

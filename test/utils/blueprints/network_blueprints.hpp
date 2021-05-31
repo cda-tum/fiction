@@ -64,6 +64,24 @@ Ntk unbalanced_and_inv_network()
     return ntk;
 }
 
+template <typename Ntk>
+Ntk multi_output_and_network()
+{
+    Ntk ntk{};
+
+    const auto a = ntk.create_pi("a");
+    const auto b = ntk.create_pi("b");
+
+    const auto f = ntk.create_and(a, b);
+
+    ntk.create_po(f, "f1");
+    ntk.create_po(f, "f2");
+    ntk.create_po(f, "f3");
+    ntk.create_po(f, "f4");
+
+    return ntk;
+}
+
 }  // namespace blueprints
 
 #endif  // FICTION_NETWORK_BLUEPRINTS_HPP

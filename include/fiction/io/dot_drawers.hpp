@@ -36,6 +36,13 @@ class topology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
         {
             return "snow2";
         }
+        if constexpr (has_is_fanout_v<Ntk>)
+        {
+            if (ntk.is_fanout(n))
+            {
+                return "navajowhite2";
+            }
+        }
         if constexpr (has_is_wire_v<Ntk>)
         {
             if (ntk.is_wire(n))
@@ -57,13 +64,6 @@ class topology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
                 return "paleturquoise";
             }
         }
-        if constexpr (has_is_fanout_v<Ntk>)
-        {
-            if (ntk.is_fanout(n))
-            {
-                return "navajowhite2";
-            }
-        }
 
         return mockturtle::gate_dot_drawer<Ntk>::node_fillcolor(ntk, n);
     }
@@ -71,6 +71,13 @@ class topology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
   private:
     std::string node_label_callback(const Ntk& ntk, const mockturtle::node<Ntk>& n) const
     {
+        if constexpr (has_is_fanout_v<Ntk>)
+        {
+            if (ntk.is_fanout(n))
+            {
+                return "F";
+            }
+        }
         if constexpr (has_is_wire_v<Ntk>)
         {
             if (ntk.is_wire(n))
@@ -90,13 +97,6 @@ class topology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
             if (ntk.is_inv(n))
             {
                 return "INV";
-            }
-        }
-        if constexpr (has_is_fanout_v<Ntk>)
-        {
-            if (ntk.is_fanout(n))
-            {
-                return "F";
             }
         }
 
