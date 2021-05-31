@@ -14,11 +14,12 @@ jobs:
     strategy:
       matrix:
         os: [ windows-2019 ]
+        toolset: [ v142, ClangCL ]
         include:
           - os: windows-2019
             env: "Visual Studio 16 2019"
 
-    name: ${{matrix.os}} with ${{matrix.compiler}}
+    name: ${{matrix.os}} with ${{matrix.env}} and ${{matrix.toolset}} toolset
     runs-on: ${{matrix.os}}
 
     steps:
@@ -36,7 +37,7 @@ jobs:
         shell: bash
         working-directory: ${{github.workspace}}/build
 
-        run: cmake $GITHUB_WORKSPACE -G "${{matrix.env}}" -A x64 -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DFICTION_TEST=ON -DWARNINGS_AS_ERRORS=OFF
+        run: cmake $GITHUB_WORKSPACE -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DFICTION_TEST=ON -DWARNINGS_AS_ERRORS=OFF
 
       #      - name: Cache Z3
       #        uses: actions/cache@v2
