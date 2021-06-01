@@ -56,6 +56,7 @@ class fanout_substitution_impl
   public:
     fanout_substitution_impl(const NtkSrc& src, const fanout_substitution_params p) :
             ntk_topo{convert_network<NtkDest>(src)},
+            old2new{ntk_topo},
             available_fanouts{ntk_topo},
             ps{p}
     {}
@@ -65,76 +66,19 @@ class fanout_substitution_impl
         // initialize a network copy
         auto init = mockturtle::initialize_copy_network<NtkDest>(ntk_topo);
 
-        auto& substituted = init.first;
-        auto& old2new     = init.second;
+        substituted = init.first;
+        old2new     = init.second;
 
-        const auto generate_fanout_tree = [this, &substituted, &old2new](const auto& n)
-        {
-            auto num_fanouts = static_cast<uint32_t>(
-                std::ceil(static_cast<double>(std::max(
-                              static_cast<int32_t>(ntk_topo.fanout_size(n)) - static_cast<int32_t>(ps.threshold), 0)) /
-                          static_cast<double>(std::max(static_cast<int32_t>(ps.degree) - 1, 1))));
-
-            auto child = old2new[n];
-
-            if (num_fanouts == 0)
-                return;
-
-            if (ps.strategy == fanout_substitution_params::substitution_strategy::DEPTH)
-            {
-                std::queue<typename NtkDest::signal> q{};
-                for (auto i = 0u; i < num_fanouts; ++i)
-                {
-                    child = substituted.create_buf(child);
-                    q.push(child);
-                }
-                available_fanouts[n] = q;
-            }
-            else if (ps.strategy == fanout_substitution_params::substitution_strategy::BREADTH)
-            {
-                std::queue<typename NtkDest::signal> q{{child}};
-
-                for (auto f = 0ul; f < num_fanouts; ++f)
-                {
-                    child = q.front();
-                    q.pop();
-                    child = substituted.create_buf(child);
-                    for (auto i = 0u; i < ps.degree; ++i) q.push(child);
-                }
-                available_fanouts[n] = q;
-            }
-        };
-
-        const auto get_fanout = [this, &substituted](const auto& n, auto& child)
-        {
-            if (substituted.fanout_size(child) >= ps.threshold)
-            {
-                if (auto fanouts = available_fanouts[n]; !fanouts.empty())
-                {
-                    // find non-overfull fanout node
-                    do {
-                        child = fanouts.front();
-                        if (substituted.fanout_size(child) >= ps.degree)
-                            fanouts.pop();
-                        else
-                            break;
-                    } while (true);
-                }
-            }
-
-            return child;
-        };
-
-        ntk_topo.foreach_pi([&generate_fanout_tree](const auto& pi) { generate_fanout_tree(pi); });
+        ntk_topo.foreach_pi([this](const auto& pi) { generate_fanout_tree(pi); });
 
         ntk_topo.foreach_gate(
-            [this, &substituted, &old2new, &generate_fanout_tree, &get_fanout](const auto& n)
+            [this](const auto& n)
             {
                 // gather children, but substitute fanouts where applicable
-                std::vector<typename mockturtle::topo_view<NtkDest>::signal> children{};
+                std::vector<mockturtle::signal<mockturtle::topo_view<NtkDest>>> children{};
 
                 ntk_topo.foreach_fanin(n,
-                                       [this, &old2new, &get_fanout, &children](const auto& f)
+                                       [this, &children](const auto& f)
                                        {
                                            const auto fn = ntk_topo.get_node(f);
 
@@ -158,7 +102,7 @@ class fanout_substitution_impl
 
         // add primary outputs to finalize the network
         ntk_topo.foreach_po(
-            [this, &old2new, &substituted, &get_fanout](const auto& po)
+            [this](const auto& po)
             {
                 const auto po_node    = ntk_topo.get_node(po);
                 auto       tgt_signal = old2new[po_node];
@@ -178,9 +122,70 @@ class fanout_substitution_impl
   private:
     mockturtle::topo_view<NtkDest> ntk_topo;
 
-    mockturtle::node_map<std::queue<typename NtkDest::signal>, mockturtle::topo_view<NtkDest>> available_fanouts;
+    NtkDest substituted;
+
+    mockturtle::node_map<mockturtle::signal<NtkDest>, mockturtle::topo_view<NtkDest>> old2new;
+
+    mockturtle::node_map<std::queue<mockturtle::signal<NtkDest>>, mockturtle::topo_view<NtkDest>> available_fanouts;
 
     const fanout_substitution_params ps;
+
+    void generate_fanout_tree(const mockturtle::node<NtkSrc>& n)
+    {
+        auto num_fanouts = static_cast<uint32_t>(
+            std::ceil(static_cast<double>(std::max(
+                          static_cast<int32_t>(ntk_topo.fanout_size(n)) - static_cast<int32_t>(ps.threshold), 0)) /
+                      static_cast<double>(std::max(static_cast<int32_t>(ps.degree) - 1, 1))));
+
+        auto child = old2new[n];
+
+        if (num_fanouts == 0)
+            return;
+
+        if (ps.strategy == fanout_substitution_params::substitution_strategy::DEPTH)
+        {
+            std::queue<mockturtle::signal<NtkDest>> q{};
+            for (auto i = 0u; i < num_fanouts; ++i)
+            {
+                child = substituted.create_buf(child);
+                q.push(child);
+            }
+            available_fanouts[n] = q;
+        }
+        else if (ps.strategy == fanout_substitution_params::substitution_strategy::BREADTH)
+        {
+            std::queue<mockturtle::signal<NtkDest>> q{{child}};
+
+            for (auto f = 0ul; f < num_fanouts; ++f)
+            {
+                child = q.front();
+                q.pop();
+                child = substituted.create_buf(child);
+                for (auto i = 0u; i < ps.degree; ++i) q.push(child);
+            }
+            available_fanouts[n] = q;
+        }
+    }
+
+    mockturtle::signal<NtkDest> get_fanout(const mockturtle::node<NtkSrc>& n, mockturtle::signal<NtkDest>& child)
+    {
+        if (substituted.fanout_size(child) >= ps.threshold)
+        {
+            if (auto fanouts = available_fanouts[n]; !fanouts.empty())
+            {
+                // find non-overfull fanout node
+                do {
+                    child = fanouts.front();
+                    if (substituted.fanout_size(child) >= ps.degree)
+                        fanouts.pop();
+                    else
+                        break;
+                } while (true);
+            }
+        }
+
+        return child;
+    }
 };
 
 template <typename Ntk>
@@ -224,17 +229,16 @@ NtkDest fanout_substitution(const NtkSrc& ntk_src, fanout_substitution_params ps
     static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
     static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
 
-    static_assert(mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node function");
-    static_assert(mockturtle::has_is_complemented_v<NtkSrc>, "NtkSrc does not implement the is_complemented function");
-    static_assert(mockturtle::has_foreach_gate_v<NtkSrc>, "NtkSrc does not implement the foreach_gate function");
-    static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin function");
-    static_assert(mockturtle::has_foreach_po_v<NtkSrc>, "NtkSrc does not implement the foreach_po function");
-
+    static_assert(mockturtle::has_is_constant_v<NtkDest>, "NtkSrc does not implement the is_constant function");
     static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi function");
     static_assert(mockturtle::has_create_not_v<NtkDest>, "NtkDest does not implement the create_not function");
     static_assert(mockturtle::has_create_po_v<NtkDest>, "NtkDest does not implement the create_po function");
     static_assert(mockturtle::has_create_buf_v<NtkDest>, "NtkDest does not implement the create_buf function");
     static_assert(mockturtle::has_clone_node_v<NtkDest>, "NtkDest does not implement the clone_node function");
+    static_assert(mockturtle::has_fanout_size_v<NtkDest>, "NtkDest does not implement the fanout_size function");
+    static_assert(mockturtle::has_foreach_gate_v<NtkDest>, "NtkDest does not implement the foreach_gate function");
+    static_assert(mockturtle::has_foreach_fanin_v<NtkDest>, "NtkDest does not implement the foreach_fanin function");
+    static_assert(mockturtle::has_foreach_po_v<NtkDest>, "NtkDest does not implement the foreach_po function");
 
     detail::fanout_substitution_impl<NtkDest, NtkSrc> p{ntk_src, ps};
 
@@ -248,9 +252,8 @@ bool is_fanout_substituted(const Ntk& ntk, fanout_substitution_params ps = {}) n
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "NtkSrc is not a network type");
     static_assert(mockturtle::has_foreach_gate_v<Ntk>, "Ntk does not implement the foreach_gate function");
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function");
-    static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po function");
-    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function");
+    static_assert(mockturtle::has_fanout_size_v<Ntk>, "Ntk does not implement the fanout_size function");
+    static_assert(fiction::has_is_fanout_v<Ntk>, "Ntk does not implement the is_fanout function");
 
     detail::is_fanout_substituted_impl<Ntk> p{ntk, ps};
 
