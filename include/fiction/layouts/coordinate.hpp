@@ -5,7 +5,7 @@
 #ifndef FICTION_COORDINATE_HPP
 #define FICTION_COORDINATE_HPP
 
-#include <fmt/ostream.h>
+#include <fmt/format.h>
 
 #include <cstdint>
 #include <iostream>
@@ -116,7 +116,7 @@ struct coord_t
 
 std::ostream& operator<<(std::ostream& os, const coord_t& t)
 {
-    fmt::print(os, "({},{},{})", t.x, t.y, t.z);
+    os << fmt::format("({},{},{})", t.x, t.y, t.z);
     return os;
 }
 

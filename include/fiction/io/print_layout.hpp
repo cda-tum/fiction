@@ -9,7 +9,6 @@
 
 #include <fmt/color.h>
 #include <fmt/format.h>
-#include <fmt/ostream.h>
 
 #include <array>
 #include <string>
@@ -25,7 +24,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     // empty layout
     if (!layout.area())
     {
-        fmt::print(os, "[i] empty layout");
+        os << fmt::format("[i] empty layout");
         return;
     }
 

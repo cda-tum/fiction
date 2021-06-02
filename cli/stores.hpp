@@ -12,7 +12,6 @@
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
-#include <fmt/ostream.h>
 #include <kitty/print.hpp>
 #include <mockturtle/views/depth_view.hpp>
 
@@ -39,9 +38,9 @@ ALICE_DESCRIBE_STORE(fiction::truth_table_t, tt)
 ALICE_PRINT_STORE_STATISTICS(fiction::truth_table_t, os, tt)
 {
     if (tt->num_vars() <= 6)
-        fmt::print(os, " {} vars, hex: {}, bin: {}", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
+        os << fmt::format(" {} vars, hex: {}, bin: {}", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
     else
-        fmt::print(os, " {} vars, (description omitted due to truth table size)", tt->num_vars());
+        os << fmt::format(" {} vars, (description omitted due to truth table size)", tt->num_vars());
 }
 
 ALICE_LOG_STORE_STATISTICS(fiction::truth_table_t, tt)
@@ -51,7 +50,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::truth_table_t, tt)
 
 ALICE_PRINT_STORE(fiction::truth_table_t, os, tt)
 {
-    fmt::print(os, " {} vars, hex: {}, bin: {}", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
+    os << fmt::format(" {} vars, hex: {}, bin: {}", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
 }
 
 /**
@@ -83,8 +82,9 @@ ALICE_PRINT_STORE_STATISTICS(fiction::logic_network_t, os, ln)
 
         mockturtle::depth_view depth_net{*net};
 
-        fmt::print(os, "{} ({}) - I/O: {}/{}, gates: {}, level: {}\n", net->get_network_name(),
-                   fiction::ntk_type_name<Ntk>, net->num_pis(), net->num_pos(), net->num_gates(), depth_net.depth());
+        os << fmt::format("{} ({}) - I/O: {}/{}, gates: {}, level: {}\n", net->get_network_name(),
+                          fiction::ntk_type_name<Ntk>, net->num_pis(), net->num_pos(), net->num_gates(),
+                          depth_net.depth());
     };
 
     std::visit(print_statistics, ln);
@@ -175,7 +175,7 @@ ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
     {
         mockturtle::depth_view depth_lyt{*lyt};
 
-        return fmt::print(os, "{} - {} × {}, gates: {}, wires: {}, CP: {}\n", lyt->get_network_name(), lyt->x() + 1,
+        os << fmt::format("{} - {} × {}, gates: {}, wires: {}, CP: {}\n", lyt->get_network_name(), lyt->x() + 1,
                           lyt->y() + 1, lyt->num_gates(), lyt->num_wires(), depth_lyt.depth());
     };
 
