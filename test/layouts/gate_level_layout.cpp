@@ -798,3 +798,48 @@ TEST_CASE("Visited values", "[gate-level]")
     layout.clear_visited();
     layout.foreach_node([&](auto n) { CHECK(layout.visited(n) == 0); });
 }
+
+TEST_CASE("Crossings", "[gate-level]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+
+    auto layout = blueprints::crossing_layout<gate_layout>();
+
+    CHECK(layout.fanout_size(layout.get_node({1, 1})) == 1);
+    CHECK(layout.fanout_size(layout.get_node({2, 1})) == 1);
+    CHECK(layout.fanout_size(layout.get_node({2, 1, 1})) == 1);
+    CHECK(layout.fanin_size(layout.get_node({2, 1})) == 1);
+    CHECK(layout.fanin_size(layout.get_node({2, 1, 1})) == 1);
+    CHECK(layout.fanin_size(layout.get_node({3, 1})) == 1);
+    CHECK(layout.fanin_size(layout.get_node({2, 2})) == 2);
+
+    layout.foreach_fanout(layout.get_node({1, 1}),
+                          [&layout](const auto& fo) {
+                              CHECK(layout.get_node(fo) == layout.get_node({2, 1, 1}));
+                          });
+
+    layout.foreach_fanout(layout.get_node({2, 1}),
+                          [&layout](const auto& fo) {
+                              CHECK(layout.get_node(fo) == layout.get_node({2, 2}));
+                          });
+
+    layout.foreach_fanout(layout.get_node({2, 1, 1}),
+                          [&layout](const auto& fo) {
+                              CHECK(layout.get_node(fo) == layout.get_node({3, 1}));
+                          });
+
+    layout.foreach_fanin(layout.get_node({2, 1}),
+                          [&layout](const auto& fi) {
+                              CHECK(layout.get_node(fi) == layout.get_node({2, 0}));
+                          });
+
+    layout.foreach_fanin(layout.get_node({2, 1, 1}),
+                         [&layout](const auto& fi) {
+                             CHECK(layout.get_node(fi) == layout.get_node({1, 1}));
+                         });
+
+    layout.foreach_fanin(layout.get_node({3, 1}),
+                         [&layout](const auto& fi) {
+                             CHECK(layout.get_node(fi) == layout.get_node({2, 1, 1}));
+                         });
+}

@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <initializer_list>
 #include <set>
 #include <unordered_map>
 #include <vector>
@@ -297,6 +298,12 @@ class gate_level_layout : public ClockedLayout
         }
 
         return {};
+    }
+
+    void move_node(const node& n, const tile& t) noexcept
+    {
+        clear_tile(get_tile(n));
+        assign_node(t, n);
     }
 
     [[nodiscard]] bool is_complemented([[maybe_unused]] const signal& s) const noexcept
@@ -652,8 +659,15 @@ class gate_level_layout : public ClockedLayout
 
         Container data_flow{};
 
-        std::copy_if(std::cbegin(incoming), std::cend(incoming), std::inserter(data_flow, std::cend(data_flow)),
-                     [this, &t](const auto& dt) { return is_child(get_node(t), static_cast<signal>(dt)); });
+        for (const auto& in : incoming)
+        {
+            const std::set<tile> incoming_above_below{
+                std::initializer_list{in, ClockedLayout::above(in), ClockedLayout::below(in)}};
+
+            std::copy_if(std::cbegin(incoming_above_below), std::cend(incoming_above_below),
+                         std::inserter(data_flow, std::cend(data_flow)),
+                         [this, &t](const auto& dt) { return is_child(get_node(t), static_cast<signal>(dt)); });
+        }
 
         return data_flow;
     }
@@ -665,8 +679,15 @@ class gate_level_layout : public ClockedLayout
 
         Container data_flow{};
 
-        std::copy_if(std::cbegin(outgoing), std::cend(outgoing), std::inserter(data_flow, std::cend(data_flow)),
-                     [this, &t](const auto& dt) { return is_child(get_node(dt), static_cast<signal>(t)); });
+        for (const auto& out : outgoing)
+        {
+            const std::set<tile> outgoing_above_below{
+                std::initializer_list{out, ClockedLayout::above(out), ClockedLayout::below(out)}};
+
+            std::copy_if(std::cbegin(outgoing_above_below), std::cend(outgoing_above_below),
+                         std::inserter(data_flow, std::cend(data_flow)),
+                         [this, &t](const auto& dt) { return is_child(get_node(dt), static_cast<signal>(t)); });
+        }
 
         return data_flow;
     }
