@@ -7,6 +7,7 @@
 #include "utils/equivalence_checking.hpp"
 
 #include <fiction/algorithms/fanout_substitution.hpp>
+#include <fiction/algorithms/network_balancing.hpp>
 #include <fiction/networks/topology_network.hpp>
 #include <fiction/utils/debug/network_writer.hpp>
 
@@ -62,4 +63,30 @@ TEST_CASE("Degree and threshold in fanout substitution", "[algorithms]")
 
     substitute(aig, ps_31, aig.size() + 33);
     substitute(aig, ps_22, aig.size() + 25);
+}
+
+TEST_CASE("Size stabilization of fanout substitution", "[algorithms]")
+{
+    const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
+
+    auto substituted = fanout_substitution<topology_network>(aig);
+
+//    debug::write_dot_network(substituted, "substituted");
+
+    auto subsubsubsubstituted = fanout_substitution<topology_network>(
+        fanout_substitution<topology_network>(fanout_substitution<topology_network>(substituted)));
+
+//    debug::write_dot_network(subsubsubsubstituted, "subsubsubstituted");
+
+    CHECK(substituted.size() == subsubsubsubstituted.size());
+}
+
+TEST_CASE("Consistent fanout substitution after balancing", "[algorithms]")
+{
+    const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
+
+    auto substituted = fanout_substitution<topology_network>(aig);
+    CHECK(is_fanout_substituted(substituted));
+    auto balanced = network_balancing<topology_network>(substituted);
+    CHECK(is_fanout_substituted(balanced));
 }

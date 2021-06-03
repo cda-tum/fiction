@@ -44,13 +44,6 @@ class topology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
                 return "navajowhite2";
             }
         }
-        if constexpr (has_is_wire_v<Ntk>)
-        {
-            if (ntk.is_wire(n))
-            {
-                return "palegoldenrod";
-            }
-        }
         if constexpr (has_is_buf_v<Ntk>)
         {
             if (ntk.is_buf(n))
@@ -77,13 +70,6 @@ class topology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
             if (ntk.is_fanout(n))
             {
                 return "F";
-            }
-        }
-        if constexpr (has_is_wire_v<Ntk>)
-        {
-            if (ntk.is_wire(n))
-            {
-                return "WIRE";
             }
         }
         if constexpr (has_is_buf_v<Ntk>)

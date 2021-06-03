@@ -24,10 +24,17 @@ namespace fiction
 
 struct orthogonal_physical_design_params
 {
+    /**
+     * Number of clock phases to use. 3 and 4 are supported.
+     */
     uint8_t number_of_clock_phases = 4u;
-
+    /**
+     * Flag to indicate that designated I/O ports should be placed.
+     */
     bool utilize_io_ports = false;
-
+    /**
+     * Flag to indicate that designated I/O ports should be routed to the layout's borders.
+     */
     bool route_ios_to_layout_borders = false;
 };
 
@@ -117,7 +124,7 @@ coloring_container<Ntk> east_south_coloring(const Ntk& ntk)
             }
         });
 
-        debug::write_dot_network<mockturtle::out_of_place_color_view<Ntk>,
+    debug::write_dot_network<mockturtle::out_of_place_color_view<Ntk>,
                              color_view_drawer<mockturtle::out_of_place_color_view<Ntk>>>(ctn.color_ntk, "colored_ntk");
 
     return ctn;
@@ -211,21 +218,16 @@ mockturtle::signal<Lyt> place(Lyt& lyt, const Ntk& ntk, const mockturtle::node<N
     {
         return lyt.create_not(a, t);
     }
-    else if constexpr (fiction::has_is_buf_v<Ntk>)
+    if constexpr (fiction::has_is_buf_v<Ntk>)
     {
         if (ntk.is_buf(n))
         {
             return lyt.create_buf(a, t);
         }
     }
-    else if constexpr (fiction::has_is_wire_v<Ntk>)
-    {
-        if (ntk.is_wire(n))
-        {
-            return lyt.create_buf(a, t);
-        }
-    }
     // more gate types go here
+
+    assert(false);
 }
 
 /**
@@ -247,11 +249,11 @@ mockturtle::signal<Lyt> place(Lyt& lyt, const Ntk& ntk, const mockturtle::node<N
     {
         return lyt.create_and(a, b, t);
     }
-    else if (ntk.is_or(n))
+    if (ntk.is_or(n))
     {
         return lyt.create_or(a, b, t);
     }
-    else if constexpr (mockturtle::has_is_xor_v<Ntk>)
+    if constexpr (mockturtle::has_is_xor_v<Ntk>)
     {
         if (ntk.is_xor(n))
         {
@@ -259,6 +261,8 @@ mockturtle::signal<Lyt> place(Lyt& lyt, const Ntk& ntk, const mockturtle::node<N
         }
     }
     // more gate types go here
+
+    assert(false);
 }
 
 template <typename Lyt>
@@ -452,19 +456,45 @@ class orthogonal_impl
                         // if n is a PO node, reserve a tile for later PO insertion
                         if (ntk.is_po(n))
                         {
-                            ++latest_pos.x;
+                            bool eastern_side_available = true;
+
+//                            if (ntk.fanout_size(n) > 1)
+//                            {
+                                // PO nodes can have a maximum of one other fanout
+                                ntk.foreach_fanout(n,
+                                                   [this, &ctn, &eastern_side_available](const auto& fo)
+                                                   {
+                                                       // if that fanout is colored east, no PO can be placed there
+                                                       if (ctn.color_ntk.color(ntk.get_node(fo)) == ctn.color_east)
+                                                       {
+                                                           eastern_side_available = false;
+                                                       }
+                                                       return false;
+                                                   });
+//                            }
+
+                            if (const auto n_s = node2pos[n]; eastern_side_available)
+                            {
+                                layout.create_po(n_s, "", layout.east(static_cast<typename Lyt::tile>(n_s)));
+                                ++latest_pos.x;
+                            }
+                            else
+                            {
+                                layout.create_po(n_s, "", layout.south(static_cast<typename Lyt::tile>(n_s)));
+                                ++latest_pos.y;
+                            }
                         }
                     }
                 }
             });
 
-        // attach primary outputs
-        ntk.foreach_po(
-            [this, &layout](const auto& po)
-            {
-                const auto l_po = node2pos[ntk.get_node(po)];
-                layout.create_po(l_po, "", layout.east(static_cast<typename Lyt::tile>(l_po)));
-            });
+        //        // attach primary outputs
+        //        ntk.foreach_po(
+        //            [this, &layout](const auto& po)
+        //            {
+        //                const auto l_po = node2pos[ntk.get_node(po)];
+        //                layout.create_po(l_po, "", layout.east(static_cast<typename Lyt::tile>(l_po)));
+        //            });
 
         // restore possibly set signal names
         restore_names(ntk, layout, node2pos);

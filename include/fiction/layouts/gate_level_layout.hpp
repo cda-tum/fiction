@@ -333,9 +333,14 @@ class gate_level_layout : public ClockedLayout
         return strg->nodes[n].data[1].h1 >= 2 && !is_pi(n);
     }
 
-    [[nodiscard]] bool is_wire(const node n) const noexcept
+    [[nodiscard]] bool is_buf(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 2;
+    }
+
+    [[nodiscard]] bool is_wire(const node n) const noexcept
+    {
+        return is_buf(n);
     }
 
     [[nodiscard]] bool is_negation(const node n) const noexcept

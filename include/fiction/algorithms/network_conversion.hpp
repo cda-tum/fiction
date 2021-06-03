@@ -66,18 +66,22 @@ class convert_network_impl
                 if (ntk_topo.is_and(g))
                 {
                     old2new[g] = ntk_dest.create_and(children[0], children[1]);
+                    return true;
                 }
                 else if (ntk_topo.is_or(g))
                 {
                     old2new[g] = ntk_dest.create_or(children[0], children[1]);
+                    return true;
                 }
                 else if (ntk_topo.is_xor(g))
                 {
                     old2new[g] = ntk_dest.create_xor(children[0], children[1]);
+                    return true;
                 }
                 else if (ntk_topo.is_maj(g))
                 {
                     old2new[g] = ntk_dest.create_maj(children[0], children[1], children[2]);
+                    return true;
                 }
                 else
                 {
@@ -87,6 +91,7 @@ class convert_network_impl
                         if (ntk_topo.is_nary_and(g))
                         {
                             old2new[g] = ntk_dest.create_nary_and(children);
+                            return true;
                         }
                     }
                     if constexpr (mockturtle::has_is_nary_or_v<TopoNtkSrc> && mockturtle::has_create_nary_or_v<NtkDest>)
@@ -94,6 +99,7 @@ class convert_network_impl
                         if (ntk_topo.is_nary_or(g))
                         {
                             old2new[g] = ntk_dest.create_nary_or(children);
+                            return true;
                         }
                     }
                     if constexpr (mockturtle::has_is_nary_xor_v<TopoNtkSrc> &&
@@ -102,6 +108,7 @@ class convert_network_impl
                         if (ntk_topo.is_nary_xor(g))
                         {
                             old2new[g] = ntk_dest.create_nary_xor(children);
+                            return true;
                         }
                     }
                     if constexpr (fiction::has_is_buf_v<TopoNtkSrc> && mockturtle::has_create_buf_v<NtkDest>)
@@ -109,19 +116,16 @@ class convert_network_impl
                         if (ntk_topo.is_buf(g))
                         {
                             old2new[g] = ntk_dest.create_buf(children[0]);
-                        }
-                    }
-                    if constexpr (fiction::has_is_wire_v<TopoNtkSrc> && mockturtle::has_create_buf_v<NtkDest>)
-                    {
-                        if (ntk_topo.is_wire(g))
-                        {
-                            old2new[g] = ntk_dest.create_buf(children[0]);
+                            return true;
                         }
                     }
                     if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<NtkDest>)
                     {
                         old2new[g] = ntk_dest.create_node(children, ntk_topo.node_function(g));
+                        return true;
                     }
+
+                    return true;
                 }
             });
 
