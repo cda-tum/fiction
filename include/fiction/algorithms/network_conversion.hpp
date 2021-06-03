@@ -89,31 +89,36 @@ class convert_network_impl
                             old2new[g] = ntk_dest.create_nary_and(children);
                         }
                     }
-                    else if constexpr (mockturtle::has_is_nary_or_v<TopoNtkSrc> &&
-                                       mockturtle::has_create_nary_or_v<NtkDest>)
+                    if constexpr (mockturtle::has_is_nary_or_v<TopoNtkSrc> && mockturtle::has_create_nary_or_v<NtkDest>)
                     {
                         if (ntk_topo.is_nary_or(g))
                         {
                             old2new[g] = ntk_dest.create_nary_or(children);
                         }
                     }
-                    else if constexpr (mockturtle::has_is_nary_xor_v<TopoNtkSrc> &&
-                                       mockturtle::has_create_nary_xor_v<NtkDest>)
+                    if constexpr (mockturtle::has_is_nary_xor_v<TopoNtkSrc> &&
+                                  mockturtle::has_create_nary_xor_v<NtkDest>)
                     {
                         if (ntk_topo.is_nary_xor(g))
                         {
                             old2new[g] = ntk_dest.create_nary_xor(children);
                         }
                     }
-                    else if constexpr (fiction::has_is_wire_v<TopoNtkSrc> && mockturtle::has_create_buf_v<NtkDest>)
+                    if constexpr (fiction::has_is_buf_v<TopoNtkSrc> && mockturtle::has_create_buf_v<NtkDest>)
+                    {
+                        if (ntk_topo.is_buf(g))
+                        {
+                            old2new[g] = ntk_dest.create_buf(children[0]);
+                        }
+                    }
+                    if constexpr (fiction::has_is_wire_v<TopoNtkSrc> && mockturtle::has_create_buf_v<NtkDest>)
                     {
                         if (ntk_topo.is_wire(g))
                         {
                             old2new[g] = ntk_dest.create_buf(children[0]);
                         }
                     }
-                    else if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> &&
-                                       mockturtle::has_create_node_v<NtkDest>)
+                    if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<NtkDest>)
                     {
                         old2new[g] = ntk_dest.create_node(children, ntk_topo.node_function(g));
                     }

@@ -16,12 +16,12 @@
 namespace fiction::debug
 {
 
-template <typename Ntk>
+template <typename Ntk, typename Drawer = fiction::topology_dot_drawer<Ntk, true>>
 void write_dot_network(const Ntk& ntk, const std::string& name = "ntk", const std::filesystem::path& p = {"./"})
 {
     std::ofstream file{p / (name + ".dot")};
 
-    mockturtle::write_dot(ntk, file, fiction::topology_dot_drawer<Ntk, true>{});
+    mockturtle::write_dot(ntk, file, Drawer{});
 
     file.close();
 }

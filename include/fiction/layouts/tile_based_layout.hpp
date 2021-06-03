@@ -173,6 +173,26 @@ class tile_based_layout
         return t1 != t2 && below(t1) == t2;
     }
 
+    [[nodiscard]] constexpr bool is_northwards_of(const tile& t1, const tile& t2) const noexcept
+    {
+        return (t1.z == t2.z) && (t1.y > t2.y) && (t1.x == t2.x);
+    }
+
+    [[nodiscard]] constexpr bool is_eastwards_of(const tile& t1, const tile& t2) const noexcept
+    {
+        return (t1.z == t2.z) && (t1.y == t2.y) && (t1.x < t2.x);
+    }
+
+    [[nodiscard]] constexpr bool is_southwards_of(const tile& t1, const tile& t2) const noexcept
+    {
+        return (t1.z == t2.z) && (t1.y < t2.y) && (t1.x == t2.x);
+    }
+
+    [[nodiscard]] constexpr bool is_westwards_of(const tile& t1, const tile& t2) const noexcept
+    {
+        return (t1.z == t2.z) && (t1.y == t2.y) && (t1.x > t2.x);
+    }
+
     [[nodiscard]] constexpr bool is_northern_border(const tile& t) const noexcept
     {
         return t.y == 0ull;

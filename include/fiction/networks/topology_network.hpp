@@ -51,7 +51,6 @@ class topology_network : public mockturtle::klut_network
 
         const auto index = _storage->nodes.size();
         _storage->nodes.push_back(node);
-        _storage->hash[node] = index;
 
         /* increase ref-count to children */
         for (auto c : children) { _storage->nodes[c].data[0].h1++; }

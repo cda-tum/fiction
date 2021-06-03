@@ -11,13 +11,14 @@
 #include <mockturtle/io/write_dot.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <array>
+
 namespace fiction
 {
 
 template <typename Ntk, bool DrawIndexes = false>
 class topology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
 {
-
   public:
     std::string node_label(const Ntk& ntk, const mockturtle::node<Ntk>& n) const override
     {
@@ -102,6 +103,33 @@ class topology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
 
         return mockturtle::gate_dot_drawer<Ntk>::node_label(ntk, n);
     }
+};
+
+template <typename Ntk, bool DrawIndexes = false>
+class color_view_drawer : public mockturtle::default_dot_drawer<Ntk>
+{
+  public:
+    std::string node_label(const Ntk& ntk, const mockturtle::node<Ntk>& n) const override
+    {
+        if constexpr (DrawIndexes)
+        {
+            return fmt::format("n: {}, c: {}", ntk.node_to_index(n), ntk.color(n));
+        }
+        else
+        {
+            return fmt::format("c: {}", ntk.color(n));
+        }
+    }
+
+    std::string node_fillcolor(const Ntk& ntk, const mockturtle::node<Ntk>& n) const override
+    {
+        auto c = ntk.color(n);
+        return c >= colors.size() ? "black" : colors[ntk.color(n)];
+    }
+
+  private:
+    std::array<std::string, 8> colors{{"ghostwhite", "deepskyblue1", "darkseagreen2", "crimson", "goldenrod1",
+                                       "darkorchid2", "chocolate1", "gray28"}};
 };
 
 }  // namespace fiction

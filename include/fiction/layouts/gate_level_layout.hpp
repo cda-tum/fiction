@@ -300,10 +300,17 @@ class gate_level_layout : public ClockedLayout
         return {};
     }
 
-    void move_node(const node& n, const tile& t) noexcept
+    [[nodiscard]] signal make_signal(const node& n) const noexcept
+    {
+        return static_cast<signal>(get_tile(n));
+    }
+
+    signal move_node(const node& n, const tile& t) noexcept
     {
         clear_tile(get_tile(n));
         assign_node(t, n);
+
+        return static_cast<signal>(t);
     }
 
     [[nodiscard]] bool is_complemented([[maybe_unused]] const signal& s) const noexcept

@@ -82,6 +82,30 @@ Ntk multi_output_and_network()
     return ntk;
 }
 
+template <typename Ntk>
+Ntk se_coloring_corner_case_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi("x1");
+    const auto x2 = ntk.create_pi("x2");
+
+    const auto x3 = ntk.create_buf(x1);
+    const auto x4 = ntk.create_buf(x2);
+
+    const auto x5 = ntk.create_and(x3, x4);
+
+    const auto x6 = ntk.create_buf(x5);
+
+    const auto x7 = ntk.create_and(x3, x6);
+    const auto x8 = ntk.create_and(x4, x6);
+
+    ntk.create_po(x7, "f1");
+    ntk.create_po(x8, "f2");
+
+    return ntk;
+}
+
 }  // namespace blueprints
 
 #endif  // FICTION_NETWORK_BLUEPRINTS_HPP
