@@ -662,7 +662,7 @@ class gate_level_layout : public ClockedLayout
         for (const auto& in : incoming)
         {
             const std::set<tile> incoming_above_below{
-                std::initializer_list{in, ClockedLayout::above(in), ClockedLayout::below(in)}};
+                std::initializer_list<tile>{in, ClockedLayout::above(in), ClockedLayout::below(in)}};
 
             std::copy_if(std::cbegin(incoming_above_below), std::cend(incoming_above_below),
                          std::inserter(data_flow, std::cend(data_flow)),
@@ -682,7 +682,7 @@ class gate_level_layout : public ClockedLayout
         for (const auto& out : outgoing)
         {
             const std::set<tile> outgoing_above_below{
-                std::initializer_list{out, ClockedLayout::above(out), ClockedLayout::below(out)}};
+                std::initializer_list<tile>{out, ClockedLayout::above(out), ClockedLayout::below(out)}};
 
             std::copy_if(std::cbegin(outgoing_above_below), std::cend(outgoing_above_below),
                          std::inserter(data_flow, std::cend(data_flow)),
