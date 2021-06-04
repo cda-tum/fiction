@@ -124,8 +124,9 @@ coloring_container<Ntk> east_south_coloring(const Ntk& ntk)
             }
         });
 
-    debug::write_dot_network<mockturtle::out_of_place_color_view<Ntk>,
-                             color_view_drawer<mockturtle::out_of_place_color_view<Ntk>>>(ctn.color_ntk, "colored_ntk");
+    //    debug::write_dot_network<mockturtle::out_of_place_color_view<Ntk>,
+    //                             color_view_drawer<mockturtle::out_of_place_color_view<Ntk>>>(ctn.color_ntk,
+    //                             "colored_ntk");
 
     return ctn;
 }
@@ -167,7 +168,7 @@ bool is_east_south_colored(const Ntk& ntk) noexcept
 template <typename Lyt, typename Ntk>
 typename Lyt::aspect_ratio determine_layout_size(const coloring_container<Ntk>& ctn) noexcept
 {
-    uint64_t x = 1ull, y = ctn.color_ntk.num_pis() - 1;
+    uint64_t x = 1ull + ctn.color_ntk.num_pos(), y = ctn.color_ntk.num_pis() - 1 + ctn.color_ntk.num_pos();
     ctn.color_ntk.foreach_gate(
         [&ctn, &x, &y](const auto& g)
         {
@@ -351,6 +352,8 @@ class orthogonal_impl
         Lyt layout{determine_layout_size<Lyt>(ctn),
                    ps.number_of_clock_phases == 3 ? twoddwave_3_clocking : twoddwave_4_clocking};
 
+        debug::write_dot_network<decltype(ntk), topology_dot_drawer<decltype(ntk), true>>(ntk, "topo_ntk");
+
         // reserve PI nodes without positions
         ntk.foreach_pi([this, &layout]([[maybe_unused]] const auto& pi) { layout.create_pi(); });
 
@@ -395,6 +398,8 @@ class orthogonal_impl
                             // single fanin nodes should not be colored null
                             assert(false);
                         }
+
+//                        check_for_po();
                     }
                     // if node has two fanins
                     else if (fs.size() == 2)
@@ -453,36 +458,35 @@ class orthogonal_impl
 
                         node2pos[n] = connect_and_place(layout, ntk, n, pre1_t, pre2_t, t);
 
-                        // if n is a PO node, reserve a tile for later PO insertion
-                        if (ntk.is_po(n))
+//                        check_for_po();
+
+                    }
+                    // if n is a PO node, reserve a tile for later PO insertion
+                    if (ntk.is_po(n))
+                    {
+                        bool eastern_side_available = true;
+
+                        // PO nodes can have a maximum of one other fanout
+                        ntk.foreach_fanout(n,
+                                           [this, &ctn, &eastern_side_available, &n](const auto& fo)
+                                           {
+                                               // if that fanout is colored east, no PO can be placed there
+                                               if (ctn.color_ntk.color(ntk.get_node(fo)) == ctn.color_east)
+                                               {
+                                                   eastern_side_available = false;
+                                               }
+                                               return false;
+                                           });
+
+                        if (const auto n_s = node2pos[n]; eastern_side_available)
                         {
-                            bool eastern_side_available = true;
-
-//                            if (ntk.fanout_size(n) > 1)
-//                            {
-                                // PO nodes can have a maximum of one other fanout
-                                ntk.foreach_fanout(n,
-                                                   [this, &ctn, &eastern_side_available](const auto& fo)
-                                                   {
-                                                       // if that fanout is colored east, no PO can be placed there
-                                                       if (ctn.color_ntk.color(ntk.get_node(fo)) == ctn.color_east)
-                                                       {
-                                                           eastern_side_available = false;
-                                                       }
-                                                       return false;
-                                                   });
-//                            }
-
-                            if (const auto n_s = node2pos[n]; eastern_side_available)
-                            {
-                                layout.create_po(n_s, "", layout.east(static_cast<typename Lyt::tile>(n_s)));
-                                ++latest_pos.x;
-                            }
-                            else
-                            {
-                                layout.create_po(n_s, "", layout.south(static_cast<typename Lyt::tile>(n_s)));
-                                ++latest_pos.y;
-                            }
+                            layout.create_po(n_s, "", layout.east(static_cast<typename Lyt::tile>(n_s)));
+                            ++latest_pos.x;
+                        }
+                        else
+                        {
+                            layout.create_po(n_s, "", layout.south(static_cast<typename Lyt::tile>(n_s)));
+                            ++latest_pos.y;
                         }
                     }
                 }
