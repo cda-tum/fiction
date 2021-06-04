@@ -106,6 +106,30 @@ Ntk se_coloring_corner_case_network()
     return ntk;
 }
 
+template <typename Ntk>
+Ntk fanout_substitution_corner_case_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi("x1");
+
+    const auto fo1 = ntk.create_buf(x1);
+    const auto fo2 = ntk.create_buf(fo1);
+    const auto fo3 = ntk.create_buf(fo1);
+
+    const auto n1 = ntk.create_not(fo2);
+    const auto n2 = ntk.create_not(fo2);
+    const auto n3 = ntk.create_not(fo3);
+    const auto n4 = ntk.create_not(fo3);
+
+    ntk.create_po(n1, "f1");
+    ntk.create_po(n2, "f2");
+    ntk.create_po(n3, "f3");
+    ntk.create_po(n4, "f4");
+
+    return ntk;
+}
+
 }  // namespace blueprints
 
 #endif  // FICTION_NETWORK_BLUEPRINTS_HPP

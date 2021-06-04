@@ -239,10 +239,10 @@ TEST_CASE("create binary operations in a topology network", "[topo]")
     CHECK(topo.size() == 5);
 
     topo.create_and(x1, x2);
-    CHECK(topo.size() == 5);
+    CHECK(topo.size() == 6);  // no structural hashing
 
     topo.create_and(x2, x1);
-    CHECK(topo.size() == 6);
+    CHECK(topo.size() == 7);  // no structural hashing
 }
 
 TEST_CASE("clone a node in a topology network", "[topo]")
@@ -350,7 +350,7 @@ TEST_CASE("hash nodes in topology network", "[topo]")
 
     topo.create_node({a, b, c}, tt_maj);
 
-    CHECK(topo.size() == 7);
+    CHECK(topo.size() == 8);  // no structural hashing
 }
 
 TEST_CASE("subsitute node by another", "[topo]")

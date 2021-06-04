@@ -13,14 +13,35 @@
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
+#include <type_traits>
+
 namespace fiction
 {
 
 namespace detail
 {
 
-template <typename NtkDest, typename NtkSrc>
+template <typename NtkDest, typename NtkSrc, bool is_same_ntk_type = std::is_same_v<NtkDest, NtkSrc>>
 class convert_network_impl
+{};
+
+template <typename NtkDest, typename NtkSrc>
+class convert_network_impl<NtkDest, NtkSrc, true>
+{
+  public:
+    explicit convert_network_impl(const NtkSrc& ntk_src) : ntk{ntk_src} {}
+
+    NtkDest run()
+    {
+        return ntk;
+    }
+
+  private:
+    NtkDest ntk;
+};
+
+template <typename NtkDest, typename NtkSrc>
+class convert_network_impl<NtkDest, NtkSrc, false>
 {
   public:
     explicit convert_network_impl(const NtkSrc& ntk_src) : ntk_topo{ntk_src} {}
@@ -175,7 +196,6 @@ NtkDest convert_network(const NtkSrc& ntk)
     static_assert(mockturtle::has_create_or_v<NtkDest>, "NtkDest does not implement the create_or function");
     static_assert(mockturtle::has_create_xor_v<NtkDest>, "NtkDest does not implement the create_xor function");
     static_assert(mockturtle::has_create_maj_v<NtkDest>, "NtkDest does not implement the create_maj function");
-    // TODO finalize asserts
     // TODO handle ci/ro/etc...
 
     assert(ntk.is_combinational() && "Network has to be combinational");
