@@ -10,8 +10,11 @@
 #include "../utils/debug/network_writer.hpp"
 #include "fanout_substitution.hpp"
 
+#include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
+#include <mockturtle/utils/progress_bar.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/color_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
@@ -25,6 +28,10 @@ namespace fiction
 struct orthogonal_physical_design_params
 {
     /**
+     * Print a report to the standard output channel.
+     */
+    bool verbose = false;
+    /**
      * Number of clock phases to use. 3 and 4 are supported.
      */
     uint8_t number_of_clock_phases = 4u;
@@ -36,6 +43,22 @@ struct orthogonal_physical_design_params
      * Flag to indicate that designated I/O ports should be routed to the layout's borders.
      */
     bool route_ios_to_layout_borders = false;
+};
+
+struct orthogonal_physical_design_stats
+{
+    mockturtle::stopwatch<>::duration time_total{0};
+
+    uint64_t x_size{0ull}, y_size{0ull};
+    uint64_t num_gates{0ull}, num_wires{0ull};
+
+    void report() const
+    {
+        std::cout << fmt::format("[i] total time  = {:>8.2f} secs\n", mockturtle::to_seconds(time_total));
+        std::cout << fmt::format("[i] layout size = {} × {}\n", x_size, y_size);
+        std::cout << fmt::format("[i] num. gates  = {}\n", num_gates);
+        std::cout << fmt::format("[i] num. wires  = {}\n", num_wires);
+    }
 };
 
 namespace detail
@@ -165,10 +188,31 @@ bool is_east_south_colored(const Ntk& ntk) noexcept
     return is_properly_colored;
 }
 
+template <typename Ntk>
+uint32_t is_eastern_po_orientation_available(const coloring_container<Ntk>& ctn,
+                                             const mockturtle::node<Ntk>&   n) noexcept
+{
+    bool eastern_side_available = true;
+
+    // PO nodes can have a maximum of one other fanout
+    ctn.color_ntk.foreach_fanout(n,
+                                 [&ctn, &eastern_side_available, &n](const auto& fo)
+                                 {
+                                     // if that fanout is colored east, no PO can be placed there
+                                     if (ctn.color_ntk.color(ctn.color_ntk.get_node(fo)) == ctn.color_east)
+                                     {
+                                         eastern_side_available = false;
+                                     }
+                                     return false;
+                                 });
+
+    return eastern_side_available;
+}
+
 template <typename Lyt, typename Ntk>
 typename Lyt::aspect_ratio determine_layout_size(const coloring_container<Ntk>& ctn) noexcept
 {
-    uint64_t x = 1ull + ctn.color_ntk.num_pos(), y = ctn.color_ntk.num_pis() - 1 + ctn.color_ntk.num_pos();
+    uint64_t x = 0ull, y = ctn.color_ntk.num_pis() - 1;
     ctn.color_ntk.foreach_gate(
         [&ctn, &x, &y](const auto& g)
         {
@@ -180,6 +224,14 @@ typename Lyt::aspect_ratio determine_layout_size(const coloring_container<Ntk>& 
             {
                 ++x;
                 ++y;
+            }
+
+            if (ctn.color_ntk.is_po(g))
+            {
+                if (is_eastern_po_orientation_available(ctn, g))
+                    ++x;
+                else
+                    ++y;
             }
         });
 
@@ -339,20 +391,22 @@ template <typename Lyt, typename Ntk>
 class orthogonal_impl
 {
   public:
-    orthogonal_impl(const Ntk& src, const orthogonal_physical_design_params& p) :
+    orthogonal_impl(const Ntk& src, const orthogonal_physical_design_params& p, orthogonal_physical_design_stats& st) :
             ntk{mockturtle::fanout_view{fanout_substitution<topology_network>(src)}},
             ps{p},
+            pst{st},
             node2pos{ntk}
     {}
 
     Lyt run()
     {
+        // measure run time
+        mockturtle::stopwatch t{pst.time_total};
+        // compute a coloring
         auto ctn = east_south_coloring(ntk);
-
+        // instantiate the layout
         Lyt layout{determine_layout_size<Lyt>(ctn),
                    ps.number_of_clock_phases == 3 ? twoddwave_3_clocking : twoddwave_4_clocking};
-
-        debug::write_dot_network<decltype(ntk), topology_dot_drawer<decltype(ntk), true>>(ntk, "topo_ntk");
 
         // reserve PI nodes without positions
         ntk.foreach_pi([this, &layout]([[maybe_unused]] const auto& pi) { layout.create_pi(); });
@@ -398,8 +452,6 @@ class orthogonal_impl
                             // single fanin nodes should not be colored null
                             assert(false);
                         }
-
-//                        check_for_po();
                     }
                     // if node has two fanins
                     else if (fs.size() == 2)
@@ -457,28 +509,12 @@ class orthogonal_impl
                         }
 
                         node2pos[n] = connect_and_place(layout, ntk, n, pre1_t, pre2_t, t);
-
-//                        check_for_po();
-
                     }
-                    // if n is a PO node, reserve a tile for later PO insertion
+
+                    // create PO at applicable position
                     if (ntk.is_po(n))
                     {
-                        bool eastern_side_available = true;
-
-                        // PO nodes can have a maximum of one other fanout
-                        ntk.foreach_fanout(n,
-                                           [this, &ctn, &eastern_side_available, &n](const auto& fo)
-                                           {
-                                               // if that fanout is colored east, no PO can be placed there
-                                               if (ctn.color_ntk.color(ntk.get_node(fo)) == ctn.color_east)
-                                               {
-                                                   eastern_side_available = false;
-                                               }
-                                               return false;
-                                           });
-
-                        if (const auto n_s = node2pos[n]; eastern_side_available)
+                        if (const auto n_s = node2pos[n]; is_eastern_po_orientation_available(ctn, n))
                         {
                             layout.create_po(n_s, "", layout.east(static_cast<typename Lyt::tile>(n_s)));
                             ++latest_pos.x;
@@ -492,16 +528,13 @@ class orthogonal_impl
                 }
             });
 
-        //        // attach primary outputs
-        //        ntk.foreach_po(
-        //            [this, &layout](const auto& po)
-        //            {
-        //                const auto l_po = node2pos[ntk.get_node(po)];
-        //                layout.create_po(l_po, "", layout.east(static_cast<typename Lyt::tile>(l_po)));
-        //            });
-
         // restore possibly set signal names
         restore_names(ntk, layout, node2pos);
+
+        pst.x_size    = layout.x() + 1;
+        pst.y_size    = layout.y() + 1;
+        pst.num_gates = layout.num_gates();
+        pst.num_wires = layout.num_wires();
 
         return layout;
     }
@@ -510,6 +543,7 @@ class orthogonal_impl
     mockturtle::topo_view<mockturtle::fanout_view<topology_network>> ntk;
 
     orthogonal_physical_design_params ps;
+    orthogonal_physical_design_stats& pst;
 
     mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ntk)> node2pos;
 };
@@ -531,14 +565,26 @@ class orthogonal_impl
  * It is not meant to be used for arranging fabricable circuits, as area is far from being optimal.
  */
 template <typename Lyt, typename Ntk>
-Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {})
+Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
+               orthogonal_physical_design_stats* pst = nullptr)
 {
     static_assert(mockturtle::is_network_type_v<Lyt>, "Lyt is not a network type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
-    detail::orthogonal_impl<Lyt, Ntk> p{ntk, ps};
+    orthogonal_physical_design_stats  st{};
+    detail::orthogonal_impl<Lyt, Ntk> p{ntk, ps, st};
 
     auto result = p.run();
+
+    if (ps.verbose)
+    {
+        st.report();
+    }
+
+    if (pst)
+    {
+        *pst = st;
+    }
 
     return result;
 }

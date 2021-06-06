@@ -8,11 +8,11 @@
 
 #include <fiction/algorithms/fanout_substitution.hpp>
 #include <fiction/algorithms/orthogonal.hpp>
+#include <fiction/io/print_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/topology_network.hpp>
-#include <fiction/io/print_layout.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/fanout_view.hpp>
@@ -21,7 +21,7 @@
 
 using namespace fiction;
 
-TEST_CASE("South-east coloring", "[algorithms]")
+TEST_CASE("East-south coloring", "[algorithms]")
 {
     const auto check = [](const auto& net)
     {
@@ -49,7 +49,7 @@ TEST_CASE("Layout equivalence", "[algorithms]")
 
         print_gate_level_layout(std::cout, layout);
 
-//        check_eq(net, layout);
+        check_eq(net, layout);
     };
 
     check(mockturtle::fanout_view{
