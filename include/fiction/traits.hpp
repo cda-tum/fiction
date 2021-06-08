@@ -66,6 +66,63 @@ template <class Ntk>
 inline constexpr bool has_is_fanout_v = has_is_fanout<Ntk>::value;
 #pragma endregion
 
+#pragma region has_is_nand
+template <class Ntk, class = void>
+struct has_is_nand : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_nand<Ntk, std::void_t<decltype(std::declval<Ntk>().is_nand(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_nand_v = has_is_nand<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_nor
+template <class Ntk, class = void>
+struct has_is_nor : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_nor<Ntk, std::void_t<decltype(std::declval<Ntk>().is_nor(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_nor_v = has_is_nor<Ntk>::value;
+#pragma endregion
+
+#pragma region has_create_dot
+template <class Ntk, class = void>
+struct has_create_dot : std::false_type
+{};
+
+template <class Ntk>
+struct has_create_dot<Ntk, std::void_t<decltype(std::declval<Ntk>().create_dot(
+                               std::declval<mockturtle::signal<Ntk>>(), std::declval<mockturtle::signal<Ntk>>(),
+                               std::declval<mockturtle::signal<Ntk>>()))>> : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_create_dot_v = has_create_dot<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_dot
+template <class Ntk, class = void>
+struct has_is_dot : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_dot<Ntk, std::void_t<decltype(std::declval<Ntk>().is_dot(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_dot_v = has_is_dot<Ntk>::value;
+#pragma endregion
+
 // TODO is_topology_network
 
 }  // namespace fiction

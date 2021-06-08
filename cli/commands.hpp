@@ -16,6 +16,7 @@
 #include "cmd/random.hpp"
 #include "cmd/simulate.hpp"
 #include "cmd/akers.hpp"
+#include "cmd/map.hpp"
 //#include "cmd/exact.hpp"
 //#include "cmd/onepass.hpp"
 //#include "cmd/ortho.hpp"
