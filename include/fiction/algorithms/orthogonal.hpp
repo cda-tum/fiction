@@ -54,7 +54,7 @@ struct orthogonal_physical_design_stats
 
     void report() const
     {
-        std::cout << fmt::format("[i] total time  = {:>8.2f} secs\n", mockturtle::to_seconds(time_total));
+        std::cout << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
         std::cout << fmt::format("[i] layout size = {} × {}\n", x_size, y_size);
         std::cout << fmt::format("[i] num. gates  = {}\n", num_gates);
         std::cout << fmt::format("[i] num. wires  = {}\n", num_wires);
@@ -401,7 +401,7 @@ class orthogonal_impl
     Lyt run()
     {
         // measure run time
-        mockturtle::stopwatch t{pst.time_total};
+        mockturtle::stopwatch stop{pst.time_total};
         // compute a coloring
         auto ctn = east_south_coloring(ntk);
         // instantiate the layout

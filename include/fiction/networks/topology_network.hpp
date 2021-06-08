@@ -124,12 +124,12 @@ class topology_network : public mockturtle::klut_network
      */
     signal _create_node(std::vector<signal> const& children, uint32_t literal)
     {
-        storage::element_type::node_type node;
-        std::copy(children.begin(), children.end(), std::back_inserter(node.children));
-        node.data[1].h1 = literal;
+        storage::element_type::node_type node_data;
+        std::copy(children.begin(), children.end(), std::back_inserter(node_data.children));
+        node_data.data[1].h1 = literal;
 
         const auto index = _storage->nodes.size();
-        _storage->nodes.push_back(node);
+        _storage->nodes.push_back(node_data);
 
         /* increase ref-count to children */
         for (auto c : children) { _storage->nodes[c].data[0].h1++; }

@@ -37,6 +37,10 @@ TEST_CASE("East-south coloring", "[algorithms]")
         fanout_substitution<topology_network>(blueprints::maj4_network<mockturtle::aig_network>())});
     check(mockturtle::fanout_view{
         fanout_substitution<topology_network>(blueprints::se_coloring_corner_case_network<topology_network>())});
+    check(mockturtle::fanout_view{fanout_substitution<topology_network>(
+        blueprints::fanout_substitution_corner_case_network<topology_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<topology_network>(blueprints::nary_operation_network<topology_network>())});
 }
 
 TEST_CASE("Layout equivalence", "[algorithms]")
@@ -45,7 +49,9 @@ TEST_CASE("Layout equivalence", "[algorithms]")
 
     const auto check = [](const auto& net)
     {
-        auto layout = orthogonal<gate_layout>(net);
+        orthogonal_physical_design_params params{true};
+        orthogonal_physical_design_stats stats;
+        auto layout = orthogonal<gate_layout>(net, params, &stats);
 
         print_gate_level_layout(std::cout, layout);
 
@@ -60,4 +66,8 @@ TEST_CASE("Layout equivalence", "[algorithms]")
         fanout_substitution<topology_network>(blueprints::maj4_network<mockturtle::aig_network>())});
     check(mockturtle::fanout_view{
         fanout_substitution<topology_network>(blueprints::se_coloring_corner_case_network<topology_network>())});
+    check(mockturtle::fanout_view{fanout_substitution<topology_network>(
+        blueprints::fanout_substitution_corner_case_network<topology_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<topology_network>(blueprints::nary_operation_network<topology_network>())});
 }

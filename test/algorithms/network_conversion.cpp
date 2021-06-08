@@ -83,21 +83,18 @@ TEST_CASE("Complex network conversion", "[algorithms]")
 {
     SECTION("MIG to X")
     {
-        auto mig = blueprints::maj4_network<mockturtle::mig_network>();
-
-        to_x(mig);
+        to_x(blueprints::maj4_network<mockturtle::mig_network>());
+        to_x(blueprints::nary_operation_network<mockturtle::mig_network>());
     }
     SECTION("AIG to X")
     {
-        auto aig = blueprints::maj4_network<mockturtle::aig_network>();
-
-        to_x(aig);
+        to_x(blueprints::maj4_network<mockturtle::aig_network>());
+        to_x(blueprints::nary_operation_network<mockturtle::aig_network>());
     }
     SECTION("TOP to X")
     {
-        auto top = blueprints::maj4_network<fiction::topology_network>();
-
-        to_x(top);
+        to_x(blueprints::maj4_network<fiction::topology_network>());
+        to_x(blueprints::nary_operation_network<fiction::topology_network>());
     }
 }
 

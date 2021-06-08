@@ -245,6 +245,30 @@ TEST_CASE("create binary operations in a topology network", "[topo]")
     CHECK(topo.size() == 7);  // no structural hashing
 }
 
+TEST_CASE("create n-ary operations in a topology network", "[topo]")
+{
+    topology_network topo;
+
+    CHECK(mockturtle::has_create_and_v<topology_network>);
+
+    const auto x1 = topo.create_pi();
+    const auto x2 = topo.create_pi();
+    const auto x3 = topo.create_pi();
+    const auto x4 = topo.create_pi();
+    const auto x5 = topo.create_pi();
+
+    CHECK(topo.size() == 7);
+
+    topo.create_nary_and({x1, x2, x3});
+    CHECK(topo.size() == 9);
+
+    topo.create_nary_or({x2, x3, x4});
+    CHECK(topo.size() == 11);
+
+    topo.create_nary_xor({x3, x4, x5});
+    CHECK(topo.size() == 13);
+}
+
 TEST_CASE("clone a node in a topology network", "[topo]")
 {
     topology_network topo1, topo2;

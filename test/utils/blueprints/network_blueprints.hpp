@@ -83,6 +83,28 @@ Ntk multi_output_and_network()
 }
 
 template <typename Ntk>
+Ntk nary_operation_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi();
+    const auto x2 = ntk.create_pi();
+    const auto x3 = ntk.create_pi();
+    const auto x4 = ntk.create_pi();
+    const auto x5 = ntk.create_pi();
+
+    const auto f1 = ntk.create_nary_and({x1, x2, x3});
+    const auto f2 = ntk.create_nary_or({x2, x3, x4});
+    const auto f3 = ntk.create_nary_xor({x3, x4, x5});
+
+    ntk.create_po(f1);
+    ntk.create_po(f2);
+    ntk.create_po(f3);
+
+    return ntk;
+}
+
+template <typename Ntk>
 Ntk se_coloring_corner_case_network()
 {
     Ntk ntk{};
