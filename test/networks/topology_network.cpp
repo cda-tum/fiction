@@ -5,6 +5,7 @@
 // This file is based on mockturtle/test/networks/klut.cpp
 
 #include <fiction/networks/topology_network.hpp>
+#include <fiction/traits.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -19,7 +20,7 @@ using namespace fiction;
 
 TEST_CASE("create and use constants in a topology network", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     CHECK(mockturtle::has_size_v<topology_network>);
     CHECK(mockturtle::has_get_constant_v<topology_network>);
@@ -48,7 +49,7 @@ TEST_CASE("create and use constants in a topology network", "[topo]")
 
 TEST_CASE("create and use primary inputs in a topology network", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     CHECK(mockturtle::has_create_pi_v<topology_network>);
     CHECK(mockturtle::has_is_constant_v<topology_network>);
@@ -67,7 +68,7 @@ TEST_CASE("create and use primary inputs in a topology network", "[topo]")
 
 TEST_CASE("create and use primary outputs in a topology network", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     CHECK(mockturtle::has_create_po_v<topology_network>);
     CHECK(mockturtle::has_num_pos_v<topology_network>);
@@ -87,7 +88,7 @@ TEST_CASE("create and use primary outputs in a topology network", "[topo]")
 
 TEST_CASE("create and use register in a topology network", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     CHECK(mockturtle::has_foreach_po_v<topology_network>);
     CHECK(mockturtle::has_create_po_v<topology_network>);
@@ -207,7 +208,7 @@ TEST_CASE("create and use register in a topology network", "[topo]")
 
 TEST_CASE("create unary operations in a topology network", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     CHECK(mockturtle::has_create_buf_v<topology_network>);
     CHECK(mockturtle::has_create_not_v<topology_network>);
@@ -226,7 +227,7 @@ TEST_CASE("create unary operations in a topology network", "[topo]")
 
 TEST_CASE("create binary operations in a topology network", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     CHECK(mockturtle::has_create_and_v<topology_network>);
 
@@ -245,9 +246,46 @@ TEST_CASE("create binary operations in a topology network", "[topo]")
     CHECK(topo.size() == 7);  // no structural hashing
 }
 
+TEST_CASE("create ternary operations in a topology network", "[topo]")
+{
+    topology_network topo{};
+
+    REQUIRE(mockturtle::has_create_maj_v<topology_network>);
+    REQUIRE(fiction::has_create_dot_v<topology_network>);
+
+    const auto x1 = topo.create_pi();
+    const auto x2 = topo.create_pi();
+    const auto x3 = topo.create_pi();
+
+    CHECK(topo.size() == 5);
+
+    const auto f1 = topo.create_maj(x1, x2, x3);
+    CHECK(topo.size() == 6);
+
+    const auto f2 = topo.create_maj(x1, x2, topo.get_constant(false));
+    CHECK(topo.size() == 7);
+    CHECK(f1 != f2);
+
+    const auto f3 = topo.create_maj(x1, x2, topo.get_constant(true));
+    CHECK(topo.size() == 8);
+    CHECK(f2 != f3);
+
+
+    const auto f4 = topo.create_dot(x1, x2, x3);
+    CHECK(topo.size() == 9);
+
+    const auto f5 = topo.create_dot(x1, x2, topo.get_constant(false));
+    CHECK(topo.size() == 10);
+    CHECK(f4 != f5);
+
+    const auto f6 = topo.create_dot(x1, x2, topo.get_constant(true));
+    CHECK(topo.size() == 11);
+    CHECK(f5 != f6);
+}
+
 TEST_CASE("create n-ary operations in a topology network", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     CHECK(mockturtle::has_create_and_v<topology_network>);
 
@@ -292,7 +330,7 @@ TEST_CASE("clone a node in a topology network", "[topo]")
 
 TEST_CASE("compute functions from AND and NOT gates in topology networks", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     const auto a = topo.create_pi();
     const auto b = topo.create_pi();
@@ -315,7 +353,7 @@ TEST_CASE("compute functions from AND and NOT gates in topology networks", "[top
 
 TEST_CASE("create nodes and compute a function in a topology network", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     CHECK(mockturtle::has_create_node_v<topology_network>);
     CHECK(mockturtle::has_compute_v<topology_network, kitty::dynamic_truth_table>);
@@ -357,7 +395,7 @@ TEST_CASE("create nodes and compute a function in a topology network", "[topo]")
 
 TEST_CASE("hash nodes in topology network", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     const auto a = topo.create_pi();
     const auto b = topo.create_pi();
@@ -379,7 +417,7 @@ TEST_CASE("hash nodes in topology network", "[topo]")
 
 TEST_CASE("subsitute node by another", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     const auto c0 = topo.get_node(topo.get_constant(false));
     const auto c1 = topo.get_node(topo.get_constant(true));
@@ -438,7 +476,7 @@ TEST_CASE("subsitute node by another", "[topo]")
 
 TEST_CASE("structural properties of a topology network", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     CHECK(mockturtle::has_size_v<topology_network>);
     CHECK(mockturtle::has_num_pis_v<topology_network>);
@@ -472,7 +510,7 @@ TEST_CASE("structural properties of a topology network", "[topo]")
 
 TEST_CASE("Node functions of a topology network", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     CHECK(mockturtle::has_is_and_v<topology_network>);
     CHECK(mockturtle::has_is_or_v<topology_network>);
@@ -487,30 +525,39 @@ TEST_CASE("Node functions of a topology network", "[topo]")
     const auto x3 = topo.create_pi();
 
     const auto and_signal  = topo.create_and(x1, x2);
+    const auto nand_signal = topo.create_nand(x1, x2);
     const auto or_signal   = topo.create_or(x1, x2);
+    const auto nor_signal  = topo.create_nor(x1, x2);
     const auto xor2_signal = topo.create_xor(x1, x2);
     const auto maj_signal  = topo.create_maj(x1, x2, x3);
+    const auto dot_signal  = topo.create_dot(x1, x2, x3);
     const auto ite_signal  = topo.create_ite(x1, x2, x3);
     const auto xor3_signal = topo.create_xor3(x1, x2, x3);
 
     topo.create_po(and_signal);
+    topo.create_po(nand_signal);
     topo.create_po(or_signal);
+    topo.create_po(nor_signal);
     topo.create_po(xor2_signal);
     topo.create_po(maj_signal);
+    topo.create_po(dot_signal);
     topo.create_po(ite_signal);
     topo.create_po(xor3_signal);
 
     CHECK(topo.is_and(topo.get_node(and_signal)));
+    CHECK(topo.is_nand(topo.get_node(nand_signal)));
     CHECK(topo.is_or(topo.get_node(or_signal)));
+    CHECK(topo.is_nor(topo.get_node(nor_signal)));
     CHECK(topo.is_xor(topo.get_node(xor2_signal)));
     CHECK(topo.is_maj(topo.get_node(maj_signal)));
+    CHECK(topo.is_dot(topo.get_node(dot_signal)));
     CHECK(topo.is_ite(topo.get_node(ite_signal)));
     CHECK(topo.is_xor3(topo.get_node(xor3_signal)));
 }
 
 TEST_CASE("node and signal iteration in a topology network", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     CHECK(mockturtle::has_foreach_node_v<topology_network>);
     CHECK(mockturtle::has_foreach_pi_v<topology_network>);
@@ -634,7 +681,7 @@ TEST_CASE("node and signal iteration in a topology network", "[topo]")
 
 TEST_CASE("custom node values in topology networks", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     CHECK(mockturtle::has_clear_values_v<topology_network>);
     CHECK(mockturtle::has_value_v<topology_network>);
@@ -669,7 +716,7 @@ TEST_CASE("custom node values in topology networks", "[topo]")
 
 TEST_CASE("visited values in topology networks", "[topo]")
 {
-    topology_network topo;
+    topology_network topo{};
 
     CHECK(mockturtle::has_clear_visited_v<topology_network>);
     CHECK(mockturtle::has_visited_v<topology_network>);

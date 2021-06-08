@@ -12,18 +12,26 @@ namespace fiction
 {
 
 template <typename NtkSrc, typename NtkDest>
-void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest,
-                   mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc>& old2new) noexcept
+void restore_network_name(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
 {
+    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
+    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
+
     if constexpr (mockturtle::has_get_network_name_v<NtkSrc> && mockturtle::has_set_network_name_v<NtkDest>)
     {
         ntk_dest.set_network_name(ntk_src.get_network_name());
     }
+}
+
+template <typename NtkSrc, typename NtkDest>
+void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest,
+                   mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc>& old2new) noexcept
+{
+    restore_network_name(ntk_src, ntk_dest);
 
     if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> &&
                   mockturtle::has_set_name_v<NtkDest>)
     {
-        static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrcSrc is not a network type");
         static_assert(mockturtle::has_foreach_node_v<NtkSrc>, "NtkSrc does not implement the foreach_node function");
         static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin function");
         static_assert(mockturtle::has_foreach_po_v<NtkSrc>, "NtkSrc does not implement the foreach_po function");

@@ -16,6 +16,21 @@ namespace fiction
 class topology_network : public mockturtle::klut_network
 {
   public:
+#pragma region Types and constructors
+
+    topology_network() : mockturtle::klut_network()
+    {
+        add_additional_functions();
+    }
+
+    explicit topology_network(std::shared_ptr<mockturtle::klut_storage> storage) :
+            mockturtle::klut_network(std::move(storage))
+    {
+        add_additional_functions();
+    }
+
+#pragma endregion
+
 #pragma region Primary I / O and functions
 
     [[nodiscard]] bool is_po(node const& n) const
@@ -62,6 +77,11 @@ class topology_network : public mockturtle::klut_network
         return _create_node({a, b}, 6);
     }
 
+    signal create_nor(signal a, signal b)
+    {
+        return _create_node({a, b}, 7);
+    }
+
     signal create_lt(signal a, signal b)
     {
         return _create_node({a, b}, 8);
@@ -93,6 +113,11 @@ class topology_network : public mockturtle::klut_network
     signal create_xor3(signal a, signal b, signal c)
     {
         return _create_node({a, b, c}, 18);
+    }
+
+    signal create_dot(signal a, signal b, signal c)
+    {
+        return _create_node({a, b, c}, 20);
     }
 #pragma endregion
 
@@ -182,9 +207,19 @@ class topology_network : public mockturtle::klut_network
         return _storage->nodes[n].data[1].h1 == 4;
     }
 
+    [[nodiscard]] bool is_nand(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 5;
+    }
+
     [[nodiscard]] bool is_or(node const& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 6;
+    }
+
+    [[nodiscard]] bool is_nor(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 7;
     }
 
     [[nodiscard]] bool is_xor(node const& n) const noexcept
@@ -207,7 +242,23 @@ class topology_network : public mockturtle::klut_network
         return _storage->nodes[n].data[1].h1 == 18;
     }
 
+    [[nodiscard]] bool is_dot(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 20;
+    }
+
 #pragma endregion
+
+  protected:
+    void add_additional_functions() noexcept
+    {
+        // create dot function: a xor (c or a and b)
+        static uint64_t dot = 0x52;
+
+        kitty::dynamic_truth_table tt_dot(3);
+        kitty::create_from_words(tt_dot, &dot, &dot + 1);
+        _storage->data.cache.insert(tt_dot);
+    }
 };
 
 }  // namespace fiction

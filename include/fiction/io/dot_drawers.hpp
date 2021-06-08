@@ -58,6 +58,27 @@ class topology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
                 return "paleturquoise";
             }
         }
+        if constexpr (has_is_nand_v<Ntk>)
+        {
+            if (ntk.is_nand(n))
+            {
+                return "lightcoral";
+            }
+        }
+        if constexpr (has_is_nor_v<Ntk>)
+        {
+            if (ntk.is_nor(n))
+            {
+                return "palegreen2";
+            }
+        }
+        if constexpr (has_is_dot_v<Ntk>)
+        {
+            if (ntk.is_dot(n))
+            {
+                return "thistle";
+            }
+        }
 
         return mockturtle::gate_dot_drawer<Ntk>::node_fillcolor(ntk, n);
     }
@@ -84,6 +105,27 @@ class topology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
             if (ntk.is_inv(n))
             {
                 return "INV";
+            }
+        }
+        if constexpr (has_is_nand_v<Ntk>)
+        {
+            if (ntk.is_nand(n))
+            {
+                return "NAND";
+            }
+        }
+        if constexpr (has_is_nor_v<Ntk>)
+        {
+            if (ntk.is_nor(n))
+            {
+                return "NOR";
+            }
+        }
+        if constexpr (has_is_dot_v<Ntk>)
+        {
+            if (ntk.is_dot(n))
+            {
+                return "DOT";
             }
         }
 
