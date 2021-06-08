@@ -62,6 +62,7 @@ TEST_CASE("Tiles", "[tile-based")
         {0x0000000000000000, tile_based_layout::tile{0, 0, 0}},
         {0x4000000000000000, tile_based_layout::tile{0, 0, 1}},
         {0x4000000080000001, tile_based_layout::tile{1, 1, 1}},
+        {0x0000000000000002, tile_based_layout::tile{2, 0, 0}},
         {0x3fffffffffffffff, tile_based_layout::tile{2147483647, 2147483647, 0}}};
 
     for (auto [repr, tile] : tile_repr)
@@ -69,6 +70,8 @@ TEST_CASE("Tiles", "[tile-based")
         CHECK(static_cast<tile_based_layout::tile>(repr) == tile);
         CHECK(repr == static_cast<uint64_t>(tile));
         CHECK(tile_based_layout::tile{repr} == tile);
+        CHECK(tile_based_layout::tile{tile} == tile);
+        CHECK(tile_based_layout::tile{static_cast<uint64_t>(tile)} == tile);
     }
 
     std::ostringstream os{};
@@ -177,6 +180,8 @@ TEST_CASE("Cardinal operations", "[tile-based]")
 
     check(t, layout.north(t), nt, bnt, layout.north(bnt));
     CHECK(layout.is_north_of(t, nt));
+    CHECK(layout.is_northwards_of(t, nt));
+    CHECK(layout.is_northwards_of(t, bnt));
     CHECK(layout.is_northern_border(bnt));
 
     auto et  = tile_based_layout::tile{6, 5};
@@ -184,6 +189,8 @@ TEST_CASE("Cardinal operations", "[tile-based]")
 
     check(t, layout.east(t), et, bet, layout.east(bet));
     CHECK(layout.is_east_of(t, et));
+    CHECK(layout.is_eastwards_of(t, et));
+    CHECK(layout.is_eastwards_of(t, bet));
     CHECK(layout.is_eastern_border(bet));
 
     auto st  = tile_based_layout::tile{5, 6};
@@ -191,6 +198,8 @@ TEST_CASE("Cardinal operations", "[tile-based]")
 
     check(t, layout.south(t), st, bst, layout.south(bst));
     CHECK(layout.is_south_of(t, st));
+    CHECK(layout.is_southwards_of(t, st));
+    CHECK(layout.is_southwards_of(t, bst));
     CHECK(layout.is_southern_border(bst));
 
     auto wt  = tile_based_layout::tile{4, 5};
@@ -198,6 +207,8 @@ TEST_CASE("Cardinal operations", "[tile-based]")
 
     check(t, layout.west(t), wt, bwt, layout.west(bwt));
     CHECK(layout.is_west_of(t, wt));
+    CHECK(layout.is_westwards_of(t, wt));
+    CHECK(layout.is_westwards_of(t, bwt));
     CHECK(layout.is_western_border(bwt));
 
     auto at  = tile_based_layout::tile{5, 5, 1};

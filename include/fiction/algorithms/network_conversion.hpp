@@ -13,14 +13,35 @@
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
+#include <type_traits>
+
 namespace fiction
 {
 
 namespace detail
 {
 
-template <typename NtkDest, typename NtkSrc>
+template <typename NtkDest, typename NtkSrc, bool is_same_ntk_type = std::is_same_v<NtkDest, NtkSrc>>
 class convert_network_impl
+{};
+
+template <typename NtkDest, typename NtkSrc>
+class convert_network_impl<NtkDest, NtkSrc, true>
+{
+  public:
+    explicit convert_network_impl(const NtkSrc& ntk_src) : ntk{ntk_src} {}
+
+    NtkDest run()
+    {
+        return ntk;
+    }
+
+  private:
+    NtkDest ntk;
+};
+
+template <typename NtkDest, typename NtkSrc>
+class convert_network_impl<NtkDest, NtkSrc, false>
 {
   public:
     explicit convert_network_impl(const NtkSrc& ntk_src) : ntk_topo{ntk_src} {}
@@ -66,18 +87,22 @@ class convert_network_impl
                 if (ntk_topo.is_and(g))
                 {
                     old2new[g] = ntk_dest.create_and(children[0], children[1]);
+                    return true;
                 }
                 else if (ntk_topo.is_or(g))
                 {
                     old2new[g] = ntk_dest.create_or(children[0], children[1]);
+                    return true;
                 }
                 else if (ntk_topo.is_xor(g))
                 {
                     old2new[g] = ntk_dest.create_xor(children[0], children[1]);
+                    return true;
                 }
                 else if (ntk_topo.is_maj(g))
                 {
                     old2new[g] = ntk_dest.create_maj(children[0], children[1], children[2]);
+                    return true;
                 }
                 else
                 {
@@ -87,36 +112,41 @@ class convert_network_impl
                         if (ntk_topo.is_nary_and(g))
                         {
                             old2new[g] = ntk_dest.create_nary_and(children);
+                            return true;
                         }
                     }
-                    else if constexpr (mockturtle::has_is_nary_or_v<TopoNtkSrc> &&
-                                       mockturtle::has_create_nary_or_v<NtkDest>)
+                    if constexpr (mockturtle::has_is_nary_or_v<TopoNtkSrc> && mockturtle::has_create_nary_or_v<NtkDest>)
                     {
                         if (ntk_topo.is_nary_or(g))
                         {
                             old2new[g] = ntk_dest.create_nary_or(children);
+                            return true;
                         }
                     }
-                    else if constexpr (mockturtle::has_is_nary_xor_v<TopoNtkSrc> &&
-                                       mockturtle::has_create_nary_xor_v<NtkDest>)
+                    if constexpr (mockturtle::has_is_nary_xor_v<TopoNtkSrc> &&
+                                  mockturtle::has_create_nary_xor_v<NtkDest>)
                     {
                         if (ntk_topo.is_nary_xor(g))
                         {
                             old2new[g] = ntk_dest.create_nary_xor(children);
+                            return true;
                         }
                     }
-                    else if constexpr (fiction::has_is_wire_v<TopoNtkSrc> && mockturtle::has_create_buf_v<NtkDest>)
+                    if constexpr (fiction::has_is_buf_v<TopoNtkSrc> && mockturtle::has_create_buf_v<NtkDest>)
                     {
-                        if (ntk_topo.is_wire(g))
+                        if (ntk_topo.is_buf(g))
                         {
                             old2new[g] = ntk_dest.create_buf(children[0]);
+                            return true;
                         }
                     }
-                    else if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> &&
-                                       mockturtle::has_create_node_v<NtkDest>)
+                    if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<NtkDest>)
                     {
                         old2new[g] = ntk_dest.create_node(children, ntk_topo.node_function(g));
+                        return true;
                     }
+
+                    return true;
                 }
             });
 
@@ -166,7 +196,6 @@ NtkDest convert_network(const NtkSrc& ntk)
     static_assert(mockturtle::has_create_or_v<NtkDest>, "NtkDest does not implement the create_or function");
     static_assert(mockturtle::has_create_xor_v<NtkDest>, "NtkDest does not implement the create_xor function");
     static_assert(mockturtle::has_create_maj_v<NtkDest>, "NtkDest does not implement the create_maj function");
-    // TODO finalize asserts
     // TODO handle ci/ro/etc...
 
     assert(ntk.is_combinational() && "Network has to be combinational");

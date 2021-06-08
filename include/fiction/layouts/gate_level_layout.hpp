@@ -300,10 +300,31 @@ class gate_level_layout : public ClockedLayout
         return {};
     }
 
-    void move_node(const node& n, const tile& t) noexcept
+    [[nodiscard]] signal make_signal(const node& n) const noexcept
     {
+        return static_cast<signal>(get_tile(n));
+    }
+
+    signal move_node(const node& n, const tile& t, const std::vector<signal>& new_children = {}) noexcept
+    {
+        auto& children = strg->nodes[n].children;
+        // decrease ref-count of children
+        std::for_each(children.begin(), children.end(),
+                      [this](const auto& c) { strg->nodes[get_node(c.index)].data[0].h1--; });
+        // clear n's children
+        children.clear();
+        // clear n's position
         clear_tile(get_tile(n));
+
+        // assign n to its new position
         assign_node(t, n);
+        // assign new children
+        std::copy(new_children.begin(), new_children.end(), std::back_inserter(children));
+        // increase ref-count to new children
+        std::for_each(new_children.cbegin(), new_children.cend(),
+                      [this, &n](const auto& nc) { strg->nodes[get_node(nc)].data[0].h1++; });
+
+        return static_cast<signal>(t);
     }
 
     [[nodiscard]] bool is_complemented([[maybe_unused]] const signal& s) const noexcept
@@ -326,9 +347,14 @@ class gate_level_layout : public ClockedLayout
         return strg->nodes[n].data[1].h1 >= 2 && !is_pi(n);
     }
 
-    [[nodiscard]] bool is_wire(const node n) const noexcept
+    [[nodiscard]] bool is_buf(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 2;
+    }
+
+    [[nodiscard]] bool is_wire(const node n) const noexcept
+    {
+        return is_buf(n);
     }
 
     [[nodiscard]] bool is_negation(const node n) const noexcept

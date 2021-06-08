@@ -10,6 +10,9 @@
 namespace fiction
 {
 
+/**
+ * Reimplement all node creation functions to disable structural hashing.
+ */
 class topology_network : public mockturtle::klut_network
 {
   public:
@@ -36,6 +39,82 @@ class topology_network : public mockturtle::klut_network
         return _create_node({a}, 2);
     }
 
+    signal create_not(signal const& a)
+    {
+        return _create_node({a}, 3);
+    }
+
+#pragma endregion
+
+#pragma region Create binary functions
+    signal create_and(signal a, signal b)
+    {
+        return _create_node({a, b}, 4);
+    }
+
+    signal create_nand(signal a, signal b)
+    {
+        return _create_node({a, b}, 5);
+    }
+
+    signal create_or(signal a, signal b)
+    {
+        return _create_node({a, b}, 6);
+    }
+
+    signal create_lt(signal a, signal b)
+    {
+        return _create_node({a, b}, 8);
+    }
+
+    signal create_le(signal a, signal b)
+    {
+        return _create_node({a, b}, 11);
+    }
+
+    signal create_xor(signal a, signal b)
+    {
+        return _create_node({a, b}, 12);
+    }
+#pragma endregion
+
+#pragma region Create ternary functions
+
+    signal create_maj(signal a, signal b, signal c)
+    {
+        return _create_node({a, b, c}, 14);
+    }
+
+    signal create_ite(signal a, signal b, signal c)
+    {
+        return _create_node({a, b, c}, 16);
+    }
+
+    signal create_xor3(signal a, signal b, signal c)
+    {
+        return _create_node({a, b, c}, 18);
+    }
+#pragma endregion
+
+#pragma region Create nary functions
+
+    signal create_nary_and(std::vector<signal> const& fs)
+    {
+        return mockturtle::tree_reduce(fs.begin(), fs.end(), get_constant(true),
+                                       [this](auto const& a, auto const& b) { return create_and(a, b); });
+    }
+
+    signal create_nary_or(std::vector<signal> const& fs)
+    {
+        return mockturtle::tree_reduce(fs.begin(), fs.end(), get_constant(false),
+                                       [this](auto const& a, auto const& b) { return create_or(a, b); });
+    }
+
+    signal create_nary_xor(std::vector<signal> const& fs)
+    {
+        return mockturtle::tree_reduce(fs.begin(), fs.end(), get_constant(false),
+                                       [this](auto const& a, auto const& b) { return create_xor(a, b); });
+    }
 #pragma endregion
 
 #pragma region Create arbitrary functions
@@ -45,13 +124,12 @@ class topology_network : public mockturtle::klut_network
      */
     signal _create_node(std::vector<signal> const& children, uint32_t literal)
     {
-        storage::element_type::node_type node;
-        std::copy(children.begin(), children.end(), std::back_inserter(node.children));
-        node.data[1].h1 = literal;
+        storage::element_type::node_type node_data;
+        std::copy(children.begin(), children.end(), std::back_inserter(node_data.children));
+        node_data.data[1].h1 = literal;
 
         const auto index = _storage->nodes.size();
-        _storage->nodes.push_back(node);
-        _storage->hash[node] = index;
+        _storage->nodes.push_back(node_data);
 
         /* increase ref-count to children */
         for (auto c : children) { _storage->nodes[c].data[0].h1++; }
@@ -61,6 +139,23 @@ class topology_network : public mockturtle::klut_network
         for (auto const& fn : _events->on_add) { (*fn)(index); }
 
         return index;
+    }
+
+    signal create_node(std::vector<signal> const& children, kitty::dynamic_truth_table const& function)
+    {
+        if (children.size() == 0u)
+        {
+            assert(function.num_vars() == 0u);
+            return get_constant(!kitty::is_const0(function));
+        }
+        return _create_node(children, _storage->data.cache.insert(function));
+    }
+
+    signal clone_node(klut_network const& other, node const& source, std::vector<signal> const& children)
+    {
+        assert(!children.empty());
+        const auto tt = other._storage->data.cache[other._storage->nodes[source].data[1].h1];
+        return create_node(children, tt);
     }
 
 #pragma endregion

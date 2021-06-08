@@ -2,6 +2,7 @@
 // Created by marcel on 19.05.21.
 //
 
+#include "../utils/blueprints/layout_blueprints.hpp"
 #include "catch.hpp"
 
 #include <fiction/io/print_layout.hpp>
@@ -13,7 +14,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Print layout", "[gate-level]")
+TEST_CASE("Print simple layout", "[gate-level]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
 
@@ -62,4 +63,25 @@ TEST_CASE("Print layout", "[gate-level]")
 
         CHECK(layout_print == print_stream.str());
     }
+}
+
+TEST_CASE("Print crossing layout", "[gate-level]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+
+    auto layout = blueprints::crossing_layout<gate_layout>();
+
+    const auto layout_print = "        \n"
+                              "▢ I I ▢ \n"
+                              "  ↓ ↓   \n"
+                              "I→&→+→O \n"
+                              "    ↓   \n"
+                              "I→=→&→O \n"
+                              "\n";
+
+    std::stringstream print_stream{};
+
+    print_gate_level_layout(print_stream, layout, false, false);
+
+    CHECK(layout_print == print_stream.str());
 }

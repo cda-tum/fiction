@@ -132,6 +132,13 @@ class fanout_substitution_impl
 
     void generate_fanout_tree(const mockturtle::node<NtkSrc>& n)
     {
+        // skip fanout tree generation if n is a proper fanout node
+        if constexpr (has_is_fanout_v<NtkDest>)
+        {
+            if (ntk_topo.is_fanout(n) && ntk_topo.fanout_size(n) <= ps.degree)
+                return;
+        }
+
         auto num_fanouts = static_cast<uint32_t>(
             std::ceil(static_cast<double>(std::max(
                           static_cast<int32_t>(ntk_topo.fanout_size(n)) - static_cast<int32_t>(ps.threshold), 0)) /
