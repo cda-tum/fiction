@@ -38,9 +38,9 @@ ALICE_DESCRIBE_STORE(fiction::truth_table_t, tt)
 ALICE_PRINT_STORE_STATISTICS(fiction::truth_table_t, os, tt)
 {
     if (tt->num_vars() <= 6)
-        os << fmt::format(" {} vars, hex: {}, bin: {}", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
+        os << fmt::format(" {} vars, hex: {}, bin: {}\n", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
     else
-        os << fmt::format(" {} vars, (description omitted due to truth table size)", tt->num_vars());
+        os << fmt::format(" {} vars, (description omitted due to truth table size)\n", tt->num_vars());
 }
 
 ALICE_LOG_STORE_STATISTICS(fiction::truth_table_t, tt)
