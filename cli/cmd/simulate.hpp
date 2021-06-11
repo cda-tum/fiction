@@ -91,7 +91,7 @@ class simulate_command : public command
             }
             if (!is_set("silent"))
             {
-                env->out() << fmt::format(" {} - hex: {}, bin: {}", po_names[i], kitty::to_hex(tables[i]),
+                env->out() << fmt::format("[i] {} - hex: {}, bin: {}", po_names[i], kitty::to_hex(tables[i]),
                                           kitty::to_binary(tables[i]))
                            << std::endl;
             }

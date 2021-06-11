@@ -56,7 +56,7 @@ class topology_network : public mockturtle::klut_network
 
     signal create_not(signal const& a)
     {
-        return _create_node({a}, 3);
+        return is_constant(a) ? get_constant(!constant_value(a)) : _create_node({a}, 3);
     }
 
 #pragma endregion

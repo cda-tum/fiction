@@ -105,6 +105,23 @@ Ntk nary_operation_network()
 }
 
 template <typename Ntk>
+Ntk constant_gate_input_maj_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi();
+    const auto x2 = ntk.create_pi();
+
+    const auto a1 = ntk.create_and(x1, x2);
+    const auto m1 = ntk.create_maj(x1, x2, ntk.get_constant(true));
+    const auto a2 = ntk.create_and(ntk.create_not(a1), m1);
+
+    ntk.create_po(a2);
+
+    return ntk;
+}
+
+template <typename Ntk>
 Ntk se_coloring_corner_case_network()
 {
     Ntk ntk{};

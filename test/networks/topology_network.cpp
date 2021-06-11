@@ -393,6 +393,42 @@ TEST_CASE("create nodes and compute a function in a topology network", "[topo]")
     CHECK(sim_xor == (xs[0] ^ xs[1] ^ xs[2]));
 }
 
+TEST_CASE("create fanouts and nodes and compute a function in a topology network", "[topo]")
+{
+    topology_network topo{};
+
+    CHECK(mockturtle::has_create_node_v<topology_network>);
+    CHECK(mockturtle::has_compute_v<topology_network, kitty::dynamic_truth_table>);
+
+    const auto a = topo.create_pi();
+    const auto b = topo.create_pi();
+    const auto c = topo.create_pi();
+
+    kitty::dynamic_truth_table tt_maj(3u), tt_xor(3u);
+    kitty::create_from_hex_string(tt_maj, "e8");
+    kitty::create_from_hex_string(tt_xor, "96");
+
+    const auto _foa  = topo.create_buf(a);
+    const auto _fob  = topo.create_buf(b);
+    const auto _foc  = topo.create_buf(c);
+    const auto _maj = topo.create_node({_foa, _fob, _foc}, tt_maj);
+    const auto _xor = topo.create_node({_foa, _fob, _foc}, tt_xor);
+
+    std::vector<kitty::dynamic_truth_table> xs;
+    xs.emplace_back(3u);
+    xs.emplace_back(3u);
+    xs.emplace_back(3u);
+    kitty::create_nth_var(xs[0], 0);
+    kitty::create_nth_var(xs[1], 1);
+    kitty::create_nth_var(xs[2], 2);
+
+    const auto sim_maj = topo.compute(topo.get_node(_maj), xs.begin(), xs.end());
+    const auto sim_xor = topo.compute(topo.get_node(_xor), xs.begin(), xs.end());
+
+    CHECK(sim_maj == kitty::ternary_majority(xs[0], xs[1], xs[2]));
+    CHECK(sim_xor == (xs[0] ^ xs[1] ^ xs[2]));
+}
+
 TEST_CASE("hash nodes in topology network", "[topo]")
 {
     topology_network topo{};
