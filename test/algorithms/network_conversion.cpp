@@ -98,6 +98,18 @@ TEST_CASE("Complex network conversion", "[algorithms]")
     }
 }
 
+TEST_CASE("Constant inverted signal recovery conversion", "[algorithms]")
+{
+    SECTION("MIG to X")
+    {
+        to_x(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
+    }
+    SECTION("AIG to X")
+    {
+        to_x(blueprints::constant_gate_input_maj_network<mockturtle::aig_network>());
+    }
+}
+
 TEST_CASE("Layout conversion", "[algorithms]")
 {
     SECTION("Gate layout to X")

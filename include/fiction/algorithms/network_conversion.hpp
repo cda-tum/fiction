@@ -56,25 +56,15 @@ class convert_network_impl<NtkDest, NtkSrc, false>
         {
             std::vector<typename NtkDest::signal> children{};
 
-            ntk_topo.foreach_fanin(
-                n,
-                [this, &ntk_dest, &old2new, &children](const auto& f)
-                {
-                    const auto fn         = ntk_topo.get_node(f);
-                    const auto tgt_signal = old2new[fn];
+            ntk_topo.foreach_fanin(n,
+                                   [this, &ntk_dest, &old2new, &children](const auto& f)
+                                   {
+                                       const auto fn         = ntk_topo.get_node(f);
+                                       const auto tgt_signal = old2new[fn];
 
-                    if (const auto cval = ntk_topo.constant_value(fn); ntk_topo.is_constant(fn))
-                    {
-                        // switch constant node polarity rather than inserting an inverter node
-                        children.emplace_back(ntk_topo.is_complemented(f) ? old2new[ntk_topo.get_constant(!cval)] :
-                                                                            tgt_signal);
-                    }
-                    else
-                    {
-                        children.emplace_back(ntk_topo.is_complemented(f) ? ntk_dest.create_not(tgt_signal) :
-                                                                            tgt_signal);
-                    }
-                });
+                                       children.emplace_back(
+                                           ntk_topo.is_complemented(f) ? ntk_dest.create_not(tgt_signal) : tgt_signal);
+                                   });
 
             return children;
         };
@@ -177,8 +167,6 @@ class convert_network_impl<NtkDest, NtkSrc, false>
     TopoNtkSrc ntk_topo;
 };
 }  // namespace detail
-
-// TODO overload for NtkDest = NtkSrc
 
 template <typename NtkDest, typename NtkSrc>
 NtkDest convert_network(const NtkSrc& ntk)
