@@ -38,9 +38,9 @@ ALICE_DESCRIBE_STORE(fiction::truth_table_t, tt)
 ALICE_PRINT_STORE_STATISTICS(fiction::truth_table_t, os, tt)
 {
     if (tt->num_vars() <= 6)
-        os << fmt::format(" {} vars, hex: {}, bin: {}\n", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
+        os << fmt::format("[i] {} vars, hex: {}, bin: {}\n", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
     else
-        os << fmt::format(" {} vars, (description omitted due to truth table size)\n", tt->num_vars());
+        os << fmt::format("[i] {} vars, (description omitted due to truth table size)\n", tt->num_vars());
 }
 
 ALICE_LOG_STORE_STATISTICS(fiction::truth_table_t, tt)
@@ -50,7 +50,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::truth_table_t, tt)
 
 ALICE_PRINT_STORE(fiction::truth_table_t, os, tt)
 {
-    os << fmt::format(" {} vars, hex: {}, bin: {}", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
+    os << fmt::format("[i] {} vars, hex: {}, bin: {}", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
 }
 
 /**
@@ -82,7 +82,7 @@ ALICE_PRINT_STORE_STATISTICS(fiction::logic_network_t, os, ln)
 
         mockturtle::depth_view depth_net{*net};
 
-        os << fmt::format("{} ({}) - I/O: {}/{}, gates: {}, level: {}\n", net->get_network_name(),
+        os << fmt::format("[i] {} ({}) - I/O: {}/{}, gates: {}, level: {}\n", net->get_network_name(),
                           fiction::ntk_type_name<Ntk>, net->num_pis(), net->num_pos(), net->num_gates(),
                           depth_net.depth());
     };
@@ -175,7 +175,7 @@ ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
     {
         mockturtle::depth_view depth_lyt{*lyt};
 
-        os << fmt::format("{} - {} × {}, gates: {}, wires: {}, CP: {}\n", lyt->get_network_name(), lyt->x() + 1,
+        os << fmt::format("[i] {} - {} × {}, gates: {}, wires: {}, CP: {}\n", lyt->get_network_name(), lyt->x() + 1,
                           lyt->y() + 1, lyt->num_gates(), lyt->num_wires(), depth_lyt.depth());
     };
 
@@ -193,6 +193,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             {"inputs", lyt->num_pis()},
             {"outputs", lyt->num_pos()},
             {"gates", lyt->num_gates()},
+            {"wires", lyt->num_wires()},
             // {"layout", {{"x-size", layout->x() + 1}, {"y-size", layout->y() + 1}, {"area", area}}},
             // {"bounding box", {{"x-size", bb.x_size}, {"y-size", bb.y_size}, {"area", bb.area()}}},
             // {"gate tiles", gate_tiles},
