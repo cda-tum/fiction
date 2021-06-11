@@ -9,8 +9,10 @@
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
+#include <kitty/print.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
+#include <mockturtle/networks/klut.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <nlohmann/json.hpp>
 
@@ -169,7 +171,7 @@ class equiv_command : public command
     template <typename Ntk1, typename Ntk2>
     void equivalence_checking(const Ntk1& ntk1, const Ntk2& ntk2)
     {
-        const auto equiv_check = [this](auto&& net_or_lyt1, auto&& net_or_lyt2)
+        const auto equiv_check = [this](auto&& net_or_lyt1, auto&& net_or_lyt2) -> bool
         {
             mockturtle::stopwatch stop{result.runtime};
 
@@ -181,25 +183,39 @@ class equiv_command : public command
 
                 auto eq = mockturtle::equivalence_checking(*miter, {}, &st);
 
-                result.eq = eq ? equiv_result::eq_type::STRONG : equiv_result::eq_type::WEAK;
+                if (eq.has_value())
+                {
+                    result.eq = *eq ? equiv_result::eq_type::STRONG : equiv_result::eq_type::NO;
 
-                if (!eq)
-                    result.counter_example = st.counter_example;
+                    if (!(*eq))
+                        result.counter_example = st.counter_example;
+                }
+                else
+                {
+                    env->out() << "[e] resource limit exceeded" << std::endl;
+                    return false;
+                }
             }
             else
             {
                 env->out() << "[w] both networks/layouts must have the same number of primary inputs and outputs"
                            << std::endl;
+                return false;
             }
+
+            return true;
         };
 
         const auto get_name = [](auto&& net_or_lyt) { return net_or_lyt->get_network_name(); };
 
-        std::visit(equiv_check, ntk1, ntk2);
+        bool success = std::visit(equiv_check, ntk1, ntk2);
 
-        env->out() << fmt::format("[i] {} and {} are{} equivalent", std::visit(get_name, ntk1),
-                                  std::visit(get_name, ntk2), result.eq == equiv_result::eq_type::NO ? " NOT" : "")
-                   << std::endl;
+        if (success)
+        {
+            env->out() << fmt::format("[i] {} and {} are{} equivalent", std::visit(get_name, ntk1),
+                                      std::visit(get_name, ntk2), result.eq == equiv_result::eq_type::NO ? " NOT" : "")
+                       << std::endl;
+        }
     }
 };
 
