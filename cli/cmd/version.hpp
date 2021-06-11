@@ -21,10 +21,10 @@ class version_command : public command
     /**
      * Standard constructor. Adds descriptive information, options, and flags.
      *
-     * @param env alice::environment that specifies stores etc.
+     * @param e alice::environment that specifies stores etc.
      */
-    explicit version_command(const environment::ptr& env) :
-            command(env, "Outputs the version string as well as build time and date.")
+    explicit version_command(const environment::ptr& e) :
+            command(e, "Outputs the version string as well as build time and date.")
     {}
 
   protected:

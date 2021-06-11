@@ -10,7 +10,7 @@
 #include <array>
 #include <functional>
 #include <optional>
-#include <string_view>
+#include <string>
 #include <type_traits>
 #include <unordered_map>
 
@@ -24,12 +24,12 @@ class clocking_scheme
     using clock_number   = uint8_t;
     using clock_function = std::function<clock_number(ClockZone)>;
 
-    explicit clocking_scheme(const std::string_view& name, clock_function fn, const clock_number cn = 4,
+    explicit clocking_scheme(const std::string& n, clock_function f, const clock_number cn = 4,
                              const bool r = true) noexcept :
-            name{name},
+            name{n},
             num_clocks{cn},
             regular{r},
-            fn{std::move(fn)}
+            fn{std::move(f)}
     {}
 
     clock_number operator()(ClockZone cz) const noexcept
@@ -64,7 +64,7 @@ class clocking_scheme
     /**
      * Name of the clocking scheme.
      */
-    const std::string_view name;
+    const std::string name;
     /**
      * Number of different clocks in this scheme.
      */

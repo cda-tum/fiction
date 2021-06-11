@@ -130,7 +130,7 @@ template <typename Ntk>
 class is_balanced_impl
 {
   public:
-    is_balanced_impl(const Ntk& ntk, network_balancing_params p) : ntk{ntk}, ntk_depth{ntk}, ps{p} {}
+    is_balanced_impl(const Ntk& src, network_balancing_params p) : ntk{src}, ntk_depth{src}, ps{p} {}
 
     bool run()
     {

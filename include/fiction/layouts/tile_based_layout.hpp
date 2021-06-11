@@ -35,11 +35,9 @@ class tile_based_layout
 
     using storage = std::shared_ptr<tile_based_layout_storage>;
 
-    explicit tile_based_layout(const aspect_ratio& aspect_ratio) :
-            strg{std::make_shared<tile_based_layout_storage>(aspect_ratio)}
-    {}
+    explicit tile_based_layout(const aspect_ratio& ar) : strg{std::make_shared<tile_based_layout_storage>(ar)} {}
 
-    explicit tile_based_layout(std::shared_ptr<tile_based_layout_storage> storage) : strg{std::move(storage)} {}
+    explicit tile_based_layout(std::shared_ptr<tile_based_layout_storage> s) : strg{std::move(s)} {}
 
 #pragma endregion
 

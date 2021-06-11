@@ -423,7 +423,11 @@ class orthogonal_impl
                     // if node is a PI, move it to its correct position
                     if (ntk.is_pi(n))
                     {
-                        node2pos[n] = layout.move_node(n, {0, latest_pos.y});
+                        node2pos[n] = layout.move_node(
+                            static_cast<mockturtle::node<Lyt>>(n),
+                            {0, latest_pos.y});  // this casts a network node to a Layout node. This only works because
+                                                 // topology_network and gate_level_layout use the same number of
+                                                 // constants followed by PIs
                         ++latest_pos.y;
                     }
                     // if n has only one fanin

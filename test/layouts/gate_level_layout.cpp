@@ -87,10 +87,10 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level]")
     layout.foreach_pi(
         [&](gate_layout::node pi, auto i)
         {
-            const auto check = [&layout, &pi](auto c, auto s)
+            const auto check = [&layout, &pi](auto p, auto s)
             {
                 auto t = layout.get_tile(pi);
-                CHECK(t == c);
+                CHECK(t == p);
                 auto n = layout.get_node(static_cast<gate_layout::signal>(t));
                 CHECK(n == layout.get_node(s));
                 auto tn = layout.get_tile(n);
@@ -417,21 +417,21 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_node(
         [&](auto n, auto i)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             counter += i;
         });
     CHECK(mask == 255);
     CHECK(counter == 28);
 
     mask = 0;
-    layout.foreach_node([&](auto n) { mask |= (1 << n); });
+    layout.foreach_node([&](auto n) { mask |= (1u << n); });
     CHECK(mask == 255);
 
     mask = counter = 0;
     layout.foreach_node(
         [&](auto n, auto i)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             counter += i;
             return false;
         });
@@ -442,7 +442,7 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_node(
         [&](auto n)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             return false;
         });
     CHECK(mask == 1);
@@ -452,21 +452,21 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_gate(
         [&](auto n, auto i)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             counter += i;
         });
     CHECK(mask == 240);
     CHECK(counter == 6);
 
     mask = 0;
-    layout.foreach_gate([&](auto n) { mask |= (1 << n); });
+    layout.foreach_gate([&](auto n) { mask |= (1u << n); });
     CHECK(mask == 240);
 
     mask = counter = 0;
     layout.foreach_gate(
         [&](auto n, auto i)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             counter += i;
             return false;
         });
@@ -477,7 +477,7 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_gate(
         [&](auto n)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             return false;
         });
     CHECK(mask == 16);
@@ -487,21 +487,21 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_wire(
         [&](auto n, auto i)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             counter += i;
         });
     CHECK(mask == 204);
     CHECK(counter == 6);
 
     mask = 0;
-    layout.foreach_wire([&](auto n) { mask |= (1 << n); });
+    layout.foreach_wire([&](auto n) { mask |= (1u << n); });
     CHECK(mask == 204);
 
     mask = counter = 0;
     layout.foreach_wire(
         [&](auto n, auto i)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             counter += i;
             return false;
         });
@@ -512,7 +512,7 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_wire(
         [&](auto n)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             return false;
         });
     CHECK(mask == 4);
@@ -522,21 +522,21 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_pi(
         [&](auto n, auto i)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             counter += i;
         });
     CHECK(mask == 12);
     CHECK(counter == 1);
 
     mask = 0;
-    layout.foreach_pi([&](auto n) { mask |= (1 << n); });
+    layout.foreach_pi([&](auto n) { mask |= (1u << n); });
     CHECK(mask == 12);
 
     mask = counter = 0;
     layout.foreach_pi(
         [&](auto n, auto i)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             counter += i;
             return false;
         });
@@ -547,7 +547,7 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_pi(
         [&](auto n)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             return false;
         });
     CHECK(mask == 4);
@@ -557,21 +557,21 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_po(
         [&](auto s, auto i)
         {
-            mask |= (1 << layout.get_node(s));
+            mask |= (1u << layout.get_node(s));
             counter += i;
         });
     CHECK(mask == 192);
     CHECK(counter == 1);
 
     mask = 0;
-    layout.foreach_po([&](auto s) { mask |= (1 << layout.get_node(s)); });
+    layout.foreach_po([&](auto s) { mask |= (1u << layout.get_node(s)); });
     CHECK(mask == 192);
 
     mask = counter = 0;
     layout.foreach_po(
         [&](auto s, auto i)
         {
-            mask |= (1 << layout.get_node(s));
+            mask |= (1u << layout.get_node(s));
             counter += i;
             return false;
         });
@@ -582,7 +582,7 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_po(
         [&](auto s)
         {
-            mask |= (1 << layout.get_node(s));
+            mask |= (1u << layout.get_node(s));
             return false;
         });
     CHECK(mask == 64);
@@ -592,21 +592,21 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_fanin(layout.get_node(a),
                          [&](auto s, auto i)
                          {
-                             mask |= (1 << layout.get_node(s));
+                             mask |= (1u << layout.get_node(s));
                              counter += i;
                          });
     CHECK(mask == 12);
     CHECK(counter == 1);
 
     mask = 0;
-    layout.foreach_fanin(layout.get_node(a), [&](auto s) { mask |= (1 << layout.get_node(s)); });
+    layout.foreach_fanin(layout.get_node(a), [&](auto s) { mask |= (1u << layout.get_node(s)); });
     CHECK(mask == 12);
 
     mask = counter = 0;
     layout.foreach_fanin(layout.get_node(a),
                          [&](auto s, auto i)
                          {
-                             mask |= (1 << layout.get_node(s));
+                             mask |= (1u << layout.get_node(s));
                              counter += i;
                              return false;
                          });
@@ -617,7 +617,7 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_fanin(layout.get_node(a),
                          [&](auto s)
                          {
-                             mask |= (1 << layout.get_node(s));
+                             mask |= (1u << layout.get_node(s));
                              return false;
                          });
     CHECK(mask == 4);
@@ -627,21 +627,21 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_fanout(layout.get_node(o),
                           [&](auto s, auto i)
                           {
-                              mask |= (1 << layout.get_node(s));
+                              mask |= (1u << layout.get_node(s));
                               counter += i;
                           });
     CHECK(mask == 128);
     CHECK(counter == 0);
 
     mask = 0;
-    layout.foreach_fanout(layout.get_node(o), [&](auto s) { mask |= (1 << layout.get_node(s)); });
+    layout.foreach_fanout(layout.get_node(o), [&](auto s) { mask |= (1u << layout.get_node(s)); });
     CHECK(mask == 128);
 
     mask = counter = 0;
     layout.foreach_fanout(layout.get_node(o),
                           [&](auto s, auto i)
                           {
-                              mask |= (1 << layout.get_node(s));
+                              mask |= (1u << layout.get_node(s));
                               counter += i;
                               return false;
                           });
@@ -652,7 +652,7 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     layout.foreach_fanout(layout.get_node(o),
                           [&](auto s)
                           {
-                              mask |= (1 << layout.get_node(s));
+                              mask |= (1u << layout.get_node(s));
                               return false;
                           });
     CHECK(mask == 128);

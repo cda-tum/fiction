@@ -33,12 +33,12 @@ class read_command : public command
     /**
      * Standard constructor. Adds descriptive information, options, and flags.
      *
-     * @param env alice::environment that specifies stores etc.
+     * @param e alice::environment that specifies stores etc.
      */
-    explicit read_command(const environment::ptr& env) :
-            command(env, "Reads one Verilog or AIGER file or a directory of those and creates logic network objects "
-                         "which will be put into the respective store. In a directory, only files with extension "
-                         "'.v' and '.aig' are considered.")
+    explicit read_command(const environment::ptr& e) :
+            command(e, "Reads one Verilog or AIGER file or a directory of those and creates logic network objects "
+                       "which will be put into the respective store. In a directory, only files with extension "
+                       "'.v' and '.aig' are considered.")
     {
         add_option("filename", filename, "Filename or directory")->required();
         add_flag("--aig,-a", "Parse networks as AIG");
@@ -109,6 +109,5 @@ class read_command : public command
 ALICE_ADD_COMMAND(read, "I/O")
 
 }  // namespace alice
-
 
 #endif  // FICTION_READ_HPP

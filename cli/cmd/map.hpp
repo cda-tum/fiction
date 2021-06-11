@@ -37,10 +37,10 @@ class map_command : public command
     /**
      * Standard constructor. Adds descriptive information, options, and flags.
      *
-     * @param env alice::environment that specifies stores etc.
+     * @param e alice::environment that specifies stores etc.
      */
-    explicit map_command(const environment::ptr& env) :
-            command(env, "Performs technology mapping to transform a network into another one using specific gates.")
+    explicit map_command(const environment::ptr& e) :
+            command(e, "Performs technology mapping to transform a network into another one using specific gates.")
     {
         add_flag("--and,-a", "Enable the use of AND gates");
         add_flag("--or,-o", "Enable the use of OR gates");

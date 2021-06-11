@@ -28,11 +28,11 @@ class simulate_command : public command
     /**
      * Standard constructor. Adds descriptive information, options, and flags.
      *
-     * @param env alice::environment that specifies stores etc.
+     * @param e alice::environment that specifies stores etc.
      */
-    explicit simulate_command(const environment::ptr& env) :
-            command(env, "Computes truth tables for each primary output of the current logic network or "
-                         "gate-level layout in store.")
+    explicit simulate_command(const environment::ptr& e) :
+            command(e, "Computes truth tables for each primary output of the current logic network or "
+                       "gate-level layout in store.")
     {
         add_flag("--gate_layout,-g", "Simulate gate layout");
         add_flag("--network,-n", "Simulate logic network");

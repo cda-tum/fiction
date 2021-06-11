@@ -31,11 +31,11 @@ class equiv_command : public command
     /**
      * Standard constructor. Adds descriptive information, options, and flags.
      *
-     * @param env alice::environment that specifies stores etc.
+     * @param e alice::environment that specifies stores etc.
      */
-    explicit equiv_command(const environment::ptr& env) :
-            command(env, "Performs logical and delay equivalence checks of gate layouts against a specification "
-                         "that can either be its own associated logic network or another gate layout.")
+    explicit equiv_command(const environment::ptr& e) :
+            command(e, "Performs logical and delay equivalence checks of gate layouts against a specification "
+                       "that can either be its own associated logic network or another gate layout.")
     {
         add_flag("--logic_network,-n", "Perform equivalence checking with a logic network");
         add_flag("--gate_layout,-g", "Perform equivalence checking with a gate-level layout");

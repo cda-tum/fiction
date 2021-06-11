@@ -25,10 +25,10 @@ class random_command : public command
     /**
      * Standard constructor. Adds descriptive information, options, and flags.
      *
-     * @param env alice::environment that specifies stores etc.
+     * @param e alice::environment that specifies stores etc.
      */
-    explicit random_command(const environment::ptr& env) :
-            command(env,
+    explicit random_command(const environment::ptr& e) :
+            command(e,
                     "Generates a random logic network. The random seed will be used as its name for reproducibility.")
     {
         add_flag("--aig,-a", "Create random AIG network");
@@ -96,30 +96,30 @@ class random_command : public command
     {
         using gen_t = mockturtle::random_logic_generator<Ntk>;
 
-        typename gen_t::rules_t rules;
+        typename gen_t::rules_t gen_rules;
         if constexpr (Maj)
         {
-            rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<typename Ntk::signal> const& vs)
-                                                    {
-                                                        assert(vs.size() == 3u);
-                                                        return ntk.create_maj(vs[0], vs[1], vs[2]);
-                                                    },
-                                                    3u});
+            gen_rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<typename Ntk::signal> const& vs)
+                                                        {
+                                                            assert(vs.size() == 3u);
+                                                            return ntk.create_maj(vs[0], vs[1], vs[2]);
+                                                        },
+                                                        3u});
         }
-        rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<typename Ntk::signal> const& vs)
-                                                {
-                                                    assert(vs.size() == 2u);
-                                                    return ntk.create_and(vs[0], vs[1]);
-                                                },
-                                                2u});
-        rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<typename Ntk::signal> const& vs)
-                                                {
-                                                    assert(vs.size() == 2u);
-                                                    return ntk.create_or(vs[0], vs[1]);
-                                                },
-                                                2u});
+        gen_rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<typename Ntk::signal> const& vs)
+                                                    {
+                                                        assert(vs.size() == 2u);
+                                                        return ntk.create_and(vs[0], vs[1]);
+                                                    },
+                                                    2u});
+        gen_rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<typename Ntk::signal> const& vs)
+                                                    {
+                                                        assert(vs.size() == 2u);
+                                                        return ntk.create_or(vs[0], vs[1]);
+                                                    },
+                                                    2u});
 
-        return mockturtle::random_logic_generator<Ntk>(rules);
+        return mockturtle::random_logic_generator<Ntk>(gen_rules);
     }
     /**
      * The actual network generator. Builds a logic_network from the generated random logic.
@@ -148,6 +148,5 @@ class random_command : public command
 ALICE_ADD_COMMAND(random, "Logic")
 
 }  // namespace alice
-
 
 #endif  // FICTION_RANDOM_HPP

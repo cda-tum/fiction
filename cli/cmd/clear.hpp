@@ -20,11 +20,11 @@ class clear_command : public command
     /**
      * Standard constructor. Adds descriptive information, options, and flags.
      *
-     * @param env alice::environment that specifies stores etc.
+     * @param e alice::environment that specifies stores etc.
      */
-    explicit clear_command(const environment::ptr& env) :
-            command(env, "Removes all elements from the respectively flagged stores. If no store is specified, all "
-                         "stores will be cleared.")
+    explicit clear_command(const environment::ptr& e) :
+            command(e, "Removes all elements from the respectively flagged stores. If no store is specified, all "
+                       "stores will be cleared.")
     {
         //            add_flag("--cell_layout,-c", cell,
         //                     "Clear cell layout store");

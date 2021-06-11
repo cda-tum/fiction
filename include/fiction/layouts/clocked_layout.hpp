@@ -41,17 +41,17 @@ class clocked_layout : public TileBasedLayout
 
     using storage = std::shared_ptr<clocked_layout_storage>;
 
-    explicit clocked_layout(const typename TileBasedLayout::aspect_ratio& aspect_ratio) :
-            TileBasedLayout(aspect_ratio),
+    explicit clocked_layout(const typename TileBasedLayout::aspect_ratio& ar) :
+            TileBasedLayout(ar),
             strg{std::make_shared<clocked_layout_storage>(open_4_clocking)}
     {}
 
-    clocked_layout(const typename TileBasedLayout::aspect_ratio& aspect_ratio, const clocking_scheme_t& scheme) :
-            TileBasedLayout(aspect_ratio),
+    clocked_layout(const typename TileBasedLayout::aspect_ratio& ar, const clocking_scheme_t& scheme) :
+            TileBasedLayout(ar),
             strg{std::make_shared<clocked_layout_storage>(scheme)}
     {}
 
-    explicit clocked_layout(std::shared_ptr<clocked_layout_storage> storage) : strg{std::move(storage)} {}
+    explicit clocked_layout(std::shared_ptr<clocked_layout_storage> s) : strg{std::move(s)} {}
 
 #pragma endregion
 

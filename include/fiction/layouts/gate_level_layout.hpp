@@ -84,24 +84,24 @@ class gate_level_layout : public ClockedLayout
 
     using storage = std::shared_ptr<gate_level_layout_storage>;
 
-    explicit gate_level_layout(const typename ClockedLayout::aspect_ratio& aspect_ratio) :
-            ClockedLayout(aspect_ratio),
+    explicit gate_level_layout(const typename ClockedLayout::aspect_ratio& ar) :
+            ClockedLayout(ar),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
         initialize_truth_table_cache();
     }
 
-    gate_level_layout(const typename ClockedLayout::aspect_ratio& aspect_ratio, const clocking_scheme<tile>& scheme) :
-            ClockedLayout(aspect_ratio, scheme),
+    gate_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<tile>& scheme) :
+            ClockedLayout(ar, scheme),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
         initialize_truth_table_cache();
     }
 
-    explicit gate_level_layout(std::shared_ptr<gate_level_layout_storage> storage) :
-            strg{std::move(storage)},
+    explicit gate_level_layout(std::shared_ptr<gate_level_layout_storage> s) :
+            strg{std::move(s)},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {}
 
@@ -518,10 +518,13 @@ class gate_level_layout : public ClockedLayout
         auto       result  = tts.front().construct();
         const auto gate_tt = strg->data.fn_cache[strg->nodes[n].data[1].h1];
 
-        for (uint32_t i = 0ul; i < static_cast<uint32_t>(result.num_bits()); ++i)
+        for (uint32_t i = 0u; i < static_cast<uint32_t>(result.num_bits()); ++i)
         {
-            uint32_t pattern = 0ul;
-            for (auto j = 0ul; j < num_fanin; ++j) { pattern |= kitty::get_bit(tts[j], i) << j; }
+            uint32_t pattern = 0u;
+            for (uint32_t j = 0u; j < num_fanin; ++j)
+            {
+                pattern |= static_cast<uint32_t>(kitty::get_bit(tts[j], i)) << j;
+            }
 
             if (kitty::get_bit(gate_tt, pattern))
             {

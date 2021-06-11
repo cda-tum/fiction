@@ -29,17 +29,17 @@ class tt_command : public command
     /**
      * Standard constructor. Adds descriptive information, options, and flags.
      *
-     * @param env alice::environment that specifies stores etc.
+     * @param e alice::environment that specifies stores etc.
      */
-    explicit tt_command(const environment::ptr& env) :
-            command(env, "Creates a truth table from the given hex or binary string or from an expression. "
-                         "An expression E is a constant 0 or 1, or a variable a, b, ..., p, the negation of an "
-                         "expression !E, the conjunction of multiple expressions (E...E), the disjunction of "
-                         "multiple expressions {E...E}, the exclusive OR of multiple expressions [E...E], or the "
-                         "majority of three expressions <EEE>. Examples are [(ab)(!ac)] to describe if-then-else, "
-                         "or !{!a!b} to describe the application of De Morgan’s law to (ab). The size of the truth "
-                         "table must fit the largest variable in the expression, e.g., if c is the largest "
-                         "variable, then the truth table have at least three variables.")
+    explicit tt_command(const environment::ptr& e) :
+            command(e, "Creates a truth table from the given hex or binary string or from an expression. "
+                       "An expression E is a constant 0 or 1, or a variable a, b, ..., p, the negation of an "
+                       "expression !E, the conjunction of multiple expressions (E...E), the disjunction of "
+                       "multiple expressions {E...E}, the exclusive OR of multiple expressions [E...E], or the "
+                       "majority of three expressions <EEE>. Examples are [(ab)(!ac)] to describe if-then-else, "
+                       "or !{!a!b} to describe the application of De Morgan’s law to (ab). The size of the truth "
+                       "table must fit the largest variable in the expression, e.g., if c is the largest "
+                       "variable, then the truth table have at least three variables.")
     {
         add_option("table,--table", table, "Truth table (prefix with 0x to parse as hexadecimal)");
         add_option("--expression,-e", expression, "Creates truth table from expression");
@@ -133,7 +133,7 @@ class tt_command : public command
         }
         else if (is_set("random"))
         {
-            fiction::tt tt(static_cast<uint32_t>(random_vars));
+            fiction::tt tt{random_vars};
             kitty::create_random(tt);
 
             s.extend() = std::make_shared<fiction::tt>(tt);
@@ -194,6 +194,5 @@ class tt_command : public command
 ALICE_ADD_COMMAND(tt, "I/O")
 
 }  // namespace alice
-
 
 #endif  // FICTION_TT_HPP

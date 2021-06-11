@@ -23,8 +23,7 @@ class topology_network : public mockturtle::klut_network
         add_additional_functions();
     }
 
-    explicit topology_network(std::shared_ptr<mockturtle::klut_storage> storage) :
-            mockturtle::klut_network(std::move(storage))
+    explicit topology_network(std::shared_ptr<mockturtle::klut_storage> s) : mockturtle::klut_network(std::move(s))
     {
         add_additional_functions();
     }

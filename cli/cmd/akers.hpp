@@ -25,10 +25,10 @@ class akers_command : public command
     /**
      * Standard constructor. Adds descriptive information, options, and flags.
      *
-     * @param env alice::environment that specifies stores etc.
+     * @param e alice::environment that specifies stores etc.
      */
-    explicit akers_command(const environment::ptr& env) :
-            command(env, "Synthesizes a Majority logic network from the current truth table in store.")
+    explicit akers_command(const environment::ptr& e) :
+            command(e, "Synthesizes a Majority logic network from the current truth table in store.")
     {
         add_flag("--aig,-a", "Generate as AIG");
         add_flag("--mig,-m", "Generate as MIG");

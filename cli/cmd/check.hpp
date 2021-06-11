@@ -5,89 +5,86 @@
 #ifndef FICTION_CHECK_HPP
 #define FICTION_CHECK_HPP
 
-
 #include "design_checker.h"
 #include "fcn_gate_layout.h"
+
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
 
-
 namespace alice
 {
+/**
+ * Performs design rule checks on the active gate layout. Checks for various design rule validations like crossing
+ * gates, too many wires in a tile, wrongly assigned directions, etc.
+ * See algo/design_checker.h for more details.
+ */
+class check_command : public command
+{
+  public:
     /**
-     * Performs design rule checks on the active gate layout. Checks for various design rule validations like crossing
-     * gates, too many wires in a tile, wrongly assigned directions, etc.
-     * See algo/design_checker.h for more details.
+     * Standard constructor. Adds descriptive information, options, and flags.
+     *
+     * @param e alice::environment that specifies stores etc.
      */
-    class check_command : public command
+    explicit check_command(const environment::ptr& e) :
+            command(e, "Performs various design rule checks on the current gate layout in store. "
+                       "A full report can be logged and a summary is printed to standard output.")
     {
-    public:
-        /**
-         * Standard constructor. Adds descriptive information, options, and flags.
-         *
-         * @param env alice::environment that specifies stores etc.
-         */
-        explicit check_command(const environment::ptr& env)
-                :
-                command(env, "Performs various design rule checks on the current gate layout in store. "
-                             "A full report can be logged and a summary is printed to standard output.")
+        add_option("--wire_limit,-w", wire_limit, "Maximum number of wires allowed per tile", true);
+    }
+
+  protected:
+    /**
+     * Function to perform the design rule check call. Generates a report and prints a summary.
+     */
+    void execute() override
+    {
+        auto& s = store<fcn_gate_layout_ptr>();
+
+        // error case: empty logic network store
+        if (s.empty())
         {
-            add_option("--wire_limit,-w", wire_limit,
-                       "Maximum number of wires allowed per tile", true);
-        }
-
-    protected:
-        /**
-         * Function to perform the design rule check call. Generates a report and prints a summary.
-         */
-        void execute() override
-        {
-            auto& s = store<fcn_gate_layout_ptr>();
-
-            // error case: empty logic network store
-            if (s.empty())
-            {
-                env->out() << "[w] no gate layout in store" << std::endl;
-                reset_flags();
-                return;
-            }
-
-            design_checker c{s.current(), wire_limit};
-            report = c.check(env->out());
-
+            env->out() << "[w] no gate layout in store" << std::endl;
             reset_flags();
+            return;
         }
 
-        /**
-         * Logs the resulting information in a log file.
-         *
-         * @return JSON object containing information about the process.
-         */
-        nlohmann::json log() const override
-        {
-            return report;
-        }
+        design_checker c{s.current(), wire_limit};
+        report = c.check(env->out());
 
-    private:
-        /**
-         * Resulting logging information.
-         */
-        nlohmann::json report;
-        /**
-         * Maximum number of wires per tile.
-         */
-        std::size_t wire_limit = 1;
+        reset_flags();
+    }
 
-        /**
-         * Reset all flags. Necessary for some reason... alice bug?
-         */
-        void reset_flags()
-        {
-            wire_limit = 1;
-        }
-    };
+    /**
+     * Logs the resulting information in a log file.
+     *
+     * @return JSON object containing information about the process.
+     */
+    nlohmann::json log() const override
+    {
+        return report;
+    }
 
-    ALICE_ADD_COMMAND(check, "Verification")
-}
+  private:
+    /**
+     * Resulting logging information.
+     */
+    nlohmann::json report;
+    /**
+     * Maximum number of wires per tile.
+     */
+    std::size_t wire_limit = 1;
 
-#endif //FICTION_CHECK_HPP
+    /**
+     * Reset all flags. Necessary for some reason... alice bug?
+     */
+    void reset_flags()
+    {
+        wire_limit = 1;
+    }
+};
+
+ALICE_ADD_COMMAND(check, "Verification")
+}  // namespace alice
+
+#endif  // FICTION_CHECK_HPP

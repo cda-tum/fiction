@@ -23,11 +23,11 @@ class balance_command : public command
     /**
      * Standard constructor. Adds descriptive information, options, and flags.
      *
-     * @param env alice::environment that specifies stores etc.
+     * @param e alice::environment that specifies stores etc.
      */
-    explicit balance_command(const environment::ptr& env) :
+    explicit balance_command(const environment::ptr& e) :
             command(
-                env,
+                e,
                 "Creates a new topology network from the current logic network in store. All paths in the new network "
                 "that are leading to any common node will have the same length. This is realized by inserting buffer "
                 "nodes. This does not respect possible crossings in the network.")

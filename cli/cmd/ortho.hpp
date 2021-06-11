@@ -25,11 +25,11 @@ class ortho_command : public command
     /**
      * Standard constructor. Adds descriptive information, options, and flags.
      *
-     * @param env alice::environment that specifies stores etc.
+     * @param e alice::environment that specifies stores etc.
      */
-    explicit ortho_command(const environment::ptr& env) :
-            command(env, "Performs scalable placement and routing of the current logic network in store. "
-                         "An FCN layout that is not minimal will be found in reasonable runtime.")
+    explicit ortho_command(const environment::ptr& e) :
+            command(e, "Performs scalable placement and routing of the current logic network in store. "
+                       "An FCN layout that is not minimal will be found in reasonable runtime.")
     {
         add_option("--clock_numbers,-n", ps.number_of_clock_phases, "Number of clock phases to be used {3 or 4}", true);
         add_flag("--io_ports,-i", ps.utilize_io_ports, "Use I/O port elements instead of gate pins");

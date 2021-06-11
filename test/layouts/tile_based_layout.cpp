@@ -12,6 +12,12 @@
 
 using namespace fiction;
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuseless-cast"
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
 TEST_CASE("Tiles", "[tile-based")
 {
     auto td = tile_based_layout::tile{};
@@ -32,15 +38,15 @@ TEST_CASE("Tiles", "[tile-based")
     CHECK(t1 == t2);
     CHECK(t2 == t1);
 
-    t1.z += static_cast<uint64_t>(4ul);
+    t1.z += uint64_t{4ul};
 
     CHECK(t1 == t2);
 
-    t1.y += static_cast<uint64_t>(2147483648ul);
+    t1.y += uint64_t{2147483648ul};
 
     CHECK(t1 == t2);
 
-    t1.x += static_cast<uint64_t>(2147483648ul);
+    t1.x += uint64_t{2147483648ul};
 
     CHECK(t1 == t2);
 
@@ -78,6 +84,10 @@ TEST_CASE("Tiles", "[tile-based")
     os << tile_based_layout::tile{3, 2, 1};
     CHECK(os.str() == "(3,2,1)");
 }
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 TEST_CASE("Tile iteration", "[tile-based]")
 {

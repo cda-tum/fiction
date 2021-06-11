@@ -614,21 +614,21 @@ TEST_CASE("node and signal iteration in a topology network", "[topo]")
     topo.foreach_node(
         [&](auto n, auto i)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             counter += i;
         });
     CHECK(mask == 63);
     CHECK(counter == 15);
 
     mask = 0;
-    topo.foreach_node([&](auto n) { mask |= (1 << n); });
+    topo.foreach_node([&](auto n) { mask |= (1u << n); });
     CHECK(mask == 63);
 
     mask = counter = 0;
     topo.foreach_node(
         [&](auto n, auto i)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             counter += i;
             return false;
         });
@@ -639,7 +639,7 @@ TEST_CASE("node and signal iteration in a topology network", "[topo]")
     topo.foreach_node(
         [&](auto n)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             return false;
         });
     CHECK(mask == 1);
@@ -649,21 +649,21 @@ TEST_CASE("node and signal iteration in a topology network", "[topo]")
     topo.foreach_pi(
         [&](auto n, auto i)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             counter += i;
         });
     CHECK(mask == 12);
     CHECK(counter == 1);
 
     mask = 0;
-    topo.foreach_pi([&](auto n) { mask |= (1 << n); });
+    topo.foreach_pi([&](auto n) { mask |= (1u << n); });
     CHECK(mask == 12);
 
     mask = counter = 0;
     topo.foreach_pi(
         [&](auto n, auto i)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             counter += i;
             return false;
         });
@@ -674,7 +674,7 @@ TEST_CASE("node and signal iteration in a topology network", "[topo]")
     topo.foreach_pi(
         [&](auto n)
         {
-            mask |= (1 << n);
+            mask |= (1u << n);
             return false;
         });
     CHECK(mask == 4);
@@ -684,21 +684,21 @@ TEST_CASE("node and signal iteration in a topology network", "[topo]")
     topo.foreach_po(
         [&](auto s, auto i)
         {
-            mask |= (1 << topo.get_node(s));
+            mask |= (1u << topo.get_node(s));
             counter += i;
         });
     CHECK(mask == 48);
     CHECK(counter == 1);
 
     mask = 0;
-    topo.foreach_po([&](auto s) { mask |= (1 << topo.get_node(s)); });
+    topo.foreach_po([&](auto s) { mask |= (1u << topo.get_node(s)); });
     CHECK(mask == 48);
 
     mask = counter = 0;
     topo.foreach_po(
         [&](auto s, auto i)
         {
-            mask |= (1 << topo.get_node(s));
+            mask |= (1u << topo.get_node(s));
             counter += i;
             return false;
         });
@@ -709,7 +709,7 @@ TEST_CASE("node and signal iteration in a topology network", "[topo]")
     topo.foreach_po(
         [&](auto s)
         {
-            mask |= (1 << topo.get_node(s));
+            mask |= (1u << topo.get_node(s));
             return false;
         });
     CHECK(mask == 16);

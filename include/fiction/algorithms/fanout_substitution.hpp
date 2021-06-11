@@ -199,7 +199,7 @@ template <typename Ntk>
 class is_fanout_substituted_impl
 {
   public:
-    is_fanout_substituted_impl(const Ntk& ntk, fanout_substitution_params p) : ntk{ntk}, ps{p} {}
+    is_fanout_substituted_impl(const Ntk& src, fanout_substitution_params p) : ntk{src}, ps{p} {}
 
     bool run()
     {

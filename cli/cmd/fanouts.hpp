@@ -21,12 +21,12 @@ class fanouts_command : public command
     /**
      * Standard constructor. Adds descriptive information, options, and flags.
      *
-     * @param env alice::environment that specifies stores etc.
+     * @param e alice::environment that specifies stores etc.
      */
-    explicit fanouts_command(const environment::ptr& env) :
-            command(env, "Substitutes high-degree outputs of gates of the current logic network in store "
-                         "and replaces them with fan-out nodes. Some algorithms require fan-out nodes explicitly and "
-                         "will break down networks if needed. Others might be able to handle both.")
+    explicit fanouts_command(const environment::ptr& e) :
+            command(e, "Substitutes high-degree outputs of gates of the current logic network in store "
+                       "and replaces them with fan-out nodes. Some algorithms require fan-out nodes explicitly and "
+                       "will break down networks if needed. Others might be able to handle both.")
     {
         add_option("--degree,-d", ps.degree, "Maximum number of outputs a fan-out node can have", true)
             ->set_type_name("{2, 3}");

@@ -5,63 +5,58 @@
 #ifndef FICTION_GATES_HPP
 #define FICTION_GATES_HPP
 
-
 #include "logic_network.h"
-#include <alice/alice.hpp>
 
+#include <alice/alice.hpp>
 
 namespace alice
 {
+/**
+ * Prints numbers of gates for a current logic network.
+ */
+class gates_command : public command
+{
+  public:
     /**
-     * Prints numbers of gates for a current logic network.
+     * Standard constructor. Adds descriptive information, options, and flags.
+     *
+     * @param e alice::environment that specifies stores etc.
      */
-    class gates_command : public command
+    explicit gates_command(const environment::ptr& e) :
+            command(e, "Prints the gate count for each different vertex type "
+                       "of the current logic network in store.")
+    {}
+
+  protected:
+    /**
+     * Function to perform the gates call. Outputs gates counts for each vertex type.
+     */
+    void execute() override
     {
-    public:
-        /**
-         * Standard constructor. Adds descriptive information, options, and flags.
-         *
-         * @param env alice::environment that specifies stores etc.
-         */
-        explicit gates_command(const environment::ptr& env)
-                :
-                command(env,
-                        "Prints the gate count for each different vertex type "
-                        "of the current logic network in store.")
-        {}
+        auto& s = store<logic_network_ptr>();
 
-    protected:
-        /**
-         * Function to perform the gates call. Outputs gates counts for each vertex type.
-         */
-        void execute() override
+        // error case: empty logic network store
+        if (s.empty())
         {
-            auto& s = store<logic_network_ptr>();
-
-            // error case: empty logic network store
-            if (s.empty())
-            {
-                env->out() << "[w] no logic network in store" << std::endl;
-                return;
-            }
-
-            auto ln = s.current();
-
-            env->out() << fmt::format("{}:\n"
-                                      " [i] AND   = {}\n [i] OR    = {}\n [i] INV   = {}\n [i] FO    = {}\n"
-                                      " [i] MAJ   = {}\n [i] wires = {}\n [i] total = {}",
-                                      ln->get_name(),
-                                      ln->operation_count(operation::AND), ln->operation_count(operation::OR),
-                                      ln->operation_count(operation::NOT),
-                                      ln->operation_count(operation::F1O2) + ln->operation_count(operation::F1O3),
-                                      ln->operation_count(operation::MAJ), ln->operation_count(operation::W),
-                                      ln->vertex_count())
-                       << std::endl;
+            env->out() << "[w] no logic network in store" << std::endl;
+            return;
         }
-    };
 
-    ALICE_ADD_COMMAND(gates, "Logic")
-}
+        auto ln = s.current();
 
+        env->out() << fmt::format("{}:\n"
+                                  " [i] AND   = {}\n [i] OR    = {}\n [i] INV   = {}\n [i] FO    = {}\n"
+                                  " [i] MAJ   = {}\n [i] wires = {}\n [i] total = {}",
+                                  ln->get_name(), ln->operation_count(operation::AND),
+                                  ln->operation_count(operation::OR), ln->operation_count(operation::NOT),
+                                  ln->operation_count(operation::F1O2) + ln->operation_count(operation::F1O3),
+                                  ln->operation_count(operation::MAJ), ln->operation_count(operation::W),
+                                  ln->vertex_count())
+                   << std::endl;
+    }
+};
 
-#endif //FICTION_GATES_HPP
+ALICE_ADD_COMMAND(gates, "Logic")
+}  // namespace alice
+
+#endif  // FICTION_GATES_HPP

@@ -5,6 +5,13 @@
 #ifndef FICTION_COORDINATE_HPP
 #define FICTION_COORDINATE_HPP
 
+// data types cannot properly be converted to bit field types
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuseless-cast"
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
 #include <fmt/format.h>
 
 #include <cstdint>
@@ -20,33 +27,33 @@ struct coord_t
     uint64_t x : 31;
 
     constexpr coord_t() noexcept :
-            d{static_cast<uint64_t>(1ull)},  // default-constructed coord_ts are dead
-            z{static_cast<uint64_t>(0ull)},
-            y{static_cast<uint64_t>(0ull)},
-            x{static_cast<uint64_t>(0ull)}
+            d{static_cast<decltype(d)>(1u)},  // default-constructed coord_ts are dead
+            z{static_cast<decltype(z)>(0u)},
+            y{static_cast<decltype(y)>(0u)},
+            x{static_cast<decltype(x)>(0u)}
     {}
 
     template <class X, class Y, class Z>
-    constexpr coord_t(X x, Y y, Z z) noexcept :
-            d{static_cast<uint64_t>(0ull)},
-            z{static_cast<uint64_t>(z)},
-            y{static_cast<uint64_t>(y)},
-            x{static_cast<uint64_t>(x)}
+    constexpr coord_t(X x_, Y y_, Z z_) noexcept :
+            d{static_cast<decltype(d)>(0u)},
+            z{static_cast<decltype(z)>(z_)},
+            y{static_cast<decltype(y)>(y_)},
+            x{static_cast<decltype(x)>(x_)}
     {}
 
     template <class X, class Y>
-    constexpr coord_t(X x, Y y) noexcept :
-            d{static_cast<uint64_t>(0ull)},
-            z{static_cast<uint64_t>(0ull)},
-            y{static_cast<uint64_t>(y)},
-            x{static_cast<uint64_t>(x)}
+    constexpr coord_t(X x_, Y y_) noexcept :
+            d{static_cast<decltype(d)>(0u)},
+            z{static_cast<decltype(z)>(0u)},
+            y{static_cast<decltype(y)>(y_)},
+            x{static_cast<decltype(x)>(x_)}
     {}
 
     constexpr explicit coord_t(const uint64_t t) noexcept :
-            d{static_cast<uint64_t>(t >> 63)},
-            z{static_cast<uint64_t>((t << 1) >> 63)},
-            y{static_cast<uint64_t>((t << 2) >> 33)},
-            x{static_cast<uint64_t>((t << 33) >> 33)}
+            d{static_cast<decltype(d)>(t >> 63)},
+            z{static_cast<decltype(z)>((t << 1) >> 63)},
+            y{static_cast<decltype(y)>((t << 2) >> 33)},
+            x{static_cast<decltype(x)>((t << 33) >> 33)}
     {}
 
     explicit constexpr operator uint64_t() const noexcept
@@ -208,5 +215,9 @@ struct iterator_traits<fiction::coord_iterator>
     using value_type        = fiction::coord_t;
 };
 }  // namespace std
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 #endif  // FICTION_COORDINATE_HPP
