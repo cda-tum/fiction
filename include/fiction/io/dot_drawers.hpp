@@ -192,119 +192,158 @@ class color_view_drawer : public mockturtle::default_dot_drawer<Ntk>
                                              "darkorchid2", "chocolate1", "gray28"}};
 };
 
+template <typename Lyt, bool DrawIndexes = false>
+class gate_layout_tile_drawer : public topology_dot_drawer<Lyt, DrawIndexes>
+{
+  public:
+    std::string tile_id(const typename Lyt::tile& t) const noexcept
+    {
+        return fmt::format("x{}y{}", t.x, t.y);
+    }
+
+    std::string additional_node_attributes() const noexcept
+    {
+        if constexpr (DrawIndexes)
+            return ", shape=square, fixedsize=true, width=1";
+        else
+            return ", shape=square, fixedsize=true, width=0.5";
+    }
+
+    std::string tile_label(const Lyt& lyt, const typename Lyt::tile& t) const noexcept
+    {
+        if (lyt.is_empty_tile(t))
+            return "";
+
+        if (lyt.is_pi_tile(t))
+            return "PI";
+
+        if (lyt.is_po_tile(t))
+            return "PO";
+
+        if constexpr (has_is_buf_v<Lyt>)
+        {
+            if (lyt.is_buf(lyt.get_node(t)) && lyt.is_buf(lyt.get_node(lyt.above(t))))
+            {
+                return "X";
+            }
+        }
+
+        return topology_dot_drawer<Lyt, DrawIndexes>::node_label(lyt, lyt.get_node(t));
+    }
+
+    std::string tile_fillcolor(const Lyt& lyt, const typename Lyt::tile& t) const noexcept
+    {
+        if (lyt.is_empty_tile(t))
+            return "white";
+
+        if (lyt.is_pi_tile(t) || lyt.is_po_tile(t))
+            return "snow2";
+
+        return topology_dot_drawer<Lyt, DrawIndexes>::node_fillcolor(lyt, lyt.get_node(t));
+    }
+
+    std::vector<std::vector<std::string>> rows(const Lyt& lyt) const noexcept
+    {
+        std::vector<std::vector<std::string>> rows{};
+
+        for (auto y = 0ul; y <= lyt.y(); ++y)
+        {
+            std::vector<std::string> row{};
+            for (auto x = 0ul; x <= lyt.x(); ++x) { row.emplace_back(tile_id({x, y})); }
+            rows.push_back(row);
+        }
+
+        return rows;
+    }
+
+    std::vector<std::vector<std::string>> columns(const Lyt& lyt) const noexcept
+    {
+        std::vector<std::vector<std::string>> columns{};
+
+        for (auto x = 0ul; x <= lyt.x(); ++x)
+        {
+            std::vector<std::string> col{};
+            for (auto y = 0ul; y <= lyt.y(); ++y) { col.emplace_back(tile_id({x, y})); }
+            columns.push_back(col);
+        }
+
+        return columns;
+    }
+};
+
 /*! \brief Writes layout in DOT format into output stream
  *
  * An overloaded variant exists that writes the layout into a file.
  *
  * **Required network functions:**
- * - is_constant
  * - is_pi
  * - foreach_node
  * - foreach_fanin
- * - foreach_po
  *
  * \param lyt Layout
  * \param os Output stream
  */
-template <class Lyt, class Drawer = mockturtle::default_dot_drawer<Lyt>>
-void write_grid_dot(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {})
+template <class Lyt, class Drawer = gate_layout_tile_drawer<Lyt>>
+void write_layout_dot(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {})
 {
     static_assert(mockturtle::is_network_type_v<Lyt>, "Ntk is not a network type");
-    static_assert(mockturtle::has_is_constant_v<Lyt>, "Ntk does not implement the is_constant method");
     static_assert(mockturtle::has_is_pi_v<Lyt>, "Ntk does not implement the is_pi method");
     static_assert(mockturtle::has_foreach_node_v<Lyt>, "Ntk does not implement the foreach_node method");
     static_assert(mockturtle::has_foreach_fanin_v<Lyt>, "Ntk does not implement the foreach_fanin method");
-    static_assert(mockturtle::has_foreach_po_v<Lyt>, "Ntk does not implement the foreach_po method");
 
-    std::stringstream nodes{}, edges{}, levels{}, grid{};
+    std::stringstream nodes{}, edges{}, grid{};
 
-//    std::vector<std::vector<uint32_t>> level_to_node_indexes;
+    nodes << fmt::format("node [style=filled {}];\n", drawer.additional_node_attributes());
 
-//    lyt.foreach_node(
-//        [&](auto const& n)
-//        {
-//            nodes << fmt::format("{} [label=\"{}\",shape={},style=filled,fillcolor={}]\n", lyt.node_to_index(n),
-//                                 drawer.node_label(lyt, n), drawer.node_shape(lyt, n), drawer.node_fillcolor(lyt, n));
-//            if (!lyt.is_constant(n) && !lyt.is_pi(n))
-//            {
-//                lyt.foreach_fanin(n,
-//                                  [&](auto const& f)
-//                                  {
-//                                      if (!drawer.draw_signal(lyt, n, f))
-//                                          return true;
-//                                      edges << fmt::format("{} -> {} [style={}]\n", lyt.node_to_index(lyt.get_node(f)),
-//                                                           lyt.node_to_index(n), drawer.signal_style(lyt, f));
-//                                      return true;
-//                                  });
-//            }
-//
-//            const auto lvl = drawer.node_level(lyt, n);
-//            if (level_to_node_indexes.size() <= lvl)
-//            {
-//                level_to_node_indexes.resize(lvl + 1);
-//            }
-//            level_to_node_indexes[lvl].push_back(lyt.node_to_index(n));
-//        });
-//
-//    for (auto const& indexes : level_to_node_indexes)
-//    {
-//        levels << "{rank = same; ";
-//        std::copy(indexes.begin(), indexes.end(), std::ostream_iterator<uint32_t>(levels, "; "));
-//        levels << "}\n";
-//    }
-//
-//    levels << "{rank = same; ";
-//    lyt.foreach_po(
-//        [&](auto const& f, auto i)
-//        {
-//            nodes << fmt::format("po{} [shape={},style=filled,fillcolor={}]\n", i, drawer.po_shape(lyt, i),
-//                                 drawer.po_fillcolor(lyt, i));
-//            edges << fmt::format("{} -> po{} [style={}]\n", lyt.node_to_index(lyt.get_node(f)), i,
-//                                 drawer.signal_style(lyt, f));
-//            levels << fmt::format("po{}; ", i);
-//        });
-//    levels << "}\n";
+    // draw tiles
+    lyt.foreach_ground_tile(
+        [&lyt, &drawer, &nodes](const auto& t)
+        {
+            nodes << fmt::format("{} [label=\"{}\", fillcolor={}];\n", drawer.tile_id(t), drawer.tile_label(lyt, t),
+                                 drawer.tile_fillcolor(lyt, t));
+        });
+
+    nodes << "edge [constraint=false];\n";
+
+    // draw connections
+    lyt.foreach_node(
+        [&lyt, &drawer, &edges](const auto& n)
+        {
+            lyt.foreach_fanin(n,
+                              [&lyt, &drawer, &edges, &n](const auto& f)
+                              {
+                                  edges << fmt::format("{} -> {} [style={}];\n",
+                                                       drawer.tile_id(static_cast<typename Lyt::tile>(f)),
+                                                       drawer.tile_id(lyt.get_tile(n)), drawer.signal_style(lyt, f));
+                              });
+        });
+
+    grid << "edge [constraint=true, style=invis];\n";
 
     // enforce grid structure
-    grid << "edge [weight=1000, style=invis];\n";
-    for (auto x = 0ul; x < lyt.x(); ++x)
-    {
-        std::vector<std::string> column{};
-        for (auto y = 0ul; y < lyt.y(); ++y)
-        {
-            column.emplace_back(fmt::format("{}{}", x, y));
-        }
+    for (const auto col : drawer.columns(lyt)) { grid << fmt::format("{};\n", fmt::join(col, " -> ")); }
+    for (const auto row : drawer.rows(lyt)) { grid << fmt::format("rank = same {{ {} }};\n", fmt::join(row, " -> ")); }
 
-        grid << fmt::format("{};\n", fmt::join(column, " -> "));
-    }
-
-    for (auto y = 0ul; y < lyt.y(); ++y)
-    {
-        std::vector<std::string> row{};
-        for (auto x = 0ul; x < lyt.x(); ++x) { row.emplace_back(fmt::format("{}{}", x, y)); }
-
-        grid << fmt::format("rank = same {{ {} }};\n", fmt::join(row, " -> "));
-    }
-
-    os << "digraph {\n"
+    // draw layout
+    os << "digraph layout{\n"
        << "rankdir=TB;\n"
-       << nodes.str() << edges.str() << levels.str() << grid.str() << "}\n";
+       << "splines=ortho;\n"
+       << "concentrate=true;\n"
+       << nodes.str() << edges.str() << grid.str() << "}\n";
 }
 
 /*! \brief Writes layout in DOT format into a file
  *
  * **Required network functions:**
- * - is_constant
  * - is_pi
  * - foreach_node
  * - foreach_fanin
- * - foreach_po
  *
  * \param lyt Layout
  * \param filename Filename
  */
-template <class Lyt, class Drawer = mockturtle::default_dot_drawer<Lyt>>
-void write_grid_dot(const Lyt& lyt, const std::string& filename, const Drawer& drawer = {})
+template <class Lyt, class Drawer = gate_layout_tile_drawer<Lyt>>
+void write_layout_dot(const Lyt& lyt, const std::string& filename, const Drawer& drawer = {})
 {
     std::ofstream os{filename.c_str(), std::ofstream::out};
     write_dot(lyt, os, drawer);

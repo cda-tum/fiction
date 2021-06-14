@@ -111,7 +111,8 @@ bool can_show<fiction::logic_network_t>(std::string& extension, [[maybe_unused]]
 {
     extension = "dot";
 
-    cmd.add_flag("--indexes,-i", "Show node indexes")->group("logic_network (-n)");
+    // indexes for both logic networks and gate layouts
+    cmd.add_flag("--indexes,-i", "Show node indexes")->group("logic_network (-n) / gate_layout (-g)");
 
     return true;
 }
@@ -214,7 +215,8 @@ bool can_show<fiction::gate_layout_t>(std::string& extension, [[maybe_unused]] c
 {
     extension = "dot";
 
-    cmd.add_flag("--indexes,-i", "Show node indexes")->group("gate_layout (-g)");
+    // already added for logic network; alice doesn't allow for both
+    // cmd.add_flag("--indexes,-i", "Show node indexes")->group("gate_layout (-g)");
 
     return true;
 }
@@ -230,11 +232,11 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
 
             if (cmd.is_set("indexes"))
             {
-                fiction::write_grid_dot(*lyt, os, fiction::topology_dot_drawer<Lyt, true>());
+                fiction::write_layout_dot(*lyt, os, fiction::gate_layout_tile_drawer<Lyt, true>());
             }
             else
             {
-                fiction::write_grid_dot(*lyt, os, fiction::topology_dot_drawer<Lyt, false>());
+                fiction::write_layout_dot(*lyt, os, fiction::gate_layout_tile_drawer<Lyt, false>());
             }
         }
         catch (const std::invalid_argument& e)
