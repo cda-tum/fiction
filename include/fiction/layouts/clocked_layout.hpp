@@ -41,7 +41,7 @@ class clocked_layout : public TileBasedLayout
 
     using storage = std::shared_ptr<clocked_layout_storage>;
 
-    explicit clocked_layout(const typename TileBasedLayout::aspect_ratio& ar) :
+    explicit clocked_layout(const typename TileBasedLayout::aspect_ratio& ar = {}) :
             TileBasedLayout(ar),
             strg{std::make_shared<clocked_layout_storage>(open_4_clocking)}
     {}
@@ -56,6 +56,11 @@ class clocked_layout : public TileBasedLayout
 #pragma endregion
 
 #pragma region Clocking
+
+    void replace_clocking_scheme(const clocking_scheme_t& scheme) noexcept
+    {
+        strg->clocking = std::make_shared<clocking_scheme_t>(scheme);
+    }
 
     void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
     {

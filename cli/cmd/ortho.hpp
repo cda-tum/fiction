@@ -68,7 +68,12 @@ class ortho_command : public command
         const auto get_name = [](auto&& net) -> std::string { return net->get_network_name(); };
 
         const auto orthogonal_physical_design = [this](auto&& net)
-        { return std::make_shared<fiction::tile_clk_lyt>(fiction::orthogonal<fiction::tile_clk_lyt>(*net, ps)); };
+        {
+            using gate_layout = fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout>>;
+
+            return std::make_shared<fiction::tile_clk_lyt>(fiction::orthogonal<gate_layout>(*net, ps),
+                                                           net->get_network_name());
+        };
 
         const auto& net = s.current();
 
@@ -104,6 +109,7 @@ class ortho_command : public command
 };
 
 ALICE_ADD_COMMAND(ortho, "Physical Design")
+
 }  // namespace alice
 
 #endif  // FICTION_ORTHO_HPP

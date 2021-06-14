@@ -19,7 +19,7 @@
 #include "cmd/map.hpp"
 //#include "cmd/exact.hpp"
 //#include "cmd/onepass.hpp"
-//#include "cmd/ortho.hpp"
+#include "cmd/ortho.hpp"
 //#include "cmd/check.hpp"
 #include "cmd/equiv.hpp"
 //#include "cmd/energy.hpp"
