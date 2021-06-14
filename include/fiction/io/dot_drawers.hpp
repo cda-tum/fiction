@@ -134,7 +134,7 @@ class topology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
         const auto label = mockturtle::gate_dot_drawer<Ntk>::node_label(ntk, n);
 
         // check if base drawer could not identify the gate either
-        if (is_node_number(label))
+        if (is_node_number(label) && !ntk.is_pi(n) && !ntk.is_constant(n))
         {
             // try to fetch the node's truth table
             if constexpr (mockturtle::has_node_function_v<Ntk>)
