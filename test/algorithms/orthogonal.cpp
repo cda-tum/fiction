@@ -50,7 +50,8 @@ TEST_CASE("Layout equivalence", "[algorithms]")
     const auto check = [](const auto& net)
     {
         orthogonal_physical_design_params params{true};
-        orthogonal_physical_design_stats stats;
+        orthogonal_physical_design_stats  stats{};
+
         auto layout = orthogonal<gate_layout>(net, params, &stats);
 
         print_gate_level_layout(std::cout, layout);

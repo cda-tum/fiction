@@ -35,7 +35,7 @@ class tile_based_layout
 
     using storage = std::shared_ptr<tile_based_layout_storage>;
 
-    explicit tile_based_layout(const aspect_ratio& ar) : strg{std::make_shared<tile_based_layout_storage>(ar)} {}
+    explicit tile_based_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<tile_based_layout_storage>(ar)} {}
 
     explicit tile_based_layout(std::shared_ptr<tile_based_layout_storage> s) : strg{std::move(s)} {}
 
@@ -61,6 +61,11 @@ class tile_based_layout
     [[nodiscard]] uint64_t area() const noexcept
     {
         return x() * y();
+    }
+
+    void resize(const aspect_ratio& ar) noexcept
+    {
+        strg->dimension = ar;
     }
 
 #pragma endregion

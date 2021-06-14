@@ -84,7 +84,7 @@ class gate_level_layout : public ClockedLayout
 
     using storage = std::shared_ptr<gate_level_layout_storage>;
 
-    explicit gate_level_layout(const typename ClockedLayout::aspect_ratio& ar) :
+    explicit gate_level_layout(const typename ClockedLayout::aspect_ratio& ar = {}) :
             ClockedLayout(ar),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
