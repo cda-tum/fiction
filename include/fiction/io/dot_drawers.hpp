@@ -8,15 +8,17 @@
 #include "../traits.hpp"
 
 #include <fmt/format.h>
+#include <kitty/print.hpp>
 #include <mockturtle/io/write_dot.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <algorithm>
 #include <array>
 
 namespace fiction
 {
 
-template <typename Ntk, bool DrawIndexes = false>
+template <typename Ntk, bool DrawIndexes = false, bool DrawHexTT = false>
 class topology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
 {
   public:
@@ -129,7 +131,37 @@ class topology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
             }
         }
 
-        return mockturtle::gate_dot_drawer<Ntk>::node_label(ntk, n);
+        const auto label = mockturtle::gate_dot_drawer<Ntk>::node_label(ntk, n);
+
+        // check if base drawer could not identify the gate either
+        if (is_node_number(label))
+        {
+            // try to fetch the node's truth table
+            if constexpr (mockturtle::has_node_function_v<Ntk>)
+            {
+                const auto node_tt = ntk.node_function(n);
+
+                // print truth tables with up to 4 variables exclusively
+                if (node_tt.num_vars() <= 4)
+                {
+                    if constexpr (DrawHexTT)
+                    {
+                        return kitty::to_hex(node_tt);
+                    }
+                    else
+                    {
+                        return kitty::to_binary(node_tt);
+                    }
+                }
+            }
+        }
+
+        return label;
+    }
+
+    [[nodiscard]] bool is_node_number(const std::string& s) const noexcept
+    {
+        return !s.empty() && std::all_of(s.begin(), s.end(), ::isdigit);
     }
 };
 
