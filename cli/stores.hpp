@@ -111,7 +111,8 @@ bool can_show<fiction::logic_network_t>(std::string& extension, [[maybe_unused]]
 {
     extension = "dot";
 
-    cmd.add_flag("--indexes,-i", "Show node indexes")->group("logic_network (-n)");
+    // indexes for both logic networks and gate layouts
+    cmd.add_flag("--indexes,-i", "Show node indexes")->group("logic_network (-n) / gate_layout (-g)");
 
     return true;
 }
@@ -207,6 +208,44 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
     };
 
     return std::visit(log_statistics, layout);
+}
+
+template <>
+bool can_show<fiction::gate_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
+{
+    extension = "dot";
+
+    // already added for logic network; alice doesn't allow for both
+    // cmd.add_flag("--indexes,-i", "Show node indexes")->group("gate_layout (-g)");
+
+    return true;
+}
+
+template <>
+void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t& element, const command& cmd)
+{
+    const auto show_lyt = [&os, &cmd](auto&& lyt)
+    {
+        try
+        {
+            using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
+
+            if (cmd.is_set("indexes"))
+            {
+                fiction::write_layout_dot(*lyt, os, fiction::gate_layout_tile_drawer<Lyt, true>());
+            }
+            else
+            {
+                fiction::write_layout_dot(*lyt, os, fiction::gate_layout_tile_drawer<Lyt, false>());
+            }
+        }
+        catch (const std::invalid_argument& e)
+        {
+            cmd.env->out() << "[e] " << e.what() << std::endl;
+        }
+    };
+
+    std::visit(show_lyt, element);
 }
 
 ///**

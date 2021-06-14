@@ -357,7 +357,7 @@ class gate_level_layout : public ClockedLayout
         return is_buf(n);
     }
 
-    [[nodiscard]] bool is_negation(const node n) const noexcept
+    [[nodiscard]] bool is_inv(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 3;
     }
