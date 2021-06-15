@@ -43,6 +43,7 @@ TEST_CASE("Simple fanout substitution", "[algorithms]")
 TEST_CASE("Complex fanout substitution", "[algorithms]")
 {
     const auto top = blueprints::maj4_network<topology_network>();
+    CHECK(!is_fanout_substituted(top));
 
     fanout_substitution_params ps_depth{fanout_substitution_params::substitution_strategy::DEPTH};
     fanout_substitution_params ps_breadth{fanout_substitution_params::substitution_strategy::BREADTH};
@@ -50,6 +51,7 @@ TEST_CASE("Complex fanout substitution", "[algorithms]")
     substitute(top, ps_depth, top.size() + 7);
 
     const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
+    CHECK(!is_fanout_substituted(aig));
     substitute(aig, ps_depth, aig.size() + 41);
     substitute(aig, ps_breadth, aig.size() + 41);
 }

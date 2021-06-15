@@ -203,16 +203,31 @@ class is_fanout_substituted_impl
 
     bool run()
     {
-        ntk.foreach_gate(
+        ntk.foreach_node(
             [this](const auto& n)
             {
-                if (ntk.is_fanout(n))
+                // skip constants
+                if (ntk.is_constant(n))
+                    return substituted;
+
+                // check degree of fanout nodes
+                if constexpr (fiction::has_is_fanout_v<Ntk>)
                 {
-                    if (ntk.fanout_size(n) > ps.degree)
-                        substituted = false;
+                    if (ntk.is_fanout(n))
+                    {
+                        if (ntk.fanout_size(n) > ps.degree)
+                        {
+                            substituted = false;
+                        }
+
+                        return substituted;
+                    }
                 }
-                else if (ntk.fanout_size(n) > ps.threshold)
+                // check threshold of non-fanout nodes
+                if (ntk.fanout_size(n) > ps.threshold)
+                {
                     substituted = false;
+                }
 
                 return substituted;
             });
@@ -260,7 +275,6 @@ bool is_fanout_substituted(const Ntk& ntk, fanout_substitution_params ps = {}) n
     static_assert(mockturtle::is_network_type_v<Ntk>, "NtkSrc is not a network type");
     static_assert(mockturtle::has_foreach_gate_v<Ntk>, "Ntk does not implement the foreach_gate function");
     static_assert(mockturtle::has_fanout_size_v<Ntk>, "Ntk does not implement the fanout_size function");
-    static_assert(fiction::has_is_fanout_v<Ntk>, "Ntk does not implement the is_fanout function");
 
     detail::is_fanout_substituted_impl<Ntk> p{ntk, ps};
 
