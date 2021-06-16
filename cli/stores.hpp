@@ -195,10 +195,8 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             {"outputs", lyt->num_pos()},
             {"gates", lyt->num_gates()},
             {"wires", lyt->num_wires()},
-            // {"layout", {{"x-size", layout->x() + 1}, {"y-size", layout->y() + 1}, {"area", area}}},
+            {"layout", {{"x-size", lyt->x() + 1}, {"y-size", lyt->y() + 1}, {"area", lyt->area()}}},
             // {"bounding box", {{"x-size", bb.x_size}, {"y-size", bb.y_size}, {"area", bb.area()}}},
-            // {"gate tiles", gate_tiles},
-            // {"wire tiles", wire_tiles},
             // {"free tiles", area - (gate_tiles + wire_tiles - crossings)},  // free tiles in ground layer
             // {"crossings", crossings},
             // {"latches", layout->latch_count()},

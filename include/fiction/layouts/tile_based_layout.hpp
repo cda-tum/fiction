@@ -60,7 +60,7 @@ class tile_based_layout
 
     [[nodiscard]] uint64_t area() const noexcept
     {
-        return x() * y();
+        return x() + 1 * y() + 1;
     }
 
     void resize(const aspect_ratio& ar) noexcept

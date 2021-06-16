@@ -20,6 +20,7 @@
 #include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
+#include <optional>
 #include <vector>
 
 namespace fiction
@@ -63,6 +64,45 @@ struct orthogonal_physical_design_stats
 
 namespace detail
 {
+
+template <typename Ntk>
+uint32_t num_constant_fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
+{
+    uint32_t num_const_fi{0};
+
+    ntk.foreach_fanin(n,
+                      [&ntk, &num_const_fi](const auto& f)
+                      {
+                          if (ntk.is_constant(ntk.get_node(f)))
+                              ++num_const_fi;
+                      });
+
+    return num_const_fi;
+}
+
+template <typename Ntk>
+bool has_high_degree_fanin_nodes(const Ntk& ntk, const uint32_t threshold = 2) noexcept
+{
+    bool result = false;
+
+    ntk.foreach_node(
+        [&ntk, &threshold, &result](const auto& n)
+        {
+            // skip constants
+            if (!ntk.is_constant(n))
+            {
+                if ((ntk.fanin_size(n) - num_constant_fanins(ntk, n)) > threshold)
+                {
+                    result = true;
+                }
+            }
+
+            return !result;
+        });
+
+    return result;
+}
+
 /**
  * Determine siblings of the given node. A sibling is a node that shares the same fan-in with n.
  * @param n Node to consider.
@@ -124,32 +164,28 @@ coloring_container<Ntk> east_south_coloring(const Ntk& ntk)
             {
                 const auto s = siblings(ntk, n);
                 // if all siblings are either colored south or null, pick color east
-                auto c = std::all_of(s.cbegin(), s.cend(),
-                                     [&ctn](const auto& sn)
-                                     {
-                                         const auto snc = ctn.color_ntk.color(sn);
-                                         return snc == ctn.color_south || snc == ctn.color_null;
-                                     }) ?
-                             ctn.color_east :
-                             // if all siblings are either colored east or null, pick color south
-                             std::all_of(s.cbegin(), s.cend(),
-                                         [&ctn](const auto& sn)
-                                         {
-                                             const auto snc = ctn.color_ntk.color(sn);
-                                             return snc == ctn.color_east || snc == ctn.color_null;
-                                         }) ?
-                             ctn.color_south :
-                             // else, pick color null
-                             ctn.color_null;
+                auto clr = std::all_of(s.cbegin(), s.cend(),
+                                       [&ctn](const auto& sn)
+                                       {
+                                           const auto snc = ctn.color_ntk.color(sn);
+                                           return snc == ctn.color_south || snc == ctn.color_null;
+                                       }) ?
+                               ctn.color_east :
+                               // if all siblings are either colored east or null, pick color south
+                               std::all_of(s.cbegin(), s.cend(),
+                                           [&ctn](const auto& sn)
+                                           {
+                                               const auto snclr = ctn.color_ntk.color(sn);
+                                               return snclr == ctn.color_east || snclr == ctn.color_null;
+                                           }) ?
+                               ctn.color_south :
+                               // else, pick color null
+                               ctn.color_null;
 
                 // paint n with color c
-                ctn.color_ntk.paint(n, c);
+                ctn.color_ntk.paint(n, clr);
             }
         });
-
-    //    debug::write_dot_network<mockturtle::out_of_place_color_view<Ntk>,
-    //                             color_view_drawer<mockturtle::out_of_place_color_view<Ntk>>>(ctn.color_ntk,
-    //                             "colored_ntk");
 
     return ctn;
 }
@@ -163,17 +199,17 @@ bool is_east_south_colored(const Ntk& ntk) noexcept
         {
             if (!ntk.is_constant(n))
             {
-                uint32_t c = 0ul;
+                uint32_t clr = 0ul;
                 ntk.foreach_fanout(n,
-                                   [&ntk, &is_properly_colored, &c](const auto& f, auto i)
+                                   [&ntk, &is_properly_colored, &clr](const auto& f, auto i)
                                    {
                                        // store color of first fanout
                                        if (i == 0)
                                        {
-                                           c = ntk.color(ntk.get_node(f));
+                                           clr = ntk.color(ntk.get_node(f));
                                        }
                                        // compare color of first fanout against all others
-                                       else if (c == ntk.color(ntk.get_node(f)))
+                                       else if (clr == ntk.color(ntk.get_node(f)))
                                        {
                                            // since we are working with 3-graphs, this can only be executed if i == 1
                                            is_properly_colored = false;
@@ -216,11 +252,11 @@ typename Lyt::aspect_ratio determine_layout_size(const coloring_container<Ntk>& 
     ctn.color_ntk.foreach_gate(
         [&ctn, &x, &y](const auto& g)
         {
-            if (const auto c = ctn.color_ntk.color(g); c == ctn.color_east)
+            if (const auto clr = ctn.color_ntk.color(g); clr == ctn.color_east)
                 ++x;
-            else if (c == ctn.color_south)
+            else if (clr == ctn.color_south)
                 ++y;
-            else if (c == ctn.color_null)
+            else if (clr == ctn.color_null)
             {
                 ++x;
                 ++y;
@@ -241,14 +277,26 @@ typename Lyt::aspect_ratio determine_layout_size(const coloring_container<Ntk>& 
 template <typename Ntk>
 std::vector<mockturtle::node<Ntk>> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
 {
-    std::vector<mockturtle::node<Ntk>> fs{};
+    std::vector<mockturtle::node<Ntk>>   fs{};
+    std::optional<mockturtle::node<Ntk>> c = std::nullopt;
 
     ntk.foreach_fanin(n,
-                      [&ntk, &fs](const auto& f)
+                      [&ntk, &fs, &c](const auto& f)
                       {
-                          if (const auto fn = ntk.get_node(f); !ntk.is_constant(fn))
+                          if (const auto fn = ntk.get_node(f); ntk.is_constant(fn))
+                          {
+                              assert(!c.has_value());  // there can only be one constant input
+                              c = fn;
+                          }
+                          else
+                          {
                               fs.push_back(fn);
+                          }
                       });
+
+    // add potential constant after regular nodes (this assumes symmetric functions)
+    if (c.has_value())
+        fs.push_back(*c);
 
     return fs;
 }
@@ -256,16 +304,16 @@ std::vector<mockturtle::node<Ntk>> fanins(const Ntk& ntk, const mockturtle::node
 /**
  * Place 1-input gates.
  * @tparam Lyt
+ * @param t
  * @tparam Ntk
  * @param lyt
  * @param ntk
  * @param n
  * @param a
- * @param t
  */
 template <typename Lyt, typename Ntk>
-mockturtle::signal<Lyt> place(Lyt& lyt, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename Lyt::signal& a,
-                              const typename Lyt::tile& t)
+mockturtle::signal<Lyt> place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                              const mockturtle::signal<Lyt>& a)
 {
     if (ntk.is_inv(n))
     {
@@ -286,31 +334,55 @@ mockturtle::signal<Lyt> place(Lyt& lyt, const Ntk& ntk, const mockturtle::node<N
 /**
  * Place 2-input gates.
  * @tparam Lyt
+ * @param t
  * @tparam Ntk
  * @param lyt
  * @param ntk
  * @param n
  * @param a
  * @param b
- * @param t
+ * @param c
  */
 template <typename Lyt, typename Ntk>
-mockturtle::signal<Lyt> place(Lyt& lyt, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename Lyt::signal& a,
-                              const typename Lyt::signal& b, const typename Lyt::tile& t)
+mockturtle::signal<Lyt> place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                              const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b,
+                              const std::optional<bool>& c = std::nullopt)
 {
-    if (ntk.is_and(n))
+    if constexpr (mockturtle::has_is_and_v<Ntk>)
     {
-        return lyt.create_and(a, b, t);
+        if (ntk.is_and(n))
+        {
+            return lyt.create_and(a, b, t);
+        }
     }
-    if (ntk.is_or(n))
+    if constexpr (mockturtle::has_is_or_v<Ntk>)
     {
-        return lyt.create_or(a, b, t);
+        if (ntk.is_or(n))
+        {
+            return lyt.create_or(a, b, t);
+        }
     }
     if constexpr (mockturtle::has_is_xor_v<Ntk>)
     {
         if (ntk.is_xor(n))
         {
             return lyt.create_xor(a, b, t);
+        }
+    }
+    if constexpr (mockturtle::has_is_maj_v<Ntk>)
+    {
+        if (ntk.is_maj(n))
+        {
+            assert(c.has_value());
+
+            if (*c)  // constant signal c points to 1
+            {
+                return lyt.create_or(a, b, t);
+            }
+            else  // constant signal c points to 0
+            {
+                return lyt.create_and(a, b, t);
+            }
         }
     }
     // more gate types go here
@@ -357,28 +429,28 @@ mockturtle::signal<Lyt> wire_south(Lyt& lyt, const typename Lyt::tile& src, cons
 }
 
 template <typename Lyt, typename Ntk>
-mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-                                          typename Lyt::tile pre1_t, typename Lyt::tile pre2_t,
-                                          const typename Lyt::tile& t)
+mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& ntk,
+                                          const mockturtle::node<Ntk>& n, typename Lyt::tile pre1_t,
+                                          typename Lyt::tile pre2_t, const std::optional<bool>& c = std::nullopt)
 {
     // make sure pre1_t is the northwards tile and pre2_t is the westwards one
     if (pre2_t < pre1_t)
         std::swap(pre1_t, pre2_t);
 
-    return place(lyt, ntk, n, wire_south(lyt, pre1_t, t), wire_east(lyt, pre2_t, t), t);
+    return place(lyt, t, ntk, n, wire_south(lyt, pre1_t, t), wire_east(lyt, pre2_t, t), c);
 }
 
 template <typename Lyt, typename Ntk>
-mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-                                          const typename Lyt::tile& pre_t, const typename Lyt::tile& t)
+mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& ntk,
+                                          const mockturtle::node<Ntk>& n, const typename Lyt::tile& pre_t)
 {
     if (lyt.is_westwards_of(t, pre_t))
     {
-        return place(lyt, ntk, n, wire_east(lyt, pre_t, t), t);
+        return place(lyt, t, ntk, n, wire_east(lyt, pre_t, t));
     }
     else if (lyt.is_northwards_of(t, pre_t))
     {
-        return place(lyt, ntk, n, wire_south(lyt, pre_t, t), t);
+        return place(lyt, t, ntk, n, wire_south(lyt, pre_t, t));
     }
     else
     {
@@ -438,17 +510,17 @@ class orthogonal_impl
                         const auto pre_t = static_cast<typename Lyt::tile>(node2pos[pre]);
 
                         // n is colored east
-                        if (const auto c = ctn.color_ntk.color(n); c == ctn.color_east)
+                        if (const auto clr = ctn.color_ntk.color(n); clr == ctn.color_east)
                         {
                             const typename Lyt::tile t{latest_pos.x, pre_t.y};
-                            node2pos[n] = connect_and_place(layout, ntk, n, pre_t, t);
+                            node2pos[n] = connect_and_place(layout, t, ntk, n, pre_t);
                             ++latest_pos.x;
                         }
                         // n is colored south
-                        else if (c == ctn.color_south)
+                        else if (clr == ctn.color_south)
                         {
                             const typename Lyt::tile t{pre_t.x, latest_pos.y};
-                            node2pos[n] = connect_and_place(layout, ntk, n, pre_t, t);
+                            node2pos[n] = connect_and_place(layout, t, ntk, n, pre_t);
                             ++latest_pos.y;
                         }
                         else
@@ -457,10 +529,14 @@ class orthogonal_impl
                             assert(false);
                         }
                     }
-                    // if node has two fanins
-                    else if (fs.size() == 2)
+                    else  // if node has two fanins (or three fanins with one of them being constant)
                     {
                         const auto &pre1 = fs[0], pre2 = fs[1];
+
+                        // access potential constant node
+                        std::optional<bool> c{};
+                        if (fs.size() == 3)
+                            c = ntk.constant_value(fs[2]);
 
                         auto pre1_t = static_cast<typename Lyt::tile>(node2pos[pre1]),
                              pre2_t = static_cast<typename Lyt::tile>(node2pos[pre2]);
@@ -468,7 +544,7 @@ class orthogonal_impl
                         typename Lyt::tile t{};
 
                         // n is colored east
-                        if (const auto c = ctn.color_ntk.color(n); c == ctn.color_east)
+                        if (const auto clr = ctn.color_ntk.color(n); clr == ctn.color_east)
                         {
                             // make sure pre1_t is the northwards tile and pre2_t is the westwards one
                             if (pre2_t.y < pre1_t.y)
@@ -483,7 +559,7 @@ class orthogonal_impl
                             ++latest_pos.x;
                         }
                         // n is colored south
-                        else if (c == ctn.color_south)
+                        else if (clr == ctn.color_south)
                         {
                             // make sure pre1_t is the northwards tile and pre2_t is the westwards one
                             if (pre2_t.x > pre1_t.x)
@@ -512,7 +588,7 @@ class orthogonal_impl
                             ++latest_pos.y;
                         }
 
-                        node2pos[n] = connect_and_place(layout, ntk, n, pre1_t, pre2_t, t);
+                        node2pos[n] = connect_and_place(layout, t, ntk, n, pre1_t, pre2_t, c);
                     }
 
                     // create PO at applicable position
@@ -569,11 +645,18 @@ class orthogonal_impl
  * It is not meant to be used for arranging fabricable circuits, as area is far from being optimal.
  */
 template <typename Lyt, typename Ntk>
-Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
-               orthogonal_physical_design_stats* pst = nullptr)
+std::optional<Lyt> orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
+                              orthogonal_physical_design_stats* pst = nullptr)
 {
     static_assert(mockturtle::is_network_type_v<Lyt>, "Lyt is not a network type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
+
+    // check for input degree
+    if (detail::has_high_degree_fanin_nodes(ntk))
+    {
+        std::cout << "[e] network cannot have nodes with more than two non-constant fanins" << std::endl;
+        return std::nullopt;
+    }
 
     orthogonal_physical_design_stats  st{};
     detail::orthogonal_impl<Lyt, Ntk> p{ntk, ps, st};
