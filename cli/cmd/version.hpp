@@ -33,9 +33,9 @@ class version_command : public command
      */
     void execute() override
     {
-        env->out() << fmt::format("[i] {} - compiled on {} at {}", fiction::VERSION, fiction::COMPILED_DATE,
+        env->out() << fmt::format("[i] {} - compiled on {} at {}\n", fiction::FICTION_VERSION, fiction::COMPILED_DATE,
                                   fiction::COMPILED_TIME)
-                   << std::endl;
+                   << fmt::format("[i] {}", fiction::FICTION_REPO) << std::endl;
     }
 };
 
