@@ -275,30 +275,33 @@ typename Lyt::aspect_ratio determine_layout_size(const coloring_container<Ntk>& 
 }
 
 template <typename Ntk>
-std::vector<mockturtle::node<Ntk>> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
+struct fanin_container
 {
-    std::vector<mockturtle::node<Ntk>>   fs{};
-    std::optional<mockturtle::node<Ntk>> c = std::nullopt;
+    std::vector<mockturtle::node<Ntk>> fanin_nodes{};
+
+    std::optional<bool> constant_fanin{};
+};
+
+template <typename Ntk>
+fanin_container<Ntk> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
+{
+    fanin_container<Ntk> fc{};
 
     ntk.foreach_fanin(n,
-                      [&ntk, &fs, &c](const auto& f)
+                      [&ntk, &fc](const auto& f)
                       {
                           if (const auto fn = ntk.get_node(f); ntk.is_constant(fn))
                           {
-                              assert(!c.has_value());  // there can only be one constant input
-                              c = fn;
+                              assert(!fc.constant_fanin.has_value());  // there can only be one constant input
+                              fc.constant_fanin = ntk.constant_value(fn);
                           }
                           else
                           {
-                              fs.push_back(fn);
+                              fc.fanin_nodes.push_back(fn);
                           }
                       });
 
-    // add potential constant after regular nodes (this assumes symmetric functions)
-    if (c.has_value())
-        fs.push_back(*c);
-
-    return fs;
+    return fc;
 }
 
 /**
@@ -503,9 +506,9 @@ class orthogonal_impl
                         ++latest_pos.y;
                     }
                     // if n has only one fanin
-                    else if (const auto fs = fanins(ntk, n); fs.size() == 1)
+                    else if (const auto fc = fanins(ntk, n); fc.fanin_nodes.size() == 1)
                     {
-                        const auto& pre = fs[0];
+                        const auto& pre = fc.fanin_nodes[0];
 
                         const auto pre_t = static_cast<typename Lyt::tile>(node2pos[pre]);
 
@@ -531,12 +534,7 @@ class orthogonal_impl
                     }
                     else  // if node has two fanins (or three fanins with one of them being constant)
                     {
-                        const auto &pre1 = fs[0], pre2 = fs[1];
-
-                        // access potential constant node
-                        std::optional<bool> c{};
-                        if (fs.size() == 3)
-                            c = ntk.constant_value(fs[2]);
+                        const auto &pre1 = fc.fanin_nodes[0], pre2 = fc.fanin_nodes[1];
 
                         auto pre1_t = static_cast<typename Lyt::tile>(node2pos[pre1]),
                              pre2_t = static_cast<typename Lyt::tile>(node2pos[pre2]);
@@ -588,7 +586,7 @@ class orthogonal_impl
                             ++latest_pos.y;
                         }
 
-                        node2pos[n] = connect_and_place(layout, t, ntk, n, pre1_t, pre2_t, c);
+                        node2pos[n] = connect_and_place(layout, t, ntk, n, pre1_t, pre2_t, fc.constant_fanin);
                     }
 
                     // create PO at applicable position
