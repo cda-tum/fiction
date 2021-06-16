@@ -201,12 +201,12 @@ class gate_layout_tile_drawer : public topology_dot_drawer<Lyt, DrawIndexes>
         return fmt::format("x{}y{}", t.x, t.y);
     }
 
-    std::string additional_node_attributes() const noexcept
+    std::vector<std::string> additional_node_attributes() const noexcept
     {
         if constexpr (DrawIndexes)
-            return ", shape=square, fixedsize=true, width=1";
+            return {"shape=square", "fixedsize=true", "width=1"};
         else
-            return ", shape=square, fixedsize=true, width=0.5";
+            return {"shape=square", "fixedsize=true", "width=0.5"};
     }
 
     std::string tile_label(const Lyt& lyt, const typename Lyt::tile& t) const noexcept
@@ -222,9 +222,10 @@ class gate_layout_tile_drawer : public topology_dot_drawer<Lyt, DrawIndexes>
 
         if constexpr (has_is_buf_v<Lyt>)
         {
+            // crossing case
             if (lyt.is_buf(lyt.get_node(t)) && lyt.is_buf(lyt.get_node(lyt.above(t))))
             {
-                return "X";
+                return "+";
             }
         }
 
@@ -293,7 +294,7 @@ void write_layout_dot(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
 
     std::stringstream nodes{}, edges{}, grid{};
 
-    nodes << fmt::format("node [style=filled {}];\n", drawer.additional_node_attributes());
+    nodes << fmt::format("node [style=filled {}];\n", fmt::join(drawer.additional_node_attributes(), " "));
 
     // draw tiles
     lyt.foreach_ground_tile(

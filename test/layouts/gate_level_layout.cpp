@@ -8,6 +8,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/traits.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -254,6 +255,9 @@ TEST_CASE("Creation of binary operations", "[gate-level]")
     REQUIRE(mockturtle::has_create_pi_v<gate_layout>);
     REQUIRE(mockturtle::has_create_and_v<gate_layout>);
     REQUIRE(mockturtle::has_create_or_v<gate_layout>);
+    REQUIRE(mockturtle::has_create_nand_v<gate_layout>);
+    REQUIRE(mockturtle::has_create_nor_v<gate_layout>);
+    REQUIRE(mockturtle::has_create_xor_v<gate_layout>);
 
     gate_layout layout{tile_based_layout::aspect_ratio{2, 2, 1}};
 
@@ -264,6 +268,9 @@ TEST_CASE("Creation of binary operations", "[gate-level]")
 
     auto a = layout.create_and(x1, x2, {0, 0});
     auto o = layout.create_or(x1, x2, {1, 1});
+
+    const auto a_node = layout.get_node(a);
+    const auto o_node = layout.get_node(o);
 
     CHECK(a != o);
     CHECK(layout.num_gates() == 2);
@@ -283,6 +290,69 @@ TEST_CASE("Creation of binary operations", "[gate-level]")
 
     CHECK(!layout.is_wire(layout.get_node({0, 0})));
     CHECK(!layout.is_wire(layout.get_node({1, 1})));
+
+    auto na = layout.create_nand(x1, x2, {0, 0});
+    auto no = layout.create_nor(x1, x2, {1, 1});
+
+    const auto na_node = layout.get_node(na);
+    const auto no_node = layout.get_node(no);
+
+    CHECK(na != no);
+    CHECK(na == a);
+    CHECK(no == o);
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.size() == 8);  // overridden nodes still count towards layout size
+
+    CHECK(layout.get_node({0, 0}) == layout.get_node(na));
+    CHECK(layout.get_node({1, 1}) == layout.get_node(no));
+
+    CHECK(layout.is_gate_tile({0, 0}));
+    CHECK(layout.is_gate_tile({1, 1}));
+
+    CHECK(layout.is_gate(layout.get_node({0, 0})));
+    CHECK(layout.is_gate(layout.get_node({1, 1})));
+
+    CHECK(!layout.is_wire_tile({0, 0}));
+    CHECK(!layout.is_wire_tile({1, 1}));
+
+    CHECK(!layout.is_wire(layout.get_node({0, 0})));
+    CHECK(!layout.is_wire(layout.get_node({1, 1})));
+
+    CHECK(layout.is_dead(a_node));
+    CHECK(layout.is_dead(o_node));
+
+    auto xo = layout.create_nand(x1, x2, {0, 0});
+    auto xn = layout.create_nor(x1, x2, {1, 1});
+
+    const auto xo_node = layout.get_node(xo);
+    const auto xn_node = layout.get_node(xn);
+
+    CHECK(xo != xn);
+    CHECK(xo == a);
+    CHECK(xn == o);
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.size() == 10);  // overridden nodes still count towards layout size
+
+    CHECK(layout.get_node({0, 0}) == layout.get_node(xo));
+    CHECK(layout.get_node({1, 1}) == layout.get_node(xn));
+
+    CHECK(layout.is_gate_tile({0, 0}));
+    CHECK(layout.is_gate_tile({1, 1}));
+
+    CHECK(layout.is_gate(layout.get_node({0, 0})));
+    CHECK(layout.is_gate(layout.get_node({1, 1})));
+
+    CHECK(!layout.is_wire_tile({0, 0}));
+    CHECK(!layout.is_wire_tile({1, 1}));
+
+    CHECK(!layout.is_wire(layout.get_node({0, 0})));
+    CHECK(!layout.is_wire(layout.get_node({1, 1})));
+
+    CHECK(layout.is_dead(na_node));
+    CHECK(layout.is_dead(no_node));
+
+    CHECK(!layout.is_dead(xo_node));
+    CHECK(!layout.is_dead(xn_node));
 }
 
 TEST_CASE("Creation of ternary operations", "[gate-level]")
@@ -704,6 +774,8 @@ TEST_CASE("Functional properties", "[gate-level]")
 
     REQUIRE(mockturtle::has_is_and_v<gate_layout>);
     REQUIRE(mockturtle::has_is_or_v<gate_layout>);
+    REQUIRE(fiction::has_is_nand_v<gate_layout>);
+    REQUIRE(fiction::has_is_nor_v<gate_layout>);
     REQUIRE(mockturtle::has_is_maj_v<gate_layout>);
     REQUIRE(mockturtle::has_is_xor_v<gate_layout>);
     REQUIRE(mockturtle::has_is_function_v<gate_layout>);
@@ -725,6 +797,9 @@ TEST_CASE("Functional properties", "[gate-level]")
     const auto n  = gate_layout::tile{2, 3};
     const auto po = gate_layout::tile{1, 3};
 
+    const auto na = gate_layout::tile{0, 4};
+    const auto no = gate_layout::tile{1, 4};
+
     CHECK(layout.is_pi(layout.get_node(x1)));
     CHECK(layout.is_pi(layout.get_node(x2)));
     CHECK(layout.is_pi(layout.get_node(x3)));
@@ -739,6 +814,9 @@ TEST_CASE("Functional properties", "[gate-level]")
 
     CHECK(layout.is_inv(layout.get_node(n)));
     CHECK(layout.is_po(layout.get_node(po)));
+
+    CHECK(layout.is_nand(layout.get_node(na)));
+    CHECK(layout.is_nor(layout.get_node(no)));
 }
 
 TEST_CASE("Custom node values", "[gate-level]")
@@ -829,9 +907,9 @@ TEST_CASE("Crossings", "[gate-level]")
                           });
 
     layout.foreach_fanin(layout.get_node({2, 1}),
-                          [&layout](const auto& fi) {
-                              CHECK(layout.get_node(fi) == layout.get_node({2, 0}));
-                          });
+                         [&layout](const auto& fi) {
+                             CHECK(layout.get_node(fi) == layout.get_node({2, 0}));
+                         });
 
     layout.foreach_fanin(layout.get_node({2, 1, 1}),
                          [&layout](const auto& fi) {

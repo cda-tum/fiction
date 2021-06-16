@@ -56,7 +56,7 @@ class gate_level_layout : public ClockedLayout
 
     /*! \brief gate-level layout node
      *
-     * `data[0].h1`: Fan-out size
+     * `data[0].h1`: Internal (data-flow independent) fan-out size (MSB indicates dead nodes)
      * `data[0].h2`: Application-specific value
      * `data[1].h1`: Function literal in truth table cache
      * `data[2].h2`: Visited flags
@@ -196,14 +196,29 @@ class gate_level_layout : public ClockedLayout
         return create_node_from_literal({a, b}, 4, t);
     }
 
+    signal create_nand(signal a, signal b, const tile& t = {})
+    {
+        return create_node_from_literal({a, b}, 5, t);
+    }
+
     signal create_or(signal a, signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 6, t);
     }
 
+    signal create_nor(signal a, signal b, const tile& t = {})
+    {
+        return create_node_from_literal({a, b}, 7, t);
+    }
+
     signal create_xor(signal a, signal b, const tile& t = {})
     {
         return create_node_from_literal({a, b}, 8, t);
+    }
+
+    signal create_xnor(signal a, signal b, const tile& t = {})
+    {
+        return create_node_from_literal({a, b}, 9, t);
     }
 
     signal create_maj(signal a, signal b, signal c, const tile& t = {})
@@ -300,6 +315,11 @@ class gate_level_layout : public ClockedLayout
         return {};
     }
 
+    [[nodiscard]] bool is_dead(const node& n) const noexcept
+    {
+        return (strg->nodes[n].data[0].h1 >> 31) & 1;
+    }
+
     [[nodiscard]] signal make_signal(const node& n) const noexcept
     {
         return static_cast<signal>(get_tile(n));
@@ -367,14 +387,29 @@ class gate_level_layout : public ClockedLayout
         return strg->nodes[n].data[1].h1 == 4;
     }
 
+    [[nodiscard]] bool is_nand(node const n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 5;
+    }
+
     [[nodiscard]] bool is_or(node const n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 6;
     }
 
+    [[nodiscard]] bool is_nor(node const n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 7;
+    }
+
     [[nodiscard]] bool is_xor(node const n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 8;
+    }
+
+    [[nodiscard]] bool is_xnor(node const n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 9;
     }
 
     [[nodiscard]] bool is_maj(node const n) const noexcept
@@ -431,7 +466,8 @@ class gate_level_layout : public ClockedLayout
     void foreach_node(Fn&& fn) const
     {
         auto r = mockturtle::range<node>(static_cast<node>(strg->nodes.size()));
-        mockturtle::detail::foreach_element(r.begin(), r.end(), fn);
+        mockturtle::detail::foreach_element_if(
+            r.begin(), r.end(), [this](const auto& n) { return !is_dead(n); }, fn);
     }
 
     template <typename Fn>
@@ -439,7 +475,7 @@ class gate_level_layout : public ClockedLayout
     {
         auto r = mockturtle::range<node>(2u, static_cast<node>(strg->nodes.size()));  // start from 2 to avoid constants
         mockturtle::detail::foreach_element_if(
-            r.begin(), r.end(), [this](const auto n) { return is_gate(n); }, fn);
+            r.begin(), r.end(), [this](const auto n) { return is_gate(n) && !is_dead(n); }, fn);
     }
 
     template <typename Fn>
@@ -447,7 +483,7 @@ class gate_level_layout : public ClockedLayout
     {
         auto r = mockturtle::range<node>(2u, static_cast<node>(strg->nodes.size()));  // start from 2 to avoid constants
         mockturtle::detail::foreach_element_if(
-            r.begin(), r.end(), [this](const auto n) { return is_wire(n); }, fn);
+            r.begin(), r.end(), [this](const auto n) { return is_wire(n) && !is_dead(n); }, fn);
     }
 
     template <typename Fn>
@@ -534,6 +570,7 @@ class gate_level_layout : public ClockedLayout
 
         return result;
     }
+
 #pragma endregion
 
 #pragma region Custom node values
@@ -595,10 +632,12 @@ class gate_level_layout : public ClockedLayout
 #pragma endregion
 
 #pragma region General methods
+
     auto& events() const
     {
         return *evnts;
     }
+
 #pragma endregion
 
   private:
@@ -638,6 +677,8 @@ class gate_level_layout : public ClockedLayout
     {
         if (!t.is_dead())
         {
+            clear_tile(t);
+
             strg->data.tile_node_map[static_cast<signal>(t)] = n;
 
             strg->data.node_tile_map[n] = static_cast<signal>(t);
@@ -651,6 +692,14 @@ class gate_level_layout : public ClockedLayout
             {
                 strg->data.num_gates++;
             }
+        }
+    }
+
+    void kill_node(const node& n)
+    {
+        if (!is_constant(n))
+        {
+            strg->nodes[n].data[0].h1 |= UINT32_C(0x80000000);
         }
     }
 
@@ -725,6 +774,15 @@ class gate_level_layout : public ClockedLayout
     {
         if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
         {
+            // decrease gate count
+            if (is_gate(it->second))
+                --strg->data.num_gates;
+            // decrease wire count
+            if (is_wire(it->second))
+                --strg->data.num_wires;
+            // mark node as dead
+            kill_node(it->second);
+
             // remove node-tile
             strg->data.node_tile_map.erase(it->second);
             // remove tile-node

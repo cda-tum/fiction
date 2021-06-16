@@ -124,7 +124,7 @@ GateLyt crossing_layout() noexcept
 template <typename GateLyt>
 GateLyt non_structural_all_function_gate_layout() noexcept
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 3, 0}, fiction::open_4_clocking};
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 4, 0}, fiction::open_4_clocking};
 
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -156,6 +156,9 @@ GateLyt non_structural_all_function_gate_layout() noexcept
 
     layout.create_not(w, {2, 3});
     layout.create_po(f, "po", {1, 3});
+
+    layout.create_nand(x1, x2, {0, 4});
+    layout.create_nor(x1, x2, {1, 4});
 
     return layout;
 }

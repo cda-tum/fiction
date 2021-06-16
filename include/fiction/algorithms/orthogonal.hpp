@@ -372,6 +372,20 @@ mockturtle::signal<Lyt> place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& 
             return lyt.create_xor(a, b, t);
         }
     }
+    if constexpr (fiction::has_is_nand_v<Ntk>)
+    {
+        if (ntk.is_nand(n))
+        {
+            return lyt.create_nand(a, b, t);
+        }
+    }
+    if constexpr (fiction::has_is_nor_v<Ntk>)
+    {
+        if (ntk.is_nor(n))
+        {
+            return lyt.create_nor(a, b, t);
+        }
+    }
     if constexpr (mockturtle::has_is_maj_v<Ntk>)
     {
         if (ntk.is_maj(n))
@@ -389,6 +403,20 @@ mockturtle::signal<Lyt> place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& 
         }
     }
     // more gate types go here
+    if constexpr (mockturtle::has_is_function_v<Ntk>)
+    {
+        if (ntk.is_function(n))
+        {
+            if (c.has_value())
+            {
+                return lyt.create_node({a, b, *c}, ntk.node_function(n), t);
+            }
+            else
+            {
+                return lyt.create_node({a, b}, ntk.node_function(n), t);
+            }
+        }
+    }
 
     assert(false);
 }

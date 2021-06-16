@@ -49,6 +49,7 @@ class map_command : public command
         add_flag("--maj,-m", "Enable the use of MAJ gates");
         add_flag("--dot,-d", "Enable the use of DOT gates");
 
+        add_flag("--decay", "Enforce the application of at least one constant input to three-input gates");
         add_flag("--logic_sharing,-s", ps.enable_logic_sharing, "Enable logic sharing optimization");
         add_flag("--verbose,-v", ps.verbose, "Be verbose");
     }
@@ -92,11 +93,17 @@ class map_command : public command
         }
         if (is_set("maj"))
         {
-            library_stream << fiction::GATE_MAJ3;
+            if (!is_set("decay"))
+                library_stream << fiction::GATE_MAJ3;
+
+            library_stream << fiction::DECAY_MAJ3;
         }
         if (is_set("dot"))
         {
-            library_stream << fiction::GATE_DOT;
+            if (!is_set("decay"))
+                library_stream << fiction::GATE_DOT;
+
+            library_stream << fiction::DECAY_DOT;
         }
 
         // generate technology library
