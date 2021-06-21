@@ -331,7 +331,8 @@ mockturtle::signal<Lyt> place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& 
     }
     // more gate types go here
 
-    assert(false);
+    assert(false);  // n must be of some supported type
+    return {};      // fix -Wreturn-type warning
 }
 
 /**
@@ -418,7 +419,8 @@ mockturtle::signal<Lyt> place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& 
         }
     }
 
-    assert(false);
+    assert(false);  // n must be of some supported type
+    return {};      // fix -Wreturn-type warning
 }
 
 template <typename Lyt>
@@ -483,11 +485,9 @@ mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const typename Lyt::tile& t,
     {
         return place(lyt, t, ntk, n, wire_south(lyt, pre_t, t));
     }
-    else
-    {
-        // gates cannot be placed elsewhere
-        assert(false);
-    }
+
+    assert(false);  // gates cannot be placed elsewhere
+    return {};      // fix -Wreturn-type warning
 }
 
 template <typename Lyt, typename Ntk>
