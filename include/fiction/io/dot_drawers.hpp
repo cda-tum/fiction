@@ -6,6 +6,7 @@
 #define FICTION_DOT_DRAWERS_HPP
 
 #include "../traits.hpp"
+#include "utils/version_info.hpp"
 
 #include <fmt/format.h>
 #include <kitty/print.hpp>
