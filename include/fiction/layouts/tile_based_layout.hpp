@@ -221,6 +221,26 @@ class tile_based_layout
         return is_northern_border(t) || is_eastern_border(t) || is_southern_border(t) || is_western_border(t);
     }
 
+    [[nodiscard]] tile northern_border_of(const tile& t) const noexcept
+    {
+        return {t.x, 0ull, t.z};
+    }
+
+    [[nodiscard]] tile eastern_border_of(const tile& t) const noexcept
+    {
+        return {x(), t.y, t.z};
+    }
+
+    [[nodiscard]] tile southern_border_of(const tile& t) const noexcept
+    {
+        return {t.x, y(), t.z};
+    }
+
+    [[nodiscard]] tile western_border_of(const tile& t) const noexcept
+    {
+        return {0ull, t.y, t.z};
+    }
+
     [[nodiscard]] constexpr bool is_ground_layer(const tile& t) const noexcept
     {
         return t.z == 0ull;

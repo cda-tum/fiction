@@ -36,14 +36,6 @@ struct orthogonal_physical_design_params
      * Number of clock phases to use. 3 and 4 are supported.
      */
     uint8_t number_of_clock_phases = 4u;
-    /**
-     * Flag to indicate that designated I/O ports should be placed.
-     */
-    bool utilize_io_ports = false;
-    /**
-     * Flag to indicate that designated I/O ports should be routed to the layout's borders.
-     */
-    bool route_ios_to_layout_borders = false;
 };
 
 struct orthogonal_physical_design_stats
@@ -554,7 +546,7 @@ class orthogonal_impl
                     {
                         node2pos[n] = layout.move_node(
                             static_cast<mockturtle::node<Lyt>>(n),
-                            {0, latest_pos.y});  // this casts a network node to a Layout node. This only works because
+                            {0, latest_pos.y});  // this casts a network node to a layout node. This only works because
                                                  // topology_network and gate_level_layout use the same number of
                                                  // constants followed by PIs
                         ++latest_pos.y;
@@ -646,15 +638,36 @@ class orthogonal_impl
                     // create PO at applicable position
                     if (ntk.is_po(n))
                     {
-                        if (const auto n_s = node2pos[n]; is_eastern_po_orientation_available(ctn, n))
+                        const auto n_s = node2pos[n];
+
+                        typename Lyt::tile po_tile{};
+
+                        // determine PO orientation
+                        if (is_eastern_po_orientation_available(ctn, n))
                         {
-                            layout.create_po(n_s, "", layout.east(static_cast<typename Lyt::tile>(n_s)));
+                            po_tile = layout.east(static_cast<typename Lyt::tile>(n_s));
                             ++latest_pos.x;
                         }
                         else
                         {
-                            layout.create_po(n_s, "", layout.south(static_cast<typename Lyt::tile>(n_s)));
+                            po_tile = layout.south(static_cast<typename Lyt::tile>(n_s));
                             ++latest_pos.y;
+                        }
+
+                        // check if PO position is located at the border
+                        if (layout.is_eastern_border(po_tile))
+                        {
+                            layout.create_po(n_s, "", po_tile);
+                        }
+                        // place PO at the border and connect it by wire segments
+                        else
+                        {
+                            const auto anker = layout.create_buf(n_s, po_tile);
+
+                            po_tile = layout.eastern_border_of(po_tile);
+
+                            layout.create_po(wire_east(layout, static_cast<typename Lyt::tile>(anker), po_tile), "",
+                                             po_tile);
                         }
                     }
                 }
@@ -668,6 +681,7 @@ class orthogonal_impl
         // restore possibly set signal names
         restore_names(ntk, layout, node2pos);
 
+        // statistical information
         pst.x_size    = layout.x() + 1;
         pst.y_size    = layout.y() + 1;
         pst.num_gates = layout.num_gates();

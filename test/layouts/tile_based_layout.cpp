@@ -193,6 +193,7 @@ TEST_CASE("Cardinal operations", "[tile-based]")
     CHECK(layout.is_northwards_of(t, nt));
     CHECK(layout.is_northwards_of(t, bnt));
     CHECK(layout.is_northern_border(bnt));
+    CHECK(layout.northern_border_of(t) == bnt);
 
     auto et  = tile_based_layout::tile{6, 5};
     auto bet = tile_based_layout::tile{10, 5};
@@ -202,6 +203,7 @@ TEST_CASE("Cardinal operations", "[tile-based]")
     CHECK(layout.is_eastwards_of(t, et));
     CHECK(layout.is_eastwards_of(t, bet));
     CHECK(layout.is_eastern_border(bet));
+    CHECK(layout.eastern_border_of(t) == bet);
 
     auto st  = tile_based_layout::tile{5, 6};
     auto bst = tile_based_layout::tile{5, 10};
@@ -211,6 +213,7 @@ TEST_CASE("Cardinal operations", "[tile-based]")
     CHECK(layout.is_southwards_of(t, st));
     CHECK(layout.is_southwards_of(t, bst));
     CHECK(layout.is_southern_border(bst));
+    CHECK(layout.southern_border_of(t) == bst);
 
     auto wt  = tile_based_layout::tile{4, 5};
     auto bwt = tile_based_layout::tile{0, 5};
@@ -220,6 +223,7 @@ TEST_CASE("Cardinal operations", "[tile-based]")
     CHECK(layout.is_westwards_of(t, wt));
     CHECK(layout.is_westwards_of(t, bwt));
     CHECK(layout.is_western_border(bwt));
+    CHECK(layout.western_border_of(t) == bwt);
 
     auto at  = tile_based_layout::tile{5, 5, 1};
     auto bat = layout.above(at);

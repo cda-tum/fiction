@@ -32,9 +32,6 @@ class ortho_command : public command
                        "An FCN layout that is not minimal will be found in reasonable runtime.")
     {
         add_option("--clock_numbers,-n", ps.number_of_clock_phases, "Number of clock phases to be used {3 or 4}", true);
-        add_flag("--io_ports,-i", ps.utilize_io_ports, "Use I/O port elements instead of gate pins");
-        add_flag("--border_io,-b", ps.route_ios_to_layout_borders,
-                 "Enforce primary I/O to be placed at the layout's borders");
         add_flag("--verbose,-v", ps.verbose, "Be verbose");
     }
 
@@ -59,11 +56,6 @@ class ortho_command : public command
             env->out() << "[e] only 3- and 4-phase clocking schemes are supported" << std::endl;
             ps = {};
             return;
-        }
-        // if border_ios is set, set io_ports as well
-        if (ps.route_ios_to_layout_borders)
-        {
-            ps.utilize_io_ports = true;
         }
 
         const auto get_name = [](auto&& net) -> std::string { return net->get_network_name(); };
