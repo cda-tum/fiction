@@ -11,6 +11,7 @@
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
+#include <mockturtle/utils/progress_bar.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
 #include <type_traits>
@@ -44,11 +45,11 @@ template <typename NtkDest, typename NtkSrc>
 class convert_network_impl<NtkDest, NtkSrc, false>
 {
   public:
-    explicit convert_network_impl(const NtkSrc& ntk_src) : ntk_topo{ntk_src} {}
+    explicit convert_network_impl(const NtkSrc& ntk_src) : ntk{ntk_src} {}
 
     NtkDest run()
     {
-        auto  init     = mockturtle::initialize_copy_network<NtkDest>(ntk_topo);
+        auto  init     = mockturtle::initialize_copy_network<NtkDest>(ntk);
         auto& ntk_dest = init.first;
         auto& old2new  = init.second;
 
@@ -56,27 +57,37 @@ class convert_network_impl<NtkDest, NtkSrc, false>
         {
             std::vector<typename NtkDest::signal> children{};
 
-            ntk_topo.foreach_fanin(n,
-                                   [this, &ntk_dest, &old2new, &children](const auto& f)
-                                   {
-                                       const auto fn         = ntk_topo.get_node(f);
-                                       const auto tgt_signal = old2new[fn];
+            ntk.foreach_fanin(n,
+                              [this, &ntk_dest, &old2new, &children](const auto& f)
+                              {
+                                  const auto fn         = ntk.get_node(f);
+                                  const auto tgt_signal = old2new[fn];
 
-                                       children.emplace_back(
-                                           ntk_topo.is_complemented(f) ? ntk_dest.create_not(tgt_signal) : tgt_signal);
-                                   });
+                                  children.emplace_back(ntk.is_complemented(f) ? ntk_dest.create_not(tgt_signal) :
+                                                                                 tgt_signal);
+                              });
 
             return children;
         };
 
-        ntk_topo.foreach_gate(
-            [this, &ntk_dest, &gather_fanin_signals, &old2new](const auto& g)
+#if (PROGRESS_BARS)
+        // initialize a progress bar
+        mockturtle::progress_bar bar{static_cast<uint32_t>(ntk.num_gates()), "[i] network conversion: |{0}|"};
+#endif
+
+        ntk.foreach_gate(
+            [&, this](const auto& g, [[maybe_unused]] auto i)
             {
                 auto children = gather_fanin_signals(g);
 
+#if (PROGRESS_BARS)
+                // update progress
+                bar(i);
+#endif
+
                 if constexpr (mockturtle::has_is_and_v<TopoNtkSrc> && mockturtle::has_create_and_v<NtkDest>)
                 {
-                    if (ntk_topo.is_and(g))
+                    if (ntk.is_and(g))
                     {
                         old2new[g] = ntk_dest.create_and(children[0], children[1]);
                         return true;
@@ -84,7 +95,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                 }
                 if constexpr (mockturtle::has_is_or_v<TopoNtkSrc> && mockturtle::has_create_or_v<NtkDest>)
                 {
-                    if (ntk_topo.is_or(g))
+                    if (ntk.is_or(g))
                     {
                         old2new[g] = ntk_dest.create_or(children[0], children[1]);
                         return true;
@@ -92,7 +103,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                 }
                 if constexpr (mockturtle::has_is_xor_v<TopoNtkSrc> && mockturtle::has_create_xor_v<NtkDest>)
                 {
-                    if (ntk_topo.is_xor(g))
+                    if (ntk.is_xor(g))
                     {
                         old2new[g] = ntk_dest.create_xor(children[0], children[1]);
                         return true;
@@ -100,7 +111,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                 }
                 if constexpr (mockturtle::has_is_maj_v<TopoNtkSrc> && mockturtle::has_create_maj_v<NtkDest>)
                 {
-                    if (ntk_topo.is_maj(g))
+                    if (ntk.is_maj(g))
                     {
                         old2new[g] = ntk_dest.create_maj(children[0], children[1], children[2]);
                         return true;
@@ -108,7 +119,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                 }
                 if constexpr (mockturtle::has_is_nary_and_v<TopoNtkSrc> && mockturtle::has_create_nary_and_v<NtkDest>)
                 {
-                    if (ntk_topo.is_nary_and(g))
+                    if (ntk.is_nary_and(g))
                     {
                         old2new[g] = ntk_dest.create_nary_and(children);
                         return true;
@@ -116,7 +127,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                 }
                 if constexpr (mockturtle::has_is_nary_or_v<TopoNtkSrc> && mockturtle::has_create_nary_or_v<NtkDest>)
                 {
-                    if (ntk_topo.is_nary_or(g))
+                    if (ntk.is_nary_or(g))
                     {
                         old2new[g] = ntk_dest.create_nary_or(children);
                         return true;
@@ -124,7 +135,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                 }
                 if constexpr (mockturtle::has_is_nary_xor_v<TopoNtkSrc> && mockturtle::has_create_nary_xor_v<NtkDest>)
                 {
-                    if (ntk_topo.is_nary_xor(g))
+                    if (ntk.is_nary_xor(g))
                     {
                         old2new[g] = ntk_dest.create_nary_xor(children);
                         return true;
@@ -132,7 +143,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                 }
                 if constexpr (fiction::has_is_buf_v<TopoNtkSrc> && mockturtle::has_create_buf_v<NtkDest>)
                 {
-                    if (ntk_topo.is_buf(g))
+                    if (ntk.is_buf(g))
                     {
                         old2new[g] = ntk_dest.create_buf(children[0]);
                         return true;
@@ -140,31 +151,31 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                 }
                 if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<NtkDest>)
                 {
-                    old2new[g] = ntk_dest.create_node(children, ntk_topo.node_function(g));
+                    old2new[g] = ntk_dest.create_node(children, ntk.node_function(g));
                     return true;
                 }
 
                 return true;
             });
 
-        ntk_topo.foreach_po(
+        ntk.foreach_po(
             [this, &ntk_dest, &old2new](const auto& po)
             {
-                const auto tgt_signal = old2new[ntk_topo.get_node(po)];
-                const auto tgt_po     = ntk_topo.is_complemented(po) ? ntk_dest.create_not(tgt_signal) : tgt_signal;
+                const auto tgt_signal = old2new[ntk.get_node(po)];
+                const auto tgt_po     = ntk.is_complemented(po) ? ntk_dest.create_not(tgt_signal) : tgt_signal;
 
                 ntk_dest.create_po(tgt_po);
             });
 
         // restore signal names if applicable
-        fiction::restore_names(ntk_topo, ntk_dest, old2new);
+        fiction::restore_names(ntk, ntk_dest, old2new);
 
         return ntk_dest;
     }
 
   private:
     using TopoNtkSrc = mockturtle::topo_view<NtkSrc>;
-    TopoNtkSrc ntk_topo;
+    TopoNtkSrc ntk;
 };
 }  // namespace detail
 

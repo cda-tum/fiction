@@ -12,6 +12,7 @@
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
+#include <mockturtle/utils/progress_bar.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
@@ -71,8 +72,13 @@ class fanout_substitution_impl
 
         ntk_topo.foreach_pi([this](const auto& pi) { generate_fanout_tree(pi); });
 
+#if (PROGRESS_BARS)
+        // initialize a progress bar
+        mockturtle::progress_bar bar{static_cast<uint32_t>(ntk_topo.num_gates()), "[i] fanout substitution: |{0}|"};
+#endif
+
         ntk_topo.foreach_gate(
-            [this](const auto& n)
+            [&, this](const auto& n, [[maybe_unused]] auto i)
             {
                 // gather children, but substitute fanouts where applicable
                 std::vector<mockturtle::signal<mockturtle::topo_view<NtkDest>>> children{};
@@ -98,6 +104,11 @@ class fanout_substitution_impl
 
                 // generate the fanout tree for n
                 generate_fanout_tree(n);
+
+#if (PROGRESS_BARS)
+                // update progress
+                bar(i);
+#endif
             });
 
         // add primary outputs to finalize the network

@@ -154,10 +154,15 @@ struct coloring_container
 template <typename Ntk>
 coloring_container<Ntk> east_south_coloring(const Ntk& ntk)
 {
+#if (PROGRESS_BARS)
+    // initialize a progress bar
+    mockturtle::progress_bar bar{static_cast<uint32_t>(ntk.num_gates()), "[i] determining relative positions: |{0}|"};
+#endif
+
     coloring_container<Ntk> ctn{ntk};
 
     ntk.foreach_gate(
-        [&ntk, &ctn](const auto& n)
+        [&](const auto& n, [[maybe_unused]] auto i)
         {
             // skip already colored nodes
             if (ctn.color_ntk.color(n) == ctn.color_null)
@@ -185,6 +190,11 @@ coloring_container<Ntk> east_south_coloring(const Ntk& ntk)
                 // paint n with color c
                 ctn.color_ntk.paint(n, clr);
             }
+
+#if (PROGRESS_BARS)
+            // update progress
+            bar(i);
+#endif
         });
 
     return ctn;
@@ -248,9 +258,15 @@ uint32_t is_eastern_po_orientation_available(const coloring_container<Ntk>& ctn,
 template <typename Lyt, typename Ntk>
 typename Lyt::aspect_ratio determine_layout_size(const coloring_container<Ntk>& ctn) noexcept
 {
+#if (PROGRESS_BARS)
+    // initialize a progress bar
+    mockturtle::progress_bar bar{static_cast<uint32_t>(ctn.color_ntk.num_gates()),
+                                 "[i] determining layout size: |{0}|"};
+#endif
+
     uint64_t x = 0ull, y = ctn.color_ntk.num_pis() - 1;
     ctn.color_ntk.foreach_gate(
-        [&ctn, &x, &y](const auto& g)
+        [&](const auto& g, [[maybe_unused]] auto i)
         {
             if (const auto clr = ctn.color_ntk.color(g); clr == ctn.color_east)
                 ++x;
@@ -269,6 +285,11 @@ typename Lyt::aspect_ratio determine_layout_size(const coloring_container<Ntk>& 
                 else
                     ++y;
             }
+
+#if (PROGRESS_BARS)
+            // update progress
+            bar(i);
+#endif
         });
 
     return {x, y, 1};
@@ -517,8 +538,13 @@ class orthogonal_impl
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         typename Lyt::tile latest_pos{1, 0};
 
+#if (PROGRESS_BARS)
+        // initialize a progress bar
+        mockturtle::progress_bar bar{static_cast<uint32_t>(ntk.size()), "[i] arranging layout: |{0}|"};
+#endif
+
         ntk.foreach_node(
-            [this, &layout, &ctn, &latest_pos](const auto& n)
+            [&, this](const auto& n, [[maybe_unused]] auto i)
             {
                 // do not place constants
                 if (!ntk.is_constant(n))
@@ -632,6 +658,11 @@ class orthogonal_impl
                         }
                     }
                 }
+
+#if (PROGRESS_BARS)
+                // update progress
+                bar(i);
+#endif
             });
 
         // restore possibly set signal names
