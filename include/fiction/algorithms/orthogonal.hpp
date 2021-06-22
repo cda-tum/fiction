@@ -232,7 +232,7 @@ uint32_t is_eastern_po_orientation_available(const coloring_container<Ntk>& ctn,
 
     // PO nodes can have a maximum of one other fanout
     ctn.color_ntk.foreach_fanout(n,
-                                 [&ctn, &eastern_side_available, &n](const auto& fo)
+                                 [&ctn, &eastern_side_available](const auto& fo)
                                  {
                                      // if that fanout is colored east, no PO can be placed there
                                      if (ctn.color_ntk.color(ctn.color_ntk.get_node(fo)) == ctn.color_east)
@@ -512,7 +512,7 @@ class orthogonal_impl
                    ps.number_of_clock_phases == 3 ? twoddwave_3_clocking : twoddwave_4_clocking};
 
         // reserve PI nodes without positions
-        ntk.foreach_pi([this, &layout]([[maybe_unused]] const auto& pi) { layout.create_pi(); });
+        ntk.foreach_pi([&layout]([[maybe_unused]] const auto& pi) { layout.create_pi(); });
 
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         typename Lyt::tile latest_pos{1, 0};

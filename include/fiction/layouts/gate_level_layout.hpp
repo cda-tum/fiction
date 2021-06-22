@@ -342,7 +342,7 @@ class gate_level_layout : public ClockedLayout
         std::copy(new_children.begin(), new_children.end(), std::back_inserter(children));
         // increase ref-count to new children
         std::for_each(new_children.cbegin(), new_children.cend(),
-                      [this, &n](const auto& nc) { strg->nodes[get_node(nc)].data[0].h1++; });
+                      [this](const auto& nc) { strg->nodes[get_node(nc)].data[0].h1++; });
 
         return static_cast<signal>(t);
     }

@@ -42,37 +42,29 @@ include(cmake/StaticAnalyzers.cmake)
 
 # Enable progress bars
 if (NOT WIN32)
-    option(ENABLE_PROGRESS_BARS "Enable animated progress bars in command line" ON)
-    if (ENABLE_PROGRESS_BARS)
+    option(FICTION_PROGRESS_BARS "Enable animated progress bars in command line" ON)
+    if (FICTION_PROGRESS_BARS)
         add_definitions(-DPROGRESS_BARS)
     endif ()
 endif ()
 
 # Include header files
-#include_directories(include/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/include)
-add_subdirectory(${CMAKE_SOURCE_DIR}/cli)
 
-# Find source files
-#file(GLOB_RECURSE SOURCES src/*.cpp src/*.h)
-#file(GLOB_RECURSE SOURCES cli/*.cpp)
-#list(FILTER SOURCES EXCLUDE REGEX "src/legacy/*")  # TODO remove when legacy code has been reworked
-#
-## Add configuration file
-#configure_file(include/fiction/util/version_info.hpp.in util/version_info.hpp)
-## Include configuration file
-#include_directories(${PROJECT_BINARY_DIR}/util/)
+# CLI
+option(FICTION_CLI "Build fiction CLI" ON)
+if (FICTION_CLI)
+    message(STATUS "Building fiction CLI")
+    add_subdirectory(${CMAKE_SOURCE_DIR}/cli)
+endif ()
 
 # Testing
-option(FICTION_TEST "Build tests" OFF)
-
-# Include tests
+option(FICTION_TEST "Build fiction tests" OFF)
 if (FICTION_TEST)
     enable_testing()
-    message(STATUS "Building tests")
+    message(STATUS "Building fiction tests")
     add_subdirectory(test)
 endif ()
 
 # Include libraries
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs)
-
