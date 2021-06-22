@@ -252,30 +252,42 @@ typename Lyt::aspect_ratio determine_layout_size(const coloring_container<Ntk>& 
 {
 #if (PROGRESS_BARS)
     // initialize a progress bar
-    mockturtle::progress_bar bar{static_cast<uint32_t>(ctn.color_ntk.num_gates()),
-                                 "[i] determining layout size: |{0}|"};
+    mockturtle::progress_bar bar{static_cast<uint32_t>(ctn.color_ntk.size()), "[i] determining layout size: |{0}|"};
 #endif
 
     uint64_t x = 0ull, y = ctn.color_ntk.num_pis() - 1;
-    ctn.color_ntk.foreach_gate(
-        [&](const auto& g, [[maybe_unused]] auto i)
+    ctn.color_ntk.foreach_node(
+        [&](const auto& n, [[maybe_unused]] auto i)
         {
-            if (const auto clr = ctn.color_ntk.color(g); clr == ctn.color_east)
-                ++x;
-            else if (clr == ctn.color_south)
-                ++y;
-            else if (clr == ctn.color_null)
+            if (!ctn.color_ntk.is_constant(n))
             {
-                ++x;
-                ++y;
-            }
-
-            if (ctn.color_ntk.is_po(g))
-            {
-                if (is_eastern_po_orientation_available(ctn, g))
+                if (ctn.color_ntk.is_pi(n))
+                {
+                    ctn.color_ntk.foreach_fanout(n,
+                                                 [&ctn, &x](const auto& fo)
+                                                 {
+                                                     if (ctn.color_ntk.color(ctn.color_ntk.get_node(fo)) ==
+                                                         ctn.color_south)
+                                                         ++x;
+                                                 });
+                }
+                else if (const auto clr = ctn.color_ntk.color(n); clr == ctn.color_east)
                     ++x;
-                else
+                else if (clr == ctn.color_south)
                     ++y;
+                else if (clr == ctn.color_null)
+                {
+                    ++x;
+                    ++y;
+                }
+
+                if (ctn.color_ntk.is_po(n))
+                {
+                    if (is_eastern_po_orientation_available(ctn, n))
+                        ++x;
+                    else
+                        ++y;
+                }
             }
 
 #if (PROGRESS_BARS)
@@ -549,6 +561,22 @@ class orthogonal_impl
                             {0, latest_pos.y});  // this casts a network node to a layout node. This only works because
                                                  // topology_network and gate_level_layout use the same number of
                                                  // constants followed by PIs
+
+                        // resolve conflicting PIs
+                        ntk.foreach_fanout(n,
+                                           [this, &ctn, &n, &layout, &latest_pos](const auto& fo)
+                                           {
+                                               if (ctn.color_ntk.color(ntk.get_node(fo)) == ctn.color_south)
+                                               {
+                                                   node2pos[n] = layout.create_buf(
+                                                       wire_east(layout, {0, latest_pos.y}, latest_pos), latest_pos);
+                                                   ++latest_pos.x;
+                                               }
+
+                                               // PIs have only one fanout
+                                               return false;
+                                           });
+
                         ++latest_pos.y;
                     }
                     // if n has only one fanin
