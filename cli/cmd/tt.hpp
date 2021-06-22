@@ -121,7 +121,7 @@ class tt_command : public command
             {
                 if (c >= 'a' && c <= 'p')
                 {
-                    num_vars = std::max<uint32_t>(num_vars, static_cast<uint32_t>(c - 'a') + 1ul);
+                    num_vars = std::max<uint32_t>(num_vars, static_cast<uint32_t>(c - 'a') + 1u);
                 }
             }
 
