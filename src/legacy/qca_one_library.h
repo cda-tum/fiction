@@ -31,7 +31,7 @@ public:
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
      * @param t Tile to be realized in QCA-ONE.
-     * @return QCA-ONE gate representation of t including I/Os, rotation, cost cells, etc.
+     * @return QCA-ONE gate representation of t including I/Os, rotation, const cells, etc.
      */
     fcn_gate set_up_gate(const fcn_gate_layout::tile& t) override;
     /**

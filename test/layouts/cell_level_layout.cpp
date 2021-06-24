@@ -1,0 +1,149 @@
+//
+// Created by marcel on 24.06.21.
+//
+
+#include "catch.hpp"
+
+#include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+
+using namespace fiction;
+
+TEST_CASE("QCA technology", "[cell-level]")
+{
+    CHECK(qca_technology::is_empty_cell(qca_technology::cell_type::EMPTY));
+    CHECK(qca_technology::is_normal_cell(qca_technology::cell_type::NORMAL));
+    CHECK(qca_technology::is_input_cell(qca_technology::cell_type::INPUT));
+    CHECK(qca_technology::is_output_cell(qca_technology::cell_type::OUTPUT));
+    CHECK(qca_technology::is_const_0_cell(qca_technology::cell_type::CONST_0));
+    CHECK(qca_technology::is_const_1_cell(qca_technology::cell_type::CONST_1));
+    CHECK(qca_technology::is_constant_cell(qca_technology::cell_type::CONST_0));
+    CHECK(qca_technology::is_constant_cell(qca_technology::cell_type::CONST_1));
+
+    CHECK(qca_technology::is_normal_cell_mode(qca_technology::cell_mode::NORMAL));
+    CHECK(qca_technology::is_rotated_cell_mode(qca_technology::cell_mode::ROTATED));
+    CHECK(qca_technology::is_vertical_cell_mode(qca_technology::cell_mode::VERTICAL));
+    CHECK(qca_technology::is_crossover_cell_mode(qca_technology::cell_mode::CROSSOVER));
+}
+
+TEST_CASE("Cell type assignment", "[cell-level]")
+{
+    using cell_layout =
+        fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::tile_based_layout>>;
+
+    cell_layout layout{fiction::tile_based_layout::aspect_ratio{4, 4}, "AND"};
+
+    layout.assign_cell_type({0, 2}, fiction::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 4}, fiction::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 0}, fiction::qca_technology::cell_type::CONST_0);
+    layout.assign_cell_type({2, 1}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2}, fiction::qca_technology::cell_type::OUTPUT);
+
+    layout.assign_cell_name({0, 2}, "a");
+    layout.assign_cell_name({2, 4}, "b");
+    layout.assign_cell_name({4, 2}, "f");
+
+    CHECK(layout.get_implementation() == fiction::technology_implementation::QCA);
+
+    CHECK(layout.get_layout_name() == "AND");
+    CHECK(layout.get_cell_name({0, 2}) == "a");
+    CHECK(layout.get_cell_name({2, 4}) == "b");
+    CHECK(layout.get_cell_name({4, 2}) == "f");
+
+    CHECK(layout.cell_count() == 9);
+    CHECK(layout.num_pis() == 2);
+    CHECK(layout.num_pos() == 1);
+
+    CHECK(layout.get_cell_type({2, 0}) == fiction::qca_technology::cell_type::CONST_0);
+    CHECK(layout.get_cell_type({2, 4}) == fiction::qca_technology::cell_type::INPUT);
+    CHECK(layout.get_cell_type({0, 2}) == fiction::qca_technology::cell_type::INPUT);
+    CHECK(layout.get_cell_type({2, 1}) == fiction::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 2}) == fiction::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 3}) == fiction::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({1, 2}) == fiction::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({3, 2}) == fiction::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({4, 2}) == fiction::qca_technology::cell_type::OUTPUT);
+
+    CHECK(layout.is_empty_cell({0, 0}));
+    CHECK(layout.is_empty_cell({0, 1}));
+    CHECK(layout.is_empty_cell({1, 0}));
+    CHECK(layout.is_empty_cell({1, 1}));
+    CHECK(layout.is_empty_cell({3, 0}));
+    CHECK(layout.is_empty_cell({3, 1}));
+    CHECK(layout.is_empty_cell({4, 0}));
+    CHECK(layout.is_empty_cell({4, 1}));
+    CHECK(layout.is_empty_cell({0, 3}));
+    CHECK(layout.is_empty_cell({1, 3}));
+    CHECK(layout.is_empty_cell({0, 4}));
+    CHECK(layout.is_empty_cell({1, 0}));
+    CHECK(layout.is_empty_cell({3, 3}));
+    CHECK(layout.is_empty_cell({3, 4}));
+    CHECK(layout.is_empty_cell({4, 3}));
+    CHECK(layout.is_empty_cell({4, 4}));
+
+    CHECK(!layout.is_empty_cell({2, 0}));
+    CHECK(!layout.is_empty_cell({2, 4}));
+    CHECK(!layout.is_empty_cell({0, 2}));
+    CHECK(!layout.is_empty_cell({2, 1}));
+    CHECK(!layout.is_empty_cell({2, 2}));
+    CHECK(!layout.is_empty_cell({2, 3}));
+    CHECK(!layout.is_empty_cell({1, 2}));
+    CHECK(!layout.is_empty_cell({3, 2}));
+    CHECK(!layout.is_empty_cell({4, 2}));
+}
+
+TEST_CASE("Cell mode assignment", "[cell-level]")
+{
+    using cell_layout =
+        fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::tile_based_layout>>;
+
+    cell_layout layout{fiction::tile_based_layout::aspect_ratio{4, 4, 1}, "Crossover"};
+
+    layout.assign_cell_type({0, 2, 0}, fiction::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 0, 0}, fiction::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({1, 2, 0}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 0}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2, 0}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 1, 1}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 1}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3, 1}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 4, 0}, fiction::qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({4, 2, 0}, fiction::qca_technology::cell_type::OUTPUT);
+
+    layout.assign_cell_mode({2, 1, 1}, fiction::qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 2, 1}, fiction::qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 3, 1}, fiction::qca_technology::cell_mode::CROSSOVER);
+
+    layout.assign_cell_name({0, 2}, "a");
+    layout.assign_cell_name({2, 0}, "b");
+    layout.assign_cell_name({4, 2}, "a'");
+    layout.assign_cell_name({2, 4}, "b'");
+
+    CHECK(layout.get_layout_name() == "Crossover");
+    CHECK(layout.get_cell_name({0, 2}) == "a");
+    CHECK(layout.get_cell_name({2, 0}) == "b");
+    CHECK(layout.get_cell_name({4, 2}) == "a'");
+    CHECK(layout.get_cell_name({2, 4}) == "b'");
+
+    CHECK(layout.cell_count() == 10);
+    CHECK(layout.num_pis() == 2);
+    CHECK(layout.num_pos() == 2);
+
+    CHECK(layout.get_cell_mode({0, 2, 0}) == fiction::qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({2, 0, 0}) == fiction::qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({1, 2, 0}) == fiction::qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({2, 2, 0}) == fiction::qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({3, 2, 0}) == fiction::qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({2, 4, 0}) == fiction::qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({4, 2, 0}) == fiction::qca_technology::cell_mode::NORMAL);
+
+    CHECK(layout.get_cell_mode({2, 1, 1}) == fiction::qca_technology::cell_mode::CROSSOVER);
+    CHECK(layout.get_cell_mode({2, 2, 1}) == fiction::qca_technology::cell_mode::CROSSOVER);
+    CHECK(layout.get_cell_mode({2, 3, 1}) == fiction::qca_technology::cell_mode::CROSSOVER);
+}

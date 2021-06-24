@@ -8,7 +8,7 @@
 #include <fiction/algorithms/name_restoration.hpp>
 #include <fiction/algorithms/network_conversion.hpp>
 #include <fiction/networks/topology_network.hpp>
-#include <fiction/technology/technology_library.hpp>
+#include <fiction/technology/technology_mapping_library.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>

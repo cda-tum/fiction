@@ -2,8 +2,8 @@
 // Created by marcel on 08.06.21.
 //
 
-#ifndef FICTION_TECHNOLOGY_LIBRARY_HPP
-#define FICTION_TECHNOLOGY_LIBRARY_HPP
+#ifndef FICTION_TECHNOLOGY_MAPPING_LIBRARY_HPP
+#define FICTION_TECHNOLOGY_MAPPING_LIBRARY_HPP
 
 namespace fiction
 {
@@ -32,4 +32,4 @@ constexpr const char* GATE_ONE  = "GATE   one     0 O=1;\n";
 
 }  // namespace fiction
 
-#endif  // FICTION_TECHNOLOGY_LIBRARY_HPP
+#endif  // FICTION_TECHNOLOGY_MAPPING_LIBRARY_HPP
