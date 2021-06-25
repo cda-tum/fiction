@@ -162,8 +162,8 @@ ALICE_DESCRIBE_STORE(fiction::gate_layout_t, layout)
 {
     const auto describe = [](auto&& lyt)
     {
-        return fmt::format("{} - {} × {}, gates: {}, wires: {}", lyt->get_network_name(), lyt->x() + 1, lyt->y() + 1,
-                           lyt->num_gates(), lyt->num_wires());
+        return fmt::format("{} - {} × {}, I/O: {}/{}, gates: {}, wires: {}", lyt->get_network_name(), lyt->x() + 1,
+                           lyt->y() + 1, lyt->num_pis(), lyt->num_pos(), lyt->num_gates(), lyt->num_wires());
     };
 
     return std::visit(describe, layout);
@@ -176,8 +176,9 @@ ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
     {
         mockturtle::depth_view depth_lyt{*lyt};
 
-        os << fmt::format("[i] {} - {} × {}, gates: {}, wires: {}, CP: {}\n", lyt->get_network_name(), lyt->x() + 1,
-                          lyt->y() + 1, lyt->num_gates(), lyt->num_wires(), depth_lyt.depth());
+        os << fmt::format("[i] {} - {} × {}, I/O: {}/{}, gates: {}, wires: {}, CP: {}\n", lyt->get_network_name(),
+                          lyt->x() + 1, lyt->y() + 1, lyt->num_pis(), lyt->num_pos(), lyt->num_gates(),
+                          lyt->num_wires(), depth_lyt.depth());
     };
 
     std::visit(print_statistics, layout);
@@ -246,41 +247,54 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
     std::visit(show_lyt, element);
 }
 
-///**
-// * FCN cell layouts.
-// */
-// ALICE_ADD_STORE(fcn_cell_layout_ptr, "cell_layout", "c", "cell layout", "cell layouts")
-//
-// ALICE_PRINT_STORE(fcn_cell_layout_ptr, os, layout)
-//{
-//    layout->write_layout(os);
-//}
-//
-// ALICE_DESCRIBE_STORE(fcn_cell_layout_ptr, layout)
-//{
-//    return fmt::format("{} ({}) - {} × {}", layout->get_name(), layout->get_technology(), layout->x(),
-//    layout->y());
-//}
-//
-// ALICE_PRINT_STORE_STATISTICS(fcn_cell_layout_ptr, os, layout)
-//{
-//    os << fmt::format(" {} ({}) - {} × {}, #Cells: {}", layout->get_name(),
-//    fcn::to_string(layout->get_technology()),
-//                      layout->x(), layout->y(), layout->cell_count())
-//       << std::endl;
-//}
-//
-// ALICE_LOG_STORE_STATISTICS(fcn_cell_layout_ptr, layout)
-//{
-//    auto bb = layout->determine_bounding_box();
-//
-//    return nlohmann::json{
-//        {"name", layout->get_name()},
-//        {"technology", fcn::to_string(layout->get_technology())},
-//        {"layout", {{"x-size", layout->x()}, {"y-size", layout->y()}, {"area", layout->x() * layout->y()}}},
-//        {"bounding box", {{"x-size", bb.x_size}, {"y-size", bb.y_size}, {"area", bb.area()}}},
-//        {"cells", layout->cell_count()}};
-//}
+/**
+ * FCN cell layouts.
+ */
+ALICE_ADD_STORE(fiction::cell_layout_t, "cell_layout", "c", "cell layout", "cell layouts")
+
+ALICE_PRINT_STORE(fiction::cell_layout_t, os, layout)
+{
+    const auto print = [&os](auto&& lyt) { fiction::print_cell_level_layout(os, *lyt); };
+
+    std::visit(print, layout);
+}
+
+ALICE_DESCRIBE_STORE(fiction::cell_layout_t, layout)
+{
+    const auto describe = [](auto&& lyt)
+    {
+        return fmt::format("{} ({}) - {} × {}, I/O: {}/{}", lyt->get_layout_name(), lyt->get_implementation(),
+                           lyt->x() + 1, lyt->y() + 1, lyt->num_pis(), lyt->num_pos());
+    };
+
+    return std::visit(describe, layout);
+}
+
+ALICE_PRINT_STORE_STATISTICS(fiction::cell_layout_t, os, layout)
+{
+    const auto print_statistics = [&os](auto&& lyt)
+    {
+        os << fmt::format("{} ({}) - {} × {}, I/O: {}/{}, cells: {}\n", lyt->get_layout_name(),
+                          lyt->get_implementation(), lyt->x() + 1, lyt->y() + 1, lyt->num_pis(), lyt->num_pos(),
+                          lyt->num_cells());
+    };
+
+    std::visit(print_statistics, layout);
+}
+
+ALICE_LOG_STORE_STATISTICS(fiction::cell_layout_t, layout)
+{
+    const auto log_statistics = [](auto&& lyt)
+    {
+        return nlohmann::json{{"name", lyt->get_layout_name()},
+                              {"inputs", lyt->num_pis()},
+                              {"outputs", lyt->num_pos()},
+                              {"cells", lyt->num_cells()},
+                              {"layout", {{"x-size", lyt->x() + 1}, {"y-size", lyt->y() + 1}, {"area", lyt->area()}}}};
+    };
+
+    return std::visit(log_statistics, layout);
+}
 //
 // template <>
 // bool can_show<fcn_cell_layout_ptr>(std::string& extension, [[maybe_unused]] command& cmd)

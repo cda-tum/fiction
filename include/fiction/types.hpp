@@ -5,10 +5,12 @@
 #ifndef FICTION_TYPES_HPP
 #define FICTION_TYPES_HPP
 
+#include "layouts/cell_level_layout.hpp"
 #include "layouts/clocked_layout.hpp"
 #include "layouts/gate_level_layout.hpp"
 #include "layouts/tile_based_layout.hpp"
 #include "networks/topology_network.hpp"
+#include "technology/cell_technologies.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/io/write_dot.hpp>
@@ -16,6 +18,7 @@
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/views/names_view.hpp>
 
+#include <memory>
 #include <variant>
 
 namespace fiction
@@ -58,11 +61,20 @@ inline constexpr const char* ntk_type_name = std::is_same_v<Ntk, fiction::aig_nt
 /**
  * FCN gate-level layouts.
  */
-using tile_clk_lyt =
+using gate_clk_lyt =
     mockturtle::names_view<fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout>>>;
-using tile_clk_lyt_ptr = std::shared_ptr<tile_clk_lyt>;
+using gate_clk_lyt_ptr = std::shared_ptr<gate_clk_lyt>;
 
-using gate_layout_t = std::variant<tile_clk_lyt_ptr>;
+using gate_layout_t = std::variant<gate_clk_lyt_ptr>;
+
+/**
+ * FCN cell-level layouts.
+ */
+using qca_cell_clk_lyt =
+    fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::tile_based_layout>>;
+using qca_cell_clk_lyt_ptr = std::shared_ptr<qca_cell_clk_lyt>;
+
+using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr>;
 
 }  // namespace fiction
 

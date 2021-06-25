@@ -17,6 +17,22 @@
 namespace fiction
 {
 
+namespace detail
+{
+
+// Escape color sequence for input colors (green).
+const auto INP_COLOR = fmt::fg(fmt::color::green);
+// Escape color sequence for output colors (red).
+const auto OUT_COLOR = fmt::fg(fmt::color::red);
+// Escape color sequence for latch colors (yellow on black).
+const auto LATCH_COLOR = fmt::fg(fmt::color::yellow) | fmt::bg(fmt::color::black);
+// Escape color sequences for clock background colors (white to dark grey).
+const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::black) | fmt::bg(fmt::color::white),
+                                                  fmt::fg(fmt::color::black) | fmt::bg(fmt::color::light_gray),
+                                                  fmt::fg(fmt::color::white) | fmt::bg(fmt::color::gray),
+                                                  fmt::fg(fmt::color::white) | fmt::bg(fmt::color::dark_gray)}};
+}  // namespace detail
+
 template <typename Lyt>
 void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_color = true,
                              const bool clk_color = false) noexcept
@@ -103,18 +119,6 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         }
     }
 
-    // Escape color sequence for input colors (green).
-    const auto INP_COLOR = fmt::fg(fmt::color::green);
-    // Escape color sequence for output colors (red).
-    const auto OUT_COLOR = fmt::fg(fmt::color::red);
-    // Escape color sequence for latch colors (yellow on black).
-    const auto LATCH_COLOR = fmt::fg(fmt::color::yellow) | fmt::bg(fmt::color::black);
-    // Escape color sequences for clock background colors (white to dark grey).
-    const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::black) | fmt::bg(fmt::color::white),
-                                                      fmt::fg(fmt::color::black) | fmt::bg(fmt::color::light_gray),
-                                                      fmt::fg(fmt::color::white) | fmt::bg(fmt::color::gray),
-                                                      fmt::fg(fmt::color::white) | fmt::bg(fmt::color::dark_gray)}};
-
     // actual printing
     auto r_ctr = 0u, c_ctr = 0u;
     for (const auto& row : reprs)
@@ -129,13 +133,13 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             fmt::text_style color{};
 
             if (clk_color)
-                color = color | CLOCK_COLOR[layout.get_clock_number(t)];
+                color = color | detail::CLOCK_COLOR[layout.get_clock_number(t)];
             //            if (io_color && (get_latch(t) > 0u))
-            //                os << LATCH_COLOR;
+            //                os << detail::LATCH_COLOR;
             if (io_color && layout.is_pi_tile(t))
-                color = color | INP_COLOR;
+                color = color | detail::INP_COLOR;
             else if (io_color && layout.is_po_tile(t))
-                color = color | OUT_COLOR;
+                color = color | detail::OUT_COLOR;
 
             os << fmt::format(color, gate);
 
@@ -146,6 +150,53 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         os << '\n';
 
         ++r_ctr;
+    }
+    // flush stream
+    os << std::endl;
+}
+
+template <typename Lyt>
+void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_color = true,
+                             const bool clk_color = false) noexcept
+{
+    // empty layout
+    if (!layout.area())
+    {
+        os << fmt::format("[i] empty layout");
+        return;
+    }
+
+    for (auto y_pos = 0ull; y_pos <= layout.y(); ++y_pos)
+    {
+        for (auto x_pos = 0ull; x_pos <= layout.x(); ++x_pos)
+        {
+            typename Lyt::cell c{x_pos, y_pos};
+
+            fmt::text_style color{};
+
+            if (clk_color && layout.get_clock_number(c))
+                color = color | detail::CLOCK_COLOR[layout.get_clock_number(c)];
+
+            // is crossing
+            if (const auto ac = layout.above(c); layout.is_empty_cell(ac))
+            {
+                os << fmt::format(color, std::string(1u, layout.get_cell_type(ac)));
+            }
+            else
+            {
+                const auto ct = layout.get_cell_type(c);
+
+                //                if (io_color && get_latch(c) > 0u)
+                //                    os << detail::LATCH_COLOR;
+                if (io_color && Lyt::technology::is_input_cell(ct))
+                    color = color | detail::INP_COLOR;
+                else if (io_color && Lyt::technology::is_output_cell(ct))
+                    color = color | detail::OUT_COLOR;
+
+                os << fmt::format(color, (Lyt::technology::is_normal_cell(ct) ? "▢" : std::string(1u, ct)));
+            }
+        }
+        os << '\n';
     }
     // flush stream
     os << std::endl;

@@ -32,6 +32,41 @@ enum class technology_implementation
     iNML,
     SiDB
 };
+/**
+ * Overload for the stream operator on technology_implementation to print a string representation.
+ *
+ * @param os Stream to write into.
+ * @param tech Technology to print.
+ * @return os extended by string representation of tech.
+ */
+std::ostream& operator<<(std::ostream& os, const technology_implementation tech)
+{
+    switch (tech)
+    {
+        case technology_implementation::QCA:
+        {
+            os << "QCA";
+            break;
+        }
+        case technology_implementation::iNML:
+        {
+            os << "iNML";
+            break;
+        }
+        case technology_implementation::SiDB:
+        {
+            os << "SiDB";
+            break;
+        }
+        default:
+        {
+            os << "?";
+            break;
+        }
+    }
+
+    return os;
+}
 
 struct qca_technology
 {

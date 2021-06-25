@@ -72,7 +72,7 @@ class ortho_command : public command
         if (auto result = std::visit(orthogonal_physical_design, net); result.has_value())
         {
             store<fiction::gate_layout_t>().extend() =
-                std::make_shared<fiction::tile_clk_lyt>(*result, std::visit(get_name, net));
+                std::make_shared<fiction::gate_clk_lyt>(*result, std::visit(get_name, net));
         }
         else
             env->out() << "[e] impossible to place and route " << std::visit(get_name, net) << std::endl;

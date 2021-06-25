@@ -56,7 +56,7 @@ TEST_CASE("Cell type assignment", "[cell-level]")
     CHECK(layout.get_cell_name({2, 4}) == "b");
     CHECK(layout.get_cell_name({4, 2}) == "f");
 
-    CHECK(layout.cell_count() == 9);
+    CHECK(layout.num_cells() == 9);
     CHECK(layout.num_pis() == 2);
     CHECK(layout.num_pos() == 1);
 
@@ -131,7 +131,7 @@ TEST_CASE("Cell mode assignment", "[cell-level]")
     CHECK(layout.get_cell_name({4, 2}) == "a'");
     CHECK(layout.get_cell_name({2, 4}) == "b'");
 
-    CHECK(layout.cell_count() == 10);
+    CHECK(layout.num_cells() == 10);
     CHECK(layout.num_pis() == 2);
     CHECK(layout.num_pos() == 2);
 

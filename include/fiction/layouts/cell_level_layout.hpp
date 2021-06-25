@@ -39,10 +39,12 @@ class cell_level_layout : public ClockedLayout
 
         std::unordered_map<Cell, std::string> cell_name_map{};
 
-        std::unordered_set<Cell> pi_set{}, po_set{};
+        std::unordered_set<Cell> inputs{}, outputs{};
     };
 
     using base_type = cell_level_layout;
+
+    using technology = Technology;
 
     using storage = std::shared_ptr<cell_level_layout_storage<uint64_t>>;
 
@@ -69,18 +71,18 @@ class cell_level_layout : public ClockedLayout
         {
             strg->cell_type_map.erase(static_cast<uint64_t>(c));
             strg->cell_mode_map.erase(static_cast<uint64_t>(c));
-            strg->pi_set.erase(static_cast<uint64_t>(c));
-            strg->po_set.erase(static_cast<uint64_t>(c));
+            strg->inputs.erase(static_cast<uint64_t>(c));
+            strg->outputs.erase(static_cast<uint64_t>(c));
 
             return;
         }
         else if (Technology::is_input_cell(ct))
         {
-            strg->pi_set.insert(static_cast<uint64_t>(c));
+            strg->inputs.insert(static_cast<uint64_t>(c));
         }
         else if (Technology::is_output_cell(ct))
         {
-            strg->po_set.insert(static_cast<uint64_t>(c));
+            strg->outputs.insert(static_cast<uint64_t>(c));
         }
 
         strg->cell_type_map[static_cast<uint64_t>(c)] = ct;
@@ -157,19 +159,29 @@ class cell_level_layout : public ClockedLayout
         return strg->layout_name;
     }
 
-    [[nodiscard]] uint64_t cell_count() const noexcept
+    [[nodiscard]] uint64_t num_cells() const noexcept
     {
         return static_cast<uint64_t>(strg->cell_type_map.size());
     }
 
     [[nodiscard]] uint32_t num_pis() const noexcept
     {
-        return static_cast<uint32_t>(strg->pi_set.size());
+        return static_cast<uint32_t>(strg->inputs.size());
     }
 
     [[nodiscard]] uint32_t num_pos() const noexcept
     {
-        return static_cast<uint32_t>(strg->po_set.size());
+        return static_cast<uint32_t>(strg->outputs.size());
+    }
+
+    [[nodiscard]] bool is_pi(const cell& c) const noexcept
+    {
+        return std::find(strg->inputs.cbegin(), strg->inputs.cend(), c) != strg->inputs.cend();
+    }
+
+    [[nodiscard]] bool is_po(const cell& c) const noexcept
+    {
+        return std::find(strg->outputs.cbegin(), strg->outputs.cend(), c) != strg->outputs.cend();
     }
 
 #pragma endregion
