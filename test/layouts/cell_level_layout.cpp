@@ -9,23 +9,51 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 
+#include <sstream>
+#include <type_traits>
+
 using namespace fiction;
 
-TEST_CASE("QCA technology", "[cell-level]")
+TEST_CASE("Cell technology", "[cell-level]")
 {
-    CHECK(qca_technology::is_empty_cell(qca_technology::cell_type::EMPTY));
-    CHECK(qca_technology::is_normal_cell(qca_technology::cell_type::NORMAL));
-    CHECK(qca_technology::is_input_cell(qca_technology::cell_type::INPUT));
-    CHECK(qca_technology::is_output_cell(qca_technology::cell_type::OUTPUT));
-    CHECK(qca_technology::is_const_0_cell(qca_technology::cell_type::CONST_0));
-    CHECK(qca_technology::is_const_1_cell(qca_technology::cell_type::CONST_1));
-    CHECK(qca_technology::is_constant_cell(qca_technology::cell_type::CONST_0));
-    CHECK(qca_technology::is_constant_cell(qca_technology::cell_type::CONST_1));
+    std::stringstream s{};
 
-    CHECK(qca_technology::is_normal_cell_mode(qca_technology::cell_mode::NORMAL));
-    CHECK(qca_technology::is_rotated_cell_mode(qca_technology::cell_mode::ROTATED));
-    CHECK(qca_technology::is_vertical_cell_mode(qca_technology::cell_mode::VERTICAL));
-    CHECK(qca_technology::is_crossover_cell_mode(qca_technology::cell_mode::CROSSOVER));
+    SECTION("QCA")
+    {
+        CHECK(qca_technology::is_empty_cell(qca_technology::cell_type::EMPTY));
+        CHECK(qca_technology::is_normal_cell(qca_technology::cell_type::NORMAL));
+        CHECK(qca_technology::is_input_cell(qca_technology::cell_type::INPUT));
+        CHECK(qca_technology::is_output_cell(qca_technology::cell_type::OUTPUT));
+        CHECK(qca_technology::is_const_0_cell(qca_technology::cell_type::CONST_0));
+        CHECK(qca_technology::is_const_1_cell(qca_technology::cell_type::CONST_1));
+        CHECK(qca_technology::is_constant_cell(qca_technology::cell_type::CONST_0));
+        CHECK(qca_technology::is_constant_cell(qca_technology::cell_type::CONST_1));
+
+        CHECK(qca_technology::is_normal_cell_mode(qca_technology::cell_mode::NORMAL));
+        CHECK(qca_technology::is_rotated_cell_mode(qca_technology::cell_mode::ROTATED));
+        CHECK(qca_technology::is_vertical_cell_mode(qca_technology::cell_mode::VERTICAL));
+        CHECK(qca_technology::is_crossover_cell_mode(qca_technology::cell_mode::CROSSOVER));
+
+        s << technology_implementation::QCA;
+
+        CHECK(s.str() == "QCA");
+    }
+    SECTION("iNML")
+    {
+        // TODO cell types go here
+
+        s << technology_implementation::iNML;
+
+        CHECK(s.str() == "iNML");
+    }
+    SECTION("SiDB")
+    {
+        // TODO cell types go here
+
+        s << technology_implementation::SiDB;
+
+        CHECK(s.str() == "SiDB");
+    }
 }
 
 TEST_CASE("Cell type assignment", "[cell-level]")
@@ -48,6 +76,8 @@ TEST_CASE("Cell type assignment", "[cell-level]")
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 4}, "b");
     layout.assign_cell_name({4, 2}, "f");
+
+    CHECK(std::is_same_v<typename cell_layout::technology, fiction::qca_technology>);
 
     CHECK(layout.get_implementation() == fiction::technology_implementation::QCA);
 

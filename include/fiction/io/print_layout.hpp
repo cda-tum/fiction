@@ -21,16 +21,16 @@ namespace detail
 {
 
 // Escape color sequence for input colors (green).
-const auto INP_COLOR = fmt::fg(fmt::color::green);
+static const auto INP_COLOR = fmt::fg(fmt::color::green);
 // Escape color sequence for output colors (red).
-const auto OUT_COLOR = fmt::fg(fmt::color::red);
-// Escape color sequence for latch colors (yellow on black).
-const auto LATCH_COLOR = fmt::fg(fmt::color::yellow) | fmt::bg(fmt::color::black);
+static const auto OUT_COLOR = fmt::fg(fmt::color::red);
+//// Escape color sequence for latch colors (yellow on black).
+// static const auto LATCH_COLOR = fmt::fg(fmt::color::yellow) | fmt::bg(fmt::color::black);
 // Escape color sequences for clock background colors (white to dark grey).
-const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::black) | fmt::bg(fmt::color::white),
-                                                  fmt::fg(fmt::color::black) | fmt::bg(fmt::color::light_gray),
-                                                  fmt::fg(fmt::color::white) | fmt::bg(fmt::color::gray),
-                                                  fmt::fg(fmt::color::white) | fmt::bg(fmt::color::dark_gray)}};
+static const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::black) | fmt::bg(fmt::color::white),
+                                                         fmt::fg(fmt::color::black) | fmt::bg(fmt::color::light_gray),
+                                                         fmt::fg(fmt::color::white) | fmt::bg(fmt::color::gray),
+                                                         fmt::fg(fmt::color::white) | fmt::bg(fmt::color::dark_gray)}};
 }  // namespace detail
 
 template <typename Lyt>
@@ -38,7 +38,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
                              const bool clk_color = false) noexcept
 {
     // empty layout
-    if (!layout.area())
+    if (layout.num_gates() == 0ul && layout.num_wires() == 0ul)
     {
         os << fmt::format("[i] empty layout");
         return;
@@ -160,7 +160,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
                              const bool clk_color = false) noexcept
 {
     // empty layout
-    if (!layout.area())
+    if (layout.num_cells() == 0ul)
     {
         os << fmt::format("[i] empty layout");
         return;
@@ -174,13 +174,13 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 
             fmt::text_style color{};
 
-            if (clk_color && layout.get_clock_number(c))
+            if (clk_color)
                 color = color | detail::CLOCK_COLOR[layout.get_clock_number(c)];
 
-            // is crossing
-            if (const auto ac = layout.above(c); layout.is_empty_cell(ac))
+            // crossing case
+            if (const auto ac = layout.above(c); (c != ac) && !layout.is_empty_cell(ac))
             {
-                os << fmt::format(color, std::string(1u, layout.get_cell_type(ac)));
+                os << fmt::format(color, "x");
             }
             else
             {

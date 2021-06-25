@@ -90,7 +90,7 @@ class cell_level_layout : public ClockedLayout
 
     [[nodiscard]] cell_type get_cell_type(const cell& c) const noexcept
     {
-        if (auto it = strg->cell_type_map.find(static_cast<uint64_t>(c)); it != strg->cell_type_map.end())
+        if (auto it = strg->cell_type_map.find(static_cast<uint64_t>(c)); it != strg->cell_type_map.cend())
         {
             return it->second;
         }
@@ -115,7 +115,7 @@ class cell_level_layout : public ClockedLayout
 
     [[nodiscard]] cell_mode get_cell_mode(const cell& c) const noexcept
     {
-        if (auto it = strg->cell_mode_map.find(static_cast<uint64_t>(c)); it != strg->cell_mode_map.end())
+        if (auto it = strg->cell_mode_map.find(static_cast<uint64_t>(c)); it != strg->cell_mode_map.cend())
         {
             return it->second;
         }
@@ -135,7 +135,7 @@ class cell_level_layout : public ClockedLayout
 
     [[nodiscard]] std::string get_cell_name(const cell& c) const noexcept
     {
-        if (auto it = strg->cell_name_map.find(static_cast<uint64_t>(c)); it != strg->cell_name_map.end())
+        if (auto it = strg->cell_name_map.find(static_cast<uint64_t>(c)); it != strg->cell_name_map.cend())
         {
             return it->second;
         }
