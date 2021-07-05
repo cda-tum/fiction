@@ -921,3 +921,42 @@ TEST_CASE("Crossings", "[gate-level]")
                              CHECK(layout.get_node(fi) == layout.get_node({2, 1, 1}));
                          });
 }
+
+TEST_CASE("Cardinal operations", "[gate-level]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+
+    auto layout = blueprints::crossing_layout<gate_layout>();
+
+    CHECK(layout.has_no_incoming_signal({0, 1}));
+    CHECK(layout.has_no_incoming_signal({0, 2}));
+    CHECK(layout.has_no_incoming_signal({1, 0}));
+    CHECK(layout.has_no_incoming_signal({2, 0}));
+    CHECK(layout.has_no_outgoing_signal({3, 1}));
+    CHECK(layout.has_no_outgoing_signal({3, 2}));
+
+    CHECK(layout.has_southern_outgoing_signal({1, 0}));
+    CHECK(layout.has_southern_outgoing_signal({2, 0}));
+    CHECK(layout.has_eastern_outgoing_signal({0, 1}));
+    CHECK(layout.has_eastern_outgoing_signal({0, 2}));
+
+    CHECK(layout.has_northern_incoming_signal({1, 1}));
+    CHECK(layout.has_western_incoming_signal({1, 1}));
+    CHECK(layout.has_eastern_outgoing_signal({1, 1}));
+
+    CHECK(layout.has_eastern_outgoing_signal({2, 1, 1}));
+    CHECK(layout.has_western_incoming_signal({2, 1, 1}));
+
+    CHECK(layout.has_northern_incoming_signal({2, 1}));
+    CHECK(layout.has_southern_outgoing_signal({2, 1}));
+
+    CHECK(layout.has_eastern_outgoing_signal({1, 2}));
+    CHECK(layout.has_western_incoming_signal({1, 2}));
+
+    CHECK(layout.has_northern_incoming_signal({2, 2}));
+    CHECK(layout.has_western_incoming_signal({2, 2}));
+    CHECK(layout.has_eastern_outgoing_signal({2, 2}));
+
+    CHECK(layout.has_western_incoming_signal({3, 1}));
+    CHECK(layout.has_western_incoming_signal({3, 2}));
+}

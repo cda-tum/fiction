@@ -8,6 +8,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/traits.hpp>
 
 #include <sstream>
 #include <type_traits>
@@ -60,6 +61,9 @@ TEST_CASE("Cell type assignment", "[cell-level]")
 {
     using cell_layout =
         fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::tile_based_layout>>;
+
+    REQUIRE(fiction::has_get_layout_name_v<cell_layout>);
+    REQUIRE(fiction::has_set_layout_name_v<cell_layout>);
 
     cell_layout layout{fiction::tile_based_layout::aspect_ratio{4, 4}, "AND"};
 
@@ -176,4 +180,36 @@ TEST_CASE("Cell mode assignment", "[cell-level]")
     CHECK(layout.get_cell_mode({2, 1, 1}) == fiction::qca_technology::cell_mode::CROSSOVER);
     CHECK(layout.get_cell_mode({2, 2, 1}) == fiction::qca_technology::cell_mode::CROSSOVER);
     CHECK(layout.get_cell_mode({2, 3, 1}) == fiction::qca_technology::cell_mode::CROSSOVER);
+}
+
+TEST_CASE("Clocking", "[cell-level]")
+{
+    cell_level_layout<qca_technology, clocked_layout<tile_based_layout>> layout{
+        tile_based_layout::aspect_ratio{4, 4, 0}, twoddwave_4_clocking, "Lyt", 2, 2};
+
+    CHECK(layout.get_clock_number({0, 0}) == 0);
+    CHECK(layout.get_clock_number({0, 1}) == 0);
+    CHECK(layout.get_clock_number({1, 0}) == 0);
+    CHECK(layout.get_clock_number({1, 1}) == 0);
+    CHECK(layout.get_clock_number({2, 0}) == 1);
+    CHECK(layout.get_clock_number({2, 1}) == 1);
+    CHECK(layout.get_clock_number({3, 0}) == 1);
+    CHECK(layout.get_clock_number({3, 1}) == 1);
+    CHECK(layout.get_clock_number({0, 2}) == 1);
+    CHECK(layout.get_clock_number({0, 3}) == 1);
+    CHECK(layout.get_clock_number({1, 2}) == 1);
+    CHECK(layout.get_clock_number({1, 3}) == 1);
+    CHECK(layout.get_clock_number({2, 2}) == 2);
+    CHECK(layout.get_clock_number({2, 3}) == 2);
+    CHECK(layout.get_clock_number({3, 2}) == 2);
+    CHECK(layout.get_clock_number({3, 3}) == 2);
+    CHECK(layout.get_clock_number({4, 0}) == 2);
+    CHECK(layout.get_clock_number({4, 1}) == 2);
+    CHECK(layout.get_clock_number({4, 2}) == 3);
+    CHECK(layout.get_clock_number({4, 3}) == 3);
+    CHECK(layout.get_clock_number({0, 4}) == 2);
+    CHECK(layout.get_clock_number({1, 4}) == 2);
+    CHECK(layout.get_clock_number({2, 4}) == 3);
+    CHECK(layout.get_clock_number({3, 4}) == 3);
+    CHECK(layout.get_clock_number({4, 4}) == 0);
 }

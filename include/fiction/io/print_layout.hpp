@@ -31,6 +31,7 @@ static const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::bla
                                                          fmt::fg(fmt::color::black) | fmt::bg(fmt::color::light_gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::dark_gray)}};
+
 }  // namespace detail
 
 template <typename Lyt>
@@ -193,7 +194,8 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
                 else if (io_color && Lyt::technology::is_output_cell(ct))
                     color = color | detail::OUT_COLOR;
 
-                os << fmt::format(color, (Lyt::technology::is_normal_cell(ct) ? "▢" : std::string(1u, ct)));
+                os << fmt::format(color,
+                                  (Lyt::technology::is_normal_cell(ct) ? "▢" : std::string(1u, static_cast<char>(ct))));
             }
         }
         os << '\n';

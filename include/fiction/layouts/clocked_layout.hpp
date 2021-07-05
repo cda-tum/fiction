@@ -87,6 +87,11 @@ class clocked_layout : public TileBasedLayout
         return *strg->clocking == name;
     }
 
+    [[nodiscard]] clocking_scheme_t get_clocking_scheme() const noexcept
+    {
+        return *strg->clocking;
+    }
+
     [[nodiscard]] bool is_incoming_clocked(const clock_zone& cz1, const clock_zone& cz2) const noexcept
     {
         if (cz1 == cz2)

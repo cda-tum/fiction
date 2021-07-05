@@ -19,6 +19,7 @@
 #include <mockturtle/views/names_view.hpp>
 
 #include <memory>
+#include <type_traits>
 #include <variant>
 
 namespace fiction
@@ -53,10 +54,10 @@ constexpr const char* top_name = "TOP";
 using logic_network_t = std::variant<aig_ptr, mig_ptr, top_ptr>;
 
 template <class Ntk>
-inline constexpr const char* ntk_type_name = std::is_same_v<Ntk, fiction::aig_nt> ? fiction::aig_name :
-                                             std::is_same_v<Ntk, fiction::mig_nt> ? fiction::mig_name :
-                                             std::is_same_v<Ntk, fiction::top_nt> ? fiction::top_name :
-                                                                                    "?";
+inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, fiction::aig_nt> ? fiction::aig_name :
+                                             std::is_same_v<std::decay_t<Ntk>, fiction::mig_nt> ? fiction::mig_name :
+                                             std::is_same_v<std::decay_t<Ntk>, fiction::top_nt> ? fiction::top_name :
+                                                                                                  "?";
 
 /**
  * FCN gate-level layouts.

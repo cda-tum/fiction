@@ -123,7 +123,32 @@ template <class Ntk>
 inline constexpr bool has_is_dot_v = has_is_dot<Ntk>::value;
 #pragma endregion
 
-// TODO is_topology_network
+#pragma region has_get_layout_name
+template <class Ntk, class = void>
+struct has_get_layout_name : std::false_type
+{};
+
+template <class Ntk>
+struct has_get_layout_name<Ntk, std::void_t<decltype(std::declval<Ntk>().get_layout_name())>> : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_get_layout_name_v = has_get_layout_name<Ntk>::value;
+#pragma endregion
+
+#pragma region has_set_layout_name
+template <class Ntk, class = void>
+struct has_set_layout_name : std::false_type
+{};
+
+template <class Ntk>
+struct has_set_layout_name<Ntk, std::void_t<decltype(std::declval<Ntk>().set_layout_name(std::string()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_set_layout_name_v = has_set_layout_name<Ntk>::value;
+#pragma endregion
 
 }  // namespace fiction
 

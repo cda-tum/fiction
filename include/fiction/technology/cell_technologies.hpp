@@ -9,17 +9,6 @@
 
 namespace fiction
 {
-
-/**
- * Supported tile sizes for available technologies.
- * - QCA: 5 x 5
- * - iNML: 4 x 4
- */
-enum class tile_size : uint8_t
-{
-    FOUR_X_FOUR = 4u,
-    FIVE_X_FIVE = 5u
-};
 /**
  * Supported technology types:
  * - Qunatum-dot Cellular Automata (QCA)

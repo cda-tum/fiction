@@ -48,16 +48,6 @@ void port_router::compute_ports()
     }
 }
 
-port_router::port_list port_router::get_ports(const fcn_gate_layout::tile t, const logic_network::vertex v) noexcept
-{
-    return g_ports[{t, v}];
-}
-
-port_router::port_list port_router::get_ports(const fcn_gate_layout::tile t, const logic_network::edge& e) noexcept
-{
-    return w_ports[{t, e}];
-}
-
 void port_router::compute_qca_5x5_ports()
 {
     // for all non-free (i.e. occupied) tiles

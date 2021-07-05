@@ -30,9 +30,16 @@ class cell_level_layout : public ClockedLayout
     template <typename Cell>
     struct cell_level_layout_storage
     {
-        explicit cell_level_layout_storage(std::string name) : layout_name{std::move(name)} {}
+        explicit cell_level_layout_storage(std::string name, uint16_t tile_x = 1u, uint16_t tile_y = 1u) :
+                layout_name{std::move(name)},
+                tile_size_x{tile_x},
+                tile_size_y{tile_y}
+        {}
 
         std::string layout_name;
+
+        const uint64_t tile_size_x;
+        const uint64_t tile_size_y;
 
         std::unordered_map<Cell, cell_type> cell_type_map{};
         std::unordered_map<Cell, cell_mode> cell_mode_map{};
@@ -48,22 +55,23 @@ class cell_level_layout : public ClockedLayout
 
     using storage = std::shared_ptr<cell_level_layout_storage<uint64_t>>;
 
-    explicit cell_level_layout(const typename ClockedLayout::aspect_ratio& ar = {}, const std::string& name = "") :
+    explicit cell_level_layout(const typename ClockedLayout::aspect_ratio& ar = {}, const std::string& name = "",
+                               const uint16_t tile_size_x = 1u, const uint64_t tile_size_y = 1u) :
             ClockedLayout(ar),
-            strg{std::make_shared<cell_level_layout_storage<uint64_t>>(name)}
+            strg{std::make_shared<cell_level_layout_storage<uint64_t>>(name, tile_size_x, tile_size_y)}
     {}
 
     cell_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<cell>& scheme,
-                      const std::string& name = "") :
+                      const std::string& name = "", const uint16_t tile_size_x = 1u, const uint64_t tile_size_y = 1u) :
             ClockedLayout(ar, scheme),
-            strg{std::make_shared<cell_level_layout_storage<uint64_t>>(name)}
+            strg{std::make_shared<cell_level_layout_storage<uint64_t>>(name, tile_size_x, tile_size_y)}
     {}
 
     explicit cell_level_layout(std::shared_ptr<cell_level_layout_storage<uint64_t>> s) : strg{std::move(s)} {}
 
 #pragma endregion
 
-#pragma region cell types
+#pragma region Cell types
 
     void assign_cell_type(const cell& c, const cell_type& ct) noexcept
     {
@@ -147,7 +155,7 @@ class cell_level_layout : public ClockedLayout
 
 #pragma endregion
 
-#pragma region properties
+#pragma region Properties
 
     [[nodiscard]] technology_implementation get_implementation() const noexcept
     {
@@ -157,6 +165,11 @@ class cell_level_layout : public ClockedLayout
     [[nodiscard]] std::string get_layout_name() const noexcept
     {
         return strg->layout_name;
+    }
+
+    void set_layout_name(const std::string& name) noexcept
+    {
+        strg->layout_name = name;
     }
 
     [[nodiscard]] uint64_t num_cells() const noexcept
@@ -183,6 +196,22 @@ class cell_level_layout : public ClockedLayout
     {
         return std::find(strg->outputs.cbegin(), strg->outputs.cend(), c) != strg->outputs.cend();
     }
+
+#pragma endregion
+
+#pragma region Clocking
+
+    [[nodiscard]] typename ClockedLayout::clock_number_t
+    get_clock_number(const typename ClockedLayout::clock_zone& cz) const noexcept
+    {
+        return ClockedLayout::get_clock_number({cz.x / strg->tile_size_x, cz.y / strg->tile_size_y, cz.z});
+    }
+
+    [[maybe_unused]] bool is_incoming_clocked(const typename ClockedLayout::clock_zone& cz1,
+                                              const typename ClockedLayout::clock_zone& cz2) const noexcept = delete;
+
+    [[maybe_unused]] bool is_outgoing_clocked(const typename ClockedLayout::clock_zone& cz1,
+                                              const typename ClockedLayout::clock_zone& cz2) const noexcept = delete;
 
 #pragma endregion
 

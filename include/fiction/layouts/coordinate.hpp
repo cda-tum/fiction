@@ -15,6 +15,7 @@
 #include <fmt/format.h>
 
 #include <cstdint>
+#include <functional>
 #include <iostream>
 
 namespace fiction
@@ -213,6 +214,15 @@ struct iterator_traits<fiction::coord_iterator>
 {
     using iterator_category = std::forward_iterator_tag;
     using value_type        = fiction::coord_t;
+};
+// define std::hash overload for coord_t
+template <>
+struct hash<fiction::coord_t>
+{
+    std::size_t operator()(const fiction::coord_t& c) const noexcept
+    {
+        return static_cast<std::size_t>(std::hash<uint64_t>{}(static_cast<uint64_t>(c)));
+    }
 };
 }  // namespace std
 

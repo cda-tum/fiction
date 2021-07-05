@@ -573,6 +573,76 @@ class gate_level_layout : public ClockedLayout
 
 #pragma endregion
 
+#pragma region Cardinal operations
+
+    [[nodiscard]] bool is_incoming_signal(const tile& t, const signal& s) const noexcept
+    {
+        const auto incoming = incoming_data_flow<std::set<tile>>(t);
+        return std::any_of(incoming.cbegin(), incoming.cend(),
+                           [this, &s](const auto& i)
+                           { return i == s || ClockedLayout::above(i) == s || ClockedLayout::below(i) == s; });
+    }
+
+    [[nodiscard]] bool has_northern_incoming_signal(const tile& t) const noexcept
+    {
+        return is_incoming_signal(t, static_cast<signal>(ClockedLayout::north(t)));
+    }
+
+    [[nodiscard]] bool has_eastern_incoming_signal(const tile& t) const noexcept
+    {
+        return is_incoming_signal(t, static_cast<signal>(ClockedLayout::east(t)));
+    }
+
+    [[nodiscard]] bool has_southern_incoming_signal(const tile& t) const noexcept
+    {
+        return is_incoming_signal(t, static_cast<signal>(ClockedLayout::south(t)));
+    }
+
+    [[nodiscard]] bool has_western_incoming_signal(const tile& t) const noexcept
+    {
+        return is_incoming_signal(t, static_cast<signal>(ClockedLayout::west(t)));
+    }
+
+    [[nodiscard]] bool has_no_incoming_signal(const tile& t) const noexcept
+    {
+        return incoming_data_flow<std::set<tile>>(t).empty();
+    }
+
+    [[nodiscard]] bool is_outgoing_signal(const tile& t, const signal& s) const noexcept
+    {
+        const auto outgoing = outgoing_data_flow<std::set<tile>>(t);
+        return std::any_of(outgoing.cbegin(), outgoing.cend(),
+                           [this, &s](const auto& o)
+                           { return o == s || ClockedLayout::above(o) == s || ClockedLayout::below(o) == s; });
+    }
+
+    [[nodiscard]] bool has_northern_outgoing_signal(const tile& t) const noexcept
+    {
+        return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::north(t)));
+    }
+
+    [[nodiscard]] bool has_eastern_outgoing_signal(const tile& t) const noexcept
+    {
+        return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::east(t)));
+    }
+
+    [[nodiscard]] bool has_southern_outgoing_signal(const tile& t) const noexcept
+    {
+        return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::south(t)));
+    }
+
+    [[nodiscard]] bool has_western_outgoing_signal(const tile& t) const noexcept
+    {
+        return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::west(t)));
+    }
+
+    [[nodiscard]] bool has_no_outgoing_signal(const tile& t) const noexcept
+    {
+        return outgoing_data_flow<std::set<tile>>(t).empty();
+    }
+
+#pragma endregion
+
 #pragma region Custom node values
 
     void clear_values() const noexcept

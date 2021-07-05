@@ -97,6 +97,20 @@ GateLyt and_not_gate_layout() noexcept
 }
 
 template <typename GateLyt>
+GateLyt or_not_gate_layout() noexcept
+{
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::twoddwave_4_clocking};
+
+    const auto x1 = layout.create_pi("x1", {1, 0});
+    const auto x2 = layout.create_pi("x2", {0, 1});
+    const auto o1 = layout.create_or(x1, x2, {1, 1});
+    const auto n1 = layout.create_not(o1, {1, 2});
+    layout.create_po(n1, "f1", {2, 2});
+
+    return layout;
+}
+
+template <typename GateLyt>
 GateLyt crossing_layout() noexcept
 {
     GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 1}, fiction::twoddwave_4_clocking};
@@ -117,6 +131,34 @@ GateLyt crossing_layout() noexcept
 
     layout.create_po(c, "f1", {3, 1});
     layout.create_po(a2, "f2", {3, 2});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt fanout_layout() noexcept
+{
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 1}};
+
+    layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(3));
+    layout.assign_clock_number({0, 1}, static_cast<typename GateLyt::clock_number_t>(0));
+    layout.assign_clock_number({0, 2}, static_cast<typename GateLyt::clock_number_t>(1));
+    layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(2));
+    layout.assign_clock_number({1, 1}, static_cast<typename GateLyt::clock_number_t>(1));
+    layout.assign_clock_number({1, 2}, static_cast<typename GateLyt::clock_number_t>(0));
+    layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(3));
+    layout.assign_clock_number({2, 1}, static_cast<typename GateLyt::clock_number_t>(2));
+    layout.assign_clock_number({2, 2}, static_cast<typename GateLyt::clock_number_t>(3));
+
+    const auto x1 = layout.create_pi("x1", {0, 1});
+
+    const auto f1 = layout.create_buf(x1, {1, 1});
+    const auto f2 = layout.create_buf(f1, {2, 1});
+    const auto w1 = layout.create_buf(f2, {2, 2});
+
+    layout.create_po(f1, "f1", {1, 0});
+    layout.create_po(f2, "f2", {2, 0});
+    layout.create_po(w1, "f3", {1, 2});
 
     return layout;
 }

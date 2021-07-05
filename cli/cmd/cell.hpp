@@ -5,9 +5,9 @@
 #ifndef FICTION_CELL_HPP
 #define FICTION_CELL_HPP
 
-#include "fcn_cell_layout.h"
-#include "qca_one_library.h"
-#include "topolinano_library.h"
+#include <fiction/algorithms/apply_gate_library.hpp>
+#include <fiction/technology/qca_one_library.hpp>
+#include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
 
@@ -16,7 +16,7 @@
 namespace alice
 {
 /**
- * Converts an fcn_gate_layout to an fcn_cell_layout. Conversion process allows to choose from supported FCN gate
+ * Converts a gate-level layout to a cell-level layout. The conversion process allows to choose from supported FCN gate
  * libraries.
  */
 class cell_command : public command
@@ -37,11 +37,11 @@ class cell_command : public command
 
   protected:
     /**
-     * Function to perform the conversion call. Generates an fcn_cell_layout.
+     * Function to perform the conversion call. Generates a cell-level layout.
      */
     void execute() override
     {
-        auto& s = store<fcn_gate_layout_ptr>();
+        auto& s = store<fiction::gate_layout_t>();
 
         // error case: empty gate layout store
         if (s.empty())
@@ -51,75 +51,65 @@ class cell_command : public command
             return;
         }
 
-        auto                 fgl = s.current();
-        fcn_gate_library_ptr lib = nullptr;
-        std::string          lib_name{};
-        try
+        if (library == 0u)
         {
-            if (library == 0u)
-            {
-                // QCA-ONE only allows non-shifted layouts
-                if (fgl->is_vertically_shifted())
-                {
-                    env->out() << "[e] non-shifted layouts are required for this library" << std::endl;
-                    reset_flags();
-                    return;
-                }
+            //                // QCA-ONE only allows non-shifted layouts
+            //                if (fgl->is_vertically_shifted())
+            //                {
+            //                    env->out() << "[e] non-shifted layouts are required for this library" << std::endl;
+            //                    reset_flags();
+            //                    return;
+            //                }
 
-                lib = std::make_shared<qca_one_library>(fgl);
-            }
-            else if (library == 1u)
+            const auto apply = [](auto&& lyt)
             {
-                // ToPoliNano only allows vertically shifted layouts
-                if (!fgl->is_vertically_shifted())
-                {
-                    env->out() << "[e] vertically shifted layouts are required for this library" << std::endl;
-                    reset_flags();
-                    return;
-                }
-                // ToPoliNano only allows layouts clocked with a ToPoliNano clocking
-                if (!fgl->is_clocking("TOPOLINANO3") && !fgl->is_clocking("TOPOLINANO4"))
-                {
-                    env->out() << "[e] a ToPoliNano clocking is required for this library" << std::endl;
-                    reset_flags();
-                    return;
-                }
+                return std::make_shared<fiction::qca_cell_clk_lyt>(
+                    fiction::apply_gate_library<fiction::qca_cell_clk_lyt, fiction::qca_one_library>(*lyt));
+            };
 
-                lib = std::make_shared<topolinano_library>(fgl);
-            }
-            // more libraries go here
-            else
-            {
-                env->out() << "[e] identifier " << library << " does not refer to a supported gate library"
-                           << std::endl;
-                reset_flags();
-                return;
-            }
-
-            lib_name = lib->get_name();
+            store<fiction::cell_layout_t>().extend() = std::visit(apply, s.current());
         }
-        catch (...)
+        //            else if (library == 1u)
+        //            {
+        //                // ToPoliNano only allows vertically shifted layouts
+        //                if (!fgl->is_vertically_shifted())
+        //                {
+        //                    env->out() << "[e] vertically shifted layouts are required for this library" << std::endl;
+        //                    reset_flags();
+        //                    return;
+        //                }
+        //                // ToPoliNano only allows layouts clocked with a ToPoliNano clocking
+        //                if (!fgl->is_clocking("TOPOLINANO3") && !fgl->is_clocking("TOPOLINANO4"))
+        //                {
+        //                    env->out() << "[e] a ToPoliNano clocking is required for this library" << std::endl;
+        //                    reset_flags();
+        //                    return;
+        //                }
+        //
+        //                lib = std::make_shared<topolinano_library>(fgl);
+        //            }
+        // more libraries go here
+        else
         {
-            env->out() << "[e] could not assign directions in " << s.current()->get_name() << " to cell ports"
-                       << std::endl;
+            env->out() << "[e] identifier " << library << " does not refer to a supported gate library" << std::endl;
             reset_flags();
             return;
         }
 
-        try
-        {
-            auto fcl = std::make_shared<fcn_cell_layout>(std::move(lib));
-
-            // store new layout
-            store<fcn_cell_layout_ptr>().extend() = std::move(fcl);
-        }
-        catch (...)
-        {
-            env->out() << "[e] mapping " << s.current()->get_name() << " to cell-level using the " << lib_name
-                       << " library was not successful" << std::endl;
-            reset_flags();
-            return;
-        }
+        //        try
+        //        {
+        //            auto fcl = std::make_shared<fcn_cell_layout>(std::move(lib));
+        //
+        //            // store new layout
+        //            store<fcn_cell_layout_ptr>().extend() = std::move(fcl);
+        //        }
+        //        catch (...)
+        //        {
+        //            env->out() << "[e] mapping " << s.current()->get_name() << " to cell-level using the " << lib_name
+        //                       << " library was not successful" << std::endl;
+        //            reset_flags();
+        //            return;
+        //        }
 
         reset_flags();
     }
@@ -140,6 +130,7 @@ class cell_command : public command
 };
 
 ALICE_ADD_COMMAND(cell, "Technology")
+
 }  // namespace alice
 
 #endif  // FICTION_CELL_HPP
