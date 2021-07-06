@@ -14,7 +14,7 @@ namespace svg
         // Therefore, the zones can only be deterministically assigned to a circuit if their sizes are known. The tile
         // size is only given in gate-libraries. Consequently, there has to be one assigned in order to enable for
         // unambiguous clock zone mapping.
-        if(fcl->get_library() == nullptr)
+        if (fcl->get_library() == nullptr)
             return generate_cell_based_svg(fcl, simple);
         else
             return generate_tile_based_svg(fcl, simple);
@@ -34,15 +34,14 @@ namespace svg
 
         // Used to determine the color of cells, tiles and text based on its clock zone
         static const std::vector<std::string>
-            tile_colors{{clock_zone_1_tile, clock_zone_2_tile, clock_zone_3_tile, clock_zone_4_tile}},
-            text_colors{{clock_zone_12_text, clock_zone_12_text, clock_zone_34_text, clock_zone_34_text}};
+                tile_colors{{clock_zone_1_tile, clock_zone_2_tile, clock_zone_3_tile, clock_zone_4_tile}},
+                text_colors{{clock_zone_12_text, clock_zone_12_text, clock_zone_34_text, clock_zone_34_text}};
 
         // Adds all non-empty cells from the layout to their correct tiles; it generates the "body"
         // of all the tile-descriptions to be used later
-        for (const auto& c : fcl->cells() | iter::filterfalse([fcl](const fcn_cell_layout::cell& _c)
-                                                              { return fcl->is_free_cell(_c); }))
+        for (const auto& c : fcl->cells())
         {
-            auto clock_zone = *fcl->cell_clocking(c);
+            auto clock_zone = (fcl->cell_clocking(c)).value_or(static_cast<fcn_clock::zone>(0));
             auto tile_coords = std::make_pair(static_cast<coord_t>(ceil(c[X] / fcl->get_library()->gate_x_size())),
                                               static_cast<coord_t>(ceil(c[Y] / fcl->get_library()->gate_y_size())));
 
@@ -85,25 +84,57 @@ namespace svg
             // Determines cell type and color
             auto desc_col = generate_description_color(fcl, c, simple);
 
-            // Current cell-description can now be appended to the description of all cells in the current tile
-            if (latch_delay)
+            // Only add cell description if the cell is not empty
+            if (!(fcl->is_free_cell(c)))
             {
-                coord_to_latch_cells[tile_coords] = current_cells.append(
-                        fmt::format(desc_col.first, desc_col.second,
-                                    starting_offset_latch_cell_x + in_tile_x * cell_distance,
-                                    starting_offset_latch_cell_y + in_tile_y * cell_distance));
+                // Current cell-description can now be appended to the description of all cells in the current tile
+                if (latch_delay)
+                {
+                    coord_to_latch_cells[tile_coords] = current_cells.append(
+                            fmt::format(desc_col.first, desc_col.second,
+                                        starting_offset_latch_cell_x + in_tile_x * cell_distance,
+                                        starting_offset_latch_cell_y + in_tile_y * cell_distance));
 
-            }
-            else
-            {
-                coord_to_cells[tile_coords] = current_cells.append(
-                        fmt::format(desc_col.first, desc_col.second,
-                                    starting_offset_cell_x + in_tile_x * cell_distance,
-                                    starting_offset_cell_y + in_tile_y * cell_distance));
+                }
+                else
+                {
+                    coord_to_cells[tile_coords] = current_cells.append(
+                            fmt::format(desc_col.first, desc_col.second,
+                                        starting_offset_cell_x + in_tile_x * cell_distance,
+                                        starting_offset_cell_y + in_tile_y * cell_distance));
+                }
             }
         }
 
         // All cell-descriptions are done and tiles have been created
+
+        // Delete empty tiles in simple designs
+        if (simple)
+        {
+            std::vector<coordinate> empty_tiles, empty_latches;
+
+            // Find empty tiles via missing cell-descriptions for their coordinates
+            for (const auto& [coord, tdscr] : coord_to_tile)
+            {
+                if (auto cell_it = coord_to_cells.find(coord); cell_it == coord_to_cells.end())
+                    empty_tiles.emplace_back(coord);
+            }
+
+            // Find empty latches via missing cell-descriptions for their coordinates
+            for (const auto& [coord, ldscr] : coord_to_latch_tile)
+            {
+                if (auto cell_it = coord_to_latch_cells.find(coord); cell_it == coord_to_latch_cells.end())
+                    empty_latches.emplace_back(coord);
+            }
+
+            // Delete empty tiles
+            for (const auto& coord : empty_tiles)
+                coord_to_tile.erase(coord);
+
+            for (const auto& coord : empty_latches)
+                coord_to_latch_tile.erase(coord);
+        }
+
         // Associate tiles with cell-descriptions now; coordinates of tiles are used for tile- and cell-descriptions
         for (const auto& [coord, tdscr] : coord_to_tile)
         {
@@ -116,14 +147,14 @@ namespace svg
             double y_pos = starting_offset_tile_y + y * tile_distance;
 
             auto c_descr = fmt::format(descr, x_pos, y_pos, tile_colors[czone], cell_descriptions,
-                    simple ? "" : text_colors[czone],
-                    simple ? "" : std::to_string(czone + 1));
+                                       simple ? "" : text_colors[czone],
+                                       simple ? "" : std::to_string(czone + 1));
 
             tile_descriptions << c_descr;
         }
 
         // Add the descriptions of latch-tiles to the whole image
-        for (const auto& [coord, ldscr] : coord_to_latch_tile)
+        for (const auto&[coord, ldscr] : coord_to_latch_tile)
         {
             auto [x, y] = coord;
             auto [descr, czone_up, latch_delay] = ldscr;
@@ -134,10 +165,11 @@ namespace svg
             double x_pos = starting_offset_latch_x + x * tile_distance;
             double y_pos = starting_offset_latch_y + y * tile_distance;
 
-            auto t_descr = fmt::format(descr, x_pos, y_pos, tile_colors[czone_lo], tile_colors[czone_up], cell_descriptions,
-                                text_colors[czone_up], simple ? "" : std::to_string(czone_up + 1),
-                                text_colors[czone_lo],
-                                simple ? "" : std::to_string(czone_lo + 1));
+            auto t_descr = fmt::format(descr, x_pos, y_pos, tile_colors[czone_lo], tile_colors[czone_up],
+                                       cell_descriptions,
+                                       text_colors[czone_up], simple ? "" : std::to_string(czone_up + 1),
+                                       text_colors[czone_lo],
+                                       simple ? "" : std::to_string(czone_lo + 1));
 
             tile_descriptions << t_descr;
         }
@@ -149,7 +181,7 @@ namespace svg
         double viewbox_y = 2 * viewbox_distance + length_y * tile_distance;
 
         return fmt::format(header, fiction::VERSION, fiction::REPO, boost::lexical_cast<std::string>(viewbox_x),
-                                   boost::lexical_cast<std::string>(viewbox_y), tile_descriptions.str());
+                           boost::lexical_cast<std::string>(viewbox_y), tile_descriptions.str());
     }
 
     std::string generate_cell_based_svg(fcn_cell_layout_ptr fcl, bool simple)
@@ -158,8 +190,8 @@ namespace svg
 
         static const std::vector<std::string> cell_colors{{clock_zone_1_cell, clock_zone_2_cell, clock_zone_3_cell, clock_zone_4_cell}};
 
-        for (const auto& c : fcl->cells() | iter::filterfalse([fcl](const fcn_cell_layout::cell& _c)
-                                                              { return fcl->is_free_cell(_c); }))
+        for (const auto& c : fcl->cells() | iter::filterfalse(
+                [fcl](const fcn_cell_layout::cell& _c) { return fcl->is_free_cell(_c); }))
         {
 
             // Determines cell type and color
@@ -169,14 +201,17 @@ namespace svg
             if (fcl->get_latch(c))
             {
                 cell_descriptions << fmt::format(desc_col.first, desc_col.second,
-                        starting_offset_tile_x + starting_offset_latch_cell_x + c[X] * cell_distance,
-                        starting_offset_tile_y + starting_offset_latch_cell_y + c[Y] * cell_distance);
+                                                 starting_offset_tile_x + starting_offset_latch_cell_x +
+                                                 c[X] * cell_distance,
+                                                 starting_offset_tile_y + starting_offset_latch_cell_y +
+                                                 c[Y] * cell_distance);
             }
             else
             {
                 cell_descriptions << fmt::format(desc_col.first, desc_col.second,
-                        starting_offset_tile_x + starting_offset_cell_x + c[X] * cell_distance,
-                        starting_offset_tile_y + starting_offset_cell_y + c[Y] * cell_distance);
+                                                 starting_offset_tile_x + starting_offset_cell_x + c[X] * cell_distance,
+                                                 starting_offset_tile_y + starting_offset_cell_y +
+                                                 c[Y] * cell_distance);
             }
         }
 
@@ -184,7 +219,7 @@ namespace svg
         double viewbox_y = 2 * viewbox_distance + fcl->y() * cell_distance;
 
         return fmt::format(header, fiction::VERSION, fiction::REPO, boost::lexical_cast<std::string>(viewbox_x),
-                                   boost::lexical_cast<std::string>(viewbox_y), cell_descriptions.str());
+                           boost::lexical_cast<std::string>(viewbox_y), cell_descriptions.str());
     }
 
     std::pair<std::string, std::string> generate_description_color(fcn_cell_layout_ptr fcl, const fcn_cell_layout::cell& c, bool simple)

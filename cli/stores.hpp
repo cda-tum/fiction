@@ -5,10 +5,11 @@
 #ifndef FICTION_STORES_HPP
 #define FICTION_STORES_HPP
 
-#include <fiction/types.hpp>
-//#include "svg_writer.h"
 #include <fiction/io/dot_drawers.hpp>
 #include <fiction/io/print_layout.hpp>
+#include <fiction/io/write_svg_layout.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
@@ -295,35 +296,42 @@ ALICE_LOG_STORE_STATISTICS(fiction::cell_layout_t, layout)
 
     return std::visit(log_statistics, layout);
 }
-//
-// template <>
-// bool can_show<fcn_cell_layout_ptr>(std::string& extension, [[maybe_unused]] command& cmd)
-//{
-//    extension = "svg";
-//
-//    return true;
-//}
-//
-// template <>
-// void show<fcn_cell_layout_ptr>(std::ostream& os, const fcn_cell_layout_ptr& element,
-//                               const command& cmd)  // const & for pointer because alice says so...
-//{
-//    if (auto tech = element->get_technology(); tech != fcn::technology::QCA)
-//    {
-//        cmd.env->out() << "[w] currently, only QCA layouts can be shown, but " << element->get_name() << " is an "
-//                       << tech << " layout" << std::endl;
-//        return;
-//    }
-//
-//    try
-//    {
-//        os << svg::generate_svg_string(element, cmd.is_set("simple")) << std::endl;
-//    }
-//    catch (const std::invalid_argument& e)
-//    {
-//        cmd.env->out() << "[e] " << e.what() << std::endl;
-//    }
-//}
+
+template <>
+bool can_show<fiction::cell_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
+{
+    extension = "svg";
+
+    return true;
+}
+
+template <>
+void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t& element,
+                                  const command& cmd)  // const & for pointer because alice says so...
+{
+    const auto show_lyt = [&os, &cmd](auto&& lyt)
+    {
+        using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
+
+        if constexpr (!std::is_same_v<typename Lyt::technology, fiction::qca_technology>)
+        {
+            cmd.env->out() << fmt::format("[e] {} is not a QCA layout", lyt->get_layout_name()) << std::endl;
+        }
+        else
+        {
+            try
+            {
+                fiction::write_qca_layout_svg(*lyt, os, {cmd.is_set("simple")});
+            }
+            catch (const std::invalid_argument& e)
+            {
+                cmd.env->out() << "[e] " << e.what() << std::endl;
+            }
+        }
+    };
+
+    std::visit(show_lyt, element);
+}
 
 }  // namespace alice
 

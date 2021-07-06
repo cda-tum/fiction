@@ -8,6 +8,8 @@
 #include "../technology/cell_technologies.hpp"
 #include "clocking_scheme.hpp"
 
+#include <mockturtle/networks/detail/foreach.hpp>
+
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -38,8 +40,8 @@ class cell_level_layout : public ClockedLayout
 
         std::string layout_name;
 
-        const uint64_t tile_size_x;
-        const uint64_t tile_size_y;
+        const uint16_t tile_size_x;
+        const uint16_t tile_size_y;
 
         std::unordered_map<Cell, cell_type> cell_type_map{};
         std::unordered_map<Cell, cell_mode> cell_mode_map{};
@@ -56,13 +58,13 @@ class cell_level_layout : public ClockedLayout
     using storage = std::shared_ptr<cell_level_layout_storage<uint64_t>>;
 
     explicit cell_level_layout(const typename ClockedLayout::aspect_ratio& ar = {}, const std::string& name = "",
-                               const uint16_t tile_size_x = 1u, const uint64_t tile_size_y = 1u) :
+                               const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
             ClockedLayout(ar),
             strg{std::make_shared<cell_level_layout_storage<uint64_t>>(name, tile_size_x, tile_size_y)}
     {}
 
     cell_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<cell>& scheme,
-                      const std::string& name = "", const uint16_t tile_size_x = 1u, const uint64_t tile_size_y = 1u) :
+                      const std::string& name = "", const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
             ClockedLayout(ar, scheme),
             strg{std::make_shared<cell_level_layout_storage<uint64_t>>(name, tile_size_x, tile_size_y)}
     {}
@@ -197,6 +199,16 @@ class cell_level_layout : public ClockedLayout
         return std::find(strg->outputs.cbegin(), strg->outputs.cend(), c) != strg->outputs.cend();
     }
 
+    [[nodiscard]] uint16_t get_tile_size_x() const noexcept
+    {
+        return strg->tile_size_x;
+    }
+
+    [[nodiscard]] uint16_t get_tile_size_y() const noexcept
+    {
+        return strg->tile_size_y;
+    }
+
 #pragma endregion
 
 #pragma region Clocking
@@ -212,6 +224,24 @@ class cell_level_layout : public ClockedLayout
 
     [[maybe_unused]] bool is_outgoing_clocked(const typename ClockedLayout::clock_zone& cz1,
                                               const typename ClockedLayout::clock_zone& cz2) const noexcept = delete;
+
+#pragma endregion
+
+#pragma region Iteration
+
+    template <typename Fn>
+    void foreach_cell(Fn&& fn) const
+    {
+        using IteratorType = decltype(strg->cell_type_map.cbegin());
+        mockturtle::detail::foreach_element_transform<IteratorType, cell_type>(
+            strg->cell_type_map.cbegin(), strg->cell_type_map.cend(), [](const auto& ct) { return ct.second; }, fn);
+    }
+
+    template <typename Fn>
+    void foreach_cell_position(Fn&& fn) const
+    {
+        ClockedLayout::foreach_tile(fn);
+    }
 
 #pragma endregion
 

@@ -22,9 +22,9 @@ class apply_gate_library_impl
   public:
     explicit apply_gate_library_impl(const GateLyt& lyt) :
             gate_lyt{lyt},
-            cell_lyt{typename CellLyt::aspect_ratio{(gate_lyt.x() + 1) * GateLibrary::gate_x_size(),
-                                                    (gate_lyt.y() + 1) * GateLibrary::gate_y_size(), gate_lyt.z()},
-                     gate_lyt.get_clocking_scheme()}
+            cell_lyt{typename CellLyt::aspect_ratio{((gate_lyt.x() + 1) * GateLibrary::gate_x_size()) - 1,
+                                                    ((gate_lyt.y() + 1) * GateLibrary::gate_y_size()) - 1, gate_lyt.z()},
+                     gate_lyt.get_clocking_scheme(), "", GateLibrary::gate_x_size(), GateLibrary::gate_y_size()}
     {}
 
     CellLyt run()
