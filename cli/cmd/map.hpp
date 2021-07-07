@@ -49,6 +49,14 @@ class map_command : public command
         add_flag("--maj,-m", "Enable the use of MAJ gates");
         add_flag("--dot,-d", "Enable the use of DOT gates");
 
+        add_flag("--and3", "Enable the use of AND3 gates");
+        add_flag("--xor_and", "Enable the use of XOR-AND gates");
+        add_flag("--or_and", "Enable the use of OR-AND gates");
+        add_flag("--onehot", "Enable the use of ONEHOT gates");
+        add_flag("--gamble", "Enable the use of GAMBLE gates");
+        add_flag("--mux", "Enable the use of MUX gates");
+        add_flag("--and_xor", "Enable the use of AND-XOR gates");
+
         add_flag("--decay", "Enforce the application of at least one constant input to three-input gates");
         add_flag("--logic_sharing,-s", ps.enable_logic_sharing, "Enable logic sharing optimization");
         add_flag("--verbose,-v", ps.verbose, "Be verbose");
@@ -105,6 +113,55 @@ class map_command : public command
 
             library_stream << fiction::DECAY_DOT;
         }
+        if (is_set("and3"))
+        {
+            if (!is_set("decay"))
+                library_stream << fiction::GATE_AND3;
+
+            library_stream << fiction::DECAY_AND3;
+        }
+        if (is_set("xor_and"))
+        {
+            if (!is_set("decay"))
+                library_stream << fiction::GATE_XOR_AND;
+
+            library_stream << fiction::DECAY_XOR_AND;
+        }
+        if (is_set("or_and"))
+        {
+            if (!is_set("decay"))
+                library_stream << fiction::GATE_OR_AND;
+
+            library_stream << fiction::DECAY_OR_AND;
+        }
+        if (is_set("onehot"))
+        {
+            if (!is_set("decay"))
+                library_stream << fiction::GATE_ONEHOT;
+
+            library_stream << fiction::DECAY_ONEHOT;
+        }
+        if (is_set("gamble"))
+        {
+            if (!is_set("decay"))
+                library_stream << fiction::GATE_GAMBLE;
+
+            library_stream << fiction::DECAY_GAMBLE;
+        }
+        if (is_set("mux"))
+        {
+            if (!is_set("decay"))
+                library_stream << fiction::GATE_MUX;
+
+            library_stream << fiction::DECAY_MUX;
+        }
+        if (is_set("and_xor"))
+        {
+            if (!is_set("decay"))
+                library_stream << fiction::GATE_AND_XOR;
+
+            library_stream << fiction::DECAY_AND_XOR;
+        }
 
         // generate technology library
         std::vector<mockturtle::gate> gates{};
@@ -113,7 +170,8 @@ class map_command : public command
 
         if (result == lorina::return_code::success)
         {
-            if (is_set("maj") || is_set("dot"))
+            if (is_set("maj") || is_set("dot") || is_set("and3") || is_set("xor_and") || is_set("or_and") ||
+                is_set("onehot") || is_set("gamble") || is_set("mux") || is_set("and_xor"))
             {
                 synthesize_and_store<3>(gates);
             }
