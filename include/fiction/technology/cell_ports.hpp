@@ -7,6 +7,8 @@
 
 #include "../utils/hash.hpp"
 
+#include <fmt/format.h>
+
 #include <cstdint>
 #include <functional>
 #include <set>
@@ -15,7 +17,7 @@
 namespace fiction
 {
 /**
- * A port is a position of a cell relative to i.e. within a tile.
+ * A port is a relative position of a cell within, i.e, a tile.
  */
 struct port
 {
@@ -124,5 +126,41 @@ struct hash<fiction::port_list>
 };
 
 }  // namespace std
+
+namespace fmt
+{
+// make port compatible with fmt::format
+template <>
+struct formatter<fiction::port>
+{
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const fiction::port& p, FormatContext& ctx)
+    {
+        return format_to(ctx.out(), "({},{})", p.x, p.y);
+    }
+};
+// make port_list compatible with fmt::format
+template <>
+struct formatter<fiction::port_list>
+{
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const fiction::port_list& pl, FormatContext& ctx)
+    {
+        return format_to(ctx.out(), "inp: {}, out: {}", join(pl.inp, ", "), join(pl.out, ", "));
+    }
+};
+}  // namespace fmt
 
 #endif  // FICTION_CELL_PORTS_HPP

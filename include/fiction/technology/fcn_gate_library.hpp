@@ -5,6 +5,7 @@
 #ifndef FICTION_FCN_GATE_LIBRARY_H
 #define FICTION_FCN_GATE_LIBRARY_H
 
+#include "../layouts/coordinate.hpp"
 #include "../utils/array.hpp"
 #include "cell_technologies.hpp"
 
@@ -14,6 +15,45 @@
 
 namespace fiction
 {
+
+class unsupported_gate_type_exception : public std::exception
+{
+  public:
+    explicit unsupported_gate_type_exception(const coord_t& c) noexcept : std::exception(), coord{c} {}
+
+    [[nodiscard]] coord_t where() const noexcept
+    {
+        return coord;
+    }
+
+  private:
+    const coord_t coord;
+};
+
+class unsupported_gate_orientation_exception : public std::exception
+{
+  public:
+    unsupported_gate_orientation_exception(const coord_t& c, const port_list& p) noexcept :
+            std::exception(),
+            coord{c},
+            ports{p}
+    {}
+
+    [[nodiscard]] coord_t where() const noexcept
+    {
+        return coord;
+    }
+
+    [[nodiscard]] port_list which_ports() const noexcept
+    {
+        return ports;
+    }
+
+  private:
+    const coord_t   coord;
+    const port_list ports;
+};
+
 /**
  * This class represents a base class for various FCN libraries used to map gate tiles to cell level.
  */

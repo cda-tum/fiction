@@ -208,13 +208,6 @@ class coord_iterator
 
 namespace std
 {
-// make coord_iterator compatible with STL iterator categories
-template <>
-struct iterator_traits<fiction::coord_iterator>
-{
-    using iterator_category = std::forward_iterator_tag;
-    using value_type        = fiction::coord_t;
-};
 // define std::hash overload for coord_t
 template <>
 struct hash<fiction::coord_t>
@@ -224,7 +217,34 @@ struct hash<fiction::coord_t>
         return static_cast<std::size_t>(std::hash<uint64_t>{}(static_cast<uint64_t>(c)));
     }
 };
+// make coord_iterator compatible with STL iterator categories
+template <>
+struct iterator_traits<fiction::coord_iterator>
+{
+    using iterator_category = std::forward_iterator_tag;
+    using value_type        = fiction::coord_t;
+};
 }  // namespace std
+
+namespace fmt
+{
+// make coord_t compatible with fmt::format
+template <>
+struct formatter<fiction::coord_t>
+{
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const fiction::coord_t& c, FormatContext& ctx)
+    {
+        return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
+    }
+};
+}  // namespace fmt
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop

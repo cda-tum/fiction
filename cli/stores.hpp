@@ -323,9 +323,14 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
             {
                 fiction::write_qca_layout_svg(*lyt, os, {cmd.is_set("simple")});
             }
-            catch (const std::invalid_argument& e)
+            catch (const fiction::unsupported_cell_type_exception& e)
             {
-                cmd.env->out() << "[e] " << e.what() << std::endl;
+                cmd.env->out() << fmt::format("[e] unsupported cell type at cell position {}", e.where()) << std::endl;
+            }
+            catch (...)
+            {
+                cmd.env->out() << "[e] an error occurred while writing the SVG description to the output stream"
+                               << std::endl;
             }
         }
     };

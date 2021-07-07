@@ -27,6 +27,20 @@ struct write_qca_layout_svg_params
     bool simple = false;
 };
 
+class unsupported_cell_type_exception : public std::exception
+{
+  public:
+    explicit unsupported_cell_type_exception(const coord_t& c) noexcept : std::exception(), coord{c} {}
+
+    [[nodiscard]] coord_t where() const noexcept
+    {
+        return coord;
+    }
+
+  private:
+    const coord_t coord;
+};
+
 namespace detail
 {
 
@@ -416,7 +430,7 @@ class write_qca_layout_svg_impl
         }
         else
         {
-            throw std::invalid_argument("unsupported cell type(s) occurred in layout");
+            throw unsupported_cell_type_exception(c);
         }
 
         return std::make_pair(cell_description, cell_color);
@@ -584,10 +598,7 @@ class write_qca_layout_svg_impl
             //            }
 
             // Delete empty tiles
-            for (const auto& coord : empty_tiles)
-            {
-                coord_to_tile.erase(coord);
-            }
+            for (const auto& coord : empty_tiles) { coord_to_tile.erase(coord); }
 
             //            for (const auto& coord : empty_latches) coord_to_latch_tile.erase(coord);
         }
@@ -645,6 +656,8 @@ class write_qca_layout_svg_impl
  *
  * For tile-based layouts, only QCA of tile size 5 x 5 is supported so far.
  *
+ * May throw an 'unsupported_cell_type_exception'
+ *
  * @param fcl The cell layout to generate an SVG representation for.
  * @param simple Flag to indicate that the SVG representation should be generated with less details. Recommended
  *               for large layouts.
@@ -653,6 +666,8 @@ class write_qca_layout_svg_impl
 template <typename Lyt>
 void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg_params ps = {})
 {
+    static_assert(std::is_same_v<typename Lyt::technology, qca_technology>, "Lyt has to be a QCA layout");
+
     detail::write_qca_layout_svg_impl<Lyt> p{lyt, os, ps};
 
     p.run();

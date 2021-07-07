@@ -67,7 +67,20 @@ class cell_command : public command
                     fiction::apply_gate_library<fiction::qca_cell_clk_lyt, fiction::qca_one_library>(*lyt));
             };
 
-            store<fiction::cell_layout_t>().extend() = std::visit(apply, s.current());
+            try
+            {
+                store<fiction::cell_layout_t>().extend() = std::visit(apply, s.current());
+            }
+            catch (const fiction::unsupported_gate_type_exception& e)
+            {
+                std::cout << fmt::format("[e] unsupported gate type at tile position {}", e.where()) << std::endl;
+            }
+            catch (const fiction::unsupported_gate_orientation_exception& e)
+            {
+                std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}",
+                                         e.where(), e.which_ports())
+                          << std::endl;
+            }
         }
         //            else if (library == 1u)
         //            {

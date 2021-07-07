@@ -81,6 +81,15 @@ class apply_gate_library_impl
 
 }  // namespace detail
 
+/**
+ * May pass through, and thereby throw, an 'unsupported_gate_type_exception' or an 'unsupported_gate_orientation_exception'.
+ *
+ * @tparam CellLyt
+ * @tparam GateLibrary
+ * @tparam GateLyt
+ * @param lyt
+ * @return
+ */
 template <typename CellLyt, typename GateLibrary, typename GateLyt>
 CellLyt apply_gate_library(const GateLyt& lyt)
 {

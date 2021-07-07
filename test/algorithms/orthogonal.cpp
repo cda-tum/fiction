@@ -80,11 +80,9 @@ TEST_CASE("Layout equivalence", "[algorithms]")
 
         auto layout = orthogonal<gate_layout>(net, params, &stats);
 
-        REQUIRE(layout.has_value());
+        print_gate_level_layout(std::cout, layout);
 
-        print_gate_level_layout(std::cout, *layout);
-
-        check_eq(net, *layout);
+        check_eq(net, layout);
     };
 
     check(mockturtle::fanout_view{

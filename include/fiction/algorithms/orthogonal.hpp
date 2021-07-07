@@ -54,6 +54,17 @@ struct orthogonal_physical_design_stats
     }
 };
 
+class high_degree_fanin_exception : public std::exception
+{
+  public:
+    explicit high_degree_fanin_exception() : std::exception() {}
+
+    [[nodiscard]] const char* what() const noexcept
+    {
+        return "network cannot have nodes with more than two non-constant fanins";
+    }
+};
+
 namespace detail
 {
 
@@ -742,9 +753,11 @@ class orthogonal_impl
  *
  * This is a proof of concept implementation for a scalable physical design approach for FCN.
  * It is not meant to be used for arranging fabricable circuits, as area is far from being optimal.
+ *
+ * May throw an 'high_degree_fanin_exception'.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
+Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
                               orthogonal_physical_design_stats* pst = nullptr)
 {
     static_assert(mockturtle::is_network_type_v<Lyt>, "Lyt is not a network type");
@@ -753,8 +766,7 @@ std::optional<Lyt> orthogonal(const Ntk& ntk, orthogonal_physical_design_params 
     // check for input degree
     if (detail::has_high_degree_fanin_nodes(ntk))
     {
-        std::cout << "[e] network cannot have nodes with more than two non-constant fanins" << std::endl;
-        return std::nullopt;
+        throw high_degree_fanin_exception();
     }
 
     orthogonal_physical_design_stats  st{};

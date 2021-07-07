@@ -42,43 +42,50 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         const auto n = lyt.get_node(t);
         const auto p = determine_port_routing(lyt, t);
 
-        if constexpr (fiction::has_is_fanout_v<Lyt>)
+        try
         {
-            if (lyt.is_fanout(n))
+            if constexpr (fiction::has_is_fanout_v<Lyt>)
             {
-                if (lyt.fanout_size(n) == 2)
-                    return fanout_map.at(p);
-                else if (lyt.fanout_size(n) == 3)
-                    return fan_out_1_3;
+                if (lyt.is_fanout(n))
+                {
+                    if (lyt.fanout_size(n) == 2)
+                        return fanout_map.at(p);
+                    else if (lyt.fanout_size(n) == 3)
+                        return fan_out_1_3;
+                }
+            }
+            if constexpr (fiction::has_is_buf_v<Lyt>)
+            {
+                if (lyt.is_buf(n))
+                    return wire_map.at(p);
+            }
+            if constexpr (fiction::has_is_inv_v<Lyt>)
+            {
+                if (lyt.is_inv(n))
+                    return inverter_map.at(p);
+            }
+            if constexpr (mockturtle::has_is_and_v<Lyt>)
+            {
+                if (lyt.is_and(n))
+                    return conjunction_map.at(p);
+            }
+            if constexpr (mockturtle::has_is_or_v<Lyt>)
+            {
+                if (lyt.is_or(n))
+                    return disjunction_map.at(p);
+            }
+            if constexpr (mockturtle::has_is_maj_v<Lyt>)
+            {
+                if (lyt.is_maj(n))
+                    return majority;
             }
         }
-        if constexpr (fiction::has_is_buf_v<Lyt>)
+        catch (const std::out_of_range&)
         {
-            if (lyt.is_buf(n))
-                return wire_map.at(p);
-        }
-        if constexpr (fiction::has_is_inv_v<Lyt>)
-        {
-            if (lyt.is_inv(n))
-                return inverter_map.at(p);
-        }
-        if constexpr (mockturtle::has_is_and_v<Lyt>)
-        {
-            if (lyt.is_and(n))
-                return conjunction_map.at(p);
-        }
-        if constexpr (mockturtle::has_is_or_v<Lyt>)
-        {
-            if (lyt.is_or(n))
-                return disjunction_map.at(p);
-        }
-        if constexpr (mockturtle::has_is_maj_v<Lyt>)
-        {
-            if (lyt.is_maj(n))
-                return majority;
+            throw unsupported_gate_orientation_exception(t, p);
         }
 
-        throw std::invalid_argument(fmt::format("gate type is not listed in the library"));
+        throw unsupported_gate_type_exception(t);
     }
 
   private:
