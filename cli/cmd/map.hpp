@@ -57,6 +57,10 @@ class map_command : public command
         add_flag("--mux", "Enable the use of MUX gates");
         add_flag("--and_xor", "Enable the use of AND-XOR gates");
 
+        add_flag("--all2", "Enable the use of all supported 2-input gates + inverters");
+        add_flag("--all3", "Enable the use of all supported 3-input gates + inverters");
+        add_flag("--all", "Enable the use of all supported gates");
+
         add_flag("--decay", "Enforce the application of at least one constant input to three-input gates");
         add_flag("--logic_sharing,-s", ps.enable_logic_sharing, "Enable logic sharing optimization");
         add_flag("--verbose,-v", ps.verbose, "Be verbose");
@@ -83,79 +87,79 @@ class map_command : public command
 
         library_stream << fiction::GATE_ZERO << fiction::GATE_ONE << fiction::GATE_BUF;
 
-        if (is_set("and"))
+        if (is_set("and") || is_set("all2") || is_set("all"))
         {
             library_stream << fiction::GATE_AND2;
         }
-        if (is_set("or"))
+        if (is_set("or") || is_set("all2") || is_set("all"))
         {
             library_stream << fiction::GATE_OR2;
         }
-        if (is_set("xor"))
+        if (is_set("xor") || is_set("all2") || is_set("all"))
         {
             library_stream << fiction::GATE_XOR2;
         }
-        if (is_set("inv"))
+        if (is_set("inv") || is_set("all2") || is_set("all3") || is_set("all"))
         {
             library_stream << fiction::GATE_INV;
         }
-        if (is_set("maj"))
+        if (is_set("maj") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
                 library_stream << fiction::GATE_MAJ3;
 
             library_stream << fiction::DECAY_MAJ3;
         }
-        if (is_set("dot"))
+        if (is_set("dot") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
                 library_stream << fiction::GATE_DOT;
 
             library_stream << fiction::DECAY_DOT;
         }
-        if (is_set("and3"))
+        if (is_set("and3") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
                 library_stream << fiction::GATE_AND3;
 
             library_stream << fiction::DECAY_AND3;
         }
-        if (is_set("xor_and"))
+        if (is_set("xor_and") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
                 library_stream << fiction::GATE_XOR_AND;
 
             library_stream << fiction::DECAY_XOR_AND;
         }
-        if (is_set("or_and"))
+        if (is_set("or_and") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
                 library_stream << fiction::GATE_OR_AND;
 
             library_stream << fiction::DECAY_OR_AND;
         }
-        if (is_set("onehot"))
+        if (is_set("onehot") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
                 library_stream << fiction::GATE_ONEHOT;
 
             library_stream << fiction::DECAY_ONEHOT;
         }
-        if (is_set("gamble"))
+        if (is_set("gamble") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
                 library_stream << fiction::GATE_GAMBLE;
 
             library_stream << fiction::DECAY_GAMBLE;
         }
-        if (is_set("mux"))
+        if (is_set("mux") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
                 library_stream << fiction::GATE_MUX;
 
             library_stream << fiction::DECAY_MUX;
         }
-        if (is_set("and_xor"))
+        if (is_set("and_xor") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
                 library_stream << fiction::GATE_AND_XOR;
@@ -171,11 +175,12 @@ class map_command : public command
         if (result == lorina::return_code::success)
         {
             if (is_set("maj") || is_set("dot") || is_set("and3") || is_set("xor_and") || is_set("or_and") ||
-                is_set("onehot") || is_set("gamble") || is_set("mux") || is_set("and_xor"))
+                is_set("onehot") || is_set("gamble") || is_set("mux") || is_set("and_xor") || is_set("all3") ||
+                is_set("all"))
             {
                 synthesize_and_store<3>(gates);
             }
-            else if (is_set("and") || is_set("or") || is_set("xor"))
+            else if (is_set("and") || is_set("or") || is_set("xor") || is_set("all2"))
             {
                 synthesize_and_store<2>(gates);
             }

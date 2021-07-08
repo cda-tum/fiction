@@ -94,6 +94,90 @@ template <class Ntk>
 inline constexpr bool has_is_nor_v = has_is_nor<Ntk>::value;
 #pragma endregion
 
+#pragma region has_is_xnor
+template <class Ntk, class = void>
+struct has_is_xnor : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_xnor<Ntk, std::void_t<decltype(std::declval<Ntk>().is_xnor(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_xnor_v = has_is_xnor<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_and3
+template <class Ntk, class = void>
+struct has_is_and3 : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_and3<Ntk, std::void_t<decltype(std::declval<Ntk>().is_and3(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_and3_v = has_is_and3<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_xor_and
+template <class Ntk, class = void>
+struct has_is_xor_and : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_xor_and<Ntk, std::void_t<decltype(std::declval<Ntk>().is_xor_and(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_xor_and_v = has_is_xor_and<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_or_and
+template <class Ntk, class = void>
+struct has_is_or_and : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_or_and<Ntk, std::void_t<decltype(std::declval<Ntk>().is_or_and(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_or_and_v = has_is_or_and<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_onehot
+template <class Ntk, class = void>
+struct has_is_onehot : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_onehot<Ntk, std::void_t<decltype(std::declval<Ntk>().is_onehot(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_onehot_v = has_is_onehot<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_gamble
+template <class Ntk, class = void>
+struct has_is_gamble : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_gamble<Ntk, std::void_t<decltype(std::declval<Ntk>().is_gamble(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_gamble_v = has_is_gamble<Ntk>::value;
+#pragma endregion
+
 #pragma region has_create_dot
 template <class Ntk, class = void>
 struct has_create_dot : std::false_type
@@ -121,6 +205,34 @@ struct has_is_dot<Ntk, std::void_t<decltype(std::declval<Ntk>().is_dot(std::decl
 
 template <class Ntk>
 inline constexpr bool has_is_dot_v = has_is_dot<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_mux
+template <class Ntk, class = void>
+struct has_is_mux : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_mux<Ntk, std::void_t<decltype(std::declval<Ntk>().is_mux(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_mux_v = has_is_mux<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_and_xor
+template <class Ntk, class = void>
+struct has_is_and_xor : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_and_xor<Ntk, std::void_t<decltype(std::declval<Ntk>().is_and_xor(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_and_xor_v = has_is_and_xor<Ntk>::value;
 #pragma endregion
 
 #pragma region has_get_layout_name

@@ -226,6 +226,11 @@ class topology_network : public mockturtle::klut_network
         return _storage->nodes[n].data[1].h1 == 12;
     }
 
+    [[nodiscard]] bool is_xnor(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 13;
+    }
+
     [[nodiscard]] bool is_maj(node const& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 14;
@@ -246,6 +251,36 @@ class topology_network : public mockturtle::klut_network
         return _storage->nodes[n].data[1].h1 == 20;
     }
 
+    [[nodiscard]] bool is_and3(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 22;
+    }
+
+    [[nodiscard]] bool is_xor_and(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 24;
+    }
+
+    [[nodiscard]] bool is_or_and(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 26;
+    }
+
+    [[nodiscard]] bool is_onehot(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 28;
+    }
+
+    [[nodiscard]] bool is_gamble(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 31;  // 31 since gamble is not normal
+    }
+
+    [[nodiscard]] bool is_and_xor(node const& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 32;
+    }
+
 #pragma endregion
 
   protected:
@@ -257,6 +292,48 @@ class topology_network : public mockturtle::klut_network
         kitty::dynamic_truth_table tt_dot(3);
         kitty::create_from_words(tt_dot, &dot, &dot + 1);
         _storage->data.cache.insert(tt_dot);
+
+        // create and3 function: a and b and c
+        static uint64_t and3 = 0x80;
+
+        kitty::dynamic_truth_table tt_and3(3);
+        kitty::create_from_words(tt_and3, &and3, &and3 + 1);
+        _storage->data.cache.insert(tt_and3);
+
+        // create xor_and function: a and (b xor c)
+        static uint64_t xor_and = 0x28;
+
+        kitty::dynamic_truth_table tt_xor_and(3);
+        kitty::create_from_words(tt_xor_and, &xor_and, &xor_and + 1);
+        _storage->data.cache.insert(tt_xor_and);
+
+        // create or_and function: a and (b or c)
+        static uint64_t or_and = 0xa8;
+
+        kitty::dynamic_truth_table tt_or_and(3);
+        kitty::create_from_words(tt_or_and, &or_and, &or_and + 1);
+        _storage->data.cache.insert(tt_or_and);
+
+        // create onehot function: exactly one of a,b,c
+        static uint64_t onehot = 0x16;
+
+        kitty::dynamic_truth_table tt_onehot(3);
+        kitty::create_from_words(tt_onehot, &onehot, &onehot + 1);
+        _storage->data.cache.insert(tt_onehot);
+
+        // create gamble function: all or nothing of a,b,c
+        static uint64_t gamble = 0x81;
+
+        kitty::dynamic_truth_table tt_gamble(3);
+        kitty::create_from_words(tt_gamble, &gamble, &gamble + 1);
+        _storage->data.cache.insert(tt_gamble);
+
+        // create and_xor function: a xor b and c
+        static uint64_t and_xor = 0x6a;
+
+        kitty::dynamic_truth_table tt_and_xor(3);
+        kitty::create_from_words(tt_and_xor, &and_xor, &and_xor + 1);
+        _storage->data.cache.insert(tt_and_xor);
     }
 };
 
