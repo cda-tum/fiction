@@ -5,10 +5,13 @@
 #ifndef FICTION_APPLY_GATE_LIBRARY_HPP
 #define FICTION_APPLY_GATE_LIBRARY_HPP
 
+#include "../technology/qca_one_library.hpp"
 #include "../traits.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/progress_bar.hpp>
+
+#include <type_traits>
 
 namespace fiction
 {
@@ -23,7 +26,8 @@ class apply_gate_library_impl
     explicit apply_gate_library_impl(const GateLyt& lyt) :
             gate_lyt{lyt},
             cell_lyt{typename CellLyt::aspect_ratio{((gate_lyt.x() + 1) * GateLibrary::gate_x_size()) - 1,
-                                                    ((gate_lyt.y() + 1) * GateLibrary::gate_y_size()) - 1, gate_lyt.z()},
+                                                    ((gate_lyt.y() + 1) * GateLibrary::gate_y_size()) - 1,
+                                                    gate_lyt.z()},
                      gate_lyt.get_clocking_scheme(), "", GateLibrary::gate_x_size(), GateLibrary::gate_y_size()}
     {}
 
@@ -47,6 +51,11 @@ class apply_gate_library_impl
                 bar(i);
 #endif
             });
+
+        if constexpr (std::is_same_v<GateLibrary, qca_one_library>)
+        {
+            GateLibrary::assign_via_cells(cell_lyt);
+        }
 
         if constexpr (mockturtle::has_get_network_name_v<GateLyt> && fiction::has_set_layout_name_v<CellLyt>)
         {
@@ -82,7 +91,8 @@ class apply_gate_library_impl
 }  // namespace detail
 
 /**
- * May pass through, and thereby throw, an 'unsupported_gate_type_exception' or an 'unsupported_gate_orientation_exception'.
+ * May pass through, and thereby throw, an 'unsupported_gate_type_exception' or an
+ * 'unsupported_gate_orientation_exception'.
  *
  * @tparam CellLyt
  * @tparam GateLibrary

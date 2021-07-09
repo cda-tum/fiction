@@ -13,6 +13,9 @@
 
 #include <fmt/format.h>
 
+#include <unordered_map>
+#include <vector>
+
 namespace fiction
 {
 
@@ -86,6 +89,37 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         }
 
         throw unsupported_gate_type_exception(t);
+    }
+
+    template <typename Lyt>
+    static void assign_via_cells(Lyt& lyt) noexcept
+    {
+        lyt.foreach_cell_position(
+            [&lyt](const auto& c)
+            {
+                if (lyt.is_crossing_layer(c))
+                {
+                    if (!lyt.is_empty_cell(c))
+                    {
+                        // gather adjacent cell positions
+                        auto adjacent_cells = lyt.template adjacent_tiles<std::vector<typename Lyt::cell>>(c);
+                        // remove all empty cells
+                        adjacent_cells.erase(std::remove_if(adjacent_cells.begin(), adjacent_cells.end(),
+                                                            [&lyt](const auto& ac) { return lyt.is_empty_cell(ac); }),
+                                             adjacent_cells.end());
+                        // if there is at most one neighbor left
+                        if (std::distance(adjacent_cells.cbegin(), adjacent_cells.cend()) <= 1)
+                        {
+                            // change cell mode to via
+                            lyt.assign_cell_mode(c, qca_technology::cell_mode::VERTICAL);
+                            // create a corresponding via ground cell
+                            const typename Lyt::cell ground_via_cell{c.x, c.y, 0};
+                            lyt.assign_cell_type(ground_via_cell, qca_technology::cell_type::NORMAL);
+                            lyt.assign_cell_mode(ground_via_cell, qca_technology::cell_mode::VERTICAL);
+                        }
+                    }
+                }
+            });
     }
 
   private:
