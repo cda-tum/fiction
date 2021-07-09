@@ -9,53 +9,6 @@
 
 namespace fiction
 {
-/**
- * Supported technology types:
- * - Qunatum-dot Cellular Automata (QCA)
- * - In-plane Nanomagnet Logic (iNML)
- * - Silicon Dangling Bonds (SiDB)
- */
-enum class technology_implementation
-{
-    QCA,
-    iNML,
-    SiDB
-};
-/**
- * Overload for the stream operator on technology_implementation to print a string representation.
- *
- * @param os Stream to write into.
- * @param tech Technology to print.
- * @return os extended by string representation of tech.
- */
-std::ostream& operator<<(std::ostream& os, const technology_implementation tech)
-{
-    switch (tech)
-    {
-        case technology_implementation::QCA:
-        {
-            os << "QCA";
-            break;
-        }
-        case technology_implementation::iNML:
-        {
-            os << "iNML";
-            break;
-        }
-        case technology_implementation::SiDB:
-        {
-            os << "SiDB";
-            break;
-        }
-        default:
-        {
-            os << "?";
-            break;
-        }
-    }
-
-    return os;
-}
 
 struct qca_technology
 {
@@ -105,8 +58,6 @@ struct qca_technology
         INPUT  = cell_type::INPUT,
         OUTPUT = cell_type::OUTPUT
     };
-
-    static constexpr const technology_implementation implementation = technology_implementation::QCA;
 
     [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
     {
@@ -163,6 +114,12 @@ struct qca_technology
         return m == cell_mode::CROSSOVER;
     }
 };
+
+struct inml_technology
+{};
+
+struct sidb_technology
+{};
 
 }  // namespace fiction
 

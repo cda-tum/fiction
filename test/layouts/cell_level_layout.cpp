@@ -9,8 +9,9 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
-#include <sstream>
+#include <string>
 #include <type_traits>
 
 using namespace fiction;
@@ -35,25 +36,19 @@ TEST_CASE("Cell technology", "[cell-level]")
         CHECK(qca_technology::is_vertical_cell_mode(qca_technology::cell_mode::VERTICAL));
         CHECK(qca_technology::is_crossover_cell_mode(qca_technology::cell_mode::CROSSOVER));
 
-        s << technology_implementation::QCA;
-
-        CHECK(s.str() == "QCA");
+        CHECK(tech_impl_name<qca_technology> == std::string{"QCA"});
     }
     SECTION("iNML")
     {
         // TODO cell types go here
 
-        s << technology_implementation::iNML;
-
-        CHECK(s.str() == "iNML");
+        CHECK(tech_impl_name<inml_technology> == std::string{"iNML"});
     }
     SECTION("SiDB")
     {
         // TODO cell types go here
 
-        s << technology_implementation::SiDB;
-
-        CHECK(s.str() == "SiDB");
+        CHECK(tech_impl_name<sidb_technology> == std::string{"SiDB"});
     }
 }
 
@@ -82,8 +77,6 @@ TEST_CASE("Cell type assignment", "[cell-level]")
     layout.assign_cell_name({4, 2}, "f");
 
     CHECK(std::is_same_v<typename cell_layout::technology, fiction::qca_technology>);
-
-    CHECK(layout.get_implementation() == fiction::technology_implementation::QCA);
 
     CHECK(layout.get_layout_name() == "AND");
     CHECK(layout.get_cell_name({0, 2}) == "a");

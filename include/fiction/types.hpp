@@ -68,6 +68,21 @@ using gate_clk_lyt_ptr = std::shared_ptr<gate_clk_lyt>;
 
 using gate_layout_t = std::variant<gate_clk_lyt_ptr>;
 
+
+/**
+ * FCN technologies.
+ */
+constexpr const char* qca_name  = "QCA";
+constexpr const char* inml_name = "iNML";
+constexpr const char* sidb_name = "SiDB";
+
+template <class Tech>
+inline constexpr const char* tech_impl_name =
+    std::is_same_v<std::decay_t<Tech>, fiction::qca_technology>  ? fiction::qca_name :
+    std::is_same_v<std::decay_t<Tech>, fiction::inml_technology> ? fiction::inml_name :
+    std::is_same_v<std::decay_t<Tech>, fiction::sidb_technology> ? fiction::sidb_name :
+                                                                   "?";
+
 /**
  * FCN cell-level layouts.
  */

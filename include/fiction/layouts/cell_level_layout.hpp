@@ -159,11 +159,6 @@ class cell_level_layout : public ClockedLayout
 
 #pragma region Properties
 
-    [[nodiscard]] technology_implementation get_implementation() const noexcept
-    {
-        return Technology::implementation;
-    }
-
     [[nodiscard]] std::string get_layout_name() const noexcept
     {
         return strg->layout_name;

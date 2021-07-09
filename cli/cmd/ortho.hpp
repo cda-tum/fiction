@@ -31,7 +31,7 @@ class ortho_command : public command
             command(e, "Performs scalable placement and routing of the current logic network in store. "
                        "An FCN layout that is not minimal will be found in reasonable runtime.")
     {
-        add_option("--clock_numbers,-n", ps.number_of_clock_phases, "Number of clock phases to be used {3 or 4}", true);
+        add_option("--clock_numbers,-n", ps.number_of_clock_phases, "Number of clock phases to be used {3 or 4}");
         add_flag("--verbose,-v", ps.verbose, "Be verbose");
     }
 

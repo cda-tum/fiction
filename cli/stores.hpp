@@ -249,7 +249,7 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
 }
 
 /**
- * FCN cell layouts.
+ * FCN cell-level layouts.
  */
 ALICE_ADD_STORE(fiction::cell_layout_t, "cell_layout", "c", "cell layout", "cell layouts")
 
@@ -264,8 +264,11 @@ ALICE_DESCRIBE_STORE(fiction::cell_layout_t, layout)
 {
     const auto describe = [](auto&& lyt)
     {
-        return fmt::format("{} ({}) - {} × {}, I/O: {}/{}", lyt->get_layout_name(), lyt->get_implementation(),
-                           lyt->x() + 1, lyt->y() + 1, lyt->num_pis(), lyt->num_pos());
+        using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
+
+        return fmt::format("{} ({}) - {} × {}, I/O: {}/{}, cells: {}", lyt->get_layout_name(),
+                           fiction::tech_impl_name<typename Lyt::technology>, lyt->x() + 1, lyt->y() + 1,
+                           lyt->num_pis(), lyt->num_pos(), lyt->num_cells());
     };
 
     return std::visit(describe, layout);
@@ -275,9 +278,11 @@ ALICE_PRINT_STORE_STATISTICS(fiction::cell_layout_t, os, layout)
 {
     const auto print_statistics = [&os](auto&& lyt)
     {
+        using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
+
         os << fmt::format("{} ({}) - {} × {}, I/O: {}/{}, cells: {}\n", lyt->get_layout_name(),
-                          lyt->get_implementation(), lyt->x() + 1, lyt->y() + 1, lyt->num_pis(), lyt->num_pos(),
-                          lyt->num_cells());
+                          fiction::tech_impl_name<typename Lyt::technology>, lyt->x() + 1, lyt->y() + 1, lyt->num_pis(),
+                          lyt->num_pos(), lyt->num_cells());
     };
 
     std::visit(print_statistics, layout);
@@ -287,7 +292,10 @@ ALICE_LOG_STORE_STATISTICS(fiction::cell_layout_t, layout)
 {
     const auto log_statistics = [](auto&& lyt)
     {
+        using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
+
         return nlohmann::json{{"name", lyt->get_layout_name()},
+                              {"technology", fiction::tech_impl_name<typename Lyt::technology>},
                               {"inputs", lyt->num_pis()},
                               {"outputs", lyt->num_pos()},
                               {"cells", lyt->num_cells()},
