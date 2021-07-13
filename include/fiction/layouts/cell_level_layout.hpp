@@ -228,8 +228,9 @@ class cell_level_layout : public ClockedLayout
     void foreach_cell(Fn&& fn) const
     {
         using IteratorType = decltype(strg->cell_type_map.cbegin());
-        mockturtle::detail::foreach_element_transform<IteratorType, cell_type>(
-            strg->cell_type_map.cbegin(), strg->cell_type_map.cend(), [](const auto& ct) { return ct.second; }, fn);
+        mockturtle::detail::foreach_element_transform<IteratorType, cell>(
+            strg->cell_type_map.cbegin(), strg->cell_type_map.cend(),
+            [](const auto& ct) { return static_cast<cell>(ct.first); }, fn);
     }
 
     template <typename Fn>

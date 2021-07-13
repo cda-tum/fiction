@@ -202,7 +202,7 @@ class gate_layout_tile_drawer : public topology_dot_drawer<Lyt, DrawIndexes>
         return fmt::format("x{}y{}", t.x, t.y);
     }
 
-    std::vector<std::string> additional_node_attributes() const noexcept
+    [[nodiscard]] std::vector<std::string> additional_node_attributes() const noexcept
     {
         if constexpr (DrawIndexes)
             return {"shape=square", "fixedsize=true", "width=1"};
@@ -286,7 +286,7 @@ class gate_layout_tile_drawer : public topology_dot_drawer<Lyt, DrawIndexes>
  * \param os Output stream
  */
 template <class Lyt, class Drawer = gate_layout_tile_drawer<Lyt>>
-void write_layout_dot(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {})
+void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {})
 {
     static_assert(mockturtle::is_network_type_v<Lyt>, "Ntk is not a network type");
     static_assert(mockturtle::has_is_pi_v<Lyt>, "Ntk does not implement the is_pi method");
@@ -345,7 +345,7 @@ void write_layout_dot(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
  * \param filename Filename
  */
 template <class Lyt, class Drawer = gate_layout_tile_drawer<Lyt>>
-void write_layout_dot(const Lyt& lyt, const std::string& filename, const Drawer& drawer = {})
+void write_dot_layout(const Lyt& lyt, const std::string& filename, const Drawer& drawer = {})
 {
     std::ofstream os{filename.c_str(), std::ofstream::out};
     write_dot(lyt, os, drawer);

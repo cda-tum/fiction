@@ -5,14 +5,16 @@
 #ifndef FICTION_QCA_HPP
 #define FICTION_QCA_HPP
 
-#include "fcn_cell_layout.h"
-#include "qca_writer.h"
+#include <fiction/io/write_qca_layout.hpp>
+#include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
 
+#include <filesystem>
+#include <ostream>
 #include <string>
-
-#include <boost/filesystem.hpp>
+#include <type_traits>
+#include <variant>
 
 namespace alice
 {
@@ -42,7 +44,7 @@ class qca_command : public command
      */
     void execute() override
     {
-        auto& s = store<fcn_cell_layout_ptr>();
+        auto& s = store<fiction::cell_layout_t>();
 
         // error case: empty cell layout store
         if (s.empty())
@@ -51,29 +53,58 @@ class qca_command : public command
             return;
         }
 
-        auto fcl = s.current();
-        if (auto tech = fcl->get_technology(); tech != fcn::technology::QCA)
+        constexpr const auto is_qca = [](auto&& lyt)
         {
-            env->out() << "[w] " << fcl->get_name() << "'s cell technology is not QCA but " << tech << std::endl;
+            using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
+
+            return std::is_same_v<typename Lyt::technology, fiction::qca_technology>;
+        };
+
+        const auto get_name = [](auto&& lyt) -> std::string { return lyt->get_layout_name(); };
+
+        constexpr const auto get_tech_name = [](auto&& lyt)
+        {
+            using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
+
+            return fiction::tech_impl_name<typename Lyt::technology>;
+        };
+
+        const auto write_qca = [this](auto&& lyt) { fiction::write_qca_layout(*lyt, filename); };
+
+        auto lyt = s.current();
+
+        if (!std::visit(is_qca, lyt))
+        {
+            env->out() << fmt::format("[e] {}'s cell technology is not QCA but {}", std::visit(get_name, lyt),
+                                      std::visit(get_tech_name, lyt))
+                       << std::endl;
             return;
         }
 
         // error case: do not override directories
-        if (boost::filesystem::is_directory(filename))
+        if (std::filesystem::is_directory(filename))
         {
             env->out() << "[e] cannot override a directory" << std::endl;
             return;
         }
         // if filename was empty or not given, use stored layout name
         if (filename.empty())
-            filename = fcl->get_name();
+        {
+            filename = std::visit(get_name, lyt);
+        }
         // add .qca file extension if necessary
-        if (boost::filesystem::extension(filename) != ".qca")
+        if (std::filesystem::path(filename).extension() != ".qca")
+        {
             filename += ".qca";
+        }
 
         try
         {
-            qca::write(std::move(fcl), filename);
+            std::visit(write_qca, lyt);
+        }
+        catch (const std::ofstream::failure& e)
+        {
+            env->out() << fmt::format("[e] {}", e.what()) << std::endl;
         }
         catch (...)
         {
@@ -89,6 +120,7 @@ class qca_command : public command
 };
 
 ALICE_ADD_COMMAND(qca, "I/O")
+
 }  // namespace alice
 
 #endif  // FICTION_QCA_HPP

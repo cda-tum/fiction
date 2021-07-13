@@ -232,11 +232,11 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
 
             if (cmd.is_set("indexes"))
             {
-                fiction::write_layout_dot(*lyt, os, fiction::gate_layout_tile_drawer<Lyt, true>());
+                fiction::write_dot_layout(*lyt, os, fiction::gate_layout_tile_drawer<Lyt, true>());
             }
             else
             {
-                fiction::write_layout_dot(*lyt, os, fiction::gate_layout_tile_drawer<Lyt, false>());
+                fiction::write_dot_layout(*lyt, os, fiction::gate_layout_tile_drawer<Lyt, false>());
             }
         }
         catch (const std::invalid_argument& e)

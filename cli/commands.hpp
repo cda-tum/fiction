@@ -25,7 +25,7 @@
 #include "cmd/energy.hpp"
 #include "cmd/cell.hpp"
 //#include "cmd/area.hpp"
-//#include "cmd/qca.hpp"
+#include "cmd/qca.hpp"
 //#include "cmd/qcc.hpp"
 
 
