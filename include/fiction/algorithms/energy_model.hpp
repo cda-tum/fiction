@@ -8,6 +8,7 @@
 #include "../traits.hpp"
 
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/progress_bar.hpp>
 
 #include <cstdint>
 #include <ostream>
@@ -121,89 +122,100 @@ class qca_energy_dissipation_impl
 
     void run()
     {
-        lyt.foreach_gate(
-            [this](const auto& n)
+#if (PROGRESS_BARS)
+        // initialize a progress bar
+        mockturtle::progress_bar bar{static_cast<uint32_t>(lyt.size()), "[i] calculating energy dissipation: |{0}|"};
+#endif
+        lyt.foreach_node(
+            [&, this](const auto& n, [[maybe_unused]] auto i)
             {
-                if constexpr (fiction::has_is_fanout_v<Lyt>)
+#if (PROGRESS_BARS)
+                // update progress
+                bar(i);
+#endif
+                if (!lyt.is_constant(n))
                 {
-                    if (lyt.is_fanout(n))
+                    if constexpr (fiction::has_is_fanout_v<Lyt>)
                     {
-                        pst.slow += qca_energy::FANOUT_SLOW;
-                        pst.fast += qca_energy::FANOUT_FAST;
-                        return true;
+                        if (lyt.is_fanout(n))
+                        {
+                            pst.slow += qca_energy::FANOUT_SLOW;
+                            pst.fast += qca_energy::FANOUT_FAST;
+                            return true;
+                        }
                     }
-                }
-                if constexpr (fiction::has_is_buf_v<Lyt>)
-                {
-                    if (lyt.is_buf(n))
+                    if constexpr (fiction::has_is_buf_v<Lyt>)
                     {
-                        // skip crossing wires and include them in the ground check instead
-                        if (auto t = lyt.get_tile(n); lyt.is_crossing_layer(t)) {}
-                        // node has a crossing wire (crossing structure)
-                        else if (auto at = lyt.above(t); t != at && lyt.is_buf(lyt.get_node(at)))
+                        if (lyt.is_buf(n))
                         {
-                            pst.slow += qca_energy::CROSSING_SLOW;
-                            pst.fast += qca_energy::CROSSING_FAST;
-                        }
-                        // node is a regular wire
-                        else
-                        {
-                            pst.slow += qca_energy::WIRE_SLOW;
-                            pst.fast += qca_energy::WIRE_FAST;
-                        }
+                            // skip crossing wires and include them in the ground check instead
+                            if (auto t = lyt.get_tile(n); lyt.is_crossing_layer(t)) {}
+                            // node has a crossing wire (crossing structure)
+                            else if (auto at = lyt.above(t); t != at && lyt.is_buf(lyt.get_node(at)))
+                            {
+                                pst.slow += qca_energy::CROSSING_SLOW;
+                                pst.fast += qca_energy::CROSSING_FAST;
+                            }
+                            // node is a regular wire
+                            else
+                            {
+                                pst.slow += qca_energy::WIRE_SLOW;
+                                pst.fast += qca_energy::WIRE_FAST;
+                            }
 
-                        return true;
-                    }
-                }
-                if constexpr (fiction::has_is_inv_v<Lyt>)
-                {
-                    if (lyt.is_inv(n))
-                    {
-                        // straight inverter
-                        if (auto t = lyt.get_tile(n); lyt.has_opposite_incoming_and_outgoing_signals(t))
-                        {
-                            pst.slow += qca_energy::INVERTER_STRAIGHT_SLOW;
-                            pst.fast += qca_energy::INVERTER_STRAIGHT_FAST;
+                            return true;
                         }
-                        // bent inverter
-                        else
+                    }
+                    if constexpr (fiction::has_is_inv_v<Lyt>)
+                    {
+                        if (lyt.is_inv(n))
                         {
-                            pst.slow += qca_energy::INVERTER_BENT_SLOW;
-                            pst.fast += qca_energy::INVERTER_BENT_FAST;
+                            // straight inverter
+                            if (auto t = lyt.get_tile(n); lyt.has_opposite_incoming_and_outgoing_signals(t))
+                            {
+                                pst.slow += qca_energy::INVERTER_STRAIGHT_SLOW;
+                                pst.fast += qca_energy::INVERTER_STRAIGHT_FAST;
+                            }
+                            // bent inverter
+                            else
+                            {
+                                pst.slow += qca_energy::INVERTER_BENT_SLOW;
+                                pst.fast += qca_energy::INVERTER_BENT_FAST;
+                            }
+
+                            return true;
                         }
+                    }
+                    if constexpr (mockturtle::has_is_and_v<Lyt>)
+                    {
+                        if (lyt.is_and(n))
+                        {
+                            pst.slow += qca_energy::AND_SLOW;
+                            pst.fast += qca_energy::AND_FAST;
+                            return true;
+                        }
+                    }
+                    if constexpr (mockturtle::has_is_or_v<Lyt>)
+                    {
+                        if (lyt.is_or(n))
+                        {
+                            pst.slow += qca_energy::OR_SLOW;
+                            pst.fast += qca_energy::OR_FAST;
+                            return true;
+                        }
+                    }
+                    if constexpr (mockturtle::has_is_maj_v<Lyt>)
+                    {
+                        if (lyt.is_maj(n))
+                        {
+                            pst.slow += qca_energy::MAJORITY_SLOW;
+                            pst.fast += qca_energy::MAJORITY_FAST;
+                            return true;
+                        }
+                    }
 
-                        return true;
-                    }
+                    ++pst.unknown;
                 }
-                if constexpr (mockturtle::has_is_and_v<Lyt>)
-                {
-                    if (lyt.is_and(n))
-                    {
-                        pst.slow += qca_energy::AND_SLOW;
-                        pst.fast += qca_energy::AND_FAST;
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_or_v<Lyt>)
-                {
-                    if (lyt.is_or(n))
-                    {
-                        pst.slow += qca_energy::OR_SLOW;
-                        pst.fast += qca_energy::OR_FAST;
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_maj_v<Lyt>)
-                {
-                    if (lyt.is_maj(n))
-                    {
-                        pst.slow += qca_energy::MAJORITY_SLOW;
-                        pst.fast += qca_energy::MAJORITY_FAST;
-                        return true;
-                    }
-                }
-
-                ++pst.unknown;
 
                 return true;
             });
@@ -222,6 +234,7 @@ void qca_energy_dissipation(const Lyt& lyt, energy_dissipation_stats* pst = null
 {
     static_assert(mockturtle::is_network_type_v<Lyt>, "Lyt is not a network type");
     static_assert(mockturtle::has_foreach_gate_v<Lyt>, "Lyt does not implement the foreach_gate function");
+    static_assert(mockturtle::has_is_constant_v<Lyt>, "Lyt does not implement the is_constant function");
 
     energy_dissipation_stats            st{};
     detail::qca_energy_dissipation_impl p{lyt, st};

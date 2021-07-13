@@ -8,6 +8,7 @@
 #include "../traits.hpp"
 
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/progress_bar.hpp>
 
 #include <ostream>
 
@@ -70,156 +71,174 @@ class count_gate_types_impl
 
     void run()
     {
-        ntk.foreach_gate(
-            [this](const auto& n)
+#if (PROGRESS_BARS)
+        // initialize a progress bar
+        mockturtle::progress_bar bar{static_cast<uint32_t>(ntk.size()), "[i] counting gate types: |{0}|"};
+#endif
+        ntk.foreach_node(
+            [&, this](const auto& n, [[maybe_unused]] auto i)
             {
-                if constexpr (fiction::has_is_fanout_v<Ntk>)
-                {
-                    if (ntk.is_fanout(n))
-                    {
-                        ++pst.num_fanout;
-                        return true;
-                    }
-                }
-                if constexpr (fiction::has_is_buf_v<Ntk>)
-                {
-                    if (ntk.is_buf(n))
-                    {
-                        ++pst.num_buf;
-                        return true;
-                    }
-                }
-                if constexpr (fiction::has_is_inv_v<Ntk>)
-                {
-                    if (ntk.is_inv(n))
-                    {
-                        ++pst.num_inv;
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_and_v<Ntk>)
-                {
-                    if (ntk.is_and(n))
-                    {
-                        ++pst.num_and2;
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_or_v<Ntk>)
-                {
-                    if (ntk.is_or(n))
-                    {
-                        ++pst.num_or2;
-                        return true;
-                    }
-                }
-                if constexpr (fiction::has_is_nand_v<Ntk>)
-                {
-                    if (ntk.is_nand(n))
-                    {
-                        ++pst.num_nand2;
-                        return true;
-                    }
-                }
-                if constexpr (fiction::has_is_nor_v<Ntk>)
-                {
-                    if (ntk.is_nor(n))
-                    {
-                        ++pst.num_nor2;
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_xor_v<Ntk>)
-                {
-                    if (ntk.is_xor(n))
-                    {
-                        ++pst.num_xor2;
-                        return true;
-                    }
-                }
-                if constexpr (fiction::has_is_xnor_v<Ntk>)
-                {
-                    if (ntk.is_xnor(n))
-                    {
-                        ++pst.num_xnor2;
-                        return true;
-                    }
-                }
-                if constexpr (fiction::has_is_and3_v<Ntk>)
-                {
-                    if (ntk.is_and3(n))
-                    {
-                        ++pst.num_and3;
-                        return true;
-                    }
-                }
-                if constexpr (fiction::has_is_xor_and_v<Ntk>)
-                {
-                    if (ntk.is_xor_and(n))
-                    {
-                        ++pst.num_xor_and;
-                        return true;
-                    }
-                }
-                if constexpr (fiction::has_is_or_and_v<Ntk>)
-                {
-                    if (ntk.is_or_and(n))
-                    {
-                        ++pst.num_or_and;
-                        return true;
-                    }
-                }
-                if constexpr (fiction::has_is_onehot_v<Ntk>)
-                {
-                    if (ntk.is_onehot(n))
-                    {
-                        ++pst.num_onehot;
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_maj_v<Ntk>)
-                {
-                    if (ntk.is_maj(n))
-                    {
-                        ++pst.num_maj3;
-                        return true;
-                    }
-                }
-                if constexpr (fiction::has_is_gamble_v<Ntk>)
-                {
-                    if (ntk.is_gamble(n))
-                    {
-                        ++pst.num_gamble;
-                        return true;
-                    }
-                }
-                if constexpr (fiction::has_is_dot_v<Ntk>)
-                {
-                    if (ntk.is_dot(n))
-                    {
-                        ++pst.num_dot;
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_ite_v<Ntk>)
-                {
-                    if (ntk.is_ite(n))
-                    {
-                        ++pst.num_mux;
-                        return true;
-                    }
-                }
-                if constexpr (fiction::has_is_and_xor_v<Ntk>)
-                {
-                    if (ntk.is_and_xor(n))
-                    {
-                        ++pst.num_and_xor;
-                        return true;
-                    }
-                }
-                // TODO more gate types go here
+#if (PROGRESS_BARS)
+                // update progress
+                bar(i);
+#endif
 
-                ++pst.num_other;
+                if (!ntk.is_constant(n))
+                {
+                    if constexpr (fiction::has_is_fanout_v<Ntk>)
+                    {
+                        if (ntk.is_fanout(n))
+                        {
+                            ++pst.num_fanout;
+                            return true;
+                        }
+                    }
+                    if constexpr (fiction::has_is_buf_v<Ntk>)
+                    {
+                        if (ntk.is_buf(n))
+                        {
+                            ++pst.num_buf;
+                            return true;
+                        }
+                    }
+                    if constexpr (fiction::has_is_inv_v<Ntk>)
+                    {
+                        if (ntk.is_inv(n))
+                        {
+                            ++pst.num_inv;
+                            return true;
+                        }
+                    }
+                    if constexpr (mockturtle::has_is_and_v<Ntk>)
+                    {
+                        if (ntk.is_and(n))
+                        {
+                            ++pst.num_and2;
+                            return true;
+                        }
+                    }
+                    if constexpr (mockturtle::has_is_or_v<Ntk>)
+                    {
+                        if (ntk.is_or(n))
+                        {
+                            ++pst.num_or2;
+                            return true;
+                        }
+                    }
+                    if constexpr (fiction::has_is_nand_v<Ntk>)
+                    {
+                        if (ntk.is_nand(n))
+                        {
+                            ++pst.num_nand2;
+                            return true;
+                        }
+                    }
+                    if constexpr (fiction::has_is_nor_v<Ntk>)
+                    {
+                        if (ntk.is_nor(n))
+                        {
+                            ++pst.num_nor2;
+                            return true;
+                        }
+                    }
+                    if constexpr (mockturtle::has_is_xor_v<Ntk>)
+                    {
+                        if (ntk.is_xor(n))
+                        {
+                            ++pst.num_xor2;
+                            return true;
+                        }
+                    }
+                    if constexpr (fiction::has_is_xnor_v<Ntk>)
+                    {
+                        if (ntk.is_xnor(n))
+                        {
+                            ++pst.num_xnor2;
+                            return true;
+                        }
+                    }
+                    if constexpr (fiction::has_is_and3_v<Ntk>)
+                    {
+                        if (ntk.is_and3(n))
+                        {
+                            ++pst.num_and3;
+                            return true;
+                        }
+                    }
+                    if constexpr (fiction::has_is_xor_and_v<Ntk>)
+                    {
+                        if (ntk.is_xor_and(n))
+                        {
+                            ++pst.num_xor_and;
+                            return true;
+                        }
+                    }
+                    if constexpr (fiction::has_is_or_and_v<Ntk>)
+                    {
+                        if (ntk.is_or_and(n))
+                        {
+                            ++pst.num_or_and;
+                            return true;
+                        }
+                    }
+                    if constexpr (fiction::has_is_onehot_v<Ntk>)
+                    {
+                        if (ntk.is_onehot(n))
+                        {
+                            ++pst.num_onehot;
+                            return true;
+                        }
+                    }
+                    if constexpr (mockturtle::has_is_maj_v<Ntk>)
+                    {
+                        if (ntk.is_maj(n))
+                        {
+                            ++pst.num_maj3;
+                            return true;
+                        }
+                    }
+                    if constexpr (fiction::has_is_gamble_v<Ntk>)
+                    {
+                        if (ntk.is_gamble(n))
+                        {
+                            ++pst.num_gamble;
+                            return true;
+                        }
+                    }
+                    if constexpr (fiction::has_is_dot_v<Ntk>)
+                    {
+                        if (ntk.is_dot(n))
+                        {
+                            ++pst.num_dot;
+                            return true;
+                        }
+                    }
+                    if constexpr (mockturtle::has_is_ite_v<Ntk>)
+                    {
+                        if (ntk.is_ite(n))
+                        {
+                            ++pst.num_mux;
+                            return true;
+                        }
+                    }
+                    if constexpr (fiction::has_is_and_xor_v<Ntk>)
+                    {
+                        if (ntk.is_and_xor(n))
+                        {
+                            ++pst.num_and_xor;
+                            return true;
+                        }
+                    }
+                    // TODO more gate types go here
+
+                    // don't count PIs
+                    if (ntk.is_pi(n))
+                    {
+                        return true;
+                    }
+
+                    ++pst.num_other;
+                }
 
                 return true;
             });
@@ -237,7 +256,8 @@ template <typename Ntk>
 void count_gate_types(const Ntk& ntk, count_gate_types_stats* pst = nullptr)
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-    static_assert(mockturtle::has_foreach_gate_v<Ntk>, "Ntk does not implement the foreach_gate function");
+    static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node function");
+    static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant function");
 
     count_gate_types_stats        st{};
     detail::count_gate_types_impl p{ntk, st};
