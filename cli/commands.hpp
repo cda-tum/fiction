@@ -22,7 +22,7 @@
 #include "cmd/ortho.hpp"
 //#include "cmd/check.hpp"
 #include "cmd/equiv.hpp"
-//#include "cmd/energy.hpp"
+#include "cmd/energy.hpp"
 #include "cmd/cell.hpp"
 //#include "cmd/area.hpp"
 //#include "cmd/qca.hpp"

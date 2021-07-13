@@ -641,6 +641,14 @@ class gate_level_layout : public ClockedLayout
         return outgoing_data_flow<std::set<tile>>(t).empty();
     }
 
+    [[nodiscard]] bool has_opposite_incoming_and_outgoing_signals(const tile& t) const noexcept
+    {
+        return (has_northern_incoming_signal(t) && has_southern_outgoing_signal(t)) ||
+               (has_eastern_incoming_signal(t) && has_western_outgoing_signal(t)) ||
+               (has_southern_incoming_signal(t) && has_northern_outgoing_signal(t)) ||
+               (has_western_incoming_signal(t) && has_eastern_outgoing_signal((t)));
+    }
+
 #pragma endregion
 
 #pragma region Custom node values

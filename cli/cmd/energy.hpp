@@ -5,14 +5,17 @@
 #ifndef FICTION_ENERGY_HPP
 #define FICTION_ENERGY_HPP
 
-#include "fcn_gate_layout.h"
+#include <fiction/algorithms/energy_model.hpp>
+#include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
+
+#include <variant>
 
 namespace alice
 {
 /**
- * Prints QCA energy dissipation for current fcn_gate_layout. Calculations are based upon
+ * Prints QCA energy dissipation for current gate-level layout. Calculations are based upon
  * 'An Energy-aware Model for the Logic Synthesis of Quantum-Dot Cellular Automata' by Frank Sill Torres, et al.
  * in TCAD 2018.
  */
@@ -38,9 +41,9 @@ class energy_command : public command
     void execute() override
     {
         // reset energy values
-        slow = 0.0, fast = 0.0;
+        st = {};
 
-        auto& s = store<fcn_gate_layout_ptr>();
+        auto& s = store<fiction::gate_layout_t>();
 
         // error case: empty gate layout store
         if (s.empty())
@@ -49,20 +52,18 @@ class energy_command : public command
             return;
         }
 
-        auto fgl = s.current();
+        const auto energy = [this](auto&& lyt) { fiction::qca_energy_dissipation(*lyt, &st); };
 
-        const auto energy = fgl->calculate_energy();
-        slow              = energy.first;
-        fast              = energy.second;
+        std::visit(energy, s.current());
 
-        env->out() << fmt::format("[i] slow (25 GHz): {} meV, fast (100 GHz): {} meV", slow, fast) << std::endl;
+        st.report(env->out());
     }
 
   private:
     /**
      * Slow (25 GHz) and fast (100 GHz) energy dissipation values.
      */
-    double slow, fast;
+    fiction::energy_dissipation_stats st{};
     /**
      * Logs the resulting information in a log file.
      *
@@ -70,11 +71,12 @@ class energy_command : public command
      */
     nlohmann::json log() const override
     {
-        return {{"energy (meV, QCA)", {{"slow (25 GHz)", slow}, {"fast (100 GHz)", fast}}}};
+        return {{"energy (meV, QCA)", {{"slow (25 GHz)", st.slow}, {"fast (100 GHz)", st.fast}}}};
     }
 };
 
 ALICE_ADD_COMMAND(energy, "Technology")
+
 }  // namespace alice
 
 #endif  // FICTION_ENERGY_HPP

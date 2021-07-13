@@ -436,25 +436,6 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         {{{port(2, 0)}, {port(2, 4), port(4, 2)}}, rotate_270(fan_out_1_2)},
         {{{port(4, 2)}, {port(2, 4), port(2, 0)}}, rotate_270(fan_out_1_2)},
         {{{port(2, 4)}, {port(4, 2), port(2, 0)}}, rotate_270(fan_out_1_2)}};
-    /**
-     * Returns the port equivalent of the given direction. Only single directions are accepted.
-     *
-     * @param d Direction whose port is desired.
-     * @return Port of direction d.
-     */
-    //    port dir_to_port(const layout::directions d) const;
-
-    //    port opposite(const port& p) const
-    //    {
-    //        static const std::unordered_map<port, port> pp_map{
-    //            {port(2, 0), port(2, 4)},
-    //            {port(4, 2), port(0, 2)},
-    //            {port(2, 4), port(2, 0)},
-    //            {port(0, 2), port(4, 2)},
-    //        };
-    //
-    //        return pp_map.at(p);
-    //    }
 };
 
 }  // namespace fiction

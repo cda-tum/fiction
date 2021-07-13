@@ -238,7 +238,6 @@ void count_gate_types(const Ntk& ntk, count_gate_types_stats* pst = nullptr)
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
     static_assert(mockturtle::has_foreach_gate_v<Ntk>, "Ntk does not implement the foreach_gate function");
-    static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant function");
 
     count_gate_types_stats        st{};
     detail::count_gate_types_impl p{ntk, st};
