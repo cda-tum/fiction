@@ -7,6 +7,8 @@
 
 #include "../technology/cell_technologies.hpp"
 
+#include <fmt/format.h>
+
 #include <ostream>
 #include <string>
 #include <type_traits>

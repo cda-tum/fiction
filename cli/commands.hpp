@@ -27,6 +27,7 @@
 //#include "cmd/area.hpp"
 #include "cmd/qca.hpp"
 //#include "cmd/qcc.hpp"
+#include "cmd/sqd.hpp"
 
 
 #endif //FICTION_COMMANDS_HPP

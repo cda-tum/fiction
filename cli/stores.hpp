@@ -280,7 +280,7 @@ ALICE_PRINT_STORE_STATISTICS(fiction::cell_layout_t, os, layout)
     {
         using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
 
-        os << fmt::format("{} ({}) - {} × {}, I/O: {}/{}, cells: {}\n", lyt->get_layout_name(),
+        os << fmt::format("[i] {} ({}) - {} × {}, I/O: {}/{}, cells: {}\n", lyt->get_layout_name(),
                           fiction::tech_impl_name<typename Lyt::technology>, lyt->x() + 1, lyt->y() + 1, lyt->num_pis(),
                           lyt->num_pos(), lyt->num_cells());
     };
