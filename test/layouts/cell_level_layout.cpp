@@ -6,7 +6,7 @@
 
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/layouts/coordinate_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -55,12 +55,12 @@ TEST_CASE("Cell technology", "[cell-level]")
 TEST_CASE("Cell type assignment", "[cell-level]")
 {
     using cell_layout =
-        fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::tile_based_layout>>;
+        fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::coordinate_layout>>;
 
     REQUIRE(fiction::has_get_layout_name_v<cell_layout>);
     REQUIRE(fiction::has_set_layout_name_v<cell_layout>);
 
-    cell_layout layout{fiction::tile_based_layout::aspect_ratio{4, 4}, "AND"};
+    cell_layout layout{fiction::coordinate_layout::aspect_ratio{4, 4}, "AND"};
 
     layout.assign_cell_type({0, 2}, fiction::qca_technology::cell_type::INPUT);
     layout.assign_cell_type({2, 4}, fiction::qca_technology::cell_type::INPUT);
@@ -128,9 +128,9 @@ TEST_CASE("Cell type assignment", "[cell-level]")
 TEST_CASE("Cell mode assignment", "[cell-level]")
 {
     using cell_layout =
-        fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::tile_based_layout>>;
+        fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::coordinate_layout>>;
 
-    cell_layout layout{fiction::tile_based_layout::aspect_ratio{4, 4, 1}, "Crossover"};
+    cell_layout layout{fiction::coordinate_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 
     layout.assign_cell_type({0, 2, 0}, fiction::qca_technology::cell_type::INPUT);
     layout.assign_cell_type({2, 0, 0}, fiction::qca_technology::cell_type::INPUT);
@@ -177,8 +177,8 @@ TEST_CASE("Cell mode assignment", "[cell-level]")
 
 TEST_CASE("Clocking", "[cell-level]")
 {
-    cell_level_layout<qca_technology, clocked_layout<tile_based_layout>> layout{
-        tile_based_layout::aspect_ratio{4, 4, 0}, twoddwave_4_clocking, "Lyt", 2, 2};
+    cell_level_layout<qca_technology, clocked_layout<coordinate_layout>> layout{
+        coordinate_layout::aspect_ratio{4, 4, 0}, twoddwave_4_clocking, "Lyt", 2, 2};
 
     CHECK(layout.get_clock_number({0, 0}) == 0);
     CHECK(layout.get_clock_number({0, 1}) == 0);

@@ -7,6 +7,7 @@
 
 #include "layouts/cell_level_layout.hpp"
 #include "layouts/clocked_layout.hpp"
+#include "layouts/coordinate_layout.hpp"
 #include "layouts/gate_level_layout.hpp"
 #include "layouts/tile_based_layout.hpp"
 #include "networks/topology_network.hpp"
@@ -68,7 +69,6 @@ using gate_clk_lyt_ptr = std::shared_ptr<gate_clk_lyt>;
 
 using gate_layout_t = std::variant<gate_clk_lyt_ptr>;
 
-
 /**
  * FCN technologies.
  */
@@ -87,7 +87,7 @@ inline constexpr const char* tech_impl_name =
  * FCN cell-level layouts.
  */
 using qca_cell_clk_lyt =
-    fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::tile_based_layout>>;
+    fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::coordinate_layout>>;
 using qca_cell_clk_lyt_ptr = std::shared_ptr<qca_cell_clk_lyt>;
 
 using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr>;

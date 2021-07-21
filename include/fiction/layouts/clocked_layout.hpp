@@ -15,13 +15,13 @@
 namespace fiction
 {
 
-template <typename TileBasedLayout>
-class clocked_layout : public TileBasedLayout
+template <typename CoordinateLayout>
+class clocked_layout : public CoordinateLayout
 {
   public:
 #pragma region Types and constructors
 
-    using clock_zone = typename TileBasedLayout::tile;
+    using clock_zone = typename CoordinateLayout::coordinate;
 
     using clocking_scheme_t = clocking_scheme<clock_zone>;
     using clock_number_t    = typename clocking_scheme_t::clock_number;
@@ -41,13 +41,13 @@ class clocked_layout : public TileBasedLayout
 
     using storage = std::shared_ptr<clocked_layout_storage>;
 
-    explicit clocked_layout(const typename TileBasedLayout::aspect_ratio& ar = {}) :
-            TileBasedLayout(ar),
+    explicit clocked_layout(const typename CoordinateLayout::aspect_ratio& ar = {}) :
+            CoordinateLayout(ar),
             strg{std::make_shared<clocked_layout_storage>(open_4_clocking)}
     {}
 
-    clocked_layout(const typename TileBasedLayout::aspect_ratio& ar, const clocking_scheme_t& scheme) :
-            TileBasedLayout(ar),
+    clocked_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking_scheme_t& scheme) :
+            CoordinateLayout(ar),
             strg{std::make_shared<clocked_layout_storage>(scheme)}
     {}
 
@@ -117,7 +117,7 @@ class clocked_layout : public TileBasedLayout
     template <typename Container>
     [[nodiscard]] Container incoming_clocked_zones(const clock_zone& cz) const noexcept
     {
-        auto adj = TileBasedLayout::template adjacent_tiles<Container>(cz);
+        auto adj = CoordinateLayout::template adjacent_coordinates<Container>(cz);
 
         Container incoming{};
 
@@ -130,7 +130,7 @@ class clocked_layout : public TileBasedLayout
     template <typename Container>
     [[nodiscard]] Container outgoing_clocked_zones(const clock_zone& cz) const noexcept
     {
-        auto adj = TileBasedLayout::template adjacent_tiles<Container>(cz);
+        auto adj = CoordinateLayout::template adjacent_coordinates<Container>(cz);
 
         Container outgoing{};
 

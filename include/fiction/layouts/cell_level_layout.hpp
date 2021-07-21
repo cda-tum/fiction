@@ -25,7 +25,7 @@ class cell_level_layout : public ClockedLayout
   public:
 #pragma region Types and constructors
 
-    using cell      = typename ClockedLayout::tile;
+    using cell      = typename ClockedLayout::coordinate;
     using cell_type = typename Technology::cell_type;
     using cell_mode = typename Technology::cell_mode;
 
@@ -236,7 +236,7 @@ class cell_level_layout : public ClockedLayout
     template <typename Fn>
     void foreach_cell_position(Fn&& fn) const
     {
-        ClockedLayout::foreach_tile(fn);
+        ClockedLayout::foreach_coordinate(fn);
     }
 
 #pragma endregion

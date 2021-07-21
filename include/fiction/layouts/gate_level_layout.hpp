@@ -33,7 +33,7 @@ class gate_level_layout : public ClockedLayout
   public:
 #pragma region Types and constructors
 
-    using tile = typename ClockedLayout::tile;
+    using tile = typename ClockedLayout::coordinate;
 
     template <typename Node, typename Tile>
     struct gate_level_layout_storage_data
