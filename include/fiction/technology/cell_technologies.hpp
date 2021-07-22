@@ -318,12 +318,12 @@ struct sidb_technology
     /**
      * Default horizontal spacing between two SiDBs in SiQAD.
      */
-    static constexpr double cell_hspace = 3.84;
+    static constexpr double cell_hspace = 0.384;
     /**
      * Default average vertical spacing between two SiDBs in SiQAD.
      * Depending on their lattice, they can be closer together or further apart.
      */
-    static constexpr double cell_vspace = 3.84;
+    static constexpr double cell_vspace = 0.384;
 };
 
 }  // namespace fiction
