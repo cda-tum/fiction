@@ -20,7 +20,7 @@ assign w9 = n1 & cin;
 assign cint = w8 | w9;
 
 assign w11 = a1 | b1;
-assign w12 = b1 & b1;
+assign w12 = a1 & b1;
 assign w13 = ~w12;
 assign n2 = w11 & w13;
 

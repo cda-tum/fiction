@@ -6,6 +6,7 @@
 #define FICTION_ORTHOGONAL_HPP
 
 #include "../algorithms/name_restoration.hpp"
+#include "../io/print_layout.hpp"
 #include "../layouts/clocking_scheme.hpp"
 #include "../utils/debug/network_writer.hpp"
 #include "fanout_substitution.hpp"
@@ -21,6 +22,7 @@
 
 #include <algorithm>
 #include <optional>
+#include <set>
 #include <vector>
 
 namespace fiction
@@ -69,6 +71,36 @@ namespace detail
 {
 
 template <typename Ntk>
+struct fanin_container
+{
+    std::vector<mockturtle::node<Ntk>> fanin_nodes{};
+
+    std::optional<bool> constant_fanin{};
+};
+
+template <typename Ntk>
+fanin_container<Ntk> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
+{
+    fanin_container<Ntk> fc{};
+
+    ntk.foreach_fanin(n,
+                      [&ntk, &fc](const auto& f)
+                      {
+                          if (const auto fn = ntk.get_node(f); ntk.is_constant(fn))
+                          {
+                              assert(!fc.constant_fanin.has_value());  // there can only be one constant input
+                              fc.constant_fanin = ntk.constant_value(fn);
+                          }
+                          else
+                          {
+                              fc.fanin_nodes.push_back(fn);
+                          }
+                      });
+
+    return fc;
+}
+
+template <typename Ntk>
 uint32_t num_constant_fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
 {
     uint32_t num_const_fi{0};
@@ -102,6 +134,25 @@ bool has_high_degree_fanin_nodes(const Ntk& ntk, const uint32_t threshold = 2) n
 
             return !result;
         });
+
+    return result;
+}
+
+template <typename Ntk>
+bool has_po_fanout(const Ntk& ntk, const mockturtle::node<Ntk> n) noexcept
+{
+    bool result = false;
+
+    ntk.foreach_fanout(n,
+                       [&ntk, &n, &result](const auto& fo)
+                       {
+                           if (ntk.is_po(fo))
+                           {
+                               result = true;
+                           }
+
+                           return !result;
+                       });
 
     return result;
 }
@@ -155,7 +206,7 @@ struct coloring_container
  * @return
  */
 template <typename Ntk>
-coloring_container<Ntk> east_south_coloring(const Ntk& ntk)
+coloring_container<Ntk> east_south_coloring(const Ntk& ntk) noexcept
 {
 #if (PROGRESS_BARS)
     // initialize a progress bar
@@ -172,23 +223,25 @@ coloring_container<Ntk> east_south_coloring(const Ntk& ntk)
             {
                 const auto s = siblings(ntk, n);
                 // if all siblings are either colored south or null, pick color east
-                auto clr = std::all_of(s.cbegin(), s.cend(),
-                                       [&ctn](const auto& sn)
-                                       {
-                                           const auto snc = ctn.color_ntk.color(sn);
-                                           return snc == ctn.color_south || snc == ctn.color_null;
-                                       }) ?
-                               ctn.color_east :
-                               // if all siblings are either colored east or null, pick color south
-                               std::all_of(s.cbegin(), s.cend(),
-                                           [&ctn](const auto& sn)
-                                           {
-                                               const auto snclr = ctn.color_ntk.color(sn);
-                                               return snclr == ctn.color_east || snclr == ctn.color_null;
-                                           }) ?
-                               ctn.color_south :
-                               // else, pick color null
-                               ctn.color_null;
+                auto clr =
+                    std::all_of(s.cbegin(), s.cend(),
+                                [&ctn](const auto& sn)
+                                {
+                                    const auto snc = ctn.color_ntk.color(sn);
+                                    return snc == ctn.color_south || snc == ctn.color_null;
+                                }) ?
+                        // unless a node has an additional PO fanout,then pick color south instead
+                        ntk.is_po(ntk.make_signal(n)) && ntk.fanout_size(n) > 1 ? ctn.color_south : ctn.color_east :
+                        // if all siblings are either colored east or null, pick color south
+                        std::all_of(s.cbegin(), s.cend(),
+                                    [&ctn](const auto& sn)
+                                    {
+                                        const auto snclr = ctn.color_ntk.color(sn);
+                                        return snclr == ctn.color_east || snclr == ctn.color_null;
+                                    }) ?
+                            ctn.color_south :
+                            // else, pick color null
+                            ctn.color_null;
 
                 // paint n with color c
                 ctn.color_ntk.paint(n, clr);
@@ -308,36 +361,6 @@ typename Lyt::aspect_ratio determine_layout_size(const coloring_container<Ntk>& 
         });
 
     return {x, y, 1};
-}
-
-template <typename Ntk>
-struct fanin_container
-{
-    std::vector<mockturtle::node<Ntk>> fanin_nodes{};
-
-    std::optional<bool> constant_fanin{};
-};
-
-template <typename Ntk>
-fanin_container<Ntk> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
-{
-    fanin_container<Ntk> fc{};
-
-    ntk.foreach_fanin(n,
-                      [&ntk, &fc](const auto& f)
-                      {
-                          if (const auto fn = ntk.get_node(f); ntk.is_constant(fn))
-                          {
-                              assert(!fc.constant_fanin.has_value());  // there can only be one constant input
-                              fc.constant_fanin = ntk.constant_value(fn);
-                          }
-                          else
-                          {
-                              fc.fanin_nodes.push_back(fn);
-                          }
-                      });
-
-    return fc;
 }
 
 /**
@@ -659,9 +682,11 @@ class orthogonal_impl
                         // n is colored null; corner case
                         else
                         {
-                            t = latest_pos;
+                            // make sure pre1_t is the northwards tile and pre2_t is the westwards one
+                            if (pre2_t.x > pre1_t.x)
+                                std::swap(pre1_t, pre2_t);
 
-                            // ordering of pre1_t and pre2_t does not matter
+                            t = latest_pos;
 
                             // both wires have one bent
                             pre1_t = static_cast<typename Lyt::tile>(wire_east(layout, pre1_t, {t.x + 1, pre1_t.y}));
@@ -758,7 +783,7 @@ class orthogonal_impl
  */
 template <typename Lyt, typename Ntk>
 Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
-                              orthogonal_physical_design_stats* pst = nullptr)
+               orthogonal_physical_design_stats* pst = nullptr)
 {
     static_assert(mockturtle::is_network_type_v<Lyt>, "Lyt is not a network type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");

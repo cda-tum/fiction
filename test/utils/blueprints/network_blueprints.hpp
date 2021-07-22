@@ -169,6 +169,43 @@ Ntk fanout_substitution_corner_case_network()
     return ntk;
 }
 
+template <typename Ntk>
+Ntk clpl()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi("x1");
+    const auto x2 = ntk.create_pi("x2");
+    const auto x3 = ntk.create_pi("x3");
+    const auto x4 = ntk.create_pi("x4");
+    const auto x5 = ntk.create_pi("x5");
+//    const auto x6 = ntk.create_pi("x6");
+//    const auto x7 = ntk.create_pi("x7");
+//    const auto x8 = ntk.create_pi("x8");
+//    const auto x9 = ntk.create_pi("x9");
+//    const auto x10 = ntk.create_pi("x10");
+//    const auto x11 = ntk.create_pi("x11");
+
+    const auto a1 = ntk.create_and(x1, x2);
+    const auto o1 = ntk.create_or(a1, x3);
+    const auto a2 = ntk.create_and(o1, x4);
+    const auto o2 = ntk.create_or(a2, x5);
+//    const auto a3 = ntk.create_and(o2, x6);
+//    const auto o3 = ntk.create_or(a3, x7);
+//    const auto a4 = ntk.create_and(o3, x8);
+//    const auto o4 = ntk.create_or(a4, x9);
+//    const auto a5 = ntk.create_and(o4, x10);
+//    const auto o5 = ntk.create_or(a5, x11);
+
+    ntk.create_po(o1, "f1");
+    ntk.create_po(o2, "f2");
+//    ntk.create_po(o3, "f3");
+//    ntk.create_po(o4, "f4");
+//    ntk.create_po(o5, "f5");
+
+    return ntk;
+}
+
 }  // namespace blueprints
 
 #endif  // FICTION_NETWORK_BLUEPRINTS_HPP

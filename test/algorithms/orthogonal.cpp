@@ -6,13 +6,16 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking.hpp"
 
-#include <fiction/algorithms/fanout_substitution.hpp>
+#include <fiction/algorithms/apply_gate_library.hpp>
 #include <fiction/algorithms/orthogonal.hpp>
 #include <fiction/io/print_layout.hpp>
+#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinate_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/topology_network.hpp>
+#include <fiction/technology/qca_one_library.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -67,6 +70,7 @@ TEST_CASE("East-south coloring", "[algorithms]")
         blueprints::fanout_substitution_corner_case_network<topology_network>())});
     check(mockturtle::fanout_view{
         fanout_substitution<topology_network>(blueprints::nary_operation_network<topology_network>())});
+    check(mockturtle::fanout_view{fanout_substitution<topology_network>(blueprints::clpl<topology_network>())});
 }
 
 TEST_CASE("Layout equivalence", "[algorithms]")
@@ -85,20 +89,40 @@ TEST_CASE("Layout equivalence", "[algorithms]")
         check_eq(net, layout);
     };
 
-    check(mockturtle::fanout_view{
-        fanout_substitution<topology_network>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<topology_network>(blueprints::maj1_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<topology_network>(blueprints::maj4_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<topology_network>(blueprints::se_coloring_corner_case_network<topology_network>())});
-    check(mockturtle::fanout_view{fanout_substitution<topology_network>(
-        blueprints::fanout_substitution_corner_case_network<topology_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<topology_network>(blueprints::nary_operation_network<topology_network>())});
+    check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
+    check(blueprints::maj1_network<mockturtle::aig_network>());
+    check(blueprints::maj4_network<mockturtle::aig_network>());
+    check(blueprints::se_coloring_corner_case_network<topology_network>());
+    check(blueprints::fanout_substitution_corner_case_network<topology_network>());
+    check(blueprints::nary_operation_network<topology_network>());
+    check(blueprints::clpl<topology_network>());
 
     // constant input network
-    check(mockturtle::fanout_view{
-        fanout_substitution<topology_network>(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>())});
+    check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
+}
+
+TEST_CASE("Gate library application", "[algorithms]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+    using cell_layout = cell_level_layout<qca_technology, clocked_layout<coordinate_layout>>;
+
+    const auto check = [](const auto& net)
+    {
+        orthogonal_physical_design_params params{false};
+        orthogonal_physical_design_stats  stats{};
+
+        auto layout = orthogonal<gate_layout>(net, params, &stats);
+
+        CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(layout));
+    };
+
+    check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
+    check(blueprints::maj1_network<mockturtle::aig_network>());
+    check(blueprints::maj4_network<mockturtle::aig_network>());
+    check(blueprints::se_coloring_corner_case_network<topology_network>());
+    check(blueprints::fanout_substitution_corner_case_network<topology_network>());
+    check(blueprints::clpl<topology_network>());
+
+    // constant input network
+    check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
 }

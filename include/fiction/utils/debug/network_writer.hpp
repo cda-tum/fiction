@@ -26,6 +26,16 @@ void write_dot_network(const Ntk& ntk, const std::string& name = "ntk", const st
     file.close();
 }
 
+template <typename Lyt, typename Drawer = fiction::gate_layout_tile_drawer<Lyt, true>>
+void write_dot_layout(const Lyt& lyt, const std::string& name = "lyt", const std::filesystem::path& p = {"./"})
+{
+    std::ofstream file{p / (name + ".dot")};
+
+    fiction::write_dot_layout(lyt, file, Drawer{});
+
+    file.close();
+}
+
 }  // namespace fiction::debug
 
 #endif  // FICTION_NETWORK_WRITER_HPP
