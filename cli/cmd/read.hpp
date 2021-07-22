@@ -17,9 +17,9 @@ namespace alice
 /**
  * Shorthand for all read commands. Chooses the proper function by the file ending.
  *
- * Currently parses Verilog and AIGER.. Gate level netlists are supported. The lorina parsers are used.
+ * Currently parses Verilog, AIGER, and BLIF using the lorina parsers.
  *
- * For more information see: https://github.com/marcelwa/lorina
+ * For more information see: https://github.com/hriener/lorina
  */
 class read_command : public command
 {

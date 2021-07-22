@@ -6,6 +6,7 @@
 #define FICTION_SQD_HPP
 
 #include <fiction/io/write_sqd_layout.hpp>
+#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -53,34 +54,26 @@ class sqd_command : public command
             return;
         }
 
-        constexpr const auto is_qca_or_sidb = [](auto&& lyt)
-        {
-            using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
-
-            return std::is_same_v<typename Lyt::technology, fiction::qca_technology> ||
-                   std::is_same_v<typename Lyt::technology, fiction::sidb_technology>;
-        };
-
         const auto get_name = [](auto&& lyt) -> std::string { return lyt->get_layout_name(); };
 
-        constexpr const auto get_tech_name = [](auto&& lyt)
+        const auto write_sqd = [this, &get_name](auto&& lyt)
         {
             using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
 
-            return fiction::tech_impl_name<typename Lyt::technology>;
+            if constexpr (std::is_same_v<typename Lyt::technology, fiction::qca_technology> ||
+                          std::is_same_v<typename Lyt::technology, fiction::sidb_technology>)
+            {
+                fiction::write_sqd_layout(*lyt, filename);
+            }
+            else
+            {
+                env->out() << fmt::format("[e] {}'s cell technology is not QCA or SiDB but {}", get_name(lyt),
+                                          fiction::tech_impl_name<typename Lyt::technology>)
+                           << std::endl;
+            }
         };
 
-        const auto write_sqd = [this](auto&& lyt) { fiction::write_sqd_layout(*lyt, filename); };
-
         auto lyt = s.current();
-
-        if (!std::visit(is_qca_or_sidb, lyt))
-        {
-            env->out() << fmt::format("[e] {}'s cell technology is not QCA or SiDB but {}", std::visit(get_name, lyt),
-                                      std::visit(get_tech_name, lyt))
-                       << std::endl;
-            return;
-        }
 
         // error case: do not override directories
         if (std::filesystem::is_directory(filename))

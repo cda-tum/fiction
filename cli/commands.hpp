@@ -24,7 +24,7 @@
 #include "cmd/equiv.hpp"
 #include "cmd/energy.hpp"
 #include "cmd/cell.hpp"
-//#include "cmd/area.hpp"
+#include "cmd/area.hpp"
 #include "cmd/qca.hpp"
 //#include "cmd/qcc.hpp"
 #include "cmd/blif.hpp"

@@ -5,10 +5,11 @@
 #ifndef FICTION_AREA_HPP
 #define FICTION_AREA_HPP
 
-#include "area_defaults.h"
-#include "fcn_cell_layout.h"
+#include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
+
+#include <variant>
 
 namespace alice
 {
@@ -25,7 +26,8 @@ class area_command : public command
      */
     explicit area_command(const environment::ptr& e) :
             command(e, "Prints the area usage (in nm²) of the current cell layout in store. Dimensions for each "
-                       "cell use default values from QCADesigner (QCA) or NMLSim (iNML) if no value is provided.")
+                       "cell use default values from QCADesigner (QCA), NMLSim (iNML), or SiQAD (SiDB) if no value is "
+                       "provided.")
     {
         add_option("--width,-x", width, "Cell width in nm");
         add_option("--height,-y", height, "Cell height in nm");
@@ -42,7 +44,7 @@ class area_command : public command
         // reset area
         area = 0ul;
 
-        auto& s = store<fcn_cell_layout_ptr>();
+        auto& s = store<fiction::cell_layout_t>();
 
         // error case: empty cell layout store
         if (s.empty())
@@ -51,49 +53,51 @@ class area_command : public command
             return;
         }
 
-        auto fcl = s.current();
+        auto lyt = s.current();
 
-        if (!is_set("width"))
+        const auto calculate_area = [this](auto&& lyt)
         {
-            width =
-                fcl->get_technology() == fcn::technology::QCA ? area_defaults::qca::width : area_defaults::inml::width;
-        }
-        if (!is_set("height"))
-        {
-            height = fcl->get_technology() == fcn::technology::QCA ? area_defaults::qca::height :
-                                                                     area_defaults::inml::height;
-        }
-        if (!is_set("hspace"))
-        {
-            hspace = fcl->get_technology() == fcn::technology::QCA ? area_defaults::qca::hspace :
-                                                                     area_defaults::inml::hspace;
-        }
-        if (!is_set("vspace"))
-        {
-            vspace = fcl->get_technology() == fcn::technology::QCA ? area_defaults::qca::vspace :
-                                                                     area_defaults::inml::vspace;
-        }
+            using Tech = typename std::decay_t<decltype(lyt)>::element_type::technology;
 
-        const auto bb = fcl->determine_bounding_box();
+            if (!is_set("width"))
+            {
+                width = Tech::cell_width;
+            }
+            if (!is_set("height"))
+            {
+                height = Tech::cell_height;
+            }
+            if (!is_set("hspace"))
+            {
+                hspace = Tech::cell_hspace;
+            }
+            if (!is_set("vspace"))
+            {
+                vspace = Tech::cell_vspace;
+            }
 
-        area = (bb.x_size * width + (bb.x_size - 1) * hspace) * (bb.y_size * height + (bb.y_size - 1) * vspace);
+            area = (static_cast<double>(lyt->x() + 1) * width + static_cast<double>(lyt->x()) * hspace) *
+                   (static_cast<double>(lyt->y() + 1) * height + static_cast<double>(lyt->y()) * vspace);
+        };
+
+        std::visit(calculate_area, lyt);
 
         env->out() << fmt::format("[i] {} nm²", area) << std::endl;
     }
 
   private:
     /**
-     * Slow (25 GHz) and fast (100 GHz) energy dissipation values.
+     * Layout area in nm².
      */
-    uint64_t area;
+    double area{0.0};
     /**
      * Width and height of each cell.
      */
-    uint64_t width, height;
+    double width{0.0}, height{0.0};
     /**
      * Horizontal and vertical spacing between cells.
      */
-    uint64_t hspace, vspace;
+    double hspace{0.0}, vspace{0.0};
     /**
      * Logs the resulting information in a log file.
      *
@@ -106,6 +110,7 @@ class area_command : public command
 };
 
 ALICE_ADD_COMMAND(area, "Technology")
+
 }  // namespace alice
 
 #endif  // FICTION_AREA_HP

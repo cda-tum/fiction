@@ -90,7 +90,15 @@ using qca_cell_clk_lyt =
     fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::coordinate_layout>>;
 using qca_cell_clk_lyt_ptr = std::shared_ptr<qca_cell_clk_lyt>;
 
-using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr>;
+using inml_cell_clk_lyt =
+    fiction::cell_level_layout<fiction::inml_technology, fiction::clocked_layout<fiction::coordinate_layout>>;
+using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
+
+using sidb_cell_clk_lyt =
+    fiction::cell_level_layout<fiction::sidb_technology, fiction::clocked_layout<fiction::coordinate_layout>>;
+using sidb_cell_clk_lyt_ptr = std::shared_ptr<sidb_cell_clk_lyt>;
+
+using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr, inml_cell_clk_lyt_ptr, sidb_cell_clk_lyt_ptr>;
 
 }  // namespace fiction
 

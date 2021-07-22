@@ -40,13 +40,30 @@ TEST_CASE("Cell technology", "[cell-level]")
     }
     SECTION("iNML")
     {
-        // TODO cell types go here
+        CHECK(inml_technology::is_empty_cell(inml_technology::cell_type::EMPTY));
+        CHECK(inml_technology::is_normal_cell(inml_technology::cell_type::NORMAL));
+        CHECK(inml_technology::is_input_cell(inml_technology::cell_type::INPUT));
+        CHECK(inml_technology::is_output_cell(inml_technology::cell_type::OUTPUT));
+        CHECK(inml_technology::is_slanted_edge_up_magnet(inml_technology::cell_type::SLANTED_EDGE_UP_MAGNET));
+        CHECK(inml_technology::is_slanted_edge_down_magnet(inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET));
+        CHECK(inml_technology::is_slanted_edge_magnet(inml_technology::cell_type::SLANTED_EDGE_UP_MAGNET));
+        CHECK(inml_technology::is_slanted_edge_magnet(inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET));
+        CHECK(inml_technology::is_inverter_magnet(inml_technology::cell_type::INVERTER_MAGNET));
+        CHECK(inml_technology::is_crosswire_magnet(inml_technology::cell_type::CROSSWIRE_MAGNET));
+        CHECK(inml_technology::is_fanout_coupler_magnet(inml_technology::cell_type::FANOUT_COUPLER_MAGNET));
 
+        CHECK(inml_technology::is_normal_cell_mode(inml_technology::cell_mode{}));
+        
         CHECK(tech_impl_name<inml_technology> == std::string{"iNML"});
     }
     SECTION("SiDB")
     {
-        // TODO cell types go here
+        CHECK(sidb_technology::is_empty_cell(sidb_technology::cell_type::EMPTY));
+        CHECK(sidb_technology::is_normal_cell(sidb_technology::cell_type::NORMAL));
+        CHECK(sidb_technology::is_input_cell(sidb_technology::cell_type::INPUT));
+        CHECK(sidb_technology::is_output_cell(sidb_technology::cell_type::OUTPUT));
+
+        CHECK(sidb_technology::is_normal_cell_mode(sidb_technology::cell_mode{}));
 
         CHECK(tech_impl_name<sidb_technology> == std::string{"SiDB"});
     }
