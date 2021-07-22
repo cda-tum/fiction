@@ -256,14 +256,34 @@ class gate_level_layout : public ClockedLayout
         return static_cast<uint32_t>(strg->nodes.size());
     }
 
+    [[nodiscard]] auto num_cis() const noexcept
+    {
+        return num_pis();
+    }
+
     [[nodiscard]] auto num_pis() const noexcept
     {
         return strg->inputs.size();
     }
 
+    [[nodiscard]] auto num_cos() const noexcept
+    {
+        return num_pos();
+    }
+
     [[nodiscard]] auto num_pos() const noexcept
     {
         return strg->outputs.size();
+    }
+
+    [[nodiscard]] uint32_t num_latches() const
+    {
+        return 0u;
+    }
+
+    [[nodiscard]] uint32_t num_registers() const
+    {
+        return 0u;
     }
 
     [[nodiscard]] auto num_gates() const noexcept

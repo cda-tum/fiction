@@ -10,6 +10,7 @@
 #include <lorina/diagnostics.hpp>
 #include <lorina/verilog.hpp>
 #include <mockturtle/io/aiger_reader.hpp>
+#include <mockturtle/io/blif_reader.hpp>
 #include <mockturtle/io/verilog_reader.hpp>
 
 #include <algorithm>
@@ -17,6 +18,7 @@
 #include <filesystem>
 #include <ostream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace fiction
@@ -36,11 +38,13 @@ class network_reader
     {
         constexpr const char* VERILOG_EXT = ".v";
         constexpr const char* AIG_EXT     = ".aig";
+        constexpr const char* BLIF_EXT    = ".blif";
+
+        constexpr const std::array<const char*, 3> extensions{{VERILOG_EXT, AIG_EXT, BLIF_EXT}};
 
         // checks for extension validity
         auto is_valid_extension = [&](const auto& p) -> bool
         {
-            std::array<const char*, 2> extensions{{VERILOG_EXT, AIG_EXT}};
             return std::any_of(extensions.cbegin(), extensions.cend(),
                                [&p](const auto& valid) { return std::filesystem::path(p).extension() == valid; });
         };
@@ -92,6 +96,24 @@ class network_reader
                 read<mockturtle::aiger_reader<Ntk>,
                      lorina::return_code(const std::string&, const lorina::aiger_reader&, lorina::diagnostic_engine*)>(
                     p, lorina::read_aiger);
+            }
+            // parse Blif
+            else if (std::filesystem::path(p).extension() == BLIF_EXT)
+            {
+                if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::aig_network>)
+                {
+                    out << "[e] AIGs do not support the full feature set of BLIF files" << std::endl;
+                }
+                else if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::mig_network>)
+                {
+                    out << "[e] MIGs do not support the full feature set of BLIF files" << std::endl;
+                }
+                else
+                {
+                    read<mockturtle::blif_reader<Ntk>,
+                         lorina::return_code(const std::string&, const lorina::blif_reader&,
+                                             lorina::diagnostic_engine*)>(p, lorina::read_blif);
+                }
             }
             // parse ...
             // else if (std::filesystem::path(p).extension() == ...)
