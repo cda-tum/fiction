@@ -1,4 +1,4 @@
-module HS(x, y, diff, bout);
+module top(x, y, diff, bout);
 input x, y;
 output diff, bout;
 

@@ -1,4 +1,4 @@
-module mux41(in0, in1, in2, in3, s0, s1, out);
+module top(in0, in1, in2, in3, s0, s1, out);
 input in0, in1, in2, in3, s0, s1;
 output out;
 

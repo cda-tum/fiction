@@ -1,4 +1,4 @@
-module par_check(a, b, c, p, parity_check);
+module top(a, b, c, p, parity_check);
 input a, b, c, p;
 output parity_check;
 wire n1, n2, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12;

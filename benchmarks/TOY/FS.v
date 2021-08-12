@@ -1,4 +1,4 @@
-module FS(x, y, bin, diff, bout);
+module top(x, y, bin, diff, bout);
 input x, y, bin;
 output diff, bout;
 

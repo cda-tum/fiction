@@ -1,4 +1,4 @@
-module C17(pi0, pi1, pi2, pi3, pi4, po0, po1);
+module top(pi0, pi1, pi2, pi3, pi4, po0, po1);
   input  pi0, pi1, pi2, pi3, pi4;
   output po0, po1;
   wire n9, n10, n11, n13;

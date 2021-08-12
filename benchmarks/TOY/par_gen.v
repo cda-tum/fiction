@@ -1,4 +1,4 @@
-module par_gen(a, b, c, parity);
+module top(a, b, c, parity);
 input a, b, c;
 output parity;
 wire w1, w2, w3, w4, w5, w6, w7, w8, n1;

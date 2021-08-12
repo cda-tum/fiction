@@ -1,4 +1,4 @@
-module mux21(in0, in1, in2, out);
+module top(in0, in1, in2, out);
 input in0, in1, in2;
 output out;
 

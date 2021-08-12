@@ -1,4 +1,4 @@
-module rca2(a0, a1, b0, b1, cin, sum0, sum1, cout);
+module top(a0, a1, b0, b1, cin, sum0, sum1, cout);
 input a0, a1, b0, b1, cin;
 output sum0, sum1, cout;
 

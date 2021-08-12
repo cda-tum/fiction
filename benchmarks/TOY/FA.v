@@ -1,4 +1,4 @@
-module fa(x, y, cin, s, cout);
+module top(x, y, cin, s, cout);
 input x, y, cin;
 output s, cout;
 
