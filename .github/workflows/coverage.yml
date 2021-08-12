@@ -37,14 +37,7 @@ jobs:
         shell: bash
         working-directory: ${{github.workspace}}/build
 
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DENABLE_PROGRESS_BARS=OFF -DFICTION_TEST=ON -DWARNINGS_AS_ERRORS=OFF -DENABLE_COVERAGE=ON
-
-#      - name: Cache Z3
-#        uses: actions/cache@v2
-#        id: cache-z3
-#        with:
-#          path: ${{github.workspace}}/build/z3
-#          key: ${{matrix.os}}_${{matrix.compiler}}
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_PROGRESS_BARS=OFF -DWARNINGS_AS_ERRORS=OFF -DENABLE_COVERAGE=ON
 
       - name: Build
         working-directory: ${{github.workspace}}/build
