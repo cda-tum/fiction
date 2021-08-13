@@ -55,9 +55,9 @@ class area_command : public command
 
         auto lyt = s.current();
 
-        const auto calculate_area = [this](auto&& lyt)
+        const auto calculate_area = [this](auto&& layout)
         {
-            using Tech = typename std::decay_t<decltype(lyt)>::element_type::technology;
+            using Tech = typename std::decay_t<decltype(layout)>::element_type::technology;
 
             if (!is_set("width"))
             {
@@ -76,8 +76,8 @@ class area_command : public command
                 vspace = Tech::cell_vspace;
             }
 
-            area = (static_cast<double>(lyt->x() + 1) * width + static_cast<double>(lyt->x()) * hspace) *
-                   (static_cast<double>(lyt->y() + 1) * height + static_cast<double>(lyt->y()) * vspace);
+            area = (static_cast<double>(layout->x() + 1) * width + static_cast<double>(layout->x()) * hspace) *
+                   (static_cast<double>(layout->y() + 1) * height + static_cast<double>(layout->y()) * vspace);
         };
 
         std::visit(calculate_area, lyt);
@@ -113,4 +113,4 @@ ALICE_ADD_COMMAND(area, "Technology")
 
 }  // namespace alice
 
-#endif  // FICTION_AREA_HP
+#endif  // FICTION_AREA_HPP

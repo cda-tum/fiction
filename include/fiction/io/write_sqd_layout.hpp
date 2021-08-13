@@ -12,6 +12,7 @@
 
 #include <chrono>
 #include <ctime>
+#include <fstream>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -89,10 +90,10 @@ constexpr const char* LAYERS_BLOCK = "<layers>\n"
                                      "        </layer_prop>\n"
                                      "    </layers>\n";
 
-constexpr const char* OPEN_DESIGN = "    <design>\n"
-                                    "        <layer type=\"Lattice\"/>\n"
-                                    "        <layer type=\"Misc\"/>\n"
-                                    "        <layer type=\"DB\">\n";
+constexpr const char* OPEN_DESIGN  = "    <design>\n"
+                                     "        <layer type=\"Lattice\"/>\n"
+                                     "        <layer type=\"Misc\"/>\n"
+                                     "        <layer type=\"DB\">\n";
 constexpr const char* CLOSE_DESIGN = "    </design>\n";
 
 constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"

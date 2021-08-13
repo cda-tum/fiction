@@ -9,6 +9,7 @@
 
 #include <fmt/format.h>
 
+#include <fstream>
 #include <ostream>
 #include <string>
 #include <type_traits>

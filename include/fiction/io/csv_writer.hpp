@@ -5,37 +5,35 @@
 #ifndef FICTION_CSV_WRITER_HPP
 #define FICTION_CSV_WRITER_HPP
 
-
-#include <string>
 #include <fstream>
+#include <string>
 
+namespace fiction
+{
 
 class csv_writer
 {
-public:
+  public:
     /**
      * Standard constructor. Opens a file.
      *
      * @param filename CSV file to write into.
      */
-    explicit csv_writer(const std::string& filename)
-            :
-            file{filename, std::ios::out | std::ios::app}
-    {}
+    explicit csv_writer(const std::string& filename) : file{filename, std::ios::out | std::ios::app} {}
     /**
      * Writes a single line of comma-separated values to the stored file. Note that no escape checks are performed.
      *
      * @tparam Ts Types of the variadic parameter pack.
      * @param args Arguments to write to the file.
      */
-    template<typename... Ts>
+    template <typename... Ts>
     void write_line(Ts&&... args)
     {
         if (file.is_open())
             (file << ... << add_delimiter(std::forward<Ts>(args))) << std::endl;
     }
 
-private:
+  private:
     /**
      * CSV file to write into.
      */
@@ -51,7 +49,7 @@ private:
      * @param arg Argument to write to the file.
      * @return Delimiter.
      */
-    template<typename T>
+    template <typename T>
     const char* add_delimiter(T&& arg)
     {
         if (file.is_open())
@@ -61,4 +59,6 @@ private:
     }
 };
 
-#endif //FICTION_CSV_WRITER_HPP
+}  // namespace fiction
+
+#endif  // FICTION_CSV_WRITER_HPP
