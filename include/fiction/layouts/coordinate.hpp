@@ -120,11 +120,16 @@ struct coord_t
     {
         return !(*this < other);
     }
+
+    [[nodiscard]] std::string str() const noexcept
+    {
+        return fmt::format("({},{},{})", x, y, z);
+    }
 };
 
 std::ostream& operator<<(std::ostream& os, const coord_t& t)
 {
-    os << fmt::format("({},{},{})", t.x, t.y, t.z);
+    os << t.str();
     return os;
 }
 

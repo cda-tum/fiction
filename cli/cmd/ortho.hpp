@@ -32,7 +32,7 @@ class ortho_command : public command
                        "An FCN layout that is not minimal will be found in reasonable runtime.")
     {
         add_option("--clock_numbers,-n", ps.number_of_clock_phases, "Number of clock phases to be used {3 or 4}");
-        add_flag("--verbose,-v", ps.verbose, "Be verbose");
+        add_flag("--verbose,-v", "Be verbose");
     }
 
   protected:
@@ -74,6 +74,11 @@ class ortho_command : public command
             auto lyt = std::visit(orthogonal_physical_design, net);
             store<fiction::gate_layout_t>().extend() =
                 std::make_shared<fiction::gate_clk_lyt>(lyt, std::visit(get_name, net));
+
+            if (is_set("verbose"))
+            {
+                st.report(env->out());
+            }
         }
         catch (const fiction::high_degree_fanin_exception& e)
         {

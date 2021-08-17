@@ -5,6 +5,7 @@
 #ifndef FICTION_GATE_LEVEL_LAYOUT_HPP
 #define FICTION_GATE_LEVEL_LAYOUT_HPP
 
+#include "../algorithms/design_rule_violations.hpp"
 #include "../utils/range.hpp"
 #include "clocking_scheme.hpp"
 
@@ -742,6 +743,9 @@ class gate_level_layout : public ClockedLayout
     storage strg;
 
     event_storage evnts;
+
+    template <typename>
+    friend class detail::gate_level_drvs_impl;
 
     inline void initialize_truth_table_cache()
     {

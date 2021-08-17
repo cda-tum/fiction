@@ -174,6 +174,8 @@ TEST_CASE("Cardinal operations", "[coordinate]")
         CHECK(at1 == at2);
         CHECK(layout.is_adjacent_of(t, at1));
         CHECK(layout.is_adjacent_of(at1, t));
+        CHECK(layout.is_surrounding_of(t, at1));
+        CHECK(layout.is_surrounding_of(at1, t));
 
         CHECK(layout.is_border(b));
         CHECK(!bt.is_dead());

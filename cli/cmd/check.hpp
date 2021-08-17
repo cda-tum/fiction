@@ -5,18 +5,21 @@
 #ifndef FICTION_CHECK_HPP
 #define FICTION_CHECK_HPP
 
-#include "design_checker.h"
-#include "fcn_gate_layout.h"
+#include <fiction/algorithms/design_rule_violations.hpp>
+#include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
 
+#include <variant>
+
 namespace alice
 {
 /**
- * Performs design rule checks on the active gate layout. Checks for various design rule validations like crossing
- * gates, too many wires in a tile, wrongly assigned directions, etc.
- * See algo/design_checker.h for more details.
+ * Performs design rule checks on the active gate-level layout. Checks for various design rule validations like crossing
+ * gates, non-adjacent connections, wrongly assigned clock zones, etc.
+ *
+ * See fiction/algorithms/design_rule_violations.hpp for more details.
  */
 class check_command : public command
 {
@@ -27,11 +30,9 @@ class check_command : public command
      * @param e alice::environment that specifies stores etc.
      */
     explicit check_command(const environment::ptr& e) :
-            command(e, "Performs various design rule checks on the current gate layout in store. "
+            command(e, "Performs various design rule checks on the current gate-level layout in store. "
                        "A full report can be logged and a summary is printed to standard output.")
-    {
-        add_option("--wire_limit,-w", wire_limit, "Maximum number of wires allowed per tile", true);
-    }
+    {}
 
   protected:
     /**
@@ -39,20 +40,21 @@ class check_command : public command
      */
     void execute() override
     {
-        auto& s = store<fcn_gate_layout_ptr>();
+        auto& s = store<fiction::gate_layout_t>();
 
-        // error case: empty logic network store
+        // error case: empty gate-level layout store
         if (s.empty())
         {
             env->out() << "[w] no gate layout in store" << std::endl;
-            reset_flags();
             return;
         }
 
-        design_checker c{s.current(), wire_limit};
-        report = c.check(env->out());
+        ps.out = &env->out();
+        pst    = {};
 
-        reset_flags();
+        const auto design_rule_check = [this](auto&& lyt) { fiction::gate_level_drvs(*lyt, ps, &pst); };
+
+        std::visit(design_rule_check, s.current());
     }
 
     /**
@@ -62,29 +64,16 @@ class check_command : public command
      */
     nlohmann::json log() const override
     {
-        return report;
+        return pst.report;
     }
 
   private:
-    /**
-     * Resulting logging information.
-     */
-    nlohmann::json report;
-    /**
-     * Maximum number of wires per tile.
-     */
-    std::size_t wire_limit = 1;
-
-    /**
-     * Reset all flags. Necessary for some reason... alice bug?
-     */
-    void reset_flags()
-    {
-        wire_limit = 1;
-    }
+    fiction::gate_level_drv_params ps{};
+    fiction::gate_level_drv_stats  pst{};
 };
 
 ALICE_ADD_COMMAND(check, "Verification")
+
 }  // namespace alice
 
 #endif  // FICTION_CHECK_HPP

@@ -166,6 +166,13 @@ class coordinate_layout
         return is_north_of(c1, c2) || is_east_of(c1, c2) || is_south_of(c1, c2) || is_west_of(c1, c2);
     }
 
+    [[nodiscard]] bool is_surrounding_of(const coordinate& c1, const coordinate& c2) const noexcept
+    {
+        return is_adjacent_of(c1, c2) || is_north_of(c1, above(c2)) || is_east_of(c1, above(c2)) ||
+               is_south_of(c1, above(c2)) || is_west_of(c1, above(c2)) || is_north_of(c1, below(c2)) ||
+               is_east_of(c1, below(c2)) || is_south_of(c1, below(c2)) || is_west_of(c1, below(c2));
+    }
+
     [[nodiscard]] bool is_above_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return c1 != c2 && above(c1) == c2;

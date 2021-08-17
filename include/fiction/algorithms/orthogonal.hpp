@@ -31,10 +31,6 @@ namespace fiction
 struct orthogonal_physical_design_params
 {
     /**
-     * Print a report to the standard output channel.
-     */
-    bool verbose = false;
-    /**
      * Number of clock phases to use. 3 and 4 are supported.
      */
     uint8_t number_of_clock_phases = 4u;
@@ -47,12 +43,12 @@ struct orthogonal_physical_design_stats
     uint64_t x_size{0ull}, y_size{0ull};
     uint64_t num_gates{0ull}, num_wires{0ull};
 
-    void report() const
+    void report(std::ostream& out = std::cout) const
     {
-        std::cout << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
-        std::cout << fmt::format("[i] layout size = {} × {}\n", x_size, y_size);
-        std::cout << fmt::format("[i] num. gates  = {}\n", num_gates);
-        std::cout << fmt::format("[i] num. wires  = {}\n", num_wires);
+        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] layout size = {} × {}\n", x_size, y_size);
+        out << fmt::format("[i] num. gates  = {}\n", num_gates);
+        out << fmt::format("[i] num. wires  = {}\n", num_wires);
     }
 };
 
@@ -798,11 +794,6 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
     detail::orthogonal_impl<Lyt, Ntk> p{ntk, ps, st};
 
     auto result = p.run();
-
-    if (ps.verbose)
-    {
-        st.report();
-    }
 
     if (pst)
     {
