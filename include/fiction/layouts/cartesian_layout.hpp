@@ -2,8 +2,8 @@
 // Created by marcel on 31.03.21.
 //
 
-#ifndef FICTION_COORDINATE_LAYOUT_HPP
-#define FICTION_COORDINATE_LAYOUT_HPP
+#ifndef FICTION_CARTESIAN_LAYOUT_HPP
+#define FICTION_CARTESIAN_LAYOUT_HPP
 
 #include "../utils/range.hpp"
 #include "coordinate.hpp"
@@ -12,32 +12,34 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <memory>
 
 namespace fiction
 {
 
-class coordinate_layout
+template <typename Coordinate>
+class cartesian_layout
 {
   public:
 #pragma region Types and constructors
 
-    using coordinate   = coord_t;
-    using aspect_ratio = coord_t;
+    using coordinate   = Coordinate;
+    using aspect_ratio = Coordinate;
 
-    struct coordinate_layout_storage
+    struct cartesian_layout_storage
     {
-        explicit coordinate_layout_storage(const aspect_ratio& ar) noexcept : dimension{ar} {};
+        explicit cartesian_layout_storage(const aspect_ratio& ar) noexcept : dimension{ar} {};
 
         aspect_ratio dimension;
     };
 
-    using base_type = coordinate_layout;
+    using base_type = cartesian_layout;
 
-    using storage = std::shared_ptr<coordinate_layout_storage>;
+    using storage = std::shared_ptr<cartesian_layout_storage>;
 
-    explicit coordinate_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<coordinate_layout_storage>(ar)} {}
+    explicit cartesian_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<cartesian_layout_storage>(ar)} {}
 
-    explicit coordinate_layout(std::shared_ptr<coordinate_layout_storage> s) : strg{std::move(s)} {}
+    explicit cartesian_layout(std::shared_ptr<cartesian_layout_storage> s) : strg{std::move(s)} {}
 
 #pragma endregion
 
@@ -72,7 +74,7 @@ class coordinate_layout
 
 #pragma region Cardinal operations
 
-    [[nodiscard]] constexpr coordinate north(const coordinate& c) const noexcept
+    [[nodiscard]] constexpr Coordinate north(const Coordinate& c) const noexcept
     {
         if (c.y == 0ull)
             return c;
@@ -83,7 +85,7 @@ class coordinate_layout
         return nc;
     }
 
-    [[nodiscard]] coordinate east(const coordinate& c) const noexcept
+    [[nodiscard]] Coordinate east(const Coordinate& c) const noexcept
     {
         auto ec = c;
 
@@ -95,7 +97,7 @@ class coordinate_layout
         return ec;
     }
 
-    [[nodiscard]] coordinate south(const coordinate& c) const noexcept
+    [[nodiscard]] Coordinate south(const Coordinate& c) const noexcept
     {
         auto sc = c;
 
@@ -107,7 +109,7 @@ class coordinate_layout
         return sc;
     }
 
-    [[nodiscard]] constexpr coordinate west(const coordinate& c) const noexcept
+    [[nodiscard]] constexpr Coordinate west(const Coordinate& c) const noexcept
     {
         if (c.x == 0ull)
             return c;
@@ -118,7 +120,7 @@ class coordinate_layout
         return wc;
     }
 
-    [[nodiscard]] coordinate above(const coordinate& c) const noexcept
+    [[nodiscard]] Coordinate above(const Coordinate& c) const noexcept
     {
         auto ac = c;
 
@@ -130,7 +132,7 @@ class coordinate_layout
         return ac;
     }
 
-    [[nodiscard]] constexpr coordinate below(const coordinate& c) const noexcept
+    [[nodiscard]] constexpr Coordinate below(const Coordinate& c) const noexcept
     {
         if (c.z == 0ull)
             return c;
@@ -141,119 +143,119 @@ class coordinate_layout
         return bc;
     }
 
-    [[nodiscard]] constexpr bool is_north_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_north_of(const Coordinate& c1, const Coordinate& c2) const noexcept
     {
         return c1 != c2 && north(c1) == c2;
     }
 
-    [[nodiscard]] bool is_east_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] bool is_east_of(const Coordinate& c1, const Coordinate& c2) const noexcept
     {
         return c1 != c2 && east(c1) == c2;
     }
 
-    [[nodiscard]] bool is_south_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] bool is_south_of(const Coordinate& c1, const Coordinate& c2) const noexcept
     {
         return c1 != c2 && south(c1) == c2;
     }
 
-    [[nodiscard]] constexpr bool is_west_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_west_of(const Coordinate& c1, const Coordinate& c2) const noexcept
     {
         return c1 != c2 && west(c1) == c2;
     }
 
-    [[nodiscard]] bool is_adjacent_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] bool is_adjacent_of(const Coordinate& c1, const Coordinate& c2) const noexcept
     {
         return is_north_of(c1, c2) || is_east_of(c1, c2) || is_south_of(c1, c2) || is_west_of(c1, c2);
     }
 
-    [[nodiscard]] bool is_surrounding_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] bool is_surrounding_of(const Coordinate& c1, const Coordinate& c2) const noexcept
     {
         return is_adjacent_of(c1, c2) || is_north_of(c1, above(c2)) || is_east_of(c1, above(c2)) ||
                is_south_of(c1, above(c2)) || is_west_of(c1, above(c2)) || is_north_of(c1, below(c2)) ||
                is_east_of(c1, below(c2)) || is_south_of(c1, below(c2)) || is_west_of(c1, below(c2));
     }
 
-    [[nodiscard]] bool is_above_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] bool is_above_of(const Coordinate& c1, const Coordinate& c2) const noexcept
     {
         return c1 != c2 && above(c1) == c2;
     }
 
-    [[nodiscard]] constexpr bool is_below_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_below_of(const Coordinate& c1, const Coordinate& c2) const noexcept
     {
         return c1 != c2 && below(c1) == c2;
     }
 
-    [[nodiscard]] constexpr bool is_northwards_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_northwards_of(const Coordinate& c1, const Coordinate& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y > c2.y) && (c1.x == c2.x);
     }
 
-    [[nodiscard]] constexpr bool is_eastwards_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_eastwards_of(const Coordinate& c1, const Coordinate& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x < c2.x);
     }
 
-    [[nodiscard]] constexpr bool is_southwards_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_southwards_of(const Coordinate& c1, const Coordinate& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y < c2.y) && (c1.x == c2.x);
     }
 
-    [[nodiscard]] constexpr bool is_westwards_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_westwards_of(const Coordinate& c1, const Coordinate& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x > c2.x);
     }
 
-    [[nodiscard]] constexpr bool is_northern_border(const coordinate& c) const noexcept
+    [[nodiscard]] constexpr bool is_northern_border(const Coordinate& c) const noexcept
     {
         return c.y == 0ull;
     }
 
-    [[nodiscard]] bool is_eastern_border(const coordinate& c) const noexcept
+    [[nodiscard]] bool is_eastern_border(const Coordinate& c) const noexcept
     {
         return c.x == x();
     }
 
-    [[nodiscard]] bool is_southern_border(const coordinate& c) const noexcept
+    [[nodiscard]] bool is_southern_border(const Coordinate& c) const noexcept
     {
         return c.y == y();
     }
 
-    [[nodiscard]] constexpr bool is_western_border(const coordinate& c) const noexcept
+    [[nodiscard]] constexpr bool is_western_border(const Coordinate& c) const noexcept
     {
         return c.x == 0ull;
     }
 
-    [[nodiscard]] bool is_border(const coordinate& c) const noexcept
+    [[nodiscard]] bool is_border(const Coordinate& c) const noexcept
     {
         return is_northern_border(c) || is_eastern_border(c) || is_southern_border(c) || is_western_border(c);
     }
 
-    [[nodiscard]] coordinate northern_border_of(const coordinate& c) const noexcept
+    [[nodiscard]] Coordinate northern_border_of(const Coordinate& c) const noexcept
     {
         return {c.x, 0ull, c.z};
     }
 
-    [[nodiscard]] coordinate eastern_border_of(const coordinate& c) const noexcept
+    [[nodiscard]] Coordinate eastern_border_of(const Coordinate& c) const noexcept
     {
         return {x(), c.y, c.z};
     }
 
-    [[nodiscard]] coordinate southern_border_of(const coordinate& c) const noexcept
+    [[nodiscard]] Coordinate southern_border_of(const Coordinate& c) const noexcept
     {
         return {c.x, y(), c.z};
     }
 
-    [[nodiscard]] coordinate western_border_of(const coordinate& c) const noexcept
+    [[nodiscard]] Coordinate western_border_of(const Coordinate& c) const noexcept
     {
         return {0ull, c.y, c.z};
     }
 
-    [[nodiscard]] constexpr bool is_ground_layer(const coordinate& c) const noexcept
+    [[nodiscard]] constexpr bool is_ground_layer(const Coordinate& c) const noexcept
     {
         return c.z == 0ull;
     }
 
-    [[nodiscard]] constexpr bool is_crossing_layer(const coordinate& c) const noexcept
+    [[nodiscard]] constexpr bool is_crossing_layer(const Coordinate& c) const noexcept
     {
         return c.z > 0ull;
     }
@@ -262,45 +264,45 @@ class coordinate_layout
 
 #pragma region Iteration
 
-    [[nodiscard]] auto coordinates(const coordinate& start = {}, const coordinate& stop = {}) const
+    [[nodiscard]] auto coordinates(const Coordinate& start = {}, const Coordinate& stop = {}) const
     {
         return range_t{
-            std::make_pair(coord_iterator{strg->dimension, start.is_dead() ? coordinate{0, 0} : start},
+            std::make_pair(coord_iterator{strg->dimension, start.is_dead() ? Coordinate{0, 0} : start},
                            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop})};
     }
 
     template <typename Fn>
-    void foreach_coordinate(Fn&& fn, const coordinate& start = {}, const coordinate& stop = {}) const
+    void foreach_coordinate(Fn&& fn, const Coordinate& start = {}, const Coordinate& stop = {}) const
     {
         mockturtle::detail::foreach_element(
-            coord_iterator{strg->dimension, start.is_dead() ? coordinate{0, 0} : start},
+            coord_iterator{strg->dimension, start.is_dead() ? Coordinate{0, 0} : start},
             coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, fn);
     }
 
-    [[nodiscard]] auto ground_coordinates(const coordinate& start = {}, const coordinate& stop = {}) const
+    [[nodiscard]] auto ground_coordinates(const Coordinate& start = {}, const Coordinate& stop = {}) const
     {
         assert(start.z == 0 && stop.z == 0);
 
         auto ground_layer = aspect_ratio{x(), y(), 0};
 
-        return range_t{std::make_pair(coord_iterator{ground_layer, start.is_dead() ? coordinate{0, 0} : start},
+        return range_t{std::make_pair(coord_iterator{ground_layer, start.is_dead() ? Coordinate{0, 0} : start},
                                       coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop})};
     }
 
     template <typename Fn>
-    void foreach_ground_coordinate(Fn&& fn, const coordinate& start = {}, const coordinate& stop = {}) const
+    void foreach_ground_coordinate(Fn&& fn, const Coordinate& start = {}, const Coordinate& stop = {}) const
     {
         assert(start.z == 0 && stop.z == 0);
 
         auto ground_layer = aspect_ratio{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
-            coord_iterator{ground_layer, start.is_dead() ? coordinate{0, 0} : start},
+            coord_iterator{ground_layer, start.is_dead() ? Coordinate{0, 0} : start},
             coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
     }
 
     template <typename Container>
-    Container adjacent_coordinates(const coordinate& c) const noexcept
+    Container adjacent_coordinates(const Coordinate& c) const noexcept
     {
         Container cnt{};
 
@@ -326,4 +328,4 @@ class coordinate_layout
 
 }  // namespace fiction
 
-#endif  // FICTION_COORDINATE_LAYOUT_HPP
+#endif  // FICTION_CARTESIAN_LAYOUT_HPP

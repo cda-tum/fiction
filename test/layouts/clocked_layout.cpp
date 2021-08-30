@@ -4,8 +4,8 @@
 
 #include "catch.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/coordinate_layout.hpp>
 
 #include <set>
 
@@ -13,6 +13,8 @@ using namespace fiction;
 
 TEST_CASE("Clocking", "[clocked]")
 {
+    using coordinate_layout = cartesian_layout<coord_t>;
+
     clocked_layout<coordinate_layout> layout{coordinate_layout::aspect_ratio{2, 2, 0}, twoddwave_4_clocking};
 
     CHECK(layout.is_clocking_scheme(clock_name::twoddwave4));
@@ -50,6 +52,8 @@ TEST_CASE("Clocking", "[clocked]")
 
 TEST_CASE("Iteration", "[clocked]")
 {
+    using coordinate_layout = cartesian_layout<coord_t>;
+
     clocked_layout<coordinate_layout> layout{coordinate_layout::aspect_ratio{2, 2, 0}, twoddwave_4_clocking};
 
     CHECK(layout.incoming_clocked_zones<std::set<coordinate_layout::coordinate>>({0, 0}).empty());
@@ -68,6 +72,8 @@ TEST_CASE("Iteration", "[clocked]")
 
 TEST_CASE("Structural properties", "[clocked]")
 {
+    using coordinate_layout = cartesian_layout<coord_t>;
+
     clocked_layout<coordinate_layout> layout{coordinate_layout::aspect_ratio{2, 2, 0}, twoddwave_4_clocking};
 
     CHECK(layout.in_degree({0, 0}) == static_cast<clocked_layout<coordinate_layout>::degree_t>(0));

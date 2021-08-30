@@ -133,12 +133,13 @@ std::ostream& operator<<(std::ostream& os, const coord_t& t)
     return os;
 }
 
+template <typename Coordinate>
 class coord_iterator
 {
   public:
-    using value_type = coord_t;
+    using value_type = Coordinate;
 
-    constexpr explicit coord_iterator(const coord_t& dimension, const coord_t& start) noexcept :
+    constexpr explicit coord_iterator(const Coordinate& dimension, const Coordinate& start) noexcept :
             aspect_ratio{dimension},
             coord{start}
     {}
@@ -179,7 +180,7 @@ class coord_iterator
         return result;
     }
 
-    constexpr coord_t operator*() const noexcept
+    constexpr Coordinate operator*() const noexcept
     {
         return coord;
     }
@@ -205,9 +206,9 @@ class coord_iterator
     }
 
   private:
-    const coord_t aspect_ratio;
+    const Coordinate aspect_ratio;
 
-    coord_t coord;
+    Coordinate coord;
 };
 }  // namespace fiction
 
@@ -223,11 +224,11 @@ struct hash<fiction::coord_t>
     }
 };
 // make coord_iterator compatible with STL iterator categories
-template <>
-struct iterator_traits<fiction::coord_iterator>
+template <typename Coordinate>
+struct iterator_traits<fiction::coord_iterator<Coordinate>>
 {
     using iterator_category = std::forward_iterator_tag;
-    using value_type        = fiction::coord_t;
+    using value_type        = Coordinate;
 };
 }  // namespace std
 

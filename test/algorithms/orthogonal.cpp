@@ -9,9 +9,9 @@
 #include <fiction/algorithms/apply_gate_library.hpp>
 #include <fiction/algorithms/orthogonal.hpp>
 #include <fiction/io/print_layout.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/coordinate_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/topology_network.hpp>
@@ -75,14 +75,13 @@ TEST_CASE("East-south coloring", "[algorithms]")
 
 TEST_CASE("Layout equivalence", "[algorithms]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
     const auto check = [](const auto& net)
     {
-        orthogonal_physical_design_params params{true};
-        orthogonal_physical_design_stats  stats{};
+        orthogonal_physical_design_stats stats{};
 
-        auto layout = orthogonal<gate_layout>(net, params, &stats);
+        auto layout = orthogonal<gate_layout>(net, {}, &stats);
 
         print_gate_level_layout(std::cout, layout);
 
@@ -103,15 +102,14 @@ TEST_CASE("Layout equivalence", "[algorithms]")
 
 TEST_CASE("Gate library application", "[algorithms]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<coordinate_layout>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
 
     const auto check = [](const auto& net)
     {
-        orthogonal_physical_design_params params{false};
-        orthogonal_physical_design_stats  stats{};
+        orthogonal_physical_design_stats stats{};
 
-        auto layout = orthogonal<gate_layout>(net, params, &stats);
+        auto layout = orthogonal<gate_layout>(net, {}, &stats);
 
         CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(layout));
     };

@@ -10,6 +10,7 @@
 #include <fiction/algorithms/fanout_substitution.hpp>
 #include <fiction/algorithms/network_balancing.hpp>
 #include <fiction/algorithms/network_conversion.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
@@ -114,7 +115,7 @@ TEST_CASE("Layout conversion", "[algorithms]")
 {
     SECTION("Gate layout to X")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
         REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
@@ -147,7 +148,8 @@ TEST_CASE("Consistent network size after fanout substitution and conversion", "[
     auto converted_substituted_aig = convert_network<topology_network>(substituted_aig);
     CHECK(substituted_aig.size() == converted_substituted_aig.size());
 
-    auto substituted_top = fanout_substitution<topology_network>(blueprints::fanout_substitution_corner_case_network<topology_network>());
+    auto substituted_top =
+        fanout_substitution<topology_network>(blueprints::fanout_substitution_corner_case_network<topology_network>());
     auto converted_substituted_top = convert_network<topology_network>(substituted_top);
     CHECK(substituted_top.size() == converted_substituted_top.size());
 }
@@ -158,7 +160,8 @@ TEST_CASE("Consistent network size after balancing and conversion", "[algorithms
     auto converted_balanced_aig = convert_network<topology_network>(balanced_aig);
     CHECK(balanced_aig.size() == converted_balanced_aig.size());
 
-    auto balanced_top = network_balancing<topology_network>(blueprints::fanout_substitution_corner_case_network<topology_network>());
+    auto balanced_top =
+        network_balancing<topology_network>(blueprints::fanout_substitution_corner_case_network<topology_network>());
     auto converted_balanced_top = convert_network<topology_network>(balanced_top);
     CHECK(balanced_top.size() == converted_balanced_top.size());
 }

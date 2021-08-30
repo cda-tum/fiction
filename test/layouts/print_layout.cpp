@@ -6,6 +6,7 @@
 #include "catch.hpp"
 
 #include <fiction/io/print_layout.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
@@ -16,9 +17,9 @@ using namespace fiction;
 
 TEST_CASE("Print empty gate-level layout", "[gate-level]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
-    gate_layout layout{tile_based_layout::aspect_ratio{2, 2}, open_4_clocking};
+    gate_layout layout{tile_based_layout<cartesian_layout<coord_t>>::aspect_ratio{2, 2}, open_4_clocking};
 
     const auto layout_print = "[i] empty layout";
 
@@ -31,9 +32,9 @@ TEST_CASE("Print empty gate-level layout", "[gate-level]")
 
 TEST_CASE("Print simple gate-level layout", "[gate-level]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
-    gate_layout layout{tile_based_layout::aspect_ratio{3, 1, 0}, open_4_clocking};
+    gate_layout layout{tile_based_layout<cartesian_layout<coord_t>>::aspect_ratio{3, 1, 0}, open_4_clocking};
 
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {1, 1});
@@ -82,7 +83,7 @@ TEST_CASE("Print simple gate-level layout", "[gate-level]")
 
 TEST_CASE("Print crossing gate-level layout", "[gate-level]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -104,9 +105,10 @@ TEST_CASE("Print crossing gate-level layout", "[gate-level]")
 TEST_CASE("Print empty cell-level layout", "[gate-level]")
 {
     using cell_layout =
-        fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::tile_based_layout>>;
+        fiction::cell_level_layout<fiction::qca_technology,
+                                   fiction::clocked_layout<fiction::tile_based_layout<cartesian_layout<coord_t>>>>;
 
-    cell_layout layout{fiction::tile_based_layout::aspect_ratio{2, 2}, "Empty"};
+    cell_layout layout{fiction::tile_based_layout<cartesian_layout<coord_t>>::aspect_ratio{2, 2}, "Empty"};
 
     const auto layout_print = "[i] empty layout";
 
@@ -120,9 +122,10 @@ TEST_CASE("Print empty cell-level layout", "[gate-level]")
 TEST_CASE("Print AND gate cell-level layout", "[cell-level]")
 {
     using cell_layout =
-        fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::tile_based_layout>>;
+        fiction::cell_level_layout<fiction::qca_technology,
+                                   fiction::clocked_layout<fiction::tile_based_layout<cartesian_layout<coord_t>>>>;
 
-    cell_layout layout{fiction::tile_based_layout::aspect_ratio{4, 4}, "AND"};
+    cell_layout layout{fiction::tile_based_layout<cartesian_layout<coord_t>>::aspect_ratio{4, 4}, "AND"};
 
     layout.assign_cell_type({0, 2}, fiction::qca_technology::cell_type::INPUT);
     layout.assign_cell_type({2, 4}, fiction::qca_technology::cell_type::INPUT);
@@ -155,9 +158,10 @@ TEST_CASE("Print AND gate cell-level layout", "[cell-level]")
 TEST_CASE("Print wire crossing cell-level layout", "[cell-level]")
 {
     using cell_layout =
-        fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::tile_based_layout>>;
+        fiction::cell_level_layout<fiction::qca_technology,
+                                   fiction::clocked_layout<fiction::tile_based_layout<cartesian_layout<coord_t>>>>;
 
-    cell_layout layout{fiction::tile_based_layout::aspect_ratio{4, 4, 1}, "Crossover"};
+    cell_layout layout{fiction::tile_based_layout<cartesian_layout<coord_t>>::aspect_ratio{4, 4, 1}, "Crossover"};
 
     layout.assign_cell_type({0, 2, 0}, fiction::qca_technology::cell_type::INPUT);
     layout.assign_cell_type({2, 0, 0}, fiction::qca_technology::cell_type::INPUT);

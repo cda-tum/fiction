@@ -5,9 +5,9 @@
 #ifndef FICTION_TYPES_HPP
 #define FICTION_TYPES_HPP
 
+#include "layouts/cartesian_layout.hpp"
 #include "layouts/cell_level_layout.hpp"
 #include "layouts/clocked_layout.hpp"
-#include "layouts/coordinate_layout.hpp"
 #include "layouts/gate_level_layout.hpp"
 #include "layouts/tile_based_layout.hpp"
 #include "networks/topology_network.hpp"
@@ -63,8 +63,8 @@ inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, f
 /**
  * FCN gate-level layouts.
  */
-using gate_clk_lyt =
-    mockturtle::names_view<fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout>>>;
+using gate_clk_lyt = mockturtle::names_view<
+    fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<cartesian_layout<coord_t>>>>>;
 using gate_clk_lyt_ptr = std::shared_ptr<gate_clk_lyt>;
 
 using gate_layout_t = std::variant<gate_clk_lyt_ptr>;
@@ -87,15 +87,15 @@ inline constexpr const char* tech_impl_name =
  * FCN cell-level layouts.
  */
 using qca_cell_clk_lyt =
-    fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::coordinate_layout>>;
+    fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::cartesian_layout<coord_t>>>;
 using qca_cell_clk_lyt_ptr = std::shared_ptr<qca_cell_clk_lyt>;
 
 using inml_cell_clk_lyt =
-    fiction::cell_level_layout<fiction::inml_technology, fiction::clocked_layout<fiction::coordinate_layout>>;
+    fiction::cell_level_layout<fiction::inml_technology, fiction::clocked_layout<fiction::cartesian_layout<coord_t>>>;
 using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
 
 using sidb_cell_clk_lyt =
-    fiction::cell_level_layout<fiction::sidb_technology, fiction::clocked_layout<fiction::coordinate_layout>>;
+    fiction::cell_level_layout<fiction::sidb_technology, fiction::clocked_layout<fiction::cartesian_layout<coord_t>>>;
 using sidb_cell_clk_lyt_ptr = std::shared_ptr<sidb_cell_clk_lyt>;
 
 using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr, inml_cell_clk_lyt_ptr, sidb_cell_clk_lyt_ptr>;

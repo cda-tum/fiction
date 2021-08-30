@@ -4,9 +4,9 @@
 
 #include "catch.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/coordinate_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -53,7 +53,7 @@ TEST_CASE("Cell technology", "[cell-level]")
         CHECK(inml_technology::is_fanout_coupler_magnet(inml_technology::cell_type::FANOUT_COUPLER_MAGNET));
 
         CHECK(inml_technology::is_normal_cell_mode(inml_technology::cell_mode{}));
-        
+
         CHECK(tech_impl_name<inml_technology> == std::string{"iNML"});
     }
     SECTION("SiDB")
@@ -71,13 +71,13 @@ TEST_CASE("Cell technology", "[cell-level]")
 
 TEST_CASE("Cell type assignment", "[cell-level]")
 {
-    using cell_layout =
-        fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::coordinate_layout>>;
+    using cell_layout = fiction::cell_level_layout<fiction::qca_technology,
+                                                   fiction::clocked_layout<fiction::cartesian_layout<coord_t>>>;
 
     REQUIRE(fiction::has_get_layout_name_v<cell_layout>);
     REQUIRE(fiction::has_set_layout_name_v<cell_layout>);
 
-    cell_layout layout{fiction::coordinate_layout::aspect_ratio{4, 4}, "AND"};
+    cell_layout layout{cell_layout::aspect_ratio{4, 4}, "AND"};
 
     layout.assign_cell_type({0, 2}, fiction::qca_technology::cell_type::INPUT);
     layout.assign_cell_type({2, 4}, fiction::qca_technology::cell_type::INPUT);
@@ -144,10 +144,10 @@ TEST_CASE("Cell type assignment", "[cell-level]")
 
 TEST_CASE("Cell mode assignment", "[cell-level]")
 {
-    using cell_layout =
-        fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::coordinate_layout>>;
+    using cell_layout = fiction::cell_level_layout<fiction::qca_technology,
+                                                   fiction::clocked_layout<fiction::cartesian_layout<coord_t>>>;
 
-    cell_layout layout{fiction::coordinate_layout::aspect_ratio{4, 4, 1}, "Crossover"};
+    cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 
     layout.assign_cell_type({0, 2, 0}, fiction::qca_technology::cell_type::INPUT);
     layout.assign_cell_type({2, 0, 0}, fiction::qca_technology::cell_type::INPUT);
@@ -194,8 +194,8 @@ TEST_CASE("Cell mode assignment", "[cell-level]")
 
 TEST_CASE("Clocking", "[cell-level]")
 {
-    cell_level_layout<qca_technology, clocked_layout<coordinate_layout>> layout{
-        coordinate_layout::aspect_ratio{4, 4, 0}, twoddwave_4_clocking, "Lyt", 2, 2};
+    cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>> layout{
+        cartesian_layout<coord_t>::aspect_ratio{4, 4, 0}, twoddwave_4_clocking, "Lyt", 2, 2};
 
     CHECK(layout.get_clock_number({0, 0}) == 0);
     CHECK(layout.get_clock_number({0, 1}) == 0);
