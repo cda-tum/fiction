@@ -40,7 +40,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
      * @return QCA-ONE gate representation of t including I/Os, rotation, const cells, etc.
      */
     template <typename Lyt>
-    [[nodiscard]] static fcn_gate set_up_gate(const Lyt& lyt, const typename Lyt::tile& t)
+    [[nodiscard]] static fcn_gate set_up_gate(const Lyt& lyt, const tile<Lyt>& t)
     {
         const auto n = lyt.get_node(t);
         const auto p = determine_port_routing(lyt, t);
@@ -124,7 +124,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 
   private:
     template <typename Lyt>
-    [[nodiscard]] static port_list determine_port_routing(const Lyt& lyt, const typename Lyt::tile& t) noexcept
+    [[nodiscard]] static port_list determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
     {
         port_list p{};
 

@@ -197,7 +197,7 @@ template <typename Lyt, bool DrawIndexes = false>
 class gate_layout_tile_drawer : public topology_dot_drawer<Lyt, DrawIndexes>
 {
   public:
-    std::string tile_id(const typename Lyt::tile& t) const noexcept
+    std::string tile_id(const tile<Lyt>& t) const noexcept
     {
         return fmt::format("x{}y{}", t.x, t.y);
     }
@@ -210,7 +210,7 @@ class gate_layout_tile_drawer : public topology_dot_drawer<Lyt, DrawIndexes>
             return {"shape=square", "fixedsize=true", "width=0.5"};
     }
 
-    std::string tile_label(const Lyt& lyt, const typename Lyt::tile& t) const noexcept
+    std::string tile_label(const Lyt& lyt, const tile<Lyt>& t) const noexcept
     {
         if (lyt.is_empty_tile(t))
             return "";
@@ -233,7 +233,7 @@ class gate_layout_tile_drawer : public topology_dot_drawer<Lyt, DrawIndexes>
         return topology_dot_drawer<Lyt, DrawIndexes>::node_label(lyt, lyt.get_node(t));
     }
 
-    std::string tile_fillcolor(const Lyt& lyt, const typename Lyt::tile& t) const noexcept
+    std::string tile_fillcolor(const Lyt& lyt, const tile<Lyt>& t) const noexcept
     {
         if (lyt.is_empty_tile(t))
             return "white";
@@ -315,7 +315,7 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
                               [&lyt, &drawer, &edges, &n](const auto& f)
                               {
                                   edges << fmt::format("{} -> {} [style={}];\n",
-                                                       drawer.tile_id(static_cast<typename Lyt::tile>(f)),
+                                                       drawer.tile_id(static_cast<tile<Lyt>>(f)),
                                                        drawer.tile_id(lyt.get_tile(n)), drawer.signal_style(lyt, f));
                               });
         });

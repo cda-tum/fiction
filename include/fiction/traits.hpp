@@ -10,6 +10,9 @@
 namespace fiction
 {
 
+template<typename Lyt>
+using tile = typename Lyt::tile;
+
 #pragma region has_is_po
 template <class Ntk, class = void>
 struct has_is_po : std::false_type

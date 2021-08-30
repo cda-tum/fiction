@@ -8,6 +8,7 @@
 #include "../algorithms/name_restoration.hpp"
 #include "../io/print_layout.hpp"
 #include "../layouts/clocking_scheme.hpp"
+#include "../traits.hpp"
 #include "../utils/debug/network_writer.hpp"
 #include "fanout_substitution.hpp"
 
@@ -235,7 +236,7 @@ coloring_container<Ntk> east_south_coloring(const Ntk& ntk) noexcept
                                         const auto snclr = ctn.color_ntk.color(sn);
                                         return snclr == ctn.color_east || snclr == ctn.color_null;
                                     }) ?
-                            ctn.color_south :
+                        ctn.color_south :
                             // else, pick color null
                             ctn.color_null;
 
@@ -370,7 +371,7 @@ typename Lyt::aspect_ratio determine_layout_size(const coloring_container<Ntk>& 
  * @param a
  */
 template <typename Lyt, typename Ntk>
-mockturtle::signal<Lyt> place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
                               const mockturtle::signal<Lyt>& a)
 {
     if (ntk.is_inv(n))
@@ -403,7 +404,7 @@ mockturtle::signal<Lyt> place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& 
  * @param c
  */
 template <typename Lyt, typename Ntk>
-mockturtle::signal<Lyt> place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
                               const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b,
                               const std::optional<bool>& c = std::nullopt)
 {
@@ -479,13 +480,13 @@ mockturtle::signal<Lyt> place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& 
 }
 
 template <typename Lyt>
-mockturtle::signal<Lyt> wire_east(Lyt& lyt, const typename Lyt::tile& src, const typename Lyt::tile& dest)
+mockturtle::signal<Lyt> wire_east(Lyt& lyt, const tile<Lyt>& src, const tile<Lyt>& dest)
 {
     auto a = static_cast<mockturtle::signal<Lyt>>(src);
 
     for (auto x = src.x + 1; x < dest.x; ++x)
     {
-        auto t = typename Lyt::tile{x, src.y, 0};
+        auto t = tile<Lyt>{x, src.y, 0};
         if (!lyt.is_empty_tile(t))  // crossing case
         {
             t = lyt.above(t);
@@ -498,13 +499,13 @@ mockturtle::signal<Lyt> wire_east(Lyt& lyt, const typename Lyt::tile& src, const
 }
 
 template <typename Lyt>
-mockturtle::signal<Lyt> wire_south(Lyt& lyt, const typename Lyt::tile& src, const typename Lyt::tile& dest)
+mockturtle::signal<Lyt> wire_south(Lyt& lyt, const tile<Lyt>& src, const tile<Lyt>& dest)
 {
     auto a = static_cast<mockturtle::signal<Lyt>>(src);
 
     for (auto y = src.y + 1; y < dest.y; ++y)
     {
-        auto t = typename Lyt::tile{src.x, y, 0};
+        auto t = tile<Lyt>{src.x, y, 0};
         if (!lyt.is_empty_tile(t))  // crossing case
         {
             t = lyt.above(t);
@@ -517,9 +518,9 @@ mockturtle::signal<Lyt> wire_south(Lyt& lyt, const typename Lyt::tile& src, cons
 }
 
 template <typename Lyt, typename Ntk>
-mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& ntk,
-                                          const mockturtle::node<Ntk>& n, typename Lyt::tile pre1_t,
-                                          typename Lyt::tile pre2_t, const std::optional<bool>& c = std::nullopt)
+mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                                          tile<Lyt> pre1_t, tile<Lyt> pre2_t,
+                                          const std::optional<bool>& c = std::nullopt)
 {
     // make sure pre1_t is the northwards tile and pre2_t is the westwards one
     if (pre2_t < pre1_t)
@@ -529,8 +530,8 @@ mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const typename Lyt::tile& t,
 }
 
 template <typename Lyt, typename Ntk>
-mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const typename Lyt::tile& t, const Ntk& ntk,
-                                          const mockturtle::node<Ntk>& n, const typename Lyt::tile& pre_t)
+mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                                          const tile<Lyt>& pre_t)
 {
     if (lyt.is_westwards_of(t, pre_t))
     {
@@ -570,7 +571,7 @@ class orthogonal_impl
         ntk.foreach_pi([&layout]([[maybe_unused]] const auto& pi) { layout.create_pi(); });
 
         // first x-pos to use for gates is 1 because PIs take up the 0th column
-        typename Lyt::tile latest_pos{1, 0};
+        tile<Lyt> latest_pos{1, 0};
 
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -614,19 +615,19 @@ class orthogonal_impl
                     {
                         const auto& pre = fc.fanin_nodes[0];
 
-                        const auto pre_t = static_cast<typename Lyt::tile>(node2pos[pre]);
+                        const auto pre_t = static_cast<tile<Lyt>>(node2pos[pre]);
 
                         // n is colored east
                         if (const auto clr = ctn.color_ntk.color(n); clr == ctn.color_east)
                         {
-                            const typename Lyt::tile t{latest_pos.x, pre_t.y};
+                            const tile<Lyt> t{latest_pos.x, pre_t.y};
                             node2pos[n] = connect_and_place(layout, t, ntk, n, pre_t);
                             ++latest_pos.x;
                         }
                         // n is colored south
                         else if (clr == ctn.color_south)
                         {
-                            const typename Lyt::tile t{pre_t.x, latest_pos.y};
+                            const tile<Lyt> t{pre_t.x, latest_pos.y};
                             node2pos[n] = connect_and_place(layout, t, ntk, n, pre_t);
                             ++latest_pos.y;
                         }
@@ -640,10 +641,10 @@ class orthogonal_impl
                     {
                         const auto &pre1 = fc.fanin_nodes[0], pre2 = fc.fanin_nodes[1];
 
-                        auto pre1_t = static_cast<typename Lyt::tile>(node2pos[pre1]),
-                             pre2_t = static_cast<typename Lyt::tile>(node2pos[pre2]);
+                        auto pre1_t = static_cast<tile<Lyt>>(node2pos[pre1]),
+                             pre2_t = static_cast<tile<Lyt>>(node2pos[pre2]);
 
-                        typename Lyt::tile t{};
+                        tile<Lyt> t{};
 
                         // n is colored east
                         if (const auto clr = ctn.color_ntk.color(n); clr == ctn.color_east)
@@ -656,7 +657,7 @@ class orthogonal_impl
                             t = {latest_pos.x, pre2_t.y};
 
                             // each 2-input gate has one incoming bent wire
-                            pre1_t = static_cast<typename Lyt::tile>(wire_east(layout, pre1_t, {t.x + 1, pre1_t.y}));
+                            pre1_t = static_cast<tile<Lyt>>(wire_east(layout, pre1_t, {t.x + 1, pre1_t.y}));
 
                             ++latest_pos.x;
                         }
@@ -671,7 +672,7 @@ class orthogonal_impl
                             t = {pre1_t.x, latest_pos.y};
 
                             // each 2-input gate has one incoming bent wire
-                            pre2_t = static_cast<typename Lyt::tile>(wire_south(layout, pre2_t, {pre2_t.x, t.y + 1}));
+                            pre2_t = static_cast<tile<Lyt>>(wire_south(layout, pre2_t, {pre2_t.x, t.y + 1}));
 
                             ++latest_pos.y;
                         }
@@ -685,8 +686,8 @@ class orthogonal_impl
                             t = latest_pos;
 
                             // both wires have one bent
-                            pre1_t = static_cast<typename Lyt::tile>(wire_east(layout, pre1_t, {t.x + 1, pre1_t.y}));
-                            pre2_t = static_cast<typename Lyt::tile>(wire_south(layout, pre2_t, {pre2_t.x, t.y + 1}));
+                            pre1_t = static_cast<tile<Lyt>>(wire_east(layout, pre1_t, {t.x + 1, pre1_t.y}));
+                            pre2_t = static_cast<tile<Lyt>>(wire_south(layout, pre2_t, {pre2_t.x, t.y + 1}));
 
                             ++latest_pos.x;
                             ++latest_pos.y;
@@ -700,17 +701,17 @@ class orthogonal_impl
                     {
                         const auto n_s = node2pos[n];
 
-                        typename Lyt::tile po_tile{};
+                        tile<Lyt> po_tile{};
 
                         // determine PO orientation
                         if (is_eastern_po_orientation_available(ctn, n))
                         {
-                            po_tile = layout.east(static_cast<typename Lyt::tile>(n_s));
+                            po_tile = layout.east(static_cast<tile<Lyt>>(n_s));
                             ++latest_pos.x;
                         }
                         else
                         {
-                            po_tile = layout.south(static_cast<typename Lyt::tile>(n_s));
+                            po_tile = layout.south(static_cast<tile<Lyt>>(n_s));
                             ++latest_pos.y;
                         }
 
@@ -726,8 +727,7 @@ class orthogonal_impl
 
                             po_tile = layout.eastern_border_of(po_tile);
 
-                            layout.create_po(wire_east(layout, static_cast<typename Lyt::tile>(anker), po_tile), "",
-                                             po_tile);
+                            layout.create_po(wire_east(layout, static_cast<tile<Lyt>>(anker), po_tile), "", po_tile);
                         }
                     }
                 }

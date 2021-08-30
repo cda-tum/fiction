@@ -5,6 +5,7 @@
 #ifndef FICTION_PRINT_LAYOUT_HPP
 #define FICTION_PRINT_LAYOUT_HPP
 
+#include "../traits.hpp"
 #include "../types.hpp"
 
 #include <fmt/color.h>
@@ -91,13 +92,13 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     {
         for (auto j = 0ull; j < num_cols; ++j)
         {
-            auto t1     = typename Lyt::tile{j, i};
+            auto t1     = tile<Lyt>{j, i};
             auto t2     = layout.above(t1);
             reprs[i][j] = gate_repr(t1);
 
             const auto east_west_connections = [&layout, &x_dirs, &t1, &t2, i, j](const auto s)
             {
-                const auto ft = static_cast<typename Lyt::tile>(s);
+                const auto ft = static_cast<tile<Lyt>>(s);
                 if (layout.is_east_of(t1, ft) || layout.is_east_of(t2, ft))
                     x_dirs[i][j] = "→";
                 if (layout.is_west_of(t1, ft) || layout.is_west_of(t2, ft))
@@ -106,7 +107,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 
             const auto north_south_connections = [&layout, &y_dirs, &t1, &t2, i, j](const auto s)
             {
-                const auto ft = static_cast<typename Lyt::tile>(s);
+                const auto ft = static_cast<tile<Lyt>>(s);
                 if (layout.is_north_of(t1, ft) || layout.is_north_of(t2, ft))
                     y_dirs[i][j] = "↑";
                 if (layout.is_south_of(t1, ft) || layout.is_south_of(t2, ft))
@@ -129,7 +130,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 
         for (const auto& gate : row)
         {
-            const auto t = typename Lyt::tile{c_ctr, r_ctr};
+            const auto t = tile<Lyt>{c_ctr, r_ctr};
 
             fmt::text_style color{};
 

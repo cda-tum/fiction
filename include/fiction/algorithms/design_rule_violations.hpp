@@ -5,10 +5,12 @@
 #ifndef FICTION_DESIGN_RULE_VIOLATIONS_HPP
 #define FICTION_DESIGN_RULE_VIOLATIONS_HPP
 
-#include "fmt/color.h"
-#include "fmt/format.h"
-#include "mockturtle/traits.hpp"
-#include "nlohmann/json.hpp"
+#include "../traits.hpp"
+
+#include <fmt/color.h>
+#include <fmt/format.h>
+#include <mockturtle/traits.hpp>
+#include <nlohmann/json.hpp>
 
 #include <ostream>
 #include <sstream>
@@ -174,7 +176,7 @@ class gate_level_drvs_impl
      * @param t Tile whose attributes are to be logged.
      * @param report Report to log into.
      */
-    void log_tile(const typename Lyt::tile t, nlohmann::json& report) const noexcept
+    void log_tile(const tile<Lyt> t, nlohmann::json& report) const noexcept
     {
         std::stringstream s{};
 
@@ -219,8 +221,8 @@ class gate_level_drvs_impl
      */
     std::string summary(std::string&& msg, const bool chk, const bool brk) const noexcept
     {
-        return fmt::format(" [{}] {}{}", chk ? CHECK_PASSED : (brk ? CHECK_FAILED : WARNING),
-                           chk ? "" : "not ", std::move(msg));
+        return fmt::format(" [{}] {}{}", chk ? CHECK_PASSED : (brk ? CHECK_FAILED : WARNING), chk ? "" : "not ",
+                           std::move(msg));
     }
     /**
      * Checks for nodes that are not placed but still alive.
@@ -307,11 +309,9 @@ class gate_level_drvs_impl
                     const auto t = lyt.get_tile(n);
 
                     bool dangling_inp_connection =
-                        lyt.template incoming_data_flow<std::set<typename Lyt::tile>>(t).size() == 0 &&
-                        !lyt.is_pi_tile(t);
+                        lyt.template incoming_data_flow<std::set<tile<Lyt>>>(t).size() == 0 && !lyt.is_pi_tile(t);
                     bool dangling_out_connection =
-                        lyt.template outgoing_data_flow<std::set<typename Lyt::tile>>(t).size() == 0 &&
-                        !lyt.is_po_tile(t);
+                        lyt.template outgoing_data_flow<std::set<tile<Lyt>>>(t).size() == 0 && !lyt.is_po_tile(t);
 
                     if (dangling_out_connection || dangling_inp_connection)
                     {
