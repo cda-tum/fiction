@@ -26,8 +26,7 @@ class clear_command : public command
             command(e, "Removes all elements from the respectively flagged stores. If no store is specified, all "
                        "stores will be cleared.")
     {
-        //            add_flag("--cell_layout,-c", cell,
-        //                     "Clear cell layout store");
+        add_flag("--cell_layout,-c", cell, "Clear cell layout store");
         add_flag("--gate_layout,-g", gate, "Clear gate layout store");
         add_flag("--network,-n", network, "Clear logic network store");
         add_flag("--truth_table,-t", table, "Clear truth table store");
@@ -48,8 +47,8 @@ class clear_command : public command
             table   = true;
         }
 
-        //            if (cell)
-        //                store<fiction::cell_layout_t>().clear();
+        if (cell)
+            store<fiction::cell_layout_t>().clear();
         if (gate)
             store<fiction::gate_layout_t>().clear();
         if (network)

@@ -10,8 +10,21 @@
 namespace fiction
 {
 
-template<typename Lyt>
+template <typename Lyt>
 using tile = typename Lyt::tile;
+
+#pragma region has_synchronization_elements
+template <class Lyt, class = void>
+struct has_synchronization_elements : std::false_type
+{};
+
+template <class Lyt>
+struct has_synchronization_elements<Lyt, std::enable_if_t<Lyt::has_synchronization_elements>> : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_synchronization_elements_v = has_synchronization_elements<Lyt>::value;
+#pragma endregion
 
 #pragma region has_is_po
 template <class Ntk, class = void>

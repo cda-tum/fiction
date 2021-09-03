@@ -28,85 +28,85 @@ namespace detail
 namespace siqad
 {
 
-constexpr const char* XML_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-constexpr const char* OPEN_SIQAD    = "<siqad>\n";
-constexpr const char* CLOSE_SIQAD   = "</siqad>\n";
-constexpr const char* PROGRAM_BLOCK = "    <program>\n"
-                                      "        <file_purpose>{}</file_purpose>\n"
-                                      "        <created_by>{}</created_by>\n"
-                                      "        <available_at>{}</available_at>\n"
-                                      "        <date>{}</date>\n"
-                                      "    </program>\n";
+static constexpr const char* XML_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+static constexpr const char* OPEN_SIQAD    = "<siqad>\n";
+static constexpr const char* CLOSE_SIQAD   = "</siqad>\n";
+static constexpr const char* PROGRAM_BLOCK = "    <program>\n"
+                                             "        <file_purpose>{}</file_purpose>\n"
+                                             "        <created_by>{}</created_by>\n"
+                                             "        <available_at>{}</available_at>\n"
+                                             "        <date>{}</date>\n"
+                                             "    </program>\n";
 
-constexpr const char* GUI_BLOCK = "    <gui>\n"
-                                  "        <zoom>{}</zoom>\n"
-                                  "        <displayed_region x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>\n"
-                                  "        <scroll x=\"{}\" y=\"{}\"/>\n"
-                                  "    </gui>\n";
+static constexpr const char* GUI_BLOCK = "    <gui>\n"
+                                         "        <zoom>{}</zoom>\n"
+                                         "        <displayed_region x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>\n"
+                                         "        <scroll x=\"{}\" y=\"{}\"/>\n"
+                                         "    </gui>\n";
 
-constexpr const char* LAYERS_BLOCK = "<layers>\n"
-                                     "        <layer_prop>\n"
-                                     "            <name>Lattice</name>\n"
-                                     "            <type>Lattice</type>\n"
-                                     "            <role>Design</role>\n"
-                                     "            <zoffset>0</zoffset>\n"
-                                     "            <zheight>0</zheight>\n"
-                                     "            <visible>1</visible>\n"
-                                     "            <active>0</active>\n"
-                                     "            <lat_vec>\n"
-                                     "                <a1 x=\"3.84\" y=\"0\"/>\n"
-                                     "                <a2 x=\"0\" y=\"7.68\"/>\n"
-                                     "                <N>2</N>\n"
-                                     "                <b1 x=\"0\" y=\"0\"/>\n"
-                                     "                <b2 x=\"0\" y=\"2.25\"/>\n"
-                                     "            </lat_vec>\n"
-                                     "        </layer_prop>\n"
-                                     "        <layer_prop>\n"
-                                     "            <name>Screenshot Overlay</name>\n"
-                                     "            <type>Misc</type>\n"
-                                     "            <role>Overlay</role>\n"
-                                     "            <zoffset>0</zoffset>\n"
-                                     "            <zheight>0</zheight>\n"
-                                     "            <visible>0</visible>\n"
-                                     "            <active>0</active>\n"
-                                     "        </layer_prop>\n"
-                                     "        <layer_prop>\n"
-                                     "            <name>Surface</name>\n"
-                                     "            <type>DB</type>\n"
-                                     "            <role>Design</role>\n"
-                                     "            <zoffset>0</zoffset>\n"
-                                     "            <zheight>0</zheight>\n"
-                                     "            <visible>1</visible>\n"
-                                     "            <active>0</active>\n"
-                                     "        </layer_prop>\n"
-                                     "        <layer_prop>\n"
-                                     "            <name>Metal</name>\n"
-                                     "            <type>Electrode</type>\n"
-                                     "            <role>Design</role>\n"
-                                     "            <zoffset>1000</zoffset>\n"
-                                     "            <zheight>100</zheight>\n"
-                                     "            <visible>1</visible>\n"
-                                     "            <active>0</active>\n"
-                                     "        </layer_prop>\n"
-                                     "    </layers>\n";
+static constexpr const char* LAYERS_BLOCK = "<layers>\n"
+                                            "        <layer_prop>\n"
+                                            "            <name>Lattice</name>\n"
+                                            "            <type>Lattice</type>\n"
+                                            "            <role>Design</role>\n"
+                                            "            <zoffset>0</zoffset>\n"
+                                            "            <zheight>0</zheight>\n"
+                                            "            <visible>1</visible>\n"
+                                            "            <active>0</active>\n"
+                                            "            <lat_vec>\n"
+                                            "                <a1 x=\"3.84\" y=\"0\"/>\n"
+                                            "                <a2 x=\"0\" y=\"7.68\"/>\n"
+                                            "                <N>2</N>\n"
+                                            "                <b1 x=\"0\" y=\"0\"/>\n"
+                                            "                <b2 x=\"0\" y=\"2.25\"/>\n"
+                                            "            </lat_vec>\n"
+                                            "        </layer_prop>\n"
+                                            "        <layer_prop>\n"
+                                            "            <name>Screenshot Overlay</name>\n"
+                                            "            <type>Misc</type>\n"
+                                            "            <role>Overlay</role>\n"
+                                            "            <zoffset>0</zoffset>\n"
+                                            "            <zheight>0</zheight>\n"
+                                            "            <visible>0</visible>\n"
+                                            "            <active>0</active>\n"
+                                            "        </layer_prop>\n"
+                                            "        <layer_prop>\n"
+                                            "            <name>Surface</name>\n"
+                                            "            <type>DB</type>\n"
+                                            "            <role>Design</role>\n"
+                                            "            <zoffset>0</zoffset>\n"
+                                            "            <zheight>0</zheight>\n"
+                                            "            <visible>1</visible>\n"
+                                            "            <active>0</active>\n"
+                                            "        </layer_prop>\n"
+                                            "        <layer_prop>\n"
+                                            "            <name>Metal</name>\n"
+                                            "            <type>Electrode</type>\n"
+                                            "            <role>Design</role>\n"
+                                            "            <zoffset>1000</zoffset>\n"
+                                            "            <zheight>100</zheight>\n"
+                                            "            <visible>1</visible>\n"
+                                            "            <active>0</active>\n"
+                                            "        </layer_prop>\n"
+                                            "    </layers>\n";
 
-constexpr const char* OPEN_DESIGN  = "    <design>\n"
-                                     "        <layer type=\"Lattice\"/>\n"
-                                     "        <layer type=\"Misc\"/>\n"
-                                     "        <layer type=\"DB\">\n";
-constexpr const char* CLOSE_DESIGN = "    </design>\n";
+static constexpr const char* OPEN_DESIGN  = "    <design>\n"
+                                            "        <layer type=\"Lattice\"/>\n"
+                                            "        <layer type=\"Misc\"/>\n"
+                                            "        <layer type=\"DB\">\n";
+static constexpr const char* CLOSE_DESIGN = "    </design>\n";
 
-constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"
-                                    "                <layer_id>2</layer_id>\n"
-                                    "                <latcoord n=\"{}\" m=\"{}\" l=\"{}\"/>\n"
-                                    "                <color>{}</color>\n"
-                                    "            </dbdot>\n";
+static constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"
+                                           "                <layer_id>2</layer_id>\n"
+                                           "                <latcoord n=\"{}\" m=\"{}\" l=\"{}\"/>\n"
+                                           "                <color>{}</color>\n"
+                                           "            </dbdot>\n";
 
 // color format is Alpha RBG
-constexpr const char* NORMAL_COLOR = "#ffc8c8c8";
-constexpr const char* INPUT_COLOR  = "#ff008dc8";
-constexpr const char* OUTPUT_COLOR = "#ffe28686";
-constexpr const char* CONST_COLOR  = "#ff000000";
+static constexpr const char* NORMAL_COLOR = "#ffc8c8c8";
+static constexpr const char* INPUT_COLOR  = "#ff008dc8";
+static constexpr const char* OUTPUT_COLOR = "#ffe28686";
+static constexpr const char* CONST_COLOR  = "#ff000000";
 
 }  // namespace siqad
 

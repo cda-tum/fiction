@@ -507,6 +507,46 @@ class gate_level_layout : public ClockedLayout
             r.begin(), r.end(), [this](const auto n) { return is_wire(n) && !is_dead(n); }, fn);
     }
 
+    template <typename Container>
+    [[nodiscard]] Container incoming_data_flow(const tile& t) const noexcept
+    {
+        auto incoming = ClockedLayout::template incoming_clocked_zones<Container>(t);
+
+        Container data_flow{};
+
+        for (const auto& in : incoming)
+        {
+            const std::set<tile> incoming_above_below{
+                std::initializer_list<tile>{in, ClockedLayout::above(in), ClockedLayout::below(in)}};
+
+            std::copy_if(std::cbegin(incoming_above_below), std::cend(incoming_above_below),
+                         std::inserter(data_flow, std::cend(data_flow)),
+                         [this, &t](const auto& dt) { return is_child(get_node(t), static_cast<signal>(dt)); });
+        }
+
+        return data_flow;
+    }
+
+    template <typename Container>
+    [[nodiscard]] Container outgoing_data_flow(const tile& t) const noexcept
+    {
+        auto outgoing = ClockedLayout::template outgoing_clocked_zones<Container>(t);
+
+        Container data_flow{};
+
+        for (const auto& out : outgoing)
+        {
+            const std::set<tile> outgoing_above_below{
+                std::initializer_list<tile>{out, ClockedLayout::above(out), ClockedLayout::below(out)}};
+
+            std::copy_if(std::cbegin(outgoing_above_below), std::cend(outgoing_above_below),
+                         std::inserter(data_flow, std::cend(data_flow)),
+                         [this, &t](const auto& dt) { return is_child(get_node(dt), static_cast<signal>(t)); });
+        }
+
+        return data_flow;
+    }
+
     template <typename Fn>
     void foreach_fanin(node const& n, Fn&& fn) const
     {
@@ -830,46 +870,6 @@ class gate_level_layout : public ClockedLayout
     {
         const auto& node_data = strg->nodes[n];
         return std::find(node_data.children.cbegin(), node_data.children.cend(), s) != node_data.children.cend();
-    }
-
-    template <typename Container>
-    [[nodiscard]] Container incoming_data_flow(const tile& t) const noexcept
-    {
-        auto incoming = ClockedLayout::template incoming_clocked_zones<Container>(t);
-
-        Container data_flow{};
-
-        for (const auto& in : incoming)
-        {
-            const std::set<tile> incoming_above_below{
-                std::initializer_list<tile>{in, ClockedLayout::above(in), ClockedLayout::below(in)}};
-
-            std::copy_if(std::cbegin(incoming_above_below), std::cend(incoming_above_below),
-                         std::inserter(data_flow, std::cend(data_flow)),
-                         [this, &t](const auto& dt) { return is_child(get_node(t), static_cast<signal>(dt)); });
-        }
-
-        return data_flow;
-    }
-
-    template <typename Container>
-    [[nodiscard]] Container outgoing_data_flow(const tile& t) const noexcept
-    {
-        auto outgoing = ClockedLayout::template outgoing_clocked_zones<Container>(t);
-
-        Container data_flow{};
-
-        for (const auto& out : outgoing)
-        {
-            const std::set<tile> outgoing_above_below{
-                std::initializer_list<tile>{out, ClockedLayout::above(out), ClockedLayout::below(out)}};
-
-            std::copy_if(std::cbegin(outgoing_above_below), std::cend(outgoing_above_below),
-                         std::inserter(data_flow, std::cend(data_flow)),
-                         [this, &t](const auto& dt) { return is_child(get_node(dt), static_cast<signal>(t)); });
-        }
-
-        return data_flow;
     }
 
     void clear_tile(const tile& t) noexcept

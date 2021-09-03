@@ -9,6 +9,7 @@
 #include "layouts/cell_level_layout.hpp"
 #include "layouts/clocked_layout.hpp"
 #include "layouts/gate_level_layout.hpp"
+#include "layouts/synchronization_element_layout.hpp"
 #include "layouts/tile_based_layout.hpp"
 #include "networks/topology_network.hpp"
 #include "technology/cell_technologies.hpp"
@@ -55,16 +56,16 @@ constexpr const char* top_name = "TOP";
 using logic_network_t = std::variant<aig_ptr, mig_ptr, top_ptr>;
 
 template <class Ntk>
-inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, fiction::aig_nt> ? fiction::aig_name :
-                                             std::is_same_v<std::decay_t<Ntk>, fiction::mig_nt> ? fiction::mig_name :
-                                             std::is_same_v<std::decay_t<Ntk>, fiction::top_nt> ? fiction::top_name :
-                                                                                                  "?";
+inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, aig_nt> ? aig_name :
+                                             std::is_same_v<std::decay_t<Ntk>, mig_nt> ? mig_name :
+                                             std::is_same_v<std::decay_t<Ntk>, top_nt> ? top_name :
+                                                                                         "?";
 
 /**
  * FCN gate-level layouts.
  */
-using gate_clk_lyt = mockturtle::names_view<
-    fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<cartesian_layout<coord_t>>>>>;
+using gate_clk_lyt =
+    mockturtle::names_view<gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>>;
 using gate_clk_lyt_ptr = std::shared_ptr<gate_clk_lyt>;
 
 using gate_layout_t = std::variant<gate_clk_lyt_ptr>;
@@ -77,25 +78,24 @@ constexpr const char* inml_name = "iNML";
 constexpr const char* sidb_name = "SiDB";
 
 template <class Tech>
-inline constexpr const char* tech_impl_name =
-    std::is_same_v<std::decay_t<Tech>, fiction::qca_technology>  ? fiction::qca_name :
-    std::is_same_v<std::decay_t<Tech>, fiction::inml_technology> ? fiction::inml_name :
-    std::is_same_v<std::decay_t<Tech>, fiction::sidb_technology> ? fiction::sidb_name :
-                                                                   "?";
+inline constexpr const char* tech_impl_name = std::is_same_v<std::decay_t<Tech>, qca_technology>  ? qca_name :
+                                              std::is_same_v<std::decay_t<Tech>, inml_technology> ? inml_name :
+                                              std::is_same_v<std::decay_t<Tech>, sidb_technology> ? sidb_name :
+                                                                                                    "?";
 
 /**
  * FCN cell-level layouts.
  */
 using qca_cell_clk_lyt =
-    fiction::cell_level_layout<fiction::qca_technology, fiction::clocked_layout<fiction::cartesian_layout<coord_t>>>;
+    cell_level_layout<qca_technology,
+                      synchronization_element_layout  // se_layouts have only been investigated for QCA technologies
+                      <clocked_layout<cartesian_layout<coord_t>>>>;
 using qca_cell_clk_lyt_ptr = std::shared_ptr<qca_cell_clk_lyt>;
 
-using inml_cell_clk_lyt =
-    fiction::cell_level_layout<fiction::inml_technology, fiction::clocked_layout<fiction::cartesian_layout<coord_t>>>;
+using inml_cell_clk_lyt     = cell_level_layout<inml_technology, clocked_layout<cartesian_layout<coord_t>>>;
 using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
 
-using sidb_cell_clk_lyt =
-    fiction::cell_level_layout<fiction::sidb_technology, fiction::clocked_layout<fiction::cartesian_layout<coord_t>>>;
+using sidb_cell_clk_lyt     = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coord_t>>>;
 using sidb_cell_clk_lyt_ptr = std::shared_ptr<sidb_cell_clk_lyt>;
 
 using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr, inml_cell_clk_lyt_ptr, sidb_cell_clk_lyt_ptr>;

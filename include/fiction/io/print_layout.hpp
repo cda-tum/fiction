@@ -26,7 +26,7 @@ static const auto INP_COLOR = fmt::fg(fmt::color::green);
 // Escape color sequence for output colors (red).
 static const auto OUT_COLOR = fmt::fg(fmt::color::red);
 //// Escape color sequence for latch colors (yellow on black).
-// static const auto LATCH_COLOR = fmt::fg(fmt::color::yellow) | fmt::bg(fmt::color::black);
+static const auto SE_COLOR = fmt::fg(fmt::color::yellow) | fmt::bg(fmt::color::black);
 // Escape color sequences for clock background colors (white to dark grey).
 static const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::black) | fmt::bg(fmt::color::white),
                                                          fmt::fg(fmt::color::black) | fmt::bg(fmt::color::light_gray),
@@ -136,8 +136,11 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 
             if (clk_color)
                 color = color | detail::CLOCK_COLOR[layout.get_clock_number(t)];
-            //            if (io_color && (get_latch(t) > 0u))
-            //                os << detail::LATCH_COLOR;
+            if constexpr (has_synchronization_elements_v<Lyt>)
+            {
+                if (io_color && layout.is_synchronization_element(t))
+                    color = color | detail::SE_COLOR;
+            }
             if (io_color && layout.is_pi_tile(t))
                 color = color | detail::INP_COLOR;
             else if (io_color && layout.is_po_tile(t))
@@ -188,8 +191,11 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             {
                 const auto ct = layout.get_cell_type(c);
 
-                //                if (io_color && get_latch(c) > 0u)
-                //                    os << detail::LATCH_COLOR;
+                if constexpr (has_synchronization_elements_v<Lyt>)
+                {
+                    if (io_color && layout.is_synchronization_element(c))
+                        color = color | detail::SE_COLOR;
+                }
                 if (io_color && Lyt::technology::is_input_cell(ct))
                     color = color | detail::INP_COLOR;
                 else if (io_color && Lyt::technology::is_output_cell(ct))

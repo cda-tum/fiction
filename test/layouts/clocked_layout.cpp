@@ -15,7 +15,7 @@ TEST_CASE("Clocking", "[clocked]")
 {
     using coordinate_layout = cartesian_layout<coord_t>;
 
-    clocked_layout<coordinate_layout> layout{coordinate_layout::aspect_ratio{2, 2, 0}, twoddwave_4_clocking};
+    clocked_layout<coordinate_layout> layout{coordinate_layout::aspect_ratio{1, 1, 0}, twoddwave_4_clocking};
 
     CHECK(layout.is_clocking_scheme(clock_name::twoddwave4));
     CHECK(layout.is_regularly_clocked());

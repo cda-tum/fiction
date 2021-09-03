@@ -190,7 +190,13 @@ class gate_level_drvs_impl
         }
 
         auto clk = lyt.get_clock_number(t);
-        // auto l   = layout->get_latch(t);
+
+        uint32_t se{0};
+
+        if constexpr (has_synchronization_elements_v<Lyt>)
+        {
+            se = lyt.get_synchronization_element(t);
+        }
 
         const std::array<const char*, 4> inp{
             {lyt.has_northern_incoming_signal(t) ? "N" : "", lyt.has_eastern_incoming_signal(t) ? "E" : "",
@@ -199,10 +205,8 @@ class gate_level_drvs_impl
             {lyt.has_northern_outgoing_signal(t) ? "N" : "", lyt.has_eastern_outgoing_signal(t) ? "E" : "",
              lyt.has_southern_outgoing_signal(t) ? "S" : "", lyt.has_western_outgoing_signal(t) ? "W" : ""}};
 
-        s << fmt::format(", clk: {}, inp: {}, out: {}{}{}", clk,
-                         // (l ? ", l: " + std::to_string(l) : ""),
-                         fmt::join(inp, ""), fmt::join(out, ""), (lyt.is_pi_tile(t) ? ", PI" : ""),
-                         (lyt.is_po_tile(t) ? ", PO" : ""));
+        s << fmt::format(", clk: {}, se: {}, inp: {}, out: {}{}{}", clk, se, fmt::join(inp, ""), fmt::join(out, ""),
+                         (lyt.is_pi_tile(t) ? ", PI" : ""), (lyt.is_po_tile(t) ? ", PO" : ""));
 
         report[t.str()] = s.str();
     }
@@ -309,9 +313,9 @@ class gate_level_drvs_impl
                     const auto t = lyt.get_tile(n);
 
                     bool dangling_inp_connection =
-                        lyt.template incoming_data_flow<std::set<tile<Lyt>>>(t).size() == 0 && !lyt.is_pi_tile(t);
+                        lyt.template incoming_data_flow<std::set<tile<Lyt>>>(t).empty() && !lyt.is_pi_tile(t);
                     bool dangling_out_connection =
-                        lyt.template outgoing_data_flow<std::set<tile<Lyt>>>(t).size() == 0 && !lyt.is_po_tile(t);
+                        lyt.template outgoing_data_flow<std::set<tile<Lyt>>>(t).empty() && !lyt.is_po_tile(t);
 
                     if (dangling_out_connection || dangling_inp_connection)
                     {

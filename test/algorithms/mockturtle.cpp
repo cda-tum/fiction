@@ -8,6 +8,7 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 
 #include <kitty/constructors.hpp>
@@ -67,4 +68,21 @@ TEST_CASE("Simulation", "[mockturtle]")
     REQUIRE(crossing_tts.size() == 2);
     CHECK(crossing_tts[0] == tt_and12);
     CHECK(crossing_tts[1] == tt_and34);
+
+    SECTION("Synchronization elements")
+    {
+        using se_layout = gate_level_layout<
+            synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>>;
+
+        REQUIRE(mockturtle::has_compute_v<se_layout, kitty::dynamic_truth_table>);
+
+        auto se_or_layout = blueprints::se_gate_layout<se_layout>();
+
+        auto se_or_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
+            se_or_layout,
+            mockturtle::default_simulator<kitty::dynamic_truth_table>(static_cast<unsigned>(se_or_layout.num_pis())));
+
+        REQUIRE(se_or_tts.size() == 1);
+        CHECK(se_or_tts[0] == tt_or);
+    }
 }

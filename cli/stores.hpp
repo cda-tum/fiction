@@ -172,14 +172,23 @@ ALICE_DESCRIBE_STORE(fiction::gate_layout_t, layout)
 
 ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
 {
-    // TODO crossings, latches, critical path, throughput
+    // TODO crossings, critical path, throughput
     const auto print_statistics = [&os](auto&& lyt)
     {
+        using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
+
+        uint32_t num_se{0};
+
+        if constexpr (fiction::has_synchronization_elements_v<Lyt>)
+        {
+            num_se = lyt->num_se();
+        }
+
         mockturtle::depth_view depth_lyt{*lyt};
 
-        os << fmt::format("[i] {} - {} × {}, I/O: {}/{}, gates: {}, wires: {}, CP: {}\n", lyt->get_network_name(),
-                          lyt->x() + 1, lyt->y() + 1, lyt->num_pis(), lyt->num_pos(), lyt->num_gates(),
-                          lyt->num_wires(), depth_lyt.depth());
+        os << fmt::format("[i] {} - {} × {}, I/O: {}/{}, gates: {}, wires: {}, CP: {}, sync. elems.: {}\n",
+                          lyt->get_network_name(), lyt->x() + 1, lyt->y() + 1, lyt->num_pis(), lyt->num_pos(),
+                          lyt->num_gates(), lyt->num_wires(), depth_lyt.depth(), num_se);
     };
 
     std::visit(print_statistics, layout);
@@ -189,6 +198,15 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
 {
     const auto log_statistics = [](auto&& lyt)
     {
+        using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
+
+        uint32_t num_se{0};
+
+        if constexpr (fiction::has_synchronization_elements_v<Lyt>)
+        {
+            num_se = lyt->num_se();
+        }
+
         mockturtle::depth_view depth_lyt{*lyt};
 
         return nlohmann::json{
@@ -201,7 +219,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             // {"bounding box", {{"x-size", bb.x_size}, {"y-size", bb.y_size}, {"area", bb.area()}}},
             // {"free tiles", area - (gate_tiles + wire_tiles - crossings)},  // free tiles in ground layer
             // {"crossings", crossings},
-            // {"latches", layout->latch_count()},
+            {"synchronization elements", num_se},
             {"critical path", depth_lyt.depth()}
             // {"throughput", fmt::format("1/{}", tp)}};
         };
@@ -308,6 +326,8 @@ ALICE_LOG_STORE_STATISTICS(fiction::cell_layout_t, layout)
 template <>
 bool can_show<fiction::cell_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
 {
+    cmd.add_flag("--simple,-s", "Simplified depiction abstracting from details")->group("cell_layouts (-c)");
+
     extension = "svg";
 
     return true;
@@ -331,7 +351,7 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
             {
                 fiction::write_qca_layout_svg(*lyt, os, {cmd.is_set("simple")});
             }
-            catch (const fiction::unsupported_cell_type_exception& e)
+            catch (const fiction::unsupported_cell_type_exception<typename Lyt::coordinate>& e)
             {
                 cmd.env->out() << fmt::format("[e] unsupported cell type at cell position {}", e.where()) << std::endl;
             }

@@ -117,7 +117,7 @@ class clocked_layout : public CoordinateLayout
     template <typename Container>
     [[nodiscard]] Container incoming_clocked_zones(const clock_zone& cz) const noexcept
     {
-        auto adj = CoordinateLayout::template adjacent_coordinates<Container>(cz);
+        const auto adj = CoordinateLayout::template adjacent_coordinates<Container>(cz);
 
         Container incoming{};
 
@@ -130,7 +130,7 @@ class clocked_layout : public CoordinateLayout
     template <typename Container>
     [[nodiscard]] Container outgoing_clocked_zones(const clock_zone& cz) const noexcept
     {
-        auto adj = CoordinateLayout::template adjacent_coordinates<Container>(cz);
+        const auto adj = CoordinateLayout::template adjacent_coordinates<Container>(cz);
 
         Container outgoing{};
 
@@ -144,17 +144,17 @@ class clocked_layout : public CoordinateLayout
 
 #pragma region Structural properties
 
-    degree_t in_degree(const clock_zone& cz) const noexcept
+    [[nodiscard]] degree_t in_degree(const clock_zone& cz) const noexcept
     {
         return static_cast<degree_t>(incoming_clocked_zones<std::set<clock_zone>>(cz).size());
     }
 
-    degree_t out_degree(const clock_zone& cz) const noexcept
+    [[nodiscard]] degree_t out_degree(const clock_zone& cz) const noexcept
     {
         return static_cast<degree_t>(outgoing_clocked_zones<std::set<clock_zone>>(cz).size());
     }
 
-    degree_t degree(const clock_zone& cz) const noexcept
+    [[nodiscard]] degree_t degree(const clock_zone& cz) const noexcept
     {
         return static_cast<degree_t>(in_degree(cz) + out_degree(cz));
     }

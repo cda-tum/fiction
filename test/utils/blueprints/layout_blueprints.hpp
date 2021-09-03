@@ -205,6 +205,25 @@ GateLyt non_structural_all_function_gate_layout() noexcept
     return layout;
 }
 
+template <typename GateLyt>
+GateLyt se_gate_layout() noexcept
+{
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 1, 0}, fiction::twoddwave_4_clocking};
+
+    layout.assign_synchronization_element({1, 0}, 1);
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {2, 0});
+
+    const auto w1 = layout.create_buf(x1, {0, 1});
+    const auto w2 = layout.create_buf(x2, {1, 0});
+
+    const auto o1 = layout.create_or(w1, w2, {1, 1});
+    layout.create_po(o1, "f1", {2, 1});
+
+    return layout;
+}
+
 }  // namespace blueprints
 
 #endif  // FICTION_LAYOUT_BLUEPRINTS_HPP
