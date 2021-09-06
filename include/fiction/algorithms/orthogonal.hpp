@@ -309,7 +309,7 @@ uint32_t is_eastern_po_orientation_available(const coloring_container<Ntk>& ctn,
 }
 
 template <typename Lyt, typename Ntk>
-typename Lyt::aspect_ratio determine_layout_size(const coloring_container<Ntk>& ctn) noexcept
+aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn) noexcept
 {
 #if (PROGRESS_BARS)
     // initialize a progress bar
@@ -781,8 +781,10 @@ template <typename Lyt, typename Ntk>
 Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
                orthogonal_physical_design_stats* pst = nullptr)
 {
-    static_assert(mockturtle::is_network_type_v<Lyt>, "Lyt is not a network type");
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(mockturtle::is_network_type_v<Ntk>,
+                  "Ntk is not a network type");  // Ntk is being converted to a topology_network anyways, therefore,
+                                                 // this is the only relevant check here
 
     // check for input degree
     if (detail::has_high_degree_fanin_nodes(ntk))

@@ -288,10 +288,10 @@ class gate_layout_tile_drawer : public topology_dot_drawer<Lyt, DrawIndexes>
 template <class Lyt, class Drawer = gate_layout_tile_drawer<Lyt>>
 void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {})
 {
-    static_assert(mockturtle::is_network_type_v<Lyt>, "Ntk is not a network type");
-    static_assert(mockturtle::has_is_pi_v<Lyt>, "Ntk does not implement the is_pi method");
-    static_assert(mockturtle::has_foreach_node_v<Lyt>, "Ntk does not implement the foreach_node method");
-    static_assert(mockturtle::has_foreach_fanin_v<Lyt>, "Ntk does not implement the foreach_fanin method");
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(mockturtle::has_is_pi_v<Lyt>, "Lyt does not implement the is_pi function");
+    static_assert(mockturtle::has_foreach_node_v<Lyt>, "Lyt does not implement the foreach_node function");
+    static_assert(mockturtle::has_foreach_fanin_v<Lyt>, "Lyt does not implement the foreach_fanin function");
 
     std::stringstream nodes{}, edges{}, grid{};
 

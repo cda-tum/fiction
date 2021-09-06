@@ -5,6 +5,7 @@
 #include "catch.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/traits.hpp>
 
 #include <map>
 #include <set>
@@ -18,18 +19,38 @@ using namespace fiction;
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 
-TEST_CASE("Coordinates", "[coordinate")
+TEST_CASE("Traits", "[coordinate]")
 {
-    auto td = cartesian_layout<coord_t>::coordinate{};
+    using layout = cartesian_layout<coord_t>;
+
+    CHECK(has_north_v<layout>);
+    CHECK(has_east_v<layout>);
+    CHECK(has_south_v<layout>);
+    CHECK(has_west_v<layout>);
+    CHECK(has_cardinal_checks_v<layout>);
+    CHECK(has_above_v<layout>);
+    CHECK(has_below_v<layout>);
+    CHECK(has_elevation_checks_v<layout>);
+    CHECK(is_coordinate_layout_v<layout>);
+
+    CHECK(has_foreach_coordinate_v<layout>);
+    CHECK(has_foreach_adjacent_coordinate_v<layout>);
+}
+
+TEST_CASE("Coordinates", "[coordinates]")
+{
+    using layout = cartesian_layout<coord_t>;
+
+    auto td = layout::coordinate{};
     CHECK(td.is_dead());
 
-    auto t0 = cartesian_layout<coord_t>::coordinate{0, 0, 0};
+    auto t0 = layout::coordinate{0, 0, 0};
     CHECK(!t0.is_dead());
 
     CHECK(t0 != td);
 
-    auto t1 = cartesian_layout<coord_t>::coordinate{1, 2, 0};
-    auto t2 = cartesian_layout<coord_t>::coordinate{1, 2};
+    auto t1 = layout::coordinate{1, 2, 0};
+    auto t2 = layout::coordinate{1, 2};
 
     CHECK(t0 < t1);
     CHECK(t1 > t0);
@@ -58,30 +79,30 @@ TEST_CASE("Coordinates", "[coordinate")
     CHECK(t2 < t1);
     CHECK(t2 <= t1);
 
-    auto t3 = cartesian_layout<coord_t>::coordinate{0, 0, 1};
+    auto t3 = layout::coordinate{0, 0, 1};
 
     CHECK(t1 < t3);
     CHECK(t2 < t3);
 
-    std::map<uint64_t, cartesian_layout<coord_t>::coordinate> coordinate_repr{
-        {0x8000000000000000, cartesian_layout<coord_t>::coordinate{}},
-        {0x0000000000000000, cartesian_layout<coord_t>::coordinate{0, 0, 0}},
-        {0x4000000000000000, cartesian_layout<coord_t>::coordinate{0, 0, 1}},
-        {0x4000000080000001, cartesian_layout<coord_t>::coordinate{1, 1, 1}},
-        {0x0000000000000002, cartesian_layout<coord_t>::coordinate{2, 0, 0}},
-        {0x3fffffffffffffff, cartesian_layout<coord_t>::coordinate{2147483647, 2147483647, 0}}};
+    std::map<uint64_t, layout::coordinate> coordinate_repr{
+        {0x8000000000000000, layout::coordinate{}},
+        {0x0000000000000000, layout::coordinate{0, 0, 0}},
+        {0x4000000000000000, layout::coordinate{0, 0, 1}},
+        {0x4000000080000001, layout::coordinate{1, 1, 1}},
+        {0x0000000000000002, layout::coordinate{2, 0, 0}},
+        {0x3fffffffffffffff, layout::coordinate{2147483647, 2147483647, 0}}};
 
     for (auto [repr, coordinate] : coordinate_repr)
     {
-        CHECK(static_cast<cartesian_layout<coord_t>::coordinate>(repr) == coordinate);
+        CHECK(static_cast<layout::coordinate>(repr) == coordinate);
         CHECK(repr == static_cast<uint64_t>(coordinate));
-        CHECK(cartesian_layout<coord_t>::coordinate{repr} == coordinate);
-        CHECK(cartesian_layout<coord_t>::coordinate{coordinate} == coordinate);
-        CHECK(cartesian_layout<coord_t>::coordinate{static_cast<uint64_t>(coordinate)} == coordinate);
+        CHECK(layout::coordinate{repr} == coordinate);
+        CHECK(layout::coordinate{coordinate} == coordinate);
+        CHECK(layout::coordinate{static_cast<uint64_t>(coordinate)} == coordinate);
     }
 
     std::ostringstream os{};
-    os << cartesian_layout<coord_t>::coordinate{3, 2, 1};
+    os << layout::coordinate{3, 2, 1};
     CHECK(os.str() == "(3,2,1)");
 }
 
@@ -174,8 +195,8 @@ TEST_CASE("Cardinal operations", "[coordinate]")
         CHECK(at1 == at2);
         CHECK(layout.is_adjacent_of(t, at1));
         CHECK(layout.is_adjacent_of(at1, t));
-        CHECK(layout.is_surrounding_of(t, at1));
-        CHECK(layout.is_surrounding_of(at1, t));
+        CHECK(layout.is_adjacent_elevation_of(t, at1));
+        CHECK(layout.is_adjacent_elevation_of(at1, t));
 
         CHECK(layout.is_border(b));
         CHECK(!bt.is_dead());
@@ -237,7 +258,7 @@ TEST_CASE("Cardinal operations", "[coordinate]")
 
     // cover corner case
     cartesian_layout<coord_t> planar_layout{{1, 1, 0}};
-    auto dat = planar_layout.above({1, 1, 1});
+    auto                      dat = planar_layout.above({1, 1, 1});
     CHECK(dat.is_dead());
 
     auto bt  = layout.below(at);
@@ -252,6 +273,12 @@ TEST_CASE("Cardinal operations", "[coordinate]")
 
     auto s1 = layout.adjacent_coordinates<std::set<cartesian_layout<coord_t>::coordinate>>({5, 5});
     auto s2 = std::set<cartesian_layout<coord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
+
+    layout.foreach_adjacent_coordinate(
+        {5, 5},
+        [](const auto& adj) {
+            CHECK(std::set<cartesian_layout<coord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}}.count(adj));
+        });
 
     CHECK(s1 == s2);
 }

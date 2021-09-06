@@ -20,8 +20,6 @@ class synchronization_element_layout : public ClockedLayout
   public:
 #pragma region Types and constructors
 
-    static constexpr bool has_synchronization_elements = true;
-
     using sync_elem_t = uint8_t;
 
     struct synchronization_element_layout_storage

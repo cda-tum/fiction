@@ -7,10 +7,18 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/synchronization_element_layout.hpp>
+#include <fiction/traits.hpp>
 
 #include <set>
 
 using namespace fiction;
+
+TEST_CASE("Traits", "[synchronization-element]")
+{
+    using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<coord_t>>>;
+
+    CHECK(has_synchronization_elements_v<se_layout>);
+}
 
 TEST_CASE("Clocking", "[synchronization-element]")
 {

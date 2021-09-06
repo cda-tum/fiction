@@ -232,7 +232,7 @@ class qca_energy_dissipation_impl
 template <typename Lyt>
 void qca_energy_dissipation(const Lyt& lyt, energy_dissipation_stats* pst = nullptr)
 {
-    static_assert(mockturtle::is_network_type_v<Lyt>, "Lyt is not a network type");
+    static_assert(fiction::is_gate_level_layout_v<Lyt>, "GateLyt is not a gate-level layout");
     static_assert(mockturtle::has_foreach_gate_v<Lyt>, "Lyt does not implement the foreach_gate function");
     static_assert(mockturtle::has_is_constant_v<Lyt>, "Lyt does not implement the is_constant function");
 

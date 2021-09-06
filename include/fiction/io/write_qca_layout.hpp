@@ -6,6 +6,7 @@
 #define FICTION_WRITE_QCA_LAYOUT_HPP
 
 #include "../technology/cell_technologies.hpp"
+#include "../traits.hpp"
 
 #include <fmt/format.h>
 
@@ -122,7 +123,7 @@ class write_qca_layout_impl
         if (!file.is_open())
             throw std::ofstream::failure("could not open file");
 
-        std::vector<typename Lyt::cell> via_layer_cells{};
+        std::vector<cell<Lyt>> via_layer_cells{};
 
         auto write_cell = [&, this](const auto& cell) -> void
         {
@@ -339,7 +340,7 @@ class write_qca_layout_impl
         };
 
         auto via_counter     = 1u;
-        auto write_via_cells = [&](std::vector<typename Lyt::cell>& vias) -> void
+        auto write_via_cells = [&](std::vector<cell<Lyt>>& vias) -> void
         {
             if (vias.empty())
                 return;
@@ -405,7 +406,8 @@ class write_qca_layout_impl
 template <typename Lyt>
 void write_qca_layout(const Lyt& lyt, std::ofstream& os)
 {
-    static_assert(std::is_same_v<typename Lyt::technology, qca_technology>, "Lyt must be a QCA layout");
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(std::is_same_v<technology<Lyt>, qca_technology>, "Lyt must be a QCA layout");
 
     detail::write_qca_layout_impl p{lyt, os};
 

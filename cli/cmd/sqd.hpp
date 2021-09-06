@@ -7,6 +7,7 @@
 
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -60,15 +61,15 @@ class sqd_command : public command
         {
             using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
 
-            if constexpr (std::is_same_v<typename Lyt::technology, fiction::qca_technology> ||
-                          std::is_same_v<typename Lyt::technology, fiction::sidb_technology>)
+            if constexpr (std::is_same_v<fiction::technology<Lyt>, fiction::qca_technology> ||
+                          std::is_same_v<fiction::technology<Lyt>, fiction::sidb_technology>)
             {
                 fiction::write_sqd_layout(*lyt, filename);
             }
             else
             {
                 env->out() << fmt::format("[e] {}'s cell technology is not QCA or SiDB but {}", get_name(lyt),
-                                          fiction::tech_impl_name<typename Lyt::technology>)
+                                          fiction::tech_impl_name<fiction::technology<Lyt>>)
                            << std::endl;
             }
         };

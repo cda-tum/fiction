@@ -103,7 +103,8 @@ class apply_gate_library_impl
 template <typename CellLyt, typename GateLibrary, typename GateLyt>
 CellLyt apply_gate_library(const GateLyt& lyt)
 {
-    static_assert(mockturtle::is_network_type_v<GateLyt>, "GateLyt is not a network type");
+    static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+    static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
     static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
 

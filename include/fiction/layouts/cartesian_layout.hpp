@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <memory>
+#include <set>
 
 namespace fiction
 {
@@ -32,6 +33,9 @@ class cartesian_layout
 
         aspect_ratio dimension;
     };
+
+    static constexpr auto min_fanin_size = 0;
+    static constexpr auto max_fanin_size = 3;
 
     using base_type = cartesian_layout;
 
@@ -168,7 +172,7 @@ class cartesian_layout
         return is_north_of(c1, c2) || is_east_of(c1, c2) || is_south_of(c1, c2) || is_west_of(c1, c2);
     }
 
-    [[nodiscard]] bool is_surrounding_of(const Coordinate& c1, const Coordinate& c2) const noexcept
+    [[nodiscard]] bool is_adjacent_elevation_of(const Coordinate& c1, const Coordinate& c2) const noexcept
     {
         return is_adjacent_of(c1, c2) || is_north_of(c1, above(c2)) || is_east_of(c1, above(c2)) ||
                is_south_of(c1, above(c2)) || is_west_of(c1, above(c2)) || is_north_of(c1, below(c2)) ||
@@ -318,6 +322,14 @@ class cartesian_layout
         add_if_not_t(west(c));
 
         return cnt;
+    }
+
+    template <typename Fn>
+    void foreach_adjacent_coordinate(const Coordinate& c, Fn&& fn) const
+    {
+        auto adj = adjacent_coordinates<std::set<Coordinate>>(c);
+
+        mockturtle::detail::foreach_element(adj.begin(), adj.end(), fn);
     }
 
 #pragma endregion

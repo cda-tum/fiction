@@ -9,6 +9,7 @@
 
 #include <alice/alice.hpp>
 #include <mockturtle/generators/random_logic_generator.hpp>
+#include <mockturtle/traits.hpp>
 
 #include <memory>
 #include <random>
@@ -99,20 +100,20 @@ class random_command : public command
         typename gen_t::rules_t gen_rules;
         if constexpr (Maj)
         {
-            gen_rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<typename Ntk::signal> const& vs)
+            gen_rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<mockturtle::signal<Ntk>> const& vs)
                                                         {
                                                             assert(vs.size() == 3u);
                                                             return ntk.create_maj(vs[0], vs[1], vs[2]);
                                                         },
                                                         3u});
         }
-        gen_rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<typename Ntk::signal> const& vs)
+        gen_rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<mockturtle::signal<Ntk>> const& vs)
                                                     {
                                                         assert(vs.size() == 2u);
                                                         return ntk.create_and(vs[0], vs[1]);
                                                     },
                                                     2u});
-        gen_rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<typename Ntk::signal> const& vs)
+        gen_rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<mockturtle::signal<Ntk>> const& vs)
                                                     {
                                                         assert(vs.size() == 2u);
                                                         return ntk.create_or(vs[0], vs[1]);

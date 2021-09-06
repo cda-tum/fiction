@@ -211,7 +211,7 @@ class gate_level_drvs_impl
         report[t.str()] = s.str();
     }
 
-    void log_node(const typename Lyt::node n, nlohmann::json& report) const noexcept
+    void log_node(const mockturtle::node<Lyt> n, nlohmann::json& report) const noexcept
     {
         report[n] = lyt.node_to_index(n);
     }
@@ -279,7 +279,7 @@ class gate_level_drvs_impl
                     for (const auto& child : lyt.strg->nodes[n].children)
                     {
                         const auto ct = lyt.get_tile(lyt.get_node(child.index));
-                        if (!lyt.is_surrounding_of(t, ct))
+                        if (!lyt.is_adjacent_elevation_of(t, ct))
                         {
                             adjacencies_respected = false;
                             log_tile(ct, non_adjacency_report);

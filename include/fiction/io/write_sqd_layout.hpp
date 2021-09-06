@@ -6,6 +6,7 @@
 #define FICTION_WRITE_SQD_LAYOUT_HPP
 
 #include "../technology/cell_technologies.hpp"
+#include "../traits.hpp"
 #include "utils/version_info.hpp"
 
 #include <fmt/format.h>
@@ -155,12 +156,12 @@ class write_sqd_layout_impl
             [this, &design](const auto& c)
             {
                 // generate SiDB cells
-                if constexpr (std::is_same_v<typename Lyt::technology, sidb_technology>)
+                if constexpr (std::is_same_v<technology<Lyt>, sidb_technology>)
                 {
                     design << fmt::format(siqad::DBDOT_BLOCK, c.x, c.y / 2, c.y % 2, siqad::NORMAL_COLOR);
                 }
                 // generate QCA cell blocks
-                else if constexpr (std::is_same_v<typename Lyt::technology, qca_technology>)
+                else if constexpr (std::is_same_v<technology<Lyt>, qca_technology>)
                 {
                     const auto type = lyt.get_cell_type(c);
 
@@ -193,8 +194,8 @@ class write_sqd_layout_impl
 template <typename Lyt>
 void write_sqd_layout(const Lyt& lyt, std::ofstream& os)
 {
-    static_assert(std::is_same_v<typename Lyt::technology, qca_technology> ||
-                      std::is_same_v<typename Lyt::technology, sidb_technology>,
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(std::is_same_v<technology<Lyt>, qca_technology> || std::is_same_v<technology<Lyt>, sidb_technology>,
                   "Lyt must be a QCA or SiDB layout");
 
     detail::write_sqd_layout_impl p{lyt, os};

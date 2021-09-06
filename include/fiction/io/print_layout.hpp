@@ -39,6 +39,8 @@ template <typename Lyt>
 void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_color = true,
                              const bool clk_color = false) noexcept
 {
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+
     // empty layout
     if (layout.num_gates() == 0ul && layout.num_wires() == 0ul)
     {
@@ -164,6 +166,8 @@ template <typename Lyt>
 void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_color = true,
                              const bool clk_color = false) noexcept
 {
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+
     // empty layout
     if (layout.num_cells() == 0ul)
     {
@@ -175,7 +179,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     {
         for (auto x_pos = 0ull; x_pos <= layout.x(); ++x_pos)
         {
-            typename Lyt::cell c{x_pos, y_pos};
+            cell<Lyt> c{x_pos, y_pos};
 
             fmt::text_style color{};
 

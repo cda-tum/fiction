@@ -58,6 +58,12 @@ class tile_based_layout : public CoordinateLayout
         return CoordinateLayout::template adjacent_coordinates<Container>(t);
     }
 
+    template <typename Fn>
+    void foreach_adjacent_tile(const tile& t, Fn&& fn) const
+    {
+        CoordinateLayout::foreach_adjacent_coordinate(t, fn);
+    }
+
 #pragma endregion
 };
 

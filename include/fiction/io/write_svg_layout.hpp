@@ -6,6 +6,7 @@
 #define FICTION_WRITE_SVG_LAYOUT_HPP
 
 #include "../layouts/coordinate.hpp"
+#include "../traits.hpp"
 #include "utils/version_info.hpp"
 
 #include <fmt/format.h>
@@ -363,11 +364,11 @@ class write_qca_layout_svg_impl
     /**
      * Maps coordinates of tiles to their string representation and their clock zone.
      */
-    using coord_to_tile_mapping = std::unordered_map<typename Lyt::coordinate, tile_description>;
+    using coord_to_tile_mapping = std::unordered_map<coordinate<Lyt>, tile_description>;
     /**
      * Maps coordinates of tiles to a string representation of the cells contained within them.
      */
-    using coord_to_cell_list_mapping = std::unordered_map<typename Lyt::coordinate, std::string>;
+    using coord_to_cell_list_mapping = std::unordered_map<coordinate<Lyt>, std::string>;
     /**
      * Alias for an SVG description of a latch tile containing also its clock zone and its offset.
      */
@@ -376,9 +377,9 @@ class write_qca_layout_svg_impl
      * Maps coordinates of latch tiles to tuples containing their string representation, their clock zone,
      * and their latch offset.
      */
-    using coord_to_latch_mapping = std::unordered_map<typename Lyt::coordinate, svg_latch>;
+    using coord_to_latch_mapping = std::unordered_map<coordinate<Lyt>, svg_latch>;
 
-    std::pair<std::string, std::string> generate_description_color(const typename Lyt::cell& c)
+    std::pair<std::string, std::string> generate_description_color(const cell<Lyt>& c)
     {
         std::string cell_description, cell_color{};
 
@@ -534,9 +535,9 @@ class write_qca_layout_svg_impl
         lyt.foreach_cell_position(
             [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_cells, &coord_to_latch_tile](const auto& c)
             {
-                const auto  clock_zone  = lyt.get_clock_number(c);
-                const auto  tile_coords = typename Lyt::coordinate{std::ceil(c.x / lyt.get_tile_size_x()),
-                                                                  std::ceil(c.y / lyt.get_tile_size_y())};
+                const auto clock_zone = lyt.get_clock_number(c);
+                const auto tile_coords =
+                    coordinate<Lyt>{std::ceil(c.x / lyt.get_tile_size_x()), std::ceil(c.y / lyt.get_tile_size_y())};
                 std::string current_cells{};
 
                 bool is_sync_elem = false;
@@ -577,7 +578,7 @@ class write_qca_layout_svg_impl
                 }
 
                 // Represent the x- and y-coordinates inside the c's tile
-                const typename Lyt::coordinate in_tile{c.x % lyt.get_tile_size_x(), c.y % lyt.get_tile_size_y()};
+                const coordinate<Lyt> in_tile{c.x % lyt.get_tile_size_x(), c.y % lyt.get_tile_size_y()};
 
                 // Determines cell type and color
                 const auto desc_col = generate_description_color(c);
@@ -614,7 +615,7 @@ class write_qca_layout_svg_impl
         // Delete empty tiles in simple designs
         if (ps.simple)
         {
-            std::vector<typename Lyt::coordinate> empty_tiles{};
+            std::vector<coordinate<Lyt>> empty_tiles{};
 
             // Find empty tiles via missing cell-descriptions for their coordinates
             for (const auto& [coord, tdscr] : coord_to_tile)
@@ -630,7 +631,7 @@ class write_qca_layout_svg_impl
 
             if constexpr (has_synchronization_elements_v<Lyt>)
             {
-                std::vector<typename Lyt::coordinate> empty_latches{};
+                std::vector<coordinate<Lyt>> empty_latches{};
 
                 // Find empty latches via missing cell-descriptions for their coordinates
                 for (const auto& [coord, ldscr] : coord_to_latch_tile)
@@ -683,8 +684,7 @@ class write_qca_layout_svg_impl
             }
         }
 
-        const typename Lyt::coordinate length = {(lyt.x() + 1) / lyt.get_tile_size_x(),
-                                                 (lyt.y() + 1) / lyt.get_tile_size_y()};
+        const coordinate<Lyt> length = {(lyt.x() + 1) / lyt.get_tile_size_x(), (lyt.y() + 1) / lyt.get_tile_size_y()};
 
         const double viewbox_x = 2 * svg::viewbox_distance + length.x * svg::tile_distance;
         const double viewbox_y = 2 * svg::viewbox_distance + length.y * svg::tile_distance;
@@ -710,7 +710,8 @@ class write_qca_layout_svg_impl
 template <typename Lyt>
 void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg_params ps = {})
 {
-    static_assert(std::is_same_v<typename Lyt::technology, qca_technology>, "Lyt has to be a QCA layout");
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(std::is_same_v<technology<Lyt>, qca_technology>, "Lyt must be a QCA layout");
 
     detail::write_qca_layout_svg_impl<Lyt> p{lyt, os, ps};
 

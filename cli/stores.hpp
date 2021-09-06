@@ -9,6 +9,7 @@
 #include <fiction/io/print_layout.hpp>
 #include <fiction/io/write_svg_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -285,7 +286,7 @@ ALICE_DESCRIBE_STORE(fiction::cell_layout_t, layout)
         using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
 
         return fmt::format("{} ({}) - {} × {}, I/O: {}/{}, cells: {}", lyt->get_layout_name(),
-                           fiction::tech_impl_name<typename Lyt::technology>, lyt->x() + 1, lyt->y() + 1,
+                           fiction::tech_impl_name<fiction::technology<Lyt>>, lyt->x() + 1, lyt->y() + 1,
                            lyt->num_pis(), lyt->num_pos(), lyt->num_cells());
     };
 
@@ -299,7 +300,7 @@ ALICE_PRINT_STORE_STATISTICS(fiction::cell_layout_t, os, layout)
         using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
 
         os << fmt::format("[i] {} ({}) - {} × {}, I/O: {}/{}, cells: {}\n", lyt->get_layout_name(),
-                          fiction::tech_impl_name<typename Lyt::technology>, lyt->x() + 1, lyt->y() + 1, lyt->num_pis(),
+                          fiction::tech_impl_name<fiction::technology<Lyt>>, lyt->x() + 1, lyt->y() + 1, lyt->num_pis(),
                           lyt->num_pos(), lyt->num_cells());
     };
 
@@ -313,7 +314,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::cell_layout_t, layout)
         using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
 
         return nlohmann::json{{"name", lyt->get_layout_name()},
-                              {"technology", fiction::tech_impl_name<typename Lyt::technology>},
+                              {"technology", fiction::tech_impl_name<fiction::technology<Lyt>>},
                               {"inputs", lyt->num_pis()},
                               {"outputs", lyt->num_pos()},
                               {"cells", lyt->num_cells()},
@@ -341,7 +342,7 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
     {
         using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
 
-        if constexpr (!std::is_same_v<typename Lyt::technology, fiction::qca_technology>)
+        if constexpr (!std::is_same_v<fiction::technology<Lyt>, fiction::qca_technology>)
         {
             cmd.env->out() << fmt::format("[e] {} is not a QCA layout", lyt->get_layout_name()) << std::endl;
         }
@@ -351,7 +352,7 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
             {
                 fiction::write_qca_layout_svg(*lyt, os, {cmd.is_set("simple")});
             }
-            catch (const fiction::unsupported_cell_type_exception<typename Lyt::coordinate>& e)
+            catch (const fiction::unsupported_cell_type_exception<fiction::coordinate<Lyt>>& e)
             {
                 cmd.env->out() << fmt::format("[e] unsupported cell type at cell position {}", e.where()) << std::endl;
             }
