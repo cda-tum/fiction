@@ -7,6 +7,9 @@
 
 #include <utility>
 
+namespace fiction
+{
+
 /**
  * Defines a range type utilizing iterators. It implements begin() and end() as member
  * functions to work for range based for-loops.
@@ -16,47 +19,57 @@
 template <typename I>
 struct range_t
 {
-private:
+  private:
     /**
      * Iterators pointing to the begin and the end of the represented range.
      */
     const I b, e;
 
-public:
+  public:
     /**
      * Standard constructor with forward reference.
      *
      * @param range Begin and end iterator pair.
      */
-    explicit range_t(std::pair<I, I>&& range)
-            :
-            b{std::move(range.first)},
-            e{std::move(range.second)}
-    {}
+    constexpr explicit range_t(std::pair<I, I>&& range) : b{std::move(range.first)}, e{std::move(range.second)} {}
     /**
      * Returns the iterator pointing to the begin of the represented range.
      *
      * @return Begin iterator.
      */
-    I begin() const {return b;}
+    constexpr I begin() const
+    {
+        return b;
+    }
     /**
      * Returns the iterator pointing to the end of the represented range.
      *
      * @return End iterator.
      */
-    I end() const {return e;}
+    constexpr I end() const
+    {
+        return e;
+    }
     /**
      * Returns a const iterator pointing to the begin of the represented range.
      *
      * @return const begin iterator.
      */
-    const I cbegin() const {return b;}
+    constexpr const I cbegin() const
+    {
+        return b;
+    }
     /**
      * Returns a const iterator pointing to the end of the represented range.
      *
      * @return const end iterator.
      */
-    const I cend() const {return e;}
+    constexpr const I cend() const
+    {
+        return e;
+    }
 };
 
-#endif //FICTION_RANGE_HPP
+}  // namespace fiction
+
+#endif  // FICTION_RANGE_HPP

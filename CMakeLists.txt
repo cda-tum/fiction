@@ -44,7 +44,7 @@ include(cmake/StaticAnalyzers.cmake)
 if (NOT WIN32)
     option(FICTION_PROGRESS_BARS "Enable animated progress bars in command line" ON)
     if (FICTION_PROGRESS_BARS)
-        add_definitions(-DPROGRESS_BARS)
+        target_compile_definitions(project_options INTERFACE PROGRESS_BARS)
     endif ()
 endif ()
 

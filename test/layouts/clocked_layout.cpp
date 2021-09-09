@@ -18,6 +18,8 @@ TEST_CASE("Traits", "[clocked]")
 
     CHECK(has_is_incoming_clocked_v<layout>);
     CHECK(has_is_outgoing_clocked_v<layout>);
+    CHECK(has_foreach_incoming_clocked_zone_v<layout>);
+    CHECK(has_foreach_outgoing_clocked_zone_v<layout>);
 }
 
 TEST_CASE("Clocking", "[clocked]")
@@ -128,10 +130,14 @@ TEST_CASE("Iteration", "[clocked]")
 
     CHECK(s1 == s2);
 
+    layout.foreach_incoming_clocked_zone({1, 1}, [&s2](const auto& cz) { CHECK(s2.count(cz) > 0); });
+
     auto s3 = layout.outgoing_clocked_zones<std::set<coordinate_layout::coordinate>>({1, 1});
     auto s4 = std::set<coordinate_layout::coordinate>{{{1, 2}, {2, 1}}};
 
     CHECK(s3 == s4);
+
+    layout.foreach_outgoing_clocked_zone({1, 1}, [&s4](const auto& cz) { CHECK(s4.count(cz) > 0); });
 }
 
 TEST_CASE("Structural properties", "[clocked]")

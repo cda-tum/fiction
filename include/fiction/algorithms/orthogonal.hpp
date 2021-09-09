@@ -15,7 +15,6 @@
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
-#include <mockturtle/utils/progress_bar.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/color_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
@@ -25,6 +24,10 @@
 #include <optional>
 #include <set>
 #include <vector>
+
+#if (PROGRESS_BARS)
+#include <mockturtle/utils/progress_bar.hpp>
+#endif
 
 namespace fiction
 {

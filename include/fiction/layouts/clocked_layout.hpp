@@ -127,6 +127,14 @@ class clocked_layout : public CoordinateLayout
         return incoming;
     }
 
+    template <typename Fn>
+    void foreach_incoming_clocked_zone(const clock_zone& cz, Fn&& fn) const
+    {
+        auto incoming = incoming_clocked_zones<std::set<clock_zone>>(cz);
+
+        mockturtle::detail::foreach_element(incoming.cbegin(), incoming.cend(), fn);
+    }
+
     template <typename Container>
     [[nodiscard]] Container outgoing_clocked_zones(const clock_zone& cz) const noexcept
     {
@@ -138,6 +146,14 @@ class clocked_layout : public CoordinateLayout
                      [this, &cz](const auto& ct) { return is_outgoing_clocked(cz, ct); });
 
         return outgoing;
+    }
+
+    template <typename Fn>
+    void foreach_outgoing_clocked_zone(const clock_zone& cz, Fn&& fn) const
+    {
+        auto outgoing = outgoing_clocked_zones<std::set<clock_zone>>(cz);
+
+        mockturtle::detail::foreach_element(outgoing.cbegin(), outgoing.cend(), fn);
     }
 
 #pragma endregion

@@ -2,24 +2,25 @@
 // Created by marcel on 06.01.20.
 //
 
-#ifndef FICTION_DIMENSION_ITERATOR_HPP
-#define FICTION_DIMENSION_ITERATOR_HPP
+#ifndef FICTION_ASPECT_RATIO_ITERATOR_HPP
+#define FICTION_ASPECT_RATIO_ITERATOR_HPP
 
-#include "fcn_layout.h"
+#include <cmath>
 #include <vector>
 
-
-class dimension_iterator
+namespace fiction
 {
-public:
+
+template <typename AspectRatio>
+class aspect_ratio_iterator
+{
+  public:
     /**
      * Standard constructor. Takes a starting value and computes an initial factorization.
      *
      * @param n Starting value of the dimension iteration.
      */
-    explicit dimension_iterator(uint64_t n) noexcept
-            :
-            num{n ? n - 1 : 0}
+    explicit aspect_ratio_iterator(uint64_t n = 0ul) noexcept : num{n ? n - 1 : 0}
     {
         next();
     }
@@ -31,7 +32,7 @@ public:
      *
      * @return Reference to this.
      */
-    dimension_iterator& operator++() noexcept
+    aspect_ratio_iterator& operator++() noexcept
     {
         ++it;
 
@@ -51,7 +52,7 @@ public:
      *
      * @return Resulting iterator.
      */
-    dimension_iterator operator++(int) noexcept
+    aspect_ratio_iterator operator++(int) noexcept
     {
         auto result{*this};
 
@@ -60,7 +61,7 @@ public:
         return result;
     }
 
-    fcn_dimension_xy operator*() const
+    AspectRatio operator*() const
     {
         return *it;
     }
@@ -70,7 +71,7 @@ public:
         return num == m;
     }
 
-    bool operator==(const dimension_iterator& other) const
+    bool operator==(const aspect_ratio_iterator& other) const
     {
         return (num == other.num) && (*it == *(other.it));
     }
@@ -80,7 +81,7 @@ public:
         return num != m;
     }
 
-    bool operator!=(const dimension_iterator& other) const
+    bool operator!=(const aspect_ratio_iterator& other) const
     {
         return !(*this == other);
     }
@@ -90,7 +91,7 @@ public:
         return num < m;
     }
 
-    bool operator<(const dimension_iterator& other) const
+    bool operator<(const aspect_ratio_iterator& other) const
     {
         return (num < other.num) || (num == other.num && *it < *(other.it));
     }
@@ -100,12 +101,12 @@ public:
         return num <= m;
     }
 
-    bool operator<=(const dimension_iterator& other) const
+    bool operator<=(const aspect_ratio_iterator& other) const
     {
         return (num <= other.num) || (num == other.num && *it <= *(other.it));
     }
 
-private:
+  private:
     /**
      * Number to factorize into dimensions.
      */
@@ -113,20 +114,17 @@ private:
     /**
      * Factors of num.
      */
-    std::vector<fcn_dimension_xy> factors;
+    std::vector<AspectRatio> factors;
     /**
-     * Pointer to current factor.
+     * Iterator pointing to current factor.
      */
-    std::vector<fcn_dimension_xy>::iterator it;
+    typename std::vector<AspectRatio>::iterator it;
 
     /**
-     * Factorizes the current num into all possible factors (x, y) with x * y = num, x, y >= 2. The result is returned
-     * as a vector of fcn_dimension_xy objects.
+     * Factorizes the current num into all possible factors (x, y) with x * y = num. The result is returned as a vector
+     * of AspectRatio objects.
      *
-     * NOTE: Due to a bug in the BGL, every dimension should have a minimum size of 2 to prevent SEGFAULTs.
-     * See https://svn.boost.org/trac10/ticket/11735 for details.
-     *
-     * @return All possible layout dimensions with num faces.
+     * @return All possible aspect ratios with num faces.
      */
     void factorize() noexcept
     {
@@ -136,16 +134,13 @@ private:
         {
             if (num % i == 0)
             {
-                auto x = i;
-                auto y = num / i;
+                const auto x = i;
+                const auto y = num / i;
 
-                if (x > 1 && y > 1) // workaround for BGL bug
+                factors.emplace_back(x, y);
+                if (x != y)
                 {
-                    factors.push_back(fcn_dimension_xy{x, y});
-                    if (x != y)
-                    {
-                        factors.push_back(fcn_dimension_xy{y, x});
-                    }
+                    factors.emplace_back(y, x);
                 }
             }
         }
@@ -154,27 +149,28 @@ private:
         it = factors.begin();
     }
     /**
-     * Computes the next possible num where a factorization (x, y) with x * y = num, x, y >= 2 exists.
+     * Computes the next possible num where a factorization (x, y) with x * y = num exists.
      */
     void next() noexcept
     {
-        do
-        {
+        do {
             ++num;
             factorize();
         } while (factors.empty());
     }
 };
 
-// make dimension_iterator compatible with STL iterator categories
+}  // namespace fiction
+
+// make aspect_ratio_iterator compatible with STL iterator categories
 namespace std
 {
-    template<>
-    struct iterator_traits<dimension_iterator>
-    {
-        using iterator_category = std::forward_iterator_tag;
-        using value_type = fcn_dimension_xy;
-    };
-}
+template <typename AspectRatio>
+struct iterator_traits<fiction::aspect_ratio_iterator<AspectRatio>>
+{
+    using iterator_category = std::forward_iterator_tag;
+    using value_type        = AspectRatio;
+};
+}  // namespace std
 
-#endif //FICTION_DIMENSION_ITERATOR_HPP
+#endif  // FICTION_ASPECT_RATIO_ITERATOR_HPP

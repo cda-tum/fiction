@@ -2,8 +2,8 @@
 // Created by marcel on 05.04.19.
 //
 
-#ifndef FICTION_VERSION_HPP_IN
-#define FICTION_VERSION_HPP_IN
+#ifndef FICTION_VERSION_INFO_HPP_IN
+#define FICTION_VERSION_INFO_HPP_IN
 
 namespace fiction
 {
@@ -27,4 +27,4 @@ constexpr const char* COMPILED_TIME = __TIME__;
 
 }  // namespace fiction
 
-#endif  // FICTION_VERSION_HPP_IN
+#endif  // FICTION_VERSION_INFO_HPP_IN

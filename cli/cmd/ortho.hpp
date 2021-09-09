@@ -62,19 +62,19 @@ class ortho_command : public command
 
         const auto orthogonal_physical_design = [this](auto&& net)
         {
-            using gate_layout = fiction::gate_level_layout<
+            using GateLyt = fiction::gate_level_layout<
                 fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::coord_t>>>>;
 
-            return fiction::orthogonal<gate_layout>(*net, ps, &st);
+            return fiction::orthogonal<GateLyt>(*net, ps, &st);
         };
 
-        const auto& net = s.current();
+        const auto& ntk = s.current();
 
         try
         {
-            auto lyt = std::visit(orthogonal_physical_design, net);
+            auto lyt = std::visit(orthogonal_physical_design, ntk);
             store<fiction::gate_layout_t>().extend() =
-                std::make_shared<fiction::gate_clk_lyt>(lyt, std::visit(get_name, net));
+                std::make_shared<fiction::gate_clk_lyt>(lyt, std::visit(get_name, ntk));
 
             if (is_set("verbose"))
             {

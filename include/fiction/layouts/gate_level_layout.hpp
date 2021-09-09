@@ -350,7 +350,7 @@ class gate_level_layout : public ClockedLayout
     {
         auto& children = strg->nodes[n].children;
         // decrease ref-count of children
-        std::for_each(children.begin(), children.end(),
+        std::for_each(children.cbegin(), children.cend(),
                       [this](const auto& c) { strg->nodes[get_node(c.index)].data[0].h1--; });
         // clear n's children
         children.clear();
@@ -478,9 +478,9 @@ class gate_level_layout : public ClockedLayout
     template <typename Fn>
     void foreach_po(Fn&& fn) const
     {
-        using IteratorType = decltype(strg->outputs.begin());
+        using IteratorType = decltype(strg->outputs.cbegin());
         mockturtle::detail::foreach_element_transform<IteratorType, signal>(
-            strg->outputs.begin(), strg->outputs.end(), [](const auto& o) { return o.index; }, fn);
+            strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return o.index; }, fn);
     }
 
     template <typename Fn>
