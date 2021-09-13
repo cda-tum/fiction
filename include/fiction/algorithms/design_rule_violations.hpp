@@ -32,6 +32,7 @@ struct gate_level_drv_params
     bool clocked_data_flow = true;
 
     // I/O
+    bool has_io    = true;
     bool empty_io  = true;
     bool io_pins   = true;
     bool border_io = true;
@@ -118,6 +119,10 @@ class gate_level_drvs_impl
         *ps.out << '\n';
 
         *ps.out << "[i] I/O ports:\n";
+        if (ps.has_io)
+        {
+            *ps.out << "[i]" << has_io_check() << '\n';
+        }
         if (ps.empty_io)
         {
             *ps.out << "[i]" << empty_io_check() << '\n';
@@ -393,6 +398,49 @@ class gate_level_drvs_impl
         pst.report["Improperly clocked tiles"] = data_flow_report;
 
         return summary("all connected tiles are properly clocked", data_flow_respected, true);
+    }
+    /**
+     * Checks if PI/PO assignments are present.
+     *
+     * @return Check summary as a one liner.
+     */
+    std::string has_io_check() noexcept
+    {
+        nlohmann::json has_io_report{};
+
+        auto ios_present = true;
+
+        uint32_t num_io{0ul};
+
+        const auto count_io = [this, &has_io_report, &ios_present, &num_io]([[maybe_unused]] const mockturtle::node<Lyt>& io)
+        {
+            ++num_io;
+        };
+
+        has_io_report["Specified PIs"] = lyt.num_pis();
+        lyt.foreach_pi(count_io);
+        has_io_report["Counted PIs"] = num_io;
+
+        if (lyt.num_pis() != num_io || lyt.num_pis() == 0 || num_io == 0)
+        {
+            ios_present = false;
+            ++pst.drvs;
+        }
+
+        num_io = 0ul;
+        has_io_report["Specified POs"] = lyt.num_pos();
+        lyt.foreach_po([this, &count_io](const auto& o) { count_io(lyt.get_node(o)); });
+        has_io_report["Counted POs"] = num_io;
+
+        if (lyt.num_pos() != num_io || lyt.num_pos() == 0 || num_io == 0)
+        {
+            ios_present = false;
+            ++pst.drvs;
+        }
+
+        pst.report["I/O counts"] = has_io_report;
+
+        return summary("all I/O are properly specified", ios_present, true);
     }
     /**
      * Checks if no PI/PO is assigned to an empty tile.

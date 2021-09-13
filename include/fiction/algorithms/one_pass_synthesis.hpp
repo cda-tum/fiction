@@ -7,7 +7,7 @@
 
 #include "../utils/range.hpp"
 #include "iter/aspect_ratio_iterator.hpp"
-#include "mugen_info.hpp"
+#include "utils/mugen_info.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/print.hpp>
@@ -154,7 +154,7 @@ class mugen_handler
      *
      * @param ratio Current aspect ratio to work on.
      */
-    void update(const aspect_ratio<Lyt>& ratio) noexcept
+    void update_aspect_ratio(const aspect_ratio<Lyt>& ratio) noexcept
     {
         lyt.resize(ratio);
     }
@@ -163,7 +163,7 @@ class mugen_handler
      *
      * @param timeout New timeout value.
      */
-    void update(const uint32_t timeout) noexcept
+    void update_timeout(const uint32_t timeout) noexcept
     {
         ps.timeout = timeout;
     }
@@ -260,7 +260,7 @@ class mugen_handler
 
         auto scheme_graph = mugen.attr("scheme_graph");
         scheme_graph.attr("__init__")(
-            scheme_graph, "shape"_a = py::make_tuple(lyt.x(), lyt.y()), "enable_wire"_a = ps.enable_wires,
+            scheme_graph, "shape"_a = py::make_tuple(lyt.x() + 1, lyt.y() + 1), "enable_wire"_a = ps.enable_wires,
             "enable_not"_a = ps.enable_not, "enable_and"_a = ps.enable_and, "enable_or"_a = ps.enable_or,
             "enable_maj"_a = ps.enable_maj, "enable_crossings"_a = ps.crossings, "designated_pi"_a = ps.io_ports,
             "designated_po"_a = ps.io_ports, "nr_threads"_a = ps.num_threads, "timeout"_a = ps.timeout);
@@ -292,24 +292,19 @@ class mugen_handler
 
         py_node_map py_n_map{};
 
-        //        using crossing_map = std::map<py::handle, py::handle>;
-
         // (crossing node, outgoing node) --> incoming node
         using crossing_map = std::map<std::pair<py::handle, py::handle>, py::handle>;
         crossing_map c_map{};
 
-        //        // extracts the gate type from a node
-        //        const auto get_gate_type = [](const auto& node)
-        //        {
-        //            //            static const std::map<std::string, operation> op_map{
-        //            //                {std::string("None"), operation::NONE}, {std::string("AND"), operation::AND},
-        //            //                {std::string("OR"), operation::OR},     {std::string("NOT"), operation::NOT},
-        //            //                {std::string("MAJ"), operation::MAJ},   {std::string("WIRE"), operation::W},
-        //            //                {std::string("CROSS"), operation::W}};
-        //
-        //            //            return op_map.at(py::str(node.attr("gate_type")));
-        //            return py::str(node.attr("gate_type"));
-        //        };
+        // returns an iterator that points to the first non-PI node of the given list of nodes
+        const auto get_node_begin_iterator = [this, &net](const auto& nodes)
+        {
+            // set up the iterator to skip the PIs
+            auto pi_it_end = nodes.begin();  // use std::advance because there is no 'operator+' overload
+            std::advance(pi_it_end, num_pis + 1);
+
+            return pi_it_end;
+        };
 
         // returns whether a node is empty
         const auto is_empty = [](const auto& node) -> bool
@@ -345,33 +340,6 @@ class mugen_handler
             return {py::int_(tuple[0]), py::int_(tuple[1]), second_layer ? 1 : 0};
         };
 
-        // returns whether fanin_node -> node -> fanout_node is a valid crossing path, where fanout_node is available in
-        // c_map
-        //        const auto is_crossing_path = [this, &c_map](const auto& node, const auto& fanin_node) -> bool
-        //        {
-        //            //            static const std::map<std::string, layout::directions>
-        //            str_to_dir{{std::string("NORTH"),
-        //            //            layout::DIR_N},
-        //            // {std::string("EAST"),
-        //            //                                                                              layout::DIR_E},
-        //            // {std::string("SOUTH"),
-        //            //                                                                              layout::DIR_S},
-        //            // {std::string("WEST"),
-        //            //                                                                              layout::DIR_W}};
-        //
-        //            auto dir_map       = node.attr("dir_map");
-        //            auto fanout_node   = c_map.at(node);
-        //            auto get_direction = mugen.attr("get_direction");
-        //
-        //            auto inp_dir = get_direction(node.attr("coords"), fanin_node.attr("coords"))[py::int_(0)];
-        //            auto out_dir = get_direction(node.attr("coords"), fanout_node.attr("coords"))[py::int_(0)];
-        //
-        //            //            return str_to_dir.at(py::str(dir_map[inp_dir])) == str_to_dir.at(py::str(out_dir));
-        //
-        //            // TODO check if this works. Should be regular string comparison
-        //            return py::str(dir_map[inp_dir]).equal(py::str(out_dir));
-        //        };
-
         // stores a (crossing, fanout) --> fanin relation for all fanins of the given crossing node
         const auto set_up_crossing = [this, &net, &c_map](const auto& cross_node) -> void
         {
@@ -403,22 +371,8 @@ class mugen_handler
             }
         };
 
-        //        // returns the ID of a PI node
-        //        const auto get_pi_id = [](const auto& node) { return py::int_(node.attr("coords")); };
-
-        //        // number of different constant nodes in the implementation of lyt
-        //        const auto num_constants = lyt.get_constant(true) == lyt.get_constant(false) ? 1 : 2;
-
-        //        // reserve PI nodes without positions
-        //        std::vector<mockturtle::node<Lyt>> pis(num_pis);
-        //        for (auto i = 0ul; i < num_pis; ++i)
-        //        {
-        //            lyt.create_pi();
-        //            pis[i] = mockturtle::node<Lyt>{
-        //                i + num_constants};  // refers to the actual node representation of the created PI as a number
-        //        }
         const std::function<std::vector<mockturtle::signal<Lyt>>(const py::handle&)> get_fanins =
-            [this, &is_crossing, &c_map, &get_tile, &py_n_map,
+            [this, &is_crossing, &is_pi, &c_map, &get_tile, &py_n_map,
              &get_fanins](const auto& node) -> std::vector<mockturtle::signal<Lyt>>
         {
             std::vector<mockturtle::signal<Lyt>> fanins{};
@@ -427,6 +381,12 @@ class mugen_handler
             for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
             {
                 auto fanin_n = fanin[*fanin_it];
+
+                // skip PI nodes
+                if (is_pi(fanin_n))
+                {
+                    continue;
+                }
 
                 // if fanin is a crossing node, use the crossing map to trace paths
                 if (is_crossing(fanin_n))
@@ -441,11 +401,11 @@ class mugen_handler
 
                     mockturtle::signal<Lyt> fanin_signal{};
                     // if the fanin node has been set up already (i.e. if it is not a crossing itself)
-                    if (py_n_map.count(c_fanin_n) > 0)
+                    if (py_n_map.count(c_fanin_n) > 0)  // TODO iterator map access
                     {
                         // find its signal in the py_n_map
                         fanin_signal = py_n_map[c_fanin_n];
-                    }  // otherwise, the signal will stay empty
+                    }
                     else
                     {
                         fanin_signal = get_fanins(fanin_n)[0];
@@ -459,7 +419,7 @@ class mugen_handler
                 // otherwise, simply add the fanin signal to the list of fanins
                 else
                 {
-                    fanins.push_back(py_n_map[fanin_n]);
+                    fanins.push_back(py_n_map.at(fanin_n));
                 }
             }
 
@@ -481,123 +441,18 @@ class mugen_handler
             return false;
         };
 
-        // checks whether a node has a PO as fan-out
-        const auto has_po_fanout = [&is_po](const auto& node) -> bool
-        {
-            auto fanout = node.attr("fanout");
-            for (auto fanout_it = fanout.begin(); fanout_it != fanout.end(); ++fanout_it)
-            {
-                auto fanout_n = fanout[*fanout_it];
-                if (is_po(fanout_n))
-                    //                    return pis[get_pi_id(fanout_n)];
-                    return true;
-            }
-
-            return false;
-        };
-
-        //        // assigns tile directions to both given tiles assuming they are adjacent as fanin_t -> cur_t
-        //        const auto assign_directions = [this](const auto& fanin_t, const auto& cur_t) -> void
-        //        {
-        //            layout->assign_tile_out_dir(fanin_t, layout->get_bearing(fanin_t, cur_t));
-        //            layout->assign_tile_inp_dir(cur_t, layout->get_bearing(cur_t, fanin_t));
-        //        };
-        //        const std::function<void(const py::handle&, const logic_network::vertex, const
-        //        fcn_gate_layout::tile&)>
-        //            traverse_and_construct =
-        //                [&](const py::handle& node, const logic_network::vertex v, const fcn_gate_layout::tile& t)
-        //        {
-        //            auto fanin = node.attr("fanin");
-        //            for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
-        //            {
-        //                // access the dict
-        //                auto fanin_n = fanin[*fanin_it];
-        //
-        //                // make sure that only the intended fan-ins of crossing nodes are explored further
-        //                if (is_crossing(node) && !is_crossing_path(node, fanin_n))
-        //                {
-        //                    continue;
-        //                }
-        //
-        //                auto n_type = get_gate_type(fanin_n);
-        //
-        //                // exit condition
-        //                if (is_pi(fanin_n))
-        //                {
-        //                    network->create_edge(pis[get_pi_id(fanin_n)], v);
-        //                    continue;
-        //                }
-        //
-        //                auto second_layer = false;
-        //
-        //                // has fanin node been created already?
-        //                if (auto vm_it = py_n_map.find(fanin_n); vm_it != py_n_map.end())
-        //                {
-        //                    // if a crossing node is revisited, just flag the tile to be used in second layer
-        //                    if (is_crossing(fanin_n))
-        //                    {
-        //                        second_layer = true;
-        //                    }
-        //                    // else, add connections (and update wire type)
-        //                    else
-        //                    {
-        //                        network->create_edge(vm_it->second, v);
-        //                        auto fanin_t = *layout->get_logic_tile(vm_it->second);
-        //                        assign_directions(fanin_t, t);
-        //
-        //                        // update operation as fan-out increases
-        //                        if (n_type == operation::W || n_type == operation::PI)
-        //                            network->assign_op(vm_it->second, operation::F1O2);
-        //                        else if (n_type == operation::F1O2)
-        //                            network->assign_op(vm_it->second, operation::F1O3);
-        //
-        //                        continue;
-        //                    }
-        //                }
-        //
-        //                // is input pin?
-        //                if (auto pi = has_pi_fanin(fanin_n); pi && n_type == operation::W)
-        //                {
-        //                    py_n_map[fanin_n] = *pi;
-        //                    auto fanin_t      = get_tile(fanin_n);
-        //                    layout->assign_logic_vertex(fanin_t, *pi, true, is_po(fanin_n));
-        //                    assign_directions(fanin_t, t);
-        //
-        //                    // recurse with the current vertex instead of *pi to not create self-loops in exit
-        //                    condition branch traverse_and_construct(fanin_n, v, fanin_t);
-        //
-        //                    continue;
-        //                }
-        //
-        //                auto fanin_v = network->create_logic_vertex(n_type);
-        //                network->create_edge(fanin_v, v);
-        //                py_n_map[fanin_n] = fanin_v;
-        //
-        //                auto fanin_t = get_tile(fanin_n, second_layer);
-        //                layout->assign_logic_vertex(fanin_t, fanin_v, has_pi_fanin(fanin_n).has_value());
-        //                assign_directions(fanin_t, t);
-        //
-        //                // store crossing fan-out for later crossing path checks
-        //                if (is_crossing(fanin_n))
-        //                    c_map[fanin_n] = node;
-        //
-        //                traverse_and_construct(fanin_n, fanin_v, fanin_t);
-        //            }
-        //        };
-
         // counters for PIs and POs
         auto ic = 0u, oc = 0u;
         // list of all nodes; first num_pi nodes are primary inputs
         auto nodes = net.attr("nodes");
-        // set up an end iterator because there is no 'operator+' overload
-        auto pi_it_end = nodes.begin();
-        std::advance(pi_it_end, num_pis);
+        net.attr("to_png")("mugen_net.png");
 
         // iterate over all nodes to reserve their positions on the layout without assigning their incoming signals yet
-        for (auto node_it = pi_it_end; node_it != nodes.end(); ++node_it)
+        for (auto node_it = get_node_begin_iterator(nodes); node_it != nodes.end(); ++node_it)
         {
             // the node
-            const auto node = nodes[*node_it];
+            const auto node = *node_it;
+
             // its position on the layout
             const auto node_pos = get_tile(node);
 
@@ -610,12 +465,12 @@ class mugen_handler
             else if (is_wire(node))
             {
                 // if it is a primary input pin
-                if (has_pi_fanin(node))
+                if (has_pi_fanin(node))  // PIs are nodes, i.e., potential fan-ins of the current node
                 {
                     py_n_map[node] = lyt.create_pi(fmt::format("pi{}", ic++), node_pos);
                 }
                 // if it is a primary output pin
-                else if (has_po_fanout(node))
+                else if (is_po(node))  // PO is simply a label of a node, i.e., not a successor node with that attribute
                 {
                     py_n_map[node] = lyt.create_po({}, fmt::format("po{}", oc++), node_pos);
                 }
@@ -662,10 +517,11 @@ class mugen_handler
         }
 
         // second iteration: draw connections between the gates
-        for (auto node_it = pi_it_end; node_it != nodes.end(); ++node_it)
+        for (auto node_it = get_node_begin_iterator(nodes); node_it != nodes.end(); ++node_it)
         {
             // the python node object
-            const auto py_node = nodes[*node_it];
+            const auto py_node = *node_it;
+
             // the layout node
             auto lyt_node = lyt.get_node(py_n_map[py_node]);
             // crossings are a special case because they are handled on-the-fly in the get_fanins function
@@ -696,18 +552,8 @@ class one_pass_synthesis_impl
             ps{p},
             pst{st}
     {
-        // make sure module 'sys' is imported
-        try
-        {
-            pybind11::module::import("sys");
-        }
-        catch (const pybind11::error_already_set&)
-        {
-            // module was already imported
-        }
-
         // add Mugen's path to Python's sys.path module scope
-        pybind11::module("sys").attr("path").attr("append")(MUGEN_PATH);
+        pybind11::module::import("sys").attr("path").attr("append")(MUGEN_PATH);
     }
 
     std::optional<Lyt> run()
@@ -717,9 +563,6 @@ class one_pass_synthesis_impl
         {
             return std::nullopt;
         }
-
-        //        // measure run time
-        //        mockturtle::stopwatch stop{pst.time_total};
 
         // empty layout with an initial size of 1 x 1 tiles
         Lyt layout{{0, 0}, *ps.scheme};
@@ -740,10 +583,10 @@ class one_pass_synthesis_impl
                 continue;
 
 #if (PROGRESS_BARS)
-            bar(aspect_ratio.x, aspect_ratio.y);
+            bar(aspect_ratio.x + 1, aspect_ratio.y + 1);
 #endif
 
-            handler.update(aspect_ratio);
+            handler.update_aspect_ratio(aspect_ratio);
 
             try
             {
@@ -791,7 +634,7 @@ class one_pass_synthesis_impl
      * scoped and only need to exist. No operations are to be performed on this object. It handles creation and proper
      * destruction of all Python objects used during this session and deals with the CPython API.
      */
-    static inline const pybind11::scoped_interpreter instance{};
+    const pybind11::scoped_interpreter instance{};
 
     //    mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ntk)> node2pos;
     /**
@@ -852,7 +695,7 @@ class one_pass_synthesis_impl
         // remaining time must be 1 because 0 means unlimited time
         auto time_left = (ps.timeout - time_elapsed > 0 ? static_cast<uint32_t>(ps.timeout - time_elapsed) : 1u);
 
-        handler.update(time_left);
+        handler.update_timeout(time_left);
     }
 };
 

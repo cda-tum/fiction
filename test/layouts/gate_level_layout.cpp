@@ -923,6 +923,60 @@ TEST_CASE("Crossings", "[gate-level]")
                          });
 }
 
+TEST_CASE("Move nodes", "[gate-level]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+
+    auto layout = blueprints::and_or_gate_layout<gate_layout>();
+
+    auto and_node = layout.get_node({1, 0});
+    auto or_node  = layout.get_node({2, 1});
+
+    // switch AND and OR
+
+    // move OR out of the way
+    layout.move_node(or_node, {3, 0}, {});
+
+    // move AND where OR was
+    layout.move_node(and_node, {2, 1},
+                     {{static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{2, 0}),
+                       static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{1, 1})}});
+
+    // move OR where AND was
+    layout.move_node(or_node, {1, 0},
+                     {{static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{2, 0}),
+                       static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{1, 1})}});
+
+    CHECK(and_node == layout.get_node({2, 1}));
+    CHECK(layout.is_and(layout.get_node({2, 1})));
+    CHECK(or_node == layout.get_node({1, 0}));
+    CHECK(layout.is_or(layout.get_node({1, 0})));
+
+    layout.foreach_fanin(and_node,
+                         [](const auto& f)
+                         {
+                             CHECK(((static_cast<gate_layout::tile>(f) == gate_layout::tile{2, 0}) ||
+                                    (static_cast<gate_layout::tile>(f) == gate_layout::tile{1, 1})));
+                         });
+
+    layout.foreach_fanin(or_node,
+                         [](const auto& f)
+                         {
+                             CHECK(((static_cast<gate_layout::tile>(f) == gate_layout::tile{2, 0}) ||
+                                    (static_cast<gate_layout::tile>(f) == gate_layout::tile{1, 1})));
+                         });
+
+    layout.foreach_fanout(and_node,
+                          [](const auto& f) {
+                              CHECK(static_cast<gate_layout::tile>(f) == gate_layout::tile{3, 1});
+                          });
+
+    layout.foreach_fanout(or_node,
+                          [](const auto& f) {
+                              CHECK(static_cast<gate_layout::tile>(f) == gate_layout::tile{0, 0});
+                          });
+}
+
 TEST_CASE("Cardinal operations", "[gate-level]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;

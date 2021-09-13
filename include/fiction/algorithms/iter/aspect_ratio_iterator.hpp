@@ -5,6 +5,7 @@
 #ifndef FICTION_ASPECT_RATIO_ITERATOR_HPP
 #define FICTION_ASPECT_RATIO_ITERATOR_HPP
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
 
@@ -17,8 +18,12 @@ class aspect_ratio_iterator
   public:
     /**
      * Standard constructor. Takes a starting value and computes an initial factorization.
+     * The value n represents the amount of faces in the desired aspect ratios. For example, n == 1 will yield
+     * aspect ratios with exactly 1 face, i.e. 1 x 1, which is equal to coord_t{0, 0}. If n == 2, the aspect ratios
+     * 1 x 2 and 2 x 1 will result, which are equal to coord_t{0, 1} and coord_t{1, 0}. Both examples with
+     * AspectRatio == coord_t.
      *
-     * @param n Starting value of the dimension iteration.
+     * @param n Starting value of the aspect ratio iteration.
      */
     explicit aspect_ratio_iterator(uint64_t n = 0ul) noexcept : num{n ? n - 1 : 0}
     {
@@ -121,10 +126,8 @@ class aspect_ratio_iterator
     typename std::vector<AspectRatio>::iterator it;
 
     /**
-     * Factorizes the current num into all possible factors (x, y) with x * y = num. The result is returned as a vector
-     * of AspectRatio objects.
-     *
-     * @return All possible aspect ratios with num faces.
+     * Factorizes the current num into all possible factors (x, y) with x * y = num. The result is stored as a vector
+     * of AspectRatio objects in the attribute factors.
      */
     void factorize() noexcept
     {
@@ -134,8 +137,8 @@ class aspect_ratio_iterator
         {
             if (num % i == 0)
             {
-                const auto x = i;
-                const auto y = num / i;
+                const auto x = i - 1;
+                const auto y = num / i - 1;
 
                 factors.emplace_back(x, y);
                 if (x != y)

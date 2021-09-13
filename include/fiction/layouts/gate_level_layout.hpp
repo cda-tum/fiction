@@ -826,11 +826,11 @@ class gate_level_layout : public ClockedLayout
             strg->data.node_tile_map[n] = static_cast<signal>(t);
 
             // keep track of number of gates and wire segments
-            if (strg->nodes[n].data[1].h1 == 2)
+            if (is_wire(n))
             {
                 strg->data.num_wires++;
             }
-            else
+            else  // is gate
             {
                 strg->data.num_gates++;
             }
@@ -876,12 +876,15 @@ class gate_level_layout : public ClockedLayout
     {
         if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
         {
-            // decrease gate count
-            if (is_gate(it->second))
-                --strg->data.num_gates;
             // decrease wire count
             if (is_wire(it->second))
+            {
                 --strg->data.num_wires;
+            }
+            else  // decrease gate count
+            {
+                --strg->data.num_gates;
+            }
             // mark node as dead
             kill_node(it->second);
 

@@ -7,6 +7,8 @@
 
 #include "clocking_scheme.hpp"
 
+#include <mockturtle/networks/detail/foreach.hpp>
+
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
