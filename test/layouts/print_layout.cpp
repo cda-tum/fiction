@@ -70,7 +70,7 @@ TEST_CASE("Print simple gate-level layout", "[gate-level]")
         const auto layout_print = "        \n"
                                   "O←&←I ▢ \n"
                                   "  ↑     \n"
-                                  "▢ Y→¬→O \n"
+                                  "▢ F→¬→O \n"
                                   "\n";
 
         std::stringstream print_stream{};
