@@ -32,5 +32,5 @@ if (FICTION_ENABLE_MUGEN)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mugen/mugen_info.hpp.in utils/mugen_info.hpp)
     target_include_directories(fictionlib INTERFACE ${PROJECT_BINARY_DIR}/libs/)
 
-    message(STATUS "Mugen was enabled. Please note that it relies on the Python3 libraries 'graphviz', 'PySAT', and 'wrapt_timeout_decorator' to be properly installed")
+    message(STATUS "Mugen was enabled. Please note that it relies on the Python3 libraries 'graphviz', 'PySAT v0.1.6.dev6', and 'wrapt_timeout_decorator' to be properly installed")
 endif ()

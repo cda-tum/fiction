@@ -179,6 +179,8 @@ class mugen_handler
 
         auto scheme_graph = generate_scheme_graph();
 
+        scheme_graph.attr("to_png")(scheme_graph, "mugen_scheme");
+
         // Mugen modifies its parameters, therefore, a copy is kept
         auto py_spec = as_py_lists(tts);
 
@@ -444,7 +446,8 @@ class mugen_handler
         auto ic = 0u, oc = 0u;
         // list of all nodes; first num_pi nodes are primary inputs
         auto nodes = net.attr("nodes");
-        net.attr("to_png")("mugen_net.png");
+        
+        net.attr("to_png")("mugen_net");
 
         // iterate over all nodes to reserve their positions on the layout without assigning their incoming signals yet
         for (auto node_it = get_node_begin_iterator(nodes); node_it != nodes.end(); ++node_it)
@@ -627,13 +630,27 @@ class one_pass_synthesis_impl
     /**
      * Factorizes a number of layout tiles into all possible aspect ratios for iteration.
      */
-    aspect_ratio_iterator<aspect_ratio<Lyt>> ari{0};
+    aspect_ratio_iterator<aspect_ratio<Lyt>> ari{5};
     /**
      * A Python interpreter instance that is necessary to call Mugen, a library written in Python. This instance is
      * scoped and only need to exist. No operations are to be performed on this object. It handles creation and proper
      * destruction of all Python objects used during this session and deals with the CPython API.
      */
     const pybind11::scoped_interpreter instance{};
+
+    class pysat_version_mismatch_exception : public std::exception
+    {
+      public:
+        explicit pysat_version_mismatch_exception(std::string v) : std::exception(), version{std::move(v)} {}
+
+        [[nodiscard]] std::string detected() const
+        {
+            return version;
+        }
+
+      private:
+        const std::string version;
+    };
 
     //    mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ntk)> node2pos;
     /**
@@ -661,10 +678,27 @@ class one_pass_synthesis_impl
         try
         {
             py::exec("from pysat.solvers import Glucose3");
+            py::exec("from pysat.card import *");
         }
         catch (...)
         {
             std::cout << "[e] Python module 'PySAT' could not be detected" << std::endl;
+            return false;
+        }
+        try
+        {
+            const auto installed_pysat_version = py::str(py::module::import("pysat").attr("__version__"));
+
+            if (!installed_pysat_version.equal(py::str(REQUIRED_PYSAT_VERSION)))
+            {
+                throw pysat_version_mismatch_exception(installed_pysat_version);
+            }
+        }
+        catch (const pysat_version_mismatch_exception& e)
+        {
+            std::cout << fmt::format("[e] 'PySAT' version '{}' was detected, but version '{}' is specifically needed",
+                                     e.detected(), REQUIRED_PYSAT_VERSION)
+                      << std::endl;
             return false;
         }
 

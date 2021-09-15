@@ -132,7 +132,7 @@ class clocked_layout : public CoordinateLayout
     template <typename Fn>
     void foreach_incoming_clocked_zone(const clock_zone& cz, Fn&& fn) const
     {
-        auto incoming = incoming_clocked_zones<std::set<clock_zone>>(cz);
+        const auto incoming = incoming_clocked_zones<std::set<clock_zone>>(cz);
 
         mockturtle::detail::foreach_element(incoming.cbegin(), incoming.cend(), fn);
     }
@@ -153,7 +153,7 @@ class clocked_layout : public CoordinateLayout
     template <typename Fn>
     void foreach_outgoing_clocked_zone(const clock_zone& cz, Fn&& fn) const
     {
-        auto outgoing = outgoing_clocked_zones<std::set<clock_zone>>(cz);
+        const auto outgoing = outgoing_clocked_zones<std::set<clock_zone>>(cz);
 
         mockturtle::detail::foreach_element(outgoing.cbegin(), outgoing.cend(), fn);
     }
