@@ -413,7 +413,8 @@ class write_qca_layout_svg_impl
             {
                 cell_description = svg::via;
             }
-            else if ((c.z == 0 && !lyt.is_empty_cell(lyt.above(c))) || (c.z != 0 && lyt.is_empty_cell(lyt.below(c))))
+            else if (const auto ac = lyt.above(c), bc = lyt.below(c);
+                     ((c != ac) && !lyt.is_empty_cell(ac)) || ((c != bc) && lyt.is_empty_cell(bc)))
             {
                 cell_description = svg::cross;
             }

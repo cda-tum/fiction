@@ -338,7 +338,7 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] bool is_dead(const node& n) const noexcept
     {
-        return (strg->nodes[n].data[0].h1 >> 31) & 1;
+        return static_cast<bool>((strg->nodes[n].data[0].h1 >> 31) & 1);
     }
 
     [[nodiscard]] signal make_signal(const node& n) const noexcept
@@ -359,6 +359,8 @@ class gate_level_layout : public ClockedLayout
 
         // assign n to its new position
         assign_node(t, n);
+        // since clear_tile marks n as dead, it has to be revived
+        revive_node(n);
         // assign new children
         std::copy(new_children.begin(), new_children.end(), std::back_inserter(children));
         // increase ref-count to new children
@@ -842,6 +844,14 @@ class gate_level_layout : public ClockedLayout
         if (!is_constant(n))
         {
             strg->nodes[n].data[0].h1 |= UINT32_C(0x80000000);
+        }
+    }
+
+    void revive_node(const node& n)
+    {
+        if (!is_constant(n))
+        {
+            strg->nodes[n].data[0].h1 &= ~UINT32_C(0x80000000);
         }
     }
 

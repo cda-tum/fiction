@@ -24,6 +24,7 @@ struct gate_level_drv_params
 {
     // Topology
     bool unplaced_nodes           = true;
+    bool placed_dead_nodes        = true;
     bool non_adjacent_connections = true;
     bool missing_connections      = true;
     bool crossing_gates           = true;
@@ -96,6 +97,10 @@ class gate_level_drvs_impl
         if (ps.unplaced_nodes)
         {
             *ps.out << "[i]" << unplaced_nodes_check() << '\n';
+        }
+        if (ps.placed_dead_nodes)
+        {
+            *ps.out << "[i]" << placed_dead_nodes_check() << '\n';
         }
         if (ps.non_adjacent_connections)
         {
@@ -264,6 +269,38 @@ class gate_level_drvs_impl
         return summary("all nodes are properly placed", all_placed, false);
     }
     /**
+     * Checks for nodes that are placed but dead.
+     *
+     * @return Check summary as a one liner.
+     */
+    std::string placed_dead_nodes_check() noexcept
+    {
+        nlohmann::json placed_dead_report{};
+
+        auto all_alive = true;
+        lyt.foreach_tile(
+            [&placed_dead_report, &all_alive, this](const auto& t)
+            {
+                // skip empty tiles
+                if (!lyt.is_empty_tile(t))
+                {
+                    const auto n = lyt.get_node(t);
+
+                    // if the node is dead but placed
+                    if (lyt.is_dead(n))
+                    {
+                        all_alive = false;
+                        log_tile(t, placed_dead_report);
+                        ++pst.warnings;
+                    }
+                }
+            });
+
+        pst.report["Dead placed nodes"] = placed_dead_report;
+
+        return summary("all placed nodes are alive", all_alive, false);
+    }
+    /**
      * Checks for proper clocking of connected tiles based on their assigned nodes.
      *
      * @return Check summary as a one liner.
@@ -412,10 +449,8 @@ class gate_level_drvs_impl
 
         uint32_t num_io{0ul};
 
-        const auto count_io = [this, &has_io_report, &ios_present, &num_io]([[maybe_unused]] const mockturtle::node<Lyt>& io)
-        {
-            ++num_io;
-        };
+        const auto count_io = [this, &has_io_report, &ios_present,
+                               &num_io]([[maybe_unused]] const mockturtle::node<Lyt>& io) { ++num_io; };
 
         has_io_report["Specified PIs"] = lyt.num_pis();
         lyt.foreach_pi(count_io);
@@ -427,7 +462,7 @@ class gate_level_drvs_impl
             ++pst.drvs;
         }
 
-        num_io = 0ul;
+        num_io                         = 0ul;
         has_io_report["Specified POs"] = lyt.num_pos();
         lyt.foreach_po([this, &count_io](const auto& o) { count_io(lyt.get_node(o)); });
         has_io_report["Counted POs"] = num_io;

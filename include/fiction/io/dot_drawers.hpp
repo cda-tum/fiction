@@ -224,7 +224,8 @@ class gate_layout_tile_drawer : public topology_dot_drawer<Lyt, DrawIndexes>
         if constexpr (has_is_buf_v<Lyt>)
         {
             // crossing case
-            if (lyt.is_buf(lyt.get_node(t)) && lyt.is_buf(lyt.get_node(lyt.above(t))))
+            if (const auto at = lyt.above(t);
+                (t != at) && (lyt.is_buf(lyt.get_node(t)) && lyt.is_buf(lyt.get_node(at))))
             {
                 return "+";
             }

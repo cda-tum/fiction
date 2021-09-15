@@ -2,8 +2,8 @@
 // Created by marcel on 26.07.18.
 //
 
-#ifndef FICTION_FCN_GATE_LIBRARY_H
-#define FICTION_FCN_GATE_LIBRARY_H
+#ifndef FICTION_FCN_GATE_LIBRARY_HPP
+#define FICTION_FCN_GATE_LIBRARY_HPP
 
 #include "../layouts/coordinate.hpp"
 #include "../utils/array.hpp"
@@ -224,4 +224,4 @@ class fcn_gate_library
 
 }  // namespace fiction
 
-#endif  // FICTION_FCN_GATE_LIBRARY_H
+#endif  // FICTION_FCN_GATE_LIBRARY_HPP

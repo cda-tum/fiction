@@ -77,7 +77,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         else if (layout.is_wire(n))
         {
             // second-layer wire indicates a crossing
-            if (auto an = layout.get_node(layout.above(t)); an != n && layout.is_wire(an))
+            if (const auto at = layout.above(t); (at != t) && layout.is_wire_tile(at))
                 return "+";
             else if (layout.is_pi(n))
                 return "I";

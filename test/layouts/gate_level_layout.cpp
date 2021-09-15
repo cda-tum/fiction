@@ -947,6 +947,9 @@ TEST_CASE("Move nodes", "[gate-level]")
                      {{static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{2, 0}),
                        static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{1, 1})}});
 
+    CHECK(!layout.is_dead(and_node));
+    CHECK(!layout.is_dead(or_node));
+
     CHECK(and_node == layout.get_node({2, 1}));
     CHECK(layout.is_and(layout.get_node({2, 1})));
     CHECK(or_node == layout.get_node({1, 0}));

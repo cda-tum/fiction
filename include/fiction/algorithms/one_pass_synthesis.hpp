@@ -5,7 +5,6 @@
 #ifndef FICTION_ONE_PASS_SYNTHESIS_HPP
 #define FICTION_ONE_PASS_SYNTHESIS_HPP
 
-#include "../utils/range.hpp"
 #include "iter/aspect_ratio_iterator.hpp"
 #include "utils/mugen_info.hpp"
 
@@ -577,7 +576,7 @@ class one_pass_synthesis_impl
             mockturtle::progress_bar bar("[i] examining layout dimensions: {:>2} × {:<2}");
 #endif
 
-            const auto aspect_ratio = *ari;
+            const auto aspect_ratio = typename Lyt::aspect_ratio{(*ari).x, (*ari).y, ps.crossings ? 1 : 0};
 
             if (handler.skippable(aspect_ratio))
                 continue;
