@@ -1,0 +1,8 @@
+//
+// Created by marcel on 15.09.21.
+//
+
+#ifndef FICTION_HEXAGONAL_LAYOUT_HPP
+#define FICTION_HEXAGONAL_LAYOUT_HPP
+
+#endif  // FICTION_HEXAGONAL_LAYOUT_HPP
