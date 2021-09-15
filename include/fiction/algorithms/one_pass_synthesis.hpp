@@ -334,6 +334,9 @@ class mugen_handler
         // checks if the given node is PO
         const auto is_po = [](const auto& node) -> bool { return py::bool_(node.attr("is_po")); };
 
+        // returns the ID of a PI node
+        const auto get_pi_id = [](const auto& node) { return py::int_(node.attr("coords")); };
+
         // extract a Python tuple representing coordinates from a node and converts it to a tile
         const auto get_tile = [](const auto& node, const bool second_layer = false) -> tile<Lyt>
         {
@@ -427,26 +430,35 @@ class mugen_handler
             return fanins;
         };
 
+        // pre-allocate PIs to preserve their order
+        std::vector<mockturtle::node<Lyt>> pis(num_pis);
+        // a little hacky: place them all at position {0, 0} so that they can be fetched to be stored as nodes
+        // instead of as signals to not lose them as soon as their tile is overridden
+        for (auto i = 0ul; i < num_pis; ++i) { pis[i] = lyt.get_node(lyt.create_pi(fmt::format("pi{}", i), {0, 0})); }
+        // finally, remove the latest created PI again (which has overridden all others) from the layout
+        lyt.move_node(pis[num_pis - 1], {0, 0});
+
         // checks whether a node has a PI as fan-in
-        const auto has_pi_fanin = [&is_pi](const auto& node) -> bool
+        const auto has_pi_fanin = [&is_pi, &get_pi_id, &pis](const auto& node) -> std::optional<mockturtle::node<Lyt>>
         {
             auto fanin = node.attr("fanin");
             for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
             {
                 auto fanin_n = fanin[*fanin_it];
                 if (is_pi(fanin_n))
-                    //                    return pis[get_pi_id(fanin_n)];
-                    return true;
+                {
+                    return pis[get_pi_id(fanin_n)];
+                }
             }
 
-            return false;
+            return std::nullopt;
         };
 
-        // counters for PIs and POs
-        auto ic = 0u, oc = 0u;
+        // counter for POs
+        auto oc = 0u;
         // list of all nodes; first num_pi nodes are primary inputs
         auto nodes = net.attr("nodes");
-        
+
         net.attr("to_png")("mugen_net");
 
         // iterate over all nodes to reserve their positions on the layout without assigning their incoming signals yet
@@ -467,9 +479,11 @@ class mugen_handler
             else if (is_wire(node))
             {
                 // if it is a primary input pin
-                if (has_pi_fanin(node))  // PIs are nodes, i.e., potential fan-ins of the current node
+                if (const auto pi = has_pi_fanin(node);
+                    pi.has_value())  // PIs are nodes, i.e., potential fan-ins of the current node
                 {
-                    py_n_map[node] = lyt.create_pi(fmt::format("pi{}", ic++), node_pos);
+                    //                    py_n_map[node] = lyt.create_pi(fmt::format("pi{}", ic++), node_pos);
+                    py_n_map[node] = lyt.move_node(*pi, node_pos);
                 }
                 // if it is a primary output pin
                 else if (is_po(node))  // PO is simply a label of a node, i.e., not a successor node with that attribute
