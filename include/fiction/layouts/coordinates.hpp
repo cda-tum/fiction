@@ -332,6 +332,9 @@ struct coord_t
 
 }  // namespace cube
 
+// Cartesian coordinates can be used as offset coordinates
+namespace offset = cartesian;
+
 }  // namespace fiction
 
 namespace std

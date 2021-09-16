@@ -970,7 +970,7 @@ TEST_CASE("Crossings", "[gate-level-layout]")
 
 TEST_CASE("Move nodes", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
     auto layout = blueprints::and_or_gate_layout<gate_layout>();
 

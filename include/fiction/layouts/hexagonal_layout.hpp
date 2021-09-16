@@ -56,11 +56,11 @@ struct flat_top
  *      /     \ /     \ /     \
  *     | (0,0) | (1,0) | (2,0) |
  *     |       |       |       |
- *      \     / \     / \     /  \
+ *      \     / \     / \     / \
  *        \ /     \ /     \ /     \
  *         | (0,1) | (1,1) | (2,1) |
  *         |       |       |       |
- *        / \     / \     /  \    /
+ *        / \     / \     / \     /
  *      /     \ /     \ /     \ /
  *     | (0,2) | (1,2) | (2,2) |
  *     |       |       |       |
@@ -80,7 +80,7 @@ struct odd_row : pointy_top
  *  /     \ /     \ /     \ /
  * | (0,1) | (1,1) | (2,1) |
  * |       |       |       |
- *  \     / \     / \     /  \
+ *  \     / \     / \     / \
  *    \ /     \ /     \ /     \
  *     | (0,2) | (1,2) | (2,2) |
  *     |       |       |       |
@@ -130,7 +130,7 @@ struct even_column : flat_top
 {};
 
 /**
- * A layout type that utilizes offset coordinates to represent a hexagonal grid. It's faces are organized in a offset
+ * A layout type that utilizes offset coordinates to represent a hexagonal grid. Its faces are organized in a offset
  * coordinate system as provided. Hexagons can be in the 'pointy top' or 'flat top' orientation. Based on that, two
  * respectively possible coordinate systems emerge accordingly: 'odd row' and 'even row' for pointy tops and 'odd
  * column' and 'even column' for flat tops. Both are sketched in ASCII above.
