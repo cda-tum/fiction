@@ -15,7 +15,7 @@ using namespace fiction;
 
 TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
     auto layout = blueprints::or_not_gate_layout<gate_layout>();
 
@@ -56,7 +56,7 @@ TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 
 TEST_CASE("Setting up wires", "[qca-one-library]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -103,7 +103,7 @@ TEST_CASE("Setting up wires", "[qca-one-library]")
 
 TEST_CASE("Setting up fanouts", "[qca-one-library]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
     auto layout = blueprints::fanout_layout<gate_layout>();
 

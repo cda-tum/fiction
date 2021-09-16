@@ -15,14 +15,14 @@ using namespace fiction;
 
 TEST_CASE("Traits", "[synchronization-element-layout]")
 {
-    using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<coord_t>>>;
+    using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
     CHECK(has_synchronization_elements_v<se_layout>);
 }
 
 TEST_CASE("Clocking", "[synchronization-element-layout]")
 {
-    using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<coord_t>>>;
+    using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
     se_layout layout{se_layout::aspect_ratio{2, 2, 0}, twoddwave_4_clocking};
 
@@ -57,7 +57,7 @@ TEST_CASE("Clocking", "[synchronization-element-layout]")
 
 TEST_CASE("Iteration", "[synchronization-element-layout]")
 {
-    using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<coord_t>>>;
+    using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
     se_layout layout{se_layout::aspect_ratio{2, 2, 0}, twoddwave_4_clocking};
 
@@ -82,7 +82,7 @@ TEST_CASE("Iteration", "[synchronization-element-layout]")
 
 TEST_CASE("Structural properties", "[synchronization-element-layout]")
 {
-    using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<coord_t>>>;
+    using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
     se_layout layout{se_layout::aspect_ratio{2, 2, 0}, twoddwave_4_clocking};
 

@@ -6,7 +6,7 @@
 #define FICTION_CARTESIAN_LAYOUT_HPP
 
 #include "../utils/range.hpp"
-#include "coordinate.hpp"
+#include "coordinates.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 
@@ -17,15 +17,36 @@
 
 namespace fiction
 {
-
-template <typename Coordinate>
+/**
+ * A layout type that utilizes Cartesian coordinates. It's faces are organized in the following way:
+ *
+ * \verbatim
+ *
+ *  +-------+-------+-------+-------+
+ *  |       |       |       |       |
+ *  | (0,0) | (1,0) | (2,0) | (3,0) |
+ *  |       |       |       |       |
+ *  +-------+-------+-------+-------+
+ *  |       |       |       |       |
+ *  | (0,1) | (1,1) | (2,1) | (3,1) |
+ *  |       |       |       |       |
+ *  +-------+-------+-------+-------+
+ *  |       |       |       |       |
+ *  | (0,2) | (1,2) | (2,2) | (3,2) |
+ *  |       |       |       |       |
+ *  +-------+-------+-------+-------+
+ *  \endverbatim
+ *
+ * @tparam CartesianCoordinateType The coordinate implementation to be used. Cartesian coordinates are required.
+ */
+template <typename CartesianCoordinateType>
 class cartesian_layout
 {
   public:
 #pragma region Types and constructors
 
-    using coordinate   = Coordinate;
-    using aspect_ratio = Coordinate;
+    using coordinate   = CartesianCoordinateType;
+    using aspect_ratio = CartesianCoordinateType;
 
     struct cartesian_layout_storage
     {
@@ -41,6 +62,12 @@ class cartesian_layout
 
     using storage = std::shared_ptr<cartesian_layout_storage>;
 
+    /**
+     * Standard constructor. The given aspect ratio points to the highest possible coordinate in the layout. That means
+     * in the ASCII layout above ar = (3,2). Consequently, with ar = (0,0), the layout has exactly one coordinate.
+     *
+     * @param ar Highest possible position in the layout.
+     */
     explicit cartesian_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<cartesian_layout_storage>(ar)} {}
 
     explicit cartesian_layout(std::shared_ptr<cartesian_layout_storage> s) : strg{std::move(s)} {}
@@ -78,7 +105,7 @@ class cartesian_layout
 
 #pragma region Cardinal operations
 
-    [[nodiscard]] constexpr Coordinate north(const Coordinate& c) const noexcept
+    [[nodiscard]] constexpr CartesianCoordinateType north(const CartesianCoordinateType& c) const noexcept
     {
         if (c.y == 0ull)
             return c;
@@ -89,7 +116,7 @@ class cartesian_layout
         return nc;
     }
 
-    [[nodiscard]] Coordinate east(const Coordinate& c) const noexcept
+    [[nodiscard]] CartesianCoordinateType east(const CartesianCoordinateType& c) const noexcept
     {
         auto ec = c;
 
@@ -101,7 +128,7 @@ class cartesian_layout
         return ec;
     }
 
-    [[nodiscard]] Coordinate south(const Coordinate& c) const noexcept
+    [[nodiscard]] CartesianCoordinateType south(const CartesianCoordinateType& c) const noexcept
     {
         auto sc = c;
 
@@ -113,7 +140,7 @@ class cartesian_layout
         return sc;
     }
 
-    [[nodiscard]] constexpr Coordinate west(const Coordinate& c) const noexcept
+    [[nodiscard]] constexpr CartesianCoordinateType west(const CartesianCoordinateType& c) const noexcept
     {
         if (c.x == 0ull)
             return c;
@@ -124,7 +151,7 @@ class cartesian_layout
         return wc;
     }
 
-    [[nodiscard]] Coordinate above(const Coordinate& c) const noexcept
+    [[nodiscard]] CartesianCoordinateType above(const CartesianCoordinateType& c) const noexcept
     {
         auto ac = c;
 
@@ -136,7 +163,7 @@ class cartesian_layout
         return ac;
     }
 
-    [[nodiscard]] constexpr Coordinate below(const Coordinate& c) const noexcept
+    [[nodiscard]] constexpr CartesianCoordinateType below(const CartesianCoordinateType& c) const noexcept
     {
         if (c.z == 0ull)
             return c;
@@ -147,119 +174,119 @@ class cartesian_layout
         return bc;
     }
 
-    [[nodiscard]] constexpr bool is_north_of(const Coordinate& c1, const Coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_north_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return c1 != c2 && north(c1) == c2;
     }
 
-    [[nodiscard]] bool is_east_of(const Coordinate& c1, const Coordinate& c2) const noexcept
+    [[nodiscard]] bool is_east_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return c1 != c2 && east(c1) == c2;
     }
 
-    [[nodiscard]] bool is_south_of(const Coordinate& c1, const Coordinate& c2) const noexcept
+    [[nodiscard]] bool is_south_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return c1 != c2 && south(c1) == c2;
     }
 
-    [[nodiscard]] constexpr bool is_west_of(const Coordinate& c1, const Coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_west_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return c1 != c2 && west(c1) == c2;
     }
 
-    [[nodiscard]] bool is_adjacent_of(const Coordinate& c1, const Coordinate& c2) const noexcept
+    [[nodiscard]] bool is_adjacent_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return is_north_of(c1, c2) || is_east_of(c1, c2) || is_south_of(c1, c2) || is_west_of(c1, c2);
     }
 
-    [[nodiscard]] bool is_adjacent_elevation_of(const Coordinate& c1, const Coordinate& c2) const noexcept
+    [[nodiscard]] bool is_adjacent_elevation_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return is_adjacent_of(c1, c2) || is_north_of(c1, above(c2)) || is_east_of(c1, above(c2)) ||
                is_south_of(c1, above(c2)) || is_west_of(c1, above(c2)) || is_north_of(c1, below(c2)) ||
                is_east_of(c1, below(c2)) || is_south_of(c1, below(c2)) || is_west_of(c1, below(c2));
     }
 
-    [[nodiscard]] bool is_above_of(const Coordinate& c1, const Coordinate& c2) const noexcept
+    [[nodiscard]] bool is_above_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return c1 != c2 && above(c1) == c2;
     }
 
-    [[nodiscard]] constexpr bool is_below_of(const Coordinate& c1, const Coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_below_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return c1 != c2 && below(c1) == c2;
     }
 
-    [[nodiscard]] constexpr bool is_northwards_of(const Coordinate& c1, const Coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_northwards_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y > c2.y) && (c1.x == c2.x);
     }
 
-    [[nodiscard]] constexpr bool is_eastwards_of(const Coordinate& c1, const Coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_eastwards_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x < c2.x);
     }
 
-    [[nodiscard]] constexpr bool is_southwards_of(const Coordinate& c1, const Coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_southwards_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y < c2.y) && (c1.x == c2.x);
     }
 
-    [[nodiscard]] constexpr bool is_westwards_of(const Coordinate& c1, const Coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_westwards_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x > c2.x);
     }
 
-    [[nodiscard]] constexpr bool is_northern_border(const Coordinate& c) const noexcept
+    [[nodiscard]] constexpr bool is_northern_border(const CartesianCoordinateType& c) const noexcept
     {
         return c.y == 0ull;
     }
 
-    [[nodiscard]] bool is_eastern_border(const Coordinate& c) const noexcept
+    [[nodiscard]] bool is_eastern_border(const CartesianCoordinateType& c) const noexcept
     {
         return c.x == x();
     }
 
-    [[nodiscard]] bool is_southern_border(const Coordinate& c) const noexcept
+    [[nodiscard]] bool is_southern_border(const CartesianCoordinateType& c) const noexcept
     {
         return c.y == y();
     }
 
-    [[nodiscard]] constexpr bool is_western_border(const Coordinate& c) const noexcept
+    [[nodiscard]] constexpr bool is_western_border(const CartesianCoordinateType& c) const noexcept
     {
         return c.x == 0ull;
     }
 
-    [[nodiscard]] bool is_border(const Coordinate& c) const noexcept
+    [[nodiscard]] bool is_border(const CartesianCoordinateType& c) const noexcept
     {
         return is_northern_border(c) || is_eastern_border(c) || is_southern_border(c) || is_western_border(c);
     }
 
-    [[nodiscard]] Coordinate northern_border_of(const Coordinate& c) const noexcept
+    [[nodiscard]] CartesianCoordinateType northern_border_of(const CartesianCoordinateType& c) const noexcept
     {
         return {c.x, 0ull, c.z};
     }
 
-    [[nodiscard]] Coordinate eastern_border_of(const Coordinate& c) const noexcept
+    [[nodiscard]] CartesianCoordinateType eastern_border_of(const CartesianCoordinateType& c) const noexcept
     {
         return {x(), c.y, c.z};
     }
 
-    [[nodiscard]] Coordinate southern_border_of(const Coordinate& c) const noexcept
+    [[nodiscard]] CartesianCoordinateType southern_border_of(const CartesianCoordinateType& c) const noexcept
     {
         return {c.x, y(), c.z};
     }
 
-    [[nodiscard]] Coordinate western_border_of(const Coordinate& c) const noexcept
+    [[nodiscard]] CartesianCoordinateType western_border_of(const CartesianCoordinateType& c) const noexcept
     {
         return {0ull, c.y, c.z};
     }
 
-    [[nodiscard]] constexpr bool is_ground_layer(const Coordinate& c) const noexcept
+    [[nodiscard]] constexpr bool is_ground_layer(const CartesianCoordinateType& c) const noexcept
     {
         return c.z == 0ull;
     }
 
-    [[nodiscard]] constexpr bool is_crossing_layer(const Coordinate& c) const noexcept
+    [[nodiscard]] constexpr bool is_crossing_layer(const CartesianCoordinateType& c) const noexcept
     {
         return c.z > 0ull;
     }
@@ -268,45 +295,46 @@ class cartesian_layout
 
 #pragma region Iteration
 
-    [[nodiscard]] auto coordinates(const Coordinate& start = {}, const Coordinate& stop = {}) const
+    [[nodiscard]] auto coordinates(const CartesianCoordinateType& start = {}, const CartesianCoordinateType& stop = {}) const
     {
+        return range_t{std::make_pair(
+            cartesian::coord_iterator{strg->dimension, start.is_dead() ? CartesianCoordinateType{0, 0} : start},
+            cartesian::coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop})};
+    }
+
+    template <typename Fn>
+    void foreach_coordinate(Fn&& fn, const CartesianCoordinateType& start = {}, const CartesianCoordinateType& stop = {}) const
+    {
+        mockturtle::detail::foreach_element(
+            cartesian::coord_iterator{strg->dimension, start.is_dead() ? CartesianCoordinateType{0, 0} : start},
+            cartesian::coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, fn);
+    }
+
+    [[nodiscard]] auto ground_coordinates(const CartesianCoordinateType& start = {}, const CartesianCoordinateType& stop = {}) const
+    {
+        assert(start.z == 0 && stop.z == 0);
+
+        auto ground_layer = aspect_ratio{x(), y(), 0};
+
         return range_t{
-            std::make_pair(coord_iterator{strg->dimension, start.is_dead() ? Coordinate{0, 0} : start},
-                           coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop})};
+            std::make_pair(cartesian::coord_iterator{ground_layer, start.is_dead() ? CartesianCoordinateType{0, 0} : start},
+                           cartesian::coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop})};
     }
 
     template <typename Fn>
-    void foreach_coordinate(Fn&& fn, const Coordinate& start = {}, const Coordinate& stop = {}) const
-    {
-        mockturtle::detail::foreach_element(
-            coord_iterator{strg->dimension, start.is_dead() ? Coordinate{0, 0} : start},
-            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, fn);
-    }
-
-    [[nodiscard]] auto ground_coordinates(const Coordinate& start = {}, const Coordinate& stop = {}) const
-    {
-        assert(start.z == 0 && stop.z == 0);
-
-        auto ground_layer = aspect_ratio{x(), y(), 0};
-
-        return range_t{std::make_pair(coord_iterator{ground_layer, start.is_dead() ? Coordinate{0, 0} : start},
-                                      coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop})};
-    }
-
-    template <typename Fn>
-    void foreach_ground_coordinate(Fn&& fn, const Coordinate& start = {}, const Coordinate& stop = {}) const
+    void foreach_ground_coordinate(Fn&& fn, const CartesianCoordinateType& start = {}, const CartesianCoordinateType& stop = {}) const
     {
         assert(start.z == 0 && stop.z == 0);
 
         auto ground_layer = aspect_ratio{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
-            coord_iterator{ground_layer, start.is_dead() ? Coordinate{0, 0} : start},
-            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
+            cartesian::coord_iterator{ground_layer, start.is_dead() ? CartesianCoordinateType{0, 0} : start},
+            cartesian::coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
     }
 
     template <typename Container>
-    Container adjacent_coordinates(const Coordinate& c) const noexcept
+    Container adjacent_coordinates(const CartesianCoordinateType& c) const noexcept
     {
         Container cnt{};
 
@@ -325,9 +353,9 @@ class cartesian_layout
     }
 
     template <typename Fn>
-    void foreach_adjacent_coordinate(const Coordinate& c, Fn&& fn) const
+    void foreach_adjacent_coordinate(const CartesianCoordinateType& c, Fn&& fn) const
     {
-        auto adj = adjacent_coordinates<std::set<Coordinate>>(c);
+        auto adj = adjacent_coordinates<std::set<CartesianCoordinateType>>(c);
 
         mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
     }

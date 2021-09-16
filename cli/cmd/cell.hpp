@@ -71,11 +71,11 @@ class cell_command : public command
             {
                 store<fiction::cell_layout_t>().extend() = std::visit(apply, s.current());
             }
-            catch (const fiction::unsupported_gate_type_exception& e)
+            catch (const fiction::unsupported_gate_type_exception<fiction::cartesian::ucoord_t>& e)
             {
                 std::cout << fmt::format("[e] unsupported gate type at tile position {}", e.where()) << std::endl;
             }
-            catch (const fiction::unsupported_gate_orientation_exception& e)
+            catch (const fiction::unsupported_gate_orientation_exception<fiction::cartesian::ucoord_t>& e)
             {
                 std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}",
                                          e.where(), e.which_ports())

@@ -30,24 +30,24 @@ class tile_based_layout : public CoordinateLayout
 
 #pragma region Iteration
 
-    [[nodiscard]] auto tiles(const coord_t& start = {}, const coord_t& stop = {}) const
+    [[nodiscard]] auto tiles(const tile& start = {}, const tile& stop = {}) const
     {
         return CoordinateLayout::coordinates(start, stop);
     }
 
     template <typename Fn>
-    void foreach_tile(Fn&& fn, const coord_t& start = {}, const coord_t& stop = {}) const
+    void foreach_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
     {
         CoordinateLayout::foreach_coordinate(fn, start, stop);
     }
 
-    [[nodiscard]] auto ground_tiles(const coord_t& start = {}, const coord_t& stop = {}) const
+    [[nodiscard]] auto ground_tiles(const tile& start = {}, const tile& stop = {}) const
     {
         return CoordinateLayout::ground_coordinates(start, stop);
     }
 
     template <typename Fn>
-    void foreach_ground_tile(Fn&& fn, const coord_t& start = {}, const coord_t& stop = {}) const
+    void foreach_ground_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
     {
         CoordinateLayout::foreach_ground_coordinate(fn, start, stop);
     }

@@ -13,7 +13,7 @@ using namespace fiction;
 
 TEST_CASE("Traits", "[cartesian-layout]")
 {
-    using layout = cartesian_layout<coord_t>;
+    using layout = cartesian_layout<cartesian::ucoord_t>;
 
     CHECK(has_north_v<layout>);
     CHECK(has_east_v<layout>);
@@ -29,13 +29,13 @@ TEST_CASE("Traits", "[cartesian-layout]")
     CHECK(has_foreach_adjacent_coordinate_v<layout>);
 }
 
-TEST_CASE("Coordinate iteration", "[cartesian-layout]")
+TEST_CASE("Coordinate iteration", "[coordinate]")
 {
-    cartesian_layout<coord_t>::aspect_ratio ar{9, 9, 1};
+    cartesian_layout<cartesian::ucoord_t>::aspect_ratio ar{9, 9, 1};
 
     cartesian_layout layout{ar};
 
-    std::set<cartesian_layout<coord_t>::coordinate> visited{};
+    std::set<cartesian_layout<cartesian::ucoord_t>::coordinate> visited{};
 
     const auto check1 = [&visited, &ar](const auto& t)
     {
@@ -56,7 +56,7 @@ TEST_CASE("Coordinate iteration", "[cartesian-layout]")
 
     visited.clear();
 
-    cartesian_layout<coord_t>::aspect_ratio ar_ground{ar.x, ar.y, 0};
+    cartesian_layout<cartesian::ucoord_t>::aspect_ratio ar_ground{ar.x, ar.y, 0};
 
     const auto check2 = [&visited, &ar_ground](const auto& t)
     {
@@ -79,7 +79,7 @@ TEST_CASE("Coordinate iteration", "[cartesian-layout]")
 
     visited.clear();
 
-    cartesian_layout<coord_t>::coordinate start{2, 2}, stop{5, 4};
+    cartesian_layout<cartesian::ucoord_t>::coordinate start{2, 2}, stop{5, 4};
 
     const auto check3 = [&visited, &start, &stop](const auto& t)
     {
@@ -104,7 +104,7 @@ TEST_CASE("Coordinate iteration", "[cartesian-layout]")
 
 TEST_CASE("Cardinal operations", "[cartesian-layout]")
 {
-    cartesian_layout<coord_t>::aspect_ratio ar{10, 10, 1};
+    cartesian_layout<cartesian::ucoord_t>::aspect_ratio ar{10, 10, 1};
 
     cartesian_layout layout{ar};
 
@@ -124,10 +124,10 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
         CHECK(layout.is_border(bt));
     };
 
-    auto t = cartesian_layout<coord_t>::coordinate{5, 5};
+    auto t = cartesian_layout<cartesian::ucoord_t>::coordinate{5, 5};
 
-    auto nt  = cartesian_layout<coord_t>::coordinate{5, 4};
-    auto bnt = cartesian_layout<coord_t>::coordinate{5, 0};
+    auto nt  = cartesian_layout<cartesian::ucoord_t>::coordinate{5, 4};
+    auto bnt = cartesian_layout<cartesian::ucoord_t>::coordinate{5, 0};
 
     check(t, layout.north(t), nt, bnt, layout.north(bnt));
     CHECK(layout.is_north_of(t, nt));
@@ -136,8 +136,8 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(layout.is_northern_border(bnt));
     CHECK(layout.northern_border_of(t) == bnt);
 
-    auto et  = cartesian_layout<coord_t>::coordinate{6, 5};
-    auto bet = cartesian_layout<coord_t>::coordinate{10, 5};
+    auto et  = cartesian_layout<cartesian::ucoord_t>::coordinate{6, 5};
+    auto bet = cartesian_layout<cartesian::ucoord_t>::coordinate{10, 5};
 
     check(t, layout.east(t), et, bet, layout.east(bet));
     CHECK(layout.is_east_of(t, et));
@@ -146,8 +146,8 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(layout.is_eastern_border(bet));
     CHECK(layout.eastern_border_of(t) == bet);
 
-    auto st  = cartesian_layout<coord_t>::coordinate{5, 6};
-    auto bst = cartesian_layout<coord_t>::coordinate{5, 10};
+    auto st  = cartesian_layout<cartesian::ucoord_t>::coordinate{5, 6};
+    auto bst = cartesian_layout<cartesian::ucoord_t>::coordinate{5, 10};
 
     check(t, layout.south(t), st, bst, layout.south(bst));
     CHECK(layout.is_south_of(t, st));
@@ -156,8 +156,8 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(layout.is_southern_border(bst));
     CHECK(layout.southern_border_of(t) == bst);
 
-    auto wt  = cartesian_layout<coord_t>::coordinate{4, 5};
-    auto bwt = cartesian_layout<coord_t>::coordinate{0, 5};
+    auto wt  = cartesian_layout<cartesian::ucoord_t>::coordinate{4, 5};
+    auto bwt = cartesian_layout<cartesian::ucoord_t>::coordinate{0, 5};
 
     check(t, layout.west(t), wt, bwt, layout.west(bwt));
     CHECK(layout.is_west_of(t, wt));
@@ -166,7 +166,7 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(layout.is_western_border(bwt));
     CHECK(layout.western_border_of(t) == bwt);
 
-    auto at  = cartesian_layout<coord_t>::coordinate{5, 5, 1};
+    auto at  = cartesian_layout<cartesian::ucoord_t>::coordinate{5, 5, 1};
     auto bat = layout.above(at);
 
     CHECK(!at.is_dead());
@@ -176,8 +176,9 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(!layout.is_border(at));
 
     // cover corner case
-    cartesian_layout<coord_t> planar_layout{{1, 1, 0}};
-    auto                      dat = planar_layout.above({1, 1, 1});
+    cartesian_layout<cartesian::ucoord_t> planar_layout{{1, 1, 0}};
+
+    auto dat = planar_layout.above({1, 1, 1});
     CHECK(dat.is_dead());
 
     auto bt  = layout.below(at);
@@ -190,13 +191,14 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(bt == bbt);
     CHECK(layout.is_ground_layer(bbt));
 
-    auto s1 = layout.adjacent_coordinates<std::set<cartesian_layout<coord_t>::coordinate>>({5, 5});
-    auto s2 = std::set<cartesian_layout<coord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
+    auto s1 = layout.adjacent_coordinates<std::set<cartesian_layout<cartesian::ucoord_t>::coordinate>>({5, 5});
+    auto s2 = std::set<cartesian_layout<cartesian::ucoord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
 
     layout.foreach_adjacent_coordinate(
         {5, 5},
         [](const auto& adj) {
-            CHECK(std::set<cartesian_layout<coord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}}.count(adj));
+            CHECK(std::set<cartesian_layout<cartesian::ucoord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}}.count(
+                adj));
         });
 
     CHECK(s1 == s2);

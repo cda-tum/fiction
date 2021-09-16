@@ -85,7 +85,7 @@ void check_stats(const orthogonal_physical_design_stats& st) noexcept
 
 TEST_CASE("Layout equivalence", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
     const auto check = [](const auto& ntk)
     {
@@ -113,8 +113,8 @@ TEST_CASE("Layout equivalence", "[orthogonal]")
 
 TEST_CASE("Gate library application", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
     const auto check = [](const auto& ntk)
     {
