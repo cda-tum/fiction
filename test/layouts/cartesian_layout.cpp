@@ -13,11 +13,9 @@
 
 using namespace fiction;
 
-#if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #pragma GCC diagnostic ignored "-Wconversion"
-#endif
 
 TEST_CASE("Traits", "[coordinate]")
 {
@@ -106,11 +104,9 @@ TEST_CASE("Coordinates", "[coordinates]")
     CHECK(os.str() == "(3,2,1)");
 }
 
-#if defined(__GNUC__)
 #pragma GCC diagnostic pop
-#endif
 
-TEST_CASE("CartesianCoordinateType iteration", "[coordinate]")
+TEST_CASE("Coordinate iteration", "[coordinate]")
 {
     cartesian_layout<cartesian::ucoord_t>::aspect_ratio ar{9, 9, 1};
 
