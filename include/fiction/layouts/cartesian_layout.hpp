@@ -314,7 +314,7 @@ class cartesian_layout
     {
         assert(start.z == 0 && stop.z == 0);
 
-        auto ground_layer = aspect_ratio{x(), y(), 0};
+        const auto ground_layer = aspect_ratio{x(), y(), 0};
 
         return range_t{
             std::make_pair(cartesian::coord_iterator{ground_layer, start.is_dead() ? CartesianCoordinateType{0, 0} : start},
@@ -326,7 +326,7 @@ class cartesian_layout
     {
         assert(start.z == 0 && stop.z == 0);
 
-        auto ground_layer = aspect_ratio{x(), y(), 0};
+        const auto ground_layer = aspect_ratio{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
             cartesian::coord_iterator{ground_layer, start.is_dead() ? CartesianCoordinateType{0, 0} : start},
@@ -355,7 +355,7 @@ class cartesian_layout
     template <typename Fn>
     void foreach_adjacent_coordinate(const CartesianCoordinateType& c, Fn&& fn) const
     {
-        auto adj = adjacent_coordinates<std::set<CartesianCoordinateType>>(c);
+        const auto adj = adjacent_coordinates<std::set<CartesianCoordinateType>>(c);
 
         mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
     }

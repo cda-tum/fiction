@@ -12,11 +12,9 @@
 #include <iostream>
 
 // data types cannot properly be converted to bit field types
-#if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #pragma GCC diagnostic ignored "-Wconversion"
-#endif
 
 namespace fiction
 {
@@ -35,7 +33,7 @@ struct ucoord_t
     uint64_t x : 31;
 
     constexpr ucoord_t() noexcept :
-            d{static_cast<decltype(d)>(1u)},  // default-constructed coord_ts are dead
+            d{static_cast<decltype(d)>(1u)},  // default-constructed ucoord_ts are dead
             z{static_cast<decltype(z)>(0u)},
             y{static_cast<decltype(y)>(0u)},
             x{static_cast<decltype(x)>(0u)}
@@ -219,14 +217,126 @@ class coord_iterator
 };
 }  // namespace cartesian
 
-// Cartesian coordinates can be used as offset coordinates
+// For all intents and purposes, Cartesian coordinates can be used as offset coordinates
 namespace offset = cartesian;
+
+namespace cube
+{
+
+/**
+ * Signed cube coordinates.
+ *
+ * Each coordinate has a dead indicator that can be used to represent that it is not in use.
+ */
+struct coord_t
+{
+    bool    d;  // dead indicator
+    int32_t z;
+    int32_t y;
+    int32_t x;
+
+    constexpr coord_t() noexcept :
+            d{true},  // default-constructed coord_ts are dead
+            z{static_cast<decltype(z)>(0)},
+            y{static_cast<decltype(y)>(0)},
+            x{static_cast<decltype(x)>(0)}
+    {}
+
+    template <class X, class Y, class Z>
+    constexpr coord_t(X x_, Y y_, Z z_) noexcept :
+            d{false},
+            z{static_cast<decltype(z)>(z_)},
+            y{static_cast<decltype(y)>(y_)},
+            x{static_cast<decltype(x)>(x_)}
+    {}
+
+    template <class X, class Y>
+    constexpr coord_t(X x_, Y y_) noexcept :
+            d{false},
+            z{static_cast<decltype(z)>(0)},
+            y{static_cast<decltype(y)>(y_)},
+            x{static_cast<decltype(x)>(x_)}
+    {}
+
+    [[nodiscard]] constexpr bool is_dead() const noexcept
+    {
+        return static_cast<bool>(d);
+    }
+
+    [[nodiscard]] constexpr coord_t get_dead() const noexcept
+    {
+        auto dead_coord{*this};
+        dead_coord.d = true;
+        return dead_coord;
+    }
+
+    constexpr bool operator==(const coord_t& other) const noexcept
+    {
+        return d == other.d && z == other.z && y == other.y && x == other.x;
+    }
+
+    constexpr bool operator!=(const coord_t& other) const noexcept
+    {
+        return !(*this == other);
+    }
+
+    constexpr bool operator<(const coord_t& other) const noexcept
+    {
+        if (z < other.z)
+            return true;
+
+        if (z == other.z)
+        {
+            if (y < other.y)
+                return true;
+
+            if (y == other.y)
+            {
+                return x < other.x;
+            }
+        }
+
+        return false;
+    }
+
+    constexpr bool operator>(const coord_t& other) const noexcept
+    {
+        return other < *this;
+    }
+
+    constexpr bool operator<=(const coord_t& other) const noexcept
+    {
+        return !(*this > other);
+    }
+
+    constexpr bool operator>=(const coord_t& other) const noexcept
+    {
+        return !(*this < other);
+    }
+
+    constexpr coord_t operator+(const coord_t& other) const noexcept
+    {
+        return coord_t{x + other.x, y + other.y, z + other.z};
+    }
+
+    constexpr coord_t operator-(const coord_t& other) const noexcept
+    {
+        return coord_t{x - other.x, y - other.y, z - other.z};
+    }
+
+    [[nodiscard]] std::string str() const noexcept
+    {
+        return fmt::format("({},{},{})", x, y, z);
+    }
+};
+
+}  // namespace cube
 
 }  // namespace fiction
 
 namespace std
 {
-// define std::hash overload for ucoord_t
+// define std::hash overload for cartesian::ucoord_t
 template <>
 struct hash<fiction::cartesian::ucoord_t>
 {
@@ -235,7 +345,7 @@ struct hash<fiction::cartesian::ucoord_t>
         return static_cast<std::size_t>(std::hash<uint64_t>{}(static_cast<uint64_t>(c)));
     }
 };
-// make coord_iterator compatible with STL iterator categories
+// make cartesian::coord_iterator compatible with STL iterator categories
 template <typename Coordinate>
 struct iterator_traits<fiction::cartesian::coord_iterator<Coordinate>>
 {
@@ -246,7 +356,7 @@ struct iterator_traits<fiction::cartesian::coord_iterator<Coordinate>>
 
 namespace fmt
 {
-// make ucoord_t compatible with fmt::format
+// make cartesian::ucoord_t compatible with fmt::format
 template <>
 struct formatter<fiction::cartesian::ucoord_t>
 {
@@ -262,10 +372,24 @@ struct formatter<fiction::cartesian::ucoord_t>
         return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
     }
 };
+// make cube::coord_t compatible with fmt::format
+template <>
+struct formatter<fiction::cube::coord_t>
+{
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const fiction::cube::coord_t& c, FormatContext& ctx)
+    {
+        return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
+    }
+};
 }  // namespace fmt
 
-#if defined(__GNUC__)
 #pragma GCC diagnostic pop
-#endif
 
 #endif  // FICTION_COORDINATES_HPP
