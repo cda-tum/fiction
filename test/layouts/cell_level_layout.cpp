@@ -18,7 +18,7 @@ using namespace fiction;
 
 TEST_CASE("Traits", "[cell-level]")
 {
-    using layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
     CHECK(is_cell_level_layout_v<layout>);
     CHECK(has_get_layout_name_v<layout>);
@@ -80,7 +80,7 @@ TEST_CASE("Cell technology", "[cell-level]")
 
 TEST_CASE("Cell type assignment", "[cell-level]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
     REQUIRE(has_get_layout_name_v<cell_layout>);
     REQUIRE(has_set_layout_name_v<cell_layout>);
@@ -152,7 +152,7 @@ TEST_CASE("Cell type assignment", "[cell-level]")
 
 TEST_CASE("Cell mode assignment", "[cell-level]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 
@@ -201,8 +201,8 @@ TEST_CASE("Cell mode assignment", "[cell-level]")
 
 TEST_CASE("Clocking", "[cell-level]")
 {
-    cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>> layout{
-        cartesian_layout<coord_t>::aspect_ratio{4, 4, 0}, twoddwave_4_clocking, "Lyt", 2, 2};
+    cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>> layout{
+        cartesian_layout<cartesian::ucoord_t>::aspect_ratio{4, 4, 0}, twoddwave_4_clocking, "Lyt", 2, 2};
 
     CHECK(layout.get_clock_number({0, 0}) == 0);
     CHECK(layout.get_clock_number({0, 1}) == 0);

@@ -63,7 +63,7 @@ class ortho_command : public command
         const auto orthogonal_physical_design = [this](auto&& net)
         {
             using gate_layout = fiction::gate_level_layout<
-                fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::coord_t>>>>;
+                fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::cartesian::ucoord_t>>>>;
 
             return fiction::orthogonal<gate_layout>(*net, ps, &st);
         };

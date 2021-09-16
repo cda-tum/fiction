@@ -5,8 +5,8 @@
 #include "../utils/blueprints/layout_blueprints.hpp"
 #include "catch.hpp"
 
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/qca_one_library.hpp>
@@ -15,7 +15,7 @@ using namespace fiction;
 
 TEST_CASE("Setting up input ports and gates", "[qca-one]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
     auto layout = blueprints::or_not_gate_layout<gate_layout>();
 
@@ -56,7 +56,7 @@ TEST_CASE("Setting up input ports and gates", "[qca-one]")
 
 TEST_CASE("Setting up wires", "[qca-one]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -103,7 +103,7 @@ TEST_CASE("Setting up wires", "[qca-one]")
 
 TEST_CASE("Setting up fanouts", "[qca-one]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
     auto layout = blueprints::fanout_layout<gate_layout>();
 

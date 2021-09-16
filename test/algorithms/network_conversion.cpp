@@ -115,7 +115,7 @@ TEST_CASE("Layout conversion", "[algorithms]")
 {
     SECTION("Gate layout to X")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
         REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
