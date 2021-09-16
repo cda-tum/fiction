@@ -29,7 +29,7 @@ TEST_CASE("Traits", "[cartesian-layout]")
     CHECK(has_foreach_adjacent_coordinate_v<layout>);
 }
 
-TEST_CASE("Coordinate iteration", "[coordinate]")
+TEST_CASE("Coordinate iteration", "[cartesian-layout]")
 {
     cartesian_layout<cartesian::ucoord_t>::aspect_ratio ar{9, 9, 1};
 
