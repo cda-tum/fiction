@@ -5,7 +5,7 @@
 #ifndef FICTION_FCN_GATE_LIBRARY_H
 #define FICTION_FCN_GATE_LIBRARY_H
 
-#include "../layouts/coordinate.hpp"
+#include "../layouts/coordinates.hpp"
 #include "../utils/array.hpp"
 #include "cell_technologies.hpp"
 
@@ -16,30 +16,32 @@
 namespace fiction
 {
 
+template <typename CoordinateType>
 class unsupported_gate_type_exception : public std::exception
 {
   public:
-    explicit unsupported_gate_type_exception(const coord_t& c) noexcept : std::exception(), coord{c} {}
+    explicit unsupported_gate_type_exception(const CoordinateType& c) noexcept : std::exception(), coord{c} {}
 
-    [[nodiscard]] coord_t where() const noexcept
+    [[nodiscard]] CoordinateType where() const noexcept
     {
         return coord;
     }
 
   private:
-    const coord_t coord;
+    const CoordinateType coord;
 };
 
+template <typename CoordinateType>
 class unsupported_gate_orientation_exception : public std::exception
 {
   public:
-    unsupported_gate_orientation_exception(const coord_t& c, const port_list& p) noexcept :
+    unsupported_gate_orientation_exception(const CoordinateType& c, const port_list& p) noexcept :
             std::exception(),
             coord{c},
             ports{p}
     {}
 
-    [[nodiscard]] coord_t where() const noexcept
+    [[nodiscard]] CoordinateType where() const noexcept
     {
         return coord;
     }
@@ -50,8 +52,8 @@ class unsupported_gate_orientation_exception : public std::exception
     }
 
   private:
-    const coord_t   coord;
-    const port_list ports;
+    const CoordinateType coord;
+    const port_list      ports;
 };
 
 /**

@@ -14,7 +14,7 @@ namespace fiction
 {
 
 /**
- * Coordinate layouts
+ * CartesianCoordinateType layouts
  */
 
 template <typename Lyt>

@@ -17,9 +17,9 @@ using namespace fiction;
 
 TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
-    gate_layout layout{tile_based_layout<cartesian_layout<coord_t>>::aspect_ratio{2, 2}, open_4_clocking};
+    gate_layout layout{gate_layout::aspect_ratio{2, 2}, open_4_clocking};
 
     constexpr const char* layout_print = "[i] empty layout";
 
@@ -32,9 +32,9 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
-    gate_layout layout{tile_based_layout<cartesian_layout<coord_t>>::aspect_ratio{3, 1, 0}, open_4_clocking};
+    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, open_4_clocking};
 
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {1, 1});
@@ -83,7 +83,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -104,11 +104,10 @@ TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print empty cell-level layout", "[print-gate-level-layout]")
 {
-    using cell_layout =
-        fiction::cell_level_layout<fiction::qca_technology,
-                                   fiction::clocked_layout<fiction::tile_based_layout<cartesian_layout<coord_t>>>>;
+    using cell_layout = fiction::cell_level_layout<fiction::qca_technology,
+                                                   fiction::clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
-    cell_layout layout{fiction::tile_based_layout<cartesian_layout<coord_t>>::aspect_ratio{2, 2}, "Empty"};
+    cell_layout layout{cell_layout::aspect_ratio{2, 2}, "Empty"};
 
     constexpr const char* layout_print = "[i] empty layout";
 
@@ -121,11 +120,10 @@ TEST_CASE("Print empty cell-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 {
-    using cell_layout =
-        fiction::cell_level_layout<fiction::qca_technology,
-                                   fiction::clocked_layout<fiction::tile_based_layout<cartesian_layout<coord_t>>>>;
+    using cell_layout = fiction::cell_level_layout<fiction::qca_technology,
+                                                   fiction::clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
-    cell_layout layout{fiction::tile_based_layout<cartesian_layout<coord_t>>::aspect_ratio{4, 4}, "AND"};
+    cell_layout layout{cell_layout::aspect_ratio{4, 4}, "AND"};
 
     layout.assign_cell_type({0, 2}, fiction::qca_technology::cell_type::INPUT);
     layout.assign_cell_type({2, 4}, fiction::qca_technology::cell_type::INPUT);
@@ -157,11 +155,10 @@ TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 
 TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 {
-    using cell_layout =
-        fiction::cell_level_layout<fiction::qca_technology,
-                                   fiction::clocked_layout<fiction::tile_based_layout<cartesian_layout<coord_t>>>>;
+    using cell_layout = fiction::cell_level_layout<fiction::qca_technology,
+                                                   fiction::clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
-    cell_layout layout{fiction::tile_based_layout<cartesian_layout<coord_t>>::aspect_ratio{4, 4, 1}, "Crossover"};
+    cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 
     layout.assign_cell_type({0, 2, 0}, fiction::qca_technology::cell_type::INPUT);
     layout.assign_cell_type({2, 0, 0}, fiction::qca_technology::cell_type::INPUT);

@@ -14,7 +14,7 @@ using namespace fiction;
 
 TEST_CASE("Traits", "[clocked-layout]")
 {
-    using layout = clocked_layout<cartesian_layout<coord_t>>;
+    using layout = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
 
     CHECK(has_is_incoming_clocked_v<layout>);
     CHECK(has_is_outgoing_clocked_v<layout>);
@@ -22,7 +22,7 @@ TEST_CASE("Traits", "[clocked-layout]")
 
 TEST_CASE("Clocking", "[clocked-layout]")
 {
-    using coordinate_layout = cartesian_layout<coord_t>;
+    using coordinate_layout = cartesian_layout<cartesian::ucoord_t>;
 
     clocked_layout<coordinate_layout> layout{coordinate_layout::aspect_ratio{1, 1, 0}, twoddwave_4_clocking};
 
@@ -116,7 +116,7 @@ TEST_CASE("Clocking", "[clocked-layout]")
 
 TEST_CASE("Iteration", "[clocked-layout]")
 {
-    using coordinate_layout = cartesian_layout<coord_t>;
+    using coordinate_layout = cartesian_layout<cartesian::ucoord_t>;
 
     clocked_layout<coordinate_layout> layout{coordinate_layout::aspect_ratio{2, 2, 0}, twoddwave_4_clocking};
 
@@ -136,7 +136,7 @@ TEST_CASE("Iteration", "[clocked-layout]")
 
 TEST_CASE("Structural properties", "[clocked-layout]")
 {
-    using coordinate_layout = cartesian_layout<coord_t>;
+    using coordinate_layout = cartesian_layout<cartesian::ucoord_t>;
 
     SECTION("2DDWave Clocking")
     {
