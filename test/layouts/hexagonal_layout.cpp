@@ -28,8 +28,8 @@ TEST_CASE("Traits", "[hexagonal]")
     //    CHECK(has_above_v<layout>);
     //    CHECK(has_below_v<layout>);
     //    CHECK(has_elevation_checks_v<layout>);
-    //    CHECK(is_coordinate_layout_v<layout>);
-    //
+    CHECK(is_coordinate_layout_v<layout>);
+
     CHECK(has_foreach_coordinate_v<layout>);
     CHECK(has_foreach_adjacent_coordinate_v<layout>);
 }
@@ -130,15 +130,79 @@ void check_visited_coordinates()
     CHECK(visited.size() == 23);
 }
 
-TEST_CASE("Coordinate iteration", "[coordinate]")
+TEST_CASE("Coordinate iteration", "[hexagonal]")
 {
-    using even_column_layout = hexagonal_layout<offset::ucoord_t, even_column>;
-    using odd_column_layout  = hexagonal_layout<offset::ucoord_t, odd_column>;
-    using even_row_layout    = hexagonal_layout<offset::ucoord_t, even_row>;
     using odd_row_layout     = hexagonal_layout<offset::ucoord_t, odd_row>;
+    using even_row_layout    = hexagonal_layout<offset::ucoord_t, even_row>;
+    using odd_column_layout  = hexagonal_layout<offset::ucoord_t, odd_column>;
+    using even_column_layout = hexagonal_layout<offset::ucoord_t, even_column>;
 
-    check_visited_coordinates<even_column_layout>();
-    check_visited_coordinates<odd_column_layout>();
-    check_visited_coordinates<even_row_layout>();
     check_visited_coordinates<odd_row_layout>();
+    check_visited_coordinates<even_row_layout>();
+    check_visited_coordinates<odd_column_layout>();
+    check_visited_coordinates<even_column_layout>();
+}
+
+TEST_CASE("Coordinate adjacencies", "[hexagonal]")
+{
+    SECTION("odd row")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, odd_row>;
+
+        layout lyt{{2, 2}};
+
+        const std::set<coordinate<layout>> adj_00{{{0, 1}, {1, 0}}};
+        CHECK(adj_00 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 0}));
+
+        const std::set<coordinate<layout>> adj_01{{{0, 0}, {1, 0}, {1, 1}, {0, 2}, {1, 2}}};
+        CHECK(adj_01 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 1}));
+
+        const std::set<coordinate<layout>> adj_22{{{1, 2}, {1, 1}, {2, 1}}};
+        CHECK(adj_22 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({2, 2}));
+    }
+    SECTION("even row")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, even_row>;
+
+        layout lyt{{2, 2}};
+
+        const std::set<coordinate<layout>> adj_00{{{0, 1}, {1, 0}, {1, 1}}};
+        CHECK(adj_00 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 0}));
+
+        const std::set<coordinate<layout>> adj_01{{{0, 0}, {1, 1}, {0, 2}}};
+        CHECK(adj_01 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 1}));
+
+        const std::set<coordinate<layout>> adj_22{{{1, 2}, {2, 1}}};
+        CHECK(adj_22 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({2, 2}));
+    }
+    SECTION("odd column")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, odd_column>;
+
+        layout lyt{{2, 2}};
+
+        const std::set<coordinate<layout>> adj_00{{{0, 1}, {1, 0}}};
+        CHECK(adj_00 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 0}));
+
+        const std::set<coordinate<layout>> adj_01{{{0, 0}, {1, 0}, {0, 2}, {1, 1}}};
+        CHECK(adj_01 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 1}));
+
+        const std::set<coordinate<layout>> adj_22{{{1, 1}, {2, 1}, {1, 2}}};
+        CHECK(adj_22 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({2, 2}));
+    }
+    SECTION("even column")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, even_column>;
+
+        layout lyt{{2, 2}};
+
+        const std::set<coordinate<layout>> adj_00{{{0, 1}, {1, 0}, {1, 1}}};
+        CHECK(adj_00 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 0}));
+
+        const std::set<coordinate<layout>> adj_01{{{0, 0}, {1, 1}, {1, 2}, {0, 2}}};
+        CHECK(adj_01 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 1}));
+
+        const std::set<coordinate<layout>> adj_22{{{1, 2}, {2, 1}}};
+        CHECK(adj_22 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({2, 2}));
+    }
 }

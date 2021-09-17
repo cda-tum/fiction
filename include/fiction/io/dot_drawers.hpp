@@ -8,6 +8,8 @@
 #include "../traits.hpp"
 #include "utils/version_info.hpp"
 
+#include <fiction/layouts/hexagonal_layout.hpp>
+
 #include <fmt/format.h>
 #include <kitty/print.hpp>
 #include <mockturtle/io/write_dot.hpp>
@@ -205,10 +207,37 @@ class gate_layout_tile_drawer : public topology_dot_drawer<Lyt, DrawIndexes>
 
     [[nodiscard]] std::vector<std::string> additional_node_attributes() const noexcept
     {
+        // all nodes are of fixed size and are pinned to precalculated positions (neato engine only)
+        std::vector<std::string> node_attributes{{"fixedsize=true"}, {"pin=true"}};
+
+        // 3 inputs must be a square grid TODO this is not that pretty. you can do better.
+        if constexpr (Lyt::max_fanin_size == 3)
+        {
+            node_attributes.emplace_back("shape=square");
+        }
+        // 5 inputs must be a hexagonal grid TODO this is not that pretty. you can do better.
+        else if constexpr (Lyt::max_fanin_size == 5)
+        {
+            node_attributes.emplace_back("shape=hexagon");
+
+            if constexpr (std::is_same_v<typename Lyt::hex_arrangment::orientation, pointy_top>)
+            {
+                // pointy top hexagons are rotated by 30°
+                node_attributes.emplace_back("orientation=30");
+            }
+        }
         if constexpr (DrawIndexes)
-            return {"shape=square", "fixedsize=true", "width=1"};
+        {
+            node_attributes.emplace_back("width=1");
+            node_attributes.emplace_back("height=1");
+        }
         else
-            return {"shape=square", "fixedsize=true", "width=0.5"};
+        {
+            node_attributes.emplace_back("width=0.5");
+            node_attributes.emplace_back("height=0.5");
+        }
+
+        return node_attributes;
     }
 
     std::string tile_label(const Lyt& lyt, const tile<Lyt>& t) const noexcept
@@ -245,6 +274,20 @@ class gate_layout_tile_drawer : public topology_dot_drawer<Lyt, DrawIndexes>
         return topology_dot_drawer<Lyt, DrawIndexes>::node_fillcolor(lyt, lyt.get_node(t));
     }
 
+    //    std::string tile_position(const tile<Lyt>& t) const noexcept
+    //    {
+    //        // 3 inputs must be a square grid TODO this is not that pretty. you can do better.
+    //        if constexpr (Lyt::max_fanin_size == 3)
+    //        {
+    //            return fmt::format("({},{})", t.x, t.y);
+    //        }
+    //        // 5 inputs must be a hexagonal grid TODO this is not that pretty. you can do better.
+    //        else if constexpr (Lyt::max_fanin_size == 5)
+    //        {
+    //            return fmt::format("({},{})", t.x, t.y);
+    //        }
+    //    }
+
     std::vector<std::vector<std::string>> rows(const Lyt& lyt) const noexcept
     {
         std::vector<std::vector<std::string>> rows{};
@@ -272,6 +315,92 @@ class gate_layout_tile_drawer : public topology_dot_drawer<Lyt, DrawIndexes>
 
         return columns;
     }
+
+    std::string enforce_topology(const Lyt& lyt) const
+    {
+        std::stringstream topology{};
+
+        topology << "edge [constraint=true, style=invis];\n";
+        //        topology << "edge [constraint=true];\n";
+
+        const auto enforce_same_cardinal_column = [this, &lyt, &topology]()
+        {
+            for (const auto& col : columns(lyt)) { topology << fmt::format("{};\n", fmt::join(col, " -> ")); }
+        };
+
+        const auto enforce_same_cardinal_row = [this, &lyt, &topology]()
+        {
+            for (const auto& row : rows(lyt))
+            {
+                topology << fmt::format("rank = same {{ {} }};\n", fmt::join(row, " -> "));
+            }
+        };
+
+        // 3 inputs must be a square grid TODO this is not that pretty. you can do better.
+        if constexpr (Lyt::max_fanin_size == 3)
+        {
+            enforce_same_cardinal_column();
+            enforce_same_cardinal_row();
+        }
+        // 5 inputs must be a hexagonal grid TODO this is not that pretty. you can do better.
+        else if constexpr (Lyt::max_fanin_size == 5)
+        {
+            const auto shift_row = [this, &lyt, &topology](const auto i)
+            {
+                topology << fmt::format("rank = same {{ r{} -> {} }};\n", i, tile_id({0, i}));
+
+                // previous row only exist if i != 0
+                if (i != 0)
+                {
+                    const tile<Lyt> previous_row{0, i - 1};
+                    topology << fmt::format("r{} -> {};\n", i, tile_id(previous_row));
+                }
+
+                // next row could be out of bounds and need to be checked for
+                if (const tile<Lyt> next_row{0, i + 1}; lyt.y() >= next_row.y)
+                {
+                    topology << fmt::format("r{} -> {};\n", i, tile_id(next_row));
+                }
+            };
+
+            topology << "node [label=\"\", width=1, height=1, style=invis];\n";
+
+            if constexpr (std::is_same_v<typename Lyt::hex_arrangment, odd_row>)
+            {
+                enforce_same_cardinal_row();
+
+                // shift odd rows
+                for (auto i = 1ul; i <= lyt.y(); i += 2) { shift_row(i); }
+            }
+            else if constexpr (std::is_same_v<typename Lyt::hex_arrangment, even_row>)
+            {
+                enforce_same_cardinal_row();
+
+                // shift even rows
+                for (auto i = 0ul; i <= lyt.y(); i += 2) { shift_row(i); }
+            }
+            else if constexpr (std::is_same_v<typename Lyt::hex_arrangment, odd_column> ||
+                               std::is_same_v<typename Lyt::hex_arrangment, even_column>)
+            {
+                enforce_same_cardinal_column();
+            }
+
+            lyt.foreach_ground_tile(
+                [this, &lyt, &topology](const auto& t)
+                {
+                    lyt.foreach_adjacent_tile(t,
+                                              [this, &topology, &t](const auto& at)
+                                              {
+                                                  if (t < at)
+                                                  {
+                                                      topology << fmt::format("{} -> {};\n", tile_id(t), tile_id(at));
+                                                  }
+                                              });
+                });
+        }
+
+        return topology.str();
+    }
 };
 
 /*! \brief Writes layout in DOT format into output stream
@@ -294,7 +423,7 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
     static_assert(mockturtle::has_foreach_node_v<Lyt>, "Lyt does not implement the foreach_node function");
     static_assert(mockturtle::has_foreach_fanin_v<Lyt>, "Lyt does not implement the foreach_fanin function");
 
-    std::stringstream nodes{}, edges{}, grid{};
+    std::stringstream nodes{}, edges{}, topology{};
 
     nodes << fmt::format("node [style=filled {}];\n", fmt::join(drawer.additional_node_attributes(), " "));
 
@@ -302,8 +431,16 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
     lyt.foreach_ground_tile(
         [&lyt, &drawer, &nodes](const auto& t)
         {
+            //            nodes << fmt::format("{} [label=\"{}\", fillcolor={}];\n", drawer.tile_id(t),
+            //            drawer.tile_id(t),
+            //                                 drawer.tile_fillcolor(lyt, t));
+
             nodes << fmt::format("{} [label=\"{}\", fillcolor={}];\n", drawer.tile_id(t), drawer.tile_label(lyt, t),
                                  drawer.tile_fillcolor(lyt, t));
+
+            //            nodes << fmt::format("{} [label=\"{}\", fillcolor={}, pos=\"{}!\"];\n", drawer.tile_id(t),
+            //                                 drawer.tile_label(lyt, t), drawer.tile_fillcolor(lyt, t),
+            //                                 drawer.tile_position(t));
         });
 
     nodes << "edge [constraint=false];\n";
@@ -321,18 +458,16 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
                               });
         });
 
-    grid << "edge [constraint=true, style=invis];\n";
-
-    // enforce grid structure
-    for (const auto& col : drawer.columns(lyt)) { grid << fmt::format("{};\n", fmt::join(col, " -> ")); }
-    for (const auto& row : drawer.rows(lyt)) { grid << fmt::format("rank = same {{ {} }};\n", fmt::join(row, " -> ")); }
+    // enforce topological structure
+    topology << drawer.enforce_topology(lyt);
 
     // draw layout
     os << fmt::format("digraph layout {{  // Generated by {} ({})", FICTION_VERSION, FICTION_REPO) << "\n"
        << "rankdir=TB;\n"
        << "splines=ortho;\n"
-       << "concentrate=true;\n"
-       << nodes.str() << edges.str() << grid.str() << "}\n";
+       << "nodesep=0.5;\n"
+       // << "concentrate=true;\n"  // this, unfortunately, causes too many issues of disappearing edges
+       << nodes.str() << edges.str() << topology.str() << "}\n";
 }
 
 /*! \brief Writes layout in DOT format into a file

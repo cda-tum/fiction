@@ -11,7 +11,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[cartesian-layout]")
+TEST_CASE("Traits", "[cartisan]")
 {
     using layout = cartesian_layout<cartesian::ucoord_t>;
 
@@ -29,7 +29,7 @@ TEST_CASE("Traits", "[cartesian-layout]")
     CHECK(has_foreach_adjacent_coordinate_v<layout>);
 }
 
-TEST_CASE("Coordinate iteration", "[cartesian-layout]")
+TEST_CASE("Coordinate iteration", "[cartisan]")
 {
     cartesian_layout<cartesian::ucoord_t>::aspect_ratio ar{9, 9, 1};
 
