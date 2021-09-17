@@ -77,18 +77,19 @@ template <class Lyt>
 inline constexpr bool has_west_v = has_west<Lyt>::value;
 #pragma endregion
 
-#pragma region has_cardinal_checks
+#pragma region has_cardinal_operations
 template <class Lyt, class = void>
-struct has_cardinal_checks : std::false_type
+struct has_cardinal_operations : std::false_type
 {};
 
 template <class Lyt>
-struct has_cardinal_checks<Lyt, std::void_t<has_north<Lyt>, has_east<Lyt>, has_south<Lyt>, has_west<Lyt>>>
+struct has_cardinal_operations<
+    Lyt, std::enable_if_t<std::conjunction_v<has_north<Lyt>, has_east<Lyt>, has_south<Lyt>, has_west<Lyt>>>>
         : std::true_type
 {};
 
 template <class Lyt>
-inline constexpr bool has_cardinal_checks_v = has_cardinal_checks<Lyt>::value;
+inline constexpr bool has_cardinal_operations_v = has_cardinal_operations<Lyt>::value;
 #pragma endregion
 
 #pragma region has_above
@@ -119,17 +120,18 @@ template <class Lyt>
 inline constexpr bool has_below_v = has_below<Lyt>::value;
 #pragma endregion
 
-#pragma region has_elevation_checks
+#pragma region has_elevation_operations
 template <class Lyt, class = void>
-struct has_elevation_checks : std::false_type
+struct has_elevation_operations : std::false_type
 {};
 
 template <class Lyt>
-struct has_elevation_checks<Lyt, std::void_t<has_above<Lyt>, has_below<Lyt>>> : std::true_type
+struct has_elevation_operations<Lyt, std::enable_if_t<std::conjunction_v<has_above<Lyt>, has_below<Lyt>>>>
+        : std::true_type
 {};
 
 template <class Lyt>
-inline constexpr bool has_elevation_checks_v = has_elevation_checks<Lyt>::value;
+inline constexpr bool has_elevation_operations_v = has_elevation_operations<Lyt>::value;
 #pragma endregion
 
 #pragma region is_coordinate_layout
@@ -141,12 +143,13 @@ template <class Lyt>
 struct is_coordinate_layout<
     Lyt,
     std::enable_if_t<
-        std::is_constructible_v<aspect_ratio<Lyt>, coordinate<Lyt>>,
+        std::conjunction_v<std::is_constructible<aspect_ratio<Lyt>, coordinate<Lyt>>, has_cardinal_operations<Lyt>,
+                           has_elevation_operations<Lyt>>,
         std::void_t<typename Lyt::base_type, aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage,
                     decltype(Lyt::max_fanin_size), decltype(Lyt::min_fanin_size), decltype(std::declval<Lyt>().x()),
                     decltype(std::declval<Lyt>().y()), decltype(std::declval<Lyt>().z()),
-                    decltype(std::declval<Lyt>().area()), decltype(std::declval<Lyt>().resize(aspect_ratio<Lyt>())),
-                    has_cardinal_checks<Lyt>, has_elevation_checks<Lyt>>>> : std::true_type
+                    decltype(std::declval<Lyt>().area()), decltype(std::declval<Lyt>().resize(aspect_ratio<Lyt>()))>>>
+        : std::true_type
 {};
 
 template <class Lyt>

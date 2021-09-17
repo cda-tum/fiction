@@ -7,7 +7,6 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/traits.hpp>
 
-#include <map>
 #include <set>
 #include <sstream>
 
@@ -17,7 +16,7 @@ using namespace fiction;
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #pragma GCC diagnostic ignored "-Wconversion"
 
-TEST_CASE("Traits", "[coordinate]")
+TEST_CASE("Traits", "[cartisan]")
 {
     using layout = cartesian_layout<cartesian::ucoord_t>;
 
@@ -25,10 +24,10 @@ TEST_CASE("Traits", "[coordinate]")
     CHECK(has_east_v<layout>);
     CHECK(has_south_v<layout>);
     CHECK(has_west_v<layout>);
-    CHECK(has_cardinal_checks_v<layout>);
+    CHECK(has_cardinal_operations_v<layout>);
     CHECK(has_above_v<layout>);
     CHECK(has_below_v<layout>);
-    CHECK(has_elevation_checks_v<layout>);
+    CHECK(has_elevation_operations_v<layout>);
     CHECK(is_coordinate_layout_v<layout>);
 
     CHECK(has_foreach_coordinate_v<layout>);
@@ -106,7 +105,7 @@ TEST_CASE("Coordinates", "[coordinates]")
 
 #pragma GCC diagnostic pop
 
-TEST_CASE("Coordinate iteration", "[coordinate]")
+TEST_CASE("Coordinate iteration", "[cartisan]")
 {
     cartesian_layout<cartesian::ucoord_t>::aspect_ratio ar{9, 9, 1};
 
@@ -179,7 +178,7 @@ TEST_CASE("Coordinate iteration", "[coordinate]")
     CHECK(visited.size() == 23);
 }
 
-TEST_CASE("Cardinal operations", "[coordinate]")
+TEST_CASE("Cardinal operations", "[cartisan]")
 {
     cartesian_layout<cartesian::ucoord_t>::aspect_ratio ar{10, 10, 1};
 
