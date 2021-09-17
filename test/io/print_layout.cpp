@@ -21,7 +21,7 @@ TEST_CASE("Print empty gate-level layout", "[gate-level]")
 
     gate_layout layout{tile_based_layout<cartesian_layout<coord_t>>::aspect_ratio{2, 2}, open_4_clocking};
 
-    const auto layout_print = "[i] empty layout";
+    constexpr const char* layout_print = "[i] empty layout";
 
     std::stringstream print_stream{};
 
@@ -45,11 +45,11 @@ TEST_CASE("Print simple gate-level layout", "[gate-level]")
 
     SECTION("No clocking")
     {
-        const auto layout_print = "        \n"
-                                  "O & I ▢ \n"
-                                  "        \n"
-                                  "▢ I ¬ O \n"
-                                  "\n";
+        constexpr const char* layout_print = "        \n"
+                                             "O & I ▢ \n"
+                                             "        \n"
+                                             "▢ I ¬ O \n"
+                                             "\n";
 
         std::stringstream print_stream{};
 
@@ -67,11 +67,11 @@ TEST_CASE("Print simple gate-level layout", "[gate-level]")
         layout.assign_clock_number({2, 1}, static_cast<typename gate_layout::clock_number_t>(1));
         layout.assign_clock_number({3, 1}, static_cast<typename gate_layout::clock_number_t>(2));
 
-        const auto layout_print = "        \n"
-                                  "O←&←I ▢ \n"
-                                  "  ↑     \n"
-                                  "▢ F→¬→O \n"
-                                  "\n";
+        constexpr const char* layout_print = "        \n"
+                                             "O←&←I ▢ \n"
+                                             "  ↑     \n"
+                                             "▢ F→¬→O \n"
+                                             "\n";
 
         std::stringstream print_stream{};
 
@@ -87,13 +87,13 @@ TEST_CASE("Print crossing gate-level layout", "[gate-level]")
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
-    const auto layout_print = "        \n"
-                              "▢ I I ▢ \n"
-                              "  ↓ ↓   \n"
-                              "I→&→+→O \n"
-                              "    ↓   \n"
-                              "I→=→&→O \n"
-                              "\n";
+    constexpr const char* layout_print = "        \n"
+                                         "▢ I I ▢ \n"
+                                         "  ↓ ↓   \n"
+                                         "I→&→+→O \n"
+                                         "    ↓   \n"
+                                         "I→=→&→O \n"
+                                         "\n";
 
     std::stringstream print_stream{};
 
@@ -110,7 +110,7 @@ TEST_CASE("Print empty cell-level layout", "[gate-level]")
 
     cell_layout layout{fiction::tile_based_layout<cartesian_layout<coord_t>>::aspect_ratio{2, 2}, "Empty"};
 
-    const auto layout_print = "[i] empty layout";
+    constexpr const char* layout_print = "[i] empty layout";
 
     std::stringstream print_stream{};
 
@@ -141,12 +141,12 @@ TEST_CASE("Print AND gate cell-level layout", "[cell-level]")
     layout.assign_cell_name({2, 4}, "b");
     layout.assign_cell_name({4, 2}, "f");
 
-    const auto layout_print = "  0  \n"
-                              "  ▢  \n"
-                              "i▢▢▢o\n"
-                              "  ▢  \n"
-                              "  i  \n"
-                              "\n";
+    constexpr const char* layout_print = "  0  \n"
+                                         "  ▢  \n"
+                                         "i▢▢▢o\n"
+                                         "  ▢  \n"
+                                         "  i  \n"
+                                         "\n";
 
     std::stringstream print_stream{};
 
@@ -183,12 +183,12 @@ TEST_CASE("Print wire crossing cell-level layout", "[cell-level]")
     layout.assign_cell_name({4, 2}, "a'");
     layout.assign_cell_name({2, 4}, "b'");
 
-    const auto layout_print = "  i  \n"
-                              "  x  \n"
-                              "i▢x▢o\n"
-                              "  x  \n"
-                              "  o  \n"
-                              "\n";
+    constexpr const char* layout_print = "  i  \n"
+                                         "  x  \n"
+                                         "i▢x▢o\n"
+                                         "  x  \n"
+                                         "  o  \n"
+                                         "\n";
 
     std::stringstream print_stream{};
 

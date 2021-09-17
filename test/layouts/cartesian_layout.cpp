@@ -19,10 +19,10 @@ TEST_CASE("Traits", "[cartisan]")
     CHECK(has_east_v<layout>);
     CHECK(has_south_v<layout>);
     CHECK(has_west_v<layout>);
-    CHECK(has_cardinal_checks_v<layout>);
+    CHECK(has_cardinal_operations_v<layout>);
     CHECK(has_above_v<layout>);
     CHECK(has_below_v<layout>);
-    CHECK(has_elevation_checks_v<layout>);
+    CHECK(has_elevation_operations_v<layout>);
     CHECK(is_coordinate_layout_v<layout>);
 
     CHECK(has_foreach_coordinate_v<layout>);
