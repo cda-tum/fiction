@@ -6,10 +6,12 @@
 #define FICTION_HEXAGONAL_LAYOUT_HPP
 
 #include "../utils/range.hpp"
+#include "coordinates.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 
 #include <algorithm>
+#include <array>
 #include <memory>
 #include <set>
 #include <type_traits>
@@ -29,7 +31,9 @@ namespace fiction
  *
  */
 struct pointy_top
-{};
+{
+    using orientation = pointy_top;
+};
 
 /**
  * \verbatim
@@ -41,7 +45,9 @@ struct pointy_top
  *
  */
 struct flat_top
-{};
+{
+    using orientation = flat_top;
+};
 
 /**
  * \verbatim
@@ -159,6 +165,8 @@ class hexagonal_layout
 
     using base_type = hexagonal_layout;
 
+    using hex_arrangment = OffsetCoordinateSystem;
+
     using storage = std::shared_ptr<hexagonal_layout_storage>;
 
     /**
@@ -207,6 +215,205 @@ class hexagonal_layout
     {
         strg->dimension = ar;
     }
+
+#pragma endregion
+
+#pragma region Cardinal operations
+
+    [[nodiscard]] constexpr OffsetCoordinateType north(const OffsetCoordinateType& c) const noexcept
+    {
+        if (c.y == 0ull)
+            return c;
+
+        auto nc = c;
+        --nc.y;
+
+        return nc;
+    }
+
+    [[nodiscard]] OffsetCoordinateType east(const OffsetCoordinateType& c) const noexcept
+    {
+        auto ec = c;
+
+        if (c.x > x())
+            ec.d = 1;
+        else if (c.x < x())
+            ++ec.x;
+
+        return ec;
+    }
+
+    [[nodiscard]] OffsetCoordinateType south(const OffsetCoordinateType& c) const noexcept
+    {
+        auto sc = c;
+
+        if (c.y > y())
+            sc.d = 1;
+        else if (c.y < y())
+            ++sc.y;
+
+        return sc;
+    }
+
+    [[nodiscard]] constexpr OffsetCoordinateType west(const OffsetCoordinateType& c) const noexcept
+    {
+        if (c.x == 0ull)
+            return c;
+
+        auto wc = c;
+        --wc.x;
+
+        return wc;
+    }
+
+    [[nodiscard]] OffsetCoordinateType above(const OffsetCoordinateType& c) const noexcept
+    {
+        auto ac = c;
+
+        if (c.z > z())
+            ac.d = 1;
+        else if (c.z < z())
+            ++ac.z;
+
+        return ac;
+    }
+
+    [[nodiscard]] constexpr OffsetCoordinateType below(const OffsetCoordinateType& c) const noexcept
+    {
+        if (c.z == 0ull)
+            return c;
+
+        auto bc = c;
+        --bc.z;
+
+        return bc;
+    }
+
+//    [[nodiscard]] constexpr bool is_north_of(const OffsetCoordinateType& c1,
+//                                             const OffsetCoordinateType& c2) const noexcept
+//    {
+//        return c1 != c2 && north(c1) == c2;
+//    }
+//
+//    [[nodiscard]] bool is_east_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+//    {
+//        return c1 != c2 && east(c1) == c2;
+//    }
+//
+//    [[nodiscard]] bool is_south_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+//    {
+//        return c1 != c2 && south(c1) == c2;
+//    }
+//
+//    [[nodiscard]] constexpr bool is_west_of(const OffsetCoordinateType& c1,
+//                                            const OffsetCoordinateType& c2) const noexcept
+//    {
+//        return c1 != c2 && west(c1) == c2;
+//    }
+//
+//    [[nodiscard]] bool is_adjacent_of(const OffsetCoordinateType& c1,
+//                                      const OffsetCoordinateType& c2) const noexcept
+//    {
+//        return is_north_of(c1, c2) || is_east_of(c1, c2) || is_south_of(c1, c2) || is_west_of(c1, c2);
+//    }
+//
+//    [[nodiscard]] bool is_adjacent_elevation_of(const OffsetCoordinateType& c1,
+//                                                const OffsetCoordinateType& c2) const noexcept
+//    {
+//        return is_adjacent_of(c1, c2) || is_north_of(c1, above(c2)) || is_east_of(c1, above(c2)) ||
+//               is_south_of(c1, above(c2)) || is_west_of(c1, above(c2)) || is_north_of(c1, below(c2)) ||
+//               is_east_of(c1, below(c2)) || is_south_of(c1, below(c2)) || is_west_of(c1, below(c2));
+//    }
+//
+//    [[nodiscard]] bool is_above_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+//    {
+//        return c1 != c2 && above(c1) == c2;
+//    }
+//
+//    [[nodiscard]] constexpr bool is_below_of(const OffsetCoordinateType& c1,
+//                                             const OffsetCoordinateType& c2) const noexcept
+//    {
+//        return c1 != c2 && below(c1) == c2;
+//    }
+//
+//    [[nodiscard]] constexpr bool is_northwards_of(const OffsetCoordinateType& c1,
+//                                                  const OffsetCoordinateType& c2) const noexcept
+//    {
+//        return (c1.z == c2.z) && (c1.y > c2.y) && (c1.x == c2.x);
+//    }
+//
+//    [[nodiscard]] constexpr bool is_eastwards_of(const OffsetCoordinateType& c1,
+//                                                 const OffsetCoordinateType& c2) const noexcept
+//    {
+//        return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x < c2.x);
+//    }
+//
+//    [[nodiscard]] constexpr bool is_southwards_of(const OffsetCoordinateType& c1,
+//                                                  const OffsetCoordinateType& c2) const noexcept
+//    {
+//        return (c1.z == c2.z) && (c1.y < c2.y) && (c1.x == c2.x);
+//    }
+//
+//    [[nodiscard]] constexpr bool is_westwards_of(const OffsetCoordinateType& c1,
+//                                                 const OffsetCoordinateType& c2) const noexcept
+//    {
+//        return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x > c2.x);
+//    }
+//
+//    [[nodiscard]] constexpr bool is_northern_border(const OffsetCoordinateType& c) const noexcept
+//    {
+//        return c.y == 0ull;
+//    }
+//
+//    [[nodiscard]] bool is_eastern_border(const OffsetCoordinateType& c) const noexcept
+//    {
+//        return c.x == x();
+//    }
+//
+//    [[nodiscard]] bool is_southern_border(const OffsetCoordinateType& c) const noexcept
+//    {
+//        return c.y == y();
+//    }
+//
+//    [[nodiscard]] constexpr bool is_western_border(const OffsetCoordinateType& c) const noexcept
+//    {
+//        return c.x == 0ull;
+//    }
+//
+//    [[nodiscard]] bool is_border(const OffsetCoordinateType& c) const noexcept
+//    {
+//        return is_northern_border(c) || is_eastern_border(c) || is_southern_border(c) || is_western_border(c);
+//    }
+//
+//    [[nodiscard]] OffsetCoordinateType northern_border_of(const OffsetCoordinateType& c) const noexcept
+//    {
+//        return {c.x, 0ull, c.z};
+//    }
+//
+//    [[nodiscard]] OffsetCoordinateType eastern_border_of(const OffsetCoordinateType& c) const noexcept
+//    {
+//        return {x(), c.y, c.z};
+//    }
+//
+//    [[nodiscard]] OffsetCoordinateType southern_border_of(const OffsetCoordinateType& c) const noexcept
+//    {
+//        return {c.x, y(), c.z};
+//    }
+//
+//    [[nodiscard]] OffsetCoordinateType western_border_of(const OffsetCoordinateType& c) const noexcept
+//    {
+//        return {0ull, c.y, c.z};
+//    }
+//
+//    [[nodiscard]] constexpr bool is_ground_layer(const OffsetCoordinateType& c) const noexcept
+//    {
+//        return c.z == 0ull;
+//    }
+//
+//    [[nodiscard]] constexpr bool is_crossing_layer(const OffsetCoordinateType& c) const noexcept
+//    {
+//        return c.z > 0ull;
+//    }
 
 #pragma endregion
 
@@ -272,7 +479,7 @@ class hexagonal_layout
                           neighbor.z = c.z;
 
                           // add neighboring coordinate if there was no over-/underflow
-                          if (neighbor <= strg->dimension)
+                          if (!(neighbor.x > strg->dimension.x || neighbor.y > strg->dimension.y))
                           {
                               cnt.insert(cnt.end(), neighbor);
                           }
