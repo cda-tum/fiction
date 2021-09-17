@@ -8,13 +8,8 @@
 #include <fiction/traits.hpp>
 
 #include <set>
-#include <sstream>
 
 using namespace fiction;
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#pragma GCC diagnostic ignored "-Wconversion"
 
 TEST_CASE("Traits", "[cartisan]")
 {
@@ -33,77 +28,6 @@ TEST_CASE("Traits", "[cartisan]")
     CHECK(has_foreach_coordinate_v<layout>);
     CHECK(has_foreach_adjacent_coordinate_v<layout>);
 }
-
-TEST_CASE("Coordinates", "[coordinates]")
-{
-    using layout = cartesian_layout<cartesian::ucoord_t>;
-
-    auto td = layout::coordinate{};
-    CHECK(td.is_dead());
-
-    auto t0 = layout::coordinate{0, 0, 0};
-    CHECK(!t0.is_dead());
-
-    CHECK(t0 != td);
-
-    auto t1 = layout::coordinate{1, 2, 0};
-    auto t2 = layout::coordinate{1, 2};
-
-    CHECK(t0 < t1);
-    CHECK(t1 > t0);
-    CHECK(t1 >= t0);
-    CHECK(t0 <= t1);
-    CHECK(t1 == t2);
-    CHECK(t2 == t1);
-
-    t1.z += uint64_t{4ul};
-
-    CHECK(t1 == t2);
-
-    t1.y += uint64_t{2147483648ul};
-
-    CHECK(t1 == t2);
-
-    t1.x += uint64_t{2147483648ul};
-
-    CHECK(t1 == t2);
-
-    t1.x++;
-
-    CHECK(t1 != t2);
-    CHECK(t1 > t2);
-    CHECK(t1 >= t2);
-    CHECK(t2 < t1);
-    CHECK(t2 <= t1);
-
-    auto t3 = layout::coordinate{0, 0, 1};
-
-    CHECK(t1 < t3);
-    CHECK(t2 < t3);
-
-    std::map<uint64_t, layout::coordinate> coordinate_repr{
-        {0x8000000000000000, layout::coordinate{}},
-        {0x0000000000000000, layout::coordinate{0, 0, 0}},
-        {0x4000000000000000, layout::coordinate{0, 0, 1}},
-        {0x4000000080000001, layout::coordinate{1, 1, 1}},
-        {0x0000000000000002, layout::coordinate{2, 0, 0}},
-        {0x3fffffffffffffff, layout::coordinate{2147483647, 2147483647, 0}}};
-
-    for (auto [repr, coordinate] : coordinate_repr)
-    {
-        CHECK(static_cast<layout::coordinate>(repr) == coordinate);
-        CHECK(repr == static_cast<uint64_t>(coordinate));
-        CHECK(layout::coordinate{repr} == coordinate);
-        CHECK(layout::coordinate{coordinate} == coordinate);
-        CHECK(layout::coordinate{static_cast<uint64_t>(coordinate)} == coordinate);
-    }
-
-    std::ostringstream os{};
-    os << layout::coordinate{3, 2, 1};
-    CHECK(os.str() == "(3,2,1)");
-}
-
-#pragma GCC diagnostic pop
 
 TEST_CASE("Coordinate iteration", "[cartisan]")
 {
