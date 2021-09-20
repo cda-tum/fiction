@@ -211,7 +211,7 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
         }
         else
         {
-            return {{"splines=ortho" /*, {concentrate=true} */}};
+            return {{{"splines=ortho"}, {"nodesep=0.25"} /*, {concentrate=true} */}};
         }
     }
 
@@ -295,6 +295,16 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
 
         return columns;
     }
+
+    [[nodiscard]] std::string same_rank(const std::vector<std::string>& rank) const noexcept
+    {
+        return fmt::format("rank = same {{ {} }};\n", fmt::join(rank, " -> "));
+    }
+
+    [[nodiscard]] std::string edge(const std::string& src, const std::string& tgt) const noexcept
+    {
+        return fmt::format("{} -> {};\n", src, tgt);
+    }
 };
 
 template <typename Lyt, bool DrawIndexes = false>
@@ -304,6 +314,15 @@ class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, 
     [[nodiscard]] virtual std::vector<std::string> additional_graph_attributes() const noexcept
     {
         auto graph_attributes = simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::additional_graph_attributes();
+
+        if constexpr (DrawIndexes)
+        {
+            graph_attributes.emplace_back("ranksep=0.5");
+        }
+        else
+        {
+            graph_attributes.emplace_back("ranksep=0.25");
+        }
 
         graph_attributes.emplace_back("rankdir=TB");
 
@@ -342,7 +361,7 @@ class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, 
         {
             for (const auto& row : simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::rows(lyt))
             {
-                topology << fmt::format("rank = same {{ {} }};\n", fmt::join(row, " -> "));
+                topology << simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::same_rank(row);
             }
         };
 
@@ -361,11 +380,23 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
     {
         auto graph_attributes = simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::additional_graph_attributes();
 
+        // hexagon visuals benefit from halved rank separation because they are interlaced
+        if constexpr (DrawIndexes)
+        {
+            graph_attributes.emplace_back("ranksep=0.25");
+        }
+        else
+        {
+            graph_attributes.emplace_back("ranksep=0.125");
+        }
+
+        // pointy top hexagons are modeled as top-down graphs
         if constexpr (std::is_same_v<typename Lyt::hex_arrangement::orientation, pointy_top>)
         {
             graph_attributes.emplace_back("rankdir=TB");
         }
-        else  // flat_top
+        // while flat top hexagons are modeled as left-right graphs
+        else
         {
             graph_attributes.emplace_back("rankdir=LR");
         }
@@ -398,81 +429,145 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
         std::stringstream topology{};
 
         topology << "edge [constraint=true, style=invis];\n";
-        //        topology << "edge [constraint=true];\n";
 
-        const auto enforce_same_cardinal_column = [this, &lyt, &topology]()
+        const auto enforce_same_hexagonal_column = [this, &lyt, &topology]()
         {
             for (const auto& col : simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::columns(lyt))
             {
-                topology << fmt::format("{};\n", fmt::join(col, " -> "));
+                topology << simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::same_rank(col);
             }
         };
 
-        const auto enforce_same_cardinal_row = [this, &lyt, &topology]()
+        const auto enforce_same_hexagonal_row = [this, &lyt, &topology]()
         {
             for (const auto& row : simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::rows(lyt))
             {
-                topology << fmt::format("rank = same {{ {} }};\n", fmt::join(row, " -> "));
+                topology << simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::same_rank(row);
             }
         };
 
-        const auto shift_row = [this, &lyt, &topology](const auto i)
+        const auto r = [](const auto i) -> std::string { return fmt::format("r{}", i); };
+
+        const auto shift_column = [this, &lyt, &topology, &r](const auto i)
         {
-            topology << fmt::format("rank = same {{ r{} -> {} }};\n", i,
-                                    simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::tile_id({0, i}));
+            topology << simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::same_rank(
+                {{r(i), simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::tile_id({i, 0})}});
+
+            // previous column only exist if i != 0
+            if (i != 0)
+            {
+                const tile<Lyt> previous_column{i - 1, 0};
+
+                topology << simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::edge(
+                    r(i), simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::tile_id(previous_column));
+            }
+
+            // next column could be out of bounds and need to be checked for
+            if (const tile<Lyt> next_column{i + 1, 0}; lyt.x() >= next_column.x)
+            {
+                topology << simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::edge(
+                    r(i), simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::tile_id(next_column));
+            }
+        };
+
+        const auto shift_row = [this, &lyt, &topology, &r](const auto i)
+        {
+            topology << simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::same_rank(
+                {{r(i), simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::tile_id({0, i})}});
 
             // previous row only exist if i != 0
             if (i != 0)
             {
                 const tile<Lyt> previous_row{0, i - 1};
-                topology << fmt::format("r{} -> {};\n", i,
-                                        simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::tile_id(previous_row));
+
+                topology << simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::edge(
+                    r(i), simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::tile_id(previous_row));
             }
 
             // next row could be out of bounds and need to be checked for
             if (const tile<Lyt> next_row{0, i + 1}; lyt.y() >= next_row.y)
             {
-                topology << fmt::format("r{} -> {};\n", i,
-                                        simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::tile_id(next_row));
+                topology << simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::edge(
+                    r(i), simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::tile_id(next_row));
             }
         };
 
-        topology << "node [label=\"\", width=1, height=1, style=invis];\n";
+        // add invisible nodes to shift rows/columns
+        if constexpr (DrawIndexes)
+        {
+            topology << "node [label=\"\", width=1, height=1, style=invis];\n";
+        }
+        else
+        {
+            topology << "node [label=\"\", width=0.5, height=0.5, style=invis];\n";
+        }
 
         if constexpr (std::is_same_v<typename Lyt::hex_arrangement, odd_row>)
         {
-            enforce_same_cardinal_row();
+            enforce_same_hexagonal_row();
 
             // shift odd rows
             for (auto i = 1ul; i <= lyt.y(); i += 2) { shift_row(i); }
         }
         else if constexpr (std::is_same_v<typename Lyt::hex_arrangement, even_row>)
         {
-            enforce_same_cardinal_row();
+            enforce_same_hexagonal_row();
 
             // shift even rows
             for (auto i = 0ul; i <= lyt.y(); i += 2) { shift_row(i); }
         }
-        else if constexpr (std::is_same_v<typename Lyt::hex_arrangement, odd_column> ||
-                           std::is_same_v<typename Lyt::hex_arrangement, even_column>)
+        else if constexpr (std::is_same_v<typename Lyt::hex_arrangement, odd_column>)
         {
-            enforce_same_cardinal_column();
+            enforce_same_hexagonal_column();
+
+            // shift odd columns
+            for (auto i = 1ul; i <= lyt.x(); i += 2) { shift_column(i); }
+        }
+        else if constexpr (std::is_same_v<typename Lyt::hex_arrangement, even_column>)
+        {
+            enforce_same_hexagonal_column();
+
+            // shift even columns
+            for (auto i = 0ul; i <= lyt.x(); i += 2) { shift_column(i); }
         }
 
+        // enforce connections other than those in direct row/column via edges
         lyt.foreach_ground_tile(
             [this, &lyt, &topology](const auto& t)
             {
-                lyt.foreach_adjacent_tile(t,
-                                          [this, &topology, &t](const auto& at)
-                                          {
-                                              if (t < at)
-                                              {
-                                                  topology << fmt::format(
-                                                      "{} -> {};\n",
-                                                      simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::tile_id(t),
-                                                      simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::tile_id(at));
-                                              }
-                                          });
+                lyt.foreach_adjacent_tile(
+                    t,
+                    [this, &topology, &t](const auto& at)
+                    {
+                        // skip adjacent tiles in one direction to prevent double edges
+                        if (t >= at)
+                        {
+                            return true;
+                        }
+
+                        if constexpr (std::is_same_v<typename Lyt::hex_arrangement::orientation, pointy_top>)
+                        {
+                            // skip adjacent tiles in same row to prevent double edges
+                            if (t.y == at.y)
+                            {
+                                return true;
+                            }
+                        }
+                        else  // flat_top
+                        {
+                            // skip adjacent tiles in same column to prevent double edges
+                            if (t.x == at.x)
+                            {
+                                return true;
+                            }
+                        }
+
+                        topology << simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::edge(
+                            simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::tile_id(t),
+                            simple_gate_layout_tile_drawer<Lyt, DrawIndexes>::tile_id(at));
+
+                        return true;
+                    });
             });
 
         return topology.str();
@@ -510,16 +605,8 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
     lyt.foreach_ground_tile(
         [&lyt, &drawer, &nodes](const auto& t)
         {
-            //            nodes << fmt::format("{} [label=\"{}\", fillcolor={}];\n", drawer.tile_id(t),
-            //            drawer.tile_id(t),
-            //                                 drawer.tile_fillcolor(lyt, t));
-
             nodes << fmt::format("{} [label=\"{}\", fillcolor={}];\n", drawer.tile_id(t), drawer.tile_label(lyt, t),
                                  drawer.tile_fillcolor(lyt, t));
-
-            //            nodes << fmt::format("{} [label=\"{}\", fillcolor={}, pos=\"{}!\"];\n", drawer.tile_id(t),
-            //                                 drawer.tile_label(lyt, t), drawer.tile_fillcolor(lyt, t),
-            //                                 drawer.tile_position(t));
         });
 
     edges << "edge [constraint=false];\n";
