@@ -9,6 +9,7 @@
 #include <fiction/traits.hpp>
 
 #include <alice/alice.hpp>
+#include <mockturtle/views/names_view.hpp>
 #include <nlohmann/json.hpp>
 
 #include <memory>
@@ -32,6 +33,9 @@ class ortho_command : public command
                        "An FCN layout that is not minimal will be found in reasonable runtime.")
     {
         add_option("--clock_numbers,-n", ps.number_of_clock_phases, "Number of clock phases to be used {3 or 4}");
+        add_option("--hex", hexagonal_tile_shift,
+                   "Use hexagonal tiles and specify tile shift. Possible values are 'odd_row', 'even_row', "
+                   "'odd_column', or 'even_column'");
         add_flag("--verbose,-v", "Be verbose");
     }
 
@@ -41,52 +45,73 @@ class ortho_command : public command
      */
     void execute() override
     {
-        auto& s = store<fiction::logic_network_t>();
-
         // error case: empty logic network store
-        if (s.empty())
+        if (store<fiction::logic_network_t>().empty())
         {
             env->out() << "[w] no logic network in store" << std::endl;
-            ps = {};
+            ps                   = {};
+            hexagonal_tile_shift = "";
             return;
         }
         // error case: phases out of range
         if (ps.number_of_clock_phases != 3u && ps.number_of_clock_phases != 4u)
         {
             env->out() << "[e] only 3- and 4-phase clocking schemes are supported" << std::endl;
-            ps = {};
+            ps                   = {};
+            hexagonal_tile_shift = "";
             return;
         }
 
-        const auto get_name = [](auto&& net) -> std::string { return net->get_network_name(); };
-
-        const auto orthogonal_physical_design = [this](auto&& net)
+        if (is_set("hex"))
         {
-            using gate_layout = fiction::gate_level_layout<
-                fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::cartesian::ucoord_t>>>>;
-
-            return fiction::orthogonal<gate_layout>(*net, ps, &st);
-        };
-
-        const auto& net = s.current();
-
-        try
-        {
-            auto lyt = std::visit(orthogonal_physical_design, net);
-            store<fiction::gate_layout_t>().extend() =
-                std::make_shared<fiction::gate_clk_lyt>(lyt, std::visit(get_name, net));
-
-            if (is_set("verbose"))
+            if (hexagonal_tile_shift == "odd_row")
             {
-                st.report(env->out());
+                using gate_layout = fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<
+                    fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::odd_row>>>>;
+
+                orthogonal_physical_design<gate_layout>();
+            }
+            else if (hexagonal_tile_shift == "even_row")
+            {
+                using gate_layout = fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<
+                    fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::even_row>>>>;
+
+                orthogonal_physical_design<gate_layout>();
+            }
+            else if (hexagonal_tile_shift == "odd_column")
+            {
+                using gate_layout = fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<
+                    fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::odd_column>>>>;
+
+                orthogonal_physical_design<gate_layout>();
+            }
+            else if (hexagonal_tile_shift == "even_column")
+            {
+                using gate_layout = fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<
+                    fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::even_column>>>>;
+
+                orthogonal_physical_design<gate_layout>();
+            }
+            else
+            {
+                env->out() << "[e] possible values for the hexagonal tile shift are 'odd_row', 'even_row', "
+                              "'odd_column', and 'even_column'"
+                           << std::endl;
+
+                ps                   = {};
+                hexagonal_tile_shift = "";
             }
         }
-        catch (const fiction::high_degree_fanin_exception& e)
+        else  // Cartesian layout
         {
-            env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+            using gate_layout = fiction::gate_level_layout<fiction::clocked_layout<
+                fiction::tile_based_layout<fiction::cartesian_layout<fiction::cartesian::ucoord_t>>>>;
+
+            orthogonal_physical_design<gate_layout>();
         }
 
-        ps = {};
+        ps                   = {};
+        hexagonal_tile_shift = "";
     }
 
     /**
@@ -105,6 +130,10 @@ class ortho_command : public command
 
   private:
     /**
+     * Tile shift for hexagonal layouts.
+     */
+    std::string hexagonal_tile_shift{};
+    /**
      * Parameters.
      */
     fiction::orthogonal_physical_design_params ps{};
@@ -112,6 +141,31 @@ class ortho_command : public command
      * Statistics.
      */
     fiction::orthogonal_physical_design_stats st{};
+
+    template <typename Lyt>
+    void orthogonal_physical_design()
+    {
+        const auto perform_physical_design = [this](auto&& net) { return fiction::orthogonal<Lyt>(*net, ps, &st); };
+
+        const auto get_name = [](auto&& net) -> std::string { return net->get_network_name(); };
+
+        const auto& net = store<fiction::logic_network_t>().current();
+        try
+        {
+            auto lyt = std::visit(perform_physical_design, net);
+            store<fiction::gate_layout_t>().extend() =
+                std::make_shared<mockturtle::names_view<Lyt>>(lyt, std::visit(get_name, net));
+
+            if (is_set("verbose"))
+            {
+                st.report(env->out());
+            }
+        }
+        catch (const fiction::high_degree_fanin_exception& e)
+        {
+            env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+        }
+    }
 };
 
 ALICE_ADD_COMMAND(ortho, "Physical Design")

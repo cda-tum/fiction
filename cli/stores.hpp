@@ -245,10 +245,11 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
 {
     const auto show_lyt = [&os, &cmd](auto&& lyt)
     {
-        try
-        {
-            using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
+        using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
 
+        // Cartesian layout
+        if constexpr (Lyt::max_fanin_size == 3)
+        {
             if (cmd.is_set("indexes"))
             {
                 fiction::write_dot_layout(*lyt, os, fiction::gate_layout_cartesian_drawer<Lyt, true>());
@@ -258,9 +259,21 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
                 fiction::write_dot_layout(*lyt, os, fiction::gate_layout_cartesian_drawer<Lyt, false>());
             }
         }
-        catch (const std::invalid_argument& e)
+        // hexagonal layout
+        else if constexpr (Lyt::max_fanin_size == 5)
         {
-            cmd.env->out() << "[e] " << e.what() << std::endl;
+            if (cmd.is_set("indexes"))
+            {
+                fiction::write_dot_layout(*lyt, os, fiction::gate_layout_hexagonal_drawer<Lyt, true>());
+            }
+            else
+            {
+                fiction::write_dot_layout(*lyt, os, fiction::gate_layout_hexagonal_drawer<Lyt, false>());
+            }
+        }
+        else
+        {
+            cmd.env->out() << "[e] unsupported layout topology" << std::endl;
         }
     };
 
