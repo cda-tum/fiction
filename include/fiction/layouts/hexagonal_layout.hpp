@@ -165,7 +165,7 @@ class hexagonal_layout
 
     using base_type = hexagonal_layout;
 
-    using hex_arrangment = OffsetCoordinateSystem;
+    using hex_arrangement = OffsetCoordinateSystem;
 
     using storage = std::shared_ptr<hexagonal_layout_storage>;
 
