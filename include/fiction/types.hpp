@@ -9,6 +9,7 @@
 #include "layouts/cell_level_layout.hpp"
 #include "layouts/clocked_layout.hpp"
 #include "layouts/gate_level_layout.hpp"
+#include "layouts/hexagonal_layout.hpp"
 #include "layouts/synchronization_element_layout.hpp"
 #include "layouts/tile_based_layout.hpp"
 #include "networks/topology_network.hpp"
@@ -65,11 +66,27 @@ inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, a
  * FCN gate-level layouts.
  */
 
-using gate_clk_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+using cart_gate_clk_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+using cart_gate_clk_lyt_ptr = std::shared_ptr<cart_gate_clk_lyt>;
 
-using gate_clk_lyt_ptr = std::shared_ptr<gate_clk_lyt>;
+using hex_odd_row_gate_clk_lyt =
+    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row>>>>;
+using hex_odd_row_gate_clk_lyt_ptr = std::shared_ptr<hex_odd_row_gate_clk_lyt>;
 
-using gate_layout_t = std::variant<gate_clk_lyt_ptr>;
+using hex_even_row_gate_clk_lyt =
+    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row>>>>;
+using hex_even_row_gate_clk_lyt_ptr = std::shared_ptr<hex_even_row_gate_clk_lyt>;
+
+using hex_odd_col_gate_clk_lyt =
+    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column>>>>;
+using hex_odd_col_gate_clk_lyt_ptr = std::shared_ptr<hex_odd_col_gate_clk_lyt>;
+
+using hex_even_col_gate_clk_lyt =
+    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column>>>>;
+using hex_even_col_gate_clk_lyt_ptr = std::shared_ptr<hex_even_col_gate_clk_lyt>;
+
+using gate_layout_t = std::variant<cart_gate_clk_lyt_ptr, hex_odd_row_gate_clk_lyt_ptr, hex_even_row_gate_clk_lyt_ptr,
+                                   hex_odd_col_gate_clk_lyt_ptr, hex_even_col_gate_clk_lyt_ptr>;
 
 /**
  * FCN technologies.

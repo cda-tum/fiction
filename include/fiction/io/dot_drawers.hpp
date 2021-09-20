@@ -587,7 +587,7 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
  * \param lyt Layout
  * \param os Output stream
  */
-template <class Lyt, class Drawer = gate_layout_cartesian_drawer<Lyt>>
+template <class Lyt, class Drawer>
 void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {})
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
