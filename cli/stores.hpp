@@ -132,11 +132,11 @@ void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_netwo
 
             if (cmd.is_set("indexes"))
             {
-                mockturtle::write_dot(depth_ntk, os, fiction::topology_dot_drawer<Ntk, true>());
+                mockturtle::write_dot(depth_ntk, os, fiction::technology_dot_drawer<Ntk, true>());
             }
             else
             {
-                mockturtle::write_dot(depth_ntk, os, fiction::topology_dot_drawer<Ntk, false>());
+                mockturtle::write_dot(depth_ntk, os, fiction::technology_dot_drawer<Ntk, false>());
             }
         }
         catch (const std::invalid_argument& e)
@@ -252,11 +252,11 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
 
             if (cmd.is_set("indexes"))
             {
-                fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_tile_drawer<Lyt, true>());
+                fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_cartesian_drawer<Lyt, true>());
             }
             else
             {
-                fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_tile_drawer<Lyt, false>());
+                fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_cartesian_drawer<Lyt, false>());
             }
         }
         catch (const std::invalid_argument& e)

@@ -16,7 +16,7 @@
 namespace fiction::debug
 {
 
-template <typename Ntk, typename Drawer = fiction::topology_dot_drawer<Ntk, true>>
+template <typename Ntk, typename Drawer = fiction::technology_dot_drawer<Ntk, true>>
 void write_dot_network(const Ntk& ntk, const std::string& name = "ntk", const std::filesystem::path& p = {"./"})
 {
     std::ofstream file{p / (name + ".dot")};
@@ -26,7 +26,7 @@ void write_dot_network(const Ntk& ntk, const std::string& name = "ntk", const st
     file.close();
 }
 
-template <typename Lyt, typename Drawer = fiction::gate_layout_tile_drawer<Lyt, true>>
+template <typename Lyt, typename Drawer = fiction::gate_layout_cartesian_drawer<Lyt, true>>
 void write_dot_layout(const Lyt& lyt, const std::string& name = "lyt", const std::filesystem::path& p = {"./"})
 {
     std::ofstream file{p / (name + ".dot")};
