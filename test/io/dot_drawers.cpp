@@ -255,8 +255,6 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "}\n";
 
         compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
-
-        debug::write_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, "empty_odd_row");
     }
     SECTION("even row")
     {
@@ -307,9 +305,6 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "}\n";
 
         compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
-
-        debug::write_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout,
-                                                                                               "empty_even_row");
     }
     SECTION("odd column")
     {
@@ -359,9 +354,6 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "}\n";
 
         compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
-
-        debug::write_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout,
-                                                                                               "empty_odd_column");
     }
     SECTION("even column")
     {
@@ -412,9 +404,6 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "}\n";
 
         compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
-
-        debug::write_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout,
-                                                                                               "empty_even_column");
     }
 }
 
