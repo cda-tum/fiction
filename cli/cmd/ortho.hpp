@@ -9,6 +9,7 @@
 #include <fiction/traits.hpp>
 
 #include <alice/alice.hpp>
+#include <mockturtle/views/names_view.hpp>
 #include <nlohmann/json.hpp>
 
 #include <memory>
@@ -32,6 +33,9 @@ class ortho_command : public command
                        "An FCN layout that is not minimal will be found in reasonable runtime.")
     {
         add_option("--clock_numbers,-n", ps.number_of_clock_phases, "Number of clock phases to be used {3 or 4}");
+        add_option("--hex", hexagonal_tile_shift,
+                   "Use hexagonal tiles and specify tile shift. Possible values are 'odd_row', 'even_row', "
+                   "'odd_column', or 'even_column'");
         add_flag("--verbose,-v", "Be verbose");
     }
 
@@ -41,44 +45,58 @@ class ortho_command : public command
      */
     void execute() override
     {
-        auto& s = store<fiction::logic_network_t>();
-
         // error case: empty logic network store
-        if (s.empty())
+        if (store<fiction::logic_network_t>().empty())
         {
             env->out() << "[w] no logic network in store" << std::endl;
-            ps = {};
+            ps                   = {};
+            hexagonal_tile_shift = "";
             return;
         }
         // error case: phases out of range
         if (ps.number_of_clock_phases != 3u && ps.number_of_clock_phases != 4u)
         {
             env->out() << "[e] only 3- and 4-phase clocking schemes are supported" << std::endl;
-            ps = {};
+            ps                   = {};
+            hexagonal_tile_shift = "";
             return;
         }
 
-        const auto orthogonal_physical_design = [this](auto&& ntk_ptr)
-        { return fiction::orthogonal<fiction::gate_clk_lyt>(*ntk_ptr, ps, &st); };
-
-        const auto& ntk_ptr = s.current();
-
-        try
+        if (is_set("hex"))
         {
-            store<fiction::gate_layout_t>().extend() =
-                std::make_shared<fiction::gate_clk_lyt>(std::visit(orthogonal_physical_design, ntk_ptr));
-
-            if (is_set("verbose"))
+            if (hexagonal_tile_shift == "odd_row")
             {
-                st.report(env->out());
+                orthogonal_physical_design<fiction::hex_odd_row_gate_clk_lyt>();
+            }
+            else if (hexagonal_tile_shift == "even_row")
+            {
+                orthogonal_physical_design<fiction::hex_even_row_gate_clk_lyt>();
+            }
+            else if (hexagonal_tile_shift == "odd_column")
+            {
+                orthogonal_physical_design<fiction::hex_odd_col_gate_clk_lyt>();
+            }
+            else if (hexagonal_tile_shift == "even_column")
+            {
+                orthogonal_physical_design<fiction::hex_even_col_gate_clk_lyt>();
+            }
+            else
+            {
+                env->out() << "[e] possible values for the hexagonal tile shift are 'odd_row', 'even_row', "
+                              "'odd_column', and 'even_column'"
+                           << std::endl;
+
+                ps                   = {};
+                hexagonal_tile_shift = "";
             }
         }
-        catch (const fiction::high_degree_fanin_exception& e)
+        else  // Cartesian layout
         {
-            env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+            orthogonal_physical_design<fiction::cart_gate_clk_lyt>();
         }
 
-        ps = {};
+        ps                   = {};
+        hexagonal_tile_shift = "";
     }
 
     /**
@@ -97,6 +115,10 @@ class ortho_command : public command
 
   private:
     /**
+     * Tile shift for hexagonal layouts.
+     */
+    std::string hexagonal_tile_shift{};
+    /**
      * Parameters.
      */
     fiction::orthogonal_physical_design_params ps{};
@@ -104,6 +126,31 @@ class ortho_command : public command
      * Statistics.
      */
     fiction::orthogonal_physical_design_stats st{};
+
+    template <typename Lyt>
+    void orthogonal_physical_design()
+    {
+        const auto perform_physical_design = [this](auto&& ntk_ptr)
+        { return fiction::orthogonal<Lyt>(*ntk_ptr, ps, &st); };
+
+        const auto& ntk_ptr = store<fiction::logic_network_t>().current();
+
+        try
+        {
+            auto lyt = std::visit(perform_physical_design, ntk_ptr);
+
+            store<fiction::gate_layout_t>().extend() = std::make_shared<Lyt>(lyt);
+
+            if (is_set("verbose"))
+            {
+                st.report(env->out());
+            }
+        }
+        catch (const fiction::high_degree_fanin_exception& e)
+        {
+            env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+        }
+    }
 };
 
 ALICE_ADD_COMMAND(ortho, "Physical Design")
