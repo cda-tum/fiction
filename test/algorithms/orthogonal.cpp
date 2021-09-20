@@ -73,31 +73,72 @@ TEST_CASE("East-south coloring", "[algorithms]")
     check(mockturtle::fanout_view{fanout_substitution<topology_network>(blueprints::clpl<topology_network>())});
 }
 
-TEST_CASE("Layout equivalence", "[algorithms]")
+template <typename Lyt, typename Ntk>
+void check_ortho_equiv(const Ntk& ntk)
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+    orthogonal_physical_design_stats stats{};
 
-    const auto check = [](const auto& net)
-    {
-        orthogonal_physical_design_stats stats{};
+    auto layout = orthogonal<Lyt>(ntk, {}, &stats);
 
-        auto layout = orthogonal<gate_layout>(net, {}, &stats);
+    print_gate_level_layout(std::cout, layout);
 
-        print_gate_level_layout(std::cout, layout);
+    check_eq(ntk, layout);
+}
 
-        check_eq(net, layout);
-    };
-
-    check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check(blueprints::maj1_network<mockturtle::aig_network>());
-    check(blueprints::maj4_network<mockturtle::aig_network>());
-    check(blueprints::se_coloring_corner_case_network<topology_network>());
-    check(blueprints::fanout_substitution_corner_case_network<topology_network>());
-    check(blueprints::nary_operation_network<topology_network>());
-    check(blueprints::clpl<topology_network>());
+template <typename Lyt>
+void check_ortho_equiv_all()
+{
+    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
+    check_ortho_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>());
+    check_ortho_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());
+    check_ortho_equiv<Lyt>(blueprints::se_coloring_corner_case_network<topology_network>());
+    check_ortho_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<topology_network>());
+    check_ortho_equiv<Lyt>(blueprints::nary_operation_network<topology_network>());
+    check_ortho_equiv<Lyt>(blueprints::clpl<topology_network>());
 
     // constant input network
-    check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
+    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
+}
+
+TEST_CASE("Layout equivalence", "[algorithms]")
+{
+    SECTION("Cartesian layouts")
+    {
+        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+
+        check_ortho_equiv_all<gate_layout>();
+    }
+    SECTION("Hexagonal layouts")
+    {
+        SECTION("odd row")
+        {
+            using gate_layout =
+                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row>>>>;
+
+            check_ortho_equiv_all<gate_layout>();
+        }
+        SECTION("even row")
+        {
+            using gate_layout =
+                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row>>>>;
+
+            check_ortho_equiv_all<gate_layout>();
+        }
+        SECTION("odd column")
+        {
+            using gate_layout =
+                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column>>>>;
+
+            check_ortho_equiv_all<gate_layout>();
+        }
+        SECTION("even column")
+        {
+            using gate_layout =
+                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column>>>>;
+
+            check_ortho_equiv_all<gate_layout>();
+        }
+    }
 }
 
 TEST_CASE("Gate library application", "[algorithms]")
