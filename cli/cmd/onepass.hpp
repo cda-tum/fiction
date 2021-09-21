@@ -67,7 +67,8 @@ class onepass_command : public command
         if (this->is_set("fixed_size") && this->is_set("upper_bound"))
         {
             env->out() << "[e] -u and -f cannot be set together" << std::endl;
-            ps = {};
+            ps       = {};
+            clocking = "2DDWave";
             return;
         }
         // set the value of fixed_size as the upper bound if set
@@ -94,7 +95,8 @@ class onepass_command : public command
             {
                 env->out() << fmt::format("[e] the \"{}\" clocking scheme is not supported by this approach", name)
                            << std::endl;
-                ps = {};
+                ps       = {};
+                clocking = "2DDWave";
                 return;
             }
 
@@ -110,7 +112,8 @@ class onepass_command : public command
         {
             env->out() << fmt::format("[e] \"{}\" does not refer to a supported clocking scheme", clocking)
                        << std::endl;
-            ps = {};
+            ps       = {};
+            clocking = "2DDWave";
             return;
         }
 
@@ -135,7 +138,8 @@ class onepass_command : public command
             if (s.empty())
             {
                 env->out() << "[w] no logic network in store" << std::endl;
-                ps = {};
+                ps       = {};
+                clocking = "2DDWave";
                 return;
             }
 
@@ -183,7 +187,8 @@ class onepass_command : public command
             if (s.empty())
             {
                 env->out() << "[w] no truth table in store" << std::endl;
-                ps = {};
+                ps       = {};
+                clocking = "2DDWave";
                 return;
             }
 
@@ -206,25 +211,8 @@ class onepass_command : public command
             }
         }
 
-        //        // scope to destruct the one_pass_synthesis object to end Python interpreter's lifetime
-        //        {
-        //            auto print_name = ps.name;
-        //            // perform one-pass synthesis
-        //            one_pass_synthesis physical_design{std::move(spec), std::move(config)};
-        //
-        //            if (auto result = physical_design(); result.success)
-        //            {
-        //                store<fcn_gate_layout_ptr>().extend() = physical_design.get_layout();
-        //                pd_result                             = result.json;
-        //            }
-        //            else
-        //            {
-        //                env->out() << "[e] impossible to synthesize " << print_name << " within the given parameters"
-        //                           << std::endl;
-        //            }
-        //        }
-
-        ps = {};
+        ps       = {};
+        clocking = "2DDWave";
     }
 
     /**
@@ -253,7 +241,7 @@ class onepass_command : public command
     /**
      * Identifier of clocking scheme to use.
      */
-    std::string clocking = "2DDWave";
+    std::string clocking{"2DDWave"};
 };
 
 ALICE_ADD_COMMAND(onepass, "Physical Design")

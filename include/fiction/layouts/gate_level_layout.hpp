@@ -348,6 +348,9 @@ class gate_level_layout : public ClockedLayout
 
     signal move_node(const node& n, const tile& t, const std::vector<signal>& new_children = {}) noexcept
     {
+        // n's current position
+        const auto old_t = get_tile(n);
+        // n's children
         auto& children = strg->nodes[n].children;
         // decrease ref-count of children
         std::for_each(children.cbegin(), children.cend(),
@@ -355,7 +358,7 @@ class gate_level_layout : public ClockedLayout
         // clear n's children
         children.clear();
         // clear n's position
-        clear_tile(get_tile(n));
+        clear_tile(old_t);
 
         // assign n to its new position
         assign_node(t, n);
@@ -366,6 +369,19 @@ class gate_level_layout : public ClockedLayout
         // increase ref-count to new children
         std::for_each(new_children.cbegin(), new_children.cend(),
                       [this](const auto& nc) { strg->nodes[get_node(nc)].data[0].h1++; });
+
+        if (t.is_dead())
+        {
+            // remove old_t from primary outputs if present
+            strg->outputs.erase(std::remove(strg->outputs.begin(), strg->outputs.end(), static_cast<signal>(old_t)),
+                                strg->outputs.end());
+        }
+        else
+        {
+            // if n lived on a tile that was marked as PO, update it with the new tile t
+            std::replace(strg->outputs.begin(), strg->outputs.end(), static_cast<signal>(old_t),
+                         static_cast<signal>(t));
+        }
 
         return static_cast<signal>(t);
     }

@@ -978,6 +978,34 @@ TEST_CASE("Move nodes", "[gate-level]")
                           [](const auto& f) {
                               CHECK(static_cast<gate_layout::tile>(f) == gate_layout::tile{0, 0});
                           });
+
+    // move PI
+
+    auto pi_node = layout.get_node({2, 0});
+
+    CHECK(layout.is_pi(pi_node));
+
+    layout.move_node(pi_node, {3, 0}, {});
+
+    CHECK(layout.is_pi(pi_node));
+
+    // move PO
+
+    auto po_node = layout.get_node({0, 0});
+
+    CHECK(layout.is_po(po_node));
+
+    layout.move_node(po_node, {0, 1}, {static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{1, 0})});
+
+    CHECK(layout.is_po(po_node));
+
+    // remove PO
+
+    CHECK(layout.num_pos() == 2);
+
+    layout.move_node(po_node, {}, {static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{1, 0})});
+
+    CHECK(layout.num_pos() == 1);
 }
 
 TEST_CASE("Cardinal operations", "[gate-level]")

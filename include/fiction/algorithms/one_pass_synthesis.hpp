@@ -124,6 +124,7 @@ class mugen_handler
     mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params p) noexcept :
             tts{spec},
             num_pis{spec[0].num_vars()},  // since all tts have to have the same number of variables
+            num_pos{spec.size()},         // since all tts have to have the same number of variables
             lyt{sketch},
             ps{std::move(p)},  // need a copy because timeout will be altered
             mugen{pybind11::module::import("mugen")}
@@ -206,7 +207,7 @@ class mugen_handler
     /**
      * Number of primary inputs and primary outputs according to spec respectively.
      */
-    const uint64_t num_pis;
+    const uint64_t num_pis, num_pos;
     /**
      * The sketch that later contains the layout generated from a model.
      */
@@ -336,6 +337,27 @@ class mugen_handler
 
         // returns the ID of a PI node
         const auto get_pi_id = [](const auto& node) { return py::int_(node.attr("coords")); };
+        // returns the ID of a PO node
+        const auto get_po_id = [&net](const auto& node)
+        {
+            auto index = 0u;
+
+            const auto po_map = net.attr("po_map");
+            for (auto po_it = po_map.begin(); po_it != po_map.end(); ++po_it, ++index)
+            {
+                // the po node; for some reason, pybind11 seems to not like lists of tuples; it could not infer the type
+                // of *po_it itself
+                const auto po = py::reinterpret_borrow<py::tuple>(*po_it)[0];
+                if (node.is(po))
+                {
+                    // return po's index
+                    return index;
+                }
+            }
+
+            // fix compiler warning
+            return 0u;
+        };
 
         // extract a Python tuple representing coordinates from a node and converts it to a tile
         const auto get_tile = [](const auto& node, const bool second_layer = false) -> tile<Lyt>
@@ -353,6 +375,8 @@ class mugen_handler
             const auto get_coords_in_direction = mugen.attr("get_coords_in_direction");
             // map from coordinates to nodes
             const auto node_map = net.attr("node_map");
+            // position of the crossing node
+            const auto cross_coords = cross_node.attr("coords");
             // cross_node's direction map which maps fanin to fanout directions
             const auto dir_map = cross_node.attr("dir_map");
             // handle to the list of cross_node's fanins
@@ -364,11 +388,12 @@ class mugen_handler
                 const auto fanin_n = fanin[*fanin_it];
 
                 // fanin --> crossing direction
-                const auto fanin_dir = get_direction(cross_node.attr("coords"), fanin_n.attr("coords"))[py::int_(1)];
+                const auto fanin_dir = get_direction(cross_node.attr("coords"), fanin_n.attr("coords"))[py::int_(0)];
                 // direction of the associated fanout
                 const auto fanout_dir = dir_map[fanin_dir];
+
                 // the fanout node
-                const auto fanout_n = node_map[get_coords_in_direction(cross_node, fanout_dir)];
+                const auto fanout_n = node_map[get_coords_in_direction(cross_coords, fanout_dir)];
 
                 // store (crossing, fanout) --> fanin
                 c_map[std::make_pair(cross_node, fanout_n)] = fanin_n;
@@ -430,16 +455,27 @@ class mugen_handler
             return fanins;
         };
 
-        // pre-allocate PIs to preserve their order
-        std::vector<mockturtle::node<Lyt>> pis(num_pis);
+        // pre-allocate PIs and POs to preserve their order
+        std::vector<mockturtle::node<Lyt>> pi_list(num_pis), po_list(num_pos);
         // a little hacky: place them all at position {0, 0} so that they can be fetched to be stored as nodes
         // instead of as signals to not lose them as soon as their tile is overridden
-        for (auto i = 0ul; i < num_pis; ++i) { pis[i] = lyt.get_node(lyt.create_pi(fmt::format("pi{}", i), {0, 0})); }
+        for (auto i = 0ul; i < num_pis; ++i)
+        {
+            pi_list[i] = lyt.get_node(lyt.create_pi(fmt::format("pi{}", i), {0, 0}));
+        }
         // finally, remove the latest created PI again (which has overridden all others) from the layout
-        lyt.move_node(pis[num_pis - 1], {0, 0});
+        lyt.move_node(pi_list[num_pis - 1], {});
+        // do the same for the POs
+        for (auto i = 0ul; i < num_pos; ++i)
+        {
+            po_list[i] = lyt.get_node(lyt.create_po({}, fmt::format("po{}", i), {0, 0}));
+        }
+        // finally, remove the latest created PO again (which has overridden all others) from the layout
+        lyt.move_node(po_list[num_pos - 1], {});
 
         // checks whether a node has a PI as fan-in
-        const auto has_pi_fanin = [&is_pi, &get_pi_id, &pis](const auto& node) -> std::optional<mockturtle::node<Lyt>>
+        const auto has_pi_fanin = [&is_pi, &get_pi_id,
+                                   &pi_list](const auto& node) -> std::optional<mockturtle::node<Lyt>>
         {
             auto fanin = node.attr("fanin");
             for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
@@ -447,15 +483,13 @@ class mugen_handler
                 auto fanin_n = fanin[*fanin_it];
                 if (is_pi(fanin_n))
                 {
-                    return pis[get_pi_id(fanin_n)];
+                    return pi_list[get_pi_id(fanin_n)];
                 }
             }
 
             return std::nullopt;
         };
 
-        // counter for POs
-        auto oc = 0u;
         // list of all nodes; first num_pi nodes are primary inputs
         auto nodes = net.attr("nodes");
 
@@ -482,13 +516,14 @@ class mugen_handler
                 if (const auto pi = has_pi_fanin(node);
                     pi.has_value())  // PIs are nodes, i.e., potential fan-ins of the current node
                 {
-                    //                    py_n_map[node] = lyt.create_pi(fmt::format("pi{}", ic++), node_pos);
                     py_n_map[node] = lyt.move_node(*pi, node_pos);
                 }
                 // if it is a primary output pin
                 else if (is_po(node))  // PO is simply a label of a node, i.e., not a successor node with that attribute
                 {
-                    py_n_map[node] = lyt.create_po({}, fmt::format("po{}", oc++), node_pos);
+                    py_n_map[node] = lyt.move_node(po_list[get_po_id(node)], node_pos);
+
+                    // TODO no reservation of POs create them after second iteration
                 }
                 // normal wire
                 else
@@ -502,13 +537,6 @@ class mugen_handler
                 // corner case: since crossing nodes represent two wire segments each, their fanins are handled with a
                 // dedicated map that unambiguously assigns the fanins for each fanout
                 set_up_crossing(node);
-
-                // TODO go on here
-
-                //                // node maps to the wire segment in ground layer
-                //                py_n_map[node] = lyt.create_buf({}, node_pos);
-                //                // but it is ensured that there is another wire segment above
-                //                lyt.create_buf({}, lyt.above(node_pos));
             }
             // if node is a negation
             else if (is_negation(node))
@@ -549,8 +577,18 @@ class mugen_handler
             {
                 // its position on the layout
                 const auto node_pos = lyt.get_tile(lyt_node);
+
+                // skip empty tiles
+                if (lyt.is_empty_tile(node_pos))
+                {
+                    continue;
+                }
+
                 // children (incoming signals) of the layout node
                 const auto fanins = get_fanins(py_node);
+
+                print_gate_level_layout(std::cout, lyt);
+
                 // the node is not moved, but its children are updated
                 lyt.move_node(lyt_node, node_pos, fanins);
             }
@@ -604,32 +642,32 @@ class one_pass_synthesis_impl
 
             handler.update_aspect_ratio(aspect_ratio);
 
-            try
-            {
-                const auto sat =
-                    mockturtle::call_with_stopwatch(pst.time_total, [&handler] { return handler.is_satisfiable(); });
+            //            try
+            //            {
+            const auto sat =
+                mockturtle::call_with_stopwatch(pst.time_total, [&handler] { return handler.is_satisfiable(); });
 
-                if (sat)  // solution found
-                {
-                    // statistical information
-                    pst.x_size    = layout.x() + 1;
-                    pst.y_size    = layout.y() + 1;
-                    pst.num_gates = layout.num_gates();
-                    pst.num_wires = layout.num_wires();
-
-                    return layout;
-                }
-                else  // update timeout and retry
-                {
-                    if (ps.timeout)
-                        update_timeout(handler, pst.time_total);
-                }
-            }
-            // timeout reached
-            catch (...)
+            if (sat)  // solution found
             {
-                return std::nullopt;
+                // statistical information
+                pst.x_size    = layout.x() + 1;
+                pst.y_size    = layout.y() + 1;
+                pst.num_gates = layout.num_gates();
+                pst.num_wires = layout.num_wires();
+
+                return layout;
             }
+            else  // update timeout and retry
+            {
+                if (ps.timeout)
+                    update_timeout(handler, pst.time_total);
+            }
+            //            }
+            //            // timeout reached
+            //            catch (...)
+            //            {
+            //                return std::nullopt;
+            //            }
         }
 
         return std::nullopt;
