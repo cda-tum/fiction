@@ -302,7 +302,8 @@ class mugen_handler
         const auto get_node_begin_iterator = [this, &net](const auto& nodes)
         {
             // set up the iterator to skip the PIs
-            auto pi_it_end = nodes.begin();  // use std::advance because there is no 'operator+' overload
+            auto pi_it_end = nodes.begin();
+            // use std::advance because there is no 'operator+' overload
             std::advance(pi_it_end, num_pis + 1);
 
             return pi_it_end;
@@ -337,27 +338,6 @@ class mugen_handler
 
         // returns the ID of a PI node
         const auto get_pi_id = [](const auto& node) { return py::int_(node.attr("coords")); };
-        // returns the ID of a PO node
-        const auto get_po_id = [&net](const auto& node)
-        {
-            auto index = 0u;
-
-            const auto po_map = net.attr("po_map");
-            for (auto po_it = po_map.begin(); po_it != po_map.end(); ++po_it, ++index)
-            {
-                // the po node; for some reason, pybind11 seems to not like lists of tuples; it could not infer the type
-                // of *po_it itself
-                const auto po = py::reinterpret_borrow<py::tuple>(*po_it)[0];
-                if (node.is(po))
-                {
-                    // return po's index
-                    return index;
-                }
-            }
-
-            // fix compiler warning
-            return 0u;
-        };
 
         // extract a Python tuple representing coordinates from a node and converts it to a tile
         const auto get_tile = [](const auto& node, const bool second_layer = false) -> tile<Lyt>
@@ -465,13 +445,6 @@ class mugen_handler
         }
         // finally, remove the latest created PI again (which has overridden all others) from the layout
         lyt.move_node(pi_list[num_pis - 1], {});
-        // do the same for the POs
-        for (auto i = 0ul; i < num_pos; ++i)
-        {
-            po_list[i] = lyt.get_node(lyt.create_po({}, fmt::format("po{}", i), {0, 0}));
-        }
-        // finally, remove the latest created PO again (which has overridden all others) from the layout
-        lyt.move_node(po_list[num_pos - 1], {});
 
         // checks whether a node has a PI as fan-in
         const auto has_pi_fanin = [&is_pi, &get_pi_id,
@@ -521,9 +494,7 @@ class mugen_handler
                 // if it is a primary output pin
                 else if (is_po(node))  // PO is simply a label of a node, i.e., not a successor node with that attribute
                 {
-                    py_n_map[node] = lyt.move_node(po_list[get_po_id(node)], node_pos);
-
-                    // TODO no reservation of POs create them after second iteration
+                    continue;
                 }
                 // normal wire
                 else
@@ -573,6 +544,11 @@ class mugen_handler
             {
                 continue;
             }
+            // POs are also skipped and only retrieved at the very end
+            else if (is_wire(py_node) && is_po(py_node))
+            {
+                continue;
+            }
             else
             {
                 // its position on the layout
@@ -587,11 +563,28 @@ class mugen_handler
                 // children (incoming signals) of the layout node
                 const auto fanins = get_fanins(py_node);
 
-                print_gate_level_layout(std::cout, lyt);
-
                 // the node is not moved, but its children are updated
                 lyt.move_node(lyt_node, node_pos, fanins);
             }
+        }
+
+        // primary output counter
+        auto oc = 0u;
+        // third iteration: retrieve primary outputs
+        const auto po_map = net.attr("po_map");
+        for (auto po_it = po_map.begin(); po_it != po_map.end(); ++po_it)
+        {
+            // the po node; for some reason, pybind11 seems to not like lists of tuples; it could not infer the type
+            // of *po_it itself
+            const auto po = py::reinterpret_borrow<py::tuple>(*po_it)[0];
+            // the tile po is located on
+            const auto po_pos = get_tile(po);
+            // po's fanins
+            const auto po_fanins = get_fanins(po);
+            // a PO should have only a single fanin
+            assert(po_fanins.size() == 1);
+            // create the primary output on the layout
+            lyt.create_po(po_fanins[0], fmt::format("po{}", oc++), po_pos);
         }
     }
 };
@@ -642,32 +635,32 @@ class one_pass_synthesis_impl
 
             handler.update_aspect_ratio(aspect_ratio);
 
-            //            try
-            //            {
-            const auto sat =
-                mockturtle::call_with_stopwatch(pst.time_total, [&handler] { return handler.is_satisfiable(); });
-
-            if (sat)  // solution found
+            try
             {
-                // statistical information
-                pst.x_size    = layout.x() + 1;
-                pst.y_size    = layout.y() + 1;
-                pst.num_gates = layout.num_gates();
-                pst.num_wires = layout.num_wires();
+                const auto sat =
+                    mockturtle::call_with_stopwatch(pst.time_total, [&handler] { return handler.is_satisfiable(); });
 
-                return layout;
+                if (sat)  // solution found
+                {
+                    // statistical information
+                    pst.x_size    = layout.x() + 1;
+                    pst.y_size    = layout.y() + 1;
+                    pst.num_gates = layout.num_gates();
+                    pst.num_wires = layout.num_wires();
+
+                    return layout;
+                }
+                else  // update timeout and retry
+                {
+                    if (ps.timeout)
+                        update_timeout(handler, pst.time_total);
+                }
             }
-            else  // update timeout and retry
+            // timeout reached
+            catch (...)
             {
-                if (ps.timeout)
-                    update_timeout(handler, pst.time_total);
+                return std::nullopt;
             }
-            //            }
-            //            // timeout reached
-            //            catch (...)
-            //            {
-            //                return std::nullopt;
-            //            }
         }
 
         return std::nullopt;
@@ -682,7 +675,7 @@ class one_pass_synthesis_impl
     /**
      * Factorizes a number of layout tiles into all possible aspect ratios for iteration.
      */
-    aspect_ratio_iterator<aspect_ratio<Lyt>> ari{5};
+    aspect_ratio_iterator<aspect_ratio<Lyt>> ari{0};
     /**
      * A Python interpreter instance that is necessary to call Mugen, a library written in Python. This instance is
      * scoped and only need to exist. No operations are to be performed on this object. It handles creation and proper
@@ -704,7 +697,6 @@ class one_pass_synthesis_impl
         const std::string version;
     };
 
-    //    mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ntk)> node2pos;
     /**
      * Tests whether all needed dependencies have been installed and can be accessed via Python.
      *

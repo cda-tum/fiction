@@ -67,8 +67,7 @@ class onepass_command : public command
         if (this->is_set("fixed_size") && this->is_set("upper_bound"))
         {
             env->out() << "[e] -u and -f cannot be set together" << std::endl;
-            ps       = {};
-            clocking = "2DDWave";
+            reset_flags();
             return;
         }
         // set the value of fixed_size as the upper bound if set
@@ -95,8 +94,8 @@ class onepass_command : public command
             {
                 env->out() << fmt::format("[e] the \"{}\" clocking scheme is not supported by this approach", name)
                            << std::endl;
-                ps       = {};
-                clocking = "2DDWave";
+
+                reset_flags();
                 return;
             }
 
@@ -112,8 +111,8 @@ class onepass_command : public command
         {
             env->out() << fmt::format("[e] \"{}\" does not refer to a supported clocking scheme", clocking)
                        << std::endl;
-            ps       = {};
-            clocking = "2DDWave";
+
+            reset_flags();
             return;
         }
 
@@ -138,8 +137,8 @@ class onepass_command : public command
             if (s.empty())
             {
                 env->out() << "[w] no logic network in store" << std::endl;
-                ps       = {};
-                clocking = "2DDWave";
+
+                reset_flags();
                 return;
             }
 
@@ -187,8 +186,8 @@ class onepass_command : public command
             if (s.empty())
             {
                 env->out() << "[w] no truth table in store" << std::endl;
-                ps       = {};
-                clocking = "2DDWave";
+
+                reset_flags();
                 return;
             }
 
@@ -211,8 +210,7 @@ class onepass_command : public command
             }
         }
 
-        ps       = {};
-        clocking = "2DDWave";
+        reset_flags();
     }
 
     /**
@@ -242,6 +240,14 @@ class onepass_command : public command
      * Identifier of clocking scheme to use.
      */
     std::string clocking{"2DDWave"};
+    /**
+     * Reset flags. Necessary due to an alice bug.
+     */
+    void reset_flags() noexcept
+    {
+        ps       = {};
+        clocking = "2DDWave";
+    }
 };
 
 ALICE_ADD_COMMAND(onepass, "Physical Design")
