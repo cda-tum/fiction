@@ -238,6 +238,8 @@ bool can_show<fiction::gate_layout_t>(std::string& extension, [[maybe_unused]] c
     // already added for logic network; alice doesn't allow for both
     // cmd.add_flag("--indexes,-i", "Show node indexes")->group("gate_layout (-g)");
 
+    cmd.add_flag("--clk_colors,-k", "Show clock colors")->group("gate_layout (-g)");
+
     return true;
 }
 
@@ -253,11 +255,25 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
         {
             if (cmd.is_set("indexes"))
             {
-                fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_cartesian_drawer<Lyt, true>());
+                if (cmd.is_set("clk_colors"))
+                {
+                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_cartesian_drawer<Lyt, true, true>());
+                }
+                else
+                {
+                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_cartesian_drawer<Lyt, false, true>());
+                }
             }
             else
             {
-                fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_cartesian_drawer<Lyt, false>());
+                if (cmd.is_set("clk_colors"))
+                {
+                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_cartesian_drawer<Lyt, true, false>());
+                }
+                else
+                {
+                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_cartesian_drawer<Lyt, false, false>());
+                }
             }
         }
         // hexagonal layout
@@ -265,11 +281,25 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
         {
             if (cmd.is_set("indexes"))
             {
-                fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_hexagonal_drawer<Lyt, true>());
+                if (cmd.is_set("clk_colors"))
+                {
+                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_hexagonal_drawer<Lyt, true, true>());
+                }
+                else
+                {
+                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_hexagonal_drawer<Lyt, false, true>());
+                }
             }
             else
             {
-                fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_hexagonal_drawer<Lyt, false>());
+                if (cmd.is_set("clk_colors"))
+                {
+                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_hexagonal_drawer<Lyt, true, false>());
+                }
+                else
+                {
+                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_hexagonal_drawer<Lyt, false, false>());
+                }
             }
         }
         else
@@ -342,7 +372,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::cell_layout_t, layout)
 template <>
 bool can_show<fiction::cell_layout_t>(std::string& extension, [[maybe_unused]] command& cmd)
 {
-    cmd.add_flag("--simple,-s", "Simplified depiction abstracting from details")->group("cell_layouts (-c)");
+    cmd.add_flag("--simple,-s", "Simplified depiction abstracting from details")->group("cell_layout (-c)");
 
     extension = "svg";
 
