@@ -39,7 +39,7 @@ TEST_CASE("Draw empty Cartesian layout", "[dot-drawers]")
         "ranksep=0.25;\n"
         "rankdir=TB;\n"
         "\n"
-        "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=square, style=filled];\n"
+        "node [fixedsize=true, width=0.5, height=0.5, shape=square, style=filled];\n"
         "x0y0 [label=\"\", fillcolor=white];\n"
         "x1y0 [label=\"\", fillcolor=white];\n"
         "x2y0 [label=\"\", fillcolor=white];\n"
@@ -61,7 +61,7 @@ TEST_CASE("Draw empty Cartesian layout", "[dot-drawers]")
         "rank = same { x0y2 -> x1y2 -> x2y2 };\n"
         "}\n";
 
-    compare_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout, false>>(layout, layout_print);
+    compare_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout, false, false>>(layout, layout_print);
 }
 
 TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
@@ -79,7 +79,7 @@ TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
             "ranksep=0.25;\n"
             "rankdir=TB;\n"
             "\n"
-            "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=square, style=filled];\n"
+            "node [fixedsize=true, width=0.5, height=0.5, shape=square, style=filled];\n"
             "x0y0 [label=\"PO\", fillcolor=snow2];\n"
             "x1y0 [label=\"AND\", fillcolor=lightcoral];\n"
             "x2y0 [label=\"PI\", fillcolor=snow2];\n"
@@ -106,7 +106,7 @@ TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
             "rank = same { x0y1 -> x1y1 -> x2y1 -> x3y1 };\n"
             "}\n";
 
-        compare_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout, false>>(layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout, false, false>>(layout, layout_print);
     }
     SECTION("XOR-MAJ Layout")
     {
@@ -119,7 +119,7 @@ TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
             "ranksep=0.25;\n"
             "rankdir=TB;\n"
             "\n"
-            "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=square, style=filled];\n"
+            "node [fixedsize=true, width=0.5, height=0.5, shape=square, style=filled];\n"
             "x0y0 [label=\"PO\", fillcolor=snow2];\n"
             "x1y0 [label=\"XOR\", fillcolor=lightskyblue];\n"
             "x2y0 [label=\"PI\", fillcolor=snow2];\n"
@@ -152,7 +152,7 @@ TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
             "rank = same { x0y2 -> x1y2 -> x2y2 -> x3y2 };\n"
             "}\n";
 
-        compare_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout, false>>(layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout, false, false>>(layout, layout_print);
     }
     SECTION("Crossing Layout")
     {
@@ -165,7 +165,7 @@ TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
             "ranksep=0.25;\n"
             "rankdir=TB;\n"
             "\n"
-            "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=square, style=filled];\n"
+            "node [fixedsize=true, width=0.5, height=0.5, shape=square, style=filled];\n"
             "x0y0 [label=\"\", fillcolor=white];\n"
             "x1y0 [label=\"PI\", fillcolor=snow2];\n"
             "x2y0 [label=\"PI\", fillcolor=snow2];\n"
@@ -200,7 +200,7 @@ TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
             "rank = same { x0y2 -> x1y2 -> x2y2 -> x3y2 };\n"
             "}\n";
 
-        compare_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout, false>>(layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout, false, false>>(layout, layout_print);
     }
 }
 
@@ -220,7 +220,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "ranksep=0.125;\n"
             "rankdir=TB;\n"
             "\n"
-            "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=hexagon, orientation=30, style=filled];\n"
+            "node [fixedsize=true, width=0.5, height=0.5, shape=hexagon, orientation=30, style=filled];\n"
             "x0y0 [label=\"\", fillcolor=white];\n"
             "x1y0 [label=\"\", fillcolor=white];\n"
             "x2y0 [label=\"\", fillcolor=white];\n"
@@ -238,9 +238,9 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "rank = same { x0y0 -> x1y0 -> x2y0 };\n"
             "rank = same { x0y1 -> x1y1 -> x2y1 };\n"
             "rank = same { x0y2 -> x1y2 -> x2y2 };\n"
-            "rank = same { r1 -> x0y1 };\n"
-            "r1 -> x0y0;\n"
-            "r1 -> x0y2;\n"
+            "rank = same { invis1 -> x0y1 };\n"
+            "invis1 -> x0y0;\n"
+            "invis1 -> x0y2;\n"
             "x0y0 -> x0y1;\n"
             "x1y0 -> x0y1;\n"
             "x1y0 -> x1y1;\n"
@@ -253,7 +253,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "x2y1 -> x2y2;\n"
             "}\n";
 
-        compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
     }
     SECTION("even row")
     {
@@ -269,7 +269,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "ranksep=0.125;\n"
             "rankdir=TB;\n"
             "\n"
-            "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=hexagon, orientation=30, style=filled];\n"
+            "node [fixedsize=true, width=0.5, height=0.5, shape=hexagon, orientation=30, style=filled];\n"
             "x0y0 [label=\"\", fillcolor=white];\n"
             "x1y0 [label=\"\", fillcolor=white];\n"
             "x2y0 [label=\"\", fillcolor=white];\n"
@@ -287,10 +287,10 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "rank = same { x0y0 -> x1y0 -> x2y0 };\n"
             "rank = same { x0y1 -> x1y1 -> x2y1 };\n"
             "rank = same { x0y2 -> x1y2 -> x2y2 };\n"
-            "rank = same { r0 -> x0y0 };\n"
-            "r0 -> x0y1;\n"
-            "rank = same { r2 -> x0y2 };\n"
-            "r2 -> x0y1;\n"
+            "rank = same { invis0 -> x0y0 };\n"
+            "invis0 -> x0y1;\n"
+            "rank = same { invis2 -> x0y2 };\n"
+            "invis2 -> x0y1;\n"
             "x0y0 -> x0y1;\n"
             "x0y0 -> x1y1;\n"
             "x1y0 -> x1y1;\n"
@@ -303,7 +303,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "x2y1 -> x2y2;\n"
             "}\n";
 
-        compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
     }
     SECTION("odd column")
     {
@@ -319,7 +319,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "ranksep=0.125;\n"
             "rankdir=LR;\n"
             "\n"
-            "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=hexagon, style=filled];\n"
+            "node [fixedsize=true, width=0.5, height=0.5, shape=hexagon, style=filled];\n"
             "x0y0 [label=\"\", fillcolor=white];\n"
             "x1y0 [label=\"\", fillcolor=white];\n"
             "x2y0 [label=\"\", fillcolor=white];\n"
@@ -337,9 +337,9 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "rank = same { x0y0 -> x0y1 -> x0y2 };\n"
             "rank = same { x1y0 -> x1y1 -> x1y2 };\n"
             "rank = same { x2y0 -> x2y1 -> x2y2 };\n"
-            "rank = same { r1 -> x1y0 };\n"
-            "r1 -> x0y0;\n"
-            "r1 -> x2y0;\n"
+            "rank = same { invis1 -> x1y0 };\n"
+            "invis1 -> x0y0;\n"
+            "invis1 -> x2y0;\n"
             "x0y0 -> x1y0;\n"
             "x1y0 -> x2y0;\n"
             "x1y0 -> x0y1;\n"
@@ -352,7 +352,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "x1y2 -> x2y2;\n"
             "}\n";
 
-        compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
     }
     SECTION("even column")
     {
@@ -368,7 +368,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "ranksep=0.125;\n"
             "rankdir=LR;\n"
             "\n"
-            "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=hexagon, style=filled];\n"
+            "node [fixedsize=true, width=0.5, height=0.5, shape=hexagon, style=filled];\n"
             "x0y0 [label=\"\", fillcolor=white];\n"
             "x1y0 [label=\"\", fillcolor=white];\n"
             "x2y0 [label=\"\", fillcolor=white];\n"
@@ -386,10 +386,10 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "rank = same { x0y0 -> x0y1 -> x0y2 };\n"
             "rank = same { x1y0 -> x1y1 -> x1y2 };\n"
             "rank = same { x2y0 -> x2y1 -> x2y2 };\n"
-            "rank = same { r0 -> x0y0 };\n"
-            "r0 -> x1y0;\n"
-            "rank = same { r2 -> x2y0 };\n"
-            "r2 -> x1y0;\n"
+            "rank = same { invis0 -> x0y0 };\n"
+            "invis0 -> x1y0;\n"
+            "rank = same { invis2 -> x2y0 };\n"
+            "invis2 -> x1y0;\n"
             "x0y0 -> x1y0;\n"
             "x0y0 -> x1y1;\n"
             "x1y0 -> x2y0;\n"
@@ -402,7 +402,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
             "x1y2 -> x2y2;\n"
             "}\n";
 
-        compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
     }
 }
 
@@ -424,7 +424,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "ranksep=0.125;\n"
                 "rankdir=TB;\n"
                 "\n"
-                "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=hexagon, orientation=30, style=filled];\n"
+                "node [fixedsize=true, width=0.5, height=0.5, shape=hexagon, orientation=30, style=filled];\n"
                 "x0y0 [label=\"PO\", fillcolor=snow2];\n"
                 "x1y0 [label=\"AND\", fillcolor=lightcoral];\n"
                 "x2y0 [label=\"PI\", fillcolor=snow2];\n"
@@ -446,8 +446,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "node [label=\"\", width=0.5, height=0.5, style=invis];\n"
                 "rank = same { x0y0 -> x1y0 -> x2y0 -> x3y0 };\n"
                 "rank = same { x0y1 -> x1y1 -> x2y1 -> x3y1 };\n"
-                "rank = same { r1 -> x0y1 };\n"
-                "r1 -> x0y0;\n"
+                "rank = same { invis1 -> x0y1 };\n"
+                "invis1 -> x0y0;\n"
                 "x0y0 -> x0y1;\n"
                 "x1y0 -> x0y1;\n"
                 "x1y0 -> x1y1;\n"
@@ -457,7 +457,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x3y0 -> x3y1;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
         }
         SECTION("Crossing Layout")
         {
@@ -470,7 +470,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "ranksep=0.125;\n"
                 "rankdir=TB;\n"
                 "\n"
-                "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=hexagon, orientation=30, style=filled];\n"
+                "node [fixedsize=true, width=0.5, height=0.5, shape=hexagon, orientation=30, style=filled];\n"
                 "x0y0 [label=\"\", fillcolor=white];\n"
                 "x1y0 [label=\"PI\", fillcolor=snow2];\n"
                 "x2y0 [label=\"PI\", fillcolor=snow2];\n"
@@ -500,9 +500,9 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "rank = same { x0y0 -> x1y0 -> x2y0 -> x3y0 };\n"
                 "rank = same { x0y1 -> x1y1 -> x2y1 -> x3y1 };\n"
                 "rank = same { x0y2 -> x1y2 -> x2y2 -> x3y2 };\n"
-                "rank = same { r1 -> x0y1 };\n"
-                "r1 -> x0y0;\n"
-                "r1 -> x0y2;\n"
+                "rank = same { invis1 -> x0y1 };\n"
+                "invis1 -> x0y0;\n"
+                "invis1 -> x0y2;\n"
                 "x0y0 -> x0y1;\n"
                 "x1y0 -> x0y1;\n"
                 "x1y0 -> x1y1;\n"
@@ -519,7 +519,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x3y1 -> x3y2;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
         }
     }
     SECTION("even row")
@@ -538,7 +538,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "ranksep=0.125;\n"
                 "rankdir=TB;\n"
                 "\n"
-                "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=hexagon, orientation=30, style=filled];\n"
+                "node [fixedsize=true, width=0.5, height=0.5, shape=hexagon, orientation=30, style=filled];\n"
                 "x0y0 [label=\"PO\", fillcolor=snow2];\n"
                 "x1y0 [label=\"AND\", fillcolor=lightcoral];\n"
                 "x2y0 [label=\"PI\", fillcolor=snow2];\n"
@@ -560,8 +560,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "node [label=\"\", width=0.5, height=0.5, style=invis];\n"
                 "rank = same { x0y0 -> x1y0 -> x2y0 -> x3y0 };\n"
                 "rank = same { x0y1 -> x1y1 -> x2y1 -> x3y1 };\n"
-                "rank = same { r0 -> x0y0 };\n"
-                "r0 -> x0y1;\n"
+                "rank = same { invis0 -> x0y0 };\n"
+                "invis0 -> x0y1;\n"
                 "x0y0 -> x0y1;\n"
                 "x0y0 -> x1y1;\n"
                 "x1y0 -> x1y1;\n"
@@ -571,7 +571,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x3y0 -> x3y1;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
         }
         SECTION("Crossing Layout")
         {
@@ -584,7 +584,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "ranksep=0.125;\n"
                 "rankdir=TB;\n"
                 "\n"
-                "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=hexagon, orientation=30, style=filled];\n"
+                "node [fixedsize=true, width=0.5, height=0.5, shape=hexagon, orientation=30, style=filled];\n"
                 "x0y0 [label=\"\", fillcolor=white];\n"
                 "x1y0 [label=\"PI\", fillcolor=snow2];\n"
                 "x2y0 [label=\"PI\", fillcolor=snow2];\n"
@@ -614,10 +614,10 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "rank = same { x0y0 -> x1y0 -> x2y0 -> x3y0 };\n"
                 "rank = same { x0y1 -> x1y1 -> x2y1 -> x3y1 };\n"
                 "rank = same { x0y2 -> x1y2 -> x2y2 -> x3y2 };\n"
-                "rank = same { r0 -> x0y0 };\n"
-                "r0 -> x0y1;\n"
-                "rank = same { r2 -> x0y2 };\n"
-                "r2 -> x0y1;\n"
+                "rank = same { invis0 -> x0y0 };\n"
+                "invis0 -> x0y1;\n"
+                "rank = same { invis2 -> x0y2 };\n"
+                "invis2 -> x0y1;\n"
                 "x0y0 -> x0y1;\n"
                 "x0y0 -> x1y1;\n"
                 "x1y0 -> x1y1;\n"
@@ -634,7 +634,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x3y1 -> x3y2;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
         }
     }
     SECTION("odd column")
@@ -654,7 +654,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "ranksep=0.125;\n"
                 "rankdir=LR;\n"
                 "\n"
-                "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=hexagon, style=filled];\n"
+                "node [fixedsize=true, width=0.5, height=0.5, shape=hexagon, style=filled];\n"
                 "x0y0 [label=\"PO\", fillcolor=snow2];\n"
                 "x1y0 [label=\"AND\", fillcolor=lightcoral];\n"
                 "x2y0 [label=\"PI\", fillcolor=snow2];\n"
@@ -678,11 +678,11 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "rank = same { x1y0 -> x1y1 };\n"
                 "rank = same { x2y0 -> x2y1 };\n"
                 "rank = same { x3y0 -> x3y1 };\n"
-                "rank = same { r1 -> x1y0 };\n"
-                "r1 -> x0y0;\n"
-                "r1 -> x2y0;\n"
-                "rank = same { r3 -> x3y0 };\n"
-                "r3 -> x2y0;\n"
+                "rank = same { invis1 -> x1y0 };\n"
+                "invis1 -> x0y0;\n"
+                "invis1 -> x2y0;\n"
+                "rank = same { invis3 -> x3y0 };\n"
+                "invis3 -> x2y0;\n"
                 "x0y0 -> x1y0;\n"
                 "x1y0 -> x2y0;\n"
                 "x1y0 -> x0y1;\n"
@@ -694,7 +694,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x2y1 -> x3y1;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
         }
         SECTION("Crossing Layout")
         {
@@ -707,7 +707,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "ranksep=0.125;\n"
                 "rankdir=LR;\n"
                 "\n"
-                "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=hexagon, style=filled];\n"
+                "node [fixedsize=true, width=0.5, height=0.5, shape=hexagon, style=filled];\n"
                 "x0y0 [label=\"\", fillcolor=white];\n"
                 "x1y0 [label=\"PI\", fillcolor=snow2];\n"
                 "x2y0 [label=\"PI\", fillcolor=snow2];\n"
@@ -738,11 +738,11 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "rank = same { x1y0 -> x1y1 -> x1y2 };\n"
                 "rank = same { x2y0 -> x2y1 -> x2y2 };\n"
                 "rank = same { x3y0 -> x3y1 -> x3y2 };\n"
-                "rank = same { r1 -> x1y0 };\n"
-                "r1 -> x0y0;\n"
-                "r1 -> x2y0;\n"
-                "rank = same { r3 -> x3y0 };\n"
-                "r3 -> x2y0;\n"
+                "rank = same { invis1 -> x1y0 };\n"
+                "invis1 -> x0y0;\n"
+                "invis1 -> x2y0;\n"
+                "rank = same { invis3 -> x3y0 };\n"
+                "invis3 -> x2y0;\n"
                 "x0y0 -> x1y0;\n"
                 "x1y0 -> x2y0;\n"
                 "x1y0 -> x0y1;\n"
@@ -760,7 +760,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x2y2 -> x3y2;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
         }
     }
     SECTION("even column")
@@ -780,7 +780,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "ranksep=0.125;\n"
                 "rankdir=LR;\n"
                 "\n"
-                "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=hexagon, style=filled];\n"
+                "node [fixedsize=true, width=0.5, height=0.5, shape=hexagon, style=filled];\n"
                 "x0y0 [label=\"PO\", fillcolor=snow2];\n"
                 "x1y0 [label=\"AND\", fillcolor=lightcoral];\n"
                 "x2y0 [label=\"PI\", fillcolor=snow2];\n"
@@ -804,11 +804,11 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "rank = same { x1y0 -> x1y1 };\n"
                 "rank = same { x2y0 -> x2y1 };\n"
                 "rank = same { x3y0 -> x3y1 };\n"
-                "rank = same { r0 -> x0y0 };\n"
-                "r0 -> x1y0;\n"
-                "rank = same { r2 -> x2y0 };\n"
-                "r2 -> x1y0;\n"
-                "r2 -> x3y0;\n"
+                "rank = same { invis0 -> x0y0 };\n"
+                "invis0 -> x1y0;\n"
+                "rank = same { invis2 -> x2y0 };\n"
+                "invis2 -> x1y0;\n"
+                "invis2 -> x3y0;\n"
                 "x0y0 -> x1y0;\n"
                 "x0y0 -> x1y1;\n"
                 "x1y0 -> x2y0;\n"
@@ -820,7 +820,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x2y1 -> x3y1;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
         }
         SECTION("Crossing Layout")
         {
@@ -833,7 +833,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "ranksep=0.125;\n"
                 "rankdir=LR;\n"
                 "\n"
-                "node [fixedsize=true, pin=true, width=0.5, height=0.5, shape=hexagon, style=filled];\n"
+                "node [fixedsize=true, width=0.5, height=0.5, shape=hexagon, style=filled];\n"
                 "x0y0 [label=\"\", fillcolor=white];\n"
                 "x1y0 [label=\"PI\", fillcolor=snow2];\n"
                 "x2y0 [label=\"PI\", fillcolor=snow2];\n"
@@ -864,11 +864,11 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "rank = same { x1y0 -> x1y1 -> x1y2 };\n"
                 "rank = same { x2y0 -> x2y1 -> x2y2 };\n"
                 "rank = same { x3y0 -> x3y1 -> x3y2 };\n"
-                "rank = same { r0 -> x0y0 };\n"
-                "r0 -> x1y0;\n"
-                "rank = same { r2 -> x2y0 };\n"
-                "r2 -> x1y0;\n"
-                "r2 -> x3y0;\n"
+                "rank = same { invis0 -> x0y0 };\n"
+                "invis0 -> x1y0;\n"
+                "rank = same { invis2 -> x2y0 };\n"
+                "invis2 -> x1y0;\n"
+                "invis2 -> x3y0;\n"
                 "x0y0 -> x1y0;\n"
                 "x0y0 -> x1y1;\n"
                 "x1y0 -> x2y0;\n"
@@ -886,7 +886,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x2y2 -> x3y2;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
         }
     }
 }
