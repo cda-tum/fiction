@@ -111,10 +111,11 @@ class write_fqca_layout_impl
      */
     char next_cell_designator()
     {
-        ++alphabet_iterator;
-
         if (const auto designator = *alphabet_iterator; designator)
         {
+            // increment iterator only after its value has been fetched to include 'a' on first call
+            ++alphabet_iterator;
+
             return designator;
         }
         else
@@ -170,7 +171,7 @@ class write_fqca_layout_impl
         else
         {
             // write cell clock number
-            os << lyt.get_clock_number(c);
+            os << std::to_string(lyt.get_clock_number(c));
         }
 
         os << qca_stack::CELL_SEPARATOR;
@@ -181,7 +182,7 @@ class write_fqca_layout_impl
         // if cell is marked as a vertical cell
         if (const auto cell_mode = lyt.get_cell_mode(c); qca_technology::is_vertical_cell_mode(cell_mode))
         {
-            via_stream << lyt.get_clock_number(c);
+            via_stream << std::to_string(lyt.get_clock_number(c));
         }
         // must be an empty cell
         else
@@ -256,13 +257,13 @@ class write_fqca_layout_impl
         // if cell has a name
         if (const auto cell_name = lyt.get_cell_name(lc.c); !cell_name.empty())
         {
-            os << qca_stack::ITEM << qca_stack::LABEL << cell_name << '\n';
+            os << fmt::format("{}{}\"{}\"\n", qca_stack::ITEM, qca_stack::LABEL, cell_name);
         }
 
         // every cell has a clock
-        os << qca_stack::ITEM << qca_stack::CLOCK << lyt.get_clock_number(lc.c) << '\n';
+        os << qca_stack::ITEM << qca_stack::CLOCK << std::to_string(lyt.get_clock_number(lc.c)) << "\n\n";
 
-        // propagate and offset are not supported
+        // 'number', 'propagate', and 'offset' are not supported
     }
 
     void write_cell_definition()
