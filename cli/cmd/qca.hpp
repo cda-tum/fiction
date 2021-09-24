@@ -38,6 +38,8 @@ class qca_command : public command
                        "QCADesigner can be used to perform physical simulations.")
     {
         add_option("filename", filename, "QCA file name");
+        add_flag("--no_via_layers,-v", ps.create_inter_layer_via_cells,
+                 "Do not insert additional inter-layer via cells");
     }
 
   protected:
@@ -52,6 +54,8 @@ class qca_command : public command
         if (s.empty())
         {
             env->out() << "[w] no cell layout in store" << std::endl;
+
+            ps = {};
             return;
         }
 
@@ -63,7 +67,7 @@ class qca_command : public command
 
             if constexpr (std::is_same_v<fiction::technology<Lyt>, fiction::qca_technology>)
             {
-                fiction::write_qca_layout(*lyt, filename);
+                fiction::write_qca_layout(*lyt, filename, ps);
             }
             else
             {
@@ -79,6 +83,8 @@ class qca_command : public command
         if (std::filesystem::is_directory(filename))
         {
             env->out() << "[e] cannot override a directory" << std::endl;
+
+            ps = {};
             return;
         }
         // if filename was not given, use stored layout name
@@ -104,6 +110,8 @@ class qca_command : public command
         {
             env->out() << "[e] an error occurred while the file was being written; it could be corrupted" << std::endl;
         }
+
+        ps = {};
     }
 
   private:
@@ -111,6 +119,8 @@ class qca_command : public command
      * File name to write the QCA file into.
      */
     std::string filename;
+
+    fiction::write_qca_layout_params ps{};
 };
 
 ALICE_ADD_COMMAND(qca, "I/O")

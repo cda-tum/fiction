@@ -81,6 +81,8 @@ class write_fqca_layout_impl
         os << qca_stack::SECTION_SEPARATOR;
 
         write_cell_definition();
+
+        os << std::flush;
     }
 
   private:
