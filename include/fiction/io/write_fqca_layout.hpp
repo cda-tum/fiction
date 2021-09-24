@@ -55,10 +55,10 @@ static constexpr const char* CONST_1_CELL   = "+";
 static constexpr const char* SECTION_SEPARATOR = "\n\n$\n\n";
 
 static constexpr const char* ITEM           = "- ";
-static constexpr const char* LABEL          = "label = ";
-static constexpr const char* NUMBER         = "number = ";
-static constexpr const char* CLOCK          = "clock = ";
-static constexpr const char* OFFSET         = "offset = ";
+static constexpr const char* LABEL          = "label = \"{}\"";
+static constexpr const char* NUMBER         = "number = {}";
+static constexpr const char* CLOCK          = "clock = {}";
+static constexpr const char* OFFSET         = "offset = {}";
 static constexpr const char* PRIMARY_INPUT  = "input";
 static constexpr const char* PRIMARY_OUTPUT = "output";
 static constexpr const char* PROPAGATE      = "propagate";
@@ -242,7 +242,7 @@ class write_fqca_layout_impl
 
     void write_labeled_cell(const labeled_cell& lc)
     {
-        os << lc.designator << ":\n";
+        os << fmt::format("{}:\n", lc.designator);
 
         // if cell is PI
         if (lyt.is_pi(lc.c))
@@ -257,13 +257,16 @@ class write_fqca_layout_impl
         // if cell has a name
         if (const auto cell_name = lyt.get_cell_name(lc.c); !cell_name.empty())
         {
-            os << fmt::format("{}{}\"{}\"\n", qca_stack::ITEM, qca_stack::LABEL, cell_name);
+            os << qca_stack::ITEM << fmt::format(qca_stack::LABEL, cell_name) << '\n';
         }
 
         // every cell has a clock
-        os << qca_stack::ITEM << qca_stack::CLOCK << std::to_string(lyt.get_clock_number(lc.c)) << "\n\n";
+        os << qca_stack::ITEM << fmt::format(qca_stack::CLOCK, lyt.get_clock_number(lc.c)) << '\n';
 
         // 'number', 'propagate', and 'offset' are not supported
+
+        // end block
+        os << "\n";
     }
 
     void write_cell_definition()
