@@ -2,6 +2,8 @@
 // Created by marcel on 09.04.20.
 //
 
+#if (MUGEN)
+
 #ifndef FICTION_ONE_PASS_SYNTHESIS_HPP
 #define FICTION_ONE_PASS_SYNTHESIS_HPP
 
@@ -875,3 +877,5 @@ std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params 
 }  // namespace fiction
 
 #endif  // FICTION_ONE_PASS_SYNTHESIS_HPP
+
+#endif  // MUGEN

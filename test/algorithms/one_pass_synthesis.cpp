@@ -2,6 +2,8 @@
 // Created by marcel on 24.09.21.
 //
 
+#if (MUGEN)
+
 #include "catch.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking.hpp"
@@ -100,3 +102,5 @@ TEST_CASE("One-pass synthesis", "[one-pass]")
     //    check_all(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
     check_all(blueprints::multi_output_and_network<mockturtle::aig_network>());
 }
+
+#endif  // MUGEN
