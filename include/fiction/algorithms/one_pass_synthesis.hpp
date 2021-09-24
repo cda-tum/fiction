@@ -5,12 +5,27 @@
 #ifndef FICTION_ONE_PASS_SYNTHESIS_HPP
 #define FICTION_ONE_PASS_SYNTHESIS_HPP
 
+#include "../layouts/clocking_scheme.hpp"
+#include "../layouts/coordinate.hpp"
 #include "iter/aspect_ratio_iterator.hpp"
 #include "utils/mugen_info.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/print.hpp>
+#include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
+
+#include <algorithm>
+#include <chrono>
+#include <exception>
+#include <functional>
+#include <iostream>
+#include <iterator>
+#include <limits>
+#include <map>
+#include <memory>
+#include <optional>
+#include <vector>
 
 // pybind11 has quite some warnings in its code; let's silence them a little
 #pragma GCC diagnostic push  // GCC
@@ -35,7 +50,7 @@ struct one_pass_synthesis_params
     /**
      * Clocking scheme to be used.
      */
-    std::shared_ptr<clocking_scheme<coord_t>> scheme = nullptr;
+    std::shared_ptr<clocking_scheme<coord_t>> scheme = std::make_shared<clocking_scheme<coord_t>>(twoddwave_4_clocking);
     /**
      * Number of tiles to use.
      */
@@ -221,6 +236,10 @@ class mugen_handler
      */
     pybind11::module mugen;
     /**
+     * (crossing node, outgoing node) --> incoming node
+     */
+    std::map<std::pair<pybind11::handle, pybind11::handle>, pybind11::handle> crossing_map{};
+    /**
      * Converts a vector of truth tables into a list of lists, i.e., Python data types.
      *
      * @param spec Truth tables.
@@ -280,109 +299,124 @@ class mugen_handler
 
         return scheme_graph;
     }
+
+    // returns an iterator that points to the first non-PI node of the given list of nodes
+    auto get_node_begin_iterator(const pybind11::handle& nodes) const
+    {
+        // set up the iterator to skip the PIs
+        auto pi_it_end = nodes.begin();
+        // use std::advance because there is no 'operator+' overload
+        std::advance(pi_it_end, num_pis + 1);
+
+        return pi_it_end;
+    }
+
+    [[nodiscard]] bool is_empty(const pybind11::handle& node) const
+    {
+        return pybind11::str(node.attr("gate_type")).equal(pybind11::str("EMPTY"));
+    }
+
+    [[nodiscard]] bool is_wire(const pybind11::handle& node) const
+    {
+        return pybind11::str(node.attr("gate_type")).equal(pybind11::str("WIRE"));
+    }
+
+    [[nodiscard]] bool is_crossing(const pybind11::handle& node) const
+    {
+        return pybind11::str(node.attr("gate_type")).equal(pybind11::str("CROSS"));
+    }
+
+    [[nodiscard]] bool is_negation(const pybind11::handle& node) const
+    {
+        return pybind11::str(node.attr("gate_type")).equal(pybind11::str("NOT"));
+    }
+
+    [[nodiscard]] bool is_conjunction(const pybind11::handle& node) const
+    {
+        return pybind11::str(node.attr("gate_type")).equal(pybind11::str("AND"));
+    }
+
+    [[nodiscard]] bool is_disjunction(const pybind11::handle& node) const
+    {
+        return pybind11::str(node.attr("gate_type")).equal(pybind11::str("OR"));
+    }
+
+    [[nodiscard]] bool is_majority(const pybind11::handle& node) const
+    {
+        return pybind11::str(node.attr("gate_type")).equal(pybind11::str("MAJ"));
+    }
+
+    [[nodiscard]] bool is_pi(const pybind11::handle& node) const
+    {
+        return pybind11::bool_(node.attr("is_pi"));
+    }
+
+    [[nodiscard]] bool is_po(const pybind11::handle& node) const
+    {
+        return pybind11::bool_(node.attr("is_po"));
+    }
+
+    [[nodiscard]] uint64_t get_pi_id(const pybind11::handle& node) const
+    {
+        return static_cast<uint64_t>(pybind11::int_(node.attr("coords")));
+    }
+
+    // extract a Python tuple representing coordinates from a node and converts it to a tile
+    [[nodiscard]] tile<Lyt> get_tile(const pybind11::handle& node) const
+    {
+        const auto coords = pybind11::tuple(node.attr("coords"));
+        return {pybind11::int_(coords[0]), pybind11::int_(coords[1])};
+    }
+
+    // stores a (crossing, fanout) --> fanin relation for all fanins of the given crossing node
+    void set_up_crossing(const pybind11::handle& net, const pybind11::handle& cross_node)
+    {
+        // Mugen's function to determine cardinal directions of two coordinates
+        const auto get_direction = mugen.attr("get_direction");
+        // Mugen's function to access a coordinate in a certain direction
+        const auto get_coords_in_direction = mugen.attr("get_coords_in_direction");
+        // map from coordinates to nodes
+        const auto node_map = net.attr("node_map");
+        // position of the crossing node
+        const auto cross_coords = cross_node.attr("coords");
+        // cross_node's direction map which maps fanin to fanout directions
+        const auto dir_map = cross_node.attr("dir_map");
+        // handle to the list of cross_node's fanins
+        const auto fanin = cross_node.attr("fanin");
+        // for each of cross_node's fanins
+        for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
+        {
+            // the fanin
+            const auto fanin_n = fanin[*fanin_it];
+
+            // fanin --> crossing direction
+            const auto fanin_dir = get_direction(cross_node.attr("coords"), fanin_n.attr("coords"))[pybind11::int_(0)];
+            // direction of the associated fanout
+            const auto fanout_dir = dir_map[fanin_dir];
+
+            // the fanout node
+            const auto fanout_n = node_map[get_coords_in_direction(cross_coords, fanout_dir)];
+
+            // store (crossing, fanout) --> fanin
+            crossing_map[std::make_pair(cross_node, fanout_n)] = fanin_n;
+        }
+    }
+
     /**
      * Extracts a Lyt from the network synthesized by Mugen.
      *
      * @param net Synthesis result returned by Mugen.
      */
-    void to_gate_layout(pybind11::handle net) const
+    void to_gate_layout(pybind11::handle net)
     {
         namespace py = pybind11;
         using namespace py::literals;
 
         using py_node_map = std::map<py::handle, mockturtle::signal<Lyt>>;
-
         py_node_map py_n_map{};
 
-        // (crossing node, outgoing node) --> incoming node
-        using crossing_map = std::map<std::pair<py::handle, py::handle>, py::handle>;
-        crossing_map c_map{};
-
-        // returns an iterator that points to the first non-PI node of the given list of nodes
-        const auto get_node_begin_iterator = [this, &net](const auto& nodes)
-        {
-            // set up the iterator to skip the PIs
-            auto pi_it_end = nodes.begin();
-            // use std::advance because there is no 'operator+' overload
-            std::advance(pi_it_end, num_pis + 1);
-
-            return pi_it_end;
-        };
-
-        // returns whether a node is empty
-        const auto is_empty = [](const auto& node) -> bool
-        { return py::str(node.attr("gate_type")).equal(py::str("EMPTY")); };
-        // returns whether a node is a wire
-        const auto is_wire = [](const auto& node) -> bool
-        { return py::str(node.attr("gate_type")).equal(py::str("WIRE")); };
-        // returns whether a node is a crossing
-        const auto is_crossing = [](const auto& node) -> bool
-        { return py::str(node.attr("gate_type")).equal(py::str("CROSS")); };
-        // returns whether a node is a negation
-        const auto is_negation = [](const auto& node) -> bool
-        { return py::str(node.attr("gate_type")).equal(py::str("NOT")); };
-        // returns whether a node is a conjunction
-        const auto is_conjunction = [](const auto& node) -> bool
-        { return py::str(node.attr("gate_type")).equal(py::str("AND")); };
-        // returns whether a node is a disjunction
-        const auto is_disjunction = [](const auto& node) -> bool
-        { return py::str(node.attr("gate_type")).equal(py::str("OR")); };
-        // returns whether a node is a majority
-        const auto is_majority = [](const auto& node) -> bool
-        { return py::str(node.attr("gate_type")).equal(py::str("MAJ")); };
-
-        // checks if the given node is PI
-        const auto is_pi = [](const auto& node) -> bool { return py::bool_(node.attr("is_pi")); };
-        // checks if the given node is PO
-        const auto is_po = [](const auto& node) -> bool { return py::bool_(node.attr("is_po")); };
-
-        // returns the ID of a PI node
-        const auto get_pi_id = [](const auto& node) { return py::int_(node.attr("coords")); };
-
-        // extract a Python tuple representing coordinates from a node and converts it to a tile
-        const auto get_tile = [](const auto& node, const bool second_layer = false) -> tile<Lyt>
-        {
-            const auto tuple = py::tuple(node.attr("coords"));
-            return {py::int_(tuple[0]), py::int_(tuple[1]), second_layer ? 1 : 0};
-        };
-
-        // stores a (crossing, fanout) --> fanin relation for all fanins of the given crossing node
-        const auto set_up_crossing = [this, &net, &c_map](const auto& cross_node) -> void
-        {
-            // Mugen's function to determine cardinal directions of two coordinates
-            const auto get_direction = mugen.attr("get_direction");
-            // Mugen's function to access a coordinate in a certain direction
-            const auto get_coords_in_direction = mugen.attr("get_coords_in_direction");
-            // map from coordinates to nodes
-            const auto node_map = net.attr("node_map");
-            // position of the crossing node
-            const auto cross_coords = cross_node.attr("coords");
-            // cross_node's direction map which maps fanin to fanout directions
-            const auto dir_map = cross_node.attr("dir_map");
-            // handle to the list of cross_node's fanins
-            const auto fanin = cross_node.attr("fanin");
-            // for each of cross_node's fanins
-            for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
-            {
-                // the fanin
-                const auto fanin_n = fanin[*fanin_it];
-
-                // fanin --> crossing direction
-                const auto fanin_dir = get_direction(cross_node.attr("coords"), fanin_n.attr("coords"))[py::int_(0)];
-                // direction of the associated fanout
-                const auto fanout_dir = dir_map[fanin_dir];
-
-                // the fanout node
-                const auto fanout_n = node_map[get_coords_in_direction(cross_coords, fanout_dir)];
-
-                // store (crossing, fanout) --> fanin
-                c_map[std::make_pair(cross_node, fanout_n)] = fanin_n;
-            }
-        };
-
         const std::function<std::vector<mockturtle::signal<Lyt>>(const py::handle&)> get_fanins =
-            [this, &is_crossing, &is_pi, &c_map, &get_tile, &py_n_map,
-             &get_fanins](const auto& node) -> std::vector<mockturtle::signal<Lyt>>
+            [this, &py_n_map, &get_fanins](const auto& node) -> std::vector<mockturtle::signal<Lyt>>
         {
             std::vector<mockturtle::signal<Lyt>> fanins{};
 
@@ -401,7 +435,7 @@ class mugen_handler
                 if (is_crossing(fanin_n))
                 {
                     // access its fanin via the given node in the crossing map to reconstruct the path
-                    const auto c_fanin_n = c_map[std::make_pair(fanin_n, node)];
+                    const auto c_fanin_n = crossing_map[std::make_pair(fanin_n, node)];
 
                     // get the tile where the crossing node is located
                     auto cross_pos = get_tile(fanin_n);
@@ -410,13 +444,14 @@ class mugen_handler
 
                     mockturtle::signal<Lyt> fanin_signal{};
                     // if the fanin node has been set up already (i.e. if it is not a crossing itself)
-                    if (py_n_map.count(c_fanin_n) > 0)  // TODO iterator map access
+                    if (auto it = py_n_map.find(c_fanin_n); it != py_n_map.cend())
                     {
-                        // find its signal in the py_n_map
-                        fanin_signal = py_n_map[c_fanin_n];
+                        // use it as the fanin signal
+                        fanin_signal = it->second;
                     }
                     else
                     {
+                        // otherwise traverse recursively
                         fanin_signal = get_fanins(fanin_n)[0];
                     }
 
@@ -436,7 +471,7 @@ class mugen_handler
         };
 
         // pre-allocate PIs and POs to preserve their order
-        std::vector<mockturtle::node<Lyt>> pi_list(num_pis), po_list(num_pos);
+        std::vector<mockturtle::node<Lyt>> pi_list(num_pis);
         // a little hacky: place them all at position {0, 0} so that they can be fetched to be stored as nodes
         // instead of as signals to not lose them as soon as their tile is overridden
         for (auto i = 0ul; i < num_pis; ++i)
@@ -447,8 +482,7 @@ class mugen_handler
         lyt.move_node(pi_list[num_pis - 1], {});
 
         // checks whether a node has a PI as fan-in
-        const auto has_pi_fanin = [&is_pi, &get_pi_id,
-                                   &pi_list](const auto& node) -> std::optional<mockturtle::node<Lyt>>
+        const auto has_pi_fanin = [this, &pi_list](const auto& node) -> std::optional<mockturtle::node<Lyt>>
         {
             auto fanin = node.attr("fanin");
             for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
@@ -507,7 +541,7 @@ class mugen_handler
             {
                 // corner case: since crossing nodes represent two wire segments each, their fanins are handled with a
                 // dedicated map that unambiguously assigns the fanins for each fanout
-                set_up_crossing(node);
+                set_up_crossing(net, node);
             }
             // if node is a negation
             else if (is_negation(node))
