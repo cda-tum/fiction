@@ -192,7 +192,7 @@ class write_qca_layout_impl
     void write_cell_layers()
     {
         // for each layer
-        for (auto layer = 0u; layer <= lyt.z(); ++layer)
+        for (auto z = 0u; z <= lyt.z(); ++z)
         {
             write_via_cells();
 
@@ -201,19 +201,24 @@ class write_qca_layout_impl
 
             os << qcad::TYPE << "1\n";
             os << qcad::STATUS << "0\n";
-            os << qcad::PSZ_DESCRIPTION << ((layer == 0) ? "Ground Layer" : ("Crossing Layer " + std::to_string(layer)))
+            os << qcad::PSZ_DESCRIPTION << ((z == 0) ? "Ground Layer" : ("Crossing Layer " + std::to_string(z)))
                << '\n';
 
-            // for all cells in that layer
-            lyt.foreach_cell(
-                [this, &layer](const auto& cell)
+            // for each row
+            for (auto y = 0ull; y <= lyt.y(); ++y)
+            {
+                // for each cell
+                for (auto x = 0ull; x <= lyt.x(); ++x)
                 {
-                    // skip cells not belonging to current layer
-                    if (cell.z == layer)
+                    const cell<Lyt> c{x, y, z};
+
+                    // skip empty cells
+                    if (!lyt.is_empty_cell(c))
                     {
-                        write_cell(cell, ps.create_inter_layer_via_cells);
+                        write_cell(c, ps.create_inter_layer_via_cells);
                     }
-                });
+                }
+            }
 
             // close design layer
             os << qcad::CLOSE_QCAD_LAYER;
