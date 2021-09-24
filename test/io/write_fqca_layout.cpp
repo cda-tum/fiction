@@ -11,6 +11,7 @@
 #include <fiction/technology/cell_technologies.hpp>
 
 #include <sstream>
+#include <string>
 
 using namespace fiction;
 
@@ -131,4 +132,23 @@ TEST_CASE("Write single-layer AND gate", "[fqca]")
     write_fqca_layout(layout, layout_stream, {false});
 
     CHECK(layout_stream.str() == fqca_layout);
+}
+
+TEST_CASE("Exceeding cell names", "[fqca]")
+{
+    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+
+    qca_layout layout{{52, 0}, "[a-z]+[A-Z]+1"};
+
+    // create layout with 53 named cells
+    for (auto i = 0u; i <= 52; ++i)
+    {
+        layout.assign_cell_type({i, 0}, qca_technology::cell_type::NORMAL);
+        layout.assign_cell_name({i, 0}, std::to_string(i));
+    }
+
+    std::ostringstream dummy_stream{};
+
+    // since only a-z and A-Z are allowed for named cells, 53 named cells should throw an exception
+    CHECK_THROWS_AS(write_fqca_layout(layout, dummy_stream), out_of_cell_names_exception);
 }
