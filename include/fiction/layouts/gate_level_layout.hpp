@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <initializer_list>
+#include <memory>
 #include <set>
 #include <unordered_map>
 #include <vector>
@@ -53,6 +54,10 @@ class gate_level_layout : public ClockedLayout
         uint32_t num_wires = 0ull;
 
         uint32_t trav_id = 0ul;
+
+        std::string layout_name{};
+
+        std::map<Node, std::string> node_names{};
     };
 
     /*! \brief gate-level layout node
@@ -85,20 +90,23 @@ class gate_level_layout : public ClockedLayout
 
     using storage = std::shared_ptr<gate_level_layout_storage>;
 
-    explicit gate_level_layout(const typename ClockedLayout::aspect_ratio& ar = {}) :
+    explicit gate_level_layout(const typename ClockedLayout::aspect_ratio& ar = {}, std::string name = {}) :
             ClockedLayout(ar),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
         initialize_truth_table_cache();
+        strg->data.layout_name = std::move(name);
     }
 
-    gate_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<tile>& scheme) :
+    gate_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<tile>& scheme,
+                      std::string name = {}) :
             ClockedLayout(ar, scheme),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
         initialize_truth_table_cache();
+        strg->data.layout_name = std::move(name);
     }
 
     explicit gate_level_layout(std::shared_ptr<gate_level_layout_storage> s) :
@@ -126,12 +134,13 @@ class gate_level_layout : public ClockedLayout
         return n == 1;
     }
 
-    signal create_pi([[maybe_unused]] const std::string& name = std::string(), const tile& t = {})
+    signal create_pi(const std::string& name = {}, const tile& t = {})
     {
         const auto n = static_cast<node>(strg->nodes.size());
         strg->nodes.emplace_back();     // empty node data
         strg->nodes[n].data[1].h1 = 2;  // assign identity function
         strg->inputs.emplace_back(n);
+        strg->data.node_names[n] = name.empty() ? fmt::format("pi{}", num_pis()) : name;
         assign_node(t, n);
 
         return static_cast<signal>(t);
@@ -143,6 +152,7 @@ class gate_level_layout : public ClockedLayout
         strg->nodes.emplace_back();     // empty node data
         strg->nodes[n].data[1].h1 = 2;  // assign identity function
         strg->outputs.emplace_back(static_cast<signal>(t));
+        strg->data.node_names[n] = name.empty() ? fmt::format("po{}", num_pos()) : name;
         assign_node(t, n);
 
         /* increase ref-count to child */
@@ -176,6 +186,92 @@ class gate_level_layout : public ClockedLayout
     [[nodiscard]] bool is_combinational() const noexcept
     {
         return true;
+    }
+
+#pragma endregion
+
+#pragma region Node names
+
+    void set_layout_name(const std::string& name) noexcept
+    {
+        strg->data.layout_name = name;
+    }
+
+    [[nodiscard]] std::string get_layout_name() const noexcept
+    {
+        return strg->data.layout_name;
+    }
+
+    void set_name(const node n, const std::string& name) noexcept
+    {
+        strg->data.node_names[n] = name;
+    }
+
+    [[nodiscard]] std::string get_name(const node n) const noexcept
+    {
+        if (auto it = strg->data.node_names.find(n); it != strg->data.node_names.cend())
+        {
+            return it->second;
+        }
+        else
+        {
+            return {};
+        }
+    }
+
+    [[nodiscard]] bool has_name(const node n) const noexcept
+    {
+        return get_name(n) != "";
+    }
+
+    void set_input_name(const uint32_t index, const std::string& name) noexcept
+    {
+        if (index <= num_pis())
+        {
+            strg->data.node_names[strg->inputs[index]] = name;
+        }
+    }
+
+    [[nodiscard]] std::string get_input_name(const uint32_t index) const noexcept
+    {
+        if (index <= num_pis())
+        {
+            return get_name(static_cast<node>(strg->inputs[index]));
+        }
+        else
+        {
+            return {};
+        }
+    }
+
+    [[nodiscard]] bool has_input_name(const uint32_t index) const noexcept
+    {
+        return !get_input_name(index).empty();
+    }
+
+    void set_output_name(const uint32_t index, const std::string& name) noexcept
+    {
+        if (index <= num_pos())
+        {
+            strg->data.node_names[get_node(strg->outputs[index].index)] = name;
+        }
+    }
+
+    [[nodiscard]] std::string get_output_name(const uint32_t index) const noexcept
+    {
+        if (index <= num_pos())
+        {
+            return get_name(get_node(strg->outputs[index].index));
+        }
+        else
+        {
+            return {};
+        }
+    }
+
+    [[nodiscard]] bool has_output_name(const uint32_t index) const noexcept
+    {
+        return !get_output_name(index).empty();
     }
 
 #pragma endregion
@@ -313,7 +409,7 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] node get_node(const signal& s) const noexcept
     {
-        if (auto it = strg->data.tile_node_map.find(s); it != strg->data.tile_node_map.end())
+        if (auto it = strg->data.tile_node_map.find(s); it != strg->data.tile_node_map.cend())
         {
             return it->second;
         }
@@ -328,7 +424,7 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] tile get_tile(const node& n) const noexcept
     {
-        if (auto it = strg->data.node_tile_map.find(n); it != strg->data.node_tile_map.end())
+        if (auto it = strg->data.node_tile_map.find(n); it != strg->data.node_tile_map.cend())
         {
             return static_cast<tile>(it->second);
         }

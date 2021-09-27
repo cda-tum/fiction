@@ -64,8 +64,7 @@ inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, a
 /**
  * FCN gate-level layouts.
  */
-using gate_clk_lyt =
-    mockturtle::names_view<gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>>;
+using gate_clk_lyt     = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 using gate_clk_lyt_ptr = std::shared_ptr<gate_clk_lyt>;
 
 using gate_layout_t = std::variant<gate_clk_lyt_ptr>;

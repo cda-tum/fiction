@@ -164,7 +164,7 @@ ALICE_DESCRIBE_STORE(fiction::gate_layout_t, layout)
 {
     const auto describe = [](auto&& lyt)
     {
-        return fmt::format("{} - {} × {}, I/O: {}/{}, gates: {}, wires: {}", lyt->get_network_name(), lyt->x() + 1,
+        return fmt::format("{} - {} × {}, I/O: {}/{}, gates: {}, wires: {}", lyt->get_layout_name(), lyt->x() + 1,
                            lyt->y() + 1, lyt->num_pis(), lyt->num_pos(), lyt->num_gates(), lyt->num_wires());
     };
 
@@ -188,7 +188,7 @@ ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
         mockturtle::depth_view depth_lyt{*lyt};
 
         os << fmt::format("[i] {} - {} × {}, I/O: {}/{}, gates: {}, wires: {}, CP: {}, sync. elems.: {}\n",
-                          lyt->get_network_name(), lyt->x() + 1, lyt->y() + 1, lyt->num_pis(), lyt->num_pos(),
+                          lyt->get_layout_name(), lyt->x() + 1, lyt->y() + 1, lyt->num_pis(), lyt->num_pos(),
                           lyt->num_gates(), lyt->num_wires(), depth_lyt.depth(), num_se);
     };
 
@@ -211,7 +211,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
         mockturtle::depth_view depth_lyt{*lyt};
 
         return nlohmann::json{
-            {"name", lyt->get_network_name()},
+            {"name", lyt->get_layout_name()},
             {"inputs", lyt->num_pis()},
             {"outputs", lyt->num_pos()},
             {"gates", lyt->num_gates()},

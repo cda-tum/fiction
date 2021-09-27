@@ -130,8 +130,21 @@ class simulate_command : public command
     template <typename NetOrLyt>
     void perform_simulation(const NetOrLyt& network_or_layout)
     {
+        const auto get_name = [](auto&& ntk_or_lyt) -> std::string
+        {
+            using NtkOrLyt = typename std::decay_t<decltype(ntk_or_lyt)>::element_type;
 
-        const auto get_name = [](auto&& net_or_lyt) -> std::string { return net_or_lyt->get_network_name(); };
+            if constexpr (mockturtle::has_get_network_name_v<NtkOrLyt>)
+            {
+                return ntk_or_lyt->get_network_name();
+            }
+            else if constexpr (fiction::has_get_layout_name_v<NtkOrLyt>)
+            {
+                return ntk_or_lyt->get_layout_name();
+            }
+
+            return {};
+        };
 
         const auto store_po_names = [this](auto&& net_or_lyt)
         {

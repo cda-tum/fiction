@@ -151,7 +151,7 @@ class cell_level_layout : public ClockedLayout
         }
         else
         {
-            return "";
+            return {};
         }
     }
 

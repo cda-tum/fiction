@@ -58,6 +58,25 @@ void to_x(Ntk ntk)
     }
 }
 
+TEST_CASE("Name conservation", "[algorithms]")
+{
+    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
+    maj.set_network_name("maj");
+
+    const auto converted_maj = convert_network<mockturtle::names_view<fiction::topology_network>>(maj);
+
+    // network name
+    CHECK(converted_maj.get_network_name() == "maj");
+
+    // PI names
+    CHECK(converted_maj.get_name(converted_maj.make_signal(2)) == "a");
+    CHECK(converted_maj.get_name(converted_maj.make_signal(3)) == "b");
+    CHECK(converted_maj.get_name(converted_maj.make_signal(4)) == "c");
+
+    // PO names
+    CHECK(converted_maj.get_output_name(0) == "f");
+}
+
 TEST_CASE("Simple network conversion", "[algorithms]")
 {
     SECTION("MIG to X")
