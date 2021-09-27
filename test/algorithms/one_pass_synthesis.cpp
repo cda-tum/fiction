@@ -17,6 +17,8 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/qca_one_library.hpp>
+#include <fiction/utils/debug/layout_printer.hpp>
+#include <fiction/utils/debug/network_writer.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -89,6 +91,10 @@ void check_all(const Ntk& ntk)
     for (const auto& ps : configurations())
     {
         const auto layout = generate_layout<gate_layout>(ntk, ps);
+
+        debug::write_dot_layout(layout);
+        debug::print_tile_to_node_assignments(layout);
+
         check_eq(ntk, layout);
         apply_gate_library(layout);
     }
@@ -97,7 +103,7 @@ void check_all(const Ntk& ntk)
 TEST_CASE("One-pass synthesis", "[one-pass]")
 {
     check_all(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    //    check_all(blueprints::maj1_network<mockturtle::mig_network>());
+    check_all(blueprints::maj1_network<mockturtle::mig_network>());
     //    check_all(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
     //    check_all(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
     check_all(blueprints::multi_output_and_network<mockturtle::aig_network>());
