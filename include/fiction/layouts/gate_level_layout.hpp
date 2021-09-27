@@ -221,12 +221,12 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] bool has_name(const node n) const noexcept
     {
-        return get_name(n) != "";
+        return !get_name(n).empty();
     }
 
     void set_input_name(const uint32_t index, const std::string& name) noexcept
     {
-        if (index <= num_pis())
+        if (index < num_pis())
         {
             strg->data.node_names[strg->inputs[index]] = name;
         }
@@ -234,7 +234,7 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] std::string get_input_name(const uint32_t index) const noexcept
     {
-        if (index <= num_pis())
+        if (index < num_pis())
         {
             return get_name(static_cast<node>(strg->inputs[index]));
         }
@@ -251,7 +251,7 @@ class gate_level_layout : public ClockedLayout
 
     void set_output_name(const uint32_t index, const std::string& name) noexcept
     {
-        if (index <= num_pos())
+        if (index < num_pos())
         {
             strg->data.node_names[get_node(strg->outputs[index].index)] = name;
         }
@@ -259,7 +259,7 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] std::string get_output_name(const uint32_t index) const noexcept
     {
-        if (index <= num_pos())
+        if (index < num_pos())
         {
             return get_name(get_node(strg->outputs[index].index));
         }
