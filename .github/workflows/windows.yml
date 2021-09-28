@@ -20,6 +20,19 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install pip packages
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            graphviz
+            python-sat==0.1.6.dev6
+            wrapt_timeout_decorator
+
       - name: Clone Repository
         uses: actions/checkout@v2
         with:
