@@ -57,7 +57,17 @@ std::vector<one_pass_synthesis_params> configurations() noexcept
     res_config.enable_wires = true;
     res_config.crossings    = true;
 
-    return {{twoddwave_config, use_config, res_config}};
+    one_pass_synthesis_params async_config{};
+
+    async_config.scheme       = std::make_shared<clocking_scheme<coord_t>>(twoddwave_4_clocking);
+    async_config.enable_and   = true;
+    async_config.enable_not   = true;
+    async_config.enable_or    = true;
+    async_config.enable_wires = true;
+    async_config.crossings    = true;
+    async_config.num_threads  = 2ul;
+
+    return {{twoddwave_config, use_config, res_config, async_config}};
 }
 
 template <typename Lyt, typename Ntk>
