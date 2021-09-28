@@ -20,19 +20,6 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Install pip packages
-        uses: BSFishy/pip-action@v1
-        with:
-          packages: |
-            graphviz
-            python-sat==0.1.6.dev6
-            wrapt_timeout_decorator
-
       - name: Clone Repository
         uses: actions/checkout@v2
         with:
@@ -47,7 +34,7 @@ jobs:
         shell: bash
         working-directory: ${{github.workspace}}/build
 
-        run: cmake $GITHUB_WORKSPACE -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_ENABLE_MUGEN=ON -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
+        run: cmake $GITHUB_WORKSPACE -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
 
       - name: Build
         working-directory: ${{github.workspace}}/build
