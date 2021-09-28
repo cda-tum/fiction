@@ -145,12 +145,13 @@ class mugen_handler
      * @param p The configurations to respect in the SAT instance generation process.
      */
     mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params p) noexcept :
-            mugen{pybind11::module::import("mugen")},
             tts{spec},
             num_pis{spec[0].num_vars()},  // since all tts have to have the same number of variables
             num_pos{spec.size()},         // since all tts have to have the same number of variables
             lyt{sketch},
-            ps{std::move(p)}  // need a copy because timeout will be altered
+            ps{std::move(p)},  // need a copy because timeout will be altered
+            pi_list(num_pis),
+            mugen{pybind11::module::import("mugen")}
     {}
     /**
      * Evaluates a given aspect ratio regarding the stored configurations whether it can be skipped, i.e., does not
@@ -222,14 +223,6 @@ class mugen_handler
 
   private:
     /**
-     * The Python module named Mugen.
-     */
-    pybind11::module mugen;
-    /**
-     * (crossing node, outgoing node) --> incoming node
-     */
-    std::map<std::pair<pybind11::handle, pybind11::handle>, pybind11::handle> crossing_map{};
-    /**
      * The Boolean functions to synthesize.
      */
     const std::vector<TT>& tts;
@@ -245,6 +238,22 @@ class mugen_handler
      * Configurations specifying layout restrictions. Used in instance generation among other places.
      */
     one_pass_synthesis_params ps;
+    /**
+     * Pre-allocate PIs to preserve their order.
+     */
+    std::vector<mockturtle::node<Lyt>> pi_list;
+    /**
+     * The Python module named Mugen.
+     */
+    pybind11::module mugen;
+    /**
+     * Mugen node --> Lyt signal
+     */
+    std::map<pybind11::handle, mockturtle::signal<Lyt>> py_n_map{};
+    /**
+     * (crossing node, outgoing node) --> incoming node
+     */
+    std::map<std::pair<pybind11::handle, pybind11::handle>, pybind11::handle> crossing_map{};
     /**
      * Converts a vector of truth tables into a list of lists, i.e., Python data types.
      *
@@ -304,6 +313,18 @@ class mugen_handler
             });
 
         return scheme_graph;
+    }
+
+    void initialize_pis()
+    {
+        // a little hacky: place them all at position {0, 0} so that they can be fetched to be stored as nodes
+        // instead of as signals to not lose them as soon as their tile is overridden
+        for (auto i = 0ul; i < num_pis; ++i)
+        {
+            pi_list[i] = lyt.get_node(lyt.create_pi(fmt::format("pi{}", i), {0, 0}));
+        }
+        // finally, remove the latest created PI again (which has overridden all others) from the layout
+        lyt.move_node(pi_list[num_pis - 1], {});
     }
 
     // returns an iterator that points to the first non-PI node of the given list of nodes
@@ -367,6 +388,21 @@ class mugen_handler
         return static_cast<uint64_t>(pybind11::int_(node.attr("coords")));
     }
 
+    std::optional<mockturtle::node<Lyt>> has_pi_fanin(const pybind11::handle& node)
+    {
+        const auto fanin = node.attr("fanin");
+        for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
+        {
+            const auto fanin_n = fanin[*fanin_it];
+            if (is_pi(fanin_n))
+            {
+                return pi_list[get_pi_id(fanin_n)];
+            }
+        }
+
+        return std::nullopt;
+    }
+
     // extract a Python tuple representing coordinates from a node and converts it to a tile
     [[nodiscard]] tile<Lyt> get_tile(const pybind11::handle& node) const
     {
@@ -408,104 +444,66 @@ class mugen_handler
         }
     }
 
-    /**
-     * Extracts a Lyt from the network synthesized by Mugen.
-     *
-     * @param net Synthesis result returned by Mugen.
-     */
-    void to_gate_layout(pybind11::handle net)
+    std::vector<mockturtle::signal<Lyt>> get_fanins(const pybind11::handle& node)
     {
-        namespace py = pybind11;
-        using namespace py::literals;
+        std::vector<mockturtle::signal<Lyt>> fanins{};
 
-        using py_node_map = std::map<py::handle, mockturtle::signal<Lyt>>;
-        py_node_map py_n_map{};
-
-        const std::function<std::vector<mockturtle::signal<Lyt>>(const py::handle&)> get_fanins =
-            [this, &py_n_map, &get_fanins](const auto& node) -> std::vector<mockturtle::signal<Lyt>>
+        const auto fanin = node.attr("fanin");
+        for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
         {
-            std::vector<mockturtle::signal<Lyt>> fanins{};
+            const auto fanin_n = fanin[*fanin_it];
 
-            const auto fanin = node.attr("fanin");
-            for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
+            // skip PI nodes
+            if (is_pi(fanin_n))
             {
-                const auto fanin_n = fanin[*fanin_it];
+                continue;
+            }
 
-                // skip PI nodes
-                if (is_pi(fanin_n))
+            // if fanin is a crossing node, use the crossing map to trace paths
+            if (is_crossing(fanin_n))
+            {
+                // access its fanin via the given node in the crossing map to reconstruct the path
+                const auto c_fanin_n = crossing_map[std::make_pair(fanin_n, node)];
+
+                // get the tile where the crossing node is located
+                auto cross_pos = get_tile(fanin_n);
+                // switch to second layer if ground is already occupied
+                cross_pos.z = lyt.is_empty_tile(cross_pos) ? 0 : 1;
+
+                mockturtle::signal<Lyt> fanin_signal{};
+                // if the fanin node has been set up already (i.e. if it is not a crossing itself)
+                if (auto it = py_n_map.find(c_fanin_n); it != py_n_map.cend())
                 {
-                    continue;
+                    // use it as the fanin signal
+                    fanin_signal = it->second;
                 }
-
-                // if fanin is a crossing node, use the crossing map to trace paths
-                if (is_crossing(fanin_n))
-                {
-                    // access its fanin via the given node in the crossing map to reconstruct the path
-                    const auto c_fanin_n = crossing_map[std::make_pair(fanin_n, node)];
-
-                    // get the tile where the crossing node is located
-                    auto cross_pos = get_tile(fanin_n);
-                    // switch to second layer if ground is already occupied
-                    cross_pos.z = lyt.is_empty_tile(cross_pos) ? 0 : 1;
-
-                    mockturtle::signal<Lyt> fanin_signal{};
-                    // if the fanin node has been set up already (i.e. if it is not a crossing itself)
-                    if (auto it = py_n_map.find(c_fanin_n); it != py_n_map.cend())
-                    {
-                        // use it as the fanin signal
-                        fanin_signal = it->second;
-                    }
-                    else
-                    {
-                        // otherwise, traverse recursively
-                        fanin_signal = get_fanins(fanin_n)[0];
-                    }
-
-                    // create crossing wire and connect it to its fanin if it exists
-                    const auto cross_wire = lyt.create_buf(fanin_signal, cross_pos);
-
-                    fanins.push_back(cross_wire);
-                }
-                // otherwise, simply add the fanin signal to the list of fanins
                 else
                 {
-                    fanins.push_back(py_n_map.at(fanin_n));
+                    // otherwise, traverse recursively
+                    fanin_signal = get_fanins(fanin_n)[0];
                 }
+
+                // create crossing wire and connect it to its fanin if it exists
+                const auto cross_wire = lyt.create_buf(fanin_signal, cross_pos);
+
+                fanins.push_back(cross_wire);
             }
-
-            return fanins;
-        };
-
-        // pre-allocate PIs and POs to preserve their order
-        std::vector<mockturtle::node<Lyt>> pi_list(num_pis);
-        // a little hacky: place them all at position {0, 0} so that they can be fetched to be stored as nodes
-        // instead of as signals to not lose them as soon as their tile is overridden
-        for (auto i = 0ul; i < num_pis; ++i)
-        {
-            pi_list[i] = lyt.get_node(lyt.create_pi(fmt::format("pi{}", i), {0, 0}));
-        }
-        // finally, remove the latest created PI again (which has overridden all others) from the layout
-        lyt.move_node(pi_list[num_pis - 1], {});
-
-        // checks whether a node has a PI as fan-in
-        const auto has_pi_fanin = [this, &pi_list](const auto& node) -> std::optional<mockturtle::node<Lyt>>
-        {
-            const auto fanin = node.attr("fanin");
-            for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
+            // otherwise, simply add the fanin signal to the list of fanins
+            else
             {
-                const auto fanin_n = fanin[*fanin_it];
-                if (is_pi(fanin_n))
-                {
-                    return pi_list[get_pi_id(fanin_n)];
-                }
+                fanins.push_back(py_n_map.at(fanin_n));
             }
+        }
 
-            return std::nullopt;
-        };
+        return fanins;
+    }
 
+    void place_nodes(const pybind11::handle& net)
+    {
         // list of all nodes; first num_pi nodes are primary inputs
         const auto nodes = net.attr("nodes");
-        // iterate over all nodes to reserve their positions on the layout without assigning their incoming signals yet
+        // first iteration: iterate over all nodes to reserve their positions on the layout without assigning their
+        // incoming signals yet
         for (auto node_it = get_node_begin_iterator(nodes); node_it != nodes.end(); ++node_it)
         {
             // the node
@@ -567,10 +565,16 @@ class mugen_handler
                 py_n_map[node] = lyt.create_maj({}, {}, {}, node_pos);
             }
         }
+    }
 
+    void establish_connections(const pybind11::handle& net)
+    {
+        // nodes can be present multiple times in the 'nodes' list, this set makes sure to visit them exactly once
         std::set<mockturtle::node<Lyt>> nodes_in_place{};
 
-        // second iteration: draw connections between the gates
+        // list of all nodes; first num_pi nodes are primary inputs
+        const auto nodes = net.attr("nodes");
+        // second iteration: draw connections between the placed gates
         for (auto node_it = get_node_begin_iterator(nodes); node_it != nodes.end(); ++node_it)
         {
             // the python node object
@@ -613,16 +617,19 @@ class mugen_handler
                 nodes_in_place.insert(lyt_node);
             }
         }
+    }
 
+    void initialize_pos(const pybind11::handle& net)
+    {
         // primary output counter
         auto oc = 0u;
-        // third iteration: retrieve primary outputs
+        // third iteration: retrieve primary outputs for PO order
         const auto po_map = net.attr("po_map");
         for (auto po_it = po_map.begin(); po_it != po_map.end(); ++po_it)
         {
             // the po node; for some reason, pybind11 seems to not like lists of tuples; it could not infer the type
             // of *po_it itself
-            const auto po = py::reinterpret_borrow<py::tuple>(*po_it)[0];
+            const auto po = pybind11::reinterpret_borrow<pybind11::tuple>(*po_it)[0];
             // the tile po is located on
             const auto po_pos = get_tile(po);
             // po's fanins
@@ -632,6 +639,24 @@ class mugen_handler
             // create the primary output on the layout
             lyt.create_po(po_fanins[0], fmt::format("po{}", oc++), po_pos);
         }
+    }
+    /**
+     * Extracts a Lyt from the network synthesized by Mugen.
+     *
+     * @param net Synthesis result returned by Mugen.
+     */
+    void to_gate_layout(const pybind11::handle& net)
+    {
+        namespace py = pybind11;
+        using namespace py::literals;
+
+        initialize_pis();
+
+        place_nodes(net);
+
+        establish_connections(net);
+
+        initialize_pos(net);
     }
 };
 
