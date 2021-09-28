@@ -357,13 +357,18 @@ class gate_level_layout : public ClockedLayout
                       [this](const auto& c) { strg->nodes[get_node(c.index)].data[0].h1--; });
         // clear n's children
         children.clear();
-        // clear n's position
-        clear_tile(old_t);
 
-        // assign n to its new position
-        assign_node(t, n);
-        // since clear_tile marks n as dead, it has to be revived
-        revive_node(n);
+        // clear old_t only if it is different from t (this function can also be used to simply update n's children)
+        if (t != old_t)
+        {
+            // clear n's position
+            clear_tile(old_t);
+            // assign n to its new position
+            assign_node(t, n);
+            // since clear_tile marks n as dead, it has to be revived
+            revive_node(n);
+        }
+
         // assign new children
         std::copy(new_children.begin(), new_children.end(), std::back_inserter(children));
         // increase ref-count to new children
@@ -376,7 +381,7 @@ class gate_level_layout : public ClockedLayout
             strg->outputs.erase(std::remove(strg->outputs.begin(), strg->outputs.end(), static_cast<signal>(old_t)),
                                 strg->outputs.end());
         }
-        else
+        else if (t != old_t)
         {
             // if n lived on a tile that was marked as PO, update it with the new tile t
             std::replace(strg->outputs.begin(), strg->outputs.end(), static_cast<signal>(old_t),

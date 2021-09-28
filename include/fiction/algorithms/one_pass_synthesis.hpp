@@ -121,6 +121,12 @@ struct one_pass_synthesis_stats
 
 namespace detail
 {
+/**
+ * A Python interpreter instance that is necessary to call Mugen, a library written in Python. This instance is
+ * scoped and only need to exist. No operations are to be performed on this object. It handles creation and proper
+ * destruction of all Python objects used during this session and deals with the CPython API.
+ */
+inline static const pybind11::scoped_interpreter instance{};
 
 // suppress warning 'declared with greater visibility than the type of its field'
 #pragma GCC visibility push(hidden)
@@ -139,12 +145,12 @@ class mugen_handler
      * @param p The configurations to respect in the SAT instance generation process.
      */
     mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params p) noexcept :
+            mugen{pybind11::module::import("mugen")},
             tts{spec},
             num_pis{spec[0].num_vars()},  // since all tts have to have the same number of variables
             num_pos{spec.size()},         // since all tts have to have the same number of variables
             lyt{sketch},
-            ps{std::move(p)},  // need a copy because timeout will be altered
-            mugen{pybind11::module::import("mugen")}
+            ps{std::move(p)}  // need a copy because timeout will be altered
     {}
     /**
      * Evaluates a given aspect ratio regarding the stored configurations whether it can be skipped, i.e., does not
@@ -195,14 +201,12 @@ class mugen_handler
         namespace py = pybind11;
         using namespace py::literals;
 
-        auto scheme_graph = generate_scheme_graph();
-
-        scheme_graph.attr("to_png")(scheme_graph, "mugen_scheme");
+        const auto scheme_graph = generate_scheme_graph();
 
         // Mugen modifies its parameters, therefore, a copy is kept
-        auto py_spec = as_py_lists(tts);
+        const auto py_spec = as_py_lists(tts);
 
-        auto nets = scheme_graph.attr("synthesize")(scheme_graph, py_spec);
+        const auto nets = scheme_graph.attr("synthesize")(scheme_graph, py_spec);
         for (auto net_it = nets.begin(); net_it != nets.end(); ++net_it)
         {
             if (net_it->is_none())
@@ -217,6 +221,14 @@ class mugen_handler
     }
 
   private:
+    /**
+     * The Python module named Mugen.
+     */
+    pybind11::module mugen;
+    /**
+     * (crossing node, outgoing node) --> incoming node
+     */
+    std::map<std::pair<pybind11::handle, pybind11::handle>, pybind11::handle> crossing_map{};
     /**
      * The Boolean functions to synthesize.
      */
@@ -234,14 +246,6 @@ class mugen_handler
      */
     one_pass_synthesis_params ps;
     /**
-     * The Python module named Mugen.
-     */
-    pybind11::module mugen;
-    /**
-     * (crossing node, outgoing node) --> incoming node
-     */
-    std::map<std::pair<pybind11::handle, pybind11::handle>, pybind11::handle> crossing_map{};
-    /**
      * Converts a vector of truth tables into a list of lists, i.e., Python data types.
      *
      * @param spec Truth tables.
@@ -255,7 +259,7 @@ class mugen_handler
 
         for (const auto& tt : spec)
         {
-            auto tt_py_list = py::list();
+            py::list tt_py_list{};
 
             const auto binary_tt_string = kitty::to_binary(tt);
 
@@ -281,7 +285,7 @@ class mugen_handler
         namespace py = pybind11;
         using namespace py::literals;
 
-        auto scheme_graph = mugen.attr("scheme_graph");
+        const auto scheme_graph = mugen.attr("scheme_graph");
         scheme_graph.attr("__init__")(
             scheme_graph, "shape"_a = py::make_tuple(lyt.x() + 1, lyt.y() + 1), "enable_wire"_a = ps.enable_wires,
             "enable_not"_a = ps.enable_not, "enable_and"_a = ps.enable_and, "enable_or"_a = ps.enable_or,
@@ -422,10 +426,10 @@ class mugen_handler
         {
             std::vector<mockturtle::signal<Lyt>> fanins{};
 
-            auto fanin = node.attr("fanin");
+            const auto fanin = node.attr("fanin");
             for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
             {
-                auto fanin_n = fanin[*fanin_it];
+                const auto fanin_n = fanin[*fanin_it];
 
                 // skip PI nodes
                 if (is_pi(fanin_n))
@@ -453,7 +457,7 @@ class mugen_handler
                     }
                     else
                     {
-                        // otherwise traverse recursively
+                        // otherwise, traverse recursively
                         fanin_signal = get_fanins(fanin_n)[0];
                     }
 
@@ -486,10 +490,10 @@ class mugen_handler
         // checks whether a node has a PI as fan-in
         const auto has_pi_fanin = [this, &pi_list](const auto& node) -> std::optional<mockturtle::node<Lyt>>
         {
-            auto fanin = node.attr("fanin");
+            const auto fanin = node.attr("fanin");
             for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
             {
-                auto fanin_n = fanin[*fanin_it];
+                const auto fanin_n = fanin[*fanin_it];
                 if (is_pi(fanin_n))
                 {
                     return pi_list[get_pi_id(fanin_n)];
@@ -500,10 +504,7 @@ class mugen_handler
         };
 
         // list of all nodes; first num_pi nodes are primary inputs
-        auto nodes = net.attr("nodes");
-
-        net.attr("to_png")("mugen_net");
-
+        const auto nodes = net.attr("nodes");
         // iterate over all nodes to reserve their positions on the layout without assigning their incoming signals yet
         for (auto node_it = get_node_begin_iterator(nodes); node_it != nodes.end(); ++node_it)
         {
@@ -567,6 +568,8 @@ class mugen_handler
             }
         }
 
+        std::set<mockturtle::node<Lyt>> nodes_in_place{};
+
         // second iteration: draw connections between the gates
         for (auto node_it = get_node_begin_iterator(nodes); node_it != nodes.end(); ++node_it)
         {
@@ -574,7 +577,7 @@ class mugen_handler
             const auto py_node = *node_it;
 
             // the layout node
-            auto lyt_node = lyt.get_node(py_n_map[py_node]);
+            const auto lyt_node = lyt.get_node(py_n_map[py_node]);
             // crossings are a special case because they are handled on-the-fly in the get_fanins function
             if (is_crossing(py_node))
             {
@@ -595,12 +598,19 @@ class mugen_handler
                 {
                     continue;
                 }
+                // skip nodes already in place
+                if (nodes_in_place.count(lyt_node) > 0)
+                {
+                    continue;
+                }
 
                 // children (incoming signals) of the layout node
                 const auto fanins = get_fanins(py_node);
 
                 // the node is not moved, but its children are updated
                 lyt.move_node(lyt_node, node_pos, fanins);
+
+                nodes_in_place.insert(lyt_node);
             }
         }
 
@@ -634,10 +644,7 @@ class one_pass_synthesis_impl
             tts{spec},
             ps{p},
             pst{st}
-    {
-        // add Mugen's path to Python's sys.path module scope
-        pybind11::module::import("sys").attr("path").attr("append")(MUGEN_PATH);
-    }
+    {}
 
     std::optional<Lyt> run()
     {
@@ -712,12 +719,6 @@ class one_pass_synthesis_impl
      * Factorizes a number of layout tiles into all possible aspect ratios for iteration.
      */
     aspect_ratio_iterator<aspect_ratio<Lyt>> ari{0};
-    /**
-     * A Python interpreter instance that is necessary to call Mugen, a library written in Python. This instance is
-     * scoped and only need to exist. No operations are to be performed on this object. It handles creation and proper
-     * destruction of all Python objects used during this session and deals with the CPython API.
-     */
-    const pybind11::scoped_interpreter instance{};
 
     class pysat_version_mismatch_exception : public std::exception
     {
@@ -793,6 +794,18 @@ class one_pass_synthesis_impl
             return false;
         }
 
+        // test for Mugen
+        try
+        {
+            // add Mugen's path to Python's sys.path module scope
+            pybind11::module::import("sys").attr("path").attr("append")(MUGEN_PATH);
+            pybind11::module::import("mugen");
+        }
+        catch (...)
+        {
+            std::cout << "[e] The 'mugen' library could not be detected; it might have been moved" << std::endl;
+        }
+
         return true;
     }
     /**
@@ -804,9 +817,9 @@ class one_pass_synthesis_impl
      */
     void update_timeout(mugen_handler<Lyt, TT>& handler, mockturtle::stopwatch<>::duration time) const noexcept
     {
-        auto time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(time).count();
+        const auto time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(time).count();
         // remaining time must be 1 because 0 means unlimited time
-        auto time_left = (ps.timeout - time_elapsed > 0 ? static_cast<uint32_t>(ps.timeout - time_elapsed) : 1u);
+        const auto time_left = (ps.timeout - time_elapsed > 0 ? static_cast<uint32_t>(ps.timeout - time_elapsed) : 1u);
 
         handler.update_timeout(time_left);
     }
@@ -849,7 +862,7 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
     one_pass_synthesis_stats                 st{};
     detail::one_pass_synthesis_impl<Lyt, TT> p{tts, ps, st};
 
-    auto result = p.run();
+    const auto result = p.run();
 
     if (pst)
     {
