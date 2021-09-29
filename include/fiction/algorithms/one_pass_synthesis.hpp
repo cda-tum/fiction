@@ -433,7 +433,7 @@ class mugen_handler
 
             // fanin --> crossing direction
             const auto fanin_dir = get_direction(cross_node.attr("coords"), fanin_n.attr("coords"))[pybind11::int_(0)];
-            // direction of the associated fanout
+            // crossing --> fanout direction
             const auto fanout_dir = dir_map[fanin_dir];
 
             // the fanout node
@@ -451,6 +451,7 @@ class mugen_handler
         const auto fanin = node.attr("fanin");
         for (auto fanin_it = fanin.begin(); fanin_it != fanin.end(); ++fanin_it)
         {
+            // the fanin node
             const auto fanin_n = fanin[*fanin_it];
 
             // skip PI nodes
@@ -462,29 +463,43 @@ class mugen_handler
             // if fanin is a crossing node, use the crossing map to trace paths
             if (is_crossing(fanin_n))
             {
-                // access its fanin via the given node in the crossing map to reconstruct the path
-                const auto c_fanin_n = crossing_map[std::make_pair(fanin_n, node)];
+                // access the crossing's fanin via the given node in the crossing map to reconstruct the path
+                const auto c_fanin_n = crossing_map.at(std::make_pair(fanin_n, node));
 
                 // get the tile where the crossing node is located
-                auto cross_pos = get_tile(fanin_n);
+                auto fanin_n_t = get_tile(fanin_n);
                 // switch to second layer if ground is already occupied
-                cross_pos.z = lyt.is_empty_tile(cross_pos) ? 0 : 1;
+                if (!lyt.is_empty_tile(fanin_n_t))
+                {
+                    fanin_n_t = lyt.above(fanin_n_t);
+                }
 
                 mockturtle::signal<Lyt> fanin_signal{};
-                // if the fanin node has been set up already (i.e. if it is not a crossing itself)
-                if (auto it = py_n_map.find(c_fanin_n); it != py_n_map.cend())
+
+                // if the c_fanin_n is a crossing itself
+                if (is_crossing(c_fanin_n))
                 {
-                    // use it as the fanin signal
-                    fanin_signal = it->second;
+                    const auto c_fanin_n_t = get_tile(c_fanin_n);
+                    // traverse the crossing path recursively
+                    for (const auto& c_fanin_s : get_fanins(fanin_n))
+                    {
+                        // match the obtained fanins against c_fanin_n's position
+                        if (const auto c_fanin_st = static_cast<tile<Lyt>>(c_fanin_s);
+                            c_fanin_st == c_fanin_n_t || c_fanin_st == lyt.above(c_fanin_n_t))
+                        {
+                            fanin_signal = c_fanin_s;
+                            break;
+                        }
+                    }
                 }
                 else
                 {
-                    // otherwise, traverse recursively
-                    fanin_signal = get_fanins(fanin_n)[0];
+                    // access py_n_map for the fanin signal
+                    fanin_signal = py_n_map.at(c_fanin_n);
                 }
 
                 // create crossing wire and connect it to its fanin if it exists
-                const auto cross_wire = lyt.create_buf(fanin_signal, cross_pos);
+                const auto cross_wire = lyt.create_buf(fanin_signal, fanin_n_t);
 
                 fanins.push_back(cross_wire);
             }
@@ -649,6 +664,8 @@ class mugen_handler
     {
         namespace py = pybind11;
         using namespace py::literals;
+
+        net.attr("to_png")("mugen");
 
         initialize_pis();
 

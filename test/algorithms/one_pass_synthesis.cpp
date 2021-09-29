@@ -110,8 +110,9 @@ TEST_CASE("One-pass synthesis", "[one-pass]")
     check_all(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
     check_all(blueprints::maj1_network<mockturtle::mig_network>());
     check_all(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
-    check_all(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
     check_all(blueprints::multi_output_and_network<mockturtle::aig_network>());
+    check_all(blueprints::half_adder_network<mockturtle::aig_network>());
+    check_all(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
 }
 
 #endif  // MUGEN
