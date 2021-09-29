@@ -665,8 +665,6 @@ class mugen_handler
         namespace py = pybind11;
         using namespace py::literals;
 
-        net.attr("to_png")("mugen");
-
         initialize_pis();
 
         place_nodes(net);
