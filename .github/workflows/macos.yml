@@ -9,7 +9,7 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ macos-10.15, macos-11 ]
+        os: [ macos-10.15 ]  # macos-11 when supported
         compiler: [ g++-9, g++-10, clang++ ]  # clang++12
         build_type: [ Debug, Release ]
 
