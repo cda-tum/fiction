@@ -788,7 +788,7 @@ class gate_level_layout : public ClockedLayout
 
     void incr_trav_id() const
     {
-        ++strg->data.trav_id;
+        strg->data.trav_id++;
     }
 
 #pragma endregion
@@ -907,14 +907,17 @@ class gate_level_layout : public ClockedLayout
     {
         if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
         {
-            // decrease wire count
-            if (is_wire(it->second))
+            if (!t.is_dead())
             {
-                --strg->data.num_wires;
-            }
-            else  // decrease gate count
-            {
-                --strg->data.num_gates;
+                // decrease wire count
+                if (is_wire(it->second))
+                {
+                    strg->data.num_wires--;
+                }
+                else  // decrease gate count
+                {
+                    strg->data.num_gates--;
+                }
             }
             // mark node as dead
             kill_node(it->second);

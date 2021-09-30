@@ -812,8 +812,10 @@ TEST_CASE("Functional properties", "[gate-level]")
     CHECK(layout.is_maj(layout.get_node(m)));
     CHECK(layout.is_fanout(layout.get_node(f)));
     CHECK(layout.is_wire(layout.get_node(w)));
+    CHECK(!layout.is_inv(layout.get_node(w)));
 
     CHECK(layout.is_inv(layout.get_node(n)));
+    CHECK(!layout.is_wire(layout.get_node(n)));
     CHECK(layout.is_po(layout.get_node(po)));
 
     CHECK(layout.is_nand(layout.get_node(na)));
@@ -929,6 +931,9 @@ TEST_CASE("Move nodes", "[gate-level]")
 
     auto layout = blueprints::and_or_gate_layout<gate_layout>();
 
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_wires() == 4);
+
     auto and_node = layout.get_node({1, 0});
     auto or_node  = layout.get_node({2, 1});
 
@@ -937,15 +942,24 @@ TEST_CASE("Move nodes", "[gate-level]")
     // move OR out of the way
     layout.move_node(or_node, {3, 0}, {});
 
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_wires() == 4);
+
     // move AND where OR was
     layout.move_node(and_node, {2, 1},
                      {{static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{2, 0}),
                        static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{1, 1})}});
 
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_wires() == 4);
+
     // move OR where AND was
     layout.move_node(or_node, {1, 0},
                      {{static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{2, 0}),
                        static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{1, 1})}});
+
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_wires() == 4);
 
     CHECK(!layout.is_dead(and_node));
     CHECK(!layout.is_dead(or_node));
@@ -989,6 +1003,9 @@ TEST_CASE("Move nodes", "[gate-level]")
 
     CHECK(layout.is_pi(pi_node));
 
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_wires() == 4);
+
     // move PO
 
     auto po_node = layout.get_node({0, 0});
@@ -999,6 +1016,9 @@ TEST_CASE("Move nodes", "[gate-level]")
 
     CHECK(layout.is_po(po_node));
 
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_wires() == 4);
+
     // remove PO
 
     CHECK(layout.num_pos() == 2);
@@ -1006,6 +1026,9 @@ TEST_CASE("Move nodes", "[gate-level]")
     layout.move_node(po_node, {}, {static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{1, 0})});
 
     CHECK(layout.num_pos() == 1);
+
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_wires() == 3);  // PO is gone now
 }
 
 TEST_CASE("Cardinal operations", "[gate-level]")
