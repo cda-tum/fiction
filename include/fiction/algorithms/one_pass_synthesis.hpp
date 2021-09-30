@@ -96,7 +96,7 @@ struct one_pass_synthesis_params
     /**
      * Sets a timeout in seconds for the solving process, where 0 allows for unlimited time.
      */
-    uint32_t timeout = 0;
+    uint32_t timeout = 0u;
     /**
      * Name of the resulting network.
      */

@@ -75,7 +75,7 @@ Lyt generate_layout(const Ntk& ntk, const one_pass_synthesis_params& ps)
 {
     one_pass_synthesis_stats stats{};
 
-    auto layout = one_pass_synthesis<Lyt>(ntk, ps, &stats);
+    const auto layout = one_pass_synthesis<Lyt>(ntk, ps, &stats);
 
     REQUIRE(layout.has_value());
 
@@ -113,6 +113,28 @@ TEST_CASE("One-pass synthesis", "[one-pass]")
     check_all(blueprints::multi_output_and_network<mockturtle::aig_network>());
     check_all(blueprints::half_adder_network<mockturtle::aig_network>());
     check_all(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
+}
+
+TEST_CASE("Timeout", "[one-pass]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+
+    one_pass_synthesis_params timeout_config{};
+
+    timeout_config.scheme       = std::make_shared<clocking_scheme<coord_t>>(use_4_clocking);
+    timeout_config.enable_and   = true;
+    timeout_config.enable_not   = true;
+    timeout_config.enable_or    = true;
+    timeout_config.enable_wires = true;
+    timeout_config.crossings    = true;
+    timeout_config.timeout      = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
+
+    const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
+
+    const auto layout = one_pass_synthesis<gate_layout>(half_adder, timeout_config);
+
+    // since a half adder cannot be synthesized in just one second, layout should not have a value
+    CHECK(!layout.has_value());
 }
 
 #endif  // MUGEN
