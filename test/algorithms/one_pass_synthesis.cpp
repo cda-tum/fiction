@@ -21,6 +21,7 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 
+#include <chrono>
 #include <memory>
 #include <type_traits>
 #include <vector>
@@ -70,6 +71,15 @@ std::vector<one_pass_synthesis_params> configurations() noexcept
     return {{twoddwave_config, use_config, res_config, async_config}};
 }
 
+void check_stats(const one_pass_synthesis_stats& st) noexcept
+{
+    CHECK(std::chrono::duration_cast<std::chrono::milliseconds>(st.time_total).count() > 0);
+    CHECK(st.x_size > 0);
+    CHECK(st.y_size > 0);
+    CHECK(st.num_gates > 0);
+    CHECK(st.num_wires > 0);
+}
+
 template <typename Lyt, typename Ntk>
 Lyt generate_layout(const Ntk& ntk, const one_pass_synthesis_params& ps)
 {
@@ -78,6 +88,7 @@ Lyt generate_layout(const Ntk& ntk, const one_pass_synthesis_params& ps)
     const auto layout = one_pass_synthesis<Lyt>(ntk, ps, &stats);
 
     REQUIRE(layout.has_value());
+    check_stats(stats);
 
     print_gate_level_layout(std::cout, *layout);
 

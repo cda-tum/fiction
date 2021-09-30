@@ -73,6 +73,14 @@ TEST_CASE("East-south coloring", "[algorithms]")
     check(mockturtle::fanout_view{fanout_substitution<topology_network>(blueprints::clpl<topology_network>())});
 }
 
+void check_stats(const orthogonal_physical_design_stats& st) noexcept
+{
+    CHECK(st.x_size > 0);
+    CHECK(st.y_size > 0);
+    CHECK(st.num_gates > 0);
+    CHECK(st.num_wires > 0);
+}
+
 TEST_CASE("Layout equivalence", "[algorithms]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
@@ -85,6 +93,7 @@ TEST_CASE("Layout equivalence", "[algorithms]")
 
         print_gate_level_layout(std::cout, layout);
 
+        check_stats(stats);
         check_eq(net, layout);
     };
 

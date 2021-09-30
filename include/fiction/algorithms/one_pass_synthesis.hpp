@@ -147,7 +147,6 @@ class mugen_handler
     mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params p) noexcept :
             tts{spec},
             num_pis{spec[0].num_vars()},  // since all tts have to have the same number of variables
-            num_pos{spec.size()},         // since all tts have to have the same number of variables
             lyt{sketch},
             ps{std::move(p)},  // need a copy because timeout will be altered
             pi_list(num_pis),
@@ -227,9 +226,9 @@ class mugen_handler
      */
     const std::vector<TT>& tts;
     /**
-     * Number of primary inputs and primary outputs according to spec respectively.
+     * Number of primary inputs according to spec.
      */
-    const uint64_t num_pis, num_pos;
+    const uint64_t num_pis;
     /**
      * The sketch that later contains the layout generated from a model.
      */
@@ -855,7 +854,7 @@ class one_pass_synthesis_impl
      * @param handler Handler whose timeout is to be updated.
      * @param time Time passed since beginning of the solving process.
      */
-    void update_timeout(mugen_handler<Lyt, TT>& handler, mockturtle::stopwatch<>::duration time) const noexcept
+    void update_timeout(mugen_handler<Lyt, TT>& handler, const mockturtle::stopwatch<>::duration time) const noexcept
     {
         const auto time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(time).count();
         // remaining time must be 1 because 0 means unlimited time
