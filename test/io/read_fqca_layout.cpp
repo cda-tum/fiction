@@ -3,8 +3,8 @@
 //
 
 #include "catch.hpp"
-#include "utils/version_info.hpp"
 
+#include <fiction/io/print_layout.hpp>
 #include <fiction/io/read_fqca_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -75,7 +75,7 @@ TEST_CASE("Read single-layer AND gate", "[fqca]")
                                                "b:\n"
                                                "- output\n"
                                                "- label = \"f\"\n"
-                                               "- clock = 0\n"
+                                               "- clock = 1\n"
                                                "\n"
                                                "c:\n"
                                                "- input\n"
@@ -86,6 +86,8 @@ TEST_CASE("Read single-layer AND gate", "[fqca]")
     std::istringstream layout_stream{fqca_layout};
 
     const auto layout = read_fqca_layout<qca_layout>(layout_stream);
+
+    print_cell_level_layout(std::cout, layout);
 
     CHECK(layout.x() == 4);
     CHECK(layout.y() == 4);
@@ -101,6 +103,16 @@ TEST_CASE("Read single-layer AND gate", "[fqca]")
     CHECK(layout.get_cell_type({1, 2}) == qca_technology::cell_type::NORMAL);
     CHECK(layout.get_cell_type({3, 2}) == qca_technology::cell_type::NORMAL);
     CHECK(layout.get_cell_type({4, 2}) == qca_technology::cell_type::OUTPUT);
+
+    CHECK(layout.get_clock_number({0, 2}) == 0);
+    CHECK(layout.get_clock_number({2, 4}) == 0);
+    CHECK(layout.get_clock_number({2, 0}) == 0);
+    CHECK(layout.get_clock_number({2, 1}) == 0);
+    CHECK(layout.get_clock_number({2, 2}) == 0);
+    CHECK(layout.get_clock_number({2, 3}) == 0);
+    CHECK(layout.get_clock_number({1, 2}) == 0);
+    CHECK(layout.get_clock_number({3, 2}) == 0);
+    CHECK(layout.get_clock_number({4, 2}) == 1);
 
     CHECK(layout.get_cell_name({0, 2}) == "a");
     CHECK(layout.get_cell_name({2, 4}) == "b");
