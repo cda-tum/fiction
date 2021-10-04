@@ -274,6 +274,21 @@ class read_fqca_layout_impl
             throw unsupported_character_exception(c);
         }
 
+        // if cell is not in ground layer
+        if (cell.z != 0)
+        {
+            // if cell is in an even crossing layer
+            if (cell.z % 2 == 0)
+            {
+                lyt.assign_cell_mode(cell, technology<Lyt>::cell_mode::CROSSOVER);
+            }
+            // odd crossing layer (assuming it's a via)
+            else
+            {
+                lyt.assign_cell_mode(cell, technology<Lyt>::cell_mode::VERTICAL);
+            }
+        }
+
         // store latest cell position via bounding box
         if (cell.x > max_cell_pos.x)
         {

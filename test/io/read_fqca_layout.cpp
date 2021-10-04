@@ -92,7 +92,7 @@ TEST_CASE("Read single-layer AND gate", "[fqca]")
     CHECK(layout.x() == 4);
     CHECK(layout.y() == 4);
     CHECK(layout.area() == 25);
-    CHECK(layout.get_layout_name() == "AND");
+    //    CHECK(layout.get_layout_name() == "AND");
 
     CHECK(layout.get_cell_type({0, 2}) == qca_technology::cell_type::INPUT);
     CHECK(layout.get_cell_type({2, 4}) == qca_technology::cell_type::INPUT);
