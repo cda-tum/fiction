@@ -64,28 +64,28 @@ class fanout_substitution_impl
 
     NtkDest run()
     {
-        std::cout << "fanout_substitution has started (convert_network already done)" << std::endl;
+        std::cerr << "fanout_substitution has started (convert_network already done)" << std::endl;
 
         // initialize a network copy
         auto init = mockturtle::initialize_copy_network<NtkDest>(ntk_topo);
 
-        std::cout << "network copy has been initialized" << std::endl;
+        std::cerr << "network copy has been initialized" << std::endl;
 
         substituted = init.first;
-        std::cout << "copy-assigned 'substituted'" << std::endl;
+        std::cerr << "copy-assigned 'substituted'" << std::endl;
         old2new     = init.second;
-        std::cout << "copy-assigned 'old2new'" << std::endl;
+        std::cerr << "copy-assigned 'old2new'" << std::endl;
 
-        std::cout << "up next: 'foreach_pi'" << std::endl;
+        std::cerr << "up next: 'foreach_pi'" << std::endl;
 
         ntk_topo.foreach_pi(
             [this](const auto& pi)
             {
-                std::cout << "PI: " << pi << std::endl;
+                std::cerr << "PI: " << pi << std::endl;
                 generate_fanout_tree(pi);
             });
 
-        std::cout << "fanout trees for PIs have been generated" << std::endl;
+        std::cerr << "fanout trees for PIs have been generated" << std::endl;
 
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -126,7 +126,7 @@ class fanout_substitution_impl
 #endif
             });
 
-        std::cout << "next up: POs and their complements" << std::endl;
+        std::cerr << "next up: POs and their complements" << std::endl;
 
         // add primary outputs to finalize the network
         ntk_topo.foreach_po(
@@ -141,12 +141,12 @@ class fanout_substitution_impl
                 substituted.create_po(tgt_po);
             });
 
-        std::cout << "all fanouts have been substituted (name restoration is to come next)" << std::endl;
+        std::cerr << "all fanouts have been substituted (name restoration is to come next)" << std::endl;
 
         // restore signal names if applicable
         fiction::restore_names(ntk_topo, substituted, old2new);
 
-        std::cout << "fanout_substitution has completed" << std::endl;
+        std::cerr << "fanout_substitution has completed" << std::endl;
 
         return substituted;
     }
@@ -164,12 +164,12 @@ class fanout_substitution_impl
 
     void generate_fanout_tree(const mockturtle::node<NtkSrc>& n)
     {
-        std::cout << "generating a fanout tree for node " << n << std::endl;
+        std::cerr << "generating a fanout tree for node " << n << std::endl;
 
         // skip fanout tree generation if n is a proper fanout node
         if constexpr (has_is_fanout_v<NtkDest>)
         {
-            std::cout << "NtkDest has 'is_fanout'" << std::endl;
+            std::cerr << "NtkDest has 'is_fanout'" << std::endl;
 
             if (ntk_topo.is_fanout(n) && ntk_topo.fanout_size(n) <= ps.degree)
                 return;
@@ -180,18 +180,18 @@ class fanout_substitution_impl
                           static_cast<int32_t>(ntk_topo.fanout_size(n)) - static_cast<int32_t>(ps.threshold), 0)) /
                       static_cast<double>(std::max(static_cast<int32_t>(ps.degree) - 1, 1))));
 
-        std::cout << "num_fanouts has value " << num_fanouts << std::endl;
+        std::cerr << "num_fanouts has value " << num_fanouts << std::endl;
 
         auto child = old2new[n];
 
-        std::cout << "accessed old2new[n] with value " << child << std::endl;
+        std::cerr << "accessed old2new[n] with value " << child << std::endl;
 
         if (num_fanouts == 0)
             return;
 
         if (ps.strategy == fanout_substitution_params::substitution_strategy::DEPTH)
         {
-            std::cout << "DEPTH strategy" << std::endl;
+            std::cerr << "DEPTH strategy" << std::endl;
 
             std::queue<mockturtle::signal<NtkDest>> q{};
             for (auto i = 0u; i < num_fanouts; ++i)
@@ -203,32 +203,32 @@ class fanout_substitution_impl
         }
         else if (ps.strategy == fanout_substitution_params::substitution_strategy::BREADTH)
         {
-            std::cout << "BREADTH strategy" << std::endl;
+            std::cerr << "BREADTH strategy" << std::endl;
 
             std::queue<mockturtle::signal<NtkDest>> q{{child}};
 
-            std::cout << "queue initialized" << std::endl;
+            std::cerr << "queue initialized" << std::endl;
 
             for (auto f = 0ul; f < num_fanouts; ++f)
             {
-                std::cout << "loop iteration: " << f << std::endl;
+                std::cerr << "loop iteration: " << f << std::endl;
 
                 child = q.front();
                 q.pop();
                 child = substituted.create_buf(child);
 
-                std::cout << "created buf: " << child << std::endl;
+                std::cerr << "created buf: " << child << std::endl;
 
                 for (auto i = 0u; i < ps.degree; ++i) q.push(child);
 
-                std::cout << "added " << ps.degree << " new children to the queue" << std::endl;
+                std::cerr << "added " << ps.degree << " new children to the queue" << std::endl;
             }
 
-            std::cout << "loop done" << std::endl;
+            std::cerr << "loop done" << std::endl;
 
             available_fanouts[n] = q;
 
-            std::cout << "stored q at available_fanouts[n]" << std::endl;
+            std::cerr << "stored q at available_fanouts[n]" << std::endl;
         }
     }
 
