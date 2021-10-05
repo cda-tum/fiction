@@ -41,7 +41,7 @@ class tt_command : public command
                        "table must fit the largest variable in the expression, e.g., if c is the largest "
                        "variable, then the truth table have at least three variables.")
     {
-        add_option("table,--table", table, "Truth table (prefix with 0x to parse as hexadecimal)");
+        add_option("table", table, "Truth table (prefix with 0x to parse as hexadecimal)");
         add_option("--expression,-e", expression, "Creates truth table from expression");
         add_option("--random,-r", random_vars, "Creates a random truth table over <INPUT> variables");
     }
