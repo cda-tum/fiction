@@ -133,10 +133,6 @@ class fanout_substitution_impl
   private:
     mockturtle::topo_view<NtkDest> ntk_topo;
 
-    //    NtkDest substituted;
-
-    //    mockturtle::node_map<mockturtle::signal<NtkDest>, mockturtle::topo_view<NtkDest>> old2new;
-
     using old2new_map = mockturtle::node_map<mockturtle::signal<NtkDest>, mockturtle::topo_view<NtkDest>>;
 
     using old2new_queue_map =
