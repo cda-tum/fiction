@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_READ_HPP
-#define FICTION_READ_HPP
+#ifndef FICTION_CMD_READ_HPP
+#define FICTION_CMD_READ_HPP
 
 #include <fiction/io/network_reader.hpp>
 #include <fiction/io/read_fqca_layout.hpp>
@@ -55,7 +55,7 @@ class read_command : public command
      */
     void execute() override
     {
-        const auto store_nets = [&](auto&& reader)
+        const auto store_ntks = [&](auto&& reader)
         {
             for (const auto& ln : reader.get_networks(sort)) store<fiction::logic_network_t>().extend() = ln;
         };
@@ -76,19 +76,19 @@ class read_command : public command
                 {
                     fiction::network_reader<fiction::aig_ptr> reader{filename, env->out()};
 
-                    store_nets(reader);
+                    store_ntks(reader);
                 }
                 if (is_set("mig"))
                 {
                     fiction::network_reader<fiction::mig_ptr> reader{filename, env->out()};
 
-                    store_nets(reader);
+                    store_ntks(reader);
                 }
                 if (is_set("top"))
                 {
                     fiction::network_reader<fiction::top_ptr> reader{filename, env->out()};
 
-                    store_nets(reader);
+                    store_ntks(reader);
                 }
                 if (is_set("qca"))
                 {
@@ -141,4 +141,4 @@ ALICE_ADD_COMMAND(read, "I/O")
 
 }  // namespace alice
 
-#endif  // FICTION_READ_HPP
+#endif  // FICTION_CMD_READ_HPP

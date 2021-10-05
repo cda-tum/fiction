@@ -2,8 +2,8 @@
 // Created by marcel on 22.07.21.
 //
 
-#ifndef FICTION_BLIF_HPP
-#define FICTION_BLIF_HPP
+#ifndef FICTION_CMD_BLIF_HPP
+#define FICTION_CMD_BLIF_HPP
 
 #include <fiction/types.hpp>
 
@@ -86,12 +86,12 @@ class blif_command : public command
      */
     std::string filename;
 
-    template <typename LytOrNtk>
-    void write_blif_callback(const LytOrNtk& lyt_or_ntk)
+    template <typename NtkOrLytVariant>
+    void write_blif_callback(const NtkOrLytVariant& ntk_or_lyt_variant)
     {
-        const auto get_name = [](auto&& net) -> std::string { return net->get_network_name(); };
+        const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return ntk_or_lyt_ptr->get_network_name(); };
 
-        const auto write_blif = [this](auto&& net) { mockturtle::write_blif(*net, filename); };
+        const auto write_blif = [this](auto&& ntk_or_lyt_ptr) { mockturtle::write_blif(*ntk_or_lyt_ptr, filename); };
 
         // error case: do not override directories
         if (std::filesystem::is_directory(filename))
@@ -102,7 +102,7 @@ class blif_command : public command
         // if filename was not given, use stored layout name
         if (!is_set("filename"))
         {
-            filename = std::visit(get_name, lyt_or_ntk);
+            filename = std::visit(get_name, ntk_or_lyt_variant);
         }
         // add .v file extension if necessary
         if (std::filesystem::path(filename).extension() != ".blif")
@@ -112,7 +112,7 @@ class blif_command : public command
 
         try
         {
-            std::visit(write_blif, lyt_or_ntk);
+            std::visit(write_blif, ntk_or_lyt_variant);
         }
         catch (const std::ofstream::failure& e)
         {
@@ -129,4 +129,4 @@ ALICE_ADD_COMMAND(blif, "I/O")
 
 }  // namespace alice
 
-#endif  // FICTION_BLIF_HPP
+#endif  // FICTION_CMD_BLIF_HPP

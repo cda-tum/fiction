@@ -2,8 +2,8 @@
 // Created by marcel on 14.07.21.
 //
 
-#ifndef FICTION_SQD_HPP
-#define FICTION_SQD_HPP
+#ifndef FICTION_CMD_SQD_HPP
+#define FICTION_CMD_SQD_HPP
 
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -55,26 +55,26 @@ class sqd_command : public command
             return;
         }
 
-        const auto get_name = [](auto&& lyt) -> std::string { return lyt->get_layout_name(); };
+        const auto get_name = [](auto&& lyt_ptr) -> std::string { return lyt_ptr->get_layout_name(); };
 
-        const auto write_sqd = [this, &get_name](auto&& lyt)
+        const auto write_sqd = [this, &get_name](auto&& lyt_ptr)
         {
-            using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
+            using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
             if constexpr (std::is_same_v<fiction::technology<Lyt>, fiction::qca_technology> ||
                           std::is_same_v<fiction::technology<Lyt>, fiction::sidb_technology>)
             {
-                fiction::write_sqd_layout(*lyt, filename);
+                fiction::write_sqd_layout(*lyt_ptr, filename);
             }
             else
             {
-                env->out() << fmt::format("[e] {}'s cell technology is not QCA or SiDB but {}", get_name(lyt),
+                env->out() << fmt::format("[e] {}'s cell technology is not QCA or SiDB but {}", get_name(lyt_ptr),
                                           fiction::tech_impl_name<fiction::technology<Lyt>>)
                            << std::endl;
             }
         };
 
-        auto lyt = s.current();
+        const auto& lyt = s.current();
 
         // error case: do not override directories
         if (std::filesystem::is_directory(filename))
@@ -118,4 +118,4 @@ ALICE_ADD_COMMAND(sqd, "I/O")
 
 }  // namespace alice
 
-#endif  // FICTION_SQD_HPP
+#endif  // FICTION_CMD_SQD_HPP

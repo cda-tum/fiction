@@ -58,7 +58,7 @@ void to_x(Ntk ntk)
     }
 }
 
-TEST_CASE("Name conservation", "[algorithms]")
+TEST_CASE("Name conservation", "[network-conversion]")
 {
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");
@@ -77,7 +77,7 @@ TEST_CASE("Name conservation", "[algorithms]")
     CHECK(converted_maj.get_output_name(0) == "f");
 }
 
-TEST_CASE("Simple network conversion", "[algorithms]")
+TEST_CASE("Simple network conversion", "[network-conversion]")
 {
     SECTION("MIG to X")
     {
@@ -99,7 +99,7 @@ TEST_CASE("Simple network conversion", "[algorithms]")
     }
 }
 
-TEST_CASE("Complex network conversion", "[algorithms]")
+TEST_CASE("Complex network conversion", "[network-conversion]")
 {
     SECTION("MIG to X")
     {
@@ -118,7 +118,7 @@ TEST_CASE("Complex network conversion", "[algorithms]")
     }
 }
 
-TEST_CASE("Constant inverted signal recovery conversion", "[algorithms]")
+TEST_CASE("Constant inverted signal recovery conversion", "[network-conversion]")
 {
     SECTION("MIG to X")
     {
@@ -130,7 +130,7 @@ TEST_CASE("Constant inverted signal recovery conversion", "[algorithms]")
     }
 }
 
-TEST_CASE("Layout conversion", "[algorithms]")
+TEST_CASE("Layout conversion", "[network-conversion]")
 {
     SECTION("Gate layout to X")
     {
@@ -144,7 +144,7 @@ TEST_CASE("Layout conversion", "[algorithms]")
     }
 }
 
-TEST_CASE("Consistent network size after multiple conversions", "[algorithms]")
+TEST_CASE("Consistent network size after multiple conversions", "[network-conversion]")
 {
     auto top = blueprints::se_coloring_corner_case_network<topology_network>();
 
@@ -161,7 +161,7 @@ TEST_CASE("Consistent network size after multiple conversions", "[algorithms]")
     CHECK(converted_aig.size() == converted_converted_aig.size());
 }
 
-TEST_CASE("Consistent network size after fanout substitution and conversion", "[algorithms]")
+TEST_CASE("Consistent network size after fanout substitution and conversion", "[network-conversion]")
 {
     auto substituted_aig = fanout_substitution<topology_network>(blueprints::maj4_network<mockturtle::aig_network>());
     auto converted_substituted_aig = convert_network<topology_network>(substituted_aig);
@@ -173,7 +173,7 @@ TEST_CASE("Consistent network size after fanout substitution and conversion", "[
     CHECK(substituted_top.size() == converted_substituted_top.size());
 }
 
-TEST_CASE("Consistent network size after balancing and conversion", "[algorithms]")
+TEST_CASE("Consistent network size after balancing and conversion", "[network-conversion]")
 {
     auto balanced_aig = network_balancing<topology_network>(blueprints::maj4_network<mockturtle::aig_network>());
     auto converted_balanced_aig = convert_network<topology_network>(balanced_aig);

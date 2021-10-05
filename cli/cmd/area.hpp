@@ -2,8 +2,8 @@
 // Created by marcel on 25.11.19.
 //
 
-#ifndef FICTION_AREA_HPP
-#define FICTION_AREA_HPP
+#ifndef FICTION_CMD_AREA_HPP
+#define FICTION_CMD_AREA_HPP
 
 #include <fiction/types.hpp>
 
@@ -55,9 +55,9 @@ class area_command : public command
 
         auto lyt = s.current();
 
-        const auto calculate_area = [this](auto&& layout)
+        const auto calculate_area = [this](auto&& lyt_ptr)
         {
-            using Tech = typename std::decay_t<decltype(layout)>::element_type::technology;
+            using Tech = typename std::decay_t<decltype(lyt_ptr)>::element_type::technology;
 
             if (!is_set("width"))
             {
@@ -76,8 +76,8 @@ class area_command : public command
                 vspace = Tech::cell_vspace;
             }
 
-            area = (static_cast<double>(layout->x() + 1) * width + static_cast<double>(layout->x()) * hspace) *
-                   (static_cast<double>(layout->y() + 1) * height + static_cast<double>(layout->y()) * vspace);
+            area = (static_cast<double>(lyt_ptr->x() + 1) * width + static_cast<double>(lyt_ptr->x()) * hspace) *
+                   (static_cast<double>(lyt_ptr->y() + 1) * height + static_cast<double>(lyt_ptr->y()) * vspace);
         };
 
         std::visit(calculate_area, lyt);
@@ -113,4 +113,4 @@ ALICE_ADD_COMMAND(area, "Technology")
 
 }  // namespace alice
 
-#endif  // FICTION_AREA_HPP
+#endif  // FICTION_CMD_AREA_HPP

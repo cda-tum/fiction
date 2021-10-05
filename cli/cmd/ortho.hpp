@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_ORTHO_HPP
-#define FICTION_ORTHO_HPP
+#ifndef FICTION_CMD_ORTHO_HPP
+#define FICTION_CMD_ORTHO_HPP
 
 #include <fiction/algorithms/orthogonal.hpp>
 #include <fiction/traits.hpp>
@@ -58,15 +58,15 @@ class ortho_command : public command
             return;
         }
 
-        const auto orthogonal_physical_design = [this](auto&& net)
-        { return fiction::orthogonal<fiction::gate_clk_lyt>(*net, ps, &st); };
+        const auto orthogonal_physical_design = [this](auto&& ntk_ptr)
+        { return fiction::orthogonal<fiction::gate_clk_lyt>(*ntk_ptr, ps, &st); };
 
-        const auto& net = s.current();
+        const auto& ntk_ptr = s.current();
 
         try
         {
             store<fiction::gate_layout_t>().extend() =
-                std::make_shared<fiction::gate_clk_lyt>(std::visit(orthogonal_physical_design, net));
+                std::make_shared<fiction::gate_clk_lyt>(std::visit(orthogonal_physical_design, ntk_ptr));
 
             if (is_set("verbose"))
             {
@@ -110,4 +110,4 @@ ALICE_ADD_COMMAND(ortho, "Physical Design")
 
 }  // namespace alice
 
-#endif  // FICTION_ORTHO_HPP
+#endif  // FICTION_CMD_ORTHO_HPP

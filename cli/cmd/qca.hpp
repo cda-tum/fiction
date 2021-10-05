@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_QCA_HPP
-#define FICTION_QCA_HPP
+#ifndef FICTION_CMD_QCA_HPP
+#define FICTION_CMD_QCA_HPP
 
 #include <fiction/io/write_qca_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -59,25 +59,25 @@ class qca_command : public command
             return;
         }
 
-        const auto get_name = [](auto&& lyt) -> std::string { return lyt->get_layout_name(); };
+        const auto get_name = [](auto&& lyt_ptr) -> std::string { return lyt_ptr->get_layout_name(); };
 
-        const auto write_qca = [this, &get_name](auto&& lyt)
+        const auto write_qca = [this, &get_name](auto&& lyt_ptr)
         {
-            using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
+            using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
             if constexpr (std::is_same_v<fiction::technology<Lyt>, fiction::qca_technology>)
             {
-                fiction::write_qca_layout(*lyt, filename, ps);
+                fiction::write_qca_layout(*lyt_ptr, filename, ps);
             }
             else
             {
-                env->out() << fmt::format("[e] {}'s cell technology is not QCA but {}", get_name(lyt),
+                env->out() << fmt::format("[e] {}'s cell technology is not QCA but {}", get_name(lyt_ptr),
                                           fiction::tech_impl_name<fiction::technology<Lyt>>)
                            << std::endl;
             }
         };
 
-        auto lyt = s.current();
+        const auto& lyt = s.current();
 
         // error case: do not override directories
         if (std::filesystem::is_directory(filename))
@@ -127,4 +127,4 @@ ALICE_ADD_COMMAND(qca, "I/O")
 
 }  // namespace alice
 
-#endif  // FICTION_QCA_HPP
+#endif  // FICTION_CMD_QCA_HPP

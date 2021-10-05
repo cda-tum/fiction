@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_CELL_HPP
-#define FICTION_CELL_HPP
+#ifndef FICTION_CMD_CELL_HPP
+#define FICTION_CMD_CELL_HPP
 
 #include <fiction/algorithms/apply_gate_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
@@ -61,10 +61,10 @@ class cell_command : public command
             //                    return;
             //                }
 
-            const auto apply = [](auto&& lyt)
+            const auto apply = [](auto&& lyt_ptr)
             {
                 return std::make_shared<fiction::qca_cell_clk_lyt>(
-                    fiction::apply_gate_library<fiction::qca_cell_clk_lyt, fiction::qca_one_library>(*lyt));
+                    fiction::apply_gate_library<fiction::qca_cell_clk_lyt, fiction::qca_one_library>(*lyt_ptr));
             };
 
             try
@@ -146,4 +146,4 @@ ALICE_ADD_COMMAND(cell, "Technology")
 
 }  // namespace alice
 
-#endif  // FICTION_CELL_HPP
+#endif  // FICTION_CMD_CELL_HPP

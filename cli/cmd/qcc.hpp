@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_QCC_HPP
-#define FICTION_QCC_HPP
+#ifndef FICTION_CMD_QCC_HPP
+#define FICTION_CMD_QCC_HPP
 
 #include "fcn_cell_layout.h"
 #include "qcc_writer.h"
@@ -114,4 +114,4 @@ class qcc_command : public command
 ALICE_ADD_COMMAND(qcc, "I/O")
 }  // namespace alice
 
-#endif  // FICTION_QCC_HPP
+#endif  // FICTION_CMD_QCC_HPP

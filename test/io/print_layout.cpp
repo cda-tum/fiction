@@ -15,7 +15,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Print empty gate-level layout", "[gate-level]")
+TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
@@ -30,7 +30,7 @@ TEST_CASE("Print empty gate-level layout", "[gate-level]")
     CHECK(print_stream.str() == layout_print);
 }
 
-TEST_CASE("Print simple gate-level layout", "[gate-level]")
+TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
@@ -81,7 +81,7 @@ TEST_CASE("Print simple gate-level layout", "[gate-level]")
     }
 }
 
-TEST_CASE("Print crossing gate-level layout", "[gate-level]")
+TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
@@ -102,7 +102,7 @@ TEST_CASE("Print crossing gate-level layout", "[gate-level]")
     CHECK(print_stream.str() == layout_print);
 }
 
-TEST_CASE("Print empty cell-level layout", "[gate-level]")
+TEST_CASE("Print empty cell-level layout", "[print-gate-level-layout]")
 {
     using cell_layout =
         fiction::cell_level_layout<fiction::qca_technology,
@@ -119,7 +119,7 @@ TEST_CASE("Print empty cell-level layout", "[gate-level]")
     CHECK(print_stream.str() == layout_print);
 }
 
-TEST_CASE("Print AND gate cell-level layout", "[cell-level]")
+TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout =
         fiction::cell_level_layout<fiction::qca_technology,
@@ -155,7 +155,7 @@ TEST_CASE("Print AND gate cell-level layout", "[cell-level]")
     CHECK(print_stream.str() == layout_print);
 }
 
-TEST_CASE("Print wire crossing cell-level layout", "[cell-level]")
+TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout =
         fiction::cell_level_layout<fiction::qca_technology,

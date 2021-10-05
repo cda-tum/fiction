@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_CHECK_HPP
-#define FICTION_CHECK_HPP
+#ifndef FICTION_CMD_CHECK_HPP
+#define FICTION_CMD_CHECK_HPP
 
 #include <fiction/algorithms/design_rule_violations.hpp>
 #include <fiction/types.hpp>
@@ -52,7 +52,7 @@ class check_command : public command
         ps.out = &env->out();
         pst    = {};
 
-        const auto design_rule_check = [this](auto&& lyt) { fiction::gate_level_drvs(*lyt, ps, &pst); };
+        const auto design_rule_check = [this](auto&& lyt_ptr) { fiction::gate_level_drvs(*lyt_ptr, ps, &pst); };
 
         std::visit(design_rule_check, s.current());
     }
@@ -76,4 +76,4 @@ ALICE_ADD_COMMAND(check, "Verification")
 
 }  // namespace alice
 
-#endif  // FICTION_CHECK_HPP
+#endif  // FICTION_CMD_CHECK_HPP

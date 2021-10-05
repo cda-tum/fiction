@@ -2,8 +2,8 @@
 // Created by marcel on 08.06.21.
 //
 
-#ifndef FICTION_MAP_HPP
-#define FICTION_MAP_HPP
+#ifndef FICTION_CMD_MAP_HPP
+#define FICTION_CMD_MAP_HPP
 
 #include <fiction/algorithms/name_restoration.hpp>
 #include <fiction/algorithms/network_conversion.hpp>
@@ -213,19 +213,19 @@ class map_command : public command
 
         mockturtle::tech_library<NumInp> lib{gates};
 
-        const auto mapper = [this, &s, &lib](auto&& net)
+        const auto mapper = [this, &s, &lib](auto&& ntk_ptr)
         {
             mockturtle::map_stats st{};
 
-            const auto mapped_net = mockturtle::map(*net, lib, ps, &st);
+            const auto mapped_ntk = mockturtle::map(*ntk_ptr, lib, ps, &st);
 
             if (!st.mapping_error)
             {
                 // convert network
-                auto converted_net = fiction::convert_network<fiction::top_nt>(mapped_net);
-                fiction::restore_network_name(*net, converted_net);
+                auto converted_ntk = fiction::convert_network<fiction::top_nt>(mapped_ntk);
+                fiction::restore_network_name(*ntk_ptr, converted_ntk);
 
-                s.extend() = std::make_shared<fiction::top_nt>(converted_net);
+                s.extend() = std::make_shared<fiction::top_nt>(converted_ntk);
             }
         };
 
@@ -237,4 +237,4 @@ ALICE_ADD_COMMAND(map, "Logic")
 
 }  // namespace alice
 
-#endif  // FICTION_MAP_HPP
+#endif  // FICTION_CMD_MAP_HPP

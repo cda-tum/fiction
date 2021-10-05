@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_CLEAR_HPP
-#define FICTION_CLEAR_HPP
+#ifndef FICTION_CMD_CLEAR_HPP
+#define FICTION_CMD_CLEAR_HPP
 
 #include <fiction/types.hpp>
 
@@ -74,4 +74,4 @@ ALICE_ADD_COMMAND(clear, "General")
 
 }  // namespace alice
 
-#endif  // FICTION_CLEAR_HPP
+#endif  // FICTION_CMD_CLEAR_HPP

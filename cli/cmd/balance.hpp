@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_BALANCE_HPP
-#define FICTION_BALANCE_HPP
+#ifndef FICTION_CMD_BALANCE_HPP
+#define FICTION_CMD_BALANCE_HPP
 
 #include <fiction/algorithms/network_balancing.hpp>
 #include <fiction/types.hpp>
@@ -53,8 +53,8 @@ class balance_command : public command
             return;
         }
 
-        const auto perform_balancing = [this](auto&& net)
-        { return std::make_shared<fiction::top_nt>(fiction::network_balancing<fiction::top_nt>(*net, ps)); };
+        const auto perform_balancing = [this](auto&& ntk_ptr)
+        { return std::make_shared<fiction::top_nt>(fiction::network_balancing<fiction::top_nt>(*ntk_ptr, ps)); };
 
         s.extend() = std::visit(perform_balancing, s.current());
 
@@ -69,4 +69,4 @@ ALICE_ADD_COMMAND(balance, "Logic")
 
 }  // namespace alice
 
-#endif  // FICTION_BALANCE_HPP
+#endif  // FICTION_CMD_BALANCE_HPP

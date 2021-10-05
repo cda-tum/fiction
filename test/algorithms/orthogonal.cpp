@@ -26,7 +26,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Number of constant fanins", "[algorithms]")
+TEST_CASE("Number of constant fanins", "[orthogonal]")
 {
     const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
 
@@ -37,7 +37,7 @@ TEST_CASE("Number of constant fanins", "[algorithms]")
     CHECK(detail::num_constant_fanins(and_inv, 3) == 1ul);
 }
 
-TEST_CASE("High-degree fanin nodes", "[algorithms]")
+TEST_CASE("High-degree fanin nodes", "[orthogonal]")
 {
     const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
 
@@ -51,11 +51,11 @@ TEST_CASE("High-degree fanin nodes", "[algorithms]")
     CHECK(!detail::has_high_degree_fanin_nodes(and_inv, 3));
 }
 
-TEST_CASE("East-south coloring", "[algorithms]")
+TEST_CASE("East-south coloring", "[orthogonal]")
 {
-    const auto check = [](const auto& net)
+    const auto check = [](const auto& ntk)
     {
-        auto container = detail::east_south_coloring(net);
+        auto container = detail::east_south_coloring(ntk);
         CHECK(detail::is_east_south_colored(container.color_ntk));
     };
 
@@ -74,19 +74,19 @@ TEST_CASE("East-south coloring", "[algorithms]")
     check(mockturtle::fanout_view{fanout_substitution<topology_network>(blueprints::clpl<topology_network>())});
 }
 
-TEST_CASE("Layout equivalence", "[algorithms]")
+TEST_CASE("Layout equivalence", "[orthogonal]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
-    const auto check = [](const auto& net)
+    const auto check = [](const auto& ntk)
     {
         orthogonal_physical_design_stats stats{};
 
-        auto layout = orthogonal<gate_layout>(net, {}, &stats);
+        auto layout = orthogonal<gate_layout>(ntk, {}, &stats);
 
         print_gate_level_layout(std::cout, layout);
 
-        check_eq(net, layout);
+        check_eq(ntk, layout);
     };
 
     check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
@@ -101,16 +101,16 @@ TEST_CASE("Layout equivalence", "[algorithms]")
     check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
 }
 
-TEST_CASE("Gate library application", "[algorithms]")
+TEST_CASE("Gate library application", "[orthogonal]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
     using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
 
-    const auto check = [](const auto& net)
+    const auto check = [](const auto& ntk)
     {
         orthogonal_physical_design_stats stats{};
 
-        auto layout = orthogonal<gate_layout>(net, {}, &stats);
+        auto layout = orthogonal<gate_layout>(ntk, {}, &stats);
 
         CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(layout));
     };
