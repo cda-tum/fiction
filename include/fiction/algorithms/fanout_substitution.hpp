@@ -74,7 +74,12 @@ class fanout_substitution_impl
         substituted = init.first;
         old2new     = init.second;
 
-        ntk_topo.foreach_pi([this](const auto& pi) { generate_fanout_tree(pi); });
+        ntk_topo.foreach_pi(
+            [this](const auto& pi)
+            {
+                std::cout << "PI: " << pi << std::endl;
+                generate_fanout_tree(pi);
+            });
 
         std::cout << "fanout trees for PIs have been generated" << std::endl;
 
