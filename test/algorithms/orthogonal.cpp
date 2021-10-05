@@ -28,8 +28,6 @@ using namespace fiction;
 
 TEST_CASE("Number of constant fanins", "[algorithms]")
 {
-    std::cout << "Started test case 'constant fanins'" << std::endl;
-
     const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
 
     maj4.foreach_node([&maj4](const auto& n) { CHECK(detail::num_constant_fanins(maj4, n) == 0ul); });
@@ -37,14 +35,10 @@ TEST_CASE("Number of constant fanins", "[algorithms]")
     const auto and_inv = blueprints::unbalanced_and_inv_network<mockturtle::mig_network>();
 
     CHECK(detail::num_constant_fanins(and_inv, 3) == 1ul);
-
-    std::cout << "Finished test case 'constant fanins'" << std::endl;
 }
 
 TEST_CASE("High-degree fanin nodes", "[algorithms]")
 {
-    std::cout << "Started test case 'high-degree'" << std::endl;
-
     const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
 
     CHECK(detail::has_high_degree_fanin_nodes(maj4, 2));
@@ -55,14 +49,10 @@ TEST_CASE("High-degree fanin nodes", "[algorithms]")
     CHECK(detail::has_high_degree_fanin_nodes(and_inv, 1));
     CHECK(!detail::has_high_degree_fanin_nodes(and_inv, 2));
     CHECK(!detail::has_high_degree_fanin_nodes(and_inv, 3));
-
-    std::cout << "Finished test case 'high-degree'" << std::endl;
 }
 
 TEST_CASE("East-south coloring", "[algorithms]")
 {
-    std::cout << "Started test case 'east-south'" << std::endl;
-
     const auto check = [](const auto& net)
     {
         auto container = detail::east_south_coloring(net);
@@ -82,14 +72,10 @@ TEST_CASE("East-south coloring", "[algorithms]")
     check(mockturtle::fanout_view{
         fanout_substitution<topology_network>(blueprints::nary_operation_network<topology_network>())});
     check(mockturtle::fanout_view{fanout_substitution<topology_network>(blueprints::clpl<topology_network>())});
-
-    std::cout << "Finished test case 'east-south'" << std::endl;
 }
 
 TEST_CASE("Layout equivalence", "[algorithms]")
 {
-    std::cout << "Started test case 'layout equivalence'" << std::endl;
-
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
     const auto check = [](const auto& net)
@@ -113,14 +99,10 @@ TEST_CASE("Layout equivalence", "[algorithms]")
 
     // constant input network
     check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
-
-    std::cout << "Finished test case 'layout equivalence'" << std::endl;
 }
 
 TEST_CASE("Gate library application", "[algorithms]")
 {
-    std::cout << "Started test case 'gate library'" << std::endl;
-
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
     using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
 
@@ -142,14 +124,10 @@ TEST_CASE("Gate library application", "[algorithms]")
 
     // constant input network
     check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
-
-    std::cout << "Finished test case 'gate library'" << std::endl;
 }
 
 TEST_CASE("Name conservation", "[algorithms]")
 {
-    std::cout << "Started test case 'name conservation'" << std::endl;
-
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>();
@@ -167,6 +145,4 @@ TEST_CASE("Name conservation", "[algorithms]")
 
     // PO names
     CHECK(layout.get_output_name(0) == "f");
-
-    std::cout << "Finished test case 'name conservation'" << std::endl;
 }

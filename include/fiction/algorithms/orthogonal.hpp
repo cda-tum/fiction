@@ -559,8 +559,6 @@ class orthogonal_impl
 
     Lyt run()
     {
-        std::cout << "ortho run started (fanout_substitution complete)" << std::endl;
-
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
         // compute a coloring
@@ -569,8 +567,6 @@ class orthogonal_impl
         Lyt layout{determine_layout_size<Lyt>(ctn),
                    ps.number_of_clock_phases == 3 ? twoddwave_3_clocking : twoddwave_4_clocking};
 
-        std::cout << "coloring determined" << std::endl;
-
         // reserve PI nodes without positions
         ntk.foreach_pi(
             [this, &layout](const auto& pi)
@@ -578,8 +574,6 @@ class orthogonal_impl
                 const auto s = ntk.make_signal(pi);
                 layout.create_pi(ntk.has_name(s) ? ntk.get_name(s) : "");
             });
-
-        std::cout << "PI nodes created" << std::endl;
 
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         tile<Lyt> latest_pos{1, 0};
@@ -755,20 +749,14 @@ class orthogonal_impl
 #endif
             });
 
-        std::cout << "layout arrangement complete" << std::endl;
-
         // restore possibly set signal names
         restore_names(ntk, layout, node2pos);
-
-        std::cout << "signal names restored" << std::endl;
 
         // statistical information
         pst.x_size    = layout.x() + 1;
         pst.y_size    = layout.y() + 1;
         pst.num_gates = layout.num_gates();
         pst.num_wires = layout.num_wires();
-
-        std::cout << "ortho run finished" << std::endl;
 
         return layout;
     }
