@@ -314,8 +314,8 @@ class read_fqca_layout_impl
  * May throw an 'unsupported_character_exception', 'undefined_cell_label_exception', or
  * 'unrecognized_cell_definition_exception'.
  *
- * @tparam Lyt
- * @param is
+ * @tparam Lyt The layout type to be created from an input. Must be a clocked cell-level QCA layout.
+ * @param is The input stream to read from.
  */
 template <typename Lyt>
 Lyt read_fqca_layout(std::istream& is)
