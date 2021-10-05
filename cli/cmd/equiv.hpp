@@ -5,6 +5,7 @@
 #ifndef FICTION_EQUIV_HPP
 #define FICTION_EQUIV_HPP
 
+#include <fiction/algorithms/design_rule_violations.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -16,6 +17,7 @@
 #include <mockturtle/utils/stopwatch.hpp>
 #include <nlohmann/json.hpp>
 
+#include <cstdint>
 #include <variant>
 
 namespace alice
@@ -67,7 +69,14 @@ class equiv_command : public command
                 return;
             }
 
-            equivalence_checking(sn.current(), sg.current());
+            if (const auto& lyt = sg.current(); has_no_drvs(lyt))
+            {
+                equivalence_checking(sn.current(), lyt);
+            }
+            else
+            {
+                env->out() << "[e] specified layout has DRVs and, thus, cannot be checked for equivalence" << std::endl;
+            }
         }
         else if (is_set("logic_network"))
         {
@@ -91,7 +100,14 @@ class equiv_command : public command
                 return;
             }
 
-            equivalence_checking(sg[sg.size() - 1], sg[sg.size() - 2]);
+            if (const auto& lyt1 = sg[sg.size() - 1], lyt2 = sg[sg.size() - 2]; has_no_drvs(lyt1) && has_no_drvs(lyt2))
+            {
+                equivalence_checking(lyt1, lyt2);
+            }
+            else
+            {
+                env->out() << "[e] specified layout has DRVs and, thus, cannot be checked for equivalence" << std::endl;
+            }
         }
         else
         {
@@ -167,6 +183,21 @@ class equiv_command : public command
     };
 
     equiv_result result{};
+
+    template <typename Lyt>
+    bool has_no_drvs(const Lyt& lyt) const noexcept
+    {
+        const auto num_drvs = [](auto&& layout) -> uint64_t
+        {
+            fiction::gate_level_drv_stats st{};
+
+            gate_level_drvs(*layout, {}, &st);
+
+            return st.drvs;
+        };
+
+        return std::visit(num_drvs, lyt) == 0;
+    }
 
     template <typename Ntk1, typename Ntk2>
     void equivalence_checking(const Ntk1& ntk1, const Ntk2& ntk2)
