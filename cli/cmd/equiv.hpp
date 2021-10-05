@@ -18,6 +18,7 @@
 #include <nlohmann/json.hpp>
 
 #include <cstdint>
+#include <sstream>
 #include <variant>
 
 namespace alice
@@ -190,9 +191,14 @@ class equiv_command : public command
     {
         const auto num_drvs = [](auto&& lyt_ptr) -> uint64_t
         {
-            fiction::gate_level_drv_stats st{};
+            fiction::gate_level_drv_stats  st{};
+            fiction::gate_level_drv_params ps{};
 
-            gate_level_drvs(*lyt_ptr, {}, &st);
+            // suppress DRV output
+            std::ostringstream null_stream{};
+            ps.out = &null_stream;
+
+            gate_level_drvs(*lyt_ptr, ps, &st);
 
             return st.drvs;
         };
