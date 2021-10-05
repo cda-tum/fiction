@@ -67,20 +67,20 @@ namespace detail
 namespace fqca_regex
 {
 
+static std::regex white_space{R"(\s*)"};
 static std::regex comment{R"(\[.*\]\s*$)"};
 static std::regex layer_separator{R"([= *]+\s*$)"};
-static std::regex cell_definition_input{R"(-\s*input\s*$)"};
-static std::regex cell_definition_output{R"(-\s*output\s*$)"};
-static std::regex cell_definition_propagate{R"(-\s*propagate\s*$)"};
-static std::regex cell_definition_id{R"([(a-zA-Z0-9_)]\:\s*$)"};              // group 1 is the id
-static std::regex cell_definition_label{R"(-\s*label\s*=\s*\"(.*)\"\s*$)"};   // group 1 is the label
-static std::regex cell_definition_clock{R"(-\s*clock\s*=\s*([0-9])\s*$)"};    // group 1 is the clock number
-static std::regex cell_definition_number{R"(-\s*number\s*=\s*([0-9])\s*$)"};  // group 1 is the number
+static std::regex cell_definition_input{R"(-input$)"};
+static std::regex cell_definition_output{R"(-output$)"};
+static std::regex cell_definition_propagate{R"(-propagate$)"};
+static std::regex cell_definition_id{R"([(a-zA-Z0-9_)]\:$)"};     // group 1 is the id
+static std::regex cell_definition_label{R"(-label=\"(.*)\"$)"};   // group 1 is the label
+static std::regex cell_definition_clock{R"(-clock=([0-9])$)"};    // group 1 is the clock number
+static std::regex cell_definition_number{R"(-number=([0-9])$)"};  // group 1 is the number
 static std::regex cell_definition_offset{
-    R"(-\s*offset\s*=\s*\((-?[0-9]\d*(?:\.\d+)?),
-                             (-?[0-9]\d*(?:\.\d+)?),
-                             (-?[0-9]\d*(?:\.\d+)?)\)\s*$)"};  // group 1, 2, and 3 are the x, y, and z offset
-                                                               // respectively
+    R"(-offset=\((-?[0-9]\d*(?:\.\d+)?),(-?[0-9]\d*(?:\.\d+)?),(-?[0-9]\d*(?:\.\d+)?)\)$)"};  // group 1, 2, and 3 are
+                                                                                              // the x, y, and z offset
+                                                                                              // respectively
 
 }  // namespace fqca_regex
 
@@ -139,6 +139,9 @@ class read_fqca_layout_impl
                 // ... or the cell definition?
                 else if (parsing_status == fqca_section::CELL_DEFINITION)
                 {
+                    // remove all white space from the line to make regex matching easier and more robust
+                    line = std::regex_replace(line, fqca_regex::white_space, "");
+
                     // if line indicates a new cell id
                     if (std::smatch sm; std::regex_match(line, sm, fqca_regex::cell_definition_id))
                     {
