@@ -61,10 +61,10 @@ class cell_command : public command
             //                    return;
             //                }
 
-            const auto apply = [](auto&& lyt)
+            const auto apply = [](auto&& lyt_ptr)
             {
                 return std::make_shared<fiction::qca_cell_clk_lyt>(
-                    fiction::apply_gate_library<fiction::qca_cell_clk_lyt, fiction::qca_one_library>(*lyt));
+                    fiction::apply_gate_library<fiction::qca_cell_clk_lyt, fiction::qca_one_library>(*lyt_ptr));
             };
 
             try

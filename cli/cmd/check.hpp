@@ -52,7 +52,7 @@ class check_command : public command
         ps.out = &env->out();
         pst    = {};
 
-        const auto design_rule_check = [this](auto&& lyt) { fiction::gate_level_drvs(*lyt, ps, &pst); };
+        const auto design_rule_check = [this](auto&& lyt_ptr) { fiction::gate_level_drvs(*lyt_ptr, ps, &pst); };
 
         std::visit(design_rule_check, s.current());
     }

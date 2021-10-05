@@ -52,7 +52,7 @@ class energy_command : public command
             return;
         }
 
-        const auto energy = [this](auto&& lyt) { fiction::qca_energy_dissipation(*lyt, &st); };
+        const auto energy = [this](auto&& lyt_ptr) { fiction::qca_energy_dissipation(*lyt_ptr, &st); };
 
         std::visit(energy, s.current());
 

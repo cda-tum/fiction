@@ -127,36 +127,38 @@ class simulate_command : public command
      */
     std::vector<std::string> po_names;
 
-    template <typename NetOrLyt>
-    void perform_simulation(const NetOrLyt& network_or_layout)
+    template <typename NtkOrLytVariant>
+    void perform_simulation(const NtkOrLytVariant& network_or_layout_variant)
     {
 
-        const auto get_name = [](auto&& net_or_lyt) -> std::string { return net_or_lyt->get_network_name(); };
+        const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return ntk_or_lyt_ptr->get_network_name(); };
 
-        const auto store_po_names = [this](auto&& net_or_lyt)
+        const auto store_po_names = [this](auto&& ntk_or_lyt_ptr)
         {
-            net_or_lyt->foreach_po(
-                [this, &net_or_lyt]([[maybe_unused]] const auto& po, auto i) {
-                    po_names.emplace_back(net_or_lyt->has_output_name(i) ? net_or_lyt->get_output_name(i) :
-                                                                           fmt::format("po{}", i));
+            ntk_or_lyt_ptr->foreach_po(
+                [this, &ntk_or_lyt_ptr]([[maybe_unused]] const auto& po, auto i)
+                {
+                    po_names.emplace_back(ntk_or_lyt_ptr->has_output_name(i) ? ntk_or_lyt_ptr->get_output_name(i) :
+                                                                               fmt::format("po{}", i));
                 });
         };
 
-        const auto simulate = [this](auto&& net_or_lyt)
+        const auto simulate = [this](auto&& ntk_or_lyt_ptr)
         {
             tables = mockturtle::simulate<fiction::tt>(
-                *net_or_lyt, mockturtle::default_simulator<fiction::tt>(static_cast<unsigned>(net_or_lyt->num_pis())));
+                *ntk_or_lyt_ptr,
+                mockturtle::default_simulator<fiction::tt>(static_cast<unsigned>(ntk_or_lyt_ptr->num_pis())));
         };
 
-        std::visit(store_po_names, network_or_layout);
+        std::visit(store_po_names, network_or_layout_variant);
 
         try
         {
-            std::visit(simulate, network_or_layout);
+            std::visit(simulate, network_or_layout_variant);
         }
         catch (const std::bad_alloc&)
         {
-            env->out() << "[e] " << std::visit(get_name, network_or_layout)
+            env->out() << "[e] " << std::visit(get_name, network_or_layout_variant)
                        << " has too many inputs to store its truth table" << std::endl;
             return;
         }

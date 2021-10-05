@@ -52,9 +52,9 @@ TEST_CASE("High-degree fanin nodes", "[orthogonal]")
 
 TEST_CASE("East-south coloring", "[orthogonal]")
 {
-    const auto check = [](const auto& net)
+    const auto check = [](const auto& ntk)
     {
-        auto container = detail::east_south_coloring(net);
+        auto container = detail::east_south_coloring(ntk);
         CHECK(detail::is_east_south_colored(container.color_ntk));
     };
 
@@ -77,15 +77,15 @@ TEST_CASE("Layout equivalence", "[orthogonal]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
-    const auto check = [](const auto& net)
+    const auto check = [](const auto& ntk)
     {
         orthogonal_physical_design_stats stats{};
 
-        auto layout = orthogonal<gate_layout>(net, {}, &stats);
+        auto layout = orthogonal<gate_layout>(ntk, {}, &stats);
 
         print_gate_level_layout(std::cout, layout);
 
-        check_eq(net, layout);
+        check_eq(ntk, layout);
     };
 
     check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
@@ -105,11 +105,11 @@ TEST_CASE("Gate library application", "[orthogonal]")
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
     using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
 
-    const auto check = [](const auto& net)
+    const auto check = [](const auto& ntk)
     {
         orthogonal_physical_design_stats stats{};
 
-        auto layout = orthogonal<gate_layout>(net, {}, &stats);
+        auto layout = orthogonal<gate_layout>(ntk, {}, &stats);
 
         CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(layout));
     };

@@ -46,10 +46,10 @@ class gates_command : public command
             return;
         }
 
-        const auto count = [this](auto&& ntk_or_lyt)
+        const auto count = [this](auto&& ntk_or_lyt_ptr)
         {
             fiction::count_gate_types_stats st{};
-            fiction::count_gate_types(*ntk_or_lyt, &st);
+            fiction::count_gate_types(*ntk_or_lyt_ptr, &st);
 
             st.report(env->out(), is_set("detailed"));
         };

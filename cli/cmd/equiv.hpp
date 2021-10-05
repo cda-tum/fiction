@@ -53,25 +53,25 @@ class equiv_command : public command
 
         if (is_set("logic_network") && is_set("gate_layout"))
         {
-            auto& sn = store<fiction::logic_network_t>();
+            auto& lns = store<fiction::logic_network_t>();
 
-            if (sn.empty())
+            if (lns.empty())
             {
                 env->out() << "[w] no logic network in store" << std::endl;
                 return;
             }
 
-            auto& sg = store<fiction::gate_layout_t>();
+            auto& gls = store<fiction::gate_layout_t>();
 
-            if (sg.empty())
+            if (gls.empty())
             {
                 env->out() << "[w] no gate layout in store" << std::endl;
                 return;
             }
 
-            if (const auto& lyt = sg.current(); has_no_drvs(lyt))
+            if (const auto& lyt = gls.current(); has_no_drvs(lyt))
             {
-                equivalence_checking(sn.current(), lyt);
+                equivalence_checking(lns.current(), lyt);
             }
             else
             {
@@ -80,27 +80,28 @@ class equiv_command : public command
         }
         else if (is_set("logic_network"))
         {
-            auto& sn = store<fiction::logic_network_t>();
+            auto& lns = store<fiction::logic_network_t>();
 
-            if (sn.size() < 2)
+            if (lns.size() < 2)
             {
                 env->out() << "[w] need at least two logic networks in store" << std::endl;
                 return;
             }
 
-            equivalence_checking(sn[sn.size() - 1], sn[sn.size() - 2]);
+            equivalence_checking(lns[lns.size() - 1], lns[lns.size() - 2]);
         }
         else if (is_set("gate_layout"))
         {
-            auto& sg = store<fiction::gate_layout_t>();
+            auto& gls = store<fiction::gate_layout_t>();
 
-            if (sg.size() < 2)
+            if (gls.size() < 2)
             {
                 env->out() << "[w] need at least two gate layouts in store" << std::endl;
                 return;
             }
 
-            if (const auto& lyt1 = sg[sg.size() - 1], lyt2 = sg[sg.size() - 2]; has_no_drvs(lyt1) && has_no_drvs(lyt2))
+            if (const auto& lyt1 = gls[gls.size() - 1], lyt2 = gls[gls.size() - 2];
+                has_no_drvs(lyt1) && has_no_drvs(lyt2))
             {
                 equivalence_checking(lyt1, lyt2);
             }
@@ -184,29 +185,29 @@ class equiv_command : public command
 
     equiv_result result{};
 
-    template <typename Lyt>
-    bool has_no_drvs(const Lyt& lyt) const noexcept
+    template <typename LytVariant>
+    bool has_no_drvs(const LytVariant& lyt_variant) const noexcept
     {
-        const auto num_drvs = [](auto&& layout) -> uint64_t
+        const auto num_drvs = [](auto&& lyt_ptr) -> uint64_t
         {
             fiction::gate_level_drv_stats st{};
 
-            gate_level_drvs(*layout, {}, &st);
+            gate_level_drvs(*lyt_ptr, {}, &st);
 
             return st.drvs;
         };
 
-        return std::visit(num_drvs, lyt) == 0;
+        return std::visit(num_drvs, lyt_variant) == 0;
     }
 
-    template <typename Ntk1, typename Ntk2>
-    void equivalence_checking(const Ntk1& ntk1, const Ntk2& ntk2)
+    template <typename NtkOrLytVariant1, typename NtkOrLytVariant2>
+    void equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_variant1, const NtkOrLytVariant2& ntk_or_lyt_variant_2)
     {
-        const auto equiv_check = [this](auto&& net_or_lyt1, auto&& net_or_lyt2) -> bool
+        const auto equiv_check = [this](auto&& ntk_or_lyt_ptr1, auto&& ntk_or_lyt_ptr2) -> bool
         {
             mockturtle::stopwatch stop{result.runtime};
 
-            auto miter = mockturtle::miter<mockturtle::klut_network>(*net_or_lyt1, *net_or_lyt2);
+            auto miter = mockturtle::miter<mockturtle::klut_network>(*ntk_or_lyt_ptr1, *ntk_or_lyt_ptr2);
 
             if (miter)
             {
@@ -237,14 +238,15 @@ class equiv_command : public command
             return true;
         };
 
-        const auto get_name = [](auto&& net_or_lyt) { return net_or_lyt->get_network_name(); };
+        const auto get_name = [](auto&& ntk_or_lyt_ptr) { return ntk_or_lyt_ptr->get_network_name(); };
 
-        bool success = std::visit(equiv_check, ntk1, ntk2);
+        bool success = std::visit(equiv_check, ntk_or_lyt_variant1, ntk_or_lyt_variant_2);
 
         if (success)
         {
-            env->out() << fmt::format("[i] {} and {} are{} equivalent", std::visit(get_name, ntk1),
-                                      std::visit(get_name, ntk2), result.eq == equiv_result::eq_type::NO ? " NOT" : "")
+            env->out() << fmt::format("[i] {} and {} are{} equivalent", std::visit(get_name, ntk_or_lyt_variant1),
+                                      std::visit(get_name, ntk_or_lyt_variant_2),
+                                      result.eq == equiv_result::eq_type::NO ? " NOT" : "")
                        << std::endl;
         }
     }

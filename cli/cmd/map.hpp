@@ -213,19 +213,19 @@ class map_command : public command
 
         mockturtle::tech_library<NumInp> lib{gates};
 
-        const auto mapper = [this, &s, &lib](auto&& net)
+        const auto mapper = [this, &s, &lib](auto&& ntk_ptr)
         {
             mockturtle::map_stats st{};
 
-            const auto mapped_net = mockturtle::map(*net, lib, ps, &st);
+            const auto mapped_ntk = mockturtle::map(*ntk_ptr, lib, ps, &st);
 
             if (!st.mapping_error)
             {
                 // convert network
-                auto converted_net = fiction::convert_network<fiction::top_nt>(mapped_net);
-                fiction::restore_network_name(*net, converted_net);
+                auto converted_ntk = fiction::convert_network<fiction::top_nt>(mapped_ntk);
+                fiction::restore_network_name(*ntk_ptr, converted_ntk);
 
-                s.extend() = std::make_shared<fiction::top_nt>(converted_net);
+                s.extend() = std::make_shared<fiction::top_nt>(converted_ntk);
             }
         };
 

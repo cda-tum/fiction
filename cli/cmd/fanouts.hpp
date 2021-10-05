@@ -67,8 +67,8 @@ class fanouts_command : public command
             return;
         }
 
-        const auto perform_substitution = [this](auto&& net)
-        { return std::make_shared<fiction::top_nt>(fiction::fanout_substitution<fiction::top_nt>(*net, ps)); };
+        const auto perform_substitution = [this](auto&& ntk_ptr)
+        { return std::make_shared<fiction::top_nt>(fiction::fanout_substitution<fiction::top_nt>(*ntk_ptr, ps)); };
 
         s.extend() = std::visit(perform_substitution, s.current());
 
