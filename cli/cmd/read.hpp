@@ -64,6 +64,10 @@ class read_command : public command
         {
             env->out() << "[e] at least one network or layout type must be specified" << std::endl;
         }
+        else if ((is_set("aig") || !is_set("mig") || is_set("top")) && is_set("qca"))
+        {
+            env->out() << "[e] cannot parse files as both logic networks and cell-level layouts" << std::endl;
+        }
         else
         {
             try
