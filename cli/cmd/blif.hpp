@@ -2,8 +2,8 @@
 // Created by marcel on 22.07.21.
 //
 
-#ifndef FICTION_BLIF_HPP
-#define FICTION_BLIF_HPP
+#ifndef FICTION_CMD_BLIF_HPP
+#define FICTION_CMD_BLIF_HPP
 
 #include <fiction/types.hpp>
 
@@ -129,4 +129,4 @@ ALICE_ADD_COMMAND(blif, "I/O")
 
 }  // namespace alice
 
-#endif  // FICTION_BLIF_HPP
+#endif  // FICTION_CMD_BLIF_HPP

@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_QCA_HPP
-#define FICTION_QCA_HPP
+#ifndef FICTION_CMD_QCA_HPP
+#define FICTION_CMD_QCA_HPP
 
 #include <fiction/io/write_qca_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -117,4 +117,4 @@ ALICE_ADD_COMMAND(qca, "I/O")
 
 }  // namespace alice
 
-#endif  // FICTION_QCA_HPP
+#endif  // FICTION_CMD_QCA_HPP

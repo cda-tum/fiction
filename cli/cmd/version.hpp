@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_VERSION_HPP
-#define FICTION_VERSION_HPP
+#ifndef FICTION_CMD_VERSION_HPP
+#define FICTION_CMD_VERSION_HPP
 
 #include "utils/version_info.hpp"
 
@@ -43,4 +43,4 @@ ALICE_ADD_COMMAND(version, "General")
 
 }  // namespace alice
 
-#endif  // FICTION_VERSION_HPP
+#endif  // FICTION_CMD_VERSION_HPP

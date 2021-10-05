@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_BALANCE_HPP
-#define FICTION_BALANCE_HPP
+#ifndef FICTION_CMD_BALANCE_HPP
+#define FICTION_CMD_BALANCE_HPP
 
 #include <fiction/algorithms/network_balancing.hpp>
 #include <fiction/types.hpp>
@@ -69,4 +69,4 @@ ALICE_ADD_COMMAND(balance, "Logic")
 
 }  // namespace alice
 
-#endif  // FICTION_BALANCE_HPP
+#endif  // FICTION_CMD_BALANCE_HPP

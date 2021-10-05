@@ -2,8 +2,8 @@
 // Created by marcel on 25.11.19.
 //
 
-#ifndef FICTION_ENERGY_HPP
-#define FICTION_ENERGY_HPP
+#ifndef FICTION_CMD_ENERGY_HPP
+#define FICTION_CMD_ENERGY_HPP
 
 #include <fiction/algorithms/energy_model.hpp>
 #include <fiction/types.hpp>
@@ -79,4 +79,4 @@ ALICE_ADD_COMMAND(energy, "Technology")
 
 }  // namespace alice
 
-#endif  // FICTION_ENERGY_HPP
+#endif  // FICTION_CMD_ENERGY_HPP

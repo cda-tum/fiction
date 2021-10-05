@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_ORTHO_HPP
-#define FICTION_ORTHO_HPP
+#ifndef FICTION_CMD_ORTHO_HPP
+#define FICTION_CMD_ORTHO_HPP
 
 #include <fiction/algorithms/orthogonal.hpp>
 #include <fiction/traits.hpp>
@@ -118,4 +118,4 @@ ALICE_ADD_COMMAND(ortho, "Physical Design")
 
 }  // namespace alice
 
-#endif  // FICTION_ORTHO_HPP
+#endif  // FICTION_CMD_ORTHO_HPP

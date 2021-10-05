@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_CELL_HPP
-#define FICTION_CELL_HPP
+#ifndef FICTION_CMD_CELL_HPP
+#define FICTION_CMD_CELL_HPP
 
 #include <fiction/algorithms/apply_gate_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
@@ -146,4 +146,4 @@ ALICE_ADD_COMMAND(cell, "Technology")
 
 }  // namespace alice
 
-#endif  // FICTION_CELL_HPP
+#endif  // FICTION_CMD_CELL_HPP

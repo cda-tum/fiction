@@ -2,8 +2,8 @@
 // Created by marcel on 08.06.21.
 //
 
-#ifndef FICTION_MAP_HPP
-#define FICTION_MAP_HPP
+#ifndef FICTION_CMD_MAP_HPP
+#define FICTION_CMD_MAP_HPP
 
 #include <fiction/algorithms/name_restoration.hpp>
 #include <fiction/algorithms/network_conversion.hpp>
@@ -237,4 +237,4 @@ ALICE_ADD_COMMAND(map, "Logic")
 
 }  // namespace alice
 
-#endif  // FICTION_MAP_HPP
+#endif  // FICTION_CMD_MAP_HPP

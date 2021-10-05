@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_FANOUTS_HPP
-#define FICTION_FANOUTS_HPP
+#ifndef FICTION_CMD_FANOUTS_HPP
+#define FICTION_CMD_FANOUTS_HPP
 
 #include <fiction/algorithms/fanout_substitution.hpp>
 #include <fiction/types.hpp>
@@ -82,4 +82,4 @@ class fanouts_command : public command
 ALICE_ADD_COMMAND(fanouts, "Logic")
 }  // namespace alice
 
-#endif  // FICTION_FANOUTS_HPP
+#endif  // FICTION_CMD_FANOUTS_HPP

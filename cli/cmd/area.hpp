@@ -2,8 +2,8 @@
 // Created by marcel on 25.11.19.
 //
 
-#ifndef FICTION_AREA_HPP
-#define FICTION_AREA_HPP
+#ifndef FICTION_CMD_AREA_HPP
+#define FICTION_CMD_AREA_HPP
 
 #include <fiction/types.hpp>
 
@@ -113,4 +113,4 @@ ALICE_ADD_COMMAND(area, "Technology")
 
 }  // namespace alice
 
-#endif  // FICTION_AREA_HPP
+#endif  // FICTION_CMD_AREA_HPP

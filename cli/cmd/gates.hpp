@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_GATES_HPP
-#define FICTION_GATES_HPP
+#ifndef FICTION_CMD_GATES_HPP
+#define FICTION_CMD_GATES_HPP
 
 #include <fiction/algorithms/count_gate_types.hpp>
 #include <fiction/types.hpp>
@@ -87,4 +87,4 @@ class gates_command : public command
 ALICE_ADD_COMMAND(gates, "Logic")
 }  // namespace alice
 
-#endif  // FICTION_GATES_HPP
+#endif  // FICTION_CMD_GATES_HPP

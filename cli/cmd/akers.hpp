@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_AKERS_HPP
-#define FICTION_AKERS_HPP
+#ifndef FICTION_CMD_AKERS_HPP
+#define FICTION_CMD_AKERS_HPP
 
 #include <fiction/types.hpp>
 
@@ -86,4 +86,4 @@ ALICE_ADD_COMMAND(akers, "Logic")
 
 }  // namespace alice
 
-#endif  // FICTION_AKERS_HPP
+#endif  // FICTION_CMD_AKERS_HPP

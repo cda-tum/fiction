@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_TT_HPP
-#define FICTION_TT_HPP
+#ifndef FICTION_CMD_TT_HPP
+#define FICTION_CMD_TT_HPP
 
 #include <fiction/types.hpp>
 
@@ -195,4 +195,4 @@ ALICE_ADD_COMMAND(tt, "I/O")
 
 }  // namespace alice
 
-#endif  // FICTION_TT_HPP
+#endif  // FICTION_CMD_TT_HPP

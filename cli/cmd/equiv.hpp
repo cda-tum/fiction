@@ -2,8 +2,8 @@
 // Created by marcel on 04.03.20.
 //
 
-#ifndef FICTION_EQUIV_HPP
-#define FICTION_EQUIV_HPP
+#ifndef FICTION_CMD_EQUIV_HPP
+#define FICTION_CMD_EQUIV_HPP
 
 #include <fiction/algorithms/design_rule_violations.hpp>
 #include <fiction/types.hpp>
@@ -254,4 +254,4 @@ ALICE_ADD_COMMAND(equiv, "Verification")
 
 }  // namespace alice
 
-#endif  // FICTION_EQUIV_HPP
+#endif  // FICTION_CMD_EQUIV_HPP

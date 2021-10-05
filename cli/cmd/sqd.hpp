@@ -2,8 +2,8 @@
 // Created by marcel on 14.07.21.
 //
 
-#ifndef FICTION_SQD_HPP
-#define FICTION_SQD_HPP
+#ifndef FICTION_CMD_SQD_HPP
+#define FICTION_CMD_SQD_HPP
 
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -118,4 +118,4 @@ ALICE_ADD_COMMAND(sqd, "I/O")
 
 }  // namespace alice
 
-#endif  // FICTION_SQD_HPP
+#endif  // FICTION_CMD_SQD_HPP

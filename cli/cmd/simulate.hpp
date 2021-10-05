@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_SIMULATE_HPP
-#define FICTION_SIMULATE_HPP
+#ifndef FICTION_CMD_SIMULATE_HPP
+#define FICTION_CMD_SIMULATE_HPP
 
 #include <fiction/types.hpp>
 
@@ -167,4 +167,4 @@ ALICE_ADD_COMMAND(simulate, "Logic")
 
 }  // namespace alice
 
-#endif  // FICTION_SIMULATE_HPP
+#endif  // FICTION_CMD_SIMULATE_HPP
