@@ -64,13 +64,19 @@ class fanout_substitution_impl
 
     NtkDest run()
     {
+        std::cout << "fanout_substitution has started (convert_network already done)" << std::endl;
+
         // initialize a network copy
         auto init = mockturtle::initialize_copy_network<NtkDest>(ntk_topo);
+
+        std::cout << "network copy has been initialized" << std::endl;
 
         substituted = init.first;
         old2new     = init.second;
 
         ntk_topo.foreach_pi([this](const auto& pi) { generate_fanout_tree(pi); });
+
+        std::cout << "fanout trees for PIs have been generated" << std::endl;
 
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -111,6 +117,8 @@ class fanout_substitution_impl
 #endif
             });
 
+        std::cout << "next up: POs and their complements" << std::endl;
+
         // add primary outputs to finalize the network
         ntk_topo.foreach_po(
             [this](const auto& po)
@@ -124,8 +132,12 @@ class fanout_substitution_impl
                 substituted.create_po(tgt_po);
             });
 
+        std::cout << "all fanouts have been substituted (name restoration is to come next)" << std::endl;
+
         // restore signal names if applicable
         fiction::restore_names(ntk_topo, substituted, old2new);
+
+        std::cout << "fanout_substitution has completed" << std::endl;
 
         return substituted;
     }
