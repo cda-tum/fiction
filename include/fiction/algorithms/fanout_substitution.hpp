@@ -72,7 +72,11 @@ class fanout_substitution_impl
         std::cout << "network copy has been initialized" << std::endl;
 
         substituted = init.first;
+        std::cout << "copy-assigned 'substituted'" << std::endl;
         old2new     = init.second;
+        std::cout << "copy-assigned 'old2new'" << std::endl;
+
+        std::cout << "up next: 'foreach_pi'" << std::endl;
 
         ntk_topo.foreach_pi(
             [this](const auto& pi)
