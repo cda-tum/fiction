@@ -155,9 +155,13 @@ class fanout_substitution_impl
 
     void generate_fanout_tree(const mockturtle::node<NtkSrc>& n)
     {
+        std::cout << "generating a fanout tree for node " << n << std::endl;
+
         // skip fanout tree generation if n is a proper fanout node
         if constexpr (has_is_fanout_v<NtkDest>)
         {
+            std::cout << "NtkDest has 'is_fanout'" << std::endl;
+
             if (ntk_topo.is_fanout(n) && ntk_topo.fanout_size(n) <= ps.degree)
                 return;
         }
@@ -167,13 +171,19 @@ class fanout_substitution_impl
                           static_cast<int32_t>(ntk_topo.fanout_size(n)) - static_cast<int32_t>(ps.threshold), 0)) /
                       static_cast<double>(std::max(static_cast<int32_t>(ps.degree) - 1, 1))));
 
+        std::cout << "num_fanouts has value " << num_fanouts << std::endl;
+
         auto child = old2new[n];
+
+        std::cout << "accessed old2new[n] with value " << child << std::endl;
 
         if (num_fanouts == 0)
             return;
 
         if (ps.strategy == fanout_substitution_params::substitution_strategy::DEPTH)
         {
+            std::cout << "DEPTH strategy" << std::endl;
+
             std::queue<mockturtle::signal<NtkDest>> q{};
             for (auto i = 0u; i < num_fanouts; ++i)
             {
@@ -184,16 +194,32 @@ class fanout_substitution_impl
         }
         else if (ps.strategy == fanout_substitution_params::substitution_strategy::BREADTH)
         {
+            std::cout << "BREADTH strategy" << std::endl;
+
             std::queue<mockturtle::signal<NtkDest>> q{{child}};
+
+            std::cout << "queue initialized" << std::endl;
 
             for (auto f = 0ul; f < num_fanouts; ++f)
             {
+                std::cout << "loop iteration: " << f << std::endl;
+
                 child = q.front();
                 q.pop();
                 child = substituted.create_buf(child);
+
+                std::cout << "created buf: " << child << std::endl;
+
                 for (auto i = 0u; i < ps.degree; ++i) q.push(child);
+
+                std::cout << "added " << ps.degree << " new children to the queue" << std::endl;
             }
+
+            std::cout << "loop done" << std::endl;
+
             available_fanouts[n] = q;
+
+            std::cout << "stored q at available_fanouts[n]" << std::endl;
         }
     }
 
