@@ -19,7 +19,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Creation and usage of constants", "[gate-level]")
+TEST_CASE("Creation and usage of constants", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -52,7 +52,7 @@ TEST_CASE("Creation and usage of constants", "[gate-level]")
     CHECK(!layout.is_complemented(c1));
 }
 
-TEST_CASE("Creation and usage of primary inputs", "[gate-level]")
+TEST_CASE("Creation and usage of primary inputs", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -129,7 +129,7 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level]")
         });
 }
 
-TEST_CASE("Creation and usage of primary outputs", "[gate-level]")
+TEST_CASE("Creation and usage of primary outputs", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -197,7 +197,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level]")
         });
 }
 
-TEST_CASE("Creation of unary operations", "[gate-level]")
+TEST_CASE("Creation of unary operations", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -246,7 +246,7 @@ TEST_CASE("Creation of unary operations", "[gate-level]")
     CHECK(!layout.is_wire(layout.get_node({0, 1})));
 }
 
-TEST_CASE("Creation of binary operations", "[gate-level]")
+TEST_CASE("Creation of binary operations", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -356,7 +356,7 @@ TEST_CASE("Creation of binary operations", "[gate-level]")
     CHECK(!layout.is_dead(xn_node));
 }
 
-TEST_CASE("Creation of ternary operations", "[gate-level]")
+TEST_CASE("Creation of ternary operations", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -392,7 +392,7 @@ TEST_CASE("Creation of ternary operations", "[gate-level]")
     CHECK(!layout.is_wire(layout.get_node({1, 1})));
 }
 
-TEST_CASE("compute functions from AND and NOT gates", "[gate-level]")
+TEST_CASE("compute functions from AND and NOT gates", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -430,7 +430,7 @@ TEST_CASE("compute functions from AND and NOT gates", "[gate-level]")
     CHECK(sim_a1 == (xs[0] & xs[1]));
 }
 
-TEST_CASE("create nodes and compute their functions", "[gate-level]")
+TEST_CASE("create nodes and compute their functions", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -464,7 +464,7 @@ TEST_CASE("create nodes and compute their functions", "[gate-level]")
     CHECK(sim_xor == (xs[0] ^ xs[1]));
 }
 
-TEST_CASE("node and signal iteration", "[gate-level]")
+TEST_CASE("node and signal iteration", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -729,7 +729,7 @@ TEST_CASE("node and signal iteration", "[gate-level]")
     CHECK(mask == 128);
 }
 
-TEST_CASE("Structural properties", "[gate-level]")
+TEST_CASE("Structural properties", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -769,7 +769,7 @@ TEST_CASE("Structural properties", "[gate-level]")
     CHECK(layout.fanout_size(layout.get_node(f2)) == 0);
 }
 
-TEST_CASE("Functional properties", "[gate-level]")
+TEST_CASE("Functional properties", "[gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
@@ -820,7 +820,7 @@ TEST_CASE("Functional properties", "[gate-level]")
     CHECK(layout.is_nor(layout.get_node(no)));
 }
 
-TEST_CASE("Custom node values", "[gate-level]")
+TEST_CASE("Custom node values", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -852,7 +852,7 @@ TEST_CASE("Custom node values", "[gate-level]")
     layout.foreach_node([&](auto n) { CHECK(layout.value(n) == 0); });
 }
 
-TEST_CASE("Visited values", "[gate-level]")
+TEST_CASE("Visited values", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -878,7 +878,7 @@ TEST_CASE("Visited values", "[gate-level]")
     layout.foreach_node([&](auto n) { CHECK(layout.visited(n) == 0); });
 }
 
-TEST_CASE("Crossings", "[gate-level]")
+TEST_CASE("Crossings", "[gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
@@ -923,7 +923,7 @@ TEST_CASE("Crossings", "[gate-level]")
                          });
 }
 
-TEST_CASE("Cardinal operations", "[gate-level]")
+TEST_CASE("Cardinal operations", "[gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 

@@ -11,7 +11,7 @@
 
 using namespace fiction;
 
-TEST_CASE("3-phase 2DDWave", "[clocking scheme]")
+TEST_CASE("3-phase 2DDWave", "[clocking-scheme]")
 {
     CHECK(twoddwave_3_clocking.is_regular());
 
@@ -56,7 +56,7 @@ TEST_CASE("3-phase 2DDWave", "[clocking scheme]")
     CHECK(twoddwave_3_clocking(coord_t{2 + 3, 2 + 3}) == 1);
 }
 
-TEST_CASE("4-phase 2DDWave", "[clocking scheme]")
+TEST_CASE("4-phase 2DDWave", "[clocking-scheme]")
 {
     CHECK(twoddwave_4_clocking.is_regular());
 
@@ -129,7 +129,7 @@ TEST_CASE("4-phase 2DDWave", "[clocking scheme]")
     CHECK(twoddwave_4_clocking(coord_t{3 + 4, 3 + 4}) == 2);
 }
 
-TEST_CASE("4-phase USE", "[clocking scheme]")
+TEST_CASE("4-phase USE", "[clocking-scheme]")
 {
     CHECK(use_4_clocking.is_regular());
 
@@ -202,7 +202,7 @@ TEST_CASE("4-phase USE", "[clocking scheme]")
     CHECK(use_4_clocking(coord_t{3 + 4, 3 + 4}) == 2);
 }
 
-TEST_CASE("4-phase RES", "[clocking scheme]")
+TEST_CASE("4-phase RES", "[clocking-scheme]")
 {
     CHECK(res_4_clocking.is_regular());
 
@@ -275,7 +275,7 @@ TEST_CASE("4-phase RES", "[clocking scheme]")
     CHECK(res_4_clocking(coord_t{3 + 4, 3 + 4}) == 1);
 }
 
-TEST_CASE("3-phase BANCS", "[clocking scheme]")
+TEST_CASE("3-phase BANCS", "[clocking-scheme]")
 {
     CHECK(bancs_3_clocking.is_regular());
 
@@ -356,7 +356,7 @@ TEST_CASE("3-phase BANCS", "[clocking scheme]")
     CHECK(bancs_3_clocking(coord_t{2 + 3, 5 + 6}) == 1);
 }
 
-TEST_CASE("3-phase ToPoliNano", "[clocking scheme]")
+TEST_CASE("3-phase ToPoliNano", "[clocking-scheme]")
 {
     CHECK(topolinano_3_clocking.is_regular());
 
@@ -401,7 +401,7 @@ TEST_CASE("3-phase ToPoliNano", "[clocking scheme]")
     CHECK(topolinano_3_clocking(coord_t{2 + 3, 2 + 3}) == 2);
 }
 
-TEST_CASE("4-phase ToPoliNano", "[clocking scheme]")
+TEST_CASE("4-phase ToPoliNano", "[clocking-scheme]")
 {
     CHECK(topolinano_4_clocking.is_regular());
 
@@ -474,7 +474,7 @@ TEST_CASE("4-phase ToPoliNano", "[clocking scheme]")
     CHECK(topolinano_4_clocking(coord_t{3 + 4, 3 + 4}) == 3);
 }
 
-TEST_CASE("3-phase open clocking", "[clocking scheme]")
+TEST_CASE("3-phase open clocking", "[clocking-scheme]")
 {
     auto open_clocking = open_3_clocking;
 
@@ -528,7 +528,7 @@ TEST_CASE("3-phase open clocking", "[clocking scheme]")
     CHECK(open_clocking(coord_t{3, 3}) == 0);
 }
 
-TEST_CASE("4-phase open clocking", "[clocking scheme]")
+TEST_CASE("4-phase open clocking", "[clocking-scheme]")
 {
     auto open_clocking = open_4_clocking;
 
@@ -582,7 +582,7 @@ TEST_CASE("4-phase open clocking", "[clocking scheme]")
     CHECK(open_clocking(coord_t{3, 3}) == 0);
 }
 
-TEST_CASE("Override clocking", "[clocking scheme]")
+TEST_CASE("Override clocking", "[clocking-scheme]")
 {
     auto twoddwave_clocking = twoddwave_4_clocking;
 
@@ -620,7 +620,7 @@ TEST_CASE("Override clocking", "[clocking scheme]")
     CHECK(twoddwave_clocking(coord_t{3, 3}) == 2);
 }
 
-TEST_CASE("Clocking lookup", "[clocking scheme]")
+TEST_CASE("Clocking lookup", "[clocking-scheme]")
 {
     auto check = [](const std::vector<std::string>& vec, const auto& name)
     {

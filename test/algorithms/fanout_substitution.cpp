@@ -29,7 +29,7 @@ void substitute(const Ntk& ntk, const fanout_substitution_params ps, const uint3
     check_eq(ntk, substituted);
 }
 
-TEST_CASE("Simple fanout substitution", "[algorithms]")
+TEST_CASE("Simple fanout substitution", "[fanout-substitution]")
 {
     const auto top = blueprints::multi_output_and_network<topology_network>();
 
@@ -40,7 +40,7 @@ TEST_CASE("Simple fanout substitution", "[algorithms]")
     substitute(top, ps_breadth, top.size() + 3);
 }
 
-TEST_CASE("Complex fanout substitution", "[algorithms]")
+TEST_CASE("Complex fanout substitution", "[fanout-substitution]")
 {
     const auto top = blueprints::maj4_network<topology_network>();
     CHECK(!is_fanout_substituted(top));
@@ -56,7 +56,7 @@ TEST_CASE("Complex fanout substitution", "[algorithms]")
     substitute(aig, ps_breadth, aig.size() + 41);
 }
 
-TEST_CASE("Degree and threshold in fanout substitution", "[algorithms]")
+TEST_CASE("Degree and threshold in fanout substitution", "[fanout-substitution]")
 {
     const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
 
@@ -67,7 +67,7 @@ TEST_CASE("Degree and threshold in fanout substitution", "[algorithms]")
     substitute(aig, ps_22, aig.size() + 34);
 }
 
-TEST_CASE("Consistent network size after multiple fanout substitutions", "[algorithms]")
+TEST_CASE("Consistent network size after multiple fanout substitutions", "[fanout-substitution]")
 {
     const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
 
@@ -79,7 +79,7 @@ TEST_CASE("Consistent network size after multiple fanout substitutions", "[algor
     CHECK(substituted.size() == subsubsubsubstituted.size());
 }
 
-TEST_CASE("Consistent fanout substitution after balancing", "[algorithms]")
+TEST_CASE("Consistent fanout substitution after balancing", "[fanout-substitution]")
 {
     const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
 

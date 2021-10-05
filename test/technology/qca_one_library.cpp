@@ -5,15 +5,15 @@
 #include "../utils/blueprints/layout_blueprints.hpp"
 #include "catch.hpp"
 
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 
 using namespace fiction;
 
-TEST_CASE("Setting up input ports and gates", "[qca-one]")
+TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
@@ -54,7 +54,7 @@ TEST_CASE("Setting up input ports and gates", "[qca-one]")
     CHECK(qca_one_library::set_up_gate(layout, {2, 2}) == qca_one_library::rotate_270(primary_output_port));
 }
 
-TEST_CASE("Setting up wires", "[qca-one]")
+TEST_CASE("Setting up wires", "[qca-one-library]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
@@ -101,7 +101,7 @@ TEST_CASE("Setting up wires", "[qca-one]")
     CHECK(qca_one_library::set_up_gate(layout, {3, 2}) == qca_one_library::rotate_270(primary_output_port));
 }
 
-TEST_CASE("Setting up fanouts", "[qca-one]")
+TEST_CASE("Setting up fanouts", "[qca-one-library]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
 
