@@ -64,25 +64,29 @@ class unrecognized_cell_definition_exception : public std::exception
 namespace detail
 {
 
-namespace fqca_regex
+namespace qca_stack
 {
 
-static std::regex white_space{R"(\s*)"};
-static std::regex comment{R"(\[.*\]\s*$)"};
-static std::regex layer_separator{R"([= *]+\s*$)"};
-static std::regex cell_definition_input{R"(-input$)"};
-static std::regex cell_definition_output{R"(-output$)"};
-static std::regex cell_definition_propagate{R"(-propagate$)"};
-static std::regex cell_definition_id{R"([(a-zA-Z0-9_)]\:$)"};     // group 1 is the id
-static std::regex cell_definition_label{R"(-label=\"(.*)\"$)"};   // group 1 is the label
-static std::regex cell_definition_clock{R"(-clock=([0-9])$)"};    // group 1 is the clock number
-static std::regex cell_definition_number{R"(-number=([0-9])$)"};  // group 1 is the number
-static std::regex cell_definition_offset{
-    R"(-offset=\((-?[0-9]\d*(?:\.\d+)?),(-?[0-9]\d*(?:\.\d+)?),(-?[0-9]\d*(?:\.\d+)?)\)$)"};  // group 1, 2, and 3 are
-                                                                                              // the x, y, and z offset
-                                                                                              // respectively
+/* Regex */
 
-}  // namespace fqca_regex
+static const std::regex re_white_space{R"(\s*)"};
+static const std::regex re_comment{R"(\[.*\]\s*$)"};
+static const std::regex re_layer_separator{R"([= *]+\s*$)"};
+static const std::regex re_cell_definition_id{R"((\w)\:$)"};              // group 1 is the id
+static const std::regex re_cell_definition_label{R"(-label=\"(.*)\"$)"};  // group 1 is the label
+static const std::regex re_cell_definition_clock{R"(-clock=(\d)$)"};      // group 1 is the clock number
+static const std::regex re_cell_definition_number{R"(-number=(\d)$)"};    // group 1 is the number
+static const std::regex re_cell_definition_offset{
+    R"(-offset=\((-?\d*(?:\.\d+)?),(-?\d*(?:\.\d+)?),(-?\d*(?:\.\d+)?)\)$)"};  // group 1, 2, and 3 are the x, y, and z
+                                                                               // offset respectively
+
+/* Strings */
+
+static constexpr const char* cell_definition_input     = "-input";
+static constexpr const char* cell_definition_output    = "-output";
+static constexpr const char* cell_definition_propagate = "-propagate";
+
+}  // namespace qca_stack
 
 template <typename Lyt>
 class read_fqca_layout_impl
@@ -102,12 +106,12 @@ class read_fqca_layout_impl
                 if (parsing_status == fqca_section::LAYOUT_DEFINITION)
                 {
                     // if line is a comment
-                    if (std::regex_match(line, fqca_regex::comment))
+                    if (std::regex_match(line, qca_stack::re_comment))
                     {
                         continue;
                     }
                     // if line is a layer separator
-                    else if (std::regex_match(line, fqca_regex::layer_separator))
+                    else if (std::regex_match(line, qca_stack::re_layer_separator))
                     {
                         // reset cell row
                         current_cell_row = 0ull;
@@ -140,13 +144,13 @@ class read_fqca_layout_impl
                 else if (parsing_status == fqca_section::CELL_DEFINITION)
                 {
                     // remove all white space from the line to make regex matching easier and more robust
-                    line = std::regex_replace(line, fqca_regex::white_space, "");
+                    line = std::regex_replace(line, qca_stack::re_white_space, "");
 
                     // if line indicates a new cell id
-                    if (std::smatch sm; std::regex_match(line, sm, fqca_regex::cell_definition_id))
+                    if (std::smatch sm; std::regex_match(line, sm, qca_stack::re_cell_definition_id))
                     {
                         // the cell id is captured in the first regex group, whose result is a single character
-                        const auto cell_id = sm.str(0)[0];
+                        const auto cell_id = sm.str(1)[0];
 
                         if (auto it = cell_label_map.find(cell_id); it != cell_label_map.cend())
                         {
@@ -158,17 +162,17 @@ class read_fqca_layout_impl
                         }
                     }
                     // if line indicates a primary input flag
-                    else if (std::regex_match(line, fqca_regex::cell_definition_input))
+                    else if (line == qca_stack::cell_definition_input)
                     {
                         lyt.assign_cell_type(current_labeled_cell, technology<Lyt>::cell_type::INPUT);
                     }
                     // if line indicates a primary output flag
-                    else if (std::regex_match(line, fqca_regex::cell_definition_output))
+                    else if (line == qca_stack::cell_definition_output)
                     {
                         lyt.assign_cell_type(current_labeled_cell, technology<Lyt>::cell_type::OUTPUT);
                     }
                     // if line indicates a cell label
-                    else if (std::regex_match(line, sm, fqca_regex::cell_definition_label))
+                    else if (std::regex_match(line, sm, qca_stack::re_cell_definition_label))
                     {
                         // the cell label is captured in the first regex group
                         const auto cell_label = sm.str(1);
@@ -176,7 +180,7 @@ class read_fqca_layout_impl
                         lyt.assign_cell_name(current_labeled_cell, cell_label);
                     }
                     // if line indicates a cell label
-                    else if (std::regex_match(line, sm, fqca_regex::cell_definition_clock))
+                    else if (std::regex_match(line, sm, qca_stack::re_cell_definition_clock))
                     {
                         // the clock number is captured in the first regex group, whose result is a single number
                         const auto clock_number_char = sm.str(1)[0];
@@ -184,17 +188,17 @@ class read_fqca_layout_impl
                         lyt.assign_clock_number(current_labeled_cell, to_clock_number(clock_number_char));
                     }
                     // if line indicates a propagate flag
-                    else if (std::regex_match(line, fqca_regex::cell_definition_propagate))
+                    else if (line == qca_stack::cell_definition_propagate)
                     {
                         // 'propagate' is not supported
                     }
                     // if line indicates a number definition
-                    else if (std::regex_match(line, sm, fqca_regex::cell_definition_number))
+                    else if (std::regex_match(line, sm, qca_stack::re_cell_definition_number))
                     {
                         // 'number' is not supported
                     }
                     // if line indicates an offset definition
-                    else if (std::regex_match(line, sm, fqca_regex::cell_definition_offset))
+                    else if (std::regex_match(line, sm, qca_stack::re_cell_definition_offset))
                     {
                         // 'offset' is not supported
                     }
