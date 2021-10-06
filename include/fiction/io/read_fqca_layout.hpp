@@ -8,6 +8,8 @@
 #include "../technology/cell_technologies.hpp"
 #include "../traits.hpp"
 
+#include <fmt/format.h>
+
 #include <cctype>
 #include <fstream>
 #include <iostream>
