@@ -72,7 +72,7 @@ namespace qca_stack
 
 /* Regex */
 
-static const std::regex re_white_space{R"(\s*)"};
+static const std::regex re_white_space{R"(\s)"};
 static const std::regex re_comment{R"(\[.*\]\s*$)"};
 static const std::regex re_layer_separator{R"([= *]+\s*$)"};
 static const std::regex re_cell_definition_id{R"((\w)\:$)"};              // group 1 is the id
