@@ -8,11 +8,8 @@
 #include "../technology/cell_technologies.hpp"
 #include "../traits.hpp"
 
-#include <fmt/format.h>
-
 #include <cctype>
 #include <fstream>
-#include <iostream>
 #include <istream>
 #include <regex>
 #include <sstream>
@@ -104,7 +101,6 @@ class read_fqca_layout_impl
         {
             // remove all white space from the line to make regex matching easier and more robust
             const auto substituted_line = std::regex_replace(line, qca_stack::re_white_space, "");
-            std::cout << fmt::format("substituted line {}: '{}'", line_number, substituted_line) << std::endl;
 
             // skip empty lines
             if (!line.empty())
@@ -165,8 +161,6 @@ class read_fqca_layout_impl
                             }
                             else
                             {
-                                std::cout << "undefined cell label" << std::endl;
-                                std::cout << fmt::format("line {}: '{}'", line_number, substituted_line) << std::endl;
                                 throw undefined_cell_label_exception(cell_id);
                             }
                         }
@@ -213,8 +207,6 @@ class read_fqca_layout_impl
                         }
                         else
                         {
-                            std::cout << "undefined cell definition" << std::endl;
-                            std::cout << fmt::format("line {}: '{}'", line_number, substituted_line) << std::endl;
                             throw unrecognized_cell_definition_exception(line_number);
                         }
                     }
@@ -290,8 +282,6 @@ class read_fqca_layout_impl
         }
         else
         {
-            std::cout << "unsupported character" << std::endl;
-            std::cout << fmt::format("cell: {}, char: '{}'", cell, c) << std::endl;
             throw unsupported_character_exception(c);
         }
 
