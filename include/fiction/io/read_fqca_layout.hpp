@@ -162,7 +162,7 @@ class read_fqca_layout_impl
                         else
                         {
                             std::cout << "undefined cell label" << std::endl;
-                            std::cout << "line: " << line << std::endl;
+                            std::cout << fmt::format("line {}: '{}'", line_number, line) << std::endl;
                             throw undefined_cell_label_exception(cell_id);
                         }
                     }
@@ -210,7 +210,7 @@ class read_fqca_layout_impl
                     else
                     {
                         std::cout << "undefined cell definition" << std::endl;
-                        std::cout << "line: " << line << std::endl;
+                        std::cout << fmt::format("line {}: '{}'", line_number, line) << std::endl;
                         throw unrecognized_cell_definition_exception(line_number);
                     }
                 }
@@ -286,7 +286,7 @@ class read_fqca_layout_impl
         else
         {
             std::cout << "unsupported character" << std::endl;
-            std::cout << "char: " << c << std::endl;
+            std::cout << fmt::format("cell: {}, char: '{}'", cell, c) << std::endl;
             throw unsupported_character_exception(c);
         }
 
