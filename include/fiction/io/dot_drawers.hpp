@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <array>
+#include <string>
 
 namespace fiction
 {

@@ -15,6 +15,7 @@
 #include "cmd/energy.hpp"
 #include "cmd/equiv.hpp"
 #include "cmd/fanouts.hpp"
+#include "cmd/fqca.hpp"
 #include "cmd/gates.hpp"
 #include "cmd/map.hpp"
 #include "cmd/ortho.hpp"

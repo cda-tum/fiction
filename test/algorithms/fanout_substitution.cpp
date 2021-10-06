@@ -29,6 +29,26 @@ void substitute(const Ntk& ntk, const fanout_substitution_params ps, const uint3
     check_eq(ntk, substituted);
 }
 
+
+TEST_CASE("Name conservation", "[fanout-substitution]")
+{
+    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
+    maj.set_network_name("maj");
+
+    const auto substituted_maj = fanout_substitution<mockturtle::names_view<fiction::topology_network>>(maj);
+
+    // network name
+    CHECK(substituted_maj.get_network_name() == "maj");
+
+    // PI names
+    CHECK(substituted_maj.get_name(substituted_maj.make_signal(2)) == "a");
+    CHECK(substituted_maj.get_name(substituted_maj.make_signal(3)) == "b");
+    CHECK(substituted_maj.get_name(substituted_maj.make_signal(4)) == "c");
+
+    // PO names
+    CHECK(substituted_maj.get_output_name(0) == "f");
+}
+
 TEST_CASE("Simple fanout substitution", "[fanout-substitution]")
 {
     const auto top = blueprints::multi_output_and_network<topology_network>();

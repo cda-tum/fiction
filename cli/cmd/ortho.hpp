@@ -58,23 +58,15 @@ class ortho_command : public command
             return;
         }
 
-        const auto get_name = [](auto&& ntk_ptr) -> std::string { return ntk_ptr->get_network_name(); };
-
         const auto orthogonal_physical_design = [this](auto&& ntk_ptr)
-        {
-            using gate_layout = fiction::gate_level_layout<
-                fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::coord_t>>>>;
-
-            return fiction::orthogonal<gate_layout>(*ntk_ptr, ps, &st);
-        };
+        { return fiction::orthogonal<fiction::gate_clk_lyt>(*ntk_ptr, ps, &st); };
 
         const auto& ntk_ptr = s.current();
 
         try
         {
-            const auto lyt = std::visit(orthogonal_physical_design, ntk_ptr);
             store<fiction::gate_layout_t>().extend() =
-                std::make_shared<fiction::gate_clk_lyt>(lyt, std::visit(get_name, ntk_ptr));
+                std::make_shared<fiction::gate_clk_lyt>(std::visit(orthogonal_physical_design, ntk_ptr));
 
             if (is_set("verbose"))
             {

@@ -44,7 +44,7 @@ class apply_gate_library_impl
                 {
                     const auto t = gate_lyt.get_tile(n);
                     assign_gate({t.x * GateLibrary::gate_x_size(), t.y * GateLibrary::gate_y_size(), t.z},
-                                GateLibrary::set_up_gate(gate_lyt, t));
+                                GateLibrary::set_up_gate(gate_lyt, t), n);
                 }
 #if (PROGRESS_BARS)
                 // update progress
@@ -57,9 +57,9 @@ class apply_gate_library_impl
             GateLibrary::assign_via_cells(cell_lyt);
         }
 
-        if constexpr (mockturtle::has_get_network_name_v<GateLyt> && fiction::has_set_layout_name_v<CellLyt>)
+        if constexpr (has_get_layout_name_v<GateLyt> && has_set_layout_name_v<CellLyt>)
         {
-            cell_lyt.set_layout_name(gate_lyt.get_network_name());
+            cell_lyt.set_layout_name(gate_lyt.get_layout_name());
         }
 
         return cell_lyt;
@@ -69,7 +69,8 @@ class apply_gate_library_impl
     GateLyt gate_lyt;
     CellLyt cell_lyt;
 
-    void assign_gate(const typename CellLyt::cell& c, const typename GateLibrary::fcn_gate& g)
+    void assign_gate(const typename CellLyt::cell& c, const typename GateLibrary::fcn_gate& g,
+                     const mockturtle::node<GateLyt>& n)
     {
         auto start_x = c.x;
         auto start_y = c.y;
@@ -83,6 +84,12 @@ class apply_gate_library_impl
                 const typename CellLyt::cell_type type{g[y][x]};
 
                 cell_lyt.assign_cell_type(pos, type);
+
+                // set IO names
+                if (technology<CellLyt>::is_input_cell(type) || technology<CellLyt>::is_output_cell(type))
+                {
+                    cell_lyt.assign_cell_name(pos, gate_lyt.get_name(n));
+                }
             }
         }
     }

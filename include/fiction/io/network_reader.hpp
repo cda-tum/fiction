@@ -12,6 +12,8 @@
 #include <mockturtle/io/aiger_reader.hpp>
 #include <mockturtle/io/blif_reader.hpp>
 #include <mockturtle/io/verilog_reader.hpp>
+#include <mockturtle/networks/aig.hpp>
+#include <mockturtle/networks/mig.hpp>
 
 #include <algorithm>
 #include <array>
@@ -167,7 +169,9 @@ class network_reader
             if (lorina::diagnostic_engine diag{&client}; rfun(file, Reader{ntk}, &diag) == lorina::return_code::success)
             {
                 const auto name = std::filesystem::path{file}.stem().string();
-                networks.push_back(std::make_shared<Ntk>(ntk, name));
+                ntk.set_network_name(name);
+
+                networks.push_back(std::make_shared<Ntk>(ntk));
             }
             else
             {

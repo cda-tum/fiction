@@ -20,6 +20,7 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/views/fanout_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include <type_traits>
 
@@ -123,4 +124,25 @@ TEST_CASE("Gate library application", "[orthogonal]")
 
     // constant input network
     check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
+}
+
+TEST_CASE("Name conservation", "[algorithms]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+
+    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>();
+    maj.set_network_name("maj");
+
+    const auto layout = orthogonal<gate_layout>(maj);
+
+    // network name
+    CHECK(layout.get_layout_name() == "maj");
+
+    // PI names
+    CHECK(layout.get_name(2) == "a");  // first PI
+    CHECK(layout.get_name(3) == "b");  // second PI
+    CHECK(layout.get_name(4) == "c");  // third PI
+
+    // PO names
+    CHECK(layout.get_output_name(0) == "f");
 }

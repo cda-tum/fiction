@@ -244,7 +244,21 @@ class equiv_command : public command
             return true;
         };
 
-        const auto get_name = [](auto&& ntk_or_lyt_ptr) { return ntk_or_lyt_ptr->get_network_name(); };
+        const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string
+        {
+            using NtkOrLyt = typename std::decay_t<decltype(ntk_or_lyt_ptr)>::element_type;
+
+            if constexpr (mockturtle::has_get_network_name_v<NtkOrLyt>)
+            {
+                return ntk_or_lyt_ptr->get_network_name();
+            }
+            else if constexpr (fiction::has_get_layout_name_v<NtkOrLyt>)
+            {
+                return ntk_or_lyt_ptr->get_layout_name();
+            }
+
+            return {};
+        };
 
         bool success = std::visit(equiv_check, ntk_or_lyt_variant1, ntk_or_lyt_variant_2);
 

@@ -130,8 +130,21 @@ class simulate_command : public command
     template <typename NtkOrLytVariant>
     void perform_simulation(const NtkOrLytVariant& network_or_layout_variant)
     {
+        const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string
+        {
+            using NtkOrLyt = typename std::decay_t<decltype(ntk_or_lyt_ptr)>::element_type;
 
-        const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return ntk_or_lyt_ptr->get_network_name(); };
+            if constexpr (mockturtle::has_get_network_name_v<NtkOrLyt>)
+            {
+                return ntk_or_lyt_ptr->get_network_name();
+            }
+            else if constexpr (fiction::has_get_layout_name_v<NtkOrLyt>)
+            {
+                return ntk_or_lyt_ptr->get_layout_name();
+            }
+
+            return {};
+        };
 
         const auto store_po_names = [this](auto&& ntk_or_lyt_ptr)
         {

@@ -197,6 +197,48 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level-layout]")
         });
 }
 
+TEST_CASE("Node names", "[gate-level-layout]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+
+    auto layout = blueprints::or_not_gate_layout<gate_layout>();
+
+    CHECK(layout.has_name(layout.get_node({1, 0})));
+    CHECK(layout.has_name(layout.get_node({0, 1})));
+    CHECK(layout.has_name(layout.get_node({2, 2})));
+
+    CHECK(!layout.has_name(layout.get_node({0, 0})));
+    CHECK(!layout.has_name(layout.get_node({1, 1})));
+    CHECK(!layout.has_name(layout.get_node({1, 2})));
+
+    CHECK(layout.has_input_name(0));
+    CHECK(layout.has_input_name(1));
+    CHECK(!layout.has_input_name(2));
+    CHECK(!layout.has_input_name(3));
+
+    CHECK(layout.has_output_name(0));
+    CHECK(!layout.has_output_name(1));
+
+    CHECK(layout.get_name(layout.get_node({1, 0})) == "x1");
+    CHECK(layout.get_name(layout.get_node({0, 1})) == "x2");
+    CHECK(layout.get_name(layout.get_node({2, 2})) == "f1");
+    CHECK(layout.get_name(layout.get_node({0, 0})).empty());
+
+    CHECK(layout.get_input_name(0) == "x1");
+    CHECK(layout.get_input_name(1) == "x2");
+    CHECK(layout.get_output_name(0) == "f1");
+
+    layout.set_name(layout.get_node({1, 1}), "or");
+
+    CHECK(layout.has_name(layout.get_node({1, 1})));
+    CHECK(layout.get_name(layout.get_node({1, 1})) == "or");
+
+    layout.set_name(layout.get_node({2, 2}), "");
+
+    CHECK(!layout.has_name(layout.get_node({2, 2})));
+    CHECK(!layout.has_output_name(0));
+}
+
 TEST_CASE("Creation of unary operations", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp

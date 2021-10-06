@@ -1,11 +1,11 @@
 //
-// Created by marcel on 24.10.19.
+// Created by marcel on 24.09.21.
 //
 
-#ifndef FICTION_CMD_QCA_HPP
-#define FICTION_CMD_QCA_HPP
+#ifndef FICTION_FQCA_HPP
+#define FICTION_FQCA_HPP
 
-#include <fiction/io/write_qca_layout.hpp>
+#include <fiction/io/write_fqca_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -21,11 +21,11 @@
 namespace alice
 {
 /**
- * Generates a QCADesigner file for the current cell layout in store and writes it to the given path.
+ * Generates a QCA-STACK file for the current cell layout in store and writes it to the given path.
  *
- * QCADesigner is available at: https://waluslab.ece.ubc.ca/qcadesigner/
+ * QCA-STACK is available at: https://github.com/wlambooy/QCA-STACK
  */
-class qca_command : public command
+class fqca_command : public command
 {
   public:
     /**
@@ -33,18 +33,17 @@ class qca_command : public command
      *
      * @param e alice::environment that specifies stores etc.
      */
-    explicit qca_command(const environment::ptr& e) :
-            command(e, "Generates a QCADesigner file for the current QCA cell layout in store. "
-                       "QCADesigner can be used to perform physical simulations.")
+    explicit fqca_command(const environment::ptr& e) :
+            command(e, "Generates a QCA-STACK file for the current QCA cell layout in store. "
+                       "QCA-STACK can be used to perform discrete simulations and layout stacking.")
     {
-        add_option("filename", filename, "QCA file name");
-        add_flag("--no_via_layers,-v", ps.create_inter_layer_via_cells,
-                 "Do not insert additional inter-layer via cells");
+        add_option("filename", filename, "FQCA file name");
+        add_flag("--via_layers,-v", ps.create_inter_layer_via_cells, "Add additional inter-layer via cells");
     }
 
   protected:
     /**
-     * Function to perform the output call. Generates a QCADesigner file.
+     * Function to perform the output call. Generates a QCA-STACK file.
      */
     void execute() override
     {
@@ -59,25 +58,25 @@ class qca_command : public command
             return;
         }
 
-        const auto get_name = [](auto&& lyt_ptr) -> std::string { return lyt_ptr->get_layout_name(); };
+        const auto get_name = [](auto&& lyt) -> std::string { return lyt->get_layout_name(); };
 
-        const auto write_qca = [this, &get_name](auto&& lyt_ptr)
+        const auto write_fqca = [this, &get_name](auto&& lyt)
         {
-            using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
+            using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
 
             if constexpr (std::is_same_v<fiction::technology<Lyt>, fiction::qca_technology>)
             {
-                fiction::write_qca_layout(*lyt_ptr, filename, ps);
+                fiction::write_fqca_layout(*lyt, filename, ps);
             }
             else
             {
-                env->out() << fmt::format("[e] {}'s cell technology is not QCA but {}", get_name(lyt_ptr),
+                env->out() << fmt::format("[e] {}'s cell technology is not QCA but {}", get_name(lyt),
                                           fiction::tech_impl_name<fiction::technology<Lyt>>)
                            << std::endl;
             }
         };
 
-        const auto& lyt = s.current();
+        auto lyt = s.current();
 
         // error case: do not override directories
         if (std::filesystem::is_directory(filename))
@@ -93,14 +92,18 @@ class qca_command : public command
             filename = std::visit(get_name, lyt);
         }
         // add .qca file extension if necessary
-        if (std::filesystem::path(filename).extension() != ".qca")
+        if (std::filesystem::path(filename).extension() != ".fqca")
         {
-            filename += ".qca";
+            filename += ".fqca";
         }
 
         try
         {
-            std::visit(write_qca, lyt);
+            std::visit(write_fqca, lyt);
+        }
+        catch (const fiction::out_of_cell_names_exception&)
+        {
+            env->out() << "[e] layout contains more named cells than QCA-STACK's file format supports" << std::endl;
         }
         catch (const std::ofstream::failure& e)
         {
@@ -116,15 +119,15 @@ class qca_command : public command
 
   private:
     /**
-     * File name to write the QCA file into.
+     * File name to write the FQCA file into.
      */
     std::string filename;
 
-    fiction::write_qca_layout_params ps{};
+    fiction::write_fqca_layout_params ps{};
 };
 
-ALICE_ADD_COMMAND(qca, "I/O")
+ALICE_ADD_COMMAND(fqca, "I/O")
 
 }  // namespace alice
 
-#endif  // FICTION_CMD_QCA_HPP
+#endif  // FICTION_FQCA_HPP
