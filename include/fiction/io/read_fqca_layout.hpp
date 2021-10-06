@@ -69,8 +69,8 @@ namespace qca_stack
 
 /* Regex */
 
-static const std::regex re_white_space{R"(\s*)"};
-static const std::regex re_comment{R"(\[.*\]\s*$)"};
+static const std::regex re_white_space{R"(\s)"};
+static const std::regex re_comment{R"(\[.*\]$)"};
 static const std::regex re_layer_separator{R"([= *]+\s*$)"};
 static const std::regex re_cell_definition_id{R"((\w)\:$)"};              // group 1 is the id
 static const std::regex re_cell_definition_label{R"(-label=\"(.*)\"$)"};  // group 1 is the label
@@ -96,9 +96,12 @@ class read_fqca_layout_impl
 
     Lyt run()
     {
-        uint64_t line_number{0ull};
+        uint64_t line_number{1ull};
         for (std::string line{}; std::getline(is, line); ++line_number)
         {
+            // remove all white space from the line to make regex matching easier and more robust
+            const auto substituted_line = std::regex_replace(line, qca_stack::re_white_space, "");
+
             // skip empty lines
             if (!line.empty())
             {
@@ -106,7 +109,7 @@ class read_fqca_layout_impl
                 if (parsing_status == fqca_section::LAYOUT_DEFINITION)
                 {
                     // if line is a comment
-                    if (std::regex_match(line, qca_stack::re_comment))
+                    if (std::regex_match(substituted_line, qca_stack::re_comment))
                     {
                         continue;
                     }
@@ -122,7 +125,7 @@ class read_fqca_layout_impl
                     else
                     {
                         // section delimiter
-                        if (line == "$")
+                        if (substituted_line == "$")
                         {
                             parsing_status = fqca_section::CELL_DEFINITION;
                         }
@@ -143,68 +146,69 @@ class read_fqca_layout_impl
                 // ... or the cell definition?
                 else if (parsing_status == fqca_section::CELL_DEFINITION)
                 {
-                    // remove all white space from the line to make regex matching easier and more robust
-                    line = std::regex_replace(line, qca_stack::re_white_space, "");
-
-                    // if line indicates a new cell id
-                    if (std::smatch sm; std::regex_match(line, sm, qca_stack::re_cell_definition_id))
+                    // skip empty substituted lines
+                    if (!substituted_line.empty())
                     {
-                        // the cell id is captured in the first regex group, whose result is a single character
-                        const auto cell_id = sm.str(1)[0];
-
-                        if (auto it = cell_label_map.find(cell_id); it != cell_label_map.cend())
+                        // if line indicates a new cell id
+                        if (std::smatch sm; std::regex_match(substituted_line, sm, qca_stack::re_cell_definition_id))
                         {
-                            current_labeled_cell = it->second;
+                            // the cell id is captured in the first regex group, whose result is a single character
+                            const auto cell_id = sm.str(1)[0];
+
+                            if (auto it = cell_label_map.find(cell_id); it != cell_label_map.cend())
+                            {
+                                current_labeled_cell = it->second;
+                            }
+                            else
+                            {
+                                throw undefined_cell_label_exception(cell_id);
+                            }
+                        }
+                        // if line indicates a primary input flag
+                        else if (substituted_line == qca_stack::cell_definition_input)
+                        {
+                            lyt.assign_cell_type(current_labeled_cell, technology<Lyt>::cell_type::INPUT);
+                        }
+                        // if line indicates a primary output flag
+                        else if (substituted_line == qca_stack::cell_definition_output)
+                        {
+                            lyt.assign_cell_type(current_labeled_cell, technology<Lyt>::cell_type::OUTPUT);
+                        }
+                        // if line indicates a cell label
+                        else if (std::regex_match(substituted_line, sm, qca_stack::re_cell_definition_label))
+                        {
+                            // the cell label is captured in the first regex group
+                            const auto cell_label = sm.str(1);
+
+                            lyt.assign_cell_name(current_labeled_cell, cell_label);
+                        }
+                        // if line indicates a cell label
+                        else if (std::regex_match(substituted_line, sm, qca_stack::re_cell_definition_clock))
+                        {
+                            // the clock number is captured in the first regex group, whose result is a single number
+                            const auto clock_number_char = sm.str(1)[0];
+
+                            lyt.assign_clock_number(current_labeled_cell, to_clock_number(clock_number_char));
+                        }
+                        // if line indicates a propagate flag
+                        else if (substituted_line == qca_stack::cell_definition_propagate)
+                        {
+                            // 'propagate' is not supported
+                        }
+                        // if line indicates a number definition
+                        else if (std::regex_match(substituted_line, sm, qca_stack::re_cell_definition_number))
+                        {
+                            // 'number' is not supported
+                        }
+                        // if line indicates an offset definition
+                        else if (std::regex_match(substituted_line, sm, qca_stack::re_cell_definition_offset))
+                        {
+                            // 'offset' is not supported
                         }
                         else
                         {
-                            throw undefined_cell_label_exception(cell_id);
+                            throw unrecognized_cell_definition_exception(line_number);
                         }
-                    }
-                    // if line indicates a primary input flag
-                    else if (line == qca_stack::cell_definition_input)
-                    {
-                        lyt.assign_cell_type(current_labeled_cell, technology<Lyt>::cell_type::INPUT);
-                    }
-                    // if line indicates a primary output flag
-                    else if (line == qca_stack::cell_definition_output)
-                    {
-                        lyt.assign_cell_type(current_labeled_cell, technology<Lyt>::cell_type::OUTPUT);
-                    }
-                    // if line indicates a cell label
-                    else if (std::regex_match(line, sm, qca_stack::re_cell_definition_label))
-                    {
-                        // the cell label is captured in the first regex group
-                        const auto cell_label = sm.str(1);
-
-                        lyt.assign_cell_name(current_labeled_cell, cell_label);
-                    }
-                    // if line indicates a cell label
-                    else if (std::regex_match(line, sm, qca_stack::re_cell_definition_clock))
-                    {
-                        // the clock number is captured in the first regex group, whose result is a single number
-                        const auto clock_number_char = sm.str(1)[0];
-
-                        lyt.assign_clock_number(current_labeled_cell, to_clock_number(clock_number_char));
-                    }
-                    // if line indicates a propagate flag
-                    else if (line == qca_stack::cell_definition_propagate)
-                    {
-                        // 'propagate' is not supported
-                    }
-                    // if line indicates a number definition
-                    else if (std::regex_match(line, sm, qca_stack::re_cell_definition_number))
-                    {
-                        // 'number' is not supported
-                    }
-                    // if line indicates an offset definition
-                    else if (std::regex_match(line, sm, qca_stack::re_cell_definition_offset))
-                    {
-                        // 'offset' is not supported
-                    }
-                    else
-                    {
-                        throw unrecognized_cell_definition_exception(line_number);
                     }
                 }
             }
