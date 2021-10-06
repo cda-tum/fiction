@@ -8,6 +8,8 @@
 #include "../technology/cell_technologies.hpp"
 #include "../traits.hpp"
 
+#include <lorina/detail/utils.hpp>
+
 #include <cctype>
 #include <fstream>
 #include <iostream>
@@ -100,8 +102,8 @@ class read_fqca_layout_impl
         uint64_t line_number{0ull};
         for (std::string line{}; std::getline(is, line); ++line_number)
         {
-            // skip empty lines
-            if (!line.empty())
+            // skip empty lines (trimmed first to remove whitespace)
+            if (!lorina::detail::trim_copy(line).empty())
             {
                 // are we currently parsing the layout definition...
                 if (parsing_status == fqca_section::LAYOUT_DEFINITION)
