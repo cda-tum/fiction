@@ -10,6 +10,7 @@
 
 #include <cctype>
 #include <fstream>
+#include <iostream>
 #include <istream>
 #include <regex>
 #include <sstream>
