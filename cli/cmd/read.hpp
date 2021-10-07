@@ -94,8 +94,8 @@ class read_command : public command
                 {
                     try
                     {
-                        store<fiction::cell_layout_t>().extend() = std::make_shared<fiction::qca_cell_clk_lyt>(
-                            fiction::read_fqca_layout<fiction::qca_cell_clk_lyt>(filename));
+                        store<fiction::cell_layout_t>().extend() = std::make_shared<fiction::stacked_qca_cell_clk_lyt>(
+                            fiction::read_fqca_layout<fiction::stacked_qca_cell_clk_lyt>(filename));
                     }
                     catch (const fiction::unsupported_character_exception& e)
                     {
