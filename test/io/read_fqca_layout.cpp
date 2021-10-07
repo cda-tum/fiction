@@ -17,8 +17,6 @@ using namespace fiction;
 
 TEST_CASE("Read empty layout", "[fqca]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
-
     static constexpr const char* fqca_layout = "[ empty layout ]\n"
                                                "\n"
                                                "= = = \n"
@@ -41,18 +39,30 @@ TEST_CASE("Read empty layout", "[fqca]")
 
     std::istringstream layout_stream{fqca_layout};
 
-    const auto layout = read_fqca_layout<qca_layout>(layout_stream);
+    const auto check = [](const auto& lyt)
+    {
+        CHECK(lyt.x() == 0);
+        CHECK(lyt.y() == 0);
+        CHECK(lyt.area() == 1);
+        CHECK(lyt.is_empty_cell({0, 0}));
+    };
 
-    CHECK(layout.x() == 0);
-    CHECK(layout.y() == 0);
-    CHECK(layout.area() == 1);
-    CHECK(layout.is_empty_cell({0, 0}));
+    SECTION("Cartesian layout")
+    {
+        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
+
+        check(read_fqca_layout<qca_layout>(layout_stream));
+    }
+    SECTION("Stacked layout")
+    {
+        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+
+        check(read_fqca_layout<qca_layout>(layout_stream));
+    }
 }
 
 TEST_CASE("Read single-layer AND gate", "[fqca]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
-
     static constexpr const char* fqca_layout = "[ AND ]\n"
                                                "\n"
                                                "= = = = = \n"
@@ -84,42 +94,54 @@ TEST_CASE("Read single-layer AND gate", "[fqca]")
 
     std::istringstream layout_stream{fqca_layout};
 
-    const auto layout = read_fqca_layout<qca_layout>(layout_stream);
+    const auto check = [](const auto& lyt)
+    {
+        CHECK(lyt.x() == 4);
+        CHECK(lyt.y() == 4);
+        CHECK(lyt.area() == 25);
+        //    CHECK(layout.get_layout_name() == "AND");
 
-    CHECK(layout.x() == 4);
-    CHECK(layout.y() == 4);
-    CHECK(layout.area() == 25);
-    //    CHECK(layout.get_layout_name() == "AND");
+        CHECK(lyt.get_cell_type({0, 2}) == qca_technology::cell_type::INPUT);
+        CHECK(lyt.get_cell_type({2, 4}) == qca_technology::cell_type::INPUT);
+        CHECK(lyt.get_cell_type({2, 0}) == qca_technology::cell_type::CONST_0);
+        CHECK(lyt.get_cell_type({2, 1}) == qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({2, 2}) == qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({2, 3}) == qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({1, 2}) == qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({3, 2}) == qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({4, 2}) == qca_technology::cell_type::OUTPUT);
 
-    CHECK(layout.get_cell_type({0, 2}) == qca_technology::cell_type::INPUT);
-    CHECK(layout.get_cell_type({2, 4}) == qca_technology::cell_type::INPUT);
-    CHECK(layout.get_cell_type({2, 0}) == qca_technology::cell_type::CONST_0);
-    CHECK(layout.get_cell_type({2, 1}) == qca_technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 2}) == qca_technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 3}) == qca_technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({1, 2}) == qca_technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({3, 2}) == qca_technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({4, 2}) == qca_technology::cell_type::OUTPUT);
+        CHECK(lyt.get_clock_number({0, 2}) == 0);
+        CHECK(lyt.get_clock_number({2, 4}) == 0);
+        CHECK(lyt.get_clock_number({2, 0}) == 0);
+        CHECK(lyt.get_clock_number({2, 1}) == 0);
+        CHECK(lyt.get_clock_number({2, 2}) == 0);
+        CHECK(lyt.get_clock_number({2, 3}) == 0);
+        CHECK(lyt.get_clock_number({1, 2}) == 0);
+        CHECK(lyt.get_clock_number({3, 2}) == 0);
+        CHECK(lyt.get_clock_number({4, 2}) == 1);
 
-    CHECK(layout.get_clock_number({0, 2}) == 0);
-    CHECK(layout.get_clock_number({2, 4}) == 0);
-    CHECK(layout.get_clock_number({2, 0}) == 0);
-    CHECK(layout.get_clock_number({2, 1}) == 0);
-    CHECK(layout.get_clock_number({2, 2}) == 0);
-    CHECK(layout.get_clock_number({2, 3}) == 0);
-    CHECK(layout.get_clock_number({1, 2}) == 0);
-    CHECK(layout.get_clock_number({3, 2}) == 0);
-    CHECK(layout.get_clock_number({4, 2}) == 1);
+        CHECK(lyt.get_cell_name({0, 2}) == "a");
+        CHECK(lyt.get_cell_name({2, 4}) == "b");
+        CHECK(lyt.get_cell_name({4, 2}) == "f");
+    };
 
-    CHECK(layout.get_cell_name({0, 2}) == "a");
-    CHECK(layout.get_cell_name({2, 4}) == "b");
-    CHECK(layout.get_cell_name({4, 2}) == "f");
+    SECTION("Cartesian layout")
+    {
+        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
+
+        check(read_fqca_layout<qca_layout>(layout_stream));
+    }
+    SECTION("Stacked layout")
+    {
+        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+
+        check(read_fqca_layout<qca_layout>(layout_stream));
+    }
 }
 
 TEST_CASE("Parsing of unsupported features", "[fqca]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
-
     static constexpr const char* fqca_layout = "[ AND ]\n"
                                                "\n"
                                                "= = = = = \n"
@@ -154,43 +176,56 @@ TEST_CASE("Parsing of unsupported features", "[fqca]")
 
     std::istringstream layout_stream{fqca_layout};
 
-    // despite unsupported features, the parsing should proceed normally
-    const auto layout = read_fqca_layout<qca_layout>(layout_stream);
+    const auto check = [](const auto& lyt)
+    {
+        CHECK(lyt.x() == 4);
+        CHECK(lyt.y() == 4);
+        CHECK(lyt.area() == 25);
+        //    CHECK(layout.get_layout_name() == "AND");
 
-    CHECK(layout.x() == 4);
-    CHECK(layout.y() == 4);
-    CHECK(layout.area() == 25);
-    //    CHECK(layout.get_layout_name() == "AND");
+        CHECK(lyt.get_cell_type({0, 2}) == qca_technology::cell_type::INPUT);
+        CHECK(lyt.get_cell_type({2, 4}) == qca_technology::cell_type::INPUT);
+        CHECK(lyt.get_cell_type({2, 0}) == qca_technology::cell_type::CONST_0);
+        CHECK(lyt.get_cell_type({2, 1}) == qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({2, 2}) == qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({2, 3}) == qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({1, 2}) == qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({3, 2}) == qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({4, 2}) == qca_technology::cell_type::OUTPUT);
 
-    CHECK(layout.get_cell_type({0, 2}) == qca_technology::cell_type::INPUT);
-    CHECK(layout.get_cell_type({2, 4}) == qca_technology::cell_type::INPUT);
-    CHECK(layout.get_cell_type({2, 0}) == qca_technology::cell_type::CONST_0);
-    CHECK(layout.get_cell_type({2, 1}) == qca_technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 2}) == qca_technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 3}) == qca_technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({1, 2}) == qca_technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({3, 2}) == qca_technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({4, 2}) == qca_technology::cell_type::OUTPUT);
+        CHECK(lyt.get_clock_number({0, 2}) == 0);
+        CHECK(lyt.get_clock_number({2, 4}) == 0);
+        CHECK(lyt.get_clock_number({2, 0}) == 0);
+        CHECK(lyt.get_clock_number({2, 1}) == 0);
+        CHECK(lyt.get_clock_number({2, 2}) == 0);
+        CHECK(lyt.get_clock_number({2, 3}) == 0);
+        CHECK(lyt.get_clock_number({1, 2}) == 0);
+        CHECK(lyt.get_clock_number({3, 2}) == 0);
+        CHECK(lyt.get_clock_number({4, 2}) == 1);
 
-    CHECK(layout.get_clock_number({0, 2}) == 0);
-    CHECK(layout.get_clock_number({2, 4}) == 0);
-    CHECK(layout.get_clock_number({2, 0}) == 0);
-    CHECK(layout.get_clock_number({2, 1}) == 0);
-    CHECK(layout.get_clock_number({2, 2}) == 0);
-    CHECK(layout.get_clock_number({2, 3}) == 0);
-    CHECK(layout.get_clock_number({1, 2}) == 0);
-    CHECK(layout.get_clock_number({3, 2}) == 0);
-    CHECK(layout.get_clock_number({4, 2}) == 1);
+        CHECK(lyt.get_cell_name({0, 2}) == "a");
+        CHECK(lyt.get_cell_name({2, 4}) == "b");
+        CHECK(lyt.get_cell_name({4, 2}) == "f");
+    };
 
-    CHECK(layout.get_cell_name({0, 2}) == "a");
-    CHECK(layout.get_cell_name({2, 4}) == "b");
-    CHECK(layout.get_cell_name({4, 2}) == "f");
+    SECTION("Cartesian layout")
+    {
+        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
+
+        // despite unsupported features, the parsing should proceed normally
+        check(read_fqca_layout<qca_layout>(layout_stream));
+    }
+    SECTION("Stacked layout")
+    {
+        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+
+        // despite unsupported features, the parsing should proceed normally
+        check(read_fqca_layout<qca_layout>(layout_stream));
+    }
 }
 
 TEST_CASE("Exceptions", "[fqca]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
-
     SECTION("unsupported_character_exception")
     {
         static constexpr const char* fqca_layout =
@@ -225,7 +260,16 @@ TEST_CASE("Exceptions", "[fqca]")
 
         std::istringstream layout_stream{fqca_layout};
 
-        CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), unsupported_character_exception);
+        SECTION("Cartesian layout")
+        {
+            using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
+            CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), unsupported_character_exception);
+        }
+        SECTION("Stacked layout")
+        {
+            using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+            CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), unsupported_character_exception);
+        }
     }
     SECTION("undefined_cell_label_exception")
     {
@@ -263,7 +307,16 @@ TEST_CASE("Exceptions", "[fqca]")
 
         std::istringstream layout_stream{fqca_layout};
 
-        CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), undefined_cell_label_exception);
+        SECTION("Cartesian layout")
+        {
+            using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
+            CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), undefined_cell_label_exception);
+        }
+        SECTION("Stacked layout")
+        {
+            using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+            CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), undefined_cell_label_exception);
+        }
     }
     SECTION("unrecognized_cell_definition_exception")
     {
@@ -300,6 +353,15 @@ TEST_CASE("Exceptions", "[fqca]")
 
         std::istringstream layout_stream{fqca_layout};
 
-        CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), unrecognized_cell_definition_exception);
+        SECTION("Cartesian layout")
+        {
+            using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
+            CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), unrecognized_cell_definition_exception);
+        }
+        SECTION("Stacked layout")
+        {
+            using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+            CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), unrecognized_cell_definition_exception);
+        }
     }
 }
