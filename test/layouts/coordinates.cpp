@@ -4,7 +4,7 @@
 
 #include "catch.hpp"
 
-#include <fiction/layouts/coordinate.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/traits.hpp>
 
 #include <map>
@@ -19,9 +19,9 @@ using namespace fiction;
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 
-TEST_CASE("Coordinates", "[coordinate]")
+TEST_CASE("Unsigned Cartesian coordinates", "[coordinates]")
 {
-    using coordinate = coord_t;
+    using coordinate = cartesian::ucoord_t;
 
     auto td = coordinate{};
     CHECK(td.is_dead());
@@ -67,12 +67,9 @@ TEST_CASE("Coordinates", "[coordinate]")
     CHECK(t2 < t3);
 
     std::map<uint64_t, coordinate> coordinate_repr{
-        {0x8000000000000000, coordinate{}},
-        {0x0000000000000000, coordinate{0, 0, 0}},
-        {0x4000000000000000, coordinate{0, 0, 1}},
-        {0x4000000080000001, coordinate{1, 1, 1}},
-        {0x0000000000000002, coordinate{2, 0, 0}},
-        {0x3fffffffffffffff, coordinate{2147483647, 2147483647, 0}}};
+        {0x8000000000000000, coordinate{}},        {0x0000000000000000, coordinate{0, 0, 0}},
+        {0x4000000000000000, coordinate{0, 0, 1}}, {0x4000000080000001, coordinate{1, 1, 1}},
+        {0x0000000000000002, coordinate{2, 0, 0}}, {0x3fffffffffffffff, coordinate{2147483647, 2147483647, 0}}};
 
     for (auto [repr, coord] : coordinate_repr)
     {

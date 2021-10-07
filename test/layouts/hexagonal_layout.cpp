@@ -16,7 +16,7 @@ using namespace fiction;
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 
-TEST_CASE("Traits", "[hexagonal]")
+TEST_CASE("Traits", "[hexagonal-layout]")
 {
     using layout = hexagonal_layout<cartesian::ucoord_t, even_column>;
 
@@ -43,7 +43,7 @@ void check_identity_conversion()
                               { CHECK(layout.to_offset_coordinate(layout.to_cube_coordinate(coord)) == coord); });
 }
 
-TEST_CASE("Coordinate conversions", "[hexagonal]")
+TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
 {
     using even_column_layout = hexagonal_layout<offset::ucoord_t, even_column>;
     using odd_column_layout  = hexagonal_layout<offset::ucoord_t, odd_column>;
@@ -130,7 +130,7 @@ void check_visited_coordinates()
     CHECK(visited.size() == 23);
 }
 
-TEST_CASE("Coordinate iteration", "[hexagonal]")
+TEST_CASE("Coordinate iteration", "[hexagonal-layout]")
 {
     using odd_row_layout     = hexagonal_layout<offset::ucoord_t, odd_row>;
     using even_row_layout    = hexagonal_layout<offset::ucoord_t, even_row>;
@@ -143,7 +143,7 @@ TEST_CASE("Coordinate iteration", "[hexagonal]")
     check_visited_coordinates<even_column_layout>();
 }
 
-TEST_CASE("Coordinate adjacencies", "[hexagonal]")
+TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
 {
     SECTION("odd row")
     {

@@ -199,7 +199,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level-layout]")
 
 TEST_CASE("Node names", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
     auto layout = blueprints::or_not_gate_layout<gate_layout>();
 
