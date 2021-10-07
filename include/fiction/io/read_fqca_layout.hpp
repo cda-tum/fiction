@@ -309,6 +309,10 @@ class read_fqca_layout_impl
         {
             max_cell_pos.y = cell.y;
         }
+        if (cell.z > max_cell_pos.z)
+        {
+            max_cell_pos.z = cell.z;
+        }
     }
 };
 
