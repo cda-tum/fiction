@@ -71,14 +71,14 @@ namespace qca_stack
 
 static const std::regex re_white_space{R"(\s)"};
 static const std::regex re_comment{R"(\[.*\]$)"};
-static const std::regex re_layer_separator{R"([= *]+\s*$)"};
-static const std::regex re_cell_definition_id{R"((\w)\:$)"};              // group 1 is the id
-static const std::regex re_cell_definition_label{R"(-label=\"(.*)\"$)"};  // group 1 is the label
-static const std::regex re_cell_definition_clock{R"(-clock=(\d)$)"};      // group 1 is the clock number
-static const std::regex re_cell_definition_number{R"(-number=(\d)$)"};    // group 1 is the number
+static const std::regex re_layer_separator{R"(^=+$)"};
+static const std::regex re_cell_definition_id{R"(^(\w)\:$)"};              // group 1 is the id
+static const std::regex re_cell_definition_label{R"(^-label=\"(.*)\"$)"};  // group 1 is the label
+static const std::regex re_cell_definition_clock{R"(^-clock=(\d)$)"};      // group 1 is the clock number
+static const std::regex re_cell_definition_number{R"(^-number=(\d)$)"};    // group 1 is the number
 static const std::regex re_cell_definition_offset{
-    R"(-offset=\((-?\d*(?:\.\d+)?),(-?\d*(?:\.\d+)?),(-?\d*(?:\.\d+)?)\)$)"};  // group 1, 2, and 3 are the x, y, and z
-                                                                               // offset respectively
+    R"(^-offset=\((-?\d*(?:\.\d+)?),(-?\d*(?:\.\d+)?),(-?\d*(?:\.\d+)?)\)$)"};  // group 1, 2, and 3 are the x, y, and z
+                                                                                // offset respectively
 
 /* Strings */
 
@@ -114,7 +114,7 @@ class read_fqca_layout_impl
                         continue;
                     }
                     // if line is a layer separator
-                    else if (std::regex_match(line, qca_stack::re_layer_separator))
+                    else if (std::regex_match(substituted_line, qca_stack::re_layer_separator))
                     {
                         // reset cell row
                         current_cell_row = 0ull;
