@@ -164,7 +164,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
     check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
 }
 
-TEST_CASE("Name conservation", "[algorithms]")
+TEST_CASE("Name conservation", "[orthogonal]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
