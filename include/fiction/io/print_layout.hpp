@@ -175,9 +175,9 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         return;
     }
 
-    for (auto y_pos = 0ull; y_pos <= layout.y(); ++y_pos)
+    for (decltype(layout.y()) y_pos = 0; y_pos <= layout.y(); ++y_pos)
     {
-        for (auto x_pos = 0ull; x_pos <= layout.x(); ++x_pos)
+        for (decltype(layout.x()) x_pos = 0; x_pos <= layout.x(); ++x_pos)
         {
             cell<Lyt> c{x_pos, y_pos};
 

@@ -55,21 +55,21 @@ class cell_level_layout : public ClockedLayout
 
     using technology = Technology;
 
-    using storage = std::shared_ptr<cell_level_layout_storage<uint64_t>>;
+    using storage = std::shared_ptr<cell_level_layout_storage<cell>>;
 
     explicit cell_level_layout(const typename ClockedLayout::aspect_ratio& ar = {}, const std::string& name = "",
                                const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
             ClockedLayout(ar),
-            strg{std::make_shared<cell_level_layout_storage<uint64_t>>(name, tile_size_x, tile_size_y)}
+            strg{std::make_shared<cell_level_layout_storage<cell>>(name, tile_size_x, tile_size_y)}
     {}
 
     cell_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<cell>& scheme,
                       const std::string& name = "", const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
             ClockedLayout(ar, scheme),
-            strg{std::make_shared<cell_level_layout_storage<uint64_t>>(name, tile_size_x, tile_size_y)}
+            strg{std::make_shared<cell_level_layout_storage<cell>>(name, tile_size_x, tile_size_y)}
     {}
 
-    explicit cell_level_layout(std::shared_ptr<cell_level_layout_storage<uint64_t>> s) : strg{std::move(s)} {}
+    explicit cell_level_layout(std::shared_ptr<cell_level_layout_storage<cell>> s) : strg{std::move(s)} {}
 
 #pragma endregion
 
@@ -79,28 +79,28 @@ class cell_level_layout : public ClockedLayout
     {
         if (Technology::is_empty_cell(ct))
         {
-            strg->cell_type_map.erase(static_cast<uint64_t>(c));
-            strg->cell_mode_map.erase(static_cast<uint64_t>(c));
-            strg->inputs.erase(static_cast<uint64_t>(c));
-            strg->outputs.erase(static_cast<uint64_t>(c));
+            strg->cell_type_map.erase(c);
+            strg->cell_mode_map.erase(c);
+            strg->inputs.erase(c);
+            strg->outputs.erase(c);
 
             return;
         }
         else if (Technology::is_input_cell(ct))
         {
-            strg->inputs.insert(static_cast<uint64_t>(c));
+            strg->inputs.insert(c);
         }
         else if (Technology::is_output_cell(ct))
         {
-            strg->outputs.insert(static_cast<uint64_t>(c));
+            strg->outputs.insert(c);
         }
 
-        strg->cell_type_map[static_cast<uint64_t>(c)] = ct;
+        strg->cell_type_map[c] = ct;
     }
 
     [[nodiscard]] cell_type get_cell_type(const cell& c) const noexcept
     {
-        if (auto it = strg->cell_type_map.find(static_cast<uint64_t>(c)); it != strg->cell_type_map.cend())
+        if (auto it = strg->cell_type_map.find(c); it != strg->cell_type_map.cend())
         {
             return it->second;
         }
@@ -118,14 +118,14 @@ class cell_level_layout : public ClockedLayout
     void assign_cell_mode(const cell& c, const cell_mode& m) noexcept
     {
         if (Technology::is_normal_cell_mode(m))
-            strg->cell_mode_map.erase(static_cast<uint64_t>(c));
+            strg->cell_mode_map.erase(c);
         else
-            strg->cell_mode_map[static_cast<uint64_t>(c)] = m;
+            strg->cell_mode_map[c] = m;
     }
 
     [[nodiscard]] cell_mode get_cell_mode(const cell& c) const noexcept
     {
-        if (auto it = strg->cell_mode_map.find(static_cast<uint64_t>(c)); it != strg->cell_mode_map.cend())
+        if (auto it = strg->cell_mode_map.find(c); it != strg->cell_mode_map.cend())
         {
             return it->second;
         }
@@ -138,14 +138,14 @@ class cell_level_layout : public ClockedLayout
     void assign_cell_name(const cell& c, const std::string& n) noexcept
     {
         if (n.empty())
-            strg->cell_name_map.erase(static_cast<uint64_t>(c));
+            strg->cell_name_map.erase(c);
         else
-            strg->cell_name_map[static_cast<uint64_t>(c)] = n;
+            strg->cell_name_map[c] = n;
     }
 
     [[nodiscard]] std::string get_cell_name(const cell& c) const noexcept
     {
-        if (auto it = strg->cell_name_map.find(static_cast<uint64_t>(c)); it != strg->cell_name_map.cend())
+        if (auto it = strg->cell_name_map.find(c); it != strg->cell_name_map.cend())
         {
             return it->second;
         }
@@ -186,12 +186,12 @@ class cell_level_layout : public ClockedLayout
 
     [[nodiscard]] bool is_pi(const cell& c) const noexcept
     {
-        return std::find(strg->inputs.cbegin(), strg->inputs.cend(), static_cast<uint64_t>(c)) != strg->inputs.cend();
+        return std::find(strg->inputs.cbegin(), strg->inputs.cend(), c) != strg->inputs.cend();
     }
 
     [[nodiscard]] bool is_po(const cell& c) const noexcept
     {
-        return std::find(strg->outputs.cbegin(), strg->outputs.cend(), static_cast<uint64_t>(c)) != strg->outputs.cend();
+        return std::find(strg->outputs.cbegin(), strg->outputs.cend(), c) != strg->outputs.cend();
     }
 
     [[nodiscard]] uint16_t get_tile_size_x() const noexcept

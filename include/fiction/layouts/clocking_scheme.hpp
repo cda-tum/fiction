@@ -22,7 +22,7 @@ class clocking_scheme
   public:
     using clock_zone     = ClockZone;
     using clock_number   = uint8_t;
-    using clock_function = std::function<clock_number(ClockZone)>;
+    using clock_function = std::function<clock_number(clock_zone)>;
 
     explicit clocking_scheme(const std::string& n, clock_function f, const clock_number cn = 4,
                              const bool r = true) noexcept :
@@ -32,12 +32,12 @@ class clocking_scheme
             fn{std::move(f)}
     {}
 
-    clock_number operator()(ClockZone cz) const noexcept
+    clock_number operator()(clock_zone cz) const noexcept
     {
         if (regular)
             return fn(cz);
 
-        if (auto it = override.find(static_cast<uint64_t>(cz)); it != override.end())
+        if (auto it = override.find(cz); it != override.end())
         {
             return it->second;
         }
@@ -55,11 +55,11 @@ class clocking_scheme
         return regular;
     }
 
-    void override_clock_number(const ClockZone& cz, const clock_number cn) noexcept
+    void override_clock_number(const clock_zone& cz, const clock_number cn) noexcept
     {
         regular = false;
 
-        override[static_cast<uint64_t>(cz)] = cn % num_clocks;
+        override[cz] = cn % num_clocks;
     }
     /**
      * Name of the clocking scheme.
@@ -82,10 +82,9 @@ class clocking_scheme
     /**
      * Alias for a hash map that overrides clock zones.
      */
-    using clocking_map = std::unordered_map<uint64_t, clock_number>;
+    using clocking_map = std::unordered_map<clock_zone, clock_number>;
     /**
-     * Stores mappings ClockZone -> clock_number to override clock zones.
-     * ClockZone must be convertible to uint64_t.
+     * Stores mappings clock_zone -> clock_number to override clock zones.
      */
     clocking_map override{};
 };

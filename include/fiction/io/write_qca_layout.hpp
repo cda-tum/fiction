@@ -127,19 +127,19 @@ constexpr const char* CHARGE_1      = "1.602176e-19";
 constexpr const char* CHARGE_8      = "8.010882e-20";
 constexpr const char* NEGATIVE_SPIN = "-319472243083548083355648.000000";
 
-constexpr const unsigned COLOR_MAX       = 65535u;
-constexpr const unsigned COLOR_HALF      = 32768u;
-constexpr const unsigned COLOR_MIN       = 0u;
-constexpr const unsigned CELL_DISTANCE   = 20u;
-constexpr const unsigned X_Y_OFFSET      = 100u;
-constexpr const float    CELL_SIZE       = 18.0f;
-constexpr const float    DOT_SIZE        = 5.0f;
-constexpr const float    LABEL_Y_OFFSET  = 21.5f;
-constexpr const float    BB_X_OFFSET     = 9.0f;
-constexpr const float    BB_Y_OFFSET     = 33.0f;
-constexpr const float    BB_CX_OFFSET    = 4.0f;
-constexpr const float    BB_CY_OFFSET    = 23.0f;
-constexpr const float    CHARACTER_WIDTH = 10.0f;
+constexpr const int   COLOR_MAX       = 65535;
+constexpr const int   COLOR_HALF      = 32768;
+constexpr const int   COLOR_MIN       = 0;
+constexpr const int   CELL_DISTANCE   = 20;
+constexpr const int   X_Y_OFFSET      = 100;
+constexpr const float CELL_SIZE       = 18.0f;
+constexpr const float DOT_SIZE        = 5.0f;
+constexpr const float LABEL_Y_OFFSET  = 21.5f;
+constexpr const float BB_X_OFFSET     = 9.0f;
+constexpr const float BB_Y_OFFSET     = 33.0f;
+constexpr const float BB_CX_OFFSET    = 4.0f;
+constexpr const float BB_CY_OFFSET    = 23.0f;
+constexpr const float CHARACTER_WIDTH = 10.0f;
 
 struct cell_pos
 {
@@ -192,7 +192,7 @@ class write_qca_layout_impl
     void write_cell_layers()
     {
         // for each layer
-        for (auto z = 0u; z <= lyt.z(); ++z)
+        for (decltype(lyt.z()) z = 0; z <= lyt.z(); ++z)
         {
             write_via_cells();
 
@@ -205,10 +205,10 @@ class write_qca_layout_impl
                << '\n';
 
             // for each row
-            for (auto y = 0ull; y <= lyt.y(); ++y)
+            for (decltype(lyt.y()) y = 0; y <= lyt.y(); ++y)
             {
                 // for each cell
-                for (auto x = 0ull; x <= lyt.x(); ++x)
+                for (decltype(lyt.x()) x = 0; x <= lyt.x(); ++x)
                 {
                     const cell<Lyt> c{x, y, z};
 
@@ -443,8 +443,9 @@ class write_qca_layout_impl
         os << qcad::OPEN_QCAD_DESIGN_OBJECT;
 
         // calculate cell position
-        const qcad::cell_pos pos{static_cast<float>(c.x * qcad::CELL_DISTANCE + qcad::X_Y_OFFSET),
-                                 static_cast<float>(c.y * qcad::CELL_DISTANCE + qcad::X_Y_OFFSET)};
+        const qcad::cell_pos pos{
+            static_cast<float>(c.x * static_cast<decltype(c.x)>(qcad::CELL_DISTANCE) + qcad::X_Y_OFFSET),
+            static_cast<float>(c.y * static_cast<decltype(c.y)>(qcad::CELL_DISTANCE) + qcad::X_Y_OFFSET)};
 
         // write cell position
         os << qcad::X_POS << std::to_string(pos.x) << '\n';
