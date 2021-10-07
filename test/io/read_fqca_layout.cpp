@@ -17,7 +17,7 @@ using namespace fiction;
 
 TEST_CASE("Read empty layout", "[fqca]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
     static constexpr const char* fqca_layout = "[ empty layout ]\n"
                                                "\n"
@@ -51,7 +51,7 @@ TEST_CASE("Read empty layout", "[fqca]")
 
 TEST_CASE("Read single-layer AND gate", "[fqca]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
     static constexpr const char* fqca_layout = "[ AND ]\n"
                                                "\n"
@@ -118,7 +118,7 @@ TEST_CASE("Read single-layer AND gate", "[fqca]")
 
 TEST_CASE("Parsing of unsupported features", "[fqca]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
     static constexpr const char* fqca_layout = "[ AND ]\n"
                                                "\n"
@@ -189,7 +189,7 @@ TEST_CASE("Parsing of unsupported features", "[fqca]")
 
 TEST_CASE("Exceptions", "[fqca]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
     SECTION("unsupported_character_exception")
     {
