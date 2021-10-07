@@ -8,6 +8,7 @@
 #include "catch.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/traits.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -220,6 +221,28 @@ GateLyt se_gate_layout() noexcept
 
     const auto o1 = layout.create_or(w1, w2, {1, 1});
     layout.create_po(o1, "f1", {2, 1});
+
+    return layout;
+}
+
+template <typename CellLyt>
+CellLyt single_layer_and_gate() noexcept
+{
+    CellLyt layout{{4, 4}, "AND"};
+
+    layout.assign_cell_type({0, 2}, fiction::technology<CellLyt>::cell_type::INPUT);
+    layout.assign_cell_type({2, 4}, fiction::technology<CellLyt>::cell_type::INPUT);
+    layout.assign_cell_type({2, 0}, fiction::technology<CellLyt>::cell_type::CONST_0);
+    layout.assign_cell_type({2, 1}, fiction::technology<CellLyt>::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, fiction::technology<CellLyt>::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, fiction::technology<CellLyt>::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, fiction::technology<CellLyt>::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2}, fiction::technology<CellLyt>::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2}, fiction::technology<CellLyt>::cell_type::OUTPUT);
+
+    layout.assign_cell_name({0, 2}, "a");
+    layout.assign_cell_name({2, 4}, "b");
+    layout.assign_cell_name({4, 2}, "f");
 
     return layout;
 }
