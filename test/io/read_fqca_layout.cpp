@@ -102,7 +102,7 @@ TEST_CASE("Read single-layer AND gate", "[fqca]")
         CHECK(lyt.x() == 4);
         CHECK(lyt.y() == 4);
         CHECK(lyt.area() == 25);
-        //    CHECK(layout.get_layout_name() == "AND");
+        CHECK(lyt.get_layout_name() == "AND");
 
         CHECK(lyt.get_cell_type({0, 2}) == qca_technology::cell_type::INPUT);
         CHECK(lyt.get_cell_type({2, 4}) == qca_technology::cell_type::INPUT);
@@ -133,13 +133,13 @@ TEST_CASE("Read single-layer AND gate", "[fqca]")
     {
         using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
-        check(read_fqca_layout<qca_layout>(layout_stream));
+        check(read_fqca_layout<qca_layout>(layout_stream, "AND"));
     }
     SECTION("Stacked layout")
     {
         using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
 
-        check(read_fqca_layout<qca_layout>(layout_stream));
+        check(read_fqca_layout<qca_layout>(layout_stream, "AND"));
     }
 }
 
@@ -195,7 +195,9 @@ TEST_CASE("Read multi-layer wire crossing", "[fqca]")
 
     using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
 
-    const auto layout = read_fqca_layout<qca_layout>(layout_stream);
+    const auto layout = read_fqca_layout<qca_layout>(layout_stream, "Crossover");
+
+    CHECK(layout.get_layout_name() == "Crossover");
 
     CHECK(layout.x() == 4);
     CHECK(layout.y() == 4);
@@ -291,7 +293,7 @@ TEST_CASE("Parsing of unsupported features", "[fqca]")
         CHECK(lyt.x() == 4);
         CHECK(lyt.y() == 4);
         CHECK(lyt.area() == 25);
-        //    CHECK(layout.get_layout_name() == "AND");
+        CHECK(lyt.get_layout_name() == "AND");
 
         CHECK(lyt.get_cell_type({0, 2}) == qca_technology::cell_type::INPUT);
         CHECK(lyt.get_cell_type({2, 4}) == qca_technology::cell_type::INPUT);
@@ -323,14 +325,14 @@ TEST_CASE("Parsing of unsupported features", "[fqca]")
         using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
         // despite unsupported features, the parsing should proceed normally
-        check(read_fqca_layout<qca_layout>(layout_stream));
+        check(read_fqca_layout<qca_layout>(layout_stream, "AND"));
     }
     SECTION("Stacked layout")
     {
         using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
 
         // despite unsupported features, the parsing should proceed normally
-        check(read_fqca_layout<qca_layout>(layout_stream));
+        check(read_fqca_layout<qca_layout>(layout_stream, "AND"));
     }
 }
 

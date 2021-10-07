@@ -92,27 +92,46 @@ class read_command : public command
                 }
                 if (is_set("qca"))
                 {
-                    try
+                    if (std::filesystem::exists(filename))
                     {
-                        store<fiction::cell_layout_t>().extend() = std::make_shared<fiction::stacked_qca_cell_clk_lyt>(
-                            fiction::read_fqca_layout<fiction::stacked_qca_cell_clk_lyt>(filename));
+                        if (std::filesystem::is_regular_file(filename))
+                        {
+                            try
+                            {
+                                const auto layout_name = std::filesystem::path{filename}.stem().string();
+
+                                store<fiction::cell_layout_t>().extend() =
+                                    std::make_shared<fiction::stacked_qca_cell_clk_lyt>(
+                                        fiction::read_fqca_layout<fiction::stacked_qca_cell_clk_lyt>(filename,
+                                                                                                     layout_name));
+                            }
+                            catch (const fiction::unsupported_character_exception& e)
+                            {
+                                env->out()
+                                    << fmt::format("character '{}' is not supported as a cell designator", e.which())
+                                    << std::endl;
+                            }
+                            catch (const fiction::undefined_cell_label_exception& e)
+                            {
+                                env->out() << fmt::format("cell label '{}' was used in the cell definition section but "
+                                                          "never defined above",
+                                                          e.which())
+                                           << std::endl;
+                            }
+                            catch (const fiction::unrecognized_cell_definition_exception& e)
+                            {
+                                env->out()
+                                    << fmt::format("unsupported cell definition in line {}", e.where()) << std::endl;
+                            }
+                        }
+                        else
+                        {
+                            env->out() << "[e] given file name does not point to a regular file" << std::endl;
+                        }
                     }
-                    catch (const fiction::unsupported_character_exception& e)
+                    else
                     {
-                        env->out() << fmt::format("character '{}' is not supported as a cell designator", e.which())
-                                   << std::endl;
-                    }
-                    catch (const fiction::undefined_cell_label_exception& e)
-                    {
-                        env->out()
-                            << fmt::format(
-                                   "cell label '{}' was used in the cell definition section but never defined above",
-                                   e.which())
-                            << std::endl;
-                    }
-                    catch (const fiction::unrecognized_cell_definition_exception& e)
-                    {
-                        env->out() << fmt::format("unsupported cell definition in line {}", e.where()) << std::endl;
+                        env->out() << "[e] given file name does not exist" << std::endl;
                     }
                 }
             }

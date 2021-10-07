@@ -92,7 +92,7 @@ template <typename Lyt>
 class read_fqca_layout_impl
 {
   public:
-    explicit read_fqca_layout_impl(std::istream& s) : lyt{}, is{s} {}
+    explicit read_fqca_layout_impl(std::istream& s, const std::string& name) : lyt{{}, name}, is{s} {}
 
     Lyt run()
     {
@@ -326,12 +326,12 @@ class read_fqca_layout_impl
  * @param is The input stream to read from.
  */
 template <typename Lyt>
-Lyt read_fqca_layout(std::istream& is)
+Lyt read_fqca_layout(std::istream& is, const std::string& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(std::is_same_v<technology<Lyt>, qca_technology>, "Lyt must be a QCA layout");
 
-    detail::read_fqca_layout_impl<Lyt> p{is};
+    detail::read_fqca_layout_impl<Lyt> p{is, name};
 
     const auto lyt = p.run();
 
@@ -339,14 +339,14 @@ Lyt read_fqca_layout(std::istream& is)
 }
 
 template <typename Lyt>
-Lyt read_fqca_layout(const std::string& filename)
+Lyt read_fqca_layout(const std::string& filename, const std::string& name = "")
 {
     std::ifstream is{filename.c_str(), std::ifstream::in};
 
     if (!is.is_open())
         throw std::ifstream::failure("could not open file");
 
-    const auto lyt = read_fqca_layout<Lyt>(is);
+    const auto lyt = read_fqca_layout<Lyt>(is, name);
     is.close();
 
     return lyt;
