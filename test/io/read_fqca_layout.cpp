@@ -2,9 +2,11 @@
 // Created by marcel on 04.10.21.
 //
 
+#include "../utils/blueprints/layout_blueprints.hpp"
 #include "catch.hpp"
 
 #include <fiction/io/read_fqca_layout.hpp>
+#include <fiction/io/write_fqca_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -12,6 +14,7 @@
 
 #include <sstream>
 #include <string>
+#include <type_traits>
 
 using namespace fiction;
 
@@ -363,5 +366,38 @@ TEST_CASE("Exceptions", "[fqca]")
             using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
             CHECK_THROWS_AS(read_fqca_layout<qca_layout>(layout_stream), unrecognized_cell_definition_exception);
         }
+    }
+}
+
+TEST_CASE("Read written layouts", "[fqca]")
+{
+    std::stringstream layout_stream{};
+
+    const auto read_write_layout = [&layout_stream](const auto& lyt)
+    {
+        // write layout into stream
+        write_fqca_layout(lyt, layout_stream);
+        // rewind stream to the beginning position
+        layout_stream.seekg(0, std::ios::beg);
+        // read layout from stream
+        const auto lyt2 = read_fqca_layout<std::decay_t<decltype(lyt)>>(layout_stream);
+
+        // check for common properties
+        CHECK(lyt.num_cells() == lyt2.num_cells());
+        CHECK(lyt.num_pis() == lyt2.num_pis());
+        CHECK(lyt.num_pos() == lyt2.num_pos());
+    };
+
+    SECTION("Cartesian layout")
+    {
+        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
+
+        read_write_layout(blueprints::single_layer_and_gate<qca_layout>());
+    }
+    SECTION("Stacked layout")
+    {
+        using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+
+        read_write_layout(blueprints::single_layer_and_gate<qca_layout>());
     }
 }
