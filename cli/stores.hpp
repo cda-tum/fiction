@@ -8,6 +8,7 @@
 #include <fiction/io/dot_drawers.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/io/write_svg_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -390,6 +391,10 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
         if constexpr (!std::is_same_v<fiction::technology<Lyt>, fiction::qca_technology>)
         {
             cmd.env->out() << fmt::format("[e] {} is not a QCA layout", lyt_ptr->get_layout_name()) << std::endl;
+        }
+        else if constexpr (!std::is_same_v<fiction::coordinate<Lyt>, fiction::cartesian::ucoord_t>)
+        {
+            cmd.env->out() << fmt::format("[e] {} is not a Cartesian layout", lyt_ptr->get_layout_name()) << std::endl;
         }
         else
         {
