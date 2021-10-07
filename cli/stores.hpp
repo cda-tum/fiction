@@ -330,9 +330,17 @@ ALICE_DESCRIBE_STORE(fiction::cell_layout_t, layout)
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        return fmt::format("{} ({}) - {} × {}, I/O: {}/{}, cells: {}", lyt_ptr->get_layout_name(),
+        // print z dimension only if layout uses cube coordinates
+        decltype(lyt_ptr->z()) z{};
+        if constexpr (std::is_same_v<fiction::coordinate<Lyt>, fiction::cube::coord_t>)
+        {
+            z = lyt_ptr->z() + 1;
+        }
+
+        return fmt::format("{} ({}) - {} × {}{}, I/O: {}/{}, cells: {}", lyt_ptr->get_layout_name(),
                            fiction::tech_impl_name<fiction::technology<Lyt>>, lyt_ptr->x() + 1, lyt_ptr->y() + 1,
-                           lyt_ptr->num_pis(), lyt_ptr->num_pos(), lyt_ptr->num_cells());
+                           (z ? fmt::format(" × {}", z) : ""), lyt_ptr->num_pis(), lyt_ptr->num_pos(),
+                           lyt_ptr->num_cells());
     };
 
     return std::visit(describe, layout);
@@ -344,9 +352,17 @@ ALICE_PRINT_STORE_STATISTICS(fiction::cell_layout_t, os, layout)
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        os << fmt::format("[i] {} ({}) - {} × {}, I/O: {}/{}, cells: {}\n", lyt_ptr->get_layout_name(),
+        // print z dimension only if layout uses cube coordinates
+        decltype(lyt_ptr->z()) z{};
+        if constexpr (std::is_same_v<fiction::coordinate<Lyt>, fiction::cube::coord_t>)
+        {
+            z = lyt_ptr->z() + 1;
+        }
+
+        os << fmt::format("[i] {} ({}) - {} × {}{}, I/O: {}/{}, cells: {}\n", lyt_ptr->get_layout_name(),
                           fiction::tech_impl_name<fiction::technology<Lyt>>, lyt_ptr->x() + 1, lyt_ptr->y() + 1,
-                          lyt_ptr->num_pis(), lyt_ptr->num_pos(), lyt_ptr->num_cells());
+                          (z ? fmt::format(" × {}", z) : ""), lyt_ptr->num_pis(), lyt_ptr->num_pos(),
+                          lyt_ptr->num_cells());
     };
 
     std::visit(print_statistics, layout);
@@ -358,13 +374,16 @@ ALICE_LOG_STORE_STATISTICS(fiction::cell_layout_t, layout)
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        return nlohmann::json{
-            {"name", lyt_ptr->get_layout_name()},
-            {"technology", fiction::tech_impl_name<fiction::technology<Lyt>>},
-            {"inputs", lyt_ptr->num_pis()},
-            {"outputs", lyt_ptr->num_pos()},
-            {"cells", lyt_ptr->num_cells()},
-            {"layout", {{"x-size", lyt_ptr->x() + 1}, {"y-size", lyt_ptr->y() + 1}, {"area", lyt_ptr->area()}}}};
+        return nlohmann::json{{"name", lyt_ptr->get_layout_name()},
+                              {"technology", fiction::tech_impl_name<fiction::technology<Lyt>>},
+                              {"inputs", lyt_ptr->num_pis()},
+                              {"outputs", lyt_ptr->num_pos()},
+                              {"cells", lyt_ptr->num_cells()},
+                              {"layout",
+                               {{"x-size", lyt_ptr->x() + 1},
+                                {"y-size", lyt_ptr->y() + 1},
+                                {"z-size", lyt_ptr->z() + 1},
+                                {"area", lyt_ptr->area()}}}};
     };
 
     return std::visit(log_statistics, layout);
