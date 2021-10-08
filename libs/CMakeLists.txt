@@ -26,3 +26,28 @@ add_subdirectory(mockturtle/)
 #            ALL
 #            DEPENDS ${PROJECT_BINARY_DIR}/glucose-syrup)
 #endif ()
+
+# Enable the usage of Z3
+option(FICTION_Z3 "Find, include, and utilize the Z3 solver by Microsoft Research. It needs to be installed manually.")
+if (FICTION_Z3)
+    message(STATUS "Usage of the Z3 solver was enabled. Make sure that it is installed on your system!")
+    option(FICTION_Z3_SEARCH_PATHS "Hints CMake where to search for the Z3 package. Usually only necessary if Z3 cannot be found automatically.")
+    # Try to locate Z3
+    find_package(Z3 PATHS ${FICTION_Z3_SEARCH_PATHS})
+
+    if (Z3_FOUND)
+        # Status update
+        message(STATUS "Found Z3 solver version: ${Z3_VERSION}")
+        message(STATUS "Found Z3 library: ${Z3_LIBRARIES}")
+        message(STATUS "Found Z3 include directories: ${Z3_CXX_INCLUDE_DIRS}")
+
+        # Include Z3 library
+        target_include_directories(fictionlib INTERFACE ${Z3_CXX_INCLUDE_DIRS})
+        # Link Z3
+        target_link_libraries(fictionlib INTERFACE ${Z3_LIBRARIES})
+
+    else ()
+        message(SEND_ERROR "Z3 solver could not be detected")
+    endif ()
+
+endif ()
