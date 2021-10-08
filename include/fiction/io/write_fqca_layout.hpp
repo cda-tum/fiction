@@ -135,7 +135,7 @@ class write_fqca_layout_impl
 
     void write_layer_separator()
     {
-        for (auto i = 0ull; i <= lyt.x(); i++) { os << qca_stack::COLUMN << qca_stack::CELL_SEPARATOR; }
+        for (decltype(lyt.x()) i = 0; i <= lyt.x(); i++) { os << qca_stack::COLUMN << qca_stack::CELL_SEPARATOR; }
 
         os << '\n';
     }
@@ -198,7 +198,7 @@ class write_fqca_layout_impl
     void write_layout_definition()
     {
         // for each layer
-        for (auto z = 0ull; z <= lyt.z(); ++z)
+        for (decltype(lyt.z()) z = 0; z <= lyt.z(); ++z)
         {
             // list of inter-layer cells
             std::stringstream via_layer_buffer{};
@@ -206,9 +206,9 @@ class write_fqca_layout_impl
             write_layer_separator();
 
             // for each cell
-            for (auto y = 0ull; y <= lyt.y(); ++y)
+            for (decltype(lyt.y()) y = 0; y <= lyt.y(); ++y)
             {
-                for (auto x = 0ull; x <= lyt.x(); ++x)
+                for (decltype(lyt.x()) x = 0; x <= lyt.x(); ++x)
                 {
                     const cell<Lyt> c{x, y, z};
 

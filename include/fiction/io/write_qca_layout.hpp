@@ -31,115 +31,115 @@ namespace detail
 namespace qcad
 {
 
-constexpr const char* VERSION_2_HEADER = "[VERSION]\n"
-                                         "qcadesigner_version=2.000000\n"
-                                         "[#VERSION]\n"
-                                         "[LAYOUT]\n"
-                                         "{}"
-                                         "generated_by={}\n"
-                                         "repo={}\n"
-                                         "[#LAYOUT]\n"
-                                         "[TYPE:DESIGN]\n"
-                                         "[TYPE:QCADLayer]\n"
-                                         "type=3\n"
-                                         "status=1\n"
-                                         "pszDescription=Drawing Layer\n"
-                                         "[#TYPE:QCADLayer]\n"
-                                         "[TYPE:QCADLayer]\n"
-                                         "type=0\n"
-                                         "status=1\n"
-                                         "pszDescription=Substrate\n"
-                                         "[TYPE:QCADSubstrate]\n"
-                                         "[TYPE:QCADStretchyObject]\n"
-                                         "[TYPE:QCADDesignObject]\n"
-                                         "x=3000.000000\n"
-                                         "y=1500.000000\n"
-                                         "bSelected=FALSE\n"
-                                         "clr.red=65535\n"
-                                         "clr.green=65535\n"
-                                         "clr.blue=65535\n"
-                                         "bounding_box.xWorld=0.000000\n"
-                                         "bounding_box.yWorld=0.000000\n"
-                                         "bounding_box.cxWorld=6000.000000\n"
-                                         "bounding_box.cyWorld=3000.000000\n"
-                                         "[#TYPE:QCADDesignObject]\n"
-                                         "[#TYPE:QCADStretchyObject]\n"
-                                         "grid_spacing=20.000000\n"
-                                         "[#TYPE:QCADSubstrate]\n"
-                                         "[#TYPE:QCADLayer]\n";
+static constexpr const char* VERSION_2_HEADER = "[VERSION]\n"
+                                                "qcadesigner_version=2.000000\n"
+                                                "[#VERSION]\n"
+                                                "[LAYOUT]\n"
+                                                "{}"
+                                                "generated_by={}\n"
+                                                "repo={}\n"
+                                                "[#LAYOUT]\n"
+                                                "[TYPE:DESIGN]\n"
+                                                "[TYPE:QCADLayer]\n"
+                                                "type=3\n"
+                                                "status=1\n"
+                                                "pszDescription=Drawing Layer\n"
+                                                "[#TYPE:QCADLayer]\n"
+                                                "[TYPE:QCADLayer]\n"
+                                                "type=0\n"
+                                                "status=1\n"
+                                                "pszDescription=Substrate\n"
+                                                "[TYPE:QCADSubstrate]\n"
+                                                "[TYPE:QCADStretchyObject]\n"
+                                                "[TYPE:QCADDesignObject]\n"
+                                                "x=3000.000000\n"
+                                                "y=1500.000000\n"
+                                                "bSelected=FALSE\n"
+                                                "clr.red=65535\n"
+                                                "clr.green=65535\n"
+                                                "clr.blue=65535\n"
+                                                "bounding_box.xWorld=0.000000\n"
+                                                "bounding_box.yWorld=0.000000\n"
+                                                "bounding_box.cxWorld=6000.000000\n"
+                                                "bounding_box.cyWorld=3000.000000\n"
+                                                "[#TYPE:QCADDesignObject]\n"
+                                                "[#TYPE:QCADStretchyObject]\n"
+                                                "grid_spacing=20.000000\n"
+                                                "[#TYPE:QCADSubstrate]\n"
+                                                "[#TYPE:QCADLayer]\n";
 
-constexpr const char* CLOSE_DESIGN               = "[#TYPE:DESIGN]\n";
-constexpr const char* OPEN_QCAD_LAYER            = "[TYPE:QCADLayer]\n";
-constexpr const char* CLOSE_QCAD_LAYER           = "[#TYPE:QCADLayer]\n";
-constexpr const char* OPEN_QCAD_CELL             = "[TYPE:QCADCell]\n";
-constexpr const char* CLOSE_QCAD_CELL            = "[#TYPE:QCADCell]\n";
-constexpr const char* OPEN_QCAD_LABEL            = "[TYPE:QCADLabel]\n";
-constexpr const char* CLOSE_QCAD_LABEL           = "[#TYPE:QCADLabel]\n";
-constexpr const char* OPEN_QCAD_DESIGN_OBJECT    = "[TYPE:QCADDesignObject]\n";
-constexpr const char* CLOSE_QCAD_DESIGN_OBJECT   = "[#TYPE:QCADDesignObject]\n";
-constexpr const char* OPEN_QCAD_STRETCHY_OBJECT  = "[TYPE:QCADStretchyObject]\n";
-constexpr const char* CLOSE_QCAD_STRETCHY_OBJECT = "[#TYPE:QCADStretchyObject]\n";
-constexpr const char* OPEN_CELL_DOT              = "[TYPE:CELL_DOT]\n";
-constexpr const char* CLOSE_CELL_DOT             = "[#TYPE:CELL_DOT]\n";
+static constexpr const char* CLOSE_DESIGN               = "[#TYPE:DESIGN]\n";
+static constexpr const char* OPEN_QCAD_LAYER            = "[TYPE:QCADLayer]\n";
+static constexpr const char* CLOSE_QCAD_LAYER           = "[#TYPE:QCADLayer]\n";
+static constexpr const char* OPEN_QCAD_CELL             = "[TYPE:QCADCell]\n";
+static constexpr const char* CLOSE_QCAD_CELL            = "[#TYPE:QCADCell]\n";
+static constexpr const char* OPEN_QCAD_LABEL            = "[TYPE:QCADLabel]\n";
+static constexpr const char* CLOSE_QCAD_LABEL           = "[#TYPE:QCADLabel]\n";
+static constexpr const char* OPEN_QCAD_DESIGN_OBJECT    = "[TYPE:QCADDesignObject]\n";
+static constexpr const char* CLOSE_QCAD_DESIGN_OBJECT   = "[#TYPE:QCADDesignObject]\n";
+static constexpr const char* OPEN_QCAD_STRETCHY_OBJECT  = "[TYPE:QCADStretchyObject]\n";
+static constexpr const char* CLOSE_QCAD_STRETCHY_OBJECT = "[#TYPE:QCADStretchyObject]\n";
+static constexpr const char* OPEN_CELL_DOT              = "[TYPE:CELL_DOT]\n";
+static constexpr const char* CLOSE_CELL_DOT             = "[#TYPE:CELL_DOT]\n";
 
-constexpr const char* TYPE            = "type=";
-constexpr const char* STATUS          = "status=";
-constexpr const char* PSZ_DESCRIPTION = "pszDescription=";
-constexpr const char* PSZ             = "psz=";
-constexpr const char* B_SELECTED      = "bSelected=";
+static constexpr const char* TYPE            = "type=";
+static constexpr const char* STATUS          = "status=";
+static constexpr const char* PSZ_DESCRIPTION = "pszDescription=";
+static constexpr const char* PSZ             = "psz=";
+static constexpr const char* B_SELECTED      = "bSelected=";
 
-constexpr const char* SELECTED_TRUE  = "TRUE";
-constexpr const char* SELECTED_FALSE = "FALSE";
+static constexpr const char* SELECTED_TRUE  = "TRUE";
+static constexpr const char* SELECTED_FALSE = "FALSE";
 
-constexpr const char* COLOR = "clr.red={}\nclr.green={}\nclr.blue={}\n";
+static constexpr const char* COLOR = "clr.red={}\nclr.green={}\nclr.blue={}\n";
 
-constexpr const char* BOUNDING_BOX_X  = "bounding_box.xWorld=";
-constexpr const char* BOUNDING_BOX_Y  = "bounding_box.yWorld=";
-constexpr const char* BOUNDING_BOX_CX = "bounding_box.cxWorld=";
-constexpr const char* BOUNDING_BOX_CY = "bounding_box.cyWorld=";
+static constexpr const char* BOUNDING_BOX_X  = "bounding_box.xWorld=";
+static constexpr const char* BOUNDING_BOX_Y  = "bounding_box.yWorld=";
+static constexpr const char* BOUNDING_BOX_CX = "bounding_box.cxWorld=";
+static constexpr const char* BOUNDING_BOX_CY = "bounding_box.cyWorld=";
 
-constexpr const char* CELL_OPTIONS_CX           = "cell_options.cxCell=";
-constexpr const char* CELL_OPTIONS_CY           = "cell_options.cyCell=";
-constexpr const char* CELL_OPTIONS_DOT_DIAMETER = "cell_options.dot_diameter=";
-constexpr const char* CELL_OPTIONS_CLOCK        = "cell_options.clock=";
-constexpr const char* CELL_OPTIONS_MODE         = "cell_options.mode=";
-constexpr const char* CELL_FUNCTION             = "cell_function=";
-constexpr const char* NUMBER_OF_DOTS_4          = "number_of_dots=4\n";
+static constexpr const char* CELL_OPTIONS_CX           = "cell_options.cxCell=";
+static constexpr const char* CELL_OPTIONS_CY           = "cell_options.cyCell=";
+static constexpr const char* CELL_OPTIONS_DOT_DIAMETER = "cell_options.dot_diameter=";
+static constexpr const char* CELL_OPTIONS_CLOCK        = "cell_options.clock=";
+static constexpr const char* CELL_OPTIONS_MODE         = "cell_options.mode=";
+static constexpr const char* CELL_FUNCTION             = "cell_function=";
+static constexpr const char* NUMBER_OF_DOTS_4          = "number_of_dots=4\n";
 
-constexpr const char* CELL_MODE_NORMAL     = "QCAD_CELL_MODE_NORMAL";
-constexpr const char* CELL_MODE_VERTICAL   = "QCAD_CELL_MODE_VERTICAL";
-constexpr const char* CELL_MODE_CROSSOVER  = "QCAD_CELL_MODE_CROSSOVER";
-constexpr const char* CELL_MODE_ROTATED    = "QCAD_CELL_MODE_ROTATED";
-constexpr const char* CELL_FUNCTION_NORMAL = "QCAD_CELL_NORMAL";
-constexpr const char* CELL_FUNCTION_FIXED  = "QCAD_CELL_FIXED";
-constexpr const char* CELL_FUNCTION_INPUT  = "QCAD_CELL_INPUT";
-constexpr const char* CELL_FUNCTION_OUTPUT = "QCAD_CELL_OUTPUT";
+static constexpr const char* CELL_MODE_NORMAL     = "QCAD_CELL_MODE_NORMAL";
+static constexpr const char* CELL_MODE_VERTICAL   = "QCAD_CELL_MODE_VERTICAL";
+static constexpr const char* CELL_MODE_CROSSOVER  = "QCAD_CELL_MODE_CROSSOVER";
+static constexpr const char* CELL_MODE_ROTATED    = "QCAD_CELL_MODE_ROTATED";
+static constexpr const char* CELL_FUNCTION_NORMAL = "QCAD_CELL_NORMAL";
+static constexpr const char* CELL_FUNCTION_FIXED  = "QCAD_CELL_FIXED";
+static constexpr const char* CELL_FUNCTION_INPUT  = "QCAD_CELL_INPUT";
+static constexpr const char* CELL_FUNCTION_OUTPUT = "QCAD_CELL_OUTPUT";
 
-constexpr const char* X_POS     = "x=";
-constexpr const char* Y_POS     = "y=";
-constexpr const char* DIAMETER  = "diameter=";
-constexpr const char* CHARGE    = "charge=";
-constexpr const char* SPIN      = "spin=";
-constexpr const char* POTENTIAL = "potential=";
+static constexpr const char* X_POS     = "x=";
+static constexpr const char* Y_POS     = "y=";
+static constexpr const char* DIAMETER  = "diameter=";
+static constexpr const char* CHARGE    = "charge=";
+static constexpr const char* SPIN      = "spin=";
+static constexpr const char* POTENTIAL = "potential=";
 
-constexpr const char* CHARGE_0      = "0.000000e+00";
-constexpr const char* CHARGE_1      = "1.602176e-19";
-constexpr const char* CHARGE_8      = "8.010882e-20";
-constexpr const char* NEGATIVE_SPIN = "-319472243083548083355648.000000";
+static constexpr const char* CHARGE_0      = "0.000000e+00";
+static constexpr const char* CHARGE_1      = "1.602176e-19";
+static constexpr const char* CHARGE_8      = "8.010882e-20";
+static constexpr const char* NEGATIVE_SPIN = "-319472243083548083355648.000000";
 
-constexpr const unsigned COLOR_MAX       = 65535u;
-constexpr const unsigned COLOR_HALF      = 32768u;
-constexpr const unsigned COLOR_MIN       = 0u;
-constexpr const unsigned CELL_DISTANCE   = 20u;
-constexpr const unsigned X_Y_OFFSET      = 100u;
-constexpr const float    CELL_SIZE       = 18.0f;
-constexpr const float    DOT_SIZE        = 5.0f;
-constexpr const float    LABEL_Y_OFFSET  = 21.5f;
-constexpr const float    BB_X_OFFSET     = 9.0f;
-constexpr const float    BB_Y_OFFSET     = 33.0f;
-constexpr const float    BB_CX_OFFSET    = 4.0f;
-constexpr const float    BB_CY_OFFSET    = 23.0f;
-constexpr const float    CHARACTER_WIDTH = 10.0f;
+static constexpr const int   COLOR_MAX       = 65535;
+static constexpr const int   COLOR_HALF      = 32768;
+static constexpr const int   COLOR_MIN       = 0;
+static constexpr const int   CELL_DISTANCE   = 20;
+static constexpr const int   X_Y_OFFSET      = 100;
+static constexpr const float CELL_SIZE       = 18.0f;
+static constexpr const float DOT_SIZE        = 5.0f;
+static constexpr const float LABEL_Y_OFFSET  = 21.5f;
+static constexpr const float BB_X_OFFSET     = 9.0f;
+static constexpr const float BB_Y_OFFSET     = 33.0f;
+static constexpr const float BB_CX_OFFSET    = 4.0f;
+static constexpr const float BB_CY_OFFSET    = 23.0f;
+static constexpr const float CHARACTER_WIDTH = 10.0f;
 
 struct cell_pos
 {
@@ -192,7 +192,7 @@ class write_qca_layout_impl
     void write_cell_layers()
     {
         // for each layer
-        for (auto z = 0u; z <= lyt.z(); ++z)
+        for (decltype(lyt.z()) z = 0; z <= lyt.z(); ++z)
         {
             write_via_cells();
 
@@ -205,10 +205,10 @@ class write_qca_layout_impl
                << '\n';
 
             // for each row
-            for (auto y = 0ull; y <= lyt.y(); ++y)
+            for (decltype(lyt.y()) y = 0; y <= lyt.y(); ++y)
             {
                 // for each cell
-                for (auto x = 0ull; x <= lyt.x(); ++x)
+                for (decltype(lyt.x()) x = 0; x <= lyt.x(); ++x)
                 {
                     const cell<Lyt> c{x, y, z};
 
@@ -443,8 +443,9 @@ class write_qca_layout_impl
         os << qcad::OPEN_QCAD_DESIGN_OBJECT;
 
         // calculate cell position
-        const qcad::cell_pos pos{static_cast<float>(c.x * qcad::CELL_DISTANCE + qcad::X_Y_OFFSET),
-                                 static_cast<float>(c.y * qcad::CELL_DISTANCE + qcad::X_Y_OFFSET)};
+        const qcad::cell_pos pos{
+            static_cast<float>(c.x * static_cast<decltype(c.x)>(qcad::CELL_DISTANCE) + qcad::X_Y_OFFSET),
+            static_cast<float>(c.y * static_cast<decltype(c.y)>(qcad::CELL_DISTANCE) + qcad::X_Y_OFFSET)};
 
         // write cell position
         os << qcad::X_POS << std::to_string(pos.x) << '\n';

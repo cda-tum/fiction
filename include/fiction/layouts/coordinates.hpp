@@ -345,6 +345,16 @@ struct hash<fiction::cartesian::ucoord_t>
         return static_cast<std::size_t>(std::hash<uint64_t>{}(static_cast<uint64_t>(c)));
     }
 };
+// define std::hash overload for cube::coord_t
+template <>
+struct hash<fiction::cube::coord_t>
+{
+    // based on: https://stackoverflow.com/questions/25649342/hash-function-for-3d-integer-coordinates
+    std::size_t operator()(const fiction::cube::coord_t& c) const noexcept
+    {
+        return static_cast<std::size_t>((c.x * 18397ll) + (c.y * 20483ll) + (c.z * 29303ll) + static_cast<int>(c.d));
+    }
+};
 // make cartesian::coord_iterator compatible with STL iterator categories
 template <typename Coordinate>
 struct iterator_traits<fiction::cartesian::coord_iterator<Coordinate>>

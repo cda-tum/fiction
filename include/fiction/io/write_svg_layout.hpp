@@ -712,6 +712,7 @@ void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(std::is_same_v<technology<Lyt>, qca_technology>, "Lyt must be a QCA layout");
+    static_assert(std::is_same_v<coordinate<Lyt>, cartesian::ucoord_t>, "Lyt must use unsigned Cartesian coordinates");
 
     detail::write_qca_layout_svg_impl<Lyt> p{lyt, os, ps};
 
