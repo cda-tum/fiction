@@ -142,27 +142,21 @@ class onepass_command : public command
                 return;
             }
 
-            const auto get_name = [](auto&& net) -> std::string { return net->get_network_name(); };
+            const auto get_name = [](auto&& ntk_ptr) -> std::string { return ntk_ptr->get_network_name(); };
 
-            const auto one_pass_with_net = [this](auto&& net)
-            {
-                using GateLyt = fiction::gate_level_layout<
-                    fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::coord_t>>>>;
-
-                return fiction::one_pass_synthesis<GateLyt>(*net, ps, &st);
-            };
+            const auto one_pass_with_ntk = [this](auto&& ntk_ptr)
+            { return fiction::one_pass_synthesis<fiction::gate_clk_lyt>(*ntk_ptr, ps, &st); };
 
             auto ntk = s.current();
             ps.name  = std::visit(get_name, ntk);
 
             try
             {
-                auto lyt = std::visit(one_pass_with_net, ntk);
+                auto lyt = std::visit(one_pass_with_ntk, ntk);
 
                 if (lyt.has_value())
                 {
-                    store<fiction::gate_layout_t>().extend() =
-                        std::make_shared<fiction::gate_clk_lyt>(*lyt, std::visit(get_name, ntk));
+                    store<fiction::gate_layout_t>().extend() = std::make_shared<fiction::gate_clk_lyt>(*lyt);
                 }
                 else
                 {
@@ -194,14 +188,11 @@ class onepass_command : public command
             auto tt = s.current();
             ps.name = kitty::to_hex(*tt);
 
-            using gate_layout = fiction::gate_level_layout<
-                fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::coord_t>>>>;
-
-            const auto lyt = fiction::one_pass_synthesis<gate_layout>(std::vector<fiction::tt>{*tt}, ps, &st);
+            auto lyt = fiction::one_pass_synthesis<fiction::gate_clk_lyt>(std::vector<fiction::tt>{*tt}, ps, &st);
 
             if (lyt.has_value())
             {
-                store<fiction::gate_layout_t>().extend() = std::make_shared<fiction::gate_clk_lyt>(*lyt, ps.name);
+                store<fiction::gate_layout_t>().extend() = std::make_shared<fiction::gate_clk_lyt>(*lyt);
             }
             else
             {

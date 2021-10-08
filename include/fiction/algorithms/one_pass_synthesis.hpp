@@ -730,6 +730,12 @@ class one_pass_synthesis_impl
                     pst.num_gates = layout.num_gates();
                     pst.num_wires = layout.num_wires();
 
+                    // restore layout name
+                    if constexpr (has_set_layout_name_v<Lyt>)
+                    {
+                        layout.set_layout_name(ps.name);
+                    }
+
                     return layout;
                 }
                 else  // update timeout and retry
