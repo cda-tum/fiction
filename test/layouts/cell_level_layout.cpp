@@ -210,8 +210,9 @@ TEST_CASE("Cell mode assignment", "[cell-level-layout]")
 
 TEST_CASE("Clocking", "[cell-level-layout]")
 {
-    cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>> layout{
-        cartesian_layout<cartesian::ucoord_t>::aspect_ratio{4, 4, 0}, twoddwave_4_clocking, "Lyt", 2, 2};
+    using clk_cell_lyt = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
+
+    clk_cell_lyt layout{clk_cell_lyt::aspect_ratio{4, 4, 0}, twoddwave_4_clocking<clk_cell_lyt>(), "Lyt", 2, 2};
 
     CHECK(layout.get_clock_number({0, 0}) == 0);
     CHECK(layout.get_clock_number({0, 1}) == 0);

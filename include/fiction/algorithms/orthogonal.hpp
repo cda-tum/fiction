@@ -568,7 +568,7 @@ class orthogonal_impl
         auto ctn = east_south_coloring(ntk);
         // instantiate the layout
         Lyt layout{determine_layout_size<Lyt>(ctn),
-                   ps.number_of_clock_phases == 3 ? twoddwave_3_clocking : twoddwave_4_clocking};
+                   ps.number_of_clock_phases == 3 ? twoddwave_3_clocking<Lyt>() : twoddwave_4_clocking<Lyt>()};
 
         // reserve PI nodes without positions
         ntk.foreach_pi(

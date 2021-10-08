@@ -53,7 +53,7 @@ class network_reader
 
         std::vector<std::string> paths{};
 
-        // check for for given file's properties
+        // check for given file's properties
         if (std::filesystem::exists(filename))
         {
             if (std::filesystem::is_regular_file(filename))

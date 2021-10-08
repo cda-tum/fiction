@@ -175,9 +175,22 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         return;
     }
 
-    for (auto y_pos = 0ull; y_pos <= layout.y(); ++y_pos)
+    const auto has_cell_above = [&layout](const auto& c)
     {
-        for (auto x_pos = 0ull; x_pos <= layout.x(); ++x_pos)
+        for (decltype(layout.z()) z = c.z + 1; z <= layout.z(); ++z)
+        {
+            if (!layout.is_empty_cell({c.x, c.y, z}))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    for (decltype(layout.y()) y_pos = 0; y_pos <= layout.y(); ++y_pos)
+    {
+        for (decltype(layout.x()) x_pos = 0; x_pos <= layout.x(); ++x_pos)
         {
             cell<Lyt> c{x_pos, y_pos};
 
@@ -187,7 +200,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
                 color = color | detail::CLOCK_COLOR[layout.get_clock_number(c)];
 
             // crossing case
-            if (const auto ac = layout.above(c); (c != ac) && !layout.is_empty_cell(ac))
+            if (has_cell_above(c))
             {
                 os << fmt::format(color, "x");
             }
