@@ -60,7 +60,6 @@ class fanout_substitution_impl
   public:
     fanout_substitution_impl(const NtkSrc& src, const fanout_substitution_params p) :
             ntk_topo{convert_network<NtkDest>(src)},
-            old2new{ntk_topo},
             available_fanouts{ntk_topo},
             ps{p}
     {}
@@ -70,10 +69,11 @@ class fanout_substitution_impl
         // initialize a network copy
         auto init = mockturtle::initialize_copy_network<NtkDest>(ntk_topo);
 
-        substituted = init.first;
-        old2new     = init.second;
+        auto substituted = init.first;
+        auto old2new     = init.second;
 
-        ntk_topo.foreach_pi([this](const auto& pi) { generate_fanout_tree(pi); });
+        ntk_topo.foreach_pi([this, &substituted, &old2new](const auto& pi)
+                            { generate_fanout_tree(substituted, pi, old2new); });
 
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -87,7 +87,7 @@ class fanout_substitution_impl
                 std::vector<mockturtle::signal<mockturtle::topo_view<NtkDest>>> children{};
 
                 ntk_topo.foreach_fanin(n,
-                                       [this, &children](const auto& f)
+                                       [this, &old2new, &children, &substituted](const auto& f)
                                        {
                                            const auto fn = ntk_topo.get_node(f);
 
@@ -96,7 +96,7 @@ class fanout_substitution_impl
                                            // constants do not need fanout trees
                                            if (!ntk_topo.is_constant(fn))
                                            {
-                                               child = get_fanout(fn, child);
+                                               child = get_fanout(substituted, fn, child);
                                            }
 
                                            children.push_back(child);
@@ -106,7 +106,7 @@ class fanout_substitution_impl
                 old2new[n] = substituted.clone_node(ntk_topo, n, children);
 
                 // generate the fanout tree for n
-                generate_fanout_tree(n);
+                generate_fanout_tree(substituted, n, old2new);
 
 #if (PROGRESS_BARS)
                 // update progress
@@ -116,11 +116,11 @@ class fanout_substitution_impl
 
         // add primary outputs to finalize the network
         ntk_topo.foreach_po(
-            [this](const auto& po)
+            [this, &old2new, &substituted](const auto& po)
             {
                 const auto po_node    = ntk_topo.get_node(po);
                 auto       tgt_signal = old2new[po_node];
-                auto       tgt_po     = get_fanout(po_node, tgt_signal);
+                auto       tgt_po     = get_fanout(substituted, po_node, tgt_signal);
 
                 tgt_po = ntk_topo.is_complemented(po) ? substituted.create_not(tgt_signal) : tgt_po;
 
@@ -136,15 +136,15 @@ class fanout_substitution_impl
   private:
     mockturtle::topo_view<NtkDest> ntk_topo;
 
-    NtkDest substituted;
+    using old2new_map = mockturtle::node_map<mockturtle::signal<NtkDest>, mockturtle::topo_view<NtkDest>>;
 
-    mockturtle::node_map<mockturtle::signal<NtkDest>, mockturtle::topo_view<NtkDest>> old2new;
-
-    mockturtle::node_map<std::queue<mockturtle::signal<NtkDest>>, mockturtle::topo_view<NtkDest>> available_fanouts;
+    using old2new_queue_map =
+        mockturtle::node_map<std::queue<mockturtle::signal<NtkDest>>, mockturtle::topo_view<NtkDest>>;
+    old2new_queue_map available_fanouts;
 
     const fanout_substitution_params ps;
 
-    void generate_fanout_tree(const mockturtle::node<NtkSrc>& n)
+    void generate_fanout_tree(NtkDest& substituted, const mockturtle::node<NtkSrc>& n, const old2new_map& old2new)
     {
         // skip fanout tree generation if n is a proper fanout node
         if constexpr (has_is_fanout_v<NtkDest>)
@@ -182,13 +182,15 @@ class fanout_substitution_impl
                 child = q.front();
                 q.pop();
                 child = substituted.create_buf(child);
+
                 for (auto i = 0u; i < ps.degree; ++i) q.push(child);
             }
             available_fanouts[n] = q;
         }
     }
 
-    mockturtle::signal<NtkDest> get_fanout(const mockturtle::node<NtkSrc>& n, mockturtle::signal<NtkDest>& child)
+    mockturtle::signal<NtkDest> get_fanout(const NtkDest& substituted, const mockturtle::node<NtkSrc>& n,
+                                           mockturtle::signal<NtkDest>& child)
     {
         if (substituted.fanout_size(child) >= ps.threshold)
         {

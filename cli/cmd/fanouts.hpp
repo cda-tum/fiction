@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_FANOUTS_HPP
-#define FICTION_FANOUTS_HPP
+#ifndef FICTION_CMD_FANOUTS_HPP
+#define FICTION_CMD_FANOUTS_HPP
 
 #include <fiction/algorithms/fanout_substitution.hpp>
 #include <fiction/types.hpp>
@@ -67,8 +67,8 @@ class fanouts_command : public command
             return;
         }
 
-        const auto perform_substitution = [this](auto&& net)
-        { return std::make_shared<fiction::top_nt>(fiction::fanout_substitution<fiction::top_nt>(*net, ps)); };
+        const auto perform_substitution = [this](auto&& ntk_ptr)
+        { return std::make_shared<fiction::top_nt>(fiction::fanout_substitution<fiction::top_nt>(*ntk_ptr, ps)); };
 
         s.extend() = std::visit(perform_substitution, s.current());
 
@@ -82,4 +82,4 @@ class fanouts_command : public command
 ALICE_ADD_COMMAND(fanouts, "Logic")
 }  // namespace alice
 
-#endif  // FICTION_FANOUTS_HPP
+#endif  // FICTION_CMD_FANOUTS_HPP

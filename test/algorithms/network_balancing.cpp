@@ -18,7 +18,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Simple network balancing", "[algorithms]")
+TEST_CASE("Simple network balancing", "[network-balancing]")
 {
     const auto top = blueprints::unbalanced_and_inv_network<topology_network>();
 
@@ -30,7 +30,7 @@ TEST_CASE("Simple network balancing", "[algorithms]")
     check_eq(top, balanced);
 }
 
-TEST_CASE("Complex network balancing", "[algorithms]")
+TEST_CASE("Complex network balancing", "[network-balancing]")
 {
     const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
     const auto mig = blueprints::maj4_network<mockturtle::mig_network>();

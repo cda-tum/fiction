@@ -13,14 +13,14 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[synchronization-element]")
+TEST_CASE("Traits", "[synchronization-element-layout]")
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<coord_t>>>;
 
     CHECK(has_synchronization_elements_v<se_layout>);
 }
 
-TEST_CASE("Clocking", "[synchronization-element]")
+TEST_CASE("Clocking", "[synchronization-element-layout]")
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<coord_t>>>;
 
@@ -55,7 +55,7 @@ TEST_CASE("Clocking", "[synchronization-element]")
     CHECK(layout.is_outgoing_clocked({1, 2}, {1, 1}));
 }
 
-TEST_CASE("Iteration", "[synchronization-element]")
+TEST_CASE("Iteration", "[synchronization-element-layout]")
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<coord_t>>>;
 
@@ -80,7 +80,7 @@ TEST_CASE("Iteration", "[synchronization-element]")
     CHECK(s3 == s4);
 }
 
-TEST_CASE("Structural properties", "[synchronization-element]")
+TEST_CASE("Structural properties", "[synchronization-element-layout]")
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<coord_t>>>;
 

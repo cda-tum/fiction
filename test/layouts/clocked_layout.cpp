@@ -12,7 +12,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[clocked]")
+TEST_CASE("Traits", "[clocked-layout]")
 {
     using layout = clocked_layout<cartesian_layout<coord_t>>;
 
@@ -22,7 +22,7 @@ TEST_CASE("Traits", "[clocked]")
     CHECK(has_foreach_outgoing_clocked_zone_v<layout>);
 }
 
-TEST_CASE("Clocking", "[clocked]")
+TEST_CASE("Clocking", "[clocked-layout]")
 {
     using coordinate_layout = cartesian_layout<coord_t>;
 
@@ -116,7 +116,7 @@ TEST_CASE("Clocking", "[clocked]")
     }
 }
 
-TEST_CASE("Iteration", "[clocked]")
+TEST_CASE("Iteration", "[clocked-layout]")
 {
     using coordinate_layout = cartesian_layout<coord_t>;
 
@@ -140,7 +140,7 @@ TEST_CASE("Iteration", "[clocked]")
     layout.foreach_outgoing_clocked_zone({1, 1}, [&s4](const auto& cz) { CHECK(s4.count(cz) > 0); });
 }
 
-TEST_CASE("Structural properties", "[clocked]")
+TEST_CASE("Structural properties", "[clocked-layout]")
 {
     using coordinate_layout = cartesian_layout<coord_t>;
 

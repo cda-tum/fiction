@@ -720,10 +720,10 @@ void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg
 }
 
 template <typename Lyt>
-void write_qca_layout(const Lyt& lyt, const std::string& filename, write_qca_layout_svg_params ps = {})
+void write_qca_layout_svg(const Lyt& lyt, const std::string& filename, write_qca_layout_svg_params ps = {})
 {
     std::ofstream os{filename.c_str(), std::ofstream::out};
-    write_sqd_layout(lyt, os, ps);
+    write_qca_layout_svg(lyt, os, ps);
     os.close();
 }
 

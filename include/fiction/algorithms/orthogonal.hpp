@@ -165,7 +165,7 @@ bool has_po_fanout(const Ntk& ntk, const mockturtle::node<Ntk> n) noexcept
 template <typename Ntk>
 std::vector<mockturtle::node<Ntk>> siblings(const Ntk& ntk, const mockturtle::node<Ntk> n) noexcept
 {
-    std::vector<mockturtle::node<topology_network>> sibs{};
+    std::vector<mockturtle::node<Ntk>> sibs{};
     ntk.foreach_fanin(n,
                       [&ntk, &sibs, &n](const auto& fi)
                       {
@@ -554,7 +554,7 @@ class orthogonal_impl
 {
   public:
     orthogonal_impl(const Ntk& src, const orthogonal_physical_design_params& p, orthogonal_physical_design_stats& st) :
-            ntk{mockturtle::fanout_view{fanout_substitution<topology_network>(src)}},
+            ntk{mockturtle::fanout_view{fanout_substitution<mockturtle::names_view<topology_network>>(src)}},
             ps{p},
             pst{st},
             node2pos{ntk}
@@ -571,7 +571,12 @@ class orthogonal_impl
                    ps.number_of_clock_phases == 3 ? twoddwave_3_clocking : twoddwave_4_clocking};
 
         // reserve PI nodes without positions
-        ntk.foreach_pi([&layout]([[maybe_unused]] const auto& pi) { layout.create_pi(); });
+        ntk.foreach_pi(
+            [this, &layout](const auto& pi)
+            {
+                const auto s = ntk.make_signal(pi);
+                layout.create_pi(ntk.has_name(s) ? ntk.get_name(s) : "");
+            });
 
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         tile<Lyt> latest_pos{1, 0};
@@ -721,7 +726,10 @@ class orthogonal_impl
                         // check if PO position is located at the border
                         if (layout.is_eastern_border(po_tile))
                         {
-                            layout.create_po(n_s, "", po_tile);
+                            layout.create_po(n_s,
+                                             ntk.has_output_name(po_counter) ? ntk.get_output_name(po_counter++) :
+                                                                               fmt::format("po{}", po_counter++),
+                                             po_tile);
                         }
                         // place PO at the border and connect it by wire segments
                         else
@@ -730,7 +738,10 @@ class orthogonal_impl
 
                             po_tile = layout.eastern_border_of(po_tile);
 
-                            layout.create_po(wire_east(layout, static_cast<tile<Lyt>>(anker), po_tile), "", po_tile);
+                            layout.create_po(wire_east(layout, static_cast<tile<Lyt>>(anker), po_tile),
+                                             ntk.has_output_name(po_counter) ? ntk.get_output_name(po_counter++) :
+                                                                               fmt::format("po{}", po_counter++),
+                                             po_tile);
                         }
                     }
                 }
@@ -754,12 +765,14 @@ class orthogonal_impl
     }
 
   private:
-    mockturtle::topo_view<mockturtle::fanout_view<topology_network>> ntk;
+    mockturtle::topo_view<mockturtle::fanout_view<mockturtle::names_view<topology_network>>> ntk;
 
     orthogonal_physical_design_params ps;
     orthogonal_physical_design_stats& pst;
 
     mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ntk)> node2pos;
+
+    uint32_t po_counter{0};
 };
 
 }  // namespace detail

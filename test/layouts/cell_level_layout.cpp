@@ -16,7 +16,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[cell-level]")
+TEST_CASE("Traits", "[cell-level-layout]")
 {
     using layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
 
@@ -25,7 +25,7 @@ TEST_CASE("Traits", "[cell-level]")
     CHECK(has_set_layout_name_v<layout>);
 }
 
-TEST_CASE("Cell technology", "[cell-level]")
+TEST_CASE("Cell technology", "[cell-level-layout]")
 {
     std::stringstream s{};
 
@@ -78,7 +78,7 @@ TEST_CASE("Cell technology", "[cell-level]")
     }
 }
 
-TEST_CASE("Cell type assignment", "[cell-level]")
+TEST_CASE("Cell type assignment", "[cell-level-layout]")
 {
     using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
 
@@ -111,6 +111,10 @@ TEST_CASE("Cell type assignment", "[cell-level]")
     CHECK(layout.num_cells() == 9);
     CHECK(layout.num_pis() == 2);
     CHECK(layout.num_pos() == 1);
+
+    CHECK(layout.is_pi({0, 2}));
+    CHECK(layout.is_pi({2, 4}));
+    CHECK(layout.is_po({4, 2}));
 
     CHECK(layout.get_cell_type({2, 0}) == qca_technology::cell_type::CONST_0);
     CHECK(layout.get_cell_type({2, 4}) == qca_technology::cell_type::INPUT);
@@ -150,7 +154,7 @@ TEST_CASE("Cell type assignment", "[cell-level]")
     CHECK(!layout.is_empty_cell({4, 2}));
 }
 
-TEST_CASE("Cell mode assignment", "[cell-level]")
+TEST_CASE("Cell mode assignment", "[cell-level-layout]")
 {
     using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
 
@@ -186,6 +190,11 @@ TEST_CASE("Cell mode assignment", "[cell-level]")
     CHECK(layout.num_pis() == 2);
     CHECK(layout.num_pos() == 2);
 
+    CHECK(layout.is_pi({0, 2}));
+    CHECK(layout.is_pi({2, 0}));
+    CHECK(layout.is_po({2, 4}));
+    CHECK(layout.is_po({4, 2}));
+
     CHECK(layout.get_cell_mode({0, 2, 0}) == qca_technology::cell_mode::NORMAL);
     CHECK(layout.get_cell_mode({2, 0, 0}) == qca_technology::cell_mode::NORMAL);
     CHECK(layout.get_cell_mode({1, 2, 0}) == qca_technology::cell_mode::NORMAL);
@@ -199,7 +208,7 @@ TEST_CASE("Cell mode assignment", "[cell-level]")
     CHECK(layout.get_cell_mode({2, 3, 1}) == qca_technology::cell_mode::CROSSOVER);
 }
 
-TEST_CASE("Clocking", "[cell-level]")
+TEST_CASE("Clocking", "[cell-level-layout]")
 {
     cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>> layout{
         cartesian_layout<coord_t>::aspect_ratio{4, 4, 0}, twoddwave_4_clocking, "Lyt", 2, 2};

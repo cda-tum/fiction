@@ -151,7 +151,7 @@ class cell_level_layout : public ClockedLayout
         }
         else
         {
-            return "";
+            return {};
         }
     }
 
@@ -186,12 +186,12 @@ class cell_level_layout : public ClockedLayout
 
     [[nodiscard]] bool is_pi(const cell& c) const noexcept
     {
-        return std::find(strg->inputs.cbegin(), strg->inputs.cend(), c) != strg->inputs.cend();
+        return std::find(strg->inputs.cbegin(), strg->inputs.cend(), static_cast<uint64_t>(c)) != strg->inputs.cend();
     }
 
     [[nodiscard]] bool is_po(const cell& c) const noexcept
     {
-        return std::find(strg->outputs.cbegin(), strg->outputs.cend(), c) != strg->outputs.cend();
+        return std::find(strg->outputs.cbegin(), strg->outputs.cend(), static_cast<uint64_t>(c)) != strg->outputs.cend();
     }
 
     [[nodiscard]] uint16_t get_tile_size_x() const noexcept

@@ -2,8 +2,8 @@
 // Created by marcel on 08.11.19.
 //
 
-#ifndef FICTION_RANDOM_HPP
-#define FICTION_RANDOM_HPP
+#ifndef FICTION_CMD_RANDOM_HPP
+#define FICTION_CMD_RANDOM_HPP
 
 #include <fiction/types.hpp>
 
@@ -150,4 +150,4 @@ ALICE_ADD_COMMAND(random, "Logic")
 
 }  // namespace alice
 
-#endif  // FICTION_RANDOM_HPP
+#endif  // FICTION_CMD_RANDOM_HPP

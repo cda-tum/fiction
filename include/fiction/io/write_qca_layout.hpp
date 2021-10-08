@@ -7,6 +7,7 @@
 
 #include "../technology/cell_technologies.hpp"
 #include "../traits.hpp"
+#include "utils/version_info.hpp"
 
 #include <fmt/format.h>
 
@@ -19,25 +20,55 @@
 namespace fiction
 {
 
+struct write_qca_layout_params
+{
+    bool create_inter_layer_via_cells = true;
+};
+
 namespace detail
 {
 
 namespace qcad
 {
 
-constexpr const char* VERSION_2_HEADER = "[VERSION]\nqcadesigner_version=2.000000\n[#VERSION]\n"
-                                         "[TYPE:DESIGN]\n[TYPE:QCADLayer]\ntype=3\nstatus=1\n"
-                                         "pszDescription=Drawing Layer\n[#TYPE:QCADLayer]\n"
-                                         "[TYPE:QCADLayer]\ntype=0\nstatus=1\npszDescription=Substrate\n"
-                                         "[TYPE:QCADSubstrate]\n[TYPE:QCADStretchyObject]\n"
-                                         "[TYPE:QCADDesignObject]\nx=3000.000000\ny=1500.000000\nbSelected=FALSE\n"
-                                         "clr.red=65535\nclr.green=65535\nclr.blue=65535\n"
-                                         "bounding_box.xWorld=0.000000\nbounding_box.yWorld=0.000000\n"
-                                         "bounding_box.cxWorld=6000.000000\nbounding_box.cyWorld=3000.000000\n"
-                                         "[#TYPE:QCADDesignObject]\n[#TYPE:QCADStretchyObject]\n"
-                                         "grid_spacing=20.000000\n[#TYPE:QCADSubstrate]\n[#TYPE:QCADLayer]\n";
+constexpr const char* VERSION_2_HEADER = "[VERSION]\n"
+                                         "qcadesigner_version=2.000000\n"
+                                         "[#VERSION]\n"
+                                         "[LAYOUT]\n"
+                                         "{}"
+                                         "generated_by={}\n"
+                                         "repo={}\n"
+                                         "[#LAYOUT]\n"
+                                         "[TYPE:DESIGN]\n"
+                                         "[TYPE:QCADLayer]\n"
+                                         "type=3\n"
+                                         "status=1\n"
+                                         "pszDescription=Drawing Layer\n"
+                                         "[#TYPE:QCADLayer]\n"
+                                         "[TYPE:QCADLayer]\n"
+                                         "type=0\n"
+                                         "status=1\n"
+                                         "pszDescription=Substrate\n"
+                                         "[TYPE:QCADSubstrate]\n"
+                                         "[TYPE:QCADStretchyObject]\n"
+                                         "[TYPE:QCADDesignObject]\n"
+                                         "x=3000.000000\n"
+                                         "y=1500.000000\n"
+                                         "bSelected=FALSE\n"
+                                         "clr.red=65535\n"
+                                         "clr.green=65535\n"
+                                         "clr.blue=65535\n"
+                                         "bounding_box.xWorld=0.000000\n"
+                                         "bounding_box.yWorld=0.000000\n"
+                                         "bounding_box.cxWorld=6000.000000\n"
+                                         "bounding_box.cyWorld=3000.000000\n"
+                                         "[#TYPE:QCADDesignObject]\n"
+                                         "[#TYPE:QCADStretchyObject]\n"
+                                         "grid_spacing=20.000000\n"
+                                         "[#TYPE:QCADSubstrate]\n"
+                                         "[#TYPE:QCADLayer]\n";
 
-constexpr const char* CLOSE_DESIGN               = "[#TYPE:DESIGN]";  // no new line to use std::endl to flush stream
+constexpr const char* CLOSE_DESIGN               = "[#TYPE:DESIGN]\n";
 constexpr const char* OPEN_QCAD_LAYER            = "[TYPE:QCADLayer]\n";
 constexpr const char* CLOSE_QCAD_LAYER           = "[#TYPE:QCADLayer]\n";
 constexpr const char* OPEN_QCAD_CELL             = "[TYPE:QCADCell]\n";
@@ -110,315 +141,392 @@ constexpr const float    BB_CX_OFFSET    = 4.0f;
 constexpr const float    BB_CY_OFFSET    = 23.0f;
 constexpr const float    CHARACTER_WIDTH = 10.0f;
 
+struct cell_pos
+{
+    float x, y;
+};
+
+struct color
+{
+    unsigned red, green, blue;
+};
+
 }  // namespace qcad
 
 template <typename Lyt>
 class write_qca_layout_impl
 {
   public:
-    write_qca_layout_impl(const Lyt& src, std::ofstream& s) : lyt{src}, file{s} {}
+    write_qca_layout_impl(const Lyt& src, std::ostream& s, const write_qca_layout_params p) : lyt{src}, os{s}, ps{p} {}
 
     void run()
     {
-        if (!file.is_open())
-            throw std::ofstream::failure("could not open file");
 
-        std::vector<cell<Lyt>> via_layer_cells{};
+        write_header();
 
-        auto write_cell = [&, this](const auto& cell) -> void
-        {
-            auto cell_type = lyt.get_cell_type(cell);
-
-            // open cell
-            file << qcad::OPEN_QCAD_CELL;
-            // open design object
-            file << qcad::OPEN_QCAD_DESIGN_OBJECT;
-
-            const auto x_pos = static_cast<float>(cell.x * qcad::CELL_DISTANCE + qcad::X_Y_OFFSET);
-            const auto y_pos = static_cast<float>(cell.y * qcad::CELL_DISTANCE + qcad::X_Y_OFFSET);
-            file << qcad::X_POS << x_pos << '\n';
-            file << qcad::Y_POS << y_pos << '\n';
-            file << qcad::B_SELECTED << qcad::SELECTED_FALSE << '\n';
-
-            // supports colors for 4 clocks only
-            unsigned red, green, blue;
-            if (qca_technology::is_input_cell(cell_type))
-            {
-                red   = qcad::COLOR_MIN;
-                green = qcad::COLOR_MIN;
-                blue  = qcad::COLOR_MAX;
-            }
-            else if (qca_technology::is_output_cell(cell_type))
-            {
-                red   = qcad::COLOR_MAX;
-                green = qcad::COLOR_MAX;
-                blue  = qcad::COLOR_MIN;
-            }
-            else if (qca_technology::is_constant_cell(cell_type))
-            {
-                red   = qcad::COLOR_MAX;
-                green = qcad::COLOR_HALF;
-                blue  = qcad::COLOR_MIN;
-            }
-            else
-            {
-                switch (lyt.get_clock_number(cell))
-                {
-                    case 0:
-                    {
-                        red   = qcad::COLOR_MIN;
-                        green = qcad::COLOR_MAX;
-                        blue  = qcad::COLOR_MIN;
-                        break;
-                    }
-                    case 1:
-                    {
-                        red   = qcad::COLOR_MAX;
-                        green = qcad::COLOR_MIN;
-                        blue  = qcad::COLOR_MAX;
-                        break;
-                    }
-                    case 2:
-                    {
-                        red   = qcad::COLOR_MIN;
-                        green = qcad::COLOR_MAX;
-                        blue  = qcad::COLOR_MAX;
-                        break;
-                    }
-                    case 3:
-                    {
-                        red   = qcad::COLOR_MAX;
-                        green = qcad::COLOR_MAX;
-                        blue  = qcad::COLOR_MAX;
-                        break;
-                    }
-                    default: break;
-                }
-            }
-            file << fmt::format(qcad::COLOR, red, green, blue);
-
-            file << qcad::BOUNDING_BOX_X << x_pos - qcad::CELL_SIZE / 2.0f << '\n';
-            file << qcad::BOUNDING_BOX_Y << y_pos - qcad::CELL_SIZE / 2.0f << '\n';
-            file << qcad::BOUNDING_BOX_CX << qcad::CELL_SIZE << '\n';
-            file << qcad::BOUNDING_BOX_CY << qcad::CELL_SIZE << '\n';
-
-            // close design object
-            file << qcad::CLOSE_QCAD_DESIGN_OBJECT;
-
-            file << qcad::CELL_OPTIONS_CX << qcad::CELL_SIZE << '\n';
-            file << qcad::CELL_OPTIONS_CY << qcad::CELL_SIZE << '\n';
-            file << qcad::CELL_OPTIONS_DOT_DIAMETER << qcad::DOT_SIZE << '\n';
-            file << qcad::CELL_OPTIONS_CLOCK << std::to_string(lyt.get_clock_number(cell)) << '\n';
-
-            // handle cell mode
-            file << qcad::CELL_OPTIONS_MODE;
-            if (const auto mode = lyt.get_cell_mode(cell); qca_technology::is_vertical_cell_mode(mode))
-            {
-                file << qcad::CELL_MODE_VERTICAL;
-                via_layer_cells.push_back(cell);  // save via cell for inter-layer
-            }
-            else if (lyt.is_crossing_layer(cell))
-            {
-                file << qcad::CELL_MODE_CROSSOVER;
-            }
-            else if (qca_technology::is_rotated_cell_mode(mode))
-            {
-                file << qcad::CELL_MODE_ROTATED;
-            }
-            else
-            {
-                file << qcad::CELL_MODE_NORMAL;
-            }
-
-            file << '\n';
-
-            // handle cell function
-            file << qcad::CELL_FUNCTION;
-
-            if (qca_technology::is_normal_cell(cell_type))
-            {
-                file << qcad::CELL_FUNCTION_NORMAL;
-            }
-            else if (qca_technology::is_constant_cell(cell_type))
-            {
-                file << qcad::CELL_FUNCTION_FIXED;
-            }
-            else if (qca_technology::is_input_cell(cell_type))
-            {
-                file << qcad::CELL_FUNCTION_INPUT;
-            }
-            else if (qca_technology::is_output_cell(cell_type))
-            {
-                file << qcad::CELL_FUNCTION_OUTPUT;
-            }
-
-            file << '\n' << qcad::NUMBER_OF_DOTS_4;
-
-            // create quantum dots
-            for (int i = 1; i > -2; i -= 2)
-            {
-                for (int j2 = 1; j2 > -2; j2 -= 2)
-                {
-                    int j = i == 1 ? -j2 : j2;
-
-                    // open dot
-                    file << qcad::OPEN_CELL_DOT;
-
-                    file << qcad::X_POS << x_pos + (qcad::CELL_SIZE / 4.0f) * static_cast<float>(i) << '\n';
-                    file << qcad::Y_POS << y_pos + (qcad::CELL_SIZE / 4.0f) * static_cast<float>(j) << '\n';
-                    file << qcad::DIAMETER << qcad::DOT_SIZE << '\n';
-
-                    // determine charge
-                    file << qcad::CHARGE;
-                    if (!qca_technology::is_constant_cell(cell_type))
-                    {
-                        file << qcad::CHARGE_8;
-                    }
-                    else if ((qca_technology::is_const_0_cell(cell_type) && std::abs(i + j) == 2) ||
-                             (qca_technology::is_const_1_cell(cell_type) && std::abs(i + j) == 0))
-                    {
-                        file << qcad::CHARGE_1;
-                    }
-                    else if ((qca_technology::is_const_0_cell(cell_type) && std::abs(i + j) == 0) ||
-                             (qca_technology::is_const_1_cell(cell_type) && std::abs(i + j) == 2))
-                    {
-                        file << qcad::CHARGE_0;
-                    }
-                    file << '\n';
-
-                    // determine spin
-                    file << qcad::SPIN;
-                    if (qca_technology::is_input_cell(cell_type) || qca_technology::is_output_cell(cell_type))
-                    {
-                        file << qcad::NEGATIVE_SPIN;
-                    }
-                    else
-                    {
-                        file << 0.0f;
-                    }
-                    file << '\n';
-
-                    file << qcad::POTENTIAL << 0.0f << '\n';
-
-                    // close dot
-                    file << qcad::CLOSE_CELL_DOT;
-                }
-            }
-
-            // override cell_name if cell is constant; if cell has a name
-            if (auto cell_name = qca_technology::is_const_0_cell(cell_type) ? "-1.00" :
-                                 qca_technology::is_const_1_cell(cell_type) ? "1.00" :
-                                                                              lyt.get_cell_name(cell);
-                !cell_name.empty())
-            {
-                // open label
-                file << qcad::OPEN_QCAD_LABEL;
-                file << qcad::OPEN_QCAD_STRETCHY_OBJECT;
-                file << qcad::OPEN_QCAD_DESIGN_OBJECT;
-
-                file << qcad::X_POS << x_pos << '\n';
-                file << qcad::Y_POS << y_pos - qcad::LABEL_Y_OFFSET << '\n';
-                file << qcad::B_SELECTED << qcad::SELECTED_FALSE << '\n';
-                file << fmt::format(qcad::COLOR, red, green, blue);
-                file << qcad::BOUNDING_BOX_X << x_pos - qcad::BB_X_OFFSET << '\n';
-                file << qcad::BOUNDING_BOX_Y << y_pos - qcad::BB_Y_OFFSET << '\n';
-                file << qcad::BOUNDING_BOX_CX
-                     << static_cast<float>(cell_name.size()) * qcad::CHARACTER_WIDTH + qcad::BB_CX_OFFSET << '\n';
-                file << qcad::BOUNDING_BOX_CY << qcad::BB_CY_OFFSET << '\n';
-
-                file << qcad::CLOSE_QCAD_DESIGN_OBJECT;
-                file << qcad::CLOSE_QCAD_STRETCHY_OBJECT;
-
-                file << qcad::PSZ << cell_name << '\n';
-
-                // close label
-                file << qcad::CLOSE_QCAD_LABEL;
-            }
-
-            // close cell
-            file << qcad::CLOSE_QCAD_CELL;
-        };
-
-        auto via_counter     = 1u;
-        auto write_via_cells = [&](std::vector<cell<Lyt>>& vias) -> void
-        {
-            if (vias.empty())
-                return;
-
-            // open via layer
-            file << qcad::OPEN_QCAD_LAYER;
-
-            file << qcad::TYPE << 1 << '\n';
-            file << qcad::STATUS << 0 << '\n';
-            file << qcad::PSZ_DESCRIPTION << "Via Layer " << std::to_string(via_counter++) << '\n';
-
-            for (auto& v : vias) write_cell(v);
-
-            // close design layer
-            file << qcad::CLOSE_QCAD_LAYER;
-
-            vias.clear();
-        };
-
-        // write version header
-        file << qcad::VERSION_2_HEADER;
-
-        // for each layer
-        for (auto layer = 0u; layer <= lyt.z(); ++layer)
-        {
-            write_via_cells(via_layer_cells);
-
-            // open design layer
-            file << qcad::OPEN_QCAD_LAYER;
-
-            file << qcad::TYPE << 1 << '\n';
-            file << qcad::STATUS << 0 << '\n';
-            file << qcad::PSZ_DESCRIPTION
-                 << ((layer == 0) ? "Ground Layer" : ("Crossing Layer " + std::to_string(layer))) << '\n';
-
-            // for all cells in that layer
-            lyt.foreach_cell(
-                [&write_cell, &layer](const auto& cell)
-                {
-                    // skip cells not belonging to current layer
-                    if (cell.z == layer)
-                    {
-                        write_cell(cell);
-                    }
-                });
-
-            // close design layer
-            file << qcad::CLOSE_QCAD_LAYER;
-        }
+        write_cell_layers();
 
         // close design block
-        file << qcad::CLOSE_DESIGN << std::endl;
+        os << qcad::CLOSE_DESIGN << std::flush;
     }
 
   private:
     Lyt lyt;
 
-    std::ofstream& file;
+    std::ostream& os;
+
+    const write_qca_layout_params ps;
+
+    uint32_t via_counter{1ul};
+
+    // via cells
+    std::vector<cell<Lyt>> via_layer_cells{};
+
+    void write_header()
+    {
+        const auto layout_name = lyt.get_layout_name();
+        os << fmt::format(qcad::VERSION_2_HEADER, (layout_name.empty() ? "" : fmt::format("name={}\n", layout_name)),
+                          FICTION_VERSION, FICTION_REPO);
+    }
+
+    void write_cell_layers()
+    {
+        // for each layer
+        for (auto z = 0u; z <= lyt.z(); ++z)
+        {
+            write_via_cells();
+
+            // open design layer
+            os << qcad::OPEN_QCAD_LAYER;
+
+            os << qcad::TYPE << "1\n";
+            os << qcad::STATUS << "0\n";
+            os << qcad::PSZ_DESCRIPTION << ((z == 0) ? "Ground Layer" : ("Crossing Layer " + std::to_string(z)))
+               << '\n';
+
+            // for each row
+            for (auto y = 0ull; y <= lyt.y(); ++y)
+            {
+                // for each cell
+                for (auto x = 0ull; x <= lyt.x(); ++x)
+                {
+                    const cell<Lyt> c{x, y, z};
+
+                    // skip empty cells
+                    if (!lyt.is_empty_cell(c))
+                    {
+                        write_cell(c, ps.create_inter_layer_via_cells);
+                    }
+                }
+            }
+
+            // close design layer
+            os << qcad::CLOSE_QCAD_LAYER;
+        }
+    }
+
+    qcad::color write_cell_colors(const cell<Lyt>& c)
+    {
+        const auto cell_type = lyt.get_cell_type(c);
+
+        // colors for 4 clocks are supported exclusively
+        qcad::color color{};
+        if (qca_technology::is_input_cell(cell_type))
+        {
+            color.red   = qcad::COLOR_MIN;
+            color.green = qcad::COLOR_MIN;
+            color.blue  = qcad::COLOR_MAX;
+        }
+        else if (qca_technology::is_output_cell(cell_type))
+        {
+            color.red   = qcad::COLOR_MAX;
+            color.green = qcad::COLOR_MAX;
+            color.blue  = qcad::COLOR_MIN;
+        }
+        else if (qca_technology::is_constant_cell(cell_type))
+        {
+            color.red   = qcad::COLOR_MAX;
+            color.green = qcad::COLOR_HALF;
+            color.blue  = qcad::COLOR_MIN;
+        }
+        else
+        {
+            switch (lyt.get_clock_number(c))
+            {
+                case 0:
+                {
+                    color.red   = qcad::COLOR_MIN;
+                    color.green = qcad::COLOR_MAX;
+                    color.blue  = qcad::COLOR_MIN;
+                    break;
+                }
+                case 1:
+                {
+                    color.red   = qcad::COLOR_MAX;
+                    color.green = qcad::COLOR_MIN;
+                    color.blue  = qcad::COLOR_MAX;
+                    break;
+                }
+                case 2:
+                {
+                    color.red   = qcad::COLOR_MIN;
+                    color.green = qcad::COLOR_MAX;
+                    color.blue  = qcad::COLOR_MAX;
+                    break;
+                }
+                case 3:
+                {
+                    color.red   = qcad::COLOR_MAX;
+                    color.green = qcad::COLOR_MAX;
+                    color.blue  = qcad::COLOR_MAX;
+                    break;
+                }
+                default: break;
+            }
+        }
+        os << fmt::format(qcad::COLOR, color.red, color.green, color.blue);
+
+        return color;
+    }
+
+    void write_cell_mode(const cell<Lyt>& c, bool save_via_cells)
+    {
+        // handle cell mode
+        os << qcad::CELL_OPTIONS_MODE;
+        if (const auto mode = lyt.get_cell_mode(c); qca_technology::is_vertical_cell_mode(mode))
+        {
+            os << qcad::CELL_MODE_VERTICAL;
+
+            if (save_via_cells)
+            {
+                via_layer_cells.push_back(c);  // save via cell for inter-layer
+            }
+        }
+        else if (lyt.is_crossing_layer(c))
+        {
+            os << qcad::CELL_MODE_CROSSOVER;
+        }
+        else if (qca_technology::is_rotated_cell_mode(mode))
+        {
+            os << qcad::CELL_MODE_ROTATED;
+        }
+        else
+        {
+            os << qcad::CELL_MODE_NORMAL;
+        }
+    }
+
+    void write_cell_function(const cell<Lyt>& c)
+    {
+        const auto cell_type = lyt.get_cell_type(c);
+
+        // handle cell function
+        os << qcad::CELL_FUNCTION;
+
+        if (qca_technology::is_normal_cell(cell_type))
+        {
+            os << qcad::CELL_FUNCTION_NORMAL;
+        }
+        else if (qca_technology::is_constant_cell(cell_type))
+        {
+            os << qcad::CELL_FUNCTION_FIXED;
+        }
+        else if (qca_technology::is_input_cell(cell_type))
+        {
+            os << qcad::CELL_FUNCTION_INPUT;
+        }
+        else if (qca_technology::is_output_cell(cell_type))
+        {
+            os << qcad::CELL_FUNCTION_OUTPUT;
+        }
+    }
+
+    void write_quantum_dots(const cell<Lyt>& c, const qcad::cell_pos pos)
+    {
+        const auto cell_type = lyt.get_cell_type(c);
+
+        os << '\n' << qcad::NUMBER_OF_DOTS_4;
+
+        // create quantum dots
+        for (int i = 1; i > -2; i -= 2)
+        {
+            for (int j2 = 1; j2 > -2; j2 -= 2)
+            {
+                int j = i == 1 ? -j2 : j2;
+
+                // open dot
+                os << qcad::OPEN_CELL_DOT;
+
+                os << qcad::X_POS << std::to_string(pos.x + (qcad::CELL_SIZE / 4.0f) * static_cast<float>(i)) << '\n';
+                os << qcad::Y_POS << std::to_string(pos.y + (qcad::CELL_SIZE / 4.0f) * static_cast<float>(j)) << '\n';
+                os << qcad::DIAMETER << qcad::DOT_SIZE << '\n';
+
+                // determine charge
+                os << qcad::CHARGE;
+                if (!qca_technology::is_constant_cell(cell_type))
+                {
+                    os << qcad::CHARGE_8;
+                }
+                else if ((qca_technology::is_const_0_cell(cell_type) && std::abs(i + j) == 2) ||
+                         (qca_technology::is_const_1_cell(cell_type) && std::abs(i + j) == 0))
+                {
+                    os << qcad::CHARGE_1;
+                }
+                else if ((qca_technology::is_const_0_cell(cell_type) && std::abs(i + j) == 0) ||
+                         (qca_technology::is_const_1_cell(cell_type) && std::abs(i + j) == 2))
+                {
+                    os << qcad::CHARGE_0;
+                }
+                os << '\n';
+
+                // determine spin
+                os << qcad::SPIN;
+                if (qca_technology::is_input_cell(cell_type) || qca_technology::is_output_cell(cell_type))
+                {
+                    os << qcad::NEGATIVE_SPIN;
+                }
+                else
+                {
+                    os << std::to_string(0.0f);
+                }
+                os << '\n';
+
+                os << qcad::POTENTIAL << std::to_string(0.0f) << '\n';
+
+                // close dot
+                os << qcad::CLOSE_CELL_DOT;
+            }
+        }
+    }
+
+    void write_cell_name(const cell<Lyt>& c, const qcad::cell_pos pos, const qcad::color color)
+    {
+        const auto cell_type = lyt.get_cell_type(c);
+
+        // override cell_name if cell is constant; if cell has a name
+        if (auto cell_name = qca_technology::is_const_0_cell(cell_type) ? "-1.00" :
+                             qca_technology::is_const_1_cell(cell_type) ? "1.00" :
+                                                                          lyt.get_cell_name(c);
+            !cell_name.empty())
+        {
+            // open label
+            os << qcad::OPEN_QCAD_LABEL;
+            os << qcad::OPEN_QCAD_STRETCHY_OBJECT;
+            os << qcad::OPEN_QCAD_DESIGN_OBJECT;
+
+            os << qcad::X_POS << std::to_string(pos.x) << '\n';
+            os << qcad::Y_POS << std::to_string(pos.y - qcad::LABEL_Y_OFFSET) << '\n';
+            os << qcad::B_SELECTED << qcad::SELECTED_FALSE << '\n';
+            os << fmt::format(qcad::COLOR, color.red, color.green, color.blue);
+            os << qcad::BOUNDING_BOX_X << std::to_string(pos.x - qcad::BB_X_OFFSET) << '\n';
+            os << qcad::BOUNDING_BOX_Y << std::to_string(pos.y - qcad::BB_Y_OFFSET) << '\n';
+            os << qcad::BOUNDING_BOX_CX
+               << std::to_string(static_cast<float>(cell_name.size()) * qcad::CHARACTER_WIDTH + qcad::BB_CX_OFFSET)
+               << '\n';
+            os << qcad::BOUNDING_BOX_CY << qcad::BB_CY_OFFSET << '\n';
+
+            os << qcad::CLOSE_QCAD_DESIGN_OBJECT;
+            os << qcad::CLOSE_QCAD_STRETCHY_OBJECT;
+
+            os << qcad::PSZ << cell_name << '\n';
+
+            // close label
+            os << qcad::CLOSE_QCAD_LABEL;
+        }
+    };
+
+    void write_cell(const cell<Lyt>& c, const bool save_via_cells)
+    {
+        // open cell
+        os << qcad::OPEN_QCAD_CELL;
+        // open design object
+        os << qcad::OPEN_QCAD_DESIGN_OBJECT;
+
+        // calculate cell position
+        const qcad::cell_pos pos{static_cast<float>(c.x * qcad::CELL_DISTANCE + qcad::X_Y_OFFSET),
+                                 static_cast<float>(c.y * qcad::CELL_DISTANCE + qcad::X_Y_OFFSET)};
+
+        // write cell position
+        os << qcad::X_POS << std::to_string(pos.x) << '\n';
+        os << qcad::Y_POS << std::to_string(pos.y) << '\n';
+        os << qcad::B_SELECTED << qcad::SELECTED_FALSE << '\n';
+
+        // write cell colors
+        const auto color = write_cell_colors(c);
+
+        // write cell bounding box
+        os << qcad::BOUNDING_BOX_X << std::to_string(pos.x - qcad::CELL_SIZE / 2.0f) << '\n';
+        os << qcad::BOUNDING_BOX_Y << std::to_string(pos.y - qcad::CELL_SIZE / 2.0f) << '\n';
+        os << qcad::BOUNDING_BOX_CX << qcad::CELL_SIZE << '\n';
+        os << qcad::BOUNDING_BOX_CY << qcad::CELL_SIZE << '\n';
+
+        // close design object
+        os << qcad::CLOSE_QCAD_DESIGN_OBJECT;
+
+        // write cell options
+        os << qcad::CELL_OPTIONS_CX << qcad::CELL_SIZE << '\n';
+        os << qcad::CELL_OPTIONS_CY << qcad::CELL_SIZE << '\n';
+        os << qcad::CELL_OPTIONS_DOT_DIAMETER << qcad::DOT_SIZE << '\n';
+        os << qcad::CELL_OPTIONS_CLOCK << std::to_string(lyt.get_clock_number(c)) << '\n';
+
+        // write cell mode
+        write_cell_mode(c, save_via_cells);
+
+        os << '\n';
+
+        write_cell_function(c);
+
+        write_quantum_dots(c, pos);
+
+        write_cell_name(c, pos, color);
+
+        // close cell
+        os << qcad::CLOSE_QCAD_CELL;
+    }
+
+    void write_via_cells()
+    {
+        if (via_layer_cells.empty())
+            return;
+
+        // open via layer
+        os << qcad::OPEN_QCAD_LAYER;
+
+        os << qcad::TYPE << std::to_string(1) << '\n';
+        os << qcad::STATUS << std::to_string(0) << '\n';
+        os << qcad::PSZ_DESCRIPTION << "Via Layer " << std::to_string(via_counter++) << '\n';
+
+        for (auto& v : via_layer_cells) { write_cell(v, false); }
+
+        // close design layer
+        os << qcad::CLOSE_QCAD_LAYER;
+
+        via_layer_cells.clear();
+    }
 };
 
 }  // namespace detail
 
 template <typename Lyt>
-void write_qca_layout(const Lyt& lyt, std::ofstream& os)
+void write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(std::is_same_v<technology<Lyt>, qca_technology>, "Lyt must be a QCA layout");
 
-    detail::write_qca_layout_impl p{lyt, os};
+    detail::write_qca_layout_impl p{lyt, os, ps};
 
     p.run();
 }
 
 template <typename Lyt>
-void write_qca_layout(const Lyt& lyt, const std::string& filename)
+void write_qca_layout(const Lyt& lyt, const std::string& filename, write_qca_layout_params ps = {})
 {
     std::ofstream os{filename.c_str(), std::ofstream::out};
-    write_qca_layout(lyt, os);
+
+    if (!os.is_open())
+        throw std::ofstream::failure("could not open file");
+
+    write_qca_layout(lyt, os, ps);
     os.close();
 }
 

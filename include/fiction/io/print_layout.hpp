@@ -73,7 +73,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         else if (layout.is_xor(n))
             return "X";
         else if (layout.is_fanout(n))
-            return "Y";
+            return "F";
         else if (layout.is_wire(n))
         {
             // second-layer wire indicates a crossing

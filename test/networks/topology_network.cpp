@@ -18,7 +18,7 @@
 
 using namespace fiction;
 
-TEST_CASE("create and use constants in a topology network", "[topo]")
+TEST_CASE("create and use constants in a topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -47,7 +47,7 @@ TEST_CASE("create and use constants in a topology network", "[topo]")
     CHECK(!topo.is_pi(c1));
 }
 
-TEST_CASE("create and use primary inputs in a topology network", "[topo]")
+TEST_CASE("create and use primary inputs in a topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -66,7 +66,7 @@ TEST_CASE("create and use primary inputs in a topology network", "[topo]")
     CHECK(x1 != x2);
 }
 
-TEST_CASE("create and use primary outputs in a topology network", "[topo]")
+TEST_CASE("create and use primary outputs in a topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -86,7 +86,7 @@ TEST_CASE("create and use primary outputs in a topology network", "[topo]")
     CHECK(topo.num_pos() == 3);
 }
 
-TEST_CASE("create and use register in a topology network", "[topo]")
+TEST_CASE("create and use register in a topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -206,7 +206,7 @@ TEST_CASE("create and use register in a topology network", "[topo]")
         });
 }
 
-TEST_CASE("create unary operations in a topology network", "[topo]")
+TEST_CASE("create unary operations in a topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -225,7 +225,7 @@ TEST_CASE("create unary operations in a topology network", "[topo]")
     CHECK(f2 != x1);
 }
 
-TEST_CASE("create binary operations in a topology network", "[topo]")
+TEST_CASE("create binary operations in a topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -246,7 +246,7 @@ TEST_CASE("create binary operations in a topology network", "[topo]")
     CHECK(topo.size() == 7);  // no structural hashing
 }
 
-TEST_CASE("create ternary operations in a topology network", "[topo]")
+TEST_CASE("create ternary operations in a topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -283,7 +283,7 @@ TEST_CASE("create ternary operations in a topology network", "[topo]")
     CHECK(f5 != f6);
 }
 
-TEST_CASE("create n-ary operations in a topology network", "[topo]")
+TEST_CASE("create n-ary operations in a topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -307,7 +307,7 @@ TEST_CASE("create n-ary operations in a topology network", "[topo]")
     CHECK(topo.size() == 13);
 }
 
-TEST_CASE("clone a node in a topology network", "[topo]")
+TEST_CASE("clone a node in a topology network", "[topology-network]")
 {
     topology_network topo1, topo2;
 
@@ -328,7 +328,7 @@ TEST_CASE("clone a node in a topology network", "[topo]")
     topo2.foreach_fanin(topo2.get_node(f2), [&](auto const& s) { CHECK(!topo2.is_complemented(s)); });
 }
 
-TEST_CASE("compute functions from AND and NOT gates in topology networks", "[topo]")
+TEST_CASE("compute functions from AND and NOT gates in topology networks", "[topology-network]")
 {
     topology_network topo{};
 
@@ -351,7 +351,7 @@ TEST_CASE("compute functions from AND and NOT gates in topology networks", "[top
     CHECK(sim_f2 == (xs[0] & xs[1]));
 }
 
-TEST_CASE("create nodes and compute a function in a topology network", "[topo]")
+TEST_CASE("create nodes and compute a function in a topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -393,7 +393,7 @@ TEST_CASE("create nodes and compute a function in a topology network", "[topo]")
     CHECK(sim_xor == (xs[0] ^ xs[1] ^ xs[2]));
 }
 
-TEST_CASE("create fanouts and nodes and compute a function in a topology network", "[topo]")
+TEST_CASE("create fanouts and nodes and compute a function in a topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -429,7 +429,7 @@ TEST_CASE("create fanouts and nodes and compute a function in a topology network
     CHECK(sim_xor == (xs[0] ^ xs[1] ^ xs[2]));
 }
 
-TEST_CASE("hash nodes in topology network", "[topo]")
+TEST_CASE("hash nodes in topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -451,7 +451,7 @@ TEST_CASE("hash nodes in topology network", "[topo]")
     CHECK(topo.size() == 8);  // no structural hashing
 }
 
-TEST_CASE("subsitute node by another", "[topo]")
+TEST_CASE("subsitute node by another", "[topology-network]")
 {
     topology_network topo{};
 
@@ -510,7 +510,7 @@ TEST_CASE("subsitute node by another", "[topo]")
         });
 }
 
-TEST_CASE("structural properties of a topology network", "[topo]")
+TEST_CASE("structural properties of a topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -544,7 +544,7 @@ TEST_CASE("structural properties of a topology network", "[topo]")
     CHECK(topo.fanout_size(topo.get_node(f2)) == 1);
 }
 
-TEST_CASE("Node functions of a topology network", "[topo]")
+TEST_CASE("Node functions of a topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -591,7 +591,7 @@ TEST_CASE("Node functions of a topology network", "[topo]")
     CHECK(topo.is_xor3(topo.get_node(xor3_signal)));
 }
 
-TEST_CASE("node and signal iteration in a topology network", "[topo]")
+TEST_CASE("node and signal iteration in a topology network", "[topology-network]")
 {
     topology_network topo{};
 
@@ -715,7 +715,7 @@ TEST_CASE("node and signal iteration in a topology network", "[topo]")
     CHECK(mask == 16);
 }
 
-TEST_CASE("custom node values in topology networks", "[topo]")
+TEST_CASE("custom node values in topology networks", "[topology-network]")
 {
     topology_network topo{};
 
@@ -750,7 +750,7 @@ TEST_CASE("custom node values in topology networks", "[topo]")
     topo.foreach_node([&](auto n) { CHECK(topo.value(n) == 0); });
 }
 
-TEST_CASE("visited values in topology networks", "[topo]")
+TEST_CASE("visited values in topology networks", "[topology-network]")
 {
     topology_network topo{};
 

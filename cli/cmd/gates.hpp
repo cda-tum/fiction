@@ -2,8 +2,8 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_GATES_HPP
-#define FICTION_GATES_HPP
+#ifndef FICTION_CMD_GATES_HPP
+#define FICTION_CMD_GATES_HPP
 
 #include <fiction/algorithms/count_gate_types.hpp>
 #include <fiction/types.hpp>
@@ -46,10 +46,10 @@ class gates_command : public command
             return;
         }
 
-        const auto count = [this](auto&& ntk_or_lyt)
+        const auto count = [this](auto&& ntk_or_lyt_ptr)
         {
             fiction::count_gate_types_stats st{};
-            fiction::count_gate_types(*ntk_or_lyt, &st);
+            fiction::count_gate_types(*ntk_or_lyt_ptr, &st);
 
             st.report(env->out(), is_set("detailed"));
         };
@@ -87,4 +87,4 @@ class gates_command : public command
 ALICE_ADD_COMMAND(gates, "Logic")
 }  // namespace alice
 
-#endif  // FICTION_GATES_HPP
+#endif  // FICTION_CMD_GATES_HPP
