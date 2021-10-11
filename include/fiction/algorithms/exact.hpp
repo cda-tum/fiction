@@ -746,12 +746,44 @@ class exact_impl
         /**
          * Adds constraints to the solver to expand the formerly created sub-paths transitively.
          */
-        void establish_transitive_paths() noexcept;
+        void establish_transitive_paths() noexcept
+        {
+            layout.foreach_ground_tile(
+                [this](const auto& t1)
+                {
+                    layout.foreach_ground_tile(
+                        [this, &t1](const auto& t2)
+                        {
+                            // skip instances where t1 == t2
+                            if (layout->index(t1) != layout->index(t2))
+                            {
+                                layout.foreach_ground_tile(
+                                    [this, &t1, &t2](const auto& t3)
+                                    {
+                                        // skip instances where t2 == t3
+                                        if (layout->index(t2) != layout->index(t3))
+                                        {
+                                            // if neither t1 nor t2 nor t3 are in added_tiles, the constraint exists
+                                            // already in the solver and does not need to be added
+                                            if (is_added_tile(t1) || is_added_tile(t2) || is_added_tile(t3))
+                                            {
+                                                solver->add(
+                                                    z3::implies(get_tp(t1, t2) and get_tp(t2, t3), get_tp(t1, t3)));
+                                            }
+                                        }
+                                    });
+                            }
+                        });
+                });
+        }
         /**
          * Adds constraints to the solver to prohibit cycles that loop back information. To this end, the formerly
          * established paths are used. Without this constraint, useless wire loops appear.
          */
-        void eliminate_cycles() noexcept;
+        void eliminate_cycles() noexcept
+        {
+            for (const auto& t : check_point->added_tiles) { solver->add(not get_tp(t, t)); }
+        }
         /**
          * Adds constraints to the solver to ensure that the cl variable of primary input pi is set to the clock zone
          * value of the tile pi is assigned to. Necessary to be taken into account for path lengths.
@@ -790,7 +822,39 @@ class exact_impl
          * Adds constraints to the solver to prevent negative valued clock latches and that vertex tiles cannot be
          * latches.
          */
-        void restrict_clock_latches() noexcept;
+        void restrict_clock_latches() noexcept
+        {
+            auto zero = ctx->int_val(0u);
+
+            for (const auto& t : check_point->added_tiles)
+            {
+                // latches must be positive
+                auto l = get_tl(t);
+                solver->add(l >= zero);
+
+                // tiles without wires cannot have latches
+                z3::expr_vector te{*ctx};
+                // TODO does this realize for (auto&& e : network->edges(config.io_ports))?
+                network.foreach_node(
+                    [this, &t, &te](const auto& n)
+                    {
+                        if (!skip_io_node(n))
+                        {
+                            network.foreach_fanin(n,
+                                                  [this, &t, &n, &te](const auto& f)
+                                                  {
+                                                      if (!skip_io_node(network.get_node(f)))
+                                                      {
+                                                          const auto e = mockturtle::edge<Ntk>{network.get_node(f), n};
+                                                          te.push_back(get_te(t, e));
+                                                      }
+                                                  });
+                        }
+                    });
+
+                solver->add(z3::implies(z3::atmost(te, 0u), l == zero));
+            }
+        }
         /**
          * Adds constraints to the solver to enforce topology-specific restrictions.
          */
@@ -800,19 +864,83 @@ class exact_impl
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
          */
-        void minimize_wires(optimize_ptr optimize) noexcept;
+        void minimize_wires(optimize_ptr optimize) noexcept
+        {
+            z3::expr_vector wire_counter{*ctx};
+            layout.foreach_ground_tile(
+                [this, &wire_counter](const auto& t)
+                {
+                    // TODO does this realize for (auto&& e : network->edges(config.io_ports))?
+                    network.foreach_node(
+                        [this, &wire_counter, &t](const auto& n)
+                        {
+                            if (!skip_io_node(n))
+                            {
+                                network.foreach_fanin(
+                                    n,
+                                    [this, &wire_counter, &t, &n](const auto& f)
+                                    {
+                                        if (!skip_io_node(network.get_node(f)))
+                                        {
+                                            const auto e = mockturtle::edge<Ntk>{network.get_node(f), n};
+                                            wire_counter.push_back(
+                                                z3::ite(get_te(t, e), ctx->real_val(1u), ctx->real_val(0u)));
+                                        }
+                                    });
+                            }
+                        });
+                });
+
+            optimize->minimize(z3::sum(wire_counter));
+        }
         /**
          * Adds constraints to the given optimize to minimize the number of crossing tiles to use.
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
          */
-        void minimize_crossings(optimize_ptr optimize) noexcept;
+        void minimize_crossings(optimize_ptr optimize) noexcept
+        {
+            z3::expr_vector crossings_counter{*ctx};
+            layout.foreach_ground_tile(
+                [this, &crossings_counter](const auto& t)
+                {
+                    z3::expr_vector wv{*ctx};
+                    // TODO does this realize for (auto&& e : network->edges(config.io_ports))?
+                    network.foreach_node(
+                        [this, &t, &wv](const auto& n)
+                        {
+                            if (!skip_io_node(n))
+                            {
+                                network.foreach_fanin(
+                                    n,
+                                    [this, &t, &n, &wv](const auto& f)
+                                    {
+                                        if (!skip_io_node(network.get_node(f)))
+                                        {
+                                            const auto e = mockturtle::edge<Ntk>{network.get_node(f), n};
+                                            wv.push_back(get_te(t, e));
+                                        }
+                                    });
+                            }
+                        });
+
+                    crossings_counter.push_back(z3::ite(z3::atleast(wv, 2u), ctx->real_val(1u), ctx->real_val(0u)));
+                });
+
+            optimize->minimize(z3::sum(crossings_counter));
+        }
         /**
          * Adds constraints to the given optimize to enforce that the overall sum of latch values should be minimized.
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
          */
-        void minimize_clock_latches(optimize_ptr optimize) noexcept;
+        void minimize_clock_latches(optimize_ptr optimize) noexcept
+        {
+            z3::expr_vector latch_counter{*ctx};
+            layout.foreach_ground_tile([this, &latch_counter](const auto& t) { latch_counter.push_back(get_tl(t)); });
+
+            optimize->minimize(z3::sum(latch_counter));
+        }
         /**
          * Generates the SMT instance by calling the constraint generating functions.
          */
@@ -822,7 +950,45 @@ class exact_impl
          * passed all constraints from the current solver and the respective optimization constraints are added to it,
          * too.
          */
-        optimize_ptr optimize() noexcept;
+        optimize_ptr optimize() noexcept
+        {
+            if (auto wires = config.minimize_wires, cross = config.minimize_crossings,
+                latch = config.clock_latches && !config.desynchronize;
+                !wires && !cross && !latch)
+            {
+                return nullptr;
+            }
+            else
+            {
+                auto optimize = std::make_shared<z3::optimize>(*ctx);
+
+                // add all solver constraints
+                for (const auto& e : solver->assertions()) { optimize->add(e); }
+
+                // add assumptions as constraints, too, because optimize::check with assumptions is broken
+                for (const auto& e : check_point->assumptions) { optimize->add(e); }
+
+                // wire minimization constraints
+                if (wires)
+                {
+                    minimize_wires(optimize);
+                }
+
+                // crossing minimization constraints
+                if (cross)
+                {
+                    minimize_crossings(optimize);
+                }
+
+                // clock latches minimization constraints
+                if (latch)
+                {
+                    minimize_clock_latches(optimize);
+                }
+
+                return optimize;
+            }
+        }
         /**
          * Assigns vertices, edges and directions to the stored layout sketch with respect to the given model.
          *
@@ -839,7 +1005,18 @@ class exact_impl
      * @param handler Handler whose timeout is to be updated.
      * @param time Time passed since beginning of the solving process.
      */
-    void update_timeout(smt_handler& handler, mockturtle::stopwatch<>::duration time) const;
+    void update_timeout(smt_handler& handler, mockturtle::stopwatch<>::duration time) const
+    {
+        auto time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
+        auto time_left    = (ps.timeout - time_elapsed > 0 ? static_cast<unsigned>(ps.timeout - time_elapsed) : 0u);
+
+        if (!time_left)
+        {
+            throw z3::exception("timeout");
+        }
+
+        handler.set_timeout(time_left);
+    }
     /**
      * Contains a context pointer and a currently worked on dimension and can be shared between multiple worker threads
      * so that they can notify each other via context interrupts based on their individual results, i.e. a thread that
