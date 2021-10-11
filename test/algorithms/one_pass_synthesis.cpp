@@ -22,6 +22,7 @@
 #include <mockturtle/networks/mig.hpp>
 
 #include <chrono>
+#include <iostream>
 #include <memory>
 #include <type_traits>
 #include <vector>
@@ -66,7 +67,7 @@ std::vector<one_pass_synthesis_params> configurations() noexcept
     async_config.enable_or    = true;
     async_config.enable_wires = true;
     async_config.crossings    = true;
-    async_config.num_threads  = 2ul;
+    async_config.num_threads  = 3ul;
 
     return {{twoddwave_config, use_config, res_config, async_config}};
 }
@@ -118,11 +119,17 @@ void check_all(const Ntk& ntk)
 
 TEST_CASE("One-pass synthesis", "[one-pass]")
 {
+    std::cout << "unbalanced and inv network" << std::endl;
     check_all(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
+    std::cout << "maj1 network" << std::endl;
     check_all(blueprints::maj1_network<mockturtle::mig_network>());
+    std::cout << "constant gate input maj network" << std::endl;
     check_all(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
+    std::cout << "multi output and network" << std::endl;
     check_all(blueprints::multi_output_and_network<mockturtle::aig_network>());
+    std::cout << "half adder network" << std::endl;
     check_all(blueprints::half_adder_network<mockturtle::aig_network>());
+    std::cout << "se coloring corner case network" << std::endl;
     check_all(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
 }
 
@@ -142,6 +149,7 @@ TEST_CASE("Timeout", "[one-pass]")
 
     const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
 
+    std::cout << "timeout test case with half adder network" << std::endl;
     const auto layout = one_pass_synthesis<gate_layout>(half_adder, timeout_config);
 
     // since a half adder cannot be synthesized in just one second, layout should not have a value
