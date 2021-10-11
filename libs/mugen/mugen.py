@@ -1343,7 +1343,8 @@ class scheme_graph:
                         f.write('0\n')
                     f.close()
                     print("running glucose")
-                    proc = subprocess.run(['../glucose-syrup', '-nthreads={}'.format(self.nr_threads), '-model', f.name], capture_output=True, text=True)
+                    proc = subprocess.run(['../glucose-syrup', '-nthreads={} -maxnbthreads={}'.format(0, self.nr_threads), '-model', f.name], capture_output=True, text=True)
+                    print("done running")
                     os.remove(f.name)
                 if proc.returncode == 10:
                     print("glucose returned 10 on SAT")
