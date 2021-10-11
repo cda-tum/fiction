@@ -602,7 +602,7 @@ class exact_impl
                 [this, &e, &ve, &one, &zero, &num_phases](const auto& t)
                 {
                     // an artificial latch variable counts as an extra 1 clock cycle (n clock phases)
-                    if (config.clock_latches)
+                    if (config.synchronization_elements)
                     {
                         ve.push_back(z3::ite(get_te(t, e), get_tl(t) * num_phases + one, zero));
                     }
@@ -822,7 +822,7 @@ class exact_impl
          * Adds constraints to the solver to prevent negative valued clock latches and that vertex tiles cannot be
          * latches.
          */
-        void restrict_clock_latches() noexcept
+        void restrict_synchronization_elements() noexcept
         {
             auto zero = ctx->int_val(0u);
 
@@ -934,7 +934,7 @@ class exact_impl
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
          */
-        void minimize_clock_latches(optimize_ptr optimize) noexcept
+        void minimize_synchronization_elements(optimize_ptr optimize) noexcept
         {
             z3::expr_vector latch_counter{*ctx};
             layout.foreach_ground_tile([this, &latch_counter](const auto& t) { latch_counter.push_back(get_tl(t)); });
@@ -944,7 +944,66 @@ class exact_impl
         /**
          * Generates the SMT instance by calling the constraint generating functions.
          */
-        void generate_smt_instance() noexcept;
+        void generate_smt_instance() noexcept
+        {
+            // placement constraints
+            restrict_tile_elements();
+            restrict_vertices();
+
+            // local synchronization constraints
+            define_adjacent_vertex_tiles();
+            define_inv_adjacent_vertex_tiles();
+            define_adjacent_edge_tiles();
+            define_inv_adjacent_edge_tiles();
+
+            // global synchronization constraints
+            if (!config.desynchronize && !layout.is_clocking_scheme(clock_name::twoddwave4))
+            {
+                assign_pi_clockings();
+                global_synchronization();
+            }
+
+            // open clocking scheme constraints
+            if (!layout->is_regularly_clocked())
+                restrict_clocks();
+
+            // path/cycle constraints
+            if (!(layout.is_clocking_scheme(clock_name::topolinano3) ||
+                  layout.is_clocking_scheme(clock_name::topolinano4) ||
+                  layout.is_clocking_scheme(clock_name::twoddwave3) ||
+                  layout.is_clocking_scheme(clock_name::twoddwave4)))  // linear schemes; no cycles by definition
+            {
+                establish_sub_paths();
+                establish_transitive_paths();
+                eliminate_cycles();
+            }
+
+            // I/O pin constraints
+            if (config.border_io)
+            {
+                enforce_border_io();
+            }
+
+            // straight inverter constraints
+            if (config.straight_inverters)
+            {
+                enforce_straight_inverters();
+            }
+
+            // clock latch constraints
+            if (config.synchronization_elements && !config.desynchronize)
+            {
+                restrict_synchronization_elements();
+            }
+
+            // topology-specific constraints
+            topology_specific_constraints();
+
+            // symmetry breaking constraints
+            prevent_insufficiencies();
+            define_number_of_connections();
+            utilize_hierarchical_information();
+        }
         /**
          * Creates and returns a z3::optimize if optimization criteria were set by the configuration. The optimize gets
          * passed all constraints from the current solver and the respective optimization constraints are added to it,
@@ -953,7 +1012,7 @@ class exact_impl
         optimize_ptr optimize() noexcept
         {
             if (auto wires = config.minimize_wires, cross = config.minimize_crossings,
-                latch = config.clock_latches && !config.desynchronize;
+                latch = config.synchronization_elements && !config.desynchronize;
                 !wires && !cross && !latch)
             {
                 return nullptr;
@@ -983,7 +1042,7 @@ class exact_impl
                 // clock latches minimization constraints
                 if (latch)
                 {
-                    minimize_clock_latches(optimize);
+                    minimize_synchronization_elements(optimize);
                 }
 
                 return optimize;
