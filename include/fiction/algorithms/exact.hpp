@@ -442,6 +442,16 @@ class exact_impl
             return check_point->updated_tiles.count(t);
         }
         /**
+         * Returns true, iff config.io_ports is set to false and n is either a PI or PO node in network.
+         *
+         * @param n Node in network.
+         * @return True iff n is to be skipped in a loop due to it being an I/O and config.io_ports == false.
+         */
+        bool skip_io_node(const mockturtle::node<Ntk>& n) const noexcept
+        {
+            return (network.is_pi(n) || network.is_po(n)) && !config.io_ports;
+        }
+        /**
          * Shortcut to the assumption literals.
          *
          * @return Reference to check_point->state->lit.
@@ -551,7 +561,28 @@ class exact_impl
          * @param t Tile to consider for literal picking.
          * @return lit -> constraint.
          */
-        z3::expr mk_as_if_se(const z3::expr& constraint, const tile<Lyt>& t) const noexcept;
+        z3::expr mk_as_if_se(const z3::expr& constraint, const tile<Lyt>& t) const noexcept
+        {
+            if (auto east = layout.is_eastern_border(t), south = layout.is_southern_border(t); east && south)
+            {
+                return mk_as(constraint, lit().e and lit().s);
+            }
+            else
+            {
+                if (east)
+                {
+                    return mk_as(constraint, lit().e);
+                }
+                else if (south)
+                {
+                    return mk_as(constraint, lit().s);
+                }
+                else
+                {
+                    return constraint;
+                }
+            }
+        }
         /**
          * Constructs a series of expressions to evaluate how many tiles were occupied by a given edge. Therefore, all
          * te variables are translated to expressions of the form ite(te, 1, 0) which allows for applying z3::sum to
@@ -560,22 +591,100 @@ class exact_impl
          * @param e Edge to consider.
          * @param ve Vector of expressions to extend.
          */
-        void tile_ite_counters(const mockturtle::edge<Ntk>& e, z3::expr_vector& ve) noexcept;
+        void tile_ite_counters(const mockturtle::edge<Ntk>& e, z3::expr_vector& ve) noexcept
+        {
+            z3::expr one  = ctx->real_val(1u);
+            z3::expr zero = ctx->real_val(0u);
+
+            z3::expr num_phases = ctx->real_val(static_cast<unsigned>(layout.num_clocks()));
+
+            layout.foreach_ground_tile(
+                [this, &e, &ve, &one, &zero, &num_phases](const auto& t)
+                {
+                    // an artificial latch variable counts as an extra 1 clock cycle (n clock phases)
+                    if (config.clock_latches)
+                    {
+                        ve.push_back(z3::ite(get_te(t, e), get_tl(t) * num_phases + one, zero));
+                    }
+                    else
+                    {
+                        ve.push_back(z3::ite(get_te(t, e), one, zero));
+                    }
+                });
+        }
         /**
          * Adds constraints to the solver to limit the number of elements that are going to be assigned to a tile to one
          * (vertex or edge) if no crossings are allowed. Otherwise, one vertex per tile or two edges per tile can be
          * placed.
          */
-        void restrict_tile_elements() noexcept;
+        void restrict_tile_elements() noexcept
+        {
+            for (const auto& t : check_point->added_tiles)
+            {
+                if (config.crossings)
+                {
+                    z3::expr_vector tv{*ctx};
+                    for (auto&& v : network->vertices(config.io_ports)) { tv.push_back(get_tv(t, v)); }
+
+                    if (!tv.empty())
+                    {
+                        solver->add(z3::atmost(tv, 1u));
+                    }
+
+                    z3::expr_vector te{*ctx};
+                    for (auto&& e : network->edges(config.io_ports)) { te.push_back(get_te(t, e)); }
+
+                    if (!te.empty())
+                    {
+                        solver->add(z3::atmost(te, 2u));
+                    }
+                }
+                else
+                {
+                    z3::expr_vector ve{*ctx};
+                    for (auto&& v : network->vertices(config.io_ports)) { ve.push_back(get_tv(t, v)); }
+
+                    for (auto&& e : network->edges(config.io_ports)) { ve.push_back(get_te(t, e)); }
+
+                    if (!ve.empty())
+                    {
+                        solver->add(z3::atmost(ve, 1u));
+                    }
+                }
+            }
+        }
         /**
          * Adds constraints to the solver to enforce that each vertex is placed exactly once on exactly one tile.
          */
-        void restrict_vertices() noexcept;
+        void restrict_vertices() noexcept
+        {
+            network.foreach_node(
+                [this](const auto& n)
+                {
+                    if (!skip_io_node(n))
+                    {
+                        z3::expr_vector ve{*ctx};
+                        layout.foreach_ground_tile([this, &n, &ve](const auto& t) { ve.push_back(get_tv(t, n)); });
+
+                        // use a tracking literal to disable constraints in case of UNSAT
+                        solver->add(mk_as(z3::atleast(ve, 1u), lit().e and lit().s));
+                        solver->add(z3::atmost(ve, 1u));
+                    }
+                });
+        }
         /**
          * Adds constraints to the solver to enforce that each clock zone variable has valid bounds of 0 <= cl <= C,
          * where C is the maximum clock number.
          */
-        void restrict_clocks() noexcept;
+        void restrict_clocks() noexcept
+        {
+            for (const auto& t : check_point->added_tiles)
+            {
+                auto cl = get_tcl(t);
+                solver->add(ctx->int_val(0) <= cl);
+                solver->add(cl < ctx->int_val(static_cast<unsigned>(layout.num_clocks())));
+            }
+        }
         /**
          * Adds constraints to the solver to enforce that a tile which was assigned with some vertex v has a successor
          * that is assigned to the adjacent vertex of v or an outgoing edge of v.
@@ -600,7 +709,40 @@ class exact_impl
          * Adds constraints to the solver to map established connections between single tiles to sub-paths. They are
          * spanned transitively by the next set of constraints.
          */
-        void establish_sub_paths() noexcept;
+        void establish_sub_paths() noexcept
+        {
+            layout.foreach_ground_tile(
+                [this](const auto& t)
+                {
+                    if (layout.is_regularly_clocked())
+                    {
+                        layout.foreach_outgoing_clocked_zones(t,
+                                                              [this, &t](const auto& at)
+                                                              {
+                                                                  // if neither t nor at are in added_tiles, the
+                                                                  // constraint exists already
+                                                                  if (is_added_tile(t) || is_added_tile(at))
+                                                                  {
+                                                                      solver->add(
+                                                                          z3::implies(get_tc(t, at), get_tp(t, at)));
+                                                                  }
+                                                              });
+                    }
+                    else  // irregular clocking
+                    {
+                        layout.foreach_adjacent_tile(t,
+                                                     [this, &t](const auto& at)
+                                                     {
+                                                         // if neither t nor at are in added_tiles, the constraint
+                                                         // exists already
+                                                         if (is_added_tile(t) || is_added_tile(at))
+                                                         {
+                                                             solver->add(z3::implies(get_tc(t, at), get_tp(t, at)));
+                                                         }
+                                                     });
+                    }
+                });
+        }
         /**
          * Adds constraints to the solver to expand the formerly created sub-paths transitively.
          */
