@@ -135,7 +135,8 @@ class exact_impl
             ps{p},
             pst{st},
             node2pos{ntk},
-            lower_bound{static_cast<decltype(lower_bound)>(ntk.num_gates() + ntk.num_pis() + ntk.num_pos())}  // minimum number tiles to use
+            lower_bound{static_cast<decltype(lower_bound)>(ntk.num_gates() + ntk.num_pis() + ntk.num_pos())}
+    // minimum number tiles to use
     //            dit{ps.fixed_size ? ps.fixed_size : lower_bound}
     {}
 
@@ -216,13 +217,24 @@ class exact_impl
          *
          * @param dim Current dimension to work on.
          */
-        void update(const aspect_ratio<Lyt>& dim) noexcept;
+        void update(const aspect_ratio<Lyt>& dim) noexcept
+        {
+            layout.resize(dim);
+            check_point = std::make_shared<solver_check_point>(fetch_solver(dim));
+            ++lc;
+            solver = check_point->state->solver;
+        }
         /**
          * Sets the given timeout for the current solver.
          *
          * @param t Timeout in ms.
          */
-        void set_timeout(const unsigned t);
+        void set_timeout(const unsigned t)
+        {
+            z3::params p{*ctx};
+            p.set("timeout", t);
+            solver->set(p);
+        }
         /**
          * Generates the SMT instance for the current solver check point and runs the solver check. In case the instance
          * was satisfiable, all constraints are moved to an z3::optimize if optimization criteria were specified. This
@@ -233,13 +245,45 @@ class exact_impl
          *
          * @return true iff the instance generated for the current configuration is SAT.
          */
-        bool is_satisfiable();
+        bool is_satisfiable()
+        {
+            generate_smt_instance();
+
+            switch (solver->check(check_point->assumptions))
+            {
+                case z3::sat:
+                {
+                    // TODO out-of-solver constraints and maybe going back into solver
+
+                    // optimize the generated result
+                    if (auto opt = optimize(); opt != nullptr)
+                    {
+                        opt->check();
+                        assign_layout(opt->get_model());
+                    }
+                    else
+                    {
+                        assign_layout(solver->get_model());
+                    }
+
+                    return true;
+                }
+                default:
+                {
+                    return false;
+                }
+            }
+        }
+
         /**
          * Stores the current solver state in the solver tree with dimension dim as key.
          *
          * @param dim Key to storing the current solver state.
          */
-        void store_solver_state(const aspect_ratio<Lyt>& dim) noexcept;
+        void store_solver_state(const aspect_ratio<Lyt>& dim) noexcept
+        {
+            solver_tree[dim] = check_point->state;
+        }
 
       private:
         /**
@@ -353,13 +397,19 @@ class exact_impl
          *
          * @return Eastern literal.
          */
-        z3::expr get_lit_e() noexcept;
+        z3::expr get_lit_e() noexcept
+        {
+            return ctx->bool_const(fmt::format("lit_e_{}", lc).c_str());
+        }
         /**
          * Returns the lc-th southern assumption literal from the stored context.
          *
          * @return Southern literal.
          */
-        z3::expr get_lit_s() noexcept;
+        z3::expr get_lit_s() noexcept
+        {
+            return ctx->bool_const(fmt::format("lit_s_{}", lc).c_str());
+        }
         /**
          * Accesses the solver tree and looks for a solver state that is associated with a dimension smaller by 1 row or
          * column than given dim. The found one is returned together with the tiles that are new to this solver.
@@ -377,20 +427,29 @@ class exact_impl
          * @param t Tile to check.
          * @return True iff t is contained in check_point->added_tiles.
          */
-        bool is_added_tile(const tile<Lyt>& t) const noexcept;
+        bool is_added_tile(const tile<Lyt>& t) const noexcept
+        {
+            return check_point->added_tiles.count(t);
+        }
         /**
          * Checks whether a given tile belongs to the updated tiles of the current solver check point.
          *
          * @param t Tile to check.
          * @return True iff t is contained in check_point->updated_tiles.
          */
-        bool is_updated_tile(const tile<Lyt>& t) const noexcept;
+        bool is_updated_tile(const tile<Lyt>& t) const noexcept
+        {
+            return check_point->updated_tiles.count(t);
+        }
         /**
          * Shortcut to the assumption literals.
          *
          * @return Reference to check_point->state->lit.
          */
-        assumption_literals& lit() const noexcept;
+        assumption_literals& lit() const noexcept
+        {
+            return check_point->state->lit;
+        }
         /**
          * Returns a tv variable from the stored context representing that tile t has vertex v assigned.
          *
@@ -398,7 +457,10 @@ class exact_impl
          * @param v Vertex to be considered.
          * @return tv variable from ctx.
          */
-        z3::expr get_tv(const tile<Lyt>& t, const mockturtle::node<Ntk> v) noexcept;
+        z3::expr get_tv(const tile<Lyt>& t, const mockturtle::node<Ntk> v) noexcept
+        {
+            return ctx->bool_const(fmt::format("tv_({},{})_{}", t.x, t.y, v).c_str());
+        }
         /**
          * Returns a te variable from the stored context representing that tile t has edge e assigned.
          *
@@ -406,7 +468,10 @@ class exact_impl
          * @param e Edge to be considered.
          * @return te variable from ctx.
          */
-        z3::expr get_te(const tile<Lyt>& t, const mockturtle::edge<Ntk>& e) noexcept;
+        z3::expr get_te(const tile<Lyt>& t, const mockturtle::edge<Ntk>& e) noexcept
+        {
+            return ctx->bool_const(fmt::format("te_({},{})_({},{})", t.x, t.y, e.source, e.target).c_str());
+        }
         /**
          * Returns a tc variable from the stored context representing that tile t1 and tile t2 are directly connected.
          *
@@ -414,7 +479,10 @@ class exact_impl
          * @param t2 Tile 2 to be considered.
          * @return tc variable from ctx.
          */
-        z3::expr get_tc(const tile<Lyt>& t1, const tile<Lyt>& t2) noexcept;
+        z3::expr get_tc(const tile<Lyt>& t1, const tile<Lyt>& t2) noexcept
+        {
+            return ctx->bool_const(fmt::format("tc_({},{})_({},{})", t1.x, t1.y, t2.x, t2.y).c_str());
+        }
         /**
          * Returns a tp variable from the stored context representing that a path from tile t1 to tile t2 exists.
          *
@@ -422,28 +490,40 @@ class exact_impl
          * @param t2 Tile 2 to be considered.
          * @return tp variable from ctx.
          */
-        z3::expr get_tp(const tile<Lyt>& t1, const tile<Lyt>& t2) noexcept;
+        z3::expr get_tp(const tile<Lyt>& t1, const tile<Lyt>& t2) noexcept
+        {
+            return ctx->bool_const(fmt::format("tp_({},{})_({},{})", t1.x, t1.y, t2.x, t2.y).c_str());
+        }
         /**
          * Returns a vcl variable from the stored context representing vertex v's (pi) clock number.
          *
          * @param v Vertex to be considered.
          * @return vcl variable from ctx.
          */
-        z3::expr get_vcl(const mockturtle::node<Ntk> v) noexcept;
+        z3::expr get_vcl(const mockturtle::node<Ntk> v) noexcept
+        {
+            return ctx->int_const(fmt::format("vcl_{}", v).c_str());
+        }
         /**
          * Returns a tcl variable from the stored context representing tile t's clock number.
          *
          * @param t Tile to be considered.
          * @return tcl variable from ctx.
          */
-        z3::expr get_tcl(const tile<Lyt>& t) noexcept;
+        z3::expr get_tcl(const tile<Lyt>& t) noexcept
+        {
+            return ctx->int_const(fmt::format("tcl_({},{})", t.x, t.y).c_str());
+        }
         /**
          * Returns a tl variable from the stored context representing tile t's clock latch delay in cycles.
          *
          * @param t Tile to be considered.
          * @return tl variable from ctx.
          */
-        z3::expr get_tl(const tile<Lyt>& t) noexcept;
+        z3::expr get_tl(const tile<Lyt>& t) noexcept
+        {
+            return ctx->int_const(fmt::format("tl_({},{})", t.x, t.y).c_str());
+        }
         /**
          * Helper function for generating an equality of an arbitrary number of expressions.
          *
@@ -458,7 +538,10 @@ class exact_impl
          * @param lit Assumption literal.
          * @return lit -> constraint.
          */
-        z3::expr mk_as(const z3::expr& constraint, const z3::expr& lit) const noexcept;
+        z3::expr mk_as(const z3::expr& constraint, const z3::expr& lit) const noexcept
+        {
+            return z3::implies(lit, constraint);
+        }
         /**
          * Helper function for generating an implication lit -> constraint where lit is the assumption literal
          * responsible for t, i.e. e if t is at eastern border, s if t is at southern border, and (e and s) if t is
