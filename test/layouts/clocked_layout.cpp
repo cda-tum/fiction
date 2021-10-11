@@ -128,8 +128,14 @@ TEST_CASE("Iteration", "[clocked-layout]")
 
     CHECK(s1 == s2);
 
+    layout.foreach_incoming_clocked_zone({1, 1}, [&s2](const auto& cz) { CHECK(s2.count(cz) > 0); });
+
     auto s3 = layout.outgoing_clocked_zones<std::set<typename clk_lyt::coordinate>>({1, 1});
     auto s4 = std::set<typename clk_lyt::coordinate>{{{1, 2}, {2, 1}}};
+
+    layout.foreach_outgoing_clocked_zone({1, 1}, [&s4](const auto& cz) {
+                                             CHECK(s4.count(cz) > 0);
+                                         });
 
     CHECK(s3 == s4);
 }
