@@ -207,7 +207,7 @@ class mugen_handler
         // Mugen modifies its parameters, therefore, a copy is kept
         const auto py_spec = as_py_lists(tts);
 
-        std::cout << "synthesize" << std::endl;
+        std::cout << "synthesize: x = " << lyt.x() + 1 << ", y = " << lyt.y() + 1 << std::endl;
         const auto nets = scheme_graph.attr("synthesize")(scheme_graph, py_spec);
         for (auto net_it = nets.begin(); net_it != nets.end(); ++net_it)
         {
