@@ -1342,7 +1342,7 @@ class scheme_graph:
                             f.write('{} '.format(-v))
                         f.write('0\n')
                     f.close()
-                    proc = subprocess.run(['../glucose-syrup', '-maxnbthreads={}'.format(max(self.nr_threads, 4)), '-model', f.name], capture_output=True, text=True)
+                    proc = subprocess.run(['../glucose-syrup', '-nthreads={}'.format(self.nr_threads), '-model', f.name], capture_output=True, text=True)
                     os.remove(f.name)
                 if proc.returncode == 10:
                     # Glucose returns 10 on SAT
