@@ -135,28 +135,21 @@ class exact_impl
             ps{p},
             pst{st},
             node2pos{ntk},
-            lower_bound{static_cast<decltype(lower_bound)>(ntk.num_gates() + ntk.num_pis() + ntk.num_pos())}
-    // minimum number tiles to use
-    //            dit{ps.fixed_size ? ps.fixed_size : lower_bound}
+            lower_bound{static_cast<decltype(lower_bound)>(ntk.num_gates() + ntk.num_pis() + ntk.num_pos())},
+            // minimum number tiles to use
+            dit{ps.fixed_size ? ps.fixed_size : lower_bound}
     {}
 
     std::optional<Lyt> run()
     {
-        // measure run time
-        mockturtle::stopwatch stop{pst.time_total};
-
-        Lyt layout{};
-
-        // restore possibly set signal names
-        restore_names(ntk, layout, node2pos);
-
-        // statistical information
-        pst.x_size    = layout.x() + 1;
-        pst.y_size    = layout.y() + 1;
-        pst.num_gates = layout.num_gates();
-        pst.num_wires = layout.num_wires();
-
-        return layout;
+        if (ps.num_threads > 1)
+        {
+            return run_asynchronously();
+        }
+        else
+        {
+            return run_synchronously();
+        }
     }
 
   private:
@@ -171,7 +164,7 @@ class exact_impl
      */
     uint16_t lower_bound;
 
-    //    dimension_iterator dit{0};
+    dimension_iterator dit{0};
 
     /**
      * Aspect ratio of found result. Only interesting for asynchronous case.
@@ -1102,19 +1095,264 @@ class exact_impl
      * @param ti_list Pointer to a list of shared thread info that the threads use for communication.
      * @return A found layout or nullptr if being interrupted.
      */
-    Lyt explore_asynchronously(const unsigned t_num, std::shared_ptr<std::vector<thread_info>> ti_list) noexcept;
+    std::optional<Lyt> explore_asynchronously(const unsigned                            t_num,
+                                              std::shared_ptr<std::vector<thread_info>> ti_list) noexcept
+    {
+        auto ctx = std::make_shared<z3::context>();
+
+        Lyt layout{{}, *ps.scheme};
+
+        smt_handler handler{ctx, layout, ps};
+        (*ti_list)[t_num].ctx = ctx;
+
+        while (true)
+        {
+            aspect_ratio<Lyt> dimension;
+
+            // mutually exclusive access to the dimension iterator
+            {
+                std::lock_guard<std::mutex> guard(dit_mutex);
+
+                ++dit;
+                dimension = *dit;  // operations ++ and * are split to prevent a vector copy construction
+            }
+
+            if (area(dimension) > ps.upper_bound)
+            {
+                return std::nullopt;
+            }
+
+            if (handler.skippable(dimension))
+            {
+                continue;
+            }
+
+            // mutually exclusive access to the result dimension
+            {
+                std::lock_guard<std::mutex> guard(rd_mutex);
+
+                // a result is available already
+                if (result_dimension)
+                {
+                    // stop working if its area is smaller or equal to the one currently at hand
+                    if (area(*result_dimension) <= area(dimension))
+                    {
+                        return std::nullopt;
+                    }
+                }
+            }
+
+            // update dimension in the thread_info list and the handler
+            (*ti_list)[t_num].worker_dimension = dimension;
+            handler.update(dimension);
+
+            try
+            {
+                mockturtle::stopwatch stop{pst.time_total};
+
+                if (handler.is_satisfiable())  // found a layout
+                {
+                    // mutually exclusive access to the result_dimension
+                    {
+                        std::lock_guard<std::mutex> guard(rd_mutex);
+
+                        // update the result_dimension if there is none
+                        if (!result_dimension)
+                        {
+                            result_dimension = dimension;
+                        }
+                        else  // or if the own one is smaller
+                        {
+                            if (area(*result_dimension) > area(dimension))
+                            {
+                                result_dimension = dimension;
+                            }
+                            else
+                            {
+                                return std::nullopt;
+                            }
+                        }
+                    }
+
+                    // interrupt other threads that are working on higher dimensions
+                    for (const auto& ti : *ti_list)
+                    {
+                        if (area(dimension) <= area(ti.worker_dimension))
+                        {
+                            ti.ctx->interrupt();
+                        }
+                    }
+
+                    return layout;
+                }
+                else  // no layout with this dimension possible
+                {
+                    // One could assume that interrupting other threads that are working on real smaller (not bigger in
+                    // any dimension) layouts could be beneficial here. However, testing revealed that this code was
+                    // hardly ever triggered and if it was, it impacted performance negatively because no solver state
+                    // could be stored that could positively influence performance of later SMT calls
+
+                    handler.store_solver_state(dimension);
+                }
+            }
+            catch (const z3::exception&)  // timed out or interrupted
+            {
+                return std::nullopt;
+            }
+
+            update_timeout(handler, time);
+        }
+
+        // unreachable code, but compiler complains if it's not there
+        return std::nullopt;
+    }
     /**
      * Launches config.num_threads threads and evaluates their return statements.
      *
      * @return Physical design result including statistical information.
      */
-    std::optional<Lyt> run_asynchronously() noexcept;
+    std::optional<Lyt> run_asynchronously() noexcept
+    {
+        Lyt layout{{}, *ps.scheme};
+
+        {
+            mockturtle::stopwatch stop{pst.time_total};
+
+            using fut_layout = std::future<std::optional<Lyt>>;
+            std::vector<fut_layout> fut(ps.num_threads);
+
+            auto ti_list = std::make_shared<std::vector<thread_info>>(ps.num_threads);
+
+#if (PROGRESS_BARS)
+            mockturtle::progress_bar thread_bar("[i] examining layout dimensions using {} threads");
+            thread_bar(ps.num_threads);
+
+            auto post_toggle = false;
+
+            mockturtle::progress_bar post_bar(
+                "[i] some layout has been found; waiting for threads examining smaller dimensions to terminate");
+#endif
+
+            for (auto i = 0u; i < ps.num_threads; ++i)
+            {
+                fut[i] = std::async(std::launch::async, &exact_impl::explore_asynchronously, this, i, ti_list);
+            }
+
+            // wait for all tasks to finish running (can be made much prettier in C++20...)
+            for (auto still_running = true; still_running;)
+            {
+                still_running = false;
+                for (auto i = 0u; i < ps.num_threads; ++i)
+                {
+                    using namespace std::chrono_literals;
+                    if (fut[i].wait_for(10ms) == std::future_status::timeout)
+                    {
+                        still_running = true;
+                    }
+#if (PROGRESS_BARS)
+                    else if (!post_toggle)
+                    {
+                        thread_bar.done();
+                        post_bar(true);
+                        post_toggle = true;
+                    }
+#endif
+                }
+            }
+
+            if (result_dimension)
+            {
+                auto result_dim_val = *result_dimension;
+                // extract the layout from the futures
+                for (auto& f : fut)
+                {
+                    if (auto l = f.get(); l.has_value())
+                    {
+                        // in case multiple returned, get the actual winner
+                        if ((*l).x() == result_dim_val.x && (*l).y() == result_dim_val.y)
+                        {
+                            layout = *l;
+                        }
+                    }
+                }
+            }
+        }
+
+        // TODO verify that this makes sense
+        if (result_dimension.has_value())
+        {
+            return layout;
+        }
+        else
+        {
+            return std::nullopt;
+        }
+    }
     /**
      * Does the same as explore_asynchronously but without thread synchronization overhead.
      *
      * @return Physical design result including statistical information.
      */
-    std::optional<Lyt> run_synchronously() noexcept;
+    std::optional<Lyt> run_synchronously() noexcept
+    {
+        Lyt layout{{}, *ps.scheme};
+
+        smt_handler handler{std::make_shared<z3::context>(), layout, ps};
+
+        for (; dit <= ps.upper_bound; ++dit)  // <= to prevent overflow
+        {
+
+#if (PROGRESS_BARS)
+            mockturtle::progress_bar bar("[i] examining layout dimensions: {:>2} × {:<2}");
+#endif
+
+            auto dimension = *dit;
+
+            if (handler.skippable(dimension))
+                continue;
+
+#if (PROGRESS_BARS)
+            bar(dimension.x, dimension.y);
+#endif
+
+            handler.update(dimension);
+
+            try
+            {
+                auto sat =
+                    mockturtle::call_with_stopwatch(pst.time_total, [&handler] { return handler.is_satisfiable(); });
+
+                if (sat)
+                {
+                    // statistical information
+                    pst.x_size    = layout.x() + 1;
+                    pst.y_size    = layout.y() + 1;
+                    pst.num_gates = layout.num_gates();
+                    pst.num_wires = layout.num_wires();
+
+                    // restore possibly set signal names
+                    restore_names(ntk, layout, node2pos);
+
+                    // TODO more statistics?
+
+                    return layout;
+                }
+                else
+                {
+                    handler.store_solver_state(dimension);
+                }
+
+                update_timeout(handler, time);
+            }
+            catch (const z3::exception&)
+            {
+                // TODO timeout exception?
+                return std::nullopt;
+            }
+        }
+
+        return std::nullopt;
+    }
 };
 
 }  // namespace detail
