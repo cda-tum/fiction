@@ -13,6 +13,7 @@
 #include "../traits.hpp"
 #include "../utils/debug/network_writer.hpp"
 #include "fanout_substitution.hpp"
+#include "iter/aspect_ratio_iterator.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -164,14 +165,14 @@ class exact_impl
      */
     uint16_t lower_bound;
 
-    dimension_iterator dit{0};
+    aspect_ratio_iterator<aspect_ratio<Lyt>> dit{0};
 
     /**
      * Aspect ratio of found result. Only interesting for asynchronous case.
      */
     std::optional<aspect_ratio<Lyt>> result_dimension;
     /**
-     * Restricts access to the dimension_iterator and the result_dimension.
+     * Restricts access to the aspect_ratio_iterator and the result_dimension.
      */
     std::mutex dit_mutex{}, rd_mutex{};
 
