@@ -68,7 +68,7 @@ std::vector<one_pass_synthesis_params> configurations() noexcept
     async_config.enable_or    = true;
     async_config.enable_wires = true;
     async_config.crossings    = true;
-    async_config.num_threads  = 5ul;
+    async_config.num_threads  = 4ul;
 #endif
 
     return {{twoddwave_config, use_config, res_config
