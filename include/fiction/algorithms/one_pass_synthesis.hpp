@@ -90,10 +90,6 @@ struct one_pass_synthesis_params
      */
     bool io_ports = true;  // TODO thus far, io_ports have to be set to true
     /**
-     * Number of threads to use for exploring the possible dimensions.
-     */
-    std::size_t num_threads = 1ul;
-    /**
      * Sets a timeout in seconds for the solving process, where 0 allows for unlimited time.
      */
     uint32_t timeout = 0u;
@@ -101,6 +97,14 @@ struct one_pass_synthesis_params
      * Name of the resulting network.
      */
     std::string name{};
+#if defined(__APPLE__)
+  private:
+#else
+    /**
+     * Number of threads to use for exploring the possible dimensions.
+     */
+    std::size_t num_threads = 1ul;
+#endif
 };
 
 struct one_pass_synthesis_stats
@@ -201,20 +205,17 @@ class mugen_handler
         namespace py = pybind11;
         using namespace py::literals;
 
-        std::cout << "generate scheme graph" << std::endl;
         const auto scheme_graph = generate_scheme_graph();
 
         // Mugen modifies its parameters, therefore, a copy is kept
         const auto py_spec = as_py_lists(tts);
 
-        std::cout << "synthesize: x = " << lyt.x() + 1 << ", y = " << lyt.y() + 1 << std::endl;
         const auto nets = scheme_graph.attr("synthesize")(scheme_graph, py_spec);
         for (auto net_it = nets.begin(); net_it != nets.end(); ++net_it)
         {
             if (net_it->is_none())
                 return false;
 
-            std::cout << "to gate layout" << std::endl;
             to_gate_layout(*net_it);
 
             return true;
@@ -667,16 +668,12 @@ class mugen_handler
         namespace py = pybind11;
         using namespace py::literals;
 
-        std::cout << "initialize pis" << std::endl;
         initialize_pis();
 
-        std::cout << "place nodes" << std::endl;
         place_nodes(net);
 
-        std::cout << "establish connections" << std::endl;
         establish_connections(net);
 
-        std::cout << "initialize pos" << std::endl;
         initialize_pos(net);
     }
 };

@@ -59,6 +59,7 @@ std::vector<one_pass_synthesis_params> configurations() noexcept
     res_config.enable_wires = true;
     res_config.crossings    = true;
 
+#if !defined(__APPLE__)
     one_pass_synthesis_params async_config{};
 
     async_config.scheme       = std::make_shared<clocking_scheme<coord_t>>(twoddwave_4_clocking);
@@ -68,8 +69,14 @@ std::vector<one_pass_synthesis_params> configurations() noexcept
     async_config.enable_wires = true;
     async_config.crossings    = true;
     async_config.num_threads  = 5ul;
+#endif
 
-    return {{twoddwave_config, use_config, res_config, async_config}};
+    return {{twoddwave_config, use_config, res_config
+#if !defined(__APPLE__)
+             ,
+             async_config
+#endif
+    }};
 }
 
 void check_stats(const one_pass_synthesis_stats& st) noexcept
@@ -119,17 +126,11 @@ void check_all(const Ntk& ntk)
 
 TEST_CASE("One-pass synthesis", "[one-pass]")
 {
-    std::cout << "unbalanced and inv network" << std::endl;
     check_all(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    std::cout << "maj1 network" << std::endl;
     check_all(blueprints::maj1_network<mockturtle::mig_network>());
-    std::cout << "constant gate input maj network" << std::endl;
     check_all(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
-    std::cout << "multi output and network" << std::endl;
     check_all(blueprints::multi_output_and_network<mockturtle::aig_network>());
-    std::cout << "half adder network" << std::endl;
     check_all(blueprints::half_adder_network<mockturtle::aig_network>());
-    std::cout << "se coloring corner case network" << std::endl;
     check_all(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
 }
 
@@ -148,8 +149,6 @@ TEST_CASE("Timeout", "[one-pass]")
     timeout_config.timeout      = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
 
     const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
-
-    std::cout << "timeout test case with half adder network" << std::endl;
     const auto layout = one_pass_synthesis<gate_layout>(half_adder, timeout_config);
 
     // since a half adder cannot be synthesized in just one second, layout should not have a value

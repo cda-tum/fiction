@@ -1342,12 +1342,9 @@ class scheme_graph:
                             f.write('{} '.format(-v))
                         f.write('0\n')
                     f.close()
-                    print("running glucose")
-                    proc = subprocess.run(['../glucose-syrup', '-model', f.name], capture_output=True, text=True)
-                    print("done running")
+                    proc = subprocess.run(['../glucose-syrup', '-maxnbthreads={}'.format(max(self.nr_threads, 4)), '-model', f.name], capture_output=True, text=True)
                     os.remove(f.name)
                 if proc.returncode == 10:
-                    print("glucose returned 10 on SAT")
                     # Glucose returns 10 on SAT
                     output = proc.stdout.split('\n')
                     model = []
@@ -1358,20 +1355,16 @@ class scheme_graph:
                                 if modelval != '0':
                                     model.append(int(modelval))
                     models.append(model)
-                    print("model to network")
                     net = self.model_to_network(self, model, nr_outputs, out_vars, nr_local_sim_vars, verbosity)
                     yield net
                 elif proc.returncode == 20:
-                    print("glucose returns 20 on UNSAT")
                     # Glucose returns 20 on UNSAT
                     break
                 elif proc.returncode == 0:
-                    print("glucose returns 0 on timeout/interrupt")
                     # Glucose returns 0 on timeout/interrupt
                     break
                 else:
                     # Error in calling SAT solver.
-                    print("error calling SAT solver; return code:", proc.returncode)
                     raise SynthesisException('Error calling Glucose::MultiSolvers')
 
     def model_to_network(self, model, nr_outputs, out_vars, nr_local_sim_vars, verbosity):
