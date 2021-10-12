@@ -35,6 +35,7 @@
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wrange-loop-analysis"
 #pragma warning(push, 0)  // MSVC
 #include <pybind11/embed.h>
 #pragma GCC diagnostic pop  // GCC
