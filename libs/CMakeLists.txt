@@ -13,20 +13,24 @@ if (NOT WIN32)
     endif ()
 
     if (FICTION_ENABLE_MUGEN)
-        # Build glucose-syrup-4.1-parallel if Mugen is enabled
-        message(STATUS "Building glucose for Mugen")
-        add_custom_command(
-                OUTPUT ${PROJECT_BINARY_DIR}/glucose-syrup
-                PRE_BUILD
-                COMMAND make
-                COMMAND mv glucose-syrup ${PROJECT_BINARY_DIR}/glucose-syrup
-                COMMAND make clean
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/mugen/glucose-syrup-4.1/parallel/)
 
-        # Make sure glucose's custom build commands are actually being executed
-        add_custom_target(glucose_syrup
-                ALL
-                DEPENDS ${PROJECT_BINARY_DIR}/glucose-syrup)
+        # Apple does not need glucose because it seems to have issues there anyways
+        if (NOT APPLE)
+            # Build glucose-syrup-4.1-parallel if Mugen is enabled
+            message(STATUS "Building glucose for Mugen")
+            add_custom_command(
+                    OUTPUT ${PROJECT_BINARY_DIR}/glucose-syrup
+                    PRE_BUILD
+                    COMMAND make
+                    COMMAND mv glucose-syrup ${PROJECT_BINARY_DIR}/glucose-syrup
+                    COMMAND make clean
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/mugen/glucose-syrup-4.1/parallel/)
+
+            # Make sure glucose's custom build commands are actually being executed
+            add_custom_target(glucose_syrup
+                    ALL
+                    DEPENDS ${PROJECT_BINARY_DIR}/glucose-syrup)
+        endif ()
 
         # Embedding the pybind11 interpreter
         target_link_libraries(fictionlib INTERFACE pybind11::embed)

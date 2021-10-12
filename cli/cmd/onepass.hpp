@@ -14,6 +14,16 @@
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
 
+#include <iostream>
+#include <memory>
+#include <string>
+#include <variant>
+#include <vector>
+
+#if !defined(__APPLE__)
+#include <thread>
+#endif
+
 namespace alice
 {
 /**
@@ -117,6 +127,7 @@ class onepass_command : public command
             return;
         }
 
+#if !defined(__APPLE__)
         // fetch number of threads available on the system
         if (this->is_set("async_max"))
         {
@@ -129,6 +140,7 @@ class onepass_command : public command
                 ps.num_threads = threads_available;
             }
         }
+#endif
 
         if (this->is_set("network"))
         {
