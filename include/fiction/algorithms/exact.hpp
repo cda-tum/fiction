@@ -195,7 +195,13 @@ class exact_impl
          * @param fgl The gate layout pointer that is going to contain the created layout.
          * @param c The configurations to respect in the SMT instance generation process.
          */
-        smt_handler(ctx_ptr ctx, const Lyt& fgl, const exact_physical_design_params<Lyt>& c) noexcept;
+        smt_handler(ctx_ptr ctx, const Lyt& fgl, const exact_physical_design_params<Lyt>& c) noexcept :
+                ctx{std::move(ctx)},
+                layout{std::move(fgl)},
+                network{layout->get_network()},
+                //                hierarchy{std::make_shared<network_hierarchy>(network, false)}, // TODO hiearchy
+                config{c}
+        {}
         /**
          * Evaluates a given dimension regarding the stored configurations whether it can be skipped, i.e. does not
          * need to be explored by the SMT solver. The better this function is, the more UNSAT instances can be skipped
@@ -204,7 +210,25 @@ class exact_impl
          * @param dim Dimension to evaluate.
          * @return True if dim can safely be skipped because it is UNSAT anyways.
          */
-        bool skippable(const aspect_ratio<Lyt>& dim) const noexcept;
+        bool skippable(const aspect_ratio<Lyt>& dim) const noexcept
+        {
+            // OPEN clocking optimization: rotated dimensions don't need to be explored
+            if (!layout->is_regularly_clocked())
+            {
+                if (dim.x != dim.y && dim.x == layout.y() && dim.y == layout.x())
+                    return true;
+            }
+            // ToPoliNano optimization: skip all dimensions where X <= levels + number of fan-outs - 1 and
+            // Y < maximum of number of PIs and number of POs; this should not be too restrictive
+            //            else if (config.topolinano)
+            //            {
+            //                if (dim.x <= hierarchy->height() + network->operation_count(operation::F1O2) - 1 ||
+            //                    dim.y < std::max(network->num_pis(), network->num_pos()))
+            //                    return true;
+            //            }  // TODO hierarchy
+
+            return false;
+        }
         /**
          * Resizes the layout and creates a new solver checkpoint from where on the next incremental instance can be
          * generated.
@@ -414,7 +438,90 @@ class exact_impl
          * @return Solver state associated with a dimension of size x - 1 * y or x * y - 1 and, additionally, the tiles
          *                new to the solver. If no such solver is available, a new one is created.
          */
-        solver_check_point fetch_solver(const aspect_ratio<Lyt>& dim) noexcept;
+        solver_check_point fetch_solver(const aspect_ratio<Lyt>& dim) noexcept
+        {
+            const auto create_assumptions = [this](const solver_state& state) -> z3::expr_vector
+            {
+                z3::expr_vector assumptions{*ctx};
+                assumptions.push_back(state.lit.s);
+                assumptions.push_back(state.lit.e);
+
+                return assumptions;
+            };
+
+            // does a solver state for a layout of dimension of size x - 1 * y exist?
+            if (auto it_x = solver_tree.find({dim.x - 1, dim.y}); it_x != solver_tree.end())
+            {
+                // gather additional y-tiles and updated tiles
+                std::set<tile<Lyt>> added_tiles{}, updated_tiles{};
+                for (decltype(dim.y) y = 0; y <= dim.y; ++y)
+                //                for (auto&& y : iter::range(dim.y))
+                {
+                    added_tiles.emplace(tile<Lyt>{dim.x - 1, y});
+                    updated_tiles.emplace(tile<Lyt>{dim.x - 2, y});
+                }
+
+                // deep-copy solver state
+                const auto   state     = it_x->second;
+                solver_state new_state = {state->solver, {get_lit_e(), state->lit.s}};
+
+                // reset eastern constraints
+                new_state.solver->add(not state->lit.e);
+
+                // remove solver
+                solver_tree.erase(it_x);
+
+                return {std::make_shared<solver_state>(new_state), added_tiles, updated_tiles,
+                        create_assumptions(new_state)};
+            }
+            else
+            {
+                // does a solver state for a layout of dimension of size x * y - 1 exist?
+                if (auto it_y = solver_tree.find({dim.x, dim.y - 1}); it_y != solver_tree.end())
+                {
+                    // gather additional x-tiles
+                    std::set<tile<Lyt>> added_tiles{}, updated_tiles{};
+                    for (decltype(dim.x) x = 0; x <= dim.x; ++x)
+                    //                    for (auto&& x : iter::range(dim.x))
+                    {
+                        added_tiles.emplace(tile<Lyt>{x, dim.y - 1});
+                        updated_tiles.emplace(tile<Lyt>{x, dim.y - 2});
+                    }
+
+                    // deep-copy solver state
+                    const auto   state     = it_y->second;
+                    solver_state new_state = {state->solver, {state->lit.e, get_lit_s()}};
+
+                    // reset southern constraints
+                    new_state.solver->add(not state->lit.s);
+
+                    // remove solver
+                    solver_tree.erase(it_y);
+
+                    return {std::make_shared<solver_state>(new_state), added_tiles, updated_tiles,
+                            create_assumptions(new_state)};
+                }
+                else  // no existing solver state; create a new one
+                {
+                    // all tiles are additional ones
+                    std::set<tile<Lyt>> added_tiles{};
+                    for (decltype(dim.y) y = 0; y <= dim.y; ++y)
+                    //                    for (auto&& y : iter::range(dim.y))
+                    {
+                        for (decltype(dim.x) x = 0; x <= dim.x; ++x)
+                        //                        for (auto&& x : iter::range(dim.x))
+                        {
+                            added_tiles.emplace(tile<Lyt>{x, y});
+                        }
+                    }
+
+                    // create new state
+                    solver_state new_state{std::make_shared<z3::solver>(*ctx), {get_lit_e(), get_lit_s()}};
+
+                    return {std::make_shared<solver_state>(new_state), added_tiles, {}, create_assumptions(new_state)};
+                }
+            }
+        }
         /**
          * Checks whether a given tile belongs to the added tiles of the current solver check point.
          *
@@ -534,7 +641,13 @@ class exact_impl
          * @param v Vector of expressions to equalize.
          * @return Expression that represents the equality of all elements in v.
          */
-        z3::expr mk_eq(const z3::expr_vector& v) const noexcept;
+        z3::expr mk_eq(const z3::expr_vector& v) const noexcept
+        {
+            z3::expr_vector eq{*ctx};
+            for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i) { eq.push_back(v[i - 1] == v[i]); }
+
+            return z3::mk_and(eq);
+        }
         /**
          * Helper function for generating an implication lit -> constraint where lit is the given assumption literal.
          *
