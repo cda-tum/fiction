@@ -89,6 +89,12 @@ struct one_pass_synthesis_params
      * Flag to indicate that designated wires should be routed to balance I/O port paths.
      */
     bool io_ports = true;  // TODO thus far, io_ports have to be set to true
+#if !defined(__APPLE__)
+    /**
+     * Number of threads to use for exploring the possible dimensions.
+     */
+    std::size_t num_threads = 1ul;
+#endif
     /**
      * Sets a timeout in seconds for the solving process, where 0 allows for unlimited time.
      */
@@ -97,14 +103,6 @@ struct one_pass_synthesis_params
      * Name of the resulting network.
      */
     std::string name{};
-#if defined(__APPLE__)
-  private:
-#else
-    /**
-     * Number of threads to use for exploring the possible dimensions.
-     */
-    std::size_t num_threads = 1ul;
-#endif
 };
 
 struct one_pass_synthesis_stats
@@ -298,11 +296,15 @@ class mugen_handler
         using namespace py::literals;
 
         const auto scheme_graph = mugen.attr("scheme_graph");
-        scheme_graph.attr("__init__")(
-            scheme_graph, "shape"_a = py::make_tuple(lyt.x() + 1, lyt.y() + 1), "enable_wire"_a = ps.enable_wires,
-            "enable_not"_a = ps.enable_not, "enable_and"_a = ps.enable_and, "enable_or"_a = ps.enable_or,
-            "enable_maj"_a = ps.enable_maj, "enable_crossings"_a = ps.crossings, "designated_pi"_a = ps.io_ports,
-            "designated_po"_a = ps.io_ports, "nr_threads"_a = ps.num_threads, "timeout"_a = ps.timeout);
+        scheme_graph.attr("__init__")(scheme_graph, "shape"_a = py::make_tuple(lyt.x() + 1, lyt.y() + 1),
+                                      "enable_wire"_a = ps.enable_wires, "enable_not"_a = ps.enable_not,
+                                      "enable_and"_a = ps.enable_and, "enable_or"_a = ps.enable_or,
+                                      "enable_maj"_a = ps.enable_maj, "enable_crossings"_a = ps.crossings,
+                                      "designated_pi"_a = ps.io_ports, "designated_po"_a = ps.io_ports,
+#if !defined(__APPLE__)
+                                      "nr_threads"_a = ps.num_threads,
+#endif
+                                      "timeout"_a = ps.timeout);
 
         lyt.foreach_ground_tile(
             [this, &scheme_graph](const auto& t)
@@ -336,7 +338,8 @@ class mugen_handler
         // set up the iterator to skip the PIs
         auto pi_it_end = nodes.begin();
         // use std::advance because there is no 'operator+' overload
-        std::advance(pi_it_end, num_pis + 1);
+        std::advance(pi_it_end,
+                     static_cast<typename std::iterator_traits<decltype(pi_it_end)>::difference_type>(num_pis + 1));
 
         return pi_it_end;
     }
