@@ -22,6 +22,7 @@
 #include <mockturtle/networks/mig.hpp>
 
 #include <chrono>
+#include <iostream>
 #include <memory>
 #include <type_traits>
 #include <vector>
@@ -58,6 +59,7 @@ std::vector<one_pass_synthesis_params> configurations() noexcept
     res_config.enable_wires = true;
     res_config.crossings    = true;
 
+#if !defined(__APPLE__)
     one_pass_synthesis_params async_config{};
 
     async_config.scheme       = std::make_shared<clocking_scheme<coord_t>>(twoddwave_4_clocking);
@@ -67,8 +69,14 @@ std::vector<one_pass_synthesis_params> configurations() noexcept
     async_config.enable_wires = true;
     async_config.crossings    = true;
     async_config.num_threads  = 2ul;
+#endif
 
-    return {{twoddwave_config, use_config, res_config, async_config}};
+    return {{twoddwave_config, use_config, res_config
+#if !defined(__APPLE__)
+             ,
+             async_config
+#endif
+    }};
 }
 
 void check_stats(const one_pass_synthesis_stats& st) noexcept
@@ -141,7 +149,6 @@ TEST_CASE("Timeout", "[one-pass]")
     timeout_config.timeout      = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
 
     const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
-
     const auto layout = one_pass_synthesis<gate_layout>(half_adder, timeout_config);
 
     // since a half adder cannot be synthesized in just one second, layout should not have a value

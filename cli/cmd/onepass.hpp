@@ -14,6 +14,16 @@
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
 
+#include <iostream>
+#include <memory>
+#include <string>
+#include <variant>
+#include <vector>
+
+#if !defined(__APPLE__)
+#include <thread>
+#endif
+
 namespace alice
 {
 /**
@@ -42,9 +52,10 @@ class onepass_command : public command
         add_option("--upper_bound,-u", ps.upper_bound, "Number of FCN gate tiles to use at maximum");
         add_option("--fixed_size,-f", ps.fixed_size, "Execute only one iteration with the given number of tiles");
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
+#if !defined(__APPLE__)
         add_option("--async,-a", ps.num_threads, "Number of threads to use for parallel solving");
-
         add_flag("--async_max", "Use the maximum number of threads available to the system");
+#endif
         add_flag("--network,-n", "Re-synthesize the current logic network in store instead of the current truth table");
         add_flag("--and,-A", ps.enable_and, "Enable the use of AND gates");
         add_flag("--or,-O", ps.enable_or, "Enable the use of OR gates");
@@ -116,6 +127,7 @@ class onepass_command : public command
             return;
         }
 
+#if !defined(__APPLE__)
         // fetch number of threads available on the system
         if (this->is_set("async_max"))
         {
@@ -128,6 +140,7 @@ class onepass_command : public command
                 ps.num_threads = threads_available;
             }
         }
+#endif
 
         if (this->is_set("network"))
         {
