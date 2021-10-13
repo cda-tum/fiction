@@ -282,6 +282,21 @@ template <class Lyt>
 inline constexpr bool has_is_incoming_clocked_v = has_is_incoming_clocked<Lyt>::value;
 #pragma endregion
 
+#pragma region has_foreach_incoming_clocked_zone
+template <class Lyt, class = void>
+struct has_foreach_incoming_clocked_zone : std::false_type
+{};
+
+template <class Lyt>
+struct has_foreach_incoming_clocked_zone<
+    Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_incoming_clocked_zone(
+             std::declval<clock_zone<Lyt>>(), std::declval<void(clock_zone<Lyt>, uint32_t)>()))>> : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_foreach_incoming_clocked_zone_v = has_foreach_incoming_clocked_zone<Lyt>::value;
+#pragma endregion
+
 #pragma region has_is_outgoing_clocked
 template <class Lyt, class = void>
 struct has_is_outgoing_clocked : std::false_type
@@ -295,6 +310,21 @@ struct has_is_outgoing_clocked<Lyt, std::void_t<decltype(std::declval<Lyt>().is_
 
 template <class Lyt>
 inline constexpr bool has_is_outgoing_clocked_v = has_is_outgoing_clocked<Lyt>::value;
+#pragma endregion
+
+#pragma region has_foreach_outgoing_clocked_zone
+template <class Lyt, class = void>
+struct has_foreach_outgoing_clocked_zone : std::false_type
+{};
+
+template <class Lyt>
+struct has_foreach_outgoing_clocked_zone<
+    Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_outgoing_clocked_zone(
+             std::declval<clock_zone<Lyt>>(), std::declval<void(clock_zone<Lyt>, uint32_t)>()))>> : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_foreach_outgoing_clocked_zone_v = has_foreach_outgoing_clocked_zone<Lyt>::value;
 #pragma endregion
 
 #pragma region has_synchronization_elements

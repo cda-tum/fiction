@@ -2,25 +2,35 @@
 // Created by marcel on 09.04.20.
 //
 
-#if MUGEN
+#if (MUGEN)
 
 #ifndef FICTION_CMD_ONEPASS_HPP
 #define FICTION_CMD_ONEPASS_HPP
 
-#include "../../algo/one_pass_synthesis.h"
-#include "fcn_clocking_scheme.h"
-#include "fcn_gate_layout.h"
+#include <fiction/algorithms/one_pass_synthesis.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <nlohmann/json.hpp>
+
+#include <iostream>
+#include <memory>
+#include <string>
+#include <variant>
+#include <vector>
+
+#if !defined(__APPLE__)
+#include <thread>
+#endif
 
 namespace alice
 {
 /**
  * Executes a SAT-driven topology-based logic re-synthesis, i.e., a one-pass synthesis. Utilizes the synthesis tool
  * Mugen by Winston Haaswijk.
- * See algo/one_pass_synthesis.h for more details.
+ *
+ * See fiction/algorithms/one_pass_synthesis.hpp for more details.
  */
 class onepass_command : public command
 {
@@ -39,20 +49,22 @@ class onepass_command : public command
                        "layout's borders.")
     {
         add_option("--clk_scheme,-s", clocking, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, BANCS}", true);
-        add_option("--upper_bound,-u", config.upper_bound, "Number of FCN gate tiles to use at maximum");
-        add_option("--fixed_size,-f", config.fixed_size, "Execute only one iteration with the given number of tiles");
-        add_option("--timeout,-t", config.timeout, "Timeout in seconds");
-        add_option("--async,-a", config.num_threads, "Number of threads to use for parallel solving");
-
+        add_option("--upper_bound,-u", ps.upper_bound, "Number of FCN gate tiles to use at maximum");
+        add_option("--fixed_size,-f", ps.fixed_size, "Execute only one iteration with the given number of tiles");
+        add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
+#if !defined(__APPLE__)
+        add_option("--async,-a", ps.num_threads, "Number of threads to use for parallel solving");
         add_flag("--async_max", "Use the maximum number of threads available to the system");
+#endif
         add_flag("--network,-n", "Re-synthesize the current logic network in store instead of the current truth table");
-        add_flag("--and,-A", config.enable_and, "Enable the use of AND gates");
-        add_flag("--or,-O", config.enable_or, "Enable the use of OR gates");
-        add_flag("--not,-N", config.enable_not, "Enable the use of NOT gates");
-        add_flag("--maj,-M", config.enable_maj, "Enable the use of MAJ gates");
-        add_flag("--wires,-W", config.enable_wires, "Enable the use of wire segments and fan-outs");
-        add_flag("--crossings,-x", config.crossings, "Enable wire crossings");
-        add_flag("--io_ports,-i", config.io_ports, "Use I/O port elements instead of gate pins");
+        add_flag("--and,-A", ps.enable_and, "Enable the use of AND gates");
+        add_flag("--or,-O", ps.enable_or, "Enable the use of OR gates");
+        add_flag("--not,-N", ps.enable_not, "Enable the use of NOT gates");
+        add_flag("--maj,-M", ps.enable_maj, "Enable the use of MAJ gates");
+        add_flag("--wires,-W", ps.enable_wires, "Enable the use of wire segments and fan-outs");
+        add_flag("--crossings,-x", ps.crossings, "Enable wire crossings");
+        //        add_flag("--io_ports,-i", ps.io_ports, "Use I/O port elements instead of gate pins");  // TODO this
+        //        toggle does not work yet
     }
 
   protected:
@@ -62,48 +74,6 @@ class onepass_command : public command
      */
     void execute() override
     {
-        if (this->is_set("network"))
-        {
-            auto& s = store<logic_network_ptr>();
-
-            // error case: empty logic network store
-            if (s.empty())
-            {
-                env->out() << "[w] no logic network in store" << std::endl;
-                reset_flags();
-                return;
-            }
-
-            auto ln     = s.current();
-            config.name = ln->get_name();
-
-            try
-            {
-                spec = ln->simulate();
-            }
-            catch (const std::bad_alloc&)
-            {
-                env->out() << "[e] " << ln->get_name() << " has too many inputs to store its truth table" << std::endl;
-                return;
-            }
-        }
-        else
-        {
-            auto& s = store<kitty::dynamic_truth_table>();
-
-            // error case: empty truth table store
-            if (s.empty())
-            {
-                env->out() << "[w] no truth table in store" << std::endl;
-                reset_flags();
-                return;
-            }
-
-            auto tt     = s.current();
-            config.name = kitty::to_hex(tt);
-            spec        = {tt};
-        }
-
         // error case: -f and -u are both set
         if (this->is_set("fixed_size") && this->is_set("upper_bound"))
         {
@@ -114,73 +84,132 @@ class onepass_command : public command
         // set the value of fixed_size as the upper bound if set
         else if (this->is_set("fixed_size"))
         {
-            config.upper_bound = config.fixed_size;
+            ps.upper_bound = ps.fixed_size;
         }
 
         // if no gate types are specified, enable them all
-        if (!config.enable_and && !config.enable_or && !config.enable_not && !config.enable_maj && !config.enable_wires)
+        if (!ps.enable_and && !ps.enable_or && !ps.enable_not && !ps.enable_maj && !ps.enable_wires)
         {
-            config.enable_and   = true;
-            config.enable_or    = true;
-            config.enable_not   = true;
-            config.enable_maj   = true;
-            config.enable_wires = true;
+            ps.enable_and   = true;
+            ps.enable_or    = true;
+            ps.enable_not   = true;
+            ps.enable_maj   = true;
+            ps.enable_wires = true;
         }
 
         // choose clocking
-        if (auto clk = get_clocking_scheme(clocking))
+        if (auto clk = fiction::get_clocking_scheme<fiction::gate_clk_lyt::tile>(clocking); clk.has_value())
         {
             if (auto name = clk->name;
                 name == "OPEN3" || name == "OPEN4" || name == "TOPOLINANO3" || name == "TOPOLINANO4")
             {
-                env->out() << "[e] the \"" << name << "\" clocking scheme is not supported by this approach"
+                env->out() << fmt::format("[e] the \"{}\" clocking scheme is not supported by this approach", name)
                            << std::endl;
+
                 reset_flags();
                 return;
             }
 
-            config.scheme = std::make_shared<fcn_clocking_scheme>(*clk);
-            if (config.scheme->name != "RES" && config.enable_maj)
+            ps.scheme = std::make_shared<fiction::clocking_scheme<fiction::gate_clk_lyt::tile>>(*clk);
+            if (ps.scheme->name != "RES" && ps.enable_maj)
             {
-                config.enable_maj = false;
-                env->out() << "[w] disabling MAJ gates as they are not supported by the " << config.scheme->name
+                ps.enable_maj = false;
+                env->out() << "[w] disabling MAJ gates as they are not supported by the " << ps.scheme->name
                            << " clocking scheme" << std::endl;
             }
         }
         else
         {
-            env->out() << "[e] \"" << clocking << "\" does not refer to a supported clocking scheme" << std::endl;
+            env->out() << fmt::format("[e] \"{}\" does not refer to a supported clocking scheme", clocking)
+                       << std::endl;
+
             reset_flags();
             return;
         }
 
+#if !defined(__APPLE__)
         // fetch number of threads available on the system
         if (this->is_set("async_max"))
         {
             if (auto threads_available = std::thread::hardware_concurrency(); threads_available == 0)
             {
-                env->out() << "[w] could not detect the number of threads available to your system" << std::endl;
+                env->out() << "[w] could not detect the number of threads available to the system" << std::endl;
             }
             else
             {
-                config.num_threads = threads_available;
+                ps.num_threads = threads_available;
             }
         }
+#endif
 
-        // scope to destruct the one_pass_synthesis object to end Python interpreter's lifetime
+        if (this->is_set("network"))
         {
-            auto print_name = config.name;
-            // perform one-pass synthesis
-            one_pass_synthesis physical_design{std::move(spec), std::move(config)};
+            auto& s = store<fiction::logic_network_t>();
 
-            if (auto result = physical_design(); result.success)
+            // error case: empty logic network store
+            if (s.empty())
             {
-                store<fcn_gate_layout_ptr>().extend() = physical_design.get_layout();
-                pd_result                             = result.json;
+                env->out() << "[w] no logic network in store" << std::endl;
+
+                reset_flags();
+                return;
+            }
+
+            const auto get_name = [](auto&& ntk_ptr) -> std::string { return ntk_ptr->get_network_name(); };
+
+            const auto one_pass_with_ntk = [this](auto&& ntk_ptr)
+            { return fiction::one_pass_synthesis<fiction::gate_clk_lyt>(*ntk_ptr, ps, &st); };
+
+            auto ntk = s.current();
+            ps.name  = std::visit(get_name, ntk);
+
+            try
+            {
+                auto lyt = std::visit(one_pass_with_ntk, ntk);
+
+                if (lyt.has_value())
+                {
+                    store<fiction::gate_layout_t>().extend() = std::make_shared<fiction::gate_clk_lyt>(*lyt);
+                }
+                else
+                {
+                    env->out() << fmt::format("[e] impossible to synthesize {} within the given parameters", ps.name)
+                               << std::endl;
+                }
+            }
+            catch (const std::bad_alloc&)
+            {
+                env->out() << fmt::format("[e] {} has too many inputs to store its truth table",
+                                          std::visit(get_name, ntk))
+                           << std::endl;
+                return;
+            }
+        }
+        else
+        {
+            auto& s = store<fiction::truth_table_t>();
+
+            // error case: empty truth table store
+            if (s.empty())
+            {
+                env->out() << "[w] no truth table in store" << std::endl;
+
+                reset_flags();
+                return;
+            }
+
+            auto tt = s.current();
+            ps.name = kitty::to_hex(*tt);
+
+            auto lyt = fiction::one_pass_synthesis<fiction::gate_clk_lyt>(std::vector<fiction::tt>{*tt}, ps, &st);
+
+            if (lyt.has_value())
+            {
+                store<fiction::gate_layout_t>().extend() = std::make_shared<fiction::gate_clk_lyt>(*lyt);
             }
             else
             {
-                env->out() << "[e] impossible to synthesize " << print_name << " within the given parameters"
+                env->out() << fmt::format("[e] impossible to synthesize {} within the given parameters", ps.name)
                            << std::endl;
             }
         }
@@ -195,38 +224,38 @@ class onepass_command : public command
      */
     nlohmann::json log() const override
     {
-        return pd_result;
+        return nlohmann::json{
+            {"runtime in seconds", mockturtle::to_seconds(st.time_total)},
+            {"number of gates", st.num_gates},
+            {"number of wires", st.num_wires},
+            {"layout", {{"x-size", st.x_size}, {"y-size", st.y_size}, {"area", st.x_size * st.y_size}}}};
     }
 
   private:
     /**
-     * Configuration object extracted from arguments and flags.
+     * Parameters.
      */
-    onepass_pd_config config{};
+    fiction::one_pass_synthesis_params ps{};
+    /**
+     * Statistics.
+     */
+    fiction::one_pass_synthesis_stats st{};
     /**
      * Identifier of clocking scheme to use.
      */
-    std::string clocking = "2DDWave";
+    std::string clocking{"2DDWave"};
     /**
-     * Specification to synthesize.
+     * Reset flags. Necessary due to an alice bug.
      */
-    std::vector<kitty::dynamic_truth_table> spec;
-    /**
-     * Resulting logging information.
-     */
-    nlohmann::json pd_result;
-
-    /**
-     * Reset all flags. Necessary for some reason... alice bug?
-     */
-    void reset_flags()
+    void reset_flags() noexcept
     {
-        config   = onepass_pd_config{};
+        ps       = {};
         clocking = "2DDWave";
     }
 };
 
 ALICE_ADD_COMMAND(onepass, "Physical Design")
+
 }  // namespace alice
 
 #endif  // FICTION_CMD_ONEPASS_HPP

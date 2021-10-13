@@ -9,9 +9,12 @@
 #include "../traits.hpp"
 
 #include <mockturtle/traits.hpp>
-#include <mockturtle/utils/progress_bar.hpp>
 
 #include <type_traits>
+
+#if (PROGRESS_BARS)
+#include <mockturtle/utils/progress_bar.hpp>
+#endif
 
 namespace fiction
 {

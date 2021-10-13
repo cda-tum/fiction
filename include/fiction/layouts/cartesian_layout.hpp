@@ -329,7 +329,7 @@ class cartesian_layout
     {
         auto adj = adjacent_coordinates<std::set<Coordinate>>(c);
 
-        mockturtle::detail::foreach_element(adj.begin(), adj.end(), fn);
+        mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
     }
 
 #pragma endregion

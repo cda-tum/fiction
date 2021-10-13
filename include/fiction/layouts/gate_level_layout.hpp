@@ -434,7 +434,7 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] bool is_dead(const node& n) const noexcept
     {
-        return (strg->nodes[n].data[0].h1 >> 31) & 1;
+        return static_cast<bool>((strg->nodes[n].data[0].h1 >> 31) & 1);
     }
 
     [[nodiscard]] signal make_signal(const node& n) const noexcept
@@ -444,22 +444,45 @@ class gate_level_layout : public ClockedLayout
 
     signal move_node(const node& n, const tile& t, const std::vector<signal>& new_children = {}) noexcept
     {
+        // n's current position
+        const auto old_t = get_tile(n);
+        // n's children
         auto& children = strg->nodes[n].children;
         // decrease ref-count of children
-        std::for_each(children.begin(), children.end(),
+        std::for_each(children.cbegin(), children.cend(),
                       [this](const auto& c) { strg->nodes[get_node(c.index)].data[0].h1--; });
         // clear n's children
         children.clear();
-        // clear n's position
-        clear_tile(get_tile(n));
 
-        // assign n to its new position
-        assign_node(t, n);
+        // clear old_t only if it is different from t (this function can also be used to simply update n's children)
+        if (t != old_t)
+        {
+            // clear n's position
+            clear_tile(old_t);
+            // assign n to its new position
+            assign_node(t, n);
+            // since clear_tile marks n as dead, it has to be revived
+            revive_node(n);
+        }
+
         // assign new children
         std::copy(new_children.begin(), new_children.end(), std::back_inserter(children));
         // increase ref-count to new children
         std::for_each(new_children.cbegin(), new_children.cend(),
                       [this](const auto& nc) { strg->nodes[get_node(nc)].data[0].h1++; });
+
+        if (t.is_dead())
+        {
+            // remove old_t from primary outputs if present
+            strg->outputs.erase(std::remove(strg->outputs.begin(), strg->outputs.end(), static_cast<signal>(old_t)),
+                                strg->outputs.end());
+        }
+        else if (t != old_t)
+        {
+            // if n lived on a tile that was marked as PO, update it with the new tile t
+            std::replace(strg->outputs.begin(), strg->outputs.end(), static_cast<signal>(old_t),
+                         static_cast<signal>(t));
+        }
 
         return static_cast<signal>(t);
     }
@@ -574,9 +597,9 @@ class gate_level_layout : public ClockedLayout
     template <typename Fn>
     void foreach_po(Fn&& fn) const
     {
-        using IteratorType = decltype(strg->outputs.begin());
+        using IteratorType = decltype(strg->outputs.cbegin());
         mockturtle::detail::foreach_element_transform<IteratorType, signal>(
-            strg->outputs.begin(), strg->outputs.end(), [](const auto& o) { return o.index; }, fn);
+            strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return o.index; }, fn);
     }
 
     template <typename Fn>
@@ -861,7 +884,7 @@ class gate_level_layout : public ClockedLayout
 
     void incr_trav_id() const
     {
-        ++strg->data.trav_id;
+        strg->data.trav_id++;
     }
 
 #pragma endregion
@@ -922,11 +945,11 @@ class gate_level_layout : public ClockedLayout
             strg->data.node_tile_map[n] = static_cast<signal>(t);
 
             // keep track of number of gates and wire segments
-            if (strg->nodes[n].data[1].h1 == 2)
+            if (is_wire(n))
             {
                 strg->data.num_wires++;
             }
-            else
+            else  // is gate
             {
                 strg->data.num_gates++;
             }
@@ -938,6 +961,14 @@ class gate_level_layout : public ClockedLayout
         if (!is_constant(n))
         {
             strg->nodes[n].data[0].h1 |= UINT32_C(0x80000000);
+        }
+    }
+
+    void revive_node(const node& n)
+    {
+        if (!is_constant(n))
+        {
+            strg->nodes[n].data[0].h1 &= ~UINT32_C(0x80000000);
         }
     }
 
@@ -972,12 +1003,18 @@ class gate_level_layout : public ClockedLayout
     {
         if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
         {
-            // decrease gate count
-            if (is_gate(it->second))
-                --strg->data.num_gates;
-            // decrease wire count
-            if (is_wire(it->second))
-                --strg->data.num_wires;
+            if (!t.is_dead())
+            {
+                // decrease wire count
+                if (is_wire(it->second))
+                {
+                    strg->data.num_wires--;
+                }
+                else  // decrease gate count
+                {
+                    strg->data.num_gates--;
+                }
+            }
             // mark node as dead
             kill_node(it->second);
 

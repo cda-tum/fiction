@@ -24,6 +24,7 @@ struct gate_level_drv_params
 {
     // Topology
     bool unplaced_nodes           = true;
+    bool placed_dead_nodes        = true;
     bool non_adjacent_connections = true;
     bool missing_connections      = true;
     bool crossing_gates           = true;
@@ -32,6 +33,7 @@ struct gate_level_drv_params
     bool clocked_data_flow = true;
 
     // I/O
+    bool has_io    = true;
     bool empty_io  = true;
     bool io_pins   = true;
     bool border_io = true;
@@ -96,6 +98,10 @@ class gate_level_drvs_impl
         {
             *ps.out << "[i]" << unplaced_nodes_check() << '\n';
         }
+        if (ps.placed_dead_nodes)
+        {
+            *ps.out << "[i]" << placed_dead_nodes_check() << '\n';
+        }
         if (ps.non_adjacent_connections)
         {
             *ps.out << "[i]" << non_adjacent_connections_check() << '\n';
@@ -118,6 +124,10 @@ class gate_level_drvs_impl
         *ps.out << '\n';
 
         *ps.out << "[i] I/O ports:\n";
+        if (ps.has_io)
+        {
+            *ps.out << "[i]" << has_io_check() << '\n';
+        }
         if (ps.empty_io)
         {
             *ps.out << "[i]" << empty_io_check() << '\n';
@@ -259,6 +269,38 @@ class gate_level_drvs_impl
         return summary("all nodes are properly placed", all_placed, false);
     }
     /**
+     * Checks for nodes that are placed but dead.
+     *
+     * @return Check summary as a one liner.
+     */
+    std::string placed_dead_nodes_check() noexcept
+    {
+        nlohmann::json placed_dead_report{};
+
+        auto all_alive = true;
+        lyt.foreach_tile(
+            [&placed_dead_report, &all_alive, this](const auto& t)
+            {
+                // skip empty tiles
+                if (!lyt.is_empty_tile(t))
+                {
+                    const auto n = lyt.get_node(t);
+
+                    // if the node is dead but placed
+                    if (lyt.is_dead(n))
+                    {
+                        all_alive = false;
+                        log_tile(t, placed_dead_report);
+                        ++pst.warnings;
+                    }
+                }
+            });
+
+        pst.report["Dead placed nodes"] = placed_dead_report;
+
+        return summary("all placed nodes are alive", all_alive, false);
+    }
+    /**
      * Checks for proper clocking of connected tiles based on their assigned nodes.
      *
      * @return Check summary as a one liner.
@@ -393,6 +435,47 @@ class gate_level_drvs_impl
         pst.report["Improperly clocked tiles"] = data_flow_report;
 
         return summary("all connected tiles are properly clocked", data_flow_respected, true);
+    }
+    /**
+     * Checks if PI/PO assignments are present.
+     *
+     * @return Check summary as a one liner.
+     */
+    std::string has_io_check() noexcept
+    {
+        nlohmann::json has_io_report{};
+
+        auto ios_present = true;
+
+        uint32_t num_io{0ul};
+
+        const auto count_io = [this, &has_io_report, &ios_present,
+                               &num_io]([[maybe_unused]] const mockturtle::node<Lyt>& io) { ++num_io; };
+
+        has_io_report["Specified PIs"] = lyt.num_pis();
+        lyt.foreach_pi(count_io);
+        has_io_report["Counted PIs"] = num_io;
+
+        if (lyt.num_pis() != num_io || lyt.num_pis() == 0 || num_io == 0)
+        {
+            ios_present = false;
+            ++pst.drvs;
+        }
+
+        num_io                         = 0ul;
+        has_io_report["Specified POs"] = lyt.num_pos();
+        lyt.foreach_po([this, &count_io](const auto& o) { count_io(lyt.get_node(o)); });
+        has_io_report["Counted POs"] = num_io;
+
+        if (lyt.num_pos() != num_io || lyt.num_pos() == 0 || num_io == 0)
+        {
+            ios_present = false;
+            ++pst.drvs;
+        }
+
+        pst.report["I/O counts"] = has_io_report;
+
+        return summary("all I/O are properly specified", ios_present, true);
     }
     /**
      * Checks if no PI/PO is assigned to an empty tile.

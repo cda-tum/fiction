@@ -2,8 +2,8 @@
 // Created by marcel on 27.07.18.
 //
 
-#ifndef FICTION_QCA_ONE_LIBRARY_H
-#define FICTION_QCA_ONE_LIBRARY_H
+#ifndef FICTION_QCA_ONE_LIBRARY_HPP
+#define FICTION_QCA_ONE_LIBRARY_HPP
 
 #include "../traits.hpp"
 #include "../utils/array.hpp"
@@ -440,4 +440,4 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 
 }  // namespace fiction
 
-#endif  // FICTION_QCA_ONE_LIBRARY_H
+#endif  // FICTION_QCA_ONE_LIBRARY_HPP

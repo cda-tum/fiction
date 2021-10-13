@@ -27,7 +27,7 @@
 #include "cmd/tt.hpp"
 #include "cmd/version.hpp"
 //#include "cmd/exact.hpp"
-//#include "cmd/onepass.hpp"
+#include "cmd/onepass.hpp"
 //#include "cmd/qcc.hpp"
 
 #endif  // FICTION_COMMANDS_HPP
