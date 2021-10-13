@@ -547,6 +547,34 @@ class exact_impl
         {
             return (network.is_pi(n) || network.is_po(n)) && !config.io_ports;
         }
+
+        uint32_t network_in_degree(const mockturtle::node<topology_ntk_t>& n) const noexcept
+        {
+            uint32_t degree{};
+            network.foreach_fanin(n,
+                                  [this, &degree](const auto& fi)
+                                  {
+                                      if (const auto fn = network.get_node(fi); !skip_io_node(fn))
+                                      {
+                                          ++degree;
+                                      }
+                                  });
+            return degree;
+        }
+
+        uint32_t network_out_degree(const mockturtle::node<topology_ntk_t>& n) const noexcept
+        {
+            uint32_t degree{};
+            network.foreach_fanout(n,
+                                   [this, &degree](const auto& fo)
+                                   {
+                                       if (const auto fn = network.get_node(fo); !skip_io_node(fn))
+                                       {
+                                           ++degree;
+                                       }
+                                   });
+            return degree;
+        }
         /**
          * Shortcut to the assumption literals.
          *
@@ -1176,7 +1204,95 @@ class exact_impl
          * Adds constraints to the solver to prevent edges or vertices to be assigned to tiles with an insufficient
          * number of predecessors/successors. Symmetry breaking constraints.
          */
-        void prevent_insufficiencies() noexcept;
+        void prevent_insufficiencies() noexcept
+        {
+            // TODO was foreach_tile (why would that be correct?)
+            layout.foreach_ground_tile(
+                [this](const auto& t)
+                {
+                    if (layout->is_eastern_border(t) || layout->is_southern_border(t) || is_updated_tile(t))
+                    {
+                        if (layout.is_regularly_clocked())
+                        {
+                            network.foreach_node(
+                                [this, &t](const auto& v)
+                                {
+                                    if (!skip_io_node(v))
+                                    {
+                                        // if vertex v has more adjacent or inversely adjacent elements than tile t
+                                        if (layout.out_degree(t) < network_out_degree(v) ||
+                                            layout.in_degree(t) < network_in_degree(v))
+                                        {
+                                            // if t is at eastern/southern border, its adjacencies might change
+                                            if (layout.is_eastern_border(t) || layout.is_southern_border(t))
+                                            {
+                                                // add restriction as assumption only
+                                                check_point->assumptions.push_back(not get_tv(t, v));
+                                            }
+                                            else if (is_updated_tile(t))  // nothing's about to change here
+                                            {
+                                                // add hard constraint
+                                                solver->add(not get_tv(t, v));
+                                            }
+                                        }
+                                    }
+                                });
+
+                            foreach_edge(network,
+                                         [this, &t](const auto& e)
+                                         {
+                                             if (!skip_io_node(e.source) && !skip_io_node(skip_io_node(e.target)))
+                                             {
+                                                 // if tile t has no adjacent or inversely adjacent tiles
+                                                 if (layout.out_degree(t) == 0 || layout.in_degree(t) == 0)
+                                                 {
+                                                     // if t is at eastern/southern border, its adjacencies might change
+                                                     if (layout.is_eastern_border(t) || layout.is_southern_border(t))
+                                                     {
+                                                         // add restriction as assumption only
+                                                         check_point->assumptions.push_back(not get_te(t, e));
+                                                     }
+                                                     else if (is_updated_tile(t))  // nothing's about to change here
+                                                     {
+                                                         // add hard constraint
+                                                         solver->add(not get_te(t, e));
+                                                     }
+                                                 }
+                                             }
+                                         });
+                        }
+                        else  // irregular clocking
+                        {
+                            // TODO make a function for this
+                            auto tile_degree = layout.template adjacent_tiles<std::set<tile<Lyt>>>(t).size();
+
+                            network.foreach_node(
+                                [this, &t, &tile_degree](const auto& v)
+                                {
+                                    if (!skip_io_node(v))
+                                    {
+                                        // in an irregular clocking scheme, not so strict restrictions can be made
+                                        if (tile_degree < network_out_degree(v) + network_in_degree(v))
+                                        {
+                                            // if t is at eastern/southern border, its adjacencies might change
+                                            if (layout->is_eastern_border(t) || layout->is_southern_border(t))
+                                            {
+                                                // add restriction as assumption only
+                                                check_point->assumptions.push_back(not get_tv(t, v));
+                                            }
+                                            else  // nothing's about to change here
+                                            {
+                                                // add hard constraint
+                                                solver->add(not get_tv(t, v));
+                                            }
+                                        }
+                                    }
+                                });
+                            // cannot restrict wires because each tile has degree >= 2 in an irregular clocking
+                        }
+                    }
+                });
+        }
         /**
          * Adds constraints to the solver to define the number of connection variables to be set for each tile, i.e.
          * empty tiles are not allowed to have connections at all, edges need to have one ingoing and one outgoing
