@@ -332,6 +332,19 @@ struct coord_t
 
 }  // namespace cube
 
+template <typename CoordinateType>
+uint64_t area(const CoordinateType& coord) noexcept
+{
+    return (coord.x + static_cast<decltype(coord.x)>(1)) * (coord.y + static_cast<decltype(coord.y)>(1));
+}
+
+template <typename CoordinateType>
+uint64_t volume(const CoordinateType& coord) noexcept
+{
+    return (coord.x + static_cast<decltype(coord.x)>(1)) * (coord.y + static_cast<decltype(coord.y)>(1)) *
+           (coord.z + static_cast<decltype(coord.z)>(1));
+}
+
 }  // namespace fiction
 
 namespace std
