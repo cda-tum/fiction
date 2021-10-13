@@ -1132,7 +1132,41 @@ class exact_impl
          * Adds constraints to the solver to ensure that the cl variable of primary input pi is set to the clock zone
          * value of the tile pi is assigned to. Necessary to be taken into account for path lengths.
          */
-        void assign_pi_clockings() noexcept;
+        void assign_pi_clockings() noexcept
+        {
+            auto assign = [this](const auto v) -> void
+            {
+                auto cl = get_vcl(v);
+                for (const auto& t : check_point->added_tiles)
+                {
+                    if (layout.is_regularly_clocked())
+                    {
+                        solver->add(z3::implies(get_tv(t, v),
+                                                cl == ctx->int_val(static_cast<unsigned>(layout.get_clock_number(t)))));
+                    }
+                    else  // irregular clocking
+                    {
+                        solver->add(z3::implies(get_tv(t, v), cl == get_tcl(t)));
+                    }
+                }
+            };
+
+            if (!(layout.is_clocking_scheme(clock_name::twoddwave4) && config.border_io))
+            {
+                if (config.io_ports)
+                {
+                    network.foreach_pi(assign);
+                }
+                else
+                {
+                    network.foreach_pi(
+                        [this, &assign](const auto& pi) {
+                            network.foreach_fanout(pi,
+                                                   [this, &assign](const auto& fo) { assign(network.get_node(fo)); });
+                        });
+                }
+            }
+        }
         /**
          * Adds constraints to the solver to ensure that fan-in paths to the same tile need to have the same length
          * in the layout modulo timing, i.e. plus the clock zone assigned to their PIs.
@@ -1157,7 +1191,92 @@ class exact_impl
         /**
          * Adds constraints to the solver to position the primary inputs and primary outputs at the layout's borders.
          */
-        void enforce_border_io() noexcept;
+        void enforce_border_io() noexcept
+        {
+            auto assign_border = [this](const auto& v)
+            {
+                const auto assign = [this, &v](const auto& t)
+                {
+                    if (!layout->is_border(t))
+                    {
+                        solver->add(not get_tv(t, v));
+                    }
+                };
+
+                std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), assign);
+                std::for_each(check_point->udated_tiles.cbegin(), check_point->updated_tiles.cend(), assign);
+            };
+
+            auto assign_west = [this](const auto& v)
+            {
+                // no need to iterate over updated_tiles, because nothing changes there
+                for (const auto& t : check_point->added_tiles)
+                {
+                    if (!layout.is_western_border(t))
+                    {
+                        solver->add(not get_tv(t, v));
+                    }
+                }
+            };
+
+            auto assign_east = [this](const auto& v)
+            {
+                const auto assign = [this, &v](const auto& t)
+                {
+                    if (!layout->is_eastern_border(t))
+                    {
+                        solver->add(not get_tv(t, v));
+                    }
+                };
+
+                std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), assign);
+                std::for_each(check_point->udated_tiles.cbegin(), check_point->updated_tiles.cend(), assign);
+            };
+
+            if (config.io_ports)
+            {
+                network.foreach_pi(
+                    [this, &assign_west, &assign_border](const auto& pi)
+                    {
+                        (layout.is_clocking_scheme(clock_name::topolinano3) ||
+                         layout.is_clocking_scheme(clock_name::topolinano4)) ?
+                            assign_west(pi) :
+                            assign_border(pi);
+                    });
+                network.foreach_po(
+                    [this, &assign_east, &assign_border](const auto& po)
+                    {
+                        (layout.is_clocking_scheme(clock_name::topolinano3) ||
+                         layout.is_clocking_scheme(clock_name::topolinano4)) ?
+                            assign_east(po) :
+                            assign_border(po);
+                    });
+            }
+            else
+            {
+                network.foreach_pi(
+                    [this, &assign_west, &assign_border](const auto& pi)
+                    {
+                        network.foreach_fanout(pi,
+                                               [this, &assign_west, &assign_border](const auto& fo)
+                                               {
+                                                   const auto v = network.get_node(fo);
+                                                   config.topolinano ? assign_west(v) : assign_border(v);
+                                               });
+                    });
+
+                network.foreach_po(
+                    [this, &assign_east, &assign_border](const auto& po)
+                    {
+                        network.foreach_fanin(po,
+                                              [this, &assign_east, &assign_border](const auto& fi)
+                                              {
+                                                  const auto v = network.get_node(fi);
+                                                  config.topolinano ? assign_east(v) : assign_border(v);
+                                              });
+                    });
+            }
+        }
         /**
          * Adds constraints to the solver to enforce that no bent inverters are used.
          */
