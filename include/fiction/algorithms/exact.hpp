@@ -7,13 +7,14 @@
 #ifndef FICTION_EXACT_HPP
 #define FICTION_EXACT_HPP
 
-#include "../algorithms/name_restoration.hpp"
 #include "../io/print_layout.hpp"
 #include "../layouts/clocking_scheme.hpp"
 #include "../traits.hpp"
 #include "../utils/debug/network_writer.hpp"
 #include "fanout_substitution.hpp"
 #include "iter/aspect_ratio_iterator.hpp"
+#include "layout_utils.hpp"
+#include "name_restoration.hpp"
 #include "network_utils.hpp"
 
 #include <fmt/format.h>
@@ -68,7 +69,7 @@ struct exact_physical_design_params
     /**
      * Flag to indicate that designated wires should be routed to balance I/O port paths.
      */
-    bool io_ports = false;
+    bool io_ports = true;  // TODO right now, this has to be true
     /**
      * Flag to indicate that I/Os should be placed at the grid's border.
      */
@@ -127,7 +128,6 @@ class exact_impl
                 src)}},  // TODO incorporate clocking scheme degree into fanout-substitution
             ps{p},
             pst{st},
-            node2pos{ntk},
             lower_bound{static_cast<decltype(lower_bound)>(ntk.num_gates() + ntk.num_pis() + ntk.num_pos())},
             // minimum number tiles to use
             dit{ps.fixed_size ? ps.fixed_size : lower_bound}
@@ -152,8 +152,6 @@ class exact_impl
 
     exact_physical_design_params<Lyt> ps;
     exact_physical_design_stats&      pst;
-
-    mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ntk)> node2pos;
     /**
      * Lower bound for the number of layout tiles.
      */
@@ -194,6 +192,7 @@ class exact_impl
                 ctx{std::move(ctxp)},
                 layout{fgl},
                 network{ntk},
+                node2pos{ntk},
                 //                hierarchy{std::make_shared<network_hierarchy>(network, false)}, // TODO hiearchy
                 config{c}
         {}
@@ -375,6 +374,10 @@ class exact_impl
          * Logical specification for the layout.
          */
         const topology_ntk_t& network;
+        /**
+         * Maps nodes to tile positions.
+         */
+        mockturtle::node_map<mockturtle::signal<Lyt>, topology_ntk_t> node2pos;
         //        /**
         //         * Network hierarchy used for symmetry breaking.
         //         */
@@ -1674,10 +1677,11 @@ class exact_impl
             define_inv_adjacent_edge_tiles();
 
             // global synchronization constraints
-            if (!config.desynchronize && !layout.is_clocking_scheme(clock_name::twoddwave4))
+            if (!config.desynchronize && !(layout.is_clocking_scheme(clock_name::twoddwave3) ||
+                                           layout.is_clocking_scheme(clock_name::twoddwave4)))
             {
                 assign_pi_clockings();
-                global_synchronization();
+                //                global_synchronization();
             }
 
             // open clocking scheme constraints
@@ -1704,24 +1708,24 @@ class exact_impl
             }
 
             // straight inverter constraints
-            if (config.straight_inverters)
-            {
-                enforce_straight_inverters();
-            }
+            //            if (config.straight_inverters)
+            //            {
+            //                enforce_straight_inverters();
+            //            }
 
             // clock latch constraints
-            if (config.synchronization_elements && !config.desynchronize)
-            {
-                restrict_synchronization_elements();
-            }
+            //            if (config.synchronization_elements && !config.desynchronize)
+            //            {
+            //                restrict_synchronization_elements();
+            //            }
 
             // topology-specific constraints
-            topology_specific_constraints();
+            //            topology_specific_constraints();
 
             // symmetry breaking constraints
             prevent_insufficiencies();
             define_number_of_connections();
-            utilize_hierarchical_information();
+            //            utilize_hierarchical_information();
         }
         /**
          * Creates and returns a z3::optimize if optimization criteria were set by the configuration. The optimize gets
@@ -1767,13 +1771,236 @@ class exact_impl
                 return optimize;
             }
         }
+
+        void assign_layout_clocking(const z3::model& model) noexcept
+        {
+            // assign clock zones to tiles of open schemes
+            if (!layout.is_regularly_clocked())
+            {
+                layout.foreach_ground_tile(
+                    [this, &model](const auto& t)
+                    {
+                        layout.assign_clock_number(t, static_cast<typename Lyt::clock_number_t>(
+                                                          model.eval(get_tcl(t), true).get_numeral_int()));
+                    });
+            }
+        }
+        /**
+         * Starting from t, all outgoing clocked tiles are recursively considered and checked against the given model.
+         * Consequently, e is routed through all tiles with a match in model. Finally, the last tile is returned on
+         * which e was successfully placed.
+         *
+         * @param t Initial tile to start recursion from (not included in model evaluations).
+         * @param e Edge to check for.
+         * @return Final tile e is assigned to on its path.
+         */
+        std::optional<mockturtle::signal<Lyt>> route(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e,
+                                                     const z3::model& model) noexcept
+        {
+            std::optional<mockturtle::signal<Lyt>> wire_route_head{std::nullopt};
+
+            layout.foreach_outgoing_clocked_zone(
+                t,
+                [this, &t, &e, &model, &wire_route_head](const auto& at)
+                {
+                    // if e got assigned to at according to the model
+                    if (model.eval(get_te(at, e)).bool_value() == Z3_L_TRUE)
+                    {
+                        // assign wire segment to at and save its position as the signal lookup for e's source node
+                        node2pos[e.source] = layout.create_buf(node2pos[e.source], at);
+
+                        // recursion call
+                        if (const auto recursion_head = route(at, e, model); recursion_head.has_value())
+                        {
+                            // if there was another successful edge assignment, update
+                            // the wire route head
+                            wire_route_head = recursion_head;
+                        }
+
+                        // quit loop since the wire should not split
+                        return false;
+                    }
+
+                    // no wire path was found yet; continue looping
+                    return true;
+                });
+
+            return wire_route_head;
+        }
         /**
          * Assigns vertices, edges and directions to the stored layout sketch with respect to the given model.
          *
          * @param model A satisfying assignment to the created variables under all created constraints that can be
          *              used to extract a layout description.
          */
-        void assign_layout(const z3::model& model) noexcept;
+        void assign_layout(const z3::model& model) noexcept
+        {
+            assign_layout_clocking(model);
+            // from now on, a clocking scheme is assigned and no distinction between regular and irregular must be made
+
+            // network is topologically sorted, therefore, foreach_node ensures conflict-free traversal
+            network.foreach_node(
+                [this, &model](const auto& n)
+                {
+                    if (!skip_io_node(n))
+                    {
+                        // find the tile where n is placed
+                        layout.foreach_ground_tile(
+                            [this, &model, &n](const auto& t)
+                            {
+                                // was node n placed on tile t according to the model?
+                                if (model.eval(get_tv(t, n)).bool_value() == Z3_L_TRUE)
+                                {
+                                    // assign n to t in layout
+                                    node2pos[n] = place(layout, t, network, n, node2pos);
+
+                                    // check n's the outgoing edges
+                                    network.foreach_fanout(
+                                        n,
+                                        [this, &model, &n, &t](const auto& fo)
+                                        {
+                                            if (const auto fn = network.get_node(fo); !skip_io_node(fn))
+                                            {
+                                                mockturtle::edge<topology_ntk_t> e{n, fn};
+
+                                                // check t's outgoing clocked tiles since those are
+                                                // the only ones where e could potentially have been
+                                                // placed
+                                                if (const auto p = route(t, e, model); p.has_value())
+                                                {
+                                                    // if any outgoing tile was assigned with e, it
+                                                    // was recursively routed, so that p points to
+                                                    // e's final tile position, which is now stored
+                                                    // as n's 'position' for lookup
+                                                    node2pos[n] = *p;  // TODO this could be superflous since it is done
+                                                                       // in route() already
+                                                }
+                                            }
+                                        });
+                                }
+                            });
+                    }
+                });
+            //
+            //            // assign vertices to tiles
+            //            layout.foreach_ground_tile(
+            //                [this](const auto& t)
+            //                {
+            //                    auto element_placed = false;
+            //                    network.foreach_node(
+            //                        [this, &t](const auto& v)
+            //                        {
+            //                            if (!skip_io_node(v))
+            //                            {
+            //                                // if vertex v is set to tile t
+            //                                if (model.eval(get_tv(t, v)).bool_value() == Z3_L_TRUE)
+            //                                {
+            //                                    // if this is a balance vertex
+            //                                    //                                    if (auto b =
+            //                                    hierarchy->get_balance_edge(v);
+            //                                    //                                    b)
+            //                                    //                                    {
+            //                                    //                                        layout->assign_logic_edge(t,
+            //                                    *b);
+            //                                    //                                    }
+            //                                    else  // regular gate
+            //                                    {
+            //                                        // check for I/Os
+            //                                        bool pi, po;
+            //                                        if (config.io_ports)
+            //                                        {
+            //                                            pi = network.is_pi(v);
+            //                                            po = network.is_po(v);
+            //                                        }
+            //                                        //                                        else
+            //                                        //                                        {
+            //                                        //                                            pi =
+            //                                        network->pre_pi(v);
+            //                                        //                                            po =
+            //                                        network->post_po(v);
+            //                                        //                                        }
+            //
+            //                                        layout->assign_logic_vertex(t, v, pi, po);
+            //                                    }
+            //
+            //                                    // there should not be two elements on the same tile, so the loop can
+            //                                    be left here element_placed = true; return false;
+            //                                }
+            //                            }
+            //                            // continue lopp
+            //                            return true;
+            //                        });
+            //
+            //                    // if there is no element placed, there is also no need to establish connections
+            //                    if (!element_placed)
+            //                    {
+            //                        // assign edges to tiles
+            //                        foreach_edge(network,
+            //                                     [this, &t](const auto& e)
+            //                                     {
+            //                                         if (!skip_io_node(e.source) && !skip_io_node(e.target))
+            //                                         {
+            //                                             // if edge e is set to tile t
+            //                                             if (model.eval(get_te(t, e)).bool_value() == Z3_L_TRUE)
+            //                                             {
+            //                                                 // there is already an edge in ground level
+            //                                                 if (layout->is_wire_tile(t))
+            //                                                 // assign to above tile
+            //                                                 {
+            //                                                     layout->assign_logic_edge(layout->above(t), e);
+            //                                                 }
+            //                                                 // no other edge yet
+            //                                                 else
+            //                                                 // assign to ground level
+            //                                                 {
+            //                                                     layout->assign_logic_edge(t, e);
+            //                                                 }
+            //                                             }
+            //                                         }
+            //                                     });
+            //                    }
+            //                });
+
+            // adjust wires for ToPoliNano clocking as multi wires are supported
+            //            if (config.topolinano)
+            //            {
+            //                for (auto&& t : layout->crossing_layers())
+            //                {
+            //                    for (auto& e : layout->get_logic_edges(t))
+            //                    {
+            //                        if (auto inp = layout->get_wire_inp_dirs(t, e), out = layout->get_wire_out_dirs(t,
+            //                        e);
+            //                            inp != layout::opposite(out))
+            //                        {
+            //                            // move edge to ground layer
+            //                            auto g = layout_tile{t[X], t[Y], GROUND};
+            //                            layout->dissociate_logic_edge(t, e);
+            //                            layout->assign_logic_edge(g, e);
+            //                            layout->assign_wire_inp_dir(g, e, inp);
+            //                            layout->assign_wire_out_dir(g, e, out);
+            //                        }
+            //                    }
+            //                }
+            //            }
+
+            // assign artificial latches if there were any in use
+            if (config.synchronization_elements)
+            {
+                if constexpr (has_synchronization_elements_v<Lyt>)
+                {
+                    layout.foreach_ground_layer(
+                        [this, &model](const auto& t)
+                        {
+                            layout.assign_synchronization_element(
+                                t,
+                                static_cast<typename Lyt::sync_elem_t>(model.eval(get_tl(t), true).get_numeral_int()));
+                        });
+                }
+            }
+
+            // restore possibly set signal names
+            restore_names(network, layout, node2pos);
+        }
     };
 
     /**
@@ -2055,9 +2282,6 @@ class exact_impl
                     pst.y_size    = layout.y() + 1;
                     pst.num_gates = layout.num_gates();
                     pst.num_wires = layout.num_wires();
-
-                    // restore possibly set signal names
-                    restore_names(ntk, layout, node2pos);
 
                     // TODO more statistics?
 
