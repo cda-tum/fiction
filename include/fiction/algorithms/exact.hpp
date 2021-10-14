@@ -1210,7 +1210,7 @@ class exact_impl
             layout.foreach_ground_tile(
                 [this](const auto& t)
                 {
-                    if (layout->is_eastern_border(t) || layout->is_southern_border(t) || is_updated_tile(t))
+                    if (layout.is_eastern_border(t) || layout.is_southern_border(t) || is_updated_tile(t))
                     {
                         if (layout.is_regularly_clocked())
                         {
@@ -1275,7 +1275,7 @@ class exact_impl
                                         if (tile_degree < network_out_degree(v) + network_in_degree(v))
                                         {
                                             // if t is at eastern/southern border, its adjacencies might change
-                                            if (layout->is_eastern_border(t) || layout->is_southern_border(t))
+                                            if (layout.is_eastern_border(t) || layout.is_southern_border(t))
                                             {
                                                 // add restriction as assumption only
                                                 check_point->assumptions.push_back(not get_tv(t, v));
@@ -1298,7 +1298,167 @@ class exact_impl
          * empty tiles are not allowed to have connections at all, edges need to have one ingoing and one outgoing
          * connection and so on. Symmetry breaking constraints.
          */
-        void define_number_of_connections() noexcept;
+        void define_number_of_connections() noexcept
+        {
+            const auto define = [this](const auto& t)
+            {
+                z3::expr_vector tcc{*ctx};
+
+                // collect (inverse) connection variables
+                z3::expr_vector acc{*ctx};
+                z3::expr_vector iacc{*ctx};
+                if (layout.is_regularly_clocked())
+                {
+                    layout.foreach_outgoing_clocked_zone(t,
+                                                         [this, &t, &tcc, &acc](const auto& at)
+                                                         {
+                                                             auto tc = get_tc(t, at);
+                                                             acc.push_back(tc);
+                                                             tcc.push_back(tc);
+                                                         });
+
+                    layout.foreach_incoming_clocked_zone(t,
+                                                         [this, &t, &tcc, &iacc](const auto& iat)
+                                                         {
+                                                             auto itc = get_tc(iat, t);
+                                                             iacc.push_back(itc);
+                                                             tcc.push_back(itc);
+                                                         });
+                }
+                else  // irregular clocking
+                {
+                    layout.foreach_adjacent_tile(t,
+                                                 [this, &t, &tcc, &acc, &iacc](const auto& at)
+                                                 {
+                                                     auto tc = get_tc(t, at);
+                                                     acc.push_back(tc);
+                                                     tcc.push_back(tc);
+
+                                                     auto itc = get_tc(at, t);
+                                                     iacc.push_back(itc);
+                                                     tcc.push_back(itc);
+                                                 });
+                }
+
+                z3::expr_vector ow{*ctx};
+
+                network.foreach_node(
+                    [this, &t, &acc, &iacc, &ow](const auto& v)
+                    {
+                        if (!skip_io_node(v))
+                        {
+                            auto tv   = get_tv(t, v);
+                            auto aon  = network_out_degree(v);
+                            auto iaon = network_in_degree(v);
+
+                            ow.push_back(tv);
+
+                            // if vertex v is assigned to a tile, the number of connections need to correspond
+                            if (!acc.empty())
+                            {
+                                solver->add(
+                                    mk_as_if_se(z3::implies(tv, z3::atleast(acc, aon) and z3::atmost(acc, aon)), t));
+                            }
+                            if (!iacc.empty())
+                            {
+                                solver->add(mk_as_if_se(
+                                    z3::implies(tv, z3::atleast(iacc, iaon) and z3::atmost(iacc, iaon)), t));
+                            }
+                        }
+                    });
+
+                z3::expr_vector wv{*ctx};
+                foreach_edge(network,
+                             [this, &t, &ow, &wv](const auto& e)
+                             {
+                                 if (!skip_io_node(e.source) && !skip_io_node(e.target))
+                                 {
+                                     auto te = get_te(t, e);
+                                     ow.push_back(te);
+                                     wv.push_back(te);
+                                 }
+                             });
+
+                // if there is any edge assigned to a tile, the number of connections need to correspond
+                if (!wv.empty())
+                {
+                    if (!acc.empty())
+                    {
+                        solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 1u) and z3::atmost(wv, 1u),
+                                                            z3::atleast(acc, 1u) and z3::atmost(acc, 1u)),
+                                                t));
+                    }
+                    if (!iacc.empty())
+                    {
+                        solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 1u) and z3::atmost(wv, 1u),
+                                                            z3::atleast(iacc, 1u) and z3::atmost(iacc, 1u)),
+                                                t));
+                    }
+
+                    // if crossings are allowed, there must be exactly four connections (one in each direction) for two
+                    // assigned edges
+                    if (config.crossings)
+                    {
+                        if (!acc.empty())
+                        {
+                            solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
+                                                                z3::atleast(acc, 2u) and z3::atmost(acc, 2u)),
+                                                    t));
+                        }
+                        if (!iacc.empty())
+                        {
+                            solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
+                                                                z3::atleast(iacc, 2u) and z3::atmost(iacc, 2u)),
+                                                    t));
+                        }
+                    }
+                }
+
+                // if tile t is empty, there must not be any connection from or to tile t established
+                if (ow.size() > 1 &&
+                    !tcc.empty())  // test for > 1 to exclude single-vertex networks from this constraint
+                {
+                    solver->add(mk_as_if_se(z3::atmost(ow, 0u) == z3::atmost(tcc, 0u), t));
+                }
+            };
+
+            std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), define);
+            std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), define);
+
+            // lacking connections for irregular clocking
+            if (!layout.is_regularly_clocked())
+            {
+                z3::expr_vector ccp{*ctx};
+
+                // iterate over added_tiles only here to not duplicate constraints
+                for (const auto& t : check_point->added_tiles)
+                {
+                    z3::expr_vector ow{*ctx};
+                    network.foreach_node(
+                        [this, &t, &ow](const auto& v)
+                        {
+                            if (!skip_io_node(v))
+                            {
+                                ow.push_back(get_tv(t, v));
+                            }
+                        });
+                    foreach_edge(network,
+                                 [this, &t, &ow](const auto& e)
+                                 {
+                                     if (!skip_io_node(e.source) && !skip_io_node(e.target))
+                                     {
+                                         ow.push_back(get_te(t, e));
+                                     }
+                                 });
+
+                    // if tile t is empty, the clock number does not matter and can be fixed to 0
+                    if (!ow.empty())
+                    {
+                        solver->add(z3::implies(z3::atmost(ow, 0u), get_tcl(t) == ctx->int_val(0)));
+                    }
+                }
+            }
+        }
         /**
          * Adds constraints to the solver to prohibit certain vertex placements based on the network hierarchy if the
          * clocking scheme is feed-back-free. Symmetry breaking constraints.
@@ -1313,14 +1473,14 @@ class exact_impl
             {
                 const auto assign = [this, &v](const auto& t)
                 {
-                    if (!layout->is_border(t))
+                    if (!layout.is_border(t))
                     {
                         solver->add(not get_tv(t, v));
                     }
                 };
 
                 std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), assign);
-                std::for_each(check_point->udated_tiles.cbegin(), check_point->updated_tiles.cend(), assign);
+                std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), assign);
             };
 
             auto assign_west = [this](const auto& v)
@@ -1339,14 +1499,14 @@ class exact_impl
             {
                 const auto assign = [this, &v](const auto& t)
                 {
-                    if (!layout->is_eastern_border(t))
+                    if (!layout.is_eastern_border(t))
                     {
                         solver->add(not get_tv(t, v));
                     }
                 };
 
                 std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), assign);
-                std::for_each(check_point->udated_tiles.cbegin(), check_point->updated_tiles.cend(), assign);
+                std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), assign);
             };
 
             if (config.io_ports)
@@ -1377,7 +1537,10 @@ class exact_impl
                                                [this, &assign_west, &assign_border](const auto& fo)
                                                {
                                                    const auto v = network.get_node(fo);
-                                                   config.topolinano ? assign_west(v) : assign_border(v);
+                                                   (layout.is_clocking_scheme(clock_name::topolinano3) ||
+                                                    layout.is_clocking_scheme(clock_name::topolinano4)) ?
+                                                       assign_west(v) :
+                                                       assign_border(v);
                                                });
                     });
 
@@ -1388,7 +1551,10 @@ class exact_impl
                                               [this, &assign_east, &assign_border](const auto& fi)
                                               {
                                                   const auto v = network.get_node(fi);
-                                                  config.topolinano ? assign_east(v) : assign_border(v);
+                                                  (layout.is_clocking_scheme(clock_name::topolinano3) ||
+                                                   layout.is_clocking_scheme(clock_name::topolinano4)) ?
+                                                      assign_east(v) :
+                                                      assign_border(v);
                                               });
                     });
             }
