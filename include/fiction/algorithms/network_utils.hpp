@@ -7,6 +7,7 @@
 
 #include <mockturtle/traits.hpp>
 
+#include <optional>
 #include <type_traits>
 
 namespace mockturtle
@@ -87,6 +88,53 @@ void foreach_incoming_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& 
 
                           fn(e);
                       });
+}
+
+template <typename Ntk>
+struct fanin_container
+{
+    std::vector<mockturtle::node<Ntk>> fanin_nodes{};
+
+    std::optional<bool> constant_fanin{std::nullopt};
+};
+
+template <typename Ntk>
+fanin_container<Ntk> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
+{
+    fanin_container<Ntk> fc{};
+
+    ntk.foreach_fanin(n,
+                      [&ntk, &fc](const auto& f)
+                      {
+                          if (const auto fn = ntk.get_node(f); ntk.is_constant(fn))
+                          {
+                              assert(!fc.constant_fanin.has_value());  // there can only be one constant input
+                              fc.constant_fanin = ntk.constant_value(fn);
+                          }
+                          else
+                          {
+                              fc.fanin_nodes.push_back(fn);
+                          }
+                      });
+
+    return fc;
+}
+
+template <typename Ntk>
+uint32_t num_constant_fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
+{
+    uint32_t num_const_fi{0};
+
+    ntk.foreach_fanin(n,
+                      [&ntk, &num_const_fi](const auto& f)
+                      {
+                          if (ntk.is_constant(ntk.get_node(f)))
+                          {
+                              ++num_const_fi;
+                          }
+                      });
+
+    return num_const_fi;
 }
 
 }  // namespace fiction

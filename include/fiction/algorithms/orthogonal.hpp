@@ -5,12 +5,14 @@
 #ifndef FICTION_ORTHOGONAL_HPP
 #define FICTION_ORTHOGONAL_HPP
 
-#include "../algorithms/name_restoration.hpp"
 #include "../io/print_layout.hpp"
 #include "../layouts/clocking_scheme.hpp"
 #include "../traits.hpp"
 #include "../utils/debug/network_writer.hpp"
 #include "fanout_substitution.hpp"
+#include "layout_utils.hpp"
+#include "name_restoration.hpp"
+#include "network_utils.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -69,51 +71,6 @@ class high_degree_fanin_exception : public std::exception
 
 namespace detail
 {
-
-template <typename Ntk>
-struct fanin_container
-{
-    std::vector<mockturtle::node<Ntk>> fanin_nodes{};
-
-    std::optional<bool> constant_fanin{};
-};
-
-template <typename Ntk>
-fanin_container<Ntk> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
-{
-    fanin_container<Ntk> fc{};
-
-    ntk.foreach_fanin(n,
-                      [&ntk, &fc](const auto& f)
-                      {
-                          if (const auto fn = ntk.get_node(f); ntk.is_constant(fn))
-                          {
-                              assert(!fc.constant_fanin.has_value());  // there can only be one constant input
-                              fc.constant_fanin = ntk.constant_value(fn);
-                          }
-                          else
-                          {
-                              fc.fanin_nodes.push_back(fn);
-                          }
-                      });
-
-    return fc;
-}
-
-template <typename Ntk>
-uint32_t num_constant_fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
-{
-    uint32_t num_const_fi{0};
-
-    ntk.foreach_fanin(n,
-                      [&ntk, &num_const_fi](const auto& f)
-                      {
-                          if (ntk.is_constant(ntk.get_node(f)))
-                              ++num_const_fi;
-                      });
-
-    return num_const_fi;
-}
 
 template <typename Ntk>
 bool has_high_degree_fanin_nodes(const Ntk& ntk, const uint32_t threshold = 2) noexcept
@@ -361,125 +318,6 @@ aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn) noex
         });
 
     return {x, y, 1};
-}
-
-/**
- * Place 1-input gates.
- * @tparam Lyt
- * @param t
- * @tparam Ntk
- * @param lyt
- * @param ntk
- * @param n
- * @param a
- */
-template <typename Lyt, typename Ntk>
-mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-                              const mockturtle::signal<Lyt>& a)
-{
-    if (ntk.is_inv(n))
-    {
-        return lyt.create_not(a, t);
-    }
-    if constexpr (fiction::has_is_buf_v<Ntk>)
-    {
-        if (ntk.is_buf(n))
-        {
-            return lyt.create_buf(a, t);
-        }
-    }
-    // more gate types go here
-
-    assert(false);  // n must be of some supported type
-    return {};      // fix -Wreturn-type warning
-}
-
-/**
- * Place 2-input gates.
- * @tparam Lyt
- * @param t
- * @tparam Ntk
- * @param lyt
- * @param ntk
- * @param n
- * @param a
- * @param b
- * @param c
- */
-template <typename Lyt, typename Ntk>
-mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-                              const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b,
-                              const std::optional<bool>& c = std::nullopt)
-{
-    if constexpr (mockturtle::has_is_and_v<Ntk>)
-    {
-        if (ntk.is_and(n))
-        {
-            return lyt.create_and(a, b, t);
-        }
-    }
-    if constexpr (mockturtle::has_is_or_v<Ntk>)
-    {
-        if (ntk.is_or(n))
-        {
-            return lyt.create_or(a, b, t);
-        }
-    }
-    if constexpr (mockturtle::has_is_xor_v<Ntk>)
-    {
-        if (ntk.is_xor(n))
-        {
-            return lyt.create_xor(a, b, t);
-        }
-    }
-    if constexpr (fiction::has_is_nand_v<Ntk>)
-    {
-        if (ntk.is_nand(n))
-        {
-            return lyt.create_nand(a, b, t);
-        }
-    }
-    if constexpr (fiction::has_is_nor_v<Ntk>)
-    {
-        if (ntk.is_nor(n))
-        {
-            return lyt.create_nor(a, b, t);
-        }
-    }
-    if constexpr (mockturtle::has_is_maj_v<Ntk>)
-    {
-        if (ntk.is_maj(n))
-        {
-            assert(c.has_value());
-
-            if (*c)  // constant signal c points to 1
-            {
-                return lyt.create_or(a, b, t);
-            }
-            else  // constant signal c points to 0
-            {
-                return lyt.create_and(a, b, t);
-            }
-        }
-    }
-    // more gate types go here
-    if constexpr (mockturtle::has_is_function_v<Ntk>)
-    {
-        if (ntk.is_function(n))
-        {
-            if (c.has_value())
-            {
-                return lyt.create_node({a, b, *c}, ntk.node_function(n), t);
-            }
-            else
-            {
-                return lyt.create_node({a, b}, ntk.node_function(n), t);
-            }
-        }
-    }
-
-    assert(false);  // n must be of some supported type
-    return {};      // fix -Wreturn-type warning
 }
 
 template <typename Lyt>
