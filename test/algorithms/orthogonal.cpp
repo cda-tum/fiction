@@ -25,17 +25,6 @@
 
 using namespace fiction;
 
-TEST_CASE("Number of constant fanins", "[orthogonal]")
-{
-    const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
-
-    maj4.foreach_node([&maj4](const auto& n) { CHECK(detail::num_constant_fanins(maj4, n) == 0ul); });
-
-    const auto and_inv = blueprints::unbalanced_and_inv_network<mockturtle::mig_network>();
-
-    CHECK(detail::num_constant_fanins(and_inv, 3) == 1ul);
-}
-
 TEST_CASE("High-degree fanin nodes", "[orthogonal]")
 {
     const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
