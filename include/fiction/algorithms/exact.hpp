@@ -20,11 +20,13 @@
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
-#include <mockturtle/utils/progress_bar.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/color_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
+#if (PROGRESS_BARS)
+#include <mockturtle/utils/progress_bar.hpp>
+#endif
 
 #include <z3++.h>
 
@@ -546,9 +548,9 @@ class exact_impl
          * @param n Node in network.
          * @return True iff n is to be skipped in a loop due to it being an I/O and config.io_ports == false.
          */
-        bool skip_io_node(const mockturtle::node<topology_ntk_t>& n) const noexcept
+        bool skip_const_or_io_node(const mockturtle::node<topology_ntk_t>& n) const noexcept
         {
-            return (network.is_pi(n) || network.is_po(n)) && !config.io_ports;
+            return network.is_constant(n) || ((network.is_pi(n) || network.is_po(n)) && !config.io_ports);
         }
 
         uint32_t network_in_degree(const mockturtle::node<topology_ntk_t>& n) const noexcept
@@ -557,7 +559,7 @@ class exact_impl
             network.foreach_fanin(n,
                                   [this, &degree](const auto& fi)
                                   {
-                                      if (const auto fn = network.get_node(fi); !skip_io_node(fn))
+                                      if (const auto fn = network.get_node(fi); !skip_const_or_io_node(fn))
                                       {
                                           ++degree;
                                       }
@@ -571,7 +573,7 @@ class exact_impl
             network.foreach_fanout(n,
                                    [this, &degree](const auto& fo)
                                    {
-                                       if (const auto fn = network.get_node(fo); !skip_io_node(fn))
+                                       if (const auto fn = network.get_node(fo); !skip_const_or_io_node(fn))
                                        {
                                            ++degree;
                                        }
@@ -760,7 +762,7 @@ class exact_impl
                     network.foreach_node(
                         [this, &t, &tv](const auto& v)
                         {
-                            if (!skip_io_node(v))
+                            if (!skip_const_or_io_node(v))
                             {
                                 tv.push_back(get_tv(t, v));
                             }
@@ -776,7 +778,7 @@ class exact_impl
                     foreach_edge(network,
                                  [this, &t, &te](const auto& e)
                                  {
-                                     if (!skip_io_node(e.source) && !skip_io_node(e.target))
+                                     if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
                                      {
                                          te.push_back(get_te(t, e));
                                      }
@@ -793,7 +795,7 @@ class exact_impl
                     network.foreach_node(
                         [this, &t, &ve](const auto& v)
                         {
-                            if (!skip_io_node(v))
+                            if (!skip_const_or_io_node(v))
                             {
                                 ve.push_back(get_tv(t, v));
                             }
@@ -802,7 +804,7 @@ class exact_impl
                     foreach_edge(network,
                                  [this, &t, &ve](const auto& e)
                                  {
-                                     if (!skip_io_node(e.source) && !skip_io_node(e.target))
+                                     if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
                                      {
                                          ve.push_back(get_te(t, e));
                                      }
@@ -823,7 +825,7 @@ class exact_impl
             network.foreach_node(
                 [this](const auto& n)
                 {
-                    if (!skip_io_node(n))
+                    if (!skip_const_or_io_node(n))
                     {
                         z3::expr_vector ve{*ctx};
                         layout.foreach_ground_tile([this, &n, &ve](const auto& t) { ve.push_back(get_tv(t, n)); });
@@ -858,7 +860,7 @@ class exact_impl
                 network.foreach_node(
                     [this, &t](const auto& v)
                     {
-                        if (!skip_io_node(v))
+                        if (!skip_const_or_io_node(v))
                         {
                             auto tv = get_tv(t, v);
 
@@ -867,7 +869,7 @@ class exact_impl
                                 network, v,
                                 [this, &t, &conj](const auto& ae)
                                 {
-                                    if (!skip_io_node(ae.source) && !skip_io_node(ae.target))
+                                    if (!skip_const_or_io_node(ae.source) && !skip_const_or_io_node(ae.target))
                                     {
                                         z3::expr_vector disj{*ctx};
 
@@ -924,7 +926,7 @@ class exact_impl
                 network.foreach_node(
                     [this, &t](const auto& v)
                     {
-                        if (!skip_io_node(v))
+                        if (!skip_const_or_io_node(v))
                         {
                             auto tv = get_tv(t, v);
 
@@ -934,7 +936,7 @@ class exact_impl
                                 network, v,
                                 [this, &t, &conj](const auto& iae)
                                 {
-                                    if (!skip_io_node(iae.source) && !skip_io_node(iae.target))
+                                    if (!skip_const_or_io_node(iae.source) && !skip_const_or_io_node(iae.target))
                                     {
                                         z3::expr_vector disj{*ctx};
 
@@ -991,7 +993,7 @@ class exact_impl
                 foreach_edge(network,
                              [this, &t](const auto& e)
                              {
-                                 if (!skip_io_node(e.target) && !skip_io_node(e.source))
+                                 if (!skip_const_or_io_node(e.target) && !skip_const_or_io_node(e.source))
                                  {
                                      auto te = e.target;
 
@@ -1041,7 +1043,7 @@ class exact_impl
                     network,
                     [this, &t](const auto& e)
                     {
-                        if (!skip_io_node(e.source) && !skip_io_node(e.target))
+                        if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
                         {
                             auto se = e.source;
 
@@ -1220,7 +1222,7 @@ class exact_impl
                             network.foreach_node(
                                 [this, &t](const auto& v)
                                 {
-                                    if (!skip_io_node(v))
+                                    if (!skip_const_or_io_node(v))
                                     {
                                         // if vertex v has more adjacent or inversely adjacent elements than tile t
                                         if (layout.out_degree(t) < network_out_degree(v) ||
@@ -1244,7 +1246,8 @@ class exact_impl
                             foreach_edge(network,
                                          [this, &t](const auto& e)
                                          {
-                                             if (!skip_io_node(e.source) && !skip_io_node(skip_io_node(e.target)))
+                                             if (!skip_const_or_io_node(e.source) &&
+                                                 !skip_const_or_io_node(skip_const_or_io_node(e.target)))
                                              {
                                                  // if tile t has no adjacent or inversely adjacent tiles
                                                  if (layout.out_degree(t) == 0 || layout.in_degree(t) == 0)
@@ -1272,7 +1275,7 @@ class exact_impl
                             network.foreach_node(
                                 [this, &t, &tile_degree](const auto& v)
                                 {
-                                    if (!skip_io_node(v))
+                                    if (!skip_const_or_io_node(v))
                                     {
                                         // in an irregular clocking scheme, not so strict restrictions can be made
                                         if (tile_degree < network_out_degree(v) + network_in_degree(v))
@@ -1348,7 +1351,7 @@ class exact_impl
                 network.foreach_node(
                     [this, &t, &acc, &iacc, &ow](const auto& v)
                     {
-                        if (!skip_io_node(v))
+                        if (!skip_const_or_io_node(v))
                         {
                             auto tv   = get_tv(t, v);
                             auto aon  = network_out_degree(v);
@@ -1374,7 +1377,7 @@ class exact_impl
                 foreach_edge(network,
                              [this, &t, &ow, &wv](const auto& e)
                              {
-                                 if (!skip_io_node(e.source) && !skip_io_node(e.target))
+                                 if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
                                  {
                                      auto te = get_te(t, e);
                                      ow.push_back(te);
@@ -1440,7 +1443,7 @@ class exact_impl
                     network.foreach_node(
                         [this, &t, &ow](const auto& v)
                         {
-                            if (!skip_io_node(v))
+                            if (!skip_const_or_io_node(v))
                             {
                                 ow.push_back(get_tv(t, v));
                             }
@@ -1448,7 +1451,7 @@ class exact_impl
                     foreach_edge(network,
                                  [this, &t, &ow](const auto& e)
                                  {
-                                     if (!skip_io_node(e.source) && !skip_io_node(e.target))
+                                     if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
                                      {
                                          ow.push_back(get_te(t, e));
                                      }
@@ -1586,7 +1589,7 @@ class exact_impl
                 foreach_edge(network,
                              [this, &t, &te](const auto& e)
                              {
-                                 if (!skip_io_node(e.source) && !skip_io_node(e.target))
+                                 if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
                                  {
                                      te.push_back(get_te(t, e));
                                  }
@@ -1613,7 +1616,7 @@ class exact_impl
                     foreach_edge(network,
                                  [this, &wire_counter, &t](const auto& e)
                                  {
-                                     if (!skip_io_node(e.source) && !skip_io_node(e.target))
+                                     if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
                                      {
                                          wire_counter.push_back(
                                              z3::ite(get_te(t, e), ctx->real_val(1u), ctx->real_val(0u)));
@@ -1638,7 +1641,7 @@ class exact_impl
                     foreach_edge(network,
                                  [this, &t, &wv](const auto& e)
                                  {
-                                     if (!skip_io_node(e.source) && !skip_io_node(e.target))
+                                     if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
                                      {
                                          wv.push_back(get_te(t, e));
                                      }
@@ -1799,31 +1802,32 @@ class exact_impl
         {
             std::optional<mockturtle::signal<Lyt>> wire_route_head{std::nullopt};
 
-            layout.foreach_outgoing_clocked_zone(
-                t,
-                [this, &t, &e, &model, &wire_route_head](const auto& at)
-                {
-                    // if e got assigned to at according to the model
-                    if (model.eval(get_te(at, e)).bool_value() == Z3_L_TRUE)
-                    {
-                        // assign wire segment to at and save its position as the signal lookup for e's source node
-                        node2pos[e.source] = layout.create_buf(node2pos[e.source], at);
+            layout.foreach_outgoing_clocked_zone(t,
+                                                 [this, &t, &e, &model, &wire_route_head](const auto& at)
+                                                 {
+                                                     // if e got assigned to at according to the model
+                                                     if (model.eval(get_te(at, e)).bool_value() == Z3_L_TRUE)
+                                                     {
+                                                         // assign wire segment to at and save its position as the
+                                                         // signal lookup for e's source node
+                                                         node2pos[e.source] = layout.create_buf(node2pos[e.source], at);
 
-                        // recursion call
-                        if (const auto recursion_head = route(at, e, model); recursion_head.has_value())
-                        {
-                            // if there was another successful edge assignment, update
-                            // the wire route head
-                            wire_route_head = recursion_head;
-                        }
+                                                         // recursion call
+                                                         if (const auto recursion_head = route(at, e, model);
+                                                             recursion_head.has_value())
+                                                         {
+                                                             // if there was another successful edge assignment, update
+                                                             // the wire route head
+                                                             wire_route_head = recursion_head;
+                                                         }
 
-                        // quit loop since the wire should not split
-                        return false;
-                    }
+                                                         // quit loop since the wire should not split
+                                                         return false;
+                                                     }
 
-                    // no wire path was found yet; continue looping
-                    return true;
-                });
+                                                     // no wire path was found yet; continue looping
+                                                     return true;
+                                                 });
 
             return wire_route_head;
         }
@@ -1842,7 +1846,7 @@ class exact_impl
             network.foreach_node(
                 [this, &model](const auto& n)
                 {
-                    if (!skip_io_node(n))
+                    if (!skip_const_or_io_node(n))
                     {
                         // find the tile where n is placed
                         layout.foreach_ground_tile(
@@ -1859,7 +1863,7 @@ class exact_impl
                                         n,
                                         [this, &model, &n, &t](const auto& fo)
                                         {
-                                            if (const auto fn = network.get_node(fo); !skip_io_node(fn))
+                                            if (const auto fn = network.get_node(fo); !skip_const_or_io_node(fn))
                                             {
                                                 mockturtle::edge<topology_ntk_t> e{n, fn};
 
@@ -2265,7 +2269,7 @@ class exact_impl
                 continue;
 
 #if (PROGRESS_BARS)
-            bar(dimension.x, dimension.y);
+            bar(dimension.x + 1, dimension.y + 1);
 #endif
 
             handler.update(dimension);
