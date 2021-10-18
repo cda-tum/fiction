@@ -18,6 +18,7 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/utils/debug/network_writer.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -34,24 +35,24 @@ std::vector<exact_physical_design_params<Lyt>> configurations() noexcept
 {
     exact_physical_design_params<Lyt> twoddwave_config{};
 
-    twoddwave_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
-    twoddwave_config.crossings    = true;
+    twoddwave_config.scheme    = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
+    twoddwave_config.crossings = true;
 
     exact_physical_design_params<Lyt> use_config{};
 
-    use_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_4_clocking<Lyt>());
-    use_config.crossings    = true;
+    use_config.scheme    = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_4_clocking<Lyt>());
+    use_config.crossings = true;
 
     exact_physical_design_params<Lyt> res_config{};
 
-    res_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_4_clocking<Lyt>());
-    res_config.crossings    = true;
+    res_config.scheme    = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_4_clocking<Lyt>());
+    res_config.crossings = true;
 
     exact_physical_design_params<Lyt> async_config{};
 
-    async_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
-    async_config.crossings    = true;
-    async_config.num_threads  = 2ul;
+    async_config.scheme      = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
+    async_config.crossings   = true;
+    async_config.num_threads = 2ul;
 
     return {{twoddwave_config, use_config, res_config, async_config}};
 }
@@ -76,6 +77,8 @@ Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps)
     check_stats(stats);
 
     print_gate_level_layout(std::cout, *layout);
+
+    debug::write_dot_layout(*layout);
 
     return *layout;
 }
@@ -107,25 +110,25 @@ TEST_CASE("Exact physical design", "[exact]")
     check_all(blueprints::maj1_network<mockturtle::mig_network>());
     check_all(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
     check_all(blueprints::multi_output_and_network<mockturtle::aig_network>());
-//    check_all(blueprints::half_adder_network<mockturtle::aig_network>());
+    //    check_all(blueprints::half_adder_network<mockturtle::aig_network>());
     check_all(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
 }
 
-//TEST_CASE("Timeout", "[exact]")
+// TEST_CASE("Timeout", "[exact]")
 //{
-//    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+//     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 //
-//    exact_physical_design_params<gate_layout> timeout_config{};
+//     exact_physical_design_params<gate_layout> timeout_config{};
 //
-//    timeout_config.scheme  = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_4_clocking);
-//    timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
+//     timeout_config.scheme  = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_4_clocking);
+//     timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
 //
-//    const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
+//     const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
 //
-//    const auto layout = exact<gate_layout>(half_adder, timeout_config);
+//     const auto layout = exact<gate_layout>(half_adder, timeout_config);
 //
-//    // since a half adder cannot be placed and routed in just one second, layout should not have a value
-//    CHECK(!layout.has_value());
-//}
+//     // since a half adder cannot be placed and routed in just one second, layout should not have a value
+//     CHECK(!layout.has_value());
+// }
 
 #endif  // FICTION_Z3_SOLVER
