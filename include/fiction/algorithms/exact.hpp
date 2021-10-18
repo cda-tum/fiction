@@ -455,7 +455,6 @@ class exact_impl
                 // gather additional y-tiles and updated tiles
                 std::set<tile<Lyt>> added_tiles{}, updated_tiles{};
                 for (decltype(dim.y) y = 0; y <= dim.y; ++y)
-                //                for (auto&& y : iter::range(dim.y))
                 {
                     added_tiles.emplace(tile<Lyt>{dim.x - 1, y});
                     updated_tiles.emplace(tile<Lyt>{dim.x - 2, y});
@@ -506,13 +505,8 @@ class exact_impl
                     // all tiles are additional ones
                     std::set<tile<Lyt>> added_tiles{};
                     for (decltype(dim.y) y = 0; y <= dim.y; ++y)
-                    //                    for (auto&& y : iter::range(dim.y))
                     {
-                        for (decltype(dim.x) x = 0; x <= dim.x; ++x)
-                        //                        for (auto&& x : iter::range(dim.x))
-                        {
-                            added_tiles.emplace(tile<Lyt>{x, y});
-                        }
+                        for (decltype(dim.x) x = 0; x <= dim.x; ++x) { added_tiles.emplace(tile<Lyt>{x, y}); }
                     }
 
                     // create new state
@@ -543,14 +537,26 @@ class exact_impl
             return check_point->updated_tiles.count(t);
         }
         /**
-         * Returns true, iff config.io_ports is set to false and n is either a PI or PO node in network.
+         * Returns true, iff config.io_ports is set to false and n is either a constant or PI or PO node in network.
          *
          * @param n Node in network.
-         * @return True iff n is to be skipped in a loop due to it being an I/O and config.io_ports == false.
+         * @return True iff n is to be skipped in a loop due to it being a constant or an I/O and config.io_ports ==
+         * false.
          */
         bool skip_const_or_io_node(const mockturtle::node<topology_ntk_t>& n) const noexcept
         {
             return network.is_constant(n) || ((network.is_pi(n) || network.is_po(n)) && !config.io_ports);
+        }
+        /**
+         * Returns true, iff skip_const_or_io_node returns true for either source or target of the given edge..
+         *
+         * @param e Edge in network.
+         * @return True iff e is to be skipped in a loop due to it having constant or I/O nodes while config.io_ports ==
+         * false.
+         */
+        bool skip_const_or_io_edge(const mockturtle::edge<topology_ntk_t>& e) const noexcept
+        {
+            return skip_const_or_io_node(e.source) || skip_const_or_io_node(e.target);
         }
 
         uint32_t network_in_degree(const mockturtle::node<topology_ntk_t>& n) const noexcept
@@ -778,7 +784,7 @@ class exact_impl
                     foreach_edge(network,
                                  [this, &t, &te](const auto& e)
                                  {
-                                     if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
+                                     if (!skip_const_or_io_edge(e))
                                      {
                                          te.push_back(get_te(t, e));
                                      }
@@ -804,7 +810,7 @@ class exact_impl
                     foreach_edge(network,
                                  [this, &t, &ve](const auto& e)
                                  {
-                                     if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
+                                     if (!skip_const_or_io_edge(e))
                                      {
                                          ve.push_back(get_te(t, e));
                                      }
@@ -869,7 +875,7 @@ class exact_impl
                                 network, v,
                                 [this, &t, &conj](const auto& ae)
                                 {
-                                    if (!skip_const_or_io_node(ae.source) && !skip_const_or_io_node(ae.target))
+                                    if (!skip_const_or_io_edge(ae))
                                     {
                                         z3::expr_vector disj{*ctx};
 
@@ -936,7 +942,7 @@ class exact_impl
                                 network, v,
                                 [this, &t, &conj](const auto& iae)
                                 {
-                                    if (!skip_const_or_io_node(iae.source) && !skip_const_or_io_node(iae.target))
+                                    if (!skip_const_or_io_edge(iae))
                                     {
                                         z3::expr_vector disj{*ctx};
 
@@ -993,7 +999,7 @@ class exact_impl
                 foreach_edge(network,
                              [this, &t](const auto& e)
                              {
-                                 if (!skip_const_or_io_node(e.target) && !skip_const_or_io_node(e.source))
+                                 if (!skip_const_or_io_edge(e))
                                  {
                                      auto te = e.target;
 
@@ -1043,7 +1049,7 @@ class exact_impl
                     network,
                     [this, &t](const auto& e)
                     {
-                        if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
+                        if (!skip_const_or_io_edge(e))
                         {
                             auto se = e.source;
 
@@ -1246,8 +1252,7 @@ class exact_impl
                             foreach_edge(network,
                                          [this, &t](const auto& e)
                                          {
-                                             if (!skip_const_or_io_node(e.source) &&
-                                                 !skip_const_or_io_node(skip_const_or_io_node(e.target)))
+                                             if (!skip_const_or_io_edge(e))
                                              {
                                                  // if tile t has no adjacent or inversely adjacent tiles
                                                  if (layout.out_degree(t) == 0 || layout.in_degree(t) == 0)
@@ -1377,7 +1382,7 @@ class exact_impl
                 foreach_edge(network,
                              [this, &t, &ow, &wv](const auto& e)
                              {
-                                 if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
+                                 if (!skip_const_or_io_edge(e))
                                  {
                                      auto te = get_te(t, e);
                                      ow.push_back(te);
@@ -1451,7 +1456,7 @@ class exact_impl
                     foreach_edge(network,
                                  [this, &t, &ow](const auto& e)
                                  {
-                                     if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
+                                     if (!skip_const_or_io_edge(e))
                                      {
                                          ow.push_back(get_te(t, e));
                                      }
@@ -1589,7 +1594,7 @@ class exact_impl
                 foreach_edge(network,
                              [this, &t, &te](const auto& e)
                              {
-                                 if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
+                                 if (!skip_const_or_io_edge(e))
                                  {
                                      te.push_back(get_te(t, e));
                                  }
@@ -1616,7 +1621,7 @@ class exact_impl
                     foreach_edge(network,
                                  [this, &wire_counter, &t](const auto& e)
                                  {
-                                     if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
+                                     if (!skip_const_or_io_edge(e))
                                      {
                                          wire_counter.push_back(
                                              z3::ite(get_te(t, e), ctx->real_val(1u), ctx->real_val(0u)));
@@ -1641,7 +1646,7 @@ class exact_impl
                     foreach_edge(network,
                                  [this, &t, &wv](const auto& e)
                                  {
-                                     if (!skip_const_or_io_node(e.source) && !skip_const_or_io_node(e.target))
+                                     if (!skip_const_or_io_edge(e))
                                      {
                                          wv.push_back(get_te(t, e));
                                      }
@@ -1858,7 +1863,7 @@ class exact_impl
                                     // assign n to t in layout
                                     node2pos[n] = place(layout, t, network, n, node2pos);
 
-                                    // check n's the outgoing edges
+                                    // check n's outgoing edges
                                     network.foreach_fanout(
                                         n,
                                         [this, &model, &n, &t](const auto& fo)
@@ -1876,15 +1881,24 @@ class exact_impl
                                                     // was recursively routed, so that p points to
                                                     // e's final tile position, which is now stored
                                                     // as n's 'position' for lookup
-                                                    node2pos[n] = *p;  // TODO this could be superflous since it is done
-                                                                       // in route() already
+                                                    node2pos[n] = *p;  // TODO this could be superfluous since it is
+                                                                       // done in route() already
                                                 }
                                             }
                                         });
+
+                                    // node placed; stop looping
+                                    return false;
                                 }
+
+                                // node not placed yet; keep looping
+                                return true;
                             });
                     }
                 });
+
+            debug::write_dot_network(network);
+
             //
             //            // assign vertices to tiles
             //            layout.foreach_ground_tile(
