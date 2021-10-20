@@ -1208,9 +1208,17 @@ class exact_impl
                 else
                 {
                     network.foreach_pi(
-                        [this, &assign](const auto& pi) {
+                        [this, &assign](const auto& pi)
+                        {
                             network.foreach_fanout(pi,
-                                                   [this, &assign](const auto& fo) { assign(network.get_node(fo)); });
+                                                   [this, &assign](const auto& fo)
+                                                   {
+                                                       if (const auto fn = network.get_node(fo);
+                                                           !skip_const_or_io_node(fo))
+                                                       {
+                                                           assign(fn);
+                                                       }
+                                                   });
                         });
                 }
             }
@@ -1544,8 +1552,8 @@ class exact_impl
                     {
                         (layout.is_clocking_scheme(clock_name::topolinano3) ||
                          layout.is_clocking_scheme(clock_name::topolinano4)) ?
-                            assign_east(po) :
-                            assign_border(po);
+                            assign_east(network.get_node(po)) :
+                            assign_border(network.get_node(po));
                     });
             }
             else
@@ -1556,11 +1564,13 @@ class exact_impl
                         network.foreach_fanout(pi,
                                                [this, &assign_west, &assign_border](const auto& fo)
                                                {
-                                                   const auto v = network.get_node(fo);
-                                                   (layout.is_clocking_scheme(clock_name::topolinano3) ||
-                                                    layout.is_clocking_scheme(clock_name::topolinano4)) ?
-                                                       assign_west(v) :
-                                                       assign_border(v);
+                                                   if (const auto v = network.get_node(fo); !skip_const_or_io_node(v))
+                                                   {
+                                                       (layout.is_clocking_scheme(clock_name::topolinano3) ||
+                                                        layout.is_clocking_scheme(clock_name::topolinano4)) ?
+                                                           assign_west(v) :
+                                                           assign_border(v);
+                                                   }
                                                });
                     });
 
@@ -1570,11 +1580,13 @@ class exact_impl
                         network.foreach_fanin(po,
                                               [this, &assign_east, &assign_border](const auto& fi)
                                               {
-                                                  const auto v = network.get_node(fi);
-                                                  (layout.is_clocking_scheme(clock_name::topolinano3) ||
-                                                   layout.is_clocking_scheme(clock_name::topolinano4)) ?
-                                                      assign_east(v) :
-                                                      assign_border(v);
+                                                  if (const auto v = network.get_node(fi); !skip_const_or_io_node(v))
+                                                  {
+                                                      (layout.is_clocking_scheme(clock_name::topolinano3) ||
+                                                       layout.is_clocking_scheme(clock_name::topolinano4)) ?
+                                                          assign_east(v) :
+                                                          assign_border(v);
+                                                  }
                                               });
                     });
             }
