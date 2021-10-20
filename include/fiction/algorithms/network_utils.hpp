@@ -64,7 +64,7 @@ void foreach_outgoing_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& 
     ntk.foreach_fanout(n,
                        [&ntk, &fn, &n](const mockturtle::signal<Ntk>& fo)
                        {
-                           mockturtle::edge<Ntk> e{ntk.get_node(fo), n};
+                           mockturtle::edge<Ntk> e{n, ntk.get_node(fo)};
 
                            fn(e);
                        });
