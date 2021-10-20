@@ -126,14 +126,23 @@ class exact_impl
 {
   public:
     exact_impl(const Ntk& src, const exact_physical_design_params<Lyt>& p, exact_physical_design_stats& st) :
-            ntk{mockturtle::fanout_view{fanout_substitution<mockturtle::names_view<topology_network>>(
-                src)}},  // TODO incorporate clocking scheme degree into fanout-substitution
             ps{p},
-            pst{st},
-            lower_bound{static_cast<decltype(lower_bound)>(ntk.num_gates() + ntk.num_pis() + ntk.num_pos())},
-            // minimum number tiles to use
-            dit{ps.fixed_size ? ps.fixed_size : lower_bound}
-    {}
+            pst{st}
+    {
+        mockturtle::names_view<topology_network> intermediate_ntk{
+            fanout_substitution<mockturtle::names_view<topology_network>>(src)};
+        // create PO nodes in the network
+        intermediate_ntk.substitute_po_signals();
+
+        debug::write_dot_network(intermediate_ntk);
+
+        ntk = std::make_shared<topology_ntk_t>(mockturtle::fanout_view{intermediate_ntk});
+
+        lower_bound = static_cast<decltype(lower_bound)>(
+            ntk->num_gates() + ntk->num_pis());  // TODO check lower bound minimum number tiles to use
+
+        dit = aspect_ratio_iterator<aspect_ratio<Lyt>>{ps.fixed_size ? ps.fixed_size : lower_bound};
+    }
 
     std::optional<Lyt> run()
     {
@@ -150,14 +159,14 @@ class exact_impl
   private:
     using topology_ntk_t = mockturtle::topo_view<mockturtle::fanout_view<mockturtle::names_view<topology_network>>>;
 
-    topology_ntk_t ntk;
+    std::shared_ptr<topology_ntk_t> ntk;  // TODO incorporate clocking scheme degree into fanout-substitution
 
     exact_physical_design_params<Lyt> ps;
     exact_physical_design_stats&      pst;
     /**
      * Lower bound for the number of layout tiles.
      */
-    uint16_t lower_bound;
+    uint16_t lower_bound{0};
 
     aspect_ratio_iterator<aspect_ratio<Lyt>> dit{0};
 
@@ -1780,6 +1789,13 @@ class exact_impl
             }
         }
 
+        void place_output(const tile<Lyt>& t, const mockturtle::node<topology_ntk_t>& n) noexcept
+        {
+            const auto output_signal = network.make_signal(fanins(network, n).fanin_nodes[0]);
+
+            layout.create_po(node2pos[output_signal], "", t);
+        }
+
         void assign_layout_clocking(const z3::model& model) noexcept
         {
             // assign clock zones to tiles of open schemes
@@ -1860,32 +1876,40 @@ class exact_impl
                                 // was node n placed on tile t according to the model?
                                 if (model.eval(get_tv(t, n)).bool_value() == Z3_L_TRUE)
                                 {
-                                    // assign n to t in layout
-                                    node2pos[n] = place(layout, t, network, n, node2pos);
+                                    if (network.is_po(n))
+                                    {
+                                        place_output(t, n);  // TODO store output in map and iterate afterwards to
+                                                             // assign named signals via get_output_name(index)
+                                    }
+                                    else
+                                    {
+                                        // assign n to t in layout
+                                        node2pos[n] = place(layout, t, network, n, node2pos);
 
-                                    // check n's outgoing edges
-                                    network.foreach_fanout(
-                                        n,
-                                        [this, &model, &n, &t](const auto& fo)
-                                        {
-                                            if (const auto fn = network.get_node(fo); !skip_const_or_io_node(fn))
+                                        // check n's outgoing edges
+                                        network.foreach_fanout(
+                                            n,
+                                            [this, &model, &n, &t](const auto& fo)
                                             {
-                                                mockturtle::edge<topology_ntk_t> e{n, fn};
-
-                                                // check t's outgoing clocked tiles since those are
-                                                // the only ones where e could potentially have been
-                                                // placed
-                                                if (const auto p = route(t, e, model); p.has_value())
+                                                if (const auto fn = network.get_node(fo); !skip_const_or_io_node(fn))
                                                 {
-                                                    // if any outgoing tile was assigned with e, it
-                                                    // was recursively routed, so that p points to
-                                                    // e's final tile position, which is now stored
-                                                    // as n's 'position' for lookup
-                                                    node2pos[n] = *p;  // TODO this could be superfluous since it is
-                                                                       // done in route() already
+                                                    mockturtle::edge<topology_ntk_t> e{n, fn};
+
+                                                    // check t's outgoing clocked tiles since those are
+                                                    // the only ones where e could potentially have been
+                                                    // placed
+                                                    if (const auto p = route(t, e, model); p.has_value())
+                                                    {
+                                                        // if any outgoing tile was assigned with e, it
+                                                        // was recursively routed, so that p points to
+                                                        // e's final tile position, which is now stored
+                                                        // as n's 'position' for lookup
+                                                        node2pos[n] = *p;  // TODO this could be superfluous since it is
+                                                                           // done in route() already
+                                                    }
                                                 }
-                                            }
-                                        });
+                                            });
+                                    }
 
                                     // node placed; stop looping
                                     return false;
@@ -2073,7 +2097,7 @@ class exact_impl
 
         Lyt layout{{}, *ps.scheme};
 
-        smt_handler handler{ctx, layout, ntk, ps};
+        smt_handler handler{ctx, layout, *ntk, ps};
         (*ti_list)[t_num].ctx = ctx;
 
         while (true)
@@ -2268,7 +2292,7 @@ class exact_impl
     {
         Lyt layout{{}, *ps.scheme};
 
-        smt_handler handler{std::make_shared<z3::context>(), layout, ntk, ps};
+        smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps};
 
         for (; dit <= ps.upper_bound; ++dit)  // <= to prevent overflow
         {
