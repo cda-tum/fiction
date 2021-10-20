@@ -2288,6 +2288,13 @@ class exact_impl
         // TODO verify that this makes sense
         if (result_dimension.has_value())
         {
+            // statistical information
+            pst.x_size    = layout.x() + 1;
+            pst.y_size    = layout.y() + 1;
+            pst.num_gates = layout.num_gates();
+            pst.num_wires = layout.num_wires();
+
+            // TODO more statistics?
             return layout;
         }
         else
