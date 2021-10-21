@@ -466,7 +466,7 @@ class gate_level_layout : public ClockedLayout
         }
 
         // assign new children
-        std::copy(new_children.begin(), new_children.end(), std::back_inserter(children));
+        std::copy(new_children.cbegin(), new_children.cend(), std::back_inserter(children));
         // increase ref-count to new children
         std::for_each(new_children.cbegin(), new_children.cend(),
                       [this](const auto& nc) { strg->nodes[get_node(nc)].data[0].h1++; });

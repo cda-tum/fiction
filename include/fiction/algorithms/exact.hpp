@@ -1876,47 +1876,56 @@ class exact_impl
             assign_layout_clocking(model);
             // from now on, a clocking scheme is assigned and no distinction between regular and irregular must be made
 
+            const auto pis = reserve_input_nodes(layout, network);
+
             // network is topologically sorted, therefore, foreach_node ensures conflict-free traversal
             network.foreach_node(
-                [this, &model](const auto& n)
+                [this, &model, &pis](const auto& n)
                 {
                     if (!skip_const_or_io_node(n))
                     {
                         // find the tile where n is placed
                         layout.foreach_ground_tile(
-                            [this, &model, &n](const auto& t)
+                            [this, &model, &pis, &n](const auto& t)
                             {
                                 // was node n placed on tile t according to the model?
                                 if (model.eval(get_tv(t, n)).bool_value() == Z3_L_TRUE)
                                 {
-                                    if (network.is_po(n))
+                                    mockturtle::signal<Lyt> lyt_signal;
+
+                                    if (network.is_pi(n))
                                     {
-                                        place_output(t, n);  // TODO store output in map and iterate afterwards to
-                                                             // assign named signals via get_output_name(index)
+                                        lyt_signal = layout.move_node(pis[n], t);
+                                    }
+                                    else if (network.is_po(n))
+                                    {
+                                        // skip POs since they are created in a second loop to preserve their order
+                                        return false;
                                     }
                                     else
                                     {
                                         // assign n to t in layout and save the resulting signal
-                                        const auto lyt_signal = place(layout, t, network, n, node2pos);
-                                        // check n's outgoing edges
-                                        network.foreach_fanout(n,
-                                                               [this, &model, &n, &t, &lyt_signal](const auto& fo)
-                                                               {
-                                                                   if (const auto fn = network.get_node(fo);
-                                                                       !skip_const_or_io_node(fn))
-                                                                   {
-                                                                       // store the signal as branch towards fn
-                                                                       node2pos[n].update_branch(fn, lyt_signal);
-
-                                                                       mockturtle::edge<topology_ntk_t> e{n, fn};
-
-                                                                       // check t's outgoing clocked tiles since those
-                                                                       // are the only ones where e could potentially
-                                                                       // have been placed
-                                                                       route(t, e, model);
-                                                                   }
-                                                               });
+                                        lyt_signal = place(layout, t, network, n, node2pos);
                                     }
+
+                                    // check n's outgoing edges
+                                    network.foreach_fanout(n,
+                                                           [this, &model, &n, &t, &lyt_signal](const auto& fo)
+                                                           {
+                                                               if (const auto fn = network.get_node(fo);
+                                                                   !skip_const_or_io_node(fn))
+                                                               {
+                                                                   // store the signal as branch towards fn
+                                                                   node2pos[n].update_branch(fn, lyt_signal);
+
+                                                                   mockturtle::edge<topology_ntk_t> e{n, fn};
+
+                                                                   // check t's outgoing clocked tiles since those
+                                                                   // are the only ones where e could potentially
+                                                                   // have been placed
+                                                                   route(t, e, model);
+                                                               }
+                                                           });
 
                                     // node placed; stop looping
                                     return false;
@@ -1924,6 +1933,24 @@ class exact_impl
 
                                 // node not placed yet; keep looping
                                 return true;
+                            });
+                    }
+                });
+
+            // place outputs
+            network.foreach_po(
+                [this, &model](const auto& po)
+                {
+                    if (const auto pon = network.get_node(po); !skip_const_or_io_node(pon))
+                    {  // find the tile where n is placed
+                        layout.foreach_ground_tile(
+                            [this, &model, &pon](const auto& t)
+                            {
+                                // was node n placed on tile t according to the model?
+                                if (model.eval(get_tv(t, pon)).bool_value() == Z3_L_TRUE)
+                                {
+                                    place_output(t, pon);
+                                }
                             });
                     }
                 });
