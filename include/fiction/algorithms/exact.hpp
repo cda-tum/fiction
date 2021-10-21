@@ -1852,7 +1852,9 @@ class exact_impl
 
                         // assign wire segment to at and save its position as the
                         // signal lookup for e's source node
-                        node2pos[e.source].update_branch(e.target, layout.create_buf(node2pos[e.source][e.target], at));
+                        node2pos[e.source].update_branch(
+                            e.target, layout.create_buf(node2pos[e.source][e.target],
+                                                        layout.is_empty_tile(at) ? at : layout.above(at)));
 
                         // recursion call
                         route(at, e, model);
