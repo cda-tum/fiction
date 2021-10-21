@@ -9,6 +9,7 @@
 #include "utils/equivalence_checking.hpp"
 
 #include <fiction/algorithms/apply_gate_library.hpp>
+#include <fiction/algorithms/design_rule_violations.hpp>
 #include <fiction/algorithms/exact.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -36,6 +37,7 @@ std::vector<exact_physical_design_params<Lyt>> configurations() noexcept
     exact_physical_design_params<Lyt> twoddwave_config{};
 
     twoddwave_config.scheme    = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
+    twoddwave_config.border_io = true;
     twoddwave_config.crossings = true;
 
     exact_physical_design_params<Lyt> use_config{};
@@ -57,13 +59,25 @@ std::vector<exact_physical_design_params<Lyt>> configurations() noexcept
     return {{twoddwave_config, use_config, res_config, async_config}};
 }
 
-void check_stats(const exact_physical_design_stats& st) noexcept
+void check_stats(const exact_physical_design_stats& st)
 {
     CHECK(std::chrono::duration_cast<std::chrono::milliseconds>(st.time_total).count() > 0);
     CHECK(st.x_size > 0);
     CHECK(st.y_size > 0);
     CHECK(st.num_gates > 0);
     CHECK(st.num_wires > 0);
+}
+
+template <typename Lyt>
+void check_drvs(const Lyt& lyt)
+{
+    gate_level_drv_params ps{};
+    std::stringstream     ss{};
+    ps.out = &ss;
+    gate_level_drv_stats st{};
+    gate_level_drvs(lyt, ps, &st);
+
+    REQUIRE(st.drvs == 0);
 }
 
 template <typename Lyt, typename Ntk>
@@ -74,11 +88,12 @@ Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps)
     const auto layout = exact<Lyt>(ntk, ps, &stats);
 
     REQUIRE(layout.has_value());
-    check_stats(stats);
 
     print_gate_level_layout(std::cout, *layout);
-
     debug::write_dot_layout(*layout);
+
+    check_drvs(*layout);
+    check_stats(stats);
 
     return *layout;
 }
@@ -107,9 +122,10 @@ void check_all(const Ntk& ntk)
 TEST_CASE("Exact physical design", "[exact]")
 {
     check_all(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check_all(blueprints::maj1_network<mockturtle::mig_network>());
+    //    check_all(blueprints::maj1_network<mockturtle::mig_network>());
     check_all(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
-    check_all(blueprints::multi_output_and_network<mockturtle::aig_network>());
+    check_all(blueprints::and_or_network<mockturtle::mig_network>());
+    //    check_all(blueprints::multi_output_and_network<mockturtle::aig_network>());
     //    check_all(blueprints::half_adder_network<mockturtle::aig_network>());
     check_all(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
 }

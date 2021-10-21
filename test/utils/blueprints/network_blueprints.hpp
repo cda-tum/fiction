@@ -65,6 +65,23 @@ Ntk unbalanced_and_inv_network()
 }
 
 template <typename Ntk>
+Ntk and_or_network()
+{
+    Ntk ntk{};
+
+    const auto a = ntk.create_pi("a");
+    const auto b = ntk.create_pi("b");
+
+    const auto f1 = ntk.create_and(a, b);
+    const auto f2 = ntk.create_or(a, b);
+
+    ntk.create_po(f1, "f1");
+    ntk.create_po(f2, "f2");
+
+    return ntk;
+}
+
+template <typename Ntk>
 Ntk multi_output_and_network()
 {
     Ntk ntk{};
