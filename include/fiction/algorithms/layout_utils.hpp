@@ -6,10 +6,16 @@
 #define FICTION_LAYOUT_UTILS_HPP
 
 #include "../traits.hpp"
+#include "../utils/array.hpp"
 #include "network_utils.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
+
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <memory>
 
 namespace fiction
 {
@@ -237,6 +243,108 @@ mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, cons
         const auto fanin_signal_c = ntk.make_signal(fc.fanin_nodes[2]);
 
         return place(lyt, t, ntk, n, node2pos[fanin_signal_a], node2pos[fanin_signal_b], node2pos[fanin_signal_c]);
+    }
+    // more fanin sizes go here
+
+    assert(false);  // unsupported number of fanins
+    return {};      // fix -Wreturn-type warning
+}
+
+template <typename Lyt, typename Ntk, uint16_t fanout_size = 2>
+struct branching_signal_container
+{
+    struct branching_signal
+    {
+        const mockturtle::node<Ntk> ntk_node;
+        mockturtle::signal<Lyt>     lyt_signal;
+
+        branching_signal(const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& s) : ntk_node{n}, lyt_signal{s}
+        {}
+    };
+
+    std::array<std::shared_ptr<branching_signal>, fanout_size> branches =
+        create_array<fanout_size, std::shared_ptr<branching_signal>>(nullptr);
+
+    mockturtle::signal<Lyt> operator[](const mockturtle::node<Ntk>& n) const
+    {
+        if (const auto branch = std::find_if(branches.cbegin(), branches.cend(),
+                                             [&n](const auto& b)
+                                             {
+                                                 if (b != nullptr)
+                                                 {
+                                                     if (b->ntk_node == n)
+                                                     {
+                                                         return true;
+                                                     }
+                                                 }
+
+                                                 return false;
+                                             });
+            branch != branches.cend())
+        {
+            return (*branch)->lyt_signal;
+        }
+        else
+        {
+            return {};
+        }
+    }
+
+    void update_branch(const mockturtle::node<Ntk>& ntk_node, const mockturtle::signal<Lyt>& lyt_signal)
+    {
+        for (auto i = 0u; i < branches.size(); ++i)
+        {
+            if (const auto b = branches[i]; b != nullptr)
+            {
+                if (b->ntk_node == ntk_node)
+                {
+                    b->lyt_signal = lyt_signal;
+
+                    return;
+                }
+            }
+            else
+            {
+                branches[i] = std::make_shared<branching_signal>(ntk_node, lyt_signal);
+
+                return;
+            }
+        }
+    }
+};
+
+template <typename Lyt, typename Ntk, uint16_t fanout_size = 2>
+mockturtle::signal<Lyt>
+place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+      const mockturtle::node_map<branching_signal_container<Lyt, Ntk, fanout_size>, Ntk>& node2pos) noexcept
+{
+    const auto fc = fanins(ntk, n);
+
+    if (const auto num_fanins = fc.fanin_nodes.size(); num_fanins == 0)
+    {
+        return place(lyt, t, ntk, n);
+    }
+    else if (num_fanins == 1)
+    {
+        const auto fanin_signal = ntk.make_signal(fc.fanin_nodes[0]);
+
+        return place(lyt, t, ntk, n, node2pos[fanin_signal][n]);
+    }
+    else if (num_fanins == 2)
+    {
+        const auto fanin_signal_a = ntk.make_signal(fc.fanin_nodes[0]);
+        const auto fanin_signal_b = ntk.make_signal(fc.fanin_nodes[1]);
+
+        return place(lyt, t, ntk, n, node2pos[fanin_signal_a][n], node2pos[fanin_signal_b][n], fc.constant_fanin);
+    }
+    else if (num_fanins == 3)
+    {
+        const auto fanin_signal_a = ntk.make_signal(fc.fanin_nodes[0]);
+        const auto fanin_signal_b = ntk.make_signal(fc.fanin_nodes[1]);
+        const auto fanin_signal_c = ntk.make_signal(fc.fanin_nodes[2]);
+
+        return place(lyt, t, ntk, n, node2pos[fanin_signal_a][n], node2pos[fanin_signal_b][n],
+                     node2pos[fanin_signal_c][n]);
     }
     // more fanin sizes go here
 
