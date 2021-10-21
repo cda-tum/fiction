@@ -31,6 +31,7 @@
 #include <z3++.h>
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <cstdint>
 #include <future>
@@ -242,7 +243,7 @@ class exact_impl
          */
         void update(const aspect_ratio<Lyt>& dim) noexcept
         {
-            layout.resize(dim);
+            layout.resize({dim.x, dim.y, config.crossings ? 1 : 0});
             check_point = std::make_shared<solver_check_point>(fetch_solver(dim));
             ++lc;
             solver = check_point->state->solver;
@@ -388,7 +389,8 @@ class exact_impl
         /**
          * Maps nodes to tile positions.
          */
-        mockturtle::node_map<mockturtle::signal<Lyt>, topology_ntk_t> node2pos;
+        mockturtle::node_map<branching_signal_container<Lyt, topology_ntk_t>, topology_ntk_t>
+            node2pos;  // TODO include fanout_size
         //        /**
         //         * Network hierarchy used for symmetry breaking.
         //         */
@@ -1808,7 +1810,7 @@ class exact_impl
         {
             const auto output_signal = network.make_signal(fanins(network, n).fanin_nodes[0]);
 
-            layout.create_po(node2pos[output_signal], "", t);
+            layout.create_po(node2pos[output_signal][n], "", t);
         }
 
         void assign_layout_clocking(const z3::model& model) noexcept
@@ -1826,46 +1828,42 @@ class exact_impl
         }
         /**
          * Starting from t, all outgoing clocked tiles are recursively considered and checked against the given model.
-         * Consequently, e is routed through all tiles with a match in model. Finally, the last tile is returned on
-         * which e was successfully placed.
+         * Consequently, e is routed through all tiles with a match in model.
          *
          * @param t Initial tile to start recursion from (not included in model evaluations).
          * @param e Edge to check for.
-         * @return Final tile e is assigned to on its path.
          */
-        std::optional<mockturtle::signal<Lyt>> route(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e,
-                                                     const z3::model& model) noexcept
+        void route(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e, const z3::model& model) noexcept
         {
-            std::optional<mockturtle::signal<Lyt>> wire_route_head{std::nullopt};
+            std::cout << fmt::format("Routing ({},{}) starting on {}", e.source, e.target, t) << std::endl;
 
-            layout.foreach_outgoing_clocked_zone(t,
-                                                 [this, &t, &e, &model, &wire_route_head](const auto& at)
-                                                 {
-                                                     // if e got assigned to at according to the model
-                                                     if (model.eval(get_te(at, e)).bool_value() == Z3_L_TRUE)
-                                                     {
-                                                         // assign wire segment to at and save its position as the
-                                                         // signal lookup for e's source node
-                                                         node2pos[e.source] = layout.create_buf(node2pos[e.source], at);
+            layout.foreach_outgoing_clocked_zone(
+                t,
+                [this, &t, &e, &model](const auto& at)
+                {
+                    // if e got assigned to at according to the model together with a
+                    // set connection variable between t and at
+                    if (model.eval(get_te(at, e)).bool_value() == Z3_L_TRUE &&
+                        model.eval(get_tc(t, at)).bool_value() == Z3_L_TRUE)
+                    {
+                        std::cout << fmt::format("assigning ({},{}) to {} with incoming signal {}", e.source, e.target,
+                                                 at, static_cast<tile<Lyt>>(node2pos[e.source][e.target]))
+                                  << std::endl;
 
-                                                         // recursion call
-                                                         if (const auto recursion_head = route(at, e, model);
-                                                             recursion_head.has_value())
-                                                         {
-                                                             // if there was another successful edge assignment, update
-                                                             // the wire route head
-                                                             wire_route_head = recursion_head;
-                                                         }
+                        // assign wire segment to at and save its position as the
+                        // signal lookup for e's source node
+                        node2pos[e.source].update_branch(e.target, layout.create_buf(node2pos[e.source][e.target], at));
 
-                                                         // quit loop since the wire should not split
-                                                         return false;
-                                                     }
+                        // recursion call
+                        route(at, e, model);
 
-                                                     // no wire path was found yet; continue looping
-                                                     return true;
-                                                 });
+                        // quit loop since the wire should not split
+                        return false;
+                    }
 
-            return wire_route_head;
+                    // no wire path was found yet; continue looping
+                    return true;
+                });
         }
         /**
          * Assigns vertices, edges and directions to the stored layout sketch with respect to the given model.
@@ -1898,32 +1896,26 @@ class exact_impl
                                     }
                                     else
                                     {
-                                        // assign n to t in layout
-                                        node2pos[n] = place(layout, t, network, n, node2pos);
-
+                                        // assign n to t in layout and save the resulting signal
+                                        const auto lyt_signal = place(layout, t, network, n, node2pos);
                                         // check n's outgoing edges
-                                        network.foreach_fanout(
-                                            n,
-                                            [this, &model, &n, &t](const auto& fo)
-                                            {
-                                                if (const auto fn = network.get_node(fo); !skip_const_or_io_node(fn))
-                                                {
-                                                    mockturtle::edge<topology_ntk_t> e{n, fn};
+                                        network.foreach_fanout(n,
+                                                               [this, &model, &n, &t, &lyt_signal](const auto& fo)
+                                                               {
+                                                                   if (const auto fn = network.get_node(fo);
+                                                                       !skip_const_or_io_node(fn))
+                                                                   {
+                                                                       // store the signal as branch towards fn
+                                                                       node2pos[n].update_branch(fn, lyt_signal);
 
-                                                    // check t's outgoing clocked tiles since those
-                                                    // are the only ones where e could potentially
-                                                    // have been placed
-                                                    if (const auto p = route(t, e, model); p.has_value())
-                                                    {
-                                                        // if any outgoing tile was assigned with e, it was recursively
-                                                        // routed, so that p points to e's final tile position, which is
-                                                        // now stored as n's 'position' for lookup
-                                                        node2pos[n] = *p;  // TODO this could be
-                                                                           // superfluous since it is
-                                                                           // done in route() already
-                                                    }
-                                                }
-                                            });
+                                                                       mockturtle::edge<topology_ntk_t> e{n, fn};
+
+                                                                       // check t's outgoing clocked tiles since those
+                                                                       // are the only ones where e could potentially
+                                                                       // have been placed
+                                                                       route(t, e, model);
+                                                                   }
+                                                               });
                                     }
 
                                     // node placed; stop looping
