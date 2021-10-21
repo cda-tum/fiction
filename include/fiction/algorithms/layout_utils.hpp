@@ -20,6 +20,31 @@
 namespace fiction
 {
 /**
+ * Reserve primary input nodes in a layout in the same order as they appear in a network.
+ *
+ * @tparam Lyt
+ * @tparam Ntk
+ * @param lyt
+ * @param ntk
+ * @return
+ */
+template <typename Lyt, typename Ntk>
+mockturtle::node_map<mockturtle::node<Lyt>, Ntk> reserve_input_nodes(Lyt& lyt, const Ntk& ntk) noexcept
+{
+    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
+    static_assert(mockturtle::has_foreach_pi_v<Ntk>, "Ntk does not implement the foreach_pi function");
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
+    static_assert(mockturtle::has_create_pi_v<Lyt>, "Lyt does not implement the create_pi function");
+
+    mockturtle::node_map<mockturtle::node<Lyt>, Ntk> pi_map{ntk};
+
+    ntk.foreach_pi([&lyt, &pi_map](const auto& pi) { pi_map[pi] = lyt.get_node(lyt.create_pi("", {0, 0})); });
+    // little hacky: move last created node to a dead tile to remove it from the layout again but preserve its existence
+    lyt.move_node(lyt.get_node({0, 0}), {});
+
+    return pi_map;
+}
+/**
  * Place 0-input gates.
  * @tparam Lyt
  * @tparam Ntk
