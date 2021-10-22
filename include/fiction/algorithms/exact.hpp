@@ -568,6 +568,18 @@ class exact_impl
         {
             return skip_const_or_io_node(e.source) || skip_const_or_io_node(e.target);
         }
+        /**
+         * Applies a given function to all added and updated tiles in the current solver check point.
+         *
+         * @tparam Fn Functor type.
+         * @param fn Unary function to apply to all added and updated tiles. Must receive a tile as parameter.
+         */
+        template <typename Fn>
+        void apply_to_added_and_updated_tiles(Fn&& fn)
+        {
+            std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), fn);
+            std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), fn);
+        }
 
         uint32_t network_in_degree(const mockturtle::node<topology_ntk_t>& n) const noexcept
         {
@@ -881,65 +893,63 @@ class exact_impl
          */
         void define_adjacent_vertex_tiles()
         {
-            const auto define_adjacencies = [this](const auto& t)
-            {
-                network.foreach_node(
-                    [this, &t](const auto& v)
-                    {
-                        if (!skip_const_or_io_node(v))
+            apply_to_added_and_updated_tiles(
+                [this](const auto& t)
+                {
+                    network.foreach_node(
+                        [this, &t](const auto& v)
                         {
-                            auto tv = get_tv(t, v);
-
-                            z3::expr_vector conj{*ctx};
-                            foreach_outgoing_edge(
-                                network, v,
-                                [this, &t, &conj](const auto& ae)
-                                {
-                                    if (!skip_const_or_io_edge(ae))
-                                    {
-                                        z3::expr_vector disj{*ctx};
-
-                                        if (auto tgt = ae.target; layout.is_regularly_clocked())
-                                        {
-                                            layout.foreach_outgoing_clocked_zone(
-                                                t,
-                                                [this, &t, &disj, &tgt, &ae](const auto& at) {
-                                                    disj.push_back((get_tv(at, tgt) or get_te(at, ae)) and
-                                                                   get_tc(t, at));
-                                                });
-                                        }
-                                        else  // irregular clocking
-                                        {
-                                            layout.foreach_adjacent_tile(
-                                                t,
-                                                [this, &t, &disj, &tgt, &ae](const auto& at)
-                                                {
-                                                    // clocks must differ by 1
-                                                    auto mod = z3::mod(get_tcl(at) - get_tcl(t), layout.num_clocks()) ==
-                                                               ctx->int_val(1);
-
-                                                    disj.push_back(((get_tv(at, tgt) or get_te(at, ae)) and mod) and
-                                                                   get_tc(t, at));
-                                                });
-                                        }
-
-                                        if (!disj.empty())
-                                        {
-                                            conj.push_back(z3::mk_or(disj));
-                                        }
-                                    }
-                                });
-
-                            if (!conj.empty())
+                            if (!skip_const_or_io_node(v))
                             {
-                                solver->add(mk_as_if_se(z3::implies(tv, z3::mk_and(conj)), t));
-                            }
-                        }
-                    });
-            };
+                                auto tv = get_tv(t, v);
 
-            std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), define_adjacencies);
-            std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), define_adjacencies);
+                                z3::expr_vector conj{*ctx};
+                                foreach_outgoing_edge(
+                                    network, v,
+                                    [this, &t, &conj](const auto& ae)
+                                    {
+                                        if (!skip_const_or_io_edge(ae))
+                                        {
+                                            z3::expr_vector disj{*ctx};
+
+                                            if (auto tgt = ae.target; layout.is_regularly_clocked())
+                                            {
+                                                layout.foreach_outgoing_clocked_zone(
+                                                    t,
+                                                    [this, &t, &disj, &tgt, &ae](const auto& at) {
+                                                        disj.push_back((get_tv(at, tgt) or get_te(at, ae)) and
+                                                                       get_tc(t, at));
+                                                    });
+                                            }
+                                            else  // irregular clocking
+                                            {
+                                                layout.foreach_adjacent_tile(
+                                                    t,
+                                                    [this, &t, &disj, &tgt, &ae](const auto& at)
+                                                    {
+                                                        // clocks must differ by 1
+                                                        auto mod = z3::mod(get_tcl(at) - get_tcl(t),
+                                                                           layout.num_clocks()) == ctx->int_val(1);
+
+                                                        disj.push_back(((get_tv(at, tgt) or get_te(at, ae)) and mod) and
+                                                                       get_tc(t, at));
+                                                    });
+                                            }
+
+                                            if (!disj.empty())
+                                            {
+                                                conj.push_back(z3::mk_or(disj));
+                                            }
+                                        }
+                                    });
+
+                                if (!conj.empty())
+                                {
+                                    solver->add(mk_as_if_se(z3::implies(tv, z3::mk_and(conj)), t));
+                                }
+                            }
+                        });
+                });
         }
         /**
          * Adds constraints to the solver to enforce that a tile which was assigned with some vertex v has a predecessor
@@ -947,66 +957,65 @@ class exact_impl
          */
         void define_inv_adjacent_vertex_tiles()
         {
-            const auto define_adjacencies = [this](const auto& t)
-            {
-                network.foreach_node(
-                    [this, &t](const auto& v)
-                    {
-                        if (!skip_const_or_io_node(v))
+            apply_to_added_and_updated_tiles(
+                [this](const auto& t)
+                {
+                    network.foreach_node(
+                        [this, &t](const auto& v)
                         {
-                            auto tv = get_tv(t, v);
-
-                            z3::expr_vector conj{*ctx};
-
-                            foreach_incoming_edge(
-                                network, v,
-                                [this, &t, &conj](const auto& iae)
-                                {
-                                    if (!skip_const_or_io_edge(iae))
-                                    {
-                                        z3::expr_vector disj{*ctx};
-
-                                        if (auto src = iae.source; layout.is_regularly_clocked())
-                                        {
-                                            layout.foreach_incoming_clocked_zone(
-                                                t,
-                                                [this, &t, &disj, &src, &iae](const auto& iat) {
-                                                    disj.push_back((get_tv(iat, src) or get_te(iat, iae)) and
-                                                                   get_tc(iat, t));
-                                                });
-                                        }
-                                        else  // irregular clocking
-                                        {
-                                            layout.foreach_adjacent_tile(
-                                                t,
-                                                [this, &t, &disj, &src, &iae](const auto& iat)
-                                                {
-                                                    // clocks must differ by 1
-                                                    auto mod = z3::mod(get_tcl(t) - get_tcl(iat),
-                                                                       layout.num_clocks()) == ctx->int_val(1);
-
-                                                    disj.push_back(((get_tv(iat, src) or get_te(iat, iae)) and mod) and
-                                                                   get_tc(iat, t));
-                                                });
-                                        }
-
-                                        if (!disj.empty())
-                                        {
-                                            conj.push_back(z3::mk_or(disj));
-                                        }
-                                    }
-                                });
-
-                            if (!conj.empty())
+                            if (!skip_const_or_io_node(v))
                             {
-                                solver->add(mk_as_if_se(z3::implies(tv, z3::mk_and(conj)), t));
-                            }
-                        }
-                    });
-            };
+                                auto tv = get_tv(t, v);
 
-            std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), define_adjacencies);
-            std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), define_adjacencies);
+                                z3::expr_vector conj{*ctx};
+
+                                foreach_incoming_edge(
+                                    network, v,
+                                    [this, &t, &conj](const auto& iae)
+                                    {
+                                        if (!skip_const_or_io_edge(iae))
+                                        {
+                                            z3::expr_vector disj{*ctx};
+
+                                            if (auto src = iae.source; layout.is_regularly_clocked())
+                                            {
+                                                layout.foreach_incoming_clocked_zone(
+                                                    t,
+                                                    [this, &t, &disj, &src, &iae](const auto& iat) {
+                                                        disj.push_back((get_tv(iat, src) or get_te(iat, iae)) and
+                                                                       get_tc(iat, t));
+                                                    });
+                                            }
+                                            else  // irregular clocking
+                                            {
+                                                layout.foreach_adjacent_tile(
+                                                    t,
+                                                    [this, &t, &disj, &src, &iae](const auto& iat)
+                                                    {
+                                                        // clocks must differ by 1
+                                                        auto mod = z3::mod(get_tcl(t) - get_tcl(iat),
+                                                                           layout.num_clocks()) == ctx->int_val(1);
+
+                                                        disj.push_back(
+                                                            ((get_tv(iat, src) or get_te(iat, iae)) and mod) and
+                                                            get_tc(iat, t));
+                                                    });
+                                            }
+
+                                            if (!disj.empty())
+                                            {
+                                                conj.push_back(z3::mk_or(disj));
+                                            }
+                                        }
+                                    });
+
+                                if (!conj.empty())
+                                {
+                                    solver->add(mk_as_if_se(z3::implies(tv, z3::mk_and(conj)), t));
+                                }
+                            }
+                        });
+                });
         }
         /**
          * Adds constraints to the solver to enforce that a tile that was assigned with some edge has a successor which
@@ -1014,48 +1023,47 @@ class exact_impl
          */
         void define_adjacent_edge_tiles()
         {
-            const auto define_adjacencies = [this](const auto& t)
-            {
-                foreach_edge(network,
-                             [this, &t](const auto& e)
-                             {
-                                 if (!skip_const_or_io_edge(e))
-                                 {
-                                     auto te = e.target;
+            apply_to_added_and_updated_tiles(
+                [this](const auto& t)
+                {
+                    foreach_edge(
+                        network,
+                        [this, &t](const auto& e)
+                        {
+                            if (!skip_const_or_io_edge(e))
+                            {
+                                auto te = e.target;
 
-                                     z3::expr_vector disj{*ctx};
+                                z3::expr_vector disj{*ctx};
 
-                                     if (layout.is_regularly_clocked())
-                                     {
-                                         layout.foreach_outgoing_clocked_zone(
-                                             t, [this, &t, &e, &te, &disj](const auto& at)
-                                             { disj.push_back((get_tv(at, te) or get_te(at, e)) and get_tc(t, at)); });
-                                     }
-                                     else  // irregular clocking
-                                     {
-                                         layout.foreach_adjacent_tile(
-                                             t,
-                                             [this, &t, &e, &te, &disj](const auto& at)
-                                             {
-                                                 // clocks must differ by 1
-                                                 auto mod = z3::mod(get_tcl(at) - get_tcl(t), layout.num_clocks()) ==
-                                                            ctx->int_val(1);
+                                if (layout.is_regularly_clocked())
+                                {
+                                    layout.foreach_outgoing_clocked_zone(
+                                        t, [this, &t, &e, &te, &disj](const auto& at)
+                                        { disj.push_back((get_tv(at, te) or get_te(at, e)) and get_tc(t, at)); });
+                                }
+                                else  // irregular clocking
+                                {
+                                    layout.foreach_adjacent_tile(
+                                        t,
+                                        [this, &t, &e, &te, &disj](const auto& at)
+                                        {
+                                            // clocks must differ by 1
+                                            auto mod = z3::mod(get_tcl(at) - get_tcl(t), layout.num_clocks()) ==
+                                                       ctx->int_val(1);
 
-                                                 disj.push_back(((get_tv(at, te) or get_te(at, e)) and mod) and
-                                                                get_tc(t, at));
-                                             });
-                                     }
+                                            disj.push_back(((get_tv(at, te) or get_te(at, e)) and mod) and
+                                                           get_tc(t, at));
+                                        });
+                                }
 
-                                     if (!disj.empty())
-                                     {
-                                         solver->add(mk_as_if_se(z3::implies(get_te(t, e), z3::mk_or(disj)), t));
-                                     }
-                                 }
-                             });
-            };
-
-            std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), define_adjacencies);
-            std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), define_adjacencies);
+                                if (!disj.empty())
+                                {
+                                    solver->add(mk_as_if_se(z3::implies(get_te(t, e), z3::mk_or(disj)), t));
+                                }
+                            }
+                        });
+                });
         }
         /**
          * Adds constraints to the solver to enforce that a tile that was assigned with some edge has a predecessor
@@ -1063,49 +1071,47 @@ class exact_impl
          */
         void define_inv_adjacent_edge_tiles()
         {
-            const auto define_adjacencies = [this](const auto& t)
-            {
-                foreach_edge(
-                    network,
-                    [this, &t](const auto& e)
-                    {
-                        if (!skip_const_or_io_edge(e))
+            apply_to_added_and_updated_tiles(
+                [this](const auto& t)
+                {
+                    foreach_edge(
+                        network,
+                        [this, &t](const auto& e)
                         {
-                            auto se = e.source;
-
-                            z3::expr_vector disj{*ctx};
-
-                            if (layout.is_regularly_clocked())
+                            if (!skip_const_or_io_edge(e))
                             {
-                                layout.foreach_incoming_clocked_zone(
-                                    t, [this, &t, &e, &se, &disj](const auto& iat)
-                                    { disj.push_back((get_tv(iat, se) or get_te(iat, e)) and get_tc(iat, t)); });
-                            }
-                            else  // irregular clocking
-                            {
-                                layout.foreach_adjacent_tile(
-                                    t,
-                                    [this, &t, &e, &se, &disj](const auto& iat)
-                                    {
-                                        // clocks must differ by 1
-                                        auto mod =
-                                            z3::mod(get_tcl(t) - get_tcl(iat), layout.num_clocks()) == ctx->int_val(1);
+                                auto se = e.source;
 
-                                        disj.push_back(((get_tv(iat, se) or get_te(iat, e)) and mod) and
-                                                       get_tc(iat, t));
-                                    });
-                            }
+                                z3::expr_vector disj{*ctx};
 
-                            if (!disj.empty())
-                            {
-                                solver->add(mk_as_if_se(z3::implies(get_te(t, e), z3::mk_or(disj)), t));
-                            }
-                        }
-                    });
-            };
+                                if (layout.is_regularly_clocked())
+                                {
+                                    layout.foreach_incoming_clocked_zone(
+                                        t, [this, &t, &e, &se, &disj](const auto& iat)
+                                        { disj.push_back((get_tv(iat, se) or get_te(iat, e)) and get_tc(iat, t)); });
+                                }
+                                else  // irregular clocking
+                                {
+                                    layout.foreach_adjacent_tile(
+                                        t,
+                                        [this, &t, &e, &se, &disj](const auto& iat)
+                                        {
+                                            // clocks must differ by 1
+                                            auto mod = z3::mod(get_tcl(t) - get_tcl(iat), layout.num_clocks()) ==
+                                                       ctx->int_val(1);
 
-            std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), define_adjacencies);
-            std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), define_adjacencies);
+                                            disj.push_back(((get_tv(iat, se) or get_te(iat, e)) and mod) and
+                                                           get_tc(iat, t));
+                                        });
+                                }
+
+                                if (!disj.empty())
+                                {
+                                    solver->add(mk_as_if_se(z3::implies(get_te(t, e), z3::mk_or(disj)), t));
+                                }
+                            }
+                        });
+                });
         }
 
         /**
@@ -1343,138 +1349,136 @@ class exact_impl
          */
         void define_number_of_connections()
         {
-            const auto define = [this](const auto& t)
-            {
-                z3::expr_vector tcc{*ctx};
-
-                // collect (inverse) connection variables
-                z3::expr_vector acc{*ctx};
-                z3::expr_vector iacc{*ctx};
-                if (layout.is_regularly_clocked())
+            apply_to_added_and_updated_tiles(
+                [this](const auto& t)
                 {
-                    layout.foreach_outgoing_clocked_zone(t,
-                                                         [this, &t, &tcc, &acc](const auto& at)
-                                                         {
-                                                             auto tc = get_tc(t, at);
-                                                             acc.push_back(tc);
-                                                             tcc.push_back(tc);
-                                                         });
+                    z3::expr_vector tcc{*ctx};
 
-                    layout.foreach_incoming_clocked_zone(t,
-                                                         [this, &t, &tcc, &iacc](const auto& iat)
-                                                         {
-                                                             auto itc = get_tc(iat, t);
-                                                             iacc.push_back(itc);
-                                                             tcc.push_back(itc);
-                                                         });
-                }
-                else  // irregular clocking
-                {
-                    layout.foreach_adjacent_tile(t,
-                                                 [this, &t, &tcc, &acc, &iacc](const auto& at)
-                                                 {
-                                                     auto tc = get_tc(t, at);
-                                                     acc.push_back(tc);
-                                                     tcc.push_back(tc);
-
-                                                     auto itc = get_tc(at, t);
-                                                     iacc.push_back(itc);
-                                                     tcc.push_back(itc);
-                                                 });
-                }
-
-                z3::expr_vector ow{*ctx};
-
-                network.foreach_node(
-                    [this, &t, &acc, &iacc, &ow](const auto& v)
+                    // collect (inverse) connection variables
+                    z3::expr_vector acc{*ctx};
+                    z3::expr_vector iacc{*ctx};
+                    if (layout.is_regularly_clocked())
                     {
-                        if (!skip_const_or_io_node(v))
+                        layout.foreach_outgoing_clocked_zone(t,
+                                                             [this, &t, &tcc, &acc](const auto& at)
+                                                             {
+                                                                 auto tc = get_tc(t, at);
+                                                                 acc.push_back(tc);
+                                                                 tcc.push_back(tc);
+                                                             });
+
+                        layout.foreach_incoming_clocked_zone(t,
+                                                             [this, &t, &tcc, &iacc](const auto& iat)
+                                                             {
+                                                                 auto itc = get_tc(iat, t);
+                                                                 iacc.push_back(itc);
+                                                                 tcc.push_back(itc);
+                                                             });
+                    }
+                    else  // irregular clocking
+                    {
+                        layout.foreach_adjacent_tile(t,
+                                                     [this, &t, &tcc, &acc, &iacc](const auto& at)
+                                                     {
+                                                         auto tc = get_tc(t, at);
+                                                         acc.push_back(tc);
+                                                         tcc.push_back(tc);
+
+                                                         auto itc = get_tc(at, t);
+                                                         iacc.push_back(itc);
+                                                         tcc.push_back(itc);
+                                                     });
+                    }
+
+                    z3::expr_vector ow{*ctx};
+
+                    network.foreach_node(
+                        [this, &t, &acc, &iacc, &ow](const auto& v)
                         {
-                            auto tv   = get_tv(t, v);
-                            auto aon  = network_out_degree(v);
-                            auto iaon = network_in_degree(v);
-
-                            ow.push_back(tv);
-
-                            // if vertex v is assigned to a tile, the number of connections need to correspond
-                            if (!acc.empty())
+                            if (!skip_const_or_io_node(v))
                             {
-                                solver->add(
-                                    mk_as_if_se(z3::implies(tv, z3::atleast(acc, aon) and z3::atmost(acc, aon)), t));
-                            }
-                            if (!iacc.empty())
-                            {
-                                solver->add(mk_as_if_se(
-                                    z3::implies(tv, z3::atleast(iacc, iaon) and z3::atmost(iacc, iaon)), t));
-                            }
-                        }
-                    });
+                                auto tv   = get_tv(t, v);
+                                auto aon  = network_out_degree(v);
+                                auto iaon = network_in_degree(v);
 
-                z3::expr_vector wv{*ctx};
-                foreach_edge(network,
-                             [this, &t, &ow, &wv](const auto& e)
-                             {
-                                 if (!skip_const_or_io_edge(e))
+                                ow.push_back(tv);
+
+                                // if vertex v is assigned to a tile, the number of connections need to correspond
+                                if (!acc.empty())
+                                {
+                                    solver->add(mk_as_if_se(
+                                        z3::implies(tv, z3::atleast(acc, aon) and z3::atmost(acc, aon)), t));
+                                }
+                                if (!iacc.empty())
+                                {
+                                    solver->add(mk_as_if_se(
+                                        z3::implies(tv, z3::atleast(iacc, iaon) and z3::atmost(iacc, iaon)), t));
+                                }
+                            }
+                        });
+
+                    z3::expr_vector wv{*ctx};
+                    foreach_edge(network,
+                                 [this, &t, &ow, &wv](const auto& e)
                                  {
-                                     auto te = get_te(t, e);
-                                     ow.push_back(te);
-                                     wv.push_back(te);
-                                 }
-                             });
+                                     if (!skip_const_or_io_edge(e))
+                                     {
+                                         auto te = get_te(t, e);
+                                         ow.push_back(te);
+                                         wv.push_back(te);
+                                     }
+                                 });
 
-                // if there is any edge assigned to a tile, the number of connections need to correspond
-                if (!wv.empty())
-                {
-                    if (!acc.empty())
+                    // if there is any edge assigned to a tile, the number of connections need to correspond
+                    if (!wv.empty())
                     {
-                        solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 1u) and z3::atmost(wv, 1u),
-                                                            z3::atleast(acc, 1u) and z3::atmost(acc, 1u)),
-                                                t));
-                    }
-                    if (!iacc.empty())
-                    {
-                        solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 1u) and z3::atmost(wv, 1u),
-                                                            z3::atleast(iacc, 1u) and z3::atmost(iacc, 1u)),
-                                                t));
-                    }
-
-                    // if crossings are allowed, there must be exactly four connections (one in each direction) for two
-                    // assigned edges
-                    if (config.crossings)
-                    {
-                        // don't assign two edges to a tile that lacks connectivity
-                        if (acc.size() < 2 || iacc.size() < 2)
+                        if (!acc.empty())
                         {
-                            solver->add(mk_as_if_se(z3::atmost(wv, 1u), t));
+                            solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 1u) and z3::atmost(wv, 1u),
+                                                                z3::atleast(acc, 1u) and z3::atmost(acc, 1u)),
+                                                    t));
                         }
-                        else
+                        if (!iacc.empty())
                         {
-                            if (!acc.empty())
+                            solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 1u) and z3::atmost(wv, 1u),
+                                                                z3::atleast(iacc, 1u) and z3::atmost(iacc, 1u)),
+                                                    t));
+                        }
+
+                        // if crossings are allowed, there must be exactly four connections (one in each direction) for
+                        // two assigned edges
+                        if (config.crossings)
+                        {
+                            // don't assign two edges to a tile that lacks connectivity
+                            if (acc.size() < 2 || iacc.size() < 2)
                             {
-                                solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
-                                                                    z3::atleast(acc, 2u) and z3::atmost(acc, 2u)),
-                                                        t));
+                                solver->add(mk_as_if_se(z3::atmost(wv, 1u), t));
                             }
-                            if (!iacc.empty())
+                            else
                             {
-                                solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
-                                                                    z3::atleast(iacc, 2u) and z3::atmost(iacc, 2u)),
-                                                        t));
+                                if (!acc.empty())
+                                {
+                                    solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
+                                                                        z3::atleast(acc, 2u) and z3::atmost(acc, 2u)),
+                                                            t));
+                                }
+                                if (!iacc.empty())
+                                {
+                                    solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
+                                                                        z3::atleast(iacc, 2u) and z3::atmost(iacc, 2u)),
+                                                            t));
+                                }
                             }
                         }
                     }
-                }
 
-                // if tile t is empty, there must not be any connection from or to tile t established
-                if (ow.size() > 1 &&
-                    !tcc.empty())  // test for > 1 to exclude single-vertex networks from this constraint
-                {
-                    solver->add(mk_as_if_se(z3::atmost(ow, 0u) == z3::atmost(tcc, 0u), t));
-                }
-            };
-
-            std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), define);
-            std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), define);
+                    // if tile t is empty, there must not be any connection from or to tile t established
+                    if (ow.size() > 1 &&
+                        !tcc.empty())  // test for > 1 to exclude single-vertex networks from this constraint
+                    {
+                        solver->add(mk_as_if_se(z3::atmost(ow, 0u) == z3::atmost(tcc, 0u), t));
+                    }
+                });  // function call to added and updated tiles done
 
             // lacking connections for irregular clocking
             if (!layout.is_regularly_clocked())
@@ -1522,16 +1526,14 @@ class exact_impl
         {
             auto assign_border = [this](const auto& v)
             {
-                const auto assign = [this, &v](const auto& t)
-                {
-                    if (!layout.is_border(t))
+                apply_to_added_and_updated_tiles(
+                    [this, &v](const auto& t)
                     {
-                        solver->add(not get_tv(t, v));
-                    }
-                };
-
-                std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), assign);
-                std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), assign);
+                        if (!layout.is_border(t))
+                        {
+                            solver->add(not get_tv(t, v));
+                        }
+                    });
             };
 
             auto assign_west = [this](const auto& v)
@@ -1548,16 +1550,14 @@ class exact_impl
 
             auto assign_east = [this](const auto& v)
             {
-                const auto assign = [this, &v](const auto& t)
-                {
-                    if (!layout.is_eastern_border(t))
+                apply_to_added_and_updated_tiles(
+                    [this, &v](const auto& t)
                     {
-                        solver->add(not get_tv(t, v));
-                    }
-                };
-
-                std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), assign);
-                std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), assign);
+                        if (!layout.is_eastern_border(t))
+                        {
+                            solver->add(not get_tv(t, v));
+                        }
+                    });
             };
 
             if (config.io_ports)
