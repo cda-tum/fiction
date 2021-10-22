@@ -612,7 +612,7 @@ class exact_impl
          * @param v Vertex to be considered.
          * @return tv variable from ctx.
          */
-        z3::expr get_tv(const tile<Lyt>& t, const mockturtle::node<topology_ntk_t> v) noexcept
+        z3::expr get_tv(const tile<Lyt>& t, const mockturtle::node<topology_ntk_t> v)
         {
             return ctx->bool_const(fmt::format("tv_({},{})_{}", t.x, t.y, v).c_str());
         }
@@ -623,7 +623,7 @@ class exact_impl
          * @param e Edge to be considered.
          * @return te variable from ctx.
          */
-        z3::expr get_te(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e) noexcept
+        z3::expr get_te(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e)
         {
             return ctx->bool_const(fmt::format("te_({},{})_({},{})", t.x, t.y, e.source, e.target).c_str());
         }
@@ -634,7 +634,7 @@ class exact_impl
          * @param t2 Tile 2 to be considered.
          * @return tc variable from ctx.
          */
-        z3::expr get_tc(const tile<Lyt>& t1, const tile<Lyt>& t2) noexcept
+        z3::expr get_tc(const tile<Lyt>& t1, const tile<Lyt>& t2)
         {
             return ctx->bool_const(fmt::format("tc_({},{})_({},{})", t1.x, t1.y, t2.x, t2.y).c_str());
         }
@@ -645,7 +645,7 @@ class exact_impl
          * @param t2 Tile 2 to be considered.
          * @return tp variable from ctx.
          */
-        z3::expr get_tp(const tile<Lyt>& t1, const tile<Lyt>& t2) noexcept
+        z3::expr get_tp(const tile<Lyt>& t1, const tile<Lyt>& t2)
         {
             return ctx->bool_const(fmt::format("tp_({},{})_({},{})", t1.x, t1.y, t2.x, t2.y).c_str());
         }
@@ -655,7 +655,7 @@ class exact_impl
          * @param v Vertex to be considered.
          * @return vcl variable from ctx.
          */
-        z3::expr get_vcl(const mockturtle::node<topology_ntk_t> v) noexcept
+        z3::expr get_vcl(const mockturtle::node<topology_ntk_t> v)
         {
             return ctx->int_const(fmt::format("vcl_{}", v).c_str());
         }
@@ -665,7 +665,7 @@ class exact_impl
          * @param t Tile to be considered.
          * @return tcl variable from ctx.
          */
-        z3::expr get_tcl(const tile<Lyt>& t) noexcept
+        z3::expr get_tcl(const tile<Lyt>& t)
         {
             return ctx->int_const(fmt::format("tcl_({},{})", t.x, t.y).c_str());
         }
@@ -675,7 +675,7 @@ class exact_impl
          * @param t Tile to be considered.
          * @return tl variable from ctx.
          */
-        z3::expr get_tl(const tile<Lyt>& t) noexcept
+        z3::expr get_tl(const tile<Lyt>& t)
         {
             return ctx->int_const(fmt::format("tl_({},{})", t.x, t.y).c_str());
         }
@@ -685,7 +685,7 @@ class exact_impl
          * @param v Vector of expressions to equalize.
          * @return Expression that represents the equality of all elements in v.
          */
-        z3::expr mk_eq(const z3::expr_vector& v) const noexcept
+        z3::expr mk_eq(const z3::expr_vector& v) const
         {
             z3::expr_vector eq{*ctx};
             for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i) { eq.push_back(v[i - 1] == v[i]); }
@@ -699,7 +699,7 @@ class exact_impl
          * @param lit Assumption literal.
          * @return lit -> constraint.
          */
-        z3::expr mk_as(const z3::expr& constraint, const z3::expr& lit) const noexcept
+        z3::expr mk_as(const z3::expr& constraint, const z3::expr& lit) const
         {
             return z3::implies(lit, constraint);
         }
@@ -712,7 +712,7 @@ class exact_impl
          * @param t Tile to consider for literal picking.
          * @return lit -> constraint.
          */
-        z3::expr mk_as_if_se(const z3::expr& constraint, const tile<Lyt>& t) const noexcept
+        z3::expr mk_as_if_se(const z3::expr& constraint, const tile<Lyt>& t) const
         {
             if (auto east = layout.is_eastern_border(t), south = layout.is_southern_border(t); east && south)
             {
@@ -742,7 +742,7 @@ class exact_impl
          * @param e Edge to consider.
          * @param ve Vector of expressions to extend.
          */
-        void tile_ite_counters(const mockturtle::edge<topology_ntk_t>& e, z3::expr_vector& ve) noexcept
+        void tile_ite_counters(const mockturtle::edge<topology_ntk_t>& e, z3::expr_vector& ve)
         {
             z3::expr one  = ctx->real_val(1u);
             z3::expr zero = ctx->real_val(0u);
@@ -768,7 +768,7 @@ class exact_impl
          * (vertex or edge) if no crossings are allowed. Otherwise, one vertex per tile or two edges per tile can be
          * placed.
          */
-        void restrict_tile_elements() noexcept
+        void restrict_tile_elements()
         {
             for (const auto& t : check_point->added_tiles)
             {
@@ -786,6 +786,7 @@ class exact_impl
 
                     if (!tv.empty())
                     {
+                        // at most 1 vertex
                         solver->add(z3::atmost(tv, 1u));
                     }
 
@@ -802,7 +803,15 @@ class exact_impl
 
                     if (!te.empty())
                     {
+                        // at most 2 edges
                         solver->add(z3::atmost(te, 2u));
+                    }
+
+                    if (!tv.empty() && !te.empty())
+                    {
+                        // prevent the assignment of both vertices and edges to the same tile
+                        solver->add(z3::implies(z3::atleast(tv, 1u), z3::atmost(te, 0)));
+                        solver->add(z3::implies(z3::atleast(te, 1u), z3::atmost(tv, 0)));
                     }
                 }
                 else
@@ -828,6 +837,7 @@ class exact_impl
 
                     if (!ve.empty())
                     {
+                        // at most 1 vertex or edge
                         solver->add(z3::atmost(ve, 1u));
                     }
                 }
@@ -836,7 +846,7 @@ class exact_impl
         /**
          * Adds constraints to the solver to enforce that each vertex is placed exactly once on exactly one tile.
          */
-        void restrict_vertices() noexcept
+        void restrict_vertices()
         {
             network.foreach_node(
                 [this](const auto& n)
@@ -856,7 +866,7 @@ class exact_impl
          * Adds constraints to the solver to enforce that each clock zone variable has valid bounds of 0 <= cl <= C,
          * where C is the maximum clock number.
          */
-        void restrict_clocks() noexcept
+        void restrict_clocks()
         {
             for (const auto& t : check_point->added_tiles)
             {
@@ -869,7 +879,7 @@ class exact_impl
          * Adds constraints to the solver to enforce that a tile which was assigned with some vertex v has a successor
          * that is assigned to the adjacent vertex of v or an outgoing edge of v.
          */
-        void define_adjacent_vertex_tiles() noexcept
+        void define_adjacent_vertex_tiles()
         {
             const auto define_adjacencies = [this](const auto& t)
             {
@@ -935,7 +945,7 @@ class exact_impl
          * Adds constraints to the solver to enforce that a tile which was assigned with some vertex v has a predecessor
          * that is assigned to the inversely adjacent vertex of v or an incoming edge of v.
          */
-        void define_inv_adjacent_vertex_tiles() noexcept
+        void define_inv_adjacent_vertex_tiles()
         {
             const auto define_adjacencies = [this](const auto& t)
             {
@@ -1002,7 +1012,7 @@ class exact_impl
          * Adds constraints to the solver to enforce that a tile that was assigned with some edge has a successor which
          * is assigned to the adjacent vertex or another edge.
          */
-        void define_adjacent_edge_tiles() noexcept
+        void define_adjacent_edge_tiles()
         {
             const auto define_adjacencies = [this](const auto& t)
             {
@@ -1051,7 +1061,7 @@ class exact_impl
          * Adds constraints to the solver to enforce that a tile that was assigned with some edge has a predecessor
          * which is assigned to the inversely adjacent vertex or another edge.
          */
-        void define_inv_adjacent_edge_tiles() noexcept
+        void define_inv_adjacent_edge_tiles()
         {
             const auto define_adjacencies = [this](const auto& t)
             {
@@ -1102,7 +1112,7 @@ class exact_impl
          * Adds constraints to the solver to map established connections between single tiles to sub-paths. They are
          * spanned transitively by the next set of constraints.
          */
-        void establish_sub_paths() noexcept
+        void establish_sub_paths()
         {
             layout.foreach_ground_tile(
                 [this](const auto& t)
@@ -1139,7 +1149,7 @@ class exact_impl
         /**
          * Adds constraints to the solver to expand the formerly created sub-paths transitively.
          */
-        void establish_transitive_paths() noexcept
+        void establish_transitive_paths()
         {
             layout.foreach_ground_tile(
                 [this](const auto& t1)
@@ -1173,7 +1183,7 @@ class exact_impl
          * Adds constraints to the solver to prohibit cycles that loop back information. To this end, the formerly
          * established paths are used. Without this constraint, useless wire loops appear.
          */
-        void eliminate_cycles() noexcept
+        void eliminate_cycles()
         {
             for (const auto& t : check_point->added_tiles) { solver->add(not get_tp(t, t)); }
         }
@@ -1181,7 +1191,7 @@ class exact_impl
          * Adds constraints to the solver to ensure that the cl variable of primary input pi is set to the clock zone
          * value of the tile pi is assigned to. Necessary to be taken into account for path lengths.
          */
-        void assign_pi_clockings() noexcept
+        void assign_pi_clockings()
         {
             auto assign = [this](const auto v) -> void
             {
@@ -1230,12 +1240,12 @@ class exact_impl
          * Adds constraints to the solver to ensure that fan-in paths to the same tile need to have the same length
          * in the layout modulo timing, i.e. plus the clock zone assigned to their PIs.
          */
-        void global_synchronization() noexcept;
+        void global_synchronization();
         /**
          * Adds constraints to the solver to prevent edges or vertices to be assigned to tiles with an insufficient
          * number of predecessors/successors. Symmetry breaking constraints.
          */
-        void prevent_insufficiencies() noexcept
+        void prevent_insufficiencies()
         {
             // TODO was foreach_tile (why would that be correct?)
             layout.foreach_ground_tile(
@@ -1331,7 +1341,7 @@ class exact_impl
          * empty tiles are not allowed to have connections at all, edges need to have one ingoing and one outgoing
          * connection and so on. Symmetry breaking constraints.
          */
-        void define_number_of_connections() noexcept
+        void define_number_of_connections()
         {
             const auto define = [this](const auto& t)
             {
@@ -1432,17 +1442,25 @@ class exact_impl
                     // assigned edges
                     if (config.crossings)
                     {
-                        if (!acc.empty())
+                        // don't assign two edges to a tile that lacks connectivity
+                        if (acc.size() < 2 || iacc.size() < 2)
                         {
-                            solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
-                                                                z3::atleast(acc, 2u) and z3::atmost(acc, 2u)),
-                                                    t));
+                            solver->add(mk_as_if_se(z3::atmost(wv, 1u), t));
                         }
-                        if (!iacc.empty())
+                        else
                         {
-                            solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
-                                                                z3::atleast(iacc, 2u) and z3::atmost(iacc, 2u)),
-                                                    t));
+                            if (!acc.empty())
+                            {
+                                solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
+                                                                    z3::atleast(acc, 2u) and z3::atmost(acc, 2u)),
+                                                        t));
+                            }
+                            if (!iacc.empty())
+                            {
+                                solver->add(mk_as_if_se(z3::implies(z3::atleast(wv, 2u) and z3::atmost(wv, 2u),
+                                                                    z3::atleast(iacc, 2u) and z3::atmost(iacc, 2u)),
+                                                        t));
+                            }
                         }
                     }
                 }
@@ -1496,11 +1514,11 @@ class exact_impl
          * Adds constraints to the solver to prohibit certain vertex placements based on the network hierarchy if the
          * clocking scheme is feed-back-free. Symmetry breaking constraints.
          */
-        void utilize_hierarchical_information() noexcept;
+        void utilize_hierarchical_information();
         /**
          * Adds constraints to the solver to position the primary inputs and primary outputs at the layout's borders.
          */
-        void enforce_border_io() noexcept
+        void enforce_border_io()
         {
             auto assign_border = [this](const auto& v)
             {
@@ -1599,12 +1617,12 @@ class exact_impl
         /**
          * Adds constraints to the solver to enforce that no bent inverters are used.
          */
-        void enforce_straight_inverters() noexcept;
+        void enforce_straight_inverters();
         /**
          * Adds constraints to the solver to prevent negative valued clock latches and that vertex tiles cannot be
          * latches.
          */
-        void restrict_synchronization_elements() noexcept
+        void restrict_synchronization_elements()
         {
             auto zero = ctx->int_val(0u);
 
@@ -1632,13 +1650,13 @@ class exact_impl
         /**
          * Adds constraints to the solver to enforce topology-specific restrictions.
          */
-        void topology_specific_constraints() noexcept;
+        void topology_specific_constraints();
         /**
          * Adds constraints to the given optimize to minimize the number of crossing tiles to use.
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
          */
-        void minimize_wires(optimize_ptr optimize) noexcept
+        void minimize_wires(optimize_ptr optimize)
         {
             z3::expr_vector wire_counter{*ctx};
             layout.foreach_ground_tile(
@@ -1662,7 +1680,7 @@ class exact_impl
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
          */
-        void minimize_crossings(optimize_ptr optimize) noexcept
+        void minimize_crossings(optimize_ptr optimize)
         {
             z3::expr_vector crossings_counter{*ctx};
             layout.foreach_ground_tile(
@@ -1688,7 +1706,7 @@ class exact_impl
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
          */
-        void minimize_synchronization_elements(optimize_ptr optimize) noexcept
+        void minimize_synchronization_elements(optimize_ptr optimize)
         {
             z3::expr_vector latch_counter{*ctx};
             layout.foreach_ground_tile([this, &latch_counter](const auto& t) { latch_counter.push_back(get_tl(t)); });
@@ -1698,7 +1716,7 @@ class exact_impl
         /**
          * Generates the SMT instance by calling the constraint generating functions.
          */
-        void generate_smt_instance() noexcept
+        void generate_smt_instance()
         {
             // placement constraints
             restrict_tile_elements();
@@ -1766,7 +1784,7 @@ class exact_impl
          * passed all constraints from the current solver and the respective optimization constraints are added to it,
          * too.
          */
-        optimize_ptr optimize() noexcept
+        optimize_ptr optimize()
         {
             if (auto wires = config.minimize_wires, cross = config.minimize_crossings,
                 latch = config.synchronization_elements && !config.desynchronize;
@@ -1873,10 +1891,22 @@ class exact_impl
          * @param model A satisfying assignment to the created variables under all created constraints that can be
          *              used to extract a layout description.
          */
-        void assign_layout(const z3::model& model) noexcept
+        void assign_layout(const z3::model& model)
         {
             assign_layout_clocking(model);
             // from now on, a clocking scheme is assigned and no distinction between regular and irregular must be made
+
+            std::ofstream assertions_file{"assertions.txt"};
+
+            assertions_file << solver->assertions() << std::endl;
+
+            assertions_file.close();
+
+            std::ofstream model_file{"model.txt"};
+
+            model_file << model << std::endl;
+
+            model_file.close();
 
             const auto pis = reserve_input_nodes(layout, network);
 
