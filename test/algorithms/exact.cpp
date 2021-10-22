@@ -32,31 +32,72 @@
 using namespace fiction;
 
 template <typename Lyt>
-std::vector<exact_physical_design_params<Lyt>> configurations() noexcept
+exact_physical_design_params<Lyt> configuration() noexcept
 {
-    exact_physical_design_params<Lyt> twoddwave_config{};
+    return {};
+}
 
-    twoddwave_config.scheme    = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
-    twoddwave_config.border_io = true;
-    twoddwave_config.crossings = true;
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& twoddwave(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
 
-    exact_physical_design_params<Lyt> use_config{};
+    return std::move(ps);
+}
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& use(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_4_clocking<Lyt>());
 
-    use_config.scheme    = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_4_clocking<Lyt>());
-    use_config.crossings = true;
+    return std::move(ps);
+}
 
-    exact_physical_design_params<Lyt> res_config{};
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& res(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_4_clocking<Lyt>());
 
-    res_config.scheme    = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_4_clocking<Lyt>());
-    res_config.crossings = true;
+    return std::move(ps);
+}
 
-    exact_physical_design_params<Lyt> async_config{};
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& crossings(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.crossings = true;
 
-    async_config.scheme      = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
-    async_config.crossings   = true;
-    async_config.num_threads = 2ul;
+    return std::move(ps);
+}
 
-    return {{twoddwave_config, use_config, res_config, async_config}};
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& border_io(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.border_io = true;
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& async(const std::size_t t, exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.num_threads = t;
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+std::vector<exact_physical_design_params<Lyt>> all_configurations() noexcept
+{
+    return {{
+        twoddwave(configuration<Lyt>()),
+        use(configuration<Lyt>()),
+        res(configuration<Lyt>()),
+        twoddwave(crossings(border_io(configuration<Lyt>()))),
+        use(crossings(border_io(configuration<Lyt>()))),
+        res(crossings(border_io(configuration<Lyt>()))),
+        twoddwave(crossings(async(4ul, configuration<Lyt>()))),
+        use(crossings(async(4ul, configuration<Lyt>()))),
+        res(crossings(async(4ul, configuration<Lyt>()))),
+    }};
 }
 
 void check_stats(const exact_physical_design_stats& st)
@@ -105,18 +146,23 @@ void apply_gate_library(const Lyt& lyt)
     CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(lyt));
 }
 
+template <typename Ntk, typename Lyt>
+void check(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps)
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+
+    const auto layout = generate_layout<gate_layout>(ntk, ps);
+
+    check_eq(ntk, layout);
+    apply_gate_library(layout);
+}
+
 template <typename Ntk>
 void check_all(const Ntk& ntk)
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
 
-    for (const auto& ps : configurations<gate_layout>())
-    {
-        const auto layout = generate_layout<gate_layout>(ntk, ps);
-
-        check_eq(ntk, layout);
-        apply_gate_library(layout);
-    }
+    for (const auto& ps : all_configurations<gate_layout>()) { check(ntk, ps); }
 }
 
 TEST_CASE("Exact physical design", "[exact]")
@@ -128,7 +174,10 @@ TEST_CASE("Exact physical design", "[exact]")
     //    check_all(blueprints::multi_output_and_network<mockturtle::aig_network>());
     //    check_all(blueprints::half_adder_network<mockturtle::aig_network>());
     check_all(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
+    //    check_all(blueprints::mux21_network<mockturtle::aig_network>());
 }
+
+TEST_CASE("High degree input networks", "[exact]") {}
 
 // TEST_CASE("Timeout", "[exact]")
 //{
