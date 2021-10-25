@@ -98,7 +98,7 @@ class onepass_command : public command
         }
 
         // choose clocking
-        if (auto clk = fiction::get_clocking_scheme<fiction::gate_clk_lyt::tile>(clocking); clk.has_value())
+        if (auto clk = fiction::get_clocking_scheme<fiction::cart_gate_clk_lyt>(clocking); clk.has_value())
         {
             if (auto name = clk->name;
                 name == "OPEN3" || name == "OPEN4" || name == "TOPOLINANO3" || name == "TOPOLINANO4")
@@ -110,7 +110,7 @@ class onepass_command : public command
                 return;
             }
 
-            ps.scheme = std::make_shared<fiction::clocking_scheme<fiction::gate_clk_lyt::tile>>(*clk);
+            ps.scheme = std::make_shared<fiction::clocking_scheme<fiction::cart_gate_clk_lyt::tile>>(*clk);
             if (ps.scheme->name != "RES" && ps.enable_maj)
             {
                 ps.enable_maj = false;
@@ -158,7 +158,7 @@ class onepass_command : public command
             const auto get_name = [](auto&& ntk_ptr) -> std::string { return ntk_ptr->get_network_name(); };
 
             const auto one_pass_with_ntk = [this](auto&& ntk_ptr)
-            { return fiction::one_pass_synthesis<fiction::gate_clk_lyt>(*ntk_ptr, ps, &st); };
+            { return fiction::one_pass_synthesis<fiction::cart_gate_clk_lyt>(*ntk_ptr, ps, &st); };
 
             auto ntk = s.current();
             ps.name  = std::visit(get_name, ntk);
@@ -169,7 +169,7 @@ class onepass_command : public command
 
                 if (lyt.has_value())
                 {
-                    store<fiction::gate_layout_t>().extend() = std::make_shared<fiction::gate_clk_lyt>(*lyt);
+                    store<fiction::gate_layout_t>().extend() = std::make_shared<fiction::cart_gate_clk_lyt>(*lyt);
                 }
                 else
                 {
@@ -201,11 +201,11 @@ class onepass_command : public command
             auto tt = s.current();
             ps.name = kitty::to_hex(*tt);
 
-            auto lyt = fiction::one_pass_synthesis<fiction::gate_clk_lyt>(std::vector<fiction::tt>{*tt}, ps, &st);
+            auto lyt = fiction::one_pass_synthesis<fiction::cart_gate_clk_lyt>(std::vector<fiction::tt>{*tt}, ps, &st);
 
             if (lyt.has_value())
             {
-                store<fiction::gate_layout_t>().extend() = std::make_shared<fiction::gate_clk_lyt>(*lyt);
+                store<fiction::gate_layout_t>().extend() = std::make_shared<fiction::cart_gate_clk_lyt>(*lyt);
             }
             else
             {
@@ -235,7 +235,7 @@ class onepass_command : public command
     /**
      * Parameters.
      */
-    fiction::one_pass_synthesis_params ps{};
+    fiction::one_pass_synthesis_params<fiction::cart_gate_clk_lyt> ps{};
     /**
      * Statistics.
      */

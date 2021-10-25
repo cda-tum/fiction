@@ -8,7 +8,7 @@
 #define FICTION_ONE_PASS_SYNTHESIS_HPP
 
 #include "../layouts/clocking_scheme.hpp"
-#include "../layouts/coordinate.hpp"
+#include "../layouts/coordinates.hpp"
 #include "iter/aspect_ratio_iterator.hpp"
 #include "utils/mugen_info.hpp"
 
@@ -48,12 +48,14 @@
 namespace fiction
 {
 
+template <typename Lyt>
 struct one_pass_synthesis_params
 {
     /**
      * Clocking scheme to be used.
      */
-    std::shared_ptr<clocking_scheme<coord_t>> scheme = std::make_shared<clocking_scheme<coord_t>>(twoddwave_4_clocking);
+    std::shared_ptr<clocking_scheme<coordinate<Lyt>>> scheme =
+        std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
     /**
      * Number of tiles to use.
      */
@@ -147,7 +149,7 @@ class mugen_handler
      * @param lyt Reference to an empty layout that serves as a floor plan for S&P&R by Mugen.
      * @param p The configurations to respect in the SAT instance generation process.
      */
-    mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params p) noexcept :
+    mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params<Lyt> p) noexcept :
             tts{spec},
             num_pis{spec[0].num_vars()},  // since all tts have to have the same number of variables
             lyt{sketch},
@@ -239,7 +241,7 @@ class mugen_handler
     /**
      * Configurations specifying layout restrictions. Used in instance generation among other places.
      */
-    one_pass_synthesis_params ps;
+    one_pass_synthesis_params<Lyt> ps;
     /**
      * Pre-allocate PIs to preserve their order.
      */
@@ -686,7 +688,7 @@ template <typename Lyt, typename TT>
 class one_pass_synthesis_impl
 {
   public:
-    one_pass_synthesis_impl(const std::vector<TT>& spec, const one_pass_synthesis_params& p,
+    one_pass_synthesis_impl(const std::vector<TT>& spec, const one_pass_synthesis_params<Lyt>& p,
                             one_pass_synthesis_stats& st) :
             tts{spec},
             ps{p},
@@ -765,8 +767,8 @@ class one_pass_synthesis_impl
   private:
     const std::vector<TT> tts;
 
-    one_pass_synthesis_params ps;
-    one_pass_synthesis_stats& pst;
+    one_pass_synthesis_params<Lyt> ps;
+    one_pass_synthesis_stats&      pst;
 
     /**
      * Factorizes a number of layout tiles into all possible aspect ratios for iteration.
@@ -901,7 +903,7 @@ class one_pass_synthesis_impl
  * This approach is still experimental and is, therefore, excluded from CLI compilation by default.
  */
 template <typename Lyt, typename TT>
-std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params ps = {},
+std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params<Lyt> ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
@@ -926,7 +928,7 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
 }
 
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params ps = {},
+std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<Lyt> ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(
