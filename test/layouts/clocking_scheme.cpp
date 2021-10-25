@@ -20,6 +20,9 @@ TEST_CASE("3-phase open clocking", "[clocking-scheme]")
 
     auto open3 = open_clocking<clk_lyt>(num_clks::THREE);
 
+    CHECK(open3.num_clocks == 3u);
+    CHECK(open3.max_in_degree == 3u);
+    CHECK(open3.max_out_degree == 3u);
     CHECK(!open3.is_regular());
 
     CHECK(open3({0, 0}) == 0);
@@ -76,6 +79,9 @@ TEST_CASE("4-phase open clocking", "[clocking-scheme]")
 
     auto open4 = open_clocking<clk_lyt>(num_clks::FOUR);
 
+    CHECK(open4.num_clocks == 4u);
+    CHECK(open4.max_in_degree == 3u);
+    CHECK(open4.max_out_degree == 3u);
     CHECK(!open4.is_regular());
 
     CHECK(open4({0, 0}) == 0);
@@ -132,6 +138,9 @@ TEST_CASE("3-phase columnar clocking", "[clocking-scheme]")
 
     const auto columnar3 = columnar_clocking<clk_lyt>(num_clks::THREE);
 
+    CHECK(columnar3.num_clocks == 3u);
+    CHECK(columnar3.max_in_degree == 3u);
+    CHECK(columnar3.max_out_degree == 2u);
     CHECK(columnar3.is_regular());
 
     CHECK(columnar3({0, 0}) == 0);
@@ -181,6 +190,9 @@ TEST_CASE("4-phase columnar clocking", "[clocking-scheme]")
 
     const auto columnar4 = columnar_clocking<clk_lyt>(num_clks::FOUR);
 
+    CHECK(columnar4.num_clocks == 4u);
+    CHECK(columnar4.max_in_degree == 3u);
+    CHECK(columnar4.max_out_degree == 2u);
     CHECK(columnar4.is_regular());
 
     CHECK(columnar4({0, 0}) == 0);
@@ -258,6 +270,9 @@ TEST_CASE("3-phase 2DDWave", "[clocking-scheme]")
 
     const auto twoddwave3 = twoddwave_clocking<clk_lyt>(num_clks::THREE);
 
+    CHECK(twoddwave3.num_clocks == 3u);
+    CHECK(twoddwave3.max_in_degree == 2u);
+    CHECK(twoddwave3.max_out_degree == 2u);
     CHECK(twoddwave3.is_regular());
 
     CHECK(twoddwave3({0, 0}) == 0);
@@ -307,6 +322,9 @@ TEST_CASE("4-phase 2DDWave", "[clocking-scheme]")
 
     const auto twoddwave4 = twoddwave_clocking<clk_lyt>(num_clks::FOUR);
 
+    CHECK(twoddwave4.num_clocks == 4u);
+    CHECK(twoddwave4.max_in_degree == 2u);
+    CHECK(twoddwave4.max_out_degree == 2u);
     CHECK(twoddwave4.is_regular());
 
     CHECK(twoddwave4({0, 0}) == 0);
@@ -384,6 +402,9 @@ TEST_CASE("4-phase USE", "[clocking-scheme]")
 
     const auto use4 = use_clocking<clk_lyt>();
 
+    CHECK(use4.num_clocks == 4u);
+    CHECK(use4.max_in_degree == 2u);
+    CHECK(use4.max_out_degree == 2u);
     CHECK(use4.is_regular());
 
     CHECK(use4({0, 0}) == 0);
@@ -461,6 +482,9 @@ TEST_CASE("4-phase RES", "[clocking-scheme]")
 
     const auto res4 = res_clocking<clk_lyt>();
 
+    CHECK(res4.num_clocks == 4u);
+    CHECK(res4.max_in_degree == 3u);
+    CHECK(res4.max_out_degree == 3u);
     CHECK(res4.is_regular());
 
     CHECK(res4({0, 0}) == 3);
@@ -538,6 +562,9 @@ TEST_CASE("3-phase BANCS", "[clocking-scheme]")
 
     const auto bancs3 = bancs_clocking<clk_lyt>();
 
+    CHECK(bancs3.num_clocks == 3u);
+    CHECK(bancs3.max_in_degree == 2u);
+    CHECK(bancs3.max_out_degree == 2u);
     CHECK(bancs3.is_regular());
 
     CHECK(bancs3({0, 0}) == 0);

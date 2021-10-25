@@ -75,7 +75,7 @@ class gate_level_layout : public ClockedLayout
         }
     };
 
-    static constexpr auto min_fanin_size = std::max(ClockedLayout::min_fanin_size, 1);
+    static constexpr auto min_fanin_size = std::max(ClockedLayout::min_fanin_size, 1u);
     static constexpr auto max_fanin_size = ClockedLayout::max_fanin_size;
 
     using base_type = gate_level_layout;
