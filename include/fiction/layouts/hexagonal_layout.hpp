@@ -160,8 +160,8 @@ class hexagonal_layout
         aspect_ratio dimension;
     };
 
-    static constexpr auto min_fanin_size = 0;
-    static constexpr auto max_fanin_size = 5;
+    static constexpr auto min_fanin_size = 0u;
+    static constexpr auto max_fanin_size = 5u;
 
     using base_type = hexagonal_layout;
 

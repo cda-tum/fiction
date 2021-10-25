@@ -55,8 +55,8 @@ class cartesian_layout
         aspect_ratio dimension;
     };
 
-    static constexpr auto min_fanin_size = 0;
-    static constexpr auto max_fanin_size = 3;
+    static constexpr auto min_fanin_size = 0u;
+    static constexpr auto max_fanin_size = 3u;
 
     using base_type = cartesian_layout;
 

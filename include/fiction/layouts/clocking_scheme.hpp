@@ -8,6 +8,7 @@
 #include "../traits.hpp"
 #include "coordinates.hpp"
 
+#include <algorithm>
 #include <array>
 #include <functional>
 #include <optional>
@@ -23,11 +24,14 @@ class clocking_scheme
   public:
     using clock_zone     = ClockZone;
     using clock_number   = uint8_t;
+    using degree         = uint8_t;
     using clock_function = std::function<clock_number(clock_zone)>;
 
-    explicit clocking_scheme(const std::string& n, clock_function f, const clock_number cn = 4,
-                             const bool r = true) noexcept :
+    explicit clocking_scheme(const std::string& n, clock_function f, const degree in_deg, const degree out_deg,
+                             const clock_number cn = 4, const bool r = true) noexcept :
             name{n},
+            max_in_degree{in_deg},
+            max_out_degree{out_deg},
             num_clocks{cn},
             regular{r},
             fn{std::move(f)}
@@ -66,6 +70,14 @@ class clocking_scheme
      * Name of the clocking scheme.
      */
     const std::string name;
+    /**
+     * Maximum number of inputs the clocking scheme supports per clock zone.
+     */
+    const degree max_in_degree;
+    /**
+     * Maximum number of outputs the clocking scheme supports per clock zone.
+     */
+    const degree max_out_degree;
     /**
      * Number of different clocks in this scheme.
      */
@@ -120,11 +132,13 @@ static auto open_clocking(const num_clks& n = num_clks::FOUR) noexcept
     {
         case num_clks::THREE:
         {
-            return clocking_scheme{clock_name::open, open_clock_function, 3u, false};
+            return clocking_scheme{
+                clock_name::open, open_clock_function, Lyt::max_fanin_size, Lyt::max_fanin_size, 3u, false};
         }
         case num_clks::FOUR:
         {
-            return clocking_scheme{clock_name::open, open_clock_function, 4u, false};
+            return clocking_scheme{
+                clock_name::open, open_clock_function, Lyt::max_fanin_size, Lyt::max_fanin_size, 4u, false};
         }
     }
 
@@ -160,11 +174,13 @@ static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
     {
         case num_clks::THREE:
         {
-            return clocking_scheme{clock_name::columnar, columnar_3_clock_function, 3u, true};
+            return clocking_scheme{
+                clock_name::columnar, columnar_3_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 3u, true};
         }
         case num_clks::FOUR:
         {
-            return clocking_scheme{clock_name::columnar, columnar_4_clock_function, 4u, true};
+            return clocking_scheme{
+                clock_name::columnar, columnar_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
         }
     }
 
@@ -200,11 +216,13 @@ static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
     {
         case num_clks::THREE:
         {
-            return clocking_scheme{clock_name::twoddwave, twoddwave_3_clock_function, 3u, true};
+            return clocking_scheme{
+                clock_name::twoddwave, twoddwave_3_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 3u, true};
         }
         case num_clks::FOUR:
         {
-            return clocking_scheme{clock_name::twoddwave, twoddwave_4_clock_function, 4u, true};
+            return clocking_scheme{
+                clock_name::twoddwave, twoddwave_4_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
         }
     }
 
@@ -227,7 +245,7 @@ static auto use_clocking() noexcept
         return cutout[cz.y % 4ul][cz.x % 4ul];
     };
 
-    return clocking_scheme{clock_name::use, use_4_clock_function, 4u, true};
+    return clocking_scheme{clock_name::use, use_4_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
 }
 /**
  * Returns the RES clocking as defined in "An efficient clocking scheme for quantum-dot cellular automata" by
@@ -246,7 +264,7 @@ static auto res_clocking() noexcept
         return cutout[cz.y % 4ul][cz.x % 4ul];
     };
 
-    return clocking_scheme{clock_name::res, res_4_clock_function, 4u, true};
+    return clocking_scheme{clock_name::res, res_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
 }
 /**
  * Returns the BANCS clocking as defined in "BANCS: Bidirectional Alternating Nanomagnetic Clocking Scheme" by
@@ -264,7 +282,7 @@ static auto bancs_clocking() noexcept
         return cutout[cz.y % 6ul][cz.x % 3ul];
     };
 
-    return clocking_scheme{clock_name::bancs, bancs_3_clock_function, 3u, true};
+    return clocking_scheme{clock_name::bancs, bancs_3_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 3u, true};
 }
 
 template <typename Lyt>
