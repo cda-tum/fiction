@@ -16,9 +16,11 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/debug/network_writer.hpp>
 
 #include <mockturtle/networks/aig.hpp>
@@ -130,8 +132,15 @@ Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps)
 
     REQUIRE(layout.has_value());
 
-    print_gate_level_layout(std::cout, *layout);
-    debug::write_dot_layout(*layout);
+    if constexpr (Lyt::max_fanin_size == 3)
+    {
+        print_gate_level_layout(std::cout, *layout);
+        debug::write_dot_layout<Lyt, gate_layout_cartesian_drawer<Lyt, true>>(*layout);
+    }
+    else if constexpr (Lyt::max_fanin_size == 5)
+    {
+        debug::write_dot_layout<Lyt, gate_layout_hexagonal_drawer<Lyt, true>>(*layout);
+    }
 
     check_drvs(*layout);
     check_stats(stats);
@@ -149,32 +158,45 @@ void apply_gate_library(const Lyt& lyt)
 template <typename Ntk, typename Lyt>
 void check(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps)
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
-
-    const auto layout = generate_layout<gate_layout>(ntk, ps);
+    const auto layout = generate_layout<Lyt>(ntk, ps);
 
     check_eq(ntk, layout);
     apply_gate_library(layout);
 }
 
 template <typename Ntk>
-void check_all(const Ntk& ntk)
+void check_all_hexagonal(const Ntk& ntk)
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
-
-    for (const auto& ps : all_configurations<gate_layout>()) { check(ntk, ps); }
+    for (const auto& ps : all_configurations<hex_odd_row_gate_clk_lyt>()) { check(ntk, ps); }
+    for (const auto& ps : all_configurations<hex_even_row_gate_clk_lyt>()) { check(ntk, ps); }
+    for (const auto& ps : all_configurations<hex_odd_col_gate_clk_lyt>()) { check(ntk, ps); }
+    for (const auto& ps : all_configurations<hex_even_col_gate_clk_lyt>()) { check(ntk, ps); }
 }
 
-TEST_CASE("Exact physical design", "[exact]")
+template <typename Ntk>
+void check_all_cartesian(const Ntk& ntk)
 {
-    check_all(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
+    for (const auto& ps : all_configurations<cart_gate_clk_lyt>()) { check(ntk, ps); }
+}
+
+TEST_CASE("Exact Cartesian physical design", "[exact]")
+{
+    check_all_cartesian(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
     //    check_all(blueprints::maj1_network<mockturtle::mig_network>());
-    check_all(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
-    check_all(blueprints::and_or_network<mockturtle::mig_network>());
+    check_all_cartesian(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
+    check_all_cartesian(blueprints::and_or_network<mockturtle::mig_network>());
     //    check_all(blueprints::multi_output_and_network<mockturtle::aig_network>());
     //    check_all(blueprints::half_adder_network<mockturtle::aig_network>());
-    check_all(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
+    check_all_cartesian(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
     //    check_all(blueprints::mux21_network<mockturtle::aig_network>());
+}
+
+TEST_CASE("Exact hexagonal physical design", "[exact]")
+{
+    check_all_hexagonal(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
+    check_all_hexagonal(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
+    check_all_hexagonal(blueprints::and_or_network<mockturtle::mig_network>());
+    check_all_hexagonal(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
 }
 
 TEST_CASE("High degree input networks", "[exact]") {}
