@@ -442,7 +442,7 @@ TEST_CASE("compute functions from AND and NOT gates", "[gate-level-layout]")
 
     REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
-    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, open_4_clocking<gate_layout>()};
+    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, open_clocking<gate_layout>(num_clks::FOUR)};
 
     layout.assign_clock_number({2, 0}, static_cast<typename gate_layout::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename gate_layout::clock_number_t>(1));

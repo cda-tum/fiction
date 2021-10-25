@@ -22,7 +22,7 @@ GateLyt xor_maj_gate_layout() noexcept
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 0}, fiction::open_4_clocking<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 0}, fiction::open_clocking<GateLyt>()};
 
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 1}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -54,7 +54,7 @@ GateLyt xor_maj_gate_layout() noexcept
 template <typename GateLyt>
 GateLyt and_or_gate_layout() noexcept
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::open_4_clocking<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::open_clocking<GateLyt>()};
 
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(1));
@@ -77,7 +77,7 @@ GateLyt and_or_gate_layout() noexcept
 template <typename GateLyt>
 GateLyt and_not_gate_layout() noexcept
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::open_4_clocking<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::open_clocking<GateLyt>()};
 
     layout.assign_clock_number({2, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(1));
@@ -100,7 +100,7 @@ GateLyt and_not_gate_layout() noexcept
 template <typename GateLyt>
 GateLyt or_not_gate_layout() noexcept
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::twoddwave_4_clocking<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::twoddwave_clocking<GateLyt>()};
 
     const auto x1 = layout.create_pi("x1", {1, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -114,7 +114,7 @@ GateLyt or_not_gate_layout() noexcept
 template <typename GateLyt>
 GateLyt crossing_layout() noexcept
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 1}, fiction::twoddwave_4_clocking<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 1}, fiction::twoddwave_clocking<GateLyt>()};
 
     const auto x1 = layout.create_pi("x1", {1, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
@@ -167,7 +167,7 @@ GateLyt fanout_layout() noexcept
 template <typename GateLyt>
 GateLyt non_structural_all_function_gate_layout() noexcept
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 4, 0}, fiction::open_4_clocking<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 4, 0}, fiction::open_clocking<GateLyt>()};
 
     layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(0));
@@ -209,7 +209,7 @@ GateLyt non_structural_all_function_gate_layout() noexcept
 template <typename GateLyt>
 GateLyt se_gate_layout() noexcept
 {
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 1, 0}, fiction::twoddwave_4_clocking<GateLyt>()};
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 1, 0}, fiction::twoddwave_clocking<GateLyt>()};
 
     layout.assign_synchronization_element({1, 0}, 1);
 

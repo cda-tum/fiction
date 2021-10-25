@@ -14,11 +14,249 @@
 
 using namespace fiction;
 
+TEST_CASE("3-phase open clocking", "[clocking-scheme]")
+{
+    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+
+    auto open3 = open_clocking<clk_lyt>(num_clks::THREE);
+
+    CHECK(!open3.is_regular());
+
+    CHECK(open3({0, 0}) == 0);
+    CHECK(open3({0, 1}) == 0);
+    CHECK(open3({0, 2}) == 0);
+    CHECK(open3({0, 3}) == 0);
+    CHECK(open3({1, 0}) == 0);
+    CHECK(open3({1, 1}) == 0);
+    CHECK(open3({1, 2}) == 0);
+    CHECK(open3({1, 3}) == 0);
+    CHECK(open3({2, 0}) == 0);
+    CHECK(open3({2, 1}) == 0);
+    CHECK(open3({2, 2}) == 0);
+    CHECK(open3({2, 3}) == 0);
+    CHECK(open3({3, 0}) == 0);
+    CHECK(open3({3, 1}) == 0);
+    CHECK(open3({3, 2}) == 0);
+    CHECK(open3({3, 3}) == 0);
+
+    open3.override_clock_number({0, 0}, 0);
+    open3.override_clock_number({0, 1}, 1);
+    open3.override_clock_number({0, 2}, 2);
+    open3.override_clock_number({0, 3}, 3);
+    open3.override_clock_number({0, 4}, 4);
+    open3.override_clock_number({0, 5}, 5);
+    open3.override_clock_number({0, 6}, 6);
+
+    CHECK(!open3.is_regular());
+
+    CHECK(open3({0, 0}) == 0);
+    CHECK(open3({0, 1}) == 1);
+    CHECK(open3({0, 2}) == 2);
+    CHECK(open3({0, 3}) == 0);
+    CHECK(open3({0, 4}) == 1);
+    CHECK(open3({0, 5}) == 2);
+    CHECK(open3({0, 6}) == 0);
+    CHECK(open3({1, 0}) == 0);
+    CHECK(open3({1, 1}) == 0);
+    CHECK(open3({1, 2}) == 0);
+    CHECK(open3({1, 3}) == 0);
+    CHECK(open3({2, 0}) == 0);
+    CHECK(open3({2, 1}) == 0);
+    CHECK(open3({2, 2}) == 0);
+    CHECK(open3({2, 3}) == 0);
+    CHECK(open3({3, 0}) == 0);
+    CHECK(open3({3, 1}) == 0);
+    CHECK(open3({3, 2}) == 0);
+    CHECK(open3({3, 3}) == 0);
+}
+
+TEST_CASE("4-phase open clocking", "[clocking-scheme]")
+{
+    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+
+    auto open4 = open_clocking<clk_lyt>(num_clks::FOUR);
+
+    CHECK(!open4.is_regular());
+
+    CHECK(open4({0, 0}) == 0);
+    CHECK(open4({0, 1}) == 0);
+    CHECK(open4({0, 2}) == 0);
+    CHECK(open4({0, 3}) == 0);
+    CHECK(open4({1, 0}) == 0);
+    CHECK(open4({1, 1}) == 0);
+    CHECK(open4({1, 2}) == 0);
+    CHECK(open4({1, 3}) == 0);
+    CHECK(open4({2, 0}) == 0);
+    CHECK(open4({2, 1}) == 0);
+    CHECK(open4({2, 2}) == 0);
+    CHECK(open4({2, 3}) == 0);
+    CHECK(open4({3, 0}) == 0);
+    CHECK(open4({3, 1}) == 0);
+    CHECK(open4({3, 2}) == 0);
+    CHECK(open4({3, 3}) == 0);
+
+    open4.override_clock_number({0, 0}, 0);
+    open4.override_clock_number({0, 1}, 1);
+    open4.override_clock_number({0, 2}, 2);
+    open4.override_clock_number({0, 3}, 3);
+    open4.override_clock_number({0, 4}, 4);
+    open4.override_clock_number({0, 5}, 5);
+    open4.override_clock_number({0, 6}, 6);
+
+    CHECK(!open4.is_regular());
+
+    CHECK(open4({0, 0}) == 0);
+    CHECK(open4({0, 1}) == 1);
+    CHECK(open4({0, 2}) == 2);
+    CHECK(open4({0, 3}) == 3);
+    CHECK(open4({0, 4}) == 0);
+    CHECK(open4({0, 5}) == 1);
+    CHECK(open4({0, 6}) == 2);
+    CHECK(open4({1, 0}) == 0);
+    CHECK(open4({1, 1}) == 0);
+    CHECK(open4({1, 2}) == 0);
+    CHECK(open4({1, 3}) == 0);
+    CHECK(open4({2, 0}) == 0);
+    CHECK(open4({2, 1}) == 0);
+    CHECK(open4({2, 2}) == 0);
+    CHECK(open4({2, 3}) == 0);
+    CHECK(open4({3, 0}) == 0);
+    CHECK(open4({3, 1}) == 0);
+    CHECK(open4({3, 2}) == 0);
+    CHECK(open4({3, 3}) == 0);
+}
+
+TEST_CASE("3-phase columnar clocking", "[clocking-scheme]")
+{
+    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+
+    const auto columnar3 = columnar_clocking<clk_lyt>(num_clks::THREE);
+
+    CHECK(columnar3.is_regular());
+
+    CHECK(columnar3({0, 0}) == 0);
+    CHECK(columnar3({0, 1}) == 0);
+    CHECK(columnar3({0, 2}) == 0);
+    CHECK(columnar3({1, 0}) == 1);
+    CHECK(columnar3({1, 1}) == 1);
+    CHECK(columnar3({1, 2}) == 1);
+    CHECK(columnar3({2, 0}) == 2);
+    CHECK(columnar3({2, 1}) == 2);
+    CHECK(columnar3({2, 2}) == 2);
+
+    CHECK(columnar3({0 + 3, 0}) == 0);
+    CHECK(columnar3({0 + 3, 1}) == 0);
+    CHECK(columnar3({0 + 3, 2}) == 0);
+    CHECK(columnar3({1 + 3, 0}) == 1);
+    CHECK(columnar3({1 + 3, 1}) == 1);
+    CHECK(columnar3({1 + 3, 2}) == 1);
+    CHECK(columnar3({2 + 3, 0}) == 2);
+    CHECK(columnar3({2 + 3, 1}) == 2);
+    CHECK(columnar3({2 + 3, 2}) == 2);
+
+    CHECK(columnar3({0, 0 + 3}) == 0);
+    CHECK(columnar3({0, 1 + 3}) == 0);
+    CHECK(columnar3({0, 2 + 3}) == 0);
+    CHECK(columnar3({1, 0 + 3}) == 1);
+    CHECK(columnar3({1, 1 + 3}) == 1);
+    CHECK(columnar3({1, 2 + 3}) == 1);
+    CHECK(columnar3({2, 0 + 3}) == 2);
+    CHECK(columnar3({2, 1 + 3}) == 2);
+    CHECK(columnar3({2, 2 + 3}) == 2);
+
+    CHECK(columnar3({0 + 3, 0 + 3}) == 0);
+    CHECK(columnar3({0 + 3, 1 + 3}) == 0);
+    CHECK(columnar3({0 + 3, 2 + 3}) == 0);
+    CHECK(columnar3({1 + 3, 0 + 3}) == 1);
+    CHECK(columnar3({1 + 3, 1 + 3}) == 1);
+    CHECK(columnar3({1 + 3, 2 + 3}) == 1);
+    CHECK(columnar3({2 + 3, 0 + 3}) == 2);
+    CHECK(columnar3({2 + 3, 1 + 3}) == 2);
+    CHECK(columnar3({2 + 3, 2 + 3}) == 2);
+}
+
+TEST_CASE("4-phase columnar clocking", "[clocking-scheme]")
+{
+    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+
+    const auto columnar4 = columnar_clocking<clk_lyt>(num_clks::FOUR);
+
+    CHECK(columnar4.is_regular());
+
+    CHECK(columnar4({0, 0}) == 0);
+    CHECK(columnar4({0, 1}) == 0);
+    CHECK(columnar4({0, 2}) == 0);
+    CHECK(columnar4({0, 3}) == 0);
+    CHECK(columnar4({1, 0}) == 1);
+    CHECK(columnar4({1, 1}) == 1);
+    CHECK(columnar4({1, 2}) == 1);
+    CHECK(columnar4({1, 3}) == 1);
+    CHECK(columnar4({2, 0}) == 2);
+    CHECK(columnar4({2, 1}) == 2);
+    CHECK(columnar4({2, 2}) == 2);
+    CHECK(columnar4({2, 3}) == 2);
+    CHECK(columnar4({3, 0}) == 3);
+    CHECK(columnar4({3, 1}) == 3);
+    CHECK(columnar4({3, 2}) == 3);
+    CHECK(columnar4({3, 3}) == 3);
+
+    CHECK(columnar4({0 + 4, 0}) == 0);
+    CHECK(columnar4({0 + 4, 1}) == 0);
+    CHECK(columnar4({0 + 4, 2}) == 0);
+    CHECK(columnar4({0 + 4, 3}) == 0);
+    CHECK(columnar4({1 + 4, 0}) == 1);
+    CHECK(columnar4({1 + 4, 1}) == 1);
+    CHECK(columnar4({1 + 4, 2}) == 1);
+    CHECK(columnar4({1 + 4, 3}) == 1);
+    CHECK(columnar4({2 + 4, 0}) == 2);
+    CHECK(columnar4({2 + 4, 1}) == 2);
+    CHECK(columnar4({2 + 4, 2}) == 2);
+    CHECK(columnar4({2 + 4, 3}) == 2);
+    CHECK(columnar4({3 + 4, 0}) == 3);
+    CHECK(columnar4({3 + 4, 1}) == 3);
+    CHECK(columnar4({3 + 4, 2}) == 3);
+    CHECK(columnar4({3 + 4, 3}) == 3);
+
+    CHECK(columnar4({0, 0 + 4}) == 0);
+    CHECK(columnar4({0, 1 + 4}) == 0);
+    CHECK(columnar4({0, 2 + 4}) == 0);
+    CHECK(columnar4({0, 3 + 4}) == 0);
+    CHECK(columnar4({1, 0 + 4}) == 1);
+    CHECK(columnar4({1, 1 + 4}) == 1);
+    CHECK(columnar4({1, 2 + 4}) == 1);
+    CHECK(columnar4({1, 3 + 4}) == 1);
+    CHECK(columnar4({2, 0 + 4}) == 2);
+    CHECK(columnar4({2, 1 + 4}) == 2);
+    CHECK(columnar4({2, 2 + 4}) == 2);
+    CHECK(columnar4({2, 3 + 4}) == 2);
+    CHECK(columnar4({3, 0 + 4}) == 3);
+    CHECK(columnar4({3, 1 + 4}) == 3);
+    CHECK(columnar4({3, 2 + 4}) == 3);
+    CHECK(columnar4({3, 3 + 4}) == 3);
+
+    CHECK(columnar4({0 + 4, 0 + 4}) == 0);
+    CHECK(columnar4({0 + 4, 1 + 4}) == 0);
+    CHECK(columnar4({0 + 4, 2 + 4}) == 0);
+    CHECK(columnar4({0 + 4, 3 + 4}) == 0);
+    CHECK(columnar4({1 + 4, 0 + 4}) == 1);
+    CHECK(columnar4({1 + 4, 1 + 4}) == 1);
+    CHECK(columnar4({1 + 4, 2 + 4}) == 1);
+    CHECK(columnar4({1 + 4, 3 + 4}) == 1);
+    CHECK(columnar4({2 + 4, 0 + 4}) == 2);
+    CHECK(columnar4({2 + 4, 1 + 4}) == 2);
+    CHECK(columnar4({2 + 4, 2 + 4}) == 2);
+    CHECK(columnar4({2 + 4, 3 + 4}) == 2);
+    CHECK(columnar4({3 + 4, 0 + 4}) == 3);
+    CHECK(columnar4({3 + 4, 1 + 4}) == 3);
+    CHECK(columnar4({3 + 4, 2 + 4}) == 3);
+    CHECK(columnar4({3 + 4, 3 + 4}) == 3);
+}
+
 TEST_CASE("3-phase 2DDWave", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
 
-    const auto twoddwave3 = twoddwave_3_clocking<clk_lyt>();
+    const auto twoddwave3 = twoddwave_clocking<clk_lyt>(num_clks::THREE);
 
     CHECK(twoddwave3.is_regular());
 
@@ -67,7 +305,7 @@ TEST_CASE("4-phase 2DDWave", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
 
-    const auto twoddwave4 = twoddwave_4_clocking<clk_lyt>();
+    const auto twoddwave4 = twoddwave_clocking<clk_lyt>(num_clks::FOUR);
 
     CHECK(twoddwave4.is_regular());
 
@@ -144,7 +382,7 @@ TEST_CASE("4-phase USE", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
 
-    const auto use4 = use_4_clocking<clk_lyt>();
+    const auto use4 = use_clocking<clk_lyt>();
 
     CHECK(use4.is_regular());
 
@@ -221,7 +459,7 @@ TEST_CASE("4-phase RES", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
 
-    const auto res4 = res_4_clocking<clk_lyt>();
+    const auto res4 = res_clocking<clk_lyt>();
 
     CHECK(res4.is_regular());
 
@@ -298,7 +536,7 @@ TEST_CASE("3-phase BANCS", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
 
-    const auto bancs3 = bancs_3_clocking<clk_lyt>();
+    const auto bancs3 = bancs_clocking<clk_lyt>();
 
     CHECK(bancs3.is_regular());
 
@@ -379,249 +617,11 @@ TEST_CASE("3-phase BANCS", "[clocking-scheme]")
     CHECK(bancs3({2 + 3, 5 + 6}) == 1);
 }
 
-TEST_CASE("3-phase ToPoliNano", "[clocking-scheme]")
-{
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
-
-    const auto topolinano3 = topolinano_3_clocking<clk_lyt>();
-
-    CHECK(topolinano3.is_regular());
-
-    CHECK(topolinano3({0, 0}) == 0);
-    CHECK(topolinano3({0, 1}) == 0);
-    CHECK(topolinano3({0, 2}) == 0);
-    CHECK(topolinano3({1, 0}) == 1);
-    CHECK(topolinano3({1, 1}) == 1);
-    CHECK(topolinano3({1, 2}) == 1);
-    CHECK(topolinano3({2, 0}) == 2);
-    CHECK(topolinano3({2, 1}) == 2);
-    CHECK(topolinano3({2, 2}) == 2);
-
-    CHECK(topolinano3({0 + 3, 0}) == 0);
-    CHECK(topolinano3({0 + 3, 1}) == 0);
-    CHECK(topolinano3({0 + 3, 2}) == 0);
-    CHECK(topolinano3({1 + 3, 0}) == 1);
-    CHECK(topolinano3({1 + 3, 1}) == 1);
-    CHECK(topolinano3({1 + 3, 2}) == 1);
-    CHECK(topolinano3({2 + 3, 0}) == 2);
-    CHECK(topolinano3({2 + 3, 1}) == 2);
-    CHECK(topolinano3({2 + 3, 2}) == 2);
-
-    CHECK(topolinano3({0, 0 + 3}) == 0);
-    CHECK(topolinano3({0, 1 + 3}) == 0);
-    CHECK(topolinano3({0, 2 + 3}) == 0);
-    CHECK(topolinano3({1, 0 + 3}) == 1);
-    CHECK(topolinano3({1, 1 + 3}) == 1);
-    CHECK(topolinano3({1, 2 + 3}) == 1);
-    CHECK(topolinano3({2, 0 + 3}) == 2);
-    CHECK(topolinano3({2, 1 + 3}) == 2);
-    CHECK(topolinano3({2, 2 + 3}) == 2);
-
-    CHECK(topolinano3({0 + 3, 0 + 3}) == 0);
-    CHECK(topolinano3({0 + 3, 1 + 3}) == 0);
-    CHECK(topolinano3({0 + 3, 2 + 3}) == 0);
-    CHECK(topolinano3({1 + 3, 0 + 3}) == 1);
-    CHECK(topolinano3({1 + 3, 1 + 3}) == 1);
-    CHECK(topolinano3({1 + 3, 2 + 3}) == 1);
-    CHECK(topolinano3({2 + 3, 0 + 3}) == 2);
-    CHECK(topolinano3({2 + 3, 1 + 3}) == 2);
-    CHECK(topolinano3({2 + 3, 2 + 3}) == 2);
-}
-
-TEST_CASE("4-phase ToPoliNano", "[clocking-scheme]")
-{
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
-
-    const auto topolinano4 = topolinano_4_clocking<clk_lyt>();
-
-    CHECK(topolinano4.is_regular());
-
-    CHECK(topolinano4({0, 0}) == 0);
-    CHECK(topolinano4({0, 1}) == 0);
-    CHECK(topolinano4({0, 2}) == 0);
-    CHECK(topolinano4({0, 3}) == 0);
-    CHECK(topolinano4({1, 0}) == 1);
-    CHECK(topolinano4({1, 1}) == 1);
-    CHECK(topolinano4({1, 2}) == 1);
-    CHECK(topolinano4({1, 3}) == 1);
-    CHECK(topolinano4({2, 0}) == 2);
-    CHECK(topolinano4({2, 1}) == 2);
-    CHECK(topolinano4({2, 2}) == 2);
-    CHECK(topolinano4({2, 3}) == 2);
-    CHECK(topolinano4({3, 0}) == 3);
-    CHECK(topolinano4({3, 1}) == 3);
-    CHECK(topolinano4({3, 2}) == 3);
-    CHECK(topolinano4({3, 3}) == 3);
-
-    CHECK(topolinano4({0 + 4, 0}) == 0);
-    CHECK(topolinano4({0 + 4, 1}) == 0);
-    CHECK(topolinano4({0 + 4, 2}) == 0);
-    CHECK(topolinano4({0 + 4, 3}) == 0);
-    CHECK(topolinano4({1 + 4, 0}) == 1);
-    CHECK(topolinano4({1 + 4, 1}) == 1);
-    CHECK(topolinano4({1 + 4, 2}) == 1);
-    CHECK(topolinano4({1 + 4, 3}) == 1);
-    CHECK(topolinano4({2 + 4, 0}) == 2);
-    CHECK(topolinano4({2 + 4, 1}) == 2);
-    CHECK(topolinano4({2 + 4, 2}) == 2);
-    CHECK(topolinano4({2 + 4, 3}) == 2);
-    CHECK(topolinano4({3 + 4, 0}) == 3);
-    CHECK(topolinano4({3 + 4, 1}) == 3);
-    CHECK(topolinano4({3 + 4, 2}) == 3);
-    CHECK(topolinano4({3 + 4, 3}) == 3);
-
-    CHECK(topolinano4({0, 0 + 4}) == 0);
-    CHECK(topolinano4({0, 1 + 4}) == 0);
-    CHECK(topolinano4({0, 2 + 4}) == 0);
-    CHECK(topolinano4({0, 3 + 4}) == 0);
-    CHECK(topolinano4({1, 0 + 4}) == 1);
-    CHECK(topolinano4({1, 1 + 4}) == 1);
-    CHECK(topolinano4({1, 2 + 4}) == 1);
-    CHECK(topolinano4({1, 3 + 4}) == 1);
-    CHECK(topolinano4({2, 0 + 4}) == 2);
-    CHECK(topolinano4({2, 1 + 4}) == 2);
-    CHECK(topolinano4({2, 2 + 4}) == 2);
-    CHECK(topolinano4({2, 3 + 4}) == 2);
-    CHECK(topolinano4({3, 0 + 4}) == 3);
-    CHECK(topolinano4({3, 1 + 4}) == 3);
-    CHECK(topolinano4({3, 2 + 4}) == 3);
-    CHECK(topolinano4({3, 3 + 4}) == 3);
-
-    CHECK(topolinano4({0 + 4, 0 + 4}) == 0);
-    CHECK(topolinano4({0 + 4, 1 + 4}) == 0);
-    CHECK(topolinano4({0 + 4, 2 + 4}) == 0);
-    CHECK(topolinano4({0 + 4, 3 + 4}) == 0);
-    CHECK(topolinano4({1 + 4, 0 + 4}) == 1);
-    CHECK(topolinano4({1 + 4, 1 + 4}) == 1);
-    CHECK(topolinano4({1 + 4, 2 + 4}) == 1);
-    CHECK(topolinano4({1 + 4, 3 + 4}) == 1);
-    CHECK(topolinano4({2 + 4, 0 + 4}) == 2);
-    CHECK(topolinano4({2 + 4, 1 + 4}) == 2);
-    CHECK(topolinano4({2 + 4, 2 + 4}) == 2);
-    CHECK(topolinano4({2 + 4, 3 + 4}) == 2);
-    CHECK(topolinano4({3 + 4, 0 + 4}) == 3);
-    CHECK(topolinano4({3 + 4, 1 + 4}) == 3);
-    CHECK(topolinano4({3 + 4, 2 + 4}) == 3);
-    CHECK(topolinano4({3 + 4, 3 + 4}) == 3);
-}
-
-TEST_CASE("3-phase open clocking", "[clocking-scheme]")
-{
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
-
-    auto open3 = open_3_clocking<clk_lyt>();
-
-    CHECK(!open3.is_regular());
-
-    CHECK(open3({0, 0}) == 0);
-    CHECK(open3({0, 1}) == 0);
-    CHECK(open3({0, 2}) == 0);
-    CHECK(open3({0, 3}) == 0);
-    CHECK(open3({1, 0}) == 0);
-    CHECK(open3({1, 1}) == 0);
-    CHECK(open3({1, 2}) == 0);
-    CHECK(open3({1, 3}) == 0);
-    CHECK(open3({2, 0}) == 0);
-    CHECK(open3({2, 1}) == 0);
-    CHECK(open3({2, 2}) == 0);
-    CHECK(open3({2, 3}) == 0);
-    CHECK(open3({3, 0}) == 0);
-    CHECK(open3({3, 1}) == 0);
-    CHECK(open3({3, 2}) == 0);
-    CHECK(open3({3, 3}) == 0);
-
-    open3.override_clock_number({0, 0}, 0);
-    open3.override_clock_number({0, 1}, 1);
-    open3.override_clock_number({0, 2}, 2);
-    open3.override_clock_number({0, 3}, 3);
-    open3.override_clock_number({0, 4}, 4);
-    open3.override_clock_number({0, 5}, 5);
-    open3.override_clock_number({0, 6}, 6);
-
-    CHECK(!open3.is_regular());
-
-    CHECK(open3({0, 0}) == 0);
-    CHECK(open3({0, 1}) == 1);
-    CHECK(open3({0, 2}) == 2);
-    CHECK(open3({0, 3}) == 0);
-    CHECK(open3({0, 4}) == 1);
-    CHECK(open3({0, 5}) == 2);
-    CHECK(open3({0, 6}) == 0);
-    CHECK(open3({1, 0}) == 0);
-    CHECK(open3({1, 1}) == 0);
-    CHECK(open3({1, 2}) == 0);
-    CHECK(open3({1, 3}) == 0);
-    CHECK(open3({2, 0}) == 0);
-    CHECK(open3({2, 1}) == 0);
-    CHECK(open3({2, 2}) == 0);
-    CHECK(open3({2, 3}) == 0);
-    CHECK(open3({3, 0}) == 0);
-    CHECK(open3({3, 1}) == 0);
-    CHECK(open3({3, 2}) == 0);
-    CHECK(open3({3, 3}) == 0);
-}
-
-TEST_CASE("4-phase open clocking", "[clocking-scheme]")
-{
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
-
-    auto open4 = open_4_clocking<clk_lyt>();
-
-    CHECK(!open4.is_regular());
-
-    CHECK(open4({0, 0}) == 0);
-    CHECK(open4({0, 1}) == 0);
-    CHECK(open4({0, 2}) == 0);
-    CHECK(open4({0, 3}) == 0);
-    CHECK(open4({1, 0}) == 0);
-    CHECK(open4({1, 1}) == 0);
-    CHECK(open4({1, 2}) == 0);
-    CHECK(open4({1, 3}) == 0);
-    CHECK(open4({2, 0}) == 0);
-    CHECK(open4({2, 1}) == 0);
-    CHECK(open4({2, 2}) == 0);
-    CHECK(open4({2, 3}) == 0);
-    CHECK(open4({3, 0}) == 0);
-    CHECK(open4({3, 1}) == 0);
-    CHECK(open4({3, 2}) == 0);
-    CHECK(open4({3, 3}) == 0);
-
-    open4.override_clock_number({0, 0}, 0);
-    open4.override_clock_number({0, 1}, 1);
-    open4.override_clock_number({0, 2}, 2);
-    open4.override_clock_number({0, 3}, 3);
-    open4.override_clock_number({0, 4}, 4);
-    open4.override_clock_number({0, 5}, 5);
-    open4.override_clock_number({0, 6}, 6);
-
-    CHECK(!open4.is_regular());
-
-    CHECK(open4({0, 0}) == 0);
-    CHECK(open4({0, 1}) == 1);
-    CHECK(open4({0, 2}) == 2);
-    CHECK(open4({0, 3}) == 3);
-    CHECK(open4({0, 4}) == 0);
-    CHECK(open4({0, 5}) == 1);
-    CHECK(open4({0, 6}) == 2);
-    CHECK(open4({1, 0}) == 0);
-    CHECK(open4({1, 1}) == 0);
-    CHECK(open4({1, 2}) == 0);
-    CHECK(open4({1, 3}) == 0);
-    CHECK(open4({2, 0}) == 0);
-    CHECK(open4({2, 1}) == 0);
-    CHECK(open4({2, 2}) == 0);
-    CHECK(open4({2, 3}) == 0);
-    CHECK(open4({3, 0}) == 0);
-    CHECK(open4({3, 1}) == 0);
-    CHECK(open4({3, 2}) == 0);
-    CHECK(open4({3, 3}) == 0);
-}
-
 TEST_CASE("Override clocking", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
 
-    auto twoddwave4 = twoddwave_4_clocking<clk_lyt>();
+    auto twoddwave4 = twoddwave_clocking<clk_lyt>();
 
     CHECK(twoddwave4.is_regular());
 
@@ -671,15 +671,12 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
         }
     };
 
-    check({"open3", "OPEN3", "oPeN3", "OpEn3"}, clock_name::open3);
-    check({"open4", "OPEN4", "oPeN4", "OpEn4", "open", "OPEN"}, clock_name::open4);
-    check({"2ddwave3", "2DDwave3", "2ddWAVE3", "2dDwAvE3", "2DdWaVe3", "DIAG3", "diag3"}, clock_name::twoddwave3);
-    check({"2ddwave4", "2DdWaVe4", "DIAG4", "diag4", "2ddwave", "2DDWAVE", "2DDWave"}, clock_name::twoddwave4);
+    check({"open", "OPEN", "oPeN", "OpEn"}, clock_name::open);
+    check({"2ddwave", "2DdWaVe", "2ddwave", "2DDWAVE", "2DDWave"}, clock_name::twoddwave);
     check({"use", "USE", "uSe", "UsE"}, clock_name::use);
     check({"res", "RES", "rEs", "ReS"}, clock_name::res);
     check({"bancs", "BANCS", "BaNCs", "banCS"}, clock_name::bancs);
-    check({"topolinano3", "TOPOLINANO3", "ToPoliNano3", "topolinano"}, clock_name::topolinano3);
-    check({"topolinano4", "TOPOLINANO4", "ToPoliNano4"}, clock_name::topolinano4);
+    check({"columnar", "COLUMNAR", "CoLumNar", "COLUMnar"}, clock_name::columnar);
 
     CHECK(!get_clocking_scheme<clk_lyt>("").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("TwoDDWave").has_value());

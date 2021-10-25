@@ -52,7 +52,7 @@ struct exact_physical_design_params
      * Clocking scheme to be used.
      */
     std::shared_ptr<clocking_scheme<coordinate<Lyt>>> scheme =
-        std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
+        std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
     /**
      * Number of tiles to use.
      */
@@ -1216,9 +1216,7 @@ class exact_impl
                 }
             };
 
-            if (!((layout.is_clocking_scheme(clock_name::twoddwave4) ||
-                   layout.is_clocking_scheme(clock_name::twoddwave3)) &&
-                  config.border_io))
+            if (!(layout.is_clocking_scheme(clock_name::twoddwave) && config.border_io))
             {
                 if (config.io_ports)
                 {
@@ -1565,19 +1563,12 @@ class exact_impl
             {
                 network.foreach_pi(
                     [this, &assign_west, &assign_border](const auto& pi)
-                    {
-                        (layout.is_clocking_scheme(clock_name::topolinano3) ||
-                         layout.is_clocking_scheme(clock_name::topolinano4)) ?
-                            assign_west(pi) :
-                            assign_border(pi);
-                    });
+                    { layout.is_clocking_scheme(clock_name::columnar) ? assign_west(pi) : assign_border(pi); });
                 network.foreach_po(
                     [this, &assign_east, &assign_border](const auto& po)
                     {
-                        (layout.is_clocking_scheme(clock_name::topolinano3) ||
-                         layout.is_clocking_scheme(clock_name::topolinano4)) ?
-                            assign_east(network.get_node(po)) :
-                            assign_border(network.get_node(po));
+                        layout.is_clocking_scheme(clock_name::columnar) ? assign_east(network.get_node(po)) :
+                                                                          assign_border(network.get_node(po));
                     });
             }
             else
@@ -1590,8 +1581,7 @@ class exact_impl
                                                {
                                                    if (const auto v = network.get_node(fo); !skip_const_or_io_node(v))
                                                    {
-                                                       (layout.is_clocking_scheme(clock_name::topolinano3) ||
-                                                        layout.is_clocking_scheme(clock_name::topolinano4)) ?
+                                                       layout.is_clocking_scheme(clock_name::columnar) ?
                                                            assign_west(v) :
                                                            assign_border(v);
                                                    }
@@ -1606,8 +1596,7 @@ class exact_impl
                                               {
                                                   if (const auto v = network.get_node(fi); !skip_const_or_io_node(v))
                                                   {
-                                                      (layout.is_clocking_scheme(clock_name::topolinano3) ||
-                                                       layout.is_clocking_scheme(clock_name::topolinano4)) ?
+                                                      layout.is_clocking_scheme(clock_name::columnar) ?
                                                           assign_east(v) :
                                                           assign_border(v);
                                                   }
@@ -1730,8 +1719,7 @@ class exact_impl
             define_inv_adjacent_edge_tiles();
 
             // global synchronization constraints
-            if (!config.desynchronize && !(layout.is_clocking_scheme(clock_name::twoddwave3) ||
-                                           layout.is_clocking_scheme(clock_name::twoddwave4)))
+            if (!config.desynchronize && !layout.is_clocking_scheme(clock_name::twoddwave))
             {
                 assign_pi_clockings();
                 //                global_synchronization();
@@ -1744,10 +1732,8 @@ class exact_impl
             }
 
             // path/cycle constraints
-            if (!(layout.is_clocking_scheme(clock_name::topolinano3) ||
-                  layout.is_clocking_scheme(clock_name::topolinano4) ||
-                  layout.is_clocking_scheme(clock_name::twoddwave3) ||
-                  layout.is_clocking_scheme(clock_name::twoddwave4)))  // linear schemes; no cycles by definition
+            if (!(layout.is_clocking_scheme(clock_name::columnar) ||
+                  layout.is_clocking_scheme(clock_name::twoddwave)))  // linear schemes; no cycles by definition
             {
                 establish_sub_paths();
                 establish_transitive_paths();
