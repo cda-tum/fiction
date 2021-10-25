@@ -1454,7 +1454,8 @@ class exact_impl
                             {
                                 solver->add(mk_as_if_se(z3::atmost(wv, 1u), t));
                             }
-                            else
+                            else if (wv.size() >= 2)  // it is pointless to check an expression vector of size < 2 for
+                                                      // at least 2 set variables
                             {
                                 if (!acc.empty())
                                 {
@@ -1824,14 +1825,14 @@ class exact_impl
             }
         }
 
-        void place_output(const tile<Lyt>& t, const mockturtle::node<topology_ntk_t>& n) noexcept
+        void place_output(const tile<Lyt>& t, const mockturtle::node<topology_ntk_t>& n)
         {
             const auto output_signal = network.make_signal(fanins(network, n).fanin_nodes[0]);
 
             layout.create_po(node2pos[output_signal][n], "", t);
         }
 
-        void assign_layout_clocking(const z3::model& model) noexcept
+        void assign_layout_clocking(const z3::model& model)
         {
             // assign clock zones to tiles of open schemes
             if (!layout.is_regularly_clocked())
@@ -1851,7 +1852,7 @@ class exact_impl
          * @param t Initial tile to start recursion from (not included in model evaluations).
          * @param e Edge to check for.
          */
-        void route(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e, const z3::model& model) noexcept
+        void route(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e, const z3::model& model)
         {
             std::cout << fmt::format("Routing ({},{}) starting on {}", e.source, e.target, t) << std::endl;
 
@@ -1898,6 +1899,7 @@ class exact_impl
 
             std::ofstream assertions_file{"assertions.txt"};
 
+            assertions_file << layout.x() << " x " << layout.y() << std::endl;
             assertions_file << solver->assertions() << std::endl;
 
             assertions_file.close();
