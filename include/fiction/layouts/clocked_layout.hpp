@@ -45,7 +45,8 @@ class clocked_layout : public CoordinateLayout
 
     explicit clocked_layout(const typename CoordinateLayout::aspect_ratio& ar = {}) :
             CoordinateLayout(ar),
-            strg{std::make_shared<clocked_layout_storage>(open_4_clocking<clocked_layout<CoordinateLayout>>())}
+            strg{std::make_shared<clocked_layout_storage>(
+                open_clocking<clocked_layout<CoordinateLayout>>(num_clks::FOUR))}
     {}
 
     clocked_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking_scheme_t& scheme) :

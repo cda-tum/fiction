@@ -39,7 +39,7 @@ struct orthogonal_physical_design_params
     /**
      * Number of clock phases to use. 3 and 4 are supported.
      */
-    uint8_t number_of_clock_phases = 4u;
+    num_clks number_of_clock_phases = num_clks::FOUR;
 };
 
 struct orthogonal_physical_design_stats
@@ -405,8 +405,7 @@ class orthogonal_impl
         // compute a coloring
         auto ctn = east_south_coloring(ntk);
         // instantiate the layout
-        Lyt layout{determine_layout_size<Lyt>(ctn),
-                   ps.number_of_clock_phases == 3 ? twoddwave_3_clocking<Lyt>() : twoddwave_4_clocking<Lyt>()};
+        Lyt layout{determine_layout_size<Lyt>(ctn), twoddwave_clocking<Lyt>(ps.number_of_clock_phases)};
 
         // reserve PI nodes without positions
         ntk.foreach_pi(

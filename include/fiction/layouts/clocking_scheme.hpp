@@ -92,47 +92,91 @@ class clocking_scheme
 
 namespace clock_name
 {
-static constexpr const char* open3       = "OPEN3";
-static constexpr const char* open4       = "OPEN4";
-static constexpr const char* twoddwave3  = "2DDWAVE3";
-static constexpr const char* twoddwave4  = "2DDWAVE4";
-static constexpr const char* use         = "USE";
-static constexpr const char* res         = "RES";
-static constexpr const char* bancs       = "BANCS";
-static constexpr const char* topolinano3 = "TOPOLINANO3";
-static constexpr const char* topolinano4 = "TOPOLINANO4";
+static constexpr const char* open      = "OPEN";
+static constexpr const char* columnar  = "COLUMNAR";
+static constexpr const char* twoddwave = "2DDWAVE";
+static constexpr const char* use       = "USE";
+static constexpr const char* res       = "RES";
+static constexpr const char* bancs     = "BANCS";
 }  // namespace clock_name
 
+enum class num_clks
+{
+    THREE,
+    FOUR
+};
+
 /**
- * Representing an irregular clocking that always returns the standard clock. It is intended to be overridden.
+ * Returns an irregular clocking that always returns the standard clock. It is intended to be overridden.
  */
 template <typename Lyt>
-static auto open_3_clocking() noexcept
+static auto open_clocking(const num_clks& n = num_clks::FOUR) noexcept
 {
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function open_3_clock_function =
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function open_clock_function =
         []([[maybe_unused]] const clock_zone<Lyt>& cz) noexcept
     { return typename clocking_scheme<clock_zone<Lyt>>::clock_number{}; };
 
-    return clocking_scheme{clock_name::open3, open_3_clock_function, 3u, false};
-}
-/**
- * Pre-defined open clocking with 4 clock phases.
- */
-template <typename Lyt>
-static auto open_4_clocking() noexcept
-{
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function open_4_clock_function =
-        []([[maybe_unused]] const clock_zone<Lyt>& cz) noexcept
-    { return typename clocking_scheme<clock_zone<Lyt>>::clock_number{}; };
+    switch (n)
+    {
+        case num_clks::THREE:
+        {
+            return clocking_scheme{clock_name::open, open_clock_function, 3u, false};
+        }
+        case num_clks::FOUR:
+        {
+            return clocking_scheme{clock_name::open, open_clock_function, 4u, false};
+        }
+    }
 
-    return clocking_scheme{clock_name::open4, open_4_clock_function, 4u, false};
+    // fix -Wreturn-type warning
+    return clocking_scheme{clock_name::open, open_clock_function, 4u, false};
 }
 /**
- * Representing a 3-phase adoption of the 2DDWave clocking as defined in "Clocking and Cell Placement for QCA" by
- * V. Vankamamidi, M. Ottavi, and F. Lombardi in IEEE Conference on Nanotechnology 2006.
+ * Returns a linear 1D clocking as originally introduced in "A device architecture for computing with
+ * quantum dots" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE 1997.
  */
 template <typename Lyt>
-static auto twoddwave_3_clocking() noexcept
+static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
+{
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function columnar_3_clock_function =
+        [](const clock_zone<Lyt>& cz) noexcept
+    {
+        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
+            {{{0, 1, 2}}, {{0, 1, 2}}, {{0, 1, 2}}}};
+
+        return cutout[cz.y % 3ul][cz.x % 3ul];
+    };
+
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function columnar_4_clock_function =
+        [](const clock_zone<Lyt>& cz) noexcept
+    {
+        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+            {{{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}}};
+
+        return cutout[cz.y % 4ul][cz.x % 4ul];
+    };
+
+    switch (n)
+    {
+        case num_clks::THREE:
+        {
+            return clocking_scheme{clock_name::columnar, columnar_3_clock_function, 3u, true};
+        }
+        case num_clks::FOUR:
+        {
+            return clocking_scheme{clock_name::columnar, columnar_4_clock_function, 4u, true};
+        }
+    }
+
+    // fix -Wreturn-type warning
+    return clocking_scheme{clock_name::columnar, columnar_4_clock_function, 4u, true};
+}
+/**
+ * Returns the 2DDWave clocking as defined in "Clocking and Cell Placement for QCA" by V. Vankamamidi, M. Ottavi,
+ * and F. Lombardi in IEEE Conference on Nanotechnology 2006.
+ */
+template <typename Lyt>
+static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
 {
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function twoddwave_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
@@ -143,15 +187,6 @@ static auto twoddwave_3_clocking() noexcept
         return cutout[cz.y % 3ul][cz.x % 3ul];
     };
 
-    return clocking_scheme{clock_name::twoddwave3, twoddwave_3_clock_function, 3u, true};
-}
-/**
- * Representing the original 2DDWave clocking as defined in "Clocking and Cell Placement for QCA" by V. Vankamamidi,
- * M. Ottavi, and F. Lombardi in IEEE Conference on Nanotechnology 2006.
- */
-template <typename Lyt>
-static auto twoddwave_4_clocking() noexcept
-{
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function twoddwave_4_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
@@ -161,14 +196,27 @@ static auto twoddwave_4_clocking() noexcept
         return cutout[cz.y % 4ul][cz.x % 4ul];
     };
 
-    return clocking_scheme{clock_name::twoddwave4, twoddwave_4_clock_function, 4u, true};
+    switch (n)
+    {
+        case num_clks::THREE:
+        {
+            return clocking_scheme{clock_name::twoddwave, twoddwave_3_clock_function, 3u, true};
+        }
+        case num_clks::FOUR:
+        {
+            return clocking_scheme{clock_name::twoddwave, twoddwave_4_clock_function, 4u, true};
+        }
+    }
+
+    // fix -Wreturn-type warning
+    return clocking_scheme{clock_name::twoddwave, twoddwave_4_clock_function, 4u, true};
 }
 /**
- * Representing the USE clocking as defined in "USE: A Universal, Scalable, and Efficient Clocking Scheme for QCA"
+ * Returns the USE clocking as defined in "USE: A Universal, Scalable, and Efficient Clocking Scheme for QCA"
  * by Caio Araujo T. Campos, Abner L. Marciano, Omar P. Vilela Neto, and Frank Sill Torres in TCAD 2015.
  */
 template <typename Lyt>
-static auto use_4_clocking() noexcept
+static auto use_clocking() noexcept
 {
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function use_4_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
@@ -182,12 +230,12 @@ static auto use_4_clocking() noexcept
     return clocking_scheme{clock_name::use, use_4_clock_function, 4u, true};
 }
 /**
- * Representing the RES clocking as defined in "An efficient clocking scheme for quantum-dot cellular automata" by
+ * Returns the RES clocking as defined in "An efficient clocking scheme for quantum-dot cellular automata" by
  * Mrinal Goswami, Anindan Mondal, Mahabub Hasan Mahalat, Bibhash Sen, and Biplab K. Sikdar in International Journal
  * of Electronics Letters 2019.
  */
 template <typename Lyt>
-static auto res_4_clocking() noexcept
+static auto res_clocking() noexcept
 {
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function res_4_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
@@ -201,11 +249,11 @@ static auto res_4_clocking() noexcept
     return clocking_scheme{clock_name::res, res_4_clock_function, 4u, true};
 }
 /**
- * Representing the BANCS clocking as defined in "BANCS: Bidirectional Alternating Nanomagnetic Clocking Scheme" by
+ * Returns the BANCS clocking as defined in "BANCS: Bidirectional Alternating Nanomagnetic Clocking Scheme" by
  * Ruan Evangelista Formigoni, Omar P. Vilela Neto, and Jose Augusto M. Nacif in SBCCI 2018.
  */
 template <typename Lyt>
-static auto bancs_3_clocking() noexcept
+static auto bancs_clocking() noexcept
 {
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function bancs_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
@@ -218,64 +266,20 @@ static auto bancs_3_clocking() noexcept
 
     return clocking_scheme{clock_name::bancs, bancs_3_clock_function, 3u, true};
 }
-/**
- * Representing a 3-phase adaption of the clocking originally introduced in "A device architecture for computing
- * with quantum dots" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE 1997. As it is used in
- * "ToPoliNano" (https://topolinano.polito.it/), it is referred to by that name in fiction to differentiate it
- * from 2DDWave.
- */
-template <typename Lyt>
-static auto topolinano_3_clocking() noexcept
-{
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function topolinano_3_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept
-    {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
-            {{{0, 1, 2}}, {{0, 1, 2}}, {{0, 1, 2}}}};
-
-        return cutout[cz.y % 3ul][cz.x % 3ul];
-    };
-
-    return clocking_scheme{clock_name::topolinano3, topolinano_3_clock_function, 3u, true};
-}
-/**
- * Representing a linear 4-phase 1D clocking as originally introduced in "A device architecture for computing with
- * quantum dots" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE 1997. As it is used in "ToPoliNano"
- * (https://topolinano.polito.it/), it is referred to by that name in fiction to differentiate it from 2DDWave.
- */
-template <typename Lyt>
-static auto topolinano_4_clocking() noexcept
-{
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function topolinano_4_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept
-    {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
-            {{{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}}};
-
-        return cutout[cz.y % 4ul][cz.x % 4ul];
-    };
-
-    return clocking_scheme{clock_name::topolinano4, topolinano_4_clock_function, 4u, true};
-}
 
 template <typename Lyt>
 std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::string& name) noexcept
 {
     static const std::unordered_map<std::string, clocking_scheme<clock_zone<Lyt>>> scheme_lookup{
-        {clock_name::open3, open_3_clocking<Lyt>()},
-        {clock_name::open4, open_4_clocking<Lyt>()},
-        {"OPEN", open_4_clocking<Lyt>()},
-        {clock_name::twoddwave3, twoddwave_3_clocking<Lyt>()},
-        {"DIAG3", twoddwave_3_clocking<Lyt>()},
-        {clock_name::twoddwave4, twoddwave_4_clocking<Lyt>()},
-        {"DIAG4", twoddwave_4_clocking<Lyt>()},
-        {"2DDWAVE", twoddwave_4_clocking<Lyt>()},
-        {clock_name::use, use_4_clocking<Lyt>()},
-        {clock_name::res, res_4_clocking<Lyt>()},
-        {clock_name::bancs, bancs_3_clocking<Lyt>()},
-        {clock_name::topolinano3, topolinano_3_clocking<Lyt>()},
-        {"TOPOLINANO", topolinano_3_clocking<Lyt>()},
-        {clock_name::topolinano4, topolinano_4_clocking<Lyt>()}};
+        {clock_name::open, open_clocking<Lyt>(num_clks::THREE)},
+        {clock_name::open, open_clocking<Lyt>(num_clks::FOUR)},
+        {clock_name::columnar, columnar_clocking<Lyt>(num_clks::THREE)},
+        {clock_name::columnar, columnar_clocking<Lyt>(num_clks::FOUR)},
+        {clock_name::twoddwave, twoddwave_clocking<Lyt>(num_clks::THREE)},
+        {clock_name::twoddwave, twoddwave_clocking<Lyt>(num_clks::FOUR)},
+        {clock_name::use, use_clocking<Lyt>()},
+        {clock_name::res, res_clocking<Lyt>()},
+        {clock_name::bancs, bancs_clocking<Lyt>()}};
 
     auto upper_name = name;
     std::transform(upper_name.begin(), upper_name.end(), upper_name.begin(), ::toupper);

@@ -42,14 +42,14 @@ exact_physical_design_params<Lyt> configuration() noexcept
 template <typename Lyt>
 exact_physical_design_params<Lyt>&& twoddwave(exact_physical_design_params<Lyt>&& ps) noexcept
 {
-    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
 
     return std::move(ps);
 }
 template <typename Lyt>
 exact_physical_design_params<Lyt>&& use(exact_physical_design_params<Lyt>&& ps) noexcept
 {
-    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_4_clocking<Lyt>());
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_clocking<Lyt>());
 
     return std::move(ps);
 }
@@ -57,7 +57,7 @@ exact_physical_design_params<Lyt>&& use(exact_physical_design_params<Lyt>&& ps) 
 template <typename Lyt>
 exact_physical_design_params<Lyt>&& res(exact_physical_design_params<Lyt>&& ps) noexcept
 {
-    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_4_clocking<Lyt>());
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_clocking<Lyt>());
 
     return std::move(ps);
 }
