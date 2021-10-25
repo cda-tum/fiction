@@ -493,8 +493,8 @@ class write_qca_layout_impl
         // open via layer
         os << qcad::OPEN_QCAD_LAYER;
 
-        os << qcad::TYPE << std::to_string(1) << '\n';
-        os << qcad::STATUS << std::to_string(0) << '\n';
+        os << qcad::TYPE << "1\n";
+        os << qcad::STATUS << "0\n";
         os << qcad::PSZ_DESCRIPTION << "Via Layer " << std::to_string(via_counter++) << '\n';
 
         for (auto& v : via_layer_cells) { write_cell(v, false); }

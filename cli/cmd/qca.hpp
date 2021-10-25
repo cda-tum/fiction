@@ -38,8 +38,7 @@ class qca_command : public command
                        "QCADesigner can be used to perform physical simulations.")
     {
         add_option("filename", filename, "QCA file name");
-        add_flag("--no_via_layers,-v", ps.create_inter_layer_via_cells,
-                 "Do not insert additional inter-layer via cells");
+        add_flag("--no_via_layers,-v", "Do not insert additional inter-layer via cells");
     }
 
   protected:
@@ -57,6 +56,11 @@ class qca_command : public command
 
             ps = {};
             return;
+        }
+
+        if (is_set("no_via_layers"))
+        {
+            ps.create_inter_layer_via_cells = false;
         }
 
         const auto get_name = [](auto&& lyt_ptr) -> std::string { return lyt_ptr->get_layout_name(); };
