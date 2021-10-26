@@ -1840,7 +1840,7 @@ class exact_impl
          */
         void route(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e, const z3::model& model)
         {
-            std::cout << fmt::format("Routing ({},{}) starting on {}", e.source, e.target, t) << std::endl;
+//            std::cout << fmt::format("Routing ({},{}) starting on {}", e.source, e.target, t) << std::endl;
 
             layout.foreach_outgoing_clocked_zone(
                 t,
@@ -1851,9 +1851,9 @@ class exact_impl
                     if (model.eval(get_te(at, e)).bool_value() == Z3_L_TRUE &&
                         model.eval(get_tc(t, at)).bool_value() == Z3_L_TRUE)
                     {
-                        std::cout << fmt::format("assigning ({},{}) to {} with incoming signal {}", e.source, e.target,
-                                                 at, static_cast<tile<Lyt>>(node2pos[e.source][e.target]))
-                                  << std::endl;
+//                        std::cout << fmt::format("assigning ({},{}) to {} with incoming signal {}", e.source, e.target,
+//                                                 at, static_cast<tile<Lyt>>(node2pos[e.source][e.target]))
+//                                  << std::endl;
 
                         // assign wire segment to at and save its position as the
                         // signal lookup for e's source node

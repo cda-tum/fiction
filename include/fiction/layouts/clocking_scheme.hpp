@@ -289,12 +289,15 @@ template <typename Lyt>
 std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::string& name) noexcept
 {
     static const std::unordered_map<std::string, clocking_scheme<clock_zone<Lyt>>> scheme_lookup{
-        {clock_name::open, open_clocking<Lyt>(num_clks::THREE)},
         {clock_name::open, open_clocking<Lyt>(num_clks::FOUR)},
-        {clock_name::columnar, columnar_clocking<Lyt>(num_clks::THREE)},
+        {"OPEN3", open_clocking<Lyt>(num_clks::THREE)},
+        {"OPEN4", open_clocking<Lyt>(num_clks::FOUR)},
         {clock_name::columnar, columnar_clocking<Lyt>(num_clks::FOUR)},
-        {clock_name::twoddwave, twoddwave_clocking<Lyt>(num_clks::THREE)},
+        {"COLUMNAR3", columnar_clocking<Lyt>(num_clks::THREE)},
+        {"COLUMNAR4", columnar_clocking<Lyt>(num_clks::FOUR)},
         {clock_name::twoddwave, twoddwave_clocking<Lyt>(num_clks::FOUR)},
+        {"TWODDWAVE3", twoddwave_clocking<Lyt>(num_clks::THREE)},
+        {"TWODDWAVE4", twoddwave_clocking<Lyt>(num_clks::FOUR)},
         {clock_name::use, use_clocking<Lyt>()},
         {clock_name::res, res_clocking<Lyt>()},
         {clock_name::bancs, bancs_clocking<Lyt>()}};
