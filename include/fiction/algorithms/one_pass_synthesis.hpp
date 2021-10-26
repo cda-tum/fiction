@@ -55,7 +55,7 @@ struct one_pass_synthesis_params
      * Clocking scheme to be used.
      */
     std::shared_ptr<clocking_scheme<coordinate<Lyt>>> scheme =
-        std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
+        std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
     /**
      * Number of tiles to use.
      */
@@ -168,7 +168,7 @@ class mugen_handler
     [[nodiscard]] bool skippable(const aspect_ratio<Lyt>& ratio) const noexcept
     {
         // OPEN clocking optimization: rotated aspect ratios don't need to be explored
-        if (lyt.is_clocking_scheme(clock_name::open3) || lyt.is_clocking_scheme(clock_name::open4))
+        if (lyt.is_clocking_scheme(clock_name::open))
         {
             if (ratio.x != ratio.y && ratio.x == lyt.y() && ratio.y == lyt.x())
                 return true;

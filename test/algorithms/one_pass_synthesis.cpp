@@ -34,7 +34,7 @@ std::vector<one_pass_synthesis_params<Lyt>> configurations() noexcept
 {
     one_pass_synthesis_params<Lyt> twoddwave_config{};
 
-    twoddwave_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
+    twoddwave_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
     twoddwave_config.enable_and   = true;
     twoddwave_config.enable_not   = true;
     twoddwave_config.enable_or    = true;
@@ -43,7 +43,7 @@ std::vector<one_pass_synthesis_params<Lyt>> configurations() noexcept
 
     one_pass_synthesis_params<Lyt> use_config{};
 
-    use_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_4_clocking<Lyt>());
+    use_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_clocking<Lyt>());
     use_config.enable_and   = true;
     use_config.enable_not   = true;
     use_config.enable_or    = true;
@@ -52,7 +52,7 @@ std::vector<one_pass_synthesis_params<Lyt>> configurations() noexcept
 
     one_pass_synthesis_params<Lyt> res_config{};
 
-    res_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_4_clocking<Lyt>());
+    res_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_clocking<Lyt>());
     res_config.enable_and   = true;
     res_config.enable_not   = true;
     res_config.enable_or    = true;
@@ -63,7 +63,7 @@ std::vector<one_pass_synthesis_params<Lyt>> configurations() noexcept
 #if !defined(__APPLE__)
     one_pass_synthesis_params<Lyt> async_config{};
 
-    async_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
+    async_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
     async_config.enable_and   = true;
     async_config.enable_not   = true;
     async_config.enable_or    = true;
@@ -141,10 +141,10 @@ TEST_CASE("Timeout", "[one-pass]")
 
     one_pass_synthesis_params<gate_layout> timeout_config{};
 
-    timeout_config.scheme = std::make_shared<clocking_scheme<coordinate<gate_layout>>>(use_4_clocking<gate_layout>());
-    timeout_config.enable_and   = true;
-    timeout_config.enable_not   = true;
-    timeout_config.enable_or    = true;
+    timeout_config.scheme     = std::make_shared<clocking_scheme<coordinate<gate_layout>>>(use_clocking<gate_layout>());
+    timeout_config.enable_and = true;
+    timeout_config.enable_not = true;
+    timeout_config.enable_or  = true;
     timeout_config.enable_wires = true;
     timeout_config.crossings    = true;
     timeout_config.timeout      = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
