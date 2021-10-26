@@ -14,6 +14,7 @@
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
 
+#include <memory>
 #include <thread>
 #include <variant>
 
@@ -43,8 +44,12 @@ class exact_command : public command
         add_option("--async,-a", ps.num_threads, "Number of layout dimensions to examine in parallel");
 
         add_flag("--async_max,", "Examine as many layout dimensions in parallel as threads are available");
+        add_option("--hex", hexagonal_tile_shift,
+                   "Use hexagonal tiles and specify tile shift. Possible values are 'odd_row', 'even_row', "
+                   "'odd_column', or 'even_column'");
         add_flag("--crossings,-x", ps.crossings, "Enable wire crossings");
-//        add_flag("--io_ports,-i", ps.io_ports, "Use I/O port elements instead of gate pins"); // TODO has to be true currently
+        //        add_flag("--io_ports,-i", ps.io_ports, "Use I/O port elements instead of gate pins"); // TODO has to
+        //        be true currently
         add_flag("--border_io,-b", ps.border_io, "Enforce primary I/O to be placed at the layout's borders");
         add_flag("--straight_inverters,-n", ps.straight_inverters, "Enforce NOT gates to be routed non-bending only");
         add_flag("--desynchronize,-d", ps.desynchronize,
@@ -53,7 +58,7 @@ class exact_command : public command
                  "Minimize the number of wire tiles to be used (slightly runtime expensive)");
         add_flag("--minimize_crossings,-c", ps.minimize_crossings,
                  "Minimize the number of crossing tiles to be used (slightly runtime expensive)");
-        add_flag("--sync_elem,-e", ps.synchronization_elements,
+        add_flag("--sync_elems,-e", ps.synchronization_elements,
                  "Allow synchronization elements to satisfy global synchronization (runtime expensive!)");
     }
 
@@ -115,34 +120,34 @@ class exact_command : public command
         // convert timeout entered in seconds to milliseconds
         ps.timeout *= 1000;
 
-        const auto get_name = [](auto&& ntk_ptr) -> std::string { return ntk_ptr->get_network_name(); };
-
-        const auto exact_physical_design = [this](auto&& ntk_ptr)
-        { return fiction::exact<fiction::cart_gate_clk_lyt>(*ntk_ptr, ps, &st); };
-
-        const auto ntk = s.current();
-
-        // perform exact physical design
-        try
+        if (is_set("hex"))
         {
-            const auto lyt = std::visit(exact_physical_design, ntk);
-
-            if (lyt.has_value())
+            if (hexagonal_tile_shift == "odd_row")
             {
-                store<fiction::gate_layout_t>().extend() = std::make_shared<fiction::cart_gate_clk_lyt>(*lyt);
+                exact_physical_design<fiction::hex_odd_row_gate_clk_lyt>();
+            }
+            else if (hexagonal_tile_shift == "even_row")
+            {
+                exact_physical_design<fiction::hex_even_row_gate_clk_lyt>();
+            }
+            else if (hexagonal_tile_shift == "odd_column")
+            {
+                exact_physical_design<fiction::hex_odd_col_gate_clk_lyt>();
+            }
+            else if (hexagonal_tile_shift == "even_column")
+            {
+                exact_physical_design<fiction::hex_even_col_gate_clk_lyt>();
             }
             else
             {
-                env->out() << fmt::format("[e] impossible to place and route {} within the given parameters",
-                                          std::visit(get_name, ntk))
+                env->out() << "[e] possible values for the hexagonal tile shift are 'odd_row', 'even_row', "
+                              "'odd_column', and 'even_column'"
                            << std::endl;
             }
         }
-        catch (...)
+        else  // Cartesian layout
         {
-            env->out() << fmt::format("[e] an error occurred while placing and routing {} with the given parameters",
-                                      std::visit(get_name, ntk))
-                       << std::endl;
+            exact_physical_design<fiction::cart_gate_clk_lyt>();
         }
 
         reset_flags();
@@ -164,11 +169,17 @@ class exact_command : public command
 
   private:
     /**
-     * Configuration object extracted from arguments and flags.
+     * Parameters.
      */
     fiction::exact_physical_design_params<fiction::cart_gate_clk_lyt> ps{};
-
+    /**
+     * Statistics.
+     */
     fiction::exact_physical_design_stats st{};
+    /**
+     * Tile shift for hexagonal layouts.
+     */
+    std::string hexagonal_tile_shift{};
     /**
      * Identifier of clocking scheme to use.
      */
@@ -179,8 +190,73 @@ class exact_command : public command
      */
     void reset_flags()
     {
-        ps       = fiction::exact_physical_design_params<fiction::cart_gate_clk_lyt>{};
-        clocking = "2DDWave";
+        ps                   = fiction::exact_physical_design_params<fiction::cart_gate_clk_lyt>{};
+        st                   = {};
+        hexagonal_tile_shift = {};
+        clocking             = "2DDWave";
+    }
+
+    template <typename LytDest, typename LytSrc>
+    fiction::exact_physical_design_params<LytDest>
+    convert_params(const fiction::exact_physical_design_params<LytSrc>& ps_src) const noexcept
+    {
+        fiction::exact_physical_design_params<LytDest> ps_dest{};
+
+        ps_dest.scheme = std::make_shared<fiction::clocking_scheme<fiction::coordinate<LytDest>>>(
+            *fiction::get_clocking_scheme<LytDest>(ps_src.scheme->name));
+
+        ps_dest.upper_bound              = ps_src.upper_bound;
+        ps_dest.fixed_size               = ps_src.fixed_size;
+        ps_dest.num_threads              = ps_src.num_threads;
+        ps_dest.crossings                = ps_src.crossings;
+        ps_dest.io_ports                 = ps_src.io_ports;
+        ps_dest.border_io                = ps_src.border_io;
+        ps_dest.synchronization_elements = ps_src.synchronization_elements;
+        ps_dest.straight_inverters       = ps_src.straight_inverters;
+        ps_dest.desynchronize            = ps_src.desynchronize;
+        ps_dest.minimize_wires           = ps_src.minimize_wires;
+        ps_dest.minimize_crossings       = ps_src.minimize_crossings;
+        ps_dest.timeout                  = ps_src.timeout;
+
+        return ps_dest;
+    }
+
+    template <typename Lyt>
+    void exact_physical_design()
+    {
+        const auto get_name = [](auto&& ntk_ptr) -> std::string { return ntk_ptr->get_network_name(); };
+
+        const auto perform_physical_design = [this](auto&& ntk_ptr)
+        { return fiction::exact<Lyt>(*ntk_ptr, convert_params<Lyt>(ps), &st); };
+
+        const auto& ntk_ptr = store<fiction::logic_network_t>().current();
+
+        // perform exact physical design
+        try
+        {
+            const auto lyt = std::visit(perform_physical_design, ntk_ptr);
+
+            if (lyt.has_value())
+            {
+                store<fiction::gate_layout_t>().extend() = std::make_shared<Lyt>(*lyt);
+            }
+            else
+            {
+                env->out() << fmt::format("[e] impossible to place and route {} within the given parameters",
+                                          std::visit(get_name, ntk_ptr))
+                           << std::endl;
+            }
+        }
+        //                catch (const fiction::high_degree_fanin_exception& e)
+        //                {
+        //                    env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+        //                }
+        catch (...)
+        {
+            env->out() << fmt::format("[e] an error occurred while placing and routing {} with the given parameters",
+                                      std::visit(get_name, ntk_ptr))
+                       << std::endl;
+        }
     }
 };
 
