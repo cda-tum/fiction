@@ -284,6 +284,18 @@ static auto bancs_clocking() noexcept
 
     return clocking_scheme{clock_name::bancs, bancs_3_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 3u, true};
 }
+/**
+ * Returns a smart pointer to the given scheme.
+ *
+ * @tparam Lyt Layout type.
+ * @param scheme Universal reference to a clocking scheme.
+ * @return A shared pointer to the given scheme.
+ */
+template <typename Lyt>
+std::shared_ptr<clocking_scheme<typename Lyt::tile>> ptr(clocking_scheme<typename Lyt::tile>&& scheme) noexcept
+{
+    return std::make_shared<clocking_scheme<typename Lyt::tile>>(std::move(scheme));
+}
 
 template <typename Lyt>
 std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::string& name) noexcept
