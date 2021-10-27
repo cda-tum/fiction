@@ -223,6 +223,13 @@ mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, cons
         }
     }
     // more gate types go here
+    if constexpr (mockturtle::has_is_function_v<Ntk>)
+    {
+        if (ntk.is_function(n))
+        {
+            return lyt.create_node({a, b, c}, ntk.node_function(n), t);
+        }
+    }
 
     assert(false);  // n must be of some supported type
     return {};      // fix -Wreturn-type warning
