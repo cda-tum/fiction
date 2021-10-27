@@ -135,8 +135,6 @@ class exact_impl
         // create PO nodes in the network
         intermediate_ntk.substitute_po_signals();
 
-        debug::write_dot_network(intermediate_ntk);
-
         ntk = std::make_shared<topology_ntk_t>(mockturtle::fanout_view{intermediate_ntk});
 
         lower_bound = static_cast<decltype(lower_bound)>(
@@ -1883,18 +1881,18 @@ class exact_impl
             assign_layout_clocking(model);
             // from now on, a clocking scheme is assigned and no distinction between regular and irregular must be made
 
-            std::ofstream assertions_file{"assertions.txt"};
-
-            assertions_file << layout.x() << " x " << layout.y() << std::endl;
-            assertions_file << solver->assertions() << std::endl;
-
-            assertions_file.close();
-
-            std::ofstream model_file{"model.txt"};
-
-            model_file << model << std::endl;
-
-            model_file.close();
+//            std::ofstream assertions_file{"assertions.txt"};
+//
+//            assertions_file << layout.x() << " x " << layout.y() << std::endl;
+//            assertions_file << solver->assertions() << std::endl;
+//
+//            assertions_file.close();
+//
+//            std::ofstream model_file{"model.txt"};
+//
+//            model_file << model << std::endl;
+//
+//            model_file.close();
 
             const auto pis = reserve_input_nodes(layout, network);
 
@@ -1975,7 +1973,7 @@ class exact_impl
                     }
                 });
 
-            debug::write_dot_network(network);
+//            debug::write_dot_network(network);
 
             // adjust wires for ToPoliNano clocking as multi wires are supported
             //            if (config.topolinano)
