@@ -2359,6 +2359,12 @@ std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = 
                   "Ntk is not a network type");  // Ntk is being converted to a topology_network anyways, therefore,
                                                  // this is the only relevant check here
 
+    // check for input degree
+    if (has_high_degree_fanin_nodes(ntk, ps.scheme->max_in_degree))
+    {
+        throw high_degree_fanin_exception();
+    }
+
     exact_physical_design_stats  st{};
     detail::exact_impl<Lyt, Ntk> p{ntk, ps, st};
 

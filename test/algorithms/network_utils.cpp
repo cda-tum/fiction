@@ -23,3 +23,17 @@ TEST_CASE("Number of constant fanins", "[network-utils]")
 
     CHECK(num_constant_fanins(and_inv, 3) == 1ul);
 }
+
+TEST_CASE("High-degree fanin nodes", "[network-utils]")
+{
+    const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
+
+    CHECK(has_high_degree_fanin_nodes(maj4, 2));
+    CHECK(!has_high_degree_fanin_nodes(maj4, 3));
+
+    const auto and_inv = blueprints::unbalanced_and_inv_network<mockturtle::mig_network>();
+
+    CHECK(has_high_degree_fanin_nodes(and_inv, 1));
+    CHECK(!has_high_degree_fanin_nodes(and_inv, 2));
+    CHECK(!has_high_degree_fanin_nodes(and_inv, 3));
+}

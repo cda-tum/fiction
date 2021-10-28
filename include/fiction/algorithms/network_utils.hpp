@@ -137,6 +137,40 @@ uint32_t num_constant_fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noe
     return num_const_fi;
 }
 
+class high_degree_fanin_exception : public std::exception
+{
+  public:
+    explicit high_degree_fanin_exception() : std::exception() {}
+
+    [[nodiscard]] const char* what() const noexcept
+    {
+        return "network contains nodes that exceed the supported non-constant fanin size";
+    }
+};
+
+template <typename Ntk>
+bool has_high_degree_fanin_nodes(const Ntk& ntk, const uint32_t threshold = 2) noexcept
+{
+    bool result = false;
+
+    ntk.foreach_node(
+        [&ntk, &threshold, &result](const auto& n)
+        {
+            // skip constants
+            if (!ntk.is_constant(n))
+            {
+                if ((ntk.fanin_size(n) - num_constant_fanins(ntk, n)) > threshold)
+                {
+                    result = true;
+                }
+            }
+
+            return !result;
+        });
+
+    return result;
+}
+
 }  // namespace fiction
 
 #endif  // FICTION_NETWORK_UTILS_HPP

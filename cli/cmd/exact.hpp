@@ -247,10 +247,10 @@ class exact_command : public command
                            << std::endl;
             }
         }
-        //                catch (const fiction::high_degree_fanin_exception& e)
-        //                {
-        //                    env->out() << fmt::format("[e] {}", e.what()) << std::endl;
-        //                }
+        catch (const fiction::high_degree_fanin_exception& e)
+        {
+            env->out() << fmt::format("[e] {} of the given clocking scheme", e.what()) << std::endl;
+        }
         catch (...)
         {
             env->out() << fmt::format("[e] an error occurred while placing and routing {} with the given parameters",

@@ -58,42 +58,8 @@ struct orthogonal_physical_design_stats
     }
 };
 
-class high_degree_fanin_exception : public std::exception
-{
-  public:
-    explicit high_degree_fanin_exception() : std::exception() {}
-
-    [[nodiscard]] const char* what() const noexcept
-    {
-        return "network cannot have nodes with more than two non-constant fanins";
-    }
-};
-
 namespace detail
 {
-
-template <typename Ntk>
-bool has_high_degree_fanin_nodes(const Ntk& ntk, const uint32_t threshold = 2) noexcept
-{
-    bool result = false;
-
-    ntk.foreach_node(
-        [&ntk, &threshold, &result](const auto& n)
-        {
-            // skip constants
-            if (!ntk.is_constant(n))
-            {
-                if ((ntk.fanin_size(n) - num_constant_fanins(ntk, n)) > threshold)
-                {
-                    result = true;
-                }
-            }
-
-            return !result;
-        });
-
-    return result;
-}
 
 template <typename Ntk>
 bool has_po_fanout(const Ntk& ntk, const mockturtle::node<Ntk> n) noexcept
@@ -640,7 +606,7 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
                                                  // this is the only relevant check here
 
     // check for input degree
-    if (detail::has_high_degree_fanin_nodes(ntk))
+    if (has_high_degree_fanin_nodes(ntk, 2))
     {
         throw high_degree_fanin_exception();
     }

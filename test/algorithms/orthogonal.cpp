@@ -25,20 +25,6 @@
 
 using namespace fiction;
 
-TEST_CASE("High-degree fanin nodes", "[orthogonal]")
-{
-    const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
-
-    CHECK(detail::has_high_degree_fanin_nodes(maj4, 2));
-    CHECK(!detail::has_high_degree_fanin_nodes(maj4, 3));
-
-    const auto and_inv = blueprints::unbalanced_and_inv_network<mockturtle::mig_network>();
-
-    CHECK(detail::has_high_degree_fanin_nodes(and_inv, 1));
-    CHECK(!detail::has_high_degree_fanin_nodes(and_inv, 2));
-    CHECK(!detail::has_high_degree_fanin_nodes(and_inv, 3));
-}
-
 TEST_CASE("East-south coloring", "[orthogonal]")
 {
     const auto check = [](const auto& ntk)

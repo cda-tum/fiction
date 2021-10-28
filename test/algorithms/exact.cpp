@@ -11,6 +11,7 @@
 #include <fiction/algorithms/apply_gate_library.hpp>
 #include <fiction/algorithms/design_rule_violations.hpp>
 #include <fiction/algorithms/exact.hpp>
+#include <fiction/algorithms/network_utils.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -199,7 +200,18 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
     check_all_hexagonal(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
 }
 
-TEST_CASE("High degree input networks", "[exact]") {}
+TEST_CASE("High degree input networks", "[exact]")
+{
+    CHECK_THROWS_AS(exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(),
+                                             twoddwave(configuration<cart_gate_clk_lyt>())),
+                    high_degree_fanin_exception);
+    CHECK_THROWS_AS(exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(),
+                                             use(configuration<cart_gate_clk_lyt>())),
+                    high_degree_fanin_exception);
+    
+    CHECK_NOTHROW(exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(),
+                                           res(configuration<cart_gate_clk_lyt>())));
+}
 
 // TEST_CASE("Timeout", "[exact]")
 //{
