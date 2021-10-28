@@ -21,13 +21,15 @@
 #include <fiction/types.hpp>                           // pre-defined types suitable for the FCN domain
 #include <fiction/utils/debug/network_writer.hpp>      // DOT writer for logic networks and layouts
 
-#include <fmt/format.h>                      // output formatting
-#include <lorina/lorina.hpp>                 // file parsing
-#include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
-#include <mockturtle/networks/aig.hpp>       // AND-inverter graphs
-#include <mockturtle/networks/mig.hpp>       // MAJ-inverter graphs
-#include <mockturtle/views/depth_view.hpp>   // to determine network levels
-#include <mockturtle/views/names_view.hpp>   // to assign names to network signals
+#include <fmt/format.h>                                        // output formatting
+#include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
+#include <mockturtle/algorithms/cut_rewriting.hpp>             // logic optimization with cut rewriting
+#include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
+#include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
+#include <mockturtle/networks/aig.hpp>                         // AND-inverter graphs
+#include <mockturtle/networks/mig.hpp>                         // MAJ-inverter graphs
+#include <mockturtle/views/depth_view.hpp>                     // to determine network levels
+#include <mockturtle/views/names_view.hpp>                     // to assign names to network signals
 
 #include <filesystem>  // filesystem access
 #include <iostream>    // output
@@ -131,14 +133,43 @@ int main(int argc, char* argv[])
 
     // ntk now contains a representation of the given file; let's have some fun with it
 
-    /**************************************************************/
-    /******************* Network pre-processing *******************/
-    /**************************************************************/
-
     // first, print some properties
     print_network_properties(ntk);
     // and draw the network
     fiction::debug::write_dot_network(ntk, "ntk", designs);
+
+    std::cout << std::endl;
+
+    /**************************************************************/
+    /********************* Logic Optimization *********************/
+    /**************************************************************/
+
+    std::cout << "[i] cut rewriting" << std::endl;
+
+    // instantiate a complete AIG NPN database for node re-synthesis
+    mockturtle::xag_npn_resynthesis<logic_network,                              // the input network type
+                                    mockturtle::aig_network,                    // the database network type
+                                    mockturtle::xag_npn_db_kind::aig_complete>  // the kind of database to use
+        resynthesis_function{};
+
+    mockturtle::cut_rewriting_params cut_params{};
+    cut_params.cut_enumeration_ps.cut_size = 4;
+
+    // rewrite network cuts using the given re-synthesis function
+    ntk = mockturtle::cut_rewriting(ntk, resynthesis_function, cut_params);
+
+    // print network properties again
+    print_network_properties(ntk);
+    // draw the network again
+    fiction::debug::write_dot_network(ntk, "cut_ntk", designs);
+
+    std::cout << std::endl;
+
+    /**************************************************************/
+    /******************* Network pre-processing *******************/
+    /**************************************************************/
+
+    std::cout << "[i] fanout substitution" << std::endl;
 
     // set up parameters for fanout substitution
     fiction::fanout_substitution_params fanout_params{};
@@ -150,7 +181,6 @@ int main(int argc, char* argv[])
     auto top_ntk = fiction::fanout_substitution<fiction::top_nt>(ntk, fanout_params);
 
     // print network properties again
-    std::cout << "[i] fanout substitution" << std::endl;
     print_network_properties(top_ntk);
     // draw network again
     fiction::debug::write_dot_network(top_ntk, "top_ntk", designs);
