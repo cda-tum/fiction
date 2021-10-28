@@ -202,6 +202,8 @@ int main(int argc, char* argv[])
         fiction::cell_level_layout<fiction::qca_technology,
                                    fiction::clocked_layout<fiction::cartesian_layout<fiction::cartesian::ucoord_t>>>;
 
+    std::cout << "[i] orthogonal physical design" << std::endl;
+
     // set up parameters for orthogonal physical design
     fiction::orthogonal_physical_design_params ortho_params{};
     ortho_params.number_of_clock_phases = fiction::num_clks::FOUR;
@@ -209,7 +211,7 @@ int main(int argc, char* argv[])
 
     // perform layout generation with a scalable algorithm
     auto ortho_gate_lyt = fiction::orthogonal<fcn_gate_level_layout>(top_ntk, ortho_params, &ortho_stats);
-    std::cout << "[i] orthogonal physical design" << std::endl;
+
     // print layout properties
     print_gate_layout_properties(ortho_gate_lyt);
     // draw the layout
@@ -240,16 +242,16 @@ int main(int argc, char* argv[])
     // attempt exact physical design only if the number of gates is manageable
     if (top_ntk.num_gates() < 28)
     {
+        std::cout << "[i] SMT-based physical design" << std::endl;
+
         // set up parameters for SMT-based physical design
         fiction::exact_physical_design_params<fcn_gate_level_layout> exact_params{};
         exact_params.scheme = fiction::ptr<fcn_gate_level_layout>(
             fiction::twoddwave_clocking<fcn_gate_level_layout>(fiction::num_clks::FOUR));
         exact_params.crossings = true;
         exact_params.border_io = true;
-        exact_params.timeout   = 300000;  // 5min in ms
+        exact_params.timeout   = 180000;  // 3min in ms
         fiction::exact_physical_design_stats exact_stats{};
-
-        std::cout << "[i] SMT-based physical design" << std::endl;
 
         // perform layout generation with an SMT-based exact algorithm
         auto exact_gate_lyt = fiction::exact<fcn_gate_level_layout>(top_ntk, exact_params, &exact_stats);
