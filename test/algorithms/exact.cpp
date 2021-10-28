@@ -208,7 +208,7 @@ TEST_CASE("High degree input networks", "[exact]")
     CHECK_THROWS_AS(exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(),
                                              use(configuration<cart_gate_clk_lyt>())),
                     high_degree_fanin_exception);
-    
+
     CHECK_NOTHROW(exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(),
                                            res(configuration<cart_gate_clk_lyt>())));
 }

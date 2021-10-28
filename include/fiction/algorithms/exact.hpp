@@ -131,7 +131,9 @@ class exact_impl
             pst{st}
     {
         mockturtle::names_view<topology_network> intermediate_ntk{
-            fanout_substitution<mockturtle::names_view<topology_network>>(src)};
+            fanout_substitution<mockturtle::names_view<topology_network>>(
+                src, {fanout_substitution_params::substitution_strategy::BREADTH, ps.scheme->max_out_degree, 1ul})};
+
         // create PO nodes in the network
         intermediate_ntk.substitute_po_signals();
 
