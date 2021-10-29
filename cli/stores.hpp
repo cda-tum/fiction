@@ -252,7 +252,7 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
         // Cartesian layout
-        if constexpr (Lyt::max_fanin_size == 3)
+        if constexpr (fiction::is_cartesian_layout_v<Lyt>)
         {
             if (cmd.is_set("indexes"))
             {
@@ -278,7 +278,7 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
             }
         }
         // hexagonal layout
-        else if constexpr (Lyt::max_fanin_size == 5)
+        else if constexpr (fiction::is_hexagonal_layout_v<Lyt>)
         {
             if (cmd.is_set("indexes"))
             {

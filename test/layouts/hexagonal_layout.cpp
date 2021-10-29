@@ -16,22 +16,79 @@ using namespace fiction;
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 
+template <typename Lyt>
+void check_common_traits()
+{
+    CHECK(has_north_v<Lyt>);
+    CHECK(has_east_v<Lyt>);
+    CHECK(has_south_v<Lyt>);
+    CHECK(has_west_v<Lyt>);
+    CHECK(has_cardinal_operations_v<Lyt>);
+    CHECK(has_above_v<Lyt>);
+    CHECK(has_below_v<Lyt>);
+    CHECK(has_elevation_operations_v<Lyt>);
+    CHECK(is_coordinate_layout_v<Lyt>);
+    CHECK(!is_cartesian_layout_v<Lyt>);
+    CHECK(is_hexagonal_layout_v<Lyt>);
+
+    CHECK(has_foreach_coordinate_v<Lyt>);
+    CHECK(has_foreach_adjacent_coordinate_v<Lyt>);
+}
+
 TEST_CASE("Traits", "[hexagonal-layout]")
 {
-    using layout = hexagonal_layout<cartesian::ucoord_t, even_column>;
+    SECTION("odd row")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, odd_row>;
 
-    //    CHECK(has_north_v<layout>);
-    //    CHECK(has_east_v<layout>);
-    //    CHECK(has_south_v<layout>);
-    //    CHECK(has_west_v<layout>);
-    //    CHECK(has_cardinal_checks_v<layout>);
-    //    CHECK(has_above_v<layout>);
-    //    CHECK(has_below_v<layout>);
-    //    CHECK(has_elevation_checks_v<layout>);
-    CHECK(is_coordinate_layout_v<layout>);
+        CHECK(has_pointy_top_hex_orientation<layout>);
+        CHECK(!has_flat_top_hex_orientation<layout>);
+        CHECK(has_odd_row_hex_arrangment<layout>);
+        CHECK(!has_even_row_hex_arrangment<layout>);
+        CHECK(!has_odd_column_hex_arrangment<layout>);
+        CHECK(!has_even_column_hex_arrangment<layout>);
 
-    CHECK(has_foreach_coordinate_v<layout>);
-    CHECK(has_foreach_adjacent_coordinate_v<layout>);
+        check_common_traits<layout>();
+    }
+    SECTION("even row")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, even_row>;
+
+        CHECK(has_pointy_top_hex_orientation<layout>);
+        CHECK(!has_flat_top_hex_orientation<layout>);
+        CHECK(!has_odd_row_hex_arrangment<layout>);
+        CHECK(has_even_row_hex_arrangment<layout>);
+        CHECK(!has_odd_column_hex_arrangment<layout>);
+        CHECK(!has_even_column_hex_arrangment<layout>);
+
+        check_common_traits<layout>();
+    }
+    SECTION("odd column")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, odd_column>;
+
+        CHECK(!has_pointy_top_hex_orientation<layout>);
+        CHECK(has_flat_top_hex_orientation<layout>);
+        CHECK(!has_odd_row_hex_arrangment<layout>);
+        CHECK(!has_even_row_hex_arrangment<layout>);
+        CHECK(has_odd_column_hex_arrangment<layout>);
+        CHECK(!has_even_column_hex_arrangment<layout>);
+
+        check_common_traits<layout>();
+    }
+    SECTION("even column")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, even_column>;
+
+        CHECK(!has_pointy_top_hex_orientation<layout>);
+        CHECK(has_flat_top_hex_orientation<layout>);
+        CHECK(!has_odd_row_hex_arrangment<layout>);
+        CHECK(!has_even_row_hex_arrangment<layout>);
+        CHECK(!has_odd_column_hex_arrangment<layout>);
+        CHECK(has_even_column_hex_arrangment<layout>);
+
+        check_common_traits<layout>();
+    }
 }
 
 template <typename Lyt>
