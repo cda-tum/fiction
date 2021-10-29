@@ -104,12 +104,13 @@ class clocking_scheme
 
 namespace clock_name
 {
-static constexpr const char* open      = "OPEN";
-static constexpr const char* columnar  = "COLUMNAR";
-static constexpr const char* twoddwave = "2DDWAVE";
-static constexpr const char* use       = "USE";
-static constexpr const char* res       = "RES";
-static constexpr const char* bancs     = "BANCS";
+static constexpr const char* open          = "OPEN";
+static constexpr const char* columnar      = "COLUMNAR";
+static constexpr const char* twoddwave     = "2DDWAVE";
+static constexpr const char* twoddwave_hex = "2DDWAVEHEX";
+static constexpr const char* use           = "USE";
+static constexpr const char* res           = "RES";
+static constexpr const char* bancs         = "BANCS";
 }  // namespace clock_name
 
 enum class num_clks
@@ -143,7 +144,7 @@ static auto open_clocking(const num_clks& n = num_clks::FOUR) noexcept
     }
 
     // fix -Wreturn-type warning
-    return clocking_scheme{clock_name::open, open_clock_function, 4u, false};
+    return clocking_scheme{clock_name::open, open_clock_function, Lyt::max_fanin_size, Lyt::max_fanin_size, 4u, false};
 }
 /**
  * Returns a linear 1D clocking as originally introduced in "A device architecture for computing with
@@ -185,7 +186,8 @@ static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
     }
 
     // fix -Wreturn-type warning
-    return clocking_scheme{clock_name::columnar, columnar_4_clock_function, 4u, true};
+    return clocking_scheme{
+        clock_name::columnar, columnar_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
 }
 /**
  * Returns the 2DDWave clocking as defined in "Clocking and Cell Placement for QCA" by V. Vankamamidi, M. Ottavi,
@@ -227,7 +229,66 @@ static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
     }
 
     // fix -Wreturn-type warning
-    return clocking_scheme{clock_name::twoddwave, twoddwave_4_clock_function, 4u, true};
+    return clocking_scheme{
+        clock_name::twoddwave, twoddwave_4_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
+}
+/**
+ * Returns a hexagonal variation of the 2DDWave clocking as originally defined in "Clocking and Cell Placement for QCA"
+ * by V. Vankamamidi, M. Ottavi, and F. Lombardi in IEEE Conference on Nanotechnology 2006.
+ */
+template <typename Lyt>
+static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
+{
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function twoddwave_hex_3_clock_function =
+        [](const clock_zone<Lyt>& cz) noexcept
+    {
+        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u> cutout{
+            {{{0, 1, 2}}, {{0, 1, 2}}, {{1, 2, 0}}, {{1, 2, 0}}, {{2, 0, 1}}, {{2, 0, 1}}}};
+
+        return cutout[cz.y % 6ul][cz.x % 3ul];
+    };
+
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function twoddwave_hex_4_clock_function =
+        [](const clock_zone<Lyt>& cz) noexcept
+    {
+        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 8u> cutout{
+            {{{0, 1, 2, 3}},
+             {{0, 1, 2, 3}},
+             {{1, 2, 3, 0}},
+             {{1, 2, 3, 0}},
+             {{2, 3, 0, 1}},
+             {{2, 3, 0, 1}},
+             {{3, 0, 1, 2}},
+             {{3, 0, 1, 2}}}};
+
+        return cutout[cz.y % 8ul][cz.x % 4ul];
+    };
+
+    switch (n)
+    {
+        case num_clks::THREE:
+        {
+            return clocking_scheme{clock_name::twoddwave_hex,
+                                   twoddwave_hex_3_clock_function,
+                                   std::min(Lyt::max_fanin_size, 2u),
+                                   2u,
+                                   3u,
+                                   true};
+        }
+        case num_clks::FOUR:
+        {
+            return clocking_scheme{clock_name::twoddwave_hex,
+                                   twoddwave_hex_4_clock_function,
+                                   std::min(Lyt::max_fanin_size, 2u),
+                                   2u,
+                                   4u,
+                                   true};
+        }
+    }
+
+    // fix -Wreturn-type warning
+    return clocking_scheme{
+        clock_name::twoddwave_hex, twoddwave_hex_4_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
 }
 /**
  * Returns the USE clocking as defined in "USE: A Universal, Scalable, and Efficient Clocking Scheme for QCA"
@@ -310,6 +371,9 @@ std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::s
         {clock_name::twoddwave, twoddwave_clocking<Lyt>(num_clks::FOUR)},
         {"TWODDWAVE3", twoddwave_clocking<Lyt>(num_clks::THREE)},
         {"TWODDWAVE4", twoddwave_clocking<Lyt>(num_clks::FOUR)},
+        {clock_name::twoddwave_hex, twoddwave_hex_clocking<Lyt>(num_clks::FOUR)},
+        {"TWODDWAVEHEX3", twoddwave_hex_clocking<Lyt>(num_clks::THREE)},
+        {"TWODDWAVEHEX4", twoddwave_hex_clocking<Lyt>(num_clks::FOUR)},
         {clock_name::use, use_clocking<Lyt>()},
         {clock_name::res, res_clocking<Lyt>()},
         {clock_name::bancs, bancs_clocking<Lyt>()}};
