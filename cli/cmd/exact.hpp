@@ -92,18 +92,6 @@ class exact_command : public command
             ps.upper_bound = ps.fixed_size;
         }
 
-        // fetch clocking scheme
-        if (auto clk = fiction::get_clocking_scheme<fiction::cart_gate_clk_lyt>(clocking); clk.has_value())
-        {
-            ps.scheme = std::make_shared<fiction::clocking_scheme<fiction::cart_gate_clk_lyt::tile>>(*clk);
-        }
-        else
-        {
-            env->out() << "[e] \"" << clocking << "\" does not refer to a supported clocking scheme" << std::endl;
-            reset_flags();
-            return;
-        }
-
         // fetch number of threads available on the system
         if (this->is_set("async_max"))
         {
@@ -202,9 +190,6 @@ class exact_command : public command
     {
         fiction::exact_physical_design_params<LytDest> ps_dest{};
 
-        ps_dest.scheme = std::make_shared<fiction::clocking_scheme<fiction::coordinate<LytDest>>>(
-            *fiction::get_clocking_scheme<LytDest>(ps_src.scheme->name));
-
         ps_dest.upper_bound              = ps_src.upper_bound;
         ps_dest.fixed_size               = ps_src.fixed_size;
         ps_dest.num_threads              = ps_src.num_threads;
@@ -222,12 +207,39 @@ class exact_command : public command
     }
 
     template <typename Lyt>
+    std::shared_ptr<fiction::clocking_scheme<fiction::clock_zone<Lyt>>> fetch_clocking_scheme()
+    {
+        // fetch clocking scheme
+        if (auto clk = fiction::get_clocking_scheme<Lyt>(clocking); clk.has_value())
+        {
+            return fiction::ptr<Lyt>(std::move(*clk));
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+
+    template <typename Lyt>
     void exact_physical_design()
     {
+        auto clk_scheme_ptr = fetch_clocking_scheme<Lyt>();
+
+        if (clk_scheme_ptr == nullptr)
+        {
+            env->out() << "[e] \"" << clocking << "\" does not refer to a supported clocking scheme" << std::endl;
+            reset_flags();
+            return;
+        }
+
         const auto get_name = [](auto&& ntk_ptr) -> std::string { return ntk_ptr->get_network_name(); };
 
-        const auto perform_physical_design = [this](auto&& ntk_ptr)
-        { return fiction::exact<Lyt>(*ntk_ptr, convert_params<Lyt>(ps), &st); };
+        const auto perform_physical_design = [this, &clk_scheme_ptr](auto&& ntk_ptr)
+        {
+            auto cps   = convert_params<Lyt>(ps);
+            cps.scheme = clk_scheme_ptr;
+            return fiction::exact<Lyt>(*ntk_ptr, cps, &st);
+        };
 
         const auto& ntk_ptr = store<fiction::logic_network_t>().current();
 

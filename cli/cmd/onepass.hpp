@@ -110,7 +110,7 @@ class onepass_command : public command
                 return;
             }
 
-            ps.scheme = std::make_shared<fiction::clocking_scheme<fiction::cart_gate_clk_lyt::tile>>(*clk);
+            ps.scheme = fiction::ptr<fiction::cart_gate_clk_lyt>(std::move(*clk));
             if (ps.scheme->name != "RES" && ps.enable_maj)
             {
                 ps.enable_maj = false;
