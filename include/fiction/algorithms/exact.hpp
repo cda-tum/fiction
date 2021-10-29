@@ -1216,7 +1216,9 @@ class exact_impl
                 }
             };
 
-            if (!(layout.is_clocking_scheme(clock_name::twoddwave) && config.border_io))
+            if (!((layout.is_clocking_scheme(clock_name::twoddwave) ||
+                   layout.is_clocking_scheme(clock_name::twoddwave_hex)) &&
+                  config.border_io))
             {
                 if (config.io_ports)
                 {
@@ -1719,7 +1721,8 @@ class exact_impl
             define_inv_adjacent_edge_tiles();
 
             // global synchronization constraints
-            if (!config.desynchronize && !layout.is_clocking_scheme(clock_name::twoddwave))
+            if (!config.desynchronize && !(layout.is_clocking_scheme(clock_name::twoddwave) ||
+                                           layout.is_clocking_scheme(clock_name::twoddwave_hex)))
             {
                 assign_pi_clockings();
                 //                global_synchronization();
@@ -1732,8 +1735,8 @@ class exact_impl
             }
 
             // path/cycle constraints
-            if (!(layout.is_clocking_scheme(clock_name::columnar) ||
-                  layout.is_clocking_scheme(clock_name::twoddwave)))  // linear schemes; no cycles by definition
+            if (!(layout.is_clocking_scheme(clock_name::columnar) || layout.is_clocking_scheme(clock_name::twoddwave) ||
+                  layout.is_clocking_scheme(clock_name::twoddwave_hex)))  // linear schemes; no cycles by definition
             {
                 establish_sub_paths();
                 establish_transitive_paths();
@@ -1840,7 +1843,8 @@ class exact_impl
          */
         void route(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e, const z3::model& model)
         {
-//            std::cout << fmt::format("Routing ({},{}) starting on {}", e.source, e.target, t) << std::endl;
+            //            std::cout << fmt::format("Routing ({},{}) starting on {}", e.source, e.target, t) <<
+            //            std::endl;
 
             layout.foreach_outgoing_clocked_zone(
                 t,
@@ -1851,9 +1855,11 @@ class exact_impl
                     if (model.eval(get_te(at, e)).bool_value() == Z3_L_TRUE &&
                         model.eval(get_tc(t, at)).bool_value() == Z3_L_TRUE)
                     {
-//                        std::cout << fmt::format("assigning ({},{}) to {} with incoming signal {}", e.source, e.target,
-//                                                 at, static_cast<tile<Lyt>>(node2pos[e.source][e.target]))
-//                                  << std::endl;
+                        //                        std::cout << fmt::format("assigning ({},{}) to {} with incoming signal
+                        //                        {}", e.source, e.target,
+                        //                                                 at,
+                        //                                                 static_cast<tile<Lyt>>(node2pos[e.source][e.target]))
+                        //                                  << std::endl;
 
                         // assign wire segment to at and save its position as the
                         // signal lookup for e's source node
@@ -1883,18 +1889,18 @@ class exact_impl
             assign_layout_clocking(model);
             // from now on, a clocking scheme is assigned and no distinction between regular and irregular must be made
 
-//            std::ofstream assertions_file{"assertions.txt"};
-//
-//            assertions_file << layout.x() << " x " << layout.y() << std::endl;
-//            assertions_file << solver->assertions() << std::endl;
-//
-//            assertions_file.close();
-//
-//            std::ofstream model_file{"model.txt"};
-//
-//            model_file << model << std::endl;
-//
-//            model_file.close();
+            //            std::ofstream assertions_file{"assertions.txt"};
+            //
+            //            assertions_file << layout.x() << " x " << layout.y() << std::endl;
+            //            assertions_file << solver->assertions() << std::endl;
+            //
+            //            assertions_file.close();
+            //
+            //            std::ofstream model_file{"model.txt"};
+            //
+            //            model_file << model << std::endl;
+            //
+            //            model_file.close();
 
             const auto pis = reserve_input_nodes(layout, network);
 
@@ -1975,7 +1981,7 @@ class exact_impl
                     }
                 });
 
-//            debug::write_dot_network(network);
+            //            debug::write_dot_network(network);
 
             // adjust wires for ToPoliNano clocking as multi wires are supported
             //            if (config.topolinano)

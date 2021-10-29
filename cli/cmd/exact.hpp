@@ -92,7 +92,7 @@ class exact_command : public command
             ps.upper_bound = ps.fixed_size;
         }
 
-        // choose clocking
+        // fetch clocking scheme
         if (auto clk = fiction::get_clocking_scheme<fiction::cart_gate_clk_lyt>(clocking); clk.has_value())
         {
             ps.scheme = std::make_shared<fiction::clocking_scheme<fiction::cart_gate_clk_lyt::tile>>(*clk);

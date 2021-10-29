@@ -268,21 +268,13 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
     {
         case num_clks::THREE:
         {
-            return clocking_scheme{clock_name::twoddwave_hex,
-                                   twoddwave_hex_3_clock_function,
-                                   std::min(Lyt::max_fanin_size, 2u),
-                                   2u,
-                                   3u,
-                                   true};
+            return clocking_scheme{
+                clock_name::twoddwave_hex, twoddwave_hex_3_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 3u, true};
         }
         case num_clks::FOUR:
         {
-            return clocking_scheme{clock_name::twoddwave_hex,
-                                   twoddwave_hex_4_clock_function,
-                                   std::min(Lyt::max_fanin_size, 2u),
-                                   2u,
-                                   4u,
-                                   true};
+            return clocking_scheme{
+                clock_name::twoddwave_hex, twoddwave_hex_4_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
         }
     }
 

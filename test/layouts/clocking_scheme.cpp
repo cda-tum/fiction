@@ -854,6 +854,8 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
     CHECK(!get_clocking_scheme<clk_lyt>("").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("TwoDDWave").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("2DDWave6").has_value());
+    CHECK(!get_clocking_scheme<clk_lyt>("SUE").has_value());
+    CHECK(!get_clocking_scheme<clk_lyt>("ERS").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("BNCS").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("Column").has_value());
 }
