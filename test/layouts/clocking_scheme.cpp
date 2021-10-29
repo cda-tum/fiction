@@ -573,28 +573,180 @@ TEST_CASE("3-phase 2DDWaveHex", "[clocking-scheme]")
         CHECK(twoddwave_hex_3({2 + 3, 4 + 6}) == 1);
         CHECK(twoddwave_hex_3({2 + 3, 5 + 6}) == 1);
     }
-//    SECTION("odd column")
-//    {
-//        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column>>;
-//
-//        const auto twoddwave_hex_3 = twoddwave_hex_clocking<clk_lyt>(num_clks::THREE);
-//
-//        CHECK(twoddwave_hex_3.num_clocks == 3u);
-//        CHECK(twoddwave_hex_3.max_in_degree == 2u);
-//        CHECK(twoddwave_hex_3.max_out_degree == 2u);
-//        CHECK(twoddwave_hex_3.is_regular());
-//    }
-//    SECTION("even column")
-//    {
-//        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_column>>;
-//
-//        const auto twoddwave_hex_3 = twoddwave_hex_clocking<clk_lyt>(num_clks::THREE);
-//
-//        CHECK(twoddwave_hex_3.num_clocks == 3u);
-//        CHECK(twoddwave_hex_3.max_in_degree == 2u);
-//        CHECK(twoddwave_hex_3.max_out_degree == 2u);
-//        CHECK(twoddwave_hex_3.is_regular());
-//    }
+    SECTION("odd column")
+    {
+        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column>>;
+
+        const auto twoddwave_hex_3 = twoddwave_hex_clocking<clk_lyt>(num_clks::THREE);
+
+        CHECK(twoddwave_hex_3.num_clocks == 3u);
+        CHECK(twoddwave_hex_3.max_in_degree == 2u);
+        CHECK(twoddwave_hex_3.max_out_degree == 2u);
+        CHECK(twoddwave_hex_3.is_regular());
+
+        CHECK(twoddwave_hex_3({0, 0}) == 0);
+        CHECK(twoddwave_hex_3({0, 1}) == 1);
+        CHECK(twoddwave_hex_3({0, 2}) == 2);
+        CHECK(twoddwave_hex_3({1, 0}) == 1);
+        CHECK(twoddwave_hex_3({1, 1}) == 2);
+        CHECK(twoddwave_hex_3({1, 2}) == 0);
+        CHECK(twoddwave_hex_3({2, 0}) == 1);
+        CHECK(twoddwave_hex_3({2, 1}) == 2);
+        CHECK(twoddwave_hex_3({2, 2}) == 0);
+        CHECK(twoddwave_hex_3({3, 0}) == 2);
+        CHECK(twoddwave_hex_3({3, 1}) == 0);
+        CHECK(twoddwave_hex_3({3, 2}) == 1);
+        CHECK(twoddwave_hex_3({4, 0}) == 2);
+        CHECK(twoddwave_hex_3({4, 1}) == 0);
+        CHECK(twoddwave_hex_3({4, 2}) == 1);
+        CHECK(twoddwave_hex_3({5, 0}) == 0);
+        CHECK(twoddwave_hex_3({5, 1}) == 1);
+        CHECK(twoddwave_hex_3({5, 2}) == 2);
+
+        CHECK(twoddwave_hex_3({0 + 6, 0}) == 0);
+        CHECK(twoddwave_hex_3({0 + 6, 1}) == 1);
+        CHECK(twoddwave_hex_3({0 + 6, 2}) == 2);
+        CHECK(twoddwave_hex_3({1 + 6, 0}) == 1);
+        CHECK(twoddwave_hex_3({1 + 6, 1}) == 2);
+        CHECK(twoddwave_hex_3({1 + 6, 2}) == 0);
+        CHECK(twoddwave_hex_3({2 + 6, 0}) == 1);
+        CHECK(twoddwave_hex_3({2 + 6, 1}) == 2);
+        CHECK(twoddwave_hex_3({2 + 6, 2}) == 0);
+        CHECK(twoddwave_hex_3({3 + 6, 0}) == 2);
+        CHECK(twoddwave_hex_3({3 + 6, 1}) == 0);
+        CHECK(twoddwave_hex_3({3 + 6, 2}) == 1);
+        CHECK(twoddwave_hex_3({4 + 6, 0}) == 2);
+        CHECK(twoddwave_hex_3({4 + 6, 1}) == 0);
+        CHECK(twoddwave_hex_3({4 + 6, 2}) == 1);
+        CHECK(twoddwave_hex_3({5 + 6, 0}) == 0);
+        CHECK(twoddwave_hex_3({5 + 6, 1}) == 1);
+        CHECK(twoddwave_hex_3({5 + 6, 2}) == 2);
+
+        CHECK(twoddwave_hex_3({0, 0 + 3}) == 0);
+        CHECK(twoddwave_hex_3({0, 1 + 3}) == 1);
+        CHECK(twoddwave_hex_3({0, 2 + 3}) == 2);
+        CHECK(twoddwave_hex_3({1, 0 + 3}) == 1);
+        CHECK(twoddwave_hex_3({1, 1 + 3}) == 2);
+        CHECK(twoddwave_hex_3({1, 2 + 3}) == 0);
+        CHECK(twoddwave_hex_3({2, 0 + 3}) == 1);
+        CHECK(twoddwave_hex_3({2, 1 + 3}) == 2);
+        CHECK(twoddwave_hex_3({2, 2 + 3}) == 0);
+        CHECK(twoddwave_hex_3({3, 0 + 3}) == 2);
+        CHECK(twoddwave_hex_3({3, 1 + 3}) == 0);
+        CHECK(twoddwave_hex_3({3, 2 + 3}) == 1);
+        CHECK(twoddwave_hex_3({4, 0 + 3}) == 2);
+        CHECK(twoddwave_hex_3({4, 1 + 3}) == 0);
+        CHECK(twoddwave_hex_3({4, 2 + 3}) == 1);
+        CHECK(twoddwave_hex_3({5, 0 + 3}) == 0);
+        CHECK(twoddwave_hex_3({5, 1 + 3}) == 1);
+        CHECK(twoddwave_hex_3({5, 2 + 3}) == 2);
+
+        CHECK(twoddwave_hex_3({0 + 6, 0 + 3}) == 0);
+        CHECK(twoddwave_hex_3({0 + 6, 1 + 3}) == 1);
+        CHECK(twoddwave_hex_3({0 + 6, 2 + 3}) == 2);
+        CHECK(twoddwave_hex_3({1 + 6, 0 + 3}) == 1);
+        CHECK(twoddwave_hex_3({1 + 6, 1 + 3}) == 2);
+        CHECK(twoddwave_hex_3({1 + 6, 2 + 3}) == 0);
+        CHECK(twoddwave_hex_3({2 + 6, 0 + 3}) == 1);
+        CHECK(twoddwave_hex_3({2 + 6, 1 + 3}) == 2);
+        CHECK(twoddwave_hex_3({2 + 6, 2 + 3}) == 0);
+        CHECK(twoddwave_hex_3({3 + 6, 0 + 3}) == 2);
+        CHECK(twoddwave_hex_3({3 + 6, 1 + 3}) == 0);
+        CHECK(twoddwave_hex_3({3 + 6, 2 + 3}) == 1);
+        CHECK(twoddwave_hex_3({4 + 6, 0 + 3}) == 2);
+        CHECK(twoddwave_hex_3({4 + 6, 1 + 3}) == 0);
+        CHECK(twoddwave_hex_3({4 + 6, 2 + 3}) == 1);
+        CHECK(twoddwave_hex_3({5 + 6, 0 + 3}) == 0);
+        CHECK(twoddwave_hex_3({5 + 6, 1 + 3}) == 1);
+        CHECK(twoddwave_hex_3({5 + 6, 2 + 3}) == 2);
+    }
+    SECTION("even column")
+    {
+        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_column>>;
+
+        const auto twoddwave_hex_3 = twoddwave_hex_clocking<clk_lyt>(num_clks::THREE);
+
+        CHECK(twoddwave_hex_3.num_clocks == 3u);
+        CHECK(twoddwave_hex_3.max_in_degree == 2u);
+        CHECK(twoddwave_hex_3.max_out_degree == 2u);
+        CHECK(twoddwave_hex_3.is_regular());
+
+        CHECK(twoddwave_hex_3({0, 0}) == 0);
+        CHECK(twoddwave_hex_3({0, 1}) == 1);
+        CHECK(twoddwave_hex_3({0, 2}) == 2);
+        CHECK(twoddwave_hex_3({1, 0}) == 0);
+        CHECK(twoddwave_hex_3({1, 1}) == 1);
+        CHECK(twoddwave_hex_3({1, 2}) == 2);
+        CHECK(twoddwave_hex_3({2, 0}) == 1);
+        CHECK(twoddwave_hex_3({2, 1}) == 2);
+        CHECK(twoddwave_hex_3({2, 2}) == 0);
+        CHECK(twoddwave_hex_3({3, 0}) == 1);
+        CHECK(twoddwave_hex_3({3, 1}) == 2);
+        CHECK(twoddwave_hex_3({3, 2}) == 0);
+        CHECK(twoddwave_hex_3({4, 0}) == 2);
+        CHECK(twoddwave_hex_3({4, 1}) == 0);
+        CHECK(twoddwave_hex_3({4, 2}) == 1);
+        CHECK(twoddwave_hex_3({5, 0}) == 2);
+        CHECK(twoddwave_hex_3({5, 1}) == 0);
+        CHECK(twoddwave_hex_3({5, 2}) == 1);
+
+        CHECK(twoddwave_hex_3({0 + 6, 0}) == 0);
+        CHECK(twoddwave_hex_3({0 + 6, 1}) == 1);
+        CHECK(twoddwave_hex_3({0 + 6, 2}) == 2);
+        CHECK(twoddwave_hex_3({1 + 6, 0}) == 0);
+        CHECK(twoddwave_hex_3({1 + 6, 1}) == 1);
+        CHECK(twoddwave_hex_3({1 + 6, 2}) == 2);
+        CHECK(twoddwave_hex_3({2 + 6, 0}) == 1);
+        CHECK(twoddwave_hex_3({2 + 6, 1}) == 2);
+        CHECK(twoddwave_hex_3({2 + 6, 2}) == 0);
+        CHECK(twoddwave_hex_3({3 + 6, 0}) == 1);
+        CHECK(twoddwave_hex_3({3 + 6, 1}) == 2);
+        CHECK(twoddwave_hex_3({3 + 6, 2}) == 0);
+        CHECK(twoddwave_hex_3({4 + 6, 0}) == 2);
+        CHECK(twoddwave_hex_3({4 + 6, 1}) == 0);
+        CHECK(twoddwave_hex_3({4 + 6, 2}) == 1);
+        CHECK(twoddwave_hex_3({5 + 6, 0}) == 2);
+        CHECK(twoddwave_hex_3({5 + 6, 1}) == 0);
+        CHECK(twoddwave_hex_3({5 + 6, 2}) == 1);
+
+        CHECK(twoddwave_hex_3({0, 0 + 3}) == 0);
+        CHECK(twoddwave_hex_3({0, 1 + 3}) == 1);
+        CHECK(twoddwave_hex_3({0, 2 + 3}) == 2);
+        CHECK(twoddwave_hex_3({1, 0 + 3}) == 0);
+        CHECK(twoddwave_hex_3({1, 1 + 3}) == 1);
+        CHECK(twoddwave_hex_3({1, 2 + 3}) == 2);
+        CHECK(twoddwave_hex_3({2, 0 + 3}) == 1);
+        CHECK(twoddwave_hex_3({2, 1 + 3}) == 2);
+        CHECK(twoddwave_hex_3({2, 2 + 3}) == 0);
+        CHECK(twoddwave_hex_3({3, 0 + 3}) == 1);
+        CHECK(twoddwave_hex_3({3, 1 + 3}) == 2);
+        CHECK(twoddwave_hex_3({3, 2 + 3}) == 0);
+        CHECK(twoddwave_hex_3({4, 0 + 3}) == 2);
+        CHECK(twoddwave_hex_3({4, 1 + 3}) == 0);
+        CHECK(twoddwave_hex_3({4, 2 + 3}) == 1);
+        CHECK(twoddwave_hex_3({5, 0 + 3}) == 2);
+        CHECK(twoddwave_hex_3({5, 1 + 3}) == 0);
+        CHECK(twoddwave_hex_3({5, 2 + 3}) == 1);
+
+        CHECK(twoddwave_hex_3({0 + 6, 0 + 3}) == 0);
+        CHECK(twoddwave_hex_3({0 + 6, 1 + 3}) == 1);
+        CHECK(twoddwave_hex_3({0 + 6, 2 + 3}) == 2);
+        CHECK(twoddwave_hex_3({1 + 6, 0 + 3}) == 0);
+        CHECK(twoddwave_hex_3({1 + 6, 1 + 3}) == 1);
+        CHECK(twoddwave_hex_3({1 + 6, 2 + 3}) == 2);
+        CHECK(twoddwave_hex_3({2 + 6, 0 + 3}) == 1);
+        CHECK(twoddwave_hex_3({2 + 6, 1 + 3}) == 2);
+        CHECK(twoddwave_hex_3({2 + 6, 2 + 3}) == 0);
+        CHECK(twoddwave_hex_3({3 + 6, 0 + 3}) == 1);
+        CHECK(twoddwave_hex_3({3 + 6, 1 + 3}) == 2);
+        CHECK(twoddwave_hex_3({3 + 6, 2 + 3}) == 0);
+        CHECK(twoddwave_hex_3({4 + 6, 0 + 3}) == 2);
+        CHECK(twoddwave_hex_3({4 + 6, 1 + 3}) == 0);
+        CHECK(twoddwave_hex_3({4 + 6, 2 + 3}) == 1);
+        CHECK(twoddwave_hex_3({5 + 6, 0 + 3}) == 2);
+        CHECK(twoddwave_hex_3({5 + 6, 1 + 3}) == 0);
+        CHECK(twoddwave_hex_3({5 + 6, 2 + 3}) == 1);
+    }
 }
 
 TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
@@ -884,6 +1036,292 @@ TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
         CHECK(twoddwave_hex_4({3 + 4, 5 + 8}) == 1);
         CHECK(twoddwave_hex_4({3 + 4, 6 + 8}) == 2);
         CHECK(twoddwave_hex_4({3 + 4, 7 + 8}) == 2);
+    }
+    SECTION("odd column")
+    {
+        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column>>;
+
+        const auto twoddwave_hex_4 = twoddwave_hex_clocking<clk_lyt>(num_clks::FOUR);
+
+        CHECK(twoddwave_hex_4.num_clocks == 4u);
+        CHECK(twoddwave_hex_4.max_in_degree == 2u);
+        CHECK(twoddwave_hex_4.max_out_degree == 2u);
+        CHECK(twoddwave_hex_4.is_regular());
+
+        CHECK(twoddwave_hex_4({0, 0}) == 0);
+        CHECK(twoddwave_hex_4({0, 1}) == 1);
+        CHECK(twoddwave_hex_4({0, 2}) == 2);
+        CHECK(twoddwave_hex_4({0, 3}) == 3);
+        CHECK(twoddwave_hex_4({1, 0}) == 1);
+        CHECK(twoddwave_hex_4({1, 1}) == 2);
+        CHECK(twoddwave_hex_4({1, 2}) == 3);
+        CHECK(twoddwave_hex_4({1, 3}) == 0);
+        CHECK(twoddwave_hex_4({2, 0}) == 1);
+        CHECK(twoddwave_hex_4({2, 1}) == 2);
+        CHECK(twoddwave_hex_4({2, 2}) == 3);
+        CHECK(twoddwave_hex_4({2, 3}) == 0);
+        CHECK(twoddwave_hex_4({3, 0}) == 2);
+        CHECK(twoddwave_hex_4({3, 1}) == 3);
+        CHECK(twoddwave_hex_4({3, 2}) == 0);
+        CHECK(twoddwave_hex_4({3, 3}) == 1);
+        CHECK(twoddwave_hex_4({4, 0}) == 2);
+        CHECK(twoddwave_hex_4({4, 1}) == 3);
+        CHECK(twoddwave_hex_4({4, 2}) == 0);
+        CHECK(twoddwave_hex_4({4, 3}) == 1);
+        CHECK(twoddwave_hex_4({5, 0}) == 3);
+        CHECK(twoddwave_hex_4({5, 1}) == 0);
+        CHECK(twoddwave_hex_4({5, 2}) == 1);
+        CHECK(twoddwave_hex_4({5, 3}) == 2);
+        CHECK(twoddwave_hex_4({6, 0}) == 3);
+        CHECK(twoddwave_hex_4({6, 1}) == 0);
+        CHECK(twoddwave_hex_4({6, 2}) == 1);
+        CHECK(twoddwave_hex_4({6, 3}) == 2);
+        CHECK(twoddwave_hex_4({7, 0}) == 0);
+        CHECK(twoddwave_hex_4({7, 1}) == 1);
+        CHECK(twoddwave_hex_4({7, 2}) == 2);
+        CHECK(twoddwave_hex_4({7, 3}) == 3);
+
+        CHECK(twoddwave_hex_4({0 + 8, 0}) == 0);
+        CHECK(twoddwave_hex_4({0 + 8, 1}) == 1);
+        CHECK(twoddwave_hex_4({0 + 8, 2}) == 2);
+        CHECK(twoddwave_hex_4({0 + 8, 3}) == 3);
+        CHECK(twoddwave_hex_4({1 + 8, 0}) == 1);
+        CHECK(twoddwave_hex_4({1 + 8, 1}) == 2);
+        CHECK(twoddwave_hex_4({1 + 8, 2}) == 3);
+        CHECK(twoddwave_hex_4({1 + 8, 3}) == 0);
+        CHECK(twoddwave_hex_4({2 + 8, 0}) == 1);
+        CHECK(twoddwave_hex_4({2 + 8, 1}) == 2);
+        CHECK(twoddwave_hex_4({2 + 8, 2}) == 3);
+        CHECK(twoddwave_hex_4({2 + 8, 3}) == 0);
+        CHECK(twoddwave_hex_4({3 + 8, 0}) == 2);
+        CHECK(twoddwave_hex_4({3 + 8, 1}) == 3);
+        CHECK(twoddwave_hex_4({3 + 8, 2}) == 0);
+        CHECK(twoddwave_hex_4({3 + 8, 3}) == 1);
+        CHECK(twoddwave_hex_4({4 + 8, 0}) == 2);
+        CHECK(twoddwave_hex_4({4 + 8, 1}) == 3);
+        CHECK(twoddwave_hex_4({4 + 8, 2}) == 0);
+        CHECK(twoddwave_hex_4({4 + 8, 3}) == 1);
+        CHECK(twoddwave_hex_4({5 + 8, 0}) == 3);
+        CHECK(twoddwave_hex_4({5 + 8, 1}) == 0);
+        CHECK(twoddwave_hex_4({5 + 8, 2}) == 1);
+        CHECK(twoddwave_hex_4({5 + 8, 3}) == 2);
+        CHECK(twoddwave_hex_4({6 + 8, 0}) == 3);
+        CHECK(twoddwave_hex_4({6 + 8, 1}) == 0);
+        CHECK(twoddwave_hex_4({6 + 8, 2}) == 1);
+        CHECK(twoddwave_hex_4({6 + 8, 3}) == 2);
+        CHECK(twoddwave_hex_4({7 + 8, 0}) == 0);
+        CHECK(twoddwave_hex_4({7 + 8, 1}) == 1);
+        CHECK(twoddwave_hex_4({7 + 8, 2}) == 2);
+        CHECK(twoddwave_hex_4({7 + 8, 3}) == 3);
+
+        CHECK(twoddwave_hex_4({0, 0 + 4}) == 0);
+        CHECK(twoddwave_hex_4({0, 1 + 4}) == 1);
+        CHECK(twoddwave_hex_4({0, 2 + 4}) == 2);
+        CHECK(twoddwave_hex_4({0, 3 + 4}) == 3);
+        CHECK(twoddwave_hex_4({1, 0 + 4}) == 1);
+        CHECK(twoddwave_hex_4({1, 1 + 4}) == 2);
+        CHECK(twoddwave_hex_4({1, 2 + 4}) == 3);
+        CHECK(twoddwave_hex_4({1, 3 + 4}) == 0);
+        CHECK(twoddwave_hex_4({2, 0 + 4}) == 1);
+        CHECK(twoddwave_hex_4({2, 1 + 4}) == 2);
+        CHECK(twoddwave_hex_4({2, 2 + 4}) == 3);
+        CHECK(twoddwave_hex_4({2, 3 + 4}) == 0);
+        CHECK(twoddwave_hex_4({3, 0 + 4}) == 2);
+        CHECK(twoddwave_hex_4({3, 1 + 4}) == 3);
+        CHECK(twoddwave_hex_4({3, 2 + 4}) == 0);
+        CHECK(twoddwave_hex_4({3, 3 + 4}) == 1);
+        CHECK(twoddwave_hex_4({4, 0 + 4}) == 2);
+        CHECK(twoddwave_hex_4({4, 1 + 4}) == 3);
+        CHECK(twoddwave_hex_4({4, 2 + 4}) == 0);
+        CHECK(twoddwave_hex_4({4, 3 + 4}) == 1);
+        CHECK(twoddwave_hex_4({5, 0 + 4}) == 3);
+        CHECK(twoddwave_hex_4({5, 1 + 4}) == 0);
+        CHECK(twoddwave_hex_4({5, 2 + 4}) == 1);
+        CHECK(twoddwave_hex_4({5, 3 + 4}) == 2);
+        CHECK(twoddwave_hex_4({6, 0 + 4}) == 3);
+        CHECK(twoddwave_hex_4({6, 1 + 4}) == 0);
+        CHECK(twoddwave_hex_4({6, 2 + 4}) == 1);
+        CHECK(twoddwave_hex_4({6, 3 + 4}) == 2);
+        CHECK(twoddwave_hex_4({7, 0 + 4}) == 0);
+        CHECK(twoddwave_hex_4({7, 1 + 4}) == 1);
+        CHECK(twoddwave_hex_4({7, 2 + 4}) == 2);
+        CHECK(twoddwave_hex_4({7, 3 + 4}) == 3);
+
+        CHECK(twoddwave_hex_4({0 + 8, 0 + 4}) == 0);
+        CHECK(twoddwave_hex_4({0 + 8, 1 + 4}) == 1);
+        CHECK(twoddwave_hex_4({0 + 8, 2 + 4}) == 2);
+        CHECK(twoddwave_hex_4({0 + 8, 3 + 4}) == 3);
+        CHECK(twoddwave_hex_4({1 + 8, 0 + 4}) == 1);
+        CHECK(twoddwave_hex_4({1 + 8, 1 + 4}) == 2);
+        CHECK(twoddwave_hex_4({1 + 8, 2 + 4}) == 3);
+        CHECK(twoddwave_hex_4({1 + 8, 3 + 4}) == 0);
+        CHECK(twoddwave_hex_4({2 + 8, 0 + 4}) == 1);
+        CHECK(twoddwave_hex_4({2 + 8, 1 + 4}) == 2);
+        CHECK(twoddwave_hex_4({2 + 8, 2 + 4}) == 3);
+        CHECK(twoddwave_hex_4({2 + 8, 3 + 4}) == 0);
+        CHECK(twoddwave_hex_4({3 + 8, 0 + 4}) == 2);
+        CHECK(twoddwave_hex_4({3 + 8, 1 + 4}) == 3);
+        CHECK(twoddwave_hex_4({3 + 8, 2 + 4}) == 0);
+        CHECK(twoddwave_hex_4({3 + 8, 3 + 4}) == 1);
+        CHECK(twoddwave_hex_4({4 + 8, 0 + 4}) == 2);
+        CHECK(twoddwave_hex_4({4 + 8, 1 + 4}) == 3);
+        CHECK(twoddwave_hex_4({4 + 8, 2 + 4}) == 0);
+        CHECK(twoddwave_hex_4({4 + 8, 3 + 4}) == 1);
+        CHECK(twoddwave_hex_4({5 + 8, 0 + 4}) == 3);
+        CHECK(twoddwave_hex_4({5 + 8, 1 + 4}) == 0);
+        CHECK(twoddwave_hex_4({5 + 8, 2 + 4}) == 1);
+        CHECK(twoddwave_hex_4({5 + 8, 3 + 4}) == 2);
+        CHECK(twoddwave_hex_4({6 + 8, 0 + 4}) == 3);
+        CHECK(twoddwave_hex_4({6 + 8, 1 + 4}) == 0);
+        CHECK(twoddwave_hex_4({6 + 8, 2 + 4}) == 1);
+        CHECK(twoddwave_hex_4({6 + 8, 3 + 4}) == 2);
+        CHECK(twoddwave_hex_4({7 + 8, 0 + 4}) == 0);
+        CHECK(twoddwave_hex_4({7 + 8, 1 + 4}) == 1);
+        CHECK(twoddwave_hex_4({7 + 8, 2 + 4}) == 2);
+        CHECK(twoddwave_hex_4({7 + 8, 3 + 4}) == 3);
+    }
+    SECTION("even column")
+    {
+        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_column>>;
+
+        const auto twoddwave_hex_4 = twoddwave_hex_clocking<clk_lyt>(num_clks::FOUR);
+
+        CHECK(twoddwave_hex_4.num_clocks == 4u);
+        CHECK(twoddwave_hex_4.max_in_degree == 2u);
+        CHECK(twoddwave_hex_4.max_out_degree == 2u);
+        CHECK(twoddwave_hex_4.is_regular());
+
+        CHECK(twoddwave_hex_4({0, 0}) == 0);
+        CHECK(twoddwave_hex_4({0, 1}) == 1);
+        CHECK(twoddwave_hex_4({0, 2}) == 2);
+        CHECK(twoddwave_hex_4({0, 3}) == 3);
+        CHECK(twoddwave_hex_4({1, 0}) == 0);
+        CHECK(twoddwave_hex_4({1, 1}) == 1);
+        CHECK(twoddwave_hex_4({1, 2}) == 2);
+        CHECK(twoddwave_hex_4({1, 3}) == 3);
+        CHECK(twoddwave_hex_4({2, 0}) == 1);
+        CHECK(twoddwave_hex_4({2, 1}) == 2);
+        CHECK(twoddwave_hex_4({2, 2}) == 3);
+        CHECK(twoddwave_hex_4({2, 3}) == 0);
+        CHECK(twoddwave_hex_4({3, 0}) == 1);
+        CHECK(twoddwave_hex_4({3, 1}) == 2);
+        CHECK(twoddwave_hex_4({3, 2}) == 3);
+        CHECK(twoddwave_hex_4({3, 3}) == 0);
+        CHECK(twoddwave_hex_4({4, 0}) == 2);
+        CHECK(twoddwave_hex_4({4, 1}) == 3);
+        CHECK(twoddwave_hex_4({4, 2}) == 0);
+        CHECK(twoddwave_hex_4({4, 3}) == 1);
+        CHECK(twoddwave_hex_4({5, 0}) == 2);
+        CHECK(twoddwave_hex_4({5, 1}) == 3);
+        CHECK(twoddwave_hex_4({5, 2}) == 0);
+        CHECK(twoddwave_hex_4({5, 3}) == 1);
+        CHECK(twoddwave_hex_4({6, 0}) == 3);
+        CHECK(twoddwave_hex_4({6, 1}) == 0);
+        CHECK(twoddwave_hex_4({6, 2}) == 1);
+        CHECK(twoddwave_hex_4({6, 3}) == 2);
+        CHECK(twoddwave_hex_4({7, 0}) == 3);
+        CHECK(twoddwave_hex_4({7, 1}) == 0);
+        CHECK(twoddwave_hex_4({7, 2}) == 1);
+        CHECK(twoddwave_hex_4({7, 3}) == 2);
+
+        CHECK(twoddwave_hex_4({0 + 8, 0}) == 0);
+        CHECK(twoddwave_hex_4({0 + 8, 1}) == 1);
+        CHECK(twoddwave_hex_4({0 + 8, 2}) == 2);
+        CHECK(twoddwave_hex_4({0 + 8, 3}) == 3);
+        CHECK(twoddwave_hex_4({1 + 8, 0}) == 0);
+        CHECK(twoddwave_hex_4({1 + 8, 1}) == 1);
+        CHECK(twoddwave_hex_4({1 + 8, 2}) == 2);
+        CHECK(twoddwave_hex_4({1 + 8, 3}) == 3);
+        CHECK(twoddwave_hex_4({2 + 8, 0}) == 1);
+        CHECK(twoddwave_hex_4({2 + 8, 1}) == 2);
+        CHECK(twoddwave_hex_4({2 + 8, 2}) == 3);
+        CHECK(twoddwave_hex_4({2 + 8, 3}) == 0);
+        CHECK(twoddwave_hex_4({3 + 8, 0}) == 1);
+        CHECK(twoddwave_hex_4({3 + 8, 1}) == 2);
+        CHECK(twoddwave_hex_4({3 + 8, 2}) == 3);
+        CHECK(twoddwave_hex_4({3 + 8, 3}) == 0);
+        CHECK(twoddwave_hex_4({4 + 8, 0}) == 2);
+        CHECK(twoddwave_hex_4({4 + 8, 1}) == 3);
+        CHECK(twoddwave_hex_4({4 + 8, 2}) == 0);
+        CHECK(twoddwave_hex_4({4 + 8, 3}) == 1);
+        CHECK(twoddwave_hex_4({5 + 8, 0}) == 2);
+        CHECK(twoddwave_hex_4({5 + 8, 1}) == 3);
+        CHECK(twoddwave_hex_4({5 + 8, 2}) == 0);
+        CHECK(twoddwave_hex_4({5 + 8, 3}) == 1);
+        CHECK(twoddwave_hex_4({6 + 8, 0}) == 3);
+        CHECK(twoddwave_hex_4({6 + 8, 1}) == 0);
+        CHECK(twoddwave_hex_4({6 + 8, 2}) == 1);
+        CHECK(twoddwave_hex_4({6 + 8, 3}) == 2);
+        CHECK(twoddwave_hex_4({7 + 8, 0}) == 3);
+        CHECK(twoddwave_hex_4({7 + 8, 1}) == 0);
+        CHECK(twoddwave_hex_4({7 + 8, 2}) == 1);
+        CHECK(twoddwave_hex_4({7 + 8, 3}) == 2);
+
+        CHECK(twoddwave_hex_4({0, 0 + 4}) == 0);
+        CHECK(twoddwave_hex_4({0, 1 + 4}) == 1);
+        CHECK(twoddwave_hex_4({0, 2 + 4}) == 2);
+        CHECK(twoddwave_hex_4({0, 3 + 4}) == 3);
+        CHECK(twoddwave_hex_4({1, 0 + 4}) == 0);
+        CHECK(twoddwave_hex_4({1, 1 + 4}) == 1);
+        CHECK(twoddwave_hex_4({1, 2 + 4}) == 2);
+        CHECK(twoddwave_hex_4({1, 3 + 4}) == 3);
+        CHECK(twoddwave_hex_4({2, 0 + 4}) == 1);
+        CHECK(twoddwave_hex_4({2, 1 + 4}) == 2);
+        CHECK(twoddwave_hex_4({2, 2 + 4}) == 3);
+        CHECK(twoddwave_hex_4({2, 3 + 4}) == 0);
+        CHECK(twoddwave_hex_4({3, 0 + 4}) == 1);
+        CHECK(twoddwave_hex_4({3, 1 + 4}) == 2);
+        CHECK(twoddwave_hex_4({3, 2 + 4}) == 3);
+        CHECK(twoddwave_hex_4({3, 3 + 4}) == 0);
+        CHECK(twoddwave_hex_4({4, 0 + 4}) == 2);
+        CHECK(twoddwave_hex_4({4, 1 + 4}) == 3);
+        CHECK(twoddwave_hex_4({4, 2 + 4}) == 0);
+        CHECK(twoddwave_hex_4({4, 3 + 4}) == 1);
+        CHECK(twoddwave_hex_4({5, 0 + 4}) == 2);
+        CHECK(twoddwave_hex_4({5, 1 + 4}) == 3);
+        CHECK(twoddwave_hex_4({5, 2 + 4}) == 0);
+        CHECK(twoddwave_hex_4({5, 3 + 4}) == 1);
+        CHECK(twoddwave_hex_4({6, 0 + 4}) == 3);
+        CHECK(twoddwave_hex_4({6, 1 + 4}) == 0);
+        CHECK(twoddwave_hex_4({6, 2 + 4}) == 1);
+        CHECK(twoddwave_hex_4({6, 3 + 4}) == 2);
+        CHECK(twoddwave_hex_4({7, 0 + 4}) == 3);
+        CHECK(twoddwave_hex_4({7, 1 + 4}) == 0);
+        CHECK(twoddwave_hex_4({7, 2 + 4}) == 1);
+        CHECK(twoddwave_hex_4({7, 3 + 4}) == 2);
+
+        CHECK(twoddwave_hex_4({0 + 8, 0 + 4}) == 0);
+        CHECK(twoddwave_hex_4({0 + 8, 1 + 4}) == 1);
+        CHECK(twoddwave_hex_4({0 + 8, 2 + 4}) == 2);
+        CHECK(twoddwave_hex_4({0 + 8, 3 + 4}) == 3);
+        CHECK(twoddwave_hex_4({1 + 8, 0 + 4}) == 0);
+        CHECK(twoddwave_hex_4({1 + 8, 1 + 4}) == 1);
+        CHECK(twoddwave_hex_4({1 + 8, 2 + 4}) == 2);
+        CHECK(twoddwave_hex_4({1 + 8, 3 + 4}) == 3);
+        CHECK(twoddwave_hex_4({2 + 8, 0 + 4}) == 1);
+        CHECK(twoddwave_hex_4({2 + 8, 1 + 4}) == 2);
+        CHECK(twoddwave_hex_4({2 + 8, 2 + 4}) == 3);
+        CHECK(twoddwave_hex_4({2 + 8, 3 + 4}) == 0);
+        CHECK(twoddwave_hex_4({3 + 8, 0 + 4}) == 1);
+        CHECK(twoddwave_hex_4({3 + 8, 1 + 4}) == 2);
+        CHECK(twoddwave_hex_4({3 + 8, 2 + 4}) == 3);
+        CHECK(twoddwave_hex_4({3 + 8, 3 + 4}) == 0);
+        CHECK(twoddwave_hex_4({4 + 8, 0 + 4}) == 2);
+        CHECK(twoddwave_hex_4({4 + 8, 1 + 4}) == 3);
+        CHECK(twoddwave_hex_4({4 + 8, 2 + 4}) == 0);
+        CHECK(twoddwave_hex_4({4 + 8, 3 + 4}) == 1);
+        CHECK(twoddwave_hex_4({5 + 8, 0 + 4}) == 2);
+        CHECK(twoddwave_hex_4({5 + 8, 1 + 4}) == 3);
+        CHECK(twoddwave_hex_4({5 + 8, 2 + 4}) == 0);
+        CHECK(twoddwave_hex_4({5 + 8, 3 + 4}) == 1);
+        CHECK(twoddwave_hex_4({6 + 8, 0 + 4}) == 3);
+        CHECK(twoddwave_hex_4({6 + 8, 1 + 4}) == 0);
+        CHECK(twoddwave_hex_4({6 + 8, 2 + 4}) == 1);
+        CHECK(twoddwave_hex_4({6 + 8, 3 + 4}) == 2);
+        CHECK(twoddwave_hex_4({7 + 8, 0 + 4}) == 3);
+        CHECK(twoddwave_hex_4({7 + 8, 1 + 4}) == 0);
+        CHECK(twoddwave_hex_4({7 + 8, 2 + 4}) == 1);
+        CHECK(twoddwave_hex_4({7 + 8, 3 + 4}) == 2);
     }
 }
 

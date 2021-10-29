@@ -243,12 +243,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
         [](const clock_zone<Lyt>& cz) noexcept
     {
         constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u> cutout{
-            {{{0, 1, 2}},
-             {{1, 2, 0}},
-             {{1, 2, 0}},
-             {{2, 0, 1}},
-             {{2, 0, 1}},
-             {{0, 1, 2}}}};
+            {{{0, 1, 2}}, {{1, 2, 0}}, {{1, 2, 0}}, {{2, 0, 1}}, {{2, 0, 1}}, {{0, 1, 2}}}};
 
         return cutout[cz.y % 6ul][cz.x % 3ul];
     };
@@ -273,12 +268,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
         [](const clock_zone<Lyt>& cz) noexcept
     {
         constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u> cutout{
-            {{{0, 1, 2}},
-             {{0, 1, 2}},
-             {{1, 2, 0}},
-             {{1, 2, 0}},
-             {{2, 0, 1}},
-             {{2, 0, 1}}}};
+            {{{0, 1, 2}}, {{0, 1, 2}}, {{1, 2, 0}}, {{1, 2, 0}}, {{2, 0, 1}}, {{2, 0, 1}}}};
 
         return cutout[cz.y % 6ul][cz.x % 3ul];
     };
@@ -297,6 +287,48 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
              {{3, 0, 1, 2}}}};
 
         return cutout[cz.y % 8ul][cz.x % 4ul];
+    };
+
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function odd_column_twoddwave_hex_3_clock_function =
+        [](const clock_zone<Lyt>& cz) noexcept
+    {
+        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 6u>, 3u> cutout{
+            {{{0, 1, 1, 2, 2, 0}}, {{1, 2, 2, 0, 0, 1}}, {{2, 0, 0, 1, 1, 2}}}};
+
+        return cutout[cz.y % 3ul][cz.x % 6ul];
+    };
+
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function odd_column_twoddwave_hex_4_clock_function =
+        [](const clock_zone<Lyt>& cz) noexcept
+    {
+        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 8u>, 4u> cutout{
+            {{{0, 1, 1, 2, 2, 3, 3, 0}},
+             {{1, 2, 2, 3, 3, 0, 0, 1}},
+             {{2, 3, 3, 0, 0, 1, 1, 2}},
+             {{3, 0, 0, 1, 1, 2, 2, 3}}}};
+
+        return cutout[cz.y % 4ul][cz.x % 8ul];
+    };
+
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function even_column_twoddwave_hex_3_clock_function =
+        [](const clock_zone<Lyt>& cz) noexcept
+    {
+        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 6u>, 3u> cutout{
+            {{{0, 0, 1, 1, 2, 2}}, {{1, 1, 2, 2, 0, 0}}, {{2, 2, 0, 0, 1, 1}}}};
+
+        return cutout[cz.y % 3ul][cz.x % 6ul];
+    };
+
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function even_column_twoddwave_hex_4_clock_function =
+        [](const clock_zone<Lyt>& cz) noexcept
+    {
+        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 8u>, 4u> cutout{
+            {{{0, 0, 1, 1, 2, 2, 3, 3}},
+             {{1, 1, 2, 2, 3, 3, 0, 0}},
+             {{2, 2, 3, 3, 0, 0, 1, 1}},
+             {{3, 3, 0, 0, 1, 1, 2, 2}}}};
+
+        return cutout[cz.y % 4ul][cz.x % 8ul];
     };
 
     if constexpr (is_hexagonal_layout_v<Lyt>)
@@ -324,14 +356,6 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
                                            true};
                 }
             }
-
-            // fix -Wreturn-type warning
-            return clocking_scheme{clock_name::twoddwave_hex,
-                                   odd_row_twoddwave_hex_4_clock_function,
-                                   std::min(Lyt::max_fanin_size, 2u),
-                                   2u,
-                                   4u,
-                                   true};
         }
         else if constexpr (has_even_row_hex_arrangment<Lyt>)
         {
@@ -356,14 +380,54 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
                                            true};
                 }
             }
-
-            // fix -Wreturn-type warning
-            return clocking_scheme{clock_name::twoddwave_hex,
-                                   even_row_twoddwave_hex_4_clock_function,
-                                   std::min(Lyt::max_fanin_size, 2u),
-                                   2u,
-                                   4u,
-                                   true};
+        }
+        else if constexpr (has_odd_column_hex_arrangment<Lyt>)
+        {
+            switch (n)
+            {
+                case num_clks::THREE:
+                {
+                    return clocking_scheme{clock_name::twoddwave_hex,
+                                           odd_column_twoddwave_hex_3_clock_function,
+                                           std::min(Lyt::max_fanin_size, 2u),
+                                           2u,
+                                           3u,
+                                           true};
+                }
+                case num_clks::FOUR:
+                {
+                    return clocking_scheme{clock_name::twoddwave_hex,
+                                           odd_column_twoddwave_hex_4_clock_function,
+                                           std::min(Lyt::max_fanin_size, 2u),
+                                           2u,
+                                           4u,
+                                           true};
+                }
+            }
+        }
+        else if constexpr (has_even_column_hex_arrangment<Lyt>)
+        {
+            switch (n)
+            {
+                case num_clks::THREE:
+                {
+                    return clocking_scheme{clock_name::twoddwave_hex,
+                                           even_column_twoddwave_hex_3_clock_function,
+                                           std::min(Lyt::max_fanin_size, 2u),
+                                           2u,
+                                           3u,
+                                           true};
+                }
+                case num_clks::FOUR:
+                {
+                    return clocking_scheme{clock_name::twoddwave_hex,
+                                           even_column_twoddwave_hex_4_clock_function,
+                                           std::min(Lyt::max_fanin_size, 2u),
+                                           2u,
+                                           4u,
+                                           true};
+                }
+            }
         }
 
         // not a supported hexagonal orientation; fall back to regular 2DDWave clocking
