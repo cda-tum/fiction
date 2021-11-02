@@ -239,97 +239,55 @@ static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
 template <typename Lyt>
 static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
 {
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function odd_row_twoddwave_hex_3_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept
-    {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u> cutout{
-            {{{0, 1, 2}}, {{1, 2, 0}}, {{1, 2, 0}}, {{2, 0, 1}}, {{2, 0, 1}}, {{0, 1, 2}}}};
+    static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u>
+        odd_3_cutout{{{{0, 1, 2}}, {{1, 2, 0}}, {{1, 2, 0}}, {{2, 0, 1}}, {{2, 0, 1}}, {{0, 1, 2}}}};
 
-        return cutout[cz.y % 6ul][cz.x % 3ul];
-    };
+    static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u>
+        even_3_cutout{{{{0, 1, 2}}, {{0, 1, 2}}, {{1, 2, 0}}, {{1, 2, 0}}, {{2, 0, 1}}, {{2, 0, 1}}}};
+
+    static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 8u>
+        odd_4_cutout{{{{0, 1, 2, 3}},
+                      {{1, 2, 3, 0}},
+                      {{1, 2, 3, 0}},
+                      {{2, 3, 0, 1}},
+                      {{2, 3, 0, 1}},
+                      {{3, 0, 1, 2}},
+                      {{3, 0, 1, 2}},
+                      {{0, 1, 2, 3}}}};
+
+    static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 8u>
+        even_4_cutout{{{{0, 1, 2, 3}},
+                       {{0, 1, 2, 3}},
+                       {{1, 2, 3, 0}},
+                       {{1, 2, 3, 0}},
+                       {{2, 3, 0, 1}},
+                       {{2, 3, 0, 1}},
+                       {{3, 0, 1, 2}},
+                       {{3, 0, 1, 2}}}};
+
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function odd_row_twoddwave_hex_3_clock_function =
+        [](const clock_zone<Lyt>& cz) noexcept { return odd_3_cutout[cz.y % 6ul][cz.x % 3ul]; };
 
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function odd_row_twoddwave_hex_4_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept
-    {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 8u> cutout{
-            {{{0, 1, 2, 3}},
-             {{1, 2, 3, 0}},
-             {{1, 2, 3, 0}},
-             {{2, 3, 0, 1}},
-             {{2, 3, 0, 1}},
-             {{3, 0, 1, 2}},
-             {{3, 0, 1, 2}},
-             {{0, 1, 2, 3}}}};
-
-        return cutout[cz.y % 8ul][cz.x % 4ul];
-    };
+        [](const clock_zone<Lyt>& cz) noexcept { return odd_4_cutout[cz.y % 8ul][cz.x % 4ul]; };
 
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function even_row_twoddwave_hex_3_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept
-    {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u> cutout{
-            {{{0, 1, 2}}, {{0, 1, 2}}, {{1, 2, 0}}, {{1, 2, 0}}, {{2, 0, 1}}, {{2, 0, 1}}}};
-
-        return cutout[cz.y % 6ul][cz.x % 3ul];
-    };
+        [](const clock_zone<Lyt>& cz) noexcept { return even_3_cutout[cz.y % 6ul][cz.x % 3ul]; };
 
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function even_row_twoddwave_hex_4_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept
-    {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 8u> cutout{
-            {{{0, 1, 2, 3}},
-             {{0, 1, 2, 3}},
-             {{1, 2, 3, 0}},
-             {{1, 2, 3, 0}},
-             {{2, 3, 0, 1}},
-             {{2, 3, 0, 1}},
-             {{3, 0, 1, 2}},
-             {{3, 0, 1, 2}}}};
-
-        return cutout[cz.y % 8ul][cz.x % 4ul];
-    };
+        [](const clock_zone<Lyt>& cz) noexcept { return even_4_cutout[cz.y % 8ul][cz.x % 4ul]; };
 
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function odd_column_twoddwave_hex_3_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept
-    {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 6u>, 3u> cutout{
-            {{{0, 1, 1, 2, 2, 0}}, {{1, 2, 2, 0, 0, 1}}, {{2, 0, 0, 1, 1, 2}}}};
-
-        return cutout[cz.y % 3ul][cz.x % 6ul];
-    };
+        [](const clock_zone<Lyt>& cz) noexcept { return odd_3_cutout[cz.x % 6ul][cz.y % 3ul]; };
 
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function odd_column_twoddwave_hex_4_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept
-    {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 8u>, 4u> cutout{
-            {{{0, 1, 1, 2, 2, 3, 3, 0}},
-             {{1, 2, 2, 3, 3, 0, 0, 1}},
-             {{2, 3, 3, 0, 0, 1, 1, 2}},
-             {{3, 0, 0, 1, 1, 2, 2, 3}}}};
-
-        return cutout[cz.y % 4ul][cz.x % 8ul];
-    };
+        [](const clock_zone<Lyt>& cz) noexcept { return odd_4_cutout[cz.x % 8ul][cz.y % 4ul]; };
 
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function even_column_twoddwave_hex_3_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept
-    {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 6u>, 3u> cutout{
-            {{{0, 0, 1, 1, 2, 2}}, {{1, 1, 2, 2, 0, 0}}, {{2, 2, 0, 0, 1, 1}}}};
-
-        return cutout[cz.y % 3ul][cz.x % 6ul];
-    };
+        [](const clock_zone<Lyt>& cz) noexcept { return even_3_cutout[cz.x % 6ul][cz.y % 3ul]; };
 
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function even_column_twoddwave_hex_4_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept
-    {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 8u>, 4u> cutout{
-            {{{0, 0, 1, 1, 2, 2, 3, 3}},
-             {{1, 1, 2, 2, 3, 3, 0, 0}},
-             {{2, 2, 3, 3, 0, 0, 1, 1}},
-             {{3, 3, 0, 0, 1, 1, 2, 2}}}};
-
-        return cutout[cz.y % 4ul][cz.x % 8ul];
-    };
+        [](const clock_zone<Lyt>& cz) noexcept { return even_4_cutout[cz.x % 8ul][cz.y % 4ul]; };
 
     if constexpr (is_hexagonal_layout_v<Lyt>)
     {
