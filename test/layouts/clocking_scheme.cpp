@@ -1613,6 +1613,86 @@ TEST_CASE("Override clocking", "[clocking-scheme]")
     CHECK(twoddwave4({3, 3}) == 2);
 }
 
+TEST_CASE("4-phase ESP", "[clocking-scheme]")
+{
+    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+
+    const auto esp4 = esp_clocking<clk_lyt>();
+
+    CHECK(esp4.num_clocks == 4u);
+    CHECK(esp4.max_in_degree == 3u);
+    CHECK(esp4.max_out_degree == 3u);
+    CHECK(esp4.is_regular());
+
+    CHECK(esp4({0, 0}) == 3);
+    CHECK(esp4({0, 1}) == 0);
+    CHECK(esp4({0, 2}) == 1);
+    CHECK(esp4({0, 3}) == 0);
+    CHECK(esp4({1, 0}) == 0);
+    CHECK(esp4({1, 1}) == 1);
+    CHECK(esp4({1, 2}) == 2);
+    CHECK(esp4({1, 3}) == 3);
+    CHECK(esp4({2, 0}) == 1);
+    CHECK(esp4({2, 1}) == 2);
+    CHECK(esp4({2, 2}) == 3);
+    CHECK(esp4({2, 3}) == 2);
+    CHECK(esp4({3, 0}) == 2);
+    CHECK(esp4({3, 1}) == 3);
+    CHECK(esp4({3, 2}) == 0);
+    CHECK(esp4({3, 3}) == 1);
+
+    CHECK(esp4({0 + 4, 0}) == 3);
+    CHECK(esp4({0 + 4, 1}) == 0);
+    CHECK(esp4({0 + 4, 2}) == 1);
+    CHECK(esp4({0 + 4, 3}) == 0);
+    CHECK(esp4({1 + 4, 0}) == 0);
+    CHECK(esp4({1 + 4, 1}) == 1);
+    CHECK(esp4({1 + 4, 2}) == 2);
+    CHECK(esp4({1 + 4, 3}) == 3);
+    CHECK(esp4({2 + 4, 0}) == 1);
+    CHECK(esp4({2 + 4, 1}) == 2);
+    CHECK(esp4({2 + 4, 2}) == 3);
+    CHECK(esp4({2 + 4, 3}) == 2);
+    CHECK(esp4({3 + 4, 0}) == 2);
+    CHECK(esp4({3 + 4, 1}) == 3);
+    CHECK(esp4({3 + 4, 2}) == 0);
+    CHECK(esp4({3 + 4, 3}) == 1);
+
+    CHECK(esp4({0, 0 + 4}) == 3);
+    CHECK(esp4({0, 1 + 4}) == 0);
+    CHECK(esp4({0, 2 + 4}) == 1);
+    CHECK(esp4({0, 3 + 4}) == 0);
+    CHECK(esp4({1, 0 + 4}) == 0);
+    CHECK(esp4({1, 1 + 4}) == 1);
+    CHECK(esp4({1, 2 + 4}) == 2);
+    CHECK(esp4({1, 3 + 4}) == 3);
+    CHECK(esp4({2, 0 + 4}) == 1);
+    CHECK(esp4({2, 1 + 4}) == 2);
+    CHECK(esp4({2, 2 + 4}) == 3);
+    CHECK(esp4({2, 3 + 4}) == 2);
+    CHECK(esp4({3, 0 + 4}) == 2);
+    CHECK(esp4({3, 1 + 4}) == 3);
+    CHECK(esp4({3, 2 + 4}) == 0);
+    CHECK(esp4({3, 3 + 4}) == 1);
+
+    CHECK(esp4({0 + 4, 0 + 4}) == 3);
+    CHECK(esp4({0 + 4, 1 + 4}) == 0);
+    CHECK(esp4({0 + 4, 2 + 4}) == 1);
+    CHECK(esp4({0 + 4, 3 + 4}) == 0);
+    CHECK(esp4({1 + 4, 0 + 4}) == 0);
+    CHECK(esp4({1 + 4, 1 + 4}) == 1);
+    CHECK(esp4({1 + 4, 2 + 4}) == 2);
+    CHECK(esp4({1 + 4, 3 + 4}) == 3);
+    CHECK(esp4({2 + 4, 0 + 4}) == 1);
+    CHECK(esp4({2 + 4, 1 + 4}) == 2);
+    CHECK(esp4({2 + 4, 2 + 4}) == 3);
+    CHECK(esp4({2 + 4, 3 + 4}) == 2);
+    CHECK(esp4({3 + 4, 0 + 4}) == 2);
+    CHECK(esp4({3 + 4, 1 + 4}) == 3);
+    CHECK(esp4({3 + 4, 2 + 4}) == 0);
+    CHECK(esp4({3 + 4, 3 + 4}) == 1);
+}
+
 TEST_CASE("Clocking lookup", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
@@ -1623,23 +1703,25 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
         {
             auto cs = get_clocking_scheme<clk_lyt>(n);
             REQUIRE(cs.has_value());
-            CHECK(cs == name);
+            CHECK(*cs == name);
         }
     };
 
     check({"open", "OPEN", "oPeN", "OpEn"}, clock_name::open);
+    check({"columnar", "COLUMNAR", "CoLumNar", "COLUMnar"}, clock_name::columnar);
     check({"2DDwave", "2DdWaVe", "2ddwave", "2DDWAVE", "2DDWave"}, clock_name::twoddwave);
     check({"2DDwavehex", "2DdWaVeHeX", "2ddwavehex", "2DDWAVEHEX", "2DDWaveHex"}, clock_name::twoddwave);
     check({"use", "USE", "uSe", "UsE"}, clock_name::use);
     check({"res", "RES", "rEs", "ReS"}, clock_name::res);
+    check({"esp", "ESP", "eSp", "EsP"}, clock_name::esp);
     check({"bancs", "BANCS", "BaNCs", "banCS"}, clock_name::bancs);
-    check({"columnar", "COLUMNAR", "CoLumNar", "COLUMnar"}, clock_name::columnar);
 
     CHECK(!get_clocking_scheme<clk_lyt>("").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("TwoDDWave").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("2DDWave6").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("SUE").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("ERS").has_value());
+    CHECK(!get_clocking_scheme<clk_lyt>("EPS").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("BNCS").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("Column").has_value());
 }

@@ -37,7 +37,7 @@ class exact_command : public command
                        "A minimum FCN layout will be found that meets all given constraints.")
     {
         add_option("--clk_scheme,-s", clocking,
-                   "Clocking scheme to use {OPEN[3|4], COLUMNAR[3|4]}, 2DDWAVE[3|4], USE, RES, BANCS", true);
+                   "Clocking scheme to use {OPEN[3|4], COLUMNAR[3|4]}, 2DDWAVE[3|4], USE, RES, ESP, BANCS", true);
         add_option("--upper_bound,-u", ps.upper_bound, "Number of FCN gate tiles to use at maximum");
         add_option("--fixed_size,-f", ps.fixed_size, "Execute only one iteration with the given number of tiles");
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");

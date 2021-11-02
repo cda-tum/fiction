@@ -48,7 +48,7 @@ class onepass_command : public command
                        "resulting from this approach might be desynchronized. I/Os are always located at the "
                        "layout's borders.")
     {
-        add_option("--clk_scheme,-s", clocking, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, BANCS}", true);
+        add_option("--clk_scheme,-s", clocking, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, ESP, BANCS}", true);
         add_option("--upper_bound,-u", ps.upper_bound, "Number of FCN gate tiles to use at maximum");
         add_option("--fixed_size,-f", ps.fixed_size, "Execute only one iteration with the given number of tiles");
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
@@ -100,8 +100,7 @@ class onepass_command : public command
         // choose clocking
         if (auto clk = fiction::get_clocking_scheme<fiction::cart_gate_clk_lyt>(clocking); clk.has_value())
         {
-            if (auto name = clk->name;
-                name == "OPEN3" || name == "OPEN4" || name == "TOPOLINANO3" || name == "TOPOLINANO4")
+            if (auto name = clk->name; name == fiction::clock_name::open || name == fiction::clock_name::columnar)
             {
                 env->out() << fmt::format("[e] the \"{}\" clocking scheme is not supported by this approach", name)
                            << std::endl;
@@ -111,7 +110,7 @@ class onepass_command : public command
             }
 
             ps.scheme = fiction::ptr<fiction::cart_gate_clk_lyt>(std::move(*clk));
-            if (ps.scheme->name != "RES" && ps.enable_maj)
+            if (clk->max_out_degree < 3 && ps.enable_maj)
             {
                 ps.enable_maj = false;
                 env->out() << "[w] disabling MAJ gates as they are not supported by the " << ps.scheme->name
