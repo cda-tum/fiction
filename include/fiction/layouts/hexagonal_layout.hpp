@@ -218,6 +218,30 @@ class hexagonal_layout
 
 #pragma endregion
 
+#pragma region row / column detection
+
+    [[nodiscard]] bool is_in_odd_row(const OffsetCoordinateType& c) const noexcept
+    {
+        return c.y % 2 == 1;
+    }
+
+    [[nodiscard]] bool is_in_even_row(const OffsetCoordinateType& c) const noexcept
+    {
+        return c.y % 2 == 0;
+    }
+
+    [[nodiscard]] bool is_in_odd_column(const OffsetCoordinateType& c) const noexcept
+    {
+        return c.x % 2 == 1;
+    }
+
+    [[nodiscard]] bool is_in_even_column(const OffsetCoordinateType& c) const noexcept
+    {
+        return c.x % 2 == 0;
+    }
+
+#pragma endregion
+
 #pragma region Cardinal operations
 
     [[nodiscard]] constexpr OffsetCoordinateType north(const OffsetCoordinateType& c) const noexcept
@@ -311,8 +335,7 @@ class hexagonal_layout
         return c1 != c2 && west(c1) == c2;
     }
 
-    [[nodiscard]] bool is_adjacent_of(const OffsetCoordinateType& c1,
-                                      const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] bool is_adjacent_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
     {
         return adjacent_coordinates<std::set<coordinate>>(c1).count(c2) != 0;
     }
