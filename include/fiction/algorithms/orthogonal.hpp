@@ -92,6 +92,7 @@ std::vector<mockturtle::node<Ntk>> siblings(const Ntk& ntk, const mockturtle::no
     ntk.foreach_fanin(n,
                       [&ntk, &sibs, &n](const auto& fi)
                       {
+                          // skip constants
                           if (const auto fin = ntk.get_node(fi); !ntk.is_constant(fin))
                           {
                               ntk.foreach_fanout(fi,
@@ -124,6 +125,25 @@ struct coloring_container
     const uint32_t color_null = 0ul, color_east, color_south;
 };
 
+template <typename Ntk>
+bool different_colored_fanins(const coloring_container<Ntk>& ctn, const mockturtle::node<Ntk>& n) noexcept
+{
+    const auto fc = fanins(ctn.color_ntk, n);
+
+    if (const auto fanin_size = fc.fanin_nodes.size(); fanin_size == 0 || fanin_size == 1)
+    {
+        return false;
+    }
+    else if (fanin_size == 2)
+    {
+        const auto fnc1 = ctn.color_ntk.color(fc.fanin_nodes[0]), fnc2 = ctn.color_ntk.color(fc.fanin_nodes[1]);
+
+        return (fnc1 != ctn.color_null && fnc2 != ctn.color_null) && fnc1 != fnc2;
+    }
+
+    return false;
+}
+
 /**
  * Nodes colored east have signals incoming from eastern direction. Nodes colored south have signals incoming from
  * southern direction.
@@ -142,20 +162,24 @@ coloring_container<Ntk> east_south_coloring(const Ntk& ntk) noexcept
     coloring_container<Ntk> ctn{ntk};
 
     ntk.foreach_gate(
-        [&](const auto& n, [[maybe_unused]] auto i)
+        [&](const auto& n, [[maybe_unused]] const auto i)
         {
             // skip already colored nodes
             if (ctn.color_ntk.color(n) == ctn.color_null)
             {
                 const auto s = siblings(ntk, n);
-                // if all siblings are either colored south or null, pick color east
-                auto clr =
-                    std::all_of(s.cbegin(), s.cend(),
-                                [&ctn](const auto& sn)
-                                {
-                                    const auto snc = ctn.color_ntk.color(sn);
-                                    return snc == ctn.color_south || snc == ctn.color_null;
-                                }) ?
+
+                const auto clr =
+                    // if node has fanins of different color, pick color null
+                    different_colored_fanins(ctn, n) ?
+                        ctn.color_null :
+                        // if all siblings are either colored south or null, pick color east
+                        std::all_of(s.cbegin(), s.cend(),
+                                    [&ctn](const auto& sn)
+                                    {
+                                        const auto snc = ctn.color_ntk.color(sn);
+                                        return snc == ctn.color_south || snc == ctn.color_null;
+                                    }) ?
                         // unless a node has an additional PO fanout,then pick color south instead
                         ntk.is_po(ntk.make_signal(n)) && ntk.fanout_size(n) > 1 ? ctn.color_south : ctn.color_east :
                         // if all siblings are either colored east or null, pick color south
@@ -193,7 +217,7 @@ bool is_east_south_colored(const Ntk& ntk) noexcept
             {
                 uint32_t clr = 0ul;
                 ntk.foreach_fanout(n,
-                                   [&ntk, &is_properly_colored, &clr](const auto& f, auto i)
+                                   [&ntk, &is_properly_colored, &clr](const auto& f, const auto i)
                                    {
                                        // store color of first fanout
                                        if (i == 0)
@@ -247,7 +271,7 @@ aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn) noex
 
     uint64_t x = 0ull, y = ctn.color_ntk.num_pis() - 1;
     ctn.color_ntk.foreach_node(
-        [&](const auto& n, [[maybe_unused]] auto i)
+        [&](const auto& n, [[maybe_unused]] const auto i)
         {
             if (!ctn.color_ntk.is_constant(n))
             {
@@ -372,7 +396,7 @@ class orthogonal_impl
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
         // compute a coloring
-        auto ctn = east_south_coloring(ntk);
+        const auto ctn = east_south_coloring(ntk);
         // instantiate the layout
         Lyt layout{determine_layout_size<Lyt>(ctn), twoddwave_clocking<Lyt>(ps.number_of_clock_phases)};
 
@@ -393,7 +417,7 @@ class orthogonal_impl
 #endif
 
         ntk.foreach_node(
-            [&, this](const auto& n, [[maybe_unused]] auto i)
+            [&, this](const auto& n, [[maybe_unused]] const auto i)
             {
                 // do not place constants
                 if (!ntk.is_constant(n))
@@ -493,8 +517,8 @@ class orthogonal_impl
                         // n is colored null; corner case
                         else
                         {
-                            // make sure pre1_t is the northwards tile and pre2_t is the westwards one
-                            if (pre2_t.x > pre1_t.x)
+                            // make sure pre1_t has an empty tile to its east
+                            if (!layout.is_empty_tile(layout.east(pre1_t)))
                                 std::swap(pre1_t, pre2_t);
 
                             t = latest_pos;
