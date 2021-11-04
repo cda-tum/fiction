@@ -151,18 +151,40 @@ Ntk half_adder_network()
 
     ntk.create_po(sum, "sum");
     ntk.create_po(c, "carry");
-  
-    return ntk; 
+
+    return ntk;
 }
-  
+
+template <typename Ntk>
+Ntk full_adder_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi("a");
+    const auto x2 = ntk.create_pi("b");
+    const auto x3 = ntk.create_pi("cin");
+
+    const auto w1 = ntk.create_and(x1, x2);
+    const auto w2 = ntk.create_xor(x1, x2);
+    const auto w3 = ntk.create_and(x3, w2);
+
+    const auto c   = ntk.create_or(w1, w3);
+    const auto sum = ntk.create_xor(x3, w2);
+
+    ntk.create_po(sum, "sum");
+    ntk.create_po(c, "carry");
+
+    return ntk;
+}
+
 template <typename Ntk>
 Ntk mux21_network()
 {
     Ntk ntk{};
 
-    const auto x1  = ntk.create_pi();
-    const auto x2  = ntk.create_pi();
-    const auto x3  = ntk.create_pi();
+    const auto x1 = ntk.create_pi();
+    const auto x2 = ntk.create_pi();
+    const auto x3 = ntk.create_pi();
 
     const auto n1  = ntk.create_not(x3);
     const auto a1  = ntk.create_and(x1, n1);

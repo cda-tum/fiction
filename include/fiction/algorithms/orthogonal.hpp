@@ -92,16 +92,19 @@ std::vector<mockturtle::node<Ntk>> siblings(const Ntk& ntk, const mockturtle::no
     ntk.foreach_fanin(n,
                       [&ntk, &sibs, &n](const auto& fi)
                       {
-                          ntk.foreach_fanout(fi,
-                                             [&ntk, &sibs, &n](const auto& fo)
-                                             {
-                                                 // do not consider constants or n itself
-                                                 if (const auto fon = ntk.get_node(fo);
-                                                     !ntk.is_constant(fon) && fon != n)
+                          if (const auto fin = ntk.get_node(fi); !ntk.is_constant(fin))
+                          {
+                              ntk.foreach_fanout(fi,
+                                                 [&ntk, &sibs, &n](const auto& fo)
                                                  {
-                                                     sibs.push_back(fon);
-                                                 }
-                                             });
+                                                     // do not consider constants or n itself
+                                                     if (const auto fon = ntk.get_node(fo);
+                                                         !ntk.is_constant(fon) && fon != n)
+                                                     {
+                                                         sibs.push_back(fon);
+                                                     }
+                                                 });
+                          }
                       });
 
     return sibs;

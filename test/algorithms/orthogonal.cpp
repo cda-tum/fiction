@@ -46,6 +46,8 @@ TEST_CASE("East-south coloring", "[orthogonal]")
     check(mockturtle::fanout_view{
         fanout_substitution<topology_network>(blueprints::nary_operation_network<topology_network>())});
     check(mockturtle::fanout_view{fanout_substitution<topology_network>(blueprints::clpl<topology_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<topology_network>(blueprints::full_adder_network<mockturtle::mig_network>())});
 }
 
 void check_stats(const orthogonal_physical_design_stats& st) noexcept
