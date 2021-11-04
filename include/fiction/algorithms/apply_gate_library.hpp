@@ -6,6 +6,7 @@
 #define FICTION_APPLY_GATE_LIBRARY_HPP
 
 #include "../technology/qca_one_library.hpp"
+#include "../technology/sidb_bestagon_library.hpp"
 #include "../traits.hpp"
 
 #include <mockturtle/traits.hpp>

@@ -32,7 +32,7 @@ class cell_command : public command
                        "specified in order to instruct the algorithm how to map gate tiles to cell blocks.")
     {
         add_option("--library,-l", library, "Gate library to use for mapping", true)
-            ->set_type_name("{QCA-ONE=0, ToPoliNano=1}");
+            ->set_type_name("{QCA-ONE=0, ToPoliNano=1, Bestagon=2}");
     }
 
   protected:
@@ -61,7 +61,7 @@ class cell_command : public command
             //                    return;
             //                }
 
-            const auto apply = [](auto&& lyt_ptr)
+            const auto apply_qca_one = [](auto&& lyt_ptr)
             {
                 return std::make_shared<fiction::qca_cell_clk_lyt>(
                     fiction::apply_gate_library<fiction::qca_cell_clk_lyt, fiction::qca_one_library>(*lyt_ptr));
@@ -69,7 +69,7 @@ class cell_command : public command
 
             try
             {
-                store<fiction::cell_layout_t>().extend() = std::visit(apply, s.current());
+                store<fiction::cell_layout_t>().extend() = std::visit(apply_qca_one, s.current());
             }
             catch (const fiction::unsupported_gate_type_exception<fiction::cartesian::ucoord_t>& e)
             {
@@ -101,6 +101,29 @@ class cell_command : public command
         //
         //                lib = std::make_shared<topolinano_library>(fgl);
         //            }
+        else if (library == 2u)
+        {
+            const auto apply_sidb_bestagon = [](auto&& lyt_ptr)
+            {
+                return std::make_shared<fiction::sidb_cell_clk_lyt>(
+                    fiction::apply_gate_library<fiction::sidb_cell_clk_lyt, fiction::sidb_bestagon_library>(*lyt_ptr));
+            };
+
+            try
+            {
+                store<fiction::cell_layout_t>().extend() = std::visit(apply_sidb_bestagon, s.current());
+            }
+            catch (const fiction::unsupported_gate_type_exception<fiction::cartesian::ucoord_t>& e)
+            {
+                std::cout << fmt::format("[e] unsupported gate type at tile position {}", e.where()) << std::endl;
+            }
+            catch (const fiction::unsupported_gate_orientation_exception<fiction::cartesian::ucoord_t>& e)
+            {
+                std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}",
+                                         e.where(), e.which_ports())
+                          << std::endl;
+            }
+        }
         // more libraries go here
         else
         {
