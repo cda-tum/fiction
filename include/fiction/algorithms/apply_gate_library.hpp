@@ -16,6 +16,11 @@
 #include <mockturtle/utils/progress_bar.hpp>
 #endif
 
+// data types cannot properly be converted to bit field types
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuseless-cast"
+#pragma GCC diagnostic ignored "-Wconversion"
+
 namespace fiction
 {
 
@@ -46,8 +51,61 @@ class apply_gate_library_impl
                 if (!gate_lyt.is_constant(n))
                 {
                     const auto t = gate_lyt.get_tile(n);
-                    assign_gate({t.x * GateLibrary::gate_x_size(), t.y * GateLibrary::gate_y_size(), t.z},
-                                GateLibrary::set_up_gate(gate_lyt, t), n);
+
+                    cell<CellLyt> c{};
+
+                    if constexpr (is_cartesian_layout_v<GateLyt>)
+                    {
+                        c = {t.x * GateLibrary::gate_x_size(), t.y * GateLibrary::gate_y_size(), t.z};
+                    }
+                    else if constexpr (is_hexagonal_layout_v<GateLyt>)
+                    {
+                        if constexpr (has_pointy_top_hex_orientation<GateLyt>)
+                        {
+                            // vertical distance between pointy top hexagons is height * 3/4
+                            c = {t.x * GateLibrary::gate_x_size(), t.y * (GateLibrary::gate_y_size() * 3 / 4), t.z};
+                        }
+                        else if constexpr (has_flat_top_hex_orientation<GateLyt>)
+                        {
+                            // horizontal distance between flat top hexagons is width * 3/4
+                            c = {t.x * (GateLibrary::gate_x_size() * 3 / 4), t.y * (GateLibrary::gate_y_size()), t.z};
+                        }
+
+                        if constexpr (has_odd_row_hex_arrangment<GateLyt>)
+                        {
+                            if (gate_lyt.is_in_odd_row(t))
+                            {
+                                // odd rows are shifted in by width / 2
+                                c.x += GateLibrary::gate_x_size() / static_cast<decltype(c.x)>(2);
+                            }
+                        }
+                        else if constexpr (has_even_row_hex_arrangment<GateLyt>)
+                        {
+                            if (gate_lyt.is_in_even_row(t))
+                            {
+                                // even rows are shifted in by width / 2
+                                c.x += GateLibrary::gate_x_size() / static_cast<decltype(c.x)>(2);
+                            }
+                        }
+                        else if constexpr (has_odd_column_hex_arrangment<GateLyt>)
+                        {
+                            if (gate_lyt.is_in_odd_column(t))
+                            {
+                                // odd columns are shifted in by height / 2
+                                c.y += GateLibrary::gate_y_size() / static_cast<decltype(c.y)>(2);
+                            }
+                        }
+                        else if constexpr (has_even_column_hex_arrangment<GateLyt>)
+                        {
+                            if (gate_lyt.is_in_even_column(t))
+                            {
+                                // even columns are shifted in by height / 2
+                                c.y += GateLibrary::gate_y_size() / static_cast<decltype(c.y)>(2);
+                            }
+                        }
+                    }
+
+                    assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t), n);
                 }
 #if (PROGRESS_BARS)
                 // update progress
@@ -86,7 +144,10 @@ class apply_gate_library_impl
                 const typename CellLyt::cell      pos{start_x + x, start_y + y, layer};
                 const typename CellLyt::cell_type type{g[y][x]};
 
-                cell_lyt.assign_cell_type(pos, type);
+                if (!technology<CellLyt>::is_empty_cell(type))
+                {
+                    cell_lyt.assign_cell_type(pos, type);
+                }
 
                 // set IO names
                 if (technology<CellLyt>::is_input_cell(type) || technology<CellLyt>::is_output_cell(type))
@@ -129,5 +190,7 @@ CellLyt apply_gate_library(const GateLyt& lyt)
 }
 
 }  // namespace fiction
+
+#pragma GCC diagnostic pop
 
 #endif  // FICTION_APPLY_GATE_LIBRARY_HPP
