@@ -5,6 +5,7 @@
 #ifndef FICTION_STORES_HPP
 #define FICTION_STORES_HPP
 
+#include <fiction/algorithms/critical_path_length_and_throughput.hpp>
 #include <fiction/io/dot_drawers.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/io/write_svg_layout.hpp>
@@ -175,7 +176,7 @@ ALICE_DESCRIBE_STORE(fiction::gate_layout_t, layout)
 
 ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
 {
-    // TODO crossings, critical path, throughput
+    // TODO crossings
     const auto print_statistics = [&os](auto&& lyt_ptr)
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
@@ -187,11 +188,13 @@ ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        mockturtle::depth_view depth_lyt{*lyt_ptr};
+        fiction::critical_path_length_and_throughput_stats st{};
+        fiction::critical_path_length_and_throughput(*lyt_ptr, &st);
 
-        os << fmt::format("[i] {} - {} × {}, I/O: {}/{}, gates: {}, wires: {}, CP: {}, sync. elems.: {}\n",
+        os << fmt::format("[i] {} - {} × {}, I/O: {}/{}, gates: {}, wires: {}, CP: {}, TP: 1/{}, sync. elems.: {}\n",
                           lyt_ptr->get_layout_name(), lyt_ptr->x() + 1, lyt_ptr->y() + 1, lyt_ptr->num_pis(),
-                          lyt_ptr->num_pos(), lyt_ptr->num_gates(), lyt_ptr->num_wires(), depth_lyt.depth(), num_se);
+                          lyt_ptr->num_pos(), lyt_ptr->num_gates(), lyt_ptr->num_wires(), st.critical_path_length,
+                          st.throughput, num_se);
     };
 
     std::visit(print_statistics, layout);
@@ -210,7 +213,8 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        mockturtle::depth_view depth_lyt{*lyt_ptr};
+        fiction::critical_path_length_and_throughput_stats st{};
+        fiction::critical_path_length_and_throughput(*lyt_ptr, &st);
 
         return nlohmann::json{
             {"name", lyt_ptr->get_layout_name()},
@@ -223,9 +227,8 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             // {"free tiles", area - (gate_tiles + wire_tiles - crossings)},  // free tiles in ground layer
             // {"crossings", crossings},
             {"synchronization elements", num_se},
-            {"critical path", depth_lyt.depth()}
-            // {"throughput", fmt::format("1/{}", tp)}};
-        };
+            {"critical path", st.critical_path_length},
+            {"throughput", fmt::format("1/{}", st.throughput)}};
     };
 
     return std::visit(log_statistics, layout);
