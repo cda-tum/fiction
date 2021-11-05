@@ -57,7 +57,7 @@ jobs:
         working-directory: ${{github.workspace}}
         run: |
           git clone --branch $Z3_GIT_TAG --depth 1 https://github.com/Z3Prover/z3.git
-          cmake -S z3 -B /z3/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=FALSE
+          cmake -S z3 -B z3/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=FALSE
           cmake --build z3/build --config Release -j2
           make install
 
