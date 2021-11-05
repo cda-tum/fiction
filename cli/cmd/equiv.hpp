@@ -5,6 +5,7 @@
 #ifndef FICTION_CMD_EQUIV_HPP
 #define FICTION_CMD_EQUIV_HPP
 
+#include <fiction/algorithms/critical_path_length_and_throughput.hpp>
 #include <fiction/algorithms/design_rule_violations.hpp>
 #include <fiction/types.hpp>
 
@@ -19,6 +20,7 @@
 
 #include <cstdint>
 #include <sstream>
+#include <string>
 #include <variant>
 
 namespace alice
@@ -115,25 +117,6 @@ class equiv_command : public command
         {
             env->out() << "[w] at least one store must be specified" << std::endl;
         }
-
-        //
-        //        env->out() << "[i] the layout is "
-        //                   << (result.eq == equivalence_checker::equiv_result::eq_type::NONE ? "NOT" :
-        //                       result.eq == equivalence_checker::equiv_result::eq_type::WEAK ? "WEAKLY" :
-        //                                                                                       "STRONGLY")
-        //                   << " equivalent to its specification";
-        //
-        //        if (result.eq == equivalence_checker::equiv_result::eq_type::NONE && !result.counter_example.empty())
-        //        {
-        //            env->out() << " with counter example ";
-        //            for (const auto c : result.counter_example) env->out() << c;
-        //        }
-        //        else if (result.eq == equivalence_checker::equiv_result::eq_type::WEAK)
-        //        {
-        //            if (!is_set("gate_layout"))
-        //                env->out() << " with a delay of " << result.delay << " cycles";
-        //        }
-        //        env->out() << std::endl;
     }
 
     /**
@@ -147,7 +130,9 @@ class equiv_command : public command
                                                    result.eq == equiv_result::eq_type::WEAK ? "WEAK" :
                                                                                               "STRONG"},
                               {"counter example", result.counter_example},
-                              {"delay", result.delay},
+                              {"specification's throughput", result.tp_spec},
+                              {"implementation's throughput", result.tp_impl},
+                              {"throughput difference", result.tp_diff},
                               {"runtime (s)", mockturtle::to_seconds(result.runtime)}};
     }
 
@@ -171,9 +156,9 @@ class equiv_command : public command
          */
         eq_type eq;
         /**
-         * Delay value at which weak equivalence manifests.
+         * Throughput values at which weak equivalence manifests.
          */
-        std::size_t delay = 0ul;
+        int64_t tp_spec = 0ll, tp_impl = 0ll, tp_diff = 0ll;
         /**
          * Stores a possible counter example.
          */
@@ -211,6 +196,9 @@ class equiv_command : public command
     {
         const auto equiv_check = [this](auto&& ntk_or_lyt_ptr1, auto&& ntk_or_lyt_ptr2) -> bool
         {
+            using LytOrNtk1 = typename std::decay_t<decltype(ntk_or_lyt_ptr1)>::element_type;
+            using LytOrNtk2 = typename std::decay_t<decltype(ntk_or_lyt_ptr2)>::element_type;
+
             mockturtle::stopwatch stop{result.runtime};
 
             auto miter = mockturtle::miter<mockturtle::klut_network>(*ntk_or_lyt_ptr1, *ntk_or_lyt_ptr2);
@@ -225,8 +213,37 @@ class equiv_command : public command
                 {
                     result.eq = *eq ? equiv_result::eq_type::STRONG : equiv_result::eq_type::NO;
 
+                    if (result.eq == equiv_result::eq_type::STRONG)
+                    {
+                        // compute TP of specification
+                        if constexpr (fiction::is_gate_level_layout_v<LytOrNtk1>)
+                        {
+                            fiction::critical_path_length_and_throughput_stats cplt_st{};
+                            fiction::critical_path_length_and_throughput(*ntk_or_lyt_ptr1, &cplt_st);
+
+                            result.tp_spec = static_cast<int64_t>(cplt_st.throughput);
+                        }
+                        // compute TP of implementation
+                        if constexpr (fiction::is_gate_level_layout_v<LytOrNtk2>)
+                        {
+                            fiction::critical_path_length_and_throughput_stats cplt_st{};
+                            fiction::critical_path_length_and_throughput(*ntk_or_lyt_ptr2, &cplt_st);
+
+                            result.tp_impl = static_cast<int64_t>(cplt_st.throughput);
+                        }
+
+                        result.tp_diff = std::abs(result.tp_spec - result.tp_impl);
+
+                        if (result.tp_diff != 0)
+                        {
+                            result.eq = equiv_result::eq_type::WEAK;
+                        }
+                    }
+
                     if (!(*eq))
+                    {
                         result.counter_example = st.counter_example;
+                    }
                 }
                 else
                 {
@@ -264,9 +281,14 @@ class equiv_command : public command
 
         if (success)
         {
-            env->out() << fmt::format("[i] {} and {} are{} equivalent", std::visit(get_name, ntk_or_lyt_variant1),
+            env->out() << fmt::format("[i] {} and {} are {} equivalent{}", std::visit(get_name, ntk_or_lyt_variant1),
                                       std::visit(get_name, ntk_or_lyt_variant_2),
-                                      result.eq == equiv_result::eq_type::NO ? " NOT" : "")
+                                      result.eq == equiv_result::eq_type::NO   ? "NOT" :
+                                      result.eq == equiv_result::eq_type::WEAK ? "WEAKLY" :
+                                                                                 "STRONGLY",
+                                      result.eq == equiv_result::eq_type::WEAK ?
+                                          fmt::format(" with a delay difference of {} clock cycles", result.tp_diff) :
+                                          "")
                        << std::endl;
         }
     }
