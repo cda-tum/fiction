@@ -160,7 +160,7 @@ class exact_impl
   private:
     using topology_ntk_t = mockturtle::topo_view<mockturtle::fanout_view<mockturtle::names_view<topology_network>>>;
 
-    std::shared_ptr<topology_ntk_t> ntk;  // TODO incorporate clocking scheme degree into fanout-substitution
+    std::shared_ptr<topology_ntk_t> ntk;
 
     exact_physical_design_params<Lyt> ps;
     exact_physical_design_stats&      pst;
@@ -389,8 +389,14 @@ class exact_impl
         /**
          * Maps nodes to tile positions.
          */
-        mockturtle::node_map<branching_signal_container<Lyt, topology_ntk_t>, topology_ntk_t>
-            node2pos;  // TODO include fanout_size
+        mockturtle::node_map<
+            branching_signal_container<
+                Lyt, topology_ntk_t, Lyt::max_fanin_size>  // this currently assumes that max_fanin_size is equal to the
+                                                           // maximum fanout size of a layout type. Should the maximum
+                                                           // fanout size exceed max_fanin_size, this will break
+            ,
+            topology_ntk_t>
+            node2pos;
         //        /**
         //         * Network hierarchy used for symmetry breaking.
         //         */
