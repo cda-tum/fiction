@@ -51,8 +51,6 @@ jobs:
         with:
           path: ${{github.workspace}}/z3
           key: ${{matrix.os}}-${{env.Z3_GIT_TAG}}
-        working-directory: ${{github.workspace}}/z3/build
-        run: make install
 
       - name: Build Z3 Solver
         if: steps.cache-z3-solver.outputs.cache-hit != 'true'
@@ -60,6 +58,10 @@ jobs:
           git clone --branch $Z3_GIT_TAG --depth 1 https://github.com/Z3Prover/z3.git
           cmake -S ${{github.workspace}}/z3 -B ${{github.workspace}}/z3/build -DCMAKE_BUILD_TYPE=Release -DZ3_BUILD_LIBZ3_SHARED=FALSE
           cmake --build ${{github.workspace}}/z3/build --config Release -j2
+
+      - name: Install Z3 Solver
+        working-directory: ${{github.workspace}}/z3/build
+        run: make install
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
