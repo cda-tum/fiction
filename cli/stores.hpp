@@ -166,9 +166,22 @@ ALICE_DESCRIBE_STORE(fiction::gate_layout_t, layout)
 {
     const auto describe = [](auto&& lyt_ptr)
     {
-        return fmt::format("{} - {} × {}, I/O: {}/{}, gates: {}, wires: {}", lyt_ptr->get_layout_name(),
-                           lyt_ptr->x() + 1, lyt_ptr->y() + 1, lyt_ptr->num_pis(), lyt_ptr->num_pos(),
-                           lyt_ptr->num_gates(), lyt_ptr->num_wires());
+        using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
+
+        uint32_t num_se{0};
+
+        if constexpr (fiction::has_synchronization_elements_v<Lyt>)
+        {
+            num_se = lyt_ptr->num_se();
+        }
+
+        fiction::critical_path_length_and_throughput_stats st{};
+        fiction::critical_path_length_and_throughput(*lyt_ptr, &st);
+
+        return fmt::format("{} - {} × {}, I/O: {}/{}, gates: {}, wires: {}, CP: {}, TP: 1/{}, sync. elems.: {}",
+                           lyt_ptr->get_layout_name(), lyt_ptr->x() + 1, lyt_ptr->y() + 1, lyt_ptr->num_pis(),
+                           lyt_ptr->num_pos(), lyt_ptr->num_gates(), lyt_ptr->num_wires(), st.critical_path_length,
+                           st.throughput, num_se);
     };
 
     return std::visit(describe, layout);
@@ -223,7 +236,6 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             {"gates", lyt_ptr->num_gates()},
             {"wires", lyt_ptr->num_wires()},
             {"layout", {{"x-size", lyt_ptr->x() + 1}, {"y-size", lyt_ptr->y() + 1}, {"area", lyt_ptr->area()}}},
-            // {"bounding box", {{"x-size", bb.x_size}, {"y-size", bb.y_size}, {"area", bb.area()}}},
             // {"free tiles", area - (gate_tiles + wire_tiles - crossings)},  // free tiles in ground layer
             // {"crossings", crossings},
             {"synchronization elements", num_se},
