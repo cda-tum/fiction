@@ -5,6 +5,9 @@ on:
     branches-ignore:
       - master
 
+env:
+  Z3_GIT_TAG: z3-4.8.10
+
 jobs:
   build_and_test:
     strategy:
@@ -38,6 +41,20 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Cache Z3 Solver
+        id: cache-z3-solver
+        uses: actions/cache@v2
+        with:
+          path: ${{github.workspace}}/z3
+          key: ${{matrix.os}}-${{env.Z3_GIT_TAG}}
+
+      - name: Build Z3 Solver
+        if: steps.cache-z3-solver.outputs.cache-hit != 'true'
+        run: |
+          git clone --branch $Z3_GIT_TAG --depth 1 https://github.com/Z3Prover/z3.git
+          cmake -S ${{github.workspace}}/z3 -B ${{github.workspace}}/z3/build -DCMAKE_BUILD_TYPE=Release -DZ3_BUILD_LIBZ3_SHARED=FALSE
+          cmake --build ${{github.workspace}}/z3/build --config Release -j2
+
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
 
@@ -47,9 +64,9 @@ jobs:
         shell: bash
         working-directory: ${{github.workspace}}/build
 
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATH=${{github.workspace}}/z3/build -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
 
-      - name: Build
+      - name: Build fiction
         working-directory: ${{github.workspace}}/build
         shell: bash
 
