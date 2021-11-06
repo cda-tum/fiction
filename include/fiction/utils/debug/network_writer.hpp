@@ -26,7 +26,7 @@ void write_dot_network(const Ntk& ntk, const std::string& name = "ntk", const st
     file.close();
 }
 
-template <typename Lyt, typename Drawer = fiction::gate_layout_cartesian_drawer<Lyt, true>>
+template <typename Lyt, typename Drawer = fiction::gate_layout_cartesian_drawer<Lyt, false, true>>
 void write_dot_layout(const Lyt& lyt, const std::string& name = "lyt", const std::filesystem::path& p = {"./"})
 {
     std::ofstream file{p / (name + ".dot")};
