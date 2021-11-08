@@ -1543,6 +1543,18 @@ class exact_impl
                     });
             };
 
+            auto assign_north = [this](const auto& v)
+            {
+                // no need to iterate over updated_tiles, because nothing changes there
+                for (const auto& t : check_point->added_tiles)
+                {
+                    if (!layout.is_northern_border(t))
+                    {
+                        solver->add(not get_tv(t, v));
+                    }
+                }
+            };
+
             auto assign_west = [this](const auto& v)
             {
                 // no need to iterate over updated_tiles, because nothing changes there
@@ -1567,46 +1579,64 @@ class exact_impl
                     });
             };
 
+            auto assign_south = [this](const auto& v)
+            {
+                apply_to_added_and_updated_tiles(
+                    [this, &v](const auto& t)
+                    {
+                        if (!layout.is_southern_border(t))
+                        {
+                            solver->add(not get_tv(t, v));
+                        }
+                    });
+            };
+
             if (config.io_ports)
             {
                 network.foreach_pi(
-                    [this, &assign_west, &assign_border](const auto& pi)
-                    { layout.is_clocking_scheme(clock_name::columnar) ? assign_west(pi) : assign_border(pi); });
+                    [this, &assign_north, &assign_west, &assign_border](const auto& pi)
+                    {
+                        layout.is_clocking_scheme(clock_name::columnar) ? assign_west(pi) :
+                        layout.is_clocking_scheme(clock_name::row)      ? assign_north(pi) :
+                                                                          assign_border(pi);
+                    });
                 network.foreach_po(
-                    [this, &assign_east, &assign_border](const auto& po)
+                    [this, &assign_east, &assign_south, &assign_border](const auto& po)
                     {
                         layout.is_clocking_scheme(clock_name::columnar) ? assign_east(network.get_node(po)) :
+                        layout.is_clocking_scheme(clock_name::row)      ? assign_south(network.get_node(po)) :
                                                                           assign_border(network.get_node(po));
                     });
             }
             else
             {
                 network.foreach_pi(
-                    [this, &assign_west, &assign_border](const auto& pi)
+                    [this, &assign_north, &assign_west, &assign_border](const auto& pi)
                     {
                         network.foreach_fanout(pi,
-                                               [this, &assign_west, &assign_border](const auto& fo)
+                                               [this, &assign_north, &assign_west, &assign_border](const auto& fo)
                                                {
                                                    if (const auto v = network.get_node(fo); !skip_const_or_io_node(v))
                                                    {
                                                        layout.is_clocking_scheme(clock_name::columnar) ?
                                                            assign_west(v) :
-                                                           assign_border(v);
+                                                       layout.is_clocking_scheme(clock_name::row) ? assign_north(v) :
+                                                                                                    assign_border(v);
                                                    }
                                                });
                     });
 
                 network.foreach_po(
-                    [this, &assign_east, &assign_border](const auto& po)
+                    [this, &assign_east, &assign_south, &assign_border](const auto& po)
                     {
                         network.foreach_fanin(po,
-                                              [this, &assign_east, &assign_border](const auto& fi)
+                                              [this, &assign_east, &assign_south, &assign_border](const auto& fi)
                                               {
                                                   if (const auto v = network.get_node(fi); !skip_const_or_io_node(v))
                                                   {
-                                                      layout.is_clocking_scheme(clock_name::columnar) ?
-                                                          assign_east(v) :
-                                                          assign_border(v);
+                                                      layout.is_clocking_scheme(clock_name::columnar) ? assign_east(v) :
+                                                      layout.is_clocking_scheme(clock_name::row) ? assign_south(v) :
+                                                                                                   assign_border(v);
                                                   }
                                               });
                     });
@@ -1741,7 +1771,8 @@ class exact_impl
             }
 
             // path/cycle constraints
-            if (!(layout.is_clocking_scheme(clock_name::columnar) || layout.is_clocking_scheme(clock_name::twoddwave) ||
+            if (!(layout.is_clocking_scheme(clock_name::columnar) || layout.is_clocking_scheme(clock_name::row) ||
+                  layout.is_clocking_scheme(clock_name::twoddwave) ||
                   layout.is_clocking_scheme(clock_name::twoddwave_hex)))  // linear schemes; no cycles by definition
             {
                 establish_sub_paths();

@@ -106,6 +106,7 @@ namespace clock_name
 {
 static constexpr const char* open          = "OPEN";
 static constexpr const char* columnar      = "COLUMNAR";
+static constexpr const char* row           = "ROW";
 static constexpr const char* twoddwave     = "2DDWAVE";
 static constexpr const char* twoddwave_hex = "2DDWAVEHEX";
 static constexpr const char* use           = "USE";
@@ -189,6 +190,48 @@ static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
     // fix -Wreturn-type warning
     return clocking_scheme{
         clock_name::columnar, columnar_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
+}
+/**
+ * Returns a 90° rotated linear 1D clocking based on the one originally introduced in "A device architecture for
+ * computing with quantum dots" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE 1997.
+ */
+template <typename Lyt>
+static auto row_clocking(const num_clks& n = num_clks::FOUR) noexcept
+{
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function row_3_clock_function =
+        [](const clock_zone<Lyt>& cz) noexcept
+    {
+        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
+            {{{0, 0, 0}}, {{1, 1, 1}}, {{2, 2, 2}}}};
+
+        return cutout[cz.y % 3ul][cz.x % 3ul];
+    };
+
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function row_4_clock_function =
+        [](const clock_zone<Lyt>& cz) noexcept
+    {
+        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+            {{{0, 0, 0, 0}}, {{1, 1, 1, 1}}, {{2, 2, 2, 2}}, {{3, 3, 3, 3}}}};
+
+        return cutout[cz.y % 4ul][cz.x % 4ul];
+    };
+
+    switch (n)
+    {
+        case num_clks::THREE:
+        {
+            return clocking_scheme{
+                clock_name::row, row_3_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 3u, true};
+        }
+        case num_clks::FOUR:
+        {
+            return clocking_scheme{
+                clock_name::row, row_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
+        }
+    }
+
+    // fix -Wreturn-type warning
+    return clocking_scheme{clock_name::row, row_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
 }
 /**
  * Returns the 2DDWave clocking as defined in "Clocking and Cell Placement for QCA" by V. Vankamamidi, M. Ottavi,
@@ -494,6 +537,9 @@ std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::s
         {clock_name::columnar, columnar_clocking<Lyt>(num_clks::FOUR)},
         {"COLUMNAR3", columnar_clocking<Lyt>(num_clks::THREE)},
         {"COLUMNAR4", columnar_clocking<Lyt>(num_clks::FOUR)},
+        {clock_name::row, row_clocking<Lyt>(num_clks::FOUR)},
+        {"ROW3", row_clocking<Lyt>(num_clks::THREE)},
+        {"ROW4", row_clocking<Lyt>(num_clks::FOUR)},
         {clock_name::twoddwave, twoddwave_clocking<Lyt>(num_clks::FOUR)},
         {"2DDWAVE3", twoddwave_clocking<Lyt>(num_clks::THREE)},
         {"2DDWAVE4", twoddwave_clocking<Lyt>(num_clks::FOUR)},
