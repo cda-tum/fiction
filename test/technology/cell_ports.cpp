@@ -71,15 +71,32 @@ TEST_CASE("Port directions", "[cell-ports]")
 
 TEST_CASE("Port lists", "[cell-ports]")
 {
-    port_position p_02{0, 2}, p_24{2, 4};
+    SECTION("Port positions")
+    {
+        port_position p_02{0, 2}, p_24{2, 4};
 
-    port_list<port_position> p_list_02_24{{p_02}, {p_24}};
-    port_list<port_position> p_list_24_02{{p_24}, {p_02}};
+        port_list<port_position> p_list_02_24{{p_02}, {p_24}};
+        port_list<port_position> p_list_24_02{{p_24}, {p_02}};
 
-    CHECK(!(p_list_02_24 == p_list_24_02));
-    CHECK(!(port_list<port_position>{} == p_list_24_02));
-    CHECK(!(p_list_02_24 == port_list<port_position>{}));
+        CHECK(!(p_list_02_24 == p_list_24_02));
+        CHECK(!(port_list<port_position>{} == p_list_24_02));
+        CHECK(!(p_list_02_24 == port_list<port_position>{}));
 
-    CHECK(p_list_02_24 == port_list<port_position>{{p_02}, {p_24}});
-    CHECK(p_list_24_02 == port_list<port_position>{{p_24}, {p_02}});
+        CHECK(p_list_02_24 == port_list<port_position>{{p_02}, {p_24}});
+        CHECK(p_list_24_02 == port_list<port_position>{{p_24}, {p_02}});
+    }
+    SECTION("Port directions")
+    {
+        port_direction p_sw{port_direction::cardinal::SOUTH_WEST}, p_w{port_direction::cardinal::WEST};
+
+        port_list<port_direction> p_list_sw_w{{p_sw}, {p_w}};
+        port_list<port_direction> p_list_w_sw{{p_w}, {p_sw}};
+
+        CHECK(!(p_list_sw_w == p_list_w_sw));
+        CHECK(!(port_list<port_direction>{} == p_list_w_sw));
+        CHECK(!(p_list_sw_w == port_list<port_direction>{}));
+
+        CHECK(p_list_sw_w == port_list<port_direction>{{p_sw}, {p_w}});
+        CHECK(p_list_w_sw == port_list<port_direction>{{p_w}, {p_sw}});
+    }
 }
