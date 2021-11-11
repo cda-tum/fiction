@@ -27,6 +27,10 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 59, 46>  
     template <typename Lyt>
     [[nodiscard]] static fcn_gate set_up_gate(const Lyt& lyt, const tile<Lyt>& t)
     {
+        static_assert(is_gate_level_layout_v<Lyt>, "Lyt must be a gate-level layout");
+        static_assert(is_hexagonal_layout_v<Lyt>, "Lyt must be a hexagonal layout");
+        static_assert(has_pointy_top_hex_orientation_v<Lyt>, "Lyt must be a pointy-top hexagonal layout");
+
         [[maybe_unused]] const auto n = lyt.get_node(t);
         [[maybe_unused]] const auto p = determine_port_routing(lyt, t);
 
@@ -35,10 +39,10 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 59, 46>  
 
   private:
     template <typename Lyt>
-    [[nodiscard]] static port_list determine_port_routing([[maybe_unused]] const Lyt& lyt,
+    [[nodiscard]] static port_list<port_position> determine_port_routing([[maybe_unused]] const Lyt& lyt,
                                                           [[maybe_unused]] const tile<Lyt>& t) noexcept
     {
-        port_list p{};
+        port_list<port_position> p{};
 
         return p;
     }

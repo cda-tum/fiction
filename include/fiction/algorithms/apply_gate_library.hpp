@@ -61,18 +61,18 @@ class apply_gate_library_impl
                     }
                     else if constexpr (is_hexagonal_layout_v<GateLyt>)
                     {
-                        if constexpr (has_pointy_top_hex_orientation<GateLyt>)
+                        if constexpr (has_pointy_top_hex_orientation_v<GateLyt>)
                         {
                             // vertical distance between pointy top hexagons is height * 3/4
                             c = {t.x * GateLibrary::gate_x_size(), t.y * (GateLibrary::gate_y_size() * 3 / 4), t.z};
                         }
-                        else if constexpr (has_flat_top_hex_orientation<GateLyt>)
+                        else if constexpr (has_flat_top_hex_orientation_v<GateLyt>)
                         {
                             // horizontal distance between flat top hexagons is width * 3/4
                             c = {t.x * (GateLibrary::gate_x_size() * 3 / 4), t.y * (GateLibrary::gate_y_size()), t.z};
                         }
 
-                        if constexpr (has_odd_row_hex_arrangment<GateLyt>)
+                        if constexpr (has_odd_row_hex_arrangement_v<GateLyt>)
                         {
                             if (gate_lyt.is_in_odd_row(t))
                             {
@@ -80,7 +80,7 @@ class apply_gate_library_impl
                                 c.x += GateLibrary::gate_x_size() / static_cast<decltype(c.x)>(2);
                             }
                         }
-                        else if constexpr (has_even_row_hex_arrangment<GateLyt>)
+                        else if constexpr (has_even_row_hex_arrangement_v<GateLyt>)
                         {
                             if (gate_lyt.is_in_even_row(t))
                             {
@@ -88,7 +88,7 @@ class apply_gate_library_impl
                                 c.x += GateLibrary::gate_x_size() / static_cast<decltype(c.x)>(2);
                             }
                         }
-                        else if constexpr (has_odd_column_hex_arrangment<GateLyt>)
+                        else if constexpr (has_odd_column_hex_arrangement_v<GateLyt>)
                         {
                             if (gate_lyt.is_in_odd_column(t))
                             {
@@ -96,7 +96,7 @@ class apply_gate_library_impl
                                 c.y += GateLibrary::gate_y_size() / static_cast<decltype(c.y)>(2);
                             }
                         }
-                        else if constexpr (has_even_column_hex_arrangment<GateLyt>)
+                        else if constexpr (has_even_column_hex_arrangement_v<GateLyt>)
                         {
                             if (gate_lyt.is_in_even_column(t))
                             {

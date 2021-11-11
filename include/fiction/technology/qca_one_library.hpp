@@ -124,9 +124,9 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 
   private:
     template <typename Lyt>
-    [[nodiscard]] static port_list determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
+    [[nodiscard]] static port_list<port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
     {
-        port_list p{};
+        port_list<port_position> p{};
 
         // determine incoming connector ports
         if (lyt.has_northern_incoming_signal(t))
@@ -303,139 +303,140 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
                                   {'x', ' ', ' ', ' ', ' '},
                                   {'x', 'x', 'x', 'x', 'x'}}})};
 
-    using port_gate_map = std::unordered_map<port_list, fcn_gate>;
+    using port_gate_map = std::unordered_map<port_list<port_position>, fcn_gate>;
     /**
      * Lookup table for wire rotations. Maps ports to corresponding wires.
      */
     static inline const port_gate_map wire_map = {
         // primary inputs
-        {{{}, {port(2, 0)}}, primary_input_port},
-        {{{}, {port(4, 2)}}, rotate_90(primary_input_port)},
-        {{{}, {port(2, 4)}}, rotate_180(primary_input_port)},
-        {{{}, {port(0, 2)}}, rotate_270(primary_input_port)},
+        {{{}, {port_position(2, 0)}}, primary_input_port},
+        {{{}, {port_position(4, 2)}}, rotate_90(primary_input_port)},
+        {{{}, {port_position(2, 4)}}, rotate_180(primary_input_port)},
+        {{{}, {port_position(0, 2)}}, rotate_270(primary_input_port)},
         // primary outputs
-        {{{port(2, 0)}, {}}, primary_output_port},
-        {{{port(4, 2)}, {}}, rotate_90(primary_output_port)},
-        {{{port(2, 4)}, {}}, rotate_180(primary_output_port)},
-        {{{port(0, 2)}, {}}, rotate_270(primary_output_port)},
+        {{{port_position(2, 0)}, {}}, primary_output_port},
+        {{{port_position(4, 2)}, {}}, rotate_90(primary_output_port)},
+        {{{port_position(2, 4)}, {}}, rotate_180(primary_output_port)},
+        {{{port_position(0, 2)}, {}}, rotate_270(primary_output_port)},
         // center wire
-        {{{port(2, 0)}, {port(2, 4)}}, center_wire},
-        {{{port(2, 4)}, {port(2, 0)}}, center_wire},
-        {{{port(0, 2)}, {port(4, 2)}}, rotate_90(center_wire)},
-        {{{port(4, 2)}, {port(0, 2)}}, rotate_90(center_wire)},
+        {{{port_position(2, 0)}, {port_position(2, 4)}}, center_wire},
+        {{{port_position(2, 4)}, {port_position(2, 0)}}, center_wire},
+        {{{port_position(0, 2)}, {port_position(4, 2)}}, rotate_90(center_wire)},
+        {{{port_position(4, 2)}, {port_position(0, 2)}}, rotate_90(center_wire)},
         // inner side wire
-        {{{port(3, 0)}, {port(3, 4)}}, inner_side_wire},
-        {{{port(3, 4)}, {port(3, 0)}}, inner_side_wire},
-        {{{port(0, 3)}, {port(4, 3)}}, rotate_90(inner_side_wire)},
-        {{{port(4, 3)}, {port(0, 3)}}, rotate_90(inner_side_wire)},
-        {{{port(1, 0)}, {port(1, 4)}}, rotate_180(inner_side_wire)},
-        {{{port(1, 4)}, {port(1, 0)}}, rotate_180(inner_side_wire)},
-        {{{port(0, 1)}, {port(4, 1)}}, rotate_270(inner_side_wire)},
-        {{{port(4, 1)}, {port(0, 1)}}, rotate_270(inner_side_wire)},
+        {{{port_position(3, 0)}, {port_position(3, 4)}}, inner_side_wire},
+        {{{port_position(3, 4)}, {port_position(3, 0)}}, inner_side_wire},
+        {{{port_position(0, 3)}, {port_position(4, 3)}}, rotate_90(inner_side_wire)},
+        {{{port_position(4, 3)}, {port_position(0, 3)}}, rotate_90(inner_side_wire)},
+        {{{port_position(1, 0)}, {port_position(1, 4)}}, rotate_180(inner_side_wire)},
+        {{{port_position(1, 4)}, {port_position(1, 0)}}, rotate_180(inner_side_wire)},
+        {{{port_position(0, 1)}, {port_position(4, 1)}}, rotate_270(inner_side_wire)},
+        {{{port_position(4, 1)}, {port_position(0, 1)}}, rotate_270(inner_side_wire)},
         // outer side wire
-        {{{port(4, 0)}, {port(4, 4)}}, outer_side_wire},
-        {{{port(4, 4)}, {port(4, 0)}}, outer_side_wire},
-        {{{port(0, 4)}, {port(4, 4)}}, rotate_90(outer_side_wire)},
-        {{{port(4, 4)}, {port(0, 4)}}, rotate_90(outer_side_wire)},
-        {{{port(0, 0)}, {port(0, 4)}}, rotate_180(outer_side_wire)},
-        {{{port(0, 4)}, {port(0, 0)}}, rotate_180(outer_side_wire)},
-        {{{port(0, 0)}, {port(4, 0)}}, rotate_270(outer_side_wire)},
-        {{{port(4, 0)}, {port(0, 0)}}, rotate_270(outer_side_wire)},
+        {{{port_position(4, 0)}, {port_position(4, 4)}}, outer_side_wire},
+        {{{port_position(4, 4)}, {port_position(4, 0)}}, outer_side_wire},
+        {{{port_position(0, 4)}, {port_position(4, 4)}}, rotate_90(outer_side_wire)},
+        {{{port_position(4, 4)}, {port_position(0, 4)}}, rotate_90(outer_side_wire)},
+        {{{port_position(0, 0)}, {port_position(0, 4)}}, rotate_180(outer_side_wire)},
+        {{{port_position(0, 4)}, {port_position(0, 0)}}, rotate_180(outer_side_wire)},
+        {{{port_position(0, 0)}, {port_position(4, 0)}}, rotate_270(outer_side_wire)},
+        {{{port_position(4, 0)}, {port_position(0, 0)}}, rotate_270(outer_side_wire)},
         // center bent wire
-        {{{port(2, 0)}, {port(4, 2)}}, center_bent_wire},
-        {{{port(4, 2)}, {port(2, 0)}}, center_bent_wire},
-        {{{port(4, 2)}, {port(2, 4)}}, rotate_90(center_bent_wire)},
-        {{{port(2, 4)}, {port(4, 2)}}, rotate_90(center_bent_wire)},
-        {{{port(0, 2)}, {port(2, 4)}}, rotate_180(center_bent_wire)},
-        {{{port(2, 4)}, {port(0, 2)}}, rotate_180(center_bent_wire)},
-        {{{port(2, 0)}, {port(0, 2)}}, rotate_270(center_bent_wire)},
-        {{{port(0, 2)}, {port(2, 0)}}, rotate_270(center_bent_wire)}
+        {{{port_position(2, 0)}, {port_position(4, 2)}}, center_bent_wire},
+        {{{port_position(4, 2)}, {port_position(2, 0)}}, center_bent_wire},
+        {{{port_position(4, 2)}, {port_position(2, 4)}}, rotate_90(center_bent_wire)},
+        {{{port_position(2, 4)}, {port_position(4, 2)}}, rotate_90(center_bent_wire)},
+        {{{port_position(0, 2)}, {port_position(2, 4)}}, rotate_180(center_bent_wire)},
+        {{{port_position(2, 4)}, {port_position(0, 2)}}, rotate_180(center_bent_wire)},
+        {{{port_position(2, 0)}, {port_position(0, 2)}}, rotate_270(center_bent_wire)},
+        {{{port_position(0, 2)}, {port_position(2, 0)}}, rotate_270(center_bent_wire)}
         // TODO more wires go here!
     };
     /**
      * Lookup table for inverter rotations. Maps ports to corresponding inverters.
      */
-    static inline const port_gate_map inverter_map = {// straight inverters
-                                                      {{{port(2, 0)}, {port(2, 4)}}, straight_inverter},
-                                                      {{{port(4, 2)}, {port(0, 2)}}, rotate_90(straight_inverter)},
-                                                      {{{port(2, 4)}, {port(2, 0)}}, rotate_180(straight_inverter)},
-                                                      {{{port(0, 2)}, {port(4, 2)}}, rotate_270(straight_inverter)},
-                                                      // without outputs
-                                                      {{{port(2, 0)}, {}}, straight_inverter},
-                                                      {{{port(4, 2)}, {}}, rotate_90(straight_inverter)},
-                                                      {{{port(2, 4)}, {}}, rotate_180(straight_inverter)},
-                                                      {{{port(0, 2)}, {}}, rotate_270(straight_inverter)},
-                                                      // without inputs
-                                                      {{{}, {port(2, 4)}}, straight_inverter},
-                                                      {{{}, {port(0, 2)}}, rotate_90(straight_inverter)},
-                                                      {{{}, {port(2, 0)}}, rotate_180(straight_inverter)},
-                                                      {{{}, {port(4, 2)}}, rotate_270(straight_inverter)},
-                                                      // bent inverters
-                                                      {{{port(2, 0)}, {port(4, 2)}}, bent_inverter},
-                                                      {{{port(4, 2)}, {port(2, 0)}}, bent_inverter},
-                                                      {{{port(4, 2)}, {port(2, 4)}}, rotate_90(bent_inverter)},
-                                                      {{{port(2, 4)}, {port(4, 2)}}, rotate_90(bent_inverter)},
-                                                      {{{port(0, 2)}, {port(2, 4)}}, rotate_180(bent_inverter)},
-                                                      {{{port(2, 4)}, {port(0, 2)}}, rotate_180(bent_inverter)},
-                                                      {{{port(2, 0)}, {port(0, 2)}}, rotate_270(bent_inverter)},
-                                                      {{{port(0, 2)}, {port(2, 0)}}, rotate_270(bent_inverter)}};
+    static inline const port_gate_map inverter_map = {
+        // straight inverters
+        {{{port_position(2, 0)}, {port_position(2, 4)}}, straight_inverter},
+        {{{port_position(4, 2)}, {port_position(0, 2)}}, rotate_90(straight_inverter)},
+        {{{port_position(2, 4)}, {port_position(2, 0)}}, rotate_180(straight_inverter)},
+        {{{port_position(0, 2)}, {port_position(4, 2)}}, rotate_270(straight_inverter)},
+        // without outputs
+        {{{port_position(2, 0)}, {}}, straight_inverter},
+        {{{port_position(4, 2)}, {}}, rotate_90(straight_inverter)},
+        {{{port_position(2, 4)}, {}}, rotate_180(straight_inverter)},
+        {{{port_position(0, 2)}, {}}, rotate_270(straight_inverter)},
+        // without inputs
+        {{{}, {port_position(2, 4)}}, straight_inverter},
+        {{{}, {port_position(0, 2)}}, rotate_90(straight_inverter)},
+        {{{}, {port_position(2, 0)}}, rotate_180(straight_inverter)},
+        {{{}, {port_position(4, 2)}}, rotate_270(straight_inverter)},
+        // bent inverters
+        {{{port_position(2, 0)}, {port_position(4, 2)}}, bent_inverter},
+        {{{port_position(4, 2)}, {port_position(2, 0)}}, bent_inverter},
+        {{{port_position(4, 2)}, {port_position(2, 4)}}, rotate_90(bent_inverter)},
+        {{{port_position(2, 4)}, {port_position(4, 2)}}, rotate_90(bent_inverter)},
+        {{{port_position(0, 2)}, {port_position(2, 4)}}, rotate_180(bent_inverter)},
+        {{{port_position(2, 4)}, {port_position(0, 2)}}, rotate_180(bent_inverter)},
+        {{{port_position(2, 0)}, {port_position(0, 2)}}, rotate_270(bent_inverter)},
+        {{{port_position(0, 2)}, {port_position(2, 0)}}, rotate_270(bent_inverter)}};
     /**
      * Lookup table for conjunction rotations. Maps ports to corresponding AND gates.
      */
     static inline const port_gate_map conjunction_map = {
-        {{{port(0, 2), port(2, 4)}, {port(4, 2)}}, conjunction},
-        {{{port(0, 2), port(4, 2)}, {port(2, 4)}}, conjunction},
-        {{{port(2, 4), port(4, 2)}, {port(0, 2)}}, conjunction},
+        {{{port_position(0, 2), port_position(2, 4)}, {port_position(4, 2)}}, conjunction},
+        {{{port_position(0, 2), port_position(4, 2)}, {port_position(2, 4)}}, conjunction},
+        {{{port_position(2, 4), port_position(4, 2)}, {port_position(0, 2)}}, conjunction},
 
-        {{{port(0, 2), port(2, 4)}, {port(2, 0)}}, rotate_90(conjunction)},
-        {{{port(0, 2), port(2, 0)}, {port(2, 4)}}, rotate_90(conjunction)},
-        {{{port(2, 4), port(2, 0)}, {port(0, 2)}}, rotate_90(conjunction)},
+        {{{port_position(0, 2), port_position(2, 4)}, {port_position(2, 0)}}, rotate_90(conjunction)},
+        {{{port_position(0, 2), port_position(2, 0)}, {port_position(2, 4)}}, rotate_90(conjunction)},
+        {{{port_position(2, 4), port_position(2, 0)}, {port_position(0, 2)}}, rotate_90(conjunction)},
 
-        {{{port(0, 2), port(4, 2)}, {port(2, 0)}}, rotate_180(conjunction)},
-        {{{port(0, 2), port(2, 0)}, {port(4, 2)}}, rotate_180(conjunction)},
-        {{{port(4, 2), port(2, 0)}, {port(0, 2)}}, rotate_180(conjunction)},
+        {{{port_position(0, 2), port_position(4, 2)}, {port_position(2, 0)}}, rotate_180(conjunction)},
+        {{{port_position(0, 2), port_position(2, 0)}, {port_position(4, 2)}}, rotate_180(conjunction)},
+        {{{port_position(4, 2), port_position(2, 0)}, {port_position(0, 2)}}, rotate_180(conjunction)},
 
-        {{{port(2, 4), port(4, 2)}, {port(2, 0)}}, rotate_270(conjunction)},
-        {{{port(2, 4), port(2, 0)}, {port(4, 2)}}, rotate_270(conjunction)},
-        {{{port(4, 2), port(2, 0)}, {port(2, 4)}}, rotate_270(conjunction)}};
+        {{{port_position(2, 4), port_position(4, 2)}, {port_position(2, 0)}}, rotate_270(conjunction)},
+        {{{port_position(2, 4), port_position(2, 0)}, {port_position(4, 2)}}, rotate_270(conjunction)},
+        {{{port_position(4, 2), port_position(2, 0)}, {port_position(2, 4)}}, rotate_270(conjunction)}};
     /**
      * Lookup table for disjunction rotations. Maps ports to corresponding OR gates.
      */
     static inline const port_gate_map disjunction_map = {
-        {{{port(0, 2), port(2, 4)}, {port(4, 2)}}, disjunction},
-        {{{port(0, 2), port(4, 2)}, {port(2, 4)}}, disjunction},
-        {{{port(2, 4), port(4, 2)}, {port(0, 2)}}, disjunction},
+        {{{port_position(0, 2), port_position(2, 4)}, {port_position(4, 2)}}, disjunction},
+        {{{port_position(0, 2), port_position(4, 2)}, {port_position(2, 4)}}, disjunction},
+        {{{port_position(2, 4), port_position(4, 2)}, {port_position(0, 2)}}, disjunction},
 
-        {{{port(0, 2), port(2, 4)}, {port(2, 0)}}, rotate_90(disjunction)},
-        {{{port(0, 2), port(2, 0)}, {port(2, 4)}}, rotate_90(disjunction)},
-        {{{port(2, 4), port(2, 0)}, {port(0, 2)}}, rotate_90(disjunction)},
+        {{{port_position(0, 2), port_position(2, 4)}, {port_position(2, 0)}}, rotate_90(disjunction)},
+        {{{port_position(0, 2), port_position(2, 0)}, {port_position(2, 4)}}, rotate_90(disjunction)},
+        {{{port_position(2, 4), port_position(2, 0)}, {port_position(0, 2)}}, rotate_90(disjunction)},
 
-        {{{port(0, 2), port(4, 2)}, {port(2, 0)}}, rotate_180(disjunction)},
-        {{{port(0, 2), port(2, 0)}, {port(4, 2)}}, rotate_180(disjunction)},
-        {{{port(4, 2), port(2, 0)}, {port(0, 2)}}, rotate_180(disjunction)},
+        {{{port_position(0, 2), port_position(4, 2)}, {port_position(2, 0)}}, rotate_180(disjunction)},
+        {{{port_position(0, 2), port_position(2, 0)}, {port_position(4, 2)}}, rotate_180(disjunction)},
+        {{{port_position(4, 2), port_position(2, 0)}, {port_position(0, 2)}}, rotate_180(disjunction)},
 
-        {{{port(2, 4), port(4, 2)}, {port(2, 0)}}, rotate_270(disjunction)},
-        {{{port(2, 4), port(2, 0)}, {port(4, 2)}}, rotate_270(disjunction)},
-        {{{port(4, 2), port(2, 0)}, {port(2, 4)}}, rotate_270(disjunction)}};
+        {{{port_position(2, 4), port_position(4, 2)}, {port_position(2, 0)}}, rotate_270(disjunction)},
+        {{{port_position(2, 4), port_position(2, 0)}, {port_position(4, 2)}}, rotate_270(disjunction)},
+        {{{port_position(4, 2), port_position(2, 0)}, {port_position(2, 4)}}, rotate_270(disjunction)}};
     /**
      * Lookup table for fan-out rotations. Maps ports to corresponding fan-out gates.
      */
     static inline const port_gate_map fanout_map = {
-        {{{port(4, 2)}, {port(0, 2), port(2, 4)}}, fan_out_1_2},
-        {{{port(2, 4)}, {port(0, 2), port(4, 2)}}, fan_out_1_2},
-        {{{port(0, 2)}, {port(2, 4), port(4, 2)}}, fan_out_1_2},
+        {{{port_position(4, 2)}, {port_position(0, 2), port_position(2, 4)}}, fan_out_1_2},
+        {{{port_position(2, 4)}, {port_position(0, 2), port_position(4, 2)}}, fan_out_1_2},
+        {{{port_position(0, 2)}, {port_position(2, 4), port_position(4, 2)}}, fan_out_1_2},
 
-        {{{port(2, 0)}, {port(0, 2), port(2, 4)}}, rotate_90(fan_out_1_2)},
-        {{{port(2, 4)}, {port(0, 2), port(2, 0)}}, rotate_90(fan_out_1_2)},
-        {{{port(0, 2)}, {port(2, 4), port(2, 0)}}, rotate_90(fan_out_1_2)},
+        {{{port_position(2, 0)}, {port_position(0, 2), port_position(2, 4)}}, rotate_90(fan_out_1_2)},
+        {{{port_position(2, 4)}, {port_position(0, 2), port_position(2, 0)}}, rotate_90(fan_out_1_2)},
+        {{{port_position(0, 2)}, {port_position(2, 4), port_position(2, 0)}}, rotate_90(fan_out_1_2)},
 
-        {{{port(2, 0)}, {port(0, 2), port(4, 2)}}, rotate_180(fan_out_1_2)},
-        {{{port(4, 2)}, {port(0, 2), port(2, 0)}}, rotate_180(fan_out_1_2)},
-        {{{port(0, 2)}, {port(4, 2), port(2, 0)}}, rotate_180(fan_out_1_2)},
+        {{{port_position(2, 0)}, {port_position(0, 2), port_position(4, 2)}}, rotate_180(fan_out_1_2)},
+        {{{port_position(4, 2)}, {port_position(0, 2), port_position(2, 0)}}, rotate_180(fan_out_1_2)},
+        {{{port_position(0, 2)}, {port_position(4, 2), port_position(2, 0)}}, rotate_180(fan_out_1_2)},
 
-        {{{port(2, 0)}, {port(2, 4), port(4, 2)}}, rotate_270(fan_out_1_2)},
-        {{{port(4, 2)}, {port(2, 4), port(2, 0)}}, rotate_270(fan_out_1_2)},
-        {{{port(2, 4)}, {port(4, 2), port(2, 0)}}, rotate_270(fan_out_1_2)}};
+        {{{port_position(2, 0)}, {port_position(2, 4), port_position(4, 2)}}, rotate_270(fan_out_1_2)},
+        {{{port_position(4, 2)}, {port_position(2, 4), port_position(2, 0)}}, rotate_270(fan_out_1_2)},
+        {{{port_position(2, 4)}, {port_position(4, 2), port_position(2, 0)}}, rotate_270(fan_out_1_2)}};
 };
 
 }  // namespace fiction

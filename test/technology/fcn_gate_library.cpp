@@ -129,11 +129,13 @@ TEST_CASE("Cell marking", "[fcn-gate-library]")
                                          {' ', 'x', ' '},
                                          {' ', 'o', ' '}}})};
 
-    CHECK(lib_t::mark_cell(wire, port(1, 0), qca_technology::cell_mark::INPUT) == pi_wire);
-    CHECK(lib_t::mark_cell(pi_wire, port(1, 2), qca_technology::cell_mark::OUTPUT) == io_wire);
-    CHECK(lib_t::mark_cell(lib_t::mark_cell(wire, port(1, 0), qca_technology::cell_mark::INPUT), port(1, 2),
+    CHECK(lib_t::mark_cell(wire, port_position(1, 0), qca_technology::cell_mark::INPUT) == pi_wire);
+    CHECK(lib_t::mark_cell(pi_wire, port_position(1, 2), qca_technology::cell_mark::OUTPUT) == io_wire);
+    CHECK(lib_t::mark_cell(lib_t::mark_cell(wire, port_position(1, 0), qca_technology::cell_mark::INPUT),
+                           port_position(1, 2),
                            qca_technology::cell_mark::OUTPUT) == io_wire);
-    CHECK(lib_t::mark_cell(lib_t::mark_cell(lib_t::mark_cell(wire, port(1, 0), qca_technology::cell_mark::EMPTY),
-                                            port(1, 1), qca_technology::cell_mark::EMPTY), port(1, 2),
+    CHECK(lib_t::mark_cell(lib_t::mark_cell(lib_t::mark_cell(wire, port_position(1, 0), qca_technology::cell_mark::EMPTY),
+                                          port_position(1, 1), qca_technology::cell_mark::EMPTY),
+                         port_position(1, 2),
                            qca_technology::cell_mark::EMPTY) == empty);
 }

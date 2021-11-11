@@ -335,7 +335,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
 
     if constexpr (is_hexagonal_layout_v<Lyt>)
     {
-        if constexpr (has_odd_row_hex_arrangment<Lyt>)
+        if constexpr (has_odd_row_hex_arrangement_v<Lyt>)
         {
             switch (n)
             {
@@ -359,7 +359,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
                 }
             }
         }
-        else if constexpr (has_even_row_hex_arrangment<Lyt>)
+        else if constexpr (has_even_row_hex_arrangement_v<Lyt>)
         {
             switch (n)
             {
@@ -383,7 +383,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
                 }
             }
         }
-        else if constexpr (has_odd_column_hex_arrangment<Lyt>)
+        else if constexpr (has_odd_column_hex_arrangement_v<Lyt>)
         {
             switch (n)
             {
@@ -407,7 +407,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
                 }
             }
         }
-        else if constexpr (has_even_column_hex_arrangment<Lyt>)
+        else if constexpr (has_even_column_hex_arrangement_v<Lyt>)
         {
             switch (n)
             {

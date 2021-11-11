@@ -404,7 +404,7 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
         }
 
         // pointy top hexagons are modeled as top-down graphs
-        if constexpr (has_pointy_top_hex_orientation<Lyt>)
+        if constexpr (has_pointy_top_hex_orientation_v<Lyt>)
         {
             graph_attributes.emplace_back("rankdir=TB");
         }
@@ -423,7 +423,7 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
 
         node_attributes.emplace_back("shape=hexagon");
 
-        if constexpr (has_pointy_top_hex_orientation<Lyt>)
+        if constexpr (has_pointy_top_hex_orientation_v<Lyt>)
         {
             // pointy top hexagons are rotated by 30°
             node_attributes.emplace_back("orientation=30");
@@ -448,28 +448,28 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
             topology << "node [label=\"\", width=0.5, height=0.5, style=invis];\n";
         }
 
-        if constexpr (has_odd_row_hex_arrangment<Lyt>)
+        if constexpr (has_odd_row_hex_arrangement_v<Lyt>)
         {
             enforce_same_hexagonal_row(lyt, topology);
 
             // shift odd rows
             for (auto i = 1ul; i <= lyt.y(); i += 2) { shift_row(lyt, i, topology); }
         }
-        else if constexpr (has_even_row_hex_arrangment<Lyt>)
+        else if constexpr (has_even_row_hex_arrangement_v<Lyt>)
         {
             enforce_same_hexagonal_row(lyt, topology);
 
             // shift even rows
             for (auto i = 0ul; i <= lyt.y(); i += 2) { shift_row(lyt, i, topology); }
         }
-        else if constexpr (has_odd_column_hex_arrangment<Lyt>)
+        else if constexpr (has_odd_column_hex_arrangement_v<Lyt>)
         {
             enforce_same_hexagonal_column(lyt, topology);
 
             // shift odd columns
             for (auto i = 1ul; i <= lyt.x(); i += 2) { shift_column(lyt, i, topology); }
         }
-        else if constexpr (has_even_column_hex_arrangment<Lyt>)
+        else if constexpr (has_even_column_hex_arrangement_v<Lyt>)
         {
             enforce_same_hexagonal_column(lyt, topology);
 
@@ -490,7 +490,7 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
                                                   return true;
                                               }
 
-                                              if constexpr (has_pointy_top_hex_orientation<Lyt>)
+                                              if constexpr (has_pointy_top_hex_orientation_v<Lyt>)
                                               {
                                                   // skip adjacent tiles in same row to prevent double edges
                                                   if (t.y == at.y)
