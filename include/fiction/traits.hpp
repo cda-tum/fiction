@@ -224,17 +224,18 @@ inline constexpr bool is_hexagonal_layout_v = is_hexagonal_layout<Lyt>::value;
 
 #pragma region hexagonal orientation and arrangement
 template <typename Lyt>
-constexpr bool has_pointy_top_hex_orientation = std::is_same_v<typename Lyt::hex_arrangement::orientation, pointy_top>;
+constexpr bool has_pointy_top_hex_orientation_v =
+    std::is_same_v<typename Lyt::hex_arrangement::orientation, pointy_top>;
 template <typename Lyt>
-constexpr bool has_flat_top_hex_orientation = std::is_same_v<typename Lyt::hex_arrangement::orientation, flat_top>;
+constexpr bool has_flat_top_hex_orientation_v = std::is_same_v<typename Lyt::hex_arrangement::orientation, flat_top>;
 template <typename Lyt>
-constexpr bool has_odd_row_hex_arrangment = std::is_same_v<typename Lyt::hex_arrangement, odd_row>;
+constexpr bool has_odd_row_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, odd_row>;
 template <typename Lyt>
-constexpr bool has_even_row_hex_arrangment = std::is_same_v<typename Lyt::hex_arrangement, even_row>;
+constexpr bool has_even_row_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, even_row>;
 template <typename Lyt>
-constexpr bool has_odd_column_hex_arrangment = std::is_same_v<typename Lyt::hex_arrangement, odd_column>;
+constexpr bool has_odd_column_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, odd_column>;
 template <typename Lyt>
-constexpr bool has_even_column_hex_arrangment = std::is_same_v<typename Lyt::hex_arrangement, even_column>;
+constexpr bool has_even_column_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, even_column>;
 #pragma endregion
 
 /**

@@ -11,6 +11,7 @@
 
 #include <alice/alice.hpp>
 
+#include <optional>
 #include <string>
 
 namespace alice
@@ -75,7 +76,8 @@ class cell_command : public command
             {
                 std::cout << fmt::format("[e] unsupported gate type at tile position {}", e.where()) << std::endl;
             }
-            catch (const fiction::unsupported_gate_orientation_exception<fiction::cartesian::ucoord_t>& e)
+            catch (const fiction::unsupported_gate_orientation_exception<fiction::cartesian::ucoord_t,
+                                                                         fiction::port_position>& e)
             {
                 std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}",
                                          e.where(), e.which_ports())
@@ -103,21 +105,44 @@ class cell_command : public command
         //            }
         else if (library == 2u)
         {
-            const auto apply_sidb_bestagon = [](auto&& lyt_ptr)
+            const auto apply_sidb_bestagon = [](auto&& lyt_ptr) -> std::optional<fiction::sidb_cell_clk_lyt_ptr>
             {
-                return std::make_shared<fiction::sidb_cell_clk_lyt>(
-                    fiction::apply_gate_library<fiction::sidb_cell_clk_lyt, fiction::sidb_bestagon_library>(*lyt_ptr));
+                using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
+
+                if constexpr (fiction::is_hexagonal_layout_v<Lyt>)
+                {
+                    if constexpr (fiction::has_pointy_top_hex_orientation_v<Lyt>)
+                    {
+                        return std::make_shared<fiction::sidb_cell_clk_lyt>(
+                            fiction::apply_gate_library<fiction::sidb_cell_clk_lyt, fiction::sidb_bestagon_library>(
+                                *lyt_ptr));
+                    }
+                    else
+                    {
+                        std::cout << "[e] hexagonal orientation must be pointy-top" << std::endl;
+                    }
+                }
+                else
+                {
+                    std::cout << "[e] layout topology must be hexagonal" << std::endl;
+                }
+
+                return std::nullopt;
             };
 
             try
             {
-                store<fiction::cell_layout_t>().extend() = std::visit(apply_sidb_bestagon, s.current());
+                if (const auto cell_lyt = std::visit(apply_sidb_bestagon, s.current()); cell_lyt.has_value())
+                {
+                    store<fiction::cell_layout_t>().extend() = *cell_lyt;
+                }
             }
             catch (const fiction::unsupported_gate_type_exception<fiction::cartesian::ucoord_t>& e)
             {
                 std::cout << fmt::format("[e] unsupported gate type at tile position {}", e.where()) << std::endl;
             }
-            catch (const fiction::unsupported_gate_orientation_exception<fiction::cartesian::ucoord_t>& e)
+            catch (const fiction::unsupported_gate_orientation_exception<fiction::cartesian::ucoord_t,
+                                                                         fiction::port_position>& e)
             {
                 std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}",
                                          e.where(), e.which_ports())

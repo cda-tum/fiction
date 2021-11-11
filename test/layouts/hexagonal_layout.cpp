@@ -41,12 +41,12 @@ TEST_CASE("Traits", "[hexagonal-layout]")
     {
         using layout = hexagonal_layout<offset::ucoord_t, odd_row>;
 
-        CHECK(has_pointy_top_hex_orientation<layout>);
-        CHECK(!has_flat_top_hex_orientation<layout>);
-        CHECK(has_odd_row_hex_arrangment<layout>);
-        CHECK(!has_even_row_hex_arrangment<layout>);
-        CHECK(!has_odd_column_hex_arrangment<layout>);
-        CHECK(!has_even_column_hex_arrangment<layout>);
+        CHECK(has_pointy_top_hex_orientation_v<layout>);
+        CHECK(!has_flat_top_hex_orientation_v<layout>);
+        CHECK(has_odd_row_hex_arrangement_v<layout>);
+        CHECK(!has_even_row_hex_arrangement_v<layout>);
+        CHECK(!has_odd_column_hex_arrangement_v<layout>);
+        CHECK(!has_even_column_hex_arrangement_v<layout>);
 
         check_common_traits<layout>();
     }
@@ -54,12 +54,12 @@ TEST_CASE("Traits", "[hexagonal-layout]")
     {
         using layout = hexagonal_layout<offset::ucoord_t, even_row>;
 
-        CHECK(has_pointy_top_hex_orientation<layout>);
-        CHECK(!has_flat_top_hex_orientation<layout>);
-        CHECK(!has_odd_row_hex_arrangment<layout>);
-        CHECK(has_even_row_hex_arrangment<layout>);
-        CHECK(!has_odd_column_hex_arrangment<layout>);
-        CHECK(!has_even_column_hex_arrangment<layout>);
+        CHECK(has_pointy_top_hex_orientation_v<layout>);
+        CHECK(!has_flat_top_hex_orientation_v<layout>);
+        CHECK(!has_odd_row_hex_arrangement_v<layout>);
+        CHECK(has_even_row_hex_arrangement_v<layout>);
+        CHECK(!has_odd_column_hex_arrangement_v<layout>);
+        CHECK(!has_even_column_hex_arrangement_v<layout>);
 
         check_common_traits<layout>();
     }
@@ -67,12 +67,12 @@ TEST_CASE("Traits", "[hexagonal-layout]")
     {
         using layout = hexagonal_layout<offset::ucoord_t, odd_column>;
 
-        CHECK(!has_pointy_top_hex_orientation<layout>);
-        CHECK(has_flat_top_hex_orientation<layout>);
-        CHECK(!has_odd_row_hex_arrangment<layout>);
-        CHECK(!has_even_row_hex_arrangment<layout>);
-        CHECK(has_odd_column_hex_arrangment<layout>);
-        CHECK(!has_even_column_hex_arrangment<layout>);
+        CHECK(!has_pointy_top_hex_orientation_v<layout>);
+        CHECK(has_flat_top_hex_orientation_v<layout>);
+        CHECK(!has_odd_row_hex_arrangement_v<layout>);
+        CHECK(!has_even_row_hex_arrangement_v<layout>);
+        CHECK(has_odd_column_hex_arrangement_v<layout>);
+        CHECK(!has_even_column_hex_arrangement_v<layout>);
 
         check_common_traits<layout>();
     }
@@ -80,12 +80,12 @@ TEST_CASE("Traits", "[hexagonal-layout]")
     {
         using layout = hexagonal_layout<offset::ucoord_t, even_column>;
 
-        CHECK(!has_pointy_top_hex_orientation<layout>);
-        CHECK(has_flat_top_hex_orientation<layout>);
-        CHECK(!has_odd_row_hex_arrangment<layout>);
-        CHECK(!has_even_row_hex_arrangment<layout>);
-        CHECK(!has_odd_column_hex_arrangment<layout>);
-        CHECK(has_even_column_hex_arrangment<layout>);
+        CHECK(!has_pointy_top_hex_orientation_v<layout>);
+        CHECK(has_flat_top_hex_orientation_v<layout>);
+        CHECK(!has_odd_row_hex_arrangement_v<layout>);
+        CHECK(!has_even_row_hex_arrangement_v<layout>);
+        CHECK(!has_odd_column_hex_arrangement_v<layout>);
+        CHECK(has_even_column_hex_arrangement_v<layout>);
 
         check_common_traits<layout>();
     }
