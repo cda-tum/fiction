@@ -116,6 +116,18 @@ class cartesian_layout
         return nc;
     }
 
+    [[nodiscard]] constexpr CartesianCoordinateType north_east(const CartesianCoordinateType& c) const noexcept
+    {
+        if (c.x == 0ull || c.y == 0ull)
+            return c;
+
+        auto nec = c;
+        ++nec.x;
+        --nec.z;
+
+        return nec;
+    }
+
     [[nodiscard]] CartesianCoordinateType east(const CartesianCoordinateType& c) const noexcept
     {
         auto ec = c;
@@ -126,6 +138,21 @@ class cartesian_layout
             ++ec.x;
 
         return ec;
+    }
+
+    [[nodiscard]] CartesianCoordinateType south_east(const CartesianCoordinateType& c) const noexcept
+    {
+        auto sec = c;
+
+        if (c.x > x() || c.y > y())
+            sec.d = 1;
+        else if (c.x < x() && c.y < y())
+        {
+            ++sec.x;
+            ++sec.y;
+        }
+
+        return sec;
     }
 
     [[nodiscard]] CartesianCoordinateType south(const CartesianCoordinateType& c) const noexcept
@@ -140,6 +167,21 @@ class cartesian_layout
         return sc;
     }
 
+    [[nodiscard]] CartesianCoordinateType south_west(const CartesianCoordinateType& c) const noexcept
+    {
+        auto swc = c;
+
+        if (c.y > y())
+            swc.d = 1;
+        else if (c.x > 0ull && c.y < y())
+        {
+            --swc.x;
+            ++swc.y;
+        }
+
+        return swc;
+    }
+
     [[nodiscard]] constexpr CartesianCoordinateType west(const CartesianCoordinateType& c) const noexcept
     {
         if (c.x == 0ull)
@@ -149,6 +191,18 @@ class cartesian_layout
         --wc.x;
 
         return wc;
+    }
+
+    [[nodiscard]] constexpr CartesianCoordinateType north_west(const CartesianCoordinateType& c) const noexcept
+    {
+        if (c.x == 0ull || c.y == 0ull)
+            return c;
+
+        auto nwc = c;
+        --nwc.x;
+        --nwc.y;
+
+        return nwc;
     }
 
     [[nodiscard]] CartesianCoordinateType above(const CartesianCoordinateType& c) const noexcept

@@ -129,6 +129,7 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     auto t = cartesian_layout<cartesian::ucoord_t>::coordinate{5, 5};
 
     auto nt  = cartesian_layout<cartesian::ucoord_t>::coordinate{5, 4};
+    auto net  = cartesian_layout<cartesian::ucoord_t>::coordinate{6, 4};
     auto bnt = cartesian_layout<cartesian::ucoord_t>::coordinate{5, 0};
 
     check(t, layout.north(t), nt, bnt, layout.north(bnt));
@@ -137,8 +138,10 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(layout.is_northwards_of(t, bnt));
     CHECK(layout.is_northern_border(bnt));
     CHECK(layout.northern_border_of(t) == bnt);
+    CHECK(layout.north_east(t) == net);
 
     auto et  = cartesian_layout<cartesian::ucoord_t>::coordinate{6, 5};
+    auto set  = cartesian_layout<cartesian::ucoord_t>::coordinate{6, 6};
     auto bet = cartesian_layout<cartesian::ucoord_t>::coordinate{10, 5};
 
     check(t, layout.east(t), et, bet, layout.east(bet));
@@ -147,8 +150,10 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(layout.is_eastwards_of(t, bet));
     CHECK(layout.is_eastern_border(bet));
     CHECK(layout.eastern_border_of(t) == bet);
+    CHECK(layout.south_east(t) == set);
 
     auto st  = cartesian_layout<cartesian::ucoord_t>::coordinate{5, 6};
+    auto swt  = cartesian_layout<cartesian::ucoord_t>::coordinate{4, 6};
     auto bst = cartesian_layout<cartesian::ucoord_t>::coordinate{5, 10};
 
     check(t, layout.south(t), st, bst, layout.south(bst));
@@ -157,8 +162,10 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(layout.is_southwards_of(t, bst));
     CHECK(layout.is_southern_border(bst));
     CHECK(layout.southern_border_of(t) == bst);
+    CHECK(layout.south_west(t) == swt);
 
     auto wt  = cartesian_layout<cartesian::ucoord_t>::coordinate{4, 5};
+    auto nwt  = cartesian_layout<cartesian::ucoord_t>::coordinate{4, 4};
     auto bwt = cartesian_layout<cartesian::ucoord_t>::coordinate{0, 5};
 
     check(t, layout.west(t), wt, bwt, layout.west(bwt));
@@ -167,6 +174,7 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(layout.is_westwards_of(t, bwt));
     CHECK(layout.is_western_border(bwt));
     CHECK(layout.western_border_of(t) == bwt);
+    CHECK(layout.north_west(t) == nwt);
 
     auto at  = cartesian_layout<cartesian::ucoord_t>::coordinate{5, 5, 1};
     auto bat = layout.above(at);
