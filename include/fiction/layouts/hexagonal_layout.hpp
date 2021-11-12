@@ -486,10 +486,10 @@ class hexagonal_layout
     //        return {0ull, c.y, c.z};
     //    }
     //
-    //    [[nodiscard]] constexpr bool is_ground_layer(const OffsetCoordinateType& c) const noexcept
-    //    {
-    //        return c.z == 0ull;
-    //    }
+    [[nodiscard]] constexpr bool is_ground_layer(const OffsetCoordinateType& c) const noexcept
+    {
+        return c.z == 0ull;
+    }
 
     [[nodiscard]] constexpr bool is_crossing_layer(const OffsetCoordinateType& c) const noexcept
     {

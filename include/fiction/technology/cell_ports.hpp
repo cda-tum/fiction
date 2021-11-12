@@ -156,9 +156,22 @@ struct port_list
      * @param p Ports to compare to.
      * @return True iff these ports are equal to p.
      */
-    bool operator==(const port_list& p) const
+    bool operator==(const port_list<PortType>& p) const
     {
         return this->inp == p.inp && this->out == p.out;
+    }
+    /**
+     * Merges two port_list objects together. The given port_list might be altered.
+     *
+     * @param p Ports to merge.
+     * @return Merged port lists.
+     */
+    port_list<PortType>& operator+=(port_list<PortType>& p)
+    {
+        this->inp.merge(p.inp);
+        this->out.merge(p.out);
+
+        return *this;
     }
 };
 

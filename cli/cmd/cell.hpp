@@ -148,6 +148,13 @@ class cell_command : public command
                                          e.where(), e.which_ports())
                           << std::endl;
             }
+            catch (const fiction::unsupported_gate_orientation_exception<fiction::cartesian::ucoord_t,
+                                                                         fiction::port_direction>& e)
+            {
+                std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with port directions {}",
+                                         e.where(), e.which_ports())
+                          << std::endl;
+            }
         }
         // more libraries go here
         else

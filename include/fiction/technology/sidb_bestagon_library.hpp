@@ -34,18 +34,131 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 59, 46>  
         [[maybe_unused]] const auto n = lyt.get_node(t);
         [[maybe_unused]] const auto p = determine_port_routing(lyt, t);
 
-        return conjunction;
+        try
+        {
+            if constexpr (fiction::has_is_fanout_v<Lyt>)
+            {
+                if (lyt.is_fanout(n))
+                {
+                    if (lyt.fanout_size(n) == 2)
+                    {
+                        return fanout_map.at(p);
+                    }
+                }
+            }
+            if constexpr (fiction::has_is_buf_v<Lyt>)
+            {
+                if (lyt.is_buf(n))
+                {
+                    if (lyt.is_ground_layer(t))
+                    {
+                        return wire_map.at(p);
+                    }
+                    else
+                    {
+                        return empty_gate;
+                    }
+                    // TODO hourglass wire
+                }
+            }
+            if constexpr (fiction::has_is_inv_v<Lyt>)
+            {
+                if (lyt.is_inv(n))
+                {
+                    return inverter_map.at(p);
+                }
+            }
+            if constexpr (mockturtle::has_is_and_v<Lyt>)
+            {
+                if (lyt.is_and(n))
+                {
+                    return conjunction_map.at(p);
+                }
+            }
+            if constexpr (mockturtle::has_is_or_v<Lyt>)
+            {
+                if (lyt.is_or(n))
+                {
+                    return disjunction_map.at(p);
+                }
+            }
+            if constexpr (fiction::has_is_nand_v<Lyt>)
+            {
+                if (lyt.is_nand(n))
+                {
+                    return negated_conjunction_map.at(p);
+                }
+            }
+            if constexpr (fiction::has_is_nor_v<Lyt>)
+            {
+                if (lyt.is_nor(n))
+                {
+                    return negated_disjunction_map.at(p);
+                }
+            }
+            if constexpr (mockturtle::has_is_xor_v<Lyt>)
+            {
+                if (lyt.is_xor(n))
+                {
+                    return exclusive_disjunction_map.at(p);
+                }
+            }
+            if constexpr (fiction::has_is_xnor_v<Lyt>)
+            {
+                if (lyt.is_xnor(n))
+                {
+                    return negated_exclusive_disjunction_map.at(p);
+                }
+            }
+        }
+        catch (const std::out_of_range&)
+        {
+            throw unsupported_gate_orientation_exception(t, p);
+        }
+
+        throw unsupported_gate_type_exception(t);
     }
 
   private:
     template <typename Lyt>
-    [[nodiscard]] static port_list<port_position> determine_port_routing([[maybe_unused]] const Lyt& lyt,
-                                                          [[maybe_unused]] const tile<Lyt>& t) noexcept
+    [[nodiscard]] static port_list<port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
     {
-        port_list<port_position> p{};
+        port_list<port_direction> p{};
+
+        // crossing case (called in ground layer)
+        if (const auto at = lyt.above(t); (t != at) && lyt.is_wire_tile(t) && lyt.is_wire_tile(at))
+        {
+            auto pa = determine_port_routing(lyt, at);
+
+            p += pa;
+        }
+
+        // determine incoming connector ports
+        if (lyt.has_north_eastern_incoming_signal(t))
+            p.inp.emplace(port_direction::cardinal::NORTH_EAST);
+        if (lyt.has_north_western_incoming_signal(t))
+            p.inp.emplace(port_direction::cardinal::NORTH_WEST);
+
+        // determine outgoing connector ports
+        if (lyt.has_south_eastern_outgoing_signal(t))
+            p.out.emplace(port_direction::cardinal::SOUTH_EAST);
+        if (lyt.has_south_western_outgoing_signal(t))
+            p.out.emplace(port_direction::cardinal::SOUTH_WEST);
+
+        // has no connector ports
+        if (const auto n = lyt.get_node(t); !lyt.is_wire(n) && !lyt.is_inv(n))
+        {
+            if (lyt.has_no_incoming_signal(t))
+                p.inp.emplace(port_direction::cardinal::NORTH_WEST);
+
+            if (lyt.has_no_outgoing_signal(t))
+                p.out.emplace(port_direction::cardinal::SOUTH_EAST);
+        }
 
         return p;
     }
+
+    // clang-format off
 
     static constexpr const fcn_gate straight_wire{cell_list_to_gate<char>({{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -683,6 +796,136 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 59, 46>  
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
+
+    // clang-format on
+
+    using port_gate_map = std::unordered_map<port_list<port_direction>, fcn_gate>;
+    /**
+     * Lookup table for wire mirroring. Maps ports to corresponding wires.
+     */
+    static inline const port_gate_map wire_map = {
+        // primary inputs
+        {{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}}, straight_wire},
+        {{{}, {port_direction(port_direction::cardinal::SOUTH_EAST)}}, diagonal_wire},
+        // primary outputs
+        {{{port_direction(port_direction::cardinal::NORTH_WEST)}, {}}, diagonal_wire},
+        {{{port_direction(port_direction::cardinal::NORTH_EAST)}, {}}, reverse_columns(straight_wire)},
+        // straight wire
+        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+         straight_wire},
+        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+         reverse_columns(straight_wire)},
+        // diagonal wire
+        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+         diagonal_wire},
+        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+         reverse_columns(diagonal_wire)},
+        // wire crossing
+        {{{port_direction(port_direction::cardinal::NORTH_EAST), port_direction(port_direction::cardinal::NORTH_WEST)},
+          {port_direction(port_direction::cardinal::SOUTH_EAST), port_direction(port_direction::cardinal::SOUTH_WEST)}},
+         crossing},
+        // TODO hourglass wire
+        // empty gate (for crossing layer)
+        {{{}, {}}, empty_gate},
+    };
+    /**
+     * Lookup table for inverter mirroring. Maps ports to corresponding inverters.
+     */
+    static inline const port_gate_map inverter_map = {
+        // straight inverters
+        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+         straight_inverter},
+        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+         reverse_columns(straight_inverter)},
+        // diagonal inverters
+        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+         diagonal_inverter},
+        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+         reverse_columns(diagonal_inverter)},
+        // without inputs
+        {{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}}, straight_inverter},
+        {{{}, {port_direction(port_direction::cardinal::SOUTH_EAST)}}, diagonal_inverter},
+        // without outputs
+        {{{port_direction(port_direction::cardinal::NORTH_WEST)}, {}}, diagonal_inverter},
+        {{{port_direction(port_direction::cardinal::NORTH_EAST)}, {}}, reverse_columns(straight_inverter)}};
+    /**
+     * Lookup table for conjunction mirroring. Maps ports to corresponding AND gates.
+     */
+    static inline const port_gate_map conjunction_map = {
+        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+         conjunction},
+        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+         reverse_columns(conjunction)}};
+    /**
+     * Lookup table for disjunction mirroring. Maps ports to corresponding OR gates.
+     */
+    static inline const port_gate_map disjunction_map = {
+        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+         disjunction},
+        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+         reverse_columns(disjunction)}};
+    /**
+     * Lookup table for negated conjunction mirroring. Maps ports to corresponding NAND gates.
+     */
+    static inline const port_gate_map negated_conjunction_map = {
+        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+         negated_conjunction},
+        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+         reverse_columns(negated_conjunction)}};
+    /**
+     * Lookup table for negated disjunction mirroring. Maps ports to corresponding NOR gates.
+     */
+    static inline const port_gate_map negated_disjunction_map = {
+        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+         negated_disjunction},
+        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+         reverse_columns(negated_disjunction)}};
+    /**
+     * Lookup table for exclusive disjunction mirroring. Maps ports to corresponding XOR gates.
+     */
+    static inline const port_gate_map exclusive_disjunction_map = {
+        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+         exclusive_disjunction},
+        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+         reverse_columns(exclusive_disjunction)}};
+    /**
+     * Lookup table for negated exclusive disjunction mirroring. Maps ports to corresponding XNOR gates.
+     */
+    static inline const port_gate_map negated_exclusive_disjunction_map = {
+        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+         negated_exclusive_disjunction},
+        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+         reverse_columns(negated_exclusive_disjunction)}};
+    /**
+     * Lookup table for fanout mirroring. Maps ports to corresponding fan-out gates.
+     */
+    static inline const port_gate_map fanout_map = {
+        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+          {port_direction(port_direction::cardinal::SOUTH_EAST), port_direction(port_direction::cardinal::SOUTH_WEST)}},
+         fanout_1_2},
+        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
+          {port_direction(port_direction::cardinal::SOUTH_EAST), port_direction(port_direction::cardinal::SOUTH_WEST)}},
+         reverse_columns(fanout_1_2)}};
 };
 
 }  // namespace fiction
