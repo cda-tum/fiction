@@ -259,7 +259,11 @@ class hexagonal_layout
 
     [[nodiscard]] constexpr OffsetCoordinateType north_east(const OffsetCoordinateType& c) const noexcept
     {
-        return to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{+1, 0, -1});
+        auto ne = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{+1, 0, -1});
+
+        ne.z = c.z;
+
+        return ne;
     }
 
     [[nodiscard]] OffsetCoordinateType east(const OffsetCoordinateType& c) const noexcept
@@ -278,11 +282,19 @@ class hexagonal_layout
     {
         if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top>)
         {
-            return to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{0, -1, +1});
+            auto se = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{0, -1, +1});
+
+            se.z = c.z;
+
+            return se;
         }
         else
         {
-            return to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{+1, -1, 0});
+            auto se = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{+1, -1, 0});
+
+            se.z = c.z;
+
+            return se;
         }
     }
 
@@ -300,7 +312,11 @@ class hexagonal_layout
 
     [[nodiscard]] constexpr OffsetCoordinateType south_west(const OffsetCoordinateType& c) const noexcept
     {
-        return to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{-1, 0, +1});
+        auto sw = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{-1, 0, +1});
+
+        sw.z = c.z;
+
+        return sw;
     }
 
     [[nodiscard]] constexpr OffsetCoordinateType west(const OffsetCoordinateType& c) const noexcept
@@ -318,11 +334,19 @@ class hexagonal_layout
     {
         if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top>)
         {
-            return to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{0, +1, -1});
+            auto nw = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{0, +1, -1});
+
+            nw.z = c.z;
+
+            return nw;
         }
         else
         {
-            return to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{-1, +1, 0});
+            auto nw = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{-1, +1, 0});
+
+            nw.z = c.z;
+
+            return nw;
         }
     }
 
