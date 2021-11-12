@@ -8,6 +8,10 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/traits.hpp>
 
+#include <fmt/format.h>
+
+#include <iostream>
+
 using namespace fiction;
 
 #if defined(__GNUC__)
@@ -102,15 +106,62 @@ void check_identity_conversion()
 
 TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
 {
-    using even_column_layout = hexagonal_layout<offset::ucoord_t, even_column>;
-    using odd_column_layout  = hexagonal_layout<offset::ucoord_t, odd_column>;
-    using even_row_layout    = hexagonal_layout<offset::ucoord_t, even_row>;
-    using odd_row_layout     = hexagonal_layout<offset::ucoord_t, odd_row>;
+    SECTION("odd row")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, odd_row>;
+        check_identity_conversion<layout>();
 
-    check_identity_conversion<even_column_layout>();
-    check_identity_conversion<odd_column_layout>();
-    check_identity_conversion<even_row_layout>();
-    check_identity_conversion<odd_row_layout>();
+        layout lyt{{3, 3}};
+
+        CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
+        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, 0, -1});
+        CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, 0, -2});
+        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{0, +1, -1});
+        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{+1, +1, -2});
+        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+2, +1, -3});
+    }
+    SECTION("even row")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, even_row>;
+        check_identity_conversion<layout>();
+
+        layout lyt{{3, 3}};
+
+        CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
+        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, 0, -1});
+        CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, 0, -2});
+        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{-1, +1, 0});
+        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{0, +1, -1});
+        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+1, +1, -2});
+    }
+    SECTION("odd column")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, odd_column>;
+        check_identity_conversion<layout>();
+
+        layout lyt{{3, 3}};
+
+        CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
+        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, 0, -1});
+        CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, -1, -1});
+        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{0, +1, -1});
+        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{+1, +1, -2});
+        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+2, 0, -2});
+    }
+    SECTION("even column")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, even_column>;
+        check_identity_conversion<layout>();
+
+        layout lyt{{3, 3}};
+
+        CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
+        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
+        CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, -1, -1});
+        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{0, +1, -1});
+        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{+1, 0, -1});
+        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+2, 0, -2});
+    }
 }
 
 template <typename Lyt>
@@ -198,6 +249,122 @@ TEST_CASE("Coordinate iteration", "[hexagonal-layout]")
     check_visited_coordinates<even_row_layout>();
     check_visited_coordinates<odd_column_layout>();
     check_visited_coordinates<even_column_layout>();
+}
+
+TEST_CASE("Cardinal operations", "[hexagonal-layout]")
+{
+    SECTION("odd row")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, odd_row>;
+
+        layout lyt{{3, 3}};
+
+        const coordinate<layout> c{2, 2};
+        const coordinate<layout> nc{2, 1};
+        const coordinate<layout> nec{2, 1};
+        const coordinate<layout> ec{3, 2};
+        const coordinate<layout> sec{2, 3};
+        const coordinate<layout> sc{2, 3};
+        const coordinate<layout> swc{1, 3};
+        const coordinate<layout> wc{1, 2};
+        const coordinate<layout> nwc{1, 1};
+
+        CHECK(lyt.north(c) == nc);
+        CHECK(lyt.north_east(c) == nec);
+        CHECK(lyt.east(c) == ec);
+        CHECK(lyt.south_east(c) == sec);
+        CHECK(lyt.south(c) == sc);
+        CHECK(lyt.south_west(c) == swc);
+        CHECK(lyt.west(c) == wc);
+    }
+    SECTION("even row")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, even_row>;
+
+        layout lyt{{3, 3}};
+
+        const coordinate<layout> c{2, 2};
+        const coordinate<layout> nc{2, 1};
+        const coordinate<layout> nec{3, 1};
+        const coordinate<layout> ec{3, 2};
+        const coordinate<layout> sec{3, 3};
+        const coordinate<layout> sc{2, 3};
+        const coordinate<layout> swc{2, 3};
+        const coordinate<layout> wc{1, 2};
+        const coordinate<layout> nwc{2, 1};
+
+        CHECK(lyt.north(c) == nc);
+        CHECK(lyt.north_east(c) == nec);
+        CHECK(lyt.east(c) == ec);
+        CHECK(lyt.south_east(c) == sec);
+        CHECK(lyt.south(c) == sc);
+        CHECK(lyt.south_west(c) == swc);
+        CHECK(lyt.west(c) == wc);
+        CHECK(lyt.north_west(c) == nwc);
+    }
+    SECTION("odd column")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, odd_column>;
+
+        layout lyt{{3, 3}};
+
+        const coordinate<layout> c{2, 2};
+        const coordinate<layout> nc{2, 1};
+        const coordinate<layout> nec{3, 1};
+        const coordinate<layout> ec{3, 2};
+        const coordinate<layout> sec{3, 2};
+        const coordinate<layout> sc{2, 3};
+        const coordinate<layout> swc{1, 2};
+        const coordinate<layout> wc{1, 2};
+        const coordinate<layout> nwc{1, 1};
+
+        CHECK(lyt.north(c) == nc);
+//        std::cout
+//            << fmt::format(
+//                   "c: {}, cube of c: {}, north east of c: {}, cube of north east of c: {}, actual cubed output: {}", c,
+//                   lyt.to_cube_coordinate(c), nec, lyt.to_cube_coordinate(nec),
+//                   lyt.to_cube_coordinate(lyt.north_east(c)))
+//            << std::endl;
+        CHECK(lyt.north_east(c) == nec);
+        CHECK(lyt.east(c) == ec);
+
+        CHECK(lyt.south_east(c) == sec);
+        CHECK(lyt.south(c) == sc);
+//        std::cout
+//            << fmt::format(
+//                   "c: {}, cube of c: {}, south west of c: {}, cube of south west of c: {}, actual cubed output: {}", c,
+//                   lyt.to_cube_coordinate(c), swc, lyt.to_cube_coordinate(swc),
+//                   lyt.to_cube_coordinate(lyt.south_west(c)))
+//            << std::endl;
+        CHECK(lyt.south_west(c) == swc);
+        CHECK(lyt.west(c) == wc);
+        CHECK(lyt.north_west(c) == nwc);
+    }
+    SECTION("even column")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, even_column>;
+
+        layout lyt{{3, 3}};
+
+        const coordinate<layout> c{2, 2};
+        const coordinate<layout> nc{2, 1};
+        const coordinate<layout> nec{3, 2};
+        const coordinate<layout> ec{3, 2};
+        const coordinate<layout> sec{3, 3};
+        const coordinate<layout> sc{2, 3};
+        const coordinate<layout> swc{1, 3};
+        const coordinate<layout> wc{1, 2};
+        const coordinate<layout> nwc{1, 2};
+
+        CHECK(lyt.north(c) == nc);
+        CHECK(lyt.north_east(c) == nec);
+        CHECK(lyt.east(c) == ec);
+        CHECK(lyt.south_east(c) == sec);
+        CHECK(lyt.south(c) == sc);
+        CHECK(lyt.south_west(c) == swc);
+        CHECK(lyt.west(c) == wc);
+        CHECK(lyt.north_west(c) == nwc);
+    }
 }
 
 TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
