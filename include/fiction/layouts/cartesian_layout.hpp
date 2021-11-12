@@ -123,7 +123,7 @@ class cartesian_layout
 
         auto nec = c;
         ++nec.x;
-        --nec.z;
+        --nec.y;
 
         return nec;
     }
