@@ -114,11 +114,11 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
         layout lyt{{3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
-        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, 0, -1});
-        CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, 0, -2});
-        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{0, +1, -1});
-        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{+1, +1, -2});
-        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+2, +1, -3});
+        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
+        CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, -2, 0});
+        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{0, -1, +1});
+        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{+1, -2, +1});
+        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+2, -3, +1});
     }
     SECTION("even row")
     {
@@ -128,11 +128,11 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
         layout lyt{{3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
-        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, 0, -1});
-        CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, 0, -2});
-        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{-1, +1, 0});
-        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{0, +1, -1});
-        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+1, +1, -2});
+        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
+        CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, -2, 0});
+        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{-1, 0, +1});
+        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{0, -1, +1});
+        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+1, -2, +1});
     }
     SECTION("odd column")
     {
@@ -142,11 +142,11 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
         layout lyt{{3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
-        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, 0, -1});
+        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
         CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, -1, -1});
-        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{0, +1, -1});
-        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{+1, +1, -2});
-        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+2, 0, -2});
+        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{0, -1, +1});
+        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{+1, -2, +1});
+        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+2, -2, 0});
     }
     SECTION("even column")
     {
@@ -156,11 +156,11 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
         layout lyt{{3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
-        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
+        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, 0, -1});
         CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, -1, -1});
-        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{0, +1, -1});
-        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{+1, 0, -1});
-        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+2, 0, -2});
+        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{0, -1, +1});
+        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{+1, -1, 0});
+        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+2, -2, 0});
     }
 }
 
@@ -319,23 +319,11 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         const coordinate<layout> nwc{1, 1};
 
         CHECK(lyt.north(c) == nc);
-//        std::cout
-//            << fmt::format(
-//                   "c: {}, cube of c: {}, north east of c: {}, cube of north east of c: {}, actual cubed output: {}", c,
-//                   lyt.to_cube_coordinate(c), nec, lyt.to_cube_coordinate(nec),
-//                   lyt.to_cube_coordinate(lyt.north_east(c)))
-//            << std::endl;
         CHECK(lyt.north_east(c) == nec);
         CHECK(lyt.east(c) == ec);
 
         CHECK(lyt.south_east(c) == sec);
         CHECK(lyt.south(c) == sc);
-//        std::cout
-//            << fmt::format(
-//                   "c: {}, cube of c: {}, south west of c: {}, cube of south west of c: {}, actual cubed output: {}", c,
-//                   lyt.to_cube_coordinate(c), swc, lyt.to_cube_coordinate(swc),
-//                   lyt.to_cube_coordinate(lyt.south_west(c)))
-//            << std::endl;
         CHECK(lyt.south_west(c) == swc);
         CHECK(lyt.west(c) == wc);
         CHECK(lyt.north_west(c) == nwc);
