@@ -768,9 +768,19 @@ class gate_level_layout : public ClockedLayout
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::north(t)));
     }
 
+    [[nodiscard]] bool has_north_eastern_incoming_signal(const tile& t) const noexcept
+    {
+        return is_incoming_signal(t, static_cast<signal>(ClockedLayout::north_east(t)));
+    }
+
     [[nodiscard]] bool has_eastern_incoming_signal(const tile& t) const noexcept
     {
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::east(t)));
+    }
+
+    [[nodiscard]] bool has_south_eastern_incoming_signal(const tile& t) const noexcept
+    {
+        return is_incoming_signal(t, static_cast<signal>(ClockedLayout::south_east(t)));
     }
 
     [[nodiscard]] bool has_southern_incoming_signal(const tile& t) const noexcept
@@ -778,9 +788,19 @@ class gate_level_layout : public ClockedLayout
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::south(t)));
     }
 
+    [[nodiscard]] bool has_south_western_incoming_signal(const tile& t) const noexcept
+    {
+        return is_incoming_signal(t, static_cast<signal>(ClockedLayout::south_west(t)));
+    }
+
     [[nodiscard]] bool has_western_incoming_signal(const tile& t) const noexcept
     {
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::west(t)));
+    }
+
+    [[nodiscard]] bool has_north_western_incoming_signal(const tile& t) const noexcept
+    {
+        return is_incoming_signal(t, static_cast<signal>(ClockedLayout::north_west(t)));
     }
 
     [[nodiscard]] bool has_no_incoming_signal(const tile& t) const noexcept
@@ -801,9 +821,19 @@ class gate_level_layout : public ClockedLayout
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::north(t)));
     }
 
+    [[nodiscard]] bool has_north_eastern_outgoing_signal(const tile& t) const noexcept
+    {
+        return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::north_east(t)));
+    }
+
     [[nodiscard]] bool has_eastern_outgoing_signal(const tile& t) const noexcept
     {
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::east(t)));
+    }
+
+    [[nodiscard]] bool has_south_eastern_outgoing_signal(const tile& t) const noexcept
+    {
+        return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::south_east(t)));
     }
 
     [[nodiscard]] bool has_southern_outgoing_signal(const tile& t) const noexcept
@@ -811,9 +841,19 @@ class gate_level_layout : public ClockedLayout
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::south(t)));
     }
 
+    [[nodiscard]] bool has_south_western_outgoing_signal(const tile& t) const noexcept
+    {
+        return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::south_west(t)));
+    }
+
     [[nodiscard]] bool has_western_outgoing_signal(const tile& t) const noexcept
     {
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::west(t)));
+    }
+
+    [[nodiscard]] bool has_north_western_outgoing_signal(const tile& t) const noexcept
+    {
+        return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::north_west(t)));
     }
 
     [[nodiscard]] bool has_no_outgoing_signal(const tile& t) const noexcept
