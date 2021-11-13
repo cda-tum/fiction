@@ -276,6 +276,7 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         CHECK(lyt.south(c) == sc);
         CHECK(lyt.south_west(c) == swc);
         CHECK(lyt.west(c) == wc);
+        CHECK(lyt.north_west(c) == nwc);
     }
     SECTION("even row")
     {
