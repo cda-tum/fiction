@@ -22,9 +22,12 @@ constexpr const char* GATE_INV = "GATE  inv1  1 O=!a;   PIN * INV    1 999 1.0 1
 /**
  * 2-ary functions.
  */
-constexpr const char* GATE_AND2 = "GATE  and2  1 O=(ab);  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
-constexpr const char* GATE_OR2  = "GATE  or2   1 O={ab};  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
-constexpr const char* GATE_XOR2 = "GATE  xor2  1 O=[ab];  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+constexpr const char* GATE_AND2  = "GATE  and2  1 O=(ab);  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+constexpr const char* GATE_NAND2 = "GATE  nand2 1 O=!(ab); PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+constexpr const char* GATE_OR2   = "GATE  or2   1 O={ab};  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+constexpr const char* GATE_NOR2  = "GATE  nor2  1 O=!{ab}; PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+constexpr const char* GATE_XOR2  = "GATE  xor2  1 O=[ab];  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+constexpr const char* GATE_XNOR2 = "GATE  xnor2 1 O=![ab]; PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
 
 /**
  * 3-ary functions.

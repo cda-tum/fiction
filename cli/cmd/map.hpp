@@ -43,8 +43,11 @@ class map_command : public command
             command(e, "Performs technology mapping to transform a network into another one using specific gates.")
     {
         add_flag("--and,-a", "Enable the use of AND gates");
+        add_flag("--nand", "Enable the use of NAND gates");
         add_flag("--or,-o", "Enable the use of OR gates");
+        add_flag("--nor", "Enable the use of NOR gates");
         add_flag("--xor,-x", "Enable the use of XOR gates");
+        add_flag("--xnor", "Enable the use of XNOR gates");
         add_flag("--inv,-i", "Enable the use of NOT gates");
         add_flag("--maj,-m", "Enable the use of MAJ gates");
         add_flag("--dot,-d", "Enable the use of DOT gates");
@@ -91,13 +94,25 @@ class map_command : public command
         {
             library_stream << fiction::GATE_AND2;
         }
+        if (is_set("nand") || is_set("all2") || is_set("all"))
+        {
+            library_stream << fiction::GATE_NAND2;
+        }
         if (is_set("or") || is_set("all2") || is_set("all"))
         {
             library_stream << fiction::GATE_OR2;
         }
+        if (is_set("nor") || is_set("all2") || is_set("all"))
+        {
+            library_stream << fiction::GATE_NOR2;
+        }
         if (is_set("xor") || is_set("all2") || is_set("all"))
         {
             library_stream << fiction::GATE_XOR2;
+        }
+        if (is_set("xnor") || is_set("all2") || is_set("all"))
+        {
+            library_stream << fiction::GATE_XNOR2;
         }
         if (is_set("inv") || is_set("all2") || is_set("all3") || is_set("all"))
         {
@@ -180,7 +195,8 @@ class map_command : public command
             {
                 synthesize_and_store<3>(gates);
             }
-            else if (is_set("and") || is_set("or") || is_set("xor") || is_set("all2"))
+            else if (is_set("and") || is_set("nand") || is_set("or") || is_set("nor") || is_set("xor") ||
+                     is_set("xnor") || is_set("all2"))
             {
                 synthesize_and_store<2>(gates);
             }
