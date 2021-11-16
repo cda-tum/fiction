@@ -106,6 +106,10 @@ class network_reader
                 {
                     out << "[e] AIGs do not support the full feature set of BLIF files" << std::endl;
                 }
+                else if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::xag_network>)
+                {
+                    out << "[e] XAGs do not support the full feature set of BLIF files" << std::endl;
+                }
                 else if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::mig_network>)
                 {
                     out << "[e] MIGs do not support the full feature set of BLIF files" << std::endl;
