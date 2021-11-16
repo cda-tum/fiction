@@ -1,4 +1,4 @@
-module xor2_1(in0, in1, out);
+module top(in0, in1, out);
 input a, b;
 output out;
 

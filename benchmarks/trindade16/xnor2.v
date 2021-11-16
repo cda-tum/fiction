@@ -1,4 +1,4 @@
-module xnor2(a, b, out);
+module top(a, b, out);
 input a, b;
 output out;
 wire w1, w2, w3, w4, w5;

@@ -1,4 +1,4 @@
-module HA(x, y, s, cout);
+module top(x, y, s, cout);
 input x, y;
 output s, cout;
 wire w1, w2;
