@@ -66,7 +66,7 @@ int main()
                      "SiDB dots",
                      "layout area in nm²"};
 
-    // instantiate a complete AIG NPN database for node re-synthesis
+    // instantiate a complete XAG NPN database for node re-synthesis
     mockturtle::xag_npn_resynthesis<mockturtle::xag_network,                    // the input network type
                                     mockturtle::xag_network,                    // the database network type
                                     mockturtle::xag_npn_db_kind::xag_complete>  // the kind of database to use
