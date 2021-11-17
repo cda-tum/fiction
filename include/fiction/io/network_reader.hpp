@@ -14,6 +14,7 @@
 #include <mockturtle/io/verilog_reader.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
+#include <mockturtle/networks/xag.hpp>
 
 #include <algorithm>
 #include <array>
