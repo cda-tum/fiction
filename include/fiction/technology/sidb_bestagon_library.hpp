@@ -137,14 +137,6 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
     {
         port_list<port_direction> p{};
 
-        //        // crossing case (called in ground layer)
-        //        if (const auto at = lyt.above(t); (t != at) && lyt.is_wire_tile(t) && lyt.is_wire_tile(at))
-        //        {
-        //            auto pa = determine_port_routing(lyt, at);
-        //
-        //            p += pa;
-        //        }
-
         // determine incoming connector ports
         if (lyt.has_north_eastern_incoming_signal(t))
             p.inp.emplace(port_direction::cardinal::NORTH_EAST);
