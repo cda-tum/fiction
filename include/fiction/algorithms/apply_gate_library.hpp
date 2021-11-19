@@ -11,6 +11,7 @@
 
 #include <mockturtle/traits.hpp>
 
+#include <cmath>
 #include <type_traits>
 
 #if (PROGRESS_BARS)
@@ -64,12 +65,15 @@ class apply_gate_library_impl
                         if constexpr (has_pointy_top_hex_orientation_v<GateLyt>)
                         {
                             // vertical distance between pointy top hexagons is height * 3/4
-                            c = {t.x * GateLibrary::gate_x_size(), t.y * (GateLibrary::gate_y_size() * 3 / 4), t.z};
+                            c = {t.x * GateLibrary::gate_x_size(),
+                                 static_cast<decltype(c.y)>((t.y * (GateLibrary::gate_y_size() * 3 / 4))),
+                                 t.z};
                         }
                         else if constexpr (has_flat_top_hex_orientation_v<GateLyt>)
                         {
                             // horizontal distance between flat top hexagons is width * 3/4
-                            c = {t.x * (GateLibrary::gate_x_size() * 3 / 4), t.y * (GateLibrary::gate_y_size()), t.z};
+                            c = {static_cast<decltype(c.x)>((t.x * (GateLibrary::gate_x_size() * 3 / 4))),
+                                 t.y * (GateLibrary::gate_y_size()), t.z};
                         }
 
                         if constexpr (has_odd_row_hex_arrangement_v<GateLyt>)
@@ -77,7 +81,8 @@ class apply_gate_library_impl
                             if (gate_lyt.is_in_odd_row(t))
                             {
                                 // odd rows are shifted in by width / 2
-                                c.x += GateLibrary::gate_x_size() / static_cast<decltype(c.x)>(2);
+                                c.x += static_cast<decltype(c.x)>(
+                                    std::ceil(GateLibrary::gate_x_size() / static_cast<decltype(c.x)>(2)) + 1);
                             }
                         }
                         else if constexpr (has_even_row_hex_arrangement_v<GateLyt>)
@@ -85,7 +90,8 @@ class apply_gate_library_impl
                             if (gate_lyt.is_in_even_row(t))
                             {
                                 // even rows are shifted in by width / 2
-                                c.x += GateLibrary::gate_x_size() / static_cast<decltype(c.x)>(2);
+                                c.x += static_cast<decltype(c.x)>(
+                                    std::ceil(GateLibrary::gate_x_size() / static_cast<decltype(c.x)>(2)) + 1);
                             }
                         }
                         else if constexpr (has_odd_column_hex_arrangement_v<GateLyt>)
@@ -93,7 +99,8 @@ class apply_gate_library_impl
                             if (gate_lyt.is_in_odd_column(t))
                             {
                                 // odd columns are shifted in by height / 2
-                                c.y += GateLibrary::gate_y_size() / static_cast<decltype(c.y)>(2);
+                                c.y += static_cast<decltype(c.y)>(
+                                    std::ceil(GateLibrary::gate_y_size() / static_cast<decltype(c.y)>(2)) + 1);
                             }
                         }
                         else if constexpr (has_even_column_hex_arrangement_v<GateLyt>)
@@ -101,7 +108,8 @@ class apply_gate_library_impl
                             if (gate_lyt.is_in_even_column(t))
                             {
                                 // even columns are shifted in by height / 2
-                                c.y += GateLibrary::gate_y_size() / static_cast<decltype(c.y)>(2);
+                                c.y += static_cast<decltype(c.y)>(
+                                    std::ceil(GateLibrary::gate_y_size() / static_cast<decltype(c.y)>(2)) + 1);
                             }
                         }
                     }
