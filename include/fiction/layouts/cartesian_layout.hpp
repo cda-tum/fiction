@@ -352,6 +352,11 @@ class cartesian_layout
         return c.z > 0;
     }
 
+    [[nodiscard]] constexpr bool is_within_bounds(const CartesianCoordinateType& c) const noexcept
+    {
+        return c.x <= x() && c.y <= y() && c.z <= z();
+    }
+
 #pragma endregion
 
 #pragma region Iteration

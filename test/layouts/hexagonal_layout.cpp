@@ -173,9 +173,12 @@ void check_visited_coordinates()
 
     std::set<coordinate<Lyt>> visited{};
 
-    const auto check1 = [&visited, &ar](const auto& t)
+    const auto check1 = [&visited, &ar, &layout](const auto& t)
     {
         CHECK(t <= ar);
+
+        // all coordinates are within the layout bounds
+        CHECK(layout.is_within_bounds(t));
 
         // no coordinate is visited twice
         CHECK(visited.count(t) == 0);
@@ -194,11 +197,14 @@ void check_visited_coordinates()
 
     aspect_ratio<Lyt> ar_ground{ar.x, ar.y, 0};
 
-    const auto check2 = [&visited, &ar_ground](const auto& t)
+    const auto check2 = [&visited, &ar_ground, &layout](const auto& t)
     {
         // iteration stays in ground layer
         CHECK(t.z == 0);
         CHECK(t <= ar_ground);
+
+        // all coordinates are within the layout bounds
+        CHECK(layout.is_within_bounds(t));
 
         // no coordinate is visited twice
         CHECK(visited.count(t) == 0);
@@ -217,12 +223,15 @@ void check_visited_coordinates()
 
     coordinate<Lyt> start{2, 2}, stop{5, 4};
 
-    const auto check3 = [&visited, &start, &stop](const auto& t)
+    const auto check3 = [&visited, &start, &stop, &layout](const auto& t)
     {
         CHECK(t.z == 0);
         // iteration stays in between the bounds
         CHECK(t >= start);
         CHECK(t < stop);
+
+        // all coordinates are within the layout bounds
+        CHECK(layout.is_within_bounds(t));
 
         // no coordinate is visited twice
         CHECK(visited.count(t) == 0);
@@ -269,6 +278,15 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         const coordinate<layout> wc{1, 2};
         const coordinate<layout> nwc{1, 1};
 
+        const coordinate<layout> bnc{2, 0};
+        const coordinate<layout> bnec{3, 0};
+        const coordinate<layout> bec{3, 2};
+        const coordinate<layout> bsec{3, 3};
+        const coordinate<layout> bsc{2, 3};
+        const coordinate<layout> bswc{0, 3};
+        const coordinate<layout> bwc{0, 2};
+        const coordinate<layout> bnwc{0, 0};
+
         CHECK(lyt.north(c) == nc);
         CHECK(lyt.north_east(c) == nec);
         CHECK(lyt.east(c) == ec);
@@ -277,6 +295,16 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         CHECK(lyt.south_west(c) == swc);
         CHECK(lyt.west(c) == wc);
         CHECK(lyt.north_west(c) == nwc);
+
+        // edge cases
+        CHECK(lyt.north(bnc) == bnc);
+        CHECK(lyt.north_east(bnec) == bnec);
+        CHECK(lyt.east(bec) == bec);
+        CHECK(lyt.south_east(bsec) == bsec);
+        CHECK(lyt.south(bsc) == bsc);
+        CHECK(lyt.south_west(bswc) == bswc);
+        CHECK(lyt.west(bwc) == bwc);
+        CHECK(lyt.north_west(bnwc) == bnwc);
     }
     SECTION("even row")
     {
@@ -294,6 +322,15 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         const coordinate<layout> wc{1, 2};
         const coordinate<layout> nwc{2, 1};
 
+        const coordinate<layout> bnc{2, 0};
+        const coordinate<layout> bnec{3, 0};
+        const coordinate<layout> bec{3, 2};
+        const coordinate<layout> bsec{3, 3};
+        const coordinate<layout> bsc{2, 3};
+        const coordinate<layout> bswc{0, 3};
+        const coordinate<layout> bwc{0, 2};
+        const coordinate<layout> bnwc{0, 0};
+
         CHECK(lyt.north(c) == nc);
         CHECK(lyt.north_east(c) == nec);
         CHECK(lyt.east(c) == ec);
@@ -302,6 +339,16 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         CHECK(lyt.south_west(c) == swc);
         CHECK(lyt.west(c) == wc);
         CHECK(lyt.north_west(c) == nwc);
+
+        // edge cases
+        CHECK(lyt.north(bnc) == bnc);
+        CHECK(lyt.north_east(bnec) == bnec);
+        CHECK(lyt.east(bec) == bec);
+        CHECK(lyt.south_east(bsec) == bsec);
+        CHECK(lyt.south(bsc) == bsc);
+        CHECK(lyt.south_west(bswc) == bswc);
+        CHECK(lyt.west(bwc) == bwc);
+        CHECK(lyt.north_west(bnwc) == bnwc);
     }
     SECTION("odd column")
     {
@@ -319,6 +366,15 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         const coordinate<layout> wc{1, 2};
         const coordinate<layout> nwc{1, 1};
 
+        const coordinate<layout> bnc{2, 0};
+        const coordinate<layout> bnec{3, 0};
+        const coordinate<layout> bec{3, 2};
+        const coordinate<layout> bsec{3, 3};
+        const coordinate<layout> bsc{2, 3};
+        const coordinate<layout> bswc{0, 3};
+        const coordinate<layout> bwc{0, 2};
+        const coordinate<layout> bnwc{0, 0};
+
         CHECK(lyt.north(c) == nc);
         CHECK(lyt.north_east(c) == nec);
         CHECK(lyt.east(c) == ec);
@@ -328,6 +384,16 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         CHECK(lyt.south_west(c) == swc);
         CHECK(lyt.west(c) == wc);
         CHECK(lyt.north_west(c) == nwc);
+
+        // edge cases
+        CHECK(lyt.north(bnc) == bnc);
+        CHECK(lyt.north_east(bnec) == bnec);
+        CHECK(lyt.east(bec) == bec);
+        CHECK(lyt.south_east(bsec) == bsec);
+        CHECK(lyt.south(bsc) == bsc);
+        CHECK(lyt.south_west(bswc) == bswc);
+        CHECK(lyt.west(bwc) == bwc);
+        CHECK(lyt.north_west(bnwc) == bnwc);
     }
     SECTION("even column")
     {
@@ -345,6 +411,15 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         const coordinate<layout> wc{1, 2};
         const coordinate<layout> nwc{1, 2};
 
+        const coordinate<layout> bnc{2, 0};
+        const coordinate<layout> bnec{3, 0};
+        const coordinate<layout> bec{3, 2};
+        const coordinate<layout> bsec{3, 3};
+        const coordinate<layout> bsc{2, 3};
+        const coordinate<layout> bswc{0, 3};
+        const coordinate<layout> bwc{0, 2};
+        const coordinate<layout> bnwc{0, 0};
+
         CHECK(lyt.north(c) == nc);
         CHECK(lyt.north_east(c) == nec);
         CHECK(lyt.east(c) == ec);
@@ -353,6 +428,16 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         CHECK(lyt.south_west(c) == swc);
         CHECK(lyt.west(c) == wc);
         CHECK(lyt.north_west(c) == nwc);
+
+        // edge cases
+        CHECK(lyt.north(bnc) == bnc);
+        CHECK(lyt.north_east(bnec) == bnec);
+        CHECK(lyt.east(bec) == bec);
+        CHECK(lyt.south_east(bsec) == bsec);
+        CHECK(lyt.south(bsc) == bsc);
+        CHECK(lyt.south_west(bswc) == bswc);
+        CHECK(lyt.west(bwc) == bwc);
+        CHECK(lyt.north_west(bnwc) == bnwc);
     }
 }
 
