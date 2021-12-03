@@ -245,6 +245,24 @@ Ntk fanout_substitution_corner_case_network()
 }
 
 template <typename Ntk>
+Ntk inverter_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi("x1");
+
+    const auto fo1 = ntk.create_buf(x1);
+
+    const auto n1 = ntk.create_not(fo1);
+    const auto n2 = ntk.create_not(fo1);
+
+    ntk.create_po(n1, "f1");
+    ntk.create_po(n2, "f2");
+
+    return ntk;
+}
+
+template <typename Ntk>
 Ntk clpl()
 {
     Ntk ntk{};
