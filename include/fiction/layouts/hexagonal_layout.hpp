@@ -263,7 +263,7 @@ class hexagonal_layout
 
         ne.z = c.z;
 
-        return ne;
+        return is_within_bounds(ne) ? ne : c;
     }
 
     [[nodiscard]] OffsetCoordinateType east(const OffsetCoordinateType& c) const noexcept
@@ -286,7 +286,7 @@ class hexagonal_layout
 
             se.z = c.z;
 
-            return se;
+            return is_within_bounds(se) ? se : c;
         }
         else
         {
@@ -294,7 +294,7 @@ class hexagonal_layout
 
             se.z = c.z;
 
-            return se;
+            return is_within_bounds(se) ? se : c;
         }
     }
 
@@ -316,7 +316,7 @@ class hexagonal_layout
 
         sw.z = c.z;
 
-        return sw;
+        return is_within_bounds(sw) ? sw : c;
     }
 
     [[nodiscard]] constexpr OffsetCoordinateType west(const OffsetCoordinateType& c) const noexcept
@@ -338,7 +338,7 @@ class hexagonal_layout
 
             nw.z = c.z;
 
-            return nw;
+            return is_within_bounds(nw) ? nw : c;
         }
         else
         {
@@ -346,7 +346,7 @@ class hexagonal_layout
 
             nw.z = c.z;
 
-            return nw;
+            return is_within_bounds(nw) ? nw : c;
         }
     }
 
@@ -494,6 +494,11 @@ class hexagonal_layout
     [[nodiscard]] constexpr bool is_crossing_layer(const OffsetCoordinateType& c) const noexcept
     {
         return c.z > 0ull;
+    }
+
+    [[nodiscard]] constexpr bool is_within_bounds(const OffsetCoordinateType& c) const noexcept
+    {
+        return c.x <= x() && c.y <= y() && c.z <= z();
     }
 
 #pragma endregion
