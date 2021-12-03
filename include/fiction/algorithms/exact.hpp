@@ -1659,144 +1659,30 @@ class exact_impl
                                 // I/Os inverters are always straight, so they can be skipped as well
                                 if (!skip_const_or_io_node(inv))
                                 {
-                                    const auto n = layout.north(t), e = layout.east(t), s = layout.south(t),
-                                               w = layout.west(t);
-
                                     // vector to store possible direction combinations
                                     z3::expr_vector ve{*ctx};
 
-                                    if constexpr (is_cartesian_layout_v<Lyt>)  // TODO put such topology-related
-                                                                               // functionality in the respective
-                                                                               // layouts and only check here whether it
-                                                                               // provides the functionality, e.g.,
-                                                                               // get_straight_line_adjacencies
+                                    if constexpr (has_foreach_straight_line_adjacent_coordinate_pair_v<Lyt>)
                                     {
-                                        if (t != n && t != s)
-                                        {
-                                            if ((layout.is_incoming_clocked(t, n) &&
-                                                 layout.is_outgoing_clocked(t, s)) ||
-                                                !layout.is_regularly_clocked())
+                                        layout.foreach_straight_line_adjacent_coordinate_pair(
+                                            t,
+                                            [this, &t, &ve](const auto& cp)
                                             {
-                                                // enforce north to south connection if inverter gets placed
-                                                // here
-                                                ve.push_back(get_tc(n, t) and get_tc(t, s));
-                                            }
-                                            if ((layout.is_incoming_clocked(t, s) &&
-                                                 layout.is_outgoing_clocked(t, n)) ||
-                                                !layout.is_regularly_clocked())
-                                            {
-                                                // enforce south to north connection if inverter gets placed
-                                                // here
-                                                ve.push_back(get_tc(s, t) and get_tc(t, n));
-                                            }
-                                        }
-                                        if (t != e && t != w)
-                                        {
-                                            if ((layout.is_incoming_clocked(t, e) &&
-                                                 layout.is_outgoing_clocked(t, w)) ||
-                                                !layout.is_regularly_clocked())
-                                            {
-                                                // enforce east to west connection if inverter gets placed
-                                                // here
-                                                ve.push_back(get_tc(e, t) and get_tc(t, w));
-                                            }
-                                            if ((layout.is_incoming_clocked(t, w) &&
-                                                 layout.is_outgoing_clocked(t, e)) ||
-                                                !layout.is_regularly_clocked())
-                                            {
-                                                // enforce west to east connection if inverter gets placed
-                                                // here
-                                                ve.push_back(get_tc(w, t) and get_tc(t, e));
-                                            }
-                                        }
-                                    }
-                                    else if constexpr (is_hexagonal_layout_v<Lyt>)
-                                    {
-                                        const auto ne = layout.north_east(t), se = layout.south_east(t),
-                                                   sw = layout.south_west(t), nw = layout.north_west(t);
+                                                const auto &t1 = cp.first, t2 = cp.second;
 
-                                        if (t != se && t != nw)
-                                        {
-                                            if ((layout.is_incoming_clocked(t, nw) &&
-                                                 layout.is_outgoing_clocked(t, se)) ||
-                                                !layout.is_regularly_clocked())
-                                            {
-                                                // enforce north-west to south-east connection if inverter
-                                                // gets placed here
-                                                ve.push_back(get_tc(nw, t) and get_tc(t, se));
-                                            }
-                                            if ((layout.is_incoming_clocked(t, se) &&
-                                                 layout.is_outgoing_clocked(t, nw)) ||
-                                                !layout.is_regularly_clocked())
-                                            {
-                                                // enforce south-east to north-west connection if inverter
-                                                // gets placed here
-                                                ve.push_back(get_tc(se, t) and get_tc(t, nw));
-                                            }
-                                        }
-                                        if (t != ne && t != sw)
-                                        {
-                                            if ((layout.is_incoming_clocked(t, sw) &&
-                                                 layout.is_outgoing_clocked(t, ne)) ||
-                                                !layout.is_regularly_clocked())
-                                            {
-                                                // enforce south-west to north-east connection if inverter
-                                                // gets placed here
-                                                ve.push_back(get_tc(sw, t) and get_tc(t, ne));
-                                            }
-                                            if ((layout.is_incoming_clocked(t, ne) &&
-                                                 layout.is_outgoing_clocked(t, sw)) ||
-                                                !layout.is_regularly_clocked())
-                                            {
-                                                // enforce north-east to south-west connection if inverter
-                                                // gets placed here
-                                                ve.push_back(get_tc(ne, t) and get_tc(t, sw));
-                                            }
-                                        }
-                                        if constexpr (has_flat_top_hex_orientation_v<Lyt>)
-                                        {
-                                            if (t != n && t != s)
-                                            {
-                                                if ((layout.is_incoming_clocked(t, n) &&
-                                                     layout.is_outgoing_clocked(t, s)) ||
+                                                if ((layout.is_incoming_clocked(t, t1) &&
+                                                     layout.is_outgoing_clocked(t, t2)) ||
                                                     !layout.is_regularly_clocked())
                                                 {
-                                                    // enforce north to south connection if inverter gets placed
-                                                    // here
-                                                    ve.push_back(get_tc(n, t) and get_tc(t, s));
+                                                    ve.push_back(get_tc(t1, t) and get_tc(t, t2));
                                                 }
-                                                if ((layout.is_incoming_clocked(t, s) &&
-                                                     layout.is_outgoing_clocked(t, n)) ||
+                                                if ((layout.is_incoming_clocked(t, t2) &&
+                                                     layout.is_outgoing_clocked(t, t1)) ||
                                                     !layout.is_regularly_clocked())
                                                 {
-                                                    // enforce south to north connection if inverter gets placed
-                                                    // here
-                                                    ve.push_back(get_tc(s, t) and get_tc(t, n));
+                                                    ve.push_back(get_tc(t2, t) and get_tc(t, t1));
                                                 }
-                                            }
-                                        }
-                                        else if constexpr (has_pointy_top_hex_orientation_v<Lyt>)
-                                        {
-                                            if (t != e && t != w)
-                                            {
-                                                if ((layout.is_incoming_clocked(t, e) &&
-                                                     layout.is_outgoing_clocked(t, w)) ||
-                                                    !layout.is_regularly_clocked())
-                                                {
-                                                    // enforce east to west connection if inverter gets placed
-                                                    // here
-                                                    ve.push_back(get_tc(e, t) and get_tc(t, w));
-                                                }
-                                                if ((layout.is_incoming_clocked(t, w) &&
-                                                     layout.is_outgoing_clocked(t, e)) ||
-                                                    !layout.is_regularly_clocked())
-                                                {
-                                                    // enforce west to east connection if inverter gets placed
-                                                    // here
-                                                    ve.push_back(get_tc(w, t) and get_tc(t, e));
-                                                }
-                                            }
-                                        }
+                                            });
                                     }
                                     if (!ve.empty())
                                     {
@@ -1929,8 +1815,8 @@ class exact_impl
             if (!config.desynchronize &&
                 !(layout.is_clocking_scheme(clock_name::twoddwave) ||
                   layout.is_clocking_scheme(
-                      clock_name::twoddwave_hex)))  // TODO linear schemes: add columnar and row + make a function in
-                                                    // clocking scheme for checking for linearity
+                      clock_name::twoddwave_hex)))  // TODO linear schemes: add columnar and row + make a function
+                                                    // in clocking scheme for checking for linearity
             {
                 assign_pi_clockings();
                 //                global_synchronization();
@@ -2064,7 +1950,8 @@ class exact_impl
                     if (model.eval(get_te(at, e)).bool_value() == Z3_L_TRUE &&
                         model.eval(get_tc(t, at)).bool_value() == Z3_L_TRUE)
                     {
-                        //                        std::cout << fmt::format("assigning ({},{}) to {} with incoming signal
+                        //                        std::cout << fmt::format("assigning ({},{}) to {} with incoming
+                        //                        signal
                         //                        {}", e.source, e.target,
                         //                                                 at,
                         //                                                 static_cast<tile<Lyt>>(node2pos[e.source][e.target]))
@@ -2096,7 +1983,8 @@ class exact_impl
         void assign_layout(const z3::model& model)
         {
             assign_layout_clocking(model);
-            // from now on, a clocking scheme is assigned and no distinction between regular and irregular must be made
+            // from now on, a clocking scheme is assigned and no distinction between regular and irregular must be
+            // made
 
             //            std::ofstream assertions_file{"assertions.txt"};
             //
@@ -2230,9 +2118,10 @@ class exact_impl
         handler.set_timeout(time_left);
     }
     /**
-     * Contains a context pointer and a currently worked on dimension and can be shared between multiple worker threads
-     * so that they can notify each other via context interrupts based on their individual results, i.e. a thread that
-     * found a result at dimension x * y can interrupt all other threads that are working on larger layout sizes.
+     * Contains a context pointer and a currently worked on dimension and can be shared between multiple worker
+     * threads so that they can notify each other via context interrupts based on their individual results, i.e. a
+     * thread that found a result at dimension x * y can interrupt all other threads that are working on larger
+     * layout sizes.
      */
     struct thread_info
     {
@@ -2248,8 +2137,8 @@ class exact_impl
     /**
      * Thread function for the asynchronous solving strategy. It registers its own context in the given list of
      * thread_info objects and starts exploring the search space. It fetches the next dimension to work on from the
-     * global dimension iterator which is protected by a mutex. When a result is found, other threads that are currently
-     * working on larger layout dimensions are interrupted while smaller ones may finish running.
+     * global dimension iterator which is protected by a mutex. When a result is found, other threads that are
+     * currently working on larger layout dimensions are interrupted while smaller ones may finish running.
      *
      * @param t_num Thread's identifier.
      * @param ti_list Pointer to a list of shared thread info that the threads use for communication.
@@ -2346,10 +2235,10 @@ class exact_impl
                 }
                 else  // no layout with this dimension possible
                 {
-                    // One could assume that interrupting other threads that are working on real smaller (not bigger in
-                    // any dimension) layouts could be beneficial here. However, testing revealed that this code was
-                    // hardly ever triggered and if it was, it impacted performance negatively because no solver state
-                    // could be stored that could positively influence performance of later SMT calls
+                    // One could assume that interrupting other threads that are working on real smaller (not bigger
+                    // in any dimension) layouts could be beneficial here. However, testing revealed that this code
+                    // was hardly ever triggered and if it was, it impacted performance negatively because no solver
+                    // state could be stored that could positively influence performance of later SMT calls
 
                     handler.store_solver_state(dimension);
                 }
