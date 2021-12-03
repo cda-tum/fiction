@@ -13,12 +13,6 @@
 #include <fiction/algorithms/exact.hpp>
 #include <fiction/algorithms/network_utils.hpp>
 #include <fiction/io/print_layout.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -41,12 +35,21 @@ exact_physical_design_params<Lyt> configuration() noexcept
 }
 
 template <typename Lyt>
+exact_physical_design_params<Lyt>&& open(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(open_clocking<Lyt>());
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
 exact_physical_design_params<Lyt>&& twoddwave(exact_physical_design_params<Lyt>&& ps) noexcept
 {
     ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
 
     return std::move(ps);
 }
+
 template <typename Lyt>
 exact_physical_design_params<Lyt>&& use(exact_physical_design_params<Lyt>&& ps) noexcept
 {
@@ -85,22 +88,6 @@ exact_physical_design_params<Lyt>&& async(const std::size_t t, exact_physical_de
     ps.num_threads = t;
 
     return std::move(ps);
-}
-
-template <typename Lyt>
-std::vector<exact_physical_design_params<Lyt>> all_configurations() noexcept
-{
-    return {{
-        twoddwave(configuration<Lyt>()),
-        use(configuration<Lyt>()),
-        res(configuration<Lyt>()),
-        twoddwave(crossings(border_io(configuration<Lyt>()))),
-        use(crossings(border_io(configuration<Lyt>()))),
-        res(crossings(border_io(configuration<Lyt>()))),
-        twoddwave(crossings(async(4ul, configuration<Lyt>()))),
-        use(crossings(async(4ul, configuration<Lyt>()))),
-        res(crossings(async(4ul, configuration<Lyt>()))),
-    }};
 }
 
 void check_stats(const exact_physical_design_stats& st)
@@ -152,8 +139,7 @@ Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps)
 template <typename Lyt>
 void apply_gate_library(const Lyt& lyt)
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
-    CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(lyt));
+    CHECK_NOTHROW(apply_gate_library<qca_cell_clk_lyt, qca_one_library>(lyt));
 }
 
 template <typename Ntk, typename Lyt>
@@ -165,39 +151,138 @@ void check(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps)
     apply_gate_library(layout);
 }
 
-template <typename Ntk>
-void check_all_hexagonal(const Ntk& ntk)
-{
-    for (const auto& ps : all_configurations<hex_odd_row_gate_clk_lyt>()) { check(ntk, ps); }
-    for (const auto& ps : all_configurations<hex_even_row_gate_clk_lyt>()) { check(ntk, ps); }
-    for (const auto& ps : all_configurations<hex_odd_col_gate_clk_lyt>()) { check(ntk, ps); }
-    for (const auto& ps : all_configurations<hex_even_col_gate_clk_lyt>()) { check(ntk, ps); }
-}
-
-template <typename Ntk>
-void check_all_cartesian(const Ntk& ntk)
-{
-    for (const auto& ps : all_configurations<cart_gate_clk_lyt>()) { check(ntk, ps); }
-}
-
 TEST_CASE("Exact Cartesian physical design", "[exact]")
 {
-    check_all_cartesian(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    //    check_all(blueprints::maj1_network<mockturtle::mig_network>());
-    check_all_cartesian(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
-    check_all_cartesian(blueprints::and_or_network<mockturtle::mig_network>());
-    //    check_all(blueprints::multi_output_and_network<mockturtle::aig_network>());
-    //    check_all(blueprints::half_adder_network<mockturtle::aig_network>());
-    check_all_cartesian(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
-    //    check_all(blueprints::mux21_network<mockturtle::aig_network>());
+    SECTION("Open clocking")
+    {
+        check(blueprints::and_or_network<mockturtle::mig_network>(),
+              open(crossings(configuration<cart_gate_clk_lyt>())));
+    }
+    SECTION("2DDWave clocking")
+    {
+        check(blueprints::and_or_network<mockturtle::mig_network>(),
+              twoddwave(crossings(configuration<cart_gate_clk_lyt>())));
+    }
+    SECTION("USE clocking")
+    {
+        check(blueprints::and_or_network<mockturtle::mig_network>(),
+              use(crossings(configuration<cart_gate_clk_lyt>())));
+    }
+    SECTION("RES clocking")
+    {
+        check(blueprints::and_or_network<mockturtle::mig_network>(),
+              res(crossings(configuration<cart_gate_clk_lyt>())));
+    }
+    SECTION("Border I/O")
+    {
+        check(blueprints::and_or_network<mockturtle::mig_network>(),
+              twoddwave(crossings(border_io(configuration<cart_gate_clk_lyt>()))));
+    }
+    SECTION("Planar")
+    {
+        check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+              twoddwave(configuration<cart_gate_clk_lyt>()));
+    }
 }
 
 TEST_CASE("Exact hexagonal physical design", "[exact]")
 {
-    check_all_hexagonal(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check_all_hexagonal(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
-    check_all_hexagonal(blueprints::and_or_network<mockturtle::mig_network>());
-    check_all_hexagonal(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
+    SECTION("odd row")
+    {
+        using hex_lyt = hex_odd_row_gate_clk_lyt;
+
+        SECTION("Open clocking")
+        {
+            check(blueprints::and_or_network<mockturtle::mig_network>(), open(crossings(configuration<hex_lyt>())));
+        }
+        SECTION("2DDWave clocking")
+        {
+            check(blueprints::and_or_network<mockturtle::mig_network>(),
+                  twoddwave(crossings(configuration<hex_lyt>())));
+        }
+        SECTION("Border I/O")
+        {
+            check(blueprints::and_or_network<mockturtle::mig_network>(),
+                  twoddwave(crossings(border_io(configuration<hex_lyt>()))));
+        }
+        SECTION("Planar")
+        {
+            check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+                  twoddwave(configuration<hex_lyt>()));
+        }
+    }
+    SECTION("even row")
+    {
+        using hex_lyt = hex_even_row_gate_clk_lyt;
+
+        SECTION("Open clocking")
+        {
+            check(blueprints::and_or_network<mockturtle::mig_network>(), open(crossings(configuration<hex_lyt>())));
+        }
+        SECTION("2DDWave clocking")
+        {
+            check(blueprints::and_or_network<mockturtle::mig_network>(),
+                  twoddwave(crossings(configuration<hex_lyt>())));
+        }
+        SECTION("Border I/O")
+        {
+            check(blueprints::and_or_network<mockturtle::mig_network>(),
+                  twoddwave(crossings(border_io(configuration<hex_lyt>()))));
+        }
+        SECTION("Planar")
+        {
+            check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+                  twoddwave(configuration<hex_lyt>()));
+        }
+    }
+    SECTION("odd column")
+    {
+        using hex_lyt = hex_odd_col_gate_clk_lyt;
+
+        SECTION("Open clocking")
+        {
+            check(blueprints::and_or_network<mockturtle::mig_network>(), open(crossings(configuration<hex_lyt>())));
+        }
+        SECTION("2DDWave clocking")
+        {
+            check(blueprints::and_or_network<mockturtle::mig_network>(),
+                  twoddwave(crossings(configuration<hex_lyt>())));
+        }
+        SECTION("Border I/O")
+        {
+            check(blueprints::and_or_network<mockturtle::mig_network>(),
+                  twoddwave(crossings(border_io(configuration<hex_lyt>()))));
+        }
+        SECTION("Planar")
+        {
+            check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+                  twoddwave(configuration<hex_lyt>()));
+        }
+    }
+    SECTION("even column")
+    {
+        using hex_lyt = hex_even_col_gate_clk_lyt;
+
+        SECTION("Open clocking")
+        {
+            check(blueprints::and_or_network<mockturtle::mig_network>(), open(crossings(configuration<hex_lyt>())));
+        }
+        SECTION("2DDWave clocking")
+        {
+            check(blueprints::and_or_network<mockturtle::mig_network>(),
+                  twoddwave(crossings(configuration<hex_lyt>())));
+        }
+        SECTION("Border I/O")
+        {
+            check(blueprints::and_or_network<mockturtle::mig_network>(),
+                  twoddwave(crossings(border_io(configuration<hex_lyt>()))));
+        }
+        SECTION("Planar")
+        {
+            check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+                  twoddwave(configuration<hex_lyt>()));
+        }
+    }
 }
 
 TEST_CASE("High degree input networks", "[exact]")
@@ -213,21 +298,16 @@ TEST_CASE("High degree input networks", "[exact]")
                                            res(configuration<cart_gate_clk_lyt>())));
 }
 
-// TEST_CASE("Timeout", "[exact]")
-//{
-//     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
-//
-//     exact_physical_design_params<gate_layout> timeout_config{};
-//
-//     timeout_config.scheme  = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_4_clocking);
-//     timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
-//
-//     const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
-//
-//     const auto layout = exact<gate_layout>(half_adder, timeout_config);
-//
-//     // since a half adder cannot be placed and routed in just one second, layout should not have a value
-//     CHECK(!layout.has_value());
-// }
+TEST_CASE("Timeout", "[exact]")
+{
+    auto timeout_config    = use(crossings(configuration<cart_gate_clk_lyt>()));
+    timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
+
+    const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
+    const auto layout     = exact<cart_gate_clk_lyt>(half_adder, timeout_config);
+
+    // since a half adder cannot be synthesized in just one second, layout should not have a value
+    CHECK(!layout.has_value());
+}
 
 #endif  // FICTION_Z3_SOLVER
