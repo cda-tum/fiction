@@ -1645,7 +1645,176 @@ class exact_impl
         /**
          * Adds constraints to the solver to enforce that no bent inverters are used.
          */
-        void enforce_straight_inverters();
+        void enforce_straight_inverters()
+        {
+            apply_to_added_and_updated_tiles(
+                [this](const auto& t)
+                {
+                    network.foreach_node(
+                        [this, &t](const auto& inv)
+                        {
+                            // skip all operations except for inverters
+                            if (network.is_inv(inv))
+                            {
+                                // I/Os inverters are always straight, so they can be skipped as well
+                                if (!skip_const_or_io_node(inv))
+                                {
+                                    const auto n = layout.north(t), e = layout.east(t), s = layout.south(t),
+                                               w = layout.west(t);
+
+                                    // vector to store possible direction combinations
+                                    z3::expr_vector ve{*ctx};
+
+                                    if constexpr (is_cartesian_layout_v<Lyt>)  // TODO put such topology-related
+                                                                               // functionality in the respective
+                                                                               // layouts and only check here whether it
+                                                                               // provides the functionality, e.g.,
+                                                                               // get_straight_line_adjacencies
+                                    {
+                                        if (t != n && t != s)
+                                        {
+                                            if ((layout.is_incoming_clocked(t, n) &&
+                                                 layout.is_outgoing_clocked(t, s)) ||
+                                                !layout.is_regularly_clocked())
+                                            {
+                                                // enforce north to south connection if inverter gets placed
+                                                // here
+                                                ve.push_back(get_tc(n, t) and get_tc(t, s));
+                                            }
+                                            if ((layout.is_incoming_clocked(t, s) &&
+                                                 layout.is_outgoing_clocked(t, n)) ||
+                                                !layout.is_regularly_clocked())
+                                            {
+                                                // enforce south to north connection if inverter gets placed
+                                                // here
+                                                ve.push_back(get_tc(s, t) and get_tc(t, n));
+                                            }
+                                        }
+                                        if (t != e && t != w)
+                                        {
+                                            if ((layout.is_incoming_clocked(t, e) &&
+                                                 layout.is_outgoing_clocked(t, w)) ||
+                                                !layout.is_regularly_clocked())
+                                            {
+                                                // enforce east to west connection if inverter gets placed
+                                                // here
+                                                ve.push_back(get_tc(e, t) and get_tc(t, w));
+                                            }
+                                            if ((layout.is_incoming_clocked(t, w) &&
+                                                 layout.is_outgoing_clocked(t, e)) ||
+                                                !layout.is_regularly_clocked())
+                                            {
+                                                // enforce west to east connection if inverter gets placed
+                                                // here
+                                                ve.push_back(get_tc(w, t) and get_tc(t, e));
+                                            }
+                                        }
+                                    }
+                                    else if constexpr (is_hexagonal_layout_v<Lyt>)
+                                    {
+                                        const auto ne = layout.north_east(t), se = layout.south_east(t),
+                                                   sw = layout.south_west(t), nw = layout.north_west(t);
+
+                                        if (t != se && t != nw)
+                                        {
+                                            if ((layout.is_incoming_clocked(t, nw) &&
+                                                 layout.is_outgoing_clocked(t, se)) ||
+                                                !layout.is_regularly_clocked())
+                                            {
+                                                // enforce north-west to south-east connection if inverter
+                                                // gets placed here
+                                                ve.push_back(get_tc(nw, t) and get_tc(t, se));
+                                            }
+                                            if ((layout.is_incoming_clocked(t, se) &&
+                                                 layout.is_outgoing_clocked(t, nw)) ||
+                                                !layout.is_regularly_clocked())
+                                            {
+                                                // enforce south-east to north-west connection if inverter
+                                                // gets placed here
+                                                ve.push_back(get_tc(se, t) and get_tc(t, nw));
+                                            }
+                                        }
+                                        if (t != ne && t != sw)
+                                        {
+                                            if ((layout.is_incoming_clocked(t, sw) &&
+                                                 layout.is_outgoing_clocked(t, ne)) ||
+                                                !layout.is_regularly_clocked())
+                                            {
+                                                // enforce south-west to north-east connection if inverter
+                                                // gets placed here
+                                                ve.push_back(get_tc(sw, t) and get_tc(t, ne));
+                                            }
+                                            if ((layout.is_incoming_clocked(t, ne) &&
+                                                 layout.is_outgoing_clocked(t, sw)) ||
+                                                !layout.is_regularly_clocked())
+                                            {
+                                                // enforce north-east to south-west connection if inverter
+                                                // gets placed here
+                                                ve.push_back(get_tc(ne, t) and get_tc(t, sw));
+                                            }
+                                        }
+                                        if constexpr (has_flat_top_hex_orientation_v<Lyt>)
+                                        {
+                                            if (t != n && t != s)
+                                            {
+                                                if ((layout.is_incoming_clocked(t, n) &&
+                                                     layout.is_outgoing_clocked(t, s)) ||
+                                                    !layout.is_regularly_clocked())
+                                                {
+                                                    // enforce north to south connection if inverter gets placed
+                                                    // here
+                                                    ve.push_back(get_tc(n, t) and get_tc(t, s));
+                                                }
+                                                if ((layout.is_incoming_clocked(t, s) &&
+                                                     layout.is_outgoing_clocked(t, n)) ||
+                                                    !layout.is_regularly_clocked())
+                                                {
+                                                    // enforce south to north connection if inverter gets placed
+                                                    // here
+                                                    ve.push_back(get_tc(s, t) and get_tc(t, n));
+                                                }
+                                            }
+                                        }
+                                        else if constexpr (has_pointy_top_hex_orientation_v<Lyt>)
+                                        {
+                                            if (t != e && t != w)
+                                            {
+                                                if ((layout.is_incoming_clocked(t, e) &&
+                                                     layout.is_outgoing_clocked(t, w)) ||
+                                                    !layout.is_regularly_clocked())
+                                                {
+                                                    // enforce east to west connection if inverter gets placed
+                                                    // here
+                                                    ve.push_back(get_tc(e, t) and get_tc(t, w));
+                                                }
+                                                if ((layout.is_incoming_clocked(t, w) &&
+                                                     layout.is_outgoing_clocked(t, e)) ||
+                                                    !layout.is_regularly_clocked())
+                                                {
+                                                    // enforce west to east connection if inverter gets placed
+                                                    // here
+                                                    ve.push_back(get_tc(w, t) and get_tc(t, e));
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (!ve.empty())
+                                    {
+                                        // inverter can be placed here; enforce any of the direction combinations
+                                        // found possible above
+                                        solver->add(mk_as_if_se(z3::implies(get_tv(t, inv), z3::mk_or(ve)), t));
+                                    }
+                                    else
+                                    {
+                                        // inverter cannot be placed here, add constraint to avoid this case and
+                                        // speed up solving
+                                        solver->add(mk_as_if_se(not get_tv(t, inv), t));
+                                    }
+                                }
+                            }
+                        });
+                });
+        }
         /**
          * Adds constraints to the solver to prevent negative valued clock latches and that vertex tiles cannot be
          * latches.
@@ -1757,8 +1926,11 @@ class exact_impl
             define_inv_adjacent_edge_tiles();
 
             // global synchronization constraints
-            if (!config.desynchronize && !(layout.is_clocking_scheme(clock_name::twoddwave) ||
-                                           layout.is_clocking_scheme(clock_name::twoddwave_hex)))
+            if (!config.desynchronize &&
+                !(layout.is_clocking_scheme(clock_name::twoddwave) ||
+                  layout.is_clocking_scheme(
+                      clock_name::twoddwave_hex)))  // TODO linear schemes: add columnar and row + make a function in
+                                                    // clocking scheme for checking for linearity
             {
                 assign_pi_clockings();
                 //                global_synchronization();
@@ -1787,10 +1959,10 @@ class exact_impl
             }
 
             // straight inverter constraints
-            //            if (config.straight_inverters)
-            //            {
-            //                enforce_straight_inverters();
-            //            }
+            if (config.straight_inverters)
+            {
+                enforce_straight_inverters();
+            }
 
             // clock latch constraints
             //            if (config.synchronization_elements && !config.desynchronize)
@@ -2017,30 +2189,6 @@ class exact_impl
                             });
                     }
                 });
-
-            //            debug::write_dot_network(network);
-
-            // adjust wires for ToPoliNano clocking as multi wires are supported
-            //            if (config.topolinano)
-            //            {
-            //                for (auto&& t : layout->crossing_layers())
-            //                {
-            //                    for (auto& e : layout->get_logic_edges(t))
-            //                    {
-            //                        if (auto inp = layout->get_wire_inp_dirs(t, e), out = layout->get_wire_out_dirs(t,
-            //                        e);
-            //                            inp != layout::opposite(out))
-            //                        {
-            //                            // move edge to ground layer
-            //                            auto g = layout_tile{t[X], t[Y], GROUND};
-            //                            layout->dissociate_logic_edge(t, e);
-            //                            layout->assign_logic_edge(g, e);
-            //                            layout->assign_wire_inp_dir(g, e, inp);
-            //                            layout->assign_wire_out_dir(g, e, out);
-            //                        }
-            //                    }
-            //                }
-            //            }
 
             // assign artificial latches if there were any in use
             if (config.synchronization_elements)

@@ -863,10 +863,36 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] bool has_opposite_incoming_and_outgoing_signals(const tile& t) const noexcept
     {
-        return (has_northern_incoming_signal(t) && has_southern_outgoing_signal(t)) ||
-               (has_eastern_incoming_signal(t) && has_western_outgoing_signal(t)) ||
-               (has_southern_incoming_signal(t) && has_northern_outgoing_signal(t)) ||
-               (has_western_incoming_signal(t) && has_eastern_outgoing_signal((t)));
+        if constexpr (is_cartesian_layout_v<ClockedLayout>)
+        {
+            return (has_northern_incoming_signal(t) && has_southern_outgoing_signal(t)) ||
+                   (has_eastern_incoming_signal(t) && has_western_outgoing_signal(t)) ||
+                   (has_southern_incoming_signal(t) && has_northern_outgoing_signal(t)) ||
+                   (has_western_incoming_signal(t) && has_eastern_outgoing_signal((t)));
+        }
+        else if constexpr (is_hexagonal_layout_v<ClockedLayout>)
+        {
+            if constexpr (has_pointy_top_hex_orientation_v<ClockedLayout>)
+            {
+                return (has_north_eastern_incoming_signal(t) && has_south_western_outgoing_signal(t)) ||
+                       (has_eastern_incoming_signal(t) && has_western_outgoing_signal(t)) ||
+                       (has_north_western_incoming_signal(t) && has_south_eastern_outgoing_signal(t)) ||
+                       (has_south_western_incoming_signal(t) && has_north_eastern_outgoing_signal(t)) ||
+                       (has_western_incoming_signal(t) && has_eastern_outgoing_signal((t))) ||
+                       (has_south_eastern_incoming_signal(t) && has_north_western_outgoing_signal((t)));
+            }
+            else  // flat top
+            {
+                return (has_north_eastern_incoming_signal(t) && has_south_western_outgoing_signal(t)) ||
+                       (has_northern_incoming_signal(t) && has_southern_outgoing_signal(t)) ||
+                       (has_north_western_incoming_signal(t) && has_south_eastern_outgoing_signal(t)) ||
+                       (has_south_western_incoming_signal(t) && has_north_eastern_outgoing_signal(t)) ||
+                       (has_southern_incoming_signal(t) && has_northern_outgoing_signal((t))) ||
+                       (has_south_eastern_incoming_signal(t) && has_north_western_outgoing_signal((t)));
+            }
+        }
+
+        return false;
     }
 
 #pragma endregion

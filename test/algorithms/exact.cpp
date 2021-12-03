@@ -13,6 +13,7 @@
 #include <fiction/algorithms/exact.hpp>
 #include <fiction/algorithms/network_utils.hpp>
 #include <fiction/io/print_layout.hpp>
+#include <fiction/networks/topology_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -83,6 +84,14 @@ exact_physical_design_params<Lyt>&& border_io(exact_physical_design_params<Lyt>&
 }
 
 template <typename Lyt>
+exact_physical_design_params<Lyt>&& straight_inverter(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.straight_inverters = true;
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
 exact_physical_design_params<Lyt>&& async(const std::size_t t, exact_physical_design_params<Lyt>&& ps) noexcept
 {
     ps.num_threads = t;
@@ -120,15 +129,15 @@ Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps)
 
     REQUIRE(layout.has_value());
 
-    if constexpr (Lyt::max_fanin_size == 3)
-    {
-        print_gate_level_layout(std::cout, *layout);
-        debug::write_dot_layout<Lyt, gate_layout_cartesian_drawer<Lyt, true>>(*layout);
-    }
-    else if constexpr (Lyt::max_fanin_size == 5)
-    {
-        debug::write_dot_layout<Lyt, gate_layout_hexagonal_drawer<Lyt, true>>(*layout);
-    }
+    //    if constexpr (Lyt::max_fanin_size == 3)
+    //    {
+    //        print_gate_level_layout(std::cout, *layout);
+    //        debug::write_dot_layout<Lyt, gate_layout_cartesian_drawer<Lyt, true>>(*layout);
+    //    }
+    //    else if constexpr (Lyt::max_fanin_size == 5)
+    //    {
+    //        debug::write_dot_layout<Lyt, gate_layout_hexagonal_drawer<Lyt, true>>(*layout);
+    //    }
 
     check_drvs(*layout);
     check_stats(stats);
@@ -149,6 +158,31 @@ void check(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps)
 
     check_eq(ntk, layout);
     apply_gate_library(layout);
+}
+
+template <typename Lyt>
+bool has_straight_inverters(const Lyt& lyt) noexcept
+{
+    bool only_straight_inverters = true;
+    lyt.foreach_gate(
+        [&lyt, &only_straight_inverters](const auto& g)
+        {
+            if constexpr (has_is_inv_v<Lyt>)
+            {
+                if (lyt.is_inv(g))
+                {
+                    if (!lyt.has_opposite_incoming_and_outgoing_signals(lyt.get_tile(g)))
+                    {
+                        only_straight_inverters = false;
+                        return false;  // break loop
+                    }
+                }
+            }
+
+            return true;  // continue
+        });
+
+    return only_straight_inverters;
 }
 
 TEST_CASE("Exact Cartesian physical design", "[exact]")
@@ -183,6 +217,12 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
         check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
               twoddwave(configuration<cart_gate_clk_lyt>()));
     }
+    SECTION("Straight inverters")
+    {
+        CHECK(has_straight_inverters(
+            generate_layout<cart_gate_clk_lyt>(blueprints::inverter_network<topology_network>(),
+                                               use(straight_inverter(configuration<cart_gate_clk_lyt>())))));
+    }
 }
 
 TEST_CASE("Exact hexagonal physical design", "[exact]")
@@ -210,6 +250,11 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
             check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
                   twoddwave(configuration<hex_lyt>()));
         }
+        SECTION("Straight inverters")
+        {
+            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
+                                                                  use(straight_inverter(configuration<hex_lyt>())))));
+        }
     }
     SECTION("even row")
     {
@@ -233,6 +278,11 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         {
             check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
                   twoddwave(configuration<hex_lyt>()));
+        }
+        SECTION("Straight inverters")
+        {
+            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
+                                                                  use(straight_inverter(configuration<hex_lyt>())))));
         }
     }
     SECTION("odd column")
@@ -258,6 +308,11 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
             check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
                   twoddwave(configuration<hex_lyt>()));
         }
+        SECTION("Straight inverters")
+        {
+            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
+                                                                  use(straight_inverter(configuration<hex_lyt>())))));
+        }
     }
     SECTION("even column")
     {
@@ -281,6 +336,11 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         {
             check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
                   twoddwave(configuration<hex_lyt>()));
+        }
+        SECTION("Straight inverters")
+        {
+            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
+                                                                  use(straight_inverter(configuration<hex_lyt>())))));
         }
     }
 }

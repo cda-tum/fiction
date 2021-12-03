@@ -8,8 +8,6 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/traits.hpp>
 
-#include <fmt/format.h>
-
 #include <iostream>
 
 using namespace fiction;
