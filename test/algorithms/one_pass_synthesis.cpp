@@ -11,11 +11,6 @@
 #include <fiction/algorithms/apply_gate_library.hpp>
 #include <fiction/algorithms/one_pass_synthesis.hpp>
 #include <fiction/io/print_layout.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 
 #include <mockturtle/networks/aig.hpp>
@@ -30,54 +25,64 @@
 using namespace fiction;
 
 template <typename Lyt>
-std::vector<one_pass_synthesis_params<Lyt>> configurations() noexcept
+one_pass_synthesis_params<Lyt> configuration() noexcept
 {
-    one_pass_synthesis_params<Lyt> twoddwave_config{};
+    one_pass_synthesis_params<Lyt> ps{};
 
-    twoddwave_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
-    twoddwave_config.enable_and   = true;
-    twoddwave_config.enable_not   = true;
-    twoddwave_config.enable_or    = true;
-    twoddwave_config.enable_wires = true;
-    twoddwave_config.crossings    = true;
+    ps.enable_and   = true;
+    ps.enable_not   = true;
+    ps.enable_or    = true;
+    ps.enable_wires = true;
 
-    one_pass_synthesis_params<Lyt> use_config{};
+    return ps;
+}
 
-    use_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_clocking<Lyt>());
-    use_config.enable_and   = true;
-    use_config.enable_not   = true;
-    use_config.enable_or    = true;
-    use_config.enable_wires = true;
-    use_config.crossings    = true;
+template <typename Lyt>
+one_pass_synthesis_params<Lyt>&& twoddwave(one_pass_synthesis_params<Lyt>&& ps) noexcept
+{
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
 
-    one_pass_synthesis_params<Lyt> res_config{};
+    return std::move(ps);
+}
 
-    res_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_clocking<Lyt>());
-    res_config.enable_and   = true;
-    res_config.enable_not   = true;
-    res_config.enable_or    = true;
-    res_config.enable_maj   = true;
-    res_config.enable_wires = true;
-    res_config.crossings    = true;
+template <typename Lyt>
+one_pass_synthesis_params<Lyt>&& use(one_pass_synthesis_params<Lyt>&& ps) noexcept
+{
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_clocking<Lyt>());
 
-#if !defined(__APPLE__)
-    one_pass_synthesis_params<Lyt> async_config{};
+    return std::move(ps);
+}
 
-    async_config.scheme       = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
-    async_config.enable_and   = true;
-    async_config.enable_not   = true;
-    async_config.enable_or    = true;
-    async_config.enable_wires = true;
-    async_config.crossings    = true;
-    async_config.num_threads  = 2ul;
-#endif
+template <typename Lyt>
+one_pass_synthesis_params<Lyt>&& res(one_pass_synthesis_params<Lyt>&& ps) noexcept
+{
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_clocking<Lyt>());
 
-    return {{twoddwave_config, use_config, res_config
-#if !defined(__APPLE__)
-             ,
-             async_config
-#endif
-    }};
+    return std::move(ps);
+}
+
+template <typename Lyt>
+one_pass_synthesis_params<Lyt>&& crossings(one_pass_synthesis_params<Lyt>&& ps) noexcept
+{
+    ps.crossings = true;
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+one_pass_synthesis_params<Lyt>&& maj(one_pass_synthesis_params<Lyt>&& ps) noexcept
+{
+    ps.enable_maj = true;
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+one_pass_synthesis_params<Lyt>&& async(const std::size_t t, one_pass_synthesis_params<Lyt>&& ps) noexcept
+{
+    ps.num_threads = t;
+
+    return std::move(ps);
 }
 
 void check_stats(const one_pass_synthesis_stats& st) noexcept
@@ -107,50 +112,70 @@ Lyt generate_layout(const Ntk& ntk, const one_pass_synthesis_params<Lyt>& ps)
 template <typename Lyt>
 void apply_gate_library(const Lyt& lyt)
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coordinate<Lyt>>>>;
-    CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(lyt));
+    CHECK_NOTHROW(apply_gate_library<qca_cell_clk_lyt, qca_one_library>(lyt));
 }
 
-template <typename Lyt, typename Ntk>
-void check_all(const Ntk& ntk)
+template <typename Ntk, typename Lyt>
+void check(const Ntk& ntk, const one_pass_synthesis_params<Lyt>& ps)
 {
-    for (const auto& ps : configurations<Lyt>())
-    {
-        const auto layout = generate_layout<Lyt>(ntk, ps);
+    const auto layout = generate_layout<Lyt>(ntk, ps);
 
-        check_eq(ntk, layout);
-        apply_gate_library(layout);
-    }
+    check_eq(ntk, layout);
+    apply_gate_library(layout);
 }
 
 TEST_CASE("One-pass synthesis", "[one-pass]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
-
-    check_all<gate_layout>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check_all<gate_layout>(blueprints::maj1_network<mockturtle::mig_network>());
-    check_all<gate_layout>(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
-    check_all<gate_layout>(blueprints::multi_output_and_network<mockturtle::aig_network>());
-    check_all<gate_layout>(blueprints::half_adder_network<mockturtle::aig_network>());
-    check_all<gate_layout>(blueprints::se_coloring_corner_case_network<mockturtle::aig_network>());
+    SECTION("2DDWave clocking")
+    {
+        check(blueprints::and_or_network<mockturtle::mig_network>(),
+              twoddwave(crossings(configuration<cart_gate_clk_lyt>())));
+    }
+    SECTION("USE clocking")
+    {
+        check(blueprints::and_or_network<mockturtle::mig_network>(),
+              use(crossings(configuration<cart_gate_clk_lyt>())));
+    }
+    SECTION("RES clocking")
+    {
+        check(blueprints::and_or_network<mockturtle::mig_network>(),
+              res(crossings(configuration<cart_gate_clk_lyt>())));
+    }
+    SECTION("Planar")
+    {
+        check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+              twoddwave(configuration<cart_gate_clk_lyt>()));
+    }
+    SECTION("MAJ network")
+    {
+        check(blueprints::maj1_network<mockturtle::mig_network>(), res(maj(configuration<cart_gate_clk_lyt>())));
+    }
+    SECTION("Constant input MAJ network")
+    {
+        check(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>(),
+              twoddwave(crossings(configuration<cart_gate_clk_lyt>())));
+    }
+    SECTION("Multi-output network")
+    {
+        check(blueprints::multi_output_and_network<mockturtle::aig_network>(),
+              twoddwave(crossings(configuration<cart_gate_clk_lyt>())));
+    }
+#if !defined(__APPLE__)
+    SECTION("Async")
+    {
+        check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+              res(crossings(async(2, configuration<cart_gate_clk_lyt>()))));
+    }
+#endif
 }
 
 TEST_CASE("Timeout", "[one-pass]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
-
-    one_pass_synthesis_params<gate_layout> timeout_config{};
-
-    timeout_config.scheme     = std::make_shared<clocking_scheme<coordinate<gate_layout>>>(use_clocking<gate_layout>());
-    timeout_config.enable_and = true;
-    timeout_config.enable_not = true;
-    timeout_config.enable_or  = true;
-    timeout_config.enable_wires = true;
-    timeout_config.crossings    = true;
-    timeout_config.timeout      = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
+    auto timeout_config    = use(crossings(configuration<cart_gate_clk_lyt>()));
+    timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
 
     const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
-    const auto layout     = one_pass_synthesis<gate_layout>(half_adder, timeout_config);
+    const auto layout     = one_pass_synthesis<cart_gate_clk_lyt>(half_adder, timeout_config);
 
     // since a half adder cannot be synthesized in just one second, layout should not have a value
     CHECK(!layout.has_value());
