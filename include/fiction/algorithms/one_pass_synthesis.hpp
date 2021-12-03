@@ -802,7 +802,7 @@ class one_pass_synthesis_impl
         // test for graphviz
         try
         {
-            py::exec("from graphviz import *");
+            py::exec("import graphviz");
         }
         catch (...)
         {
