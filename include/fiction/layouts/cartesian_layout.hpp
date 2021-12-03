@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <memory>
 #include <set>
+#include <utility>
 
 namespace fiction
 {
@@ -408,16 +409,18 @@ class cartesian_layout
     {
         Container cnt{};
 
-        const auto add_if_not_t = [&c, &cnt](const auto& cardinal)
+        const auto add_if_not_c = [&c, &cnt](const auto& cardinal)
         {
             if (cardinal != c)
+            {
                 cnt.insert(cnt.end(), cardinal);
+            }
         };
 
-        add_if_not_t(north(c));
-        add_if_not_t(east(c));
-        add_if_not_t(south(c));
-        add_if_not_t(west(c));
+        add_if_not_c(north(c));
+        add_if_not_c(east(c));
+        add_if_not_c(south(c));
+        add_if_not_c(west(c));
 
         return cnt;
     }
@@ -426,6 +429,35 @@ class cartesian_layout
     void foreach_adjacent_coordinate(const CartesianCoordinateType& c, Fn&& fn) const
     {
         const auto adj = adjacent_coordinates<std::set<CartesianCoordinateType>>(c);
+
+        mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
+    }
+
+    template <typename Container>
+    Container adjacent_straight_line_coordinates(const CartesianCoordinateType& c) const noexcept
+    {
+        Container cnt{};
+
+        const auto add_if_not_c = [&c, &cnt](CartesianCoordinateType cardinal1, CartesianCoordinateType cardinal2)
+        {
+            if (cardinal1 != c && cardinal2 != c)
+            {
+                cnt.insert(cnt.end(), {std::move(cardinal1), std::move(cardinal2)});
+            }
+        };
+
+        add_if_not_c(north(c), south(c));
+        add_if_not_c(east(c), west(c));
+
+        return cnt;
+    }
+
+    template <typename Fn>
+    void foreach_straight_line_adjacent_coordinate_pair(const CartesianCoordinateType& c, Fn&& fn) const
+    {
+        const auto adj =
+            adjacent_straight_line_coordinates<std::set<std::pair<CartesianCoordinateType, CartesianCoordinateType>>>(
+                c);
 
         mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
     }

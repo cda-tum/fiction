@@ -222,6 +222,9 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
         CHECK(has_straight_inverters(
             generate_layout<cart_gate_clk_lyt>(blueprints::inverter_network<topology_network>(),
                                                use(straight_inverter(configuration<cart_gate_clk_lyt>())))));
+        CHECK(has_straight_inverters(
+            generate_layout<cart_gate_clk_lyt>(blueprints::inverter_network<topology_network>(),
+                                               open(straight_inverter(configuration<cart_gate_clk_lyt>())))));
     }
 }
 
@@ -254,6 +257,8 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         {
             CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
                                                                   use(straight_inverter(configuration<hex_lyt>())))));
+            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
+                                                                  open(straight_inverter(configuration<hex_lyt>())))));
         }
     }
     SECTION("even row")
@@ -341,6 +346,8 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         {
             CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
                                                                   use(straight_inverter(configuration<hex_lyt>())))));
+            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
+                                                                  open(straight_inverter(configuration<hex_lyt>())))));
         }
     }
 }

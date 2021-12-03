@@ -259,6 +259,22 @@ template <class Lyt>
 inline constexpr bool has_foreach_adjacent_coordinate_v = has_foreach_adjacent_coordinate<Lyt>::value;
 #pragma endregion
 
+#pragma region has_foreach_straight_line_adjacent_coordinate_pair
+template <class Lyt, class = void>
+struct has_foreach_straight_line_adjacent_coordinate_pair : std::false_type
+{};
+
+template <class Lyt>
+struct has_foreach_straight_line_adjacent_coordinate_pair<
+    Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_straight_line_adjacent_coordinate_pair(
+             std::declval<coordinate<Lyt>>(), std::declval<void(coordinate<Lyt>, uint32_t)>()))>> : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_foreach_straight_line_adjacent_coordinate_pair_v =
+    has_foreach_straight_line_adjacent_coordinate_pair<Lyt>::value;
+#pragma endregion
+
 #pragma region is_cartesian_layout
 template <class Ntk, class = void>
 struct is_cartesian_layout : std::false_type

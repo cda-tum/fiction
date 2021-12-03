@@ -15,6 +15,7 @@
 #include <memory>
 #include <set>
 #include <type_traits>
+#include <utility>
 
 namespace fiction
 {
@@ -565,7 +566,7 @@ class hexagonal_layout
                           neighbor.z = c.z;
 
                           // add neighboring coordinate if there was no over-/underflow
-                          if (!(neighbor.x > strg->dimension.x || neighbor.y > strg->dimension.y))
+                          if (is_within_bounds(neighbor))
                           {
                               cnt.insert(cnt.end(), neighbor);
                           }
@@ -578,6 +579,43 @@ class hexagonal_layout
     void foreach_adjacent_coordinate(const OffsetCoordinateType& c, Fn&& fn) const
     {
         const auto adj = adjacent_coordinates<std::set<OffsetCoordinateType>>(c);
+
+        mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
+    }
+
+    template <typename Container>
+    Container adjacent_straight_line_coordinates(const OffsetCoordinateType& c) const noexcept
+    {
+        Container cnt{};
+
+        const auto add_if_not_c = [&c, &cnt](OffsetCoordinateType cardinal1, OffsetCoordinateType cardinal2)
+        {
+            if (cardinal1 != c && cardinal2 != c)
+            {
+                cnt.insert(cnt.end(), {std::move(cardinal1), std::move(cardinal2)});
+            }
+        };
+
+        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top>)
+        {
+            add_if_not_c(east(c), west(c));
+        }
+        else  // flat top
+        {
+            add_if_not_c(north(c), south(c));
+        }
+
+        add_if_not_c(north_east(c), south_west(c));
+        add_if_not_c(north_west(c), south_east(c));
+
+        return cnt;
+    }
+
+    template <typename Fn>
+    void foreach_straight_line_adjacent_coordinate_pair(const OffsetCoordinateType& c, Fn&& fn) const
+    {
+        const auto adj =
+            adjacent_straight_line_coordinates<std::set<std::pair<OffsetCoordinateType, OffsetCoordinateType>>>(c);
 
         mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
     }
