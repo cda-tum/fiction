@@ -28,6 +28,11 @@ void check_common_traits()
     CHECK(has_south_v<Lyt>);
     CHECK(has_west_v<Lyt>);
     CHECK(has_cardinal_operations_v<Lyt>);
+    CHECK(has_north_east_v<Lyt>);
+    CHECK(has_south_east_v<Lyt>);
+    CHECK(has_south_west_v<Lyt>);
+    CHECK(has_north_west_v<Lyt>);
+    CHECK(has_ordinal_operations_v<Lyt>);
     CHECK(has_above_v<Lyt>);
     CHECK(has_below_v<Lyt>);
     CHECK(has_elevation_operations_v<Lyt>);

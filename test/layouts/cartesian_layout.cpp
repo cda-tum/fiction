@@ -20,6 +20,11 @@ TEST_CASE("Traits", "[cartesian-layout]")
     CHECK(has_south_v<layout>);
     CHECK(has_west_v<layout>);
     CHECK(has_cardinal_operations_v<layout>);
+    CHECK(has_north_east_v<layout>);
+    CHECK(has_south_east_v<layout>);
+    CHECK(has_south_west_v<layout>);
+    CHECK(has_north_west_v<layout>);
+    CHECK(has_ordinal_operations_v<layout>);
     CHECK(has_above_v<layout>);
     CHECK(has_below_v<layout>);
     CHECK(has_elevation_operations_v<layout>);
