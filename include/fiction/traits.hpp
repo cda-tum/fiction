@@ -104,6 +104,77 @@ struct has_above<Lyt, std::void_t<decltype(std::declval<Lyt>().above(std::declva
         : std::true_type
 {};
 
+#pragma region has_north_east
+template <class Lyt, class = void>
+struct has_north_east : std::false_type
+{};
+
+template <class Lyt>
+struct has_north_east<Lyt, std::void_t<decltype(std::declval<Lyt>().north_east(std::declval<coordinate<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_north_east_v = has_north_east<Lyt>::value;
+#pragma endregion
+
+#pragma region has_south_east
+template <class Lyt, class = void>
+struct has_south_east : std::false_type
+{};
+
+template <class Lyt>
+struct has_south_east<Lyt, std::void_t<decltype(std::declval<Lyt>().south_east(std::declval<coordinate<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_south_east_v = has_south_east<Lyt>::value;
+#pragma endregion
+
+#pragma region has_south_west
+template <class Lyt, class = void>
+struct has_south_west : std::false_type
+{};
+
+template <class Lyt>
+struct has_south_west<Lyt, std::void_t<decltype(std::declval<Lyt>().south_west(std::declval<coordinate<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_south_west_v = has_south_west<Lyt>::value;
+#pragma endregion
+
+#pragma region has_north_west
+template <class Lyt, class = void>
+struct has_north_west : std::false_type
+{};
+
+template <class Lyt>
+struct has_north_west<Lyt, std::void_t<decltype(std::declval<Lyt>().north_west(std::declval<coordinate<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_north_west_v = has_north_west<Lyt>::value;
+#pragma endregion
+
+#pragma region has_ordinal_operations
+template <class Lyt, class = void>
+struct has_ordinal_operations : std::false_type
+{};
+
+template <class Lyt>
+struct has_ordinal_operations<Lyt, std::enable_if_t<std::conjunction_v<has_north_east<Lyt>, has_south_east<Lyt>,
+                                                                       has_south_west<Lyt>, has_north_west<Lyt>>>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_ordinal_operations_v = has_ordinal_operations<Lyt>::value;
+#pragma endregion
+
 template <class Lyt>
 inline constexpr bool has_above_v = has_above<Lyt>::value;
 #pragma endregion
@@ -211,11 +282,10 @@ struct is_hexagonal_layout : std::false_type
 {};
 
 template <class Lyt>
-struct is_hexagonal_layout<Lyt,
-                           std::enable_if_t<is_coordinate_layout_v<Lyt> && Lyt::max_fanin_size == 5u,
-                                            std::void_t<typename Lyt::base_type, typename Lyt::hex_arrangement,
-                                                        aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage>>>
-        : std::true_type
+struct is_hexagonal_layout<
+    Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt> && has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
+                          std::void_t<typename Lyt::base_type, typename Lyt::hex_arrangement, aspect_ratio<Lyt>,
+                                      coordinate<Lyt>, typename Lyt::storage>>> : std::true_type
 {};
 
 template <class Lyt>
