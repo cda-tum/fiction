@@ -72,7 +72,8 @@ inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, a
 /**
  * FCN gate-level layouts.
  */
-using cart_gate_clk_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+using cart_gate_clk_lyt = gate_level_layout<
+    synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>>;
 using cart_gate_clk_lyt_ptr = std::shared_ptr<cart_gate_clk_lyt>;
 
 using hex_odd_row_gate_clk_lyt =
