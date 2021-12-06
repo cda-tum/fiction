@@ -91,6 +91,12 @@ TEST_CASE("Simple network conversion", "[network-conversion]")
 
         to_x(aig);
     }
+    SECTION("XAG to X")
+    {
+        auto xag = blueprints::maj1_network<mockturtle::xag_network>();
+
+        to_x(xag);
+    }
     SECTION("TOP to X")
     {
         auto top = blueprints::maj1_network<fiction::topology_network>();
@@ -111,6 +117,11 @@ TEST_CASE("Complex network conversion", "[network-conversion]")
         to_x(blueprints::maj4_network<mockturtle::aig_network>());
         to_x(blueprints::nary_operation_network<mockturtle::aig_network>());
     }
+    SECTION("XAG to X")
+    {
+        to_x(blueprints::maj4_network<mockturtle::xag_network>());
+        to_x(blueprints::nary_operation_network<mockturtle::xag_network>());
+    }
     SECTION("TOP to X")
     {
         to_x(blueprints::maj4_network<fiction::topology_network>());
@@ -128,6 +139,11 @@ TEST_CASE("Constant inverted signal recovery conversion", "[network-conversion]"
     {
         to_x(blueprints::constant_gate_input_maj_network<mockturtle::aig_network>());
     }
+    SECTION("XAG to X")
+    {
+        to_x(blueprints::constant_gate_input_maj_network<mockturtle::xag_network>());
+    }
+    // no test for topology_network because it does not support inverted signals
 }
 
 TEST_CASE("Layout conversion", "[network-conversion]")
