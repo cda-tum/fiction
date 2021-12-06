@@ -9,6 +9,7 @@
 #include "utils/equivalence_checking.hpp"
 
 #include <fiction/algorithms/apply_gate_library.hpp>
+#include <fiction/algorithms/critical_path_length_and_throughput.hpp>
 #include <fiction/algorithms/design_rule_violations.hpp>
 #include <fiction/algorithms/exact.hpp>
 #include <fiction/algorithms/network_utils.hpp>
@@ -82,6 +83,14 @@ exact_physical_design_params<Lyt>&& border_io(exact_physical_design_params<Lyt>&
 }
 
 template <typename Lyt>
+exact_physical_design_params<Lyt>&& desynchronize(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.desynchronize = true;
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
 exact_physical_design_params<Lyt>&& straight_inverter(exact_physical_design_params<Lyt>&& ps) noexcept
 {
     ps.straight_inverters = true;
@@ -112,6 +121,15 @@ void check_stats(const exact_physical_design_stats& st)
     CHECK(st.y_size > 0);
     CHECK(st.num_gates > 0);
     CHECK(st.num_wires > 0);
+}
+
+template <typename Lyt>
+void check_tp(const Lyt& lyt, const uint64_t tp)
+{
+    critical_path_length_and_throughput_stats st{};
+    critical_path_length_and_throughput(lyt, &st);
+
+    CHECK(st.throughput == tp);
 }
 
 template <typename Lyt>
@@ -153,6 +171,7 @@ void check(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps)
     const auto layout = generate_layout<Lyt>(ntk, ps);
 
     check_eq(ntk, layout);
+    check_tp(layout, 1);
     apply_gate_library(layout);
 }
 
@@ -221,6 +240,23 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
         CHECK(has_straight_inverters(
             generate_layout<cart_gate_clk_lyt>(blueprints::inverter_network<topology_network>(),
                                                open(straight_inverter(configuration<cart_gate_clk_lyt>())))));
+    }
+    SECTION("Global synchronization")
+    {
+        SECTION("enabled")
+        {
+            check_tp(
+                generate_layout<cart_gate_clk_lyt>(blueprints::one_to_five_path_difference_network<topology_network>(),
+                                                   use(configuration<cart_gate_clk_lyt>())),
+                1);
+        }
+        SECTION("disabled")
+        {
+            check_tp(
+                generate_layout<cart_gate_clk_lyt>(blueprints::one_to_five_path_difference_network<topology_network>(),
+                                                   use(desynchronize(configuration<cart_gate_clk_lyt>()))),
+                2);
+        }
     }
     //    SECTION("Synchronization elements")
     //    {

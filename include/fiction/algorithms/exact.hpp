@@ -1277,7 +1277,104 @@ class exact_impl
          * Adds constraints to the solver to ensure that fan-in paths to the same tile need to have the same length
          * in the layout modulo timing, i.e. plus the clock zone assigned to their PIs.
          */
-        void global_synchronization();
+        void global_synchronization()
+        {
+            // restrict PIs to the first c x c tiles of the layout
+            const auto restrict_entry_tiles = [this](const auto& pi)
+            {
+                apply_to_added_tiles(
+                    [this, &pi](const auto& t)
+                    {
+                        if (t.x > layout.num_clocks() - 1u || t.y > layout.num_clocks() - 1u)
+                        {
+                            solver->add(not get_tv(t, pi));
+                        }
+                    });
+            };
+
+            const auto define_length = [this](const mockturtle::node<topology_ntk_t>& n)
+            {
+                const auto paths = all_incoming_edge_paths(network, n);
+
+                const auto longest_path = std::max_element(
+                    paths.cbegin(), paths.cend(), [](const auto& p1, const auto& p2) { return p1.size() < p2.size(); });
+
+                if (longest_path == paths.cend())
+                {
+                    return;
+                }
+
+                z3::expr_vector all_path_lengths{*ctx};
+                for (auto& p : paths)
+                {
+                    z3::expr_vector path_length{*ctx};
+
+                    // respect number of vertices as an offset to path length
+                    // this works because every node must be placed
+                    if (const auto offset = static_cast<int>(p.size() - longest_path->size()); offset)
+                    {
+                        path_length.push_back(ctx->real_val(offset));
+                    }
+
+                    for (const auto& e : p)
+                    {
+                        // respect clock zone of PI if one is involved
+                        if (const auto s = e.source; config.io_ports && network.is_pi(s))
+                        {
+                            path_length.push_back(get_vcl(s));
+                        }
+                        else if (!config.io_ports)
+                        {
+                            if (has_incoming_primary_input(network, s))
+                            {
+                                path_length.push_back(get_vcl(s));
+                            }
+                        }
+
+                        tile_ite_counters(e, path_length);
+                    }
+                    all_path_lengths.push_back(z3::sum(path_length));
+                }
+
+                // use a tracking literal to disable constraints in case of UNSAT
+                solver->add(mk_as(mk_eq(all_path_lengths), lit().e and lit().s));
+            };
+
+            // much simpler but equisatisfiable version of the constraint for 2DDWave clocking with border I/Os
+            if (config.border_io && (layout.is_clocking_scheme(clock_name::twoddwave) ||
+                                     layout.is_clocking_scheme(clock_name::twoddwave_hex)))
+            {
+                if (config.io_ports)
+                {
+                    network.foreach_pi([this, &restrict_entry_tiles](const auto& pi) { restrict_entry_tiles(pi); });
+                }
+                else
+                {
+                    network.foreach_pi(
+                        [this, &restrict_entry_tiles](const auto& pi)
+                        {
+                            network.foreach_fanout(pi, [this, &restrict_entry_tiles](const auto& fo)
+                                                   { restrict_entry_tiles(network.get_node(fo)); });
+                        });
+                }
+            }
+            // normal version for all other configurations
+            else
+            {
+                if (config.io_ports)
+                {
+                    network.foreach_po([this, &define_length](const auto& po) { define_length(po); });
+                }
+                else
+                {
+                    network.foreach_po(
+                        [this, &define_length](const auto& po) {
+                            network.foreach_fanin(po, [this, &define_length](const auto& fi)
+                                                  { define_length(network.get_node(fi)); });
+                        });
+                }
+            }
+        }
         /**
          * Adds constraints to the solver to prevent edges or vertices to be assigned to tiles with an insufficient
          * number of predecessors/successors. Symmetry breaking constraints.
@@ -1849,14 +1946,10 @@ class exact_impl
             define_inv_adjacent_edge_tiles();
 
             // global synchronization constraints
-            if (!config.desynchronize &&
-                !(layout.is_clocking_scheme(clock_name::twoddwave) ||
-                  layout.is_clocking_scheme(
-                      clock_name::twoddwave_hex)))  // TODO linear schemes: add columnar and row + make a function
-                                                    // in clocking scheme for checking for linearity
+            if (!config.desynchronize)
             {
                 assign_pi_clockings();
-                //                global_synchronization();
+                global_synchronization();
             }
 
             // open clocking scheme constraints
@@ -1869,7 +1962,7 @@ class exact_impl
             if (!(layout.is_clocking_scheme(clock_name::columnar) || layout.is_clocking_scheme(clock_name::row) ||
                   layout.is_clocking_scheme(clock_name::twoddwave) ||
                   layout.is_clocking_scheme(clock_name::twoddwave_hex)))  // linear schemes; no cycles by definition
-            {
+            {  // TODO function for detection of linear schemes
                 establish_sub_paths();
                 establish_transitive_paths();
                 eliminate_cycles();
