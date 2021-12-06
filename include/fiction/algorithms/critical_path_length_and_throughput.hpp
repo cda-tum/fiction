@@ -42,11 +42,14 @@ class critical_path_length_and_throughput_impl
                     std::max(signal_delay(static_cast<tile<Lyt>>(po)).length, pst.critical_path_length);
             });
 
-        if (!delay_cache.empty())
-            pst.throughput =
-                std::max_element(delay_cache.cbegin(), delay_cache.cend(),
-                                 [](const auto& i1, const auto& i2) { return i1.second.diff < i2.second.diff; })
-                    ->second.diff;
+        const auto max_diff =
+            std::max_element(delay_cache.cbegin(), delay_cache.cend(),
+                             [](const auto& i1, const auto& i2) { return i1.second.diff < i2.second.diff; });
+
+        if (max_diff != delay_cache.cend())
+        {
+            pst.throughput = max_diff->second.diff;
+        }
 
         // give throughput in cycles, not in phases
         pst.throughput /= lyt.num_clocks();
@@ -62,6 +65,9 @@ class critical_path_length_and_throughput_impl
 
     struct path_info
     {
+        path_info() = default;
+        path_info(const uint64_t len, const uint64_t dly, const uint64_t dff) : length(len), delay(dly), diff(dff){};
+
         uint64_t length{0ull}, delay{0ull}, diff{0ull};
     };
 
@@ -86,15 +92,17 @@ class critical_path_length_and_throughput_impl
         {
             // fetch information about all incoming paths
             std::vector<path_info> infos{};
-            for (const auto& in_tile : idf) { infos.push_back(signal_delay(in_tile)); }
+
+            std::transform(idf.cbegin(), idf.cend(), std::back_inserter(infos),
+                           [this](const auto& in_tile) { return signal_delay(in_tile); });
 
             path_info dominant_path{};
 
             if (lyt.is_pi_tile(t))  // primary input to the circuit
             {
-                infos.push_back(
-                    {1, static_cast<uint64_t>((lyt.get_clock_number(t) + (lyt.num_clocks() - 1)) % lyt.num_clocks()),
-                     0});
+                infos.emplace_back(
+                    1ull, static_cast<uint64_t>((lyt.get_clock_number(t) + (lyt.num_clocks() - 1)) % lyt.num_clocks()),
+                    0ull);
             }
 
             if (infos.size() == 1)  // size cannot be 0
