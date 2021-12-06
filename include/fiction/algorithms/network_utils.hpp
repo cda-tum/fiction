@@ -142,7 +142,7 @@ class high_degree_fanin_exception : public std::exception
   public:
     explicit high_degree_fanin_exception() : std::exception() {}
 
-    [[nodiscard]] const char* what() const noexcept
+    [[nodiscard]] const char* what() const noexcept override
     {
         return "network contains nodes that exceed the supported non-constant fanin size";
     }
@@ -165,10 +165,70 @@ bool has_high_degree_fanin_nodes(const Ntk& ntk, const uint32_t threshold = 2) n
                 }
             }
 
-            return !result;
+            return !result;  // keep looping if no high-degree fanin node has yet been encountered
         });
 
     return result;
+}
+
+template <typename Ntk>
+bool has_incoming_primary_input(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
+{
+    bool in_pi = false;
+
+    ntk.foreach_fanin(n,
+                      [&ntk, &in_pi](const auto& fi)
+                      {
+                          // skip constants
+                          if (const auto fn = ntk.get_node(fi); !ntk.is_constant(fn))
+                          {
+                              if (ntk.is_pi(fn))
+                              {
+                                  in_pi = true;
+                              }
+                          }
+
+                          return !in_pi;  // keep looping if no PI has yet been encountered
+                      });
+
+    return in_pi;
+}
+
+template <typename Ntk>
+using edge_path = std::vector<mockturtle::edge<Ntk>>;
+/**
+ * Returns a vector of all possible paths to reach the given node from the primary inputs within the given network.
+ *
+ * Each vertex without predecessors is considered a terminal and a path is defined as a sequence of edges.
+ *
+ * @param n Node whose paths are desired.
+ * @return A vector of all possible edge paths leading from terminals to v.
+ */
+template <typename Ntk>
+std::vector<edge_path<Ntk>> all_incoming_edge_paths(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
+{
+    if (ntk.fanin_size(n) == 0u)
+    {
+        // this creates an empty path for each PI to built upon recursively; very important!
+        return std::vector<edge_path<Ntk>>{edge_path<Ntk>{}};
+    }
+
+    std::vector<edge_path<Ntk>> paths{};
+    foreach_incoming_edge(ntk, n,
+                          [&ntk, &paths](const auto& e)
+                          {
+                              if (!ntk.is_constant(e.source))
+                              {
+                                  auto ps = all_incoming_edge_paths(ntk, e.source);
+
+                                  for (auto& p : ps) { p.push_back(e); }
+
+                                  paths.insert(paths.end(), std::make_move_iterator(ps.begin()),
+                                               std::make_move_iterator(ps.end()));
+                              }
+                          });
+
+    return paths;
 }
 
 }  // namespace fiction
