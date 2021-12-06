@@ -42,6 +42,8 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
     template <typename Lyt>
     [[nodiscard]] static fcn_gate set_up_gate(const Lyt& lyt, const tile<Lyt>& t)
     {
+        static_assert(is_gate_level_layout_v<Lyt>, "Lyt must be a gate-level layout");
+
         const auto n = lyt.get_node(t);
         const auto p = determine_port_routing(lyt, t);
 
