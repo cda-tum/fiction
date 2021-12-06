@@ -34,7 +34,7 @@ TEST_CASE("Traits", "[cartesian-layout]")
 
     CHECK(has_foreach_coordinate_v<layout>);
     CHECK(has_foreach_adjacent_coordinate_v<layout>);
-    CHECK(has_foreach_straight_line_adjacent_coordinate_pair_v<layout>);
+    CHECK(has_foreach_adjacent_opposite_coordinates_v<layout>);
 }
 
 TEST_CASE("Coordinate iteration", "[cartesian-layout]")

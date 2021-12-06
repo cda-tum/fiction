@@ -40,7 +40,7 @@ void check_common_traits()
 
     CHECK(has_foreach_coordinate_v<Lyt>);
     CHECK(has_foreach_adjacent_coordinate_v<Lyt>);
-    CHECK(has_foreach_straight_line_adjacent_coordinate_pair_v<Lyt>);
+    CHECK(has_foreach_adjacent_opposite_coordinates_v<Lyt>);
 }
 
 TEST_CASE("Traits", "[hexagonal-layout]")

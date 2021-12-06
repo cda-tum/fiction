@@ -1647,24 +1647,24 @@ class exact_impl
          */
         void enforce_straight_inverters()
         {
-            apply_to_added_and_updated_tiles(
-                [this](const auto& t)
-                {
-                    network.foreach_node(
-                        [this, &t](const auto& inv)
-                        {
-                            // skip all operations except for inverters
-                            if (network.is_inv(inv))
+            if constexpr (has_foreach_adjacent_opposite_coordinates_v<Lyt>)
+            {
+                apply_to_added_and_updated_tiles(
+                    [this](const auto& t)
+                    {
+                        network.foreach_node(
+                            [this, &t](const auto& inv)
                             {
-                                // I/Os inverters are always straight, so they can be skipped as well
-                                if (!skip_const_or_io_node(inv))
+                                // skip all operations except for inverters
+                                if (network.is_inv(inv))
                                 {
-                                    // vector to store possible direction combinations
-                                    z3::expr_vector ve{*ctx};
-
-                                    if constexpr (has_foreach_straight_line_adjacent_coordinate_pair_v<Lyt>)
+                                    // I/Os inverters are always straight, so they can be skipped as well
+                                    if (!skip_const_or_io_node(inv))
                                     {
-                                        layout.foreach_straight_line_adjacent_coordinate_pair(
+                                        // vector to store possible direction combinations
+                                        z3::expr_vector ve{*ctx};
+
+                                        layout.foreach_adjacent_opposite_coordinates(
                                             t,
                                             [this, &t, &ve](const auto& cp)
                                             {
@@ -1683,23 +1683,30 @@ class exact_impl
                                                     ve.push_back(get_tc(t2, t) and get_tc(t, t1));
                                                 }
                                             });
-                                    }
-                                    if (!ve.empty())
-                                    {
-                                        // inverter can be placed here; enforce any of the direction combinations
-                                        // found possible above
-                                        solver->add(mk_as_if_se(z3::implies(get_tv(t, inv), z3::mk_or(ve)), t));
-                                    }
-                                    else
-                                    {
-                                        // inverter cannot be placed here, add constraint to avoid this case and
-                                        // speed up solving
-                                        solver->add(mk_as_if_se(not get_tv(t, inv), t));
+
+                                        if (!ve.empty())
+                                        {
+                                            // inverter can be placed here; enforce any of the direction combinations
+                                            // found possible above
+                                            solver->add(mk_as_if_se(z3::implies(get_tv(t, inv), z3::mk_or(ve)), t));
+                                        }
+                                        else
+                                        {
+                                            // inverter cannot be placed here, add constraint to avoid this case and
+                                            // speed up solving
+                                            solver->add(mk_as_if_se(not get_tv(t, inv), t));
+                                        }
                                     }
                                 }
-                            }
-                        });
-                });
+                            });
+                    });
+            }
+            else
+            {
+                std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_coordinates function; straight "
+                             "inverters cannot be guaranteed"
+                          << std::endl;
+            }
         }
         /**
          * Adds constraints to the solver to prevent negative valued clock latches and that vertex tiles cannot be

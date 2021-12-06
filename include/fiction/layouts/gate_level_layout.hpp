@@ -24,6 +24,7 @@
 #include <memory>
 #include <set>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -863,36 +864,26 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] bool has_opposite_incoming_and_outgoing_signals(const tile& t) const noexcept
     {
-        if constexpr (is_cartesian_layout_v<ClockedLayout>)
-        {
-            return (has_northern_incoming_signal(t) && has_southern_outgoing_signal(t)) ||
-                   (has_eastern_incoming_signal(t) && has_western_outgoing_signal(t)) ||
-                   (has_southern_incoming_signal(t) && has_northern_outgoing_signal(t)) ||
-                   (has_western_incoming_signal(t) && has_eastern_outgoing_signal((t)));
-        }
-        else if constexpr (is_hexagonal_layout_v<ClockedLayout>)
-        {
-            if constexpr (has_pointy_top_hex_orientation_v<ClockedLayout>)
-            {
-                return (has_north_eastern_incoming_signal(t) && has_south_western_outgoing_signal(t)) ||
-                       (has_eastern_incoming_signal(t) && has_western_outgoing_signal(t)) ||
-                       (has_north_western_incoming_signal(t) && has_south_eastern_outgoing_signal(t)) ||
-                       (has_south_western_incoming_signal(t) && has_north_eastern_outgoing_signal(t)) ||
-                       (has_western_incoming_signal(t) && has_eastern_outgoing_signal((t))) ||
-                       (has_south_eastern_incoming_signal(t) && has_north_western_outgoing_signal((t)));
-            }
-            else  // flat top
-            {
-                return (has_north_eastern_incoming_signal(t) && has_south_western_outgoing_signal(t)) ||
-                       (has_northern_incoming_signal(t) && has_southern_outgoing_signal(t)) ||
-                       (has_north_western_incoming_signal(t) && has_south_eastern_outgoing_signal(t)) ||
-                       (has_south_western_incoming_signal(t) && has_north_eastern_outgoing_signal(t)) ||
-                       (has_southern_incoming_signal(t) && has_northern_outgoing_signal((t))) ||
-                       (has_south_eastern_incoming_signal(t) && has_north_western_outgoing_signal((t)));
-            }
-        }
+        auto opposite_signals = false;
 
-        return false;
+        ClockedLayout::foreach_adjacent_opposite_coordinates(
+            t,
+            [this, &t, &opposite_signals](const auto& sp)
+            {
+                const auto s1 = static_cast<signal>(std::get<0>(sp)), s2 = static_cast<signal>(std::get<1>(sp));
+
+                if ((is_incoming_signal(t, s1) && is_outgoing_signal(t, s2)) ||
+                    (is_incoming_signal(t, s2) && is_outgoing_signal(t, s1)))
+                {
+                    opposite_signals = true;
+
+                    return false;  // break loop
+                }
+
+                return true;  // continue looping
+            });
+
+        return opposite_signals;
     }
 
 #pragma endregion

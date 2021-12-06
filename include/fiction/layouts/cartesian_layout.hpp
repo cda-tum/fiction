@@ -434,7 +434,7 @@ class cartesian_layout
     }
 
     template <typename Container>
-    Container adjacent_straight_line_coordinates(const CartesianCoordinateType& c) const noexcept
+    Container adjacent_opposite_coordinates(const CartesianCoordinateType& c) const noexcept
     {
         Container cnt{};
 
@@ -453,11 +453,10 @@ class cartesian_layout
     }
 
     template <typename Fn>
-    void foreach_straight_line_adjacent_coordinate_pair(const CartesianCoordinateType& c, Fn&& fn) const
+    void foreach_adjacent_opposite_coordinates(const CartesianCoordinateType& c, Fn&& fn) const
     {
         const auto adj =
-            adjacent_straight_line_coordinates<std::set<std::pair<CartesianCoordinateType, CartesianCoordinateType>>>(
-                c);
+            adjacent_opposite_coordinates<std::set<std::pair<CartesianCoordinateType, CartesianCoordinateType>>>(c);
 
         mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
     }
