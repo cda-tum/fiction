@@ -67,7 +67,7 @@ void check_ortho_equiv(const Ntk& ntk)
 
     check_stats(stats);
     check_eq(ntk, layout);
-};
+}
 
 template <typename Lyt>
 void check_ortho_equiv_all()
