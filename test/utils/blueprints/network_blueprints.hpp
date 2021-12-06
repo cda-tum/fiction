@@ -299,6 +299,24 @@ Ntk clpl()
     return ntk;
 }
 
+template <typename Ntk>
+Ntk one_to_five_path_difference_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi("x1");
+    const auto x2 = ntk.create_pi("x2");
+
+    const auto p1 = ntk.create_buf(x1);
+    const auto p2 = ntk.create_buf(ntk.create_buf(ntk.create_buf(ntk.create_buf(ntk.create_buf(x2)))));
+
+    const auto a = ntk.create_and(p1, p2);
+
+    ntk.create_po(a, "f");
+
+    return ntk;
+}
+
 }  // namespace blueprints
 
 #endif  // FICTION_NETWORK_BLUEPRINTS_HPP

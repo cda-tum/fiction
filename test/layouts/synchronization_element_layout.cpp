@@ -87,6 +87,8 @@ TEST_CASE("Structural properties", "[synchronization-element-layout]")
     se_layout layout{se_layout::aspect_ratio{2, 2, 0}, twoddwave_clocking<se_layout>()};
 
     CHECK(layout.num_se() == 0);
+    layout.assign_synchronization_element({0, 0}, 0);
+    CHECK(layout.num_se() == 0);
     layout.assign_synchronization_element({0, 1}, 1);
     CHECK(layout.num_se() == 1);
     layout.assign_synchronization_element({1, 0}, 1);

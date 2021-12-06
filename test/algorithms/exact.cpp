@@ -12,12 +12,10 @@
 #include <fiction/algorithms/design_rule_violations.hpp>
 #include <fiction/algorithms/exact.hpp>
 #include <fiction/algorithms/network_utils.hpp>
-#include <fiction/io/print_layout.hpp>
 #include <fiction/networks/topology_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/debug/network_writer.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -91,6 +89,14 @@ exact_physical_design_params<Lyt>&& straight_inverter(exact_physical_design_para
     return std::move(ps);
 }
 
+// template <typename Lyt>
+// exact_physical_design_params<Lyt>&& sync_elems(exact_physical_design_params<Lyt>&& ps) noexcept
+//{
+//     ps.synchronization_elements = true;
+//
+//     return std::move(ps);
+// }
+
 template <typename Lyt>
 exact_physical_design_params<Lyt>&& async(const std::size_t t, exact_physical_design_params<Lyt>&& ps) noexcept
 {
@@ -128,16 +134,6 @@ Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps)
     const auto layout = exact<Lyt>(ntk, ps, &stats);
 
     REQUIRE(layout.has_value());
-
-    //    if constexpr (Lyt::max_fanin_size == 3)
-    //    {
-    //        print_gate_level_layout(std::cout, *layout);
-    //        debug::write_dot_layout<Lyt, gate_layout_cartesian_drawer<Lyt, true>>(*layout);
-    //    }
-    //    else if constexpr (Lyt::max_fanin_size == 5)
-    //    {
-    //        debug::write_dot_layout<Lyt, gate_layout_hexagonal_drawer<Lyt, true>>(*layout);
-    //    }
 
     check_drvs(*layout);
     check_stats(stats);
@@ -226,6 +222,12 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
             generate_layout<cart_gate_clk_lyt>(blueprints::inverter_network<topology_network>(),
                                                open(straight_inverter(configuration<cart_gate_clk_lyt>())))));
     }
+    //    SECTION("Synchronization elements")
+    //    {
+    //        CHECK(generate_layout<cart_gate_clk_lyt>(blueprints::one_to_five_path_difference_network<topology_network>(),
+    //                                                 twoddwave(border_io(sync_elems(configuration<cart_gate_clk_lyt>()))))
+    //                  .num_se() > 0);
+    //    }
 }
 
 TEST_CASE("Exact hexagonal physical design", "[exact]")

@@ -575,6 +575,28 @@ class exact_impl
             return skip_const_or_io_node(e.source) || skip_const_or_io_node(e.target);
         }
         /**
+         * Applies a given function to all added tiles in the current solver check point.
+         *
+         * @tparam Fn Functor type.
+         * @param fn Unary function to apply to all added tiles. Must receive a tile as parameter.
+         */
+        template <typename Fn>
+        void apply_to_added_tiles(Fn&& fn)
+        {
+            std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), fn);
+        }
+        /**
+         * Applies a given function to all updated tiles in the current solver check point.
+         *
+         * @tparam Fn Functor type.
+         * @param fn Unary function to apply to all updated tiles. Must receive a tile as parameter.
+         */
+        template <typename Fn>
+        void apply_to_updated_tiles(Fn&& fn)
+        {
+            std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), fn);
+        }
+        /**
          * Applies a given function to all added and updated tiles in the current solver check point.
          *
          * @tparam Fn Functor type.
@@ -583,8 +605,8 @@ class exact_impl
         template <typename Fn>
         void apply_to_added_and_updated_tiles(Fn&& fn)
         {
-            std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), fn);
-            std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), fn);
+            apply_to_added_tiles(fn);
+            apply_to_updated_tiles(fn);
         }
 
         uint32_t network_in_degree(const mockturtle::node<topology_ntk_t>& n) const noexcept
@@ -771,7 +793,7 @@ class exact_impl
                 [this, &e, &ve, &one, &zero, &num_phases](const auto& t)
                 {
                     // an artificial latch variable counts as an extra 1 clock cycle (n clock phases)
-                    if (config.synchronization_elements)
+                    if (has_synchronization_elements_v<Lyt> && config.synchronization_elements && !config.desynchronize)
                     {
                         ve.push_back(z3::ite(get_te(t, e), get_tl(t) * num_phases + one, zero));
                     }
@@ -788,78 +810,79 @@ class exact_impl
          */
         void restrict_tile_elements()
         {
-            for (const auto& t : check_point->added_tiles)
-            {
-                if (config.crossings)
+            apply_to_added_tiles(
+                [this](const auto& t)
                 {
-                    z3::expr_vector tv{*ctx};
-                    network.foreach_node(
-                        [this, &t, &tv](const auto& v)
-                        {
-                            if (!skip_const_or_io_node(v))
+                    if (config.crossings)
+                    {
+                        z3::expr_vector tv{*ctx};
+                        network.foreach_node(
+                            [this, &t, &tv](const auto& v)
                             {
-                                tv.push_back(get_tv(t, v));
-                            }
-                        });
+                                if (!skip_const_or_io_node(v))
+                                {
+                                    tv.push_back(get_tv(t, v));
+                                }
+                            });
 
-                    if (!tv.empty())
-                    {
-                        // at most 1 vertex
-                        solver->add(z3::atmost(tv, 1u));
-                    }
-
-                    z3::expr_vector te{*ctx};
-
-                    foreach_edge(network,
-                                 [this, &t, &te](const auto& e)
-                                 {
-                                     if (!skip_const_or_io_edge(e))
-                                     {
-                                         te.push_back(get_te(t, e));
-                                     }
-                                 });
-
-                    if (!te.empty())
-                    {
-                        // at most 2 edges
-                        solver->add(z3::atmost(te, 2u));
-                    }
-
-                    if (!tv.empty() && !te.empty())
-                    {
-                        // prevent the assignment of both vertices and edges to the same tile
-                        solver->add(z3::implies(z3::atleast(tv, 1u), z3::atmost(te, 0)));
-                        solver->add(z3::implies(z3::atleast(te, 1u), z3::atmost(tv, 0)));
-                    }
-                }
-                else
-                {
-                    z3::expr_vector ve{*ctx};
-                    network.foreach_node(
-                        [this, &t, &ve](const auto& v)
+                        if (!tv.empty())
                         {
-                            if (!skip_const_or_io_node(v))
-                            {
-                                ve.push_back(get_tv(t, v));
-                            }
-                        });
+                            // at most 1 vertex
+                            solver->add(z3::atmost(tv, 1u));
+                        }
 
-                    foreach_edge(network,
-                                 [this, &t, &ve](const auto& e)
-                                 {
-                                     if (!skip_const_or_io_edge(e))
+                        z3::expr_vector te{*ctx};
+
+                        foreach_edge(network,
+                                     [this, &t, &te](const auto& e)
                                      {
-                                         ve.push_back(get_te(t, e));
-                                     }
-                                 });
+                                         if (!skip_const_or_io_edge(e))
+                                         {
+                                             te.push_back(get_te(t, e));
+                                         }
+                                     });
 
-                    if (!ve.empty())
-                    {
-                        // at most 1 vertex or edge
-                        solver->add(z3::atmost(ve, 1u));
+                        if (!te.empty())
+                        {
+                            // at most 2 edges
+                            solver->add(z3::atmost(te, 2u));
+                        }
+
+                        if (!tv.empty() && !te.empty())
+                        {
+                            // prevent the assignment of both vertices and edges to the same tile
+                            solver->add(z3::implies(z3::atleast(tv, 1u), z3::atmost(te, 0)));
+                            solver->add(z3::implies(z3::atleast(te, 1u), z3::atmost(tv, 0)));
+                        }
                     }
-                }
-            }
+                    else
+                    {
+                        z3::expr_vector ve{*ctx};
+                        network.foreach_node(
+                            [this, &t, &ve](const auto& v)
+                            {
+                                if (!skip_const_or_io_node(v))
+                                {
+                                    ve.push_back(get_tv(t, v));
+                                }
+                            });
+
+                        foreach_edge(network,
+                                     [this, &t, &ve](const auto& e)
+                                     {
+                                         if (!skip_const_or_io_edge(e))
+                                         {
+                                             ve.push_back(get_te(t, e));
+                                         }
+                                     });
+
+                        if (!ve.empty())
+                        {
+                            // at most 1 vertex or edge
+                            solver->add(z3::atmost(ve, 1u));
+                        }
+                    }
+                });
         }
         /**
          * Adds constraints to the solver to enforce that each vertex is placed exactly once on exactly one tile.
@@ -886,12 +909,13 @@ class exact_impl
          */
         void restrict_clocks()
         {
-            for (const auto& t : check_point->added_tiles)
-            {
-                auto cl = get_tcl(t);
-                solver->add(ctx->int_val(0) <= cl);
-                solver->add(cl < ctx->int_val(static_cast<unsigned>(layout.num_clocks())));
-            }
+            apply_to_added_tiles(
+                [this](const auto& t)
+                {
+                    auto cl = get_tcl(t);
+                    solver->add(ctx->int_val(0) <= cl);
+                    solver->add(cl < ctx->int_val(static_cast<unsigned>(layout.num_clocks())));
+                });
         }
         /**
          * Adds constraints to the solver to enforce that a tile which was assigned with some vertex v has a successor
@@ -1197,7 +1221,7 @@ class exact_impl
          */
         void eliminate_cycles()
         {
-            for (const auto& t : check_point->added_tiles) { solver->add(not get_tp(t, t)); }
+            apply_to_added_tiles([this](const auto& t) { solver->add(not get_tp(t, t)); });
         }
         /**
          * Adds constraints to the solver to ensure that the cl variable of primary input pi is set to the clock zone
@@ -1208,18 +1232,19 @@ class exact_impl
             auto assign = [this](const auto v) -> void
             {
                 auto cl = get_vcl(v);
-                for (const auto& t : check_point->added_tiles)
-                {
-                    if (layout.is_regularly_clocked())
+                apply_to_added_tiles(
+                    [this, &v, &cl](const auto& t)
                     {
-                        solver->add(z3::implies(get_tv(t, v),
-                                                cl == ctx->int_val(static_cast<unsigned>(layout.get_clock_number(t)))));
-                    }
-                    else  // irregular clocking
-                    {
-                        solver->add(z3::implies(get_tv(t, v), cl == get_tcl(t)));
-                    }
-                }
+                        if (layout.is_regularly_clocked())
+                        {
+                            solver->add(z3::implies(
+                                get_tv(t, v), cl == ctx->int_val(static_cast<unsigned>(layout.get_clock_number(t)))));
+                        }
+                        else  // irregular clocking
+                        {
+                            solver->add(z3::implies(get_tv(t, v), cl == get_tcl(t)));
+                        }
+                    });
             };
 
             if (!((layout.is_clocking_scheme(clock_name::twoddwave) ||
@@ -1493,32 +1518,33 @@ class exact_impl
                 z3::expr_vector ccp{*ctx};
 
                 // iterate over added_tiles only here to not duplicate constraints
-                for (const auto& t : check_point->added_tiles)
-                {
-                    z3::expr_vector ow{*ctx};
-                    network.foreach_node(
-                        [this, &t, &ow](const auto& v)
-                        {
-                            if (!skip_const_or_io_node(v))
-                            {
-                                ow.push_back(get_tv(t, v));
-                            }
-                        });
-                    foreach_edge(network,
-                                 [this, &t, &ow](const auto& e)
-                                 {
-                                     if (!skip_const_or_io_edge(e))
-                                     {
-                                         ow.push_back(get_te(t, e));
-                                     }
-                                 });
-
-                    // if tile t is empty, the clock number does not matter and can be fixed to 0
-                    if (!ow.empty())
+                apply_to_added_tiles(
+                    [this](const auto& t)
                     {
-                        solver->add(z3::implies(z3::atmost(ow, 0u), get_tcl(t) == ctx->int_val(0)));
-                    }
-                }
+                        z3::expr_vector ow{*ctx};
+                        network.foreach_node(
+                            [this, &t, &ow](const auto& v)
+                            {
+                                if (!skip_const_or_io_node(v))
+                                {
+                                    ow.push_back(get_tv(t, v));
+                                }
+                            });
+                        foreach_edge(network,
+                                     [this, &t, &ow](const auto& e)
+                                     {
+                                         if (!skip_const_or_io_edge(e))
+                                         {
+                                             ow.push_back(get_te(t, e));
+                                         }
+                                     });
+
+                        // if tile t is empty, the clock number does not matter and can be fixed to 0
+                        if (!ow.empty())
+                        {
+                            solver->add(z3::implies(z3::atmost(ow, 0u), get_tcl(t) == ctx->int_val(0)));
+                        }
+                    });
             }
         }
         /**
@@ -1546,25 +1572,27 @@ class exact_impl
             auto assign_north = [this](const auto& v)
             {
                 // no need to iterate over updated_tiles, because nothing changes there
-                for (const auto& t : check_point->added_tiles)
-                {
-                    if (!layout.is_northern_border(t))
+                apply_to_added_tiles(
+                    [this, &v](const auto& t)
                     {
-                        solver->add(not get_tv(t, v));
-                    }
-                }
+                        if (!layout.is_northern_border(t))
+                        {
+                            solver->add(not get_tv(t, v));
+                        }
+                    });
             };
 
             auto assign_west = [this](const auto& v)
             {
                 // no need to iterate over updated_tiles, because nothing changes there
-                for (const auto& t : check_point->added_tiles)
-                {
-                    if (!layout.is_western_border(t))
+                apply_to_added_tiles(
+                    [this, &v](const auto& t)
                     {
-                        solver->add(not get_tv(t, v));
-                    }
-                }
+                        if (!layout.is_western_border(t))
+                        {
+                            solver->add(not get_tv(t, v));
+                        }
+                    });
             };
 
             auto assign_east = [this](const auto& v)
@@ -1701,40 +1729,38 @@ class exact_impl
                             });
                     });
             }
-            else
-            {
-                std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_coordinates function; straight "
-                             "inverters cannot be guaranteed"
-                          << std::endl;
-            }
         }
         /**
-         * Adds constraints to the solver to prevent negative valued clock latches and that vertex tiles cannot be
-         * latches.
+         * Adds constraints to the solver to prevent negative valued synchronization elements and that gate tiles cannot
+         * be assigned synchronization elements.
          */
         void restrict_synchronization_elements()
         {
-            auto zero = ctx->int_val(0u);
-
-            for (const auto& t : check_point->added_tiles)
+            if constexpr (has_synchronization_elements_v<Lyt>)
             {
-                // latches must be positive
-                auto l = get_tl(t);
-                solver->add(l >= zero);
+                auto zero = ctx->int_val(0u);
 
-                // tiles without wires cannot have latches
-                z3::expr_vector te{*ctx};
+                apply_to_added_tiles(
+                    [this, &zero](const auto& t)
+                    {
+                        // synchronization elements must be positive
+                        auto l = get_tl(t);
+                        solver->add(l >= zero);
 
-                foreach_edge(network,
-                             [this, &t, &te](const auto& e)
-                             {
-                                 if (!skip_const_or_io_edge(e))
-                                 {
-                                     te.push_back(get_te(t, e));
-                                 }
-                             });
+                        // tiles without wires cannot be synchronization elements
+                        z3::expr_vector te{*ctx};
 
-                solver->add(z3::implies(z3::atmost(te, 0u), l == zero));
+                        foreach_edge(network,
+                                     [this, &t, &te](const auto& e)
+                                     {
+                                         if (!skip_const_or_io_edge(e))
+                                         {
+                                             te.push_back(get_te(t, e));
+                                         }
+                                     });
+
+                        solver->add(z3::implies(z3::atmost(te, 0u), l == zero));
+                    });
             }
         }
         /**
@@ -1792,16 +1818,20 @@ class exact_impl
             optimize->minimize(z3::sum(crossings_counter));
         }
         /**
-         * Adds constraints to the given optimize to enforce that the overall sum of latch values should be minimized.
+         * Adds constraints to the given optimize to enforce that the overall sum of synchronization element values
+         * should be minimized.
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
          */
         void minimize_synchronization_elements(optimize_ptr optimize)
         {
-            z3::expr_vector latch_counter{*ctx};
-            layout.foreach_ground_tile([this, &latch_counter](const auto& t) { latch_counter.push_back(get_tl(t)); });
+            if constexpr (has_synchronization_elements_v<Lyt>)
+            {
+                z3::expr_vector se_counter{*ctx};
+                layout.foreach_ground_tile([this, &se_counter](const auto& t) { se_counter.push_back(get_tl(t)); });
 
-            optimize->minimize(z3::sum(latch_counter));
+                optimize->minimize(z3::sum(se_counter));
+            }
         }
         /**
          * Generates the SMT instance by calling the constraint generating functions.
@@ -1857,11 +1887,11 @@ class exact_impl
                 enforce_straight_inverters();
             }
 
-            // clock latch constraints
-            //            if (config.synchronization_elements && !config.desynchronize)
-            //            {
-            //                restrict_synchronization_elements();
-            //            }
+            // synchronization element constraints
+            if (config.synchronization_elements && !config.desynchronize)
+            {
+                restrict_synchronization_elements();
+            }
 
             // topology-specific constraints
             //            topology_specific_constraints();
@@ -1879,40 +1909,40 @@ class exact_impl
         optimize_ptr optimize()
         {
             if (auto wires = config.minimize_wires, cross = config.minimize_crossings,
-                latch = config.synchronization_elements && !config.desynchronize;
-                !wires && !cross && !latch)
+                se = config.synchronization_elements && !config.desynchronize;
+                !wires && !cross && !se)
             {
                 return nullptr;
             }
             else
             {
-                auto optimize = std::make_shared<z3::optimize>(*ctx);
+                auto optimizer = std::make_shared<z3::optimize>(*ctx);
 
                 // add all solver constraints
-                for (const auto& e : solver->assertions()) { optimize->add(e); }
+                for (const auto& e : solver->assertions()) { optimizer->add(e); }
 
                 // add assumptions as constraints, too, because optimize::check with assumptions is broken
-                for (const auto& e : check_point->assumptions) { optimize->add(e); }
+                for (const auto& e : check_point->assumptions) { optimizer->add(e); }
 
                 // wire minimization constraints
                 if (wires)
                 {
-                    minimize_wires(optimize);
+                    minimize_wires(optimizer);
                 }
 
                 // crossing minimization constraints
                 if (cross)
                 {
-                    minimize_crossings(optimize);
+                    minimize_crossings(optimizer);
                 }
 
                 // clock latches minimization constraints
-                if (latch)
+                if (se)
                 {
-                    minimize_synchronization_elements(optimize);
+                    minimize_synchronization_elements(optimizer);
                 }
 
-                return optimize;
+                return optimizer;
             }
         }
 
@@ -2085,12 +2115,12 @@ class exact_impl
                     }
                 });
 
-            // assign artificial latches if there were any in use
-            if (config.synchronization_elements)
+            // assign synchronization elements if there were any in use
+            if constexpr (has_synchronization_elements_v<Lyt>)
             {
-                if constexpr (has_synchronization_elements_v<Lyt>)
+                if (config.synchronization_elements)
                 {
-                    layout.foreach_ground_layer(
+                    layout.foreach_ground_tile(
                         [this, &model](const auto& t)
                         {
                             layout.assign_synchronization_element(
@@ -2452,6 +2482,23 @@ std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = 
     if (has_high_degree_fanin_nodes(ntk, ps.scheme->max_in_degree))
     {
         throw high_degree_fanin_exception();
+    }
+
+    if constexpr (!fiction::has_foreach_adjacent_opposite_coordinates_v<Lyt>)
+    {
+        if (ps.straight_inverters)
+        {
+            std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_coordinates function; straight "
+                         "inverters cannot be guaranteed"
+                      << std::endl;
+        }
+    }
+    if constexpr (!fiction::has_synchronization_elements_v<Lyt>)
+    {
+        if (ps.synchronization_elements)
+        {
+            std::cout << "[w] Lyt does not support synchronization elements; not using them" << std::endl;
+        }
     }
 
     exact_physical_design_stats  st{};
