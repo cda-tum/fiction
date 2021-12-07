@@ -99,6 +99,16 @@ struct fanin_container
 };
 
 template <typename Ntk>
+std::vector<mockturtle::node<Ntk>> fanouts(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
+{
+    std::vector<mockturtle::node<Ntk>> fos{};
+
+    ntk.foreach_fanout(n, [&ntk, &fos](const auto& f) { fos.push_back(f); });
+
+    return fos;
+}
+
+template <typename Ntk>
 fanin_container<Ntk> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
 {
     fanin_container<Ntk> fc{};
@@ -229,6 +239,58 @@ std::vector<edge_path<Ntk>> all_incoming_edge_paths(const Ntk& ntk, const mocktu
                           });
 
     return paths;
+}
+
+template <typename Ntk>
+std::vector<uint32_t> inverse_levels(const Ntk& ntk) noexcept
+{
+    // vector of all inverse levels by node index
+    std::vector<uint32_t> inv_levels(ntk.size(), uint32_t{0});
+    // vector to store a discovered flag to not visit nodes twice
+    std::vector<bool> discovered(ntk.size(), false);
+
+    // helper function to access a given node's inverse level
+    const auto get_inv_level = [&inv_levels, &ntk](const auto& n) { return inv_levels[ntk.node_to_index(n)]; };
+    // helper function to set a given node's inverse level
+    const auto set_inv_level = [&inv_levels, &ntk](const auto& n, const auto& l)
+    { inv_levels[ntk.node_to_index(n)] = l; };
+    // helper function to check if a given node has already been discovered
+    const auto is_discovered = [&discovered, &ntk](const auto& n) { return discovered[ntk.node_to_index(n)]; };
+    // helper function to set a given node as discovered
+    const auto set_discovered = [&discovered, &ntk](const auto& n) { discovered[ntk.node_to_index(n)] = true; };
+
+    // inverse joint depth first search
+    const std::function<void(const mockturtle::node<Ntk>& n)> inv_jdfs = [&](const auto& n)
+    {
+        auto fos = fanouts(ntk, n);
+        // if all predecessors are yet discovered
+        if (!fos.empty() && std::all_of(fos.cbegin(), fos.cend(), is_discovered))
+        {
+            set_discovered(n);
+
+            // determine successor's maximum level
+            const auto post_l =
+                std::max_element(fos.cbegin(), fos.cend(),
+                                 [&](const auto& n1, const auto& n2) { return get_inv_level(n1) < get_inv_level(n2); });
+
+            // if there are no successors, level of current vertex is 0, else it is one higher than theirs
+            set_inv_level(n, post_l != fos.cend() ? std::max(get_inv_level(n), get_inv_level(*post_l) + 1u) : 0u);
+
+            ntk.foreach_fanin(n,
+                              [&ntk, &is_discovered, &inv_jdfs](const auto& fi)
+                              {
+                                  if (const auto fin = ntk.get_node(fi); !is_discovered(fin))
+                                  {
+                                      inv_jdfs(fin);
+                                  }
+                              });
+        }
+    };
+
+    // call inverse joint dfs for every PO node
+    ntk.foreach_po([&ntk, &inv_jdfs](const auto& po) { inv_jdfs(ntk.get_node(po)); });
+
+    return inv_levels;
 }
 
 }  // namespace fiction
