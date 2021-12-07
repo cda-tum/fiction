@@ -22,6 +22,7 @@
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/color_view.hpp>
+#include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
 #if (PROGRESS_BARS)
@@ -218,7 +219,8 @@ class exact_impl
                 layout{fgl},
                 network{ntk},
                 node2pos{ntk},
-                //                hierarchy{std::make_shared<network_hierarchy>(network, false)}, // TODO hiearchy
+                depth_ntk{ntk},
+                inv_levels{inverse_levels(ntk)},
                 config{c}
         {}
         /**
@@ -410,10 +412,14 @@ class exact_impl
             ,
             topology_ntk_t>
             node2pos;
-        //        /**
-        //         * Network hierarchy used for symmetry breaking.
-        //         */
-        //        network_hierarchy_ptr hierarchy;
+        /**
+         * Mapping of levels to nodes used for symmetry breaking.
+         */
+        mockturtle::depth_view<topology_ntk_t> depth_ntk;
+        /**
+         * Mapping of inverse levels to nodes used for symmetry breaking.
+         */
+        std::vector<uint32_t> inv_levels;
         /**
          * Configurations specifying layout restrictions. Used in instance generation among other places.
          */
@@ -1658,10 +1664,120 @@ class exact_impl
             }
         }
         /**
-         * Adds constraints to the solver to prohibit certain vertex placements based on the network hierarchy if the
+         * Adds constraints to the solver to prohibit certain node placements based on the network hierarchy if the
          * clocking scheme is feed-back-free. Symmetry breaking constraints.
          */
-        void utilize_hierarchical_information();
+        void utilize_hierarchical_information()
+        {
+            // symmetry breaking for columnar clocking
+            if (layout.is_clocking_scheme(clock_name::columnar))
+            {
+                // restrict node placement according to the hierarchy level
+                if (config.io_ports && config.border_io)
+                {
+                    network.foreach_node(
+                        [this](const auto& n)
+                        {
+                            if (!skip_const_or_io_node(n))
+                            {
+                                const auto l  = depth_ntk.level(n);
+                                const auto il = inv_levels[network.node_to_index(n)];
+
+                                // cannot be placed with too little distance to western border
+                                for (auto column = 0u; column < l; ++column)
+                                {
+                                    for (auto row = 0u; row <= layout.y(); ++row)
+                                    {
+                                        if (const auto t = tile<Lyt>{column, row}; is_added_tile(t))
+                                        {
+                                            solver->add(not get_tv(t, n));
+
+                                            // same for the outgoing edges
+                                            foreach_outgoing_edge(network, n,
+                                                                  [this, &t](const auto& e)
+                                                                  {
+                                                                      if (!skip_const_or_io_edge(e))
+                                                                      {
+                                                                          solver->add(not get_te(t, e));
+                                                                      }
+                                                                  });
+                                        }
+                                    }
+                                }
+
+                                // cannot be placed with too little distance to eastern border
+                                for (auto column = layout.x() - il - 1; column <= layout.x(); ++column)
+                                {
+                                    for (auto row = 0u; row <= layout.y(); ++row)
+                                    {
+                                        const auto t = tile<Lyt>{column, row};
+
+                                        // use assumptions here because the south-east corner moves away in the
+                                        // following iterations
+                                        check_point->assumptions.push_back(not get_tv(t, n));
+
+                                        // same for the incoming edges
+                                        foreach_incoming_edge(network, n,
+                                                              [this, &t](const auto& e)
+                                                              {
+                                                                  if (!skip_const_or_io_edge(e))
+                                                                  {
+                                                                      check_point->assumptions.push_back(
+                                                                          not get_te(t, e));
+                                                                  }
+                                                              });
+                                    }
+                                }
+                            }
+                        });
+                }
+            }  // TODO same for row clocking
+            // symmetry breaking for 2DDWave clocking
+            else if (layout.is_clocking_scheme(clock_name::twoddwave))
+            {
+                // restrict vertex placement according to their hierarchy level
+                if (config.io_ports && config.border_io)
+                {
+                    network.foreach_node(
+                        [this](const auto& n)
+                        {
+                            if (!skip_const_or_io_node(n))
+                            {
+                                const auto l  = depth_ntk.level(n);
+                                const auto il = inv_levels[network.node_to_index(n)];
+
+                                // cannot be placed with too little distance to north-west corner
+                                apply_to_added_tiles(
+                                    [this, &n, &l, &il](const auto& t)
+                                    {
+                                        if (t.x + t.y < static_cast<decltype(t.x + t.y)>(l))
+                                        {
+                                            solver->add(not get_tv(t, n));
+
+                                            // same for the outgoing edges
+                                            foreach_outgoing_edge(network, n,
+                                                                  [this, &t](const auto& e)
+                                                                  { solver->add(not get_te(t, e)); });
+                                        }
+                                        // cannot be placed with too little distance to south-east corner
+                                        if (layout.x() - t.x + layout.y() - t.y < il)
+                                        {
+                                            // use assumptions here because the south-east corner moves away in the
+                                            // following iterations
+                                            check_point->assumptions.push_back(not get_tv(t, n));
+
+                                            // same for the incoming edges
+                                            foreach_incoming_edge(
+                                                network, n,
+                                                [this, &t](const auto& e)
+                                                { check_point->assumptions.push_back(not get_te(t, e)); });
+                                        }
+                                    });
+                            }
+                        });
+                }
+            }
+        }
         /**
          * Adds constraints to the solver to position the primary inputs and primary outputs at the layout's borders.
          */
@@ -2147,7 +2263,7 @@ class exact_impl
             // symmetry breaking constraints
             prevent_insufficiencies();
             define_number_of_connections();
-            //            utilize_hierarchical_information();
+            utilize_hierarchical_information();
         }
         /**
          * Creates and returns a z3::optimize if optimization criteria were set by the configuration. The optimize gets

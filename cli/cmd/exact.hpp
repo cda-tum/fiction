@@ -190,7 +190,6 @@ class exact_command : public command
     void reset_flags()
     {
         ps                   = fiction::exact_physical_design_params<fiction::cart_gate_clk_lyt>{};
-        st                   = {};
         hexagonal_tile_shift = {};
         clocking             = "2DDWave";
     }
