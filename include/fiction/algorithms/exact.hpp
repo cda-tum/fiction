@@ -45,6 +45,15 @@
 namespace fiction
 {
 
+/**
+ * Target technologies.
+ */
+enum class technology_constraints
+{
+    NONE,
+    TOPOLINANO
+};
+
 template <typename Lyt>
 struct exact_physical_design_params
 {
@@ -101,6 +110,10 @@ struct exact_physical_design_params
      * Sets a timeout in ms for the solving process. Standard is 4294967 seconds as defined by Z3.
      */
     unsigned timeout = 4294967u;
+    /**
+     * Technology-specific constraints that are only to be added for a certain target technology.
+     */
+    technology_constraints technology_specifics = technology_constraints::NONE;
 };
 
 struct exact_physical_design_stats
@@ -1861,9 +1874,151 @@ class exact_impl
             }
         }
         /**
-         * Adds constraints to the solver to enforce topology-specific restrictions.
+         * Adds constraints to the solver to enforce technology-specific restrictions.
          */
-        void topology_specific_constraints();
+        void technology_specific_constraints()
+        {
+            if (config.technology_specifics == technology_constraints::TOPOLINANO)
+            {
+                // fan-outs (couplers) cannot be followed by fan-outs and can only have inputs from their north-western
+                // tiles
+                network.foreach_gate(
+                    [this](const auto& fon)
+                    {
+                        if (network.is_fanout(fon))
+                        {
+                            // prohibit succeeding fan-outs
+                            network.foreach_fanout(
+                                fon,
+                                [this, &fon](const auto& afo)
+                                {
+                                    if (const auto afon = network.get_node(afo); network.is_fanout(afon))
+                                    {
+                                        layout.foreach_ground_tile(
+                                            [this, &fon, &afon](const auto& t)
+                                            {
+                                                layout.foreach_outgoing_clocked_zone(
+                                                    t,
+                                                    [this, &fon, &afon, &t](const auto& at)
+                                                    {
+                                                        if (is_added_tile(at))
+                                                        {
+                                                            solver->add(
+                                                                z3::implies(get_tv(t, fon), not get_tv(at, afon)));
+                                                        }
+                                                    });
+                                            });
+                                    }
+                                });
+
+                            // do not argue about fan-outs without predecessors in the following
+                            if (network_in_degree(fon) != 0)
+                            {
+                                // enforce north-western input
+                                apply_to_added_tiles(
+                                    [this, &fon](const auto& t)
+                                    {
+                                        // if fo gets placed here, its predecessor must be on the north-western tile
+                                        if (const auto nw = layout.north_west(t); nw != t)
+                                        {
+                                            solver->add(z3::implies(get_tv(t, fon), get_tc(nw, t)));
+
+                                            // additionally, no crossing can precede a fan-out
+                                            z3::expr_vector wv{*ctx};
+                                            foreach_edge(network,
+                                                         [this, &nw, &wv](const auto& e)
+                                                         {
+                                                             if (!skip_const_or_io_edge(e))
+                                                             {
+                                                                 wv.push_back(get_te(nw, e));
+                                                             }
+                                                         });
+
+                                            solver->add(z3::implies(get_tv(t, fon), z3::atmost(wv, 1u)));
+                                        }
+                                        // if tile t doesn't have a north-western adjacent tile, fon cannot be placed
+                                        // here
+                                        else
+                                        {
+                                            solver->add(not get_tv(t, fon));
+                                        }
+                                    });
+                            }
+                        }
+                    });
+
+                network.foreach_gate(
+                    [this](const auto& v1)
+                    {
+                        // AND/OR/MAJ gates cannot be followed directly by an AND/OR/MAJ gate or a fan-out (coupler)
+                        // additionally, if straight inverters are enforced, AND/OR/MAJ cannot be followed by NOT either
+                        if (network.is_and(v1) || network.is_or(v1) || network.is_maj(v1))
+                        {
+                            network.foreach_fanout(
+                                v1,
+                                [this, &v1](const auto& fo)
+                                {
+                                    // only argue about AND/OR/MAJ/fan-out and, additionally, about NOT if straight
+                                    // inverters are enforced
+                                    if (const auto v2 = network.get_node(fo);
+                                        network.is_and(v2) || network.is_or(v2) || network.is_maj(v2) ||
+                                        network.is_fanout(v2) || (network.is_inv(v2) && config.straight_inverters))
+                                    {
+                                        layout.foreach_ground_tile(
+                                            [this, &v1, &v2](const auto& t)
+                                            {
+                                                layout.foreach_outgoing_clocked_zone(
+                                                    t,
+                                                    [this, &v1, &v2, &t](const auto& at)
+                                                    {
+                                                        if (is_added_tile(at))
+                                                        {
+                                                            solver->add(z3::implies(get_tv(t, v1), not get_tv(at, v2)));
+                                                        }
+                                                    });
+                                            });
+                                    }
+                                });
+
+                            // AND/OR/MAJ gates cannot be followed by a south-eastern connection
+                            // and cannot be followed by a crossing directly
+                            layout.foreach_ground_tile(
+                                [this, &v1](const auto& t)
+                                {
+                                    if (auto ne = layout.north_east(t); ne == t)
+                                    {
+                                        // no north-eastern tile, do not place v1 here
+                                        check_point->assumptions.push_back(not get_tv(t, v1));
+                                    }
+                                    else
+                                    {
+                                        // north-eastern tile exists, do not create a crossing here
+                                        z3::expr_vector wv{*ctx};
+                                        foreach_edge(network,
+                                                     [this, &ne, &wv](const auto& e)
+                                                     {
+                                                         if (!skip_const_or_io_edge(e))
+                                                         {
+                                                             wv.push_back(get_te(ne, e));
+                                                         }
+                                                     });
+
+                                        solver->add(z3::implies(get_tv(t, v1), z3::atmost(wv, 1u)));
+                                    }
+                                    if (auto se = layout.south_east(t); se != t)
+                                    {
+                                        // south-eastern tile exists, do not route a connection here
+                                        if (is_added_tile(se))
+                                        {
+                                            solver->add(z3::implies(get_tv(t, v1), not get_tc(t, se)));
+                                        }
+                                    }
+                                });
+                        }
+                    });
+            }
+            // more target technology constraints go here
+        }
         /**
          * Adds constraints to the given optimize to minimize the number of crossing tiles to use.
          *
@@ -1986,8 +2141,8 @@ class exact_impl
                 restrict_synchronization_elements();
             }
 
-            // topology-specific constraints
-            //            topology_specific_constraints();
+            // technology-specific constraints
+            technology_specific_constraints();
 
             // symmetry breaking constraints
             prevent_insufficiencies();
@@ -2559,8 +2714,8 @@ class exact_impl
  * incremental solving and thereby, comparatively, slows down each run.
  *
  * The SMT instance works with a single layer of variables even though it is possible to allow crossings in the
- * solution. The reduced number of variables saves a considerable amount of runtime. That's why most for-loops iterate
- * over layout->get_ground_layer_tiles() even though the model will be mapped to a 3-dimensional layout afterwards.
+ * solution. The reduced number of variables saves a considerable amount of runtime. That's why
+ * layout.foreach_ground_tile() is used even though the model will be mapped to a 3-dimensional layout afterwards.
  */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = {},
