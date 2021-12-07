@@ -62,6 +62,9 @@ class exact_command : public command
                  "Minimize the number of crossing tiles to be used (slightly runtime expensive)");
         add_flag("--sync_elems,-e", ps.synchronization_elements,
                  "Allow synchronization elements to satisfy global synchronization (runtime expensive!)");
+
+        add_flag("--topolinano", "Indicate the use of technology-specific constraints for iNML as used by ToPoliNano "
+                                 "(to be used with COLUMNAR clocking)");
     }
 
   protected:
@@ -105,6 +108,12 @@ class exact_command : public command
             {
                 ps.num_threads = threads_available;
             }
+        }
+
+        // target technology constraints
+        if (this->is_set("topolinano"))
+        {
+            ps.technology_specifics = fiction::technology_constraints::TOPOLINANO;
         }
 
         // convert timeout entered in seconds to milliseconds
@@ -204,6 +213,7 @@ class exact_command : public command
         ps_dest.minimize_wires           = ps_src.minimize_wires;
         ps_dest.minimize_crossings       = ps_src.minimize_crossings;
         ps_dest.timeout                  = ps_src.timeout;
+        ps_dest.technology_specifics     = ps_src.technology_specifics;
 
         return ps_dest;
     }
