@@ -13,7 +13,6 @@
 #include <fiction/algorithms/design_rule_violations.hpp>
 #include <fiction/algorithms/exact.hpp>
 #include <fiction/algorithms/network_utils.hpp>
-#include <fiction/io/print_layout.hpp>
 #include <fiction/networks/topology_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
@@ -188,8 +187,6 @@ void check_with_gate_library(const Ntk& ntk, const exact_physical_design_params<
 {
     const auto layout = generate_layout<GateLyt>(ntk, ps);
 
-    print_gate_level_layout(std::cout, layout);
-
     check_eq(ntk, layout);
     check_tp(layout, 1);
     check_apply_lib<CellLyt, Lib>(layout);
@@ -199,8 +196,6 @@ template <typename Ntk, typename Lyt>
 void check_without_gate_library(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps)
 {
     const auto layout = generate_layout<Lyt>(ntk, ps);
-
-    print_gate_level_layout(std::cout, layout);
 
     check_eq(ntk, layout);
     check_tp(layout, 1);
