@@ -436,11 +436,11 @@ class exact_impl
         /**
          * Mapping of levels to nodes used for symmetry breaking.
          */
-        mockturtle::depth_view<topology_ntk_t> depth_ntk;
+        const mockturtle::depth_view<topology_ntk_t> depth_ntk;
         /**
          * Mapping of inverse levels to nodes used for symmetry breaking.
          */
-        std::vector<uint32_t> inv_levels;
+        const std::vector<uint32_t> inv_levels;
         /**
          * Configurations specifying layout restrictions. Used in instance generation among other places.
          */
@@ -507,7 +507,7 @@ class exact_impl
             };
 
             // does a solver state for a layout of dimension of size x - 1 * y exist?
-            if (auto it_x = solver_tree.find({dim.x - 1, dim.y}); it_x != solver_tree.end())
+            if (const auto it_x = solver_tree.find({dim.x - 1, dim.y}); it_x != solver_tree.end())
             {
                 // gather additional y-tiles and updated tiles
                 std::set<tile<Lyt>> added_tiles{}, updated_tiles{};
@@ -533,7 +533,7 @@ class exact_impl
             else
             {
                 // does a solver state for a layout of dimension of size x * y - 1 exist?
-                if (auto it_y = solver_tree.find({dim.x, dim.y - 1}); it_y != solver_tree.end())
+                if (const auto it_y = solver_tree.find({dim.x, dim.y - 1}); it_y != solver_tree.end())
                 {
                     // gather additional x-tiles
                     std::set<tile<Lyt>> added_tiles{}, updated_tiles{};
@@ -794,7 +794,7 @@ class exact_impl
          */
         [[nodiscard]] z3::expr mk_as_if_se(const z3::expr& constraint, const tile<Lyt>& t) const
         {
-            if (auto east = layout.is_eastern_border(t), south = layout.is_southern_border(t); east && south)
+            if (const auto east = layout.is_eastern_border(t), south = layout.is_southern_border(t); east && south)
             {
                 return mk_as(constraint, lit().e and lit().s);
             }
@@ -824,10 +824,10 @@ class exact_impl
          */
         void tile_ite_counters(const mockturtle::edge<topology_ntk_t>& e, z3::expr_vector& ve)
         {
-            z3::expr one  = ctx->real_val(1u);
-            z3::expr zero = ctx->real_val(0u);
+            const z3::expr zero = ctx->real_val(0u);
+            const z3::expr one  = ctx->real_val(1u);
 
-            z3::expr num_phases = ctx->real_val(static_cast<unsigned>(layout.num_clocks()));
+            const z3::expr num_phases = ctx->real_val(static_cast<unsigned>(layout.num_clocks()));
 
             layout.foreach_ground_tile(
                 [this, &e, &ve, &one, &zero, &num_phases](const auto& t)
@@ -952,8 +952,9 @@ class exact_impl
             apply_to_added_tiles(
                 [this](const auto& t)
                 {
-                    auto cl = get_tcl(t);
-                    solver->add(ctx->int_val(0) <= cl);
+                    const auto cl = get_tcl(t);
+                    solver->add(ctx->int_val(0) <=
+                                cl);  // TODO use real vals and a big OR up to the number of clock cycles
                     solver->add(cl < ctx->int_val(static_cast<unsigned>(layout.num_clocks())));
                 });
         }
@@ -971,7 +972,7 @@ class exact_impl
                         {
                             if (!skip_const_or_io_node(v))
                             {
-                                auto tv = get_tv(t, v);
+                                const auto tv = get_tv(t, v);
 
                                 z3::expr_vector conj{*ctx};
                                 foreach_outgoing_edge(
@@ -982,7 +983,7 @@ class exact_impl
                                         {
                                             z3::expr_vector disj{*ctx};
 
-                                            if (auto tgt = ae.target; layout.is_regularly_clocked())
+                                            if (const auto tgt = ae.target; layout.is_regularly_clocked())
                                             {
                                                 layout.foreach_outgoing_clocked_zone(
                                                     t,
@@ -998,8 +999,9 @@ class exact_impl
                                                     [this, &t, &disj, &tgt, &ae](const auto& at)
                                                     {
                                                         // clocks must differ by 1
-                                                        auto mod = z3::mod(get_tcl(at) - get_tcl(t),
-                                                                           layout.num_clocks()) == ctx->int_val(1);
+                                                        const auto mod =
+                                                            z3::mod(get_tcl(at) - get_tcl(t), layout.num_clocks()) ==
+                                                            ctx->int_val(1);
 
                                                         disj.push_back(((get_tv(at, tgt) or get_te(at, ae)) and mod) and
                                                                        get_tc(t, at));
@@ -1035,7 +1037,7 @@ class exact_impl
                         {
                             if (!skip_const_or_io_node(v))
                             {
-                                auto tv = get_tv(t, v);
+                                const auto tv = get_tv(t, v);
 
                                 z3::expr_vector conj{*ctx};
 
@@ -1047,7 +1049,7 @@ class exact_impl
                                         {
                                             z3::expr_vector disj{*ctx};
 
-                                            if (auto src = iae.source; layout.is_regularly_clocked())
+                                            if (const auto src = iae.source; layout.is_regularly_clocked())
                                             {
                                                 layout.foreach_incoming_clocked_zone(
                                                     t,
@@ -1063,8 +1065,9 @@ class exact_impl
                                                     [this, &t, &disj, &src, &iae](const auto& iat)
                                                     {
                                                         // clocks must differ by 1
-                                                        auto mod = z3::mod(get_tcl(t) - get_tcl(iat),
-                                                                           layout.num_clocks()) == ctx->int_val(1);
+                                                        const auto mod =
+                                                            z3::mod(get_tcl(t) - get_tcl(iat), layout.num_clocks()) ==
+                                                            ctx->int_val(1);
 
                                                         disj.push_back(
                                                             ((get_tv(iat, src) or get_te(iat, iae)) and mod) and
@@ -1102,7 +1105,7 @@ class exact_impl
                         {
                             if (!skip_const_or_io_edge(e))
                             {
-                                auto te = e.target;
+                                const auto te = e.target;
 
                                 z3::expr_vector disj{*ctx};
 
@@ -1119,8 +1122,8 @@ class exact_impl
                                         [this, &t, &e, &te, &disj](const auto& at)
                                         {
                                             // clocks must differ by 1
-                                            auto mod = z3::mod(get_tcl(at) - get_tcl(t), layout.num_clocks()) ==
-                                                       ctx->int_val(1);
+                                            const auto mod = z3::mod(get_tcl(at) - get_tcl(t), layout.num_clocks()) ==
+                                                             ctx->int_val(1);
 
                                             disj.push_back(((get_tv(at, te) or get_te(at, e)) and mod) and
                                                            get_tc(t, at));
@@ -1150,7 +1153,7 @@ class exact_impl
                         {
                             if (!skip_const_or_io_edge(e))
                             {
-                                auto se = e.source;
+                                const auto se = e.source;
 
                                 z3::expr_vector disj{*ctx};
 
@@ -1167,8 +1170,8 @@ class exact_impl
                                         [this, &t, &e, &se, &disj](const auto& iat)
                                         {
                                             // clocks must differ by 1
-                                            auto mod = z3::mod(get_tcl(t) - get_tcl(iat), layout.num_clocks()) ==
-                                                       ctx->int_val(1);
+                                            const auto mod = z3::mod(get_tcl(t) - get_tcl(iat), layout.num_clocks()) ==
+                                                             ctx->int_val(1);
 
                                             disj.push_back(((get_tv(iat, se) or get_te(iat, e)) and mod) and
                                                            get_tc(iat, t));
@@ -1269,9 +1272,9 @@ class exact_impl
          */
         void assign_pi_clockings()
         {
-            auto assign = [this](const auto v) -> void
+            const auto assign = [this](const auto v) -> void
             {
-                auto cl = get_vcl(v);
+                const auto cl = get_vcl(v);
                 apply_to_added_tiles(
                     [this, &v, &cl](const auto& t)
                     {
@@ -1397,7 +1400,7 @@ class exact_impl
                                                    { restrict_entry_tiles(network.get_node(fo)); });
                         });
                 }
-            }
+            }  // TODO row and column don't need the constraints at all
             // normal version for all other configurations
             else
             {
@@ -1421,7 +1424,6 @@ class exact_impl
          */
         void prevent_insufficiencies()
         {
-            // TODO was foreach_tile (why would that be correct?)
             layout.foreach_ground_tile(
                 [this](const auto& t)
                 {
@@ -1481,7 +1483,7 @@ class exact_impl
                         else  // irregular clocking
                         {
                             // TODO make a function for this
-                            auto tile_degree = layout.template adjacent_tiles<std::set<tile<Lyt>>>(t).size();
+                            const auto tile_degree = layout.template adjacent_tiles<std::set<tile<Lyt>>>(t).size();
 
                             network.foreach_node(
                                 [this, &t, &tile_degree](const auto& v)
@@ -1530,7 +1532,7 @@ class exact_impl
                         layout.foreach_outgoing_clocked_zone(t,
                                                              [this, &t, &tcc, &acc](const auto& at)
                                                              {
-                                                                 auto tc = get_tc(t, at);
+                                                                 const auto tc = get_tc(t, at);
                                                                  acc.push_back(tc);
                                                                  tcc.push_back(tc);
                                                              });
@@ -1538,7 +1540,7 @@ class exact_impl
                         layout.foreach_incoming_clocked_zone(t,
                                                              [this, &t, &tcc, &iacc](const auto& iat)
                                                              {
-                                                                 auto itc = get_tc(iat, t);
+                                                                 const auto itc = get_tc(iat, t);
                                                                  iacc.push_back(itc);
                                                                  tcc.push_back(itc);
                                                              });
@@ -1548,11 +1550,11 @@ class exact_impl
                         layout.foreach_adjacent_tile(t,
                                                      [this, &t, &tcc, &acc, &iacc](const auto& at)
                                                      {
-                                                         auto tc = get_tc(t, at);
+                                                         const auto tc = get_tc(t, at);
                                                          acc.push_back(tc);
                                                          tcc.push_back(tc);
 
-                                                         auto itc = get_tc(at, t);
+                                                         const auto itc = get_tc(at, t);
                                                          iacc.push_back(itc);
                                                          tcc.push_back(itc);
                                                      });
@@ -1565,9 +1567,9 @@ class exact_impl
                         {
                             if (!skip_const_or_io_node(v))
                             {
-                                auto tv   = get_tv(t, v);
-                                auto aon  = network_out_degree(v);
-                                auto iaon = network_in_degree(v);
+                                const auto tv   = get_tv(t, v);
+                                const auto aon  = network_out_degree(v);
+                                const auto iaon = network_in_degree(v);
 
                                 ow.push_back(tv);
 
@@ -1591,7 +1593,7 @@ class exact_impl
                                  {
                                      if (!skip_const_or_io_edge(e))
                                      {
-                                         auto te = get_te(t, e);
+                                         const auto te = get_te(t, e);
                                          ow.push_back(te);
                                          wv.push_back(te);
                                      }
@@ -1869,7 +1871,7 @@ class exact_impl
          */
         void enforce_border_io()
         {
-            auto assign_border = [this](const auto& v)
+            const auto assign_border = [this](const auto& v)
             {
                 apply_to_added_and_updated_tiles(
                     [this, &v](const auto& t)
@@ -1881,7 +1883,7 @@ class exact_impl
                     });
             };
 
-            auto assign_north = [this](const auto& v)
+            const auto assign_north = [this](const auto& v)
             {
                 // no need to iterate over updated_tiles, because nothing changes there
                 apply_to_added_tiles(
@@ -1894,7 +1896,7 @@ class exact_impl
                     });
             };
 
-            auto assign_west = [this](const auto& v)
+            const auto assign_west = [this](const auto& v)
             {
                 // no need to iterate over updated_tiles, because nothing changes there
                 apply_to_added_tiles(
@@ -1907,7 +1909,7 @@ class exact_impl
                     });
             };
 
-            auto assign_east = [this](const auto& v)
+            const auto assign_east = [this](const auto& v)
             {
                 apply_to_added_and_updated_tiles(
                     [this, &v](const auto& t)
@@ -1919,7 +1921,7 @@ class exact_impl
                     });
             };
 
-            auto assign_south = [this](const auto& v)
+            const auto assign_south = [this](const auto& v)
             {
                 apply_to_added_and_updated_tiles(
                     [this, &v](const auto& t)
@@ -2050,13 +2052,13 @@ class exact_impl
         {
             if constexpr (has_synchronization_elements_v<Lyt>)
             {
-                auto zero = ctx->int_val(0u);
+                const auto zero = ctx->int_val(0u);
 
                 apply_to_added_tiles(
                     [this, &zero](const auto& t)
                     {
                         // synchronization elements must be positive
-                        auto l = get_tl(t);
+                        const auto l = get_tl(t);
                         solver->add(l >= zero);
 
                         // tiles without wires cannot be synchronization elements
@@ -2226,7 +2228,7 @@ class exact_impl
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
          */
-        void minimize_wires(optimize_ptr optimize)
+        void minimize_wires(const optimize_ptr& optimize)
         {
             z3::expr_vector wire_counter{*ctx};
             layout.foreach_ground_tile(
@@ -2250,7 +2252,7 @@ class exact_impl
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
          */
-        void minimize_crossings(optimize_ptr optimize)
+        void minimize_crossings(const optimize_ptr& optimize)
         {
             z3::expr_vector crossings_counter{*ctx};
             layout.foreach_ground_tile(
@@ -2277,7 +2279,7 @@ class exact_impl
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
          */
-        void minimize_synchronization_elements(optimize_ptr optimize)
+        void minimize_synchronization_elements(const optimize_ptr& optimize)
         {
             if constexpr (has_synchronization_elements_v<Lyt>)
             {
@@ -2358,7 +2360,7 @@ class exact_impl
          */
         [[nodiscard]] optimize_ptr optimize()
         {
-            if (auto wires = config.minimize_wires, cross = config.minimize_crossings,
+            if (const auto wires = config.minimize_wires, cross = config.minimize_crossings,
                 se = config.synchronization_elements && !config.desynchronize;
                 !wires && !cross && !se)
             {
@@ -2366,7 +2368,7 @@ class exact_impl
             }
             else
             {
-                auto optimizer = std::make_shared<z3::optimize>(*ctx);
+                const auto optimizer = std::make_shared<z3::optimize>(*ctx);
 
                 // add all solver constraints
                 for (const auto& e : solver->assertions()) { optimizer->add(e); }
@@ -2592,10 +2594,10 @@ class exact_impl
      * @param handler Handler whose timeout is to be updated.
      * @param time Time passed since beginning of the solving process.
      */
-    void update_timeout(smt_handler& handler, mockturtle::stopwatch<>::duration time) const
+    void update_timeout(smt_handler& handler, const mockturtle::stopwatch<>::duration& time) const
     {
-        auto time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
-        auto time_left    = (ps.timeout - time_elapsed > 0 ? static_cast<unsigned>(ps.timeout - time_elapsed) : 0u);
+        const auto time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
+        const auto time_left = (ps.timeout - time_elapsed > 0 ? static_cast<unsigned>(ps.timeout - time_elapsed) : 0u);
 
         if (!time_left)
         {
@@ -2631,10 +2633,10 @@ class exact_impl
      * @param ti_list Pointer to a list of shared thread info that the threads use for communication.
      * @return A found layout or nullptr if being interrupted.
      */
-    [[nodiscard]] std::optional<Lyt> explore_asynchronously(const unsigned                            t_num,
-                                                            std::shared_ptr<std::vector<thread_info>> ti_list)
+    [[nodiscard]] std::optional<Lyt> explore_asynchronously(const unsigned                                   t_num,
+                                                            const std::shared_ptr<std::vector<thread_info>>& ti_list)
     {
-        auto ctx = std::make_shared<z3::context>();
+        const auto ctx = std::make_shared<z3::context>();
 
         Lyt layout{{}, *ps.scheme};
 
@@ -2757,7 +2759,7 @@ class exact_impl
             using fut_layout = std::future<std::optional<Lyt>>;
             std::vector<fut_layout> fut(ps.num_threads);
 
-            auto ti_list = std::make_shared<std::vector<thread_info>>(ps.num_threads);
+            const auto ti_list = std::make_shared<std::vector<thread_info>>(ps.num_threads);
 
 #if (PROGRESS_BARS)
             mockturtle::progress_bar thread_bar("[i] examining layout dimensions using {} threads");
@@ -2798,7 +2800,7 @@ class exact_impl
 
             if (result_dimension)
             {
-                auto result_dim_val = *result_dimension;
+                const auto result_dim_val = *result_dimension;
                 // extract the layout from the futures
                 for (auto& f : fut)
                 {
@@ -2852,7 +2854,9 @@ class exact_impl
             auto dimension = *dit;
 
             if (handler.skippable(dimension))
+            {
                 continue;
+            }
 
 #if (PROGRESS_BARS)
             bar(dimension.x + 1, dimension.y + 1);
@@ -2862,7 +2866,7 @@ class exact_impl
 
             try
             {
-                auto sat =
+                const auto sat =
                     mockturtle::call_with_stopwatch(pst.time_total, [&handler] { return handler.is_satisfiable(); });
 
                 if (sat)
