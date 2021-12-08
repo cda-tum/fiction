@@ -231,7 +231,7 @@ class exact_impl
          * @param dim Dimension to evaluate.
          * @return True if dim can safely be skipped because it is UNSAT anyways.
          */
-        bool skippable(const aspect_ratio<Lyt>& dim) const noexcept
+        [[nodiscard]] bool skippable(const aspect_ratio<Lyt>& dim) const noexcept
         {
             // OPEN clocking optimization
             if (!layout.is_regularly_clocked())
@@ -307,7 +307,7 @@ class exact_impl
          *
          * @return true iff the instance generated for the current configuration is SAT.
          */
-        bool is_satisfiable()
+        [[nodiscard]] bool is_satisfiable()
         {
             generate_smt_instance();
 
@@ -315,8 +315,6 @@ class exact_impl
             {
                 case z3::sat:
                 {
-                    // TODO out-of-solver constraints and maybe going back into solver
-
                     // optimize the generated result
                     if (auto opt = optimize(); opt != nullptr)
                     {
@@ -474,7 +472,7 @@ class exact_impl
          *
          * @return Eastern literal.
          */
-        z3::expr get_lit_e() noexcept
+        [[nodiscard]] z3::expr get_lit_e() noexcept
         {
             return ctx->bool_const(fmt::format("lit_e_{}", lc).c_str());
         }
@@ -483,7 +481,7 @@ class exact_impl
          *
          * @return Southern literal.
          */
-        z3::expr get_lit_s() noexcept
+        [[nodiscard]] z3::expr get_lit_s() noexcept
         {
             return ctx->bool_const(fmt::format("lit_s_{}", lc).c_str());
         }
@@ -497,7 +495,7 @@ class exact_impl
          * @return Solver state associated with a dimension of size x - 1 * y or x * y - 1 and, additionally, the tiles
          *                new to the solver. If no such solver is available, a new one is created.
          */
-        solver_check_point fetch_solver(const aspect_ratio<Lyt>& dim) noexcept
+        [[nodiscard]] solver_check_point fetch_solver(const aspect_ratio<Lyt>& dim) noexcept
         {
             const auto create_assumptions = [this](const solver_state& state) -> z3::expr_vector
             {
@@ -580,7 +578,7 @@ class exact_impl
          * @param t Tile to check.
          * @return True iff t is contained in check_point->added_tiles.
          */
-        bool is_added_tile(const tile<Lyt>& t) const noexcept
+        [[nodiscard]] bool is_added_tile(const tile<Lyt>& t) const noexcept
         {
             return check_point->added_tiles.count(t);
         }
@@ -590,7 +588,7 @@ class exact_impl
          * @param t Tile to check.
          * @return True iff t is contained in check_point->updated_tiles.
          */
-        bool is_updated_tile(const tile<Lyt>& t) const noexcept
+        [[nodiscard]] bool is_updated_tile(const tile<Lyt>& t) const noexcept
         {
             return check_point->updated_tiles.count(t);
         }
@@ -601,7 +599,7 @@ class exact_impl
          * @return True iff n is to be skipped in a loop due to it being a constant or an I/O and config.io_ports ==
          * false.
          */
-        bool skip_const_or_io_node(const mockturtle::node<topology_ntk_t>& n) const noexcept
+        [[nodiscard]] bool skip_const_or_io_node(const mockturtle::node<topology_ntk_t>& n) const noexcept
         {
             return network.is_constant(n) || ((network.is_pi(n) || network.is_po(n)) && !config.io_ports);
         }
@@ -612,7 +610,7 @@ class exact_impl
          * @return True iff e is to be skipped in a loop due to it having constant or I/O nodes while config.io_ports ==
          * false.
          */
-        bool skip_const_or_io_edge(const mockturtle::edge<topology_ntk_t>& e) const noexcept
+        [[nodiscard]] bool skip_const_or_io_edge(const mockturtle::edge<topology_ntk_t>& e) const noexcept
         {
             return skip_const_or_io_node(e.source) || skip_const_or_io_node(e.target);
         }
@@ -651,7 +649,7 @@ class exact_impl
             apply_to_updated_tiles(fn);
         }
 
-        uint32_t network_in_degree(const mockturtle::node<topology_ntk_t>& n) const noexcept
+        [[nodiscard]] uint32_t network_in_degree(const mockturtle::node<topology_ntk_t>& n) const noexcept
         {
             uint32_t degree{0};
             network.foreach_fanin(n,
@@ -665,7 +663,7 @@ class exact_impl
             return degree;
         }
 
-        uint32_t network_out_degree(const mockturtle::node<topology_ntk_t>& n) const noexcept
+        [[nodiscard]] uint32_t network_out_degree(const mockturtle::node<topology_ntk_t>& n) const noexcept
         {
             uint32_t degree{0};
             network.foreach_fanout(n,
@@ -683,7 +681,7 @@ class exact_impl
          *
          * @return Reference to check_point->state->lit.
          */
-        assumption_literals& lit() const noexcept
+        [[nodiscard]] assumption_literals& lit() const noexcept
         {
             return check_point->state->lit;
         }
@@ -694,7 +692,7 @@ class exact_impl
          * @param v Vertex to be considered.
          * @return tv variable from ctx.
          */
-        z3::expr get_tv(const tile<Lyt>& t, const mockturtle::node<topology_ntk_t> v)
+        [[nodiscard]] z3::expr get_tv(const tile<Lyt>& t, const mockturtle::node<topology_ntk_t> v)
         {
             return ctx->bool_const(fmt::format("tv_({},{})_{}", t.x, t.y, v).c_str());
         }
@@ -705,7 +703,7 @@ class exact_impl
          * @param e Edge to be considered.
          * @return te variable from ctx.
          */
-        z3::expr get_te(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e)
+        [[nodiscard]] z3::expr get_te(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e)
         {
             return ctx->bool_const(fmt::format("te_({},{})_({},{})", t.x, t.y, e.source, e.target).c_str());
         }
@@ -716,7 +714,7 @@ class exact_impl
          * @param t2 Tile 2 to be considered.
          * @return tc variable from ctx.
          */
-        z3::expr get_tc(const tile<Lyt>& t1, const tile<Lyt>& t2)
+        [[nodiscard]] z3::expr get_tc(const tile<Lyt>& t1, const tile<Lyt>& t2)
         {
             return ctx->bool_const(fmt::format("tc_({},{})_({},{})", t1.x, t1.y, t2.x, t2.y).c_str());
         }
@@ -727,7 +725,7 @@ class exact_impl
          * @param t2 Tile 2 to be considered.
          * @return tp variable from ctx.
          */
-        z3::expr get_tp(const tile<Lyt>& t1, const tile<Lyt>& t2)
+        [[nodiscard]] z3::expr get_tp(const tile<Lyt>& t1, const tile<Lyt>& t2)
         {
             return ctx->bool_const(fmt::format("tp_({},{})_({},{})", t1.x, t1.y, t2.x, t2.y).c_str());
         }
@@ -737,7 +735,7 @@ class exact_impl
          * @param v Vertex to be considered.
          * @return vcl variable from ctx.
          */
-        z3::expr get_vcl(const mockturtle::node<topology_ntk_t> v)
+        [[nodiscard]] z3::expr get_vcl(const mockturtle::node<topology_ntk_t> v)
         {
             return ctx->int_const(fmt::format("vcl_{}", v).c_str());
         }
@@ -747,7 +745,7 @@ class exact_impl
          * @param t Tile to be considered.
          * @return tcl variable from ctx.
          */
-        z3::expr get_tcl(const tile<Lyt>& t)
+        [[nodiscard]] z3::expr get_tcl(const tile<Lyt>& t)
         {
             return ctx->int_const(fmt::format("tcl_({},{})", t.x, t.y).c_str());
         }
@@ -757,7 +755,7 @@ class exact_impl
          * @param t Tile to be considered.
          * @return tl variable from ctx.
          */
-        z3::expr get_tl(const tile<Lyt>& t)
+        [[nodiscard]] z3::expr get_tl(const tile<Lyt>& t)
         {
             return ctx->int_const(fmt::format("tl_({},{})", t.x, t.y).c_str());
         }
@@ -767,7 +765,7 @@ class exact_impl
          * @param v Vector of expressions to equalize.
          * @return Expression that represents the equality of all elements in v.
          */
-        z3::expr mk_eq(const z3::expr_vector& v) const
+        [[nodiscard]] z3::expr mk_eq(const z3::expr_vector& v) const
         {
             z3::expr_vector eq{*ctx};
             for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i) { eq.push_back(v[i - 1] == v[i]); }
@@ -781,7 +779,7 @@ class exact_impl
          * @param lit Assumption literal.
          * @return lit -> constraint.
          */
-        z3::expr mk_as(const z3::expr& constraint, const z3::expr& lit) const
+        [[nodiscard]] z3::expr mk_as(const z3::expr& constraint, const z3::expr& lit) const
         {
             return z3::implies(lit, constraint);
         }
@@ -794,7 +792,7 @@ class exact_impl
          * @param t Tile to consider for literal picking.
          * @return lit -> constraint.
          */
-        z3::expr mk_as_if_se(const z3::expr& constraint, const tile<Lyt>& t) const
+        [[nodiscard]] z3::expr mk_as_if_se(const z3::expr& constraint, const tile<Lyt>& t) const
         {
             if (auto east = layout.is_eastern_border(t), south = layout.is_southern_border(t); east && south)
             {
@@ -1291,7 +1289,7 @@ class exact_impl
 
             if (!((layout.is_clocking_scheme(clock_name::twoddwave) ||
                    layout.is_clocking_scheme(clock_name::twoddwave_hex)) &&
-                  config.border_io))
+                  config.border_io))  // TODO all linear schemes?
             {
                 if (config.io_ports)
                 {
@@ -1819,7 +1817,7 @@ class exact_impl
                             }
                         });
                 }
-            }  // TODO both columnar and row don't work yet
+            }
             // symmetry breaking for 2DDWave clocking
             else if (layout.is_clocking_scheme(clock_name::twoddwave))
             {
@@ -2358,7 +2356,7 @@ class exact_impl
          * passed all constraints from the current solver and the respective optimization constraints are added to it,
          * too.
          */
-        optimize_ptr optimize()
+        [[nodiscard]] optimize_ptr optimize()
         {
             if (auto wires = config.minimize_wires, cross = config.minimize_crossings,
                 se = config.synchronization_elements && !config.desynchronize;
@@ -2633,7 +2631,8 @@ class exact_impl
      * @param ti_list Pointer to a list of shared thread info that the threads use for communication.
      * @return A found layout or nullptr if being interrupted.
      */
-    std::optional<Lyt> explore_asynchronously(const unsigned t_num, std::shared_ptr<std::vector<thread_info>> ti_list)
+    [[nodiscard]] std::optional<Lyt> explore_asynchronously(const unsigned                            t_num,
+                                                            std::shared_ptr<std::vector<thread_info>> ti_list)
     {
         auto ctx = std::make_shared<z3::context>();
 
@@ -2748,7 +2747,7 @@ class exact_impl
      *
      * @return Physical design result including statistical information.
      */
-    std::optional<Lyt> run_asynchronously()
+    [[nodiscard]] std::optional<Lyt> run_asynchronously()
     {
         Lyt layout{{}, *ps.scheme};
 
@@ -2837,7 +2836,7 @@ class exact_impl
      *
      * @return Physical design result including statistical information.
      */
-    std::optional<Lyt> run_synchronously() noexcept
+    [[nodiscard]] std::optional<Lyt> run_synchronously() noexcept
     {
         Lyt layout{{}, *ps.scheme};
 
