@@ -1684,7 +1684,8 @@ class exact_impl
                                 const auto il = inv_levels[network.node_to_index(n)];
 
                                 // cannot be placed with too little distance to western border
-                                for (auto column = 0u; column < l; ++column)
+                                for (auto column = 0u;
+                                     column < std::min(static_cast<decltype(layout.y())>(l), layout.x()); ++column)
                                 {
                                     for (auto row = 0u; row <= layout.y(); ++row)
                                     {
@@ -1706,7 +1707,7 @@ class exact_impl
                                 }
 
                                 // cannot be placed with too little distance to eastern border
-                                for (auto column = layout.x() - il - 1; column <= layout.x(); ++column)
+                                for (auto column = layout.x() - il; column < layout.x(); ++column)
                                 {
                                     for (auto row = 0u; row <= layout.y(); ++row)
                                     {
@@ -1731,7 +1732,71 @@ class exact_impl
                             }
                         });
                 }
-            }  // TODO same for row clocking
+            }
+            // symmetry breaking for row clocking
+            if (layout.is_clocking_scheme(clock_name::row))
+            {
+                // restrict node placement according to the hierarchy level
+                if (config.io_ports && config.border_io)
+                {
+                    network.foreach_node(
+                        [this](const auto& n)
+                        {
+                            if (!skip_const_or_io_node(n))
+                            {
+                                const auto l  = depth_ntk.level(n);
+                                const auto il = inv_levels[network.node_to_index(n)];
+
+                                // cannot be placed with too little distance to western border
+                                for (auto row = 0u; row < std::min(static_cast<decltype(layout.y())>(l), layout.y());
+                                     ++row)
+                                {
+                                    for (auto column = 0u; column <= layout.x(); ++column)
+                                    {
+                                        if (const auto t = tile<Lyt>{column, row}; is_added_tile(t))
+                                        {
+                                            solver->add(not get_tv(t, n));
+
+                                            // same for the outgoing edges
+                                            foreach_outgoing_edge(network, n,
+                                                                  [this, &t](const auto& e)
+                                                                  {
+                                                                      if (!skip_const_or_io_edge(e))
+                                                                      {
+                                                                          solver->add(not get_te(t, e));
+                                                                      }
+                                                                  });
+                                        }
+                                    }
+                                }
+
+                                // cannot be placed with too little distance to eastern border
+                                for (auto row = layout.y() - il; row < layout.y(); ++row)
+                                {
+                                    for (auto column = 0u; column <= layout.x(); ++column)
+                                    {
+                                        const auto t = tile<Lyt>{column, row};
+
+                                        // use assumptions here because the south-east corner moves away in the
+                                        // following iterations
+                                        check_point->assumptions.push_back(not get_tv(t, n));
+
+                                        // same for the incoming edges
+                                        foreach_incoming_edge(network, n,
+                                                              [this, &t](const auto& e)
+                                                              {
+                                                                  if (!skip_const_or_io_edge(e))
+                                                                  {
+                                                                      check_point->assumptions.push_back(
+                                                                          not get_te(t, e));
+                                                                  }
+                                                              });
+                                    }
+                                }
+                            }
+                        });
+                }
+            }  // TODO both columnar and row don't work yet
             // symmetry breaking for 2DDWave clocking
             else if (layout.is_clocking_scheme(clock_name::twoddwave))
             {
