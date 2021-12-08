@@ -233,20 +233,43 @@ class exact_impl
          */
         bool skippable(const aspect_ratio<Lyt>& dim) const noexcept
         {
-            // OPEN clocking optimization: rotated dimensions don't need to be explored
+            // OPEN clocking optimization
             if (!layout.is_regularly_clocked())
             {
+                // rotated dimensions don't need to be explored
                 if (dim.x != dim.y && dim.x == layout.y() && dim.y == layout.x())
+                {
                     return true;
+                }
             }
-            // ToPoliNano optimization: skip all dimensions where X <= levels + number of fan-outs - 1 and
-            // Y < maximum of number of PIs and number of POs; this should not be too restrictive
-            //            else if (config.topolinano)
-            //            {
-            //                if (dim.x <= hierarchy->height() + network->operation_count(operation::F1O2) - 1 ||
-            //                    dim.y < std::max(network->num_pis(), network->num_pos()))
-            //                    return true;
-            //            }  // TODO hierarchy
+            // Columnar clocking optimization
+            else if (layout.is_clocking_scheme(clock_name::columnar))
+            {
+                // skip all aspect ratios that are too shallow for the network's depth
+                if (dim.x < depth_ntk.depth())
+                {
+                    return true;
+                }
+                // if border I/Os are enforced, skip all aspect ratios that are too narrow for hosting all I/Os
+                if (config.border_io && dim.y < std::max(network.num_pis(), network.num_pos()))
+                {
+                    return true;
+                }
+            }
+            // Row clocking optimization
+            else if (layout.is_clocking_scheme(clock_name::row))
+            {
+                // skip all aspect ratios that are too shallow for the network's depth
+                if (dim.y < depth_ntk.depth())
+                {
+                    return true;
+                }
+                // if border I/Os are enforced, skip all aspect ratios that are too narrow for hosting all I/Os
+                if (config.border_io && dim.x < std::max(network.num_pis(), network.num_pos()))
+                {
+                    return true;
+                }
+            }
 
             return false;
         }
