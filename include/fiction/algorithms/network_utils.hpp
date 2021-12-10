@@ -62,9 +62,9 @@ template <typename Ntk, typename Fn>
 void foreach_outgoing_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& fn)
 {
     ntk.foreach_fanout(n,
-                       [&ntk, &fn, &n](const mockturtle::signal<Ntk>& fo)
+                       [&ntk, &fn, &n](const mockturtle::node<Ntk>& fon)
                        {
-                           mockturtle::edge<Ntk> e{n, ntk.get_node(fo)};
+                           mockturtle::edge<Ntk> e{n, fon};
 
                            fn(e);
                        });
@@ -103,7 +103,7 @@ std::vector<mockturtle::node<Ntk>> fanouts(const Ntk& ntk, const mockturtle::nod
 {
     std::vector<mockturtle::node<Ntk>> fos{};
 
-    ntk.foreach_fanout(n, [&ntk, &fos](const auto& f) { fos.push_back(f); });
+    ntk.foreach_fanout(n, [&ntk, &fos](const auto& fon) { fos.push_back(fon); });
 
     return fos;
 }
@@ -114,16 +114,16 @@ fanin_container<Ntk> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noex
     fanin_container<Ntk> fc{};
 
     ntk.foreach_fanin(n,
-                      [&ntk, &fc](const auto& f)
+                      [&ntk, &fc](const auto& fi)
                       {
-                          if (const auto fn = ntk.get_node(f); ntk.is_constant(fn))
+                          if (const auto fin = ntk.get_node(fi); ntk.is_constant(fin))
                           {
                               assert(!fc.constant_fanin.has_value());  // there can only be one constant input
-                              fc.constant_fanin = ntk.constant_value(fn);
+                              fc.constant_fanin = ntk.constant_value(fin);
                           }
                           else
                           {
-                              fc.fanin_nodes.push_back(fn);
+                              fc.fanin_nodes.push_back(fin);
                           }
                       });
 
@@ -136,9 +136,9 @@ uint32_t num_constant_fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noe
     uint32_t num_const_fi{0};
 
     ntk.foreach_fanin(n,
-                      [&ntk, &num_const_fi](const auto& f)
+                      [&ntk, &num_const_fi](const auto& fi)
                       {
-                          if (ntk.is_constant(ntk.get_node(f)))
+                          if (ntk.is_constant(ntk.get_node(fi)))
                           {
                               ++num_const_fi;
                           }
@@ -190,9 +190,9 @@ bool has_incoming_primary_input(const Ntk& ntk, const mockturtle::node<Ntk>& n) 
                       [&ntk, &in_pi](const auto& fi)
                       {
                           // skip constants
-                          if (const auto fn = ntk.get_node(fi); !ntk.is_constant(fn))
+                          if (const auto fin = ntk.get_node(fi); !ntk.is_constant(fin))
                           {
-                              if (ntk.is_pi(fn))
+                              if (ntk.is_pi(fin))
                               {
                                   in_pi = true;
                               }

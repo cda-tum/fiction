@@ -67,9 +67,9 @@ bool has_po_fanout(const Ntk& ntk, const mockturtle::node<Ntk> n) noexcept
     bool result = false;
 
     ntk.foreach_fanout(n,
-                       [&ntk, &n, &result](const auto& fo)
+                       [&ntk, &n, &result](const auto& fon)
                        {
-                           if (ntk.is_po(fo))
+                           if (ntk.is_po(fon))
                            {
                                result = true;
                            }
@@ -96,11 +96,10 @@ std::vector<mockturtle::node<Ntk>> siblings(const Ntk& ntk, const mockturtle::no
                           if (const auto fin = ntk.get_node(fi); !ntk.is_constant(fin))
                           {
                               ntk.foreach_fanout(fin,
-                                                 [&ntk, &sibs, &n](const auto& fo)
+                                                 [&ntk, &sibs, &n](const auto& fon)
                                                  {
                                                      // do not consider constants or n itself
-                                                     if (const auto fon = ntk.get_node(fo);
-                                                         !ntk.is_constant(fon) && (fon != n))
+                                                     if (!ntk.is_constant(fon) && (fon != n))
                                                      {
                                                          sibs.push_back(fon);
                                                      }
@@ -220,15 +219,15 @@ bool is_east_south_colored(const Ntk& ntk) noexcept
             {
                 uint32_t clr = 0ul;
                 ntk.foreach_fanout(n,
-                                   [&ntk, &is_properly_colored, &clr](const auto& f, const auto i)
+                                   [&ntk, &is_properly_colored, &clr](const auto& fon, const auto i)
                                    {
                                        // store color of first fanout
                                        if (i == 0)
                                        {
-                                           clr = ntk.color(ntk.get_node(f));
+                                           clr = ntk.color(fon);
                                        }
                                        // compare color of first fanout against all others
-                                       else if (clr == ntk.color(ntk.get_node(f)))
+                                       else if (clr == ntk.color(fon))
                                        {
                                            // since we are working with 3-graphs, this can only be executed if i == 1
                                            is_properly_colored = false;
@@ -251,10 +250,10 @@ uint32_t is_eastern_po_orientation_available(const coloring_container<Ntk>& ctn,
 
     // PO nodes can have a maximum of one other fanout
     ctn.color_ntk.foreach_fanout(n,
-                                 [&ctn, &eastern_side_available](const auto& fo)
+                                 [&ctn, &eastern_side_available](const auto& fon)
                                  {
                                      // if that fanout is colored east, no PO can be placed there
-                                     if (ctn.color_ntk.color(ctn.color_ntk.get_node(fo)) == ctn.color_east)
+                                     if (ctn.color_ntk.color(fon) == ctn.color_east)
                                      {
                                          eastern_side_available = false;
                                      }
@@ -281,17 +280,20 @@ aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn) noex
                 if (ctn.color_ntk.is_pi(n))
                 {
                     ctn.color_ntk.foreach_fanout(n,
-                                                 [&ctn, &x](const auto& fo)
+                                                 [&ctn, &x](const auto& fon)
                                                  {
-                                                     if (ctn.color_ntk.color(ctn.color_ntk.get_node(fo)) ==
-                                                         ctn.color_south)
+                                                     if (ctn.color_ntk.color(fon) == ctn.color_south)
                                                          ++x;
                                                  });
                 }
                 else if (const auto clr = ctn.color_ntk.color(n); clr == ctn.color_east)
+                {
                     ++x;
+                }
                 else if (clr == ctn.color_south)
+                {
                     ++y;
+                }
                 else if (clr == ctn.color_null)
                 {
                     ++x;
@@ -439,9 +441,9 @@ class orthogonal_impl
                         // resolve conflicting PIs
                         ctn.color_ntk.foreach_fanout(
                             n,
-                            [this, &ctn, &n, &layout, &node2pos, &latest_pos](const auto& fo)
+                            [this, &ctn, &n, &layout, &node2pos, &latest_pos](const auto& fon)
                             {
-                                if (ctn.color_ntk.color(ctn.color_ntk.get_node(fo)) == ctn.color_south)
+                                if (ctn.color_ntk.color(fon) == ctn.color_south)
                                 {
                                     node2pos[n] =
                                         layout.create_buf(wire_east(layout, {0, latest_pos.y}, latest_pos), latest_pos);
