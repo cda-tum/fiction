@@ -667,9 +667,9 @@ class exact_impl
         {
             uint32_t degree{0};
             network.foreach_fanout(n,
-                                   [this, &degree](const auto& fo)
+                                   [this, &degree](const auto& fn)
                                    {
-                                       if (const auto fn = network.get_node(fo); !skip_const_or_io_node(fn))
+                                       if (!skip_const_or_io_node(fn))
                                        {
                                            ++degree;
                                        }
@@ -1306,10 +1306,9 @@ class exact_impl
                         [this, &assign](const auto& pi)
                         {
                             network.foreach_fanout(pi,
-                                                   [this, &assign](const auto& fo)
+                                                   [this, &assign](const auto& fn)
                                                    {
-                                                       if (const auto fn = network.get_node(fo);
-                                                           !skip_const_or_io_node(fo))
+                                                       if (!skip_const_or_io_node(fn))
                                                        {
                                                            assign(fn);
                                                        }
@@ -1396,10 +1395,9 @@ class exact_impl
                 else
                 {
                     network.foreach_pi(
-                        [this, &restrict_entry_tiles](const auto& pi)
-                        {
-                            network.foreach_fanout(pi, [this, &restrict_entry_tiles](const auto& fo)
-                                                   { restrict_entry_tiles(network.get_node(fo)); });
+                        [this, &restrict_entry_tiles](const auto& pi) {
+                            network.foreach_fanout(pi, [this, &restrict_entry_tiles](const auto& fn)
+                                                   { restrict_entry_tiles(fn); });
                         });
                 }
             }  // TODO row and column don't need the constraints at all
@@ -1956,14 +1954,14 @@ class exact_impl
                     [this, &assign_north, &assign_west, &assign_border](const auto& pi)
                     {
                         network.foreach_fanout(pi,
-                                               [this, &assign_north, &assign_west, &assign_border](const auto& fo)
+                                               [this, &assign_north, &assign_west, &assign_border](const auto& fon)
                                                {
-                                                   if (const auto v = network.get_node(fo); !skip_const_or_io_node(v))
+                                                   if (!skip_const_or_io_node(fon))
                                                    {
                                                        layout.is_clocking_scheme(clock_name::columnar) ?
-                                                           assign_west(v) :
-                                                       layout.is_clocking_scheme(clock_name::row) ? assign_north(v) :
-                                                                                                    assign_border(v);
+                                                           assign_west(fon) :
+                                                       layout.is_clocking_scheme(clock_name::row) ? assign_north(fon) :
+                                                                                                    assign_border(fon);
                                                    }
                                                });
                     });
@@ -1971,16 +1969,17 @@ class exact_impl
                 network.foreach_po(
                     [this, &assign_east, &assign_south, &assign_border](const auto& po)
                     {
-                        network.foreach_fanin(po,
-                                              [this, &assign_east, &assign_south, &assign_border](const auto& fi)
-                                              {
-                                                  if (const auto v = network.get_node(fi); !skip_const_or_io_node(v))
-                                                  {
-                                                      layout.is_clocking_scheme(clock_name::columnar) ? assign_east(v) :
-                                                      layout.is_clocking_scheme(clock_name::row) ? assign_south(v) :
-                                                                                                   assign_border(v);
-                                                  }
-                                              });
+                        network.foreach_fanin(
+                            po,
+                            [this, &assign_east, &assign_south, &assign_border](const auto& fi)
+                            {
+                                if (const auto fin = network.get_node(fi); !skip_const_or_io_node(fin))
+                                {
+                                    layout.is_clocking_scheme(clock_name::columnar) ? assign_east(fin) :
+                                    layout.is_clocking_scheme(clock_name::row)      ? assign_south(fin) :
+                                                                                      assign_border(fin);
+                                }
+                            });
                     });
             }
         }
@@ -2094,9 +2093,9 @@ class exact_impl
                             // prohibit succeeding fan-outs
                             network.foreach_fanout(
                                 fon,
-                                [this, &fon](const auto& afo)
+                                [this, &fon](const auto& afon)
                                 {
-                                    if (const auto afon = network.get_node(afo); network.is_fanout(afon))
+                                    if (network.is_fanout(afon))
                                     {
                                         layout.foreach_ground_tile(
                                             [this, &fon, &afon](const auto& t)
@@ -2160,12 +2159,11 @@ class exact_impl
                         {
                             network.foreach_fanout(
                                 n1,
-                                [this, &n1](const auto& fo)
+                                [this, &n1](const auto& n2)
                                 {
                                     // only argue about AND/OR/MAJ/fan-out and, additionally, about NOT if straight
                                     // inverters are enforced
-                                    if (const auto n2 = network.get_node(fo);
-                                        network.is_and(n2) || network.is_or(n2) || network.is_maj(n2) ||
+                                    if (network.is_and(n2) || network.is_or(n2) || network.is_maj(n2) ||
                                         network.is_fanout(n2) || (network.is_inv(n2) && params.straight_inverters))
                                     {
                                         layout.foreach_ground_tile(
@@ -2523,15 +2521,14 @@ class exact_impl
 
                                     // check n's outgoing edges
                                     network.foreach_fanout(n,
-                                                           [this, &model, &n, &t, &lyt_signal](const auto& fo)
+                                                           [this, &model, &n, &t, &lyt_signal](const auto& fon)
                                                            {
-                                                               if (const auto fn = network.get_node(fo);
-                                                                   !skip_const_or_io_node(fn))
+                                                               if (!skip_const_or_io_node(fon))
                                                                {
                                                                    // store the signal as branch towards fn
-                                                                   node2pos[n].update_branch(fn, lyt_signal);
+                                                                   node2pos[n].update_branch(fon, lyt_signal);
 
-                                                                   mockturtle::edge<topology_ntk_t> e{n, fn};
+                                                                   mockturtle::edge<topology_ntk_t> e{n, fon};
 
                                                                    // check t's outgoing clocked tiles since those
                                                                    // are the only ones where e could potentially

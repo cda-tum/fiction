@@ -5,6 +5,8 @@
 #ifndef FICTION_LAYOUT_PRINTER_HPP
 #define FICTION_LAYOUT_PRINTER_HPP
 
+#include <fmt/format.h>
+
 #include <iostream>
 
 namespace fiction::debug
@@ -28,12 +30,8 @@ void print_node_to_tile_assignments(const Lyt& lyt)
                               });
             std::cout << std::endl;
             std::cout << "\t with fanouts:" << std::endl;
-            lyt.foreach_fanout(n,
-                               [&lyt](const auto& f)
-                               {
-                                   auto fn = lyt.get_node(f);
-                                   std::cout << fmt::format("\t   {} @ {}", fn, lyt.get_tile(fn)) << std::endl;
-                               });
+            lyt.foreach_fanout(n, [&lyt](const auto& fn)
+                               { std::cout << fmt::format("\t   {} @ {}", fn, lyt.get_tile(fn)) << std::endl; });
         });
 
     std::cout << std::endl << "----------------------" << std::endl;
@@ -63,12 +61,8 @@ void print_tile_to_node_assignments(const Lyt& lyt)
                                   });
                 std::cout << std::endl;
                 std::cout << "\t with fanouts:" << std::endl;
-                lyt.foreach_fanout(n,
-                                   [&lyt](const auto& f)
-                                   {
-                                       auto fn = lyt.get_node(f);
-                                       std::cout << fmt::format("\t   {} @ {}", fn, lyt.get_tile(fn)) << std::endl;
-                                   });
+                lyt.foreach_fanout(n, [&lyt](const auto& fn)
+                                   { std::cout << fmt::format("\t   {} @ {}", fn, lyt.get_tile(fn)) << std::endl; });
 
                 std::cout << std::endl;
             }
