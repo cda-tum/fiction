@@ -63,7 +63,7 @@ class onepass_command : public command
         add_flag("--maj,-M", ps.enable_maj, "Enable the use of MAJ gates");
         add_flag("--wires,-W", ps.enable_wires, "Enable the use of wire segments and fan-outs");
         add_flag("--crossings,-x", ps.crossings, "Enable wire crossings");
-        //        add_flag("--io_ports,-i", ps.io_ports, "Use I/O port elements instead of gate pins");  // TODO this
+        //        add_flag("--io_pins,-i", ps.io_pins, "Use I/O port elements instead of gate pins");  // TODO this
         //        toggle does not work yet
     }
 
