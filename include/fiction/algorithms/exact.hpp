@@ -513,8 +513,8 @@ class exact_impl
                 std::set<tile<Lyt>> added_tiles{}, updated_tiles{};
                 for (decltype(ar.y) y = 0; y <= ar.y; ++y)
                 {
-                    added_tiles.emplace(tile<Lyt>{ar.x, y});
-                    updated_tiles.emplace(tile<Lyt>{ar.x - 1, y});
+                    added_tiles.emplace(ar.x, y);
+                    updated_tiles.emplace(ar.x - 1, y);
                 }
 
                 // deep-copy solver state
@@ -539,8 +539,8 @@ class exact_impl
                     std::set<tile<Lyt>> added_tiles{}, updated_tiles{};
                     for (decltype(ar.x) x = 0; x <= ar.x; ++x)
                     {
-                        added_tiles.emplace(tile<Lyt>{x, ar.y});
-                        updated_tiles.emplace(tile<Lyt>{x, ar.y - 1});
+                        added_tiles.emplace(x, ar.y);
+                        updated_tiles.emplace(x, ar.y - 1);
                     }
 
                     // deep-copy solver state
@@ -562,7 +562,7 @@ class exact_impl
                     std::set<tile<Lyt>> added_tiles{};
                     for (decltype(ar.y) y = 0; y <= ar.y; ++y)
                     {
-                        for (decltype(ar.x) x = 0; x <= ar.x; ++x) { added_tiles.emplace(tile<Lyt>{x, y}); }
+                        for (decltype(ar.x) x = 0; x <= ar.x; ++x) { added_tiles.emplace(x, y); }
                     }
 
                     // create new state
