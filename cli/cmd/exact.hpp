@@ -204,7 +204,7 @@ class exact_command : public command
         ps_dest.fixed_size               = ps_src.fixed_size;
         ps_dest.num_threads              = ps_src.num_threads;
         ps_dest.crossings                = ps_src.crossings;
-        ps_dest.io_ports                 = ps_src.io_ports;
+        ps_dest.io_pins                  = ps_src.io_pins;
         ps_dest.border_io                = ps_src.border_io;
         ps_dest.synchronization_elements = ps_src.synchronization_elements;
         ps_dest.straight_inverters       = ps_src.straight_inverters;
