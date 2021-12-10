@@ -35,6 +35,7 @@
 #include <cassert>
 #include <chrono>
 #include <cstdint>
+#include <functional>
 #include <future>
 #include <memory>
 #include <mutex>
@@ -735,9 +736,9 @@ class exact_impl
          * @param n Node to be considered.
          * @return ncl variable from ctx.
          */
-        [[nodiscard]] z3::expr get_ncl(const mockturtle::node<topology_ntk_t>& n)
+        [[nodiscard]] z3::expr get_ncl(const mockturtle::node<topology_ntk_t>& n, const unsigned clk)
         {
-            return ctx->int_const(fmt::format("ncl_{}", n).c_str());
+            return ctx->bool_const(fmt::format("ncl_{}_{}", n, clk).c_str());
         }
         /**
          * Returns a tcl variable from the stored context representing tile t's clock number.
@@ -745,9 +746,9 @@ class exact_impl
          * @param t Tile to be considered.
          * @return tcl variable from ctx.
          */
-        [[nodiscard]] z3::expr get_tcl(const tile<Lyt>& t)
+        [[nodiscard]] z3::expr get_tcl(const tile<Lyt>& t, const unsigned clk)
         {
-            return ctx->int_const(fmt::format("tcl_({},{})", t.x, t.y).c_str());
+            return ctx->bool_const(fmt::format("tcl_({},{})_{}", t.x, t.y, clk).c_str());
         }
         /**
          * Returns a tse variable from the stored context representing tile t's synchronization element delay in cycles.
@@ -813,6 +814,47 @@ class exact_impl
                     return constraint;
                 }
             }
+        }
+        /**
+         * Helper function to create an expression that assigns a matching clocking to a tile given its outgoing tile.
+         * This function is only needed for irregular clocking schemes.
+         *
+         * @param t1 Tile.
+         * @param t2 Tile outgoing to t1 given its dataflow.
+         * @return An expression of the form tcl(t1, 0) --> tcl(t2, 1) and tcl(t1, 1) --> tcl(t2, 2) and ... up to the
+         * number of clock phases in the layout.
+         */
+        [[nodiscard]] z3::expr mk_clk_mod(const tile<Lyt>& t1, const tile<Lyt>& t2)
+        {
+            z3::expr_vector clk_mod{*ctx};
+
+            for (auto i = 0u; i < layout.num_clocks(); ++i)
+            {
+                clk_mod.push_back(z3::implies(get_tcl(t1, i), get_tcl(t2, (i + 1) % layout.num_clocks())));
+            }
+
+            return z3::mk_and(clk_mod);
+        }
+        /**
+         * Helper function to create an expression that maps from an ncl variable to a real value during a solver call.
+         *
+         * @param n Network node.
+         * @return An expression of the form ite(ncl == 0, 0, ite(ncl == 1, 1, ...)) up to the number of clock phases in
+         * the layout.
+         */
+        [[nodiscard]] z3::expr ncl_to_real(const mockturtle::node<topology_ntk_t>& n)
+        {
+            const std::function<z3::expr(const unsigned i)> ncl_ite_chain = [&, this](const auto i) -> z3::expr
+            {
+                if (i == layout.num_clocks())
+                {
+                    return ctx->real_val(i);
+                }
+
+                return z3::ite(get_ncl(n, i), ctx->real_val(i), ncl_ite_chain(i + 1));
+            };
+
+            return ncl_ite_chain(0u);
         }
         /**
          * Constructs a series of expressions to evaluate how many tiles were occupied by a given edge. Therefore, all
@@ -952,12 +994,13 @@ class exact_impl
             apply_to_added_tiles(
                 [this](const auto& t)
                 {
-                    // an evaluation has shown that it is in fact faster to use bounded int_consts for tcl variables
-                    // rather than disjoint real_consts. Most likely, this is due to Z3's quantifier-free finite domain
-                    // (QF_FD) solver. An alternative could, however, be a bool_const one-hot encoding
-                    const auto cl = get_tcl(t);
-                    solver->add(ctx->int_val(0) <= cl);
-                    solver->add(cl < ctx->int_val(static_cast<unsigned>(layout.num_clocks())));
+                    // an evaluation has shown that it is in fact one magnitude slower to use bounded int_consts for tcl
+                    // variables and even slower to use disjoint real_consts. Most likely, the performance benefit of
+                    // ints over reals is due to Z3's quantifier-free finite domain (QF_FD) solver.
+                    // TL;DR one-hot encoding rules!
+                    z3::expr_vector tcl{*ctx};
+                    for (auto i = 0u; i < layout.num_clocks(); ++i) { tcl.push_back(get_tcl(t, i)); }
+                    solver->add(z3::atleast(tcl, 1) and z3::atmost(tcl, 1));
                 });
         }
         /**
@@ -1001,9 +1044,7 @@ class exact_impl
                                                     [this, &t, &disj, &tgt, &ae](const auto& at)
                                                     {
                                                         // clocks must differ by 1
-                                                        const auto mod =
-                                                            z3::mod(get_tcl(at) - get_tcl(t), layout.num_clocks()) ==
-                                                            ctx->int_val(1);
+                                                        const auto mod = mk_clk_mod(t, at);
 
                                                         disj.push_back(((get_tn(at, tgt) or get_te(at, ae)) and mod) and
                                                                        get_tc(t, at));
@@ -1067,9 +1108,7 @@ class exact_impl
                                                     [this, &t, &disj, &src, &iae](const auto& iat)
                                                     {
                                                         // clocks must differ by 1
-                                                        const auto mod =
-                                                            z3::mod(get_tcl(t) - get_tcl(iat), layout.num_clocks()) ==
-                                                            ctx->int_val(1);
+                                                        const auto mod = mk_clk_mod(iat, t);
 
                                                         disj.push_back(
                                                             ((get_tn(iat, src) or get_te(iat, iae)) and mod) and
@@ -1119,17 +1158,16 @@ class exact_impl
                                 }
                                 else  // irregular clocking
                                 {
-                                    layout.foreach_adjacent_tile(
-                                        t,
-                                        [this, &t, &e, &te, &disj](const auto& at)
-                                        {
-                                            // clocks must differ by 1
-                                            const auto mod = z3::mod(get_tcl(at) - get_tcl(t), layout.num_clocks()) ==
-                                                             ctx->int_val(1);
+                                    layout.foreach_adjacent_tile(t,
+                                                                 [this, &t, &e, &te, &disj](const auto& at)
+                                                                 {
+                                                                     // clocks must differ by 1
+                                                                     const auto mod = mk_clk_mod(t, at);
 
-                                            disj.push_back(((get_tn(at, te) or get_te(at, e)) and mod) and
-                                                           get_tc(t, at));
-                                        });
+                                                                     disj.push_back(
+                                                                         ((get_tn(at, te) or get_te(at, e)) and mod) and
+                                                                         get_tc(t, at));
+                                                                 });
                                 }
 
                                 if (!disj.empty())
@@ -1172,8 +1210,7 @@ class exact_impl
                                         [this, &t, &e, &se, &disj](const auto& iat)
                                         {
                                             // clocks must differ by 1
-                                            const auto mod = z3::mod(get_tcl(t) - get_tcl(iat), layout.num_clocks()) ==
-                                                             ctx->int_val(1);
+                                            const auto mod = mk_clk_mod(iat, t);
 
                                             disj.push_back(((get_tn(iat, se) or get_te(iat, e)) and mod) and
                                                            get_tc(iat, t));
@@ -1274,20 +1311,22 @@ class exact_impl
          */
         void assign_pi_clockings()
         {
-            const auto assign = [this](const auto v) -> void
+            const auto assign = [this](const auto n) -> void
             {
-                const auto cl = get_ncl(v);
                 apply_to_added_tiles(
-                    [this, &v, &cl](const auto& t)
+                    [this, &n](const auto& t)
                     {
                         if (layout.is_regularly_clocked())
                         {
-                            solver->add(z3::implies(
-                                get_tn(t, v), cl == ctx->int_val(static_cast<unsigned>(layout.get_clock_number(t)))));
+                            solver->add(z3::implies(get_tn(t, n),
+                                                    get_ncl(n, static_cast<unsigned>(layout.get_clock_number(t)))));
                         }
                         else  // irregular clocking
                         {
-                            solver->add(z3::implies(get_tn(t, v), cl == get_tcl(t)));
+                            for (auto i = 0u; i < layout.num_clocks(); ++i)
+                            {
+                                solver->add(z3::implies(get_tn(t, n), get_ncl(n, i) == get_tcl(t, i)));
+                            }
                         }
                     });
             };
@@ -1296,6 +1335,15 @@ class exact_impl
                    layout.is_clocking_scheme(clock_name::twoddwave_hex)) &&
                   params.border_io))  // TODO all linear schemes?
             {
+                // ensure that exactly one ncl variable is set for each node
+                network.foreach_node(
+                    [this](const auto& n)
+                    {
+                        z3::expr_vector ncl{*ctx};
+                        for (auto i = 0u; i < layout.num_clocks(); ++i) { ncl.push_back(get_ncl(n, i)); }
+                        solver->add(z3::atleast(ncl, 1) and z3::atmost(ncl, 1));
+                    });
+
                 if (params.io_pins)
                 {
                     network.foreach_pi(assign);
@@ -1365,13 +1413,13 @@ class exact_impl
                         // respect clock zone of PI if one is involved
                         if (const auto src = e.source; params.io_pins && network.is_pi(src))
                         {
-                            path_length.push_back(get_ncl(src));
+                            path_length.push_back(ncl_to_real(src));
                         }
                         else if (!params.io_pins)
                         {
                             if (has_incoming_primary_input(network, src))
                             {
-                                path_length.push_back(get_ncl(src));
+                                path_length.push_back(ncl_to_real(src));
                             }
                         }
 
@@ -1679,7 +1727,7 @@ class exact_impl
                         // if tile t is empty, the clock number does not matter and can be fixed to 0
                         if (!ow.empty())
                         {
-                            solver->add(z3::implies(z3::atmost(ow, 0u), get_tcl(t) == ctx->int_val(0)));
+                            solver->add(z3::implies(z3::atmost(ow, 0u), get_tcl(t, 0)));
                         }
                     });
             }
@@ -2412,8 +2460,13 @@ class exact_impl
                 layout.foreach_ground_tile(
                     [this, &model](const auto& t)
                     {
-                        layout.assign_clock_number(t, static_cast<typename Lyt::clock_number_t>(
-                                                          model.eval(get_tcl(t), true).get_numeral_int()));
+                        for (auto i = 0u; i < layout.num_clocks(); ++i)
+                        {
+                            if (model.eval(get_tcl(t, i), true).bool_value() == Z3_L_TRUE)
+                            {
+                                layout.assign_clock_number(t, static_cast<typename Lyt::clock_number_t>(i));
+                            }
+                        }
                     });
             }
         }
