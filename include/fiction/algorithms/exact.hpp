@@ -10,7 +10,6 @@
 #include "../io/print_layout.hpp"
 #include "../layouts/clocking_scheme.hpp"
 #include "../traits.hpp"
-#include "../utils/debug/network_writer.hpp"
 #include "fanout_substitution.hpp"
 #include "iter/aspect_ratio_iterator.hpp"
 #include "layout_utils.hpp"
@@ -2464,7 +2463,11 @@ class exact_impl
                         {
                             if (model.eval(get_tcl(t, i), true).bool_value() == Z3_L_TRUE)
                             {
+                                // assign clock number to tile t
                                 layout.assign_clock_number(t, static_cast<typename Lyt::clock_number_t>(i));
+                                // and to the tile above
+                                layout.assign_clock_number(layout.above(t),
+                                                           static_cast<typename Lyt::clock_number_t>(i));
                             }
                         }
                     });
@@ -2491,10 +2494,10 @@ class exact_impl
                     if (model.eval(get_te(at, e)).bool_value() == Z3_L_TRUE &&
                         model.eval(get_tc(t, at)).bool_value() == Z3_L_TRUE)
                     {
-                        //                        std::cout << fmt::format("assigning ({},{}) to {} with incoming
-                        //                        signal
+                        //                        std::cout << fmt::format("assigning ({},{}) to {} with incoming signal
                         //                        {}", e.source, e.target,
-                        //                                                 at,
+                        //                                                 layout.is_empty_tile(at) ? at :
+                        //                                                 layout.above(at),
                         //                                                 static_cast<tile<Lyt>>(node2pos[e.source][e.target]))
                         //                                  << std::endl;
 
