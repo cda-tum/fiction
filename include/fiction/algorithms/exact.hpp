@@ -55,7 +55,9 @@ enum class technology_constraints
     NONE,
     TOPOLINANO
 };
-
+/**
+ * Parameters.
+ */
 template <typename Lyt>
 struct exact_physical_design_params
 {
@@ -117,7 +119,9 @@ struct exact_physical_design_params
      */
     technology_constraints technology_specifics = technology_constraints::NONE;
 };
-
+/**
+ * Statistics.
+ */
 struct exact_physical_design_stats
 {
     mockturtle::stopwatch<>::duration time_total{0};
@@ -174,19 +178,31 @@ class exact_impl
     }
 
   private:
+    /**
+     * Network type for internal handling. Converting the input network to this type ensures the availability of all
+     * necessary member functions.
+     */
     using topology_ntk_t = mockturtle::topo_view<mockturtle::fanout_view<mockturtle::names_view<topology_network>>>;
-
+    /**
+     * Specification network.
+     */
     std::shared_ptr<topology_ntk_t> ntk;
-
+    /**
+     * Parameters.
+     */
     exact_physical_design_params<Lyt> ps;
-    exact_physical_design_stats&      pst;
+    /**
+     * Statistics.
+     */
+    exact_physical_design_stats& pst;
     /**
      * Lower bound for the number of layout tiles.
      */
-    uint16_t lower_bound{0};
-
+    uint16_t lower_bound{0u};
+    /**
+     * Iterator for the factorization of possible aspect ratios.
+     */
     aspect_ratio_iterator<aspect_ratio<Lyt>> ari{0};
-
     /**
      * Aspect ratio of found result. Only needed for the asynchronous case.
      */
@@ -226,12 +242,13 @@ class exact_impl
                 inv_levels{inverse_levels(ntk)}
         {}
         /**
-         * Evaluates a given aspect ratio regarding the stored configurations whether it can be skipped, i.e. does not
-         * need to be explored by the SMT solver. The better this function is, the more UNSAT instances can be skipped
-         * without losing the optimality guarantee. This function should never be overly restrictive!
+         * Evaluates a given aspect ratio regarding the stored configurations whether it can be skipped, i.e., does not
+         * need to be explored by the SMT solver. The better this function is at predicting unsatisfying inputs, the
+         * more UNSAT instances can be skipped without losing the optimality guarantee. This function should never be
+         * overly restrictive!
          *
          * @param ar Aspect ratio to evaluate.
-         * @return True if ar can safely be skipped because it is UNSAT anyways.
+         * @return True if ar can safely be skipped because it is UNSAT anyway.
          */
         [[nodiscard]] bool skippable(const aspect_ratio<Lyt>& ar) const noexcept
         {
@@ -305,7 +322,7 @@ class exact_impl
          * way, no unnecessary optimization constraints need to be generated over and over for UNSAT instances.
          *
          * If the instance was found SAT on both levels, a layout is extract from the model and stored. The function
-         * returns true.
+         * returns then true.
          *
          * @return true iff the instance generated for the current configuration is SAT.
          */
@@ -336,7 +353,6 @@ class exact_impl
                 }
             }
         }
-
         /**
          * Stores the current solver state in the solver tree with aspect ratio ar as key.
          *
@@ -360,7 +376,7 @@ class exact_impl
         /**
          * During incremental SMT calls, several created assertions need to be reformulated. To still be able to reuse
          * information like learned clauses and lemmas, the push/pop strategy is not employed. Instead, assumption
-         * literals are used that track, i.e. imply, certain assertions and can be negated in order to deactivate them.
+         * literals are used that track, i.e., imply, certain assertions and can be negated in order to deactivate them.
          * Over incremental calls, the layout size grows either in eastern or southern direction. Assertions to
          * deactivate affect tiles sitting at the growing borders as they certainly get new neighbors. To not deactivate
          * both at once if not needed, there is one assertion literal tracking eastern growth and one tracking southern
@@ -394,7 +410,7 @@ class exact_impl
         using state_ptr = std::shared_ptr<solver_state>;
         /**
          * To reuse solver states, more information is necessary in the SMT instance generation process. Namely, which
-         * tiles have been added in contrast to the last generation and which tiles got new neighbors, i.e. have been
+         * tiles have been added in contrast to the last generation and which tiles got new neighbors, i.e., have been
          * updated. Additionally, a container for assumptions, i.e., assertions that are only valid in this and only
          * this run, is needed. All of that is packaged in a solver check point.
          */
@@ -405,10 +421,9 @@ class exact_impl
              */
             state_ptr state;
             /**
-             * added_tiles contains only the newly added tiles in eastern or southern direction.
-             * updated_tiles instead contains the column (eastern) or row (southern) of tiles that used to be at the
-             * border but is not anymore now. In these tiles, certain assertions change so that their assertions need to
-             * be reformulated.
+             * added_tiles contains only the newly added tiles in eastern or southern direction. updated_tiles instead
+             * contains the column (eastern) or row (southern) of tiles that used to be at the border but is not anymore
+             * now. In these tiles, certain assertions change so that their previous assertions need to be reformulated.
              */
             std::set<tile<Lyt>> added_tiles, updated_tiles;
             /**
@@ -438,7 +453,7 @@ class exact_impl
          */
         const exact_physical_design_params<Lyt> params;
         /**
-         * Maps nodes to tile positions.
+         * Maps nodes to tile positions when creating the layout from the SMT model.
          */
         mockturtle::node_map<
             branching_signal_container<
@@ -497,14 +512,14 @@ class exact_impl
             return ctx->bool_const(fmt::format("lit_s_{}", lc).c_str());
         }
         /**
-         * Accesses the solver tree and looks for a solver state that is associated with a aspect ratio smaller by 1 row
-         * or column than given aspect ratio. The found one is returned together with the tiles that are new to this
+         * Accesses the solver tree and looks for a solver state that is associated with an aspect ratio smaller by 1
+         * row or column than given aspect ratio. The found one is returned together with the tiles that are new to this
          * solver.
          *
          * If no such solver could be found, a new solver is created from the context given.
          *
          * @param ar aspect ratio of size x * y.
-         * @return Solver state associated with a aspect ratio of size x - 1 * y or x * y - 1 and, additionally, the
+         * @return Solver state associated with an aspect ratio of size x - 1 * y or x * y - 1 and, additionally, the
          * tiles new to the solver. If no such solver is available, a new one is created.
          */
         [[nodiscard]] solver_check_point fetch_solver(const aspect_ratio<Lyt>& ar) noexcept
@@ -542,46 +557,43 @@ class exact_impl
                 return {std::make_shared<solver_state>(new_state), added_tiles, updated_tiles,
                         create_assumptions(new_state)};
             }
-            else
+            // does a solver state for a layout of aspect ratio of size x * y - 1 exist?
+            else if (const auto it_y = solver_tree.find({ar.x, ar.y - 1}); it_y != solver_tree.end())
             {
-                // does a solver state for a layout of aspect ratio of size x * y - 1 exist?
-                if (const auto it_y = solver_tree.find({ar.x, ar.y - 1}); it_y != solver_tree.end())
+                // gather additional x-tiles
+                std::set<tile<Lyt>> added_tiles{}, updated_tiles{};
+                for (decltype(ar.x) x = 0; x <= ar.x; ++x)
                 {
-                    // gather additional x-tiles
-                    std::set<tile<Lyt>> added_tiles{}, updated_tiles{};
-                    for (decltype(ar.x) x = 0; x <= ar.x; ++x)
-                    {
-                        added_tiles.emplace(x, ar.y);
-                        updated_tiles.emplace(x, ar.y - 1);
-                    }
-
-                    // deep-copy solver state
-                    const auto   state     = it_y->second;
-                    solver_state new_state = {state->solver, {state->lit.e, get_lit_s()}};
-
-                    // reset southern constraints
-                    new_state.solver->add(not state->lit.s);
-
-                    // remove solver
-                    solver_tree.erase(it_y);
-
-                    return {std::make_shared<solver_state>(new_state), added_tiles, updated_tiles,
-                            create_assumptions(new_state)};
+                    added_tiles.emplace(x, ar.y);
+                    updated_tiles.emplace(x, ar.y - 1);
                 }
-                else  // no existing solver state; create a new one
+
+                // deep-copy solver state
+                const auto   state     = it_y->second;
+                solver_state new_state = {state->solver, {state->lit.e, get_lit_s()}};
+
+                // reset southern constraints
+                new_state.solver->add(not state->lit.s);
+
+                // remove solver
+                solver_tree.erase(it_y);
+
+                return {std::make_shared<solver_state>(new_state), added_tiles, updated_tiles,
+                        create_assumptions(new_state)};
+            }
+            else  // no existing solver state; create a new one
+            {
+                // all tiles are additional ones
+                std::set<tile<Lyt>> added_tiles{};
+                for (decltype(ar.y) y = 0; y <= ar.y; ++y)
                 {
-                    // all tiles are additional ones
-                    std::set<tile<Lyt>> added_tiles{};
-                    for (decltype(ar.y) y = 0; y <= ar.y; ++y)
-                    {
-                        for (decltype(ar.x) x = 0; x <= ar.x; ++x) { added_tiles.emplace(x, y); }
-                    }
-
-                    // create new state
-                    solver_state new_state{std::make_shared<z3::solver>(*ctx), {get_lit_e(), get_lit_s()}};
-
-                    return {std::make_shared<solver_state>(new_state), added_tiles, {}, create_assumptions(new_state)};
+                    for (decltype(ar.x) x = 0; x <= ar.x; ++x) { added_tiles.emplace(x, y); }
                 }
+
+                // create new state
+                solver_state new_state{std::make_shared<z3::solver>(*ctx), {get_lit_e(), get_lit_s()}};
+
+                return {std::make_shared<solver_state>(new_state), added_tiles, {}, create_assumptions(new_state)};
             }
         }
         /**
@@ -592,7 +604,7 @@ class exact_impl
          */
         [[nodiscard]] bool is_added_tile(const tile<Lyt>& t) const noexcept
         {
-            return check_point->added_tiles.count(t);
+            return check_point->added_tiles.count(t) != 0;
         }
         /**
          * Checks whether a given tile belongs to the updated tiles of the current solver check point.
@@ -602,13 +614,13 @@ class exact_impl
          */
         [[nodiscard]] bool is_updated_tile(const tile<Lyt>& t) const noexcept
         {
-            return check_point->updated_tiles.count(t);
+            return check_point->updated_tiles.count(t) != 0;
         }
         /**
-         * Returns true, iff config.io_ports is set to false and n is either a constant or PI or PO node in network.
+         * Returns true, iff params.io_ports is set to false and n is either a constant or PI or PO node in network.
          *
          * @param n Node in network.
-         * @return True iff n is to be skipped in a loop due to it being a constant or an I/O and config.io_ports ==
+         * @return True iff n is to be skipped in a loop due to it being a constant or an I/O and params.io_ports ==
          * false.
          */
         [[nodiscard]] bool skip_const_or_io_node(const mockturtle::node<topology_ntk_t>& n) const noexcept
@@ -619,7 +631,7 @@ class exact_impl
          * Returns true, iff skip_const_or_io_node returns true for either source or target of the given edge..
          *
          * @param e Edge in network.
-         * @return True iff e is to be skipped in a loop due to it having constant or I/O nodes while config.io_ports ==
+         * @return True iff e is to be skipped in a loop due to it having constant or I/O nodes while params.io_ports ==
          * false.
          */
         [[nodiscard]] bool skip_const_or_io_edge(const mockturtle::edge<topology_ntk_t>& e) const noexcept
@@ -660,7 +672,13 @@ class exact_impl
             apply_to_added_tiles(fn);
             apply_to_updated_tiles(fn);
         }
-
+        /**
+         * Determines the number of child nodes to some given node n in the stored logic network, not counting constants
+         * and not counting primary inputs if params.io_pins is not set.
+         *
+         * @param n Node in the stored network.
+         * @return Number of incoming nodes to n.
+         */
         [[nodiscard]] uint32_t network_in_degree(const mockturtle::node<topology_ntk_t>& n) const noexcept
         {
             uint32_t degree{0};
@@ -674,7 +692,13 @@ class exact_impl
                                   });
             return degree;
         }
-
+        /**
+         * Determines the number of parent nodes to some given node n in the stored logic network, not counting
+         * constants and not counting primary outputs if params.io_pins is not set.
+         *
+         * @param n Node in the stored network.
+         * @return Number of outgoing nodes of n.
+         */
         [[nodiscard]] uint32_t network_out_degree(const mockturtle::node<topology_ntk_t>& n) const noexcept
         {
             uint32_t degree{0};
@@ -720,10 +744,10 @@ class exact_impl
             return ctx->bool_const(fmt::format("te_({},{})_({},{})", t.x, t.y, e.source, e.target).c_str());
         }
         /**
-         * Returns a tc variable from the stored context representing that tile t1 and tile t2 are directly connected.
+         * Returns a tc variable from the stored context representing that information flows from tile t1 to tile t2.
          *
          * @param t1 Tile 1 to be considered.
-         * @param t2 Tile 2 to be considered.
+         * @param t2 Tile 2 to be considered that is adjacent to t1.
          * @return tc variable from ctx.
          */
         [[nodiscard]] z3::expr get_tc(const tile<Lyt>& t1, const tile<Lyt>& t2)
@@ -742,7 +766,7 @@ class exact_impl
             return ctx->bool_const(fmt::format("tp_({},{})_({},{})", t1.x, t1.y, t2.x, t2.y).c_str());
         }
         /**
-         * Returns a ncl variable from the stored context representing node n's (pi) clock number.
+         * Returns an ncl variable from the stored context representing node n's (pi) clock number.
          *
          * @param n Node to be considered.
          * @return ncl variable from ctx.
@@ -797,7 +821,7 @@ class exact_impl
         }
         /**
          * Helper function for generating an implication lit -> constraint where lit is the assumption literal
-         * responsible for t, i.e. e if t is at eastern border, s if t is at southern border, and (e and s) if t is
+         * responsible for t, i.e., e if t is at eastern border, s if t is at southern border, and (e and s) if t is
          * the corner tile.
          *
          * @param constraint Constraint to be implied.
@@ -998,7 +1022,7 @@ class exact_impl
         }
         /**
          * Adds constraints to the solver to enforce that each clock zone variable has valid bounds of 0 <= cl <= C,
-         * where C is the maximum clock number.
+         * where C is the maximum clock number. Uses a one-hot encoding.
          */
         void restrict_clocks()
         {
@@ -1376,7 +1400,7 @@ class exact_impl
         }
         /**
          * Adds constraints to the solver to ensure that fan-in paths to the same tile need to have the same length
-         * in the layout modulo timing, i.e. plus the clock zone assigned to their PIs.
+         * in the layout modulo timing, i.e., plus the clock zone assigned to their PIs.
          */
         void global_synchronization()
         {
@@ -2457,17 +2481,27 @@ class exact_impl
                 return optimizer;
             }
         }
-
+        /**
+         * Places a primary output pin represented by node n of the stored network onto tile t in the stored layout.
+         *
+         * @param t Tile to place the PO pin.
+         * @param n Node in the stored network representing a PO.
+         */
         void place_output(const tile<Lyt>& t, const mockturtle::node<topology_ntk_t>& n)
         {
             const auto output_signal = network.make_signal(fanins(network, n).fanin_nodes[0]);
 
             layout.create_po(node2pos[output_signal][n], "", t);
         }
-
+        /**
+         * If an open clocking scheme was provided, this function extracts the clocking information from the given model
+         * and assigns the respective clock zones to the stored layout.
+         *
+         * @param model Satisfying model to the generated instance.
+         */
         void assign_layout_clocking(const z3::model& model)
         {
-            // assign clock zones to tiles of open schemes
+            // assign clock zones to the stored layout when using an open clocking scheme
             if (!layout.is_regularly_clocked())
             {
                 layout.foreach_ground_tile(
@@ -2482,6 +2516,9 @@ class exact_impl
                                 // and to the tile above
                                 layout.assign_clock_number(layout.above(t),
                                                            static_cast<typename Lyt::clock_number_t>(i));
+                                // NOTE if this algorithm is ever to be extended for stacked FCN, this function needs to
+                                // assign the clock zone to all tiles in the z direction or the clocking lookup must
+                                // only consider the ground tile
                             }
                         }
                     });
@@ -2496,9 +2533,6 @@ class exact_impl
          */
         void route(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e, const z3::model& model)
         {
-            //            std::cout << fmt::format("Routing ({},{}) starting on {}", e.source, e.target, t) <<
-            //            std::endl;
-
             layout.foreach_outgoing_clocked_zone(
                 t,
                 [this, &t, &e, &model](const auto& at)
@@ -2508,13 +2542,6 @@ class exact_impl
                     if (model.eval(get_te(at, e)).bool_value() == Z3_L_TRUE &&
                         model.eval(get_tc(t, at)).bool_value() == Z3_L_TRUE)
                     {
-                        //                        std::cout << fmt::format("assigning ({},{}) to {} with incoming signal
-                        //                        {}", e.source, e.target,
-                        //                                                 layout.is_empty_tile(at) ? at :
-                        //                                                 layout.above(at),
-                        //                                                 static_cast<tile<Lyt>>(node2pos[e.source][e.target]))
-                        //                                  << std::endl;
-
                         // assign wire segment to at and save its position as the
                         // signal lookup for e's source node
                         node2pos[e.source].update_branch(
@@ -2541,21 +2568,8 @@ class exact_impl
         void assign_layout(const z3::model& model)
         {
             assign_layout_clocking(model);
-            // from now on, a clocking scheme is assigned and no distinction between regular and irregular must be
-            // made
-
-            //            std::ofstream assertions_file{"assertions.txt"};
-            //
-            //            assertions_file << layout.x() << " x " << layout.y() << std::endl;
-            //            assertions_file << solver->assertions() << std::endl;
-            //
-            //            assertions_file.close();
-            //
-            //            std::ofstream model_file{"model.txt"};
-            //
-            //            model_file << model << std::endl;
-            //
-            //            model_file.close();
+            // from now on, a clocking scheme is assigned and no distinction between regular and irregular clocking
+            // must be made
 
             const auto pis = reserve_input_nodes(layout, network);
 
@@ -2676,7 +2690,7 @@ class exact_impl
     }
     /**
      * Contains a context pointer and a currently worked on aspect ratio and can be shared between multiple worker
-     * threads so that they can notify each other via context interrupts based on their individual results, i.e. a
+     * threads so that they can notify each other via context interrupts based on their individual results, i.e., a
      * thread that found a result at aspect ratio x * y can interrupt all other threads that are working on larger
      * layout sizes.
      */
@@ -2821,9 +2835,9 @@ class exact_impl
         return std::nullopt;
     }
     /**
-     * Launches config.num_threads threads and evaluates their return statements.
+     * Launches params.num_threads threads and evaluates their return statements.
      *
-     * @return Physical design result including statistical information.
+     * @return A placed and routed gate-level layout or std::nullopt in case a timeout or an upper bound was reached.
      */
     [[nodiscard]] std::optional<Lyt> run_asynchronously()
     {
@@ -2910,7 +2924,7 @@ class exact_impl
     /**
      * Does the same as explore_asynchronously but without thread synchronization overhead.
      *
-     * @return Physical design result including statistical information.
+     * @return A placed and routed gate-level layout or std::nullopt in case a timeout or an upper bound was reached.
      */
     [[nodiscard]] std::optional<Lyt> run_synchronously() noexcept
     {
@@ -2976,27 +2990,44 @@ class exact_impl
 }  // namespace detail
 
 /**
- * An exact physical design approach using SMT solving. This class provides the interface via which the technique
- * can be called from the CLI. The instance generation happens in its sub-class smt_handler.
+ * An exact physical design approach using SMT solving as originally proposed in "An Exact Method for Design Exploration
+ * of Quantum-dot Cellular Automata" by M. Walter, R. Wille, D. Große, F. Sill Torres, and R. Drechsler in DATE 2018. A
+ * more extensive description can be found in "Design Automation for Field-coupled Nanotechnologies" by M. Walter, R.
+ * Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
  *
- * Via incremental SMT calls, an optimal placement & routing for a given logic network will be found. Starting with n,
- * each possible layout aspect ratio in n tiles will be examined by factorization and tested for routability with the
- * SMT solver z3. The number n thereby is the lower bound which is equal to the number of vertices in the given logic
- * network. When no upper bound is given, this approach will run until it finds a solution to the placement & routing
- * problem instance under all given constraints. Note that there a combinations of constraints for which no valid
- * solution under the given parameters exist for the given logic network. Recommended settings include the use of
- * I/O pins located at the layout borders for better integration. Most networks are not realizable without crossings
- * enabled. Specifying a clocking scheme SIGNIFICANTLY speeds up the process. 2DDWave allows for the strictest
- * constraints and thereby finds a solution the quickest. However, for high input degree networks, no valid solution
- * exists when border I/Os are to be used unless global synchronization is disabled. Generally, solutions are found
- * the fastest with the following settings: Crossings enabled, de-synchronization enabled, and 2DDWave clocking given.
- * Multi-threading can sometimes speed up the process especially for large networks. Note that the more threads are
- * being used, the less information can be shared across the individual solver runs which destroys the benefits of
- * incremental solving and thereby, comparatively, slows down each run.
+ * Via incremental SMT calls, an optimal gate-level layout for a given logic network will be found under constraints.
+ * Starting with n tiles, where n is the number of logic network nodes, each possible layout aspect ratio will be
+ * examined by factorization and tested for routability with the SMT solver z3. When no upper bound is given, this
+ * approach will run until it finds a solution to the placement & routing problem instance.
+ *
+ * Note that there a combinations of constraints for which no valid solution under the given parameters exist for the
+ * given logic network. Such combinations cannot be detected automatically. It is, thus, recommended to always set a
+ * timeout. Recommended settings include the use of I/O pins located at the layout borders for better integration. Most
+ * networks are not realizable without crossings enabled. Specifying a regular clocking scheme SIGNIFICANTLY speeds up
+ * the process. 2DDWave allows for the strictest constraints and, thereby, finds a solution the quickest. However, for
+ * high input degree networks, no valid solution exists when border I/Os are to be used unless global synchronization is
+ * disabled. Generally, solutions are found the fastest with the following settings: Crossings enabled,
+ * de-synchronization enabled, and 2DDWave clocking given. Multi-threading can sometimes speed up the process,
+ * especially for large networks. Note that the more threads are being used, the less information can be shared across
+ * the individual solver runs which destroys the benefits of incremental solving and thereby, comparatively, slows down
+ * each run.
  *
  * The SMT instance works with a single layer of variables even though it is possible to allow crossings in the
  * solution. The reduced number of variables saves a considerable amount of runtime. That's why
  * layout.foreach_ground_tile() is used even though the model will be mapped to a 3-dimensional layout afterwards.
+ * Generally, the algorithm incorporates quite a few encoding optimizations to be as performant as possible on various
+ * layout topologies and clocking schemes.
+ *
+ * The approach applies to any data structures that implement the necessary functions to comply with is_network_type and
+ * is_gate_level_layout, respectively. It is, thereby, mostly technology-independent but can make certain assumptions if
+ * needed, for instance for ToPoliNano-compliant circuits.
+ *
+ * @tparam Lyt Desired gate-level layout type.
+ * @tparam Ntk Network type that acts as specification.
+ * @param ntk The network that is to place and route.
+ * @param ps Parameters.
+ * @param pst Statistics.
+ * @return A gate-level layout of type Lyt that implements ntk as an FCN circuit.
  */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = {},
