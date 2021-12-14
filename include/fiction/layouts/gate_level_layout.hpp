@@ -96,6 +96,8 @@ class gate_level_layout : public ClockedLayout
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
+        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+
         initialize_truth_table_cache();
         strg->data.layout_name = std::move(name);
     }
@@ -106,6 +108,8 @@ class gate_level_layout : public ClockedLayout
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
+        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+
         initialize_truth_table_cache();
         strg->data.layout_name = std::move(name);
     }
@@ -113,7 +117,9 @@ class gate_level_layout : public ClockedLayout
     explicit gate_level_layout(std::shared_ptr<gate_level_layout_storage> s) :
             strg{std::move(s)},
             evnts{std::make_shared<typename event_storage::element_type>()}
-    {}
+    {
+        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+    }
 
 #pragma endregion
 
