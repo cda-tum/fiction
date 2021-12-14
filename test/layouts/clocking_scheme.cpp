@@ -1859,3 +1859,19 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
     CHECK(!get_clocking_scheme<clk_lyt>("EPS").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("BNCS").has_value());
 }
+
+TEST_CASE("Linear schemes", "[clocking-scheme]")
+{
+    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+
+    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::columnar)));
+    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::row)));
+    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::twoddwave)));
+    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::twoddwave_hex)));
+
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::open)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::use)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::res)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::bancs)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::esp)));
+}

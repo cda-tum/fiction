@@ -15,6 +15,7 @@
 #include <fiction/algorithms/network_utils.hpp>
 #include <fiction/networks/topology_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
+#include <fiction/io/print_layout.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -145,6 +146,12 @@ void check_tp(const Lyt& lyt, const uint64_t tp)
 {
     critical_path_length_and_throughput_stats st{};
     critical_path_length_and_throughput(lyt, &st);
+
+    if (st.throughput != tp)
+    {
+        print_gate_level_layout(std::cout, lyt);
+        std::cout << lyt.get_clocking_scheme().name << std::endl;
+    }
 
     CHECK(st.throughput == tp);
 }
