@@ -100,10 +100,10 @@ int main()
     exact_params.timeout       = 3'600'000;  // 1h in ms
     fiction::exact_physical_design_stats exact_stats{};
 
-    constexpr const uint64_t bench_select =
-        fiction_experiments::all & ~fiction_experiments::parity & ~fiction_experiments::xor5_maj &
-        ~fiction_experiments::two_bit_add_maj & ~fiction_experiments::cm82a_5 & ~fiction_experiments::xor5_r1 &
-        ~fiction_experiments::one_bit_add_maj & ~fiction_experiments::b1_r2 & ~fiction_experiments::clpl;
+    constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::parity &
+                                            ~fiction_experiments::xor5_maj & ~fiction_experiments::two_bit_add_maj &
+                                            ~fiction_experiments::cm82a_5 & ~fiction_experiments::xor5_r1 &
+                                            ~fiction_experiments::b1_r2 & ~fiction_experiments::clpl;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {

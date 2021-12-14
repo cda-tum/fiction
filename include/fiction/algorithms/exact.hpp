@@ -31,6 +31,7 @@
 #include <z3++.h>
 
 #include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <cstdint>
@@ -123,6 +124,8 @@ struct exact_physical_design_stats
 
     uint64_t x_size{0ull}, y_size{0ull};
     uint64_t num_gates{0ull}, num_wires{0ull};
+
+    uint32_t num_aspect_ratios{0ul};
 
     void report(std::ostream& out = std::cout) const
     {
@@ -250,7 +253,7 @@ class exact_impl
                     return true;
                 }
                 // if border I/Os are enforced, skip all aspect ratios that are too narrow for hosting all I/Os
-                if (params.border_io && ar.y < std::max(network.num_pis(), network.num_pos()))
+                if (params.border_io && ar.y < std::max(network.num_pis(), network.num_pos()) - 1)
                 {
                     return true;
                 }
@@ -264,7 +267,7 @@ class exact_impl
                     return true;
                 }
                 // if border I/Os are enforced, skip all aspect ratios that are too narrow for hosting all I/Os
-                if (params.border_io && ar.x < std::max(network.num_pis(), network.num_pos()))
+                if (params.border_io && ar.x < std::max(network.num_pis(), network.num_pos()) - 1)
                 {
                     return true;
                 }
@@ -342,6 +345,15 @@ class exact_impl
         void store_solver_state(const aspect_ratio<Lyt>& ar) noexcept
         {
             solver_tree[ar] = check_point->state;
+        }
+        /**
+         * Returns a statistics object from the current solver state.
+         *
+         * @return Statistics.
+         */
+        [[nodiscard]] z3::stats get_solver_statistics() const
+        {
+            return solver->statistics();
         }
 
       private:
@@ -1330,9 +1342,7 @@ class exact_impl
                     });
             };
 
-            if (!((layout.is_clocking_scheme(clock_name::twoddwave) ||
-                   layout.is_clocking_scheme(clock_name::twoddwave_hex)) &&
-                  params.border_io))  // TODO all linear schemes?
+            if (!(params.border_io && is_linear_scheme<Lyt>(layout.get_clocking_scheme())))
             {
                 // ensure that exactly one ncl variable is set for each node
                 network.foreach_node(
@@ -1371,7 +1381,7 @@ class exact_impl
         void global_synchronization()
         {
             // restrict PIs to the first c x c tiles of the layout
-            const auto restrict_entry_tiles = [this](const auto& pi)
+            const auto restrict_2ddwave_entry_tiles = [this](const auto& pi)
             {
                 apply_to_added_tiles(
                     [this, &pi](const auto& t)
@@ -1437,18 +1447,25 @@ class exact_impl
             {
                 if (params.io_pins)
                 {
-                    network.foreach_pi([this, &restrict_entry_tiles](const auto& pi) { restrict_entry_tiles(pi); });
+                    network.foreach_pi([this, &restrict_2ddwave_entry_tiles](const auto& pi)
+                                       { restrict_2ddwave_entry_tiles(pi); });
                 }
                 else
                 {
                     network.foreach_pi(
-                        [this, &restrict_entry_tiles](const auto& pi) {
-                            network.foreach_fanout(pi, [this, &restrict_entry_tiles](const auto& fn)
-                                                   { restrict_entry_tiles(fn); });
+                        [this, &restrict_2ddwave_entry_tiles](const auto& pi)
+                        {
+                            network.foreach_fanout(pi, [this, &restrict_2ddwave_entry_tiles](const auto& fn)
+                                                   { restrict_2ddwave_entry_tiles(fn); });
                         });
                 }
-            }  // TODO row and column don't need the constraints at all
-            // normal version for all other configurations
+            }
+            else if (params.border_io &&
+                     (layout.is_clocking_scheme(clock_name::columnar) || layout.is_clocking_scheme(clock_name::row)))
+            {
+                // Columnar and row clocking scheme don't need the path length constraints when border pins are enabled
+            }
+            // all other configurations get expensive path length constraints
             else
             {
                 if (params.io_pins)
@@ -1527,8 +1544,7 @@ class exact_impl
                         }
                         else  // irregular clocking
                         {
-                            // TODO make a function for this
-                            const auto tile_degree = layout.template adjacent_tiles<std::set<tile<Lyt>>>(t).size();
+                            const auto tile_degree = num_adjacent_coordinates(layout, t);
 
                             network.foreach_node(
                                 [this, &t, &tile_degree](const auto& n)
@@ -2363,10 +2379,8 @@ class exact_impl
             }
 
             // path/cycle constraints
-            if (!(layout.is_clocking_scheme(clock_name::columnar) || layout.is_clocking_scheme(clock_name::row) ||
-                  layout.is_clocking_scheme(clock_name::twoddwave) ||
-                  layout.is_clocking_scheme(clock_name::twoddwave_hex)))  // linear schemes; no cycles by definition
-            {  // TODO function for detection of linear schemes
+            if (!is_linear_scheme<Lyt>(layout.get_clocking_scheme()))  // linear schemes; no cycles by definition
+            {
                 establish_sub_paths();
                 establish_transitive_paths();
                 eliminate_cycles();
@@ -2694,7 +2708,12 @@ class exact_impl
 
         Lyt layout{{}, *ps.scheme};
 
-        smt_handler handler{ctx, layout, *ntk, ps};
+        smt_handler handler{
+            ctx,
+            layout,
+            *ntk,
+            ps,
+        };
         (*ti_list)[t_num].ctx = ctx;
 
         while (true)
@@ -2707,6 +2726,9 @@ class exact_impl
 
                 ++ari;
                 ar = *ari;  // operations ++ and * are split to prevent a vector copy construction
+
+                // log the examination of a new aspect ratio
+                pst.num_aspect_ratios++;
             }
 
             if (area(ar) > ps.upper_bound)
@@ -2870,7 +2892,6 @@ class exact_impl
             }
         }
 
-        // TODO verify that this makes sense
         if (result_aspect_ratio.has_value())
         {
             // statistical information
@@ -2879,7 +2900,6 @@ class exact_impl
             pst.num_gates = layout.num_gates();
             pst.num_wires = layout.num_wires();
 
-            // TODO more statistics?
             return layout;
         }
         else
@@ -2907,6 +2927,9 @@ class exact_impl
 
             auto ar = *ari;
 
+            // log the examination of a new aspect ratio
+            pst.num_aspect_ratios++;
+
             if (handler.skippable(ar))
             {
                 continue;
@@ -2931,8 +2954,6 @@ class exact_impl
                     pst.num_gates = layout.num_gates();
                     pst.num_wires = layout.num_wires();
 
-                    // TODO more statistics?
-
                     return layout;
                 }
                 else
@@ -2944,7 +2965,6 @@ class exact_impl
             }
             catch (const z3::exception&)
             {
-                // TODO timeout exception?
                 return std::nullopt;
             }
         }
@@ -2984,7 +3004,7 @@ std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = 
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
-                  "Ntk is not a network type");  // Ntk is being converted to a topology_network anyways, therefore,
+                  "Ntk is not a network type");  // Ntk is being converted to a topology_network anyway, therefore,
                                                  // this is the only relevant check here
 
     // check for input degree

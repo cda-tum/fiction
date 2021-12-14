@@ -526,7 +526,35 @@ std::shared_ptr<clocking_scheme<clock_zone<Lyt>>> ptr(clocking_scheme<clock_zone
 {
     return std::make_shared<clocking_scheme<clock_zone<Lyt>>>(std::move(scheme));
 }
+/**
+ * Checks whether a given clocking scheme is registered as a cycle-free one. These currently are
+ *
+ * - COLUMNAR
+ * - ROW
+ * - 2DDWAVE
+ * - 2DDWAVEHEX
+ *
+ * @tparam Lyt Layout type.
+ * @param scheme Clocking scheme to check.
+ * @return true iff scheme is listed as one of the linear clocking schemes.
+ */
+template <typename Lyt>
+bool is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
+{
+    static constexpr const std::array<const char*, 4> linear_schemes{
+        {clock_name::columnar, clock_name::row, clock_name::twoddwave, clock_name::twoddwave_hex}};
 
+    return std::any_of(linear_schemes.cbegin(), linear_schemes.cend(),
+                       [&scheme](const auto& name) { return scheme == name; });
+}
+/**
+ * Returns a clocking scheme by name.
+ *
+ * @tparam Lyt Layout type.
+ * @param name Name of the desired clocking scheme.
+ * @return Clocking scheme object that matches the given name or std::nullopt if no clocking scheme by the given name
+ * exists.
+ */
 template <typename Lyt>
 std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::string& name) noexcept
 {
