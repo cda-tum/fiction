@@ -56,6 +56,9 @@ if (FICTION_Z3)
         message(STATUS "Found Z3 library: ${Z3_LIBRARIES}")
         message(STATUS "Found Z3 include directories: ${Z3_CXX_INCLUDE_DIRS}")
 
+        # Threads are used by Z3 and are, thus, required at this point
+        find_package(Threads REQUIRED)
+
         # Compile definition to guard include files
         target_compile_definitions(fictionlib INTERFACE FICTION_Z3_SOLVER)
         # Include Z3 library
