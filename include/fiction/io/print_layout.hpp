@@ -177,7 +177,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 
     const auto has_cell_above = [&layout](const auto& c)
     {
-        for (decltype(layout.z()) z = c.z + 1; z <= layout.z(); ++z)
+        for (decltype(layout.z()) z = c.z + decltype(layout.z()){1}; z <= layout.z(); ++z)
         {
             if (!layout.is_empty_cell({c.x, c.y, z}))
             {
