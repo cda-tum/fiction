@@ -62,7 +62,7 @@ template <typename Ntk, typename Fn>
 void foreach_outgoing_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& fn)
 {
     ntk.foreach_fanout(n,
-                       [&ntk, &fn, &n](const mockturtle::node<Ntk>& fon)
+                       [&fn, &n](const mockturtle::node<Ntk>& fon)
                        {
                            mockturtle::edge<Ntk> e{n, fon};
 

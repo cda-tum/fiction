@@ -696,7 +696,7 @@ class gate_level_layout : public ClockedLayout
 
         using IteratorType = decltype(fanout.cbegin());
         mockturtle::detail::foreach_element_transform<IteratorType, node>(
-            fanout.cbegin(), fanout.cend(), [this](const auto& t) { return get_node(t); }, fn);
+            fanout.cbegin(), fanout.cend(), [this](const auto& t) { return this->get_node(t); }, fn);
     }
 
     template <typename Fn>
