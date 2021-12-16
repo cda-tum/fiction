@@ -409,7 +409,7 @@ class orthogonal_impl
 
         // reserve PI nodes without positions
         ctn.color_ntk.foreach_pi(
-            [this, &layout, &ctn](const auto& pi)
+            [&layout, &ctn](const auto& pi)
             {
                 const auto s = ctn.color_ntk.make_signal(pi);
                 layout.create_pi(ctn.color_ntk.has_name(s) ? ctn.color_ntk.get_name(s) : "");
@@ -441,7 +441,7 @@ class orthogonal_impl
                         // resolve conflicting PIs
                         ctn.color_ntk.foreach_fanout(
                             n,
-                            [this, &ctn, &n, &layout, &node2pos, &latest_pos](const auto& fon)
+                            [&ctn, &n, &layout, &node2pos, &latest_pos](const auto& fon)
                             {
                                 if (ctn.color_ntk.color(fon) == ctn.color_south)
                                 {

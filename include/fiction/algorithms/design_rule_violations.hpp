@@ -449,8 +449,7 @@ class gate_level_drvs_impl
 
         uint32_t num_io{0ul};
 
-        const auto count_io = [this, &has_io_report, &ios_present,
-                               &num_io]([[maybe_unused]] const mockturtle::node<Lyt>& io) { ++num_io; };
+        const auto count_io = [&num_io]([[maybe_unused]] const mockturtle::node<Lyt>& io) { ++num_io; };
 
         has_io_report["Specified PIs"] = lyt.num_pis();
         lyt.foreach_pi(count_io);
