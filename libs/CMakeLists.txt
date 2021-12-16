@@ -66,6 +66,11 @@ if (FICTION_Z3)
         # Link Z3
         target_link_libraries(fictionlib INTERFACE ${Z3_LIBRARIES})
 
+        # use libc++ on macOS
+        if (APPLE)
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
+        endif ()
+
     else ()
         message(SEND_ERROR "Z3 solver could not be detected")
     endif ()
