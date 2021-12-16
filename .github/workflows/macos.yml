@@ -19,6 +19,13 @@ jobs:
         os: [ macos-10.15 ]  # macos-11 when supported
         compiler: [ g++-9, g++-10, clang++ ]  # clang++12
         build_type: [ Debug, Release ]
+        include:
+          - compiler: g++-9
+            ccompiler: gcc
+          - compiler: g++-10
+            ccompiler: gcc
+          - compiler: clang++
+            ccompiler: clang
 
     name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode)
     runs-on: ${{matrix.os}}
@@ -47,14 +54,14 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{github.workspace}}/z3lib
-          key: ${{matrix.os}}-z3lib-${{env.Z3_GIT_TAG}}
+          key: ${{matrix.os}}-${{matrix.compiler}}-z3lib-${{env.Z3_GIT_TAG}}
 
       - name: Build Z3 Solver
         if: steps.cache-z3-solver.outputs.cache-hit != 'true'
         working-directory: ${{github.workspace}}
         run: |
           git clone --branch $Z3_GIT_TAG --depth 1 https://github.com/Z3Prover/z3.git
-          cmake -S z3 -B z3/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=FALSE
+          CC=${{matrix.ccompiler}} CXX=${{matrix.compiler}} cmake -S z3 -B z3/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=FALSE
           cmake --build z3/build --config Release -j3 --target install
 
       - name: Create Build Environment
@@ -63,7 +70,7 @@ jobs:
       - name: Configure CMake
         working-directory: ${{github.workspace}}/build
 
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}/z3lib -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
+        run: cmake ${{github.workspace}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}/z3lib -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
 
       - name: Build
         working-directory: ${{github.workspace}}/build

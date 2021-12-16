@@ -50,7 +50,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{github.workspace}}/z3lib
-          key: ${{matrix.os}}-z3lib-${{env.Z3_GIT_TAG}}
+          key: ${{matrix.os}}-${{matrix.compiler}}-z3lib-${{env.Z3_GIT_TAG}}
 
       - name: Build Z3 Solver
         if: steps.cache-z3-solver.outputs.cache-hit != 'true'
@@ -66,7 +66,7 @@ jobs:
       - name: Configure CMake
         working-directory: ${{github.workspace}}/build
 
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}/z3lib -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
+        run: cmake ${{github.workspace}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}/z3lib -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
 
       - name: Build fiction
         working-directory: ${{github.workspace}}/build
