@@ -7,7 +7,7 @@ on:
 
 defaults:
   run:
-    shell: bash
+    shell: pwsh  # use pwsh as directory handling does not seem to work with bash
 
 env:
   Z3_GIT_TAG: z3-4.8.12
@@ -53,7 +53,6 @@ jobs:
           cmake --build z3\build --config Release -j2 --target install
 
       - name: Create Build Environment
-        shell: pwsh  # use pwsh to create a directory as it does not seem to work with bash
         run: cmake -E make_directory ${{github.workspace}}\build
 
       - name: Configure CMake
