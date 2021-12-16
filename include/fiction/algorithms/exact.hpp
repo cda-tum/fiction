@@ -1471,15 +1471,14 @@ class exact_impl
             {
                 if (params.io_pins)
                 {
-                    network.foreach_pi([this, &restrict_2ddwave_entry_tiles](const auto& pi)
+                    network.foreach_pi([&restrict_2ddwave_entry_tiles](const auto& pi)
                                        { restrict_2ddwave_entry_tiles(pi); });
                 }
                 else
                 {
                     network.foreach_pi(
-                        [this, &restrict_2ddwave_entry_tiles](const auto& pi)
-                        {
-                            network.foreach_fanout(pi, [this, &restrict_2ddwave_entry_tiles](const auto& fn)
+                        [this, &restrict_2ddwave_entry_tiles](const auto& pi) {
+                            network.foreach_fanout(pi, [&restrict_2ddwave_entry_tiles](const auto& fn)
                                                    { restrict_2ddwave_entry_tiles(fn); });
                         });
                 }
@@ -1494,7 +1493,7 @@ class exact_impl
             {
                 if (params.io_pins)
                 {
-                    network.foreach_po([this, &define_length](const auto& po) { define_length(po); });
+                    network.foreach_po([&define_length](const auto& po) { define_length(po); });
                 }
                 else
                 {
