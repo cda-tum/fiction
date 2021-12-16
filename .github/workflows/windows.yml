@@ -58,7 +58,7 @@ jobs:
       - name: Configure CMake
         working-directory: ${{github.workspace}}\build
 
-        run: cmake $GITHUB_WORKSPACE -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}\z3lib -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
+        run: cmake $GITHUB_WORKSPACE -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS="${{github.workspace}}\z3lib\" -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
 
       - name: Build
         working-directory: ${{github.workspace}}\build
