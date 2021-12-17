@@ -42,7 +42,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{github.workspace}}\z3lib
-          key: ${{matrix.os}}-${{matrix.toolset}}-z3lib-${{env.Z3_GIT_TAG}}
+          key: ${{matrix.os}}-${{matrix.toolset}}-z3lib-${{matrix.build_type}}-${{env.Z3_GIT_TAG}}
 
       - name: Build Z3 Solver
         if: steps.cache-z3-solver.outputs.cache-hit != 'true'
@@ -50,7 +50,7 @@ jobs:
         shell: bash
         run: |
           git clone --branch $Z3_GIT_TAG --depth 1 https://github.com/Z3Prover/z3.git
-          CC=clang CXX=clang++ cmake -S z3 -B z3\build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=OFF -DZ3_BUILD_TEST_EXECUTABLES=OFF -DZ3_ENABLE_EXAMPLE_TARGETS=OFF
+          CC=clang CXX=clang++ cmake -S z3 -B z3\build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=OFF -DZ3_BUILD_TEST_EXECUTABLES=OFF -DZ3_ENABLE_EXAMPLE_TARGETS=OFF
           cmake --build z3\build --config Release -j2 --target install
 
       - name: Create Build Environment
