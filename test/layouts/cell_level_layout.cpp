@@ -152,6 +152,26 @@ TEST_CASE("Cell type assignment", "[cell-level-layout]")
     CHECK(!layout.is_empty_cell({1, 2}));
     CHECK(!layout.is_empty_cell({3, 2}));
     CHECK(!layout.is_empty_cell({4, 2}));
+
+    // remove cells by assigning them the empty cell type
+    layout.assign_cell_type({0, 2}, qca_technology::cell_type::EMPTY);
+    layout.assign_cell_type({2, 0}, qca_technology::cell_type::EMPTY);
+    layout.assign_cell_type({2, 1}, qca_technology::cell_type::EMPTY);
+    layout.assign_cell_type({4, 2}, qca_technology::cell_type::EMPTY);
+
+    CHECK(layout.is_empty_cell({0, 2}));
+    CHECK(layout.is_empty_cell({2, 0}));
+    CHECK(layout.is_empty_cell({2, 1}));
+    CHECK(layout.is_empty_cell({4, 2}));
+
+    // this should also have reduced the number of cells, PIs, and POs
+    CHECK(layout.num_cells() == 5);
+    CHECK(layout.num_pis() == 1);
+    CHECK(layout.num_pos() == 0);
+
+    // remove cell names by assigning them the empty name
+    layout.assign_cell_name({2, 4}, "");
+    CHECK(layout.get_cell_name({2, 4}).empty());
 }
 
 TEST_CASE("Cell mode assignment", "[cell-level-layout]")
@@ -206,6 +226,15 @@ TEST_CASE("Cell mode assignment", "[cell-level-layout]")
     CHECK(layout.get_cell_mode({2, 1, 1}) == qca_technology::cell_mode::CROSSOVER);
     CHECK(layout.get_cell_mode({2, 2, 1}) == qca_technology::cell_mode::CROSSOVER);
     CHECK(layout.get_cell_mode({2, 3, 1}) == qca_technology::cell_mode::CROSSOVER);
+
+    // remove cell modes by assigning the normal mode
+    layout.assign_cell_mode({2, 1, 1}, qca_technology::cell_mode::NORMAL);
+    layout.assign_cell_mode({2, 2, 1}, qca_technology::cell_mode::NORMAL);
+    layout.assign_cell_mode({2, 3, 1}, qca_technology::cell_mode::NORMAL);
+
+    CHECK(layout.get_cell_mode({2, 1, 1}) == qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({2, 2, 1}) == qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({2, 3, 1}) == qca_technology::cell_mode::NORMAL);
 }
 
 TEST_CASE("Clocking", "[cell-level-layout]")
