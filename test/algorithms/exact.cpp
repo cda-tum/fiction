@@ -310,12 +310,12 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
                 2);
         }
     }
-    SECTION("Asynchronicity")
-    {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
-            blueprints::maj1_network<mockturtle::aig_network>(),
-            twoddwave(crossings(async(2, configuration<cart_gate_clk_lyt>()))));
-    }
+    //    SECTION("Asynchronicity")
+    //    {
+    //        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
+    //            blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+    //            twoddwave(crossings(border_io(async(2, configuration<cart_gate_clk_lyt>())))));
+    //    }
     //    SECTION("Synchronization elements")
     //    {
     //        CHECK(generate_layout<cart_gate_clk_lyt>(blueprints::one_to_five_path_difference_network<topology_network>(),
