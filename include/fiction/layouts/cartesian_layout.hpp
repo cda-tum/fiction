@@ -19,7 +19,7 @@
 namespace fiction
 {
 /**
- * A layout type that utilizes Cartesian coordinates. It's faces are organized in the following way:
+ * A layout type that utilizes Cartesian coordinates. Its faces are organized in the following way:
  *
  * \verbatim
  *
@@ -76,27 +76,47 @@ class cartesian_layout
 #pragma endregion
 
 #pragma region Structural properties
-
+    /**
+     * Returns the layout's x-dimension, i.e., returns the biggest x-value that still belongs to the layout.
+     *
+     * @return x-dimension.
+     */
     [[nodiscard]] auto x() const noexcept
     {
         return strg->dimension.x;
     }
-
+    /**
+     * Returns the layout's y-dimension, i.e., returns the biggest y-value that still belongs to the layout.
+     *
+     * @return y-dimension.
+     */
     [[nodiscard]] auto y() const noexcept
     {
         return strg->dimension.y;
     }
-
+    /**
+     * Returns the layout's z-dimension, i.e., returns the biggest z-value that still belongs to the layout.
+     *
+     * @return z-dimension.
+     */
     [[nodiscard]] auto z() const noexcept
     {
         return strg->dimension.z;
     }
-
+    /**
+     * Returns the layout's number of faces which are equal to (x + 1) * (y + 1).
+     *
+     * @return Area of layout.
+     */
     [[nodiscard]] auto area() const noexcept
     {
         return (x() + 1) * (y() + 1);
     }
-
+    /**
+     * Updates the layout's dimensions, effectively resizing it.
+     *
+     * @param ar New aspect ratio.
+     */
     void resize(const aspect_ratio& ar) noexcept
     {
         strg->dimension = ar;
@@ -105,7 +125,13 @@ class cartesian_layout
 #pragma endregion
 
 #pragma region Cardinal operations
-
+    /**
+     * Returns the coordinate that is directly adjacent in northern direction of a given coordinate c, i.e., the face
+     * whose y-dimension is lower by 1. If c's y-dimension is already at minimum, c is returned instead.
+     *
+     * @param c Coordinate whose northern counterpart is desired.
+     * @return Coordinate adjacent and north of c.
+     */
     [[nodiscard]] constexpr CartesianCoordinateType north(const CartesianCoordinateType& c) const noexcept
     {
         if (c.y == 0ull)
@@ -116,10 +142,17 @@ class cartesian_layout
 
         return nc;
     }
-
+    /**
+     * Returns the coordinate that is located in north-eastern direction of a given coordinate c, i.e., the face
+     * whose x-dimension is higher by 1 and whose y-dimension is lower by 1. If c's x-dimension is already at maximum or
+     * c's y-dimension is already at minimum, c is returned instead.
+     *
+     * @param c Coordinate whose north-eastern counterpart is desired.
+     * @return Coordinate directly north-eastern of c.
+     */
     [[nodiscard]] constexpr CartesianCoordinateType north_east(const CartesianCoordinateType& c) const noexcept
     {
-        if (c.x == 0ull || c.y == 0ull)
+        if (c.x == x() || c.y == 0ull)
             return c;
 
         auto nec = c;
@@ -128,7 +161,13 @@ class cartesian_layout
 
         return nec;
     }
-
+    /**
+     * Returns the coordinate that is directly adjacent in eastern direction of a given coordinate c, i.e., the face
+     * whose x-dimension is higher by 1. If c's x-dimension is already at maximum, c is returned instead.
+     *
+     * @param c Coordinate whose eastern counterpart is desired.
+     * @return Coordinate adjacent and east of c.
+     */
     [[nodiscard]] CartesianCoordinateType east(const CartesianCoordinateType& c) const noexcept
     {
         auto ec = c;
@@ -140,7 +179,14 @@ class cartesian_layout
 
         return ec;
     }
-
+    /**
+     * Returns the coordinate that is located in south-eastern direction of a given coordinate c, i.e., the face
+     * whose x-dimension and y-dimension are higher by 1. If c's x-dimension or y-dimension are already at maximum, c is
+     * returned instead.
+     *
+     * @param c Coordinate whose south-eastern counterpart is desired.
+     * @return Coordinate directly south-eastern of c.
+     */
     [[nodiscard]] CartesianCoordinateType south_east(const CartesianCoordinateType& c) const noexcept
     {
         auto sec = c;
@@ -155,7 +201,13 @@ class cartesian_layout
 
         return sec;
     }
-
+    /**
+     * Returns the coordinate that is directly adjacent in southern direction of a given coordinate c, i.e., the face
+     * whose y-dimension is higher by 1. If c's y-dimension is already at maximum, c is returned instead.
+     *
+     * @param c Coordinate whose southern counterpart is desired.
+     * @return Coordinate adjacent and south of c.
+     */
     [[nodiscard]] CartesianCoordinateType south(const CartesianCoordinateType& c) const noexcept
     {
         auto sc = c;
@@ -167,7 +219,14 @@ class cartesian_layout
 
         return sc;
     }
-
+    /**
+     * Returns the coordinate that is located in south-western direction of a given coordinate c, i.e., the face
+     * whose x-dimension is lower by 1 and whose y-dimension is higher by 1. If c's x-dimension is already at minimum or
+     * c's y-dimension is already at maximum, c is returned instead.
+     *
+     * @param c Coordinate whose south-western counterpart is desired.
+     * @return Coordinate directly south-western of c.
+     */
     [[nodiscard]] CartesianCoordinateType south_west(const CartesianCoordinateType& c) const noexcept
     {
         auto swc = c;
@@ -182,7 +241,13 @@ class cartesian_layout
 
         return swc;
     }
-
+    /**
+     * Returns the coordinate that is directly adjacent in western direction of a given coordinate c, i.e., the face
+     * whose x-dimension is lower by 1. If c's x-dimension is already at minimum, c is returned instead.
+     *
+     * @param c Coordinate whose western counterpart is desired.
+     * @return Coordinate adjacent and west of c.
+     */
     [[nodiscard]] constexpr CartesianCoordinateType west(const CartesianCoordinateType& c) const noexcept
     {
         if (c.x == 0ull)
@@ -193,7 +258,14 @@ class cartesian_layout
 
         return wc;
     }
-
+    /**
+     * Returns the coordinate that is located in north-western direction of a given coordinate c, i.e., the face
+     * whose x-dimension and y-dimension are lower by 1. If c's x-dimension or y-dimension are already at minimum, c is
+     * returned instead.
+     *
+     * @param c Coordinate whose north-western counterpart is desired.
+     * @return Coordinate directly north-western of c.
+     */
     [[nodiscard]] constexpr CartesianCoordinateType north_west(const CartesianCoordinateType& c) const noexcept
     {
         if (c.x == 0ull || c.y == 0ull)
@@ -205,7 +277,13 @@ class cartesian_layout
 
         return nwc;
     }
-
+    /**
+     * Returns the coordinate that is directly above a given coordinate c, i.e., the face whose z-dimension is higher
+     * by 1. If c's z-dimension is already at maximum, c is returned instead.
+     *
+     * @param c Coordinate whose above counterpart is desired.
+     * @return Coordinate directly above c.
+     */
     [[nodiscard]] CartesianCoordinateType above(const CartesianCoordinateType& c) const noexcept
     {
         auto ac = c;
@@ -217,7 +295,13 @@ class cartesian_layout
 
         return ac;
     }
-
+    /**
+     * Returns the coordinate that is directly below a given coordinate c, i.e., the face whose z-dimension is lower
+     * by 1. If c's z-dimension is already at minimum, c is returned instead.
+     *
+     * @param c Coordinate whose below counterpart is desired.
+     * @return Coordinate directly below c.
+     */
     [[nodiscard]] constexpr CartesianCoordinateType below(const CartesianCoordinateType& c) const noexcept
     {
         if (c.z == 0ull)
