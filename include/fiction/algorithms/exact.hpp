@@ -830,7 +830,7 @@ class exact_impl
          */
         [[nodiscard]] z3::expr mk_as_if_se(const z3::expr& constraint, const tile<Lyt>& t) const
         {
-            if (const auto east = layout.is_eastern_border(t), south = layout.is_southern_border(t); east && south)
+            if (const auto east = layout.is_at_eastern_border(t), south = layout.is_at_southern_border(t); east && south)
             {
                 return mk_as(constraint, lit().e and lit().s);
             }
@@ -1514,7 +1514,7 @@ class exact_impl
             layout.foreach_ground_tile(
                 [this](const auto& t)
                 {
-                    if (layout.is_eastern_border(t) || layout.is_southern_border(t) || is_updated_tile(t))
+                    if (layout.is_at_eastern_border(t) || layout.is_at_southern_border(t) || is_updated_tile(t))
                     {
                         if (layout.is_regularly_clocked())
                         {
@@ -1528,7 +1528,7 @@ class exact_impl
                                             layout.in_degree(t) < network_in_degree(n))
                                         {
                                             // if t is at eastern/southern border, its adjacencies might change
-                                            if (layout.is_eastern_border(t) || layout.is_southern_border(t))
+                                            if (layout.is_at_eastern_border(t) || layout.is_at_southern_border(t))
                                             {
                                                 // add restriction as assumption only
                                                 check_point->assumptions.push_back(not get_tn(t, n));
@@ -1551,7 +1551,8 @@ class exact_impl
                                                  if (layout.out_degree(t) == 0 || layout.in_degree(t) == 0)
                                                  {
                                                      // if t is at eastern/southern border, its adjacencies might change
-                                                     if (layout.is_eastern_border(t) || layout.is_southern_border(t))
+                                                     if (layout.is_at_eastern_border(t) ||
+                                                         layout.is_at_southern_border(t))
                                                      {
                                                          // add restriction as assumption only
                                                          check_point->assumptions.push_back(not get_te(t, e));
@@ -1578,7 +1579,7 @@ class exact_impl
                                         if (tile_degree < network_out_degree(n) + network_in_degree(n))
                                         {
                                             // if t is at eastern/southern border, its adjacencies might change
-                                            if (layout.is_eastern_border(t) || layout.is_southern_border(t))
+                                            if (layout.is_at_eastern_border(t) || layout.is_at_southern_border(t))
                                             {
                                                 // add restriction as assumption only
                                                 check_point->assumptions.push_back(not get_tn(t, n));
@@ -1960,7 +1961,7 @@ class exact_impl
                 apply_to_added_and_updated_tiles(
                     [this, &n](const auto& t)
                     {
-                        if (!layout.is_border(t))
+                        if (!layout.is_at_any_border(t))
                         {
                             solver->add(not get_tn(t, n));
                         }
@@ -1973,7 +1974,7 @@ class exact_impl
                 apply_to_added_tiles(
                     [this, &n](const auto& t)
                     {
-                        if (!layout.is_northern_border(t))
+                        if (!layout.is_at_northern_border(t))
                         {
                             solver->add(not get_tn(t, n));
                         }
@@ -1986,7 +1987,7 @@ class exact_impl
                 apply_to_added_tiles(
                     [this, &n](const auto& t)
                     {
-                        if (!layout.is_western_border(t))
+                        if (!layout.is_at_western_border(t))
                         {
                             solver->add(not get_tn(t, n));
                         }
@@ -1998,7 +1999,7 @@ class exact_impl
                 apply_to_added_and_updated_tiles(
                     [this, &n](const auto& t)
                     {
-                        if (!layout.is_eastern_border(t))
+                        if (!layout.is_at_eastern_border(t))
                         {
                             solver->add(not get_tn(t, n));
                         }
@@ -2010,7 +2011,7 @@ class exact_impl
                 apply_to_added_and_updated_tiles(
                     [this, &n](const auto& t)
                     {
-                        if (!layout.is_southern_border(t))
+                        if (!layout.is_at_southern_border(t))
                         {
                             solver->add(not get_tn(t, n));
                         }

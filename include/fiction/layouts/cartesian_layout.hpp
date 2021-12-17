@@ -312,131 +312,269 @@ class cartesian_layout
 
         return bc;
     }
-
+    /**
+     * Returns true iff coordinate c2 is directly north of coordinate c1.
+     *
+     * @param c1 Base coordinate.
+     * @param c2 Coordinate to test for its location in relation to c1.
+     * @return True iff c2 is directly north of c1.
+     */
     [[nodiscard]] constexpr bool is_north_of(const CartesianCoordinateType& c1,
                                              const CartesianCoordinateType& c2) const noexcept
     {
         return c1 != c2 && north(c1) == c2;
     }
-
+    /**
+     * Returns true iff coordinate c2 is directly east of coordinate c1.
+     *
+     * @param c1 Base coordinate.
+     * @param c2 Coordinate to test for its location in relation to c1.
+     * @return True iff c2 is directly east of c1.
+     */
     [[nodiscard]] bool is_east_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return c1 != c2 && east(c1) == c2;
     }
-
+    /**
+     * Returns true iff coordinate c2 is directly south of coordinate c1.
+     *
+     * @param c1 Base coordinate.
+     * @param c2 Coordinate to test for its location in relation to c1.
+     * @return True iff c2 is directly south of c1.
+     */
     [[nodiscard]] bool is_south_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return c1 != c2 && south(c1) == c2;
     }
-
+    /**
+     * Returns true iff coordinate c2 is directly west of coordinate c1.
+     *
+     * @param c1 Base coordinate.
+     * @param c2 Coordinate to test for its location in relation to c1.
+     * @return True iff c2 is directly west of c1.
+     */
     [[nodiscard]] constexpr bool is_west_of(const CartesianCoordinateType& c1,
                                             const CartesianCoordinateType& c2) const noexcept
     {
         return c1 != c2 && west(c1) == c2;
     }
-
+    /**
+     * Returns true iff coordinate c2 is either directly north, east, south, or west of coordinate c1.
+     *
+     * @param c1 Base coordinate.
+     * @param c2 Coordinate to test for its location in relation to c1.
+     * @return True iff c2 is either directly north, east, south, or west of c1.
+     */
     [[nodiscard]] bool is_adjacent_of(const CartesianCoordinateType& c1,
                                       const CartesianCoordinateType& c2) const noexcept
     {
         return is_north_of(c1, c2) || is_east_of(c1, c2) || is_south_of(c1, c2) || is_west_of(c1, c2);
     }
-
+    /**
+     * Similar to is_adjacent_of but also considers c1's elevation, i.e., if c2 is adjacent to above(c1) or below(c1).
+     *
+     * @param c1 Base coordinate.
+     * @param c2 Coordinate to test for its location in relation to c1.
+     * @return True iff c2 is either directly north, east, south, or west of c1 or c1's elevations.
+     */
     [[nodiscard]] bool is_adjacent_elevation_of(const CartesianCoordinateType& c1,
                                                 const CartesianCoordinateType& c2) const noexcept
     {
         return is_adjacent_of(c1, c2) || is_adjacent_of(above(c1), c2) || is_adjacent_of(below(c1), c2);
     }
-
-    [[nodiscard]] bool is_above_of(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
+    /**
+     * Returns true iff coordinate c2 is directly above coordinate c1.
+     *
+     * @param c1 Base coordinate.
+     * @param c2 Coordinate to test for its location in relation to c1.
+     * @return True iff c2 is directly above c1.
+     */
+    [[nodiscard]] bool is_above(const CartesianCoordinateType& c1, const CartesianCoordinateType& c2) const noexcept
     {
         return c1 != c2 && above(c1) == c2;
     }
-
-    [[nodiscard]] constexpr bool is_below_of(const CartesianCoordinateType& c1,
-                                             const CartesianCoordinateType& c2) const noexcept
+    /**
+     * Returns true iff coordinate c2 is directly below coordinate c1.
+     *
+     * @param c1 Base coordinate.
+     * @param c2 Coordinate to test for its location in relation to c1.
+     * @return True iff c2 is directly below c1.
+     */
+    [[nodiscard]] constexpr bool is_below(const CartesianCoordinateType& c1,
+                                          const CartesianCoordinateType& c2) const noexcept
     {
         return c1 != c2 && below(c1) == c2;
     }
-
+    /**
+     * Returns true iff coordinate c2 is somewhere north of coordinate c1.
+     *
+     * @param c1 Base coordinate.
+     * @param c2 Coordinate to test for its location in relation to c1.
+     * @return True iff c2 is somewhere north of c1.
+     */
     [[nodiscard]] constexpr bool is_northwards_of(const CartesianCoordinateType& c1,
                                                   const CartesianCoordinateType& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y > c2.y) && (c1.x == c2.x);
     }
-
+    /**
+     * Returns true iff coordinate c2 is somewhere east of coordinate c1.
+     *
+     * @param c1 Base coordinate.
+     * @param c2 Coordinate to test for its location in relation to c1.
+     * @return True iff c2 is somewhere east of c1.
+     */
     [[nodiscard]] constexpr bool is_eastwards_of(const CartesianCoordinateType& c1,
                                                  const CartesianCoordinateType& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x < c2.x);
     }
-
+    /**
+     * Returns true iff coordinate c2 is somewhere south of coordinate c1.
+     *
+     * @param c1 Base coordinate.
+     * @param c2 Coordinate to test for its location in relation to c1.
+     * @return True iff c2 is somewhere south of c1.
+     */
     [[nodiscard]] constexpr bool is_southwards_of(const CartesianCoordinateType& c1,
                                                   const CartesianCoordinateType& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y < c2.y) && (c1.x == c2.x);
     }
-
+    /**
+     * Returns true iff coordinate c2 is somewhere west of coordinate c1.
+     *
+     * @param c1 Base coordinate.
+     * @param c2 Coordinate to test for its location in relation to c1.
+     * @return True iff c2 is somewhere west of c1.
+     */
     [[nodiscard]] constexpr bool is_westwards_of(const CartesianCoordinateType& c1,
                                                  const CartesianCoordinateType& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x > c2.x);
     }
-
-    [[nodiscard]] constexpr bool is_northern_border(const CartesianCoordinateType& c) const noexcept
+    /**
+     * Returns whether the given coordinate is located at the layout's northern border where y is minimal.
+     *
+     * @param c Coordinate to check for border location.
+     * @return True iff c is located at the layout's northern border.
+     */
+    [[nodiscard]] constexpr bool is_at_northern_border(const CartesianCoordinateType& c) const noexcept
     {
         return c.y == 0ull;
     }
-
-    [[nodiscard]] bool is_eastern_border(const CartesianCoordinateType& c) const noexcept
+    /**
+     * Returns whether the given coordinate is located at the layout's eastern border where x is maximal.
+     *
+     * @param c Coordinate to check for border location.
+     * @return True iff c is located at the layout's northern border.
+     */
+    [[nodiscard]] bool is_at_eastern_border(const CartesianCoordinateType& c) const noexcept
     {
         return c.x == x();
     }
-
-    [[nodiscard]] bool is_southern_border(const CartesianCoordinateType& c) const noexcept
+    /**
+     * Returns whether the given coordinate is located at the layout's southern border where y is maximal.
+     *
+     * @param c Coordinate to check for border location.
+     * @return True iff c is located at the layout's southern border.
+     */
+    [[nodiscard]] bool is_at_southern_border(const CartesianCoordinateType& c) const noexcept
     {
         return c.y == y();
     }
-
-    [[nodiscard]] constexpr bool is_western_border(const CartesianCoordinateType& c) const noexcept
+    /**
+     * Returns whether the given coordinate is located at the layout's western border where x is minimal.
+     *
+     * @param c Coordinate to check for border location.
+     * @return True iff c is located at the layout's western border.
+     */
+    [[nodiscard]] constexpr bool is_at_western_border(const CartesianCoordinateType& c) const noexcept
     {
         return c.x == 0ull;
     }
-
-    [[nodiscard]] bool is_border(const CartesianCoordinateType& c) const noexcept
+    /**
+     * Returns whether the given coordinate is located at any of the layout's borders where x or y are either minimal or
+     * maximal.
+     *
+     * @param c Coordinate to check for border location.
+     * @return True iff c is located at any of the layout's borders.
+     */
+    [[nodiscard]] bool is_at_any_border(const CartesianCoordinateType& c) const noexcept
     {
-        return is_northern_border(c) || is_eastern_border(c) || is_southern_border(c) || is_western_border(c);
+        return is_at_northern_border(c) || is_at_eastern_border(c) || is_at_southern_border(c) ||
+               is_at_western_border(c);
     }
-
+    /**
+     * Returns the coordinate with the same x and z values as a given coordinate but that is located at the layout's
+     * northern border.
+     *
+     * @param c Coordinate whose border counterpart is desired.
+     * @return The northern border equivalent of c.
+     */
     [[nodiscard]] CartesianCoordinateType northern_border_of(const CartesianCoordinateType& c) const noexcept
     {
         return {c.x, 0ull, c.z};
     }
-
+    /**
+     * Returns the coordinate with the same y and z values as a given coordinate but that is located at the layout's
+     * eastern border.
+     *
+     * @param c Coordinate whose border counterpart is desired.
+     * @return The eastern border equivalent of c.
+     */
     [[nodiscard]] CartesianCoordinateType eastern_border_of(const CartesianCoordinateType& c) const noexcept
     {
         return {x(), c.y, c.z};
     }
-
+    /**
+     * Returns the coordinate with the same x and z values as a given coordinate but that is located at the layout's
+     * southern border.
+     *
+     * @param c Coordinate whose border counterpart is desired.
+     * @return The southern border equivalent of c.
+     */
     [[nodiscard]] CartesianCoordinateType southern_border_of(const CartesianCoordinateType& c) const noexcept
     {
         return {c.x, y(), c.z};
     }
-
+    /**
+     * Returns the coordinate with the same y and z values as a given coordinate but that is located at the layout's
+     * western border.
+     *
+     * @param c Coordinate whose border counterpart is desired.
+     * @return The western border equivalent of c.
+     */
     [[nodiscard]] CartesianCoordinateType western_border_of(const CartesianCoordinateType& c) const noexcept
     {
         return {0ull, c.y, c.z};
     }
-
+    /**
+     * Returns whether the given coordinate is located in the ground layer where z is minimal.
+     *
+     * @param c Coordinate to check for elevation.
+     * @return True iff c is in ground layer.
+     */
     [[nodiscard]] constexpr bool is_ground_layer(const CartesianCoordinateType& c) const noexcept
     {
         return c.z == 0ull;
     }
-
+    /**
+     * Returns whether the given coordinate is located in a crossing layer where z is not minimal.
+     *
+     * @param c Coordinate to check for elevation.
+     * @return True iff c is in a crossing layer.
+     */
     [[nodiscard]] constexpr bool is_crossing_layer(const CartesianCoordinateType& c) const noexcept
     {
         return c.z > 0;
     }
-
+    /**
+     * Returns whether the given coordinate is located within the layout bounds.
+     *
+     * @param c Coordinate to check for boundary.
+     * @return True iff c is located within the layout bounds.
+     */
     [[nodiscard]] constexpr bool is_within_bounds(const CartesianCoordinateType& c) const noexcept
     {
         return c.x <= x() && c.y <= y() && c.z <= z();
@@ -445,7 +583,18 @@ class cartesian_layout
 #pragma endregion
 
 #pragma region Iteration
-
+    /**
+     * Returns a range of all coordinates accessible in the layout between start and stop. If no values are provided,
+     * all coordinates in the layout will be included. The returned iterator range points to the first and last
+     * coordinate, respectively. The range object can be used within a for-each loop. Incrementing the iterator is
+     * equivalent to nested for loops in the order z, y, x. Consequently, the iteration will happen inside out, i.e., x
+     * will be iterated first, then y, then z.
+     *
+     * @param start First coordinate to include in the range of all coordinates.
+     * @param stop Last coordinate to include in the range of all coordinates.
+     * @return An iterator range from start to stop. If they are not provided, the first/last coordinate is used as a
+     * default.
+     */
     [[nodiscard]] auto coordinates(const CartesianCoordinateType& start = {},
                                    const CartesianCoordinateType& stop  = {}) const
     {
@@ -453,7 +602,15 @@ class cartesian_layout
             cartesian::coord_iterator{strg->dimension, start.is_dead() ? CartesianCoordinateType{0, 0} : start},
             cartesian::coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop})};
     }
-
+    /**
+     * Applies a function to all coordinates accessible in the layout between start and stop. The iteration order is the
+     * same as for the coordinates function.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * @param fn Functor to apply to each coordinate in the range.
+     * @param start First coordinate to include in the range of all coordinates.
+     * @param stop Last coordinate to include in the range of all coordinates.
+     */
     template <typename Fn>
     void foreach_coordinate(Fn&& fn, const CartesianCoordinateType& start = {},
                             const CartesianCoordinateType& stop = {}) const
@@ -462,7 +619,15 @@ class cartesian_layout
             cartesian::coord_iterator{strg->dimension, start.is_dead() ? CartesianCoordinateType{0, 0} : start},
             cartesian::coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, fn);
     }
-
+    /**
+     * Returns a range of all coordinates accessible in the layout's ground layer between start and stop. The iteration
+     * order is the same as for the coordinates function but without the z dimension.
+     *
+     * @param start First coordinate to include in the range of all ground coordinates.
+     * @param stop Last coordinate to include in the range of all ground coordinates.
+     * @return An iterator range from start to stop. If they are not provided, the first/last coordinate in the ground
+     * layer is used as a default.
+     */
     [[nodiscard]] auto ground_coordinates(const CartesianCoordinateType& start = {},
                                           const CartesianCoordinateType& stop  = {}) const
     {
@@ -474,7 +639,15 @@ class cartesian_layout
             cartesian::coord_iterator{ground_layer, start.is_dead() ? CartesianCoordinateType{0, 0} : start},
             cartesian::coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop})};
     }
-
+    /**
+     * Applies a function to all coordinates accessible in the layout's ground layer between start and stop. The
+     * iteration order is the same as for the ground_coordinates function.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * @param fn Functor to apply to each coordinate in the range.
+     * @param start First coordinate to include in the range of all ground coordinates.
+     * @param stop Last coordinate to include in the range of all ground coordinates.
+     */
     template <typename Fn>
     void foreach_ground_coordinate(Fn&& fn, const CartesianCoordinateType& start = {},
                                    const CartesianCoordinateType& stop = {}) const
@@ -487,7 +660,15 @@ class cartesian_layout
             cartesian::coord_iterator{ground_layer, start.is_dead() ? CartesianCoordinateType{0, 0} : start},
             cartesian::coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
     }
-
+    /**
+     * Returns a container of a given type that contains all coordinates that are adjacent to a given one. Thereby, only
+     * cardinal directions are being considered, i.e., the container contains all coordinates ac for which
+     * is_adjacent(c, ac) returns true.
+     *
+     * @tparam Container Container type that has to provide an insert member function.
+     * @param c Coordinate whose adjacent ones are desired.
+     * @return A container of type Container that contains all of c's adjacent coordinates.
+     */
     template <typename Container>
     Container adjacent_coordinates(const CartesianCoordinateType& c) const noexcept
     {
@@ -508,7 +689,13 @@ class cartesian_layout
 
         return cnt;
     }
-
+    /**
+     * Applies a function to all coordinates adjacent to a given one in accordance with adjacent_coordinates.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * @param c Coordinate whose adjacent ones are desired.
+     * @param fn Functor to apply to each of c's adjacent coordinates.
+     */
     template <typename Fn>
     void foreach_adjacent_coordinate(const CartesianCoordinateType& c, Fn&& fn) const
     {
@@ -516,7 +703,15 @@ class cartesian_layout
 
         mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
     }
-
+    /**
+     * Returns a container of a given type that contains all coordinates pairs of opposing adjacent coordinates with
+     * respect to a given one. In this Cartesian layout, the container will contain (north(c), south(c)) and (east(c),
+     * west(c)). This function comes in handy when straight lines on the layout are to be examined.
+     *
+     * @tparam Container Container type that has to provide an insert member function and holds pairs of coordinates.
+     * @param c Coordinate whose opposite ones are desired.
+     * @return A container of type Container that contains pairs of c's opposing coordinates.
+     */
     template <typename Container>
     Container adjacent_opposite_coordinates(const CartesianCoordinateType& c) const noexcept
     {
@@ -535,7 +730,14 @@ class cartesian_layout
 
         return cnt;
     }
-
+    /**
+     * Applies a function to all opposing coordinate pairs adjacent to a given one in accordance with
+     * adjacent_opposite_coordinates.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * @param c Coordinate whose opposite adjacent ones are desired.
+     * @param fn Functor to apply to each of c's opposite adjacent coordinate pairs.
+     */
     template <typename Fn>
     void foreach_adjacent_opposite_coordinates(const CartesianCoordinateType& c, Fn&& fn) const
     {

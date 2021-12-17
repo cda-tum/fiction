@@ -407,13 +407,13 @@ class hexagonal_layout
         return is_adjacent_of(c1, c2) || is_adjacent_of(above(c1), c2) || is_adjacent_of(below(c1), c2);
     }
 
-    //    [[nodiscard]] bool is_above_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+    //    [[nodiscard]] bool is_above(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
     //    {
     //        return c1 != c2 && above(c1) == c2;
     //    }
     //
-    //    [[nodiscard]] constexpr bool is_below_of(const OffsetCoordinateType& c1,
-    //                                             const OffsetCoordinateType& c2) const noexcept
+    //    [[nodiscard]] constexpr bool is_below(const OffsetCoordinateType& c1,
+    //                                          const OffsetCoordinateType& c2) const noexcept
     //    {
     //        return c1 != c2 && below(c1) == c2;
     //    }
@@ -442,29 +442,30 @@ class hexagonal_layout
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x > c2.x);
     }
 
-    [[nodiscard]] constexpr bool is_northern_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_at_northern_border(const OffsetCoordinateType& c) const noexcept
     {
         return c.y == 0ull;
     }
 
-    [[nodiscard]] bool is_eastern_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_at_eastern_border(const OffsetCoordinateType& c) const noexcept
     {
         return c.x == x();
     }
 
-    [[nodiscard]] bool is_southern_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_at_southern_border(const OffsetCoordinateType& c) const noexcept
     {
         return c.y == y();
     }
 
-    [[nodiscard]] constexpr bool is_western_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_at_western_border(const OffsetCoordinateType& c) const noexcept
     {
         return c.x == 0ull;
     }
 
-    [[nodiscard]] bool is_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_at_any_border(const OffsetCoordinateType& c) const noexcept
     {
-        return is_northern_border(c) || is_eastern_border(c) || is_southern_border(c) || is_western_border(c);
+        return is_at_northern_border(c) || is_at_eastern_border(c) || is_at_southern_border(c) ||
+               is_at_western_border(c);
     }
 
     [[nodiscard]] OffsetCoordinateType northern_border_of(const OffsetCoordinateType& c) const noexcept

@@ -565,7 +565,7 @@ class orthogonal_impl
                         }
 
                         // check if PO position is located at the border
-                        if (layout.is_eastern_border(po_tile))
+                        if (layout.is_at_eastern_border(po_tile))
                         {
                             layout.create_po(n_s,
                                              ctn.color_ntk.has_output_name(po_counter) ?
