@@ -50,7 +50,7 @@ jobs:
         shell: bash
         run: |
           git clone --branch $Z3_GIT_TAG --depth 1 https://github.com/Z3Prover/z3.git
-          cmake -S z3 -B z3\build -T ${{matrix.toolset}} -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=OFF -DZ3_BUILD_TEST_EXECUTABLES=OFF -DZ3_ENABLE_EXAMPLE_TARGETS=OFF
+          cmake -S z3 -B z3\build -T ${{matrix.toolset}} -DCMAKE_BUILD_TYPE=Release -DWARNINGS_AS_ERRORS=OFF -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=OFF -DZ3_BUILD_TEST_EXECUTABLES=OFF -DZ3_ENABLE_EXAMPLE_TARGETS=OFF
           cmake --build z3\build --config Release -j2 --target install
 
       - name: Create Build Environment
