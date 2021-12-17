@@ -292,13 +292,26 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         const coordinate<layout> bnwc{0, 0};
 
         CHECK(lyt.north(c) == nc);
+        CHECK(lyt.is_north_of(c, nc));
         CHECK(lyt.north_east(c) == nec);
         CHECK(lyt.east(c) == ec);
+        CHECK(lyt.is_east_of(c, ec));
         CHECK(lyt.south_east(c) == sec);
         CHECK(lyt.south(c) == sc);
+        CHECK(lyt.is_south_of(c, sc));
         CHECK(lyt.south_west(c) == swc);
         CHECK(lyt.west(c) == wc);
+        CHECK(lyt.is_west_of(c, wc));
         CHECK(lyt.north_west(c) == nwc);
+
+        CHECK(lyt.is_adjacent_of(c, nc));
+        CHECK(lyt.is_adjacent_of(c, nec));
+        CHECK(lyt.is_adjacent_of(c, ec));
+        CHECK(lyt.is_adjacent_of(c, sec));
+        CHECK(lyt.is_adjacent_of(c, sc));
+        CHECK(lyt.is_adjacent_of(c, swc));
+        CHECK(lyt.is_adjacent_of(c, wc));
+        CHECK(lyt.is_adjacent_of(c, nwc));
 
         // edge cases
         CHECK(lyt.north(bnc) == bnc);
@@ -336,13 +349,26 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         const coordinate<layout> bnwc{0, 0};
 
         CHECK(lyt.north(c) == nc);
+        CHECK(lyt.is_north_of(c, nc));
         CHECK(lyt.north_east(c) == nec);
         CHECK(lyt.east(c) == ec);
+        CHECK(lyt.is_east_of(c, ec));
         CHECK(lyt.south_east(c) == sec);
         CHECK(lyt.south(c) == sc);
+        CHECK(lyt.is_south_of(c, sc));
         CHECK(lyt.south_west(c) == swc);
         CHECK(lyt.west(c) == wc);
+        CHECK(lyt.is_west_of(c, wc));
         CHECK(lyt.north_west(c) == nwc);
+
+        CHECK(lyt.is_adjacent_of(c, nc));
+        CHECK(lyt.is_adjacent_of(c, nec));
+        CHECK(lyt.is_adjacent_of(c, ec));
+        CHECK(lyt.is_adjacent_of(c, sec));
+        CHECK(lyt.is_adjacent_of(c, sc));
+        CHECK(lyt.is_adjacent_of(c, swc));
+        CHECK(lyt.is_adjacent_of(c, wc));
+        CHECK(lyt.is_adjacent_of(c, nwc));
 
         // edge cases
         CHECK(lyt.north(bnc) == bnc);
@@ -380,14 +406,26 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         const coordinate<layout> bnwc{0, 0};
 
         CHECK(lyt.north(c) == nc);
+        CHECK(lyt.is_north_of(c, nc));
         CHECK(lyt.north_east(c) == nec);
         CHECK(lyt.east(c) == ec);
-
+        CHECK(lyt.is_east_of(c, ec));
         CHECK(lyt.south_east(c) == sec);
         CHECK(lyt.south(c) == sc);
+        CHECK(lyt.is_south_of(c, sc));
         CHECK(lyt.south_west(c) == swc);
         CHECK(lyt.west(c) == wc);
+        CHECK(lyt.is_west_of(c, wc));
         CHECK(lyt.north_west(c) == nwc);
+
+        CHECK(lyt.is_adjacent_of(c, nc));
+        CHECK(lyt.is_adjacent_of(c, nec));
+        CHECK(lyt.is_adjacent_of(c, ec));
+        CHECK(lyt.is_adjacent_of(c, sec));
+        CHECK(lyt.is_adjacent_of(c, sc));
+        CHECK(lyt.is_adjacent_of(c, swc));
+        CHECK(lyt.is_adjacent_of(c, wc));
+        CHECK(lyt.is_adjacent_of(c, nwc));
 
         // edge cases
         CHECK(lyt.north(bnc) == bnc);
@@ -425,13 +463,26 @@ TEST_CASE("Cardinal operations", "[hexagonal-layout]")
         const coordinate<layout> bnwc{0, 0};
 
         CHECK(lyt.north(c) == nc);
+        CHECK(lyt.is_north_of(c, nc));
         CHECK(lyt.north_east(c) == nec);
         CHECK(lyt.east(c) == ec);
+        CHECK(lyt.is_east_of(c, ec));
         CHECK(lyt.south_east(c) == sec);
         CHECK(lyt.south(c) == sc);
+        CHECK(lyt.is_south_of(c, sc));
         CHECK(lyt.south_west(c) == swc);
         CHECK(lyt.west(c) == wc);
+        CHECK(lyt.is_west_of(c, wc));
         CHECK(lyt.north_west(c) == nwc);
+
+        CHECK(lyt.is_adjacent_of(c, nc));
+        CHECK(lyt.is_adjacent_of(c, nec));
+        CHECK(lyt.is_adjacent_of(c, ec));
+        CHECK(lyt.is_adjacent_of(c, sec));
+        CHECK(lyt.is_adjacent_of(c, sc));
+        CHECK(lyt.is_adjacent_of(c, swc));
+        CHECK(lyt.is_adjacent_of(c, wc));
+        CHECK(lyt.is_adjacent_of(c, nwc));
 
         // edge cases
         CHECK(lyt.north(bnc) == bnc);
