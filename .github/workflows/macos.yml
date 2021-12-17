@@ -54,14 +54,14 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{github.workspace}}/z3lib
-          key: ${{matrix.os}}-${{matrix.compiler}}-z3lib-${{env.Z3_GIT_TAG}}
+          key: ${{matrix.os}}-${{matrix.compiler}}-z3lib-${{env.Z3_GIT_TAG}}  # use compiler in key because linking z3 to fiction when compiled differently does not work under macOS
 
       - name: Build Z3 Solver
         if: steps.cache-z3-solver.outputs.cache-hit != 'true'
         working-directory: ${{github.workspace}}
         run: |
           git clone --branch $Z3_GIT_TAG --depth 1 https://github.com/Z3Prover/z3.git
-          CC=${{matrix.ccompiler}} CXX=${{matrix.compiler}} cmake -S z3 -B z3/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=OFF -DZ3_BUILD_TEST_EXECUTABLES=OFF -DZ3_ENABLE_EXAMPLE_TARGETS=OFF
+          CC=${{matrix.ccompiler}} CXX=${{matrix.compiler}} cmake -S z3 -B z3/build -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=OFF -DZ3_BUILD_TEST_EXECUTABLES=OFF -DZ3_ENABLE_EXAMPLE_TARGETS=OFF
           cmake --build z3/build --config Release -j3 --target install
 
       - name: Create Build Environment
