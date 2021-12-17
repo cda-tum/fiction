@@ -13,9 +13,9 @@
 #include <fiction/algorithms/design_rule_violations.hpp>
 #include <fiction/algorithms/exact.hpp>
 #include <fiction/algorithms/network_utils.hpp>
+#include <fiction/io/print_layout.hpp>
 #include <fiction/networks/topology_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
-#include <fiction/io/print_layout.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -128,6 +128,22 @@ template <typename Lyt>
 exact_physical_design_params<Lyt>&& async(const std::size_t t, exact_physical_design_params<Lyt>&& ps) noexcept
 {
     ps.num_threads = t;
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& minimize_wires(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.minimize_wires = true;
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& minimize_crossings(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.minimize_crossings = true;
 
     return std::move(ps);
 }
@@ -294,12 +310,30 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
                 2);
         }
     }
+    SECTION("Asynchronicity")
+    {
+        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
+            blueprints::maj1_network<mockturtle::aig_network>(),
+            twoddwave(crossings(async(2, configuration<cart_gate_clk_lyt>()))));
+    }
     //    SECTION("Synchronization elements")
     //    {
     //        CHECK(generate_layout<cart_gate_clk_lyt>(blueprints::one_to_five_path_difference_network<topology_network>(),
     //                                                 twoddwave(border_io(sync_elems(configuration<cart_gate_clk_lyt>()))))
     //                  .num_se() > 0);
     //    }
+    SECTION("Minimize wires")
+    {
+        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
+            blueprints::one_to_five_path_difference_network<mockturtle::aig_network>(),
+            res(crossings(minimize_wires(configuration<cart_gate_clk_lyt>()))));
+    }
+    SECTION("Minimize crossings")
+    {
+        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
+            blueprints::one_to_five_path_difference_network<mockturtle::aig_network>(),
+            res(crossings(minimize_crossings(configuration<cart_gate_clk_lyt>()))));
+    }
 }
 
 TEST_CASE("Exact hexagonal physical design", "[exact]")
