@@ -545,7 +545,7 @@ class gate_level_drvs_impl
 
         const auto check_io = [this, &border_report, &all_border](const mockturtle::node<Lyt>& io)
         {
-            if (const auto iot = lyt.get_tile(io); !lyt.is_border(iot))
+            if (const auto iot = lyt.get_tile(io); !lyt.is_at_any_border(iot))
             {
                 all_border = false;
                 log_tile(iot, border_report);

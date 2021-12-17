@@ -134,11 +134,11 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
         CHECK(layout.is_adjacent_elevation_of(t, at1));
         CHECK(layout.is_adjacent_elevation_of(at1, t));
 
-        CHECK(layout.is_border(b));
+        CHECK(layout.is_at_any_border(b));
         CHECK(!bt.is_dead());
         CHECK(b == bt);
         CHECK(layout.is_ground_layer(bt));
-        CHECK(layout.is_border(bt));
+        CHECK(layout.is_at_any_border(bt));
     };
 
     auto t = cartesian_layout<cartesian::ucoord_t>::coordinate{5, 5};
@@ -151,7 +151,7 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(layout.is_north_of(t, nt));
     CHECK(layout.is_northwards_of(t, nt));
     CHECK(layout.is_northwards_of(t, bnt));
-    CHECK(layout.is_northern_border(bnt));
+    CHECK(layout.is_at_northern_border(bnt));
     CHECK(layout.northern_border_of(t) == bnt);
     CHECK(layout.north(bnt) == bnt);
     CHECK(layout.north_east(t) == net);
@@ -165,7 +165,7 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(layout.is_east_of(t, et));
     CHECK(layout.is_eastwards_of(t, et));
     CHECK(layout.is_eastwards_of(t, bet));
-    CHECK(layout.is_eastern_border(bet));
+    CHECK(layout.is_at_eastern_border(bet));
     CHECK(layout.eastern_border_of(t) == bet);
     CHECK(layout.east(bet) == bet);
     CHECK(layout.south_east(t) == set);
@@ -179,7 +179,7 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(layout.is_south_of(t, st));
     CHECK(layout.is_southwards_of(t, st));
     CHECK(layout.is_southwards_of(t, bst));
-    CHECK(layout.is_southern_border(bst));
+    CHECK(layout.is_at_southern_border(bst));
     CHECK(layout.southern_border_of(t) == bst);
     CHECK(layout.south(bst) == bst);
     CHECK(layout.south_west(t) == swt);
@@ -193,7 +193,7 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(layout.is_west_of(t, wt));
     CHECK(layout.is_westwards_of(t, wt));
     CHECK(layout.is_westwards_of(t, bwt));
-    CHECK(layout.is_western_border(bwt));
+    CHECK(layout.is_at_western_border(bwt));
     CHECK(layout.western_border_of(t) == bwt);
     CHECK(layout.west(bwt) == bwt);
     CHECK(layout.north_west(t) == nwt);
@@ -203,10 +203,10 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     auto bat = layout.above(at);
 
     CHECK(!at.is_dead());
-    CHECK(layout.is_above_of(t, at));
+    CHECK(layout.is_above(t, at));
     CHECK(at == bat);
     CHECK(layout.is_crossing_layer(bat));
-    CHECK(!layout.is_border(at));
+    CHECK(!layout.is_at_any_border(at));
 
     // cover corner case
     cartesian_layout<cartesian::ucoord_t> planar_layout{{1, 1, 0}};
@@ -219,7 +219,7 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
 
     CHECK(!bt.is_dead());
     CHECK(bt == t);
-    CHECK(layout.is_below_of(at, bt));
+    CHECK(layout.is_below(at, bt));
     CHECK(!bbt.is_dead());
     CHECK(bt == bbt);
     CHECK(layout.is_ground_layer(bbt));
