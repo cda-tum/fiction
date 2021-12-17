@@ -1815,7 +1815,7 @@ class exact_impl
                                 }
 
                                 // cannot be placed with too little distance to eastern border
-                                for (auto column = layout.x() - il; column < layout.x(); ++column)
+                                for (auto column = layout.x() - il + 1; column < layout.x(); ++column)
                                 {
                                     for (auto row = 0u; row <= layout.y(); ++row)
                                     {
@@ -1855,7 +1855,7 @@ class exact_impl
                                 const auto l  = depth_ntk.level(n);
                                 const auto il = inv_levels[network.node_to_index(n)];
 
-                                // cannot be placed with too little distance to western border
+                                // cannot be placed with too little distance to northern border
                                 for (auto row = 0u; row < std::min(static_cast<decltype(layout.y())>(l), layout.y());
                                      ++row)
                                 {
@@ -1878,8 +1878,8 @@ class exact_impl
                                     }
                                 }
 
-                                // cannot be placed with too little distance to eastern border
-                                for (auto row = layout.y() - il; row < layout.y(); ++row)
+                                // cannot be placed with too little distance to southern border
+                                for (auto row = layout.y() - il + 1; row < layout.y(); ++row)
                                 {
                                     for (auto column = 0u; column <= layout.x(); ++column)
                                     {
