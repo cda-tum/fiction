@@ -43,9 +43,10 @@ class exact_command : public command
         add_option("--upper_bound,-u", ps.upper_bound, "Number of FCN gate tiles to use at maximum");
         add_option("--fixed_size,-f", ps.fixed_size, "Execute only one iteration with the given number of tiles");
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
-        add_option("--async,-a", ps.num_threads, "Number of layout dimensions to examine in parallel");
+        add_option("--async,-a", ps.num_threads, "Number of layout dimensions to examine in parallel (beta feature)");
 
-        add_flag("--async_max,", "Examine as many layout dimensions in parallel as threads are available");
+        add_flag("--async_max,",
+                 "Examine as many layout dimensions in parallel as threads are available (beta feature)");
         add_option("--hex", hexagonal_tile_shift,
                    "Use hexagonal tiles and specify tile shift. Possible values are 'odd_row', 'even_row', "
                    "'odd_column', or 'even_column'");

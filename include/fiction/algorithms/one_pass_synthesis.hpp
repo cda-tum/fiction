@@ -94,7 +94,7 @@ struct one_pass_synthesis_params
     bool io_pins = true;  // TODO thus far, io_ports have to be set to true
 #if !defined(__APPLE__)
     /**
-     * Number of threads to use for exploring the possible aspect ratios.
+     * Number of threads to use for exploring the possible aspect ratios. NOTE: THIS IS AN UNSTABLE BETA FEATURE.
      */
     std::size_t num_threads = 1ul;
 #endif

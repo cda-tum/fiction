@@ -53,8 +53,8 @@ class onepass_command : public command
         add_option("--fixed_size,-f", ps.fixed_size, "Execute only one iteration with the given number of tiles");
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
 #if !defined(__APPLE__)
-        add_option("--async,-a", ps.num_threads, "Number of threads to use for parallel solving");
-        add_flag("--async_max", "Use the maximum number of threads available to the system");
+        add_option("--async,-a", ps.num_threads, "Number of threads to use for parallel solving (beta feature)");
+        add_flag("--async_max", "Use the maximum number of threads available to the system (beta feature)");
 #endif
         add_flag("--network,-n", "Re-synthesize the current logic network in store instead of the current truth table");
         add_flag("--and,-A", ps.enable_and, "Enable the use of AND gates");

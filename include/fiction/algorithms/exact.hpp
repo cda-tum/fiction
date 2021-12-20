@@ -75,7 +75,7 @@ struct exact_physical_design_params
      */
     uint16_t fixed_size = 0ul;
     /**
-     * Number of threads to use for exploring the possible aspect ratios.
+     * Number of threads to use for exploring the possible aspect ratios. NOTE: THIS IS AN UNSTABLE BETA FEATURE.
      */
     std::size_t num_threads = 1ul;
     /**
@@ -830,7 +830,8 @@ class exact_impl
          */
         [[nodiscard]] z3::expr mk_as_if_se(const z3::expr& constraint, const tile<Lyt>& t) const
         {
-            if (const auto east = layout.is_at_eastern_border(t), south = layout.is_at_southern_border(t); east && south)
+            if (const auto east = layout.is_at_eastern_border(t), south = layout.is_at_southern_border(t);
+                east && south)
             {
                 return mk_as(constraint, lit().e and lit().s);
             }
@@ -2841,6 +2842,8 @@ class exact_impl
      */
     [[nodiscard]] std::optional<Lyt> run_asynchronously()
     {
+        std::cout << "You have called an unstable beta feature that might crash." << std::endl;
+
         Lyt layout{{}, *ps.scheme};
 
         {
