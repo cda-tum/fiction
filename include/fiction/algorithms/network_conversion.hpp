@@ -7,7 +7,7 @@
 
 #include "../traits.hpp"
 #include "../types.hpp"
-#include "name_restoration.hpp"
+#include "name_utils.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>

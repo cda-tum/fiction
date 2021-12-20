@@ -11,7 +11,7 @@
 #include "../utils/debug/network_writer.hpp"
 #include "fanout_substitution.hpp"
 #include "layout_utils.hpp"
-#include "name_restoration.hpp"
+#include "name_utils.hpp"
 #include "network_utils.hpp"
 
 #include <fmt/format.h>

@@ -5,21 +5,15 @@
 #ifndef FICTION_CMD_EQUIV_HPP
 #define FICTION_CMD_EQUIV_HPP
 
-#include <fiction/algorithms/critical_path_length_and_throughput.hpp>
-#include <fiction/algorithms/design_rule_violations.hpp>
+#include <fiction/algorithms/equivalence_checking.hpp>
+#include <fiction/algorithms/name_utils.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
-#include <kitty/print.hpp>
-#include <mockturtle/algorithms/equivalence_checking.hpp>
-#include <mockturtle/algorithms/miter.hpp>
-#include <mockturtle/networks/klut.hpp>
-#include <mockturtle/utils/stopwatch.hpp>
 #include <nlohmann/json.hpp>
 
 #include <cstdint>
-#include <sstream>
 #include <string>
 #include <variant>
 
@@ -72,14 +66,7 @@ class equiv_command : public command
                 return;
             }
 
-            if (const auto& lyt = gls.current(); has_no_drvs(lyt))
-            {
-                equivalence_checking(lns.current(), lyt);
-            }
-            else
-            {
-                env->out() << "[e] specified layout has DRVs and, thus, cannot be checked for equivalence" << std::endl;
-            }
+            equivalence_checking(lns.current(), gls.current());
         }
         else if (is_set("logic_network"))
         {
@@ -103,15 +90,7 @@ class equiv_command : public command
                 return;
             }
 
-            if (const auto& lyt1 = gls[gls.size() - 1], lyt2 = gls[gls.size() - 2];
-                has_no_drvs(lyt1) && has_no_drvs(lyt2))
-            {
-                equivalence_checking(lyt1, lyt2);
-            }
-            else
-            {
-                env->out() << "[e] specified layout has DRVs and, thus, cannot be checked for equivalence" << std::endl;
-            }
+            equivalence_checking(gls[gls.size() - 1], gls[gls.size() - 2]);
         }
         else
         {
@@ -126,9 +105,9 @@ class equiv_command : public command
      */
     nlohmann::json log() const override
     {
-        return nlohmann::json{{"equivalence type", result.eq == equiv_result::eq_type::NO   ? "NOT EQ" :
-                                                   result.eq == equiv_result::eq_type::WEAK ? "WEAK" :
-                                                                                              "STRONG"},
+        return nlohmann::json{{"equivalence type", result.eq == fiction::eq_type::NO   ? "NOT EQ" :
+                                                   result.eq == fiction::eq_type::WEAK ? "WEAK" :
+                                                                                         "STRONG"},
                               {"counter example", result.counter_example},
                               {"specification's throughput", result.tp_spec},
                               {"implementation's throughput", result.tp_impl},
@@ -137,156 +116,36 @@ class equiv_command : public command
     }
 
   private:
-    /**
-     * Encapsulates the equivalence call information.
-     */
-    struct equiv_result
-    {
-        /**
-         * The different equivalence types possible. See above for more information.
-         */
-        enum class eq_type
-        {
-            NO,
-            WEAK,
-            STRONG
-        };
-        /**
-         * Stores the equivalence type.
-         */
-        eq_type eq;
-        /**
-         * Throughput values at which weak equivalence manifests.
-         */
-        int64_t tp_spec = 0ll, tp_impl = 0ll, tp_diff = 0ll;
-        /**
-         * Stores a possible counter example.
-         */
-        std::vector<bool> counter_example{};
-        /**
-         * Stores the runtime.
-         */
-        mockturtle::stopwatch<>::duration runtime{0};
-    };
-
-    equiv_result result{};
-
-    template <typename LytVariant>
-    bool has_no_drvs(const LytVariant& lyt_variant) const noexcept
-    {
-        const auto num_drvs = [](auto&& lyt_ptr) -> uint64_t
-        {
-            fiction::gate_level_drv_stats  st{};
-            fiction::gate_level_drv_params ps{};
-
-            // suppress DRV output
-            std::ostringstream null_stream{};
-            ps.out = &null_stream;
-
-            gate_level_drvs(*lyt_ptr, ps, &st);
-
-            return st.drvs;
-        };
-
-        return std::visit(num_drvs, lyt_variant) == 0;
-    }
+    fiction::equivalence_checking_stats result{};
 
     template <typename NtkOrLytVariant1, typename NtkOrLytVariant2>
     void equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_variant1, const NtkOrLytVariant2& ntk_or_lyt_variant_2)
     {
-        const auto equiv_check = [this](auto&& ntk_or_lyt_ptr1, auto&& ntk_or_lyt_ptr2) -> bool
+        const auto equiv_check = [this](auto&& ntk_or_lyt_ptr1, auto&& ntk_or_lyt_ptr2)
+        { fiction::equivalence_checking(*ntk_or_lyt_ptr1, *ntk_or_lyt_ptr2, &result); };
+
+        const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return fiction::get_name(*ntk_or_lyt_ptr); };
+
+        std::visit(equiv_check, ntk_or_lyt_variant1, ntk_or_lyt_variant_2);
+
+        if (result.spec_drv_stats.drvs > 0)
         {
-            using LytOrNtk1 = typename std::decay_t<decltype(ntk_or_lyt_ptr1)>::element_type;
-            using LytOrNtk2 = typename std::decay_t<decltype(ntk_or_lyt_ptr2)>::element_type;
-
-            mockturtle::stopwatch stop{result.runtime};
-
-            auto miter = mockturtle::miter<mockturtle::klut_network>(*ntk_or_lyt_ptr1, *ntk_or_lyt_ptr2);
-
-            if (miter)
-            {
-                mockturtle::equivalence_checking_stats st;
-
-                auto eq = mockturtle::equivalence_checking(*miter, {}, &st);
-
-                if (eq.has_value())
-                {
-                    result.eq = *eq ? equiv_result::eq_type::STRONG : equiv_result::eq_type::NO;
-
-                    if (result.eq == equiv_result::eq_type::STRONG)
-                    {
-                        // compute TP of specification
-                        if constexpr (fiction::is_gate_level_layout_v<LytOrNtk1>)
-                        {
-                            fiction::critical_path_length_and_throughput_stats cplt_st{};
-                            fiction::critical_path_length_and_throughput(*ntk_or_lyt_ptr1, &cplt_st);
-
-                            result.tp_spec = static_cast<int64_t>(cplt_st.throughput);
-                        }
-                        // compute TP of implementation
-                        if constexpr (fiction::is_gate_level_layout_v<LytOrNtk2>)
-                        {
-                            fiction::critical_path_length_and_throughput_stats cplt_st{};
-                            fiction::critical_path_length_and_throughput(*ntk_or_lyt_ptr2, &cplt_st);
-
-                            result.tp_impl = static_cast<int64_t>(cplt_st.throughput);
-                        }
-
-                        result.tp_diff = std::abs(result.tp_spec - result.tp_impl);
-
-                        if (result.tp_diff != 0)
-                        {
-                            result.eq = equiv_result::eq_type::WEAK;
-                        }
-                    }
-
-                    if (!(*eq))
-                    {
-                        result.counter_example = st.counter_example;
-                    }
-                }
-                else
-                {
-                    env->out() << "[e] resource limit exceeded" << std::endl;
-                    return false;
-                }
-            }
-            else
-            {
-                env->out() << "[w] both networks/layouts must have the same number of primary inputs and outputs"
-                           << std::endl;
-                return false;
-            }
-
-            return true;
-        };
-
-        const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string
+            env->out() << "[e] the layout given as specification has DRVs and, thus, cannot be checked for equivalence"
+                       << std::endl;
+        }
+        else if (result.impl_drv_stats.drvs > 0)
         {
-            using NtkOrLyt = typename std::decay_t<decltype(ntk_or_lyt_ptr)>::element_type;
-
-            if constexpr (mockturtle::has_get_network_name_v<NtkOrLyt>)
-            {
-                return ntk_or_lyt_ptr->get_network_name();
-            }
-            else if constexpr (fiction::has_get_layout_name_v<NtkOrLyt>)
-            {
-                return ntk_or_lyt_ptr->get_layout_name();
-            }
-
-            return {};
-        };
-
-        bool success = std::visit(equiv_check, ntk_or_lyt_variant1, ntk_or_lyt_variant_2);
-
-        if (success)
+            env->out() << "[e] the layout given as implementation has DRVs and, thus, cannot be checked for equivalence"
+                       << std::endl;
+        }
+        else
         {
             env->out() << fmt::format("[i] {} and {} are {} equivalent{}", std::visit(get_name, ntk_or_lyt_variant1),
                                       std::visit(get_name, ntk_or_lyt_variant_2),
-                                      result.eq == equiv_result::eq_type::NO   ? "NOT" :
-                                      result.eq == equiv_result::eq_type::WEAK ? "WEAKLY" :
-                                                                                 "STRONGLY",
-                                      result.eq == equiv_result::eq_type::WEAK ?
+                                      result.eq == fiction::eq_type::NO   ? "NOT" :
+                                      result.eq == fiction::eq_type::WEAK ? "WEAKLY" :
+                                                                            "STRONGLY",
+                                      result.eq == fiction::eq_type::WEAK ?
                                           fmt::format(" with a delay difference of {} clock cycles", result.tp_diff) :
                                           "")
                        << std::endl;

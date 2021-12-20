@@ -2,8 +2,8 @@
 // Created by marcel on 26.05.21.
 //
 
-#ifndef FICTION_NAME_RESTORATION_HPP
-#define FICTION_NAME_RESTORATION_HPP
+#ifndef FICTION_NAME_UTILS_HPP
+#define FICTION_NAME_UTILS_HPP
 
 #include "../algorithms/layout_utils.hpp"
 
@@ -12,6 +12,22 @@
 
 namespace fiction
 {
+
+template <typename NtkOrLyt>
+std::string get_name(const NtkOrLyt& ntk_or_lyt) noexcept
+
+{
+    if constexpr (mockturtle::has_get_network_name_v<NtkOrLyt>)
+    {
+        return ntk_or_lyt.get_network_name();
+    }
+    else if constexpr (fiction::has_get_layout_name_v<NtkOrLyt>)
+    {
+        return ntk_or_lyt.get_layout_name();
+    }
+
+    return {};
+}
 
 template <typename NtkSrc, typename NtkDest>
 void restore_network_name(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
@@ -135,4 +151,4 @@ void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, mockturtle::node_ma
 
 }  // namespace fiction
 
-#endif  // FICTION_NAME_RESTORATION_HPP
+#endif  // FICTION_NAME_UTILS_HPP
