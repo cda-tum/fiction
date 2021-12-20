@@ -18,10 +18,10 @@
 
 namespace fiction
 {
-namespace cartesian
+namespace offset
 {
 /**
- * Unsigned Cartesian coordinates. The implementation is optimized for memory-efficiency.
+ * Unsigned offset coordinates. The implementation is optimized for memory-efficiency.
  * Coordinates span from (0, 0, 0) to (2^31 - 1, 2^31 - 1, 1).
  * Each coordinate has a dead indicator that can be used to represent that it is not in use.
  */
@@ -215,10 +215,7 @@ class coord_iterator
 
     CoordinateType coord;
 };
-}  // namespace cartesian
-
-// For all intents and purposes, Cartesian coordinates can be used as offset coordinates
-namespace offset = cartesian;
+}  // namespace offset
 
 namespace cube
 {
@@ -332,9 +329,6 @@ struct coord_t
 
 }  // namespace cube
 
-// Cartesian coordinates can be used as offset coordinates
-namespace offset = cartesian;
-
 template <typename CoordinateType>
 uint64_t area(const CoordinateType& coord) noexcept
 {
@@ -352,11 +346,11 @@ uint64_t volume(const CoordinateType& coord) noexcept
 
 namespace std
 {
-// define std::hash overload for cartesian::ucoord_t
+// define std::hash overload for offset::ucoord_t
 template <>
-struct hash<fiction::cartesian::ucoord_t>
+struct hash<fiction::offset::ucoord_t>
 {
-    std::size_t operator()(const fiction::cartesian::ucoord_t& c) const noexcept
+    std::size_t operator()(const fiction::offset::ucoord_t& c) const noexcept
     {
         return static_cast<std::size_t>(std::hash<uint64_t>{}(static_cast<uint64_t>(c)));
     }
@@ -371,9 +365,9 @@ struct hash<fiction::cube::coord_t>
         return static_cast<std::size_t>((c.x * 18397ll) + (c.y * 20483ll) + (c.z * 29303ll) + static_cast<int>(c.d));
     }
 };
-// make cartesian::coord_iterator compatible with STL iterator categories
+// make offset::coord_iterator compatible with STL iterator categories
 template <typename Coordinate>
-struct iterator_traits<fiction::cartesian::coord_iterator<Coordinate>>
+struct iterator_traits<fiction::offset::coord_iterator<Coordinate>>
 {
     using iterator_category = std::forward_iterator_tag;
     using value_type        = Coordinate;
@@ -382,9 +376,9 @@ struct iterator_traits<fiction::cartesian::coord_iterator<Coordinate>>
 
 namespace fmt
 {
-// make cartesian::ucoord_t compatible with fmt::format
+// make offset::ucoord_t compatible with fmt::format
 template <>
-struct formatter<fiction::cartesian::ucoord_t>
+struct formatter<fiction::offset::ucoord_t>
 {
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
@@ -393,7 +387,7 @@ struct formatter<fiction::cartesian::ucoord_t>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::cartesian::ucoord_t& c, FormatContext& ctx)
+    auto format(const fiction::offset::ucoord_t& c, FormatContext& ctx)
     {
         return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
     }

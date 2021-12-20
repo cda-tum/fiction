@@ -17,7 +17,7 @@ using namespace fiction;
 
 TEST_CASE("3-phase open clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     auto open3 = open_clocking<clk_lyt>(num_clks::THREE);
 
@@ -76,7 +76,7 @@ TEST_CASE("3-phase open clocking", "[clocking-scheme]")
 
 TEST_CASE("4-phase open clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     auto open4 = open_clocking<clk_lyt>(num_clks::FOUR);
 
@@ -135,7 +135,7 @@ TEST_CASE("4-phase open clocking", "[clocking-scheme]")
 
 TEST_CASE("3-phase columnar clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     const auto columnar3 = columnar_clocking<clk_lyt>(num_clks::THREE);
 
@@ -187,7 +187,7 @@ TEST_CASE("3-phase columnar clocking", "[clocking-scheme]")
 
 TEST_CASE("4-phase columnar clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     const auto columnar4 = columnar_clocking<clk_lyt>(num_clks::FOUR);
 
@@ -267,7 +267,7 @@ TEST_CASE("4-phase columnar clocking", "[clocking-scheme]")
 
 TEST_CASE("3-phase row clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     const auto row3 = row_clocking<clk_lyt>(num_clks::THREE);
 
@@ -319,7 +319,7 @@ TEST_CASE("3-phase row clocking", "[clocking-scheme]")
 
 TEST_CASE("4-phase row clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     const auto row4 = row_clocking<clk_lyt>(num_clks::FOUR);
 
@@ -399,7 +399,7 @@ TEST_CASE("4-phase row clocking", "[clocking-scheme]")
 
 TEST_CASE("3-phase 2DDWave", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     const auto twoddwave3 = twoddwave_clocking<clk_lyt>(num_clks::THREE);
 
@@ -451,7 +451,7 @@ TEST_CASE("3-phase 2DDWave", "[clocking-scheme]")
 
 TEST_CASE("4-phase 2DDWave", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     const auto twoddwave4 = twoddwave_clocking<clk_lyt>(num_clks::FOUR);
 
@@ -1459,7 +1459,7 @@ TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
 
 TEST_CASE("4-phase USE", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     const auto use4 = use_clocking<clk_lyt>();
 
@@ -1539,7 +1539,7 @@ TEST_CASE("4-phase USE", "[clocking-scheme]")
 
 TEST_CASE("4-phase RES", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     const auto res4 = res_clocking<clk_lyt>();
 
@@ -1619,7 +1619,7 @@ TEST_CASE("4-phase RES", "[clocking-scheme]")
 
 TEST_CASE("3-phase BANCS", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     const auto bancs3 = bancs_clocking<clk_lyt>();
 
@@ -1707,7 +1707,7 @@ TEST_CASE("3-phase BANCS", "[clocking-scheme]")
 
 TEST_CASE("Override clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     auto twoddwave4 = twoddwave_clocking<clk_lyt>();
 
@@ -1747,7 +1747,7 @@ TEST_CASE("Override clocking", "[clocking-scheme]")
 
 TEST_CASE("4-phase ESP", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     const auto esp4 = esp_clocking<clk_lyt>();
 
@@ -1827,7 +1827,7 @@ TEST_CASE("4-phase ESP", "[clocking-scheme]")
 
 TEST_CASE("Clocking lookup", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     auto check = [](const std::vector<std::string>& vec, const auto& name)
     {
@@ -1862,7 +1862,7 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
 
 TEST_CASE("Linear schemes", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<cartesian::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
     CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::columnar)));
     CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::row)));

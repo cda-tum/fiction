@@ -73,7 +73,7 @@ inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, a
  * FCN gate-level layouts.
  */
 using cart_gate_clk_lyt = gate_level_layout<
-    synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>>;
+    synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>>;
 using cart_gate_clk_lyt_ptr = std::shared_ptr<cart_gate_clk_lyt>;
 
 using hex_odd_row_gate_clk_lyt =
@@ -114,16 +114,16 @@ inline constexpr const char* tech_impl_name = std::is_same_v<std::decay_t<Tech>,
 using qca_cell_clk_lyt =
     cell_level_layout<qca_technology,
                       synchronization_element_layout  // se_layouts have only been investigated for QCA technologies
-                      <clocked_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+                      <clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
 using qca_cell_clk_lyt_ptr = std::shared_ptr<qca_cell_clk_lyt>;
 
 using stacked_qca_cell_clk_lyt     = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
 using stacked_qca_cell_clk_lyt_ptr = std::shared_ptr<stacked_qca_cell_clk_lyt>;
 
-using inml_cell_clk_lyt     = cell_level_layout<inml_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
+using inml_cell_clk_lyt     = cell_level_layout<inml_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
 
-using sidb_cell_clk_lyt     = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
+using sidb_cell_clk_lyt     = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 using sidb_cell_clk_lyt_ptr = std::shared_ptr<sidb_cell_clk_lyt>;
 
 using cell_layout_t =

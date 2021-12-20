@@ -72,11 +72,11 @@ class cell_command : public command
             {
                 store<fiction::cell_layout_t>().extend() = std::visit(apply_qca_one, s.current());
             }
-            catch (const fiction::unsupported_gate_type_exception<fiction::cartesian::ucoord_t>& e)
+            catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
             {
                 std::cout << fmt::format("[e] unsupported gate type at tile position {}", e.where()) << std::endl;
             }
-            catch (const fiction::unsupported_gate_orientation_exception<fiction::cartesian::ucoord_t,
+            catch (const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t,
                                                                          fiction::port_position>& e)
             {
                 std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}",
@@ -137,18 +137,18 @@ class cell_command : public command
                     store<fiction::cell_layout_t>().extend() = *cell_lyt;
                 }
             }
-            catch (const fiction::unsupported_gate_type_exception<fiction::cartesian::ucoord_t>& e)
+            catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
             {
                 std::cout << fmt::format("[e] unsupported gate type at tile position {}", e.where()) << std::endl;
             }
-            catch (const fiction::unsupported_gate_orientation_exception<fiction::cartesian::ucoord_t,
+            catch (const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t,
                                                                          fiction::port_position>& e)
             {
                 std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}",
                                          e.where(), e.which_ports())
                           << std::endl;
             }
-            catch (const fiction::unsupported_gate_orientation_exception<fiction::cartesian::ucoord_t,
+            catch (const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t,
                                                                          fiction::port_direction>& e)
             {
                 std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with port directions {}",

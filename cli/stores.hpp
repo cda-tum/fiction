@@ -428,7 +428,7 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
         {
             cmd.env->out() << fmt::format("[e] {} is not a QCA layout", lyt_ptr->get_layout_name()) << std::endl;
         }
-        else if constexpr (!std::is_same_v<fiction::coordinate<Lyt>, fiction::cartesian::ucoord_t>)
+        else if constexpr (!std::is_same_v<fiction::coordinate<Lyt>, fiction::offset::ucoord_t>)
         {
             cmd.env->out() << fmt::format("[e] {} is not a Cartesian layout", lyt_ptr->get_layout_name()) << std::endl;
         }

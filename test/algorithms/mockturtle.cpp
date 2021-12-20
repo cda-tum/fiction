@@ -25,7 +25,7 @@ TEST_CASE("Simulation", "[mockturtle]")
     // adapted from mockturtle/test/networks/klut.cpp
 
     using gate_layout =
-        gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+        gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
@@ -73,7 +73,7 @@ TEST_CASE("Simulation", "[mockturtle]")
     SECTION("Synchronization elements")
     {
         using se_layout = gate_level_layout<
-            synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>>;
+            synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>>;
 
         REQUIRE(mockturtle::has_compute_v<se_layout, kitty::dynamic_truth_table>);
 

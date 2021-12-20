@@ -40,7 +40,7 @@ void check(const Lyt& lyt, const uint64_t throughput) noexcept
 
 TEST_CASE("Balanced layout", "[throughput]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     check(blueprints::and_or_gate_layout<gate_layout>(), 1);
     check(blueprints::xor_maj_gate_layout<gate_layout>(), 1);
@@ -51,7 +51,7 @@ TEST_CASE("Balanced layout", "[throughput]")
     SECTION("Synchronization Elements")
     {
         using se_gate_layout = gate_level_layout<
-            synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>>;
+            synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>>;
 
         check(blueprints::se_gate_layout<se_gate_layout>(), 1);
     }
@@ -59,7 +59,7 @@ TEST_CASE("Balanced layout", "[throughput]")
 
 TEST_CASE("Unbalanced layout", "[throughput]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     check(blueprints::unbalanced_and_layout<gate_layout>(), 2);
 }

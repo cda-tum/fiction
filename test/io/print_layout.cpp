@@ -17,7 +17,7 @@ using namespace fiction;
 
 TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     gate_layout layout{gate_layout::aspect_ratio{2, 2}, open_clocking<gate_layout>(num_clks::FOUR)};
 
@@ -32,7 +32,7 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, open_clocking<gate_layout>(num_clks::FOUR)};
 
@@ -83,7 +83,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -105,7 +105,7 @@ TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 TEST_CASE("Print empty cell-level layout", "[print-gate-level-layout]")
 {
     using cell_layout = fiction::cell_level_layout<fiction::qca_technology,
-                                                   fiction::clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
+                                                   fiction::clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
     cell_layout layout{cell_layout::aspect_ratio{2, 2}, "Empty"};
 
@@ -121,7 +121,7 @@ TEST_CASE("Print empty cell-level layout", "[print-gate-level-layout]")
 TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = fiction::cell_level_layout<fiction::qca_technology,
-                                                   fiction::clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
+                                                   fiction::clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4}, "AND"};
 
@@ -156,7 +156,7 @@ TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = fiction::cell_level_layout<fiction::qca_technology,
-                                                   fiction::clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
+                                                   fiction::clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 

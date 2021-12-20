@@ -28,7 +28,7 @@ void compare_dot_layout(const Lyt& lyt, const char* layout_print)
 
 TEST_CASE("Draw empty Cartesian layout", "[dot-drawers]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     gate_layout layout{gate_layout::aspect_ratio{2, 2}};
 
@@ -66,7 +66,7 @@ TEST_CASE("Draw empty Cartesian layout", "[dot-drawers]")
 
 TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     SECTION("AND-OR Layout")
     {

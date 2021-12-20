@@ -19,9 +19,9 @@ using namespace fiction;
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 
-TEST_CASE("Unsigned Cartesian coordinates", "[coordinates]")
+TEST_CASE("Unsigned offset coordinates", "[coordinates]")
 {
-    using coordinate = cartesian::ucoord_t;
+    using coordinate = offset::ucoord_t;
 
     auto td = coordinate{};
     CHECK(td.is_dead());
