@@ -116,13 +116,21 @@ exact_physical_design_params<Lyt>&& straight_inverter(exact_physical_design_para
     return std::move(ps);
 }
 
-// template <typename Lyt>
-// exact_physical_design_params<Lyt>&& sync_elems(exact_physical_design_params<Lyt>&& ps) noexcept
-//{
-//     ps.synchronization_elements = true;
-//
-//     return std::move(ps);
-// }
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& sync_elems(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.synchronization_elements = true;
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& topolinano(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.technology_specifics = technology_constraints::TOPOLINANO;
+
+    return std::move(ps);
+}
 
 template <typename Lyt>
 exact_physical_design_params<Lyt>&& async(const std::size_t t, exact_physical_design_params<Lyt>&& ps) noexcept
@@ -316,12 +324,16 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
     //            blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
     //            twoddwave(crossings(border_io(async(2, configuration<cart_gate_clk_lyt>())))));
     //    }
-    //    SECTION("Synchronization elements")
-    //    {
-    //        CHECK(generate_layout<cart_gate_clk_lyt>(blueprints::one_to_five_path_difference_network<topology_network>(),
-    //                                                 twoddwave(border_io(sync_elems(configuration<cart_gate_clk_lyt>()))))
-    //                  .num_se() > 0);
-    //    }
+    SECTION("Synchronization elements")
+    {
+        //            CHECK(generate_layout<cart_gate_clk_lyt>(blueprints::one_to_five_path_difference_network<topology_network>(),
+        //                                                     twoddwave(border_io(sync_elems(configuration<cart_gate_clk_lyt>()))))
+        //                      .num_se() > 0);
+
+        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
+            blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+            twoddwave(border_io(sync_elems(configuration<cart_gate_clk_lyt>()))));
+    }
     SECTION("Minimize wires")
     {
         check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
@@ -389,7 +401,7 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         SECTION("Row clocking")
         {
             check_with_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(
-                blueprints::and_or_network<mockturtle::mig_network>(),
+                blueprints::unbalanced_and_inv_network<mockturtle::mig_network>(),
                 row(crossings(border_io(configuration<hex_lyt>()))));
         }
         SECTION("2DDWave clocking")
@@ -448,6 +460,11 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         {
             CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
                                                                   use(straight_inverter(configuration<hex_lyt>())))));
+        }
+        SECTION("Technology constraints: ToPoliNano")
+        {
+            check_without_gate_library(blueprints::and_or_network<mockturtle::mig_network>(),
+                                       columnar(crossings(border_io(topolinano(configuration<hex_lyt>())))));
         }
     }
     SECTION("even column")
