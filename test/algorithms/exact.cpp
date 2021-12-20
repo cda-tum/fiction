@@ -332,7 +332,7 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
 
         check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
             blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
-            twoddwave(border_io(sync_elems(configuration<cart_gate_clk_lyt>()))));
+            use(border_io(sync_elems(configuration<cart_gate_clk_lyt>()))));
     }
     SECTION("Minimize wires")
     {
@@ -463,7 +463,7 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         }
         SECTION("Technology constraints: ToPoliNano")
         {
-            check_without_gate_library(blueprints::and_or_network<mockturtle::mig_network>(),
+            check_without_gate_library(blueprints::topolinano_network<mockturtle::mig_network>(),
                                        columnar(crossings(border_io(topolinano(configuration<hex_lyt>())))));
         }
     }

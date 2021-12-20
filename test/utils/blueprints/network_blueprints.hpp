@@ -317,6 +317,26 @@ Ntk one_to_five_path_difference_network()
     return ntk;
 }
 
+template <typename Ntk>
+Ntk topolinano_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi("x1");
+    const auto x2 = ntk.create_pi("x2");
+
+    const auto fo1 = ntk.create_buf(x1);
+    const auto fo2 = ntk.create_buf(fo1);
+    const auto a1  = ntk.create_and(x1, x2);
+    const auto o1  = ntk.create_or(a1, fo2);
+
+    ntk.create_po(fo1, "f1");
+    ntk.create_po(fo2, "f2");
+    ntk.create_po(o1, "f3");
+
+    return ntk;
+}
+
 }  // namespace blueprints
 
 #endif  // FICTION_NETWORK_BLUEPRINTS_HPP
