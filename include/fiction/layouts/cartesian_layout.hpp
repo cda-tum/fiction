@@ -663,6 +663,9 @@ class cartesian_layout
      * cardinal directions are being considered, i.e., the container contains all coordinates ac for which
      * is_adjacent(c, ac) returns true.
      *
+     * Coordinates that are outside of the layout bounds are not considered. Thereby, the size of the returned container
+     * is at max 4.
+     *
      * @tparam Container Container type that has to provide an insert member function.
      * @param c Coordinate whose adjacent ones are desired.
      * @return A container of type Container that contains all of c's adjacent coordinates.
@@ -704,7 +707,11 @@ class cartesian_layout
     /**
      * Returns a container of a given type that contains all coordinates pairs of opposing adjacent coordinates with
      * respect to a given one. In this Cartesian layout, the container will contain (north(c), south(c)) and (east(c),
-     * west(c)). This function comes in handy when straight lines on the layout are to be examined.
+     * west(c)).
+     *
+     * This function comes in handy when straight lines on the layout are to be examined.
+     *
+     * Coordinates outside of the layout bounds are not being considered.
      *
      * @tparam Container Container type that has to provide an insert member function and holds pairs of coordinates.
      * @param c Coordinate whose opposite ones are desired.
