@@ -9,7 +9,15 @@
 
 namespace fiction
 {
-
+/**
+ * This class provides a tile-based naming scheme for coordinate-based functions. It does not add any functionality,
+ * but it might be useful to adopt tile_based_layout to provide an intuition of abstraction in the code. For instance,
+ * in a gate_level_layout, the coordinates, in fact, refer to groups of coordinates in lower-level abstractions. These
+ * are called 'tiles' in the literature. Therefore, it might be helpful for a reader of the code to provide this
+ * abstraction level-dependent information.
+ *
+ * @tparam CoordinateLayout A coordinate layout type.
+ */
 template <typename CoordinateLayout>
 class tile_based_layout : public CoordinateLayout
 {
@@ -20,11 +28,16 @@ class tile_based_layout : public CoordinateLayout
 
     using base_type = tile_based_layout;
 
-    explicit tile_based_layout(const typename CoordinateLayout::aspect_ratio& ar = {}) : CoordinateLayout(ar) {}
+    explicit tile_based_layout(const typename CoordinateLayout::aspect_ratio& ar = {}) : CoordinateLayout(ar)
+    {
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+    }
 
     template <typename Storage>
     explicit tile_based_layout(std::shared_ptr<Storage> s) : CoordinateLayout(s)
-    {}
+    {
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+    }
 
 #pragma endregion
 
@@ -62,6 +75,18 @@ class tile_based_layout : public CoordinateLayout
     void foreach_adjacent_tile(const tile& t, Fn&& fn) const
     {
         CoordinateLayout::foreach_adjacent_coordinate(t, fn);
+    }
+
+    template <typename Container>
+    Container adjacent_opposite_tiles(const tile& t) const noexcept
+    {
+        return CoordinateLayout::template adjacent_opposite_coordinates<Container>(t);
+    }
+
+    template <typename Fn>
+    void foreach_adjacent_opposite_tiles(const tile& t, Fn&& fn) const
+    {
+        CoordinateLayout::foreach_adjacent_opposite_coordinates(t, fn);
     }
 
 #pragma endregion

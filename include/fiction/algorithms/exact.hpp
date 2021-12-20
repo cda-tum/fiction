@@ -64,8 +64,8 @@ struct exact_physical_design_params
     /**
      * Clocking scheme to be used.
      */
-    std::shared_ptr<clocking_scheme<coordinate<Lyt>>> scheme =
-        std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
+    std::shared_ptr<clocking_scheme<tile<Lyt>>> scheme =
+        std::make_shared<clocking_scheme<tile<Lyt>>>(twoddwave_clocking<Lyt>());
     /**
      * Number of tiles to use as an upper bound.
      */
@@ -2076,7 +2076,7 @@ class exact_impl
          */
         void enforce_straight_inverters()
         {
-            if constexpr (has_foreach_adjacent_opposite_coordinates_v<Lyt>)
+            if constexpr (has_foreach_adjacent_opposite_tiles_v<Lyt>)
             {
                 apply_to_added_and_updated_tiles(
                     [this](const auto& t)
@@ -2093,7 +2093,7 @@ class exact_impl
                                         // vector to store possible direction combinations
                                         z3::expr_vector ve{*ctx};
 
-                                        layout.foreach_adjacent_opposite_coordinates(
+                                        layout.foreach_adjacent_opposite_tiles(
                                             t,
                                             [this, &t, &ve](const auto& cp)
                                             {
@@ -3037,6 +3037,7 @@ std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = 
                          exact_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a topology_network anyway, therefore,
                                                  // this is the only relevant check here
@@ -3047,12 +3048,12 @@ std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = 
         throw high_degree_fanin_exception();
     }
 
-    if constexpr (!fiction::has_foreach_adjacent_opposite_coordinates_v<Lyt>)
+    if constexpr (!fiction::has_foreach_adjacent_opposite_tiles_v<Lyt>)
     {
         if (ps.straight_inverters)
         {
-            std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_coordinates function; straight "
-                         "inverters cannot be guaranteed"
+            std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_tiles function; straight inverters "
+                         "cannot be guaranteed"
                       << std::endl;
         }
     }

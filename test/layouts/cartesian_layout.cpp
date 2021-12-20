@@ -30,6 +30,7 @@ TEST_CASE("Traits", "[cartesian-layout]")
     CHECK(has_elevation_operations_v<layout>);
     CHECK(is_coordinate_layout_v<layout>);
     CHECK(is_cartesian_layout_v<layout>);
+    CHECK(!is_tile_based_layout_v<layout>);
     CHECK(!is_hexagonal_layout_v<layout>);
 
     CHECK(has_foreach_coordinate_v<layout>);

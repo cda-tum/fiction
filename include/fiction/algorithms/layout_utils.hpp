@@ -33,7 +33,7 @@ template <typename Lyt>
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
-    return static_cast<uint8_t>(lyt.template adjacent_tiles<std::set<coordinate<Lyt>>>(c).size());
+    return static_cast<uint8_t>(lyt.template adjacent_coordinates<std::set<coordinate<Lyt>>>(c).size());
 }
 /**
  * Reserve primary input nodes in a layout in the same order as they appear in a network.

@@ -377,6 +377,22 @@ template <class Lyt>
 inline constexpr bool has_foreach_adjacent_tile_v = has_foreach_adjacent_tile<Lyt>::value;
 #pragma endregion
 
+#pragma region has_foreach_adjacent_opposite_tiles
+template <class Lyt, class = void>
+struct has_foreach_adjacent_opposite_tiles : std::false_type
+{};
+
+template <class Lyt>
+struct has_foreach_adjacent_opposite_tiles<Lyt,
+                                           std::void_t<decltype(std::declval<Lyt>().foreach_adjacent_opposite_tiles(
+                                               std::declval<tile<Lyt>>(), std::declval<void(tile<Lyt>, uint32_t)>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_foreach_adjacent_opposite_tiles_v = has_foreach_adjacent_opposite_tiles<Lyt>::value;
+#pragma endregion
+
 /**
  * Clocked layouts
  */

@@ -19,6 +19,16 @@
 
 using namespace fiction;
 
+TEST_CASE("Traits", "[gate-level-layout]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK(fiction::is_coordinate_layout_v<gate_layout>);
+    CHECK(fiction::is_tile_based_layout_v<gate_layout>);
+    CHECK(fiction::is_clocked_layout_v<gate_layout>);
+    CHECK(fiction::is_gate_level_layout_v<gate_layout>);
+}
+
 TEST_CASE("Creation and usage of constants", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
