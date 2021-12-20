@@ -19,6 +19,7 @@
 #include <mockturtle/io/write_dot.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
+#include <mockturtle/networks/xag.hpp>
 #include <mockturtle/views/names_view.hpp>
 
 #include <memory>
@@ -44,6 +45,11 @@ using aig_ptr = std::shared_ptr<aig_nt>;
 
 constexpr const char* aig_name = "AIG";
 
+using xag_nt  = mockturtle::names_view<mockturtle::xag_network>;
+using xag_ptr = std::shared_ptr<xag_nt>;
+
+constexpr const char* xag_name = "XAG";
+
 using mig_nt  = mockturtle::names_view<mockturtle::mig_network>;
 using mig_ptr = std::shared_ptr<mig_nt>;
 
@@ -54,10 +60,11 @@ using top_ptr = std::shared_ptr<top_nt>;
 
 constexpr const char* top_name = "TOP";
 
-using logic_network_t = std::variant<aig_ptr, mig_ptr, top_ptr>;
+using logic_network_t = std::variant<aig_ptr, xag_ptr, mig_ptr, top_ptr>;
 
 template <class Ntk>
 inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, aig_nt> ? aig_name :
+                                             std::is_same_v<std::decay_t<Ntk>, xag_nt> ? xag_name :
                                              std::is_same_v<std::decay_t<Ntk>, mig_nt> ? mig_name :
                                              std::is_same_v<std::decay_t<Ntk>, top_nt> ? top_name :
                                                                                          "?";
@@ -65,7 +72,8 @@ inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, a
 /**
  * FCN gate-level layouts.
  */
-using cart_gate_clk_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>;
+using cart_gate_clk_lyt = gate_level_layout<
+    synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<cartesian::ucoord_t>>>>>;
 using cart_gate_clk_lyt_ptr = std::shared_ptr<cart_gate_clk_lyt>;
 
 using hex_odd_row_gate_clk_lyt =

@@ -95,6 +95,11 @@ class topology_network : public mockturtle::klut_network
     {
         return _create_node({a, b}, 12);
     }
+
+    signal create_xnor(signal a, signal b)
+    {
+        return _create_node({a, b}, 13);
+    }
 #pragma endregion
 
 #pragma region Create ternary functions
@@ -279,6 +284,29 @@ class topology_network : public mockturtle::klut_network
     [[nodiscard]] bool is_and_xor(node const& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 32;
+    }
+
+#pragma endregion
+
+#pragma region Structural manipulation
+    /**
+     * Adds additional buffer nodes for each primary output that does not already point to a buffer.
+     */
+    void substitute_po_signals() noexcept
+    {
+        foreach_po(
+            [this](const auto& po, auto index)
+            {
+                if (!is_buf(get_node(po)))
+                {
+                    // decrease ref-count
+                    _storage->nodes[po].data[0].h1--;
+                    // create a new buf node
+                    const auto b = create_buf(po);
+                    // bend PO signal to point to the new node
+                    _storage->outputs[index] = b;
+                }
+            });
     }
 
 #pragma endregion

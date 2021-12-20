@@ -58,6 +58,13 @@ if (FICTION_CLI)
     add_subdirectory(${CMAKE_SOURCE_DIR}/cli)
 endif ()
 
+# Experiments
+option(FICTION_EXPERIMENTS "Build fiction experiments" OFF)
+if (FICTION_EXPERIMENTS)
+    message(STATUS "Building fiction experiments")
+    add_subdirectory(${CMAKE_SOURCE_DIR}/experiments)
+endif ()
+
 # Testing
 option(FICTION_TEST "Build fiction tests" OFF)
 if (FICTION_TEST)

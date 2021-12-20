@@ -54,14 +54,21 @@ class synchronization_element_layout : public ClockedLayout
 
     void assign_synchronization_element(const typename ClockedLayout::clock_zone& cz, const sync_elem_t se) noexcept
     {
-        strg->se_map[static_cast<uint64_t>(cz)] = se;
+        if (se == sync_elem_t{0})
+        {
+            strg->se_map.erase(static_cast<uint64_t>(cz));
+        }
+        else
+        {
+            strg->se_map[static_cast<uint64_t>(cz)] = se;
+        }
     }
 
     [[nodiscard]] sync_elem_t is_synchronization_element(const typename ClockedLayout::clock_zone& cz) const noexcept
     {
         if (auto it = strg->se_map.find(static_cast<uint64_t>(cz)); it != strg->se_map.end())
         {
-            return true;
+            return it->second != sync_elem_t{0};
         }
 
         return false;

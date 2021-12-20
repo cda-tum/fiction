@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <set>
+#include <utility>
 
 namespace fiction
 {
@@ -38,6 +39,18 @@ struct hash<std::set<T>>
     {
         std::size_t h = 0;
         for (const auto& e : s) fiction::hash_combine(h, e);
+
+        return h;
+    }
+};
+
+template <typename T1, typename T2>
+struct hash<std::pair<T1, T2>>
+{
+    std::size_t operator()(const std::pair<T1, T2>& p) const noexcept
+    {
+        std::size_t h = 0;
+        fiction::hash_combine(h, p.first, p.second);
 
         return h;
     }

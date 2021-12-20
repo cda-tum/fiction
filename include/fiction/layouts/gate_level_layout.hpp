@@ -24,6 +24,7 @@
 #include <memory>
 #include <set>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -75,7 +76,7 @@ class gate_level_layout : public ClockedLayout
         }
     };
 
-    static constexpr auto min_fanin_size = std::max(ClockedLayout::min_fanin_size, 1);
+    static constexpr auto min_fanin_size = std::max(ClockedLayout::min_fanin_size, 1u);
     static constexpr auto max_fanin_size = ClockedLayout::max_fanin_size;
 
     using base_type = gate_level_layout;
@@ -95,6 +96,8 @@ class gate_level_layout : public ClockedLayout
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
+        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+
         initialize_truth_table_cache();
         strg->data.layout_name = std::move(name);
     }
@@ -105,6 +108,8 @@ class gate_level_layout : public ClockedLayout
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
+        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+
         initialize_truth_table_cache();
         strg->data.layout_name = std::move(name);
     }
@@ -112,7 +117,9 @@ class gate_level_layout : public ClockedLayout
     explicit gate_level_layout(std::shared_ptr<gate_level_layout_storage> s) :
             strg{std::move(s)},
             evnts{std::make_shared<typename event_storage::element_type>()}
-    {}
+    {
+        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+    }
 
 #pragma endregion
 
@@ -146,7 +153,7 @@ class gate_level_layout : public ClockedLayout
         return static_cast<signal>(t);
     }
 
-    signal create_po(const signal& s, [[maybe_unused]] const std::string& name = std::string(), const tile& t = {})
+    signal create_po(const signal& s, [[maybe_unused]] const std::string& name = {}, const tile& t = {})
     {
         const auto n = static_cast<node>(strg->nodes.size());
         strg->nodes.emplace_back();     // empty node data
@@ -466,7 +473,7 @@ class gate_level_layout : public ClockedLayout
         }
 
         // assign new children
-        std::copy(new_children.begin(), new_children.end(), std::back_inserter(children));
+        std::copy(new_children.cbegin(), new_children.cend(), std::back_inserter(children));
         // increase ref-count to new children
         std::for_each(new_children.cbegin(), new_children.cend(),
                       [this](const auto& nc) { strg->nodes[get_node(nc)].data[0].h1++; });
@@ -629,7 +636,7 @@ class gate_level_layout : public ClockedLayout
     template <typename Container>
     [[nodiscard]] Container incoming_data_flow(const tile& t) const noexcept
     {
-        auto incoming = ClockedLayout::template incoming_clocked_zones<Container>(t);
+        const auto incoming = ClockedLayout::template incoming_clocked_zones<Container>(t);
 
         Container data_flow{};
 
@@ -649,7 +656,7 @@ class gate_level_layout : public ClockedLayout
     template <typename Container>
     [[nodiscard]] Container outgoing_data_flow(const tile& t) const noexcept
     {
-        auto outgoing = ClockedLayout::template outgoing_clocked_zones<Container>(t);
+        const auto outgoing = ClockedLayout::template outgoing_clocked_zones<Container>(t);
 
         Container data_flow{};
 
@@ -688,8 +695,8 @@ class gate_level_layout : public ClockedLayout
         const auto fanout = outgoing_data_flow<std::set<tile>>(get_tile(n));
 
         using IteratorType = decltype(fanout.cbegin());
-        mockturtle::detail::foreach_element_transform<IteratorType, signal>(
-            fanout.cbegin(), fanout.cend(), [](const auto& t) { return static_cast<signal>(t); }, fn);
+        mockturtle::detail::foreach_element_transform<IteratorType, node>(
+            fanout.cbegin(), fanout.cend(), [this](const auto& t) { return this->get_node(t); }, fn);
     }
 
     template <typename Fn>
@@ -768,9 +775,19 @@ class gate_level_layout : public ClockedLayout
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::north(t)));
     }
 
+    [[nodiscard]] bool has_north_eastern_incoming_signal(const tile& t) const noexcept
+    {
+        return is_incoming_signal(t, static_cast<signal>(ClockedLayout::north_east(t)));
+    }
+
     [[nodiscard]] bool has_eastern_incoming_signal(const tile& t) const noexcept
     {
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::east(t)));
+    }
+
+    [[nodiscard]] bool has_south_eastern_incoming_signal(const tile& t) const noexcept
+    {
+        return is_incoming_signal(t, static_cast<signal>(ClockedLayout::south_east(t)));
     }
 
     [[nodiscard]] bool has_southern_incoming_signal(const tile& t) const noexcept
@@ -778,9 +795,19 @@ class gate_level_layout : public ClockedLayout
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::south(t)));
     }
 
+    [[nodiscard]] bool has_south_western_incoming_signal(const tile& t) const noexcept
+    {
+        return is_incoming_signal(t, static_cast<signal>(ClockedLayout::south_west(t)));
+    }
+
     [[nodiscard]] bool has_western_incoming_signal(const tile& t) const noexcept
     {
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::west(t)));
+    }
+
+    [[nodiscard]] bool has_north_western_incoming_signal(const tile& t) const noexcept
+    {
+        return is_incoming_signal(t, static_cast<signal>(ClockedLayout::north_west(t)));
     }
 
     [[nodiscard]] bool has_no_incoming_signal(const tile& t) const noexcept
@@ -801,9 +828,19 @@ class gate_level_layout : public ClockedLayout
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::north(t)));
     }
 
+    [[nodiscard]] bool has_north_eastern_outgoing_signal(const tile& t) const noexcept
+    {
+        return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::north_east(t)));
+    }
+
     [[nodiscard]] bool has_eastern_outgoing_signal(const tile& t) const noexcept
     {
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::east(t)));
+    }
+
+    [[nodiscard]] bool has_south_eastern_outgoing_signal(const tile& t) const noexcept
+    {
+        return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::south_east(t)));
     }
 
     [[nodiscard]] bool has_southern_outgoing_signal(const tile& t) const noexcept
@@ -811,9 +848,19 @@ class gate_level_layout : public ClockedLayout
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::south(t)));
     }
 
+    [[nodiscard]] bool has_south_western_outgoing_signal(const tile& t) const noexcept
+    {
+        return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::south_west(t)));
+    }
+
     [[nodiscard]] bool has_western_outgoing_signal(const tile& t) const noexcept
     {
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::west(t)));
+    }
+
+    [[nodiscard]] bool has_north_western_outgoing_signal(const tile& t) const noexcept
+    {
+        return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::north_west(t)));
     }
 
     [[nodiscard]] bool has_no_outgoing_signal(const tile& t) const noexcept
@@ -823,10 +870,26 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] bool has_opposite_incoming_and_outgoing_signals(const tile& t) const noexcept
     {
-        return (has_northern_incoming_signal(t) && has_southern_outgoing_signal(t)) ||
-               (has_eastern_incoming_signal(t) && has_western_outgoing_signal(t)) ||
-               (has_southern_incoming_signal(t) && has_northern_outgoing_signal(t)) ||
-               (has_western_incoming_signal(t) && has_eastern_outgoing_signal((t)));
+        auto opposite_signals = false;
+
+        ClockedLayout::foreach_adjacent_opposite_coordinates(
+            t,
+            [this, &t, &opposite_signals](const auto& sp)
+            {
+                const auto s1 = static_cast<signal>(std::get<0>(sp)), s2 = static_cast<signal>(std::get<1>(sp));
+
+                if ((is_incoming_signal(t, s1) && is_outgoing_signal(t, s2)) ||
+                    (is_incoming_signal(t, s2) && is_outgoing_signal(t, s1)))
+                {
+                    opposite_signals = true;
+
+                    return false;  // break loop
+                }
+
+                return true;  // continue looping
+            });
+
+        return opposite_signals;
     }
 
 #pragma endregion

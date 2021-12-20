@@ -43,6 +43,7 @@ class read_command : public command
     {
         add_option("filename", filename, "Filename or directory")->required();
         add_flag("--aig,-a", "Parse file as AIG");
+        add_flag("--xag,-x", "Parse file as XAG");
         add_flag("--mig,-m", "Parse file as MIG");
         add_flag("--top,-t", "Parse file as Topology network");
         add_flag("--qca,-q", "Parse file as QCA cell-level layout");
@@ -60,11 +61,11 @@ class read_command : public command
             for (const auto& ln : reader.get_networks(sort)) store<fiction::logic_network_t>().extend() = ln;
         };
 
-        if (!is_set("aig") && !is_set("mig") && !is_set("top") && !is_set("qca"))
+        if (!is_set("aig") && !is_set("xag") && !is_set("mig") && !is_set("top") && !is_set("qca"))
         {
             env->out() << "[e] at least one network or layout type must be specified" << std::endl;
         }
-        else if ((is_set("aig") || is_set("mig") || is_set("top")) && is_set("qca"))
+        else if ((is_set("aig") || is_set("xag") || is_set("mig") || is_set("top")) && is_set("qca"))
         {
             env->out() << "[e] cannot parse files as both logic networks and cell-level layouts" << std::endl;
         }
@@ -75,6 +76,12 @@ class read_command : public command
                 if (is_set("aig"))
                 {
                     fiction::network_reader<fiction::aig_ptr> reader{filename, env->out()};
+
+                    store_ntks(reader);
+                }
+                if (is_set("xag"))
+                {
+                    fiction::network_reader<fiction::xag_ptr> reader{filename, env->out()};
 
                     store_ntks(reader);
                 }

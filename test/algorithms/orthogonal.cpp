@@ -25,31 +25,6 @@
 
 using namespace fiction;
 
-TEST_CASE("Number of constant fanins", "[orthogonal]")
-{
-    const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
-
-    maj4.foreach_node([&maj4](const auto& n) { CHECK(detail::num_constant_fanins(maj4, n) == 0ul); });
-
-    const auto and_inv = blueprints::unbalanced_and_inv_network<mockturtle::mig_network>();
-
-    CHECK(detail::num_constant_fanins(and_inv, 3) == 1ul);
-}
-
-TEST_CASE("High-degree fanin nodes", "[orthogonal]")
-{
-    const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
-
-    CHECK(detail::has_high_degree_fanin_nodes(maj4, 2));
-    CHECK(!detail::has_high_degree_fanin_nodes(maj4, 3));
-
-    const auto and_inv = blueprints::unbalanced_and_inv_network<mockturtle::mig_network>();
-
-    CHECK(detail::has_high_degree_fanin_nodes(and_inv, 1));
-    CHECK(!detail::has_high_degree_fanin_nodes(and_inv, 2));
-    CHECK(!detail::has_high_degree_fanin_nodes(and_inv, 3));
-}
-
 TEST_CASE("East-south coloring", "[orthogonal]")
 {
     const auto check = [](const auto& ntk)
@@ -71,6 +46,8 @@ TEST_CASE("East-south coloring", "[orthogonal]")
     check(mockturtle::fanout_view{
         fanout_substitution<topology_network>(blueprints::nary_operation_network<topology_network>())});
     check(mockturtle::fanout_view{fanout_substitution<topology_network>(blueprints::clpl<topology_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<topology_network>(blueprints::full_adder_network<mockturtle::mig_network>())});
 }
 
 void check_stats(const orthogonal_physical_design_stats& st) noexcept
@@ -90,7 +67,7 @@ void check_ortho_equiv(const Ntk& ntk)
 
     check_stats(stats);
     check_eq(ntk, layout);
-};
+}
 
 template <typename Lyt>
 void check_ortho_equiv_all()

@@ -32,7 +32,7 @@ class ortho_command : public command
             command(e, "Performs scalable placement and routing of the current logic network in store. "
                        "An FCN layout that is not minimal will be found in reasonable runtime.")
     {
-        add_option("--clock_numbers,-n", ps.number_of_clock_phases, "Number of clock phases to be used {3 or 4}");
+        add_option("--clock_numbers,-n", num_clock_phases, "Number of clock phases to be used {3 or 4}");
         add_option("--hex", hexagonal_tile_shift,
                    "Use hexagonal tiles and specify tile shift. Possible values are 'odd_row', 'even_row', "
                    "'odd_column', or 'even_column'");
@@ -54,13 +54,15 @@ class ortho_command : public command
             return;
         }
         // error case: phases out of range
-        if (ps.number_of_clock_phases != 3u && ps.number_of_clock_phases != 4u)
+        if (num_clock_phases != 3u && num_clock_phases != 4u)
         {
             env->out() << "[e] only 3- and 4-phase clocking schemes are supported" << std::endl;
             ps                   = {};
             hexagonal_tile_shift = "";
             return;
         }
+
+        ps.number_of_clock_phases = num_clock_phases == 3 ? fiction::num_clks::THREE : fiction::num_clks::FOUR;
 
         if (is_set("hex"))
         {
@@ -85,9 +87,6 @@ class ortho_command : public command
                 env->out() << "[e] possible values for the hexagonal tile shift are 'odd_row', 'even_row', "
                               "'odd_column', and 'even_column'"
                            << std::endl;
-
-                ps                   = {};
-                hexagonal_tile_shift = "";
             }
         }
         else  // Cartesian layout
@@ -118,6 +117,10 @@ class ortho_command : public command
      * Tile shift for hexagonal layouts.
      */
     std::string hexagonal_tile_shift{};
+    /**
+     * Number of clock phases.
+     */
+    uint8_t num_clock_phases = 4u;
     /**
      * Parameters.
      */

@@ -449,8 +449,7 @@ class gate_level_drvs_impl
 
         uint32_t num_io{0ul};
 
-        const auto count_io = [this, &has_io_report, &ios_present,
-                               &num_io]([[maybe_unused]] const mockturtle::node<Lyt>& io) { ++num_io; };
+        const auto count_io = [&num_io]([[maybe_unused]] const mockturtle::node<Lyt>& io) { ++num_io; };
 
         has_io_report["Specified PIs"] = lyt.num_pis();
         lyt.foreach_pi(count_io);
@@ -546,7 +545,7 @@ class gate_level_drvs_impl
 
         const auto check_io = [this, &border_report, &all_border](const mockturtle::node<Lyt>& io)
         {
-            if (const auto iot = lyt.get_tile(io); !lyt.is_border(iot))
+            if (const auto iot = lyt.get_tile(io); !lyt.is_at_any_border(iot))
             {
                 all_border = false;
                 log_tile(iot, border_report);

@@ -5,6 +5,7 @@
 #ifndef FICTION_CMD_AREA_HPP
 #define FICTION_CMD_AREA_HPP
 
+#include <fiction/technology/area.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -42,7 +43,7 @@ class area_command : public command
     void execute() override
     {
         // reset area
-        area = 0ul;
+        st = {};
 
         auto& s = store<fiction::cell_layout_t>();
 
@@ -76,20 +77,21 @@ class area_command : public command
                 vspace = Tech::cell_vspace;
             }
 
-            area = (static_cast<double>(lyt_ptr->x() + 1) * width + static_cast<double>(lyt_ptr->x()) * hspace) *
-                   (static_cast<double>(lyt_ptr->y() + 1) * height + static_cast<double>(lyt_ptr->y()) * vspace);
+            fiction::area_params<Tech, double> ps{width, height, hspace, vspace};
+
+            fiction::area(*lyt_ptr, ps, &st);
         };
 
         std::visit(calculate_area, lyt);
 
-        env->out() << fmt::format("[i] {} nm²", area) << std::endl;
+        st.report(env->out());
     }
 
   private:
     /**
      * Layout area in nm².
      */
-    double area{0.0};
+    fiction::area_stats<double> st{};
     /**
      * Width and height of each cell.
      */
@@ -105,7 +107,7 @@ class area_command : public command
      */
     nlohmann::json log() const override
     {
-        return {{"area (nm²)", area}};
+        return {{"area (nm²)", st.area}};
     }
 };
 

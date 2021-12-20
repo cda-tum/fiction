@@ -55,7 +55,7 @@ struct one_pass_synthesis_params
      * Clocking scheme to be used.
      */
     std::shared_ptr<clocking_scheme<coordinate<Lyt>>> scheme =
-        std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_4_clocking<Lyt>());
+        std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
     /**
      * Number of tiles to use.
      */
@@ -89,12 +89,12 @@ struct one_pass_synthesis_params
      */
     bool crossings = false;
     /**
-     * Flag to indicate that designated wires should be routed to balance I/O port paths.
+     * Flag to indicate that I/Os should be realized by designated wire segments (preferred).
      */
-    bool io_ports = true;  // TODO thus far, io_ports have to be set to true
+    bool io_pins = true;  // TODO thus far, io_ports have to be set to true
 #if !defined(__APPLE__)
     /**
-     * Number of threads to use for exploring the possible dimensions.
+     * Number of threads to use for exploring the possible aspect ratios. NOTE: THIS IS AN UNSTABLE BETA FEATURE.
      */
     std::size_t num_threads = 1ul;
 #endif
@@ -168,7 +168,7 @@ class mugen_handler
     [[nodiscard]] bool skippable(const aspect_ratio<Lyt>& ratio) const noexcept
     {
         // OPEN clocking optimization: rotated aspect ratios don't need to be explored
-        if (lyt.is_clocking_scheme(clock_name::open3) || lyt.is_clocking_scheme(clock_name::open4))
+        if (lyt.is_clocking_scheme(clock_name::open))
         {
             if (ratio.x != ratio.y && ratio.x == lyt.y() && ratio.y == lyt.x())
                 return true;
@@ -303,7 +303,7 @@ class mugen_handler
                                       "enable_wire"_a = ps.enable_wires, "enable_not"_a = ps.enable_not,
                                       "enable_and"_a = ps.enable_and, "enable_or"_a = ps.enable_or,
                                       "enable_maj"_a = ps.enable_maj, "enable_crossings"_a = ps.crossings,
-                                      "designated_pi"_a = ps.io_ports, "designated_po"_a = ps.io_ports,
+                                      "designated_pi"_a = ps.io_pins, "designated_po"_a = ps.io_pins,
 #if !defined(__APPLE__)
                                       "nr_threads"_a = ps.num_threads,
 #endif
@@ -713,7 +713,7 @@ class one_pass_synthesis_impl
         {
 
 #if (PROGRESS_BARS)
-            mockturtle::progress_bar bar("[i] examining layout dimensions: {:>2} × {:<2}");
+            mockturtle::progress_bar bar("[i] examining layout aspect ratios: {:>2} × {:<2}");
 #endif
 
             const auto aspect_ratio = typename Lyt::aspect_ratio{(*ari).x, (*ari).y, ps.crossings ? 1 : 0};
@@ -802,7 +802,7 @@ class one_pass_synthesis_impl
         // test for graphviz
         try
         {
-            py::exec("from graphviz import *");
+            py::exec("import graphviz");
         }
         catch (...)
         {
@@ -892,7 +892,7 @@ class one_pass_synthesis_impl
  * on GitHub: https://github.com/whaaswijk/mugen
  *
  * Using iterative SAT calls, an optimal synthesis & placement & routing for a given specification will be found.
- * Starting with n, each possible layout dimension in n tiles will be examined by factorization and tested for
+ * Starting with n, each possible layout aspect ratio in n tiles will be examined by factorization and tested for
  * realizability using the SAT solver glucose. When no upper bound is given, this approach will run until it finds a
  * solution to the synthesis & placement & routing problem instance under all given constraints. Note that there are
  * combinations of constraints for which no valid solution under the given parameters might exist.

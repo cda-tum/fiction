@@ -5,7 +5,7 @@
 #ifndef FICTION_ENERGY_MODEL_HPP
 #define FICTION_ENERGY_MODEL_HPP
 
-#include "../traits.hpp"
+#include "fiction/traits.hpp"
 
 #include <mockturtle/traits.hpp>
 

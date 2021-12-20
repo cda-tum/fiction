@@ -5,7 +5,7 @@
 #ifndef FICTION_CMD_ENERGY_HPP
 #define FICTION_CMD_ENERGY_HPP
 
-#include <fiction/algorithms/energy_model.hpp>
+#include <fiction/technology/energy_model.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>

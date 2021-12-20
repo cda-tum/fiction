@@ -24,11 +24,11 @@ TEST_CASE("Clocking", "[synchronization-element-layout]")
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
-    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, twoddwave_4_clocking<se_layout>()};
+    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, twoddwave_clocking<se_layout>()};
 
     layout.assign_synchronization_element({1, 1}, 1);
 
-    CHECK(layout.is_clocking_scheme(clock_name::twoddwave4));
+    CHECK(layout.is_clocking_scheme(clock_name::twoddwave));
     CHECK(layout.is_regularly_clocked());
     CHECK(layout.num_clocks() == 4);
 
@@ -59,7 +59,7 @@ TEST_CASE("Iteration", "[synchronization-element-layout]")
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
-    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, twoddwave_4_clocking<se_layout>()};
+    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, twoddwave_clocking<se_layout>()};
 
     layout.assign_synchronization_element({0, 1}, 1);
     layout.assign_synchronization_element({1, 0}, 1);
@@ -84,8 +84,10 @@ TEST_CASE("Structural properties", "[synchronization-element-layout]")
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<cartesian::ucoord_t>>>;
 
-    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, twoddwave_4_clocking<se_layout>()};
+    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, twoddwave_clocking<se_layout>()};
 
+    CHECK(layout.num_se() == 0);
+    layout.assign_synchronization_element({0, 0}, 0);
     CHECK(layout.num_se() == 0);
     layout.assign_synchronization_element({0, 1}, 1);
     CHECK(layout.num_se() == 1);

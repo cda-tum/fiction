@@ -19,16 +19,16 @@ namespace fiction
 /**
  * A port is a relative position of a cell within, i.e, a tile.
  */
-struct port
+struct port_position
 {
     /**
      * Default constructor.
      */
-    constexpr port() = default;
+    constexpr port_position() = default;
     /**
      * Standard constructor.
      */
-    constexpr port(const uint16_t x_, const uint16_t y_, const bool pi_ = false, const bool po_ = false) :
+    constexpr port_position(const uint16_t x_, const uint16_t y_, const bool pi_ = false, const bool po_ = false) :
             x{x_},
             y{y_},
             pi{pi_},
@@ -52,7 +52,7 @@ struct port
      * @param p Port to compare to.
      * @return True iff this port goes before p in set.
      */
-    constexpr bool operator<(const port& p) const
+    constexpr bool operator<(const port_position& p) const
     {
         return (this->x < p.x) || ((this->x == p.x) && (this->y < p.y));
     }
@@ -62,14 +62,80 @@ struct port
      * @param p Port to compare to.
      * @return True iff this port is equal to given port p.
      */
-    constexpr bool operator==(const port& p) const
+    constexpr bool operator==(const port_position& p) const
     {
         return (this->x == p.x) && (this->y == p.y);
     }
 };
 /**
+ * A port is a relative (cardinal) direction of a port within, i.e, a tile.
+ * Useful, when no exact ports within a tile are needed.
+ */
+struct port_direction
+{
+    /**
+     * Cardinal direction.
+     */
+    enum cardinal : uint8_t
+    {
+        NORTH = 0,
+        NORTH_EAST,
+        EAST,
+        SOUTH_EAST,
+        SOUTH,
+        SOUTH_WEST,
+        WEST,
+        NORTH_WEST
+    };
+    /**
+     * Default constructor.
+     */
+    constexpr port_direction() = default;
+    /**
+     * Standard constructor.
+     */
+    constexpr explicit port_direction(const cardinal d, const bool pi_ = false, const bool po_ = false) :
+            dir{d},
+            pi{pi_},
+            po{po_}
+    {}
+    /**
+     * Direction.
+     */
+    uint16_t dir{};
+    /**
+     * Primary input port.
+     */
+    bool pi = false;
+    /**
+     * Primary output port.
+     */
+    bool po = false;
+    /**
+     * Comparator for set insertion.
+     *
+     * @param p Port to compare to.
+     * @return True iff this port goes before p in set.
+     */
+    constexpr bool operator<(const port_direction& p) const
+    {
+        return (this->dir < p.dir);
+    }
+    /**
+     * Comparator for equality tests.
+     *
+     * @param p Port to compare to.
+     * @return True iff this port is equal to given port p.
+     */
+    constexpr bool operator==(const port_direction& p) const
+    {
+        return (this->dir == p.dir);
+    }
+};
+/**
  * Port lists are collections of input and output identifiers.
  */
+template <typename PortType>
 struct port_list
 {
     /**
@@ -79,20 +145,33 @@ struct port_list
     /**
      * Standard constructor.
      */
-    port_list(std::set<port> inp_, std::set<port> out_) : inp{std::move(inp_)}, out{std::move(out_)} {}
+    port_list(std::set<PortType> inp_, std::set<PortType> out_) : inp{std::move(inp_)}, out{std::move(out_)} {}
     /**
      * Input and output positions.
      */
-    std::set<port> inp{}, out{};
+    std::set<PortType> inp{}, out{};
     /**
      * Comparator for unordered_set/map.
      *
      * @param p Ports to compare to.
      * @return True iff these ports are equal to p.
      */
-    bool operator==(const port_list& p) const
+    bool operator==(const port_list<PortType>& p) const
     {
         return this->inp == p.inp && this->out == p.out;
+    }
+    /**
+     * Merges two port_list objects together. The given port_list might be altered.
+     *
+     * @param p Ports to merge.
+     * @return Merged port lists.
+     */
+    port_list<PortType>& operator+=(port_list<PortType>& p)
+    {
+        this->inp.merge(p.inp);
+        this->out.merge(p.out);
+
+        return *this;
     }
 };
 
@@ -102,9 +181,9 @@ namespace std
 {
 
 template <>
-struct hash<fiction::port>
+struct hash<fiction::port_position>
 {
-    std::size_t operator()(const fiction::port& port) const noexcept
+    std::size_t operator()(const fiction::port_position& port) const noexcept
     {
         std::size_t h = port.x ^ port.y;
         fiction::hash_combine(h, port.x, port.y);
@@ -114,9 +193,18 @@ struct hash<fiction::port>
 };
 
 template <>
-struct hash<fiction::port_list>
+struct hash<fiction::port_direction>
 {
-    std::size_t operator()(const fiction::port_list& port_list) const noexcept
+    std::size_t operator()(const fiction::port_direction& port) const noexcept
+    {
+        return std::hash<std::size_t>{}(static_cast<std::size_t>(port.dir));
+    }
+};
+
+template <typename PortType>
+struct hash<fiction::port_list<PortType>>
+{
+    std::size_t operator()(const fiction::port_list<PortType>& port_list) const noexcept
     {
         std::size_t h = 0;
         fiction::hash_combine(h, port_list.inp, port_list.out);
@@ -131,7 +219,7 @@ namespace fmt
 {
 // make port compatible with fmt::format
 template <>
-struct formatter<fiction::port>
+struct formatter<fiction::port_position>
 {
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
@@ -140,14 +228,13 @@ struct formatter<fiction::port>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::port& p, FormatContext& ctx)
+    auto format(const fiction::port_position& p, FormatContext& ctx)
     {
         return format_to(ctx.out(), "({},{})", p.x, p.y);
     }
 };
-// make port_list compatible with fmt::format
 template <>
-struct formatter<fiction::port_list>
+struct formatter<fiction::port_direction>
 {
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
@@ -156,7 +243,31 @@ struct formatter<fiction::port_list>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::port_list& pl, FormatContext& ctx)
+    auto format(const fiction::port_direction& p, FormatContext& ctx)
+    {
+        return format_to(ctx.out(), p.dir == fiction::port_direction::NORTH      ? "N" :
+                                    p.dir == fiction::port_direction::NORTH_EAST ? "NE" :
+                                    p.dir == fiction::port_direction::EAST       ? "E" :
+                                    p.dir == fiction::port_direction::SOUTH_EAST ? "SE" :
+                                    p.dir == fiction::port_direction::SOUTH      ? "S" :
+                                    p.dir == fiction::port_direction::SOUTH_WEST ? "SW" :
+                                    p.dir == fiction::port_direction::WEST       ? "W" :
+                                    p.dir == fiction::port_direction::NORTH_WEST ? "NW" :
+                                                                                   "?");
+    }
+};
+// make port_list compatible with fmt::format
+template <typename PortType>
+struct formatter<fiction::port_list<PortType>>
+{
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const fiction::port_list<PortType>& pl, FormatContext& ctx)
     {
         return format_to(ctx.out(), "inp: {}, out: {}", join(pl.inp, ", "), join(pl.out, ", "));
     }

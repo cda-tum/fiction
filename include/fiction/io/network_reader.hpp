@@ -14,6 +14,7 @@
 #include <mockturtle/io/verilog_reader.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
+#include <mockturtle/networks/xag.hpp>
 
 #include <algorithm>
 #include <array>
@@ -105,6 +106,10 @@ class network_reader
                 if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::aig_network>)
                 {
                     out << "[e] AIGs do not support the full feature set of BLIF files" << std::endl;
+                }
+                else if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::xag_network>)
+                {
+                    out << "[e] XAGs do not support the full feature set of BLIF files" << std::endl;
                 }
                 else if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::mig_network>)
                 {

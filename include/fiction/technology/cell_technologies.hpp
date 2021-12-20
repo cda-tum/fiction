@@ -279,6 +279,15 @@ struct sidb_technology
      */
     struct cell_mode
     {};
+    /**
+     * Possible marks to be applied to a cell to change its type.
+     */
+    enum class cell_mark : uint8_t
+    {
+        EMPTY  = cell_type::EMPTY,
+        INPUT  = cell_type::INPUT,
+        OUTPUT = cell_type::OUTPUT
+    };
 
     [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
     {

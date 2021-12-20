@@ -15,6 +15,7 @@
 #include <memory>
 #include <set>
 #include <type_traits>
+#include <utility>
 
 namespace fiction
 {
@@ -153,6 +154,8 @@ class hexagonal_layout
     using coordinate   = OffsetCoordinateType;
     using aspect_ratio = OffsetCoordinateType;
 
+    using cube_coordinate = CubeCoordinateType;
+
     struct hexagonal_layout_storage
     {
         explicit hexagonal_layout_storage(const aspect_ratio& ar) noexcept : dimension{ar} {};
@@ -160,8 +163,8 @@ class hexagonal_layout
         aspect_ratio dimension;
     };
 
-    static constexpr auto min_fanin_size = 0;
-    static constexpr auto max_fanin_size = 5;
+    static constexpr auto min_fanin_size = 0u;
+    static constexpr auto max_fanin_size = 5u;
 
     using base_type = hexagonal_layout;
 
@@ -218,6 +221,30 @@ class hexagonal_layout
 
 #pragma endregion
 
+#pragma region row / column detection
+
+    [[nodiscard]] bool is_in_odd_row(const OffsetCoordinateType& c) const noexcept
+    {
+        return c.y % 2 == 1;
+    }
+
+    [[nodiscard]] bool is_in_even_row(const OffsetCoordinateType& c) const noexcept
+    {
+        return c.y % 2 == 0;
+    }
+
+    [[nodiscard]] bool is_in_odd_column(const OffsetCoordinateType& c) const noexcept
+    {
+        return c.x % 2 == 1;
+    }
+
+    [[nodiscard]] bool is_in_even_column(const OffsetCoordinateType& c) const noexcept
+    {
+        return c.x % 2 == 0;
+    }
+
+#pragma endregion
+
 #pragma region Cardinal operations
 
     [[nodiscard]] constexpr OffsetCoordinateType north(const OffsetCoordinateType& c) const noexcept
@@ -229,6 +256,15 @@ class hexagonal_layout
         --nc.y;
 
         return nc;
+    }
+
+    [[nodiscard]] constexpr OffsetCoordinateType north_east(const OffsetCoordinateType& c) const noexcept
+    {
+        auto ne = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{+1, 0, -1});
+
+        ne.z = c.z;
+
+        return is_within_bounds(ne) ? ne : c;
     }
 
     [[nodiscard]] OffsetCoordinateType east(const OffsetCoordinateType& c) const noexcept
@@ -243,6 +279,26 @@ class hexagonal_layout
         return ec;
     }
 
+    [[nodiscard]] constexpr OffsetCoordinateType south_east(const OffsetCoordinateType& c) const noexcept
+    {
+        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top>)
+        {
+            auto se = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{0, -1, +1});
+
+            se.z = c.z;
+
+            return is_within_bounds(se) ? se : c;
+        }
+        else
+        {
+            auto se = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{+1, -1, 0});
+
+            se.z = c.z;
+
+            return is_within_bounds(se) ? se : c;
+        }
+    }
+
     [[nodiscard]] OffsetCoordinateType south(const OffsetCoordinateType& c) const noexcept
     {
         auto sc = c;
@@ -255,6 +311,15 @@ class hexagonal_layout
         return sc;
     }
 
+    [[nodiscard]] constexpr OffsetCoordinateType south_west(const OffsetCoordinateType& c) const noexcept
+    {
+        auto sw = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{-1, 0, +1});
+
+        sw.z = c.z;
+
+        return is_within_bounds(sw) ? sw : c;
+    }
+
     [[nodiscard]] constexpr OffsetCoordinateType west(const OffsetCoordinateType& c) const noexcept
     {
         if (c.x == 0ull)
@@ -264,6 +329,26 @@ class hexagonal_layout
         --wc.x;
 
         return wc;
+    }
+
+    [[nodiscard]] constexpr OffsetCoordinateType north_west(const OffsetCoordinateType& c) const noexcept
+    {
+        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top>)
+        {
+            auto nw = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{0, +1, -1});
+
+            nw.z = c.z;
+
+            return is_within_bounds(nw) ? nw : c;
+        }
+        else
+        {
+            auto nw = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{-1, +1, 0});
+
+            nw.z = c.z;
+
+            return is_within_bounds(nw) ? nw : c;
+        }
     }
 
     [[nodiscard]] OffsetCoordinateType above(const OffsetCoordinateType& c) const noexcept
@@ -311,8 +396,7 @@ class hexagonal_layout
         return c1 != c2 && west(c1) == c2;
     }
 
-    [[nodiscard]] bool is_adjacent_of(const OffsetCoordinateType& c1,
-                                      const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] bool is_adjacent_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
     {
         return adjacent_coordinates<std::set<coordinate>>(c1).count(c2) != 0;
     }
@@ -323,16 +407,16 @@ class hexagonal_layout
         return is_adjacent_of(c1, c2) || is_adjacent_of(above(c1), c2) || is_adjacent_of(below(c1), c2);
     }
 
-//    [[nodiscard]] bool is_above_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
-//    {
-//        return c1 != c2 && above(c1) == c2;
-//    }
-//
-//    [[nodiscard]] constexpr bool is_below_of(const OffsetCoordinateType& c1,
-//                                             const OffsetCoordinateType& c2) const noexcept
-//    {
-//        return c1 != c2 && below(c1) == c2;
-//    }
+    //    [[nodiscard]] bool is_above(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+    //    {
+    //        return c1 != c2 && above(c1) == c2;
+    //    }
+    //
+    //    [[nodiscard]] constexpr bool is_below(const OffsetCoordinateType& c1,
+    //                                          const OffsetCoordinateType& c2) const noexcept
+    //    {
+    //        return c1 != c2 && below(c1) == c2;
+    //    }
 
     [[nodiscard]] constexpr bool is_northwards_of(const OffsetCoordinateType& c1,
                                                   const OffsetCoordinateType& c2) const noexcept
@@ -340,17 +424,17 @@ class hexagonal_layout
         return (c1.z == c2.z) && (c1.y > c2.y) && (c1.x == c2.x);
     }
 
-//    [[nodiscard]] constexpr bool is_eastwards_of(const OffsetCoordinateType& c1,
-//                                                 const OffsetCoordinateType& c2) const noexcept
-//    {
-//        return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x < c2.x);
-//    }
-//
-//    [[nodiscard]] constexpr bool is_southwards_of(const OffsetCoordinateType& c1,
-//                                                  const OffsetCoordinateType& c2) const noexcept
-//    {
-//        return (c1.z == c2.z) && (c1.y < c2.y) && (c1.x == c2.x);
-//    }
+    //    [[nodiscard]] constexpr bool is_eastwards_of(const OffsetCoordinateType& c1,
+    //                                                 const OffsetCoordinateType& c2) const noexcept
+    //    {
+    //        return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x < c2.x);
+    //    }
+    //
+    //    [[nodiscard]] constexpr bool is_southwards_of(const OffsetCoordinateType& c1,
+    //                                                  const OffsetCoordinateType& c2) const noexcept
+    //    {
+    //        return (c1.z == c2.z) && (c1.y < c2.y) && (c1.x == c2.x);
+    //    }
 
     [[nodiscard]] constexpr bool is_westwards_of(const OffsetCoordinateType& c1,
                                                  const OffsetCoordinateType& c2) const noexcept
@@ -358,29 +442,30 @@ class hexagonal_layout
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x > c2.x);
     }
 
-    [[nodiscard]] constexpr bool is_northern_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_at_northern_border(const OffsetCoordinateType& c) const noexcept
     {
         return c.y == 0ull;
     }
 
-    [[nodiscard]] bool is_eastern_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_at_eastern_border(const OffsetCoordinateType& c) const noexcept
     {
         return c.x == x();
     }
 
-    [[nodiscard]] bool is_southern_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_at_southern_border(const OffsetCoordinateType& c) const noexcept
     {
         return c.y == y();
     }
 
-    [[nodiscard]] constexpr bool is_western_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_at_western_border(const OffsetCoordinateType& c) const noexcept
     {
         return c.x == 0ull;
     }
 
-    [[nodiscard]] bool is_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_at_any_border(const OffsetCoordinateType& c) const noexcept
     {
-        return is_northern_border(c) || is_eastern_border(c) || is_southern_border(c) || is_western_border(c);
+        return is_at_northern_border(c) || is_at_eastern_border(c) || is_at_southern_border(c) ||
+               is_at_western_border(c);
     }
 
     [[nodiscard]] OffsetCoordinateType northern_border_of(const OffsetCoordinateType& c) const noexcept
@@ -398,19 +483,24 @@ class hexagonal_layout
         return {c.x, y(), c.z};
     }
 
-//    [[nodiscard]] OffsetCoordinateType western_border_of(const OffsetCoordinateType& c) const noexcept
-//    {
-//        return {0ull, c.y, c.z};
-//    }
-//
-//    [[nodiscard]] constexpr bool is_ground_layer(const OffsetCoordinateType& c) const noexcept
-//    {
-//        return c.z == 0ull;
-//    }
+    //    [[nodiscard]] OffsetCoordinateType western_border_of(const OffsetCoordinateType& c) const noexcept
+    //    {
+    //        return {0ull, c.y, c.z};
+    //    }
+    //
+    [[nodiscard]] constexpr bool is_ground_layer(const OffsetCoordinateType& c) const noexcept
+    {
+        return c.z == 0ull;
+    }
 
     [[nodiscard]] constexpr bool is_crossing_layer(const OffsetCoordinateType& c) const noexcept
     {
         return c.z > 0ull;
+    }
+
+    [[nodiscard]] constexpr bool is_within_bounds(const OffsetCoordinateType& c) const noexcept
+    {
+        return c.x <= x() && c.y <= y() && c.z <= z();
     }
 
 #pragma endregion
@@ -477,7 +567,7 @@ class hexagonal_layout
                           neighbor.z = c.z;
 
                           // add neighboring coordinate if there was no over-/underflow
-                          if (!(neighbor.x > strg->dimension.x || neighbor.y > strg->dimension.y))
+                          if (is_within_bounds(neighbor))
                           {
                               cnt.insert(cnt.end(), neighbor);
                           }
@@ -490,6 +580,43 @@ class hexagonal_layout
     void foreach_adjacent_coordinate(const OffsetCoordinateType& c, Fn&& fn) const
     {
         const auto adj = adjacent_coordinates<std::set<OffsetCoordinateType>>(c);
+
+        mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
+    }
+
+    template <typename Container>
+    Container adjacent_opposite_coordinates(const OffsetCoordinateType& c) const noexcept
+    {
+        Container cnt{};
+
+        const auto add_if_not_c = [&c, &cnt](OffsetCoordinateType cardinal1, OffsetCoordinateType cardinal2)
+        {
+            if (cardinal1 != c && cardinal2 != c)
+            {
+                cnt.insert(cnt.end(), {std::move(cardinal1), std::move(cardinal2)});
+            }
+        };
+
+        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top>)
+        {
+            add_if_not_c(east(c), west(c));
+        }
+        else  // flat top
+        {
+            add_if_not_c(north(c), south(c));
+        }
+
+        add_if_not_c(north_east(c), south_west(c));
+        add_if_not_c(north_west(c), south_east(c));
+
+        return cnt;
+    }
+
+    template <typename Fn>
+    void foreach_adjacent_opposite_coordinates(const OffsetCoordinateType& c, Fn&& fn) const
+    {
+        const auto adj =
+            adjacent_opposite_coordinates<std::set<std::pair<OffsetCoordinateType, OffsetCoordinateType>>>(c);
 
         mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
     }
@@ -509,25 +636,23 @@ class hexagonal_layout
     {
         CubeCoordinateType cube_coord{0, 0, 0};
 
-        constexpr auto offset =
+        constexpr const auto offset =
             std::is_same_v<OffsetCoordinateSystem, odd_row> || std::is_same_v<OffsetCoordinateSystem, odd_column> ? -1 :
                                                                                                                     1;
 
-        if constexpr (std::is_same_v<OffsetCoordinateSystem, odd_row> ||
-                      std::is_same_v<OffsetCoordinateSystem, even_row>)
+        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top>)
         {
             cube_coord.x = offset_coord.x -
                            static_cast<decltype(cube_coord.x)>((offset_coord.y + offset * (offset_coord.y & 1)) / 2);
-            cube_coord.y = offset_coord.y;
-            cube_coord.z = -cube_coord.x - cube_coord.y;
+            cube_coord.z = offset_coord.y;
+            cube_coord.y = -cube_coord.x - cube_coord.z;
         }
-        else if constexpr (std::is_same_v<OffsetCoordinateSystem, odd_column> ||
-                           std::is_same_v<OffsetCoordinateSystem, even_column>)
+        else if constexpr (std::is_same_v<typename hex_arrangement::orientation, flat_top>)
         {
             cube_coord.x = offset_coord.x;
-            cube_coord.y = offset_coord.y -
-                           static_cast<decltype(cube_coord.y)>((offset_coord.x + offset * (offset_coord.x & 1)) / 2);
-            cube_coord.z = -cube_coord.x - cube_coord.y;
+            cube_coord.z = offset_coord.y -
+                           static_cast<decltype(cube_coord.z)>((offset_coord.x + offset * (offset_coord.x & 1)) / 2);
+            cube_coord.y = -cube_coord.x - cube_coord.z;
         }
 
         return cube_coord;
@@ -540,23 +665,20 @@ class hexagonal_layout
         // the generated coordinate will be in ground layer
         OffsetCoordinateType offset_coord{0, 0};
 
-        constexpr auto offset =
+        constexpr const auto offset =
             std::is_same_v<OffsetCoordinateSystem, odd_row> || std::is_same_v<OffsetCoordinateSystem, odd_column> ? -1 :
                                                                                                                     1;
-
-        if constexpr (std::is_same_v<OffsetCoordinateSystem, odd_row> ||
-                      std::is_same_v<OffsetCoordinateSystem, even_row>)
+        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top>)
         {
-            offset_coord.x = static_cast<decltype(offset_coord.x)>(cube_coord.x) +
-                             static_cast<decltype(offset_coord.x)>((cube_coord.y + offset * (cube_coord.y & 1)) / 2);
-            offset_coord.y = static_cast<decltype(offset_coord.y)>(cube_coord.y);
+            offset_coord.x = static_cast<decltype(offset_coord.x)>(
+                cube_coord.x + static_cast<int64_t>((cube_coord.z + offset * (cube_coord.z & 1)) / 2));
+            offset_coord.y = static_cast<decltype(offset_coord.y)>(cube_coord.z);
         }
-        else if constexpr (std::is_same_v<OffsetCoordinateSystem, odd_column> ||
-                           std::is_same_v<OffsetCoordinateSystem, even_column>)
+        else if constexpr (std::is_same_v<typename hex_arrangement::orientation, flat_top>)
         {
             offset_coord.x = static_cast<decltype(offset_coord.x)>(cube_coord.x);
-            offset_coord.y = static_cast<decltype(offset_coord.y)>(cube_coord.y) +
-                             static_cast<decltype(offset_coord.y)>((cube_coord.x + offset * (cube_coord.x & 1)) / 2);
+            offset_coord.y = static_cast<decltype(offset_coord.y)>(
+                cube_coord.z + static_cast<int64_t>((cube_coord.x + offset * (cube_coord.x & 1)) / 2));
         }
 
         return offset_coord;

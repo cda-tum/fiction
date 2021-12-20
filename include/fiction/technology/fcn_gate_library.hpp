@@ -31,11 +31,11 @@ class unsupported_gate_type_exception : public std::exception
     const CoordinateType coord;
 };
 
-template <typename CoordinateType>
+template <typename CoordinateType, typename PortType>
 class unsupported_gate_orientation_exception : public std::exception
 {
   public:
-    unsupported_gate_orientation_exception(const CoordinateType& c, const port_list& p) noexcept :
+    unsupported_gate_orientation_exception(const CoordinateType& c, const port_list<PortType>& p) noexcept :
             std::exception(),
             coord{c},
             ports{p}
@@ -46,14 +46,14 @@ class unsupported_gate_orientation_exception : public std::exception
         return coord;
     }
 
-    [[nodiscard]] port_list which_ports() const noexcept
+    [[nodiscard]] port_list<PortType> which_ports() const noexcept
     {
         return ports;
     }
 
   private:
-    const CoordinateType coord;
-    const port_list      ports;
+    const CoordinateType      coord;
+    const port_list<PortType> ports;
 };
 
 /**
@@ -75,7 +75,7 @@ class fcn_gate_library
     template <typename T>
     static constexpr fcn_gate cell_list_to_gate(const cell_list<T>& c) noexcept
     {
-        return convert_array_of_arrays<typename Technology::cell_type>(c);
+        return convert_array_of_arrays<typename Technology::cell_type, T, GateSizeY, GateSizeX>(c);
     }
     /**
      * Rotates the given fcn_gate by 90° clockwise.

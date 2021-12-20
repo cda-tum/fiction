@@ -5,6 +5,8 @@
 #ifndef FICTION_TRAITS_HPP
 #define FICTION_TRAITS_HPP
 
+#include <fiction/layouts/hexagonal_layout.hpp>
+
 #include <mockturtle/traits.hpp>
 
 #include <cstdint>
@@ -14,7 +16,7 @@ namespace fiction
 {
 
 /**
- * Cartesian layouts
+ * Coordinate layouts
  */
 
 template <typename Lyt>
@@ -102,6 +104,77 @@ struct has_above<Lyt, std::void_t<decltype(std::declval<Lyt>().above(std::declva
         : std::true_type
 {};
 
+#pragma region has_north_east
+template <class Lyt, class = void>
+struct has_north_east : std::false_type
+{};
+
+template <class Lyt>
+struct has_north_east<Lyt, std::void_t<decltype(std::declval<Lyt>().north_east(std::declval<coordinate<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_north_east_v = has_north_east<Lyt>::value;
+#pragma endregion
+
+#pragma region has_south_east
+template <class Lyt, class = void>
+struct has_south_east : std::false_type
+{};
+
+template <class Lyt>
+struct has_south_east<Lyt, std::void_t<decltype(std::declval<Lyt>().south_east(std::declval<coordinate<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_south_east_v = has_south_east<Lyt>::value;
+#pragma endregion
+
+#pragma region has_south_west
+template <class Lyt, class = void>
+struct has_south_west : std::false_type
+{};
+
+template <class Lyt>
+struct has_south_west<Lyt, std::void_t<decltype(std::declval<Lyt>().south_west(std::declval<coordinate<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_south_west_v = has_south_west<Lyt>::value;
+#pragma endregion
+
+#pragma region has_north_west
+template <class Lyt, class = void>
+struct has_north_west : std::false_type
+{};
+
+template <class Lyt>
+struct has_north_west<Lyt, std::void_t<decltype(std::declval<Lyt>().north_west(std::declval<coordinate<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_north_west_v = has_north_west<Lyt>::value;
+#pragma endregion
+
+#pragma region has_ordinal_operations
+template <class Lyt, class = void>
+struct has_ordinal_operations : std::false_type
+{};
+
+template <class Lyt>
+struct has_ordinal_operations<Lyt, std::enable_if_t<std::conjunction_v<has_north_east<Lyt>, has_south_east<Lyt>,
+                                                                       has_south_west<Lyt>, has_north_west<Lyt>>>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_ordinal_operations_v = has_ordinal_operations<Lyt>::value;
+#pragma endregion
+
 template <class Lyt>
 inline constexpr bool has_above_v = has_above<Lyt>::value;
 #pragma endregion
@@ -184,6 +257,71 @@ struct has_foreach_adjacent_coordinate<
 
 template <class Lyt>
 inline constexpr bool has_foreach_adjacent_coordinate_v = has_foreach_adjacent_coordinate<Lyt>::value;
+#pragma endregion
+
+#pragma region has_foreach_adjacent_opposite_coordinates
+template <class Lyt, class = void>
+struct has_foreach_adjacent_opposite_coordinates : std::false_type
+{};
+
+template <class Lyt>
+struct has_foreach_adjacent_opposite_coordinates<
+    Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_adjacent_opposite_coordinates(
+             std::declval<coordinate<Lyt>>(), std::declval<void(coordinate<Lyt>, uint32_t)>()))>> : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_foreach_adjacent_opposite_coordinates_v =
+    has_foreach_adjacent_opposite_coordinates<Lyt>::value;
+#pragma endregion
+
+#pragma region is_cartesian_layout
+template <class Ntk, class = void>
+struct is_cartesian_layout : std::false_type
+{};
+
+template <class Lyt>
+struct is_cartesian_layout<
+    Lyt,
+    std::enable_if_t<is_coordinate_layout_v<Lyt> && Lyt::max_fanin_size == 3u,
+                     std::void_t<typename Lyt::base_type, aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage>>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool is_cartesian_layout_v = is_cartesian_layout<Lyt>::value;
+#pragma endregion
+
+#pragma region is_hexagonal_layout
+template <class Ntk, class = void>
+struct is_hexagonal_layout : std::false_type
+{};
+
+template <class Lyt>
+struct is_hexagonal_layout<
+    Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt> && has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
+                          std::void_t<typename Lyt::base_type, typename Lyt::hex_arrangement, aspect_ratio<Lyt>,
+                                      coordinate<Lyt>, typename Lyt::storage>>> : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool is_hexagonal_layout_v = is_hexagonal_layout<Lyt>::value;
+#pragma endregion
+
+#pragma region hexagonal orientation and arrangement
+template <typename Lyt>
+constexpr bool has_pointy_top_hex_orientation_v =
+    std::is_same_v<typename Lyt::hex_arrangement::orientation, pointy_top>;
+template <typename Lyt>
+constexpr bool has_flat_top_hex_orientation_v = std::is_same_v<typename Lyt::hex_arrangement::orientation, flat_top>;
+template <typename Lyt>
+constexpr bool has_odd_row_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, odd_row>;
+template <typename Lyt>
+constexpr bool has_even_row_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, even_row>;
+template <typename Lyt>
+constexpr bool has_odd_column_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, odd_column>;
+template <typename Lyt>
+constexpr bool has_even_column_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, even_column>;
 #pragma endregion
 
 /**

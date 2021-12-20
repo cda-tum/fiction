@@ -163,7 +163,7 @@ class write_sqd_layout_impl
                 // generate QCA cell blocks
                 else if constexpr (std::is_same_v<technology<Lyt>, qca_technology>)
                 {
-                    const auto type = lyt.get_cell_type(c);
+                    const auto type = this->lyt.get_cell_type(c);
 
                     const auto color = qca_technology::is_input_cell(type)    ? siqad::INPUT_COLOR :
                                        qca_technology::is_output_cell(type)   ? siqad::OUTPUT_COLOR :

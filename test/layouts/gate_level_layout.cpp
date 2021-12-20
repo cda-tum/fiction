@@ -442,7 +442,7 @@ TEST_CASE("compute functions from AND and NOT gates", "[gate-level-layout]")
 
     REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
-    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, open_4_clocking<gate_layout>()};
+    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, open_clocking<gate_layout>(num_clks::FOUR)};
 
     layout.assign_clock_number({2, 0}, static_cast<typename gate_layout::clock_number_t>(0));
     layout.assign_clock_number({1, 0}, static_cast<typename gate_layout::clock_number_t>(1));
@@ -738,23 +738,23 @@ TEST_CASE("node and signal iteration", "[gate-level-layout]")
     /* iterate over fanouts */
     mask = counter = 0;
     layout.foreach_fanout(layout.get_node(o),
-                          [&](auto s, auto i)
+                          [&](auto fon, auto i)
                           {
-                              mask |= (1u << layout.get_node(s));
+                              mask |= (1u << fon);
                               counter += i;
                           });
     CHECK(mask == 128);
     CHECK(counter == 0);
 
     mask = 0;
-    layout.foreach_fanout(layout.get_node(o), [&](auto s) { mask |= (1u << layout.get_node(s)); });
+    layout.foreach_fanout(layout.get_node(o), [&](auto fon) { mask |= (1u << fon); });
     CHECK(mask == 128);
 
     mask = counter = 0;
     layout.foreach_fanout(layout.get_node(o),
-                          [&](auto s, auto i)
+                          [&](auto fon, auto i)
                           {
-                              mask |= (1u << layout.get_node(s));
+                              mask |= (1u << fon);
                               counter += i;
                               return false;
                           });
@@ -763,9 +763,9 @@ TEST_CASE("node and signal iteration", "[gate-level-layout]")
 
     mask = 0;
     layout.foreach_fanout(layout.get_node(o),
-                          [&](auto s)
+                          [&](auto fon)
                           {
-                              mask |= (1u << layout.get_node(s));
+                              mask |= (1u << fon);
                               return false;
                           });
     CHECK(mask == 128);
@@ -937,18 +937,18 @@ TEST_CASE("Crossings", "[gate-level-layout]")
     CHECK(layout.fanin_size(layout.get_node({2, 2})) == 2);
 
     layout.foreach_fanout(layout.get_node({1, 1}),
-                          [&layout](const auto& fo) {
-                              CHECK(layout.get_node(fo) == layout.get_node({2, 1, 1}));
+                          [&layout](const auto& fon) {
+                              CHECK(fon == layout.get_node({2, 1, 1}));
                           });
 
     layout.foreach_fanout(layout.get_node({2, 1}),
-                          [&layout](const auto& fo) {
-                              CHECK(layout.get_node(fo) == layout.get_node({2, 2}));
+                          [&layout](const auto& fon) {
+                              CHECK(fon == layout.get_node({2, 2}));
                           });
 
     layout.foreach_fanout(layout.get_node({2, 1, 1}),
-                          [&layout](const auto& fo) {
-                              CHECK(layout.get_node(fo) == layout.get_node({3, 1}));
+                          [&layout](const auto& fon) {
+                              CHECK(fon == layout.get_node({3, 1}));
                           });
 
     layout.foreach_fanin(layout.get_node({2, 1}),
@@ -1026,13 +1026,13 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
                          });
 
     layout.foreach_fanout(and_node,
-                          [](const auto& f) {
-                              CHECK(static_cast<gate_layout::tile>(f) == gate_layout::tile{3, 1});
+                          [&layout](const auto& fon) {
+                              CHECK(layout.get_tile(fon) == gate_layout::tile{3, 1});
                           });
 
     layout.foreach_fanout(or_node,
-                          [](const auto& f) {
-                              CHECK(static_cast<gate_layout::tile>(f) == gate_layout::tile{0, 0});
+                          [&layout](const auto& fon) {
+                              CHECK(layout.get_tile(fon) == gate_layout::tile{0, 0});
                           });
 
     // move PI

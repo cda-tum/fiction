@@ -50,11 +50,11 @@ constexpr auto convert_array(const ArrayType& a, [[maybe_unused]] std::index_seq
  * @param a
  * @return
  */
-template <typename ElementType, typename T, std::size_t N, std::size_t... Is>
-constexpr auto convert_array_of_arrays(const std::array<T, N>& a, [[maybe_unused]] std::index_sequence<Is...>)
-    -> std::array<std::array<ElementType, sizeof...(Is)>, N>
+template <typename ElementType, typename T, std::size_t N, std::size_t M, std::size_t... Is>
+constexpr auto convert_array_of_arrays(const std::array<std::array<T, M>, N>& a, [[maybe_unused]] std::index_sequence<Is...>)
+    -> std::array<std::array<ElementType, M>, N>
 {
-    return {{convert_array<ElementType>(a[Is], std::make_index_sequence<N>())...}};
+    return {{detail::convert_array<ElementType>(a[Is], std::make_index_sequence<M>())...}};
 }
 
 }  // namespace detail
@@ -71,8 +71,8 @@ constexpr auto convert_array(const std::array<T, N>& a)
     return detail::convert_array<ElementType>(a, std::make_index_sequence<N>());
 }
 
-template <typename ElementType, typename T, std::size_t N>
-constexpr auto convert_array_of_arrays(const std::array<T, N>& a)
+template <typename ElementType, typename T, std::size_t N, std::size_t M>
+constexpr auto convert_array_of_arrays(const std::array<std::array<T, M>, N>& a)
 {
     return detail::convert_array_of_arrays<ElementType>(a, std::make_index_sequence<N>());
 }

@@ -48,13 +48,13 @@ class onepass_command : public command
                        "resulting from this approach might be desynchronized. I/Os are always located at the "
                        "layout's borders.")
     {
-        add_option("--clk_scheme,-s", clocking, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, BANCS}", true);
+        add_option("--clk_scheme,-s", clocking, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, ESP, BANCS}", true);
         add_option("--upper_bound,-u", ps.upper_bound, "Number of FCN gate tiles to use at maximum");
         add_option("--fixed_size,-f", ps.fixed_size, "Execute only one iteration with the given number of tiles");
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
 #if !defined(__APPLE__)
-        add_option("--async,-a", ps.num_threads, "Number of threads to use for parallel solving");
-        add_flag("--async_max", "Use the maximum number of threads available to the system");
+        add_option("--async,-a", ps.num_threads, "Number of threads to use for parallel solving (beta feature)");
+        add_flag("--async_max", "Use the maximum number of threads available to the system (beta feature)");
 #endif
         add_flag("--network,-n", "Re-synthesize the current logic network in store instead of the current truth table");
         add_flag("--and,-A", ps.enable_and, "Enable the use of AND gates");
@@ -63,7 +63,7 @@ class onepass_command : public command
         add_flag("--maj,-M", ps.enable_maj, "Enable the use of MAJ gates");
         add_flag("--wires,-W", ps.enable_wires, "Enable the use of wire segments and fan-outs");
         add_flag("--crossings,-x", ps.crossings, "Enable wire crossings");
-        //        add_flag("--io_ports,-i", ps.io_ports, "Use I/O port elements instead of gate pins");  // TODO this
+        //        add_flag("--io_pins,-i", ps.io_pins, "Use I/O port elements instead of gate pins");  // TODO this
         //        toggle does not work yet
     }
 
@@ -100,8 +100,7 @@ class onepass_command : public command
         // choose clocking
         if (auto clk = fiction::get_clocking_scheme<fiction::cart_gate_clk_lyt>(clocking); clk.has_value())
         {
-            if (auto name = clk->name;
-                name == "OPEN3" || name == "OPEN4" || name == "TOPOLINANO3" || name == "TOPOLINANO4")
+            if (auto name = clk->name; name == fiction::clock_name::open || name == fiction::clock_name::columnar)
             {
                 env->out() << fmt::format("[e] the \"{}\" clocking scheme is not supported by this approach", name)
                            << std::endl;
@@ -110,8 +109,8 @@ class onepass_command : public command
                 return;
             }
 
-            ps.scheme = std::make_shared<fiction::clocking_scheme<fiction::cart_gate_clk_lyt::tile>>(*clk);
-            if (ps.scheme->name != "RES" && ps.enable_maj)
+            ps.scheme = fiction::ptr<fiction::cart_gate_clk_lyt>(std::move(*clk));
+            if (clk->max_out_degree < 3 && ps.enable_maj)
             {
                 ps.enable_maj = false;
                 env->out() << "[w] disabling MAJ gates as they are not supported by the " << ps.scheme->name

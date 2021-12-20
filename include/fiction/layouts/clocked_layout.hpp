@@ -45,15 +45,23 @@ class clocked_layout : public CoordinateLayout
 
     explicit clocked_layout(const typename CoordinateLayout::aspect_ratio& ar = {}) :
             CoordinateLayout(ar),
-            strg{std::make_shared<clocked_layout_storage>(open_4_clocking<clocked_layout<CoordinateLayout>>())}
-    {}
+            strg{std::make_shared<clocked_layout_storage>(
+                open_clocking<clocked_layout<CoordinateLayout>>(num_clks::FOUR))}
+    {
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+    }
 
     clocked_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking_scheme_t& scheme) :
             CoordinateLayout(ar),
             strg{std::make_shared<clocked_layout_storage>(scheme)}
-    {}
+    {
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+    }
 
-    explicit clocked_layout(std::shared_ptr<clocked_layout_storage> s) : strg{std::move(s)} {}
+    explicit clocked_layout(std::shared_ptr<clocked_layout_storage> s) : strg{std::move(s)}
+    {
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+    }
 
 #pragma endregion
 
