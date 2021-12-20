@@ -1,9 +1,9 @@
 ﻿---
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
-AlignConsecutiveBitFields: true
-AlignConsecutiveMacros: true
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveBitFields: Consecutive
+AlignConsecutiveMacros: Consecutive
 AlignEscapedNewlines: Left
 AlignOperands: Align
 AlignTrailingComments: true
@@ -63,7 +63,7 @@ IndentCaseLabels: true
 IndentWidth: 4
 Language: Cpp
 ReflowComments: true
-SortIncludes: true
+SortIncludes: CaseSensitive
 SortUsingDeclarations: true
 SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: true
