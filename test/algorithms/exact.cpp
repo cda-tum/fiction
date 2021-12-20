@@ -364,6 +364,10 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
             check_with_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(
                 blueprints::and_or_network<mockturtle::mig_network>(),
                 row(crossings(border_io(configuration<hex_lyt>()))));
+
+            check_with_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(
+                blueprints::nand_xnor_network<fiction::topology_network>(),
+                row(crossings(border_io(configuration<hex_lyt>()))));
         }
         SECTION("2DDWave clocking")
         {

@@ -95,6 +95,11 @@ class topology_network : public mockturtle::klut_network
     {
         return _create_node({a, b}, 12);
     }
+
+    signal create_xnor(signal a, signal b)
+    {
+        return _create_node({a, b}, 13);
+    }
 #pragma endregion
 
 #pragma region Create ternary functions

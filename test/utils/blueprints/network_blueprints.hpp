@@ -318,6 +318,25 @@ Ntk one_to_five_path_difference_network()
 }
 
 template <typename Ntk>
+Ntk nand_xnor_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi("x1");
+    const auto x2 = ntk.create_pi("x2");
+
+    const auto nand1 = ntk.create_nand(x1, x2);
+    const auto nor1  = ntk.create_nor(x1, x2);
+    const auto xor1  = ntk.create_xor(nand1, nor1);
+    const auto xnor1 = ntk.create_xnor(nand1, nor1);
+
+    ntk.create_po(xor1, "f1");
+    ntk.create_po(xnor1, "f2");
+
+    return ntk;
+}
+
+template <typename Ntk>
 Ntk topolinano_network()
 {
     Ntk ntk{};
