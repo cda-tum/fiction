@@ -885,22 +885,40 @@ class one_pass_synthesis_impl
 }  // namespace detail
 
 /**
- * An exact approach combining logic synthesis and physical design using SAT solving. This class provides the interface
- * via which the technique can be called from the CLI. The instance generation happens in its sub-class mugen_handler.
+ * A physical design approach combining logic synthesis and physical design into a single run instead of considering
+ * them independently. To this end, SAT solving is utilized, which makes this approach an exact one but one that is
+ * independent of prior logic network synthesis. Nevertheless, it does only find solutions for small specifications
+ * because it does not scale.
  *
- * Mugen is a framework for one-pass synthesis of FCN circuit layouts developed by Winston Haaswijk. It can be found
- * on GitHub: https://github.com/whaaswijk/mugen
+ * The algorithm was originally proposed in "One-pass Synthesis for Field-coupled Nanocomputing Technologies" by M.
+ * Walter, W. Haaswijk, R. Wille, F. Sill Torres, and Rolf Drechsler in ASP-DAC 2021.
  *
  * Using iterative SAT calls, an optimal synthesis & placement & routing for a given specification will be found.
  * Starting with n, each possible layout aspect ratio in n tiles will be examined by factorization and tested for
  * realizability using the SAT solver glucose. When no upper bound is given, this approach will run until it finds a
  * solution to the synthesis & placement & routing problem instance under all given constraints. Note that there are
- * combinations of constraints for which no valid solution under the given parameters might exist.
+ * combinations of constraints for which no valid solution under the given parameters might exist. It is, thus, prudent
+ * to always provide a timeout limit.
+ *
+ * This implementation relies on Mugen, a framework for one-pass synthesis of FCN circuit layouts developed by Winston
+ * Haaswijk. It can be found on GitHub: https://github.com/whaaswijk/mugen
  *
  * Since Mugen is written in Python3, fiction uses pybind11 for interoperability. This can lead to performance and
- * integration issues. Make sure to follow all steps given in the README carefully if you decide to run this code.
+ * integration issues. Mugen requires the following Python3 packages to be installed:
+ * - graphviz
+ * - python-sat
+ * - wrapt_timeout_decorator
  *
- * This approach is still experimental and is, therefore, excluded from CLI compilation by default.
+ * Due to the integration hassle, possible performance issues, and its experimental status this approach is excluded
+ * from (CLI) compilation by default. To enable it, pass -DFICTION_ENABLE_MUGEN=ON to the cmake call.
+ *
+ * @tparam Lyt Gate-level layout type to generate.
+ * @tparam TT Truth table type used as specification.
+ * @param tts A vector of truth tables where table at index i specifies the Boolean function for output i.
+ * @param ps Parameters.
+ * @param pst Statistics.
+ * @return A gate-level layout of type TT implementing tts as an FCN circuit if one is found under the given parameters;
+ * std::nullopt, otherwise.
  */
 template <typename Lyt, typename TT>
 std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params<Lyt> ps = {},
@@ -926,7 +944,20 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
 
     return result;
 }
-
+/**
+ * An overload of one_pass_synthesis above that utilizes a logic network as specification instead of a vector of truth
+ * tables. It first generates truth tables from the given network and then calls the function above.
+ *
+ * This function might throw an 'std::bad_alloc' exception if the provided logic network has too many inputs.
+ *
+ * @tparam Lyt Gate-level layout type to generate.
+ * @tparam Ntk Logic network type used as specification.
+ * @param ntk The network whose function is to be realized as an FCN circuit.
+ * @param ps Parameters.
+ * @param pst Statistics.
+ * @return A gate-level layout of type TT implementing tts as an FCN circuit if one is found under the given parameters;
+ * std::nullopt, otherwise.
+ */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<Lyt> ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)

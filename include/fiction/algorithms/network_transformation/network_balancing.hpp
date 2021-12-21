@@ -24,6 +24,9 @@ namespace fiction
 
 struct network_balancing_params
 {
+    /**
+     * Flag to indicate that all output nodes should be in the same rank.
+     */
     bool unify_outputs = false;
 };
 
@@ -183,6 +186,25 @@ class is_balanced_impl
 
 }  // namespace detail
 
+/**
+ * Balances a logic network with buffer nodes that compute the identity function. For this purpose, create_buf is
+ * utilized. Therefore, NtkDest should support identity nodes. If it does not, no new nodes will in fact be created. In
+ * either case, the returned network will be logically equivalent to the input one.
+ *
+ * The process is rather naive and is not combined with fanout substitution.
+ *
+ * The returned network is newly created from scratch because its type NtkDest may differ from NtkSrc.
+ *
+ * NOTE: The physical design algorithms natively provided in fiction do not require their input networks to be balanced.
+ * If that is necessary, they will do it themselves. Providing already balanced networks may lead to substantial
+ * overhead.
+ *
+ * @tparam NtkDest Type of the returned logic network.
+ * @tparam NtkSrc Type of the input logic network.
+ * @param ntk_src The input logic network.
+ * @param ps Parameters.
+ * @return A path-balanced logic network of type NtkDest that is logically equivalent to ntk_src.
+ */
 template <typename NtkDest, typename NtkSrc>
 NtkDest network_balancing(const NtkSrc& ntk_src, network_balancing_params ps = {})
 {
@@ -207,7 +229,14 @@ NtkDest network_balancing(const NtkSrc& ntk_src, network_balancing_params ps = {
 
     return result;
 }
-
+/**
+ * Checks if a logic network is properly path-balanced with regard to the provided parameters.
+ *
+ * @tparam Ntk Logic network type.
+ * @param ntk The logic network to check.
+ * @param ps Parameters.
+ * @return True iff ntk is properly path-balanced with regard to ps.
+ */
 template <typename Ntk>
 bool is_balanced(const Ntk& ntk, network_balancing_params ps = {}) noexcept
 {

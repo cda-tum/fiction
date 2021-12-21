@@ -2994,14 +2994,14 @@ class exact_impl
 }  // namespace detail
 
 /**
- * An exact physical design approach using SMT solving as originally proposed in "An Exact Method for Design Exploration
- * of Quantum-dot Cellular Automata" by M. Walter, R. Wille, D. Große, F. Sill Torres, and R. Drechsler in DATE 2018. A
- * more extensive description can be found in "Design Automation for Field-coupled Nanotechnologies" by M. Walter, R.
- * Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
+ * An exact placement & routing approach using SMT solving as originally proposed in "An Exact Method for Design
+ * Exploration of Quantum-dot Cellular Automata" by M. Walter, R. Wille, D. Große, F. Sill Torres, and R. Drechsler in
+ * DATE 2018. A more extensive description can be found in "Design Automation for Field-coupled Nanotechnologies" by M.
+ * Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
  *
  * Via incremental SMT calls, an optimal gate-level layout for a given logic network will be found under constraints.
  * Starting with n tiles, where n is the number of logic network nodes, each possible layout aspect ratio will be
- * examined by factorization and tested for routability with the SMT solver z3. When no upper bound is given, this
+ * examined by factorization and tested for routability with the SMT solver Z3. When no upper bound is given, this
  * approach will run until it finds a solution to the placement & routing problem instance.
  *
  * Note that there a combinations of constraints for which no valid solution under the given parameters exist for the
@@ -3026,12 +3026,16 @@ class exact_impl
  * is_gate_level_layout, respectively. It is, thereby, mostly technology-independent but can make certain assumptions if
  * needed, for instance for ToPoliNano-compliant circuits.
  *
+ * This approach requires the Z3 SMT solver to be installed on the system. Due to this circumstance, it is excluded from
+ * (CLI) compilation by default. To enable it, pass -DFICTION_Z3=ON to the cmake call.
+ *
  * @tparam Lyt Desired gate-level layout type.
  * @tparam Ntk Network type that acts as specification.
  * @param ntk The network that is to place and route.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return A gate-level layout of type Lyt that implements ntk as an FCN circuit.
+ * @return A gate-level layout of type Lyt that implements ntk as an FCN circuit if one is found under the given
+ * parameters; std::nullopt, otherwise.
  */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = {},

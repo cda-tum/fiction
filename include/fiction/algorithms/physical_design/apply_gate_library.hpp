@@ -170,14 +170,19 @@ class apply_gate_library_impl
 }  // namespace detail
 
 /**
+ * Applies a gate library to a given gate-level layout and, thereby, creates and returns a cell-level layout. The gate
+ * library type should provide all functions specified in fcn_gate_library. It is, thus, easiest to extend
+ * fcn_gate_library to implement a new gate library. Examples are qca_one_gate_library, topolinano_inml_gate_library,
+ * and sidb_bestagon_gate_library.
+ *
  * May pass through, and thereby throw, an 'unsupported_gate_type_exception' or an
  * 'unsupported_gate_orientation_exception'.
  *
- * @tparam CellLyt
- * @tparam GateLibrary
- * @tparam GateLyt
- * @param lyt
- * @return
+ * @tparam CellLyt Type of the returned cell-level layout.
+ * @tparam GateLibrary Type of the gate library to apply.
+ * @tparam GateLyt Type of the gate-level layout to apply the library to.
+ * @param lyt The gate-level layout.
+ * @return A cell-level layout that implements lyt's gate types with building blocks defined in GateLibrary.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt>
 CellLyt apply_gate_library(const GateLyt& lyt)

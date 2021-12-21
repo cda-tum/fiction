@@ -619,20 +619,36 @@ class orthogonal_impl
 }  // namespace detail
 
 /**
- * A heuristic physical design approach based on orthogonal graph drawing. A slight modification of
- * Therese C. Biedl's improved algorithm for drawing of 3-graphs is used because the original
- * one works for undirected graphs only. Modification includes using directions of the logic network
- * directly instead of relabeling the edges according to its DFS tree, ordering the vertices
- * using jDFS instead of DFS, and adding an extra placement rule for nodes without predecessors.
+ * A scalable placement & routing approach based on orthogonal graph drawing as originally proposed in "Scalable Design
+ * for Field-coupled Nanocomputing Circuits" by M. Walter, R. Wille, F. Sill Torres, D. Große, and R. Drechsler in
+ * ASP-DAC 2019. A more extensive description can be found in "Design Automation for Field-coupled Nanotechnologies" by
+ * M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
  *
- * The algorithm works in linear time O(2|V| + |E|). Produced layout has a size of x * y, where
- * x + y = |V| - |PI| + 1. This is because each vertex leads to either one extra row or column
- * except for those without predecessors which create both.
+ * Via certain restrictions to the degrees of freedom in FCN physical design, this algorithm achieves a polynomial time
+ * complexity. However, these restrictions lead to an overall approximation of optimal layout quality within several
+ * factors. Therefore, this algorithm produces valid layouts within a short amount of time, its results are far from
+ * being optimal in terms of area.
  *
- * This is a proof of concept implementation for a scalable physical design approach for FCN.
- * It is not meant to be used for arranging fabricable circuits, as area is far from being optimal.
+ * The imposed restrictions are that the input logic network has to be a 3-graph, i.e., cannot have any node exceeding
+ * degree 3 (combined input and output), and that the resulting layout is always 2DDWave-clocked.
+ *
+ * This algorithm is based on a modification of "Improved orthogonal drawings of 3-graphs" by Therese C. Biedl in CCCG
+ * 1996. The original one works for undirected graphs only while this modification respects information flow of directed
+ * logic networks. To this end, the edge directions of the logic network directly used instead of relabeling the edges
+ * according to its DFS tree, ordering the vertices using topological sorting instead of DFS, and adding an extra
+ * placement rule for nodes without predecessors.
+ *
+ * The algorithm works in polynomial time O(3|N| + |L|) where |N| is the number of nodes in the given network and |L| is
+ * the resulting layout size given by x * y, which approaches (|N|/2)^2 asymptotically.
  *
  * May throw an 'high_degree_fanin_exception'.
+ *
+ * @tparam Lyt Desired gate-level layout type.
+ * @tparam Ntk Network type that acts as specification.
+ * @param ntk The network that is to place and route.
+ * @param ps Parameters.
+ * @param pst Statistics.
+ * @return A gate-level layout of type Lyt that implements ntk as an FCN circuit.
  */
 template <typename Lyt, typename Ntk>
 Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
@@ -640,7 +656,7 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
-                  "Ntk is not a network type");  // Ntk is being converted to a topology_network anyways, therefore,
+                  "Ntk is not a network type");  // Ntk is being converted to a topology_network anyway, therefore,
                                                  // this is the only relevant check here
 
     // check for input degree
