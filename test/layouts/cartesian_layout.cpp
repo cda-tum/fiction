@@ -231,8 +231,8 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     layout.foreach_adjacent_coordinate(
         {5, 5},
         [](const auto& adj) {
-            CHECK(std::set<cartesian_layout<offset::ucoord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}}.count(
-                adj));
+            CHECK(
+                std::set<cartesian_layout<offset::ucoord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}}.count(adj));
         });
 
     CHECK(s1 == s2);

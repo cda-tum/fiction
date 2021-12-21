@@ -5,12 +5,12 @@
 #ifndef FICTION_SIDB_BESTAGON_LIBRARY_HPP
 #define FICTION_SIDB_BESTAGON_LIBRARY_HPP
 
-#include "../traits.hpp"
-#include "../utils/array.hpp"
-#include "../utils/hash.hpp"
-#include "cell_ports.hpp"
-#include "cell_technologies.hpp"
-#include "fcn_gate_library.hpp"
+#include "fiction/technology/cell_ports.hpp"
+#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/fcn_gate_library.hpp"
+#include "fiction/traits.hpp"
+#include "fiction/utils/array_utils.hpp"
+#include "fiction/utils/hash.hpp"
 
 #include <fmt/format.h>
 

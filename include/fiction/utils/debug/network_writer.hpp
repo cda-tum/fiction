@@ -5,7 +5,7 @@
 #ifndef FICTION_NETWORK_WRITER_HPP
 #define FICTION_NETWORK_WRITER_HPP
 
-#include <fiction/io/dot_drawers.hpp>
+#include "fiction/io/dot_drawers.hpp"
 
 #include <mockturtle/io/write_dot.hpp>
 

@@ -134,9 +134,7 @@ TEST_CASE("Iteration", "[clocked-layout]")
     auto s3 = layout.outgoing_clocked_zones<std::set<clk_lyt::coordinate>>({1, 1});
     auto s4 = std::set<clk_lyt::coordinate>{{{1, 2}, {2, 1}}};
 
-    layout.foreach_outgoing_clocked_zone({1, 1}, [&s4](const auto& cz) {
-                                             CHECK(s4.count(cz) > 0);
-                                         });
+    layout.foreach_outgoing_clocked_zone({1, 1}, [&s4](const auto& cz) { CHECK(s4.count(cz) > 0); });
 
     CHECK(s3 == s4);
 

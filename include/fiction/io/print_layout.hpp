@@ -5,8 +5,8 @@
 #ifndef FICTION_PRINT_LAYOUT_HPP
 #define FICTION_PRINT_LAYOUT_HPP
 
-#include "../traits.hpp"
-#include "../types.hpp"
+#include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 
 #include <fmt/color.h>
 #include <fmt/format.h>

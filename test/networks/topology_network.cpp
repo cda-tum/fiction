@@ -6,7 +6,6 @@
 
 #include <fiction/networks/topology_network.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/utils/debug/network_writer.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>

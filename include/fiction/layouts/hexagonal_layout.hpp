@@ -5,8 +5,8 @@
 #ifndef FICTION_HEXAGONAL_LAYOUT_HPP
 #define FICTION_HEXAGONAL_LAYOUT_HPP
 
-#include "../utils/range.hpp"
-#include "coordinates.hpp"
+#include "fiction/layouts/coordinates.hpp"
+#include "fiction/utils/range.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 
@@ -188,7 +188,14 @@ class hexagonal_layout
             "OffsetCoordinateSystem has to be one of the following: odd_row, even_row, odd_column, even_column");
     }
 
-    explicit hexagonal_layout(std::shared_ptr<hexagonal_layout_storage> s) : strg{std::move(s)} {}
+    explicit hexagonal_layout(std::shared_ptr<hexagonal_layout_storage> s) : strg{std::move(s)}
+    {
+        static_assert(
+            std::is_same_v<OffsetCoordinateSystem, odd_row> || std::is_same_v<OffsetCoordinateSystem, even_row> ||
+                std::is_same_v<OffsetCoordinateSystem, odd_column> ||
+                std::is_same_v<OffsetCoordinateSystem, even_column>,
+            "OffsetCoordinateSystem has to be one of the following: odd_row, even_row, odd_column, even_column");
+    }
 
 #pragma endregion
 

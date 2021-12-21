@@ -5,7 +5,7 @@
 #ifndef FICTION_STORES_HPP
 #define FICTION_STORES_HPP
 
-#include <fiction/algorithms/critical_path_length_and_throughput.hpp>
+#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
 #include <fiction/io/dot_drawers.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/io/write_svg_layout.hpp>

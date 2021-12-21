@@ -5,6 +5,8 @@
 #ifndef FICTION_SYNCHRONIZATION_ELEMENT_LAYOUT_HPP
 #define FICTION_SYNCHRONIZATION_ELEMENT_LAYOUT_HPP
 
+#include "fiction/traits.hpp"
+
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
@@ -36,17 +38,23 @@ class synchronization_element_layout : public ClockedLayout
     explicit synchronization_element_layout(const typename ClockedLayout::aspect_ratio& ar = {}) :
             ClockedLayout(ar),
             strg{std::make_shared<synchronization_element_layout_storage>()}
-    {}
+    {
+        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+    }
 
     synchronization_element_layout(const typename ClockedLayout::aspect_ratio&      ar,
                                    const typename ClockedLayout::clocking_scheme_t& scheme) :
             ClockedLayout(ar, scheme),
             strg{std::make_shared<synchronization_element_layout_storage>()}
-    {}
+    {
+        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+    }
 
     explicit synchronization_element_layout(std::shared_ptr<synchronization_element_layout_storage> s) :
             strg{std::move(s)}
-    {}
+    {
+        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+    }
 
 #pragma endregion
 

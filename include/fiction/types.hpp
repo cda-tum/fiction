@@ -5,15 +5,15 @@
 #ifndef FICTION_TYPES_HPP
 #define FICTION_TYPES_HPP
 
-#include "layouts/cartesian_layout.hpp"
-#include "layouts/cell_level_layout.hpp"
-#include "layouts/clocked_layout.hpp"
-#include "layouts/gate_level_layout.hpp"
-#include "layouts/hexagonal_layout.hpp"
-#include "layouts/synchronization_element_layout.hpp"
-#include "layouts/tile_based_layout.hpp"
-#include "networks/topology_network.hpp"
-#include "technology/cell_technologies.hpp"
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/layouts/clocked_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/synchronization_element_layout.hpp"
+#include "fiction/layouts/tile_based_layout.hpp"
+#include "fiction/networks/topology_network.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/io/write_dot.hpp>

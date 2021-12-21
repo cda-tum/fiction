@@ -5,8 +5,8 @@
 #ifndef FICTION_WRITE_SVG_LAYOUT_HPP
 #define FICTION_WRITE_SVG_LAYOUT_HPP
 
-#include "../layouts/coordinates.hpp"
-#include "../traits.hpp"
+#include "fiction/layouts/coordinates.hpp"
+#include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
 
 #include <fmt/format.h>

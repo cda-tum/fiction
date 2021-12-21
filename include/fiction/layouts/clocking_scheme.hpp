@@ -5,8 +5,8 @@
 #ifndef FICTION_CLOCKING_SCHEME_HPP
 #define FICTION_CLOCKING_SCHEME_HPP
 
-#include "../traits.hpp"
-#include "coordinates.hpp"
+#include "fiction/layouts/coordinates.hpp"
+#include "fiction/traits.hpp"
 
 #include <algorithm>
 #include <array>

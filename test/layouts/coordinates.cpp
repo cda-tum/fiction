@@ -5,7 +5,6 @@
 #include "catch.hpp"
 
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/traits.hpp>
 
 #include <map>
 #include <set>

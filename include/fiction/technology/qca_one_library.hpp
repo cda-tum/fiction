@@ -5,11 +5,11 @@
 #ifndef FICTION_QCA_ONE_LIBRARY_HPP
 #define FICTION_QCA_ONE_LIBRARY_HPP
 
-#include "../traits.hpp"
-#include "../utils/array.hpp"
-#include "cell_ports.hpp"
-#include "cell_technologies.hpp"
-#include "fcn_gate_library.hpp"
+#include "fiction/technology/cell_ports.hpp"
+#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/fcn_gate_library.hpp"
+#include "fiction/traits.hpp"
+#include "fiction/utils/array_utils.hpp"
 
 #include <fmt/format.h>
 
@@ -163,6 +163,8 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         return p;
     }
 
+    // clang-format off
+
     // ************************************************************
     // ************************** Gates ***************************
     // ************************************************************
@@ -304,6 +306,8 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
                                   {'x', ' ', ' ', ' ', ' '},
                                   {'x', ' ', ' ', ' ', ' '},
                                   {'x', 'x', 'x', 'x', 'x'}}})};
+
+    // clang-format on
 
     using port_gate_map = std::unordered_map<port_list<port_position>, fcn_gate>;
     /**

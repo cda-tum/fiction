@@ -2,8 +2,8 @@
 // Created by marcel on 19.05.21.
 //
 
-#include "../utils/blueprints/layout_blueprints.hpp"
 #include "catch.hpp"
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/io/print_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>

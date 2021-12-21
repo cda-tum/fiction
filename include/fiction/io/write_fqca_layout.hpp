@@ -5,8 +5,8 @@
 #ifndef FICTION_WRITE_FQCA_LAYOUT_HPP
 #define FICTION_WRITE_FQCA_LAYOUT_HPP
 
-#include "../technology/cell_technologies.hpp"
-#include "../traits.hpp"
+#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
 
 #include <fmt/format.h>

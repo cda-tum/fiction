@@ -5,7 +5,7 @@
 #ifndef FICTION_DOT_DRAWERS_HPP
 #define FICTION_DOT_DRAWERS_HPP
 
-#include "../traits.hpp"
+#include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
 
 #include <fiction/layouts/hexagonal_layout.hpp>

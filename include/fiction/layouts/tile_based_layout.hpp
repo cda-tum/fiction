@@ -5,6 +5,8 @@
 #ifndef FICTION_TILE_BASED_LAYOUT_HPP
 #define FICTION_TILE_BASED_LAYOUT_HPP
 
+#include "fiction/traits.hpp"
+
 #include <memory>
 
 namespace fiction

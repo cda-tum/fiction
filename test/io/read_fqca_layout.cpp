@@ -2,8 +2,8 @@
 // Created by marcel on 04.10.21.
 //
 
-#include "../utils/blueprints/layout_blueprints.hpp"
 #include "catch.hpp"
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/io/read_fqca_layout.hpp>
 #include <fiction/io/write_fqca_layout.hpp>

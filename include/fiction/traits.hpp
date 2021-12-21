@@ -5,7 +5,7 @@
 #ifndef FICTION_TRAITS_HPP
 #define FICTION_TRAITS_HPP
 
-#include <fiction/layouts/hexagonal_layout.hpp>
+#include "fiction/layouts/hexagonal_layout.hpp"
 
 #include <mockturtle/traits.hpp>
 

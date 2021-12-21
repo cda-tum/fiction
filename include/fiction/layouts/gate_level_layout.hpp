@@ -5,9 +5,9 @@
 #ifndef FICTION_GATE_LEVEL_LAYOUT_HPP
 #define FICTION_GATE_LEVEL_LAYOUT_HPP
 
-#include "../algorithms/design_rule_violations.hpp"
-#include "../utils/range.hpp"
-#include "clocking_scheme.hpp"
+#include "fiction/algorithms/verification/design_rule_violations.hpp"
+#include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/utils/range.hpp"
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>

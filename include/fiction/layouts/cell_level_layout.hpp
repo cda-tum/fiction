@@ -5,8 +5,8 @@
 #ifndef FICTION_CELL_LEVEL_LAYOUT_HPP
 #define FICTION_CELL_LEVEL_LAYOUT_HPP
 
-#include "../technology/cell_technologies.hpp"
-#include "clocking_scheme.hpp"
+#include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 

@@ -5,9 +5,9 @@
 #ifndef FICTION_FCN_GATE_LIBRARY_HPP
 #define FICTION_FCN_GATE_LIBRARY_HPP
 
-#include "../layouts/coordinates.hpp"
-#include "../utils/array.hpp"
-#include "cell_technologies.hpp"
+#include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/utils/array_utils.hpp"
 
 #include <array>
 #include <initializer_list>

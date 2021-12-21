@@ -2,8 +2,8 @@
 // Created by marcel on 17.09.21.
 //
 
-#include "../utils/blueprints/layout_blueprints.hpp"
 #include "catch.hpp"
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/io/dot_drawers.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -457,7 +457,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x3y0 -> x3y1;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
         SECTION("Crossing Layout")
         {
@@ -519,7 +520,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x3y1 -> x3y2;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
     }
     SECTION("even row")
@@ -571,7 +573,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x3y0 -> x3y1;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
         SECTION("Crossing Layout")
         {
@@ -634,7 +637,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x3y1 -> x3y2;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
     }
     SECTION("odd column")
@@ -694,7 +698,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x2y1 -> x3y1;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
         SECTION("Crossing Layout")
         {
@@ -760,7 +765,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x2y2 -> x3y2;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
     }
     SECTION("even column")
@@ -820,7 +826,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x2y1 -> x3y1;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
         SECTION("Crossing Layout")
         {
@@ -886,7 +893,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "x2y2 -> x3y2;\n"
                 "}\n";
 
-            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
     }
 }
