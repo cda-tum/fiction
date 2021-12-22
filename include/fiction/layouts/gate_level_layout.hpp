@@ -30,6 +30,51 @@
 namespace fiction
 {
 
+/**
+ * A layout type to layer on top of a clocked layout that allows the assignment of gates to clock zones (aka tiles in
+ * this context). This class represents a gate-level FCN layout and, thus, adds a notion of Boolean logic. The
+ * gate_level_layout class fulfills the requirements of a mockturtle logic network so that it can be used in many of
+ * mockturtle's algorithms. Since a layout has to assign fixed positions to its gates (logic nodes), most generative
+ * member functions like create_pi, create_po, create_and, etc. require additional coordinate parameters. Consequently,
+ * mockturtle's algorithms cannot be used to generate gate_level_layout networks. To make the class compliant with the
+ * API anyways, these member functions have their parameters defaulted but they are, in fact required to create
+ * meaningful layouts.
+ *
+ * The following notion is utilized in this implementation:
+ * - a node n is an index representing the nth created gate. All properties of said gate, e.g., its type and position,
+ * are stored independently and can be requested from the layout. An empty layout has 2 nodes, namely const0 and const1
+ * as required by mockturtle. At the moment, they are not used for anything meaningful but could be.
+ *
+ * - a signal is an unsigned integer representation of a tile, i.e., a coordinate in the layout. It can be seen as a
+ * pointer to a position. Consequently, the utilized coordinates need to be convertible to uint64_t.
+ *
+ * - the creation of PIs and POs creates nodes (the latter in contrast to other mockturtle networks) that have a
+ * position on the layout.
+ *
+ * - the creation of buffers (create_buf) creates nodes as well. A buffer with more than one output is a fanout such
+ * that is_fanout will return true on it. However, it is also still a buffer (is_buf returns true as well). Buffers and
+ * wires are used interchangeably.
+ *
+ * - each node has an associated gate function. PIs, POs, and buffers compute the identity function.
+ *
+ * - signals (pointers to tiles) cannot be inverting. Thereby, inverter nodes (gates) have to be created that can be
+ * checked for via is_inv.
+ *
+ * - each create_... function requires a tile parameter that determines its placement. If the provided tile is dead, the
+ * location will not be stored and the node will not count towards number of gates or wires.
+ *
+ * - a node can be overwritten by creating another node on its location. This can, however, lead to unwanted effects and
+ * should be avoided.
+ *
+ * - nodes can be moved via the move_node function. This function can also be used to update their children, i.e.,
+ * incoming signals.
+ *
+ * Most implementation details regarding mockturtle specific functions are borrowed from mockturtle/networks/klut.hpp.
+ * Therefore, mockturtle API functions are only sporadically documented where their behavior might differ. Information
+ * on their functionality can be found in mockturtle's docs.
+ *
+ * @tparam ClockedLayout The clocked layout that is to be extended by gate functions.
+ */
 template <typename ClockedLayout>
 class gate_level_layout : public ClockedLayout
 {
@@ -91,6 +136,13 @@ class gate_level_layout : public ClockedLayout
 
     using storage = std::shared_ptr<gate_level_layout_storage>;
 
+    /**
+     * Standard constructor. Creates a named gate-level layout of the given aspect ratio. To this end, it calls
+     * ClockedLayout's standard constructor.
+     *
+     * @param ar Highest possible position in the layout.
+     * @param name Layout name.
+     */
     explicit gate_level_layout(const typename ClockedLayout::aspect_ratio& ar = {}, std::string name = {}) :
             ClockedLayout(ar),
             strg{std::make_shared<gate_level_layout_storage>()},
@@ -101,7 +153,14 @@ class gate_level_layout : public ClockedLayout
         initialize_truth_table_cache();
         strg->data.layout_name = std::move(name);
     }
-
+    /**
+     * Standard constructor. Creates a gate-level layout of the given aspect ratio and clocks it via the given clocking
+     * scheme. To this end, it calls ClockedLayout's standard constructor.
+     *
+     * @param ar Highest possible position in the layout.
+     * @param scheme Clocking scheme to apply to this layout.
+     * @param name Layout name.
+     */
     gate_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<tile>& scheme,
                       std::string name = {}) :
             ClockedLayout(ar, scheme),
@@ -113,7 +172,11 @@ class gate_level_layout : public ClockedLayout
         initialize_truth_table_cache();
         strg->data.layout_name = std::move(name);
     }
-
+    /**
+     * Copy constructor from another layout's storage.
+     *
+     * @param s Storage of another gate_level_layout.
+     */
     explicit gate_level_layout(std::shared_ptr<gate_level_layout_storage> s) :
             strg{std::move(s)},
             evnts{std::make_shared<typename event_storage::element_type>()}
@@ -127,7 +190,7 @@ class gate_level_layout : public ClockedLayout
 
     [[nodiscard]] signal get_constant(bool value = false) const noexcept
     {
-        // const0 = (1,0,0,0), const1 = (1,1,0,0)
+        // tiles reserved for constants: const0 = (1,0,0,0), const1 = (1,1,0,0)
         return value ? strg->data.const1 : strg->data.const0;
     }
 
@@ -173,7 +236,12 @@ class gate_level_layout : public ClockedLayout
     {
         return std::find(strg->inputs.cbegin(), strg->inputs.cend(), n) != strg->inputs.cend();
     }
-
+    /**
+     * Check whether tile t hosts a primary input.
+     *
+     * @param t Tile to be checked.
+     * @return True iff the node located at tile t is a PI.
+     */
     [[nodiscard]] bool is_pi_tile(const tile& t) const noexcept
     {
         return is_pi(get_node(t));
@@ -184,7 +252,12 @@ class gate_level_layout : public ClockedLayout
         return std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
                             [this, &n](const auto& p) { return this->get_node(p.index) == n; }) != strg->outputs.cend();
     }
-
+    /**
+     * Check whether tile t hosts a primary output.
+     *
+     * @param t Tile to be checked.
+     * @return True iff the node located at tile t is a PO.
+     */
     [[nodiscard]] bool is_po_tile(const tile& t) const noexcept
     {
         return is_po(get_node(t));
@@ -389,22 +462,40 @@ class gate_level_layout : public ClockedLayout
     {
         return 0u;
     }
-
+    /**
+     * Returns the number of placed nodes in the layout that do not compute the identity function.
+     *
+     * @return Number of gates in the layout.
+     */
     [[nodiscard]] auto num_gates() const noexcept
     {
         return strg->data.num_gates;
     }
-
+    /**
+     * Returns the number of placed nodes in the layout that compute the identity function including PIs and POs.
+     *
+     * @return Number of wires in the layout.
+     */
     [[nodiscard]] auto num_wires() const noexcept
     {
         return strg->data.num_wires;
     }
-
+    /**
+     * Returns the number of incoming, adjacently placed, and properly clocked signals to the given node.
+     *
+     * @param n Node to check.
+     * @return Number of fanins to n.
+     */
     [[nodiscard]] auto fanin_size(node const& n) const
     {
         return static_cast<uint32_t>(incoming_data_flow<std::set<tile>>(get_tile(n)).size());
     }
-
+    /**
+     * Returns the number of outgoing, adjacently placed, and properly clocked signals of the given node.
+     *
+     * @param n Node to check.
+     * @return Number of fanouts to n.
+     */
     [[nodiscard]] auto fanout_size(node const& n) const
     {
         return static_cast<uint32_t>(outgoing_data_flow<std::set<tile>>(get_tile(n)).size());
@@ -414,6 +505,13 @@ class gate_level_layout : public ClockedLayout
 
 #pragma region Nodes and signals
 
+    /**
+     * Fetches the node that is placed onto a tile pointed to by a given signal. If no node is placed there, the const0
+     * node is returned.
+     *
+     * @param s Pointer to a tile.
+     * @return Node at position t where s points at t; or 0 if no node is placed at t.
+     */
     [[nodiscard]] node get_node(const signal& s) const noexcept
     {
         if (auto it = strg->data.tile_node_map.find(s); it != strg->data.tile_node_map.cend())
@@ -423,12 +521,23 @@ class gate_level_layout : public ClockedLayout
 
         return 0;
     }
-
+    /**
+     * Fetches the node that is placed onto the provided tile If no node is placed there, the const0 node is returned.
+     *
+     * @param t Tile in the layout.
+     * @return Node at position t; or 0 if no node is placed at t.
+     */
     [[nodiscard]] node get_node(const tile& t) const noexcept
     {
         return get_node(static_cast<signal>(t));
     }
-
+    /**
+     * The inverse function of get_node. Fetches the tile that the provided node is placed on. Returns a default dead
+     * tile if the node is not placed.
+     *
+     * @param n Node whose location is desired.
+     * @return Tile at which n is placed or a default dead tile if n is not placed.
+     */
     [[nodiscard]] tile get_tile(const node& n) const noexcept
     {
         if (auto it = strg->data.node_tile_map.find(n); it != strg->data.node_tile_map.cend())
@@ -448,7 +557,14 @@ class gate_level_layout : public ClockedLayout
     {
         return static_cast<signal>(get_tile(n));
     }
-
+    /**
+     * Moves a given node to a new position and also updates its children, i.e., incoming signals.
+     *
+     * @param n Node to move.
+     * @param t Tile to move n to.
+     * @param new_children New incoming signals to n.
+     * @return Signal pointing to n's new tile.
+     */
     signal move_node(const node& n, const tile& t, const std::vector<signal>& new_children = {}) noexcept
     {
         // n's current position
@@ -508,22 +624,41 @@ class gate_level_layout : public ClockedLayout
     {
         return index;
     }
-
+    /**
+     * Returns whether a given node is a gate in accordance with mockturtle's definition, i.e., whether it not a
+     * constant and not a PI. Thereby, any wire/buffer (including POs) is a gate if this function is used to check for
+     * it. This poses an inconsistency but is required to comply with certain mockturtle algorithms.
+     *
+     * @param n Node to check.
+     * @return True iff n is neither a constant nor a PI.
+     */
     [[nodiscard]] bool is_gate(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 >= 2 && !is_pi(n);
     }
-
+    /**
+     * Returns whether n computes the identity function.
+     *
+     * @param n Node to check.
+     * @return True iff n computes the identity.
+     */
     [[nodiscard]] bool is_buf(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 2;
     }
-
+    /**
+     * Equivalent to is_buf.
+     */
     [[nodiscard]] bool is_wire(const node n) const noexcept
     {
         return is_buf(n);
     }
-
+    /**
+     * Returns whether n computes the binary inversion (NOT gate).
+     *
+     * @param n Node to check.
+     * @return True iff n is a NOT gate.
+     */
     [[nodiscard]] bool is_inv(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 3;
@@ -563,7 +698,13 @@ class gate_level_layout : public ClockedLayout
     {
         return strg->nodes[n].data[1].h1 == 10;
     }
-
+    /**
+     * Returns whether n is a wire and has multiple outputs, thereby, acting as a fanout gate. Note that a fanout will
+     * return true for both is_wire and is_fanout.
+     *
+     * @param n Node to check.
+     * @return True iff n is a fanout gate.
+     */
     [[nodiscard]] bool is_fanout(const node n) const noexcept
     {
         return is_wire(n) && fanout_size(n) > 1;
@@ -573,20 +714,35 @@ class gate_level_layout : public ClockedLayout
     {
         return n > 1;
     }
-
+    /**
+     * Returns whether the node assigned to t fulfills is_gate (in accordance with mockturtle's definition of gates).
+     *
+     * @param t Tile to check.
+     * @return True iff t hosts a node that is a neither a constant nor a PI.
+     */
     [[nodiscard]] bool is_gate_tile(const tile& t) const noexcept
     {
         return is_gate(get_node(static_cast<signal>(t)));
     }
-
+    /**
+     * Returns whether the node assigned to t fulfills is_wire.
+     *
+     * @param t Tile to check.
+     * @return True iff t hosts a node that computes the identity.
+     */
     [[nodiscard]] bool is_wire_tile(const tile& t) const noexcept
     {
         return is_wire(get_node(static_cast<signal>(t)));
     }
-
+    /**
+     * Returns whether t does not have a node assigned to it.
+     *
+     * @param t Tile to check.
+     * @return True iff t is an empty tile.
+     */
     [[nodiscard]] bool is_empty_tile(const tile& t) const noexcept
     {
-        return !is_gate_tile(t) && !is_wire_tile(t);
+        return !get_node(static_cast<signal>(t));
     }
 
 #pragma endregion
