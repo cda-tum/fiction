@@ -20,6 +20,9 @@
 namespace fiction
 {
 
+/**
+ * Specify the checks that are to be executed.
+ */
 struct gate_level_drv_params
 {
     // Topology
@@ -38,6 +41,9 @@ struct gate_level_drv_params
     bool io_pins   = true;
     bool border_io = true;
 
+    /**
+     * Stream to write the report into.
+     */
     std::ostream* out = &std::cout;
 };
 
@@ -564,6 +570,23 @@ class gate_level_drvs_impl
 
 }  // namespace detail
 
+/**
+ * Performs design rule violation (DRV) checking on the given gate-level layout. The implementation of gate_level_layout
+ * allows for layouts with structural defects like the connection of non-adjacent tiles or connections that defy the
+ * clocking scheme. This function checks for such violations and documents them in the statistics. A brief report can be
+ * printed and more in-depth information including with error sites can be obtained from a generated json object.
+ *
+ * Furthermore, this function does not only find and log DRVs but can also warn for instances that are not per se errors
+ * but defy best practices of layout generation, e.g., I/Os not being placed at the layout borders.
+ *
+ * For this function to work, detail::gate_level_drvs_impl need to be declared as a friend class to the layout type that
+ * is going to be examined.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt The gate-level layout that is to be examined for DRVs and warnings.
+ * @param ps Parameters.
+ * @param pst Statistics.
+ */
 template <typename Lyt>
 void gate_level_drvs(const Lyt& lyt, gate_level_drv_params ps = {}, gate_level_drv_stats* pst = nullptr)
 {

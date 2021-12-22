@@ -508,6 +508,17 @@ class write_qca_layout_impl
 
 }  // namespace detail
 
+/**
+ * Writes a cell-level QCA layout to a qca file that is used by QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/),
+ * a physical simulator for the QCA technology platform.
+ *
+ * This overload uses an output stream to write into.
+ *
+ * @tparam Lyt Cell-level QCA layout type.
+ * @param lyt The layout to be written.
+ * @param os The output stream to write into.
+ * @param ps Parameters.
+ */
 template <typename Lyt>
 void write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params ps = {})
 {
@@ -518,7 +529,17 @@ void write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params 
 
     p.run();
 }
-
+/**
+ * Writes a cell-level QCA layout to a qca file that is used by QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/),
+ * a physical simulator for the QCA technology platform.
+ *
+ * This overload uses a file name to create and write into.
+ *
+ * @tparam Lyt Cell-level QCA layout type.
+ * @param lyt The layout to be written.
+ * @param filename The file name to create and write into. Should preferably use the ".qca" extension.
+ * @param ps Parameters.
+ */
 template <typename Lyt>
 void write_qca_layout(const Lyt& lyt, const std::string& filename, write_qca_layout_params ps = {})
 {

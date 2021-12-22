@@ -319,11 +319,15 @@ class read_fqca_layout_impl
 }  // namespace detail
 
 /**
+ * Reads a cell-level QCA layout from an fqca file provided as an input stream. The format is used by QCA-STACK by
+ * Willem Lambooy (https://github.com/wlambooy/QCA-STACK).
+ *
  * May throw an 'unsupported_character_exception', 'undefined_cell_label_exception', or
  * 'unrecognized_cell_definition_exception'.
  *
  * @tparam Lyt The layout type to be created from an input. Must be a clocked cell-level QCA layout.
  * @param is The input stream to read from.
+ * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
 Lyt read_fqca_layout(std::istream& is, const std::string& name = "")
@@ -337,7 +341,17 @@ Lyt read_fqca_layout(std::istream& is, const std::string& name = "")
 
     return lyt;
 }
-
+/**
+ * Reads a cell-level QCA layout from an fqca file provided as a file name. The format is used by QCA-STACK by
+ * Willem Lambooy (https://github.com/wlambooy/QCA-STACK).
+ *
+ * May throw an 'unsupported_character_exception', 'undefined_cell_label_exception', or
+ * 'unrecognized_cell_definition_exception'.
+ *
+ * @tparam Lyt The layout type to be created from an input. Must be a clocked cell-level QCA layout.
+ * @param filename The file name to open and read from.
+ * @param name The name to give to the generated layout.
+ */
 template <typename Lyt>
 Lyt read_fqca_layout(const std::string& filename, const std::string& name = "")
 {

@@ -22,6 +22,13 @@
 namespace fiction
 {
 
+/**
+ * A DOT drawer that extends mockturtle's one by several additional gate types.
+ *
+ * @tparam Ntk Logic network type.
+ * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ * @tparam DrawHexTT Flag to toggle the representation of truth tables for unknown functions in hexadecimal notation.
+ */
 template <typename Ntk, bool DrawIndexes = false, bool DrawHexTT = false>
 class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
 {
@@ -168,7 +175,13 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
         return !s.empty() && std::all_of(s.begin(), s.end(), ::isdigit);
     }
 };
-
+/**
+ * A DOT drawer for networks wrapped in mockturtle::color_view. Node colors represent their painted color instead of
+ * their gate type.
+ *
+ * @tparam Ntk Logic network type.
+ * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ */
 template <typename Ntk, bool DrawIndexes = false>
 class color_view_drawer : public mockturtle::default_dot_drawer<Ntk>
 {
@@ -198,7 +211,13 @@ class color_view_drawer : public mockturtle::default_dot_drawer<Ntk>
     static constexpr const std::array<const char*, 8> colors{{"ghostwhite", "deepskyblue1", "darkseagreen2", "crimson",
                                                               "goldenrod1", "darkorchid2", "chocolate1", "gray28"}};
 };
-
+/**
+ * Base class for a simple gate-level layout DOT drawer.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
+ * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ */
 template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
 class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawIndexes>
 {
@@ -324,12 +343,18 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
         return fmt::format("{} -> {};\n", src, tgt);
     }
 };
-
+/**
+ * An extended gate-level layout DOT drawer for Cartesian layouts.
+ *
+ * @tparam Lyt Cartesian gate-level layout type.
+ * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
+ * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ */
 template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
 class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>
 {
   public:
-    [[nodiscard]] virtual std::vector<std::string> additional_graph_attributes() const noexcept
+    [[nodiscard]] std::vector<std::string> additional_graph_attributes() const noexcept override
     {
         auto graph_attributes = base_drawer::additional_graph_attributes();
 
@@ -347,7 +372,7 @@ class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, 
         return graph_attributes;
     }
 
-    [[nodiscard]] virtual std::vector<std::string> additional_node_attributes() const noexcept
+    [[nodiscard]] std::vector<std::string> additional_node_attributes() const noexcept override
     {
         auto node_attributes = base_drawer::additional_node_attributes();
 
@@ -384,12 +409,18 @@ class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, 
   private:
     using base_drawer = simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>;
 };
-
+/**
+ * An extended gate-level layout DOT drawer for hexagonal layouts.
+ *
+ * @tparam Lyt Hexagonal gate-level layout type.
+ * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
+ * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ */
 template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
 class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>
 {
   public:
-    [[nodiscard]] virtual std::vector<std::string> additional_graph_attributes() const noexcept
+    [[nodiscard]] std::vector<std::string> additional_graph_attributes() const noexcept override
     {
         auto graph_attributes = base_drawer::additional_graph_attributes();
 
@@ -417,7 +448,7 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
         return graph_attributes;
     }
 
-    [[nodiscard]] virtual std::vector<std::string> additional_node_attributes() const noexcept
+    [[nodiscard]] std::vector<std::string> additional_node_attributes() const noexcept override
     {
         auto node_attributes = base_drawer::additional_node_attributes();
 
@@ -573,7 +604,6 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
         }
     }
 };
-
 /*! \brief Writes layout in DOT format into output stream
  *
  * An overloaded variant exists that writes the layout into a file.
@@ -634,7 +664,6 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
        << edges.rdbuf() << '\n'
        << topology.rdbuf() << "}\n";
 }
-
 /*! \brief Writes layout in DOT format into a file
  *
  * **Required network functions:**

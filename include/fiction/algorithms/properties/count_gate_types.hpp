@@ -255,6 +255,15 @@ class count_gate_types_impl
 
 }  // namespace detail
 
+/**
+ * Gives a detailed listing of all gate types present in the provided network (or layout). This function can distinguish
+ * most gate types available as atomic building blocks and can easily be extended to support more gate types. The given
+ * network (or layout) has to implement a function to test whether a node is of the respective gate type.
+ *
+ * @tparam Ntk Logic network (or layout) type.
+ * @param ntk The network (or layout).
+ * @param pst Statistics.
+ */
 template <typename Ntk>
 void count_gate_types(const Ntk& ntk, count_gate_types_stats* pst = nullptr)
 {

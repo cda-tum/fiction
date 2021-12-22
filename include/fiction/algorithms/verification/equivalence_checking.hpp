@@ -187,6 +187,31 @@ class equivalence_checking_impl
 
 }  // namespace detail
 
+/**
+ * Performs SAT-based equivalence checking between a specification of type Spec and an implementation of type Impl. Both
+ * Spec and Impl need to be network types (that is, gate-level layouts can be utilized as well).
+ *
+ * This implementation enables the comparison of two logic networks, a logic network and a gate-level layout or two
+ * gate-level layouts. Since gate-level layouts have a notion of timing that logic networks do not, this function does
+ * not simply prove logical equivalence but, additionally, takes timing aspects into account as well.
+ *
+ * Thereby, three different types of equivalences arise:
+ *
+ * - NO equivalence: Spec and Impl are not logically equivalent or one of them is a gate-level layout that contains DRVs
+ * and, thus, cannot be checked for equivalence.
+ * - WEAK equivalence: Spec and Impl are logically equivalent but either one of them is a gate-level layout with TP of
+ * 1/x with x > 1 or both of them are gate-level layouts with TP 1/x and 1/y, respectively, where x != y.
+ * - STRONG equivalence: Spec and Impl are logically equivalent and all involved gate-level layouts have TP of 1/1.
+ *
+ * This approach was first proposed in "Verification for Field-coupled Nanocomputing Circuits" by M. Walter, R. Wille,
+ * F. Sill Torres. D. Große, and R. Drechsler in DAC 2020.
+ *
+ * @tparam Spec Specification type.
+ * @tparam Impl Implementation type.
+ * @param spec The specification.
+ * @param impl The implementation.
+ * @param pst Statistics.
+ */
 template <typename Spec, typename Impl>
 void equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checking_stats* pst = nullptr)
 {

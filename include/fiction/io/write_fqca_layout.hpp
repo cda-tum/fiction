@@ -280,12 +280,16 @@ class write_fqca_layout_impl
 }  // namespace detail
 
 /**
- * Might throw an 'out_of_cell_names_exception'.
+ * Writes a cell-level QCA layout to an fqca file provided as an output stream. The format is used by QCA-STACK by
+ * Willem Lambooy (https://github.com/wlambooy/QCA-STACK).
  *
- * @tparam Lyt
- * @param lyt
- * @param os
- * @param ps
+ * Might throw an 'out_of_cell_names_exception' in case there are more I/O cells in the layout than lowercase +
+ * uppercase letters in the English alphabet.
+ *
+ * @tparam Lyt The layout type to be written. Must be a clocked cell-level QCA layout.
+ * @param lyt The cell-level QCA layout.
+ * @param os The output stream to write into.
+ * @param ps Parameters.
  */
 template <typename Lyt>
 void write_fqca_layout(const Lyt& lyt, std::ostream& os, write_fqca_layout_params ps = {})
@@ -297,7 +301,18 @@ void write_fqca_layout(const Lyt& lyt, std::ostream& os, write_fqca_layout_param
 
     p.run();
 }
-
+/**
+ * Writes a cell-level QCA layout to an fqca file provided as a file name. The format is used by QCA-STACK by
+ * Willem Lambooy (https://github.com/wlambooy/QCA-STACK).
+ *
+ * Might throw an 'out_of_cell_names_exception' in case there are more I/O cells in the layout than lowercase +
+ * uppercase letters in the English alphabet.
+ *
+ * @tparam Lyt The layout type to be written. Must be a clocked cell-level QCA layout.
+ * @param lyt The cell-level QCA layout.
+ * @param filename The file name to create and write into. Should preferably use the ".fqca" extension.
+ * @param ps Parameters.
+ */
 template <typename Lyt>
 void write_fqca_layout(const Lyt& lyt, const std::string& filename, write_fqca_layout_params ps = {})
 {
