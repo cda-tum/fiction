@@ -71,7 +71,11 @@ class cartesian_layout
      * @param ar Highest possible position in the layout.
      */
     explicit cartesian_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<cartesian_layout_storage>(ar)} {}
-
+    /**
+     * Copy constructor from another layout's storage.
+     *
+     * @param s Storage of another cartesian_layout.
+     */
     explicit cartesian_layout(std::shared_ptr<cartesian_layout_storage> s) : strg{std::move(s)} {}
 
 #pragma endregion

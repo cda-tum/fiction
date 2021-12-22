@@ -18,6 +18,11 @@
 
 namespace fiction
 {
+
+/**
+ * Provides offset coordinates. An offset coordinate is a coordinate that defines a location via an offset from a fixed
+ * point (origin). Cartesian coordinates are offset coordinates.
+ */
 namespace offset
 {
 /**
@@ -217,9 +222,12 @@ class coord_iterator
 };
 }  // namespace offset
 
+/**
+ * Provides cube coordinates. Cube coordinates are used to as a way to identify faces in a hexagonal grid. A wonderful
+ * resource on the topic is: https://www.redblobgames.com/grids/hexagons/#coordinates-cube
+ */
 namespace cube
 {
-
 /**
  * Signed cube coordinates.
  *

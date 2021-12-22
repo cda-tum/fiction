@@ -18,6 +18,20 @@
 
 namespace fiction
 {
+
+/**
+ * Clocking scheme type that assigns a clock number to each element of the provided type ClockZone. Clocking scheme
+ * objects are utilized, e.g., in clocked_layout.
+ *
+ * Usually, a clocking scheme is defined by the means of a cutout that can be seamlessly extended in all directions to
+ * provide repeating clock numbers.
+ *
+ * Many regular clocking schemes have been proposed in the literature. Some are pre-defined below.
+ *
+ * Clocking schemes are uniquely identified via their name.
+ *
+ * @tparam ClockZone Clock zone type. Usually, a coordinate type in a layout.
+ */
 template <typename ClockZone>
 class clocking_scheme
 {
@@ -27,6 +41,16 @@ class clocking_scheme
     using degree         = uint8_t;
     using clock_function = std::function<clock_number(clock_zone)>;
 
+    /**
+     * Standard constructor.
+     *
+     * @param n The clocking scheme's name. The name is utilized as the key to uniquely identify a scheme.
+     * @param f A function that assigns a clock number to each clock zone.
+     * @param in_deg Maximum possible in-degree in the provided scheme.
+     * @param out_deg Maximum possible out-degree in the provided scheme.
+     * @param cn Number of clock phases that make up one clock cycle, i.e., the number of different clock numbers.
+     * @param r Flag to identify the scheme as regular.
+     */
     explicit clocking_scheme(const std::string& n, clock_function f, const degree in_deg, const degree out_deg,
                              const clock_number cn = 4, const bool r = true) noexcept :
             name{n},
@@ -36,7 +60,14 @@ class clocking_scheme
             regular{r},
             fn{std::move(f)}
     {}
-
+    /**
+     * Accesses the clock function to determine the clock number of the given clock zone if the scheme is regular.
+     * Otherwise, the stored clock map is accessed to look for a manually specified/overwritten clock number. If none is
+     * found, the default one, usually 0, is returned.
+     *
+     * @param cz Clock zone whose clock number is desired.
+     * @return Clock number of cz.
+     */
     clock_number operator()(clock_zone cz) const noexcept
     {
         if (regular)
@@ -49,17 +80,32 @@ class clocking_scheme
 
         return fn(cz);
     }
-
+    /**
+     * Compares the stored name against a given one.
+     *
+     * @param n Name to compare.
+     * @return True iff the stored name is equal to n.
+     */
     bool operator==(const std::string& n) const noexcept
     {
         return name == n;
     }
-
+    /**
+     * Checks for the clocking scheme's regularity.
+     *
+     * @return True iff the clocking scheme is regular.
+     */
     [[nodiscard]] bool is_regular() const noexcept
     {
         return regular;
     }
-
+    /**
+     * Overrides a clock zone's clock number. The usage of this function immediately labels the clocking scheme as
+     * irregular.
+     *
+     * @param cz Clock zone to override.
+     * @param cn Clock number to assign to cz.
+     */
     void override_clock_number(const clock_zone& cz, const clock_number cn) noexcept
     {
         regular = false;
