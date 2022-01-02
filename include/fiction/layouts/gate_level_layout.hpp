@@ -115,7 +115,7 @@ class gate_level_layout : public ClockedLayout
      */
     struct gate_level_layout_storage_node : mockturtle::mixed_fanin_node<2>
     {
-        bool operator==(gate_level_layout_storage_node const& other) const
+        bool operator==(gate_level_layout_storage_const node other) const
         {
             return data[1].h1 == other.data[1].h1 && children == other.children;
         }
@@ -194,12 +194,12 @@ class gate_level_layout : public ClockedLayout
         return value ? strg->data.const1 : strg->data.const0;
     }
 
-    [[nodiscard]] bool is_constant(node const& n) const noexcept
+    [[nodiscard]] bool is_constant(const node n) const noexcept
     {
         return n <= 1;
     }
 
-    [[nodiscard]] bool constant_value(node const& n) const noexcept
+    [[nodiscard]] bool constant_value(const node n) const noexcept
     {
         return n == 1;
     }
@@ -232,7 +232,7 @@ class gate_level_layout : public ClockedLayout
         return static_cast<signal>(t);
     }
 
-    [[nodiscard]] bool is_pi(const node& n) const noexcept
+    [[nodiscard]] bool is_pi(const node n) const noexcept
     {
         return std::find(strg->inputs.cbegin(), strg->inputs.cend(), n) != strg->inputs.cend();
     }
@@ -247,7 +247,7 @@ class gate_level_layout : public ClockedLayout
         return is_pi(get_node(t));
     }
 
-    [[nodiscard]] bool is_po(const node& n) const noexcept
+    [[nodiscard]] bool is_po(const node n) const noexcept
     {
         return std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
                             [this, &n](const auto& p) { return this->get_node(p.index) == n; }) != strg->outputs.cend();
@@ -419,7 +419,7 @@ class gate_level_layout : public ClockedLayout
 
 #pragma region Functional properties
 
-    [[nodiscard]] kitty::dynamic_truth_table node_function(const node& n) const
+    [[nodiscard]] kitty::dynamic_truth_table node_function(const node n) const
     {
         return strg->data.fn_cache[strg->nodes[n].data[1].h1];
     }
@@ -428,6 +428,12 @@ class gate_level_layout : public ClockedLayout
 
 #pragma region Structural properties
 
+    /**
+     * Does NOT return the layout dimensions but the number of nodes (including constants and dead ones) in accordance
+     * with the mockturtle API.
+     *
+     * @return Number of all nodes.
+     */
     [[nodiscard]] auto size() const noexcept
     {
         return static_cast<uint32_t>(strg->nodes.size());
@@ -486,7 +492,7 @@ class gate_level_layout : public ClockedLayout
      * @param n Node to check.
      * @return Number of fanins to n.
      */
-    [[nodiscard]] auto fanin_size(node const& n) const
+    [[nodiscard]] auto fanin_size(const node n) const
     {
         return static_cast<uint32_t>(incoming_data_flow<std::set<tile>>(get_tile(n)).size());
     }
@@ -496,7 +502,7 @@ class gate_level_layout : public ClockedLayout
      * @param n Node to check.
      * @return Number of fanouts to n.
      */
-    [[nodiscard]] auto fanout_size(node const& n) const
+    [[nodiscard]] auto fanout_size(const node n) const
     {
         return static_cast<uint32_t>(outgoing_data_flow<std::set<tile>>(get_tile(n)).size());
     }
@@ -538,7 +544,7 @@ class gate_level_layout : public ClockedLayout
      * @param n Node whose location is desired.
      * @return Tile at which n is placed or a default dead tile if n is not placed.
      */
-    [[nodiscard]] tile get_tile(const node& n) const noexcept
+    [[nodiscard]] tile get_tile(const node n) const noexcept
     {
         if (auto it = strg->data.node_tile_map.find(n); it != strg->data.node_tile_map.cend())
         {
@@ -547,13 +553,26 @@ class gate_level_layout : public ClockedLayout
 
         return {};
     }
-
-    [[nodiscard]] bool is_dead(const node& n) const noexcept
+    /**
+     * Checks whether a node (not its assigned tile) is dead. Nodes can be dead for a variety of reasons. For instance
+     * if they are dangling (see the mockturtle API). In this layout type, nodes are also marked dead when they are not
+     * assigned to a tile (which is considered equivalent to dangling).
+     *
+     * @param n Node to check for lifeliness.
+     * @return True iff n is dead.
+     */
+    [[nodiscard]] bool is_dead(const node n) const noexcept
     {
         return static_cast<bool>((strg->nodes[n].data[0].h1 >> 31) & 1);
     }
-
-    [[nodiscard]] signal make_signal(const node& n) const noexcept
+    /**
+     * Invokes the same behavior as get_tile(n) but additionally casts the return value to a signal. That is, this
+     * function returns the signal representation of the tile that the node n is assigned to.
+     *
+     * @param n Node whose signal is desired.
+     * @return Signal that points to n.
+     */
+    [[nodiscard]] signal make_signal(const node n) const noexcept
     {
         return static_cast<signal>(get_tile(n));
     }
@@ -565,7 +584,7 @@ class gate_level_layout : public ClockedLayout
      * @param new_children New incoming signals to n.
      * @return Signal pointing to n's new tile.
      */
-    signal move_node(const node& n, const tile& t, const std::vector<signal>& new_children = {}) noexcept
+    signal move_node(const node n, const tile& t, const std::vector<signal>& new_children = {}) noexcept
     {
         // n's current position
         const auto old_t = get_tile(n);
@@ -609,13 +628,18 @@ class gate_level_layout : public ClockedLayout
 
         return static_cast<signal>(t);
     }
-
+    /**
+     * Necessary function in the mockturtle API. However, in this layout type, signals cannot be complemented.
+     *
+     * @param s Signal to check.
+     * @return False.
+     */
     [[nodiscard]] bool is_complemented([[maybe_unused]] const signal& s) const noexcept
     {
         return false;
     }
 
-    [[nodiscard]] uint32_t node_to_index(node const& n) const noexcept
+    [[nodiscard]] uint32_t node_to_index(const node n) const noexcept
     {
         return static_cast<uint32_t>(n);
     }
@@ -664,37 +688,37 @@ class gate_level_layout : public ClockedLayout
         return strg->nodes[n].data[1].h1 == 3;
     }
 
-    [[nodiscard]] bool is_and(node const n) const noexcept
+    [[nodiscard]] bool is_and(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 4;
     }
 
-    [[nodiscard]] bool is_nand(node const n) const noexcept
+    [[nodiscard]] bool is_nand(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 5;
     }
 
-    [[nodiscard]] bool is_or(node const n) const noexcept
+    [[nodiscard]] bool is_or(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 6;
     }
 
-    [[nodiscard]] bool is_nor(node const n) const noexcept
+    [[nodiscard]] bool is_nor(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 7;
     }
 
-    [[nodiscard]] bool is_xor(node const n) const noexcept
+    [[nodiscard]] bool is_xor(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 8;
     }
 
-    [[nodiscard]] bool is_xnor(node const n) const noexcept
+    [[nodiscard]] bool is_xnor(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 9;
     }
 
-    [[nodiscard]] bool is_maj(node const n) const noexcept
+    [[nodiscard]] bool is_maj(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 10;
     }
@@ -709,8 +733,13 @@ class gate_level_layout : public ClockedLayout
     {
         return is_wire(n) && fanout_size(n) > 1;
     }
-
-    [[nodiscard]] bool is_function(node const& n) const
+    /**
+     * Returns whether node n computes a function. That is, this function returns true iff n is not a constant.
+     *
+     * @param n Node to check.
+     * @return True iff n is not a constant.
+     */
+    [[nodiscard]] bool is_function(const node n) const
     {
         return n > 1;
     }
@@ -749,6 +778,13 @@ class gate_level_layout : public ClockedLayout
 
 #pragma region Iteration
 
+    /**
+     * Applies a function to all primary input nodes (including dead ones) in the layout.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by
+     * mockturtle::foreach_element_transform.
+     * @param fn Functor to apply to each primary input node.
+     */
     template <typename Fn>
     void foreach_pi(Fn&& fn) const
     {
@@ -756,7 +792,15 @@ class gate_level_layout : public ClockedLayout
         mockturtle::detail::foreach_element_transform<IteratorType, node>(
             strg->inputs.cbegin(), strg->inputs.cend(), [](const auto& i) { return static_cast<node>(i); }, fn);
     }
-
+    /**
+     * Applies a function to all primary output signals (including those that point to dead nodes) in the layout. Note
+     * the difference to foreach_pi in the signature of fn. This function applies to all POs as signals whereas
+     * foreach_pi applies to all PIs as nodes. This is with respect to mockturtle's API.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by
+     * mockturtle::foreach_element_transform.
+     * @param fn Functor to apply to each primary output signal.
+     */
     template <typename Fn>
     void foreach_po(Fn&& fn) const
     {
@@ -764,7 +808,13 @@ class gate_level_layout : public ClockedLayout
         mockturtle::detail::foreach_element_transform<IteratorType, signal>(
             strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return o.index; }, fn);
     }
-
+    /**
+     * Applies a function to all nodes (excluding dead ones) in the layout.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by
+     * mockturtle::foreach_element_if.
+     * @param fn Functor to apply to each node that is not dead.
+     */
     template <typename Fn>
     void foreach_node(Fn&& fn) const
     {
@@ -772,7 +822,14 @@ class gate_level_layout : public ClockedLayout
         mockturtle::detail::foreach_element_if(
             r.begin(), r.end(), [this](const auto& n) { return !is_dead(n); }, fn);
     }
-
+    /**
+     * Applies a function to all gates (excluding dead ones) in the layout. Uses is_gate to check whether a node is a
+     * gate or not.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by
+     * mockturtle::foreach_element_if.
+     * @param fn Functor to apply to each gate that is not dead.
+     */
     template <typename Fn>
     void foreach_gate(Fn&& fn) const
     {
@@ -780,7 +837,14 @@ class gate_level_layout : public ClockedLayout
         mockturtle::detail::foreach_element_if(
             r.begin(), r.end(), [this](const auto n) { return is_gate(n) && !is_dead(n); }, fn);
     }
-
+    /**
+     * Applies a function to all wires (excluding dead ones) in the layout. Uses is_wire to check whether a node is a
+     * wire or not.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by
+     * mockturtle::foreach_element_if.
+     * @param fn Functor to apply to each wire that is not dead.
+     */
     template <typename Fn>
     void foreach_wire(Fn&& fn) const
     {
@@ -788,7 +852,16 @@ class gate_level_layout : public ClockedLayout
         mockturtle::detail::foreach_element_if(
             r.begin(), r.end(), [this](const auto n) { return is_wire(n) && !is_dead(n); }, fn);
     }
-
+    /**
+     * Returns a container of a given type that contains all tiles that feed information to the given one. Thereby, only
+     * incoming clocked zones (+/- one layer to include crossings) are being considered whose data flow connections are
+     * respectively established. That is, the returned container contains all tiles that host nodes that are connected
+     * to the one assigned to t as fanins.
+     *
+     * @tparam Container Container type that has to provide an insert member function.
+     * @param t Tile whose incoming data flow ones are desired.
+     * @return A container of type Container that contains all of t's incoming data flow tiles.
+     */
     template <typename Container>
     [[nodiscard]] Container incoming_data_flow(const tile& t) const noexcept
     {
@@ -808,7 +881,16 @@ class gate_level_layout : public ClockedLayout
 
         return data_flow;
     }
-
+    /**
+     * Returns a container of a given type that contains all tiles that accept information from the given one. Thereby,
+     * only outgoing clocked zones (+/- one layer to include crossings) are being considered whose data flow connections
+     * are respectively established. That is, the returned container contains all tiles that host nodes that are
+     * connected to the one assigned to t as fanouts.
+     *
+     * @tparam Container Container type that has to provide an insert member function.
+     * @param t Tile whose outgoing data flow ones are desired.
+     * @return A container of type Container that contains all of t's outgoing data flow tiles.
+     */
     template <typename Container>
     [[nodiscard]] Container outgoing_data_flow(const tile& t) const noexcept
     {
@@ -828,9 +910,16 @@ class gate_level_layout : public ClockedLayout
 
         return data_flow;
     }
-
+    /**
+     * Applies a function to all nodes that are incoming to a given one in accordance with incoming_data_flow.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by
+     * mockturtle::foreach_element_transform.
+     * @param n Node whose fanins are desired.
+     * @param fn Functor to apply to each of n's fanins.
+     */
     template <typename Fn>
-    void foreach_fanin(node const& n, Fn&& fn) const
+    void foreach_fanin(const node n, Fn&& fn) const
     {
         if (n <= 1)  // const-0 or const-1
             return;
@@ -841,9 +930,16 @@ class gate_level_layout : public ClockedLayout
         mockturtle::detail::foreach_element_transform<IteratorType, signal>(
             fanin.cbegin(), fanin.cend(), [](const auto& t) { return static_cast<signal>(t); }, fn);
     }
-
+    /**
+     * Applies a function to all nodes that are outgoing from a given one in accordance with outgoing_data_flow.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by
+     * mockturtle::foreach_element_transform.
+     * @param n Node whose fanouts are desired.
+     * @param fn Functor to apply to each of n's fanouts.
+     */
     template <typename Fn>
-    void foreach_fanout(node const& n, Fn&& fn) const
+    void foreach_fanout(const node n, Fn&& fn) const
     {
         if (n <= 1)  // const-0 or const-1
             return;
@@ -872,7 +968,7 @@ class gate_level_layout : public ClockedLayout
 #pragma region Simulate values
 
     template <typename Iterator>
-    mockturtle::iterates_over_t<Iterator, bool> compute(node const& n, Iterator begin, Iterator end) const
+    mockturtle::iterates_over_t<Iterator, bool> compute(const node n, Iterator begin, Iterator end) const
     {
         uint32_t index{0};
         while (begin != end)
@@ -885,7 +981,7 @@ class gate_level_layout : public ClockedLayout
     }
 
     template <typename Iterator>
-    mockturtle::iterates_over_truth_table_t<Iterator> compute(node const& n, Iterator begin, Iterator end) const
+    mockturtle::iterates_over_truth_table_t<Iterator> compute(const node n, Iterator begin, Iterator end) const
     {
         std::vector<typename Iterator::value_type> tts{begin, end};
 
@@ -918,6 +1014,14 @@ class gate_level_layout : public ClockedLayout
 
 #pragma region Cardinal operations
 
+    /**
+     * Checks whether signal s is incoming to tile t. That is, whether tile t hosts a node that has a fanin assigned
+     * to the tile that signal s points to.
+     *
+     * @param t Base tile.
+     * @param s Signal pointing to a potential incoming tile to t.
+     * @return True iff s is incoming to t.
+     */
     [[nodiscard]] bool is_incoming_signal(const tile& t, const signal& s) const noexcept
     {
         const auto incoming = incoming_data_flow<std::set<tile>>(t);
@@ -925,52 +1029,104 @@ class gate_level_layout : public ClockedLayout
                            [this, &s](const auto& i)
                            { return i == s || ClockedLayout::above(i) == s || ClockedLayout::below(i) == s; });
     }
-
+    /**
+     * Checks whether the given tile has an incoming one in northern direction.
+     *
+     * @param t Base tile.
+     * @return True iff north(t) is incoming to t.
+     */
     [[nodiscard]] bool has_northern_incoming_signal(const tile& t) const noexcept
     {
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::north(t)));
     }
-
+    /**
+     * Checks whether the given tile has an incoming one in north-eastern direction.
+     *
+     * @param t Base tile.
+     * @return True iff north_east(t) is incoming to t.
+     */
     [[nodiscard]] bool has_north_eastern_incoming_signal(const tile& t) const noexcept
     {
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::north_east(t)));
     }
-
+    /**
+     * Checks whether the given tile has an incoming one in eastern direction.
+     *
+     * @param t Base tile.
+     * @return True iff east(t) is incoming to t.
+     */
     [[nodiscard]] bool has_eastern_incoming_signal(const tile& t) const noexcept
     {
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::east(t)));
     }
-
+    /**
+     * Checks whether the given tile has an incoming one in south-eastern direction.
+     *
+     * @param t Base tile.
+     * @return True iff south_east(t) is incoming to t.
+     */
     [[nodiscard]] bool has_south_eastern_incoming_signal(const tile& t) const noexcept
     {
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::south_east(t)));
     }
-
+    /**
+     * Checks whether the given tile has an incoming one in southern direction.
+     *
+     * @param t Base tile.
+     * @return True iff south(t) is incoming to t.
+     */
     [[nodiscard]] bool has_southern_incoming_signal(const tile& t) const noexcept
     {
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::south(t)));
     }
-
+    /**
+     * Checks whether the given tile has an incoming one in south-western direction.
+     *
+     * @param t Base tile.
+     * @return True iff south_west(t) is incoming to t.
+     */
     [[nodiscard]] bool has_south_western_incoming_signal(const tile& t) const noexcept
     {
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::south_west(t)));
     }
-
+    /**
+     * Checks whether the given tile has an incoming one in western direction.
+     *
+     * @param t Base tile.
+     * @return True iff west(t) is incoming to t.
+     */
     [[nodiscard]] bool has_western_incoming_signal(const tile& t) const noexcept
     {
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::west(t)));
     }
-
+    /**
+     * Checks whether the given tile has an incoming one in north-western direction.
+     *
+     * @param t Base tile.
+     * @return True iff north_west(t) is incoming to t.
+     */
     [[nodiscard]] bool has_north_western_incoming_signal(const tile& t) const noexcept
     {
         return is_incoming_signal(t, static_cast<signal>(ClockedLayout::north_west(t)));
     }
-
+    /**
+     * Checks whether the given tile has no incoming tiles.
+     *
+     * @param t Base tile.
+     * @return True iff t does not have incoming tiles.
+     */
     [[nodiscard]] bool has_no_incoming_signal(const tile& t) const noexcept
     {
         return incoming_data_flow<std::set<tile>>(t).empty();
     }
-
+    /**
+     * Checks whether signal s is outgoing from tile t. That is, whether tile t hosts a node that has a fanout assigned
+     * to the tile that signal s points to.
+     *
+     * @param t Base tile.
+     * @param s Signal pointing to a potential outgoing tile of t.
+     * @return True iff s is outgoing from t.
+     */
     [[nodiscard]] bool is_outgoing_signal(const tile& t, const signal& s) const noexcept
     {
         const auto outgoing = outgoing_data_flow<std::set<tile>>(t);
@@ -978,52 +1134,106 @@ class gate_level_layout : public ClockedLayout
                            [this, &s](const auto& o)
                            { return o == s || ClockedLayout::above(o) == s || ClockedLayout::below(o) == s; });
     }
-
+    /**
+     * Checks whether the given tile has an outgoing one in northern direction.
+     *
+     * @param t Base tile.
+     * @return True iff north(t) is outgoing from t.
+     */
     [[nodiscard]] bool has_northern_outgoing_signal(const tile& t) const noexcept
     {
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::north(t)));
     }
-
+    /**
+     * Checks whether the given tile has an outgoing one in north-eastern direction.
+     *
+     * @param t Base tile.
+     * @return True iff north_east(t) is outgoing from t.
+     */
     [[nodiscard]] bool has_north_eastern_outgoing_signal(const tile& t) const noexcept
     {
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::north_east(t)));
     }
-
+    /**
+     * Checks whether the given tile has an outgoing one in eastern direction.
+     *
+     * @param t Base tile.
+     * @return True iff east(t) is outgoing from t.
+     */
     [[nodiscard]] bool has_eastern_outgoing_signal(const tile& t) const noexcept
     {
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::east(t)));
     }
-
+    /**
+     * Checks whether the given tile has an outgoing one in south-eastern direction.
+     *
+     * @param t Base tile.
+     * @return True iff south_east(t) is outgoing from t.
+     */
     [[nodiscard]] bool has_south_eastern_outgoing_signal(const tile& t) const noexcept
     {
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::south_east(t)));
     }
-
+    /**
+     * Checks whether the given tile has an outgoing one in southern direction.
+     *
+     * @param t Base tile.
+     * @return True iff south(t) is outgoing from t.
+     */
     [[nodiscard]] bool has_southern_outgoing_signal(const tile& t) const noexcept
     {
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::south(t)));
     }
-
+    /**
+     * Checks whether the given tile has an outgoing one in south-western direction.
+     *
+     * @param t Base tile.
+     * @return True iff south_west(t) is outgoing from t.
+     */
     [[nodiscard]] bool has_south_western_outgoing_signal(const tile& t) const noexcept
     {
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::south_west(t)));
     }
-
+    /**
+     * Checks whether the given tile has an outgoing one in western direction.
+     *
+     * @param t Base tile.
+     * @return True iff west(t) is outgoing from t.
+     */
     [[nodiscard]] bool has_western_outgoing_signal(const tile& t) const noexcept
     {
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::west(t)));
     }
-
+    /**
+     * Checks whether the given tile has an outgoing one in north-western direction.
+     *
+     * @param t Base tile.
+     * @return True iff north_west(t) is outgoing from t.
+     */
     [[nodiscard]] bool has_north_western_outgoing_signal(const tile& t) const noexcept
     {
         return is_outgoing_signal(t, static_cast<signal>(ClockedLayout::north_west(t)));
     }
-
+    /**
+     * Checks whether the given tile has no outgoing tiles.
+     *
+     * @param t Base tile.
+     * @return True iff t does not have outgoing tiles.
+     */
     [[nodiscard]] bool has_no_outgoing_signal(const tile& t) const noexcept
     {
         return outgoing_data_flow<std::set<tile>>(t).empty();
     }
-
+    /**
+     * Checks whether the given tile t has its incoming and outgoing signals on opposite sides of the tile. For this
+     * purpose, the function relies on foreach_adjacent_opposite_coordinates of the underlying ClockedLayout.
+     *
+     * This function is very helpful for many gate libraries to check for (non-)straight gates, which might look
+     * different.
+     *
+     * @param t Base tile.
+     * @return True iff t has incoming and outgoing signals on opposite sides.
+     */
     [[nodiscard]] bool has_opposite_incoming_and_outgoing_signals(const tile& t) const noexcept
     {
         auto opposite_signals = false;
@@ -1057,22 +1267,22 @@ class gate_level_layout : public ClockedLayout
         std::for_each(strg->nodes.begin(), strg->nodes.end(), [](auto& n) { n.data[0].h2 = 0; });
     }
 
-    [[nodiscard]] uint32_t value(node const& n) const
+    [[nodiscard]] uint32_t value(const node n) const
     {
         return strg->nodes[n].data[0].h2;
     }
 
-    void set_value(node const& n, uint32_t v) const
+    void set_value(const node n, uint32_t v) const
     {
         strg->nodes[n].data[0].h2 = v;
     }
 
-    uint32_t incr_value(node const& n) const
+    uint32_t incr_value(const node n) const
     {
         return static_cast<uint32_t>(strg->nodes[n].data[0].h2++);
     }
 
-    uint32_t decr_value(node const& n) const
+    uint32_t decr_value(const node n) const
     {
         return static_cast<uint32_t>(--strg->nodes[n].data[0].h2);
     }
@@ -1086,12 +1296,12 @@ class gate_level_layout : public ClockedLayout
         std::for_each(strg->nodes.begin(), strg->nodes.end(), [](auto& n) { n.data[1].h2 = 0; });
     }
 
-    [[nodiscard]] auto visited(node const& n) const
+    [[nodiscard]] auto visited(const node n) const
     {
         return strg->nodes[n].data[1].h2;
     }
 
-    void set_visited(node const& n, uint32_t v) const
+    void set_visited(const node n, uint32_t v) const
     {
         strg->nodes[n].data[1].h2 = v;
     }
@@ -1153,7 +1363,7 @@ class gate_level_layout : public ClockedLayout
         create_and_cache(lit_maj, 3);
     }
 
-    void assign_node(const tile& t, const node& n)
+    void assign_node(const tile& t, const node n)
     {
         if (!t.is_dead())
         {
@@ -1175,7 +1385,7 @@ class gate_level_layout : public ClockedLayout
         }
     }
 
-    void kill_node(const node& n)
+    void kill_node(const node n)
     {
         if (!is_constant(n))
         {
@@ -1183,7 +1393,7 @@ class gate_level_layout : public ClockedLayout
         }
     }
 
-    void revive_node(const node& n)
+    void revive_node(const node n)
     {
         if (!is_constant(n))
         {
@@ -1212,7 +1422,7 @@ class gate_level_layout : public ClockedLayout
         return static_cast<signal>(t);
     }
 
-    [[nodiscard]] bool is_child(const node& n, const signal& s) const noexcept
+    [[nodiscard]] bool is_child(const node n, const signal& s) const noexcept
     {
         const auto& node_data = strg->nodes[n];
         return std::find(node_data.children.cbegin(), node_data.children.cend(), s) != node_data.children.cend();
