@@ -11,7 +11,17 @@ namespace fiction
 {
 
 /**
- * Reimplement all node creation functions to disable structural hashing.
+ * A mockturtle logic network type that extends klut_network. It reimplements all node creation functions to disable
+ * structural hashing. Furthermore, create_buf is overwritten such that it creates real buffer nodes that count towards
+ * the size of the network and compute the identity function. In the same way, a buffer with more than one fanout node
+ * is considered a fanout node (or splitter in some contexts) that copies an incoming signal to two or more data paths.
+ *
+ * This network is used internally for most implemented FCN physical design algorithms and extends klut_network by some
+ * further convenience functions but is still fully compatible with the mockturtle network API. The function
+ * convert_network can be used to convert any other mockturtle network to this type.
+ *
+ * Most functions in this class are borrowed and reimplemented directly from klut_network and are, therefore, only
+ * sporadically documented where their behavior might differ. For information consider mockturtle/networks/klut.hpp.
  */
 class topology_network : public mockturtle::klut_network
 {
@@ -32,13 +42,20 @@ class topology_network : public mockturtle::klut_network
 
 #pragma region Primary I / O and functions
 
-    [[nodiscard]] bool is_po(node const& n) const
+    /**
+     * Checks whether a node is primary output by considering the signal pointing to it. This is possible because this
+     * network does not use complemented signals.
+     *
+     * @param n Node to consider.
+     * @return True iff n's signal is primary output.
+     */
+    [[nodiscard]] bool is_po(const node& n) const
     {
-        const auto end = _storage->outputs.begin() + _storage->data.num_pos;
+        const auto end = _storage->outputs.cbegin() + _storage->data.num_pos;
 
-        return std::find_if(_storage->outputs.begin(), end,
+        return std::find_if(_storage->outputs.cbegin(), end,
                             [this, &n](const auto& p)
-                            { return this->get_node(p.index) == n; }) != _storage->outputs.end();
+                            { return this->get_node(p.index) == n; }) != _storage->outputs.cend();
     }
 
 #pragma endregion
@@ -46,14 +63,18 @@ class topology_network : public mockturtle::klut_network
 #pragma region Create unary functions
 
     /**
-     * Make buffers real nodes.
+     * Creates a buffer node in the network that computes the identity function and counts towards the network size and
+     * depth. A buffer node with more than one output is called a fanout.
+     *
+     * @param a Incoming signal to the newly created buffer node.
+     * @return Outgoing signal of the newly created buffer node.
      */
-    signal create_buf(signal const& a)
+    signal create_buf(const signal& a)
     {
         return _create_node({a}, 2);
     }
 
-    signal create_not(signal const& a)
+    signal create_not(const signal& a)
     {
         return is_constant(a) ? get_constant(!constant_value(a)) : _create_node({a}, 3);
     }
@@ -61,6 +82,7 @@ class topology_network : public mockturtle::klut_network
 #pragma endregion
 
 #pragma region Create binary functions
+
     signal create_and(signal a, signal b)
     {
         return _create_node({a, b}, 4);
@@ -127,19 +149,19 @@ class topology_network : public mockturtle::klut_network
 
 #pragma region Create nary functions
 
-    signal create_nary_and(std::vector<signal> const& fs)
+    signal create_nary_and(const std::vector<signal>& fs)
     {
         return mockturtle::tree_reduce(fs.begin(), fs.end(), get_constant(true),
                                        [this](auto const& a, auto const& b) { return create_and(a, b); });
     }
 
-    signal create_nary_or(std::vector<signal> const& fs)
+    signal create_nary_or(const std::vector<signal>& fs)
     {
         return mockturtle::tree_reduce(fs.begin(), fs.end(), get_constant(false),
                                        [this](auto const& a, auto const& b) { return create_or(a, b); });
     }
 
-    signal create_nary_xor(std::vector<signal> const& fs)
+    signal create_nary_xor(const std::vector<signal>& fs)
     {
         return mockturtle::tree_reduce(fs.begin(), fs.end(), get_constant(false),
                                        [this](auto const& a, auto const& b) { return create_xor(a, b); });
@@ -151,7 +173,7 @@ class topology_network : public mockturtle::klut_network
     /**
      * Disable structural hashing.
      */
-    signal _create_node(std::vector<signal> const& children, uint32_t literal)
+    signal _create_node(const std::vector<signal>& children, uint32_t literal)
     {
         storage::element_type::node_type node_data;
         std::copy(children.begin(), children.end(), std::back_inserter(node_data.children));
@@ -169,10 +191,12 @@ class topology_network : public mockturtle::klut_network
 
         return index;
     }
-
-    signal create_node(std::vector<signal> const& children, kitty::dynamic_truth_table const& function)
+    /**
+     * Disable structural hashing.
+     */
+    signal create_node(const std::vector<signal>& children, const kitty::dynamic_truth_table& function)
     {
-        if (children.size() == 0u)
+        if (children.empty())
         {
             assert(function.num_vars() == 0u);
             return get_constant(!kitty::is_const0(function));
@@ -180,7 +204,7 @@ class topology_network : public mockturtle::klut_network
         return _create_node(children, _storage->data.cache.insert(function));
     }
 
-    signal clone_node(klut_network const& other, node const& source, std::vector<signal> const& children)
+    signal clone_node(const klut_network& other, const node& source, const std::vector<signal>& children)
     {
         assert(!children.empty());
         const auto tt = other._storage->data.cache[other._storage->nodes[source].data[1].h1];
@@ -191,97 +215,115 @@ class topology_network : public mockturtle::klut_network
 
 #pragma region Structural properties
 
-    [[nodiscard]] bool is_buf(node const& n) const noexcept
+    /**
+     * Returns whether the given node n is a buffer node, i.e., whether  n computes the identity function and is not a
+     * PI. This also returns true on fanout nodes.
+     *
+     * @param n Node to consider.
+     * @return True iff n is a buffer node.
+     */
+    [[nodiscard]] bool is_buf(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 2 && !is_pi(n);
     }
-
-    [[nodiscard]] bool is_fanout(const node n) const noexcept
+    /**
+     * Returns whether the given node n is a fanout node, i.e., whether n is a buffer node and has more than one output
+     * signal.
+     *
+     * @param n Node to consider.
+     * @return True iff n is a fanout node.
+     */
+    [[nodiscard]] bool is_fanout(const node& n) const noexcept
     {
         return is_buf(n) && fanout_size(n) > 1;
     }
-
-    [[nodiscard]] bool is_inv(node const& n) const noexcept
+    /**
+     * Returns whether the given node n is an inverter node.
+     *
+     * @param n Node to consider.
+     * @return True iff n is an inverter node.
+     */
+    [[nodiscard]] bool is_inv(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 3;
     }
 
-    [[nodiscard]] bool is_and(node const& n) const noexcept
+    [[nodiscard]] bool is_and(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 4;
     }
 
-    [[nodiscard]] bool is_nand(node const& n) const noexcept
+    [[nodiscard]] bool is_nand(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 5;
     }
 
-    [[nodiscard]] bool is_or(node const& n) const noexcept
+    [[nodiscard]] bool is_or(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 6;
     }
 
-    [[nodiscard]] bool is_nor(node const& n) const noexcept
+    [[nodiscard]] bool is_nor(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 7;
     }
 
-    [[nodiscard]] bool is_xor(node const& n) const noexcept
+    [[nodiscard]] bool is_xor(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 12;
     }
 
-    [[nodiscard]] bool is_xnor(node const& n) const noexcept
+    [[nodiscard]] bool is_xnor(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 13;
     }
 
-    [[nodiscard]] bool is_maj(node const& n) const noexcept
+    [[nodiscard]] bool is_maj(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 14;
     }
 
-    [[nodiscard]] bool is_ite(node const& n) const noexcept
+    [[nodiscard]] bool is_ite(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 16;
     }
 
-    [[nodiscard]] bool is_xor3(node const& n) const noexcept
+    [[nodiscard]] bool is_xor3(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 18;
     }
 
-    [[nodiscard]] bool is_dot(node const& n) const noexcept
+    [[nodiscard]] bool is_dot(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 20;
     }
 
-    [[nodiscard]] bool is_and3(node const& n) const noexcept
+    [[nodiscard]] bool is_and3(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 22;
     }
 
-    [[nodiscard]] bool is_xor_and(node const& n) const noexcept
+    [[nodiscard]] bool is_xor_and(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 24;
     }
 
-    [[nodiscard]] bool is_or_and(node const& n) const noexcept
+    [[nodiscard]] bool is_or_and(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 26;
     }
 
-    [[nodiscard]] bool is_onehot(node const& n) const noexcept
+    [[nodiscard]] bool is_onehot(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 28;
     }
 
-    [[nodiscard]] bool is_gamble(node const& n) const noexcept
+    [[nodiscard]] bool is_gamble(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 31;  // 31 since gamble is not normal
     }
 
-    [[nodiscard]] bool is_and_xor(node const& n) const noexcept
+    [[nodiscard]] bool is_and_xor(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 32;
     }
@@ -289,6 +331,7 @@ class topology_network : public mockturtle::klut_network
 #pragma endregion
 
 #pragma region Structural manipulation
+
     /**
      * Adds additional buffer nodes for each primary output that does not already point to a buffer.
      */
@@ -312,6 +355,9 @@ class topology_network : public mockturtle::klut_network
 #pragma endregion
 
   protected:
+    /**
+     * Adds some further Boolean functions to the truth table cache for fixed indexing.
+     */
     void add_additional_functions() noexcept
     {
         // create dot function: a xor (c or a and b)
