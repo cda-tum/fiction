@@ -29,6 +29,12 @@
 namespace fiction
 {
 /**
+ * This file provides preset types that can be used as parameter types to run fiction's algorithms. They are furthermore
+ * utilized in fiction's CLI. Naturally, this selection is neither complete nor final and can be extended at any time by
+ * custom types.
+ */
+
+/**
  * Truth tables.
  */
 using tt     = kitty::dynamic_truth_table;

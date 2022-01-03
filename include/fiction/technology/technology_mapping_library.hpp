@@ -7,6 +7,11 @@
 
 namespace fiction
 {
+
+/**
+ * This file provides preset gates for mockturtle's technology mapper that are parsable by lorina's genlib parser.
+ */
+
 /**
  * 0-ary functions.
  */

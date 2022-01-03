@@ -22,7 +22,7 @@ namespace fiction
 struct energy_dissipation_stats
 {
     /**
-     * Energy information slow (25 GHz) and fast (100 GHz).
+     * Energy dissipation information in meV for slow (25 GHz) and fast (100 GHz) clocking.
      */
     double slow{0.0}, fast{0.0};
 
@@ -51,67 +51,67 @@ namespace detail
 namespace qca_energy
 {
 /**
- * Energy consumption (slow) of a normal wire.
+ * Energy dissipation (slow) of a normal wire.
  */
 constexpr double WIRE_SLOW = 0.09;
 /**
- * Energy consumption (fast) of a normal wire.
+ * Energy dissipation (fast) of a normal wire.
  */
 constexpr double WIRE_FAST = 0.82;
 /**
- * Energy consumption (slow) of a fan-out.
+ * Energy dissipation (slow) of a fan-out.
  */
 constexpr double FANOUT_SLOW = 0.12;
 /**
- * Energy consumption (fast) of a fan-out.
+ * Energy dissipation (fast) of a fan-out.
  */
 constexpr double FANOUT_FAST = 1.15;
 /**
- * Energy consumption (slow) of a straight inverter.
+ * Energy dissipation (slow) of a straight inverter.
  */
 constexpr double INVERTER_STRAIGHT_SLOW = 0.13;
 /**
- * Energy consumption (fast) of a straight inverter.
+ * Energy dissipation (fast) of a straight inverter.
  */
 constexpr double INVERTER_STRAIGHT_FAST = 1.19;
 /**
- * Energy consumption (slow) of a bent inverter.
+ * Energy dissipation (slow) of a bent inverter.
  */
 constexpr double INVERTER_BENT_SLOW = 0.10;
 /**
- * Energy consumption (fast) of a bent inverter.
+ * Energy dissipation (fast) of a bent inverter.
  */
 constexpr double INVERTER_BENT_FAST = 0.84;
 /**
- * Energy consumption (slow) of a crossing.
+ * Energy dissipation (slow) of a crossing.
  */
 constexpr double CROSSING_SLOW = 0.28;
 /**
- * Energy consumption (fast) of a crossing.
+ * Energy dissipation (fast) of a crossing.
  */
 constexpr double CROSSING_FAST = 2.57;
 /**
- * Energy consumption (slow) of an AND gate.
+ * Energy dissipation (slow) of an AND gate.
  */
 constexpr double AND_SLOW = 0.47;
 /**
- * Energy consumption (fast) of an AND gate.
+ * Energy dissipation (fast) of an AND gate.
  */
 constexpr double AND_FAST = 1.39;
 /**
- * Energy consumption (slow) of an OR gate.
+ * Energy dissipation (slow) of an OR gate.
  */
 constexpr double OR_SLOW = 0.47;
 /**
- * Energy consumption (fast) of an AND gate.
+ * Energy dissipation (fast) of an AND gate.
  */
 constexpr double OR_FAST = 1.39;
 /**
- * Energy consumption (slow) of a classic majority gate.
+ * Energy dissipation (slow) of a classic majority gate.
  */
 constexpr double MAJORITY_SLOW = 0.65;
 /**
- * Energy consumption (fast) of a classic majority gate.
+ * Energy dissipation (fast) of a classic majority gate.
  */
 constexpr double MAJORITY_FAST = 1.68;
 
@@ -232,10 +232,22 @@ class qca_energy_dissipation_impl
 
 }  // namespace detail
 
+/**
+ * Estimates the energy dissipation of a gate-level layout if it were to be converted to a QCA cell-level layout via the
+ * QCA ONE gate library. This estimation was proposed in 'An Energy-aware Model for the Logic Synthesis of Quantum-Dot
+ * Cellular Automata' by Frank Sill Torres, Robert Wille, Philipp Niemann, and Rolf Drechsler in TCAD 2018.
+ *
+ * As done in that publication, energy dissipation values are being given in meV for slow (25 GHz) and fast (100 GHz)
+ * clocking.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt The gate-level layout whose energy dissipation is to be calculated.
+ * @param pst Statistics.
+ */
 template <typename Lyt>
 void qca_energy_dissipation(const Lyt& lyt, energy_dissipation_stats* pst = nullptr)
 {
-    static_assert(fiction::is_gate_level_layout_v<Lyt>, "GateLyt is not a gate-level layout");
+    static_assert(fiction::is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::has_foreach_gate_v<Lyt>, "Lyt does not implement the foreach_gate function");
     static_assert(mockturtle::has_is_constant_v<Lyt>, "Lyt does not implement the is_constant function");
 

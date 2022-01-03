@@ -17,7 +17,7 @@
 namespace fiction
 {
 /**
- * A port is a relative position of a cell within, i.e, a tile.
+ * A port position is a relative location of a cell within a tile.
  */
 struct port_position
 {
@@ -68,8 +68,8 @@ struct port_position
     }
 };
 /**
- * A port is a relative (cardinal) direction of a port within, i.e, a tile.
- * Useful, when no exact ports within a tile are needed.
+ * A port direction is a relative (cardinal) direction of a port within  a tile.
+ * Useful, when no exact port locations within a tile are needed.
  */
 struct port_direction
 {
@@ -133,7 +133,9 @@ struct port_direction
     }
 };
 /**
- * Port lists are collections of input and output identifiers.
+ * Port lists are collections of input and output ports.
+ *
+ * @tparam PortType A port type, e.g., port_position or port_direction.
  */
 template <typename PortType>
 struct port_list
@@ -180,6 +182,7 @@ struct port_list
 namespace std
 {
 
+// hashing for port_position
 template <>
 struct hash<fiction::port_position>
 {
@@ -191,7 +194,7 @@ struct hash<fiction::port_position>
         return h;
     }
 };
-
+// hashing for port_direction
 template <>
 struct hash<fiction::port_direction>
 {
@@ -200,7 +203,7 @@ struct hash<fiction::port_direction>
         return std::hash<std::size_t>{}(static_cast<std::size_t>(port.dir));
     }
 };
-
+// hashing for port_list
 template <typename PortType>
 struct hash<fiction::port_list<PortType>>
 {
@@ -217,7 +220,7 @@ struct hash<fiction::port_list<PortType>>
 
 namespace fmt
 {
-// make port compatible with fmt::format
+// make port_position compatible with fmt::format
 template <>
 struct formatter<fiction::port_position>
 {
@@ -233,6 +236,7 @@ struct formatter<fiction::port_position>
         return format_to(ctx.out(), "({},{})", p.x, p.y);
     }
 };
+// make port_direction compatible with fmt::format
 template <>
 struct formatter<fiction::port_direction>
 {

@@ -16,6 +16,11 @@ namespace fiction
 {
 
 /**
+ * This file includes fiction's trait system that is modeled after mockturtle/traits.hpp. It allows to check at compile
+ * time for the appropriateness of passed types to any function.
+ */
+
+/**
  * Coordinate layouts
  */
 

@@ -42,6 +42,15 @@ struct area_stats
     }
 };
 
+/**
+ * Computes real-world area requirements in nm² of a given cell-level layout. For this purpose, each cell position in
+ * the layout is assigned a vertical and horizontal size. Additionally, a spacing between cell positions in horizontal
+ * and vertical direction is taken into account.
+ *
+ * @tparam Lyt Cell-level layout type.
+ * @tparam AreaType Type for area representation.
+ * @param lyt The cell-level layout whose area is desired.
+ */
 template <typename Lyt, typename AreaType = double>
 void area(const Lyt& lyt, area_params<technology<Lyt>, AreaType>& ps = {}, area_stats<AreaType>* pst = nullptr)
 {

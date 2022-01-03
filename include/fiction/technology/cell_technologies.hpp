@@ -10,6 +10,9 @@
 namespace fiction
 {
 
+/**
+ * Quantum-dot Cellular Automata (QCA) technology implementation of the FCN concept.
+ */
 struct qca_technology
 {
     enum cell_type : uint8_t
@@ -131,6 +134,9 @@ struct qca_technology
     static constexpr uint64_t cell_vspace = 2ul;
 };
 
+/**
+ * in-plane Nanomagnet Logic (iNML) technology implementation of the FCN concept.
+ */
 struct inml_technology
 {
     enum cell_type : uint8_t
@@ -252,6 +258,9 @@ struct inml_technology
     static constexpr uint64_t cell_vspace = 25ul;
 };
 
+/**
+ * Silicon Dangling Bond (SiDB) technology implementation of the FCN concept.
+ */
 struct sidb_technology
 {
     enum cell_type : uint8_t
@@ -315,7 +324,7 @@ struct sidb_technology
     }
 
     /**
-     * Default width of a SiDB in SiQAD.
+     * Default width of a SiDB in SiQAD (https://github.com/siqad/siqad).
      * Dots are considered to be 0-dimensional entities for simulation purposes.
      */
     static constexpr double cell_width = 0.0;
