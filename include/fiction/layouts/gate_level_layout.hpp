@@ -116,7 +116,7 @@ class gate_level_layout : public ClockedLayout
      */
     struct gate_level_layout_storage_node : mockturtle::mixed_fanin_node<2>
     {
-        bool operator==(gate_level_layout_storage_const node other) const
+        bool operator==(const gate_level_layout_storage_node& other) const
         {
             return data[1].h1 == other.data[1].h1 && children == other.children;
         }
