@@ -11,8 +11,8 @@ namespace fiction
 {
 
 /**
- * Defines a range type utilizing iterators. It implements begin() and end() as member
- * functions to work for range based for-loops.
+ * Defines a range type utilizing iterators. It implements begin() and end() as member functions to work for range based
+ * for-loops.
  *
  * @tparam Iterator type for which the range should be created.
  */

@@ -15,9 +15,11 @@ using namespace fiction;
 
 TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     auto layout = blueprints::or_not_gate_layout<gate_layout>();
+
+    // clang-format off
 
     static constexpr const qca_one_library::fcn_gate primary_input_port{
         qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
@@ -47,6 +49,8 @@ TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
                                                    {' ', ' ', ' ', ' ', ' '},
                                                    {' ', ' ', ' ', ' ', ' '}}})};
 
+    // clang-format on
+
     CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == qca_one_library::rotate_90(primary_input_port));
     CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == qca_one_library::rotate_180(primary_input_port));
     CHECK(qca_one_library::set_up_gate(layout, {1, 1}) == qca_one_library::rotate_90(disjunction));
@@ -56,9 +60,11 @@ TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 
 TEST_CASE("Setting up wires", "[qca-one-library]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
+
+    // clang-format off
 
     static constexpr const qca_one_library::fcn_gate primary_input_port{
         qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
@@ -88,6 +94,8 @@ TEST_CASE("Setting up wires", "[qca-one-library]")
                                                    {' ', ' ', 'x', ' ', ' '},
                                                    {' ', ' ', 'x', ' ', ' '}}})};
 
+    // clang-format on
+
     CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == qca_one_library::rotate_90(primary_input_port));
     CHECK(qca_one_library::set_up_gate(layout, {0, 2}) == qca_one_library::rotate_90(primary_input_port));
     CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == qca_one_library::rotate_180(primary_input_port));
@@ -103,9 +111,11 @@ TEST_CASE("Setting up wires", "[qca-one-library]")
 
 TEST_CASE("Setting up fanouts", "[qca-one-library]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     auto layout = blueprints::fanout_layout<gate_layout>();
+
+    // clang-format off
 
     static constexpr const qca_one_library::fcn_gate primary_input_port{
         qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
@@ -134,6 +144,8 @@ TEST_CASE("Setting up fanouts", "[qca-one-library]")
                                                    {' ', ' ', 'x', 'x', 'x'},
                                                    {' ', ' ', ' ', ' ', ' '},
                                                    {' ', ' ', ' ', ' ', ' '}}})};
+
+    // clang-format on
 
     CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == qca_one_library::rotate_90(primary_input_port));
     CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == qca_one_library::rotate_180(primary_output_port));

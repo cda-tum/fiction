@@ -65,6 +65,23 @@ Ntk unbalanced_and_inv_network()
 }
 
 template <typename Ntk>
+Ntk and_or_network()
+{
+    Ntk ntk{};
+
+    const auto a = ntk.create_pi("a");
+    const auto b = ntk.create_pi("b");
+
+    const auto f1 = ntk.create_and(a, b);
+    const auto f2 = ntk.create_or(a, b);
+
+    ntk.create_po(f1, "f1");
+    ntk.create_po(f2, "f2");
+
+    return ntk;
+}
+
+template <typename Ntk>
 Ntk multi_output_and_network()
 {
     Ntk ntk{};
@@ -134,18 +151,40 @@ Ntk half_adder_network()
 
     ntk.create_po(sum, "sum");
     ntk.create_po(c, "carry");
-  
-    return ntk; 
+
+    return ntk;
 }
-  
+
+template <typename Ntk>
+Ntk full_adder_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi("a");
+    const auto x2 = ntk.create_pi("b");
+    const auto x3 = ntk.create_pi("cin");
+
+    const auto w1 = ntk.create_and(x1, x2);
+    const auto w2 = ntk.create_xor(x1, x2);
+    const auto w3 = ntk.create_and(x3, w2);
+
+    const auto c   = ntk.create_or(w1, w3);
+    const auto sum = ntk.create_xor(x3, w2);
+
+    ntk.create_po(sum, "sum");
+    ntk.create_po(c, "carry");
+
+    return ntk;
+}
+
 template <typename Ntk>
 Ntk mux21_network()
 {
     Ntk ntk{};
 
-    const auto x1  = ntk.create_pi();
-    const auto x2  = ntk.create_pi();
-    const auto x3  = ntk.create_pi();
+    const auto x1 = ntk.create_pi();
+    const auto x2 = ntk.create_pi();
+    const auto x3 = ntk.create_pi();
 
     const auto n1  = ntk.create_not(x3);
     const auto a1  = ntk.create_and(x1, n1);
@@ -206,6 +245,24 @@ Ntk fanout_substitution_corner_case_network()
 }
 
 template <typename Ntk>
+Ntk inverter_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi("x1");
+
+    const auto fo1 = ntk.create_buf(x1);
+
+    const auto n1 = ntk.create_not(fo1);
+    const auto n2 = ntk.create_not(fo1);
+
+    ntk.create_po(n1, "f1");
+    ntk.create_po(n2, "f2");
+
+    return ntk;
+}
+
+template <typename Ntk>
 Ntk clpl()
 {
     Ntk ntk{};
@@ -238,6 +295,63 @@ Ntk clpl()
     //    ntk.create_po(o3, "f3");
     //    ntk.create_po(o4, "f4");
     //    ntk.create_po(o5, "f5");
+
+    return ntk;
+}
+
+template <typename Ntk>
+Ntk one_to_five_path_difference_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi("x1");
+    const auto x2 = ntk.create_pi("x2");
+
+    const auto p1 = ntk.create_buf(x1);
+    const auto p2 = ntk.create_buf(ntk.create_buf(ntk.create_buf(ntk.create_buf(ntk.create_buf(x2)))));
+
+    const auto a = ntk.create_and(p1, p2);
+
+    ntk.create_po(a, "f");
+
+    return ntk;
+}
+
+template <typename Ntk>
+Ntk nand_xnor_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi("x1");
+    const auto x2 = ntk.create_pi("x2");
+
+    const auto nand1 = ntk.create_nand(x1, x2);
+    const auto nor1  = ntk.create_nor(x1, x2);
+    const auto xor1  = ntk.create_xor(nand1, nor1);
+    const auto xnor1 = ntk.create_xnor(nand1, nor1);
+
+    ntk.create_po(xor1, "f1");
+    ntk.create_po(xnor1, "f2");
+
+    return ntk;
+}
+
+template <typename Ntk>
+Ntk topolinano_network()
+{
+    Ntk ntk{};
+
+    const auto x1 = ntk.create_pi("x1");
+    const auto x2 = ntk.create_pi("x2");
+
+    const auto fo1 = ntk.create_buf(x1);
+    const auto fo2 = ntk.create_buf(fo1);
+    const auto a1  = ntk.create_and(x1, x2);
+    const auto o1  = ntk.create_or(a1, fo2);
+
+    ntk.create_po(fo1, "f1");
+    ntk.create_po(fo2, "f2");
+    ntk.create_po(o1, "f3");
 
     return ntk;
 }

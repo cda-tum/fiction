@@ -11,7 +11,14 @@
 
 namespace fiction
 {
-
+/**
+ * An iterator type that iterates over increasingly larger 2D aspect ratios via factorization, starting from a number of
+ * faces n. After iterating over all possible factorizations of n, the next step increases n and continues with the
+ * factorization. Thereby, a sequence of aspect ratios starting from n == 4 faces looks like this: 1 x 4, 4 x 1, 2 x 2,
+ * 1 x 5, 5 x 1, 1 x 6, 6 x 1, 2 x 3, 3 x 2, ...
+ *
+ * @tparam AspectRatio Aspect ratio type.
+ */
 template <typename AspectRatio>
 class aspect_ratio_iterator
 {

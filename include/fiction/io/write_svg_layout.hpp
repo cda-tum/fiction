@@ -5,8 +5,8 @@
 #ifndef FICTION_WRITE_SVG_LAYOUT_HPP
 #define FICTION_WRITE_SVG_LAYOUT_HPP
 
-#include "../layouts/coordinate.hpp"
-#include "../traits.hpp"
+#include "fiction/layouts/coordinates.hpp"
+#include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
 
 #include <fmt/format.h>
@@ -697,28 +697,44 @@ class write_qca_layout_svg_impl
 }  // namespace detail
 
 /**
- * Returns an SVG string representing the given cell layout. Both tile- and cell-based layouts are supported.
+ * Writes an SVG representation of a cell-level QCA layout into an output stream. Both tile- and cell-based layouts are
+ * supported. For tile-based layouts, QCA layouts of tile size 5 x 5 are supported exclusively so far.
  *
- * For tile-based layouts, only QCA of tile size 5 x 5 is supported so far.
+ * The utilized color scheme is based on the standard scheme used in QCADesigner
+ * (https://waluslab.ece.ubc.ca/qcadesigner/).
  *
- * May throw an 'unsupported_cell_type_exception'
+ * May throw an 'unsupported_cell_type_exception'.
  *
- * @param fcl The cell layout to generate an SVG representation for.
- * @param simple Flag to indicate that the SVG representation should be generated with less details. Recommended
- *               for large layouts.
- * @return The SVG string containing a visual representation of the given layout.
+ * @tparam Lyt Cell-level QCA layout type.
+ * @param lyt The layout to be written.
+ * @param os The output stream to write into.
+ * @param ps Parameters.
  */
 template <typename Lyt>
 void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg_params ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(std::is_same_v<technology<Lyt>, qca_technology>, "Lyt must be a QCA layout");
+    static_assert(std::is_same_v<coordinate<Lyt>, offset::ucoord_t>, "Lyt must use unsigned Cartesian coordinates");
 
     detail::write_qca_layout_svg_impl<Lyt> p{lyt, os, ps};
 
     p.run();
 }
-
+/**
+ * Writes an SVG representation of a cell-level QCA layout into a file. Both tile- and cell-based layouts are supported.
+ * For tile-based layouts, QCA layouts of tile size 5 x 5 are supported exclusively so far.
+ *
+ * The utilized color scheme is based on the standard scheme used in QCADesigner
+ * (https://waluslab.ece.ubc.ca/qcadesigner/).
+ *
+ * May throw an 'unsupported_cell_type_exception'.
+ *
+ * @tparam Lyt Cell-level QCA layout type.
+ * @param lyt The layout to be written.
+ * @param filename The file name to create and write into. Should preferably use the ".svg" extension.
+ * @param ps Parameters.
+ */
 template <typename Lyt>
 void write_qca_layout_svg(const Lyt& lyt, const std::string& filename, write_qca_layout_svg_params ps = {})
 {

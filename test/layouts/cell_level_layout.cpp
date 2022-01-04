@@ -18,7 +18,7 @@ using namespace fiction;
 
 TEST_CASE("Traits", "[cell-level-layout]")
 {
-    using layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
     CHECK(is_cell_level_layout_v<layout>);
     CHECK(has_get_layout_name_v<layout>);
@@ -80,7 +80,7 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
 
 TEST_CASE("Cell type assignment", "[cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
     REQUIRE(has_get_layout_name_v<cell_layout>);
     REQUIRE(has_set_layout_name_v<cell_layout>);
@@ -152,11 +152,31 @@ TEST_CASE("Cell type assignment", "[cell-level-layout]")
     CHECK(!layout.is_empty_cell({1, 2}));
     CHECK(!layout.is_empty_cell({3, 2}));
     CHECK(!layout.is_empty_cell({4, 2}));
+
+    // remove cells by assigning them the empty cell type
+    layout.assign_cell_type({0, 2}, qca_technology::cell_type::EMPTY);
+    layout.assign_cell_type({2, 0}, qca_technology::cell_type::EMPTY);
+    layout.assign_cell_type({2, 1}, qca_technology::cell_type::EMPTY);
+    layout.assign_cell_type({4, 2}, qca_technology::cell_type::EMPTY);
+
+    CHECK(layout.is_empty_cell({0, 2}));
+    CHECK(layout.is_empty_cell({2, 0}));
+    CHECK(layout.is_empty_cell({2, 1}));
+    CHECK(layout.is_empty_cell({4, 2}));
+
+    // this should also have reduced the number of cells, PIs, and POs
+    CHECK(layout.num_cells() == 5);
+    CHECK(layout.num_pis() == 1);
+    CHECK(layout.num_pos() == 0);
+
+    // remove cell names by assigning them the empty name
+    layout.assign_cell_name({2, 4}, "");
+    CHECK(layout.get_cell_name({2, 4}).empty());
 }
 
 TEST_CASE("Cell mode assignment", "[cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 
@@ -206,12 +226,22 @@ TEST_CASE("Cell mode assignment", "[cell-level-layout]")
     CHECK(layout.get_cell_mode({2, 1, 1}) == qca_technology::cell_mode::CROSSOVER);
     CHECK(layout.get_cell_mode({2, 2, 1}) == qca_technology::cell_mode::CROSSOVER);
     CHECK(layout.get_cell_mode({2, 3, 1}) == qca_technology::cell_mode::CROSSOVER);
+
+    // remove cell modes by assigning the normal mode
+    layout.assign_cell_mode({2, 1, 1}, qca_technology::cell_mode::NORMAL);
+    layout.assign_cell_mode({2, 2, 1}, qca_technology::cell_mode::NORMAL);
+    layout.assign_cell_mode({2, 3, 1}, qca_technology::cell_mode::NORMAL);
+
+    CHECK(layout.get_cell_mode({2, 1, 1}) == qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({2, 2, 1}) == qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({2, 3, 1}) == qca_technology::cell_mode::NORMAL);
 }
 
 TEST_CASE("Clocking", "[cell-level-layout]")
 {
-    cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>> layout{
-        cartesian_layout<coord_t>::aspect_ratio{4, 4, 0}, twoddwave_4_clocking, "Lyt", 2, 2};
+    using clk_cell_lyt = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+
+    clk_cell_lyt layout{clk_cell_lyt::aspect_ratio{4, 4, 0}, twoddwave_clocking<clk_cell_lyt>(), "Lyt", 2, 2};
 
     CHECK(layout.get_clock_number({0, 0}) == 0);
     CHECK(layout.get_clock_number({0, 1}) == 0);

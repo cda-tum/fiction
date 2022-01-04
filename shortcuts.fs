@@ -1,6 +1,6 @@
 # commands
 alias "xibs(.*)" "exact -x -i -b -s{}"
-alias "topo" "exact -xinobs topolinano3; cell -l 1; print -c"
+alias "topo" "exact -xinobs columnar; cell -l 1; print -c"
 
 # flows
 alias "synth(.*)" "{}; cell; show -c"

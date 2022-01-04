@@ -41,3 +41,38 @@ if (NOT WIN32)
         message(STATUS "Mugen was enabled. Please note that it relies on the Python3 libraries 'graphviz', 'PySAT v0.1.6.dev6', and 'wrapt_timeout_decorator' to be properly installed")
     endif ()
 endif ()
+
+# Enable the usage of Z3
+option(FICTION_Z3 "Find, include, and utilize the Z3 solver by Microsoft Research. It needs to be installed manually.")
+if (FICTION_Z3)
+    message(STATUS "Usage of the Z3 solver was enabled. Make sure that it is installed on your system!")
+    set(FICTION_Z3_SEARCH_PATHS "" CACHE STRING "Hints CMake where to search for the Z3 package. Usually only necessary if Z3 cannot be found automatically.")
+    # Try to locate Z3
+    find_package(Z3 PATHS ${FICTION_Z3_SEARCH_PATHS})
+
+    if (Z3_FOUND)
+        # Status update
+        message(STATUS "Found Z3 solver version: ${Z3_VERSION}")
+        message(STATUS "Found Z3 library: ${Z3_LIBRARIES}")
+        message(STATUS "Found Z3 include directories: ${Z3_CXX_INCLUDE_DIRS}")
+
+        # Threads are used by Z3 and are, thus, required at this point
+        find_package(Threads REQUIRED)
+
+        # Compile definition to guard include files
+        target_compile_definitions(fictionlib INTERFACE FICTION_Z3_SOLVER)
+        # Include Z3 library
+        target_include_directories(fictionlib INTERFACE ${Z3_CXX_INCLUDE_DIRS})
+        # Link Z3
+        target_link_libraries(fictionlib INTERFACE ${Z3_LIBRARIES})
+
+        # use libc++ on macOS
+        if (APPLE)
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
+        endif ()
+
+    else ()
+        message(SEND_ERROR "Z3 solver could not be detected")
+    endif ()
+
+endif ()

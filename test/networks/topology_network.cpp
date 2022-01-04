@@ -270,7 +270,6 @@ TEST_CASE("create ternary operations in a topology network", "[topology-network]
     CHECK(topo.size() == 8);
     CHECK(f2 != f3);
 
-
     const auto f4 = topo.create_dot(x1, x2, x3);
     CHECK(topo.size() == 9);
 
@@ -408,9 +407,9 @@ TEST_CASE("create fanouts and nodes and compute a function in a topology network
     kitty::create_from_hex_string(tt_maj, "e8");
     kitty::create_from_hex_string(tt_xor, "96");
 
-    const auto _foa  = topo.create_buf(a);
-    const auto _fob  = topo.create_buf(b);
-    const auto _foc  = topo.create_buf(c);
+    const auto _foa = topo.create_buf(a);
+    const auto _fob = topo.create_buf(b);
+    const auto _foc = topo.create_buf(c);
     const auto _maj = topo.create_node({_foa, _fob, _foc}, tt_maj);
     const auto _xor = topo.create_node({_foa, _fob, _foc}, tt_xor);
 
@@ -560,21 +559,23 @@ TEST_CASE("Node functions of a topology network", "[topology-network]")
     const auto x2 = topo.create_pi();
     const auto x3 = topo.create_pi();
 
-    const auto and_signal  = topo.create_and(x1, x2);
-    const auto nand_signal = topo.create_nand(x1, x2);
-    const auto or_signal   = topo.create_or(x1, x2);
-    const auto nor_signal  = topo.create_nor(x1, x2);
-    const auto xor2_signal = topo.create_xor(x1, x2);
-    const auto maj_signal  = topo.create_maj(x1, x2, x3);
-    const auto dot_signal  = topo.create_dot(x1, x2, x3);
-    const auto ite_signal  = topo.create_ite(x1, x2, x3);
-    const auto xor3_signal = topo.create_xor3(x1, x2, x3);
+    const auto and_signal   = topo.create_and(x1, x2);
+    const auto nand_signal  = topo.create_nand(x1, x2);
+    const auto or_signal    = topo.create_or(x1, x2);
+    const auto nor_signal   = topo.create_nor(x1, x2);
+    const auto xor2_signal  = topo.create_xor(x1, x2);
+    const auto xnor2_signal = topo.create_xnor(x1, x2);
+    const auto maj_signal   = topo.create_maj(x1, x2, x3);
+    const auto dot_signal   = topo.create_dot(x1, x2, x3);
+    const auto ite_signal   = topo.create_ite(x1, x2, x3);
+    const auto xor3_signal  = topo.create_xor3(x1, x2, x3);
 
     topo.create_po(and_signal);
     topo.create_po(nand_signal);
     topo.create_po(or_signal);
     topo.create_po(nor_signal);
     topo.create_po(xor2_signal);
+    topo.create_po(xnor2_signal);
     topo.create_po(maj_signal);
     topo.create_po(dot_signal);
     topo.create_po(ite_signal);
@@ -585,6 +586,7 @@ TEST_CASE("Node functions of a topology network", "[topology-network]")
     CHECK(topo.is_or(topo.get_node(or_signal)));
     CHECK(topo.is_nor(topo.get_node(nor_signal)));
     CHECK(topo.is_xor(topo.get_node(xor2_signal)));
+    CHECK(topo.is_xnor(topo.get_node(xnor2_signal)));
     CHECK(topo.is_maj(topo.get_node(maj_signal)));
     CHECK(topo.is_dot(topo.get_node(dot_signal)));
     CHECK(topo.is_ite(topo.get_node(ite_signal)));
@@ -777,4 +779,42 @@ TEST_CASE("visited values in topology networks", "[topology-network]")
         });
     topo.clear_visited();
     topo.foreach_node([&](auto n) { CHECK(topo.visited(n) == 0); });
+}
+
+TEST_CASE("substitute PO signals", "[topology-network]")
+{
+    topology_network topo{};
+
+    const auto x1 = topo.create_pi();
+    const auto x2 = topo.create_pi();
+    const auto x3 = topo.create_pi();
+
+    const auto a = topo.create_and(x1, x2);
+    const auto i = topo.create_not(x3);
+    const auto b = topo.create_buf(i);
+
+    topo.create_po(a);
+    topo.create_po(i);
+    topo.create_po(b);
+
+    CHECK(topo.size() == 8);
+
+    CHECK(topo.is_po(a));
+    CHECK(topo.is_po(i));
+    CHECK(topo.is_po(b));
+
+    CHECK(topo.fanout_size(a) == 1);
+    CHECK(topo.fanout_size(i) == 2);
+    CHECK(topo.fanout_size(b) == 1);
+
+    topo.substitute_po_signals();
+
+    CHECK(topo.size() == 10);
+    CHECK(!topo.is_po(a));
+    CHECK(!topo.is_po(i));
+    CHECK(topo.is_po(b));  // b pointed to a buf already and, thus, wasn't substituted
+
+    CHECK(topo.fanout_size(a) == 1);
+    CHECK(topo.fanout_size(i) == 2);
+    CHECK(topo.fanout_size(b) == 1);
 }

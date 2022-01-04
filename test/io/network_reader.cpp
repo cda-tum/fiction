@@ -4,12 +4,10 @@
 
 #include "catch.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
-#include "utils/equivalence_checking.hpp"
+#include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/io/network_reader.hpp>
 #include <fiction/types.hpp>
-
-#include <fmt/format.h>
 
 #include <sstream>
 #include <string>

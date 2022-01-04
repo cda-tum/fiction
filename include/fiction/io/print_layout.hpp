@@ -5,8 +5,8 @@
 #ifndef FICTION_PRINT_LAYOUT_HPP
 #define FICTION_PRINT_LAYOUT_HPP
 
-#include "../traits.hpp"
-#include "../types.hpp"
+#include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 
 #include <fmt/color.h>
 #include <fmt/format.h>
@@ -98,18 +98,18 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             auto t2     = layout.above(t1);
             reprs[i][j] = gate_repr(t1);
 
-            const auto east_west_connections = [&layout, &x_dirs, &t1, &t2, i, j](const auto s)
+            const auto east_west_connections = [&layout, &x_dirs, &t1, &t2, i, j](const auto n)
             {
-                const auto ft = static_cast<tile<Lyt>>(s);
+                const auto ft = layout.get_tile(n);
                 if (layout.is_east_of(t1, ft) || layout.is_east_of(t2, ft))
                     x_dirs[i][j] = "→";
                 if (layout.is_west_of(t1, ft) || layout.is_west_of(t2, ft))
                     x_dirs[i][j - 1] = "←";
             };
 
-            const auto north_south_connections = [&layout, &y_dirs, &t1, &t2, i, j](const auto s)
+            const auto north_south_connections = [&layout, &y_dirs, &t1, &t2, i, j](const auto n)
             {
-                const auto ft = static_cast<tile<Lyt>>(s);
+                const auto ft = layout.get_tile(n);
                 if (layout.is_north_of(t1, ft) || layout.is_north_of(t2, ft))
                     y_dirs[i][j] = "↑";
                 if (layout.is_south_of(t1, ft) || layout.is_south_of(t2, ft))
@@ -175,9 +175,22 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         return;
     }
 
-    for (auto y_pos = 0ull; y_pos <= layout.y(); ++y_pos)
+    const auto has_cell_above = [&layout](const auto& c)
     {
-        for (auto x_pos = 0ull; x_pos <= layout.x(); ++x_pos)
+        for (decltype(layout.z()) z = c.z + decltype(layout.z()){1}; z <= layout.z(); ++z)
+        {
+            if (!layout.is_empty_cell({c.x, c.y, z}))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    for (decltype(layout.y()) y_pos = 0; y_pos <= layout.y(); ++y_pos)
+    {
+        for (decltype(layout.x()) x_pos = 0; x_pos <= layout.x(); ++x_pos)
         {
             cell<Lyt> c{x_pos, y_pos};
 
@@ -187,7 +200,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
                 color = color | detail::CLOCK_COLOR[layout.get_clock_number(c)];
 
             // crossing case
-            if (const auto ac = layout.above(c); (c != ac) && !layout.is_empty_cell(ac))
+            if (has_cell_above(c))
             {
                 os << fmt::format(color, "x");
             }

@@ -20,7 +20,7 @@ using namespace fiction;
 
 TEST_CASE("Write empty layout", "[qcad]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
     qca_layout layout{{2, 2, 1}, "empty layout"};
 
@@ -142,7 +142,7 @@ TEST_CASE("Write empty layout", "[qcad]")
 
 TEST_CASE("Write single-layer AND gate", "[qcad]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
     qca_layout layout{{4, 4}, "AND"};
 
@@ -758,7 +758,7 @@ TEST_CASE("Write single-layer AND gate", "[qcad]")
 
 TEST_CASE("Write wire crossing", "[qcad]")
 {
-    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coord_t>>>;
+    using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
     qca_layout layout{{4, 4, 1}, "Crossover"};
 

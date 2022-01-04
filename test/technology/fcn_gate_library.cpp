@@ -24,6 +24,8 @@ TEST_CASE("Gate rotation", "[fcn-gate-library]")
 {
     using lib_t = fcn_gate_library<qca_technology, 3, 3>;
 
+    // clang-format off
+
     constexpr const typename lib_t::fcn_gate wire{
         lib_t::cell_list_to_gate<char>({{{' ', 'x', ' '},
                                          {' ', 'x', 'x'},
@@ -44,6 +46,8 @@ TEST_CASE("Gate rotation", "[fcn-gate-library]")
                                          {'x', 'x', ' '},
                                          {' ', ' ', ' '}}})};
 
+    // clang-format on
+
     CHECK(lib_t::rotate_90(wire) == wire_rotated_90);
     CHECK(lib_t::rotate_180(wire) == wire_rotated_180);
     CHECK(lib_t::rotate_270(wire) == wire_rotated_270);
@@ -59,6 +63,8 @@ TEST_CASE("Gate rotation", "[fcn-gate-library]")
 TEST_CASE("Gate merging", "[fcn-gate-library]")
 {
     using lib_t = fcn_gate_library<qca_technology, 3, 3>;
+
+    // clang-format off
 
     constexpr const typename lib_t::fcn_gate wire{
         lib_t::cell_list_to_gate<char>({{{' ', 'x', ' '},
@@ -85,7 +91,11 @@ TEST_CASE("Gate merging", "[fcn-gate-library]")
                                          {'x', 'x', 'x'},
                                          {' ', 'x', ' '}}})};
 
+    // clang-format on
+
     CHECK(lib_t::merge({{wire, wire_rotated_90, wire_rotated_180, wire_rotated_270}}) == merged_wire);
+
+    // clang-format off
 
     constexpr const typename lib_t::fcn_gate pi_pin{
         lib_t::cell_list_to_gate<char>({{{' ', ' ', ' '},
@@ -102,12 +112,16 @@ TEST_CASE("Gate merging", "[fcn-gate-library]")
                                          {'i', 'x', 'o'},
                                          {' ', ' ', ' '}}})};
 
+    // clang-format on
+
     CHECK(lib_t::merge({{pi_pin, po_pin}}) == io_pin);
 }
 
 TEST_CASE("Cell marking", "[fcn-gate-library]")
 {
     using lib_t = fcn_gate_library<qca_technology, 3, 3>;
+
+    // clang-format off
 
     constexpr const typename lib_t::fcn_gate empty{
         lib_t::cell_list_to_gate<char>({{{' ', ' ', ' '},
@@ -129,11 +143,14 @@ TEST_CASE("Cell marking", "[fcn-gate-library]")
                                          {' ', 'x', ' '},
                                          {' ', 'o', ' '}}})};
 
-    CHECK(lib_t::mark_cell(wire, port(1, 0), qca_technology::cell_mark::INPUT) == pi_wire);
-    CHECK(lib_t::mark_cell(pi_wire, port(1, 2), qca_technology::cell_mark::OUTPUT) == io_wire);
-    CHECK(lib_t::mark_cell(lib_t::mark_cell(wire, port(1, 0), qca_technology::cell_mark::INPUT), port(1, 2),
-                           qca_technology::cell_mark::OUTPUT) == io_wire);
-    CHECK(lib_t::mark_cell(lib_t::mark_cell(lib_t::mark_cell(wire, port(1, 0), qca_technology::cell_mark::EMPTY),
-                                            port(1, 1), qca_technology::cell_mark::EMPTY), port(1, 2),
-                           qca_technology::cell_mark::EMPTY) == empty);
+    // clang-format on
+
+    CHECK(lib_t::mark_cell(wire, port_position(1, 0), qca_technology::cell_mark::INPUT) == pi_wire);
+    CHECK(lib_t::mark_cell(pi_wire, port_position(1, 2), qca_technology::cell_mark::OUTPUT) == io_wire);
+    CHECK(lib_t::mark_cell(lib_t::mark_cell(wire, port_position(1, 0), qca_technology::cell_mark::INPUT),
+                           port_position(1, 2), qca_technology::cell_mark::OUTPUT) == io_wire);
+    CHECK(
+        lib_t::mark_cell(lib_t::mark_cell(lib_t::mark_cell(wire, port_position(1, 0), qca_technology::cell_mark::EMPTY),
+                                          port_position(1, 1), qca_technology::cell_mark::EMPTY),
+                         port_position(1, 2), qca_technology::cell_mark::EMPTY) == empty);
 }

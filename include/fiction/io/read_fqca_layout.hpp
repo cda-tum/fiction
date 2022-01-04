@@ -5,8 +5,8 @@
 #ifndef FICTION_READ_FQCA_LAYOUT_HPP
 #define FICTION_READ_FQCA_LAYOUT_HPP
 
-#include "../technology/cell_technologies.hpp"
-#include "../traits.hpp"
+#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/traits.hpp"
 
 #include <cctype>
 #include <fstream>
@@ -71,14 +71,14 @@ namespace qca_stack
 
 static const std::regex re_white_space{R"(\s)"};
 static const std::regex re_comment{R"(\[.*\]$)"};
-static const std::regex re_layer_separator{R"([= *]+\s*$)"};
-static const std::regex re_cell_definition_id{R"((\w)\:$)"};              // group 1 is the id
-static const std::regex re_cell_definition_label{R"(-label=\"(.*)\"$)"};  // group 1 is the label
-static const std::regex re_cell_definition_clock{R"(-clock=(\d)$)"};      // group 1 is the clock number
-static const std::regex re_cell_definition_number{R"(-number=(\d)$)"};    // group 1 is the number
+static const std::regex re_layer_separator{R"(^=+$)"};
+static const std::regex re_cell_definition_id{R"(^(\w)\:$)"};              // group 1 is the id
+static const std::regex re_cell_definition_label{R"(^-label=\"(.*)\"$)"};  // group 1 is the label
+static const std::regex re_cell_definition_clock{R"(^-clock=(\d)$)"};      // group 1 is the clock number
+static const std::regex re_cell_definition_number{R"(^-number=(\d)$)"};    // group 1 is the number
 static const std::regex re_cell_definition_offset{
-    R"(-offset=\((-?\d*(?:\.\d+)?),(-?\d*(?:\.\d+)?),(-?\d*(?:\.\d+)?)\)$)"};  // group 1, 2, and 3 are the x, y, and z
-                                                                               // offset respectively
+    R"(^-offset=\((-?\d*(?:\.\d+)?),(-?\d*(?:\.\d+)?),(-?\d*(?:\.\d+)?)\)$)"};  // group 1, 2, and 3 are the x, y, and z
+                                                                                // offset respectively
 
 /* Strings */
 
@@ -92,7 +92,7 @@ template <typename Lyt>
 class read_fqca_layout_impl
 {
   public:
-    explicit read_fqca_layout_impl(std::istream& s) : lyt{}, is{s} {}
+    explicit read_fqca_layout_impl(std::istream& s, const std::string& name) : lyt{{}, name}, is{s} {}
 
     Lyt run()
     {
@@ -114,7 +114,7 @@ class read_fqca_layout_impl
                         continue;
                     }
                     // if line is a layer separator
-                    else if (std::regex_match(line, qca_stack::re_layer_separator))
+                    else if (std::regex_match(substituted_line, qca_stack::re_layer_separator))
                     {
                         // reset cell row
                         current_cell_row = 0ull;
@@ -309,40 +309,58 @@ class read_fqca_layout_impl
         {
             max_cell_pos.y = cell.y;
         }
+        if (cell.z > max_cell_pos.z)
+        {
+            max_cell_pos.z = cell.z;
+        }
     }
 };
 
 }  // namespace detail
 
 /**
+ * Reads a cell-level QCA layout from an fqca file provided as an input stream. The format is used by QCA-STACK by
+ * Willem Lambooy (https://github.com/wlambooy/QCA-STACK).
+ *
  * May throw an 'unsupported_character_exception', 'undefined_cell_label_exception', or
  * 'unrecognized_cell_definition_exception'.
  *
  * @tparam Lyt The layout type to be created from an input. Must be a clocked cell-level QCA layout.
  * @param is The input stream to read from.
+ * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-Lyt read_fqca_layout(std::istream& is)
+Lyt read_fqca_layout(std::istream& is, const std::string& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(std::is_same_v<technology<Lyt>, qca_technology>, "Lyt must be a QCA layout");
 
-    detail::read_fqca_layout_impl<Lyt> p{is};
+    detail::read_fqca_layout_impl<Lyt> p{is, name};
 
     const auto lyt = p.run();
 
     return lyt;
 }
-
+/**
+ * Reads a cell-level QCA layout from an fqca file provided as a file name. The format is used by QCA-STACK by
+ * Willem Lambooy (https://github.com/wlambooy/QCA-STACK).
+ *
+ * May throw an 'unsupported_character_exception', 'undefined_cell_label_exception', or
+ * 'unrecognized_cell_definition_exception'.
+ *
+ * @tparam Lyt The layout type to be created from an input. Must be a clocked cell-level QCA layout.
+ * @param filename The file name to open and read from.
+ * @param name The name to give to the generated layout.
+ */
 template <typename Lyt>
-Lyt read_fqca_layout(const std::string& filename)
+Lyt read_fqca_layout(const std::string& filename, const std::string& name = "")
 {
     std::ifstream is{filename.c_str(), std::ifstream::in};
 
     if (!is.is_open())
         throw std::ifstream::failure("could not open file");
 
-    const auto lyt = read_fqca_layout<Lyt>(is);
+    const auto lyt = read_fqca_layout<Lyt>(is, name);
     is.close();
 
     return lyt;

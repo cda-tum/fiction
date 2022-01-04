@@ -5,8 +5,8 @@
 #ifndef FICTION_WRITE_SQD_LAYOUT_HPP
 #define FICTION_WRITE_SQD_LAYOUT_HPP
 
-#include "../technology/cell_technologies.hpp"
-#include "../traits.hpp"
+#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
 
 #include <fmt/format.h>
@@ -163,7 +163,7 @@ class write_sqd_layout_impl
                 // generate QCA cell blocks
                 else if constexpr (std::is_same_v<technology<Lyt>, qca_technology>)
                 {
-                    const auto type = lyt.get_cell_type(c);
+                    const auto type = this->lyt.get_cell_type(c);
 
                     const auto color = qca_technology::is_input_cell(type)    ? siqad::INPUT_COLOR :
                                        qca_technology::is_output_cell(type)   ? siqad::OUTPUT_COLOR :
@@ -191,6 +191,16 @@ class write_sqd_layout_impl
 
 }  // namespace detail
 
+/**
+ * Writes a cell-level SiDB or QCA layout to a sqd file that is used by SiQAD (https://github.com/siqad/siqad),
+ * a physical simulator for the SiDB technology platform.
+ *
+ * This overload uses an output stream to write into.
+ *
+ * @tparam Lyt Cell-level SiDB or QCA layout type.
+ * @param lyt The layout to be written.
+ * @param os The output stream to write into.
+ */
 template <typename Lyt>
 void write_sqd_layout(const Lyt& lyt, std::ofstream& os)
 {
@@ -202,7 +212,16 @@ void write_sqd_layout(const Lyt& lyt, std::ofstream& os)
 
     p.run();
 }
-
+/**
+ * Writes a cell-level SiDB or QCA layout to a sqd file that is used by SiQAD (https://github.com/siqad/siqad),
+ * a physical simulator for the SiDB technology platform.
+ *
+ * This overload uses file name to create and write into..
+ *
+ * @tparam Lyt Cell-level SiDB or QCA layout type.
+ * @param lyt The layout to be written.
+ * @param filename The file name to create and write into. Should preferably use the ".sqd" extension.
+ */
 template <typename Lyt>
 void write_sqd_layout(const Lyt& lyt, const std::string& filename)
 {
