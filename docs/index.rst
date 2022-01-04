@@ -8,8 +8,8 @@ Welcome to fiction's documentation!
 
    getting_started
    acknowledgments
-..
    cli
+..
    changelog
    publications
 

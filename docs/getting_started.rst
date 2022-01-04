@@ -1,7 +1,7 @@
 Getting started
 ===============
 
-This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
+This code base provides a framework for **fi**\ eld-**c**\ oupled **t**\ echnology-**i**\ ndependent **o**\ pen **n**\ anocomputing
 in C++17 using the `EPFL Logic Synthesis Libraries <https://github.com/lsils/lstools-showcase>`_. Thereby, *fiction* focuses on the
 logic synthesis, placement, routing, clocking, and verification of emerging nanotechnologies. As a promising class of post-CMOS technologies,
 `Field-coupled Nanocomputing (FCN) <https://www.springer.com/de/book/9783662437216>`_ devices like Quantum-dot Cellular
@@ -23,7 +23,7 @@ The repository should always be cloned recursively with all submodules::
   git clone --recursive
 
 Several third-party libraries will be cloned within the ``libs`` folder. The ``cmake`` build process will take care of
-them automatically. Should the repository have been cloned before,::
+them automatically. Should the repository have been cloned before, the commands::
 
   git submodule update --init --recursive
 
@@ -65,7 +65,7 @@ for each used file. Everything that can safely be used is located inside the ``f
 Building tests
 --------------
 
-Unit tests can be built with CMake via a respective flag on the command line and executed via ``ctest``.::
+Unit tests can be built with CMake via a respective flag on the command line and executed via ``ctest``::
 
   mkdir build
   cd build
