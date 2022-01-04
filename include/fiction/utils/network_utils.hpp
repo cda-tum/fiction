@@ -117,7 +117,7 @@ std::vector<mockturtle::node<Ntk>> fanouts(const Ntk& ntk, const mockturtle::nod
 
     std::vector<mockturtle::node<Ntk>> fos{};
 
-    ntk.foreach_fanout(n, [&ntk, &fos](const auto& fon) { fos.push_back(fon); });
+    ntk.foreach_fanout(n, [&fos](const auto& fon) { fos.push_back(fon); });
 
     return fos;
 }
