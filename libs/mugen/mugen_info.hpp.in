@@ -1,0 +1,22 @@
+//
+// Created by marcel on 09.09.21.
+//
+
+#ifndef FICTION_MUGEN_INFO_HPP_IN
+#define FICTION_MUGEN_INFO_HPP_IN
+
+namespace fiction
+{
+
+/**
+ * Path to the Mugen library.
+ */
+constexpr const char* MUGEN_PATH = "@CMAKE_CURRENT_SOURCE_DIR@/mugen/";
+/**
+ * Version of python-sat required to work.
+ */
+constexpr const char* REQUIRED_PYSAT_VERSION = "0.1.6.dev6";
+
+}  // namespace fiction
+
+#endif  // FICTION_MUGEN_INFO_HPP_IN

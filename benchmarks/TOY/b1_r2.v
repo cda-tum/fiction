@@ -1,4 +1,4 @@
-module b1 (pi0, pi1, pi2, po0, po1, po2, po3);
+module top (pi0, pi1, pi2, po0, po1, po2, po3);
   input  pi0, pi1, pi2;
   output po0, po1, po2, po3;
   wire n8, n9, n11, n12;

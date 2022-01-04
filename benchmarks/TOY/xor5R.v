@@ -1,4 +1,4 @@
-module xor5 (x0, x1, x2, x3, x4, z0);
+module top (x0, x1, x2, x3, x4, z0);
   input  x0, x1, x2, x3, x4;
   output z0;
   wire n12, n13, n14, n15, n16, n17, n18, n19, n20, n22, n23, n24, n28, n29;

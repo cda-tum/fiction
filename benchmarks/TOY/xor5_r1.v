@@ -1,4 +1,4 @@
-module source (pi0, pi1, pi2, pi3, pi4, po0);
+module top (pi0, pi1, pi2, pi3, pi4, po0);
   input  pi0, pi1, pi2, pi3, pi4;
   output po0;
   wire n7, n8, n9, n10, n11, n12, n13, n14, n15, n16, n17;

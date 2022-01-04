@@ -1,0 +1,84 @@
+name: macOS CI
+
+on:
+  push:
+    branches-ignore:
+      - master
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  Z3_GIT_TAG: z3-4.8.12
+
+jobs:
+  build_and_test:
+    strategy:
+      matrix:
+        os: [ macos-10.15 ]  # macos-11 when supported
+        compiler: [ g++-9, g++-10, clang++ ]  # clang++12
+        build_type: [ Debug, Release ]
+        include:
+          - compiler: g++-9
+            ccompiler: gcc
+          - compiler: g++-10
+            ccompiler: gcc
+          - compiler: clang++
+            ccompiler: clang
+
+    name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode)
+    runs-on: ${{matrix.os}}
+
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9.x'
+
+      - name: Install pip packages
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            graphviz
+            python-sat==0.1.6.dev6
+            wrapt_timeout_decorator
+
+      - name: Clone Repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Cache Z3 Solver
+        id: cache-z3-solver
+        uses: actions/cache@v2
+        with:
+          path: ${{github.workspace}}/z3lib
+          key: ${{matrix.os}}-${{matrix.compiler}}-z3lib-${{env.Z3_GIT_TAG}}  # use compiler in key because linking z3 to fiction when compiled differently does not work under macOS
+
+      - name: Build Z3 Solver
+        if: steps.cache-z3-solver.outputs.cache-hit != 'true'
+        working-directory: ${{github.workspace}}
+        run: |
+          git clone --branch $Z3_GIT_TAG --depth 1 https://github.com/Z3Prover/z3.git
+          CC=${{matrix.ccompiler}} CXX=${{matrix.compiler}} cmake -S z3 -B z3/build -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=OFF -DZ3_BUILD_TEST_EXECUTABLES=OFF -DZ3_ENABLE_EXAMPLE_TARGETS=OFF
+          cmake --build z3/build --config Release -j3 --target install
+
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{github.workspace}}/build
+
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/build
+
+        run: cmake ${{github.workspace}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}/z3lib -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
+
+      - name: Build
+        working-directory: ${{github.workspace}}/build
+
+        run: cmake --build . --config ${{matrix.build_type}} -j3  # macOS runners provide 3 cores
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        # Execute tests defined by the CMake configuration.
+        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+        run: ctest -C ${{matrix.build_type}} --verbose

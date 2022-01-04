@@ -1,4 +1,4 @@
-module b1 (A, B, Cin, M3);
+module top (A, B, Cin, M3);
   input  A, B, Cin;
   output M3;
   wire M11, M12, M13, M14, M1, M21, M22, M23, M2, M31, M32, M33, M34 ;
