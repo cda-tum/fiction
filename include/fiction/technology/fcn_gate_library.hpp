@@ -243,7 +243,7 @@ class fcn_gate_library
         return rev_rows;
     }
     /**
-     * Single empty gate in given technology and tile_size. Used as a blue print to create new ones in merge and
+     * Single empty gate in given technology and tile size. Used as a blue print to create new ones in merge and
      * transpose for example.
      */
     static constexpr const fcn_gate empty_gate =
