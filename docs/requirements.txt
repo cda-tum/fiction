@@ -1,0 +1,2 @@
+sphinx==4.0.1
+breathe==4.30.0
