@@ -13,12 +13,13 @@ Let there be a fiction
    changelog
    publications
 
-   .. toctree::
+.. toctree::
    :maxdepth: 2
    :caption: Layouts
 
    layouts/*
 
+..
    .. toctree::
    :maxdepth: 2
    :glob:

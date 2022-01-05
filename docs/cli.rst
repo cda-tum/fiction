@@ -62,6 +62,13 @@ The content of the logic network store can be briefly viewed by entering ``store
 printed by command ``gates``. Command ``show -n`` writes a `Graphviz <https://www.graphviz.org/>`_ ``.dot`` file of the
 current network and opens it with the user's standard viewer (e.g. `xdot <https://github.com/jrfonseca/xdot.py>`_).
 
+Multiple different ``network`` types are supported that can directly be created from the input file via individual flags:
+
+- AND-Inverter Graph (AIG), ``-a``
+- XOR-AND-Inverter Graph (XAG), ``-x``
+- MAJ-Inverter Graph (MIG), ``-m``
+- Topology network (TOP), ``-t``
+
 Truth tables
 ############
 
@@ -318,7 +325,6 @@ the following called ``c17_synth.fs``::
     ps -g
     cell
     show -c
-
 
 which can be executed by ``./fiction -ef c17_synth.fs -l c17_log.json`` where statistics are to be logged in a JSON file
 called ``c17_log.json``.  The following table presents possible results.
