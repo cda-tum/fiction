@@ -9,15 +9,19 @@ Offset coordinates
 ------------------
 
 .. doxygennamespace:: fiction::offset
+   :no-members:
 
 .. doxygenstruct:: fiction::offset::ucoord_t
    :members:
+   :undoc-members:
 
 
 Cube coordinates
 ----------------
 
 .. doxygennamespace:: fiction::cube
+   :no-members:
 
 .. doxygenstruct:: fiction::cube::coord_t
    :members:
+   :undoc-members:
