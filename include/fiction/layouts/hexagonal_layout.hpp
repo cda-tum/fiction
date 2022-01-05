@@ -29,7 +29,7 @@ namespace fiction
   |       |
    \     /
      \ /
-
+  \endverbatim
  */
 struct pointy_top
 {
@@ -43,7 +43,7 @@ struct pointy_top
    /       \
    \       /
     \_____/
-
+  \endverbatim
  */
 struct flat_top
 {
@@ -67,6 +67,7 @@ struct flat_top
       |       |       |       |
        \     / \     / \     /
          \ /     \ /     \ /
+  \endverbatim
  */
 struct odd_row : pointy_top
 {};
@@ -87,6 +88,7 @@ struct odd_row : pointy_top
       |       |       |       |
        \     / \     / \     /
          \ /     \ /     \ /
+  \endverbatim
  */
 struct even_row : pointy_top
 {};
@@ -105,7 +107,7 @@ struct even_row : pointy_top
    / (0,2) \_____/ (2,2) \_____/
    \       /     \       /
     \_____/       \_____/
-
+  \endverbatim
  */
 struct odd_column : flat_top
 {};
@@ -125,7 +127,7 @@ struct odd_column : flat_top
     \_____/ (1,2) \_____/ (3,2) \
           \       /     \       /
            \_____/       \_____/
-
+  \endverbatim
  */
 struct even_column : flat_top
 {};
