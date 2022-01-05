@@ -1,7 +1,7 @@
 .. fiction documentation master file
 
-Welcome to fiction's documentation!
-======================================
+Let there be a fiction
+======================
 
 .. toctree::
    :maxdepth: 2
