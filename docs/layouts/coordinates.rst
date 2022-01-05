@@ -25,5 +25,5 @@ At the same time, they can be used to address 3-dimensional grids.
 Utility functions
 -----------------
 
-.. doxygenfunction:: template<typename CoordinateType> uint64_t fiction::area(const CoordinateType &coord) noexcept
-.. doxygenfunction:: template <typename CoordinateType> uint64_t fiction::volume(const CoordinateType& coord) noexcept
+.. doxygenfunction:: fiction::area(const CoordinateType& coord) noexcept
+.. doxygenfunction:: fiction::volume(const CoordinateType& coord) noexcept
