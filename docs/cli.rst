@@ -78,16 +78,16 @@ if-then-else, or ``!{!a!b}`` to describe the application of De Morgan’s law to
 fit the largest variable in the expression, e.g., if ``c`` is the largest variable, then the truth table has at least
 three variables.
 
-Alternatively, ``tt 0110`` or ``tt 0xaffe`` generate ``truth_table``s from bit/hex strings.
+Alternatively, ``tt 0110`` or ``tt 0xaffe`` generate ``truth_table``\ s from bit/hex strings.
 
 Logic synthesis
 ###############
 
 Having a ``truth_table`` in store, the command ``akers`` generates an equivalent Majority ``network`` using Akers' synthesis.
 
-Furthermore, it is possible to generate random ``network``s by using command ``random``. The desired number of primary
+Furthermore, it is possible to generate random ``network``\ s by using command ``random``. The desired number of primary
 inputs can be specified (``-n``) as well as the gate count excluding inverters and fan-outs (``-g``). A random seed (``-s``)
-allows for reproducibility as it will also be used as the network``s name.
+allows for reproducibility as it will also be used as the network``\ s name.
 
 Structural manipulation
 #######################
@@ -208,14 +208,9 @@ Equivalence checking (``equiv``)
 Performs logical and delay equivalence checks of implementations (gate layouts or logic networks) against specifications.
 Those can themselves be either logic networks or gate layout (``-g/-n <index>``). Three cases are to be distinguished:
 
-1. The implementation performs a different functionality under at least one input pattern than its specification.
-The implementation is **not** equivalent to its specification.
-
-2. The implementation performs the same functionality like its specification and has a throughput of ``1/1`` if it is a gate layout.
-The implementation is **strongly** equivalent to its specification.
-
-3. The implementation performs the same functionality like its specification and has a throughput of ``1/x`` if it is a gate layout, where ``x > 1``.
-The implementation is **weakly** equivalent to its specification.
+1. The implementation performs a different functionality under at least one input pattern than its specification. The implementation is **not** equivalent to its specification.
+2. The implementation performs the same functionality like its specification and has a throughput of ``1/1`` if it is a gate layout. The implementation is **strongly** equivalent to its specification.
+3. The implementation performs the same functionality like its specification and has a throughput of ``1/x`` if it is a gate layout, where ``x > 1``. The implementation is **weakly** equivalent to its specification.
 
 Logical equivalence is checked with a SAT solver via miter structures and Tseitin transformation.
 For more information, see `the paper <https://ieeexplore.ieee.org/abstract/document/9218641>`_.
@@ -314,7 +309,7 @@ Benchmarking and scripting
 All design steps explained in the previous sections can also be specified within a single *fiction script* file like
 the following called ``c17_synth.fs``::
 
-    read ../benchmarks/ISCAS85/c17.v
+    read ../benchmarks/ISCAS85/c17.v -t
     exact -xbs 2ddwave
     ps -g
     cell
@@ -335,11 +330,15 @@ called ``c17_log.json``.  The following table presents possible results.
     * - ``exact -xbs 2ddwave``
       - ``exact -ds use``
 
-    * - image:: img/compare1.png
-      - image:: img/compare2.png
+    * - .. image:: img/compare1.png
+           :width: 300
+           :alt: Compare 1
+      - .. image:: img/compare2.png
+           :width: 300
+           :alt: Compare 2
 
-    * - ``c17 - 5 × 7, #G: 18, #W: 18, #C: 3, #L: 0, CP: 11, TP: 1/1``
-      - ``c17 - 4 × 5, #G: 11, #W: 7, #C: 0, #L: 0, CP: 13, TP: 1/3``
+    * - ``c17 (2DDWAVE) - 5 × 7, I/O: 5/2, gates: 8, wires: 28, CP: 11, TP: 1/1, sync. elems.: 0``
+      - ``c17 (USE) - 4 × 7, I/O: 5/2, gates: 8, wires: 16, CP: 14, TP: 1/3, sync. elems.: 0``
 
 
 These scripts can also be nested. One can use ``< script.fs`` within a *fiction script* to load ``script.fs`` in that very position.
