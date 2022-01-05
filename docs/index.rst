@@ -19,6 +19,7 @@ Let there be a fiction
 
    layouts/coordinates.rst
    layouts/cartesian_layout.rst
+   layouts/hexagonal_layout.rst
 
 ..
    .. toctree::
