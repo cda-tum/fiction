@@ -18,6 +18,7 @@ Let there be a fiction
    :caption: Layouts
 
    layouts/coordinates.rst
+   layouts/cartesian_layout.rst
 
 ..
    .. toctree::
