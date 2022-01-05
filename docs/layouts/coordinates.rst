@@ -6,7 +6,7 @@ Coordinate types identify positions in a coordinate system, e.g., a Cartesian or
 Offset coordinates
 ------------------
 
-.. doxygennamesprace:: fiction::offset
+.. doxygennamespace:: fiction::offset
    :project: fiction
    :members:
 
@@ -17,7 +17,7 @@ Offset coordinates
 Cube coordinates
 ------------------
 
-.. doxygennamesprace:: fiction::cube
+.. doxygennamespace:: fiction::cube
    :project: fiction
    :members:
 
