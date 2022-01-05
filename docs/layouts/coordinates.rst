@@ -11,10 +11,8 @@ Offset coordinates
 An offset coordinate is a coordinate that defines a location via an offset from a fixed point (origin). Cartesian coordinates are offset coordinates.
 
 .. doxygenstruct:: fiction::offset::ucoord_t
-   :members:
 
 .. doxygenclass:: fiction::offset::coord_iterator
-   :members:
 
 Cube coordinates
 ----------------
@@ -23,10 +21,9 @@ Cube coordinates are used as a way to identify faces in a hexagonal grid. A wond
 At the same time, they can be used to address 3-dimensional grids.
 
 .. doxygenstruct:: fiction::cube::coord_t
-   :members:
 
 Utility functions
 -----------------
 
-.. doxygenfunction:: fiction::area
-.. doxygenfunction:: fiction::volume
+.. doxygenfunction:: template<typename CoordinateType> uint64_t fiction::area(const CoordinateType &coord) noexcept
+.. doxygenfunction:: template <typename CoordinateType> uint64_t fiction::volume(const CoordinateType& coord) noexcept
