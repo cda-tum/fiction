@@ -17,7 +17,7 @@ Let there be a fiction
    :maxdepth: 2
    :caption: Layouts
 
-   layouts/*
+   layouts/*.rst
 
 ..
    .. toctree::
