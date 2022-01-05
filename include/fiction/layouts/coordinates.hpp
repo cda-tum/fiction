@@ -37,13 +37,25 @@ struct ucoord_t
     uint64_t y : 31;
     uint64_t x : 31;
 
+    /**
+     * Default constructor. Creates a dead coordinate at (0, 0, 0).
+     */
     constexpr ucoord_t() noexcept :
             d{static_cast<decltype(d)>(1u)},  // default-constructed ucoord_ts are dead
             z{static_cast<decltype(z)>(0u)},
             y{static_cast<decltype(y)>(0u)},
             x{static_cast<decltype(x)>(0u)}
     {}
-
+    /**
+     * Standard constructor. Creates a non-dead coordinate at (x_, y_, z_).
+     *
+     * @tparam X Type of x.
+     * @tparam Y Type of y.
+     * @tparam Z Type of z.
+     * @param x_ x position.
+     * @param y_ y position.
+     * @param z_ z position.
+     */
     template <class X, class Y, class Z>
     constexpr ucoord_t(X x_, Y y_, Z z_) noexcept :
             d{static_cast<decltype(d)>(0u)},
@@ -51,7 +63,14 @@ struct ucoord_t
             y{static_cast<decltype(y)>(y_)},
             x{static_cast<decltype(x)>(x_)}
     {}
-
+    /**
+     * Standard constructor. Creates a non-dead coordinate at (x_, y_, 0).
+     *
+     * @tparam X Type of x.
+     * @tparam Y Type of y.
+     * @param x_ x position.
+     * @param y_ y position.
+     */
     template <class X, class Y>
     constexpr ucoord_t(X x_, Y y_) noexcept :
             d{static_cast<decltype(d)>(0u)},
@@ -59,14 +78,29 @@ struct ucoord_t
             y{static_cast<decltype(y)>(y_)},
             x{static_cast<decltype(x)>(x_)}
     {}
-
+    /**
+     * Standard constructor. Instantiates a coordinate from an uint64_t, where the positions are encoded in the
+     * following four parts of the unsigned 64-bit integer (from MSB to LSB):
+     *  - 1 bit for the dead indicator
+     *  - 1 bit for the z position
+     *  - 31 bit for the y position
+     *  - 31 bit for the x position
+     *
+     * @param t Unsigned 64-bit integer to instantiate the coordinate from.
+     */
     constexpr explicit ucoord_t(const uint64_t t) noexcept :
             d{static_cast<decltype(d)>(t >> 63)},
             z{static_cast<decltype(z)>((t << 1) >> 63)},
             y{static_cast<decltype(y)>((t << 2) >> 33)},
             x{static_cast<decltype(x)>((t << 33) >> 33)}
     {}
-
+    /**
+     * Allows explicit conversion to uint64_t. Segments an unsigned 64-bit integer into four parts (from MSB to LSB):
+     *  - 1 bit for the dead indicator
+     *  - 1 bit for the z position
+     *  - 31 bit for the y position
+     *  - 31 bit for the x position
+     */
     explicit constexpr operator uint64_t() const noexcept
     {
         return (((((((0ull | d) << 1) | z) << 31) | y) << 31) | x);

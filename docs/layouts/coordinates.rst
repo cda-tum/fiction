@@ -9,8 +9,6 @@ Offset coordinates
 ------------------
 
 .. doxygennamespace:: fiction::offset
-   :project: fiction
-   :members:
 
 .. doxygenstruct:: fiction::offset::ucoord_t
    :members:
@@ -20,8 +18,6 @@ Cube coordinates
 ----------------
 
 .. doxygennamespace:: fiction::cube
-   :project: fiction
-   :members:
 
 .. doxygenstruct:: fiction::cube::coord_t
    :members:
