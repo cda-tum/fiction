@@ -8,20 +8,25 @@ Coordinate types identify positions in a coordinate system, e.g., a Cartesian or
 Offset coordinates
 ------------------
 
-.. doxygennamespace:: fiction::offset
-   :no-members:
+An offset coordinate is a coordinate that defines a location via an offset from a fixed point (origin). Cartesian coordinates are offset coordinates.
 
 .. doxygenstruct:: fiction::offset::ucoord_t
    :members:
-   :undoc-members:
 
+.. doxygenclass:: fiction::offset::coord_iterator
+   :members:
 
 Cube coordinates
 ----------------
 
-.. doxygennamespace:: fiction::cube
-   :no-members:
+Cube coordinates are used as a way to identify faces in a hexagonal grid. A wonderful resource on the topic is: https://www.redblobgames.com/grids/hexagons/#coordinates-cube
+At the same time, they can be used to address 3-dimensional grids.
 
 .. doxygenstruct:: fiction::cube::coord_t
    :members:
-   :undoc-members:
+
+Utility functions
+-----------------
+
+.. doxygenfunction:: fiction::area
+.. doxygenfunction:: fiction::volume
