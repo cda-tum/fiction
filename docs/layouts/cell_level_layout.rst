@@ -6,14 +6,14 @@ Cell-level Layout
 The cell-level layout can be layered on top of any clocked layout type at compile time to extend its functionality by
 a notion of FCN cells that can be assigned to its clock zones. In contrast to ``gate_level_layout``, this layout type
 does not abstract from a technology implementation but embraces it. The cell-level layout requires a
-:ref:`cell technology <cell_technologies:FCN Cell Technologies>` as a template parameter that specifies the types and properties of cells
+:ref:`cell technology <FCN Cell Technologies>` as a template parameter that specifies the types and properties of cells
 available to it. These could for instance be QCA, iNML, or SiDB.
 
 Cell-level layouts merely represent structural information of the FCN circuit but do not inherently possess any
 knowledge of their implemented functionality.
 
 A cell-level layout can be obtained from a ``gate_level_layout`` by the :ref:`application <apply gate library>` of a
-:ref:`gate library <gate_libraries:FCN Gate Libraries>`.
+:ref:`gate library <FCN Gate Libraries>`.
 
 .. doxygenclass:: fiction::cell_level_layout
    :members:

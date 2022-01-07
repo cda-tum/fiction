@@ -1,5 +1,5 @@
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Physical Design
 
    physical_design/exact.rst
