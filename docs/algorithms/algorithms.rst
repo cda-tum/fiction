@@ -1,6 +1,8 @@
+Physical Design
+===============
+
 .. toctree::
    :maxdepth: 1
-   :caption: Physical Design
 
    exact.rst
    orthogonal.rst
