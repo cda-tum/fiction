@@ -35,7 +35,6 @@ Let there be a fiction
 
 .. toctree::
    :maxdepth: 2
-   :glob:
    :caption: Algorithms
 
    algorithms/algorithms.rst
