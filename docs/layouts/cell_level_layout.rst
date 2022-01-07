@@ -17,4 +17,3 @@ A cell-level layout can be obtained from a ``gate_level_layout`` by the :ref:`ap
 
 .. doxygenclass:: fiction::cell_level_layout
    :members:
-

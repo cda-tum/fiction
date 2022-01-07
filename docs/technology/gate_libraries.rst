@@ -1,4 +1,4 @@
-.. _gate libraries
+.. _fcn-gate-libraries:
 
 FCN Gate Libraries
 ==================
