@@ -338,12 +338,10 @@ called ``c17_log.json``.  The following table presents possible results.
     * - ``exact -xbs 2ddwave``
       - ``exact -ds use``
 
-    * - .. figure:: _static/compare1.png
+    * - .. figure:: /_static/compare1.png
            :width: 300
-           :alt: Compare 1
-      - .. figure:: _static/compare2.png
+      - .. figure:: /_static/compare2.png
            :width: 300
-           :alt: Compare 2
 
     * - ``c17 (2DDWAVE) - 5 × 7, I/O: 5/2, gates: 8, wires: 28, CP: 11, TP: 1/1, sync. elems.: 0``
       - ``c17 (USE) - 4 × 7, I/O: 5/2, gates: 8, wires: 16, CP: 14, TP: 1/3, sync. elems.: 0``
