@@ -31,7 +31,7 @@ v0.3.1 - 2020-06-04
 
 Added
 #####
-- Command ``equiv`` for logical and delay equivalence checking of ``fcn_gate_layout``s against a specification
+- Command ``equiv`` for logical and delay equivalence checking of ``fcn_gate_layout``\ s against a specification
 - Command ``energy`` to print and log energy dissipation of current ``fcn_gate_layout`` based on a physical model for the QCA-ONE library
 - Command ``area`` to print and log area usage in nm²
 - Parameter ``-a`` and flag ``-A`` to enable asynchronous parallelism for ``exact``
@@ -62,7 +62,7 @@ Fixed
 - SEGFAULTS caused by ``ortho`` on large networks when compiling with gcc
 - ``ortho -b`` losing bent wire connections
 - ``fcn_layout::random_face``\ 's index to coordinate mapping again, but for real now (thanks to Till Schlechtweg!)
-- ``logic_network``s are deep-copied for each physical design call now to secure them from external changes
+- ``logic_network``\ s are deep-copied for each physical design call now to secure them from external changes
 - Gates and wires without directions assigned are mapped to standard rotations using QCA-ONE library now
 - Rotation issues with border gate-pin I/Os using QCA-ONE library
 - 3-output fan-outs are correctly printed as fan-outs when using ``print -g`` now
@@ -84,17 +84,17 @@ v0.3.0 - 2019-11-22
 Added
 #####
 - Support for iNML technology using `ToPoliNano <https://topolinano.polito.it/>`_\ 's gate library and clocking scheme. Thanks to Umberto Garlando for cooperating with me on this project!
-- Support for vertically shifted ``fcn_layout``s to emulate column-based clocking schemes
+- Support for vertically shifted ``fcn_layout``\ s to emulate column-based clocking schemes
 - Enhanced ``logic_network`` by incorporating `mockturtle <https://github.com/lsils/mockturtle>`_ for logic representation
 - Truth table store (mnemonic ``-t``) and command ``tt``. Thanks to Mathias Soeken for granting permission to use code from `CirKit <https://github.com/msoeken/cirkit>`_!
-- Command ``simulate`` to compute ``truth_table``s for ``logic_network`` and ``fcn_gate_layout`` objects. Thanks to Mathias Soeken for granting permission to use code from `CirKit <https://github.com/msoeken/cirkit>`_!
+- Command ``simulate`` to compute ``truth_table``\ s for ``logic_network`` and ``fcn_gate_layout`` objects. Thanks to Mathias Soeken for granting permission to use code from `CirKit <https://github.com/msoeken/cirkit>`_!
 - Command ``akers`` to perform Akers' Majority synthesis to generate a ``logic_network`` from a ``truth_table``
 - Command ``random`` to generate random ``logic_network`` objects
 - Command ``check`` to verify structural integrity of designed ``fcn_gate_layout`` objects
 - Command ``gates`` to list gate counts for each vertex type in the current ``logic_network``
-- Command ``fanouts`` to substitute high-degree inputs into fan-out vertices in ``logic_network``s using a given strategy
+- Command ``fanouts`` to substitute high-degree inputs into fan-out vertices in ``logic_network``\ s using a given strategy
 - Command ``balance`` to subdivide ``logic_network`` edges to equalize path lengths by inserting auxiliary wire vertices
-- Command ``qcc`` to write ``iNML`` ``cell_layout``s to component files readable by `ToPoliNano and MagCAD <https://topolinano.polito.it/>`_
+- Command ``qcc`` to write ``iNML`` ``cell_layout``\ s to component files readable by `ToPoliNano and MagCAD <https://topolinano.polito.it/>`_
 - Capability to enforce straight inverter gates in ``exact`` with flag ``-n``
 - Capability to minimize the number of used crossing tiles in ``exact`` with flag ``-m``
 - Capability to parse AIGER (``*.aig``) files using ``read``
@@ -137,7 +137,7 @@ Removed
 - ``print -n`` as it is replaced by ``show -n``
 - ``operation::BUF``; use ``operation::W`` instead
 - ``operation::CONST0``, ``operation::CONST1``, and ``operation::XOR``
-- ``operator[x][y][z]`` for ``fcn_layout``s as it was slow and therefore not used; use ``face/tile/cell{x,y,z}`` instead
+- ``operator[x][y][z]`` for ``fcn_layout``\ s as it was slow and therefore not used; use ``face/tile/cell{x,y,z}`` instead
 
 v0.2.1 - 2019-05-02
 -------------------
@@ -167,7 +167,7 @@ Fixed
 - Visualization of clock latches in ``show -c`` (thanks to Gregor Kuhn!)
 - Multi direction assignment to wires and gates in ``exact`` leading to physically impossible layouts
 - ``shrink_to_fit`` in ``fcn_gate_layout`` incorporates the BGL bug now. Minimum size in each dimension is 2.
-For more information, see <https://svn.boost.org/trac10/ticket/11735>
+For more information, see https://svn.boost.org/trac10/ticket/11735
 - Parameters for ``exact`` no longer get stuck once set
 
 Removed

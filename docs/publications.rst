@@ -1,1 +1,4 @@
 .. _publications:
+
+Publications
+============
