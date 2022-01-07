@@ -58,6 +58,6 @@ Let there be a fiction
 .. toctree::
    :maxdepth: 2
    :glob:
-   :caption: Utilities
+   :caption: Utility
 
    utils/utils.rst

@@ -1,7 +1,3 @@
-Utility
-=======
-
-
 Network Utils
 -------------
 
@@ -61,7 +57,8 @@ Name Utils
 
 .. doxygenfunction:: fiction::get_name
 .. doxygenfunction:: fiction::restore_network_name
-.. doxygenfunction:: fiction::restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc>& old2new) noexcept
+.. doxygenfunction:: fiction::restore_output_names
+.. doxygenfunction:: fiction::restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc>& old2new) noexcept
 .. doxygenfunction:: fiction::restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<branching_signal_container<NtkDest, NtkSrc, fanout_size>, NtkSrc>& old2new) noexcept
 .. doxygenfunction:: fiction::restore_names
 
@@ -91,5 +88,3 @@ Hashing
 **Header:** ``fiction/utils/hash.hpp``
 
 .. doxygenfunction:: fiction::hash_combine
-.. doxygenstruct:: std::hash<std::set<T>>
-.. doxygenstruct:: std::hash<std::pair<T1, T2>>
