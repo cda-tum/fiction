@@ -338,10 +338,10 @@ called ``c17_log.json``.  The following table presents possible results.
     * - ``exact -xbs 2ddwave``
       - ``exact -ds use``
 
-    * - .. image:: /_static/compare1.png
+    * - .. figure:: /_static/compare1.png
            :width: 300
            :alt: Compare 1
-      - .. image:: /_static/compare2.png
+      - .. figure:: /_static/compare2.png
            :width: 300
            :alt: Compare 2
 
