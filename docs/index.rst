@@ -15,6 +15,12 @@ Let there be a fiction
 
 .. toctree::
    :maxdepth: 2
+   :caption: Networks
+
+   networks/topology_network.rst
+
+.. toctree::
+   :maxdepth: 2
    :caption: Layouts
 
    layouts/coordinates.rst
@@ -27,20 +33,21 @@ Let there be a fiction
    layouts/gate_level_layout.rst
    layouts/cell_level_layout.rst
 
-..
-   .. toctree::
+.. toctree::
    :maxdepth: 2
    :glob:
    :caption: Algorithms
 
-   algorithms/*
+   algorithms/apply_gate_library.rst
 
-   .. toctree::
+.. toctree::
    :maxdepth: 2
    :caption: Technology
 
-   technology/*
+   technology/cell_technologies.rst
+   technology/gate_libraries.rst
 
+..
    .. toctree::
    :maxdepth: 2
    :glob:

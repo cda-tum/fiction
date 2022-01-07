@@ -16,6 +16,11 @@
 namespace fiction
 {
 
+/**
+ * Exception to be thrown when a layout hosts a gate type that is not implemented in the applied gate library.
+ *
+ * @tparam CoordinateType Type of the layout coordinates.
+ */
 template <typename CoordinateType>
 class unsupported_gate_type_exception : public std::exception
 {
@@ -30,7 +35,13 @@ class unsupported_gate_type_exception : public std::exception
   private:
     const CoordinateType coord;
 };
-
+/**
+ * Exception to be thrown when a layout hosts a gate with an orientation that is unsupported by the applied gate
+ * library.
+ *
+ * @tparam CoordinateType Type of the layout coordinates.
+ * @tparam PortType Type of the library ports.
+ */
 template <typename CoordinateType, typename PortType>
 class unsupported_gate_orientation_exception : public std::exception
 {
