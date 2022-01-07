@@ -1,4 +1,4 @@
-.. _cell technologies
+.. _fcn-cell-technologies
 
 FCN Cell Technologies
 =====================
