@@ -47,13 +47,13 @@ Let there be a fiction
    technology/gate_libraries.rst
    technology/properties.rst
 
-..
-   .. toctree::
+.. toctree::
    :maxdepth: 2
-   :glob:
    :caption: Input/Output
 
-   io/*
+   io/input.rst
+   io/visualization.rst
+   io/physical_simulation.rst
 
 .. toctree::
    :maxdepth: 2
