@@ -4,12 +4,12 @@ FCN Gate Libraries
 ==================
 
 A gate library is a set of cell-accurate implementations of gate functions. It breaks down each gate into a tile of
-cells. Thereby, via apply_gate_library, a gate_level_layout can be compiled down to a cell_level_layout of a concrete
-technology.
+cells. Thereby, via ``apply_gate_library``, a ``gate_level_layout`` can be compiled down to a ``cell_level_layout`` of a
+concrete technology.
 
 The implementation of a gate library should be non-instantiatable plus ``static`` and ``constexpr`` wherever possible.
-The abstract class fcn_gate_library provides utility functions that can be used to implement custom gate libraries by
-extending it.
+The abstract class ``fcn_gate_library`` provides utility functions that can be used to implement custom gate libraries
+by extending it.
 
 Abstract Gate Library
 ---------------------

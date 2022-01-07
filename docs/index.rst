@@ -38,7 +38,7 @@ Let there be a fiction
    :glob:
    :caption: Algorithms
 
-   algorithms/apply_gate_library.rst
+   algorithms/algorithms.rst
 
 .. toctree::
    :maxdepth: 2
