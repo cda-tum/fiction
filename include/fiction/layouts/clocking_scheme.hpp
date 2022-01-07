@@ -168,7 +168,11 @@ enum class num_clks
 };
 
 /**
- * Returns an irregular clocking that always returns the standard clock. It is intended to be overridden.
+ * Returns an irregular clocking that maps every coordinate to the standard clock. It is intended to be overridden.
+ *
+ * @tparam Lyt Clocked layout type.
+ * @param n Number of clocks.
+ * @return Irregular clocking scheme.
  */
 template <typename Lyt>
 static auto open_clocking(const num_clks& n = num_clks::FOUR) noexcept
@@ -197,6 +201,10 @@ static auto open_clocking(const num_clks& n = num_clks::FOUR) noexcept
 /**
  * Returns a linear 1D clocking as originally introduced in "A device architecture for computing with
  * quantum dots" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE 1997.
+ *
+ * @tparam Lyt Clocked layout type.
+ * @param n Number of clocks.
+ * @return Columnar clocking scheme.
  */
 template <typename Lyt>
 static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
@@ -240,6 +248,10 @@ static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
 /**
  * Returns a 90° rotated linear 1D clocking based on the one originally introduced in "A device architecture for
  * computing with quantum dots" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE 1997.
+ *
+ * @tparam Lyt Clocked layout type.
+ * @param n Number of clocks.
+ * @return Row-based clocking scheme.
  */
 template <typename Lyt>
 static auto row_clocking(const num_clks& n = num_clks::FOUR) noexcept
@@ -282,6 +294,10 @@ static auto row_clocking(const num_clks& n = num_clks::FOUR) noexcept
 /**
  * Returns the 2DDWave clocking as defined in "Clocking and Cell Placement for QCA" by V. Vankamamidi, M. Ottavi,
  * and F. Lombardi in IEEE Conference on Nanotechnology 2006.
+ *
+ * @tparam Lyt Clocked layout type.
+ * @param n Number of clocks.
+ * @return 2DDWave clocking scheme.
  */
 template <typename Lyt>
 static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
@@ -325,6 +341,10 @@ static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
 /**
  * Returns a hexagonal variation of the 2DDWave clocking as originally defined in "Clocking and Cell Placement for QCA"
  * by V. Vankamamidi, M. Ottavi, and F. Lombardi in IEEE Conference on Nanotechnology 2006.
+ *
+ * @tparam Lyt Clocked layout type.
+ * @param n Number of clocks.
+ * @return Hexagonal 2DDWave clocking scheme.
  */
 template <typename Lyt>
 static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
@@ -489,6 +509,9 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
 /**
  * Returns the USE clocking as defined in "USE: A Universal, Scalable, and Efficient Clocking Scheme for QCA"
  * by Caio Araujo T. Campos, Abner L. Marciano, Omar P. Vilela Neto, and Frank Sill Torres in TCAD 2015.
+ *
+ * @tparam Lyt Clocked layout type.
+ * @return USE clocking scheme.
  */
 template <typename Lyt>
 static auto use_clocking() noexcept
@@ -508,6 +531,9 @@ static auto use_clocking() noexcept
  * Returns the RES clocking as defined in "An efficient clocking scheme for quantum-dot cellular automata" by
  * Mrinal Goswami, Anindan Mondal, Mahabub Hasan Mahalat, Bibhash Sen, and Biplab K. Sikdar in International Journal
  * of Electronics Letters 2019.
+ *
+ * @tparam Lyt Clocked layout type.
+ * @return RES clocking scheme.
  */
 template <typename Lyt>
 static auto res_clocking() noexcept
@@ -527,6 +553,9 @@ static auto res_clocking() noexcept
  * Returns the ESP (Zig-Zag) clocking as defined in "Regular Clocking based Emerging Technique in QCA Targeting Low
  * Power Nano Circuit" by Jayanta Pal, Amit Kumar Pramanik, Mrinal Goswami, Apu Kumar Saha, and Bibhash Sen in
  * International Journal of Electronics 2021.
+ *
+ * @tparam Lyt Clocked layout type.
+ * @return ESP clocking scheme.
  */
 template <typename Lyt>
 static auto esp_clocking() noexcept
@@ -545,6 +574,9 @@ static auto esp_clocking() noexcept
 /**
  * Returns the BANCS clocking as defined in "BANCS: Bidirectional Alternating Nanomagnetic Clocking Scheme" by
  * Ruan Evangelista Formigoni, Omar P. Vilela Neto, and Jose Augusto M. Nacif in SBCCI 2018.
+ *
+ * @tparam Lyt Clocked layout type.
+ * @return BANCS clocking scheme.
  */
 template <typename Lyt>
 static auto bancs_clocking() noexcept

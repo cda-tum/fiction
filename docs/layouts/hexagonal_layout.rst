@@ -3,9 +3,9 @@ Hexagonal Layout
 
 **Header:** ``fiction/layouts/hexagonal_layout.hpp``
 
-Coordinate system that represents a hexagonal grid. In contrast to Cartesian layouts, the faces of hexagonal layouts can
-be arranged in different ways. The most obvious are the distinction between the orientation of the hexagons that can
-either be pointy-top up or flat-top up.
+Coordinate system that represents a hexagonal grid of compile-time coordinate types. In contrast to Cartesian layouts,
+the faces of hexagonal layouts can be arranged in different ways. The most obvious are the distinction between the
+orientation of the hexagons that can either be pointy-top up or flat-top up.
 
 .. doxygenstruct:: fiction::pointy_top
 .. doxygenstruct:: fiction::flat_top

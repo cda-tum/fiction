@@ -1,0 +1,17 @@
+.. _clocked layout:
+
+Clocked Layout
+==============
+
+**Header:** ``fiction/layouts/clocked_layout.hpp``
+
+Clocking is one of the most important differences between conventional CMOS technologies and the FCN domain. Clocking
+directs information flow and provides a notion of timing for both combinational and sequential circuits alike. Usually,
+clocking information is assigned to the coordinates of a layout by the means of a clocking scheme.
+
+The clocked layout can be layered on top of any coordinate layout type at compile time to extend its functionality by
+a notion of FCN clocking. Various :ref:`pre-defined clocking schemes<clocking schemes>` can be utilized or the clock
+numbers can be assigned manually.
+
+.. doxygenclass:: fiction::clocked_layout
+   :members:
