@@ -19,8 +19,8 @@ Graphviz (DOT) Drawers
 .. doxygenclass:: fiction::technology_dot_drawer
 .. doxygenclass:: fiction::color_view_drawer
 .. doxygenclass:: fiction::simple_gate_layout_tile_drawer
-.. doxygenclass:: fiction::simple_gate_layout_cartesian_drawer
-.. doxygenclass:: fiction::simple_gate_layout_hexagonal_drawer
+.. doxygenclass:: fiction::gate_layout_cartesian_drawer
+.. doxygenclass:: fiction::gate_layout_hexagonal_drawer
 
 .. doxygenfunction:: fiction::write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {})
 .. doxygenfunction:: fiction::write_dot_layout(const Lyt& lyt, const std::string& filename, const Drawer& drawer = {})
