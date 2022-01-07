@@ -26,7 +26,7 @@ Open
 Columnar
 ########
 
-.. figure:: docs/img/columnar.png
+.. figure:: /_static/columnar.png
    :width: 200
 
 .. doxygenfunction:: fiction::columnar_clocking
@@ -34,7 +34,7 @@ Columnar
 Row
 ###
 
-.. figure:: docs/img/row.png
+.. figure:: /_static/row.png
    :width: 200
 
 .. doxygenfunction:: fiction::row_clocking
@@ -42,7 +42,7 @@ Row
 2DDWave
 #######
 
-.. figure:: docs/img/2ddwave.png
+.. figure:: /_static/2ddwave.png
    :width: 200
 
 .. doxygenfunction:: fiction::twoddwave_clocking
@@ -51,7 +51,7 @@ Row
 USE
 ###
 
-.. figure:: docs/img/use.png
+.. figure:: /_static/use.png
    :width: 200
 
 .. doxygenfunction:: fiction::use_clocking
@@ -59,7 +59,7 @@ USE
 RES
 ###
 
-.. figure:: docs/img/res.png
+.. figure:: /_static/res.png
    :width: 200
 
 .. doxygenfunction:: fiction::res_clocking
@@ -67,7 +67,7 @@ RES
 ESP
 ###
 
-.. figure:: docs/img/esp.png
+.. figure:: /_static/esp.png
    :width: 200
 
 .. doxygenfunction:: fiction::esp_clocking
@@ -75,7 +75,7 @@ ESP
 BANCS
 #####
 
-.. figure:: docs/img/bancs.png
+.. figure:: /_static/bancs.png
    :width: 150
 
 .. doxygenfunction:: fiction::bancs_clocking
