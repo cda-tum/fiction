@@ -8,5 +8,5 @@ The tile-based layout implements a naming convention that can be layered on top 
 conveys the intention that each coordinate is in actuality referring to a group of smaller coordinates in another
 abstraction down the hierarchy. In the literature, these are called tiles.
 
-.. doxygenclass:: fiction::hexagonal_layout
+.. doxygenclass:: fiction::tile_based_layout
    :members:

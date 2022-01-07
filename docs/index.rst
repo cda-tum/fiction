@@ -23,6 +23,9 @@ Let there be a fiction
    layouts/tile_based_layout.rst
    layouts/clocked_layout.rst
    layouts/clocking_scheme.rst
+   layouts/synchronization_element_layout.rst
+   layouts/gate_level_layout.rst
+   layouts/cell_level_layout.rst
 
 ..
    .. toctree::
