@@ -18,14 +18,66 @@ This header provides the ``clocking_scheme`` class that defines general floor pl
 Pre-defined schemes
 -------------------
 
+Open
+####
+
 .. doxygenfunction:: fiction::open_clocking
+
+Columnar
+########
+
+.. figure:: docs/img/columnar.png
+   :width: 200
+
 .. doxygenfunction:: fiction::columnar_clocking
+
+Row
+###
+
+.. figure:: docs/img/row.png
+   :width: 200
+
 .. doxygenfunction:: fiction::row_clocking
+
+2DDWave
+#######
+
+.. figure:: docs/img/2ddwave.png
+   :width: 200
+
 .. doxygenfunction:: fiction::twoddwave_clocking
 .. doxygenfunction:: fiction::twoddwave_hex_clocking
+
+USE
+###
+
+.. figure:: docs/img/use.png
+   :width: 200
+
 .. doxygenfunction:: fiction::use_clocking
+
+RES
+###
+
+.. figure:: docs/img/res.png
+   :width: 200
+
 .. doxygenfunction:: fiction::res_clocking
+
+ESP
+###
+
+.. figure:: docs/img/esp.png
+   :width: 200
+
 .. doxygenfunction:: fiction::esp_clocking
+
+BANCS
+#####
+
+.. figure:: docs/img/bancs.png
+   :width: 150
+
 .. doxygenfunction:: fiction::bancs_clocking
 
 Utility functions
