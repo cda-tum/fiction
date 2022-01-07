@@ -72,7 +72,7 @@ class unsupported_gate_orientation_exception : public std::exception
  * extend fcn_gate_library if it benefits from its features but does not have to. The only requirement is that it must
  * be a static class that provides a
  *
- * static fcn_gate set_up_gate(const Lyt& lyt, const tile<Lyt>& t)
+ *    static fcn_gate set_up_gate(const Lyt& lyt, const tile<Lyt>& t)
  *
  * public member function.
  *
