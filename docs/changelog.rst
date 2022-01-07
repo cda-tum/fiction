@@ -102,7 +102,7 @@ Added
 - Progress bars for ``exact`` and ``ortho``
 - ``show -n`` to display ``logic_network`` objects
 - Several convenience functions in the core data structures for easier access
-- An overview `paper <../bib/paper.pdf>`_ and a `poster <../bib/poster.pdf>`_ about the features of *fiction*. Please find citation information in the :ref:`publication list <publications>`
+- An overview `paper <https://github.com/marcelwa/fiction/blob/main/bib/paper.pdf>`_ and a `poster <https://github.com/marcelwa/fiction/blob/main/bib/poster.pdf>`_ about the features of *fiction*. Please find citation information in the :ref:`publication list <publications>`
 
 Changed
 #######
@@ -166,8 +166,7 @@ Fixed
 - Usage of non-PI/PO MAJ gates in QCA-ONE library
 - Visualization of clock latches in ``show -c`` (thanks to Gregor Kuhn!)
 - Multi direction assignment to wires and gates in ``exact`` leading to physically impossible layouts
-- ``shrink_to_fit`` in ``fcn_gate_layout`` incorporates the BGL bug now. Minimum size in each dimension is 2.
-For more information, see https://svn.boost.org/trac10/ticket/11735
+- ``shrink_to_fit`` in ``fcn_gate_layout`` incorporates the BGL bug now. Minimum size in each dimension is 2. For more information, see https://svn.boost.org/trac10/ticket/11735
 - Parameters for ``exact`` no longer get stuck once set
 
 Removed

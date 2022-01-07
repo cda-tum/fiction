@@ -5,6 +5,9 @@ Design Rule Violations (DRVs)
 
 .. doxygenfunction:: fiction::gate_level_drvs
 
+
+.. _equiv:
+
 Equivalence Checking
 --------------------
 

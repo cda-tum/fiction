@@ -1,3 +1,5 @@
+.. _onepass:
+
 SAT-based One-pass Synthesis
 ----------------------------
 
