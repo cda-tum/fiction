@@ -13,6 +13,7 @@ If you use *fiction* in your work, I would appreciate if you cited
     for the Design of Field-coupled Nanocomputing Circuits", 2019, **arXiv:1905.02477**.
 
 .. code-block:: tex
+
     @misc{fiction,
       author = {Walter, Marcel and Wille, Robert and Sill Torres, Frank and Gro{\ss}e, Daniel and Drechsler, Rolf},
       title = {{fiction: An Open Source Framework for the Design of Field-coupled Nanocomputing Circuits}},
@@ -27,6 +28,7 @@ Furthermore, if you use any of the physical design algorithms :ref:`exact <exact
 :ref:`onepass <onepass>`, or :ref:`equiv <equiv>`, please consider citing their respective papers as well:
 
 .. code-block:: tex
+
     @inproceedings{walter2018exact,
       title={{An Exact Method for Design Exploration of Quantum-dot Cellular Automata}},
       author={Walter, Marcel and Wille, Robert and Gro{\ss}e, Daniel and Sill Torres, Frank and Drechsler, Rolf},
@@ -36,6 +38,7 @@ Furthermore, if you use any of the physical design algorithms :ref:`exact <exact
     }
 
 .. code-block:: tex
+
     @inproceedings{walter2019scalable,
       title={{Scalable Design for Field-coupled Nanocomputing Circuits}},
       author={Walter, Marcel and Wille, Robert and Sill Torres, Frank and Gro{\ss}e, Daniel and Drechsler, Rolf},
@@ -46,6 +49,7 @@ Furthermore, if you use any of the physical design algorithms :ref:`exact <exact
     }
 
 .. code-block:: tex
+
     @inproceedings{walter2021one,
       title={{One-pass Synthesis for Field-coupled Nanocomputing Technologies}},
       author={Walter, Marcel and Haaswijk, W. and Wille, Robert and Sill Torres, Frank and Drechsler, Rolf},
@@ -56,6 +60,7 @@ Furthermore, if you use any of the physical design algorithms :ref:`exact <exact
     }
 
 .. code-block:: tex
+
     @inproceedings{walter2020verify,
       title={{Verification for Field-coupled Nanocomputing Circuits}},
       author={Walter, Marcel and Wille, Robert and Sill Torres, Frank and D. Gro{\ss}e and Drechsler, Rolf},
