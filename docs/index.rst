@@ -6,12 +6,11 @@ Let there be a fiction
 .. toctree::
    :maxdepth: 2
 
-   getting_started
-   acknowledgments
-   cli
-..
-   changelog
-   publications
+   getting_started.rst
+   acknowledgments.rst
+   cli.rst
+   changelog.rst
+   publications.rst
 
 .. toctree::
    :maxdepth: 2
