@@ -22,6 +22,15 @@ Abstract Gate Library
 .. doxygenclass:: fiction::unsupported_gate_type_exception
 .. doxygenclass:: fiction::unsupported_gate_orientation_exception
 
+**Header:** ``fiction/technology/cell_ports.hpp``
+
+.. doxygenstruct:: fiction::port_position
+   :members:
+.. doxygenstruct:: fiction::port_direction
+   :members:
+.. doxygenstruct:: fiction::port_list
+   :members:
+
 QCA ONE Gate Library
 --------------------
 

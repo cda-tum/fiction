@@ -45,6 +45,7 @@ Let there be a fiction
 
    technology/cell_technologies.rst
    technology/gate_libraries.rst
+   technology/properties.rst
 
 ..
    .. toctree::
@@ -54,9 +55,9 @@ Let there be a fiction
 
    io/*
 
-   .. toctree::
+.. toctree::
    :maxdepth: 2
    :glob:
    :caption: Utilities
 
-   utils/*
+   utils/utils.rst
