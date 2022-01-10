@@ -33,7 +33,7 @@ Learn more by referring to the [full documentation](https://fiction.readthedocs.
 
 If you have any questions, comments, or suggestions, please do not hesitate to get in touch.
 
-### Implemented Physical Design Algorithms
+## Implemented Physical Design Algorithms
 
 For automatic FCN layout obtainment, *fiction* provides implementations of state-of-the-art
 [physical design algorithms](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#physical-design).
@@ -54,14 +54,14 @@ network types and optimization algorithms. Optimized logic networks can then be 
 design algorithms. Alternatively, logic synthesis can be performed in external tools and resulting
 Verilog/AIGER/BLIF/... files can be parsed by *fiction*.
 
-### Supported Technologies
+## Supported Technologies
 
 Physical design in *fiction* can be performed technology-independent. Only if resulted layouts are to be physically,
 simulated, a specific technology implementation is required. To this end, *fiction* supports various potential FCN
 implementations together with gate libraries to compile gate-level layout abstractions down to the cell level.
 Additionally, output formats for state-of-the-art physical simulator engines are supported.
 
-#### Quantum-dot Cellular Automata (QCA)
+### Quantum-dot Cellular Automata (QCA)
 
 Gate libraries:
 
@@ -70,17 +70,17 @@ Gate libraries:
 File formats:
 
 - `*.qca` for [QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/)
-- `*.fqca` for [QCA-STACK](https://github.com/wlambooy)
+- `*.fqca` for [QCA-STACK](https://github.com/wlambooy/QCA-STACK)
 - `*.svg` for visual representation
 
 Many thanks to Frank Sill Torres for his support with the QCADesigner format, to Willem Lambooy for his support with the
 QCA-STACK format, and to Gregor Kuhn for implementing the SVG writer!
 
-#### in-plane Nanomagnet Logic (iNML)
+### in-plane Nanomagnet Logic (iNML)
 
 Gate libraries:
 
-- [ToPoliNano](https://topolinano.polito.it/)
+- [ToPoliNano](https://topolinano.polito.it/supported-technologies/)
 
 File formats:
 
@@ -88,7 +88,7 @@ File formats:
 
 Many thanks to Umberto Garlando and Fabrizio Riente for their support!
 
-#### Silicon Dangling Bond (SiDB)
+### Silicon Dangling Bond (SiDB)
 
 File formats:
 
@@ -96,7 +96,7 @@ File formats:
 
 Many thanks to Samuel Sze Hang Ng for his support!
 
-### Clocking Schemes
+## Clocking Schemes
 
 There are highly regular clocking schemes proposed for FCN technologies which can be used as a floor plan for physical
 design. However, sometimes it can make sense to have more degree of freedom and assign clock numbers on the fly. That is
@@ -120,7 +120,7 @@ Built-in schemes are
 
 plus the mentioned irregular open clocking that works via a clock map instead of a regular extrapolated cutout.
 
-### Wire Crossings
+## Wire Crossings
 
 <img src="docs/_static/cross.png" alt="Second layer crossing" align="left" width="200"/>
 
@@ -132,7 +132,7 @@ However, note that it is to be interpreted as the concept of crossings and could
 
 Wires are only allowed to cross other wires! Wires crossing gates is considered to lead to unstable signals.
 
-### Gate Pins vs. Designated I/Os
+## Gate Pins vs. Designated I/Os
 
 <img src="docs/_static/io.png" alt="Input pin and cell output" align="right" width="200"/>
 
@@ -140,7 +140,7 @@ In the literature, both is seen: having input cells (pins) directly located in t
 I/O elements which are located outside of gates. This distinction only makes sense on the gate-level and *fiction*
 supports both approaches and offers usage in the implemented physical design algorithms.
 
-### Multi Wires
+## Multi Wires
 
 <img src="docs/_static/multi.png" alt="Multi wires" align="left" width="200"/>
 
@@ -149,7 +149,7 @@ cell-level layouts allow for precise control over cell placement and can, thus, 
 clock zone. Physical simulation can give an indication whether the built structures are implementing the intended
 functionality.
 
-### Synchronization Elements
+## Synchronization Elements
 
 <img src="docs/_static/se.png" alt="Synchronization element" align="right" width="150"/>
 
@@ -159,7 +159,7 @@ tiles, [synchronization elements](https://ieeexplore.ieee.org/document/8626294) 
 multiple clock cycles. These artificial latches are able to feed information to any other clock number, but their usage
 reduces the overall throughput of the layout. In return, long wire detours for signal synchronization can be prevented.
 
-### Cost Metrics
+## Cost Metrics
 
 Designed layouts can be evaluated with regard to several cost functions. The following metrics are currently
 implemented:
