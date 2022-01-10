@@ -98,6 +98,11 @@ Furthermore, it is possible to generate random ``network``\ s by using command `
 inputs can be specified (``-n``) as well as the gate count excluding inverters and fan-outs (``-g``). A random seed (``-s``)
 allows for reproducibility as it will also be used as the network``\ s name.
 
+However, most importantly, a technology mapping command ``map`` is available that rewrites any ``network`` type as a
+topology network that exclusively uses gates from a given set but computes the same Boolean function.
+For instance, ``map -oxi`` produces a logic network that only uses OR gates, XOR gates, and inverters. This is extremely
+helpful for gate libraries that do not support certain gate types.
+
 Structural manipulation
 #######################
 
@@ -120,9 +125,7 @@ Find some information and parameters about them below.
 Generated FCN gate layouts are also saved in stores. Entering ``store -g`` shows a list of all gate layouts available.
 Statistical information about store elements can be printed using command ``ps -g`` and could produce the following output::
 
-
     c17 (2DDWAVE) - 5 × 7, I/O: 5/2, gates: 8, wires: 28, CP: 11, TP: 1/1, sync. elems.: 0
-
 
 This displays (from left to right) the name of the layout, its clocking scheme, the aspect ratio in tiles, the number
 of primary inputs and outputs, the number of gate tiles, wire elements, the length of the critical path,
