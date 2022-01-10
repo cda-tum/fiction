@@ -15,7 +15,7 @@ technologies, and cell types, these can easily be compiled down to any desired F
 The *fiction* framework is academic software and aims at researchers and developers in the FCN domain who want to obtain
 cell-accurate circuit layouts from logical specifications or who want to implement their own physical design algorithms.
 
-For these use cases, *fiction* provides a :ref:`header-only <header-only>` library that provides data types and algorithms
+For these use cases, *fiction* provides a :ref:`header-only library <header-only>` that provides data types and algorithms
 for recurring tasks, e.g., logic network and layout types on different abstraction levels, clocking schemes, gate libraries,
 placement, routing, clocking, and verification algorithms, etc. Additionally, *fiction* comes with an ABC-like
 :ref:`CLI tool <cli>` that allows quick access to its core functionality.

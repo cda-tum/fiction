@@ -67,3 +67,20 @@ Unit tests can be built with CMake via a respective flag on the command line and
   cmake -DFICTION_TEST=ON ..
   make
   ctest
+
+Building experiments
+--------------------
+
+The ``experiments`` folder provides a playground for quickly scripting some ideas by plugging algorithms together.
+A ``fictionlib_demo.cpp`` demonstrates the usage. Any ``*.cpp`` file that is placed in that folder is automatically
+linked against *fiction* and compiled as a stand-alone binary using the following commands::
+
+  mkdir build
+  cd build
+  cmake -DFICTION_EXPERIMENTS=ON ..
+  make
+
+Uninstall
+---------
+
+Since all tools were built locally, simply delete the git folder cloned initially to uninstall this project.
