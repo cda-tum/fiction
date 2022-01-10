@@ -39,7 +39,7 @@ Furthermore, if you use any of the physical design algorithms :ref:`exact <exact
 
 .. code-block:: tex
 
-    @inproceedings{walter2019scalable,
+    @inproceedings{walter2019ortho,
       title={{Scalable Design for Field-coupled Nanocomputing Circuits}},
       author={Walter, Marcel and Wille, Robert and Sill Torres, Frank and Gro{\ss}e, Daniel and Drechsler, Rolf},
       booktitle={Asia and South Pacific Design Automation Conference},
@@ -50,7 +50,7 @@ Furthermore, if you use any of the physical design algorithms :ref:`exact <exact
 
 .. code-block:: tex
 
-    @inproceedings{walter2021one,
+    @inproceedings{walter2021onepass,
       title={{One-pass Synthesis for Field-coupled Nanocomputing Technologies}},
       author={Walter, Marcel and Haaswijk, W. and Wille, Robert and Sill Torres, Frank and Drechsler, Rolf},
       booktitle={Asia and South Pacific Design Automation Conference},
@@ -61,7 +61,7 @@ Furthermore, if you use any of the physical design algorithms :ref:`exact <exact
 
 .. code-block:: tex
 
-    @inproceedings{walter2020verify,
+    @inproceedings{walter2020equiv,
       title={{Verification for Field-coupled Nanocomputing Circuits}},
       author={Walter, Marcel and Wille, Robert and Sill Torres, Frank and D. Gro{\ss}e and Drechsler, Rolf},
       booktitle={Design Automation Conference},

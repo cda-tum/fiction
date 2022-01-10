@@ -6,6 +6,7 @@ Let there be a fiction
 .. toctree::
    :maxdepth: 2
 
+   about.rst
    getting_started.rst
    acknowledgments.rst
    cli.rst
