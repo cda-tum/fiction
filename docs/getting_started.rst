@@ -16,15 +16,14 @@ them automatically. Should the repository have been cloned before, the commands:
 
   git submodule update --init --recursive
 
-will fetch the latest version of all external modules used.
-
-Afterwards, *fiction* is ready to be built.
+will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++17 compiler are required.
 
 
 Using *fiction* as a stand-alone CLI tool
 -----------------------------------------
 
-It is possible to compile *fiction* as a stand-alone CLI tool.
+It is possible to compile *fiction* as a stand-alone CLI tool. For auto-completion in the CLI, it is recommended but not
+required to install the ``libreadline-dev`` package.
 The build system CMake can be invoked from the command line as follows::
 
   mkdir build
@@ -32,13 +31,18 @@ The build system CMake can be invoked from the command line as follows::
   cmake ..
   make
 
-Several options can be toggled during the build. For a more interactive interface, please refer to ``ccmake`` for a full list of supported customizations.
+Several options can be toggled during the build. For a more interactive interface, please refer to ``ccmake`` for a
+full list of supported customizations.
 
 The CLI tool can then be run using::
 
   cli/fiction
 
 See :ref:`cli` for a full user guide.
+
+
+As an alternative to this build workflow, the CLI tool is also available as an image for a
+`Docker container <https://www.docker.com/>`_. The respective ``Dockerfile`` is available in the base directory.
 
 .. _header-only:
 
@@ -56,6 +60,39 @@ All data types and algorithms provided by *fiction* can be used independently by
    #include <fiction/...>
 
 for each used file. Everything that can safely be used is located inside the ``fiction`` namespace.
+
+
+Enabling dependent functions
+----------------------------
+
+Some functionalities require the presence of third-party dependencies. In the following, it is discussed how to enable
+them.
+
+SMT-based ``exact`` P&R
+#######################
+
+The :ref:`exact placement and routing algorithm <exact>` utilizes the `SMT solver Z3 <https://github.com/Z3Prover/z3>`_.
+Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/master/README-CMake.md>`_ and make sure to call
+``sudo make install`` to install headers, scripts, and the binary.
+
+Finally, before building *fiction*, pass ``-DFICTION_Z3=ON`` to the ``cmake`` call. It should be able to find
+Z3's include path and link against the binary automatically if installed correctly. Otherwise, you can use
+``-DFICTION_Z3_SEARCH_PATHS=<path_to_z3>`` to set a list of locations that are to be searched for the installed solver.
+
+
+SAT-based ``onepass`` synthesis
+###############################
+
+The :ref:`one-pass synthesis algorithm <onepass>` is embedded via the Python3 script
+`Mugen <https://github.com/whaaswijk/mugen>`_ by Winston Haaswijk using `pybind11 <https://github.com/pybind/pybind11>`_.
+It has some further Python dependencies that can be installed via ``pip3``::
+
+    pip3 install python-sat==0.1.6.dev6 wrapt_timeout_decorator graphviz
+
+The Python3 integration is experimental and may cause issues on some systems. It is currently not available on Windows
+due to issues with ``python-sat``. Mugen requires at least Python 3.7!
+
+Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``cmake`` call.
 
 Building tests
 --------------
