@@ -25,6 +25,7 @@ Let there be a *fiction*
 
    layouts/coordinates.rst
    layouts/cartesian_layout.rst
+   layouts/shifted_cartesian_layout.rst
    layouts/hexagonal_layout.rst
    layouts/tile_based_layout.rst
    layouts/clocked_layout.rst

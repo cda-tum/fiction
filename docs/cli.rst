@@ -243,7 +243,7 @@ As mentioned above, gate-level layouts can be compiled down to cell-level ones i
 is required to do so. The command ``cell`` does exactly this, where the ``-l`` option indicates the gate
 library to use. ``-l 0`` represents `QCA-ONE <https://ieeexplore.ieee.org/document/7538997/>`_ which is the default
 setting, ``-l 1`` refers to `ToPoliNano <https://topolinano.polito.it/>`_'s gate library for iNML circuits. Note that only
-``exact`` can be used in the moment to create layouts mappable to iNML. Suggested parameters are ``exact -xnbs columnar --hex even_column``.
+``exact`` can be used in the moment to create layouts mappable to iNML. Suggested parameters are ``exact -xnbs columnar --hex even_column_hex``.
 Cell-based layouts are also saved in stores which can be accessed by typing ``store -c``. Due to significantly larger size of
 cell layouts compared to gate layouts, the ``print -c`` command to write layouts to the terminal should be used
 carefully. See :ref:`SVG export<command show>` instead.

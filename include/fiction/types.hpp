@@ -83,19 +83,19 @@ using cart_gate_clk_lyt = gate_level_layout<
 using cart_gate_clk_lyt_ptr = std::shared_ptr<cart_gate_clk_lyt>;
 
 using hex_odd_row_gate_clk_lyt =
-    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row>>>>;
+    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>>;
 using hex_odd_row_gate_clk_lyt_ptr = std::shared_ptr<hex_odd_row_gate_clk_lyt>;
 
 using hex_even_row_gate_clk_lyt =
-    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row>>>>;
+    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>>;
 using hex_even_row_gate_clk_lyt_ptr = std::shared_ptr<hex_even_row_gate_clk_lyt>;
 
 using hex_odd_col_gate_clk_lyt =
-    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column>>>>;
+    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>>;
 using hex_odd_col_gate_clk_lyt_ptr = std::shared_ptr<hex_odd_col_gate_clk_lyt>;
 
 using hex_even_col_gate_clk_lyt =
-    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column>>>>;
+    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>>;
 using hex_even_col_gate_clk_lyt_ptr = std::shared_ptr<hex_even_col_gate_clk_lyt>;
 
 using gate_layout_t = std::variant<cart_gate_clk_lyt_ptr, hex_odd_row_gate_clk_lyt_ptr, hex_even_row_gate_clk_lyt_ptr,

@@ -533,7 +533,7 @@ TEST_CASE("3-phase 2DDWaveHex", "[clocking-scheme]")
 {
     SECTION("odd row")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row>>;
+        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>;
 
         const auto twoddwave_hex_3 = twoddwave_hex_clocking<clk_lyt>(num_clks::THREE);
 
@@ -620,7 +620,7 @@ TEST_CASE("3-phase 2DDWaveHex", "[clocking-scheme]")
     }
     SECTION("even row")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_row>>;
+        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>;
 
         const auto twoddwave_hex_3 = twoddwave_hex_clocking<clk_lyt>(num_clks::THREE);
 
@@ -707,7 +707,7 @@ TEST_CASE("3-phase 2DDWaveHex", "[clocking-scheme]")
     }
     SECTION("odd column")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column>>;
+        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>;
 
         const auto twoddwave_hex_3 = twoddwave_hex_clocking<clk_lyt>(num_clks::THREE);
 
@@ -794,7 +794,7 @@ TEST_CASE("3-phase 2DDWaveHex", "[clocking-scheme]")
     }
     SECTION("even column")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_column>>;
+        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>;
 
         const auto twoddwave_hex_3 = twoddwave_hex_clocking<clk_lyt>(num_clks::THREE);
 
@@ -885,7 +885,7 @@ TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
 {
     SECTION("odd row")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row>>;
+        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>;
 
         const auto twoddwave_hex_4 = twoddwave_hex_clocking<clk_lyt>(num_clks::FOUR);
 
@@ -1028,7 +1028,7 @@ TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
     }
     SECTION("even row")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_row>>;
+        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>;
 
         const auto twoddwave_hex_4 = twoddwave_hex_clocking<clk_lyt>(num_clks::FOUR);
 
@@ -1171,7 +1171,7 @@ TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
     }
     SECTION("odd column")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column>>;
+        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>;
 
         const auto twoddwave_hex_4 = twoddwave_hex_clocking<clk_lyt>(num_clks::FOUR);
 
@@ -1314,7 +1314,7 @@ TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
     }
     SECTION("even column")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_column>>;
+        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>;
 
         const auto twoddwave_hex_4 = twoddwave_hex_clocking<clk_lyt>(num_clks::FOUR);
 
