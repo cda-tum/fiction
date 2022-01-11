@@ -4,7 +4,7 @@
 [![macOS CI](https://github.com/marcelwa/fiction/actions/workflows/macos.yml/badge.svg)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
 [![Windows CI](https://github.com/marcelwa/fiction/actions/workflows/windows.yml/badge.svg)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
 [![codecov](https://codecov.io/gh/marcelwa/fiction/branch/v0.4.0/graph/badge.svg?token=SUPC5N6KFU)](https://codecov.io/gh/marcelwa/fiction)
-[![Documentation Status](https://readthedocs.org/projects/fiction/badge/?version=rtfd)](https://fiction.readthedocs.io/en/rtfd/?badge=rtfd)
+[![Documentation Status](https://readthedocs.org/projects/fiction/badge/?version=latest)](https://fiction.readthedocs.io/en/latest/?badge=latest)
 
 This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
 in C++17 using the [EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). *fiction* focuses on the
