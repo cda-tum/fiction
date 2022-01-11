@@ -26,7 +26,11 @@
 
 namespace fiction
 {
-
+/**
+ * Helper class to read directories of mockturtle networks of certain types.
+ *
+ * @tparam NtkPtr Pointer type to a logic network.
+ */
 template <typename NtkPtr>
 class network_reader
 {

@@ -1,22 +1,11 @@
 Getting started
 ===============
 
-This code base provides a framework for **fi**\ eld-**c**\ oupled **t**\ echnology-**i**\ ndependent **o**\ pen **n**\ anocomputing
-in C++17 using the `EPFL Logic Synthesis Libraries <https://github.com/lsils/lstools-showcase>`_. Thereby, *fiction* focuses on the
-logic synthesis, placement, routing, clocking, and verification of emerging nanotechnologies. As a promising class of post-CMOS technologies,
-`Field-coupled Nanocomputing (FCN) <https://www.springer.com/de/book/9783662437216>`_ devices like Quantum-dot Cellular
-Automata (QCA) in manifold forms (e.g. atomic or molecular), Nanomagnet Logic (NML) devices, Silicon Dangling Bonds (SiDBs), and many more, allow for high computing performance with tremendously low power consumption without the flow of electric current.
-
-With ongoing research in the field, it is unclear, which technology will eventually be competing with CMOS.
-To be as generic as possible, *fiction* is able to perform physical design tasks for FCN circuit layouts on a data
-structure that abstracts from a particular technology or cell design. Using an extensible set of gate libraries,
-technologies, and cell types, these can easily be compiled down to any desired FCN technology.
+The *fiction* framework provides stand-alone CLI tool as well as a header-only library that can be used in external projects.
+Both are written in C++17 and are continuously tested on ubuntu, macOS, and Windows with multiple compilers. See the build badges in the README file for more information.
 
 Compilation requirements
 ------------------------
-
-The *fiction* framework provides stand-alone CLI tool as well as a header-only library that can be used in external projects.
-Both are written in C++17 and are continuously tested on ubuntu, macOS, and Windows with multiple compilers. See the build badges in the README file for more information.
 
 The repository should always be cloned recursively with all submodules::
 
@@ -27,15 +16,14 @@ them automatically. Should the repository have been cloned before, the commands:
 
   git submodule update --init --recursive
 
-will fetch the latest version of all external modules used.
-
-Afterwards, *fiction* is ready to be built.
+will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++17 compiler are required.
 
 
 Using *fiction* as a stand-alone CLI tool
 -----------------------------------------
 
-It is possible to compile *fiction* as a stand-alone CLI tool.
+It is possible to compile *fiction* as a stand-alone CLI tool. For auto-completion in the CLI, it is recommended but not
+required to install the ``libreadline-dev`` package.
 The build system CMake can be invoked from the command line as follows::
 
   mkdir build
@@ -43,7 +31,8 @@ The build system CMake can be invoked from the command line as follows::
   cmake ..
   make
 
-Several options can be toggled during the build. For a more interactive interface, please refer to ``ccmake`` for a full list of supported customizations.
+Several options can be toggled during the build. For a more interactive interface, please refer to ``ccmake`` for a
+full list of supported customizations.
 
 The CLI tool can then be run using::
 
@@ -51,16 +40,59 @@ The CLI tool can then be run using::
 
 See :ref:`cli` for a full user guide.
 
+
+As an alternative to this build workflow, the CLI tool is also available as an image for a
+`Docker container <https://www.docker.com/>`_. The respective ``Dockerfile`` is available in the base directory.
+
+.. _header-only:
+
 Using *fiction* as a header-only library
 ----------------------------------------
 
-All data types and algorithms provided by *fiction* can be used independently by simply including its ``include/`` directory into a source build tree and using
+All data types and algorithms provided by *fiction* can be used independently by simply including its ``include/`` directory into a source build tree and using, e.g.,
 
 .. code-block:: c++
 
-  #include <fiction/...>
+   #include <fiction/layouts/cell_level_layout.hpp>
+   #include <fiction/layouts/clocking_scheme.hpp>
+   #include <fiction/technology/qca_one_library.hpp>
+   #include <fiction/io/write_qca_layout.hpp>
+   #include <fiction/...>
 
 for each used file. Everything that can safely be used is located inside the ``fiction`` namespace.
+
+
+Enabling dependent functions
+----------------------------
+
+Some functionalities require the presence of third-party dependencies. In the following, it is discussed how to enable
+them.
+
+SMT-based ``exact`` P&R
+#######################
+
+The :ref:`exact placement and routing algorithm <exact>` utilizes the `SMT solver Z3 <https://github.com/Z3Prover/z3>`_.
+Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/master/README-CMake.md>`_ and make sure to call
+``sudo make install`` to install headers, scripts, and the binary.
+
+Finally, before building *fiction*, pass ``-DFICTION_Z3=ON`` to the ``cmake`` call. It should be able to find
+Z3's include path and link against the binary automatically if installed correctly. Otherwise, you can use
+``-DFICTION_Z3_SEARCH_PATHS=<path_to_z3>`` to set a list of locations that are to be searched for the installed solver.
+
+
+SAT-based ``onepass`` synthesis
+###############################
+
+The :ref:`one-pass synthesis algorithm <onepass>` is embedded via the Python3 script
+`Mugen <https://github.com/whaaswijk/mugen>`_ by Winston Haaswijk using `pybind11 <https://github.com/pybind/pybind11>`_.
+It has some further Python dependencies that can be installed via ``pip3``::
+
+    pip3 install python-sat==0.1.6.dev6 wrapt_timeout_decorator graphviz
+
+The Python3 integration is experimental and may cause issues on some systems. It is currently not available on Windows
+due to issues with ``python-sat``. Mugen requires at least Python 3.7!
+
+Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``cmake`` call.
 
 Building tests
 --------------
@@ -72,3 +104,20 @@ Unit tests can be built with CMake via a respective flag on the command line and
   cmake -DFICTION_TEST=ON ..
   make
   ctest
+
+Building experiments
+--------------------
+
+The ``experiments`` folder provides a playground for quickly scripting some ideas by plugging algorithms together.
+A ``fictionlib_demo.cpp`` demonstrates the usage. Any ``*.cpp`` file that is placed in that folder is automatically
+linked against *fiction* and compiled as a stand-alone binary using the following commands::
+
+  mkdir build
+  cd build
+  cmake -DFICTION_EXPERIMENTS=ON ..
+  make
+
+Uninstall
+---------
+
+Since all tools were built locally, simply delete the git folder cloned initially to uninstall this project.

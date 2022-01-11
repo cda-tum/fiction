@@ -1,47 +1,63 @@
 .. fiction documentation master file
 
-Welcome to fiction's documentation!
-======================================
+Let there be a *fiction*
+========================
 
 .. toctree::
    :maxdepth: 2
 
-   getting_started
-   acknowledgments
-   cli
-..
-   changelog
-   publications
+   about.rst
+   getting_started.rst
+   acknowledgments.rst
+   cli.rst
+   changelog.rst
+   publications.rst
 
-   .. toctree::
+.. toctree::
+   :maxdepth: 2
+   :caption: Networks
+
+   networks/topology_network.rst
+
+.. toctree::
    :maxdepth: 2
    :caption: Layouts
 
-   layouts/*
+   layouts/coordinates.rst
+   layouts/cartesian_layout.rst
+   layouts/hexagonal_layout.rst
+   layouts/tile_based_layout.rst
+   layouts/clocked_layout.rst
+   layouts/clocking_scheme.rst
+   layouts/synchronization_element_layout.rst
+   layouts/gate_level_layout.rst
+   layouts/cell_level_layout.rst
 
-   .. toctree::
+.. toctree::
    :maxdepth: 2
-   :glob:
    :caption: Algorithms
 
-   algorithms/*
+   algorithms/algorithms.rst
 
-   .. toctree::
+.. toctree::
    :maxdepth: 2
    :caption: Technology
 
-   technology/*
+   technology/cell_technologies.rst
+   technology/gate_libraries.rst
+   technology/properties.rst
 
-   .. toctree::
+.. toctree::
    :maxdepth: 2
-   :glob:
    :caption: Input/Output
 
-   io/*
+   io/input.rst
+   io/visualization.rst
+   io/physical_simulation.rst
 
-   .. toctree::
+.. toctree::
    :maxdepth: 2
    :glob:
-   :caption: Utilities
+   :caption: Utility
 
-   utils/*
+   utils/utils.rst

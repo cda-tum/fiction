@@ -36,6 +36,8 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
      * that tile. May it be a gate or wires. Rotation and special marks like input and output, const cells etc.
      * are computed additionally.
      *
+     * @tparam Lyt Gate-level layout type.
+     * @param lyt Gate-level layout that hosts tile t.
      * @param t Tile to be realized in QCA-ONE.
      * @return QCA-ONE gate representation of t including I/Os, rotation, const cells, etc.
      */

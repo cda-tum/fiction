@@ -35,6 +35,15 @@ static const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::bla
 
 }  // namespace detail
 
+/**
+ * Writes a simplified 2D representation of a gate-level layout to an output stream.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @param os Output stream to write into.
+ * @param layout The gate-level layout to print.
+ * @param io_color Flag to utilize color escapes for inputs and outputs.
+ * @param clk_color Flag to utilize color escapes for clock zones.
+ */
 template <typename Lyt>
 void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_color = true,
                              const bool clk_color = false) noexcept
@@ -161,7 +170,15 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     // flush stream
     os << std::endl;
 }
-
+/**
+ * Writes a simplified 2D representation of a cell-level layout to an output stream.
+ *
+ * @tparam Lyt Cell-level layout type.
+ * @param os Output stream to write into.
+ * @param layout The cell-level layout to print.
+ * @param io_color Flag to utilize color escapes for inputs and outputs.
+ * @param clk_color Flag to utilize color escapes for clock zones.
+ */
 template <typename Lyt>
 void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_color = true,
                              const bool clk_color = false) noexcept

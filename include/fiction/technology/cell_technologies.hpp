@@ -15,6 +15,9 @@ namespace fiction
  */
 struct qca_technology
 {
+    /**
+     * Possible types of QCA cells.
+     */
     enum cell_type : uint8_t
     {
         /**
@@ -139,6 +142,9 @@ struct qca_technology
  */
 struct inml_technology
 {
+    /**
+     * Possible types of iNML cells.
+     */
     enum cell_type : uint8_t
     {
         /**
@@ -263,22 +269,25 @@ struct inml_technology
  */
 struct sidb_technology
 {
+    /**
+     * Possible types of SiDB cells.
+     */
     enum cell_type : uint8_t
     {
         /**
-         * Symbol used for empty QCA cells.
+         * Symbol used for empty SiDB cells.
          */
         EMPTY = ' ',
         /**
-         * Symbol used for normal QCA cells.
+         * Symbol used for normal SiDB cells.
          */
         NORMAL = 'x',
         /**
-         * Symbol used for input QCA cells.
+         * Symbol used for input SiDB cells.
          */
         INPUT = 'i',
         /**
-         * Symbol used for output QCA cells.
+         * Symbol used for output SiDB cells.
          */
         OUTPUT = 'o'
     };
