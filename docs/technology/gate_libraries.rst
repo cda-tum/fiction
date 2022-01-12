@@ -39,3 +39,12 @@ QCA ONE Gate Library
 .. doxygenclass:: fiction::qca_one_library
    :members:
 
+
+iNML ToPoliNano Library
+-----------------------
+
+**Header:** ``fiction/technology/inml_topolinano_library.hpp``
+
+.. doxygenclass:: fiction::inml_topolinano_library
+   :members:
+
