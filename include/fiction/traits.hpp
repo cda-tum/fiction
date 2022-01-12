@@ -582,6 +582,21 @@ template <class Lyt>
 inline constexpr bool is_cell_level_layout_v = is_cell_level_layout<Lyt>::value;
 #pragma endregion
 
+#pragma region has_foreach_cell
+template <class Lyt, class = void>
+struct has_foreach_cell : std::false_type
+{};
+
+template <class Lyt>
+struct has_foreach_cell<
+    Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_cell(std::declval<void(cell<Lyt>, uint32_t)>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_foreach_cell_v = has_foreach_cell<Lyt>::value;
+#pragma endregion
+
 #pragma region has_set_layout_name
 template <class Ntk, class = void>
 struct has_set_layout_name : std::false_type
