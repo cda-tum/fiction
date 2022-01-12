@@ -138,27 +138,27 @@ template <typename OffsetCoordinateType, typename ShiftedCartesianCoordinateSyst
 class shifted_cartesian_layout
         : public hexagonal_layout<
               OffsetCoordinateType,
-              std::conditional<
+              std::conditional_t<
                   std::is_same_v<ShiftedCartesianCoordinateSystem, odd_row_cartesian>, odd_row_hex,
-                  std::conditional<
+                  std::conditional_t<
                       std::is_same_v<ShiftedCartesianCoordinateSystem, even_row_cartesian>, even_row_hex,
-                      std::conditional<
+                      std::conditional_t<
                           std::is_same_v<ShiftedCartesianCoordinateSystem, odd_column_cartesian>, odd_column_hex,
-                          std::conditional<std::is_same_v<ShiftedCartesianCoordinateSystem, even_column_cartesian>,
-                                           even_column_hex, void>>>>,
+                          std::conditional_t<std::is_same_v<ShiftedCartesianCoordinateSystem, even_column_cartesian>,
+                                             even_column_hex, void>>>>,
               cube::coord_t>
 {
   private:
     using HexagonalLayout = hexagonal_layout<
         OffsetCoordinateType,
-        std::conditional<
+        std::conditional_t<
             std::is_same_v<ShiftedCartesianCoordinateSystem, odd_row_cartesian>, odd_row_hex,
-            std::conditional<
+            std::conditional_t<
                 std::is_same_v<ShiftedCartesianCoordinateSystem, even_row_cartesian>, even_row_hex,
-                std::conditional<
+                std::conditional_t<
                     std::is_same_v<ShiftedCartesianCoordinateSystem, odd_column_cartesian>, odd_column_hex,
-                    std::conditional<std::is_same_v<ShiftedCartesianCoordinateSystem, even_column_cartesian>,
-                                     even_column_hex, void>>>>,
+                    std::conditional_t<std::is_same_v<ShiftedCartesianCoordinateSystem, even_column_cartesian>,
+                                       even_column_hex, void>>>>,
         cube::coord_t>;
 
   public:
@@ -183,9 +183,9 @@ class shifted_cartesian_layout
 
   private:
     // intentionally hide members of HexagonalLayout
-    using typename HexagonalLayout::hex_arrangement;
     using HexagonalLayout::to_cube_coordinate;
     using HexagonalLayout::to_offset_coordinate;
+    using typename HexagonalLayout::hex_arrangement;
 };
 
 }  // namespace fiction
