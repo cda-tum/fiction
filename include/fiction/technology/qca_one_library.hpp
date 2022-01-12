@@ -12,6 +12,7 @@
 #include "fiction/utils/array_utils.hpp"
 
 #include <fmt/format.h>
+#include <mockturtle/traits.hpp>
 
 #include <unordered_map>
 #include <vector>
@@ -20,11 +21,11 @@ namespace fiction
 {
 
 /**
- * A concrete FCN gate library based on QCA-ONE proposed in "A Methodology for Standard Cell Design for QCA" by Dayane
+ * A concrete FCN gate library based on QCA ONE proposed in "A Methodology for Standard Cell Design for QCA" by Dayane
  * Alfenas Reis, Caio Araújo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba V. Neto, and Frank Sill Torres in
- * IEEE International Symposium on Circuits and Systems, 2016. QCA-ONE was originally proposed for the USE clocking
- * scheme. The version used here is an extension to the original QCA-ONE by also theoretically allowing multiple wires
- * in the same tile. Furthermore, it can be used for a range of clocking schemes. Tiles in QCA-ONE are 5 x 5 QCA cells.
+ * IEEE International Symposium on Circuits and Systems, 2016. QCA ONE was originally proposed for the USE clocking
+ * scheme. The version used here is an extension to the original QCA ONE by also theoretically allowing multiple wires
+ * in the same tile. Furthermore, it can be used for a range of clocking schemes. Tiles in QCA ONE are 5 x 5 QCA cells.
  */
 class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 {
@@ -38,8 +39,8 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
      *
      * @tparam Lyt Gate-level layout type.
      * @param lyt Gate-level layout that hosts tile t.
-     * @param t Tile to be realized in QCA-ONE.
-     * @return QCA-ONE gate representation of t including I/Os, rotation, const cells, etc.
+     * @param t Tile to be realized in QCA ONE.
+     * @return QCA ONE gate representation of t including I/Os, rotation, const cells, etc.
      */
     template <typename Lyt>
     [[nodiscard]] static fcn_gate set_up_gate(const Lyt& lyt, const tile<Lyt>& t)
@@ -171,87 +172,126 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
     // ************************** Gates ***************************
     // ************************************************************
 
-    static constexpr const fcn_gate straight_inverter{cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                                                {' ', 'x', 'x', 'x', ' '},
-                                                                                {' ', 'x', ' ', 'x', ' '},
-                                                                                {' ', ' ', 'x', ' ', ' '},
-                                                                                {' ', ' ', 'x', ' ', ' '}}})};
+    static constexpr const fcn_gate straight_inverter{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', 'x', 'x', 'x', ' '},
+        {' ', 'x', ' ', 'x', ' '},
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '}
+    }})};
 
-    static constexpr const fcn_gate bent_inverter{cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                                            {' ', ' ', 'x', ' ', ' '},
-                                                                            {' ', ' ', ' ', 'x', 'x'},
-                                                                            {' ', ' ', ' ', ' ', ' '},
-                                                                            {' ', ' ', ' ', ' ', ' '}}})};
+    static constexpr const fcn_gate bent_inverter{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', ' ', 'x', 'x'},
+        {' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' '}
+    }})};
 
-    static constexpr const fcn_gate conjunction{cell_list_to_gate<char>({{{' ', ' ', '0', ' ', ' '},
-                                                                          {' ', ' ', 'x', ' ', ' '},
-                                                                          {'x', 'x', 'x', 'x', 'x'},
-                                                                          {' ', ' ', 'x', ' ', ' '},
-                                                                          {' ', ' ', 'x', ' ', ' '}}})};
+    static constexpr const fcn_gate conjunction{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', '0', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '},
+        {'x', 'x', 'x', 'x', 'x'},
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '}
+    }})};
 
-    static constexpr const fcn_gate disjunction{cell_list_to_gate<char>({{{' ', ' ', '1', ' ', ' '},
-                                                                          {' ', ' ', 'x', ' ', ' '},
-                                                                          {'x', 'x', 'x', 'x', 'x'},
-                                                                          {' ', ' ', 'x', ' ', ' '},
-                                                                          {' ', ' ', 'x', ' ', ' '}}})};
+    static constexpr const fcn_gate disjunction{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', '1', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '},
+        {'x', 'x', 'x', 'x', 'x'},
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '}
+    }})};
 
-    static constexpr const fcn_gate majority{cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                                       {' ', ' ', 'x', ' ', ' '},
-                                                                       {'x', 'x', 'x', 'x', 'x'},
-                                                                       {' ', ' ', 'x', ' ', ' '},
-                                                                       {' ', ' ', 'x', ' ', ' '}}})};
+    static constexpr const fcn_gate majority{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '},
+        {'x', 'x', 'x', 'x', 'x'},
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '}
+    }})};
 
-    static constexpr const fcn_gate fan_out_1_2{cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', ' '},
-                                                                          {' ', ' ', ' ', ' ', ' '},
-                                                                          {'x', 'x', 'x', 'x', 'x'},
-                                                                          {' ', ' ', 'x', ' ', ' '},
-                                                                          {' ', ' ', 'x', ' ', ' '}}})};
+    static constexpr const fcn_gate fan_out_1_2{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' '},
+        {'x', 'x', 'x', 'x', 'x'},
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '}
+    }})};
 
-    static constexpr const fcn_gate fan_out_1_3{cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                                          {' ', ' ', 'x', ' ', ' '},
-                                                                          {'x', 'x', 'x', 'x', 'x'},
-                                                                          {' ', ' ', 'x', ' ', ' '},
-                                                                          {' ', ' ', 'x', ' ', ' '}}})};
+    static constexpr const fcn_gate fan_out_1_3{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '},
+        {'x', 'x', 'x', 'x', 'x'},
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '}
+    }})};
 
     // ************************************************************
     // ************************** Wires ***************************
     // ************************************************************
 
-    static constexpr const fcn_gate primary_input_port{cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                                                 {' ', ' ', 'x', ' ', ' '},
-                                                                                 {' ', ' ', 'i', ' ', ' '},
-                                                                                 {' ', ' ', ' ', ' ', ' '},
-                                                                                 {' ', ' ', ' ', ' ', ' '}}})};
+    static constexpr const fcn_gate primary_input_port{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'i', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' '}
+    }})};
 
-    static constexpr const fcn_gate primary_output_port{cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                                                  {' ', ' ', 'x', ' ', ' '},
-                                                                                  {' ', ' ', 'o', ' ', ' '},
-                                                                                  {' ', ' ', ' ', ' ', ' '},
-                                                                                  {' ', ' ', ' ', ' ', ' '}}})};
+    static constexpr const fcn_gate primary_output_port{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'o', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' '}
+    }})};
 
-    static constexpr const fcn_gate center_wire{cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                                          {' ', ' ', 'x', ' ', ' '},
-                                                                          {' ', ' ', 'x', ' ', ' '},
-                                                                          {' ', ' ', 'x', ' ', ' '},
-                                                                          {' ', ' ', 'x', ' ', ' '}}})};
+    static constexpr const fcn_gate center_wire{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '}
+    }})};
 
-    static constexpr const fcn_gate inner_side_wire{cell_list_to_gate<char>({{{' ', ' ', ' ', 'x', ' '},
-                                                                              {' ', ' ', ' ', 'x', ' '},
-                                                                              {' ', ' ', ' ', 'x', ' '},
-                                                                              {' ', ' ', ' ', 'x', ' '},
-                                                                              {' ', ' ', ' ', 'x', ' '}}})};
+    static constexpr const fcn_gate inner_side_wire{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', 'x', ' '},
+        {' ', ' ', ' ', 'x', ' '},
+        {' ', ' ', ' ', 'x', ' '},
+        {' ', ' ', ' ', 'x', ' '},
+        {' ', ' ', ' ', 'x', ' '}
+    }})};
 
-    static constexpr const fcn_gate outer_side_wire{cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', 'x'},
-                                                                              {' ', ' ', ' ', ' ', 'x'},
-                                                                              {' ', ' ', ' ', ' ', 'x'},
-                                                                              {' ', ' ', ' ', ' ', 'x'},
-                                                                              {' ', ' ', ' ', ' ', 'x'}}})};
+    static constexpr const fcn_gate outer_side_wire{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'x'},
+        {' ', ' ', ' ', ' ', 'x'},
+        {' ', ' ', ' ', ' ', 'x'},
+        {' ', ' ', ' ', ' ', 'x'},
+        {' ', ' ', ' ', ' ', 'x'}
+    }})};
 
-    static constexpr const fcn_gate center_bent_wire{cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                                               {' ', ' ', 'x', ' ', ' '},
-                                                                               {' ', ' ', 'x', 'x', 'x'},
-                                                                               {' ', ' ', ' ', ' ', ' '},
-                                                                               {' ', ' ', ' ', ' ', ' '}}})};
+    static constexpr const fcn_gate center_bent_wire{cell_list_to_gate<char>(
+    {{
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', ' ', ' '},
+        {' ', ' ', 'x', 'x', 'x'},
+        {' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' '}
+    }})};
 
     static constexpr const fcn_gate inner_center_to_inner_center_bent_wire{
         cell_list_to_gate<char>({{{' ', ' ', ' ', 'x', ' '},

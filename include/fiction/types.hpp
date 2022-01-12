@@ -10,6 +10,7 @@
 #include "fiction/layouts/clocked_layout.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/layouts/synchronization_element_layout.hpp"
 #include "fiction/layouts/tile_based_layout.hpp"
 #include "fiction/networks/topology_network.hpp"
@@ -82,6 +83,22 @@ using cart_gate_clk_lyt = gate_level_layout<
     synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>>;
 using cart_gate_clk_lyt_ptr = std::shared_ptr<cart_gate_clk_lyt>;
 
+using cart_odd_row_gate_clk_lyt =
+    gate_level_layout<clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_row_cartesian>>>>;
+using cart_odd_row_gate_clk_lyt_ptr = std::shared_ptr<cart_odd_row_gate_clk_lyt>;
+
+using cart_even_row_gate_clk_lyt = gate_level_layout<
+    clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, even_row_cartesian>>>>;
+using cart_even_row_gate_clk_lyt_ptr = std::shared_ptr<cart_even_row_gate_clk_lyt>;
+
+using cart_odd_col_gate_clk_lyt = gate_level_layout<
+    clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_column_cartesian>>>>;
+using cart_odd_col_gate_clk_lyt_ptr = std::shared_ptr<cart_odd_col_gate_clk_lyt>;
+
+using cart_even_col_gate_clk_lyt = gate_level_layout<
+    clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, even_column_cartesian>>>>;
+using cart_even_col_gate_clk_lyt_ptr = std::shared_ptr<cart_even_col_gate_clk_lyt>;
+
 using hex_odd_row_gate_clk_lyt =
     gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>>;
 using hex_odd_row_gate_clk_lyt_ptr = std::shared_ptr<hex_odd_row_gate_clk_lyt>;
@@ -98,8 +115,10 @@ using hex_even_col_gate_clk_lyt =
     gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>>;
 using hex_even_col_gate_clk_lyt_ptr = std::shared_ptr<hex_even_col_gate_clk_lyt>;
 
-using gate_layout_t = std::variant<cart_gate_clk_lyt_ptr, hex_odd_row_gate_clk_lyt_ptr, hex_even_row_gate_clk_lyt_ptr,
-                                   hex_odd_col_gate_clk_lyt_ptr, hex_even_col_gate_clk_lyt_ptr>;
+using gate_layout_t =
+    std::variant<cart_gate_clk_lyt_ptr, cart_odd_row_gate_clk_lyt_ptr, cart_even_row_gate_clk_lyt_ptr,
+                 cart_odd_col_gate_clk_lyt_ptr, cart_even_col_gate_clk_lyt_ptr, hex_odd_row_gate_clk_lyt_ptr,
+                 hex_even_row_gate_clk_lyt_ptr, hex_odd_col_gate_clk_lyt_ptr, hex_even_col_gate_clk_lyt_ptr>;
 
 /**
  * FCN technologies.

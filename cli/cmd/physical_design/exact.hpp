@@ -111,16 +111,18 @@ class exact_command : public command
             }
         }
 
+        // convert timeout entered in seconds to milliseconds
+        ps.timeout *= 1000;
+
         // target technology constraints
         if (this->is_set("topolinano"))
         {
             ps.technology_specifics = fiction::technology_constraints::TOPOLINANO;
+
+            // shifted Cartesian layout
+            exact_physical_design<fiction::cart_odd_col_gate_clk_lyt>();
         }
-
-        // convert timeout entered in seconds to milliseconds
-        ps.timeout *= 1000;
-
-        if (is_set("hex"))
+        else if (is_set("hex"))  // hexagonal layout
         {
             if (hexagonal_tile_shift == "odd_row")
             {
