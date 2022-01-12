@@ -184,8 +184,8 @@ class shifted_cartesian_layout
   private:
     // intentionally hide members of HexagonalLayout
     using typename HexagonalLayout::hex_arrangement;
-    using typename HexagonalLayout::to_cube_coordinate;
-    using typename HexagonalLayout::to_offset_coordinate;
+    using HexagonalLayout::to_cube_coordinate;
+    using HexagonalLayout::to_offset_coordinate;
 };
 
 }  // namespace fiction
