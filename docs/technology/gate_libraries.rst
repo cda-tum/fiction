@@ -31,8 +31,8 @@ Abstract Gate Library
 .. doxygenstruct:: fiction::port_list
    :members:
 
-QCA ONE Gate Library
---------------------
+QCA ONE Library
+---------------
 
 **Header:** ``fiction/technology/qca_one_library.hpp``
 
