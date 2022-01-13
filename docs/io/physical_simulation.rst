@@ -29,8 +29,8 @@ ToPoliNano & MagCAD
 
 **Header:** ``fiction/io/write_qcc_layout.hpp``
 
-.. doxygenfunction:: fiction::void write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params ps = {})
-.. doxygenfunction:: fiction::void write_qcc_layout(const Lyt& lyt, const std::string& filename, write_qcc_layout_params ps = {})
+.. doxygenfunction:: fiction::write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params ps = {})
+.. doxygenfunction:: fiction::write_qcc_layout(const Lyt& lyt, const std::string& filename, write_qcc_layout_params ps = {})
 
 SiQAD
 #####
