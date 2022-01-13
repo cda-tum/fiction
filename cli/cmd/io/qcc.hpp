@@ -5,12 +5,18 @@
 #ifndef FICTION_CMD_QCC_HPP
 #define FICTION_CMD_QCC_HPP
 
-#include "fcn_cell_layout.h"
-#include "qcc_writer.h"
+#include <fiction/io/write_qcc_layout.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
+#include <ostream>
+#include <string>
+#include <type_traits>
+#include <variant>
 
 namespace alice
 {
@@ -33,7 +39,8 @@ class qcc_command : public command
                        "perform physical simulations.")
     {
         add_option("filename", filename, "QCC file name");
-        add_flag("-c,--component_name", component_name, "Use given file name as the component's identifier");
+        add_flag("-c,--component_name", ps.use_filename_as_component_name,
+                 "Use given file name as the component's identifier");
     }
 
   protected:
@@ -42,41 +49,63 @@ class qcc_command : public command
      */
     void execute() override
     {
-        auto& s = store<fcn_cell_layout_ptr>();
+        auto& s = store<fiction::cell_layout_t>();
 
         // error case: empty cell layout store
         if (s.empty())
         {
             env->out() << "[w] no cell layout in store" << std::endl;
-            reset_flags();
+
+            ps = {};
             return;
         }
 
-        auto fcl = s.current();
-        if (auto tech = fcl->get_technology(); tech != fcn::technology::INML)
+        const auto get_name = [](auto&& lyt_ptr) -> std::string { return lyt_ptr->get_layout_name(); };
+
+        const auto write_qcc = [this, &get_name](auto&& lyt_ptr)
         {
-            env->out() << "[w] " << fcl->get_name() << "'s cell technology is not iNML but " << tech << std::endl;
-            reset_flags();
-            return;
-        }
+            using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
+
+            if constexpr (std::is_same_v<fiction::technology<Lyt>, fiction::inml_technology>)
+            {
+                fiction::write_qcc_layout(*lyt_ptr, filename, ps);
+            }
+            else
+            {
+                env->out() << fmt::format("[e] {}'s cell technology is not iNML but {}", get_name(lyt_ptr),
+                                          fiction::tech_impl_name<fiction::technology<Lyt>>)
+                           << std::endl;
+            }
+        };
+
+        const auto& lyt = s.current();
 
         // error case: do not override directories
-        if (boost::filesystem::is_directory(filename))
+        if (std::filesystem::is_directory(filename))
         {
             env->out() << "[e] cannot override a directory" << std::endl;
-            reset_flags();
+
+            ps = {};
             return;
         }
-        // if filename was empty or not given, use stored layout name
-        if (filename.empty())
-            filename = fcl->get_name();
+        // if filename was not given, use stored layout name
+        if (!is_set("filename"))
+        {
+            filename = std::visit(get_name, lyt);
+        }
         // add .qca file extension if necessary
-        if (boost::filesystem::extension(filename) != ".qcc")
+        if (std::filesystem::path(filename).extension() != ".qcc")
+        {
             filename += ".qcc";
+        }
 
         try
         {
-            qcc::write(std::move(fcl), filename, component_name);
+            std::visit(write_qcc, lyt);
+        }
+        catch (const std::ofstream::failure& e)
+        {
+            env->out() << fmt::format("[e] {}", e.what()) << std::endl;
         }
         catch (const std::invalid_argument& e)
         {
@@ -84,11 +113,10 @@ class qcc_command : public command
         }
         catch (...)
         {
-            env->out() << "[e] an error occurredopd while the file was being written; it could be corrupted"
-                       << std::endl;
+            env->out() << "[e] an error occurred while the file was being written; it could be corrupted" << std::endl;
         }
 
-        reset_flags();
+        ps = {};
     }
 
   private:
@@ -96,22 +124,12 @@ class qcc_command : public command
      * File name to write the QCC file into.
      */
     std::string filename;
-    /**
-     * Flag to indicate that the component name should be the filename.
-     */
-    bool component_name = false;
 
-    /**
-     * Reset all flags. Necessary for some reason... alice bug?
-     */
-    void reset_flags()
-    {
-        filename       = "";
-        component_name = false;
-    }
+    fiction::write_qcc_layout_params ps{};
 };
 
 ALICE_ADD_COMMAND(qcc, "I/O")
+
 }  // namespace alice
 
 #endif  // FICTION_CMD_QCC_HPP

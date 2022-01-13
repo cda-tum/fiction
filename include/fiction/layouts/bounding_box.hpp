@@ -135,7 +135,7 @@ class bounding_box_2d
      *
      * @return The minimum enclosing coordinate in the associated layout.
      */
-    coordinate<Lyt> get_min() const noexcept
+    [[nodiscard]] coordinate<Lyt> get_min() const noexcept
     {
         return min;
     }
@@ -147,7 +147,7 @@ class bounding_box_2d
      *
      * @return The maximum enclosing coordinate in the associated layout.
      */
-    coordinate<Lyt> get_max() const noexcept
+    [[nodiscard]] coordinate<Lyt> get_max() const noexcept
     {
         return max;
     }
@@ -156,7 +156,7 @@ class bounding_box_2d
      *
      * @return Bounding box size along the x-axis.
      */
-    auto get_x_size() const noexcept
+    [[nodiscard]] auto get_x_size() const noexcept
     {
         return x_size;
     }
@@ -165,7 +165,7 @@ class bounding_box_2d
      *
      * @return Bounding box size along the y-axis.
      */
-    auto get_y_size() const noexcept
+    [[nodiscard]] auto get_y_size() const noexcept
     {
         return y_size;
     }
@@ -178,7 +178,7 @@ class bounding_box_2d
     decltype(min.x) x_size{};
     decltype(min.y) y_size{};
 
-    bool is_empty_coordinate(const coordinate<Lyt>& c) const noexcept
+    [[nodiscard]] bool is_empty_coordinate(const coordinate<Lyt>& c) const noexcept
     {
         static_assert(has_is_empty_tile_v<Lyt> || has_is_empty_cell_v<Lyt>,
                       "Lyt does neither implement the is_empty_tile nor the is_empty_cell function");

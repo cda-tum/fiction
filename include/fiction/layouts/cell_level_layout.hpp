@@ -37,7 +37,7 @@ namespace fiction
  *
  * On the implementation side, this layout distinguishes between cell, cell_type, and cell_mode. A cell is a coordinate,
  * i.e., a position on the layout where a cell_type can be assigned. A cell_type is a concrete variation of a fabricated
- * cell and depdends on the given technology. QCA offers regular and constant cell types while SiDB only provides
+ * cell and depends on the given technology. QCA offers regular and constant cell types while SiDB only provides
  * regular ones. Cell types can also include primary input and output cells if they are being treated differently in a
  * simulator for instance. A cell_mode, on the other hand, is a variation of a cell (thus far only known from
  * QCADesigner) that provides further attributes like its functionality as a crossing or via cell.
@@ -411,6 +411,34 @@ class cell_level_layout : public ClockedLayout
     void foreach_cell_position(Fn&& fn) const
     {
         ClockedLayout::foreach_coordinate(std::forward<Fn>(fn));
+    }
+    /**
+     * Applies a function to all primary input cell positions in the layout.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by
+     * mockturtle::foreach_element_transform.
+     * @param fn Functor to apply to each primary input cell.
+     */
+    template <typename Fn>
+    void foreach_pi(Fn&& fn) const
+    {
+        using IteratorType = decltype(strg->inputs.cbegin());
+        mockturtle::detail::foreach_element_transform<IteratorType, cell>(
+            strg->inputs.cbegin(), strg->inputs.cend(), [](const auto& i) { return static_cast<cell>(i); }, fn);
+    }
+    /**
+     * Applies a function to all primary output cells in the layout.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by
+     * mockturtle::foreach_element_transform.
+     * @param fn Functor to apply to each primary output cell.
+     */
+    template <typename Fn>
+    void foreach_po(Fn&& fn) const
+    {
+        using IteratorType = decltype(strg->outputs.cbegin());
+        mockturtle::detail::foreach_element_transform<IteratorType, cell>(
+            strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return static_cast<cell>(o); }, fn);
     }
 
 #pragma endregion
