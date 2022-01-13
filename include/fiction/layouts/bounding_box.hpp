@@ -7,6 +7,10 @@
 
 #include "fiction/traits.hpp"
 
+// data types cannot properly be converted to bit field types
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+
 namespace fiction
 {
 
@@ -119,6 +123,9 @@ class bounding_box_2d
             if (elem_found)
                 break;
         }
+
+        x_size = max.x - min.x;
+        y_size = max.y - min.y;
     }
     /**
      * Returns the minimum corner of the bounding box.
@@ -144,11 +151,32 @@ class bounding_box_2d
     {
         return max;
     }
+    /**
+     * Returns the horizontal size of the bounding box in layout coordinates.
+     *
+     * @return Bounding box size along the x-axis.
+     */
+    auto get_x_size() const noexcept
+    {
+        return x_size;
+    }
+    /**
+     * Returns the vertical size of the bounding box in layout coordinates.
+     *
+     * @return Bounding box size along the y-axis.
+     */
+    auto get_y_size() const noexcept
+    {
+        return y_size;
+    }
 
   private:
     const Lyt& layout;
 
     coordinate<Lyt> min{0, 0, 0}, max{0, 0, 0};
+
+    decltype(min.x) x_size{};
+    decltype(min.y) y_size{};
 
     bool is_empty_coordinate(const coordinate<Lyt>& c) const noexcept
     {
@@ -171,3 +199,5 @@ class bounding_box_2d
 }  // namespace fiction
 
 #endif  // FICTION_BOUNDING_BOX_HPP
+
+#pragma GCC diagnostic pop

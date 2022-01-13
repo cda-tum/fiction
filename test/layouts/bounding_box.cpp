@@ -21,6 +21,8 @@ TEST_CASE("Initialize 2D gate-level bounding box", "[bounding-box]")
 
     CHECK(bb_xor_maj.get_min() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb_xor_maj.get_max() == tile<cart_gate_clk_lyt>{3, 2});
+    CHECK(bb_xor_maj.get_x_size() == 3);
+    CHECK(bb_xor_maj.get_y_size() == 2);
 
     const auto lyt_or_not = blueprints::or_not_gate_layout<cart_gate_clk_lyt>();
 
@@ -28,6 +30,8 @@ TEST_CASE("Initialize 2D gate-level bounding box", "[bounding-box]")
 
     CHECK(bb_or_not.get_min() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb_or_not.get_max() == tile<cart_gate_clk_lyt>{2, 2});
+    CHECK(bb_or_not.get_x_size() == 2);
+    CHECK(bb_or_not.get_y_size() == 2);
 
     const auto lyt_crossing = blueprints::crossing_layout<cart_gate_clk_lyt>();
 
@@ -35,6 +39,8 @@ TEST_CASE("Initialize 2D gate-level bounding box", "[bounding-box]")
 
     CHECK(bb_crossing.get_min() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb_crossing.get_max() == tile<cart_gate_clk_lyt>{3, 2});
+    CHECK(bb_crossing.get_x_size() == 3);
+    CHECK(bb_crossing.get_y_size() == 2);
 }
 
 TEST_CASE("Update 2D gate-level bounding box", "[bounding-box]")
@@ -59,6 +65,8 @@ TEST_CASE("Update 2D gate-level bounding box", "[bounding-box]")
     // new bounding box
     CHECK(bb_crossing.get_min() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb_crossing.get_max() == tile<cart_gate_clk_lyt>{3, 3});
+    CHECK(bb_crossing.get_x_size() == 3);
+    CHECK(bb_crossing.get_y_size() == 3);
 }
 
 // TODO empty layout
@@ -71,6 +79,8 @@ TEST_CASE("Initialize 2D cell-level bounding box", "[bounding-box]")
 
     CHECK(bb_and.get_min() == cell<qca_cell_clk_lyt>{0, 0});
     CHECK(bb_and.get_max() == cell<qca_cell_clk_lyt>{4, 4});
+    CHECK(bb_and.get_x_size() == 4);
+    CHECK(bb_and.get_y_size() == 4);
 }
 
 TEST_CASE("Update 2D cell-level bounding box", "[bounding-box]")
@@ -103,4 +113,6 @@ TEST_CASE("Update 2D cell-level bounding box", "[bounding-box]")
     // new bounding box
     CHECK(bb_and.get_min() == tile<cart_gate_clk_lyt>{1, 1});
     CHECK(bb_and.get_max() == tile<cart_gate_clk_lyt>{5, 6});
+    CHECK(bb_and.get_x_size() == 4);
+    CHECK(bb_and.get_y_size() == 5);
 }
