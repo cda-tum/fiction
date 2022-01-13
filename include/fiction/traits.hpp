@@ -582,6 +582,20 @@ template <class Lyt>
 inline constexpr bool is_cell_level_layout_v = is_cell_level_layout<Lyt>::value;
 #pragma endregion
 
+#pragma region has_is_empty_cell
+template <class Lyt, class = void>
+struct has_is_empty_cell : std::false_type
+{};
+
+template <class Lyt>
+struct has_is_empty_cell<Lyt, std::void_t<decltype(std::declval<Lyt>().is_empty_cell(std::declval<cell<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_is_empty_cell_v = has_is_empty_cell<Lyt>::value;
+#pragma endregion
+
 #pragma region has_foreach_cell
 template <class Lyt, class = void>
 struct has_foreach_cell : std::false_type
@@ -641,6 +655,33 @@ struct is_gate_level_layout<
 
 template <class Lyt>
 inline constexpr bool is_gate_level_layout_v = is_gate_level_layout<Lyt>::value;
+#pragma endregion
+
+#pragma region has_is_empty_tile
+template <class Lyt, class = void>
+struct has_is_empty_tile : std::false_type
+{};
+
+template <class Lyt>
+struct has_is_empty_tile<Lyt, std::void_t<decltype(std::declval<Lyt>().is_empty_tile(std::declval<tile<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_is_empty_tile_v = has_is_empty_tile<Lyt>::value;
+#pragma endregion
+
+#pragma region has_is_empty
+template <class Lyt, class = void>
+struct has_is_empty : std::false_type
+{};
+
+template <class Lyt>
+struct has_is_empty<Lyt, std::void_t<decltype(std::declval<Lyt>().is_empty())>> : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_is_empty_v = has_is_empty<Lyt>::value;
 #pragma endregion
 
 /**

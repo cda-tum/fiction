@@ -27,6 +27,8 @@ TEST_CASE("Traits", "[gate-level-layout]")
     CHECK(fiction::is_tile_based_layout_v<gate_layout>);
     CHECK(fiction::is_clocked_layout_v<gate_layout>);
     CHECK(fiction::is_gate_level_layout_v<gate_layout>);
+    CHECK(fiction::has_is_empty_tile_v<gate_layout>);
+    CHECK(fiction::has_is_empty_v<gate_layout>);
 }
 
 TEST_CASE("Creation and usage of constants", "[gate-level-layout]")
@@ -77,8 +79,12 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level-layout]")
 
     gate_layout layout{gate_layout::aspect_ratio{2, 2, 1}};
 
+    CHECK(layout.is_empty());
+
     auto a = layout.create_pi("a", {0, 0});
     CHECK(layout.is_pi(layout.get_node(a)));
+
+    CHECK(!layout.is_empty());
 
     CHECK(layout.size() == 3);
     CHECK(layout.num_pis() == 1);
@@ -263,6 +269,8 @@ TEST_CASE("Creation of unary operations", "[gate-level-layout]")
 
     gate_layout layout{gate_layout::aspect_ratio{2, 2, 1}};
 
+    CHECK(layout.is_empty());
+
     auto x1 = layout.create_pi("x1", {0, 0});
 
     CHECK(layout.size() == 3);
@@ -284,6 +292,8 @@ TEST_CASE("Creation of unary operations", "[gate-level-layout]")
     auto f2n  = layout.get_node(f2);
     auto t01n = layout.get_node(static_cast<gate_layout::signal>(gate_layout::tile{0, 1}));
     CHECK(f2n == t01n);
+
+    CHECK(!layout.is_empty());
 
     CHECK(!layout.is_empty_tile({1, 0}));
     CHECK(layout.is_gate_tile({1, 0}));

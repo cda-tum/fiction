@@ -283,6 +283,15 @@ class cell_level_layout : public ClockedLayout
         return static_cast<uint64_t>(strg->cell_type_map.size());
     }
     /**
+     * Checks whether there are no cells assigned to the layout's coordinates.
+     *
+     * @return True iff the layout is empty.
+     */
+    [[nodiscard]] bool is_empty() const noexcept
+    {
+        return strg->cell_type_map.empty();
+    }
+    /**
      * Returns the number of primary input cells in the layout.
      *
      * @return Number of primary input cells.

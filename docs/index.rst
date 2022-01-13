@@ -33,6 +33,7 @@ Let there be a *fiction*
    layouts/synchronization_element_layout.rst
    layouts/gate_level_layout.rst
    layouts/cell_level_layout.rst
+   layouts/bounding_box.rst
 
 .. toctree::
    :maxdepth: 2

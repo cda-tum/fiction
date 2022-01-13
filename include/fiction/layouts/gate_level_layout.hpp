@@ -488,6 +488,15 @@ class gate_level_layout : public ClockedLayout
         return strg->data.num_wires;
     }
     /**
+     * Checks whether there are no gates or wires assigned to the layout's coordinates.
+     *
+     * @return True iff the layout is empty.
+     */
+    [[nodiscard]] bool is_empty() const noexcept
+    {
+        return num_gates() + num_wires() == 0;
+    }
+    /**
      * Returns the number of incoming, adjacently placed, and properly clocked signals to the given node.
      *
      * @param n Node to check.
