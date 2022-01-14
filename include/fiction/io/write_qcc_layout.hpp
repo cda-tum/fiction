@@ -14,12 +14,17 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
+#include <array>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <map>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <unordered_set>
 #include <vector>
 
 namespace fiction
@@ -65,8 +70,10 @@ static constexpr const char* LAYOUT_ITEM_PROPERTY = "\t\t\t<property name=\"{}\"
 static constexpr const char* PROPERTY_PHASE       = "phase";
 static constexpr const char* PROPERTY_LENGTH      = "length";
 
-const std::vector<std::string> components{"Magnet", "Coupler", "Cross Wire", "And", "Inverter", "Or"};
-const std::map<inml_technology::cell_type, unsigned> component_selector{
+static constexpr const std::array<const char*, 6> components{"Magnet", "Coupler",  "Cross Wire",
+                                                             "And",    "Inverter", "Or"};
+
+static const std::map<inml_technology::cell_type, uint8_t> component_selector{
     {inml_technology::cell_type::NORMAL, 0},           {inml_technology::cell_type::INPUT, 0},
     {inml_technology::cell_type::OUTPUT, 0},           {inml_technology::cell_type::FANOUT_COUPLER_MAGNET, 1},
     {inml_technology::cell_type::CROSSWIRE_MAGNET, 2}, {inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET, 3},
