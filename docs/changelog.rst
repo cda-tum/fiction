@@ -11,7 +11,7 @@ v0.3.2 - 2021-01-06
 
 Added
 #####
-- Command ``onepass`` for a combined SAT-based logic synthesis and physical design using `Mugen <https://github.com/whaaswijk/mugen>`_. Thanks to Winston Haaswijk for cooperating with me on this project!
+- Command ``onepass`` for a combined SAT-based logic synthesis and physical design using `Mugen <https://github.com/whaaswijk/mugen>`_. Thanks to Winston Haaswijk for cooperating with us on this project!
 - SVG output for irregular (cell-based) clocked ``fcn_cell_layout``\ s (thanks to Gregor Kuhn!)
 - ``csv_writer`` for conveniently formatting experiments' results
 - ``tt_reader`` for reading truth tables from a `file format used by Alan Mishchenko <https://people.eecs.berkeley.edu/~alanmi/temp5/>`_
@@ -83,7 +83,7 @@ v0.3.0 - 2019-11-22
 
 Added
 #####
-- Support for iNML technology using `ToPoliNano <https://topolinano.polito.it/>`_\ 's gate library and clocking scheme. Thanks to Umberto Garlando for cooperating with me on this project!
+- Support for iNML technology using `ToPoliNano <https://topolinano.polito.it/>`_\ 's gate library and clocking scheme. Thanks to Umberto Garlando for cooperating with us on this project!
 - Support for vertically shifted ``fcn_layout``\ s to emulate column-based clocking schemes
 - Enhanced ``logic_network`` by incorporating `mockturtle <https://github.com/lsils/mockturtle>`_ for logic representation
 - Truth table store (mnemonic ``-t``) and command ``tt``. Thanks to Mathias Soeken for granting permission to use code from `CirKit <https://github.com/msoeken/cirkit>`_!
