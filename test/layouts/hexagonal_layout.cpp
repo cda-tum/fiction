@@ -12,12 +12,6 @@
 
 using namespace fiction;
 
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#pragma GCC diagnostic ignored "-Wconversion"
-#endif
-
 template <typename Lyt>
 void check_common_traits()
 {
@@ -48,7 +42,7 @@ TEST_CASE("Traits", "[hexagonal-layout]")
 {
     SECTION("odd row")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, odd_row>;
+        using layout = hexagonal_layout<offset::ucoord_t, odd_row_hex>;
 
         CHECK(has_pointy_top_hex_orientation_v<layout>);
         CHECK(!has_flat_top_hex_orientation_v<layout>);
@@ -61,7 +55,7 @@ TEST_CASE("Traits", "[hexagonal-layout]")
     }
     SECTION("even row")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, even_row>;
+        using layout = hexagonal_layout<offset::ucoord_t, even_row_hex>;
 
         CHECK(has_pointy_top_hex_orientation_v<layout>);
         CHECK(!has_flat_top_hex_orientation_v<layout>);
@@ -74,7 +68,7 @@ TEST_CASE("Traits", "[hexagonal-layout]")
     }
     SECTION("odd column")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, odd_column>;
+        using layout = hexagonal_layout<offset::ucoord_t, odd_column_hex>;
 
         CHECK(!has_pointy_top_hex_orientation_v<layout>);
         CHECK(has_flat_top_hex_orientation_v<layout>);
@@ -87,7 +81,7 @@ TEST_CASE("Traits", "[hexagonal-layout]")
     }
     SECTION("even column")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, even_column>;
+        using layout = hexagonal_layout<offset::ucoord_t, even_column_hex>;
 
         CHECK(!has_pointy_top_hex_orientation_v<layout>);
         CHECK(has_flat_top_hex_orientation_v<layout>);
@@ -113,7 +107,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
 {
     SECTION("odd row")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, odd_row>;
+        using layout = hexagonal_layout<offset::ucoord_t, odd_row_hex>;
         check_identity_conversion<layout>();
 
         layout lyt{{3, 3}};
@@ -127,7 +121,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
     }
     SECTION("even row")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, even_row>;
+        using layout = hexagonal_layout<offset::ucoord_t, even_row_hex>;
         check_identity_conversion<layout>();
 
         layout lyt{{3, 3}};
@@ -141,7 +135,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
     }
     SECTION("odd column")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, odd_column>;
+        using layout = hexagonal_layout<offset::ucoord_t, odd_column_hex>;
         check_identity_conversion<layout>();
 
         layout lyt{{3, 3}};
@@ -155,7 +149,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
     }
     SECTION("even column")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, even_column>;
+        using layout = hexagonal_layout<offset::ucoord_t, even_column_hex>;
         check_identity_conversion<layout>();
 
         layout lyt{{3, 3}};
@@ -255,10 +249,10 @@ void check_visited_coordinates()
 
 TEST_CASE("Coordinate iteration", "[hexagonal-layout]")
 {
-    using odd_row_layout     = hexagonal_layout<offset::ucoord_t, odd_row>;
-    using even_row_layout    = hexagonal_layout<offset::ucoord_t, even_row>;
-    using odd_column_layout  = hexagonal_layout<offset::ucoord_t, odd_column>;
-    using even_column_layout = hexagonal_layout<offset::ucoord_t, even_column>;
+    using odd_row_layout     = hexagonal_layout<offset::ucoord_t, odd_row_hex>;
+    using even_row_layout    = hexagonal_layout<offset::ucoord_t, even_row_hex>;
+    using odd_column_layout  = hexagonal_layout<offset::ucoord_t, odd_column_hex>;
+    using even_column_layout = hexagonal_layout<offset::ucoord_t, even_column_hex>;
 
     check_visited_coordinates<odd_row_layout>();
     check_visited_coordinates<even_row_layout>();
@@ -270,7 +264,7 @@ TEST_CASE("Cardinal and ordinal operations", "[hexagonal-layout]")
 {
     SECTION("odd row")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, odd_row>;
+        using layout = hexagonal_layout<offset::ucoord_t, odd_row_hex>;
 
         layout lyt{{3, 3, 1}};
 
@@ -340,7 +334,7 @@ TEST_CASE("Cardinal and ordinal operations", "[hexagonal-layout]")
     }
     SECTION("even row")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, even_row>;
+        using layout = hexagonal_layout<offset::ucoord_t, even_row_hex>;
 
         layout lyt{{3, 3, 1}};
 
@@ -410,7 +404,7 @@ TEST_CASE("Cardinal and ordinal operations", "[hexagonal-layout]")
     }
     SECTION("odd column")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, odd_column>;
+        using layout = hexagonal_layout<offset::ucoord_t, odd_column_hex>;
 
         layout lyt{{3, 3, 1}};
 
@@ -480,7 +474,7 @@ TEST_CASE("Cardinal and ordinal operations", "[hexagonal-layout]")
     }
     SECTION("even column")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, even_column>;
+        using layout = hexagonal_layout<offset::ucoord_t, even_column_hex>;
 
         layout lyt{{3, 3, 1}};
 
@@ -554,7 +548,7 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
 {
     SECTION("odd row")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, odd_row>;
+        using layout = hexagonal_layout<offset::ucoord_t, odd_row_hex>;
 
         layout lyt{{2, 2}};
 
@@ -569,7 +563,7 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     }
     SECTION("even row")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, even_row>;
+        using layout = hexagonal_layout<offset::ucoord_t, even_row_hex>;
 
         layout lyt{{2, 2}};
 
@@ -584,7 +578,7 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     }
     SECTION("odd column")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, odd_column>;
+        using layout = hexagonal_layout<offset::ucoord_t, odd_column_hex>;
 
         layout lyt{{2, 2}};
 
@@ -599,7 +593,7 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
     }
     SECTION("even column")
     {
-        using layout = hexagonal_layout<offset::ucoord_t, even_column>;
+        using layout = hexagonal_layout<offset::ucoord_t, even_column_hex>;
 
         layout lyt{{2, 2}};
 

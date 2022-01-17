@@ -14,6 +14,7 @@
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/networks/topology_network.hpp>
+#include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/traits.hpp>
@@ -348,6 +349,21 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
     }
 }
 
+TEST_CASE("Exact shifted Cartesian physical design", "[exact]")
+{
+    SECTION("odd col")
+    {
+        using shift_lyt = cart_odd_col_gate_clk_lyt;
+
+        SECTION("Technology constraints: ToPoliNano")
+        {
+            check_with_gate_library<inml_cell_clk_lyt, inml_topolinano_library>(
+                blueprints::topolinano_network<mockturtle::mig_network>(),
+                columnar(crossings(border_io(topolinano(configuration<shift_lyt>())))));
+        }
+    }
+}
+
 TEST_CASE("Exact hexagonal physical design", "[exact]")
 {
     SECTION("odd row")
@@ -464,11 +480,6 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         {
             CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
                                                                   use(straight_inverter(configuration<hex_lyt>())))));
-        }
-        SECTION("Technology constraints: ToPoliNano")
-        {
-            check_without_gate_library(blueprints::topolinano_network<mockturtle::mig_network>(),
-                                       columnar(crossings(border_io(topolinano(configuration<hex_lyt>())))));
         }
     }
     SECTION("even column")

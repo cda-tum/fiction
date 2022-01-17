@@ -8,6 +8,7 @@
 #include "catch.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 
 #include <kitty/constructors.hpp>
@@ -253,23 +254,73 @@ GateLyt se_gate_layout() noexcept
     return layout;
 }
 
+template <typename GateLyt>
+GateLyt shifted_cart_and_or_inv_gate_layout() noexcept
+{
+    GateLyt layout{typename GateLyt::aspect_ratio{4, 2, 0},
+                   fiction::columnar_clocking<GateLyt>(fiction::num_clks::THREE)};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {0, 1});
+    const auto x3 = layout.create_pi("x3", {0, 2});
+
+    const auto a1 = layout.create_and(x1, x2, {1, 0});
+
+    const auto w1 = layout.create_buf(x3, {1, 1});
+    const auto w2 = layout.create_buf(a1, {2, 0});
+    const auto i1 = layout.create_not(w1, {2, 1});
+
+    const auto o1 = layout.create_or(w2, i1, {3, 0});
+
+    layout.create_po(o1, "f1", {4, 0});
+
+    return layout;
+}
+
 template <typename CellLyt>
-CellLyt single_layer_and_gate() noexcept
+CellLyt single_layer_qca_and_gate() noexcept
 {
     CellLyt layout{{4, 4}, "AND"};
 
-    layout.assign_cell_type({0, 2}, fiction::technology<CellLyt>::cell_type::INPUT);
-    layout.assign_cell_type({2, 4}, fiction::technology<CellLyt>::cell_type::INPUT);
-    layout.assign_cell_type({2, 0}, fiction::technology<CellLyt>::cell_type::CONST_0);
-    layout.assign_cell_type({2, 1}, fiction::technology<CellLyt>::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2}, fiction::technology<CellLyt>::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3}, fiction::technology<CellLyt>::cell_type::NORMAL);
-    layout.assign_cell_type({1, 2}, fiction::technology<CellLyt>::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2}, fiction::technology<CellLyt>::cell_type::NORMAL);
-    layout.assign_cell_type({4, 2}, fiction::technology<CellLyt>::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2}, fiction::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 4}, fiction::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 0}, fiction::qca_technology::cell_type::CONST_0);
+    layout.assign_cell_type({2, 1}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2}, fiction::qca_technology::cell_type::OUTPUT);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 4}, "b");
+    layout.assign_cell_name({4, 2}, "f");
+
+    return layout;
+}
+
+template <typename CellLyt>
+CellLyt single_layer_inml_maj_gate() noexcept
+{
+    CellLyt layout{{4, 4}, "MAJ"};
+
+    layout.assign_cell_type({0, 0}, fiction::inml_technology::cell_type::INPUT);
+    layout.assign_cell_type({0, 2}, fiction::inml_technology::cell_type::INPUT);
+    layout.assign_cell_type({0, 4}, fiction::inml_technology::cell_type::INPUT);
+    layout.assign_cell_type({1, 0}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 4}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 0}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 1}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 4}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2}, fiction::inml_technology::cell_type::OUTPUT);
+
+    layout.assign_cell_name({0, 0}, "a");
+    layout.assign_cell_name({0, 2}, "b");
+    layout.assign_cell_name({0, 4}, "c");
     layout.assign_cell_name({4, 2}, "f");
 
     return layout;

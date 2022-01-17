@@ -6,6 +6,7 @@
 #define FICTION_TRAITS_HPP
 
 #include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 
 #include <mockturtle/traits.hpp>
 
@@ -297,16 +298,55 @@ template <class Lyt>
 inline constexpr bool is_cartesian_layout_v = is_cartesian_layout<Lyt>::value;
 #pragma endregion
 
+#pragma region is_shifted_cartesian_layout
+template <class Ntk, class = void>
+struct is_shifted_cartesian_layout : std::false_type
+{};
+
+template <class Lyt>
+struct is_shifted_cartesian_layout<
+    Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt> && has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
+                          std::void_t<typename Lyt::base_type, typename Lyt::cartesian_arrangement, aspect_ratio<Lyt>,
+                                      coordinate<Lyt>, typename Lyt::storage>>> : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool is_shifted_cartesian_layout_v = is_shifted_cartesian_layout<Lyt>::value;
+#pragma endregion
+
+#pragma region shifted cartesian orientation and arrangement
+template <typename Lyt>
+constexpr bool has_horizontally_shifted_cartesian_orientation_v =
+    std::is_same_v<typename Lyt::cartesian_arrangement::orientation, horizontal_shift_cartesian>;
+template <typename Lyt>
+constexpr bool has_vertically_shifted_cartesian_orientation_v =
+    std::is_same_v<typename Lyt::cartesian_arrangement::orientation, vertical_shift_cartesian>;
+template <typename Lyt>
+constexpr bool has_odd_row_cartesian_arrangement_v =
+    std::is_same_v<typename Lyt::cartesian_arrangement, odd_row_cartesian>;
+template <typename Lyt>
+constexpr bool has_even_row_cartesian_arrangement_v =
+    std::is_same_v<typename Lyt::cartesian_arrangement, even_row_cartesian>;
+template <typename Lyt>
+constexpr bool has_odd_column_cartesian_arrangement_v =
+    std::is_same_v<typename Lyt::cartesian_arrangement, odd_column_cartesian>;
+template <typename Lyt>
+constexpr bool has_even_column_cartesian_arrangement_v =
+    std::is_same_v<typename Lyt::cartesian_arrangement, even_column_cartesian>;
+#pragma endregion
+
 #pragma region is_hexagonal_layout
 template <class Ntk, class = void>
 struct is_hexagonal_layout : std::false_type
 {};
 
 template <class Lyt>
-struct is_hexagonal_layout<
-    Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt> && has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
-                          std::void_t<typename Lyt::base_type, typename Lyt::hex_arrangement, aspect_ratio<Lyt>,
-                                      coordinate<Lyt>, typename Lyt::storage>>> : std::true_type
+struct is_hexagonal_layout<Lyt,
+                           std::enable_if_t<!is_shifted_cartesian_layout_v<Lyt> && is_coordinate_layout_v<Lyt> &&
+                                                has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
+                                            std::void_t<typename Lyt::base_type, typename Lyt::hex_arrangement,
+                                                        aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage>>>
+        : std::true_type
 {};
 
 template <class Lyt>
@@ -316,17 +356,18 @@ inline constexpr bool is_hexagonal_layout_v = is_hexagonal_layout<Lyt>::value;
 #pragma region hexagonal orientation and arrangement
 template <typename Lyt>
 constexpr bool has_pointy_top_hex_orientation_v =
-    std::is_same_v<typename Lyt::hex_arrangement::orientation, pointy_top>;
+    std::is_same_v<typename Lyt::hex_arrangement::orientation, pointy_top_hex>;
 template <typename Lyt>
-constexpr bool has_flat_top_hex_orientation_v = std::is_same_v<typename Lyt::hex_arrangement::orientation, flat_top>;
+constexpr bool has_flat_top_hex_orientation_v =
+    std::is_same_v<typename Lyt::hex_arrangement::orientation, flat_top_hex>;
 template <typename Lyt>
-constexpr bool has_odd_row_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, odd_row>;
+constexpr bool has_odd_row_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, odd_row_hex>;
 template <typename Lyt>
-constexpr bool has_even_row_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, even_row>;
+constexpr bool has_even_row_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, even_row_hex>;
 template <typename Lyt>
-constexpr bool has_odd_column_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, odd_column>;
+constexpr bool has_odd_column_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, odd_column_hex>;
 template <typename Lyt>
-constexpr bool has_even_column_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, even_column>;
+constexpr bool has_even_column_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, even_column_hex>;
 #pragma endregion
 
 /**
@@ -541,6 +582,35 @@ template <class Lyt>
 inline constexpr bool is_cell_level_layout_v = is_cell_level_layout<Lyt>::value;
 #pragma endregion
 
+#pragma region has_is_empty_cell
+template <class Lyt, class = void>
+struct has_is_empty_cell : std::false_type
+{};
+
+template <class Lyt>
+struct has_is_empty_cell<Lyt, std::void_t<decltype(std::declval<Lyt>().is_empty_cell(std::declval<cell<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_is_empty_cell_v = has_is_empty_cell<Lyt>::value;
+#pragma endregion
+
+#pragma region has_foreach_cell
+template <class Lyt, class = void>
+struct has_foreach_cell : std::false_type
+{};
+
+template <class Lyt>
+struct has_foreach_cell<
+    Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_cell(std::declval<void(cell<Lyt>, uint32_t)>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_foreach_cell_v = has_foreach_cell<Lyt>::value;
+#pragma endregion
+
 #pragma region has_set_layout_name
 template <class Ntk, class = void>
 struct has_set_layout_name : std::false_type
@@ -585,6 +655,33 @@ struct is_gate_level_layout<
 
 template <class Lyt>
 inline constexpr bool is_gate_level_layout_v = is_gate_level_layout<Lyt>::value;
+#pragma endregion
+
+#pragma region has_is_empty_tile
+template <class Lyt, class = void>
+struct has_is_empty_tile : std::false_type
+{};
+
+template <class Lyt>
+struct has_is_empty_tile<Lyt, std::void_t<decltype(std::declval<Lyt>().is_empty_tile(std::declval<tile<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_is_empty_tile_v = has_is_empty_tile<Lyt>::value;
+#pragma endregion
+
+#pragma region has_is_empty
+template <class Lyt, class = void>
+struct has_is_empty : std::false_type
+{};
+
+template <class Lyt>
+struct has_is_empty<Lyt, std::void_t<decltype(std::declval<Lyt>().is_empty())>> : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_is_empty_v = has_is_empty<Lyt>::value;
 #pragma endregion
 
 /**

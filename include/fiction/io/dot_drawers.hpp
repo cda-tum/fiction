@@ -410,6 +410,194 @@ class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, 
     using base_drawer = simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>;
 };
 /**
+ * An extended gate-level layout DOT drawer for shifted Cartesian layouts.
+ *
+ * @tparam Lyt Shifted Cartesian gate-level layout type.
+ * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
+ * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ */
+template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
+class gate_layout_shifted_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>
+{
+  public:
+    [[nodiscard]] std::vector<std::string> additional_graph_attributes() const noexcept override
+    {
+        auto graph_attributes = base_drawer::additional_graph_attributes();
+
+        if constexpr (DrawIndexes)
+        {
+            graph_attributes.emplace_back("ranksep=0.5");
+        }
+        else
+        {
+            graph_attributes.emplace_back("ranksep=0.25");
+        }
+
+        // horizontal shifts are modeled as top-down graphs
+        if constexpr (has_horizontally_shifted_cartesian_orientation_v<Lyt>)
+        {
+            graph_attributes.emplace_back("rankdir=TB");
+        }
+        // while vertical shifts are modeled as left-right graphs
+        else
+        {
+            graph_attributes.emplace_back("rankdir=LR");
+        }
+
+        return graph_attributes;
+    }
+
+    [[nodiscard]] std::vector<std::string> additional_node_attributes() const noexcept override
+    {
+        auto node_attributes = base_drawer::additional_node_attributes();
+
+        node_attributes.emplace_back("shape=square");
+
+        return node_attributes;
+    }
+
+    [[nodiscard]] std::string enforce_topology(const Lyt& lyt) const
+    {
+        std::stringstream topology{};
+
+        topology << "edge [constraint=true, style=invis];\n";
+
+        // add invisible nodes to shift rows/columns
+        if constexpr (DrawIndexes)
+        {
+            topology << "node [label=\"\", width=1, height=1, style=invis];\n";
+        }
+        else
+        {
+            topology << "node [label=\"\", width=0.5, height=0.5, style=invis];\n";
+        }
+
+        if constexpr (has_odd_row_cartesian_arrangement_v<Lyt>)
+        {
+            enforce_same_shifted_row(lyt, topology);
+
+            // shift odd rows
+            for (auto i = 1ul; i <= lyt.y(); i += 2) { shift_row(lyt, i, topology); }
+        }
+        else if constexpr (has_even_row_cartesian_arrangement_v<Lyt>)
+        {
+            enforce_same_shifted_row(lyt, topology);
+
+            // shift even rows
+            for (auto i = 0ul; i <= lyt.y(); i += 2) { shift_row(lyt, i, topology); }
+        }
+        else if constexpr (has_odd_column_cartesian_arrangement_v<Lyt>)
+        {
+            enforce_same_shifted_column(lyt, topology);
+
+            // shift odd columns
+            for (auto i = 1ul; i <= lyt.x(); i += 2) { shift_column(lyt, i, topology); }
+        }
+        else if constexpr (has_even_column_cartesian_arrangement_v<Lyt>)
+        {
+            enforce_same_shifted_column(lyt, topology);
+
+            // shift even columns
+            for (auto i = 0ul; i <= lyt.x(); i += 2) { shift_column(lyt, i, topology); }
+        }
+
+        // enforce connections other than those in direct row/column via edges
+        lyt.foreach_ground_tile(
+            [this, &lyt, &topology](const auto& t)
+            {
+                lyt.foreach_adjacent_tile(t,
+                                          [this, &topology, &t](const auto& at)
+                                          {
+                                              // skip adjacent tiles in one direction to prevent double edges
+                                              if (t >= at)
+                                              {
+                                                  return true;
+                                              }
+
+                                              if constexpr (has_horizontally_shifted_cartesian_orientation_v<Lyt>)
+                                              {
+                                                  // skip adjacent tiles in same row to prevent double edges
+                                                  if (t.y == at.y)
+                                                  {
+                                                      return true;
+                                                  }
+                                              }
+                                              else  // vertically shifted
+                                              {
+                                                  // skip adjacent tiles in same column to prevent double edges
+                                                  if (t.x == at.x)
+                                                  {
+                                                      return true;
+                                                  }
+                                              }
+
+                                              topology << base_drawer::edge(base_drawer::tile_id(t),
+                                                                            base_drawer::tile_id(at));
+
+                                              return true;
+                                          });
+            });
+
+        return topology.str();
+    }
+
+  protected:
+    using base_drawer = simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>;
+
+    [[nodiscard]] std::string invisible_node(const uint64_t i) const noexcept
+    {
+        return fmt::format("invis{}", i);
+    }
+
+    void enforce_same_shifted_column(const Lyt& lyt, std::stringstream& stream) const noexcept
+    {
+        for (const auto& col : base_drawer::columns(lyt)) { stream << base_drawer::same_rank(col); }
+    }
+
+    void enforce_same_shifted_row(const Lyt& lyt, std::stringstream& stream) const noexcept
+    {
+        for (const auto& row : base_drawer::rows(lyt)) { stream << base_drawer::same_rank(row); }
+    }
+
+    void shift_column(const Lyt& lyt, const uint64_t col, std::stringstream& stream) const noexcept
+    {
+        stream << base_drawer::same_rank({{invisible_node(col), base_drawer::tile_id({col, 0})}});
+
+        // previous column only exist if i != 0
+        if (col != 0)
+        {
+            const tile<Lyt> previous_column_tile{col - 1, 0};
+
+            stream << base_drawer::edge(invisible_node(col), base_drawer::tile_id(previous_column_tile));
+        }
+
+        // next column could be out of bounds and need to be checked for
+        if (const tile<Lyt> next_column_tile{col + 1, 0}; lyt.x() >= next_column_tile.x)
+        {
+            stream << base_drawer::edge(invisible_node(col), base_drawer::tile_id(next_column_tile));
+        }
+    }
+
+    void shift_row(const Lyt& lyt, const uint64_t row, std::stringstream& stream) const noexcept
+    {
+        stream << base_drawer::same_rank({{invisible_node(row), base_drawer::tile_id({0, row})}});
+
+        // previous row only exist if i != 0
+        if (row != 0)
+        {
+            const tile<Lyt> previous_row_tile{0, row - 1};
+
+            stream << base_drawer::edge(invisible_node(row), base_drawer::tile_id(previous_row_tile));
+        }
+
+        // next row could be out of bounds and need to be checked for
+        if (const tile<Lyt> next_row_tile{0, row + 1}; lyt.y() >= next_row_tile.y)
+        {
+            stream << base_drawer::edge(invisible_node(row), base_drawer::tile_id(next_row_tile));
+        }
+    }
+};
+/**
  * An extended gate-level layout DOT drawer for hexagonal layouts.
  *
  * @tparam Lyt Hexagonal gate-level layout type.
@@ -548,7 +736,7 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
         return topology.str();
     }
 
-  private:
+  protected:
     using base_drawer = simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>;
 
     [[nodiscard]] std::string invisible_node(const uint64_t i) const noexcept

@@ -22,7 +22,6 @@ namespace fiction
 
 /**
  * \verbatim
-
      / \
    /     \
   |       |
@@ -31,9 +30,9 @@ namespace fiction
      \ /
   \endverbatim
  */
-struct pointy_top
+struct pointy_top_hex
 {
-    using orientation = pointy_top;
+    using orientation = pointy_top_hex;
 };
 
 /**
@@ -45,14 +44,13 @@ struct pointy_top
     \_____/
   \endverbatim
  */
-struct flat_top
+struct flat_top_hex
 {
-    using orientation = flat_top;
+    using orientation = flat_top_hex;
 };
 
 /**
  * \verbatim
-
          / \     / \     / \
        /     \ /     \ /     \
       | (0,0) | (1,0) | (2,0) |
@@ -69,11 +67,10 @@ struct flat_top
          \ /     \ /     \ /
   \endverbatim
  */
-struct odd_row : pointy_top
+struct odd_row_hex : pointy_top_hex
 {};
 /**
  * \verbatim
-
          / \     / \     / \
        /     \ /     \ /     \
       | (0,0) | (1,0) | (2,0) |
@@ -90,7 +87,7 @@ struct odd_row : pointy_top
          \ /     \ /     \ /
   \endverbatim
  */
-struct even_row : pointy_top
+struct even_row_hex : pointy_top_hex
 {};
 /**
  * \verbatim
@@ -109,7 +106,7 @@ struct even_row : pointy_top
     \_____/       \_____/
   \endverbatim
  */
-struct odd_column : flat_top
+struct odd_column_hex : flat_top_hex
 {};
 
 /**
@@ -129,14 +126,14 @@ struct odd_column : flat_top
            \_____/       \_____/
   \endverbatim
  */
-struct even_column : flat_top
+struct even_column_hex : flat_top_hex
 {};
 
 /**
- * A layout type that utilizes offset coordinates to represent a hexagonal grid. Its faces are organized in a offset
+ * A layout type that utilizes offset coordinates to represent a hexagonal grid. Its faces are organized in an offset
  * coordinate system as provided. Hexagons can be in the 'pointy top' or 'flat top' orientation. Based on that, two
  * respectively possible coordinate systems emerge accordingly: 'odd row' and 'even row' for pointy tops and 'odd
- * column' and 'even column' for flat tops. Both are sketched in ASCII above.
+ * column' and 'even column' for flat tops. All are sketched in ASCII above.
  *
  * Other representations would be using cube or axial coordinates for instance, but since we want the layouts to be
  * rectangular-ish, offset coordinates make the most sense here.
@@ -144,10 +141,11 @@ struct even_column : flat_top
  * https://www.redblobgames.com/grids/hexagons/ is a wonderful resource on the topic.
  *
  * @tparam OffsetCoordinateType The coordinate implementation to be used. Offset coordinates are required.
- * @tparam OffsetCoordinateSystem One of the following: odd_row, even_row, odd_column, even_column.
+ * @tparam HexagonalCoordinateSystem One of the following: odd_row_hex, even_row_hex, odd_column_hex, even_column_hex.
  * @tparam CubeCoordinateType Internally, cube coordinates are needed for certain algorithms or calculations.
  */
-template <typename OffsetCoordinateType, typename OffsetCoordinateSystem, typename CubeCoordinateType = cube::coord_t>
+template <typename OffsetCoordinateType, typename HexagonalCoordinateSystem,
+          typename CubeCoordinateType = cube::coord_t>
 class hexagonal_layout
 {
   public:
@@ -170,33 +168,35 @@ class hexagonal_layout
 
     using base_type = hexagonal_layout;
 
-    using hex_arrangement = OffsetCoordinateSystem;
+    using hex_arrangement = HexagonalCoordinateSystem;
 
     using storage = std::shared_ptr<hexagonal_layout_storage>;
 
     /**
      * Standard constructor. The given aspect ratio points to the highest possible coordinate in the layout. That means
-     * in the even_column ASCII layout representation above ar = (3,2). Consequently, with ar = (0,0), the layout has
-     * exactly one coordinate.
+     * in the even_column_hex ASCII layout representation above ar = (3,2). Consequently, with ar = (0,0), the layout
+     * has exactly one coordinate.
      *
      * @param ar Highest possible position in the layout.
      */
     explicit hexagonal_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<hexagonal_layout_storage>(ar)}
     {
-        static_assert(
-            std::is_same_v<OffsetCoordinateSystem, odd_row> || std::is_same_v<OffsetCoordinateSystem, even_row> ||
-                std::is_same_v<OffsetCoordinateSystem, odd_column> ||
-                std::is_same_v<OffsetCoordinateSystem, even_column>,
-            "OffsetCoordinateSystem has to be one of the following: odd_row, even_row, odd_column, even_column");
+        static_assert(std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
+                          std::is_same_v<HexagonalCoordinateSystem, even_row_hex> ||
+                          std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ||
+                          std::is_same_v<HexagonalCoordinateSystem, even_column_hex>,
+                      "HexagonalCoordinateSystem has to be one of the following: odd_row_hex, even_row_hex, "
+                      "odd_column_hex, even_column_hex");
     }
 
     explicit hexagonal_layout(std::shared_ptr<hexagonal_layout_storage> s) : strg{std::move(s)}
     {
-        static_assert(
-            std::is_same_v<OffsetCoordinateSystem, odd_row> || std::is_same_v<OffsetCoordinateSystem, even_row> ||
-                std::is_same_v<OffsetCoordinateSystem, odd_column> ||
-                std::is_same_v<OffsetCoordinateSystem, even_column>,
-            "OffsetCoordinateSystem has to be one of the following: odd_row, even_row, odd_column, even_column");
+        static_assert(std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
+                          std::is_same_v<HexagonalCoordinateSystem, even_row_hex> ||
+                          std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ||
+                          std::is_same_v<HexagonalCoordinateSystem, even_column_hex>,
+                      "HexagonalCoordinateSystem has to be one of the following: odd_row_hex, even_row_hex, "
+                      "odd_column_hex, even_column_hex");
     }
 
 #pragma endregion
@@ -354,7 +354,7 @@ class hexagonal_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType south_east(const OffsetCoordinateType& c) const noexcept
     {
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top>)
+        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
         {
             auto se = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{0, -1, +1});
 
@@ -430,7 +430,7 @@ class hexagonal_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType north_west(const OffsetCoordinateType& c) const noexcept
     {
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top>)
+        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
         {
             auto nw = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{0, +1, -1});
 
@@ -911,7 +911,7 @@ class hexagonal_layout
             }
         };
 
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top>)
+        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
         {
             add_if_not_c(east(c), west(c));
         }
@@ -963,18 +963,19 @@ class hexagonal_layout
     {
         CubeCoordinateType cube_coord{0, 0, 0};
 
-        constexpr const auto offset =
-            std::is_same_v<OffsetCoordinateSystem, odd_row> || std::is_same_v<OffsetCoordinateSystem, odd_column> ? -1 :
-                                                                                                                    1;
+        constexpr const auto offset = std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
+                                              std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ?
+                                          -1 :
+                                          1;
 
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top>)
+        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
         {
             cube_coord.x = offset_coord.x -
                            static_cast<decltype(cube_coord.x)>((offset_coord.y + offset * (offset_coord.y & 1)) / 2);
             cube_coord.z = offset_coord.y;
             cube_coord.y = -cube_coord.x - cube_coord.z;
         }
-        else if constexpr (std::is_same_v<typename hex_arrangement::orientation, flat_top>)
+        else if constexpr (std::is_same_v<typename hex_arrangement::orientation, flat_top_hex>)
         {
             cube_coord.x = offset_coord.x;
             cube_coord.z = offset_coord.y -
@@ -998,16 +999,17 @@ class hexagonal_layout
         // the generated coordinate will be in ground layer
         OffsetCoordinateType offset_coord{0, 0};
 
-        constexpr const auto offset =
-            std::is_same_v<OffsetCoordinateSystem, odd_row> || std::is_same_v<OffsetCoordinateSystem, odd_column> ? -1 :
-                                                                                                                    1;
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top>)
+        constexpr const auto offset = std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
+                                              std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ?
+                                          -1 :
+                                          1;
+        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
         {
             offset_coord.x = static_cast<decltype(offset_coord.x)>(
                 cube_coord.x + static_cast<int64_t>((cube_coord.z + offset * (cube_coord.z & 1)) / 2));
             offset_coord.y = static_cast<decltype(offset_coord.y)>(cube_coord.z);
         }
-        else if constexpr (std::is_same_v<typename hex_arrangement::orientation, flat_top>)
+        else if constexpr (std::is_same_v<typename hex_arrangement::orientation, flat_top_hex>)
         {
             offset_coord.x = static_cast<decltype(offset_coord.x)>(cube_coord.x);
             offset_coord.y = static_cast<decltype(offset_coord.y)>(

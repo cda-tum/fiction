@@ -97,28 +97,28 @@ TEST_CASE("Layout equivalence", "[algorithms]")
         SECTION("odd row")
         {
             using gate_layout =
-                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row>>>>;
+                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
         SECTION("even row")
         {
             using gate_layout =
-                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row>>>>;
+                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
         SECTION("odd column")
         {
             using gate_layout =
-                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column>>>>;
+                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
         SECTION("even column")
         {
             using gate_layout =
-                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column>>>>;
+                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>>;
 
             check_ortho_equiv_all<gate_layout>();
         }

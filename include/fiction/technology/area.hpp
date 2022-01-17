@@ -54,7 +54,7 @@ struct area_stats
 template <typename Lyt, typename AreaType = double>
 void area(const Lyt& lyt, area_params<technology<Lyt>, AreaType>& ps = {}, area_stats<AreaType>* pst = nullptr)
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "GateLyt is not a cell-level layout");
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
     area_stats st{};
 

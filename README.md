@@ -85,6 +85,7 @@ Gate libraries:
 
 File formats:
 
+- `*.qll` for [ToPoliNano and MagCAD](https://topolinano.polito.it/)
 - `*.qcc` for [ToPoliNano and MagCAD](https://topolinano.polito.it/)
 
 Many thanks to Umberto Garlando and Fabrizio Riente for their support!

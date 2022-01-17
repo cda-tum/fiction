@@ -209,7 +209,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
     SECTION("odd row")
     {
         using gate_layout =
-            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row>>>>;
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>>;
 
         gate_layout layout{gate_layout::aspect_ratio{2, 2}};
 
@@ -258,7 +258,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
     SECTION("even row")
     {
         using gate_layout =
-            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row>>>>;
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>>;
 
         gate_layout layout{gate_layout::aspect_ratio{2, 2}};
 
@@ -308,7 +308,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
     SECTION("odd column")
     {
         using gate_layout =
-            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column>>>>;
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>>;
 
         gate_layout layout{gate_layout::aspect_ratio{2, 2}};
 
@@ -357,7 +357,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
     SECTION("even column")
     {
         using gate_layout =
-            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column>>>>;
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>>;
 
         gate_layout layout{gate_layout::aspect_ratio{2, 2}};
 
@@ -411,7 +411,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
     SECTION("odd row")
     {
         using gate_layout =
-            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row>>>>;
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>>;
 
         SECTION("AND-OR Layout")
         {
@@ -527,7 +527,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
     SECTION("even row")
     {
         using gate_layout =
-            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row>>>>;
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>>;
 
         SECTION("AND-OR Layout")
         {
@@ -644,7 +644,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
     SECTION("odd column")
     {
         using gate_layout =
-            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column>>>>;
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>>;
 
         SECTION("AND-OR Layout")
         {
@@ -772,7 +772,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
     SECTION("even column")
     {
         using gate_layout =
-            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column>>>>;
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>>;
 
         SECTION("AND-OR Layout")
         {

@@ -6,10 +6,13 @@
 #define FICTION_CMD_CELL_HPP
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
+#include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
+#include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
+#include <fmt/format.h>
 
 #include <optional>
 #include <string>
@@ -32,8 +35,7 @@ class cell_command : public command
             command(e, "Compiles the current gate layout in store down to a cell-level layout. A gate library must be "
                        "specified in order to instruct the algorithm how to map gate tiles to cell blocks.")
     {
-        add_option("--library,-l", library, "Gate library to use for mapping", true)
-            ->set_type_name("{QCA-ONE=0, ToPoliNano=1, Bestagon=2}");
+        add_option("--library,-l", library, "Gate library to use for mapping {QCA-ONE, ToPoliNano, Bestagon}", true);
     }
 
   protected:
@@ -52,16 +54,11 @@ class cell_command : public command
             return;
         }
 
-        if (library == 0u)
-        {
-            //                // QCA-ONE only allows non-shifted layouts
-            //                if (fgl->is_vertically_shifted())
-            //                {
-            //                    env->out() << "[e] non-shifted layouts are required for this library" << std::endl;
-            //                    reset_flags();
-            //                    return;
-            //                }
+        const auto lib_orig = library;
+        std::transform(library.begin(), library.end(), library.begin(), ::toupper);
 
+        if (library == "QCA-ONE" || library == "QCAONE" || library == "QCA ONE")
+        {
             const auto apply_qca_one = [](auto&& lyt_ptr)
             {
                 return std::make_shared<fiction::qca_cell_clk_lyt>(
@@ -84,26 +81,53 @@ class cell_command : public command
                           << std::endl;
             }
         }
-        //            else if (library == 1u)
-        //            {
-        //                // ToPoliNano only allows vertically shifted layouts
-        //                if (!fgl->is_vertically_shifted())
-        //                {
-        //                    env->out() << "[e] vertically shifted layouts are required for this library" << std::endl;
-        //                    reset_flags();
-        //                    return;
-        //                }
-        //                // ToPoliNano only allows layouts clocked with a ToPoliNano clocking
-        //                if (!fgl->is_clocking("TOPOLINANO3") && !fgl->is_clocking("TOPOLINANO4"))
-        //                {
-        //                    env->out() << "[e] a ToPoliNano clocking is required for this library" << std::endl;
-        //                    reset_flags();
-        //                    return;
-        //                }
-        //
-        //                lib = std::make_shared<topolinano_library>(fgl);
-        //            }
-        else if (library == 2u)
+        else if (library == "TOPOLINANO")
+        {
+            const auto apply_inml_topolinano = [](auto&& lyt_ptr) -> std::optional<fiction::inml_cell_clk_lyt_ptr>
+            {
+                using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
+
+                if constexpr (fiction::is_shifted_cartesian_layout_v<Lyt>)
+                {
+                    if constexpr (fiction::has_vertically_shifted_cartesian_orientation_v<Lyt>)
+                    {
+                        return std::make_shared<fiction::inml_cell_clk_lyt>(
+                            fiction::apply_gate_library<fiction::inml_cell_clk_lyt, fiction::inml_topolinano_library>(
+                                *lyt_ptr));
+                    }
+                    else
+                    {
+                        std::cout << "[e] Cartesian shift must be vertical" << std::endl;
+                    }
+                }
+                else
+                {
+                    std::cout << "[e] layout topology must be shifted Cartesian" << std::endl;
+                }
+
+                return std::nullopt;
+            };
+
+            try
+            {
+                if (const auto cell_lyt = std::visit(apply_inml_topolinano, s.current()); cell_lyt.has_value())
+                {
+                    store<fiction::cell_layout_t>().extend() = *cell_lyt;
+                }
+            }
+            catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
+            {
+                std::cout << fmt::format("[e] unsupported gate type at tile position {}", e.where()) << std::endl;
+            }
+            catch (const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t,
+                                                                         fiction::port_position>& e)
+            {
+                std::cout << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}",
+                                         e.where(), e.which_ports())
+                          << std::endl;
+            }
+        }
+        else if (library == "BESTAGON")
         {
             const auto apply_sidb_bestagon = [](auto&& lyt_ptr) -> std::optional<fiction::sidb_cell_clk_lyt_ptr>
             {
@@ -159,25 +183,11 @@ class cell_command : public command
         // more libraries go here
         else
         {
-            env->out() << "[e] identifier " << library << " does not refer to a supported gate library" << std::endl;
+            env->out() << fmt::format("[e] identifier '{}' does not refer to a supported gate library", lib_orig)
+                       << std::endl;
             reset_flags();
             return;
         }
-
-        //        try
-        //        {
-        //            auto fcl = std::make_shared<fcn_cell_layout>(std::move(lib));
-        //
-        //            // store new layout
-        //            store<fcn_cell_layout_ptr>().extend() = std::move(fcl);
-        //        }
-        //        catch (...)
-        //        {
-        //            env->out() << "[e] mapping " << s.current()->get_name() << " to cell-level using the " << lib_name
-        //                       << " library was not successful" << std::endl;
-        //            reset_flags();
-        //            return;
-        //        }
 
         reset_flags();
     }
@@ -186,14 +196,13 @@ class cell_command : public command
     /**
      * Identifier of gate library to use.
      */
-    unsigned library = 0u;
-
+    std::string library = "QCA-ONE";
     /**
      * Reset all flags. Necessary for some reason... alice bug?
      */
     void reset_flags()
     {
-        library = 0u;
+        library = "QCA-ONE";
     }
 };
 

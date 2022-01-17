@@ -21,6 +21,9 @@ TEST_CASE("Traits", "[cell-level-layout]")
     using layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
     CHECK(is_cell_level_layout_v<layout>);
+    CHECK(has_foreach_cell_v<layout>);
+    CHECK(has_is_empty_cell_v<layout>);
+    CHECK(has_is_empty_v<layout>);
     CHECK(has_get_layout_name_v<layout>);
     CHECK(has_set_layout_name_v<layout>);
 }
@@ -87,6 +90,8 @@ TEST_CASE("Cell type assignment", "[cell-level-layout]")
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4}, "AND"};
 
+    CHECK(layout.is_empty());
+
     layout.assign_cell_type({0, 2}, qca_technology::cell_type::INPUT);
     layout.assign_cell_type({2, 4}, qca_technology::cell_type::INPUT);
     layout.assign_cell_type({2, 0}, qca_technology::cell_type::CONST_0);
@@ -96,6 +101,8 @@ TEST_CASE("Cell type assignment", "[cell-level-layout]")
     layout.assign_cell_type({1, 2}, qca_technology::cell_type::NORMAL);
     layout.assign_cell_type({3, 2}, qca_technology::cell_type::NORMAL);
     layout.assign_cell_type({4, 2}, qca_technology::cell_type::OUTPUT);
+
+    CHECK(!layout.is_empty());
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 4}, "b");

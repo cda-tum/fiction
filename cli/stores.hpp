@@ -294,6 +294,36 @@ void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t
                 }
             }
         }
+        // shifted Cartesian layout
+        else if constexpr (fiction::is_shifted_cartesian_layout_v<Lyt>)
+        {
+            if (cmd.is_set("indexes"))
+            {
+                if (cmd.is_set("clk_colors"))
+                {
+                    fiction::write_dot_layout(*lyt_ptr, os,
+                                              fiction::gate_layout_shifted_cartesian_drawer<Lyt, true, true>());
+                }
+                else
+                {
+                    fiction::write_dot_layout(*lyt_ptr, os,
+                                              fiction::gate_layout_shifted_cartesian_drawer<Lyt, false, true>());
+                }
+            }
+            else
+            {
+                if (cmd.is_set("clk_colors"))
+                {
+                    fiction::write_dot_layout(*lyt_ptr, os,
+                                              fiction::gate_layout_shifted_cartesian_drawer<Lyt, true, false>());
+                }
+                else
+                {
+                    fiction::write_dot_layout(*lyt_ptr, os,
+                                              fiction::gate_layout_shifted_cartesian_drawer<Lyt, false, false>());
+                }
+            }
+        }
         // hexagonal layout
         else if constexpr (fiction::is_hexagonal_layout_v<Lyt>)
         {

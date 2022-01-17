@@ -10,6 +10,8 @@
 #include "cmd/io/blif.hpp"
 #include "cmd/io/fqca.hpp"
 #include "cmd/io/qca.hpp"
+#include "cmd/io/qcc.hpp"
+#include "cmd/io/qll.hpp"
 #include "cmd/io/read.hpp"
 #include "cmd/io/sqd.hpp"
 #include "cmd/io/tt.hpp"
@@ -28,6 +30,5 @@
 #include "cmd/technology/energy.hpp"
 #include "cmd/verification/check.hpp"
 #include "cmd/verification/equiv.hpp"
-//#include "cmd/qcc.hpp"
 
 #endif  // FICTION_COMMANDS_HPP

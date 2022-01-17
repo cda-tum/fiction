@@ -25,6 +25,7 @@ Let there be a *fiction*
 
    layouts/coordinates.rst
    layouts/cartesian_layout.rst
+   layouts/shifted_cartesian_layout.rst
    layouts/hexagonal_layout.rst
    layouts/tile_based_layout.rst
    layouts/clocked_layout.rst
@@ -32,6 +33,7 @@ Let there be a *fiction*
    layouts/synchronization_element_layout.rst
    layouts/gate_level_layout.rst
    layouts/cell_level_layout.rst
+   layouts/bounding_box.rst
 
 .. toctree::
    :maxdepth: 2

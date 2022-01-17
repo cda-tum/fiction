@@ -5,6 +5,7 @@
 #ifndef FICTION_APPLY_GATE_LIBRARY_HPP
 #define FICTION_APPLY_GATE_LIBRARY_HPP
 
+#include "fiction/technology/inml_topolinano_library.hpp"
 #include "fiction/technology/qca_one_library.hpp"
 #include "fiction/technology/sidb_bestagon_library.hpp"
 #include "fiction/traits.hpp"
@@ -56,16 +57,69 @@ class apply_gate_library_impl
 
                     cell<CellLyt> c{};
 
+                    // Cartesian layouts
                     if constexpr (is_cartesian_layout_v<GateLyt>)
                     {
                         c = {t.x * GateLibrary::gate_x_size(), t.y * GateLibrary::gate_y_size(), t.z};
                     }
+                    // Shifted Cartesian layouts
+                    else if constexpr (is_shifted_cartesian_layout_v<GateLyt>)
+                    {
+                        if constexpr (has_horizontally_shifted_cartesian_orientation_v<GateLyt>)
+                        {
+                            c = {t.x * GateLibrary::gate_x_size(),
+                                 static_cast<decltype(c.y)>(t.y * (GateLibrary::gate_y_size())), t.z};
+                        }
+                        else if constexpr (has_vertically_shifted_cartesian_orientation_v<GateLyt>)
+                        {
+                            c = {static_cast<decltype(c.x)>(t.x * (GateLibrary::gate_x_size())),
+                                 t.y * (GateLibrary::gate_y_size()), t.z};
+                        }
+
+                        if constexpr (has_odd_row_cartesian_arrangement_v<GateLyt>)
+                        {
+                            if (gate_lyt.is_in_odd_row(t))
+                            {
+                                // odd rows are shifted in by width / 2
+                                c.x +=
+                                    static_cast<decltype(c.x)>(static_cast<double>(GateLibrary::gate_x_size()) / 2.0);
+                            }
+                        }
+                        else if constexpr (has_even_row_cartesian_arrangement_v<GateLyt>)
+                        {
+                            if (gate_lyt.is_in_even_row(t))
+                            {
+                                // even rows are shifted in by width / 2
+                                c.x +=
+                                    static_cast<decltype(c.x)>(static_cast<double>(GateLibrary::gate_x_size()) / 2.0);
+                            }
+                        }
+                        else if constexpr (has_odd_column_cartesian_arrangement_v<GateLyt>)
+                        {
+                            if (gate_lyt.is_in_odd_column(t))
+                            {
+                                // odd columns are shifted in by height / 2
+                                c.y +=
+                                    static_cast<decltype(c.y)>(static_cast<double>(GateLibrary::gate_y_size()) / 2.0);
+                            }
+                        }
+                        else if constexpr (has_even_column_cartesian_arrangement_v<GateLyt>)
+                        {
+                            if (gate_lyt.is_in_even_column(t))
+                            {
+                                // even columns are shifted in by height / 2
+                                c.y +=
+                                    static_cast<decltype(c.y)>(static_cast<double>(GateLibrary::gate_y_size()) / 2.0);
+                            }
+                        }
+                    }
+                    // hexagonal layouts
                     else if constexpr (is_hexagonal_layout_v<GateLyt>)
                     {
                         if constexpr (has_pointy_top_hex_orientation_v<GateLyt>)
                         {
                             // vertical distance between pointy top hexagons is height * 3/4
-                            c = {t.x * GateLibrary::gate_x_size() + 1,
+                            c = {t.x * GateLibrary::gate_x_size() + 1,  // TODO make sure the +1 is correct here
                                  static_cast<decltype(c.y)>(t.y * (GateLibrary::gate_y_size() * 3 / 4)), t.z};
                         }
                         else if constexpr (has_flat_top_hex_orientation_v<GateLyt>)
@@ -125,6 +179,10 @@ class apply_gate_library_impl
         {
             GateLibrary::assign_via_cells(cell_lyt);
         }
+        else if constexpr (std::is_same_v<GateLibrary, inml_topolinano_library>)
+        {
+            GateLibrary::straighten_wires(cell_lyt);
+        }
 
         if constexpr (has_get_layout_name_v<GateLyt> && has_set_layout_name_v<CellLyt>)
         {
@@ -172,8 +230,8 @@ class apply_gate_library_impl
 /**
  * Applies a gate library to a given gate-level layout and, thereby, creates and returns a cell-level layout. The gate
  * library type should provide all functions specified in fcn_gate_library. It is, thus, easiest to extend
- * fcn_gate_library to implement a new gate library. Examples are qca_one_gate_library, topolinano_inml_gate_library,
- * and sidb_bestagon_gate_library.
+ * fcn_gate_library to implement a new gate library. Examples are qca_one_library, inml_topolinano_library, and
+ * sidb_bestagon_library.
  *
  * May pass through, and thereby throw, an 'unsupported_gate_type_exception' or an
  * 'unsupported_gate_orientation_exception'.
