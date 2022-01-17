@@ -73,7 +73,7 @@ TEST_CASE("Update 2D gate-level bounding box", "[bounding-box]")
 
 TEST_CASE("Initialize 2D cell-level bounding box", "[bounding-box]")
 {
-    const auto lyt_and = blueprints::single_layer_and_gate<qca_cell_clk_lyt>();
+    const auto lyt_and = blueprints::single_layer_qca_and_gate<qca_cell_clk_lyt>();
 
     bounding_box_2d bb_and{lyt_and};
 
@@ -85,7 +85,7 @@ TEST_CASE("Initialize 2D cell-level bounding box", "[bounding-box]")
 
 TEST_CASE("Update 2D cell-level bounding box", "[bounding-box]")
 {
-    auto lyt_and = blueprints::single_layer_and_gate<qca_cell_clk_lyt>();
+    auto lyt_and = blueprints::single_layer_qca_and_gate<qca_cell_clk_lyt>();
 
     bounding_box_2d bb_and{lyt_and};
 

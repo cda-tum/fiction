@@ -8,6 +8,7 @@
 #include "catch.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 
 #include <kitty/constructors.hpp>
@@ -254,22 +255,49 @@ GateLyt se_gate_layout() noexcept
 }
 
 template <typename CellLyt>
-CellLyt single_layer_and_gate() noexcept
+CellLyt single_layer_qca_and_gate() noexcept
 {
     CellLyt layout{{4, 4}, "AND"};
 
-    layout.assign_cell_type({0, 2}, fiction::technology<CellLyt>::cell_type::INPUT);
-    layout.assign_cell_type({2, 4}, fiction::technology<CellLyt>::cell_type::INPUT);
-    layout.assign_cell_type({2, 0}, fiction::technology<CellLyt>::cell_type::CONST_0);
-    layout.assign_cell_type({2, 1}, fiction::technology<CellLyt>::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2}, fiction::technology<CellLyt>::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3}, fiction::technology<CellLyt>::cell_type::NORMAL);
-    layout.assign_cell_type({1, 2}, fiction::technology<CellLyt>::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2}, fiction::technology<CellLyt>::cell_type::NORMAL);
-    layout.assign_cell_type({4, 2}, fiction::technology<CellLyt>::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2}, fiction::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 4}, fiction::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 0}, fiction::qca_technology::cell_type::CONST_0);
+    layout.assign_cell_type({2, 1}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2}, fiction::qca_technology::cell_type::OUTPUT);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 4}, "b");
+    layout.assign_cell_name({4, 2}, "f");
+
+    return layout;
+}
+
+template <typename CellLyt>
+CellLyt single_layer_inml_maj_gate() noexcept
+{
+    CellLyt layout{{4, 4}, "MAJ"};
+
+    layout.assign_cell_type({0, 0}, fiction::inml_technology::cell_type::INPUT);
+    layout.assign_cell_type({0, 2}, fiction::inml_technology::cell_type::INPUT);
+    layout.assign_cell_type({0, 4}, fiction::inml_technology::cell_type::INPUT);
+    layout.assign_cell_type({1, 0}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 4}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 0}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 1}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 4}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2}, fiction::inml_technology::cell_type::OUTPUT);
+
+    layout.assign_cell_name({0, 0}, "a");
+    layout.assign_cell_name({0, 2}, "b");
+    layout.assign_cell_name({0, 4}, "c");
     layout.assign_cell_name({4, 2}, "f");
 
     return layout;

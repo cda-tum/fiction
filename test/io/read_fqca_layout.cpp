@@ -501,12 +501,12 @@ TEST_CASE("Read written layouts", "[fqca]")
     {
         using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-        read_write_layout(blueprints::single_layer_and_gate<qca_layout>());
+        read_write_layout(blueprints::single_layer_qca_and_gate<qca_layout>());
     }
     SECTION("Stacked layout")
     {
         using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
 
-        read_write_layout(blueprints::single_layer_and_gate<qca_layout>());
+        read_write_layout(blueprints::single_layer_qca_and_gate<qca_layout>());
     }
 }

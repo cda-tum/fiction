@@ -149,7 +149,7 @@ TEST_CASE("Write single-layer AND gate", "[fqca]")
     {
         using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-        write_fqca_layout(blueprints::single_layer_and_gate<qca_layout>(), layout_stream, {false});
+        write_fqca_layout(blueprints::single_layer_qca_and_gate<qca_layout>(), layout_stream, {false});
 
         CHECK(layout_stream.str() == fqca_layout);
     }
@@ -157,7 +157,7 @@ TEST_CASE("Write single-layer AND gate", "[fqca]")
     {
         using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
 
-        write_fqca_layout(blueprints::single_layer_and_gate<qca_layout>(), layout_stream, {false});
+        write_fqca_layout(blueprints::single_layer_qca_and_gate<qca_layout>(), layout_stream, {false});
 
         CHECK(layout_stream.str() == fqca_layout);
     }
