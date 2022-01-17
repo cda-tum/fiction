@@ -300,7 +300,7 @@ class write_qcc_layout_impl
                     skip.insert({c.x + 3, c.y});
                 }
 
-                if (auto it = qcc::component_selector.find(type); it != qcc::component_selector.end())
+                if (const auto it = qcc::component_selector.find(type); it != qcc::component_selector.end())
                 {
                     os << fmt::format(qcc::OPEN_LAYOUT_ITEM, it->second, bb_x(c), bb_y(c));
                 }
@@ -326,7 +326,7 @@ class write_qcc_layout_impl
 }  // namespace detail
 
 /**
- * Writes a cell-level iNML layout to a qcc os that is used by ToPoliNano & MagCAD (https://topolinano.polito.it/),
+ * Writes a cell-level iNML layout to a qcc file that is used by ToPoliNano & MagCAD (https://topolinano.polito.it/),
  * an EDA tool and a physical simulator for the iNML technology platform.
  *
  * This overload uses an output stream to write into.
@@ -347,14 +347,14 @@ void write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params 
     p.run();
 }
 /**
- * Writes a cell-level iNML layout to a qcc os that is used by ToPoliNano & MagCAD (https://topolinano.polito.it/),
+ * Writes a cell-level iNML layout to a qcc file that is used by ToPoliNano & MagCAD (https://topolinano.polito.it/),
  * an EDA tool and a physical simulator for the iNML technology platform.
  *
- * This overload uses a os name to create and write into.
+ * This overload uses a file name to create and write into.
  *
  * @tparam Lyt Cell-level iNML layout type.
  * @param lyt The layout to be written.
- * @param filename The os name to create and write into. Should preferably use the ".qcc" extension.
+ * @param filename The file name to create and write into. Should preferably use the ".qcc" extension.
  * @param ps Parameters.
  */
 template <typename Lyt>
