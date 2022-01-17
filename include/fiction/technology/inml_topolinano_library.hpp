@@ -501,15 +501,6 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                     p.inp.emplace(0u, 2u);
                 }
             }
-            // TODO this might not be necessary since MAJ does not need to access the port map
-            // special case: MAJ needs to have an input at the bottom
-            if constexpr (mockturtle::has_is_maj_v<Lyt>)
-            {
-                if (lyt.is_maj(n) && lyt.has_northern_incoming_signal(t))
-                {
-                    p.inp.emplace(1u, 3u);
-                }
-            }
             // special case: PI determines input according to successor
             if (lyt.is_pi(n))
             {
@@ -763,7 +754,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         // special wires
         {{{port_position(0, 0)}, {port_position(1, 0)}}, majority_wire},
         {{{port_position(0, 3)}, {port_position(3, 2)}}, coupler_wire}
-        // TODO more wires go here!
+        // NOTE more wires go here!
     };
     /**
      * Lookup table for inverter rotations. Maps ports to corresponding inverters.
