@@ -11,6 +11,7 @@
 #include "cmd/io/fqca.hpp"
 #include "cmd/io/qca.hpp"
 #include "cmd/io/qcc.hpp"
+#include "cmd/io/qll.hpp"
 #include "cmd/io/read.hpp"
 #include "cmd/io/sqd.hpp"
 #include "cmd/io/tt.hpp"
