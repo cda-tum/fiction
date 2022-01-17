@@ -199,7 +199,7 @@ class cell_level_layout : public ClockedLayout
         }
     }
     /**
-     * Returns the cell mode assigned to cell position c. If no cell mode is assigned, the normal mode is returned.
+     * Returns the cell mode assigned to cell position c. If no cell mode is assigned, the default mode is returned.
      *
      * @param c Cell position whose assigned cell mode is desired.
      * @return Cell mode assigned to cell position c.
@@ -212,7 +212,7 @@ class cell_level_layout : public ClockedLayout
         }
         else
         {
-            return Technology::cell_mode::NORMAL;
+            return {};
         }
     }
     /**
