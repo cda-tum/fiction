@@ -7,7 +7,7 @@ Publications
 
 A brief technical report summarizing the features of *fiction* v0.2.1 is available at `arXiv <https://arxiv.org/abs/1905.02477>`_.
 
-If you use *fiction* in your work, I would appreciate if you cited
+If you use *fiction* in your work, we would appreciate if you cited
 
     Marcel Walter, Robert Wille, Frank Sill Torres, Daniel Große and Rolf Drechsler: "fiction: An Open Source Framework
     for the Design of Field-coupled Nanocomputing Circuits", 2019, **arXiv:1905.02477**.
