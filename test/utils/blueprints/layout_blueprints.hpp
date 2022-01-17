@@ -254,6 +254,29 @@ GateLyt se_gate_layout() noexcept
     return layout;
 }
 
+template <typename GateLyt>
+GateLyt shifted_cart_and_or_inv_gate_layout() noexcept
+{
+    GateLyt layout{typename GateLyt::aspect_ratio{4, 2, 0},
+                   fiction::columnar_clocking<GateLyt>(fiction::num_clks::THREE)};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {0, 1});
+    const auto x3 = layout.create_pi("x3", {0, 2});
+
+    const auto a1 = layout.create_and(x1, x2, {1, 0});
+
+    const auto w1 = layout.create_buf(x3, {1, 1});
+    const auto w2 = layout.create_buf(a1, {2, 0});
+    const auto i1 = layout.create_not(w1, {2, 1});
+
+    const auto o1 = layout.create_or(w2, i1, {3, 0});
+
+    layout.create_po(o1, "f1", {4, 0});
+
+    return layout;
+}
+
 template <typename CellLyt>
 CellLyt single_layer_qca_and_gate() noexcept
 {

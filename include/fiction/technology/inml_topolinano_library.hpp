@@ -93,7 +93,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                 if (lyt.is_buf(n))
                 {
                     // crossing case
-                    if (lyt.is_wire_tile(lyt.above(t)))
+                    if (const auto a = lyt.above(t); t != a && lyt.is_wire_tile(a))
                     {
                         return crosswire;
                     }
