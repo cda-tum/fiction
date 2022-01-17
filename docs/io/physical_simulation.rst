@@ -27,6 +27,12 @@ QCA-STACK
 ToPoliNano & MagCAD
 ###################
 
+**Header:** ``fiction/io/write_qll_layout.hpp``
+
+.. doxygenfunction:: fiction::write_qll_layout(const Lyt& lyt, std::ostream& os)
+.. doxygenfunction:: fiction::write_qll_layout(const Lyt& lyt, const std::string& filename)
+
+
 **Header:** ``fiction/io/write_qcc_layout.hpp``
 
 .. doxygenfunction:: fiction::write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params ps = {})
