@@ -179,6 +179,10 @@ class apply_gate_library_impl
         {
             GateLibrary::assign_via_cells(cell_lyt);
         }
+        else if constexpr (std::is_same_v<GateLibrary, inml_topolinano_library>)
+        {
+            GateLibrary::straighten_wires(cell_lyt);
+        }
 
         if constexpr (has_get_layout_name_v<GateLyt> && has_set_layout_name_v<CellLyt>)
         {

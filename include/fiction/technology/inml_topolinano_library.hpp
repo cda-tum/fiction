@@ -14,6 +14,7 @@
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 
+#include <algorithm>
 #include <unordered_map>
 #include <vector>
 
@@ -122,6 +123,167 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         }
 
         throw unsupported_gate_type_exception(t);
+    }
+
+    template <typename Lyt>
+    static void straighten_wires(Lyt& lyt) noexcept
+    {
+        enum class status
+        {
+            SEARCH,
+            COLLECT,
+            SKIP
+        };
+
+        bool improvement_found;
+
+        const auto handle = [&lyt, &improvement_found](const auto& hump)
+        {
+            // single cell collections are no humps, do not merge them.
+            if (hump.size() > 1)
+            {
+                // if sequence starts with a PI or there are normal cells south of first and last hump cell, this is an
+                // upper hump
+                if (const auto inp = lyt.get_cell_type(hump.front()), out = lyt.get_cell_type(hump.back()),
+                    fts = lyt.get_cell_type(lyt.south(hump.front())), bts = lyt.get_cell_type(lyt.south(hump.back()));
+                    (inp == inml_technology::cell_type::INPUT || fts == inml_technology::cell_type::NORMAL) &&
+                    (bts == inml_technology::cell_type::NORMAL || out == inml_technology::cell_type::OUTPUT ||
+                     bts == inml_technology::cell_type::INVERTER_MAGNET))
+                {
+                    // hump found, check if there is enough space below for merging
+                    if (std::all_of(hump.begin() + 1, hump.end() - 2,
+                                    [&lyt](const auto hc) { return lyt.is_empty_cell(lyt.south(lyt.south(hc))); }))
+                    {
+                        // merge it down
+                        for (const auto& hc : hump)
+                        {
+                            const auto s = lyt.south(hc);
+                            if (lyt.get_cell_type(s) != inml_technology::cell_type::INVERTER_MAGNET)
+                            {
+                                lyt.assign_cell_type(s, lyt.get_cell_type(hc));
+                                lyt.assign_cell_mode(s, lyt.get_cell_mode(hc));
+                                lyt.assign_cell_name(s, lyt.get_cell_name(hc));
+                            }
+                            lyt.assign_cell_type(hc, inml_technology::cell_type::EMPTY);
+                            lyt.assign_cell_name(hc, "");
+                        }
+
+                        improvement_found = true;
+                    }
+                }
+                // if there are normal cells north of first and last hump cell, this is a lower hump
+                else if (const auto ftn = lyt.get_cell_type(lyt.north(hump.front())),
+                         btn            = lyt.get_cell_type(lyt.north(hump.back()));
+                         (inp == inml_technology::cell_type::INPUT || ftn == inml_technology::cell_type::NORMAL) &&
+                         (btn == inml_technology::cell_type::NORMAL || out == inml_technology::cell_type::OUTPUT))
+                {
+                    // hump found, check if there is enough space above for merging
+                    if (std::all_of(hump.begin() + 1, hump.end() - 2,
+                                    [&lyt](const auto hc) { return lyt.is_empty_cell(lyt.north(lyt.north(hc))); }))
+                    {
+                        // merge it up
+                        for (const auto& hc : hump)
+                        {
+                            const auto n = lyt.north(hc);
+                            lyt.assign_cell_type(n, lyt.get_cell_type(hc));
+                            lyt.assign_cell_mode(n, lyt.get_cell_mode(hc));
+                            lyt.assign_cell_name(n, lyt.get_cell_name(hc));
+                            lyt.assign_cell_type(hc, inml_technology::cell_type::EMPTY);
+                            lyt.assign_cell_name(hc, "");
+                        }
+
+                        improvement_found = true;
+                    }
+                }
+            }
+        };
+
+        do {
+            status st = status::SEARCH;
+
+            improvement_found = false;
+
+            for (decltype(lyt.y()) row = 0; row <= lyt.y(); ++row)
+            {
+                std::vector<cell<Lyt>> hump{};
+
+                for (decltype(lyt.x()) column = 0; column <= lyt.x(); ++column)
+                {
+                    // simple state machine for identifying humps and removing them
+                    switch (const auto c = cell<Lyt>{column, row}; st)
+                    {
+                        case status::SEARCH:
+                        {
+                            switch (const auto t = lyt.get_cell_type(c); t)
+                            {
+                                // encountering a normal, input, or inverter magnet triggers collecting hump cells
+                                case inml_technology::cell_type::NORMAL:
+                                case inml_technology::cell_type::INPUT:
+                                case inml_technology::cell_type::INVERTER_MAGNET:
+                                {
+                                    st = status::COLLECT;
+                                    hump.push_back(c);
+                                    break;
+                                }
+                                // remain searching
+                                case inml_technology::cell_type::EMPTY:
+                                {
+                                    break;
+                                }
+                                // everything else leads to skipping
+                                default:
+                                {
+                                    st = status::SKIP;
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                        case status::COLLECT:
+                        {
+                            switch (const auto t = lyt.get_cell_type(c); t)
+                            {
+                                // collect cells
+                                case inml_technology::cell_type::NORMAL:
+                                case inml_technology::cell_type::INVERTER_MAGNET:
+                                {
+                                    hump.push_back(c);
+                                    break;
+                                }
+                                // interesting branch: could be a hump
+                                case inml_technology::cell_type::EMPTY:
+                                case inml_technology::cell_type::OUTPUT:
+                                {
+                                    handle(hump);
+                                    // discard hump cells and start searching again
+                                    hump.clear();
+                                    st = status::SEARCH;
+                                    break;
+                                }
+                                // encountered anything else: cannot be a hump
+                                default:
+                                {
+                                    hump.clear();
+                                    st = status::SKIP;
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                        case status::SKIP:
+                        {
+                            if (const auto t = lyt.get_cell_type(c); t == inml_technology::cell_type::EMPTY)
+                            {
+                                // skipping over, return to searching
+                                st = status::SEARCH;
+                            }
+                            break;
+                        }
+                        break;  // silence compiler warning
+                    }
+                }
+            }
+        } while (improvement_found);
     }
 
   private:
