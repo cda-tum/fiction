@@ -18,6 +18,7 @@ Let there be a *fiction*
    :caption: Networks
 
    networks/topology_network.rst
+   networks/edge_color_view.rst
 
 .. toctree::
    :maxdepth: 2

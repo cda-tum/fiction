@@ -5,6 +5,8 @@
 #ifndef FICTION_NETWORK_UTILS_HPP
 #define FICTION_NETWORK_UTILS_HPP
 
+#include "fiction/utils/hash.hpp"
+
 #include <mockturtle/traits.hpp>
 
 #include <algorithm>
@@ -25,8 +27,38 @@ template <typename Ntk>
 struct edge
 {
     const node<Ntk> source, target;
+    /**
+     * Equality operator.
+     *
+     * @param other Edge to compare to.
+     * @return True iff both sources and targets match.
+     */
+    bool operator==(const edge<Ntk>& other) const
+    {
+        return source == other.source && target == other.target;
+    }
 };
 }  // namespace mockturtle
+
+namespace std
+{
+/**
+ * Provides a hash implementation for mockturtle::edge<Ntk>.
+ *
+ * @tparam Ntk Network type of edge.
+ */
+template <typename Ntk>
+struct hash<mockturtle::edge<Ntk>>
+{
+    std::size_t operator()(const mockturtle::edge<Ntk>& e) const noexcept
+    {
+        std::size_t h = 0;
+        fiction::hash_combine(h, e.source, e.target);
+
+        return h;
+    }
+};
+}  // namespace std
 
 namespace fiction
 {
