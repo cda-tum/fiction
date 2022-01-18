@@ -81,13 +81,17 @@ class reverse_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
         update_topo();
     }
 
-    /*! \brief Reimplementation of `size`. */
+    /**
+     * Reimplementation of `size`.
+     */
     [[nodiscard]] auto size() const
     {
         return static_cast<uint32_t>(topo_order.size());
     }
 
-    /*! \brief Reimplementation of `num_gates`. */
+    /**
+     * Reimplementation of `num_gates`.
+     */
     [[nodiscard]] auto num_gates() const
     {
         uint32_t const offset = 1u + this->num_pis() +
@@ -95,27 +99,35 @@ class reverse_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
         return static_cast<uint32_t>(topo_order.size() - offset);
     }
 
-    /*! \brief Reimplementation of `node_to_index`. */
+    /**
+     * Reimplementation of `node_to_index`.
+     */
     [[nodiscard]] uint32_t node_to_index(node const& n) const
     {
         return static_cast<uint32_t>(
             std::distance(std::begin(topo_order), std::find(std::begin(topo_order), std::end(topo_order), n)));
     }
 
-    /*! \brief Reimplementation of `index_to_node`. */
+    /**
+     * Reimplementation of `index_to_node`.
+     */
     [[nodiscard]] node index_to_node(uint32_t index) const
     {
         return topo_order.at(index);
     }
 
-    /*! \brief Reimplementation of `foreach_node`. */
+    /**
+     * Reimplementation of `foreach_node`.
+     */
     template <typename Fn>
     void foreach_node(Fn&& fn) const
     {
         mockturtle::detail::foreach_element(topo_order.begin(), topo_order.end(), fn);
     }
 
-    /*! \brief Reimplementation of `foreach_gate`. */
+    /**
+     * Reimplementation of `foreach_gate`.
+     */
     template <typename Fn>
     void foreach_gate(Fn&& fn) const
     {
@@ -124,10 +136,11 @@ class reverse_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
         mockturtle::detail::foreach_element(topo_order.begin(), topo_order.end() - offset, fn);
     }
 
-    /*! \brief Reimplementation of `foreach_po`.
+    /**
+     * Reimplementation of `foreach_po`.
      *
-     * If `start_signal` is provided in constructor, only this is returned as
-     * primary output, otherwise reverts to original `foreach_po` implementation.
+     * If `start_signal` is provided in constructor, only this is returned as primary output, otherwise reverts to
+     * original `foreach_po` implementation.
      */
     template <typename Fn>
     void foreach_po(Fn&& fn) const
