@@ -47,6 +47,8 @@ TEST_CASE("East-south coloring", "[orthogonal]")
         fanout_substitution<topology_network>(blueprints::nary_operation_network<topology_network>())});
     check(mockturtle::fanout_view{fanout_substitution<topology_network>(blueprints::clpl<topology_network>())});
     check(mockturtle::fanout_view{
+        fanout_substitution<topology_network>(blueprints::half_adder_network<mockturtle::mig_network>())});
+    check(mockturtle::fanout_view{
         fanout_substitution<topology_network>(blueprints::full_adder_network<mockturtle::mig_network>())});
 }
 
@@ -145,6 +147,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
     check(blueprints::se_coloring_corner_case_network<topology_network>());
     check(blueprints::fanout_substitution_corner_case_network<topology_network>());
     check(blueprints::clpl<topology_network>());
+    check(blueprints::half_adder_network<mockturtle::mig_network>());
 
     // constant input network
     check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
