@@ -176,8 +176,7 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
     }
 };
 /**
- * A DOT drawer for networks wrapped in mockturtle::color_view. Node colors represent their painted color instead of
- * their gate type.
+ * A DOT drawer for networks with colored nodes. Node colors represent their painted color instead of their gate type.
  *
  * @tparam Ntk Logic network type.
  * @tparam DrawIndexes Flag to toggle the drawing of node indices.
@@ -204,12 +203,50 @@ class color_view_drawer : public mockturtle::default_dot_drawer<Ntk>
 
         static constexpr const char* undef_color = "black, fontcolor=white";
 
-        return c < colors.size() ? colors[ntk.color(n)] : undef_color;
+        return c < colors.size() ? colors[c] : undef_color;
+    }
+
+  protected:
+    static constexpr const std::array<const char*, 8> colors{{"ghostwhite", "deepskyblue1", "darkseagreen2", "crimson",
+                                                              "goldenrod1", "darkorchid2", "chocolate1", "gray28"}};
+};
+/**
+ * A DOT drawer for networks with colored edges. Node colors represent their painted color instead of
+ * their gate type.
+ *
+ * @tparam Ntk Logic network type.
+ * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ */
+template <typename Ntk, bool DrawIndexes = false>
+class edge_color_view_drawer : public color_view_drawer<Ntk>
+{
+  public:
+    /**
+     * Override function to store the previously accessed node such that edges can be colored when signal_style is
+     * called without specific information on the target node. This is a little bit hacky and depends on the way
+     * mockturtle's dot drawer works.
+     */
+    [[nodiscard]] std::string node_fillcolor(const Ntk& ntk, const mockturtle::node<Ntk>& n) const
+    {
+        last_accessed = n;
+
+        return color_view_drawer<Ntk>::node_fillcolor(ntk, n);
+    }
+
+    [[nodiscard]] std::string signal_style(Ntk const& ntk, mockturtle::signal<Ntk> const& f) const override
+    {
+        const auto c = ntk.color({last_accessed, ntk.get_node(f)});
+
+        static constexpr const char* undef_color = "black";
+
+        const auto color_str =
+            (c == 0 || c >= color_view_drawer<Ntk>::colors.size()) ? undef_color : color_view_drawer<Ntk>::colors[c];
+
+        return fmt::format("{}, color=\"{}\"", color_view_drawer<Ntk>::signal_style(ntk, f), color_str);
     }
 
   private:
-    static constexpr const std::array<const char*, 8> colors{{"ghostwhite", "deepskyblue1", "darkseagreen2", "crimson",
-                                                              "goldenrod1", "darkorchid2", "chocolate1", "gray28"}};
+    mutable mockturtle::node<Ntk> last_accessed{};
 };
 /**
  * Base class for a simple gate-level layout DOT drawer.

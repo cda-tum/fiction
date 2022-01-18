@@ -53,7 +53,7 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * @param e Edge whose color is desired.
      * @return Color of edge e.
      */
-    uint32_t color(const edge& e) const
+    [[nodiscard]] uint32_t color(const edge& e) const
     {
         if (auto it = edge_colors.find(e); it != edge_colors.cend())
         {
@@ -102,7 +102,7 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * @return Return value of pred(color(e)).
      */
     template <typename Pred>
-    bool eval_color(const edge& e, Pred&& pred) const
+    [[nodiscard]] bool eval_color(const edge& e, Pred&& pred) const
     {
         return pred(color(e));
     }
@@ -116,7 +116,7 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * @return Return value of pred(color(a), color(b)).
      */
     template <typename Pred>
-    bool eval_color(const edge& a, const edge& b, Pred&& pred) const
+    [[nodiscard]] bool eval_color(const edge& a, const edge& b, Pred&& pred) const
     {
         return pred(color(a), color(b));
     }

@@ -4,8 +4,8 @@
 
 // This file is based on mockturtle/test/views/color_view.cpp
 
-#include <fiction/networks/edge_color_view.hpp>
-#include <fiction/networks/topology_network.hpp>
+#include "fiction/networks/views/edge_color_view.hpp"
+#include "fiction/networks/topology_network.hpp"
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/klut.hpp>
@@ -16,7 +16,7 @@
 
 #include <vector>
 
-#include <catch.hpp>
+#include "catch.hpp"
 
 using namespace fiction;
 
