@@ -1,8 +1,8 @@
 # Let there be a *fiction*
 
-[![Ubuntu CI](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
-[![macOS CI](https://github.com/marcelwa/fiction/actions/workflows/macos.yml/badge.svg)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
-[![Windows CI](https://github.com/marcelwa/fiction/actions/workflows/windows.yml/badge.svg)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
+[![Ubuntu CI](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml/badge.svg?branch=v0.4.0)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
+[![macOS CI](https://github.com/marcelwa/fiction/actions/workflows/macos.yml/badge.svg?branch=v0.4.0)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
+[![Windows CI](https://github.com/marcelwa/fiction/actions/workflows/windows.yml/badge.svg?branch=v0.4.0)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
 [![codecov](https://codecov.io/gh/marcelwa/fiction/branch/v0.4.0/graph/badge.svg?token=SUPC5N6KFU)](https://codecov.io/gh/marcelwa/fiction)
 [![Documentation Status](https://readthedocs.org/projects/fiction/badge/?version=latest)](https://fiction.readthedocs.io/en/latest/?badge=latest)
 
