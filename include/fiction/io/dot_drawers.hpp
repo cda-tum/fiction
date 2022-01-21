@@ -237,8 +237,6 @@ class edge_color_view_drawer : public color_view_drawer<Ntk, DrawIndexes>
     {
         const auto c = ntk.color(mockturtle::edge<Ntk>{ntk.get_node(f), last_accessed});
 
-        std::cout << fmt::format("edge ({}, {}) colored with {}", last_accessed, ntk.get_node(f), c) << std::endl;
-
         static constexpr const char* undef_color = "black";
 
         const auto color_str = (c == 0 || c >= base_drawer::colors.size()) ? undef_color : base_drawer::colors[c];
