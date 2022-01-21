@@ -6,6 +6,7 @@
 #define FICTION_DOT_DRAWERS_HPP
 
 #include "fiction/traits.hpp"
+#include "fiction/utils/network_utils.hpp"
 #include "utils/version_info.hpp"
 
 #include <fiction/layouts/hexagonal_layout.hpp>
@@ -296,13 +297,32 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
     [[nodiscard]] virtual std::string tile_label(const Lyt& lyt, const tile<Lyt>& t) const noexcept
     {
         if (lyt.is_empty_tile(t))
+        {
             return "";
+        }
 
-        if (lyt.is_pi_tile(t))
-            return "PI";
+        if (lyt.is_pi_tile(t) || lyt.is_po_tile(t))
+        {
+            if constexpr (mockturtle::has_get_name_v<Lyt> && mockturtle::has_has_name_v<Lyt>)
+            {
+                if (const auto n = lyt.get_node(t); lyt.has_name(n))
+                {
+                    return lyt.get_name(n);
+                }
+            }
+            else
+            {
+                if (lyt.is_pi_tile(t))
+                {
+                    return "PI";
+                }
 
-        if (lyt.is_po_tile(t))
-            return "PO";
+                if (lyt.is_po_tile(t))
+                {
+                    return "PO";
+                }
+            }
+        }
 
         if constexpr (has_is_buf_v<Lyt>)
         {
