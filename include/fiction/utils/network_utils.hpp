@@ -37,6 +37,16 @@ struct edge
     {
         return source == other.source && target == other.target;
     }
+    /**
+     * Inequality operator.
+     *
+     * @param other Edge to compare to.
+     * @return True iff this edge is not equal to other.
+     */
+    bool operator!=(const edge<Ntk>& other) const
+    {
+        return !(*this == other);
+    }
 };
 }  // namespace mockturtle
 
@@ -281,6 +291,47 @@ bool has_high_degree_fanin_nodes(const Ntk& ntk, const uint32_t threshold = 2) n
         });
 
     return result;
+}
+/**
+ * Container that stores fanin edges of a node in a network, including whether one of them is a constant.
+ *
+ * @tparam Ntk mockturtle network type.
+ */
+template <typename Ntk>
+struct fanin_edge_container
+{
+    /**
+     * A vector of all fanin edges excluding for constants.
+     */
+    std::vector<mockturtle::edge<Ntk>> fanin_edges{};
+};
+/**
+ * Returns a fanin edge container filled with all fanin edges (fanin, node) of some given network node.
+ *
+ * @tparam Ntk mockturtle network type.
+ * @param ntk Network in which the fanin edges are to be gathered.
+ * @param n Node whose fanins are desired.
+ * @return A container of all incoming edges (fanin, n) in ntk.
+ */
+template <typename Ntk>
+fanin_edge_container<Ntk> fanin_edges(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
+{
+    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function.");
+    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function.");
+    static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant function.");
+
+    fanin_edge_container<Ntk> fec{};
+
+    ntk.foreach_fanin(n,
+                      [&ntk, &n, &fec](const auto& fi)
+                      {
+                          if (const auto fin = ntk.get_node(fi); !ntk.is_constant(fin))
+                          {
+                              fec.fanin_edges.push_back({fin, n});
+                          }
+                      });
+
+    return fec;
 }
 /**
  * Checks if a given node in a given network has fanins that are primary inputs.

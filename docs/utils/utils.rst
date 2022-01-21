@@ -19,6 +19,12 @@ Network Utils
 .. doxygenclass:: fiction::high_degree_fanin_exception
 
 .. doxygenfunction:: fiction::has_high_degree_fanin_nodes
+
+.. doxygenstruct:: fiction::fanin_edge_container
+   :members:
+
+.. doxygenfunction:: fiction::fanin_edges
+
 .. doxygenfunction:: fiction::has_incoming_primary_input
 .. doxygenfunction:: fiction::all_incoming_edge_paths
 .. doxygenfunction:: fiction::inverse_levels
