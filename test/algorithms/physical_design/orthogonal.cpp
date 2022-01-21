@@ -15,6 +15,7 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/topology_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
+#include <fiction/utils/debug/network_writer.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -29,7 +30,7 @@ TEST_CASE("East-south coloring", "[orthogonal]")
 {
     const auto check = [](const auto& ntk)
     {
-        auto container = detail::east_south_coloring(ntk);
+        auto container = detail::east_south_edge_coloring(ntk);
         CHECK(detail::is_east_south_colored(container.color_ntk));
     };
 
@@ -112,15 +113,15 @@ TEST_CASE("Layout equivalence", "[algorithms]")
         }
         SECTION("odd column")
         {
-            using gate_layout =
-                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>>;
+            using gate_layout = gate_level_layout<
+                clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
         SECTION("even column")
         {
-            using gate_layout =
-                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>>;
+            using gate_layout = gate_level_layout<
+                clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
@@ -172,4 +173,7 @@ TEST_CASE("Name conservation", "[orthogonal]")
 
     // PO names
     CHECK(layout.get_output_name(0) == "f");
+
+//    debug::write_dot_network(maj);
+//    debug::write_dot_layout(layout);
 }

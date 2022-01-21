@@ -8,6 +8,8 @@
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/networks/views/edge_color_view.hpp"
+#include "fiction/networks/views/reverse_topo_view.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/debug/network_writer.hpp"
 #include "fiction/utils/name_utils.hpp"
@@ -18,7 +20,6 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
-#include <mockturtle/views/color_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
@@ -119,28 +120,48 @@ struct coloring_container
             color_south{color_ntk.new_color()}
     {}
 
-    mockturtle::out_of_place_color_view<Ntk> color_ntk;
+    out_of_place_edge_color_view<Ntk> color_ntk;
 
     const uint32_t color_null = 0ul, color_east, color_south;
+
+    [[nodiscard]] uint32_t opposite_color(const uint32_t c) const noexcept
+    {
+        return c == color_south ? color_east : color_south;
+    }
 };
 
 template <typename Ntk>
-bool different_colored_fanins(const coloring_container<Ntk>& ctn, const mockturtle::node<Ntk>& n) noexcept
+void recursively_paint_edges(const coloring_container<Ntk>&                             ctn,
+                             const mockturtle::edge<out_of_place_edge_color_view<Ntk>>& e, const uint32_t c) noexcept
 {
-    const auto fc = fanins(ctn.color_ntk, n);
-
-    if (const auto fanin_size = fc.fanin_nodes.size(); fanin_size == 0 || fanin_size == 1)
+    // exit condition: edge is already painted
+    if (ctn.color_ntk.color(e) != ctn.color_null)
     {
-        return false;
-    }
-    else if (fanin_size == 2)
-    {
-        const auto fnc1 = ctn.color_ntk.color(fc.fanin_nodes[0]), fnc2 = ctn.color_ntk.color(fc.fanin_nodes[1]);
-
-        return (fnc1 != ctn.color_null && fnc2 != ctn.color_null) && fnc1 != fnc2;
+        return;
     }
 
-    return false;
+    // paint edge with given color
+    ctn.color_ntk.paint(e, c);
+
+    // paint children edges
+    foreach_outgoing_edge(ctn.color_ntk, e.source,
+                          [&ctn, &e, &c](const auto& oe)
+                          {
+                              if (oe != e)
+                              {
+                                  recursively_paint_edges(ctn, oe, ctn.opposite_color(c));
+                              }
+                          });
+
+    // paint spouse edges
+    foreach_incoming_edge(ctn.color_ntk, e.target,
+                          [&ctn, &e, &c](const auto& ie)
+                          {
+                              if (ie != e)
+                              {
+                                  recursively_paint_edges(ctn, ie, c);
+                              }
+                          });
 }
 
 /**
@@ -151,9 +172,10 @@ bool different_colored_fanins(const coloring_container<Ntk>& ctn, const mockturt
  * @return
  */
 template <typename Ntk>
-coloring_container<Ntk> east_south_coloring(const Ntk& ntk) noexcept
+coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
 {
     coloring_container<Ntk> ctn{ntk};
+    reverse_topo_view       rtv{ntk};  // reverse topological order of nodes
 
 #if (PROGRESS_BARS)
     // initialize a progress bar
@@ -161,42 +183,30 @@ coloring_container<Ntk> east_south_coloring(const Ntk& ntk) noexcept
                                  "[i] determining relative positions: |{0}|"};
 #endif
 
-    ctn.color_ntk.foreach_gate(
+    rtv.foreach_gate(
         [&](const auto& n, [[maybe_unused]] const auto i)
         {
-            // skip already colored nodes
-            if (ctn.color_ntk.color(n) == ctn.color_null)
+            const auto finc = fanin_edges(ctn.color_ntk, n);
+
+            // if any incoming edge is colored east, color them all east, and south otherwise
+            const auto color =
+                std::any_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
+                            [&ctn](const auto& fe) { return ctn.color_ntk.color(fe) == ctn.color_east; }) ?
+                    ctn.color_east :
+                    ctn.color_south;
+
+            std::for_each(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
+                          [&ctn, &color](const auto& fe) { recursively_paint_edges(ctn, fe, color); });
+
+            if (std::all_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
+                            [&ctn](const auto& fe) { return ctn.color_ntk.color(fe) == ctn.color_east; }))
             {
-                const auto s = siblings(ctn.color_ntk, n);
-
-                const auto clr =
-                    // if node has fanins of different color, pick color null
-                    different_colored_fanins(ctn, n) ?
-                        ctn.color_null :
-                        // if all siblings are either colored south or null, pick color east
-                        std::all_of(s.cbegin(), s.cend(),
-                                    [&ctn](const auto& sn)
-                                    {
-                                        const auto snc = ctn.color_ntk.color(sn);
-                                        return snc == ctn.color_south || snc == ctn.color_null;
-                                    }) ?
-                        // unless a node has an additional PO fanout,then pick color south instead
-                        ctn.color_ntk.is_po(ctn.color_ntk.make_signal(n)) && ctn.color_ntk.fanout_size(n) > 1 ?
-                        ctn.color_south :
-                        ctn.color_east :
-                        // if all siblings are either colored east or null, pick color south
-                        std::all_of(s.cbegin(), s.cend(),
-                                    [&ctn](const auto& sn)
-                                    {
-                                        const auto snclr = ctn.color_ntk.color(sn);
-                                        return snclr == ctn.color_east || snclr == ctn.color_null;
-                                    }) ?
-                        ctn.color_south :
-                            // else, pick color null
-                            ctn.color_null;
-
-                // paint n with color c
-                ctn.color_ntk.paint(n, clr);
+                ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, ctn.color_east);
+            }
+            else if (std::all_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
+                                 [&ctn](const auto& fe) { return ctn.color_ntk.color(fe) == ctn.color_south; }))
+            {
+                ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, ctn.color_south);
             }
 
 #if (PROGRESS_BARS)
@@ -204,6 +214,9 @@ coloring_container<Ntk> east_south_coloring(const Ntk& ntk) noexcept
             bar(i);
 #endif
         });
+
+//    debug::write_dot_network<decltype(ctn.color_ntk), edge_color_view_drawer<decltype(ctn.color_ntk), true>>(
+//        ctn.color_ntk, "edge_coloring");
 
     return ctn;
 }
@@ -400,7 +413,7 @@ class orthogonal_impl
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
         // compute a coloring
-        const auto ctn = east_south_coloring(ntk);
+        const auto ctn = east_south_edge_coloring(ntk);
 
         mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ctn.color_ntk)> node2pos{ctn.color_ntk};
 
@@ -408,12 +421,7 @@ class orthogonal_impl
         Lyt layout{determine_layout_size<Lyt>(ctn), twoddwave_clocking<Lyt>(ps.number_of_clock_phases)};
 
         // reserve PI nodes without positions
-        ctn.color_ntk.foreach_pi(
-            [&layout, &ctn](const auto& pi)
-            {
-                const auto s = ctn.color_ntk.make_signal(pi);
-                layout.create_pi(ctn.color_ntk.has_name(s) ? ctn.color_ntk.get_name(s) : "");
-            });
+        auto pi2node = reserve_input_nodes(layout, ctn.color_ntk);
 
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         tile<Lyt> latest_pos{1, 0};
@@ -432,11 +440,7 @@ class orthogonal_impl
                     // if node is a PI, move it to its correct position
                     if (ctn.color_ntk.is_pi(n))
                     {
-                        node2pos[n] = layout.move_node(
-                            static_cast<mockturtle::node<Lyt>>(n),
-                            {0, latest_pos.y});  // this casts a network node to a layout node. This only works because
-                                                 // topology_network and gate_level_layout use the same number of
-                                                 // constants followed by PIs
+                        node2pos[n] = layout.move_node(pi2node[n], {0, latest_pos.y});
 
                         // resolve conflicting PIs
                         ctn.color_ntk.foreach_fanout(
@@ -525,8 +529,6 @@ class orthogonal_impl
                         // n is colored null; corner case
                         else
                         {
-                            // TODO if both directions are free, consider the siblings
-
                             // make sure pre1_t has an empty tile to its east and pre2_t to its south
                             if (!layout.is_empty_tile(layout.east(pre1_t)) ||
                                 !layout.is_empty_tile(layout.south(pre2_t)))
