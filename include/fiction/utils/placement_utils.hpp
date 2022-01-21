@@ -39,12 +39,28 @@ template <typename Lyt, typename Ntk>
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
     static_assert(mockturtle::has_foreach_pi_v<Ntk>, "Ntk does not implement the foreach_pi function");
+    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function");
+    static_assert(mockturtle::has_make_signal_v<Ntk>, "Ntk does not implement the make_signal function");
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::has_create_pi_v<Lyt>, "Lyt does not implement the create_pi function");
 
     mockturtle::node_map<mockturtle::node<Lyt>, Ntk> pi_map{ntk};
 
-    ntk.foreach_pi([&lyt, &pi_map](const auto& pi) { pi_map[pi] = lyt.get_node(lyt.create_pi("", {0, 0})); });
+    ntk.foreach_pi(
+        [&lyt, &ntk, &pi_map](const auto& pi)
+        {
+            std::string pi_name{};
+
+            if constexpr (mockturtle::has_has_name_v<Ntk> && mockturtle::has_get_name_v<Ntk>)
+            {
+                if (const auto pi_signal = ntk.make_signal(pi); ntk.has_name(pi_signal))
+                {
+                    pi_name = ntk.get_name(pi_signal);
+                }
+            }
+
+            pi_map[pi] = lyt.get_node(lyt.create_pi(pi_name, {0, 0}));
+        });
     // little hacky: move last created node to a dead tile to remove it from the layout again but preserve its existence
     lyt.move_node(lyt.get_node({0, 0}), {});
 
