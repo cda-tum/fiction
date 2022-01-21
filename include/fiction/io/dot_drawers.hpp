@@ -218,7 +218,7 @@ class color_view_drawer : public mockturtle::default_dot_drawer<Ntk>
  * @tparam DrawIndexes Flag to toggle the drawing of node indices.
  */
 template <typename Ntk, bool DrawIndexes = false>
-class edge_color_view_drawer : public color_view_drawer<Ntk>
+class edge_color_view_drawer : public color_view_drawer<Ntk, DrawIndexes>
 {
   public:
     /**
@@ -226,27 +226,30 @@ class edge_color_view_drawer : public color_view_drawer<Ntk>
      * called without specific information on the target node. This is a little bit hacky and depends on the way
      * mockturtle's dot drawer works.
      */
-    [[nodiscard]] std::string node_fillcolor(const Ntk& ntk, const mockturtle::node<Ntk>& n) const
+    [[nodiscard]] std::string node_fillcolor(const Ntk& ntk, const mockturtle::node<Ntk>& n) const override
     {
         last_accessed = n;
 
-        return color_view_drawer<Ntk>::node_fillcolor(ntk, n);
+        return base_drawer::node_fillcolor(ntk, n);
     }
 
     [[nodiscard]] std::string signal_style(Ntk const& ntk, mockturtle::signal<Ntk> const& f) const override
     {
-        const auto c = ntk.color({last_accessed, ntk.get_node(f)});
+        const auto c = ntk.color(mockturtle::edge<Ntk>{ntk.get_node(f), last_accessed});
+
+        std::cout << fmt::format("edge ({}, {}) colored with {}", last_accessed, ntk.get_node(f), c) << std::endl;
 
         static constexpr const char* undef_color = "black";
 
-        const auto color_str =
-            (c == 0 || c >= color_view_drawer<Ntk>::colors.size()) ? undef_color : color_view_drawer<Ntk>::colors[c];
+        const auto color_str = (c == 0 || c >= base_drawer::colors.size()) ? undef_color : base_drawer::colors[c];
 
-        return fmt::format("{}, color=\"{}\"", color_view_drawer<Ntk>::signal_style(ntk, f), color_str);
+        return fmt::format("{}, color=\"{}\"", base_drawer::signal_style(ntk, f), color_str);
     }
 
   private:
     mutable mockturtle::node<Ntk> last_accessed{};
+
+    using base_drawer = color_view_drawer<Ntk, DrawIndexes>;
 };
 /**
  * Base class for a simple gate-level layout DOT drawer.
