@@ -1,0 +1,14 @@
+path_classifiers:
+  test:
+    - test
+  library:
+    - libs
+
+extraction:
+  cpp:
+    configure:
+      command:
+        - cmake -S . -B build -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
+    index:
+      build_command:
+        - cmake --build build -j2
