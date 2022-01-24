@@ -5,6 +5,9 @@ path_classifiers:
     - libs
   docs:
     - docs
+    - bib
+  template:
+    - benchmarks
 
 extraction:
   cpp:
