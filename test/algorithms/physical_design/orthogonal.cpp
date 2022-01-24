@@ -29,7 +29,7 @@ TEST_CASE("East-south coloring", "[orthogonal]")
 {
     const auto check = [](const auto& ntk)
     {
-        auto container = detail::east_south_coloring(ntk);
+        auto container = detail::east_south_edge_coloring(ntk);
         CHECK(detail::is_east_south_colored(container.color_ntk));
     };
 
@@ -46,6 +46,8 @@ TEST_CASE("East-south coloring", "[orthogonal]")
     check(mockturtle::fanout_view{
         fanout_substitution<topology_network>(blueprints::nary_operation_network<topology_network>())});
     check(mockturtle::fanout_view{fanout_substitution<topology_network>(blueprints::clpl<topology_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<topology_network>(blueprints::half_adder_network<mockturtle::mig_network>())});
     check(mockturtle::fanout_view{
         fanout_substitution<topology_network>(blueprints::full_adder_network<mockturtle::mig_network>())});
 }
@@ -110,15 +112,15 @@ TEST_CASE("Layout equivalence", "[algorithms]")
         }
         SECTION("odd column")
         {
-            using gate_layout =
-                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>>;
+            using gate_layout = gate_level_layout<
+                clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
         SECTION("even column")
         {
-            using gate_layout =
-                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>>;
+            using gate_layout = gate_level_layout<
+                clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
@@ -145,6 +147,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
     check(blueprints::se_coloring_corner_case_network<topology_network>());
     check(blueprints::fanout_substitution_corner_case_network<topology_network>());
     check(blueprints::clpl<topology_network>());
+    check(blueprints::half_adder_network<mockturtle::mig_network>());
 
     // constant input network
     check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());

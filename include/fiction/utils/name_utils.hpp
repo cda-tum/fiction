@@ -23,7 +23,6 @@ namespace fiction
  */
 template <typename NtkOrLyt>
 std::string get_name(const NtkOrLyt& ntk_or_lyt) noexcept
-
 {
     if constexpr (mockturtle::has_get_network_name_v<NtkOrLyt>)
     {
@@ -74,7 +73,7 @@ void restore_network_name(const NtkOrLytSrc& ntk_or_lyt_src, NtkOrLytDest& ntk_o
 }
 /**
  * Assigns output names from one network to another. Outputs are identified by their order. Since gate-level layout's
- * are network types as well, this function naturally works for them too.
+ * are network types as well, this function naturally works for them, too.
  *
  * @tparam NtkSrc Source network type.
  * @tparam NtkDest Target network type.
@@ -107,7 +106,7 @@ void restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
 }
 /**
  * Assigns all signal names from one network to another. For this purpose, a mapping between signals is needed in terms
- * of a node_map. Since gate-level layout's are network types as well, this function naturally works for them too.
+ * of a node_map. Since gate-level layout's are network types as well, this function naturally works for them, too.
  *
  * @tparam NtkSrc Source network type.
  * @tparam NtkDest Target network type.
@@ -133,9 +132,9 @@ void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest,
         {
             if (ntk_src.has_name(f))
             {
-                auto name = ntk_src.get_name(f);
+                const auto name = ntk_src.get_name(f);
 
-                ntk_dest.set_name(static_cast<mockturtle::node<NtkDest>>(old2new[ntk_src.get_node(f)]), name);
+                ntk_dest.set_name(ntk_dest.get_node((old2new[ntk_src.get_node(f)])), name);
             }
         };
 
@@ -174,9 +173,9 @@ void restore_signal_names(
         {
             if (ntk_src.has_name(f))
             {
-                auto name = ntk_src.get_name(f);
+                const auto name = ntk_src.get_name(f);
 
-                ntk_dest.set_name(static_cast<mockturtle::node<NtkDest>>(old2new[ntk_src.get_node(f)][n]), name);
+                ntk_dest.set_name(ntk_dest.get_node((old2new[ntk_src.get_node(f)][n])), name);
             }
         };
 

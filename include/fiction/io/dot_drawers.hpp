@@ -6,6 +6,7 @@
 #define FICTION_DOT_DRAWERS_HPP
 
 #include "fiction/traits.hpp"
+#include "fiction/utils/network_utils.hpp"
 #include "utils/version_info.hpp"
 
 #include <fiction/layouts/hexagonal_layout.hpp>
@@ -176,8 +177,7 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
     }
 };
 /**
- * A DOT drawer for networks wrapped in mockturtle::color_view. Node colors represent their painted color instead of
- * their gate type.
+ * A DOT drawer for networks with colored nodes. Node colors represent their painted color instead of their gate type.
  *
  * @tparam Ntk Logic network type.
  * @tparam DrawIndexes Flag to toggle the drawing of node indices.
@@ -190,26 +190,65 @@ class color_view_drawer : public mockturtle::default_dot_drawer<Ntk>
     {
         if constexpr (DrawIndexes)
         {
-            return fmt::format("n: {}, c: {}", ntk.node_to_index(n), ntk.color(n));
+            return fmt::format("n: {}, c: {}", ntk.node_to_index(n), ntk.edge_color(n));
         }
         else
         {
-            return fmt::format("c: {}", ntk.color(n));
+            return fmt::format("c: {}", ntk.edge_color(n));
         }
     }
 
     [[nodiscard]] std::string node_fillcolor(const Ntk& ntk, const mockturtle::node<Ntk>& n) const override
     {
-        const auto c = ntk.color(n);
+        const auto c = ntk.edge_color(n);
 
         static constexpr const char* undef_color = "black, fontcolor=white";
 
-        return c < colors.size() ? colors[ntk.color(n)] : undef_color;
+        return c < colors.size() ? colors[c] : undef_color;
+    }
+
+  protected:
+    static constexpr const std::array<const char*, 8> colors{{"ghostwhite", "deepskyblue1", "darkseagreen2", "crimson",
+                                                              "goldenrod1", "darkorchid2", "chocolate1", "gray28"}};
+};
+/**
+ * A DOT drawer for networks with colored edges. Node colors represent their painted color instead of
+ * their gate type.
+ *
+ * @tparam Ntk Logic network type.
+ * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ */
+template <typename Ntk, bool DrawIndexes = false>
+class edge_color_view_drawer : public color_view_drawer<Ntk, DrawIndexes>
+{
+  public:
+    /**
+     * Override function to store the previously accessed node such that edges can be colored when signal_style is
+     * called without specific information on the target node. This is a little bit hacky and depends on the way
+     * mockturtle's dot drawer works.
+     */
+    [[nodiscard]] std::string node_fillcolor(const Ntk& ntk, const mockturtle::node<Ntk>& n) const override
+    {
+        last_accessed = n;
+
+        return base_drawer::node_fillcolor(ntk, n);
+    }
+
+    [[nodiscard]] std::string signal_style(Ntk const& ntk, mockturtle::signal<Ntk> const& f) const override
+    {
+        const auto c = ntk.edge_color(mockturtle::edge<Ntk>{ntk.get_node(f), last_accessed});
+
+        static constexpr const char* undef_color = "black";
+
+        const auto color_str = (c == 0 || c >= base_drawer::colors.size()) ? undef_color : base_drawer::colors[c];
+
+        return fmt::format("{}, color=\"{}\"", base_drawer::signal_style(ntk, f), color_str);
     }
 
   private:
-    static constexpr const std::array<const char*, 8> colors{{"ghostwhite", "deepskyblue1", "darkseagreen2", "crimson",
-                                                              "goldenrod1", "darkorchid2", "chocolate1", "gray28"}};
+    mutable mockturtle::node<Ntk> last_accessed{};
+
+    using base_drawer = color_view_drawer<Ntk, DrawIndexes>;
 };
 /**
  * Base class for a simple gate-level layout DOT drawer.
@@ -258,13 +297,32 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
     [[nodiscard]] virtual std::string tile_label(const Lyt& lyt, const tile<Lyt>& t) const noexcept
     {
         if (lyt.is_empty_tile(t))
+        {
             return "";
+        }
 
-        if (lyt.is_pi_tile(t))
-            return "PI";
+        if (lyt.is_pi_tile(t) || lyt.is_po_tile(t))
+        {
+            if constexpr (mockturtle::has_get_name_v<Lyt> && mockturtle::has_has_name_v<Lyt>)
+            {
+                if (const auto n = lyt.get_node(t); lyt.has_name(n))
+                {
+                    return lyt.get_name(n);
+                }
+            }
+            else
+            {
+                if (lyt.is_pi_tile(t))
+                {
+                    return "PI";
+                }
 
-        if (lyt.is_po_tile(t))
-            return "PO";
+                if (lyt.is_po_tile(t))
+                {
+                    return "PO";
+                }
+            }
+        }
 
         if constexpr (has_is_buf_v<Lyt>)
         {
