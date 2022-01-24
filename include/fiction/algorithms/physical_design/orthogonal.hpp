@@ -11,7 +11,6 @@
 #include "fiction/networks/views/edge_color_view.hpp"
 #include "fiction/networks/views/reverse_topo_view.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/debug/network_writer.hpp"
 #include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/network_utils.hpp"
 #include "fiction/utils/placement_utils.hpp"
@@ -62,25 +61,6 @@ struct orthogonal_physical_design_stats
 namespace detail
 {
 
-template <typename Ntk>
-bool has_po_fanout(const Ntk& ntk, const mockturtle::node<Ntk> n) noexcept
-{
-    bool result = false;
-
-    ntk.foreach_fanout(n,
-                       [&ntk, &n, &result](const auto& fon)
-                       {
-                           if (ntk.is_po(fon))
-                           {
-                               result = true;
-                           }
-
-                           return !result;
-                       });
-
-    return result;
-}
-
 /**
  * Determine siblings of the given node. A sibling is a node that shares the same fan-in with n.
  * @param n Node to consider.
@@ -126,7 +106,7 @@ struct coloring_container
 
     [[nodiscard]] uint32_t opposite_color(const uint32_t c) const noexcept
     {
-        return c == color_south ? color_east : color_south;
+        return c == color_east ? color_south : color_east;
     }
 };
 
@@ -198,11 +178,13 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
             std::for_each(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
                           [&ctn, &color](const auto& fe) { recursively_paint_edges(ctn, fe, color); });
 
+            // if all incoming edges are colored east, paint the node east as well
             if (std::all_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
                             [&ctn](const auto& fe) { return ctn.color_ntk.color(fe) == ctn.color_east; }))
             {
                 ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, ctn.color_east);
             }
+            // else, if all incoming edges are colored south, paint the node south as well
             else if (std::all_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
                                  [&ctn](const auto& fe) { return ctn.color_ntk.color(fe) == ctn.color_south; }))
             {
@@ -214,9 +196,6 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
             bar(i);
 #endif
         });
-
-//    debug::write_dot_network<decltype(ctn.color_ntk), edge_color_view_drawer<decltype(ctn.color_ntk), true>>(
-//        ctn.color_ntk, "edge_coloring");
 
     return ctn;
 }
