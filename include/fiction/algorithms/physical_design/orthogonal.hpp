@@ -411,7 +411,7 @@ class orthogonal_impl
 #endif
 
         ctn.color_ntk.foreach_node(
-            [&, this](const auto& n, [[maybe_unused]] const auto i)
+            [&, this](const mockturtle::node<decltype(ctn.color_ntk)>& n, [[maybe_unused]] const auto i)
             {
                 // do not place constants
                 if (!ctn.color_ntk.is_constant(n))
