@@ -134,7 +134,7 @@ void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest,
             {
                 const auto name = ntk_src.get_name(f);
 
-                ntk_dest.set_name(static_cast<mockturtle::node<NtkDest>>(old2new[ntk_src.get_node(f)]), name);
+                ntk_dest.set_name(ntk_dest.get_node((old2new[ntk_src.get_node(f)])), name);
             }
         };
 
@@ -175,7 +175,7 @@ void restore_signal_names(
             {
                 const auto name = ntk_src.get_name(f);
 
-                ntk_dest.set_name(static_cast<mockturtle::node<NtkDest>>(old2new[ntk_src.get_node(f)][n]), name);
+                ntk_dest.set_name(ntk_dest.get_node((old2new[ntk_src.get_node(f)][n])), name);
             }
         };
 

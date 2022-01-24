@@ -15,7 +15,6 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/topology_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
-#include <fiction/utils/debug/network_writer.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -173,7 +172,4 @@ TEST_CASE("Name conservation", "[orthogonal]")
 
     // PO names
     CHECK(layout.get_output_name(0) == "f");
-
-//    debug::write_dot_network(maj);
-//    debug::write_dot_layout(layout);
 }
