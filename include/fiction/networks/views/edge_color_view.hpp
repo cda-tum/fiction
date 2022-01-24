@@ -53,7 +53,7 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * @param e Edge whose color is desired.
      * @return Color of edge e.
      */
-    [[nodiscard]] uint32_t color(const edge& e) const
+    [[nodiscard]] uint32_t edge_color(const edge& e) const
     {
         if (auto it = edge_colors.find(e); it != edge_colors.cend())
         {
@@ -69,7 +69,7 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      *
      * @param e Edge to paint.
      */
-    void paint(const edge& e) const
+    void paint_edge(const edge& e) const
     {
         edge_colors[e] = parent_view::value;
     }
@@ -77,11 +77,11 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * Paint a given edge with the given color.
      *
      * @param e Edge to paint.
-     * @param color Color to paint e with.
+     * @param clr Color to paint e with.
      */
-    void paint(const edge& e, uint32_t color) const
+    void paint_edge(const edge& e, uint32_t clr) const
     {
-        edge_colors[e] = color;
+        edge_colors[e] = clr;
     }
     /**
      * Paint a given edge with the color of another given edge.
@@ -89,7 +89,7 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * @param e Edge to paint.
      * @param other Edge whose color is to be used to paint e.
      */
-    void paint(const edge& e, const edge& other) const
+    void paint_edge(const edge& e, const edge& other) const
     {
         edge_colors[e] = edge_colors[other];
     }
@@ -102,9 +102,9 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * @return Return value of pred(color(e)).
      */
     template <typename Pred>
-    [[nodiscard]] bool eval_color(const edge& e, Pred&& pred) const
+    [[nodiscard]] bool eval_edge_color(const edge& e, Pred&& pred) const
     {
-        return pred(color(e));
+        return pred(edge_color(e));
     }
     /**
      * Evaluates a predicate on two given edges' colors.
@@ -116,9 +116,9 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * @return Return value of pred(color(a), color(b)).
      */
     template <typename Pred>
-    [[nodiscard]] bool eval_color(const edge& a, const edge& b, Pred&& pred) const
+    [[nodiscard]] bool eval_edge_color(const edge& a, const edge& b, Pred&& pred) const
     {
-        return pred(color(a), color(b));
+        return pred(edge_color(a), edge_color(b));
     }
 
     // make functions from parent_view accessible in this scope

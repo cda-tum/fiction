@@ -115,13 +115,13 @@ void recursively_paint_edges(const coloring_container<Ntk>&                     
                              const mockturtle::edge<out_of_place_edge_color_view<Ntk>>& e, const uint32_t c) noexcept
 {
     // exit condition: edge is already painted
-    if (ctn.color_ntk.color(e) != ctn.color_null)
+    if (ctn.color_ntk.edge_color(e) != ctn.color_null)
     {
         return;
     }
 
     // paint edge with given color
-    ctn.color_ntk.paint(e, c);
+    ctn.color_ntk.paint_edge(e, c);
 
     // paint children edges
     foreach_outgoing_edge(ctn.color_ntk, e.source,
@@ -171,7 +171,7 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
             // if any incoming edge is colored east, color them all east, and south otherwise
             const auto color =
                 std::any_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
-                            [&ctn](const auto& fe) { return ctn.color_ntk.color(fe) == ctn.color_east; }) ?
+                            [&ctn](const auto& fe) { return ctn.color_ntk.edge_color(fe) == ctn.color_east; }) ?
                     ctn.color_east :
                     ctn.color_south;
 
@@ -180,13 +180,13 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
 
             // if all incoming edges are colored east, paint the node east as well
             if (std::all_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
-                            [&ctn](const auto& fe) { return ctn.color_ntk.color(fe) == ctn.color_east; }))
+                            [&ctn](const auto& fe) { return ctn.color_ntk.edge_color(fe) == ctn.color_east; }))
             {
                 ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, ctn.color_east);
             }
             // else, if all incoming edges are colored south, paint the node south as well
             else if (std::all_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
-                                 [&ctn](const auto& fe) { return ctn.color_ntk.color(fe) == ctn.color_south; }))
+                                 [&ctn](const auto& fe) { return ctn.color_ntk.edge_color(fe) == ctn.color_south; }))
             {
                 ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, ctn.color_south);
             }
@@ -411,7 +411,7 @@ class orthogonal_impl
 #endif
 
         ctn.color_ntk.foreach_node(
-            [&, this](const mockturtle::node<decltype(ctn.color_ntk)>& n, [[maybe_unused]] const auto i)
+            [&, this](const auto& n, [[maybe_unused]] const auto i)
             {
                 // do not place constants
                 if (!ctn.color_ntk.is_constant(n))

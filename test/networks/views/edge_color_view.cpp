@@ -5,6 +5,8 @@
 // This file is based on mockturtle/test/views/color_view.cpp
 
 #include "fiction/networks/views/edge_color_view.hpp"
+
+#include "catch.hpp"
 #include "fiction/networks/topology_network.hpp"
 
 #include <mockturtle/networks/aig.hpp>
@@ -15,8 +17,6 @@
 #include <mockturtle/traits.hpp>
 
 #include <vector>
-
-#include "catch.hpp"
 
 using namespace fiction;
 
@@ -135,26 +135,26 @@ TEST_CASE("Out-of-place edge color view", "[edge-color-view]")
     SECTION("acts as edge color view")
     {
         /* assign some colors: (f1, f5) is white, (f1, f3) is yellow, and (f3, f6) is in the color of (f1, f3) */
-        aig_ecv.paint({aig_ecv.get_node(f1), aig_ecv.get_node(f5)}, white);
-        aig_ecv.paint({aig_ecv.get_node(f1), aig_ecv.get_node(f3)}, yellow);
-        aig_ecv.paint({aig_ecv.get_node(f3), aig_ecv.get_node(f6)}, {aig_ecv.get_node(f1), aig_ecv.get_node(f3)});
+        aig_ecv.paint_edge({aig_ecv.get_node(f1), aig_ecv.get_node(f5)}, white);
+        aig_ecv.paint_edge({aig_ecv.get_node(f1), aig_ecv.get_node(f3)}, yellow);
+        aig_ecv.paint_edge({aig_ecv.get_node(f3), aig_ecv.get_node(f6)}, {aig_ecv.get_node(f1), aig_ecv.get_node(f3)});
 
         /* (f1, f3) and (f3, f6) have the same color */
-        CHECK(aig_ecv.eval_color({aig_ecv.get_node(f1), aig_ecv.get_node(f3)},
-                                 {aig_ecv.get_node(f3), aig_ecv.get_node(f6)},
-                                 [](const auto c0, const auto c1) { return c0 == c1; }));
+        CHECK(aig_ecv.eval_edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f3)},
+                                      {aig_ecv.get_node(f3), aig_ecv.get_node(f6)},
+                                      [](const auto c0, const auto c1) { return c0 == c1; }));
 
         /* (f1, f5) and (f1, f3) have different colors */
-        CHECK(aig_ecv.eval_color({aig_ecv.get_node(f1), aig_ecv.get_node(f5)},
-                                 {aig_ecv.get_node(f1), aig_ecv.get_node(f3)},
-                                 [](const auto c0, const auto c1) { return c0 != c1; }));
+        CHECK(aig_ecv.eval_edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f5)},
+                                      {aig_ecv.get_node(f1), aig_ecv.get_node(f3)},
+                                      [](const auto c0, const auto c1) { return c0 != c1; }));
 
         /* (f1, f5) is at least white */
-        CHECK(aig_ecv.eval_color({aig_ecv.get_node(f1), aig_ecv.get_node(f5)},
-                                 [white](const auto color) { return color >= white; }));
+        CHECK(aig_ecv.eval_edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f5)},
+                                      [white](const auto color) { return color >= white; }));
 
         /* (f1, f5) is not yellow */
-        CHECK(aig_ecv.eval_color({aig_ecv.get_node(f1), aig_ecv.get_node(f5)},
-                                 [yellow](const auto color) { return color != yellow; }));
+        CHECK(aig_ecv.eval_edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f5)},
+                                      [yellow](const auto color) { return color != yellow; }));
     }
 }

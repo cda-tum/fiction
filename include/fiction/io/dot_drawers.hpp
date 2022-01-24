@@ -190,17 +190,17 @@ class color_view_drawer : public mockturtle::default_dot_drawer<Ntk>
     {
         if constexpr (DrawIndexes)
         {
-            return fmt::format("n: {}, c: {}", ntk.node_to_index(n), ntk.color(n));
+            return fmt::format("n: {}, c: {}", ntk.node_to_index(n), ntk.edge_color(n));
         }
         else
         {
-            return fmt::format("c: {}", ntk.color(n));
+            return fmt::format("c: {}", ntk.edge_color(n));
         }
     }
 
     [[nodiscard]] std::string node_fillcolor(const Ntk& ntk, const mockturtle::node<Ntk>& n) const override
     {
-        const auto c = ntk.color(n);
+        const auto c = ntk.edge_color(n);
 
         static constexpr const char* undef_color = "black, fontcolor=white";
 
@@ -236,7 +236,7 @@ class edge_color_view_drawer : public color_view_drawer<Ntk, DrawIndexes>
 
     [[nodiscard]] std::string signal_style(Ntk const& ntk, mockturtle::signal<Ntk> const& f) const override
     {
-        const auto c = ntk.color(mockturtle::edge<Ntk>{ntk.get_node(f), last_accessed});
+        const auto c = ntk.edge_color(mockturtle::edge<Ntk>{ntk.get_node(f), last_accessed});
 
         static constexpr const char* undef_color = "black";
 
