@@ -657,6 +657,9 @@ template <class Lyt>
 inline constexpr bool is_gate_level_layout_v = is_gate_level_layout<Lyt>::value;
 #pragma endregion
 
+template <typename Lyt>
+using gate = typename Lyt::node;
+
 #pragma region has_is_empty_tile
 template <class Lyt, class = void>
 struct has_is_empty_tile : std::false_type
