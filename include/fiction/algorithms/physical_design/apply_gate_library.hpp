@@ -36,9 +36,8 @@ class apply_gate_library_impl
   public:
     explicit apply_gate_library_impl(const GateLyt& lyt) :
             gate_lyt{lyt},
-            cell_lyt{typename CellLyt::aspect_ratio{((gate_lyt.x() + 1) * GateLibrary::gate_x_size()) - 1,
-                                                    ((gate_lyt.y() + 1) * GateLibrary::gate_y_size()) - 1,
-                                                    gate_lyt.z()},
+            cell_lyt{aspect_ratio<CellLyt>{((gate_lyt.x() + 1) * GateLibrary::gate_x_size()) - 1,
+                                           ((gate_lyt.y() + 1) * GateLibrary::gate_y_size()) - 1, gate_lyt.z()},
                      gate_lyt.get_clocking_scheme(), "", GateLibrary::gate_x_size(), GateLibrary::gate_y_size()}
     {}
 
@@ -175,15 +174,12 @@ class apply_gate_library_impl
 #endif
             });
 
-        if constexpr (std::is_same_v<GateLibrary, qca_one_library>)
+        // perform post-layout optimization if necessary
+        if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
         {
-            GateLibrary::assign_via_cells(cell_lyt);
+            GateLibrary::post_layout_optimization(cell_lyt);
         }
-        else if constexpr (std::is_same_v<GateLibrary, inml_topolinano_library>)
-        {
-            GateLibrary::straighten_wires(cell_lyt);
-        }
-
+        // if available, recover layout name
         if constexpr (has_get_layout_name_v<GateLyt> && has_set_layout_name_v<CellLyt>)
         {
             cell_lyt.set_layout_name(gate_lyt.get_layout_name());

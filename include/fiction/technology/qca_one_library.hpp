@@ -37,22 +37,22 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
      * that tile. May it be a gate or wires. Rotation and special marks like input and output, const cells etc.
      * are computed additionally.
      *
-     * @tparam Lyt Gate-level layout type.
+     * @tparam GateLyt Gate-level layout type.
      * @param lyt Gate-level layout that hosts tile t.
      * @param t Tile to be realized in QCA ONE.
      * @return QCA ONE gate representation of t including I/Os, rotation, const cells, etc.
      */
-    template <typename Lyt>
-    [[nodiscard]] static fcn_gate set_up_gate(const Lyt& lyt, const tile<Lyt>& t)
+    template <typename GateLyt>
+    [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
     {
-        static_assert(is_gate_level_layout_v<Lyt>, "Lyt must be a gate-level layout");
+        static_assert(is_gate_level_layout_v<GateLyt>, "Lyt must be a gate-level layout");
 
         const auto n = lyt.get_node(t);
         const auto p = determine_port_routing(lyt, t);
 
         try
         {
-            if constexpr (fiction::has_is_fanout_v<Lyt>)
+            if constexpr (fiction::has_is_fanout_v<GateLyt>)
             {
                 if (lyt.is_fanout(n))
                 {
@@ -62,27 +62,27 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
                         return fan_out_1_3;
                 }
             }
-            if constexpr (fiction::has_is_buf_v<Lyt>)
+            if constexpr (fiction::has_is_buf_v<GateLyt>)
             {
                 if (lyt.is_buf(n))
                     return wire_map.at(p);
             }
-            if constexpr (fiction::has_is_inv_v<Lyt>)
+            if constexpr (fiction::has_is_inv_v<GateLyt>)
             {
                 if (lyt.is_inv(n))
                     return inverter_map.at(p);
             }
-            if constexpr (mockturtle::has_is_and_v<Lyt>)
+            if constexpr (mockturtle::has_is_and_v<GateLyt>)
             {
                 if (lyt.is_and(n))
                     return conjunction_map.at(p);
             }
-            if constexpr (mockturtle::has_is_or_v<Lyt>)
+            if constexpr (mockturtle::has_is_or_v<GateLyt>)
             {
                 if (lyt.is_or(n))
                     return disjunction_map.at(p);
             }
-            if constexpr (mockturtle::has_is_maj_v<Lyt>)
+            if constexpr (mockturtle::has_is_maj_v<GateLyt>)
             {
                 if (lyt.is_maj(n))
                     return majority;
@@ -96,8 +96,14 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         throw unsupported_gate_type_exception(t);
     }
 
-    template <typename Lyt>
-    static void assign_via_cells(Lyt& lyt) noexcept
+    /**
+     * Post-layout optimization that assigns via cell mode to wire crossings.
+     *
+     * @tparam CellLyt Cell-level layout type.
+     * @param lyt The cell-level layout that has been created via application of set_up_gate.
+     */
+    template <typename CellLyt>
+    static void post_layout_optimization(CellLyt& lyt) noexcept
     {
         lyt.foreach_cell_position(
             [&lyt](const auto& c)
@@ -107,7 +113,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
                     if (!lyt.is_empty_cell(c))
                     {
                         // gather adjacent cell positions
-                        auto adjacent_cells = lyt.template adjacent_coordinates<std::vector<cell<Lyt>>>(c);
+                        auto adjacent_cells = lyt.template adjacent_coordinates<std::vector<cell<CellLyt>>>(c);
                         // remove all empty cells
                         adjacent_cells.erase(std::remove_if(adjacent_cells.begin(), adjacent_cells.end(),
                                                             [&lyt](const auto& ac) { return lyt.is_empty_cell(ac); }),
@@ -118,7 +124,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
                             // change cell mode to via
                             lyt.assign_cell_mode(c, qca_technology::cell_mode::VERTICAL);
                             // create a corresponding via ground cell
-                            const cell<Lyt> ground_via_cell{c.x, c.y, 0};
+                            const cell<CellLyt> ground_via_cell{c.x, c.y, 0};
                             lyt.assign_cell_type(ground_via_cell, qca_technology::cell_type::NORMAL);
                             lyt.assign_cell_mode(ground_via_cell, qca_technology::cell_mode::VERTICAL);
                         }

@@ -36,40 +36,40 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
      * that tile. May it be a gate or wires. Rotation and special marks like input and output, const cells etc.
      * are computed additionally.
      *
-     * @tparam Lyt Gate-level layout type.
+     * @tparam GateLyt Gate-level layout type.
      * @param lyt Gate-level layout that hosts tile t.
      * @param t Tile to be realized in the ToPoliNano library.
      * @return ToPoliNano gate representation of t including I/Os, rotation, etc.
      */
-    template <typename Lyt>
-    [[nodiscard]] static fcn_gate set_up_gate(const Lyt& lyt, const tile<Lyt>& t)
+    template <typename GateLyt>
+    [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
     {
-        static_assert(is_gate_level_layout_v<Lyt>, "Lyt must be a gate-level layout");
+        static_assert(is_gate_level_layout_v<GateLyt>, "Lyt must be a gate-level layout");
 
         const auto n = lyt.get_node(t);
 
-        if constexpr (fiction::has_is_fanout_v<Lyt>)
+        if constexpr (fiction::has_is_fanout_v<GateLyt>)
         {
             if (lyt.is_fanout(n))
             {
                 return coupler;
             }
         }
-        if constexpr (mockturtle::has_is_and_v<Lyt>)
+        if constexpr (mockturtle::has_is_and_v<GateLyt>)
         {
             if (lyt.is_and(n))
             {
                 return conjunction;
             }
         }
-        if constexpr (mockturtle::has_is_or_v<Lyt>)
+        if constexpr (mockturtle::has_is_or_v<GateLyt>)
         {
             if (lyt.is_or(n))
             {
                 return disjunction;
             }
         }
-        if constexpr (mockturtle::has_is_maj_v<Lyt>)
+        if constexpr (mockturtle::has_is_maj_v<GateLyt>)
         {
             if (lyt.is_maj(n))
             {
@@ -81,14 +81,14 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
 
         try
         {
-            if constexpr (fiction::has_is_inv_v<Lyt>)
+            if constexpr (fiction::has_is_inv_v<GateLyt>)
             {
                 if (lyt.is_inv(n))
                 {
                     return inverter_map.at(p);
                 }
             }
-            if constexpr (fiction::has_is_buf_v<Lyt>)
+            if constexpr (fiction::has_is_buf_v<GateLyt>)
             {
                 if (lyt.is_buf(n))
                 {
@@ -125,9 +125,17 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         throw unsupported_gate_type_exception(t);
     }
 
-    template <typename Lyt>
-    static void straighten_wires(Lyt& lyt) noexcept
+    /**
+     * Post-layout optimization that straightens the wire segments to save cells.
+     *
+     * @tparam CellLyt Cell-level layout type.
+     * @param lyt The cell-level layout that has been created via application of set_up_gate.
+     */
+    template <typename CellLyt>
+    static void post_layout_optimization(CellLyt& lyt) noexcept
     {
+        static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt must be a cell-level layout");
+
         enum class status
         {
             SEARCH,
@@ -205,12 +213,12 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
 
             for (decltype(lyt.y()) row = 0; row <= lyt.y(); ++row)
             {
-                std::vector<cell<Lyt>> hump{};
+                std::vector<cell<CellLyt>> hump{};
 
                 for (decltype(lyt.x()) column = 0; column <= lyt.x(); ++column)
                 {
                     // simple state machine for identifying humps and removing them
-                    switch (const auto c = cell<Lyt>{column, row}; st)
+                    switch (const auto c = cell<CellLyt>{column, row}; st)
                     {
                         case status::SEARCH:
                         {

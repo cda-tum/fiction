@@ -7,9 +7,16 @@
 #include "fiction/io/print_layout.hpp"
 
 #include <fiction/technology/inml_topolinano_library.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
+
+TEST_CASE("Traits", "[iNML-ToPoliNano-library]")
+{
+    CHECK(has_post_layout_optimization_v<inml_topolinano_library, inml_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<inml_topolinano_library, cart_gate_clk_lyt>);
+}
 
 TEST_CASE("Setting up input ports, gates, and wires", "[iNML-ToPoliNano-library]")
 {
@@ -90,7 +97,6 @@ TEST_CASE("Setting up input ports, gates, and wires", "[iNML-ToPoliNano-library]
         {' ', ' ', ' ', ' '},
         {'x', 'x', 'x', 'o'}
     }})};
-
 
     // clang-format on
 

@@ -72,9 +72,20 @@ class unsupported_gate_orientation_exception : public std::exception
  * extend fcn_gate_library if it benefits from its features but does not have to. The only requirement is that it must
  * be a static class that provides a
  *
- *    static fcn_gate set_up_gate(const Lyt& lyt, const tile<Lyt>& t)
+ * .. code-block:: c++
  *
- * public member function.
+ *    template <typename GateLyt>
+ *    static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
+ *
+ * public member function. Additionally, a
+ *
+ * .. code-block:: c++
+ *
+ *    template <typename CellLyt>
+ *    static void post_layout_optimization(CellLyt& lyt)
+ *
+ * can optionally be provided if some cleanup or optimization is necessary on the cell-level layout after each gate has
+ * been mapped.
  *
  * @tparam Technology FCN technology type of the implementing gate library.
  * @tparam GateSizeX Tile size in x-dimension.

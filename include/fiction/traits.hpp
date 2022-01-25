@@ -214,7 +214,7 @@ inline constexpr bool has_elevation_operations_v = has_elevation_operations<Lyt>
 #pragma endregion
 
 #pragma region is_coordinate_layout
-template <class Ntk, class = void>
+template <class Lyt, class = void>
 struct is_coordinate_layout : std::false_type
 {};
 
@@ -378,7 +378,7 @@ template <typename Lyt>
 using tile = typename Lyt::tile;
 
 #pragma region is_tile_based_layout
-template <class Ntk, class = void>
+template <class Lyt, class = void>
 struct is_tile_based_layout : std::false_type
 {};
 
@@ -447,7 +447,7 @@ template <typename Lyt>
 using clock_zone = typename Lyt::clock_zone;
 
 #pragma region is_clocked_layout
-template <class Ntk, class = void>
+template <class Lyt, class = void>
 struct is_clocked_layout : std::false_type
 {};
 
@@ -559,7 +559,7 @@ template <typename Lyt>
 using technology = typename Lyt::technology;
 
 #pragma region is_cell_level_layout
-template <class Ntk, class = void>
+template <class Lyt, class = void>
 struct is_cell_level_layout : std::false_type
 {};
 
@@ -643,7 +643,7 @@ inline constexpr bool has_get_layout_name_v = has_get_layout_name<Ntk>::value;
  */
 
 #pragma region is_gate_level_layout
-template <class Ntk, class = void>
+template <class Lyt, class = void>
 struct is_gate_level_layout : std::false_type
 {};
 
@@ -682,6 +682,27 @@ struct has_is_empty<Lyt, std::void_t<decltype(std::declval<Lyt>().is_empty())>> 
 
 template <class Lyt>
 inline constexpr bool has_is_empty_v = has_is_empty<Lyt>::value;
+#pragma endregion
+
+/**
+ * Gate libraries
+ */
+
+#pragma region has_post_layout_optimization
+template <class Lib, class Lyt, class = void>
+struct has_post_layout_optimization : std::false_type
+{};
+
+template <class Lib, class Lyt>
+struct has_post_layout_optimization<
+    Lib, Lyt,
+    std::enable_if_t<is_cell_level_layout_v<Lyt>,
+                     std::void_t<decltype(std::declval<Lib>().post_layout_optimization(std::declval<Lyt>))>>>
+        : std::true_type
+{};
+
+template <class Lib, class Lyt>
+inline constexpr bool has_post_layout_optimization_v = has_post_layout_optimization<Lib, Lyt>::value;
 #pragma endregion
 
 /**

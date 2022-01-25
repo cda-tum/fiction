@@ -10,8 +10,16 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/qca_one_library.hpp>
+#include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 using namespace fiction;
+
+TEST_CASE("Traits", "[qca-one-library]")
+{
+    CHECK(has_post_layout_optimization_v<qca_one_library, qca_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<qca_one_library, cart_gate_clk_lyt>);
+}
 
 TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 {
