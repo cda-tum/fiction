@@ -7,7 +7,7 @@
 #include "fiction/networks/views/edge_color_view.hpp"
 
 #include "catch.hpp"
-#include "fiction/networks/topology_network.hpp"
+#include "fiction/networks/technology_network.hpp"
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/klut.hpp>
@@ -66,7 +66,7 @@ TEST_CASE("Create edge color views", "[edge-color-view]")
     test_color_view<mockturtle::xag_network>();
     test_color_view<mockturtle::xmg_network>();
     test_color_view<mockturtle::klut_network>();
-    test_color_view<fiction::topology_network>();
+    test_color_view<fiction::technology_network>();
 }
 
 TEST_CASE("Out-of-place edge color view", "[edge-color-view]")

@@ -13,7 +13,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
-#include <fiction/networks/topology_network.hpp>
+#include <fiction/networks/technology_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 
 #include <mockturtle/networks/aig.hpp>
@@ -34,22 +34,22 @@ TEST_CASE("East-south coloring", "[orthogonal]")
     };
 
     check(mockturtle::fanout_view{
-        fanout_substitution<topology_network>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>())});
+        fanout_substitution<technology_network>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>())});
     check(mockturtle::fanout_view{
-        fanout_substitution<topology_network>(blueprints::maj1_network<mockturtle::aig_network>())});
+        fanout_substitution<technology_network>(blueprints::maj1_network<mockturtle::aig_network>())});
     check(mockturtle::fanout_view{
-        fanout_substitution<topology_network>(blueprints::maj4_network<mockturtle::aig_network>())});
+        fanout_substitution<technology_network>(blueprints::maj4_network<mockturtle::aig_network>())});
     check(mockturtle::fanout_view{
-        fanout_substitution<topology_network>(blueprints::se_coloring_corner_case_network<topology_network>())});
-    check(mockturtle::fanout_view{fanout_substitution<topology_network>(
-        blueprints::fanout_substitution_corner_case_network<topology_network>())});
+        fanout_substitution<technology_network>(blueprints::se_coloring_corner_case_network<technology_network>())});
+    check(mockturtle::fanout_view{fanout_substitution<technology_network>(
+        blueprints::fanout_substitution_corner_case_network<technology_network>())});
     check(mockturtle::fanout_view{
-        fanout_substitution<topology_network>(blueprints::nary_operation_network<topology_network>())});
-    check(mockturtle::fanout_view{fanout_substitution<topology_network>(blueprints::clpl<topology_network>())});
+        fanout_substitution<technology_network>(blueprints::nary_operation_network<technology_network>())});
+    check(mockturtle::fanout_view{fanout_substitution<technology_network>(blueprints::clpl<technology_network>())});
     check(mockturtle::fanout_view{
-        fanout_substitution<topology_network>(blueprints::half_adder_network<mockturtle::mig_network>())});
+        fanout_substitution<technology_network>(blueprints::half_adder_network<mockturtle::mig_network>())});
     check(mockturtle::fanout_view{
-        fanout_substitution<topology_network>(blueprints::full_adder_network<mockturtle::mig_network>())});
+        fanout_substitution<technology_network>(blueprints::full_adder_network<mockturtle::mig_network>())});
 }
 
 void check_stats(const orthogonal_physical_design_stats& st) noexcept
@@ -77,10 +77,10 @@ void check_ortho_equiv_all()
     check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
     check_ortho_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>());
     check_ortho_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());
-    check_ortho_equiv<Lyt>(blueprints::se_coloring_corner_case_network<topology_network>());
-    check_ortho_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<topology_network>());
-    check_ortho_equiv<Lyt>(blueprints::nary_operation_network<topology_network>());
-    check_ortho_equiv<Lyt>(blueprints::clpl<topology_network>());
+    check_ortho_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>());
+    check_ortho_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
+    check_ortho_equiv<Lyt>(blueprints::nary_operation_network<technology_network>());
+    check_ortho_equiv<Lyt>(blueprints::clpl<technology_network>());
 
     // constant input network
     check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
@@ -144,9 +144,9 @@ TEST_CASE("Gate library application", "[orthogonal]")
     check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
     check(blueprints::maj1_network<mockturtle::aig_network>());
     check(blueprints::maj4_network<mockturtle::aig_network>());
-    check(blueprints::se_coloring_corner_case_network<topology_network>());
-    check(blueprints::fanout_substitution_corner_case_network<topology_network>());
-    check(blueprints::clpl<topology_network>());
+    check(blueprints::se_coloring_corner_case_network<technology_network>());
+    check(blueprints::fanout_substitution_corner_case_network<technology_network>());
+    check(blueprints::clpl<technology_network>());
     check(blueprints::half_adder_network<mockturtle::mig_network>());
 
     // constant input network

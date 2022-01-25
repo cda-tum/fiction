@@ -17,7 +17,7 @@ Let there be a *fiction*
    :maxdepth: 2
    :caption: Networks
 
-   networks/topology_network.rst
+   networks/technology_network.rst
    networks/views.rst
 
 .. toctree::

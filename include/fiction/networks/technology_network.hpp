@@ -2,8 +2,8 @@
 // Created by marcel on 20.05.21.
 //
 
-#ifndef FICTION_TOPOLOGY_NETWORK_HPP
-#define FICTION_TOPOLOGY_NETWORK_HPP
+#ifndef FICTION_TECHNOLOGY_NETWORK_HPP
+#define FICTION_TECHNOLOGY_NETWORK_HPP
 
 #include <mockturtle/networks/klut.hpp>
 
@@ -23,17 +23,17 @@ namespace fiction
  * Most functions in this class are borrowed and reimplemented directly from klut_network and are, therefore, only
  * sporadically documented where their behavior might differ. For information consider mockturtle/networks/klut.hpp.
  */
-class topology_network : public mockturtle::klut_network
+class technology_network : public mockturtle::klut_network
 {
   public:
 #pragma region Types and constructors
 
-    topology_network() : mockturtle::klut_network()
+    technology_network() : mockturtle::klut_network()
     {
         add_additional_functions();
     }
 
-    explicit topology_network(std::shared_ptr<mockturtle::klut_storage> s) : mockturtle::klut_network(std::move(s))
+    explicit technology_network(std::shared_ptr<mockturtle::klut_storage> s) : mockturtle::klut_network(std::move(s))
     {
         add_additional_functions();
     }
@@ -413,4 +413,4 @@ class topology_network : public mockturtle::klut_network
 
 }  // namespace fiction
 
-#endif  // FICTION_TOPOLOGY_NETWORK_HPP
+#endif  // FICTION_TECHNOLOGY_NETWORK_HPP

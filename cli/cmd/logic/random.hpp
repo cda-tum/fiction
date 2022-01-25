@@ -33,7 +33,9 @@ class random_command : public command
                     "Generates a random logic network. The random seed will be used as its name for reproducibility.")
     {
         add_flag("--aig,-a", "Create random AIG network");
+        add_flag("--xag,-x", "Create random XAG network");
         add_flag("--mig,-m", "Create random MIG network");
+        add_flag("--tec,-t", "Create random technology network");
         add_option("--rnd_num_inp,-n", num_inp, "Number of primary inputs", true);
         add_option("--rnd_num_gates,-g", num_gates, "Number of gates (excluding inverters and fan-outs)", true);
         add_option("--rnd_seed,-s", seed, "Random seed");
@@ -45,7 +47,7 @@ class random_command : public command
      */
     void execute() override
     {
-        if (!is_set("aig") && !is_set("mig") && !is_set("top"))
+        if (!is_set("aig") && !is_set("xag") && !is_set("mig") && !is_set("tec"))
         {
             env->out() << "[e] at least one network type must be specified" << std::endl;
         }
@@ -55,13 +57,17 @@ class random_command : public command
             {
                 generate<fiction::aig_nt, false>();
             }
+            if (is_set("xag"))
+            {
+                generate<fiction::xag_nt, false>();
+            }
             if (is_set("mig"))
             {
                 generate<fiction::mig_nt, true>();
             }
-            if (is_set("top"))
+            if (is_set("tec"))
             {
-                generate<fiction::top_nt, true>();
+                generate<fiction::tec_nt, true>();
             }
         }
 

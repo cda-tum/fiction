@@ -178,7 +178,7 @@ int main(int argc, char* argv[])
     fanout_params.threshold = 1;
 
     // substitute high-degree output nodes by fanout nodes (converts network into a topology_network)
-    auto top_ntk = fiction::fanout_substitution<fiction::top_nt>(ntk, fanout_params);
+    auto top_ntk = fiction::fanout_substitution<fiction::tec_nt>(ntk, fanout_params);
 
     // print network properties again
     print_network_properties(top_ntk);

@@ -13,7 +13,7 @@
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/io/print_layout.hpp>
-#include <fiction/networks/topology_network.hpp>
+#include <fiction/networks/technology_network.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
@@ -296,27 +296,27 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
     SECTION("Straight inverters")
     {
         CHECK(has_straight_inverters(
-            generate_layout<cart_gate_clk_lyt>(blueprints::inverter_network<topology_network>(),
+            generate_layout<cart_gate_clk_lyt>(blueprints::inverter_network<technology_network>(),
                                                use(straight_inverter(configuration<cart_gate_clk_lyt>())))));
         CHECK(has_straight_inverters(
-            generate_layout<cart_gate_clk_lyt>(blueprints::inverter_network<topology_network>(),
+            generate_layout<cart_gate_clk_lyt>(blueprints::inverter_network<technology_network>(),
                                                open(straight_inverter(configuration<cart_gate_clk_lyt>())))));
     }
     SECTION("Global synchronization")
     {
         SECTION("enabled")
         {
-            check_tp(
-                generate_layout<cart_gate_clk_lyt>(blueprints::one_to_five_path_difference_network<topology_network>(),
-                                                   use(configuration<cart_gate_clk_lyt>())),
-                1);
+            check_tp(generate_layout<cart_gate_clk_lyt>(
+                         blueprints::one_to_five_path_difference_network<technology_network>(),
+                         use(configuration<cart_gate_clk_lyt>())),
+                     1);
         }
         SECTION("disabled")
         {
-            check_tp(
-                generate_layout<cart_gate_clk_lyt>(blueprints::one_to_five_path_difference_network<topology_network>(),
-                                                   use(desynchronize(configuration<cart_gate_clk_lyt>()))),
-                2);
+            check_tp(generate_layout<cart_gate_clk_lyt>(
+                         blueprints::one_to_five_path_difference_network<technology_network>(),
+                         use(desynchronize(configuration<cart_gate_clk_lyt>()))),
+                     2);
         }
     }
     //    SECTION("Asynchronicity")
@@ -327,7 +327,7 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
     //    }
     SECTION("Synchronization elements")
     {
-        //            CHECK(generate_layout<cart_gate_clk_lyt>(blueprints::one_to_five_path_difference_network<topology_network>(),
+        //            CHECK(generate_layout<cart_gate_clk_lyt>(blueprints::one_to_five_path_difference_network<technology_network>(),
         //                                                     twoddwave(border_io(sync_elems(configuration<cart_gate_clk_lyt>()))))
         //                      .num_se() > 0);
 
@@ -382,7 +382,7 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
                 row(crossings(border_io(configuration<hex_lyt>()))));
 
             check_with_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(
-                blueprints::nand_xnor_network<fiction::topology_network>(),
+                blueprints::nand_xnor_network<fiction::technology_network>(),
                 row(crossings(border_io(configuration<hex_lyt>()))));
         }
         SECTION("2DDWave clocking")
@@ -403,9 +403,9 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         }
         SECTION("Straight inverters")
         {
-            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
+            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
                                                                   use(straight_inverter(configuration<hex_lyt>())))));
-            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
+            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
                                                                   open(straight_inverter(configuration<hex_lyt>())))));
         }
     }
@@ -442,7 +442,7 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         }
         SECTION("Straight inverters")
         {
-            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
+            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
                                                                   use(straight_inverter(configuration<hex_lyt>())))));
         }
     }
@@ -478,7 +478,7 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         }
         SECTION("Straight inverters")
         {
-            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
+            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
                                                                   use(straight_inverter(configuration<hex_lyt>())))));
         }
     }
@@ -514,9 +514,9 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         }
         SECTION("Straight inverters")
         {
-            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
+            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
                                                                   use(straight_inverter(configuration<hex_lyt>())))));
-            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<topology_network>(),
+            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
                                                                   open(straight_inverter(configuration<hex_lyt>())))));
         }
     }

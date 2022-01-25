@@ -5,7 +5,7 @@
 #include "catch.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 
-#include <fiction/networks/topology_network.hpp>
+#include <fiction/networks/technology_network.hpp>
 #include <fiction/utils/network_utils.hpp>
 
 #include <mockturtle/networks/mig.hpp>
@@ -69,11 +69,11 @@ TEST_CASE("Incoming primary input", "[network-utils")
 
 TEST_CASE("Inverse levels", "[network-utils]")
 {
-    const auto top = blueprints::one_to_five_path_difference_network<mockturtle::fanout_view<topology_network>>();
+    const auto tec = blueprints::one_to_five_path_difference_network<mockturtle::fanout_view<technology_network>>();
 
-    const auto inv_levels = inverse_levels(top);
+    const auto inv_levels = inverse_levels(tec);
 
-    // there should be 11 nodes in the topology network (2 constants, 2 PIs, 6 BUFs, 1 AND)
+    // there should be 11 nodes in the technology network (2 constants, 2 PIs, 6 BUFs, 1 AND)
     REQUIRE(inv_levels.size() == 11);
 
     // constant does not get a level assigned

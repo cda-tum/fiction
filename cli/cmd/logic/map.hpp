@@ -6,7 +6,7 @@
 #define FICTION_CMD_MAP_HPP
 
 #include <fiction/algorithms/network_transformation/network_conversion.hpp>
-#include <fiction/networks/topology_network.hpp>
+#include <fiction/networks/technology_network.hpp>
 #include <fiction/technology/technology_mapping_library.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
@@ -238,10 +238,10 @@ class map_command : public command
             if (!st.mapping_error)
             {
                 // convert network
-                auto converted_ntk = fiction::convert_network<fiction::top_nt>(mapped_ntk);
+                auto converted_ntk = fiction::convert_network<fiction::tec_nt>(mapped_ntk);
                 fiction::restore_network_name(*ntk_ptr, converted_ntk);
 
-                s.extend() = std::make_shared<fiction::top_nt>(converted_ntk);
+                s.extend() = std::make_shared<fiction::tec_nt>(converted_ntk);
             }
         };
 

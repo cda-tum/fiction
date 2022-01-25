@@ -69,7 +69,7 @@ Multiple different ``network`` types are supported that can directly be created 
 - AND-Inverter Graph (AIG), ``-a``
 - XOR-AND-Inverter Graph (XAG), ``-x``
 - MAJ-Inverter Graph (MIG), ``-m``
-- Topology network (TOP), ``-t``
+- Technology network (TEC), ``-t``
 
 Truth tables
 ############
@@ -99,7 +99,7 @@ inputs can be specified (``-n``) as well as the gate count excluding inverters a
 allows for reproducibility as it will also be used as the network``\ s name.
 
 However, most importantly, a technology mapping command ``map`` is available that rewrites any ``network`` type as a
-topology network that exclusively uses gates from a given set but computes the same Boolean function.
+technology network that exclusively uses gates from a given set but computes the same Boolean function.
 For instance, ``map -oxi`` produces a logic network that only uses OR gates, XOR gates, and inverters. This is extremely
 helpful for gate libraries that do not support certain gate types.
 

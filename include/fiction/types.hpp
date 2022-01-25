@@ -13,7 +13,7 @@
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/layouts/synchronization_element_layout.hpp"
 #include "fiction/layouts/tile_based_layout.hpp"
-#include "fiction/networks/topology_network.hpp"
+#include "fiction/networks/technology_network.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
@@ -62,18 +62,18 @@ using mig_ptr = std::shared_ptr<mig_nt>;
 
 constexpr const char* mig_name = "MIG";
 
-using top_nt  = mockturtle::names_view<fiction::topology_network>;
-using top_ptr = std::shared_ptr<top_nt>;
+using tec_nt  = mockturtle::names_view<fiction::technology_network>;
+using tec_ptr = std::shared_ptr<tec_nt>;
 
-constexpr const char* top_name = "TOP";
+constexpr const char* tec_name = "TEC";
 
-using logic_network_t = std::variant<aig_ptr, xag_ptr, mig_ptr, top_ptr>;
+using logic_network_t = std::variant<aig_ptr, xag_ptr, mig_ptr, tec_ptr>;
 
 template <class Ntk>
 inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, aig_nt> ? aig_name :
                                              std::is_same_v<std::decay_t<Ntk>, xag_nt> ? xag_name :
                                              std::is_same_v<std::decay_t<Ntk>, mig_nt> ? mig_name :
-                                             std::is_same_v<std::decay_t<Ntk>, top_nt> ? top_name :
+                                             std::is_same_v<std::decay_t<Ntk>, tec_nt> ? tec_name :
                                                                                          "?";
 
 /**

@@ -14,7 +14,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
-#include <fiction/networks/topology_network.hpp>
+#include <fiction/networks/technology_network.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
@@ -31,30 +31,30 @@ void to_x(Ntk ntk)
 {
     SECTION("MIG")
     {
-        auto converted_mig = convert_network<mockturtle::mig_network>(ntk);
+        const auto converted_mig = convert_network<mockturtle::mig_network>(ntk);
 
         check_eq(ntk, converted_mig);
     }
 
     SECTION("AIG")
     {
-        auto converted_aig = convert_network<mockturtle::aig_network>(ntk);
+        const auto converted_aig = convert_network<mockturtle::aig_network>(ntk);
 
         check_eq(ntk, converted_aig);
     }
 
     SECTION("XAG")
     {
-        auto converted_xag = convert_network<mockturtle::xag_network>(ntk);
+        const auto converted_xag = convert_network<mockturtle::xag_network>(ntk);
 
         check_eq(ntk, converted_xag);
     }
 
-    SECTION("TOP")
+    SECTION("TEC")
     {
-        auto converted_top = convert_network<topology_network>(ntk);
+        const auto converted_tec = convert_network<technology_network>(ntk);
 
-        check_eq(ntk, converted_top);
+        check_eq(ntk, converted_tec);
     }
 }
 
@@ -63,7 +63,7 @@ TEST_CASE("Name conservation", "[network-conversion]")
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");
 
-    const auto converted_maj = convert_network<mockturtle::names_view<fiction::topology_network>>(maj);
+    const auto converted_maj = convert_network<mockturtle::names_view<fiction::technology_network>>(maj);
 
     // network name
     CHECK(converted_maj.get_network_name() == "maj");
@@ -81,27 +81,27 @@ TEST_CASE("Simple network conversion", "[network-conversion]")
 {
     SECTION("MIG to X")
     {
-        auto mig = blueprints::maj1_network<mockturtle::mig_network>();
+        const auto mig = blueprints::maj1_network<mockturtle::mig_network>();
 
         to_x(mig);
     }
     SECTION("AIG to X")
     {
-        auto aig = blueprints::maj1_network<mockturtle::aig_network>();
+        const auto aig = blueprints::maj1_network<mockturtle::aig_network>();
 
         to_x(aig);
     }
     SECTION("XAG to X")
     {
-        auto xag = blueprints::maj1_network<mockturtle::xag_network>();
+        const auto xag = blueprints::maj1_network<mockturtle::xag_network>();
 
         to_x(xag);
     }
-    SECTION("TOP to X")
+    SECTION("TEC to X")
     {
-        auto top = blueprints::maj1_network<fiction::topology_network>();
+        const auto tec = blueprints::maj1_network<fiction::technology_network>();
 
-        to_x(top);
+        to_x(tec);
     }
 }
 
@@ -122,10 +122,10 @@ TEST_CASE("Complex network conversion", "[network-conversion]")
         to_x(blueprints::maj4_network<mockturtle::xag_network>());
         to_x(blueprints::nary_operation_network<mockturtle::xag_network>());
     }
-    SECTION("TOP to X")
+    SECTION("TEC to X")
     {
-        to_x(blueprints::maj4_network<fiction::topology_network>());
-        to_x(blueprints::nary_operation_network<fiction::topology_network>());
+        to_x(blueprints::maj4_network<fiction::technology_network>());
+        to_x(blueprints::nary_operation_network<fiction::technology_network>());
     }
 }
 
@@ -143,7 +143,7 @@ TEST_CASE("Constant inverted signal recovery conversion", "[network-conversion]"
     {
         to_x(blueprints::constant_gate_input_maj_network<mockturtle::xag_network>());
     }
-    // no test for topology_network because it does not support inverted signals
+    // no test for technology_network because it does not support inverted signals
 }
 
 TEST_CASE("Layout conversion", "[network-conversion]")
@@ -154,7 +154,7 @@ TEST_CASE("Layout conversion", "[network-conversion]")
 
         REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
-        auto layout = blueprints::xor_maj_gate_layout<gate_layout>();
+        const auto layout = blueprints::xor_maj_gate_layout<gate_layout>();
 
         to_x(layout);
     }
@@ -162,41 +162,43 @@ TEST_CASE("Layout conversion", "[network-conversion]")
 
 TEST_CASE("Consistent network size after multiple conversions", "[network-conversion]")
 {
-    auto top = blueprints::se_coloring_corner_case_network<topology_network>();
+    const auto tec = blueprints::se_coloring_corner_case_network<technology_network>();
 
-    auto converted =
-        convert_network<topology_network>(convert_network<topology_network>(convert_network<topology_network>(top)));
+    const auto converted = convert_network<technology_network>(
+        convert_network<technology_network>(convert_network<technology_network>(tec)));
 
-    CHECK(top.size() == converted.size());
+    CHECK(tec.size() == converted.size());
 
-    auto converted_aig = convert_network<topology_network>(blueprints::maj4_network<mockturtle::aig_network>());
+    const auto converted_aig = convert_network<technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
 
-    auto converted_converted_aig = convert_network<topology_network>(
-        convert_network<topology_network>(convert_network<topology_network>(converted_aig)));
+    const auto converted_converted_aig = convert_network<technology_network>(
+        convert_network<technology_network>(convert_network<technology_network>(converted_aig)));
 
     CHECK(converted_aig.size() == converted_converted_aig.size());
 }
 
 TEST_CASE("Consistent network size after fanout substitution and conversion", "[network-conversion]")
 {
-    auto substituted_aig = fanout_substitution<topology_network>(blueprints::maj4_network<mockturtle::aig_network>());
-    auto converted_substituted_aig = convert_network<topology_network>(substituted_aig);
+    const auto substituted_aig =
+        fanout_substitution<technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
+    const auto converted_substituted_aig = convert_network<technology_network>(substituted_aig);
     CHECK(substituted_aig.size() == converted_substituted_aig.size());
 
-    auto substituted_top =
-        fanout_substitution<topology_network>(blueprints::fanout_substitution_corner_case_network<topology_network>());
-    auto converted_substituted_top = convert_network<topology_network>(substituted_top);
-    CHECK(substituted_top.size() == converted_substituted_top.size());
+    const auto substituted_tec = fanout_substitution<technology_network>(
+        blueprints::fanout_substitution_corner_case_network<technology_network>());
+    const auto converted_substituted_tec = convert_network<technology_network>(substituted_tec);
+    CHECK(substituted_tec.size() == converted_substituted_tec.size());
 }
 
 TEST_CASE("Consistent network size after balancing and conversion", "[network-conversion]")
 {
-    auto balanced_aig = network_balancing<topology_network>(blueprints::maj4_network<mockturtle::aig_network>());
-    auto converted_balanced_aig = convert_network<topology_network>(balanced_aig);
+    const auto balanced_aig =
+        network_balancing<technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
+    const auto converted_balanced_aig = convert_network<technology_network>(balanced_aig);
     CHECK(balanced_aig.size() == converted_balanced_aig.size());
 
-    auto balanced_top =
-        network_balancing<topology_network>(blueprints::fanout_substitution_corner_case_network<topology_network>());
-    auto converted_balanced_top = convert_network<topology_network>(balanced_top);
-    CHECK(balanced_top.size() == converted_balanced_top.size());
+    const auto balanced_tec = network_balancing<technology_network>(
+        blueprints::fanout_substitution_corner_case_network<technology_network>());
+    const auto converted_balanced_tec = convert_network<technology_network>(balanced_tec);
+    CHECK(balanced_tec.size() == converted_balanced_tec.size());
 }

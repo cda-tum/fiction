@@ -12,7 +12,7 @@
 #include <mockturtle/networks/klut.hpp>
 
 template <typename Ntk1, typename Ntk2>
-void check_eq(Ntk1 ntk1, Ntk2 ntk2)
+void check_eq(const Ntk1& ntk1, const Ntk2& ntk2)
 {
     auto miter = mockturtle::miter<mockturtle::klut_network>(ntk1, ntk2);
 

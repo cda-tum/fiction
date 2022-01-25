@@ -15,7 +15,7 @@
 namespace alice
 {
 /**
- * Creates a new topology network of the current logic network in store and performs a path balancing.
+ * Creates a new technology network of the current logic network in store and performs a path balancing.
  */
 class balance_command : public command
 {
@@ -26,11 +26,9 @@ class balance_command : public command
      * @param e alice::environment that specifies stores etc.
      */
     explicit balance_command(const environment::ptr& e) :
-            command(
-                e,
-                "Creates a new topology network from the current logic network in store. All paths in the new network "
-                "that are leading to any common node will have the same length. This is realized by inserting buffer "
-                "nodes. This does not respect possible crossings in the network.")
+            command(e, "Creates a new technology network from the current logic network in store. All paths in the new "
+                       "network that are leading to any common node will have the same length. This is realized by "
+                       "inserting buffer nodes. This does not respect possible crossings in the network.")
     {
         add_flag("--unify_outputs,-u", ps.unify_outputs,
                  "Additionally, push all primary outputs down to the same level");
@@ -54,7 +52,7 @@ class balance_command : public command
         }
 
         const auto perform_balancing = [this](auto&& ntk_ptr)
-        { return std::make_shared<fiction::top_nt>(fiction::network_balancing<fiction::top_nt>(*ntk_ptr, ps)); };
+        { return std::make_shared<fiction::tec_nt>(fiction::network_balancing<fiction::tec_nt>(*ntk_ptr, ps)); };
 
         s.extend() = std::visit(perform_balancing, s.current());
 

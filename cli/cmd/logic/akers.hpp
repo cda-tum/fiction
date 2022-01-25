@@ -31,8 +31,9 @@ class akers_command : public command
             command(e, "Synthesizes a Majority logic network from the current truth table in store.")
     {
         add_flag("--aig,-a", "Generate as AIG");
+        add_flag("--xag,-a", "Generate as XAG");
         add_flag("--mig,-m", "Generate as MIG");
-        add_flag("--top,-t", "Generate as Topology network");
+        add_flag("--tec,-t", "Generate as technology network");
     }
 
   protected:
@@ -41,7 +42,7 @@ class akers_command : public command
      */
     void execute() override
     {
-        if (!is_set("aig") && !is_set("mig") && !is_set("top"))
+        if (!is_set("aig") && !is_set("xag") && !is_set("mig") && !is_set("tec"))
         {
             env->out() << "[e] at least one network type must be specified" << std::endl;
             return;
@@ -62,13 +63,17 @@ class akers_command : public command
         {
             synthesize_and_store<fiction::aig_nt>(tt);
         }
+        if (is_set("xag"))
+        {
+            synthesize_and_store<fiction::xag_nt>(tt);
+        }
         if (is_set("mig"))
         {
             synthesize_and_store<fiction::mig_nt>(tt);
         }
-        if (is_set("top"))
+        if (is_set("tec"))
         {
-            synthesize_and_store<fiction::top_nt>(tt);
+            synthesize_and_store<fiction::tec_nt>(tt);
         }
     }
 

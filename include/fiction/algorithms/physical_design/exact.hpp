@@ -152,8 +152,8 @@ class exact_impl
             ps{p},
             pst{st}
     {
-        mockturtle::names_view<topology_network> intermediate_ntk{
-            fanout_substitution<mockturtle::names_view<topology_network>>(
+        mockturtle::names_view<technology_network> intermediate_ntk{
+            fanout_substitution<mockturtle::names_view<technology_network>>(
                 src, {fanout_substitution_params::substitution_strategy::BREADTH, ps.scheme->max_out_degree, 1ul})};
 
         // create PO nodes in the network
@@ -183,7 +183,7 @@ class exact_impl
      * Network type for internal handling. Converting the input network to this type ensures the availability of all
      * necessary member functions.
      */
-    using topology_ntk_t = mockturtle::topo_view<mockturtle::fanout_view<mockturtle::names_view<topology_network>>>;
+    using topology_ntk_t = mockturtle::topo_view<mockturtle::fanout_view<mockturtle::names_view<technology_network>>>;
     /**
      * Specification network.
      */
