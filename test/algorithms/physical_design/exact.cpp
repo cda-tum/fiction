@@ -547,4 +547,25 @@ TEST_CASE("Timeout", "[exact]")
     CHECK(!layout.has_value());
 }
 
+TEST_CASE("Name conservation", "[exact]")
+{
+    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
+    maj.set_network_name("maj");
+
+    const auto layout = exact<cart_gate_clk_lyt>(maj, res(configuration<cart_gate_clk_lyt>()));
+
+    REQUIRE(layout.has_value());
+
+    // network name
+    CHECK(layout->get_layout_name() == "maj");
+
+    // PI names
+    CHECK(layout->get_name(layout->pi_at(0)) == "a");  // first PI
+    CHECK(layout->get_name(layout->pi_at(1)) == "b");  // second PI
+    CHECK(layout->get_name(layout->pi_at(2)) == "c");  // third PI
+
+    // PO names
+    CHECK(layout->get_output_name(0) == "f");
+}
+
 #endif  // FICTION_Z3_SOLVER

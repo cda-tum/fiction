@@ -10,6 +10,7 @@
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/coordinates.hpp"
+#include "fiction/utils/name_utils.hpp"
 #include "utils/mugen_info.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
@@ -964,13 +965,23 @@ std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<
 {
     static_assert(
         mockturtle::is_network_type_v<Ntk>,
-        "Ntk is not a network type");  // Ntk is simulated anyways, therefore, this is the only relevant check here
+        "Ntk is not a network type");  // Ntk is simulated anyway, therefore, this is the only relevant check here
 
     // might throw an std::bad_alloc exception if ntk has too many inputs
     const auto tts = mockturtle::simulate<kitty::dynamic_truth_table>(
         ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>(static_cast<unsigned>(ntk.num_pis())));
 
-    return one_pass_synthesis<Lyt>(tts, ps, pst);
+    auto lyt = one_pass_synthesis<Lyt>(tts, ps, pst);
+
+    // if a layout was successfully generated, restore PI names
+    if (lyt.has_value())
+    {
+        restore_network_name(ntk, *lyt);
+        restore_input_names(ntk, *lyt);
+        restore_output_names(ntk, *lyt);
+    }
+
+    return lyt;
 }
 
 }  // namespace fiction

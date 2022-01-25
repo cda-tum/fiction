@@ -166,9 +166,9 @@ TEST_CASE("Name conservation", "[orthogonal]")
     CHECK(layout.get_layout_name() == "maj");
 
     // PI names
-    CHECK(layout.get_name(2) == "a");  // first PI
-    CHECK(layout.get_name(3) == "b");  // second PI
-    CHECK(layout.get_name(4) == "c");  // third PI
+    CHECK(layout.get_name(layout.pi_at(0)) == "a");  // first PI
+    CHECK(layout.get_name(layout.pi_at(1)) == "b");  // second PI
+    CHECK(layout.get_name(layout.pi_at(2)) == "c");  // third PI
 
     // PO names
     CHECK(layout.get_output_name(0) == "f");

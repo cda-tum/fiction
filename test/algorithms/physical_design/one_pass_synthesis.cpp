@@ -56,7 +56,8 @@ one_pass_synthesis_params<Lyt>&& use(one_pass_synthesis_params<Lyt>&& ps) noexce
 template <typename Lyt>
 one_pass_synthesis_params<Lyt>&& res(one_pass_synthesis_params<Lyt>&& ps) noexcept
 {
-    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_clocking<Lyt>());
+    ps.scheme     = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_clocking<Lyt>());
+    ps.enable_maj = true;
 
     return std::move(ps);
 }
@@ -171,14 +172,35 @@ TEST_CASE("One-pass synthesis", "[one-pass]")
 
 TEST_CASE("Timeout", "[one-pass]")
 {
-    auto timeout_config    = use(crossings(configuration<cart_gate_clk_lyt>()));
+    auto timeout_config    = use(configuration<cart_gate_clk_lyt>());
     timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
 
-    const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
+    const auto half_adder = blueprints::full_adder_network<mockturtle::aig_network>();
     const auto layout     = one_pass_synthesis<cart_gate_clk_lyt>(half_adder, timeout_config);
 
-    // since a half adder cannot be synthesized in just one second, layout should not have a value
+    // since a full adder cannot be synthesized in just one second, layout should not have a value
     CHECK(!layout.has_value());
+}
+
+TEST_CASE("Name conservation", "[one-pass]")
+{
+    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
+    maj.set_network_name("maj");
+
+    const auto layout = one_pass_synthesis<cart_gate_clk_lyt>(maj, res(configuration<cart_gate_clk_lyt>()));
+
+    REQUIRE(layout.has_value());
+
+    // network name
+    CHECK(layout->get_layout_name() == "maj");
+
+    // PI names
+    CHECK(layout->get_name(layout->pi_at(0)) == "a");  // first PI
+    CHECK(layout->get_name(layout->pi_at(1)) == "b");  // second PI
+    CHECK(layout->get_name(layout->pi_at(2)) == "c");  // third PI
+
+    // PO names
+    CHECK(layout->get_output_name(0) == "f");
 }
 
 #endif  // MUGEN
