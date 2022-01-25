@@ -9,7 +9,7 @@ if (NOT WIN32)
     # Option to enable Mugen
     option(FICTION_ENABLE_MUGEN "Enable the usage of Mugen, a Python3 library by Winston Haaswijk for FCN one-pass synthesis, and its dependencies" OFF)
     if (FICTION_ENABLE_MUGEN)
-        target_compile_definitions(fictionlib INTERFACE MUGEN)
+        target_compile_definitions(libfiction INTERFACE MUGEN)
     endif ()
 
     if (FICTION_ENABLE_MUGEN)
@@ -33,10 +33,10 @@ if (NOT WIN32)
         endif ()
 
         # Embedding the pybind11 interpreter
-        target_link_libraries(fictionlib INTERFACE pybind11::embed)
+        target_link_libraries(libfiction INTERFACE pybind11::embed)
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mugen/mugen_info.hpp.in utils/mugen_info.hpp)
-        target_include_directories(fictionlib INTERFACE ${PROJECT_BINARY_DIR}/libs/)
+        target_include_directories(libfiction INTERFACE ${PROJECT_BINARY_DIR}/libs/)
 
         message(STATUS "Mugen was enabled. Please note that it relies on the Python3 libraries 'graphviz', 'PySAT v0.1.6.dev6', and 'wrapt_timeout_decorator' to be properly installed")
     endif ()
@@ -60,11 +60,11 @@ if (FICTION_Z3)
         find_package(Threads REQUIRED)
 
         # Compile definition to guard include files
-        target_compile_definitions(fictionlib INTERFACE FICTION_Z3_SOLVER)
+        target_compile_definitions(libfiction INTERFACE FICTION_Z3_SOLVER)
         # Include Z3 library
-        target_include_directories(fictionlib INTERFACE ${Z3_CXX_INCLUDE_DIRS})
+        target_include_directories(libfiction INTERFACE ${Z3_CXX_INCLUDE_DIRS})
         # Link Z3
-        target_link_libraries(fictionlib INTERFACE ${Z3_LIBRARIES})
+        target_link_libraries(libfiction INTERFACE ${Z3_LIBRARIES})
 
         # use libc++ on macOS
         if (APPLE)
