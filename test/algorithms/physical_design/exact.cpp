@@ -12,7 +12,6 @@
 #include <fiction/algorithms/physical_design/exact.hpp>
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
-#include <fiction/io/print_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
@@ -174,7 +173,6 @@ void check_tp(const Lyt& lyt, const uint64_t tp)
 
     if (st.throughput != tp)
     {
-        print_gate_level_layout(std::cout, lyt);
         std::cout << lyt.get_clocking_scheme().name << std::endl;
     }
 
