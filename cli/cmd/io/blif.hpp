@@ -6,6 +6,7 @@
 #define FICTION_CMD_BLIF_HPP
 
 #include <fiction/types.hpp>
+#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <mockturtle/io/write_blif.hpp>
@@ -89,7 +90,7 @@ class blif_command : public command
     template <typename NtkOrLytVariant>
     void write_blif_callback(const NtkOrLytVariant& ntk_or_lyt_variant)
     {
-        const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return ntk_or_lyt_ptr->get_network_name(); };
+        const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return fiction::get_name(ntk_or_lyt_ptr); };
 
         const auto write_blif = [this](auto&& ntk_or_lyt_ptr) { mockturtle::write_blif(*ntk_or_lyt_ptr, filename); };
 
