@@ -7,7 +7,6 @@
 
 #include "fiction/algorithms/network_transformation/network_conversion.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/debug/network_writer.hpp"
 
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
