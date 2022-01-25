@@ -4,17 +4,26 @@
 
 #include "catch.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/blueprints/network_blueprints.hpp"
+#include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/networks/technology_network.hpp>
+#include <fiction/technology/technology_mapping_library.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+#include <lorina/genlib.hpp>
+#include <mockturtle/algorithms/mapper.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
+#include <mockturtle/io/genlib_reader.hpp>
+#include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/tech_library.hpp>
 
 #include <type_traits>
 
@@ -24,8 +33,7 @@ TEST_CASE("Simulation", "[mockturtle]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout =
-        gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
@@ -85,5 +93,72 @@ TEST_CASE("Simulation", "[mockturtle]")
 
         REQUIRE(se_or_tts.size() == 1);
         CHECK(se_or_tts[0] == tt_or);
+    }
+}
+
+template <typename Ntk, typename Lib>
+technology_network map(const Ntk& ntk, const Lib& lib)
+{
+    return mockturtle::map<technology_network>(ntk, lib);
+}
+
+template <typename Ntk, typename Lib>
+void check(const Ntk& ntk, const Lib& lib)
+{
+    check_eq(ntk, map(ntk, lib));
+}
+
+template <typename Lib>
+void check_all(const Lib& lib)
+{
+    check(blueprints::maj4_network<mockturtle::aig_network>(), lib);
+    check(blueprints::nary_operation_network<mockturtle::aig_network>(), lib);
+    check(blueprints::full_adder_network<mockturtle::aig_network>(), lib);
+}
+
+TEST_CASE("Technology mapping", "[mockturtle]")
+{
+    // instantiate a technology mapping library
+    std::stringstream library_stream{};
+
+    std::vector<mockturtle::gate> gates{};
+
+    SECTION("QCA ONE library")
+    {
+        library_stream << fiction::GATE_ZERO << fiction::GATE_ONE << fiction::GATE_BUF << fiction::GATE_INV
+                       << fiction::GATE_AND2 << fiction::GATE_OR2 << fiction::GATE_MAJ3 << fiction::DECAY_MAJ3;
+
+        const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
+        REQUIRE(read_genlib_result == lorina::return_code::success);
+        mockturtle::tech_library<3> gate_lib{gates};
+
+        check_all(gate_lib);
+    }
+    SECTION("Bestagon library")
+    {
+        library_stream << fiction::GATE_ZERO << fiction::GATE_ONE << fiction::GATE_BUF << fiction::GATE_INV
+                       << fiction::GATE_AND2 << fiction::GATE_NAND2 << fiction::GATE_OR2 << fiction::GATE_NOR2
+                       << fiction::GATE_XOR2 << fiction::GATE_XNOR2;
+
+        const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
+        REQUIRE(read_genlib_result == lorina::return_code::success);
+        mockturtle::tech_library<2> gate_lib{gates};
+
+        check_all(gate_lib);
+    }
+    SECTION("Marakkalage 3-input library")
+    {
+        library_stream << fiction::GATE_ZERO << fiction::GATE_ONE << fiction::GATE_BUF << fiction::GATE_INV
+                       << fiction::GATE_AND3 << fiction::GATE_XOR_AND << fiction::GATE_OR_AND << fiction::GATE_ONEHOT
+                       << fiction::GATE_MAJ3 << fiction::GATE_GAMBLE << fiction::GATE_DOT << fiction::GATE_MUX
+                       << fiction::GATE_AND_XOR << fiction::DECAY_AND3 << fiction::DECAY_XOR_AND
+                       << fiction::DECAY_OR_AND << fiction::DECAY_ONEHOT << fiction::DECAY_MAJ3 << fiction::DECAY_GAMBLE
+                       << fiction::DECAY_DOT << fiction::DECAY_MUX << fiction::DECAY_AND_XOR;
+
+        const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
+        REQUIRE(read_genlib_result == lorina::return_code::success);
+        mockturtle::tech_library<3> gate_lib{gates};
+
+        check_all(gate_lib);
     }
 }
