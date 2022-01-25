@@ -102,6 +102,10 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level-layout]")
     CHECK(layout.num_pis() == 3);
     CHECK(layout.num_wires() == 3);
 
+    CHECK(layout.pi_at(0) == layout.get_node(a));
+    CHECK(layout.pi_at(1) == layout.get_node(b));
+    CHECK(layout.pi_at(2) == layout.get_node(c));
+
     layout.foreach_pi(
         [&](gate_layout::node pi, auto i)
         {
@@ -178,6 +182,10 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level-layout]")
     CHECK(layout.size() == 5);
     CHECK(layout.num_pos() == 2);
     CHECK(layout.num_wires() == 3);
+
+    CHECK(layout.po_at(0) == f1);
+    CHECK(layout.po_at(1) == f2);
+    CHECK(layout.po_at(0) != layout.po_at(1));
 
     layout.foreach_po(
         [&](auto po, auto i)

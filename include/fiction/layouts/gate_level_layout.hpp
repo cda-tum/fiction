@@ -264,6 +264,18 @@ class gate_level_layout : public ClockedLayout
         return is_po(get_node(t));
     }
 
+    [[nodiscard]] node pi_at(const uint32_t index) const noexcept
+    {
+        assert(index < num_pis());
+        return static_cast<node>(strg->inputs[index]);
+    }
+
+    [[nodiscard]] signal po_at(const uint32_t index) const noexcept
+    {
+        assert(index < num_pos());
+        return strg->outputs[index].index;
+    }
+
     [[nodiscard]] bool is_combinational() const noexcept
     {
         return true;
@@ -288,6 +300,11 @@ class gate_level_layout : public ClockedLayout
         strg->data.node_names[n] = name;
     }
 
+    void set_name(const signal s, const std::string& name) noexcept
+    {
+        set_name(get_node(s), name);
+    }
+
     [[nodiscard]] std::string get_name(const node n) const noexcept
     {
         if (auto it = strg->data.node_names.find(n); it != strg->data.node_names.cend())
@@ -300,9 +317,19 @@ class gate_level_layout : public ClockedLayout
         }
     }
 
+    [[nodiscard]] std::string get_name(const signal s) const noexcept
+    {
+        return get_name(get_node(s));
+    }
+
     [[nodiscard]] bool has_name(const node n) const noexcept
     {
         return !get_name(n).empty();
+    }
+
+    [[nodiscard]] bool has_name(const signal s) const noexcept
+    {
+        return !get_name(s).empty();
     }
 
     void set_input_name(const uint32_t index, const std::string& name) noexcept
