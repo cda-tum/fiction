@@ -23,8 +23,9 @@ jobs:
           - os: ubuntu-20.04
             compiler: g++-10
             cppstandard: -DFICTION_CXX_STANDARD=20
+            cppname: C++20
 
-    name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode) ${{matrix.cppstandard}}
+    name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode) ${{matrix.cppname}}
     runs-on: ${{matrix.os}}
 
     steps:
