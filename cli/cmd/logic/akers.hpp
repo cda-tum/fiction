@@ -31,7 +31,7 @@ class akers_command : public command
             command(e, "Synthesizes a Majority logic network from the current truth table in store.")
     {
         add_flag("--aig,-a", "Generate as AIG");
-        add_flag("--xag,-a", "Generate as XAG");
+        add_flag("--xag,-x", "Generate as XAG");
         add_flag("--mig,-m", "Generate as MIG");
         add_flag("--tec,-t", "Generate as technology network");
     }
