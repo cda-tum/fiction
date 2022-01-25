@@ -2,8 +2,8 @@
 // Created by marcel on 04.03.20.
 //
 
-#ifndef FICTION_EQUIVALENCE_CHECKING_UTILS_HPP
-#define FICTION_EQUIVALENCE_CHECKING_UTILS_HPP
+#ifndef FICTION_EQUIVALENCE_CHECKING_HPP
+#define FICTION_EQUIVALENCE_CHECKING_HPP
 
 #include "fiction/algorithms/properties/critical_path_length_and_throughput.hpp"
 #include "fiction/algorithms/verification/design_rule_violations.hpp"
@@ -231,4 +231,4 @@ void equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checki
 
 }  // namespace fiction
 
-#endif  // FICTION_EQUIVALENCE_CHECKING_UTILS_HPP
+#endif  // FICTION_EQUIVALENCE_CHECKING_HPP

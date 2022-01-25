@@ -151,8 +151,10 @@ class qca_energy_dissipation_impl
                     {
                         if (lyt.is_buf(n))
                         {
-                            // skip crossing wires and include them in the ground check instead
-                            if (auto t = lyt.get_tile(n); lyt.is_crossing_layer(t)) {}
+                            if (const auto t = lyt.get_tile(n); lyt.is_crossing_layer(t))
+                            {
+                                // skip crossing wires and include them in the ground check instead
+                            }
                             // node has a crossing wire (crossing structure)
                             else if (auto at = lyt.above(t); t != at && lyt.is_buf(lyt.get_node(at)))
                             {
@@ -174,7 +176,7 @@ class qca_energy_dissipation_impl
                         if (lyt.is_inv(n))
                         {
                             // straight inverter
-                            if (auto t = lyt.get_tile(n); lyt.has_opposite_incoming_and_outgoing_signals(t))
+                            if (const auto t = lyt.get_tile(n); lyt.has_opposite_incoming_and_outgoing_signals(t))
                             {
                                 pst.slow += qca_energy::INVERTER_STRAIGHT_SLOW;
                                 pst.fast += qca_energy::INVERTER_STRAIGHT_FAST;

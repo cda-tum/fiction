@@ -388,7 +388,10 @@ class write_qca_layout_svg_impl
 
         bool is_sync_elem = false;
 
-        if (lyt.is_empty_cell(c)) {}
+        if (lyt.is_empty_cell(c))
+        {
+            // skip empty cells
+        }
         else if (const auto ct = lyt.get_cell_type(c); Lyt::technology::is_normal_cell(ct))
         {
             if constexpr (has_synchronization_elements_v<Lyt>)
@@ -419,7 +422,9 @@ class write_qca_layout_svg_impl
                 cell_description = svg::cross;
             }
             else if (c.z != 0)
-            {}
+            {
+                // skip non-ground layer cells
+            }
             else
             {
                 cell_description = svg::cell;
