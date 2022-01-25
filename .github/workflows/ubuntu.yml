@@ -19,8 +19,12 @@ jobs:
         os: [ ubuntu-20.04, ubuntu-18.04 ]
         compiler: [ g++-9, g++-10, clang++-9, clang++-10 ]
         build_type: [ Debug, Release ]
+        include:
+          - os: ubuntu-20.04
+            compiler: g++-10
+            cppstandard: -DFICTION_CXX_STANDARD=20
 
-    name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode)
+    name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode) ${{matrix.cppstandard}}
     runs-on: ${{matrix.os}}
 
     steps:
@@ -66,7 +70,7 @@ jobs:
       - name: Configure CMake
         working-directory: ${{github.workspace}}/build
 
-        run: cmake ${{github.workspace}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}/z3lib -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
+        run: cmake ${{github.workspace}} ${{matrix.cppstandard}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}/z3lib -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
 
       - name: Build fiction
         working-directory: ${{github.workspace}}/build

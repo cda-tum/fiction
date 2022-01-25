@@ -8,8 +8,9 @@ project(fiction
 include(cmake/StandardProjectSettings.cmake)
 include(cmake/PreventInSourceBuilds.cmake)
 
-# Require C++17
-set(CMAKE_CXX_STANDARD 17)
+# Set C++ standard; at least C++17 is required
+set(FICTION_CXX_STANDARD "17" CACHE STRING "C++ standard")
+set(CMAKE_CXX_STANDARD ${FICTION_CXX_STANDARD})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Interface library to set project options
