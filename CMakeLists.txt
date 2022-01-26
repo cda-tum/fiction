@@ -52,6 +52,9 @@ endif ()
 # Include header files
 add_subdirectory(${CMAKE_SOURCE_DIR}/include)
 
+# Include libraries
+add_subdirectory(${CMAKE_SOURCE_DIR}/libs)
+
 # CLI
 option(FICTION_CLI "Build fiction CLI" ON)
 if (FICTION_CLI)
@@ -74,5 +77,9 @@ if (FICTION_TEST)
     add_subdirectory(test)
 endif ()
 
-# Include libraries
-add_subdirectory(${CMAKE_SOURCE_DIR}/libs)
+# Python bindings
+option(FICTION_PYTHON_BINDINGS "Build Python bindings for fiction" OFF)
+if (FICTION_PYTHON_BINDINGS)
+    message(STATUS "Building fiction Python bindings")
+    add_subdirectory(bindings)
+endif ()
