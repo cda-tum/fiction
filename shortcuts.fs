@@ -1,10 +1,7 @@
-# commands
-alias "xibs(.*)" "exact -x -i -b -s{}"
-alias "topo" "exact -xinobs columnar; cell -l 1; print -c"
-
 # flows
-alias "synth(.*)" "{}; cell; show -c"
-alias "phys(.*)" "{}; cell; qca"
+alias "qcaone(.*)" "map -aoi; exact -x -b -s{}; cell -l qcaone"
+alias "topolinano" "map -aoi; exact -x -n -b -d -s columnar --topolinano; cell -l topolinano"
+alias "bestagon" "map -a -o -i --nand --nor --xor --xnor; exact -x -b -d -s row --hex even_row; cell -l bestagon"
 
 # load
 alias "mux" "read ../benchmarks/TOY/mux21.v"
