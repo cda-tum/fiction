@@ -118,7 +118,7 @@ class apply_gate_library_impl
                         if constexpr (has_pointy_top_hex_orientation_v<GateLyt>)
                         {
                             // vertical distance between pointy top hexagons is height * 3/4
-                            c = {t.x * GateLibrary::gate_x_size() + 1,  // TODO make sure the +1 is correct here
+                            c = {t.x * GateLibrary::gate_x_size(),
                                  static_cast<decltype(c.y)>(t.y * (GateLibrary::gate_y_size() * 3 / 4)), t.z};
                         }
                         else if constexpr (has_flat_top_hex_orientation_v<GateLyt>)
