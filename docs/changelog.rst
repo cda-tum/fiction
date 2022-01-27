@@ -20,7 +20,7 @@ Added
     - New layout type ``shifted_cartesian_layout`` replacing the ``offset`` parameter of legacy ``fcn_layout``
     - New layout type ``synchronization_element_layout`` replacing the ``clock_latch`` member of legacy ``fcn_layout``
     - New layout types ``cartesian_layout``, ``tile_based_layout``, ``gate_level_layout``, and ``cell_level_layout`` replacing various aspects of legacy ``fcn_layout``, ``fcn_gate_layout``, and ``fcn_cell_layout`` types
-    - All layout types can be layered to expand their functionality, e.g., a clocked Cartesian layout type results from ``clocked_layout<cartesian_layout>``
+    - All layout types can be layered to expand their functionality, e.g., a clocked Cartesian layout type with offset coordinates results from ``clocked_layout<cartesian_layout<offset::ucoord_t>>``
     - Support for arbitrary ``mockturtle`` logic networks as layout specifications
     - New logic network type ``technology_network`` replacing legacy ``logic_network`` type
     - New view types that can be layered on top of networks ``reverse_topo_view`` and ``out_of_place_edge_color_view`` refactoring aspects from the ``ortho`` algorithm out into their own data structures
@@ -44,7 +44,7 @@ Added
     - Command ``qll`` to write iNML layouts to `ToPoliNano & MagCAD <https://topolinano.polito.it/>`_ files (complements the existing ``qcc`` command)
     - Command ``fqca`` to write QCA layouts to `QCA-STACK <https://github.com/wlambooy/QCA-STACK>`_ files
     - Command ``blif`` to write logic networks to BLIF files
-    - Added option ``--hex`` to ``exact`` and ``ortho`` instructing the algorithms to create a hexagonal layout instead of a Cartesian one. The option expects a hexagonal orientation that has to be one of the following ``odd_row``, ``even_row``, ``odd_column``, or ``even_column`` referring to
+    - Added option ``--hex`` to ``exact`` and ``ortho`` instructing the algorithms to create a hexagonal layout instead of a Cartesian one. The option expects a hexagonal orientation that has to be one of the following ``odd_row``, ``even_row``, ``odd_column``, or ``even_column``
 - Utility:
     - Added utility functions for networks, layouts, placement, names, arrays, ranges, and hashing to the ``utils`` folder
 - Build and documentation:
