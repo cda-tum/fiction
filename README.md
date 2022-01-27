@@ -10,8 +10,9 @@
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/marcelwa/fiction.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/marcelwa/fiction/context:cpp)
 
 This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
-in C++17 using the [EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). *fiction* focuses on the
-physical design of emerging nanotechnologies. As a promising class of post-CMOS technologies,
+in C++17 using the [EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). Thereby, *fiction*
+focuses on the logic synthesis, placement, routing, clocking, and verification of emerging nanotechnologies. As a
+promising class of post-CMOS technologies,
 [Field-coupled Nanocomputing (FCN)](https://www.springer.com/de/book/9783662437216) devices like Quantum-dot Cellular
 Automata (QCA) in manifold forms (e.g. atomic or molecular), Nanomagnet Logic (NML) devices, Silicon Dangling Bonds
 (SiDBs), and many more, allow for high computing performance with tremendously low power consumption without the flow of
