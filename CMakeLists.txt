@@ -50,20 +50,20 @@ if (NOT WIN32)
 endif ()
 
 # Include header files
-add_subdirectory(${CMAKE_SOURCE_DIR}/include)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # CLI
 option(FICTION_CLI "Build fiction CLI" ON)
 if (FICTION_CLI)
     message(STATUS "Building fiction CLI")
-    add_subdirectory(${CMAKE_SOURCE_DIR}/cli)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cli)
 endif ()
 
 # Experiments
 option(FICTION_EXPERIMENTS "Build fiction experiments" OFF)
 if (FICTION_EXPERIMENTS)
     message(STATUS "Building fiction experiments")
-    add_subdirectory(${CMAKE_SOURCE_DIR}/experiments)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/experiments)
 endif ()
 
 # Testing
@@ -75,4 +75,4 @@ if (FICTION_TEST)
 endif ()
 
 # Include libraries
-add_subdirectory(${CMAKE_SOURCE_DIR}/libs)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
