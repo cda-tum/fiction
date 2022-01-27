@@ -1,10 +1,10 @@
 # Let there be a *fiction*
 
-[![Ubuntu CI](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml/badge.svg?branch=v0.4.0)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
-[![macOS CI](https://github.com/marcelwa/fiction/actions/workflows/macos.yml/badge.svg?branch=v0.4.0)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
-[![Windows CI](https://github.com/marcelwa/fiction/actions/workflows/windows.yml/badge.svg?branch=v0.4.0)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
-[![codecov](https://codecov.io/gh/marcelwa/fiction/branch/v0.4.0/graph/badge.svg?token=SUPC5N6KFU)](https://codecov.io/gh/marcelwa/fiction)
-[![Documentation Status](https://img.shields.io/readthedocs/fiction?logo=readthedocs)](https://fiction.readthedocs.io/en/latest/?badge=latest)
+[![Ubuntu CI](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
+[![macOS CI](https://github.com/marcelwa/fiction/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
+[![Windows CI](https://github.com/marcelwa/fiction/actions/workflows/windows.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
+[![codecov](https://codecov.io/gh/marcelwa/fiction/branch/main/graph/badge.svg?token=SUPC5N6KFU)](https://codecov.io/gh/marcelwa/fiction)
+[![Documentation Status](https://img.shields.io/readthedocs/fiction?logo=readthedocs)](https://fiction.readthedocs.io/en/stable/?badge=stable)
 [![Release](https://img.shields.io/github/v/tag/marcelwa/fiction?label=fiction&logo=github&logoColor=darkgray)](https://github.com/marcelwa/fiction/releases)
 [![License](https://img.shields.io/github/license/marcelwa/fiction)](https://github.com/marcelwa/fiction/blob/main/LICENSE.txt)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/marcelwa/fiction.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/marcelwa/fiction/context:cpp)
@@ -27,11 +27,11 @@ The *fiction* framework is academic software and aims at researchers and develop
 cell-accurate circuit layouts from logical specifications or who want to implement their own physical design algorithms.
 
 For these use cases, *fiction* provides
-a [header-only library](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-header-only-library)
+a [header-only library](https://fiction.readthedocs.io/en/stable/getting_started.html#using-fiction-as-a-header-only-library)
 that provides data types and algorithms for recurring tasks, e.g., logic network and layout types on different
 abstraction levels, clocking schemes, gate libraries, placement, routing, clocking, and verification algorithms, etc.
 Additionally, *fiction* comes with an
-ABC-like [CLI tool](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-stand-alone-cli-tool)
+ABC-like [CLI tool](https://fiction.readthedocs.io/en/stable/getting_started.html#using-fiction-as-a-stand-alone-cli-tool)
 that allows quick access to its core functionality.
 
 Learn more by referring to the [full documentation](https://fiction.readthedocs.io/).
@@ -41,7 +41,7 @@ If you have any questions, comments, or suggestions, please do not hesitate to g
 ## Implemented Physical Design Algorithms
 
 For automatic FCN layout obtainment, *fiction* provides implementations of state-of-the-art
-[physical design algorithms](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#physical-design).
+[physical design algorithms](https://fiction.readthedocs.io/en/stable/algorithms/algorithms.html#physical-design).
 
 Among these are
 
@@ -50,7 +50,7 @@ Among these are
 - SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
 
 Furthermore, layout correctness can
-be [validated](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#verification) using
+be [validated](https://fiction.readthedocs.io/en/stable/algorithms/algorithms.html#verification) using
 
 - SAT-based [formal verification](https://ieeexplore.ieee.org/document/9218641)
 
@@ -107,7 +107,7 @@ Many thanks to Samuel Sze Hang Ng for his support!
 There are highly regular clocking schemes proposed for FCN technologies which can be used as a floor plan for physical
 design. However, sometimes it can make sense to have more degree of freedom and assign clock numbers on the fly. That is
 why *fiction*
-supports [regular and irregular clocking schemes](https://fiction.readthedocs.io/en/latest/layouts/clocking_scheme.html)
+supports [regular and irregular clocking schemes](https://fiction.readthedocs.io/en/stable/layouts/clocking_scheme.html)
 with variable amounts of clock numbers as QCA for instance uses four clock phases but iNML needs only three.
 
 Built-in schemes are

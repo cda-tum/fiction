@@ -1,9 +1,6 @@
 name: macOS CI
 
-on:
-  push:
-    branches-ignore:
-      - master
+on: push
 
 defaults:
   run:
