@@ -144,13 +144,6 @@ void recursively_paint_edges(const coloring_container<Ntk>&                     
                           });
 }
 
-/**
- * Nodes colored east have signals incoming from eastern direction. Nodes colored south have signals incoming from
- * southern direction.
- * @tparam Ntk
- * @param ntk
- * @return
- */
 template <typename Ntk>
 coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
 {
