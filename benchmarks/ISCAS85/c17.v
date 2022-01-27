@@ -1,4 +1,4 @@
-module c17 ( 
+module top ( 
     \1 , 2, 3, 6, 7,
     22, 23  );
   input  \1 , 2, 3, 6, 7;

@@ -1,0 +1,82 @@
+name: Ubuntu CI
+
+on: push
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  Z3_GIT_TAG: z3-4.8.12
+
+jobs:
+  build_and_test:
+    strategy:
+      matrix:
+        os: [ ubuntu-20.04, ubuntu-18.04 ]
+        compiler: [ g++-9, g++-10, clang++-9, clang++-10 ]
+        build_type: [ Debug, Release ]
+        include:
+          - os: ubuntu-20.04
+            compiler: g++-10
+            cppstandard: -DFICTION_CXX_STANDARD=20
+            cppname: C++20
+
+    name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode) ${{matrix.cppname}}
+    runs-on: ${{matrix.os}}
+
+    steps:
+      - name: Install the respective compiler
+        run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}}
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9.x'
+
+      - name: Install pip packages
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            graphviz
+            python-sat==0.1.6.dev6
+            wrapt_timeout_decorator
+
+      - name: Clone Repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Cache Z3 Solver
+        id: cache-z3-solver
+        uses: actions/cache@v2
+        with:
+          path: ${{github.workspace}}/z3lib
+          key: ${{matrix.os}}-${{matrix.compiler}}-z3lib-${{env.Z3_GIT_TAG}}
+
+      - name: Build Z3 Solver
+        if: steps.cache-z3-solver.outputs.cache-hit != 'true'
+        working-directory: ${{github.workspace}}
+        run: |
+          git clone --branch $Z3_GIT_TAG --depth 1 https://github.com/Z3Prover/z3.git
+          cmake -S z3 -B z3/build -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=OFF -DZ3_BUILD_TEST_EXECUTABLES=OFF -DZ3_ENABLE_EXAMPLE_TARGETS=OFF
+          cmake --build z3/build --config Release -j2 --target install
+
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{github.workspace}}/build
+
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/build
+
+        run: cmake ${{github.workspace}} ${{matrix.cppstandard}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}/z3lib -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
+
+      - name: Build fiction
+        working-directory: ${{github.workspace}}/build
+
+        run: cmake --build . --config ${{matrix.build_type}} -j2
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        # Execute tests defined by the CMake configuration.
+        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+        run: ctest -C ${{matrix.build_type}} --verbose

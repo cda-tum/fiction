@@ -1,0 +1,94 @@
+name: Coverage CI
+
+on: push
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  BUILD_TYPE: Debug
+  Z3_GIT_TAG: z3-4.8.12
+
+jobs:
+  build_and_test:
+    strategy:
+      matrix:
+        os: [ ubuntu-20.04 ]
+        compiler: [ g++-10 ]
+
+    name: Coverage on ${{matrix.os}} with ${{matrix.compiler}}
+    runs-on: ${{matrix.os}}
+
+    steps:
+      - name: Install the Compiler
+        run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}}
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9.x'
+
+      - name: Install pip packages
+        uses: BSFishy/pip-action@v1
+        with:
+          packages: |
+            graphviz
+            python-sat==0.1.6.dev6
+            wrapt_timeout_decorator
+
+      - name: Clone Repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Cache Z3 Solver
+        id: cache-z3-solver
+        uses: actions/cache@v2
+        with:
+          path: ${{github.workspace}}/z3lib
+          key: ${{matrix.os}}-${{matrix.compiler}}-z3lib-${{env.Z3_GIT_TAG}}
+
+      - name: Build Z3 Solver
+        if: steps.cache-z3-solver.outputs.cache-hit != 'true'
+        working-directory: ${{github.workspace}}
+        run: |
+          git clone --branch $Z3_GIT_TAG --depth 1 https://github.com/Z3Prover/z3.git
+          cmake -S z3 -B z3/build -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=OFF -DZ3_BUILD_TEST_EXECUTABLES=OFF -DZ3_ENABLE_EXAMPLE_TARGETS=OFF
+          cmake --build z3/build --config Release -j2 --target install
+
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{github.workspace}}/build
+
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/build
+
+        run: cmake ${{github.workspace}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}/z3lib -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF -DENABLE_COVERAGE=ON
+
+      - name: Build
+        working-directory: ${{github.workspace}}/build
+
+        run: cmake --build . --config $BUILD_TYPE -j2
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+
+        run: ctest -C $BUILD_TYPE --verbose
+
+      #    - name: Coverage report
+      #      uses: codecov/codecov-action@v1
+      #      with:
+      #        env_vars: ${{matrix.os}}
+      #        verbose: true
+      #        gcov_path_exclude: ${{github.workspace}}/libs/
+
+      - name: Setup and run lcov
+        run: |
+          sudo apt-get install lcov
+          lcov -t "result" -o lcov.info -c -d ${{github.workspace}}/build/
+          lcov -e lcov.info "${{github.workspace}}/include*" -o lcov_filtered.info
+          lcov -l lcov_filtered.info
+
+      - name: Upload report to Codecov
+        run: |
+          bash <(curl -s https://codecov.io/bash) -f lcov_filtered.info || echo "Codecov did not collect coverage reports"
