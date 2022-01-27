@@ -5,7 +5,8 @@
 [![Windows CI](https://github.com/marcelwa/fiction/actions/workflows/windows.yml/badge.svg?branch=v0.4.0)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
 [![codecov](https://codecov.io/gh/marcelwa/fiction/branch/v0.4.0/graph/badge.svg?token=SUPC5N6KFU)](https://codecov.io/gh/marcelwa/fiction)
 [![Documentation Status](https://img.shields.io/readthedocs/fiction?logo=readthedocs)](https://fiction.readthedocs.io/en/latest/?badge=latest)
-[![Release](https://img.shields.io/github/v/tag/marcelwa/fiction?label=fiction&logo=github&logoColor=darkgray)](https://img.shields.io/github/v/tag/marcelwa/fiction?label=fiction&logo=github&logoColor=darkgray)
+[![Release](https://img.shields.io/github/v/tag/marcelwa/fiction?label=fiction&logo=github&logoColor=darkgray)](https://github.com/marcelwa/fiction/releases)
+[![License](https://img.shields.io/github/license/marcelwa/fiction)](https://github.com/marcelwa/fiction/blob/main/LICENSE.txt)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/marcelwa/fiction.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/marcelwa/fiction/context:cpp)
 
 This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
@@ -186,7 +187,3 @@ Cell-level layouts:
 - Number of cells
 - Bounding box
 - Area usage in nm²
-
-## Disclaimer
-
-This is academic software made available under the CRAPL license. For more information see the LICENSE file.
