@@ -9,7 +9,6 @@ print("The network's truth tables are:")
 print("f1:", tts[0])
 print("f2:", tts[1])
 
-
 # create 2DDWave-clocked layout of size 4 x 3 tiles (max. coordinate is (3,2))
 layout = gate_level_layout((3, 2), "Layout", "2DDWave")
 
@@ -41,3 +40,8 @@ tts = simulate(layout)
 print("The layout's truth tables are:")
 print("f1:", tts[0])
 print("f2:", tts[1])
+
+# perform design rule checking
+drvs, warnings = drc(layout)
+
+print("The layout has", drvs, "DRVs and", warnings, "warnings")

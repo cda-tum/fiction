@@ -2,6 +2,7 @@
 // Created by marcel on 26.01.22.
 //
 
+#include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/io/network_reader.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/traits.hpp>
@@ -13,6 +14,7 @@
 #include <cstdint>
 #include <exception>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <utility>
 
@@ -61,6 +63,19 @@ uint64_t area(const fiction::cart_gate_clk_lyt& lyt)
 void resize(fiction::cart_gate_clk_lyt& lyt, const std::tuple<uint32_t, uint32_t>& dimension)
 {
     lyt.resize({std::get<0>(dimension), std::get<1>(dimension), 1});
+}
+
+std::tuple<std::size_t, std::size_t> design_rule_checking(const fiction::cart_gate_clk_lyt& lyt)
+{
+    fiction::gate_level_drv_stats  st{};
+    fiction::gate_level_drv_params ps{};
+
+    std::stringstream stream{};
+    ps.out = &stream;
+
+    fiction::gate_level_drvs(lyt, ps, &st);
+
+    return {st.drvs, st.warnings};
 }
 
 [[nodiscard]] py::list as_py_lists(const std::vector<fiction::tt>& spec)
@@ -129,4 +144,5 @@ PYBIND11_MODULE(pyfiction, m)
     m.def("area", &area, "lyt"_a, "Return layout area");
     m.def("resize", &resize, "lyt"_a, "dimension"_a, "Resize a layout");
     m.def("simulate", &simulate<fiction::cart_gate_clk_lyt>, "lyt"_a, "Simulates the truth table of a layout");
+    m.def("drc", &design_rule_checking, "lyt"_a, "Design rule checking that returns (#DRVs, #Warnings)");
 }
