@@ -43,7 +43,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'fiction'
-copyright = '2018-2022, Marcel Walter'
+copyright = '2018-2022, Marcel Walter, Technical University of Munich (TUM)'
 author = 'Marcel Walter'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -141,7 +141,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'fiction.tex', 'fiction Documentation',
-     'Marcel Walter', 'manual'),
+     'Marcel Walter, TUM', 'manual'),
 ]
 
 
