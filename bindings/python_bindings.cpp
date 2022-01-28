@@ -5,6 +5,7 @@
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/algorithms/verification/equivalence_checking.hpp>
 #include <fiction/io/network_reader.hpp>
+#include <fiction/io/print_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -56,6 +57,14 @@ fiction::cart_gate_clk_lyt create_gate_level_layout(const std::tuple<uint32_t, u
     {
         throw std::runtime_error("Given name does not refer to a supported clocking scheme");
     }
+}
+
+std::string layout_repr(const fiction::cart_gate_clk_lyt& lyt)
+{
+    std::stringstream stream{};
+    fiction::print_gate_level_layout(stream, lyt);
+
+    return stream.str();
 }
 
 uint64_t area(const fiction::cart_gate_clk_lyt& lyt)
@@ -145,7 +154,8 @@ PYBIND11_MODULE(pyfiction, m)
         .def("create_nor", &fiction::cart_gate_clk_lyt::create_nor, "a"_a, "b"_a, "t"_a)
         .def("create_xor", &fiction::cart_gate_clk_lyt::create_xor, "a"_a, "b"_a, "t"_a)
         .def("create_xnor", &fiction::cart_gate_clk_lyt::create_xnor, "a"_a, "b"_a, "t"_a)
-        .def("create_maj", &fiction::cart_gate_clk_lyt::create_maj, "a"_a, "b"_a, "c"_a, "t"_a);
+        .def("create_maj", &fiction::cart_gate_clk_lyt::create_maj, "a"_a, "b"_a, "c"_a, "t"_a)
+        .def("__repr__", &layout_repr);
     m.def("area", &area, "lyt"_a, "Return layout area");
     m.def("resize", &resize, "lyt"_a, "dimension"_a, "Resize a layout");
     m.def("simulate", &simulate<fiction::cart_gate_clk_lyt>, "lyt"_a, "Simulates the truth table of a layout");

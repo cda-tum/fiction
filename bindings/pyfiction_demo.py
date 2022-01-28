@@ -32,6 +32,8 @@ c = layout.create_buf(a1, tile(2, 1, 1))
 layout.create_po(c, "f1", tile(3, 1))
 layout.create_po(a2, "f2", tile(3, 2))
 
+print(layout)
+
 print("The layout's area is", area(layout), "tiles")
 
 # simulate the layout's Boolean functions
