@@ -1,2 +1,2 @@
-pybind11_add_module(pyfiction fiction_bindings.cpp)
+pybind11_add_module(pyfiction python_bindings.cpp)
 target_link_libraries(pyfiction PRIVATE libfiction mockturtle)

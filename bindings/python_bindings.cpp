@@ -2,6 +2,7 @@
 // Created by marcel on 26.01.22.
 //
 
+#include <fiction/io/network_reader.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -19,6 +20,20 @@
 
 namespace py = pybind11;
 using namespace pybind11::literals;
+
+fiction::tec_nt create_logic_network(const std::string& filename)
+{
+    auto reader = fiction::network_reader<fiction::tec_ptr>(filename, std::cout);
+
+    if (const auto ntks = reader.get_networks(); !ntks.empty())
+    {
+        return *ntks.front();
+    }
+    else
+    {
+        throw std::runtime_error("Could not parse specification file");
+    }
+}
 
 fiction::offset::ucoord_t create_tile(const uint32_t x, const uint32_t y, const uint32_t z = 0)
 {
@@ -48,10 +63,8 @@ void resize(fiction::cart_gate_clk_lyt& lyt, const std::tuple<uint32_t, uint32_t
     lyt.resize({std::get<0>(dimension), std::get<1>(dimension), 1});
 }
 
-[[nodiscard]] pybind11::list as_py_lists(const std::vector<fiction::tt>& spec)
+[[nodiscard]] py::list as_py_lists(const std::vector<fiction::tt>& spec)
 {
-    namespace py = pybind11;
-
     py::list spec_py_list{};
 
     for (const auto& tt : spec)
@@ -71,12 +84,13 @@ void resize(fiction::cart_gate_clk_lyt& lyt, const std::tuple<uint32_t, uint32_t
     return spec_py_list;
 }
 
-pybind11::list simulate(const fiction::cart_gate_clk_lyt& lyt)
+template <typename NtkOrLyt>
+py::list simulate(const NtkOrLyt& ntk_or_lyt)
 {
     try
     {
         return as_py_lists(mockturtle::simulate<fiction::tt>(
-            lyt, mockturtle::default_simulator<fiction::tt>(static_cast<unsigned>(lyt.num_pis()))));
+            ntk_or_lyt, mockturtle::default_simulator<fiction::tt>(static_cast<unsigned>(ntk_or_lyt.num_pis()))));
     }
     catch (const std::bad_alloc&)
     {
@@ -86,10 +100,17 @@ pybind11::list simulate(const fiction::cart_gate_clk_lyt& lyt)
 
 PYBIND11_MODULE(pyfiction, m)
 {
+    // docstring
     m.doc() = "Python interface for the fiction framework for Field-coupled Nanotechnologies";
 
+    // logic networks
+    py::class_<fiction::tec_nt>(m, "logic_network").def(py::init<>(&create_logic_network), "filename"_a);
+    m.def("simulate", &simulate<fiction::tec_nt>, "ntk"_a, "Simulates the truth table of a network");
+
+    // coordinates
     py::class_<fiction::offset::ucoord_t>(m, "tile").def(py::init<>(&create_tile), "x"_a, "y"_a, "z"_a = 0);
 
+    // gate-level layouts
     py::class_<fiction::cart_gate_clk_lyt>(m, "gate_level_layout")
         .def(py::init<>(&create_gate_level_layout), "dimension"_a, "name"_a, "clocking"_a)
         .def("create_pi", &fiction::cart_gate_clk_lyt::create_pi, "name"_a, "t"_a)
@@ -105,8 +126,7 @@ PYBIND11_MODULE(pyfiction, m)
         .def("create_xor", &fiction::cart_gate_clk_lyt::create_xor, "a"_a, "b"_a, "t"_a)
         .def("create_xnor", &fiction::cart_gate_clk_lyt::create_xnor, "a"_a, "b"_a, "t"_a)
         .def("create_maj", &fiction::cart_gate_clk_lyt::create_maj, "a"_a, "b"_a, "c"_a, "t"_a);
-
     m.def("area", &area, "lyt"_a, "Return layout area");
     m.def("resize", &resize, "lyt"_a, "dimension"_a, "Resize a layout");
-    m.def("simulate", &simulate, "lyt"_a, "Simulates the truth table of a layout");
+    m.def("simulate", &simulate<fiction::cart_gate_clk_lyt>, "lyt"_a, "Simulates the truth table of a layout");
 }
