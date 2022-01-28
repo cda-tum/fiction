@@ -3,6 +3,7 @@
 //
 
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
+#include <fiction/algorithms/verification/equivalence_checking.hpp>
 #include <fiction/io/network_reader.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/traits.hpp>
@@ -11,6 +12,7 @@
 #include <kitty/print.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <exception>
 #include <memory>
@@ -19,6 +21,7 @@
 #include <utility>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -78,39 +81,41 @@ std::tuple<std::size_t, std::size_t> design_rule_checking(const fiction::cart_ga
     return {st.drvs, st.warnings};
 }
 
-[[nodiscard]] py::list as_py_lists(const std::vector<fiction::tt>& spec)
+[[nodiscard]] std::vector<std::string> tts_to_strings(const std::vector<fiction::tt>& spec)
 {
-    py::list spec_py_list{};
+    std::vector<std::string> spec_py_list{};
 
-    for (const auto& tt : spec)
-    {
-        py::list tt_py_list{};
-
-        const auto binary_tt_string = kitty::to_binary(tt);
-
-        for (auto it = std::cbegin(binary_tt_string); it != std::cend(binary_tt_string); ++it)
-        {
-            tt_py_list.append(py::int_(*it == '0' ? 0 : 1));
-        }
-
-        spec_py_list.append(tt_py_list);
-    }
+    std::transform(spec.cbegin(), spec.cend(), std::back_inserter(spec_py_list),
+                   [](const auto& tt) { return kitty::to_binary(tt); });
 
     return spec_py_list;
 }
 
 template <typename NtkOrLyt>
-py::list simulate(const NtkOrLyt& ntk_or_lyt)
+std::vector<std::string> simulate(const NtkOrLyt& ntk_or_lyt)
 {
     try
     {
-        return as_py_lists(mockturtle::simulate<fiction::tt>(
+        return tts_to_strings(mockturtle::simulate<fiction::tt>(
             ntk_or_lyt, mockturtle::default_simulator<fiction::tt>(static_cast<unsigned>(ntk_or_lyt.num_pis()))));
     }
     catch (const std::bad_alloc&)
     {
         throw std::runtime_error("Layout has too many inputs to store its truth table");
     }
+}
+
+template <typename Spec, typename Impl>
+std::tuple<fiction::eq_type, int64_t, std::string> equivalence_checking(const Spec& spec, const Impl& impl)
+{
+    fiction::equivalence_checking_stats st{};
+    fiction::equivalence_checking(spec, impl, &st);
+
+    std::string cex{};
+    std::transform(st.counter_example.cbegin(), st.counter_example.cend(), std::back_inserter(cex),
+                   [](const auto& bit) { return bit ? '1' : '0'; });
+
+    return {st.eq, st.tp_diff, cex};
 }
 
 PYBIND11_MODULE(pyfiction, m)
@@ -145,4 +150,13 @@ PYBIND11_MODULE(pyfiction, m)
     m.def("resize", &resize, "lyt"_a, "dimension"_a, "Resize a layout");
     m.def("simulate", &simulate<fiction::cart_gate_clk_lyt>, "lyt"_a, "Simulates the truth table of a layout");
     m.def("drc", &design_rule_checking, "lyt"_a, "Design rule checking that returns (#DRVs, #Warnings)");
+
+    py::enum_<fiction::eq_type>(m, "eq_type")
+        .value("no", fiction::eq_type::NO)
+        .value("weak", fiction::eq_type::WEAK)
+        .value("strong", fiction::eq_type::STRONG)
+        .export_values();
+
+    m.def("equiv", &equivalence_checking<fiction::tec_nt, fiction::cart_gate_clk_lyt>, "spec"_a, "impl"_a,
+          "SAT-based equivalence checking that returns (EQ type, TP difference, CEX)");
 }

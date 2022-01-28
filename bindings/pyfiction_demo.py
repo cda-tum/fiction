@@ -45,3 +45,13 @@ print("f2:", tts[1])
 drvs, warnings = drc(layout)
 
 print("The layout has", drvs, "DRVs and", warnings, "warnings")
+
+# perform SAT-based equivalence checking (suitable for large inputs while simulate is not)
+eq, tp_diff, cex = equiv(network, layout)
+
+print("Network and layout are", ("STRONGLY" if eq == eq_type.strong else "WEAKLY" if eq == eq_type.weak else "NOT"),
+      "equivalent")
+if (eq == eq_type.weak):
+    print("with a TP difference of", tp_diff, "clock cycles")
+elif (eq == eq_type.no):
+    print("with the counter example", cex)
