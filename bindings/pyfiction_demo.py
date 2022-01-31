@@ -2,6 +2,11 @@ from pyfiction import *
 
 network = logic_network("demo_network.v")
 
+print("The network has the following nodes:", network.nodes())
+print("Is node 0 a constant?", network.is_constant(0))
+print("Is node 2 a primary input?", network.is_pi(2))
+print("Is node 6 an AND gate?", network.is_and(6))
+
 # simulate the network's Boolean functions
 tts = simulate(network)
 

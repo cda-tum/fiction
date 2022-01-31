@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <exception>
 #include <memory>
+#include <set>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -27,9 +28,10 @@
 namespace py = pybind11;
 using namespace pybind11::literals;
 
-fiction::tec_nt create_logic_network(const std::string& filename)
+template <typename Ntk>
+Ntk create_logic_network(const std::string& filename)
 {
-    auto reader = fiction::network_reader<fiction::tec_ptr>(filename, std::cout);
+    auto reader = fiction::network_reader<std::shared_ptr<Ntk>>(filename, std::cout);
 
     if (const auto ntks = reader.get_networks(); !ntks.empty())
     {
@@ -39,6 +41,26 @@ fiction::tec_nt create_logic_network(const std::string& filename)
     {
         throw std::runtime_error("Could not parse specification file");
     }
+}
+
+template <typename Ntk>
+std::set<mockturtle::node<Ntk>> nodes(const Ntk& ntk)
+{
+    std::set<mockturtle::node<Ntk>> all_nodes{};
+
+    ntk.foreach_node([&all_nodes](const auto& n) { all_nodes.insert(n); });
+
+    return all_nodes;
+}
+
+template <typename Ntk>
+std::set<mockturtle::node<Ntk>> gates(const Ntk& ntk)
+{
+    std::set<mockturtle::node<Ntk>> all_gates{};
+
+    ntk.foreach_gate([&all_gates](const auto& g) { all_gates.insert(g); });
+
+    return all_gates;
 }
 
 fiction::offset::ucoord_t create_tile(const uint32_t x, const uint32_t y, const uint32_t z = 0)
@@ -147,8 +169,30 @@ PYBIND11_MODULE(pyfiction, m)
     m.doc() = "Python interface for the fiction framework for Field-coupled Nanotechnologies";
 
     // logic networks
-    py::class_<fiction::tec_nt>(m, "logic_network").def(py::init<>(&create_logic_network), "filename"_a);
-    m.def("simulate", &simulate<fiction::tec_nt>, "ntk"_a, "Simulates the truth table of a network");
+    py::class_<mockturtle::klut_network>(m, "klut")
+        .def(py::init<>(&create_logic_network<mockturtle::klut_network>), "filename"_a)
+        .def("is_constant", &mockturtle::klut_network::is_constant, "n"_a)
+        .def("is_pi", &mockturtle::klut_network::is_pi, "n"_a)
+        .def("num_nodes", &mockturtle::klut_network::size)
+        .def("num_gates", &mockturtle::klut_network::num_gates);
+
+    py::class_<fiction::technology_network, mockturtle::klut_network>(m, "logic_network")
+        .def(py::init<>(&create_logic_network<fiction::technology_network>), "filename"_a)
+        .def("is_po", &fiction::technology_network::is_po, "n"_a)
+        .def("is_buf", &fiction::technology_network::is_buf, "n"_a)
+        .def("is_fanout", &fiction::technology_network::is_fanout, "n"_a)
+        .def("is_inv", &fiction::technology_network::is_inv, "n"_a)
+        .def("is_and", &fiction::technology_network::is_and, "n"_a)
+        .def("is_nand", &fiction::technology_network::is_nand, "n"_a)
+        .def("is_or", &fiction::technology_network::is_or, "n"_a)
+        .def("is_nor", &fiction::technology_network::is_nor, "n"_a)
+        .def("is_xor", &fiction::technology_network::is_xor, "n"_a)
+        .def("is_xnor", &fiction::technology_network::is_xnor, "n"_a)
+        .def("is_maj", &fiction::technology_network::is_maj, "n"_a)
+        .def("substitute_po_signals", &fiction::technology_network::substitute_po_signals)
+        .def("nodes", &nodes<fiction::technology_network>)
+        .def("gates", &gates<fiction::technology_network>);
+    m.def("simulate", &simulate<fiction::technology_network>, "ntk"_a, "Simulates the truth table of a network");
 
     // coordinates
     py::class_<fiction::offset::ucoord_t>(m, "tile")
@@ -197,6 +241,6 @@ PYBIND11_MODULE(pyfiction, m)
         .value("strong", fiction::eq_type::STRONG);
 
     // equivalence checking
-    m.def("equiv", &equivalence_checking<fiction::tec_nt, fiction::cart_gate_clk_lyt>, "spec"_a, "impl"_a,
+    m.def("equiv", &equivalence_checking<fiction::technology_network, fiction::cart_gate_clk_lyt>, "spec"_a, "impl"_a,
           "SAT-based equivalence checking that returns (EQ type, TP difference, CEX)");
 }
