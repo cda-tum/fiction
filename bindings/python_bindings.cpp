@@ -46,10 +46,24 @@ fiction::offset::ucoord_t create_tile(const uint32_t x, const uint32_t y, const 
     return {x, y, z};
 }
 
-fiction::cart_gate_clk_lyt create_gate_level_layout(const std::tuple<uint32_t, uint32_t>& dimension,
-                                                    const std::string& name, const std::string& clocking)
+template <typename Lyt>
+Lyt create_clocked_layout(const std::tuple<uint32_t, uint32_t>& dimension, const std::string& clocking)
 {
-    if (const auto scheme = fiction::get_clocking_scheme<fiction::cart_gate_clk_lyt>(clocking); scheme.has_value())
+    if (const auto scheme = fiction::get_clocking_scheme<Lyt>(clocking); scheme.has_value())
+    {
+        return {{std::get<0>(dimension), std::get<1>(dimension), 1}, *scheme};
+    }
+    else
+    {
+        throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+    }
+}
+
+template <typename Lyt>
+Lyt create_gate_level_layout(const std::tuple<uint32_t, uint32_t>& dimension, const std::string& name,
+                             const std::string& clocking)
+{
+    if (const auto scheme = fiction::get_clocking_scheme<Lyt>(clocking); scheme.has_value())
     {
         return {{std::get<0>(dimension), std::get<1>(dimension), 1}, *scheme, name};
     }
@@ -137,11 +151,26 @@ PYBIND11_MODULE(pyfiction, m)
     m.def("simulate", &simulate<fiction::tec_nt>, "ntk"_a, "Simulates the truth table of a network");
 
     // coordinates
-    py::class_<fiction::offset::ucoord_t>(m, "tile").def(py::init<>(&create_tile), "x"_a, "y"_a, "z"_a = 0);
+    py::class_<fiction::offset::ucoord_t>(m, "tile")
+        .def(py::init<const uint64_t>(), "t"_a)
+        .def(py::init<>(&create_tile), "x"_a, "y"_a, "z"_a = 0)
+        .def("__repr__", &fiction::offset::ucoord_t::str);
+
+    // clocked layout
+    using cart_clk_lyt =
+        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>;
+    py::class_<cart_clk_lyt>(m, "clocked_layout")
+        .def(py::init<>(&create_clocked_layout<cart_clk_lyt>), "dimension"_a, "clocking"_a)
+        .def("assign_clock_number", &cart_clk_lyt::assign_clock_number, "cz"_a, "cn"_a)
+        .def("get_clock_number", &cart_clk_lyt::get_clock_number, "cz"_a)
+        .def("incoming_clocked_zones",
+             (&cart_clk_lyt::incoming_clocked_zones<std::set<fiction::clock_zone<cart_clk_lyt>>>), "cz"_a)
+        .def("outgoing_clocked_zones",
+             (&cart_clk_lyt::outgoing_clocked_zones<std::set<fiction::clock_zone<cart_clk_lyt>>>), "cz"_a);
 
     // gate-level layouts
-    py::class_<fiction::cart_gate_clk_lyt>(m, "gate_level_layout")
-        .def(py::init<>(&create_gate_level_layout), "dimension"_a, "name"_a, "clocking"_a)
+    py::class_<fiction::cart_gate_clk_lyt, cart_clk_lyt>(m, "gate_level_layout")
+        .def(py::init<>(&create_gate_level_layout<fiction::cart_gate_clk_lyt>), "dimension"_a, "name"_a, "clocking"_a)
         .def("create_pi", &fiction::cart_gate_clk_lyt::create_pi, "name"_a, "t"_a)
         .def("create_po", &fiction::cart_gate_clk_lyt::create_po, "s"_a, "name"_a, "t"_a)
         .def("is_pi_tile", &fiction::cart_gate_clk_lyt::is_pi_tile, "t"_a)
@@ -161,12 +190,13 @@ PYBIND11_MODULE(pyfiction, m)
     m.def("simulate", &simulate<fiction::cart_gate_clk_lyt>, "lyt"_a, "Simulates the truth table of a layout");
     m.def("drc", &design_rule_checking, "lyt"_a, "Design rule checking that returns (#DRVs, #Warnings)");
 
+    // equivalence type
     py::enum_<fiction::eq_type>(m, "eq_type")
         .value("no", fiction::eq_type::NO)
         .value("weak", fiction::eq_type::WEAK)
-        .value("strong", fiction::eq_type::STRONG)
-        .export_values();
+        .value("strong", fiction::eq_type::STRONG);
 
+    // equivalence checking
     m.def("equiv", &equivalence_checking<fiction::tec_nt, fiction::cart_gate_clk_lyt>, "spec"_a, "impl"_a,
           "SAT-based equivalence checking that returns (EQ type, TP difference, CEX)");
 }

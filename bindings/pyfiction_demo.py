@@ -29,8 +29,8 @@ a2 = layout.create_and(b1, b2, tile(2, 2))
 c = layout.create_buf(a1, tile(2, 1, 1))
 
 # create primary outputs
-layout.create_po(c, "f1", tile(3, 1))
-layout.create_po(a2, "f2", tile(3, 2))
+f1 = layout.create_po(c, "f1", tile(3, 1))
+f2 = layout.create_po(a2, "f2", tile(3, 2))
 
 print(layout)
 
@@ -53,7 +53,15 @@ eq, tp_diff, cex = equiv(network, layout)
 
 print("Network and layout are", ("STRONGLY" if eq == eq_type.strong else "WEAKLY" if eq == eq_type.weak else "NOT"),
       "equivalent")
-if eq == eq_type.weak:
+if (eq == eq_type.weak):
     print("with a TP difference of", tp_diff, "clock cycles")
-elif eq == eq_type.no:
+elif (eq == eq_type.no):
     print("with the counter example", cex)
+
+# fetch clock numbers
+print("Tile", tile(x1), "has clock number", layout.get_clock_number(tile(x1)))
+print("Tile", tile(f1), "has clock number", layout.get_clock_number(tile(f1)))
+
+# iterate over incoming and outgoing clock zones (this does not consider established connections but potential data flow)
+print("Tile", tile(x1), "has the following outgoing clock zones:", layout.outgoing_clocked_zones(tile(x1)))
+print("Tile", tile(f1), "has the following incoming clock zones:", layout.incoming_clocked_zones(tile(f1)))
