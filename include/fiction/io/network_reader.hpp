@@ -178,7 +178,11 @@ class network_reader
             if (lorina::diagnostic_engine diag{&client}; rfun(file, Reader{ntk}, &diag) == lorina::return_code::success)
             {
                 const auto name = std::filesystem::path{file}.stem().string();
-                ntk.set_network_name(name);
+
+                if constexpr (mockturtle::has_set_network_name_v<Ntk>)
+                {
+                    ntk.set_network_name(name);
+                }
 
                 networks.push_back(std::make_shared<Ntk>(ntk));
             }
