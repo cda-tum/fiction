@@ -63,6 +63,24 @@ std::set<mockturtle::node<Ntk>> gates(const Ntk& ntk)
     return all_gates;
 }
 
+template <typename Ntk>
+std::set<mockturtle::node<Ntk>> fanin_nodes(const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                                            const bool constants = false)
+{
+    std::set<mockturtle::node<Ntk>> fi_nodes{};
+
+    ntk.foreach_fanin(n,
+                      [&ntk, &constants, &fi_nodes](const auto& fi)
+                      {
+                          if (const auto fin = ntk.get_node(fi); !ntk.is_constant(fin) || constants)
+                          {
+                              fi_nodes.insert(fin);
+                          }
+                      });
+
+    return fi_nodes;
+}
+
 fiction::offset::ucoord_t create_tile(const uint32_t x, const uint32_t y, const uint32_t z = 0)
 {
     return {x, y, z};
@@ -174,7 +192,8 @@ PYBIND11_MODULE(pyfiction, m)
         .def("is_constant", &mockturtle::klut_network::is_constant, "n"_a)
         .def("is_pi", &mockturtle::klut_network::is_pi, "n"_a)
         .def("num_nodes", &mockturtle::klut_network::size)
-        .def("num_gates", &mockturtle::klut_network::num_gates);
+        .def("num_gates", &mockturtle::klut_network::num_gates)
+        .def("fanin_nodes", &fanin_nodes<mockturtle::klut_network>, "n"_a, "constants"_a = false);
 
     py::class_<fiction::technology_network, mockturtle::klut_network>(m, "logic_network")
         .def(py::init<>(&create_logic_network<fiction::technology_network>), "filename"_a)
