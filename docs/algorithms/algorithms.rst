@@ -6,6 +6,13 @@ Iterators
 
    iterators.rst
 
+Graph Algorithms
+================
+
+.. toctree::
+   :maxdepth: 1
+
+   graph.rst
 
 Network Transformation
 ======================

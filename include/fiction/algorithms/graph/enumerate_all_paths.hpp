@@ -148,6 +148,19 @@ class enumerate_all_clocking_paths_impl
 
 }  // namespace detail
 
+/**
+ * Enumerates all possible paths in a clocked layout that start at coordinate source and lead to coordinate target while
+ * respecting the information flow imposed by the clocking scheme. This algorithm does neither generate duplicate nor
+ * looping paths, even in a cyclic clocking scheme. That is, along each path, each coordinate can occur at maximum once.
+ *
+ * @tparam Path Type of the returned individual paths.
+ * @tparam Lyt Type of the clocked layout to perform path finding on.
+ * @param layout The clocked layout whose paths are to be enumerated.
+ * @param source Starting coordinate.
+ * @param target Goal coordinate.
+ * @param ps Parameters.
+ * @return A collection of all unique paths in layout from source to target.
+ */
 template <typename Path, typename Lyt>
 [[nodiscard]] path_collection<Path> enumerate_all_clocking_paths(const Lyt& layout, const coordinate<Lyt>& source,
                                                                  const coordinate<Lyt>&              target,
