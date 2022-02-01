@@ -2,8 +2,8 @@
 // Created by marcel on 01.02.22.
 //
 
-#ifndef FICTION_ALL_PATHS_HPP
-#define FICTION_ALL_PATHS_HPP
+#ifndef FICTION_ENUMERATE_ALL_PATHS_HPP
+#define FICTION_ENUMERATE_ALL_PATHS_HPP
 
 #include "fiction/traits.hpp"
 
@@ -21,12 +21,12 @@ struct layout_coordinate_path : std::vector<coordinate<Lyt>>
         this->push_back(c);
     }
 
-    coordinate<Lyt> source() const noexcept
+    [[nodiscard]] coordinate<Lyt> source() const noexcept
     {
         return this->empty() ? coordinate<Lyt>{} : this->front();
     }
 
-    coordinate<Lyt> target() const noexcept
+    [[nodiscard]] coordinate<Lyt> target() const noexcept
     {
         return this->empty() ? coordinate<Lyt>{} : this->back();
     }
@@ -40,13 +40,13 @@ struct path_collection : std::vector<Path>
         this->push_back(p);
     }
 
-    bool contains(const Path& p) const noexcept
+    [[nodiscard]] bool contains(const Path& p) const noexcept
     {
         return std::find(std::cbegin(*this), std::cend(*this), p) != std::cend(*this);
     }
 };
 
-struct all_layout_clocking_paths_params
+struct enumerate_all_clocking_paths_params
 {
     // should paths be considered that extend into the crossing layer?
     bool consider_crossing_layer = false;
@@ -56,11 +56,11 @@ namespace detail
 {
 
 template <typename Lyt, typename Path>
-class all_layout_clocking_paths_impl
+class enumerate_all_clocking_paths_impl
 {
   public:
-    all_layout_clocking_paths_impl(const Lyt& lyt, const coordinate<Lyt>& src, const coordinate<Lyt>& tgt,
-                                   const all_layout_clocking_paths_params p) :
+    enumerate_all_clocking_paths_impl(const Lyt& lyt, const coordinate<Lyt>& src, const coordinate<Lyt>& tgt,
+                                      const enumerate_all_clocking_paths_params p) :
             layout{lyt},
             source{src},
             target{tgt},
@@ -68,7 +68,7 @@ class all_layout_clocking_paths_impl
             visited(layout.area(), false)
     {}
 
-    path_collection<Path> run()
+    [[nodiscard]] path_collection<Path> run()
     {
         Path p{};
         recursively_enumerate_all_paths(source, target, p);
@@ -81,7 +81,7 @@ class all_layout_clocking_paths_impl
 
     const coordinate<Lyt>&source, target;
 
-    all_layout_clocking_paths_params ps;
+    enumerate_all_clocking_paths_params ps;
 
     std::vector<bool> visited;
 
@@ -94,7 +94,7 @@ class all_layout_clocking_paths_impl
      * @param c Coordinate whose index is desired.
      * @return Index of coordinate c.
      */
-    std::size_t to_index(const coordinate<Lyt>& c) const noexcept
+    [[nodiscard]] std::size_t to_index(const coordinate<Lyt>& c) const noexcept
     {
         return c.x + (layout.y() + 1) * c.y;
     }
@@ -109,7 +109,7 @@ class all_layout_clocking_paths_impl
         visited[to_index(c)] = false;
     }
 
-    bool is_visited(const coordinate<Lyt>& c) const noexcept
+    [[nodiscard]] bool is_visited(const coordinate<Lyt>& c) const noexcept
     {
         return visited[to_index(c)];
     }
@@ -149,13 +149,13 @@ class all_layout_clocking_paths_impl
 }  // namespace detail
 
 template <typename Path, typename Lyt>
-path_collection<Path> all_layout_clocking_paths(const Lyt& layout, const coordinate<Lyt>& source,
-                                                const coordinate<Lyt>&           target,
-                                                all_layout_clocking_paths_params ps = {}) noexcept
+[[nodiscard]] path_collection<Path> enumerate_all_clocking_paths(const Lyt& layout, const coordinate<Lyt>& source,
+                                                                 const coordinate<Lyt>&              target,
+                                                                 enumerate_all_clocking_paths_params ps = {}) noexcept
 {
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
 
-    detail::all_layout_clocking_paths_impl<Lyt, Path> p{layout, source, target, ps};
+    detail::enumerate_all_clocking_paths_impl<Lyt, Path> p{layout, source, target, ps};
 
     auto result = p.run();
 
@@ -164,4 +164,4 @@ path_collection<Path> all_layout_clocking_paths(const Lyt& layout, const coordin
 
 }  // namespace fiction
 
-#endif  // FICTION_ALL_PATHS_HPP
+#endif  // FICTION_ENUMERATE_ALL_PATHS_HPP
