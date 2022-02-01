@@ -7,65 +7,42 @@
 
 #include "fiction/traits.hpp"
 
-#include <vector>
 #include <algorithm>
+#include <vector>
 
 namespace fiction
 {
 
 template <typename Lyt>
-struct layout_coordinate_path
+struct layout_coordinate_path : std::vector<coordinate<Lyt>>
 {
-    using path_t = std::vector<coordinate<Lyt>>;
-
-    path_t path{};
-
     void append(const coordinate<Lyt>& c) noexcept
     {
-        path.push_back(c);
-    }
-
-    void pop_back() noexcept
-    {
-        path.pop_back();
+        this->push_back(c);
     }
 
     coordinate<Lyt> source() const noexcept
     {
-        return path.empty() ? coordinate<Lyt>{} : path.front();
+        return this->empty() ? coordinate<Lyt>{} : this->front();
     }
 
     coordinate<Lyt> target() const noexcept
     {
-        return path.empty() ? coordinate<Lyt>{} : path.back();
-    }
-
-    bool operator==(const layout_coordinate_path<Lyt>& other) const noexcept
-    {
-        return path == other.path;
+        return this->empty() ? coordinate<Lyt>{} : this->back();
     }
 };
 
 template <typename Path>
-struct path_collection
+struct path_collection : std::vector<Path>
 {
-    using collection_t = std::vector<Path>;
-
-    collection_t collection{};
-
     void add(const Path& p) noexcept
     {
-        collection.push_back(p);
-    }
-
-    std::size_t size() const noexcept
-    {
-        return collection.size();
+        this->push_back(p);
     }
 
     bool contains(const Path& p) const noexcept
     {
-        return std::find(std::cbegin(collection), std::cend(collection), p) != std::cend(collection);
+        return std::find(std::cbegin(*this), std::cend(*this), p) != std::cend(*this);
     }
 };
 
