@@ -130,16 +130,27 @@ class enumerate_all_clocking_paths_impl
         else  // destination is not reached yet
         {
             // recurse for all outgoing clock zones
-            layout.foreach_outgoing_clocked_zone(src,
-                                                 [this, &tgt, &p](const auto& cz)
-                                                 {
-                                                     // if it has not yet been visited
-                                                     if (!is_visited(cz))
-                                                     {
-                                                         // recurse
-                                                         recursively_enumerate_all_paths(cz, tgt, p);
-                                                     }
-                                                 });
+            layout.foreach_outgoing_clocked_zone(
+                src,
+                [this, &tgt, &p](const auto& cz)
+                {
+                    if constexpr (has_is_obstructed_v<Lyt>)
+                    {
+                        if (layout.is_obstructed(cz))
+                        {
+                            return true;  // skip the obstructed coordinate and keep looping
+                        }
+                    }
+
+                    // if it has not yet been visited
+                    if (!is_visited(cz))
+                    {
+                        // recurse
+                        recursively_enumerate_all_paths(cz, tgt, p);
+                    }
+
+                    return true;  // keep looping
+                });
         }
 
         // after recursion, remove current coordinate from path and mark it as unvisited to allow it in other paths
