@@ -685,6 +685,24 @@ inline constexpr bool has_is_empty_v = has_is_empty<Lyt>::value;
 #pragma endregion
 
 /**
+ * Obstruction layout
+ */
+
+#pragma region has_is_obstructed
+template <class Lyt, class = void>
+struct has_is_obstructed : std::false_type
+{};
+
+template <class Lyt>
+struct has_is_obstructed<Lyt, std::void_t<decltype(std::declval<Lyt>().is_obstructed(std::declval<coordinate<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_is_obstructed_v = has_is_obstructed<Lyt>::value;
+#pragma endregion
+
+/**
  * Gate libraries
  */
 
