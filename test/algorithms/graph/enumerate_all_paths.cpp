@@ -12,7 +12,7 @@
 
 using namespace fiction;
 
-TEST_CASE("2x2 clocked layouts", "[all-paths]")
+TEST_CASE("2x2 clocked layouts", "[enumerate-all-paths]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using path    = layout_coordinate_path<clk_lyt>;
@@ -72,7 +72,7 @@ TEST_CASE("2x2 clocked layouts", "[all-paths]")
     }
 }
 
-TEST_CASE("4x4 clocked layouts", "[all-paths]")
+TEST_CASE("4x4 clocked layouts", "[enumerate-all-paths]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using path    = layout_coordinate_path<clk_lyt>;
