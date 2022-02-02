@@ -14,8 +14,9 @@ namespace fiction
 {
 
 template <typename Lyt>
-struct layout_coordinate_path : std::vector<coordinate<Lyt>>
+class layout_coordinate_path : public std::vector<coordinate<Lyt>>
 {
+  public:
     void append(const coordinate<Lyt>& c) noexcept
     {
         this->push_back(c);
@@ -33,8 +34,9 @@ struct layout_coordinate_path : std::vector<coordinate<Lyt>>
 };
 
 template <typename Path>
-struct path_collection : std::vector<Path>
+class path_collection : public std::vector<Path>
 {
+  public:
     void add(const Path& p) noexcept
     {
         this->push_back(p);
@@ -55,7 +57,7 @@ struct enumerate_all_clocking_paths_params
 namespace detail
 {
 
-template <typename Lyt, typename Path>
+template <typename Path, typename Lyt>
 class enumerate_all_clocking_paths_impl
 {
   public:
@@ -168,11 +170,7 @@ template <typename Path, typename Lyt>
 {
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
 
-    detail::enumerate_all_clocking_paths_impl<Lyt, Path> p{layout, source, target, ps};
-
-    auto result = p.run();
-
-    return result;
+    return detail::enumerate_all_clocking_paths_impl<Path, Lyt>{layout, source, target, ps}.run();
 }
 
 }  // namespace fiction
