@@ -32,6 +32,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.strongly_connected_components.size() == 2);
 
             CHECK(graph.size_vertices() == 2);
             CHECK(graph.size_edges() == 0);
@@ -47,6 +48,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.strongly_connected_components.size() == 2);
 
             CHECK(graph.size_vertices() == 3);
             CHECK(graph.size_edges() == 3);
@@ -59,6 +61,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unsatisfiable_objectives == 1);
+            CHECK(st.strongly_connected_components.size() == 2);
 
             CHECK(graph.size_vertices() == 2);
             CHECK(graph.size_edges() == 1);
@@ -76,6 +79,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.strongly_connected_components.size() == 2);
 
             CHECK(graph.size_vertices() == 2);
             CHECK(graph.size_edges() == 0);
@@ -91,6 +95,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.strongly_connected_components.size() == 2);
 
             CHECK(graph.size_vertices() == 2);
             CHECK(graph.size_edges() == 1);
@@ -103,6 +108,8 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unsatisfiable_objectives == 1);
+            CHECK(st.strongly_connected_components.size() == 2);
+            CHECK(st.strongly_connected_components.back().empty());
 
             CHECK(graph.size_vertices() == 1);
             CHECK(graph.size_edges() == 0);
@@ -126,6 +133,8 @@ TEST_CASE("4x4 clocked layouts", "[generate-edge-intersection-graph]")
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.strongly_connected_components.size() == 1);
+            CHECK(st.strongly_connected_components.size() == 1);
 
             CHECK(graph.size_vertices() == 20);  // 20 valid paths == 20 vertices
             CHECK(graph.size_edges() == 190);    // a complete graph has (n(n-1))/2 edges
@@ -142,6 +151,8 @@ TEST_CASE("4x4 clocked layouts", "[generate-edge-intersection-graph]")
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.strongly_connected_components.size() == 1);
+            CHECK(st.strongly_connected_components.front().size() == 4);
 
             CHECK(graph.size_vertices() == 4);  // 4 valid paths == 4 vertices
             CHECK(graph.size_edges() == 6);     // a complete graph has (n(n-1))/2 edges
@@ -168,6 +179,8 @@ TEST_CASE("4x4 gate-level layouts with obstruction", "[generate-edge-intersectio
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.strongly_connected_components.size() == 1);
+            CHECK(st.strongly_connected_components.front().size() == 19);
 
             CHECK(graph.size_vertices() == 19);  // 19 valid paths == 19 vertices
             CHECK(graph.size_edges() == 171);    // a complete graph has (n(n-1))/2 edges
@@ -187,6 +200,8 @@ TEST_CASE("4x4 gate-level layouts with obstruction", "[generate-edge-intersectio
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.strongly_connected_components.size() == 1);
+            CHECK(st.strongly_connected_components.front().size() == 1);
 
             CHECK(graph.size_vertices() == 1);  // 1 valid paths == 1 vertex
             CHECK(graph.size_edges() == 0);     // a complete graph has (n(n-1))/2 edges

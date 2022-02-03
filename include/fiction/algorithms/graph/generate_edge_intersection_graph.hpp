@@ -53,6 +53,12 @@ struct generate_edge_intersection_graph_stats
      * For each routing objective that cannot be fulfilled in the given layout, this counter is incremented.
      */
     std::size_t number_of_unsatisfiable_objectives{0};
+    /**
+     * Stores all strongly connected components (SCCs) in the resulting graph that were created during path
+     * enumeration. There might be more SCCs in the overall graph but these ones correspond to one routing objective
+     * each, which could be useful information to have in certain algorithms.
+     */
+    std::vector<std::vector<std::size_t>> strongly_connected_components{};
 };
 
 namespace detail
@@ -92,8 +98,6 @@ class generate_edge_intersection_graph_impl
                               // since all paths of the same objective have intersections by definition, create edges
                               // between all of them by iterating over all possible combinations of size 2
                               connect_scc(obj_paths);
-
-                              // TODO store SCC in stats
                           }
                           // for each previously stored path, create an edge if there is an intersection
                           create_intersection_edges(obj_paths);
@@ -191,16 +195,24 @@ class generate_edge_intersection_graph_impl
      * Given a collection of paths belonging to the same objective, this function assigns them unique labels and
      * generates corresponding nodes in the edge intersection graph.
      *
+     * Since each path of the same objective objective belongs to an SCC in the final graph, this function additionally
+     * stores their node IDs in the statistics.
+     *
      * @param objective_paths Collection of paths belonging to the same objective.
      */
     void initiate_objective_nodes(path_collection<clk_path>& objective_paths) noexcept
     {
+        std::vector<std::size_t> scc{};
+
         std::for_each(objective_paths.begin(), objective_paths.end(),
-                      [this](auto& p)
+                      [this, &scc](auto& p)
                       {
                           p.label = node_id++;
                           graph.insert_vertex(p.label, p);
+                          scc.push_back(p.label);
                       });
+
+        pst.strongly_connected_components.push_back(scc);
     }
     /**
      * Given a collection of paths belonging to the same objective, this function creates edges in the edge intersection
