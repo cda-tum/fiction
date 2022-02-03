@@ -9,8 +9,8 @@
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
 
+#include <algorithm>
 #include <set>
-#include <unordered_map>
 #include <vector>
 
 #include <combinations.h>
