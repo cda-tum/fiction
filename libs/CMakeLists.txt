@@ -76,3 +76,6 @@ if (FICTION_Z3)
     endif ()
 
 endif ()
+
+# Include undirected_graph by Fabian Löschner
+target_include_directories(libfiction INTERFACE undirected_graph/source/)
