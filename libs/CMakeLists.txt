@@ -79,3 +79,6 @@ endif ()
 
 # Include undirected_graph by Fabian Löschner
 target_include_directories(libfiction INTERFACE undirected_graph/source/)
+
+# Include combinations by Howard Hinnant
+target_include_directories(libfiction INTERFACE combinations/)
