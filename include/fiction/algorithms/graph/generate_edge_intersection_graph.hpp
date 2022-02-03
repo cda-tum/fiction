@@ -152,13 +152,13 @@ class generate_edge_intersection_graph_impl
 
     void connect_scc(path_collection<clk_path>& objective_paths) noexcept
     {
-        for_each_combination(objective_paths.begin(), objective_paths.begin() + 2, objective_paths.end(),
-                             [this, &objective_paths](const auto begin, [[maybe_unused]] const auto end)
-                             {
-                                 graph.insert_edge(begin->label, (begin + 1)->label, edge_id++);
+        combinations::for_each_combination(objective_paths.begin(), objective_paths.begin() + 2, objective_paths.end(),
+                                           [this, &objective_paths](const auto begin, [[maybe_unused]] const auto end)
+                                           {
+                                               graph.insert_edge(begin->label, (begin + 1)->label, edge_id++);
 
-                                 return false;  // keep looping
-                             });
+                                               return false;  // keep looping
+                                           });
     }
 
     void create_intersection_edges(path_collection<clk_path>& objective_paths) noexcept
