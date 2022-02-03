@@ -94,7 +94,7 @@ TEST_CASE("4x4 clocked layouts", "[enumerate-all-paths]")
     {
         clk_lyt layout{{3, 3}, use_clocking<clk_lyt>()};
 
-        SECTION("(0,0) to (3,3)")  // 4 valid paths
+        SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
         {
             const auto collection = enumerate_all_clocking_paths<path>(layout, {0, 0}, {3, 3});
 
