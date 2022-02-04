@@ -102,7 +102,7 @@ v0.3.2 - 2021-01-06
 Added
 #####
 - Command ``onepass`` for a combined SAT-based logic synthesis and physical design using `Mugen <https://github.com/whaaswijk/mugen>`_. Thanks to Winston Haaswijk for cooperating with us on this project!
-- SVG output for irregular (cell-based) clocked ``fcn_cell_layout``\ s (thanks to Gregor Kuhn!)
+- SVG output for irregular (cell-based) clocked ``fcn_cell_layout``\ s (thanks to Sophia Kuhn!)
 - ``csv_writer`` for conveniently formatting experiments' results
 - ``tt_reader`` for reading truth tables from a `file format used by Alan Mishchenko <https://people.eecs.berkeley.edu/~alanmi/temp5/>`_
 
@@ -254,7 +254,7 @@ Fixed
 - TP calculation for layouts without designated I/O pins (thanks to Mario Kneidinger!)
 - I/O port orientation of PI/PO gates using QCA-ONE library
 - Usage of non-PI/PO MAJ gates in QCA-ONE library
-- Visualization of clock latches in ``show -c`` (thanks to Gregor Kuhn!)
+- Visualization of clock latches in ``show -c`` (thanks to Sophia Kuhn!)
 - Multi direction assignment to wires and gates in ``exact`` leading to physically impossible layouts
 - ``shrink_to_fit`` in ``fcn_gate_layout`` incorporates the BGL bug now. Minimum size in each dimension is 2. For more information, see https://svn.boost.org/trac10/ticket/11735
 - Parameters for ``exact`` no longer get stuck once set

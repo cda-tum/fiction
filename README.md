@@ -79,7 +79,7 @@ File formats:
 - `*.svg` for visual representation
 
 Many thanks to Frank Sill Torres for his support with the QCADesigner format, to Willem Lambooy for his support with the
-QCA-STACK format, and to Gregor Kuhn for implementing the SVG writer!
+QCA-STACK format, and to Sophia Kuhn for implementing the SVG writer!
 
 ### in-plane Nanomagnet Logic (iNML)
 
