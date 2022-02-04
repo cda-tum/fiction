@@ -3,6 +3,7 @@ add_subdirectory(alice/)
 
 # Include mockturtle
 add_subdirectory(mockturtle/)
+target_link_libraries(libfiction INTERFACE mockturtle)
 
 # Mugen is not available under Windows
 if (NOT WIN32)
