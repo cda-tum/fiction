@@ -4,7 +4,7 @@ PROJECT(graph-coloring)
 
 SET(CMAKE_CXX_STANDARD 17)
 
-ADD_LIBRARY(graph-coloring SHARED
+ADD_LIBRARY(graph-coloring STATIC
         Source/coloring_algorithm.cpp
         Source/dsatur.cpp
         Source/mcs.cpp
