@@ -101,7 +101,7 @@ class enumerate_all_clocking_paths_impl
                 {
                     if constexpr (has_is_obstructed_v<Lyt>)
                     {
-                        if (layout.is_obstructed(cz))
+                        if (layout.is_obstructed(cz) && cz != tgt)
                         {
                             return true;  // skip the obstructed coordinate and keep looping
                         }
