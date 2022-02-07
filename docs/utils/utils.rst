@@ -56,6 +56,23 @@ Placement Utils
 .. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<branching_signal_container<Lyt, Ntk, fanout_size>, Ntk>& node2pos) noexcept
 
 
+Routing Utils
+-------------
+
+**Header:** ``fiction/utils/routing_utils.hpp``
+
+.. doxygenstruct:: fiction::routing_objective
+   :members:
+
+.. doxygenclass:: fiction::layout_coordinate_path
+   :members:
+
+.. doxygenclass:: fiction::path_collection
+   :members:
+
+.. doxygenfunction:: fiction::route_path
+
+
 Name Utils
 ----------
 
