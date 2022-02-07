@@ -666,6 +666,54 @@ class gate_level_layout : public ClockedLayout
         return static_cast<signal>(t);
     }
     /**
+     * Connects the given signal s to the given node n as a child. The new child s is appended at the end of n's list of
+     * children. Thus, if the order of children is important, move_node should be used instead. Otherwise, this function
+     * has a smaller overhead and is to be preferred.
+     *
+     * @param s New incoming signal to n.
+     * @param n Node that should add s as its child.
+     * @return Signal pointing to n.
+     */
+    signal connect(const signal& s, const node n) noexcept
+    {
+        if (!is_constant(n))
+        {
+            strg->nodes[n].children.push_back(s);
+        }
+
+        return make_signal(n);
+    }
+    /**
+     * Removes all assigned nodes from the given tile and marks them as dead.
+     *
+     * @param t Tile whose nodes are to be removed.
+     */
+    void clear_tile(const tile& t) noexcept
+    {
+        if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
+        {
+            if (!t.is_dead())
+            {
+                // decrease wire count
+                if (is_wire(it->second))
+                {
+                    strg->data.num_wires--;
+                }
+                else  // decrease gate count
+                {
+                    strg->data.num_gates--;
+                }
+            }
+            // mark node as dead
+            kill_node(it->second);
+
+            // remove node-tile
+            strg->data.node_tile_map.erase(it->second);
+            // remove tile-node
+            strg->data.tile_node_map.erase(it);
+        }
+    }
+    /**
      * Necessary function in the mockturtle API. However, in this layout type, signals cannot be complemented.
      *
      * @param s Signal to check.
@@ -1463,32 +1511,6 @@ class gate_level_layout : public ClockedLayout
     {
         const auto& node_data = strg->nodes[n];
         return std::find(node_data.children.cbegin(), node_data.children.cend(), s) != node_data.children.cend();
-    }
-
-    void clear_tile(const tile& t) noexcept
-    {
-        if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
-        {
-            if (!t.is_dead())
-            {
-                // decrease wire count
-                if (is_wire(it->second))
-                {
-                    strg->data.num_wires--;
-                }
-                else  // decrease gate count
-                {
-                    strg->data.num_gates--;
-                }
-            }
-            // mark node as dead
-            kill_node(it->second);
-
-            // remove node-tile
-            strg->data.node_tile_map.erase(it->second);
-            // remove tile-node
-            strg->data.tile_node_map.erase(it);
-        }
     }
 };
 
