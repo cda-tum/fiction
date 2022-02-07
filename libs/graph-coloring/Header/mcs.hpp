@@ -5,18 +5,23 @@
 
 using GraphColoring::GraphColor;
 
-namespace GraphColoring{
-	class Mcs : public GraphColor {
-		public: 
-			/* Constructors */
-			explicit Mcs(map<string,vector<string>> graph) : GraphColor(graph) {}
+namespace GraphColoring
+{
+class Mcs : public GraphColor
+{
+  public:
+    /* Constructors */
+    explicit Mcs(const map<string, vector<string>>& g) : GraphColor(g) {}
 
-			/* Mutators */
-			map<string,int> color();
+    /* Mutators */
+    map<string, int> color() override;
 
-			/* Accessors */
-			string get_algorithm() { return "MCS"; }
-	};
-}
+    /* Accessors */
+    string get_algorithm() override
+    {
+        return "MCS";
+    }
+};
+}  // namespace GraphColoring
 
-#endif //_MCS_HPP_
+#endif  //_MCS_HPP_
