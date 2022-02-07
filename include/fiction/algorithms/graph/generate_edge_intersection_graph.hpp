@@ -156,7 +156,14 @@ class generate_edge_intersection_graph_impl
         template <typename Path>
         bool has_intersection_with(const Path& other) const noexcept
         {
-            return std::any_of(std::cbegin(other), std::cend(other),
+            // if source and target are identical, an intersection was found
+            if (this->source() == other.source() && this->target() == other.target())
+            {
+                return true;
+            }
+
+            // else, check if any of the remaining coordinates occur in the stored path
+            return std::any_of(std::cbegin(other) + 1, std::cend(other) - 1,
                                [this](const auto& c) { return path_elements.count(c) > 0; });
         }
         /**
