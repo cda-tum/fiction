@@ -14,6 +14,16 @@ namespace fiction
 {
 
 /**
+ * Routing objectives are source-target pairs.
+ *
+ * @tparam Lyt Layout type whose coordinates are to be used.
+ */
+template <typename Lyt>
+struct routing_objective
+{
+    const coordinate<Lyt>&source, target;
+};
+/**
  * A path in a layout defined as a ordered sequence of coordinates.
  *
  * @tparam Lyt Coordinate layout type.
@@ -57,15 +67,32 @@ class path_collection : public std::vector<Path>
     }
 };
 /**
- * Routing objectives are source-target pairs.
+ * Establishes a wire routing along the given path in the given layout. To this end, the given path's source and target
+ * coordinates are assumed to be populated by other gates or wires that the new path shall connect to.
  *
- * @tparam Lyt Layout type whose coordinates are to be used.
+ * This function overwrites any nodes that might already be placed at any of the path's coordinates other than source
+ * and target. If path contains exactly source and target, no wires are created but source and target are connected.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @tparam Path Path type.
+ * @param lyt Gate-level layout in which a wire path is to be established.
+ * @param path Path to route wires along.
  */
-template <typename Lyt>
-struct routing_objective
+template <typename Lyt, typename Path>
+void route_path(Lyt& lyt, const Path& path) noexcept
 {
-    const coordinate<Lyt>&source, target;
-};
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+
+    auto incoming_signal = static_cast<mockturtle::signal<Lyt>>(path.source());
+
+    // exclude source and target
+    std::for_each(path.cbegin() + 1, path.cend() - 1,
+                  [&lyt, &incoming_signal](const auto& coord)
+                  { incoming_signal = lyt.create_buf(incoming_signal, coord); });
+
+    // establish final connection to target node
+    lyt.connect(incoming_signal, lyt.get_node(path.target()));
+}
 
 }  // namespace fiction
 
