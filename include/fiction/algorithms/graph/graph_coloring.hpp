@@ -93,6 +93,8 @@ struct determine_vertex_coloring_stats
      * Validation result of the coloring (std::nullopt = none attempted, true = valid, false = invalid).
      */
     std::optional<bool> coloring_verified = std::nullopt;
+
+    // TODO determine most frequent color
 };
 
 namespace detail
@@ -226,16 +228,31 @@ class graph_coloring_impl
     {
         brian_crites_graph translated_graph{};
 
-        // iterate over all edges e of the original graph
-        std::for_each(g.begin_edges(), g.end_edges(),
-                      [this, &translated_graph](const auto& e_pair)
+        // iterate over all vertices of the original graph
+        std::for_each(g.begin_vertices(), g.end_vertices(),
+                      [this, &g, &translated_graph](const auto& v_pair)
                       {
-                          const auto e = e_pair.first;
+                          const auto v1 = v_pair.first;
 
-                          // add an edge in the brian_crites_graph that leads from 'source' of e to 'target' of e
-                          translated_graph[convert_node_index(e.a)].push_back(convert_node_index(e.b));
-                          // add an edge in the brian_crites_graph that leads from 'target' of e to 'source' of e
-                          translated_graph[convert_node_index(e.b)].push_back(convert_node_index(e.a));
+                          // if v does not have any adjacent vertices
+                          if (g.begin_adjacent(v1) == g.end_adjacent(v1))
+                          {
+                              // create an isolated vertex in the brian_crites_graph
+                              translated_graph[convert_node_index(v1)] = {};
+                          }
+                          else
+                          {
+                              // iterate over all vertices v2 adjacent to v1
+                              std::for_each(
+                                  g.begin_adjacent(v1), g.end_adjacent(v1),
+                                  [this, &translated_graph, &v1](const auto& v2)
+                                  {
+                                      // add an edge in the brian_crites_graph that leads from v1 to v2
+                                      translated_graph[convert_node_index(v1)].push_back(convert_node_index(v2));
+                                      // and ones that leads from v2 to v1
+                                      translated_graph[convert_node_index(v2)].push_back(convert_node_index(v1));
+                                  });
+                          }
                       });
 
         return translated_graph;
