@@ -6,47 +6,12 @@
 #define FICTION_ENUMERATE_ALL_PATHS_HPP
 
 #include "fiction/traits.hpp"
+#include "fiction/utils/routing_utils.hpp"
 
-#include <algorithm>
 #include <vector>
 
 namespace fiction
 {
-
-template <typename Lyt>
-class layout_coordinate_path : public std::vector<coordinate<Lyt>>
-{
-  public:
-    void append(const coordinate<Lyt>& c) noexcept
-    {
-        this->push_back(c);
-    }
-
-    [[nodiscard]] coordinate<Lyt> source() const noexcept
-    {
-        return this->empty() ? coordinate<Lyt>{} : this->front();
-    }
-
-    [[nodiscard]] coordinate<Lyt> target() const noexcept
-    {
-        return this->empty() ? coordinate<Lyt>{} : this->back();
-    }
-};
-
-template <typename Path>
-class path_collection : public std::vector<Path>
-{
-  public:
-    void add(const Path& p) noexcept
-    {
-        this->push_back(p);
-    }
-
-    [[nodiscard]] bool contains(const Path& p) const noexcept
-    {
-        return std::find(std::cbegin(*this), std::cend(*this), p) != std::cend(*this);
-    }
-};
 
 struct enumerate_all_clocking_paths_params
 {
