@@ -62,15 +62,13 @@ class color_routing_impl
         determine_vertex_coloring_stats dvc_st{};
         const auto vertex_coloring = determine_vertex_coloring(edge_intersection_graph, ps.dvc_ps, &dvc_st);
 
-        const auto [color, frequency] = determine_most_frequent_color(vertex_coloring);
-
         // if no partial routing is allowed, abort if the coloring does not satisfy all objectives
-        if (!ps.conduct_partial_routing && !is_complete_routing(frequency, geig_st))
+        if (!ps.conduct_partial_routing && dvc_st.color_frequency != geig_st.strongly_connected_components.size())
         {
             return false;
         }
 
-        conduct_routing(edge_intersection_graph, vertex_coloring, color);
+        conduct_routing(edge_intersection_graph, vertex_coloring, dvc_st.most_frequent_color);
 
         return true;
     }
@@ -83,49 +81,6 @@ class color_routing_impl
     const color_routing_params ps;
 
     color_routing_stats& pst;
-
-    template <typename Graph, typename Color>
-    [[nodiscard]] std::pair<Color, std::size_t>
-    determine_most_frequent_color(const vertex_coloring<Graph, Color>& coloring) const noexcept
-    {
-        std::map<Color, std::size_t> color_counter{};
-
-        std::for_each(coloring.cbegin(), coloring.cend(),
-                      [&color_counter](const auto& v_clr_pair)
-                      {
-                          const auto clr = v_clr_pair.second;
-                          color_counter[clr]++;
-                      });
-
-        const auto max_clr_it = std::max_element(color_counter.cbegin(), color_counter.cend(),
-                                                 [](const auto& p1, const auto& p2) { return p1.second < p2.second; });
-
-        if (max_clr_it != color_counter.cend())
-        {
-            return *max_clr_it;
-        }
-
-        return {};
-    }
-    /**
-     * Checks if a valid, i.e., complete, routing can be conducted given the vertex coloring of the edge intersection
-     * graph. To this end, the full coloring is not needed to answer this question. Instead, only the frequency of the
-     * most used color is necessary. This realization is based on the assumption that the edge intersection graph is a
-     * collection of strongly connected components (SCCs) whose size is known. If a color occurs in each SCC, the
-     * respectively associated paths form a complete routing. Since a color cannot appear twice within the same SCC by
-     * the definition of vertex coloring, it is sufficient to check whether the given frequency is equal to the number
-     * of all SCCs.
-     *
-     * @param frequency Frequency of most used color in the colored edge intersection graph.
-     * @param geig_st Statistics determined from the call to generate_edge_intersection_graph that store the SCCs.
-     * @return True iff the frequency nodes in the edge intersection graph that are painted with the same color form a
-     * complete routing.
-     */
-    [[nodiscard]] bool is_complete_routing(const std::size_t                             frequency,
-                                           const generate_edge_intersection_graph_stats& geig_st) const noexcept
-    {
-        return frequency == geig_st.strongly_connected_components.size();
-    }
 
     template <typename Graph, typename Color>
     void conduct_routing(const Graph& graph, const vertex_coloring<Graph, Color>& coloring, const Color& color) noexcept

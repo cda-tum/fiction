@@ -83,6 +83,7 @@ struct determine_vertex_coloring_params
     bool verify_coloring_after_computation = false;
 };
 
+template <typename Color = std::size_t>
 struct determine_vertex_coloring_stats
 {
     /**
@@ -90,11 +91,17 @@ struct determine_vertex_coloring_stats
      */
     std::size_t chromatic_number{0};
     /**
+     * The color that appeared the most.
+     */
+    Color most_frequent_color{0};
+    /**
+     * The frequency of the most used color.
+     */
+    std::size_t color_frequency{0};
+    /**
      * Validation result of the coloring (std::nullopt = none attempted, true = valid, false = invalid).
      */
     std::optional<bool> coloring_verified = std::nullopt;
-
-    // TODO determine most frequent color
 };
 
 namespace detail
@@ -105,7 +112,7 @@ class graph_coloring_impl
 {
   public:
     graph_coloring_impl(const Graph& g, const determine_vertex_coloring_params& p,
-                        determine_vertex_coloring_stats& st) :
+                        determine_vertex_coloring_stats<Color>& st) :
             graph{g},
             ps{p},
             pst{st}
@@ -177,7 +184,7 @@ class graph_coloring_impl
     /**
      * Statistics.
      */
-    determine_vertex_coloring_stats& pst;
+    determine_vertex_coloring_stats<Color>& pst;
     /**
      * An alias for the graph structure used in Brian Crites' graph-coloring library. The usage of his algorithms
      * require the translation into this data structure.
@@ -267,9 +274,26 @@ class graph_coloring_impl
     {
         vertex_coloring<Graph, Color> v_coloring{};
 
+        // determine the color frequency alongside; index represents the color, value its frequency
+        std::vector<Color> color_frequency(pst.chromatic_number, Color{0});
+
         std::for_each(bc_coloring.cbegin(), bc_coloring.cend(),
-                      [this, &v_coloring](const auto& c_pair)
-                      { v_coloring[convert_node_index(c_pair.first)] = static_cast<Color>(c_pair.second); });
+                      [this, &v_coloring, &color_frequency](const auto& c_pair)
+                      {
+                          // convert color
+                          v_coloring[convert_node_index(c_pair.first)] = static_cast<Color>(c_pair.second);
+                          // increment the color frequency
+                          color_frequency[static_cast<std::size_t>(c_pair.second)]++;
+                      });
+
+        if (const auto it = std::max_element(color_frequency.cbegin(), color_frequency.cend());
+            it != color_frequency.cend())
+        {
+            // get index from iterator; index represents the color
+            pst.most_frequent_color = static_cast<Color>(it - color_frequency.cbegin());
+            // the value of the iterator represents the color frequency
+            pst.color_frequency = *it;
+        }
 
         return v_coloring;
     }
@@ -297,7 +321,7 @@ class graph_coloring_impl
  */
 template <typename Graph, typename Color = std::size_t>
 vertex_coloring<Graph, Color> determine_vertex_coloring(const Graph& graph, determine_vertex_coloring_params ps = {},
-                                                        determine_vertex_coloring_stats* pst = nullptr)
+                                                        determine_vertex_coloring_stats<Color>* pst = nullptr)
 {
     determine_vertex_coloring_stats st{};
 

@@ -28,6 +28,7 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
         REQUIRE(pst.coloring_verified.has_value());
         CHECK(pst.coloring_verified.value() == true);
         CHECK(pst.chromatic_number == expected_chromatic_number);
+        CHECK(pst.color_frequency > 0);
     }
     SECTION("DSATUR")
     {
@@ -36,6 +37,7 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
         REQUIRE(pst.coloring_verified.has_value());
         CHECK(pst.coloring_verified.value() == true);
         CHECK(pst.chromatic_number == expected_chromatic_number);
+        CHECK(pst.color_frequency > 0);
     }
     SECTION("LmXRLF")
     {
@@ -44,6 +46,7 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
         REQUIRE(pst.coloring_verified.has_value());
         CHECK(pst.coloring_verified.value() == true);
         CHECK(pst.chromatic_number >= expected_chromatic_number);  // randomized, could be non-optimal
+        CHECK(pst.color_frequency > 0);
     }
     SECTION("TabuCol")
     {
@@ -53,6 +56,7 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
         REQUIRE(pst.coloring_verified.has_value());
         CHECK(pst.coloring_verified.value() == true);
         CHECK(pst.chromatic_number == expected_chromatic_number);
+        CHECK(pst.color_frequency > 0);
     }
 }
 
