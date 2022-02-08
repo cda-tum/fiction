@@ -51,7 +51,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
             CHECK(st.strongly_connected_components.size() == 2);
 
             CHECK(graph.size_vertices() == 3);
-            CHECK(graph.size_edges() == 3);
+            CHECK(graph.size_edges() == 2);
         }
         SECTION("Unsatisfiable objective")
         {
