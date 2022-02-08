@@ -71,6 +71,7 @@ Routing Utils
    :members:
 
 .. doxygenfunction:: fiction::route_path
+.. doxygenfunction:: fiction::extract_routing_objectives
 
 
 Name Utils

@@ -7,7 +7,10 @@
 
 #include "fiction/traits.hpp"
 
+#include <mockturtle/traits.hpp>
+
 #include <algorithm>
+#include <functional>
 #include <vector>
 
 namespace fiction
@@ -21,7 +24,21 @@ namespace fiction
 template <typename Lyt>
 struct routing_objective
 {
-    const coordinate<Lyt>&source, target;
+    /**
+     * Source and target of the objective.
+     */
+    const coordinate<Lyt> source, target;
+    /**
+     * Equality operator.
+     * @tparam OtherLyt Type of other layout.
+     * @param other Routing objective to compare to.
+     * @return True iff the given objective is equal to this one.
+     */
+    template <typename OtherLyt>
+    bool operator==(const routing_objective<OtherLyt>& other) const noexcept
+    {
+        return source == other.source && target == other.target;
+    }
 };
 /**
  * A path in a layout defined as a ordered sequence of coordinates.
@@ -92,6 +109,68 @@ void route_path(Lyt& lyt, const Path& path) noexcept
 
     // establish final connection to target node
     lyt.connect(incoming_signal, lyt.get_node(path.target()));
+}
+/**
+ * Extracts all routing objectives from the given layout. To this end, all routing paths in the layout are traversed,
+ * starting at each PI. Whenever the next regular node (non-IO, non-constant, non-wire) is encountered, this connection
+ * is added to the list of all objectives.
+ *
+ * Example: Let a layout have connections from (0,0) to (2,3) via a cascade of wires and a direct connection from (2,2)
+ * to (2,3). The list of routing objectives extracted from that layout would contain {(0,0), (2,3)} and {(2,2), (2,3)}.
+ *
+ * In other words, if all wires were removed from the layout and all connections ripped-up, an equivalent layout could
+ * be recreated from the list of routing objectives.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout whose routing objectives are to be extracted.
+ * @return List of all routing objectives in the given layout.
+ */
+template <typename Lyt>
+std::vector<routing_objective<Lyt>> extract_routing_objectives(const Lyt& lyt) noexcept
+{
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+
+    // extracted routing objectives
+    std::vector<routing_objective<Lyt>> objectives{};
+    // list of visited nodes
+    std::vector<bool> visited(lyt.size(), false);
+    // checks if a node is an intermediate routing wire
+    const auto is_connection_wire = [&lyt](const auto& n)
+    { return lyt.is_wire(n) && !lyt.is_fanout(n) && !lyt.is_pi(n) && !lyt.is_po(n); };
+    // recursively traverse the layout paths and gather routing objectives
+    const std::function<void(const tile<Lyt>&, const mockturtle::node<Lyt>&)> recursively_traverse_paths =
+        [&](const auto& recent_gate_tile, const auto& current_node)
+    {
+        auto current_gate_tile = recent_gate_tile;
+
+        if (!is_connection_wire(current_node))  // is regular gate, fan-out, or I/O
+        {
+            current_gate_tile = lyt.get_tile(current_node);
+            // objective found
+            objectives.push_back({recent_gate_tile, current_gate_tile});
+        }
+
+        // node already visited
+        if (visited[current_node])
+        {
+            return;
+        }
+        // mark node as visited
+        visited[current_node] = true;
+
+        // recursively traverse successors
+        lyt.foreach_fanout(current_node, [&](const auto& fon) { recursively_traverse_paths(current_gate_tile, fon); });
+    };
+
+    // start recursion at each PI
+    lyt.foreach_pi(
+        [&](const auto& pi)
+        {
+            const auto pi_tile = lyt.get_tile(pi);
+            lyt.foreach_fanout(pi, [&](const auto& fon) { recursively_traverse_paths(pi_tile, fon); });
+        });
+
+    return objectives;
 }
 
 }  // namespace fiction
