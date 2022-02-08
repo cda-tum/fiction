@@ -145,6 +145,32 @@ GateLyt or_not_gate_layout() noexcept
 }
 
 template <typename GateLyt>
+GateLyt use_and_gate_layout() noexcept
+{
+    GateLyt layout{typename GateLyt::aspect_ratio{3, 3, 0}, fiction::use_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 1});
+    const auto x2 = layout.create_pi("x2", {3, 3});
+
+    const auto w1 = layout.create_buf(x1, {0, 0});
+    const auto w2 = layout.create_buf(w1, {1, 0});
+    const auto w3 = layout.create_buf(w2, {1, 1});
+
+    const auto w4 = layout.create_buf(x2, {2, 3});
+    const auto w5 = layout.create_buf(w4, {1, 3});
+    const auto w6 = layout.create_buf(w5, {0, 3});
+    const auto w7 = layout.create_buf(w6, {0, 2});
+
+    const auto a1 = layout.create_and(w3, w7, {1, 2});
+
+    const auto w8 = layout.create_buf(a1, {2, 2});
+
+    layout.create_po(w8, "f1", {3, 2});
+
+    return layout;
+}
+
+template <typename GateLyt>
 GateLyt crossing_layout() noexcept
 {
     GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 1}, fiction::twoddwave_clocking<GateLyt>()};

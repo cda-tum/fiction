@@ -96,3 +96,35 @@ TEST_CASE("Direct gate connections", "[color-routing]")
 
     check_eq(spec_layout, impl_layout);
 }
+
+TEST_CASE("Partial routing", "[color-routing]")
+{
+    auto spec_layout = blueprints::use_and_gate_layout<cart_gate_clk_lyt>();
+    auto impl_layout = blueprints::use_and_gate_layout<cart_gate_clk_lyt>();
+
+    // remove the wire from the implementation
+    impl_layout.clear_tile({0, 0});
+    impl_layout.clear_tile({1, 0});
+    impl_layout.clear_tile({1, 1});
+    impl_layout.clear_tile({2, 3});
+    impl_layout.clear_tile({1, 3});
+    impl_layout.clear_tile({0, 3});
+    impl_layout.clear_tile({0, 2});
+    impl_layout.clear_tile({2, 2});
+
+    // rip-up all connections
+    impl_layout.move_node(impl_layout.get_node({0, 1}), {0, 1}, {});
+    impl_layout.move_node(impl_layout.get_node({3, 3}), {3, 3}, {});
+    impl_layout.move_node(impl_layout.get_node({1, 2}), {1, 2}, {});
+    impl_layout.move_node(impl_layout.get_node({3, 2}), {3, 2}, {});
+
+    // color routing should be able to recreate the removed wire
+    const auto success = color_routing(
+        impl_layout,
+        {{{0, 1}, {1, 2}}, {{3, 3}, {1, 2}}, {{1, 2}, {3, 2}}, {{0, 3}, {3, 0}}},  // additional unsatisfiable objective
+        {true});
+
+    CHECK(success);
+
+    check_eq(spec_layout, impl_layout);
+}
