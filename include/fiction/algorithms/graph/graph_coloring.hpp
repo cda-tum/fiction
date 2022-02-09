@@ -399,7 +399,14 @@ class graph_coloring_impl
         {
             sat_coloring_handler<Graph, Color> sat_handler{graph, pst};  // TODO pass largest SCC
 
-            return sat_handler.color(ps.k_color_value);
+            const auto coloring = sat_handler.color(ps.k_color_value);
+
+            if (ps.verify_coloring_after_computation)
+            {
+                pst.coloring_verified = is_valid_vertex_coloring(coloring);
+            }
+
+            return coloring;
         }
 
         // unreachable code; silence compiler warning
@@ -530,6 +537,30 @@ class graph_coloring_impl
         }
 
         return v_coloring;
+    }
+    /**
+     * Checks whether the given coloring is valid, i.e., if no two adjacent vertices have the same color assigned.
+     *
+     * @param v_coloring Vertex coloring to check.
+     * @return True iff no two adjacent vertices in the stored graph have the same color assigned according to the given
+     * coloring.
+     */
+    bool is_valid_vertex_coloring(const vertex_coloring<Graph, Color>& v_coloring) const noexcept
+    {
+        return std::none_of(graph.begin_vertices(), graph.end_vertices(),
+                            [this, &v_coloring](const auto& vp1)
+                            {
+                                const auto& v1 = vp1.first;
+
+                                if (std::any_of(graph.begin_adjacent(v1), graph.end_adjacent(v1),
+                                                [&v_coloring, c1 = v_coloring.at(v1)](const auto& v2)
+                                                { return c1 != v_coloring.at(v2); }))
+                                {
+                                    return true;
+                                }
+
+                                return false;
+                            });
     }
 };
 
