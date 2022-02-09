@@ -5,11 +5,18 @@
 #ifndef FICTION_GRAPH_COLORING_HPP
 #define FICTION_GRAPH_COLORING_HPP
 
+#include "fiction/utils/hash.hpp"
+
+#include <bill/sat/cardinality.hpp>
+#include <bill/sat/solver.hpp>
+#include <bill/sat/tseytin.hpp>
+
 #include <algorithm>
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <coloring_algorithm.hpp>
@@ -81,6 +88,10 @@ struct determine_vertex_coloring_params
      * Verify that the found coloring is valid.
      */
     bool verify_coloring_after_computation = false;
+    /**
+     * If engine == SAT, this selects the SAT solver to use.
+     */
+    bill::solvers sat_engine = bill::solvers::ghack;
 };
 
 template <typename Color = std::size_t>
@@ -107,6 +118,222 @@ struct determine_vertex_coloring_stats
 namespace detail
 {
 
+template <typename Graph, typename Color = std::size_t, bill::solvers SolverType = bill::solvers::ghack>
+class sat_coloring_handler
+{
+  private:
+    // forward declaration
+    struct solver_instance;
+    using solver_instance_ptr = std::shared_ptr<solver_instance>;
+    using result_instance     = std::pair<bill::result::states, solver_instance_ptr>;
+
+  public:
+    explicit sat_coloring_handler(const Graph& g, determine_vertex_coloring_stats<Color>& st,
+                                  const std::vector<typename Graph::vertex_id_type>& scc = {}) :
+            graph{g},
+            pst{st},
+            strongly_connected_component{scc}
+    {}
+
+    result_instance check_k_coloring(const std::size_t k) const noexcept
+    {
+        const auto k_color_instance = std::make_shared<solver_instance>(graph, k);
+
+        at_least_one_color_per_vertex(k_color_instance);
+        at_most_one_color_per_vertex(k_color_instance);
+        exclude_identical_adjacent_colors(k_color_instance);
+
+        return {check_sat(k_color_instance), k_color_instance};
+    }
+
+    void determine_k_coloring_with_linearly_ascending_search() const noexcept
+    {
+        // TODO increase k (starting at scc.size()) and call check_k_coloring
+    }
+
+    void determine_k_coloring_with_linearly_descending_search() const noexcept
+    {
+        // TODO decrease k (starting at vertex size?) and call check_k_coloring
+    }
+
+    void determine_k_coloring_with_binary_search() const noexcept
+    {
+        // TODO find a k by checking for 1, 2, 4, 8, 16, ... colors
+        // TODO Stop at smallest value 2^𝑘 such that G is 2^k-colorable
+        // TODO Binary search for Color(G) in range [2^𝑘−1, 2^k]
+    }
+
+    vertex_coloring<Graph, Color> color(const std::size_t k) noexcept
+    {
+        const auto [sat, instance] = check_k_coloring(k);
+
+        if (sat == bill::result::states::satisfiable)
+        {
+            pst.chromatic_number = k;
+            return extract_vertex_coloring(instance, get_model(instance));
+        }
+
+        return {};
+    }
+
+  private:
+    const Graph& graph;
+
+    determine_vertex_coloring_stats<Color>& pst;
+
+    const std::vector<typename Graph::vertex_id_type> strongly_connected_component;
+    /**
+     * Alias for a vertex-color pair.
+     */
+    using vertex_color = std::pair<typename Graph::vertex_id_type, Color>;
+
+    struct solver_instance
+    {
+        /**
+         * Standard constructor. Initialize one variable for each vertex-color pair.
+         *
+         * @param graph The graph to color.
+         * @param num_colors Number of colors to attempt the coloring with.
+         */
+        explicit solver_instance(const Graph& graph, const std::size_t num_colors) : k{num_colors}
+        {
+            std::for_each(graph.begin_vertices(), graph.end_vertices(),
+                          [this, &num_colors](const auto& vp)
+                          {
+                              const auto& v = vp.first;
+                              for (std::size_t c = 0; c < num_colors; ++c)
+                              {
+                                  variables[{v, c}] = solver.add_variable();
+                              }
+                          });
+        }
+        /**
+         * Default constructor is not available.
+         */
+        solver_instance() = delete;
+        /**
+         * Number of colors.
+         */
+        std::size_t k;
+        /**
+         * SAT solver.
+         */
+        bill::solver<SolverType> solver{};
+        /**
+         * Stores all variables.
+         */
+        std::unordered_map<vertex_color, bill::var_type> variables{};
+    };
+
+    void at_least_one_color_per_vertex(const solver_instance_ptr& instance) const
+    {
+        // for each vertex
+        std::for_each(graph.begin_vertices(), graph.end_vertices(),
+                      [this, &instance](const auto& vp)
+                      {
+                          const auto& v = vp.first;
+
+                          std::vector<bill::var_type> vc(instance->k, 0);
+
+                          // for each color
+                          for (std::size_t c = 0; c < instance->k; ++c) { vc[c] = instance->variables[{v, c}]; }
+
+                          bill::at_least_one(vc, instance->solver);
+                      });
+    }
+
+    void at_most_one_color_per_vertex(const solver_instance_ptr& instance) const
+    {
+        // for each pair of colors
+        for (std::size_t c1 = 0; c1 < instance->k; ++c1)
+        {
+            // use an optimization here: c2 > c1 instead of c2 != c1 to save half the clauses
+            for (std::size_t c2 = c1 + 1; c2 < instance->k; ++c2)
+            {
+                // for each vertex
+                std::for_each(
+                    graph.begin_vertices(), graph.end_vertices(),
+                    [this, &instance, &c1, &c2](const auto& vp)
+                    {
+                        const auto& v = vp.first;
+                        // not vertex has color 1 OR not vertex has color 2
+                        bill::add_tseytin_or(
+                            instance->solver,
+                            bill::lit_type{instance->variables[{v, c1}], bill::lit_type::polarities::negative},
+                            bill::lit_type{instance->variables[{v, c2}], bill::lit_type::polarities::negative});
+                    });
+            }
+        }
+    }
+
+    void exclude_identical_adjacent_colors(const solver_instance_ptr& instance) const
+    {
+        // for each edge
+        std::for_each(graph.begin_edges(), graph.end_edges(),
+                      [&instance](const auto& e)
+                      {
+                          // source and target of edge e
+                          const auto& [v1, v2] = e.first;
+
+                          // for each color
+                          for (std::size_t c = 0; c < instance->k; ++c)
+                          {
+                              // not vertex 1 has color OR not vertex 2 has color
+                              bill::add_tseytin_or(
+                                  instance->solver,
+                                  bill::lit_type{instance->variables[{v1, c}], bill::lit_type::polarities::negative},
+                                  bill::lit_type{instance->variables[{v2, c}], bill::lit_type::polarities::negative});
+                          }
+                      });
+    }
+
+    auto check_sat(const solver_instance_ptr& instance) const
+    {
+        return instance->solver.solve();
+    }
+
+    auto get_model(const solver_instance_ptr& instance) const
+    {
+        return instance->solver.get_model().model();
+    }
+
+    vertex_coloring<Graph, Color> extract_vertex_coloring(const solver_instance_ptr&      instance,
+                                                          const bill::result::model_type& model) const noexcept
+    {
+        vertex_coloring<Graph, Color> coloring{};
+        // determine the color frequency alongside
+        std::unordered_map<Color, std::size_t> color_frequency{};
+
+        // for each vertex
+        std::for_each(graph.begin_vertices(), graph.end_vertices(),
+                      [this, &instance, &model, &coloring, &color_frequency](const auto& vp)
+                      {
+                          const auto& v = vp.first;
+                          // for each color
+                          for (std::size_t c = 0; c < instance->k; ++c)
+                          {
+                              // if vertex v is colored with color c
+                              if (model.at(instance->variables.at({v, c})) == bill::lbool_type::true_)
+                              {
+                                  // paint the vertex
+                                  coloring[v] = c;
+                                  // increment the color frequency
+                                  color_frequency[c]++;
+                              }
+                          }
+                      });
+
+        if (const auto it = std::max_element(color_frequency.cbegin(), color_frequency.cend());
+            it != color_frequency.cend())
+        {
+            pst.most_frequent_color = it->first;
+            pst.color_frequency     = it->second;
+        }
+
+        return coloring;
+    }
+};
+
 template <typename Graph, typename Color>
 class graph_coloring_impl
 {
@@ -120,6 +347,7 @@ class graph_coloring_impl
 
     vertex_coloring<Graph, Color> run()
     {
+        // TODO create functions: is_brian_crites_engine and determine_brian_crites_coloring
         if (ps.engine == graph_coloring_engine::DSATUR || ps.engine == graph_coloring_engine::MCS ||
             ps.engine == graph_coloring_engine::LMXRLF || ps.engine == graph_coloring_engine::TABUCOL)
         {
@@ -167,8 +395,14 @@ class graph_coloring_impl
 
             return translate_to_vertex_coloring(brian_crites_clr);
         }
+        else if (ps.engine == graph_coloring_engine::SAT)
+        {
+            sat_coloring_handler<Graph, Color> sat_handler{graph, pst};  // TODO pass largest SCC
 
-        // TODO SAT encoding
+            return sat_handler.color(ps.k_color_value);
+        }
+
+        // unreachable code; silence compiler warning
         return {};
     }
 

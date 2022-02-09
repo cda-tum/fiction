@@ -58,6 +58,16 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
         CHECK(pst.chromatic_number == expected_chromatic_number);
         CHECK(pst.color_frequency > 0);
     }
+    SECTION("SAT")
+    {
+        const auto coloring =
+            determine_vertex_coloring(graph, {graph_coloring_engine::SAT, expected_chromatic_number, false}, &pst);
+
+//        REQUIRE(pst.coloring_verified.has_value());
+//        CHECK(pst.coloring_verified.value() == true);
+        CHECK(pst.chromatic_number == expected_chromatic_number);
+        CHECK(pst.color_frequency > 0);
+    }
 }
 
 TEST_CASE("Petersen graph", "[graph-coloring]")

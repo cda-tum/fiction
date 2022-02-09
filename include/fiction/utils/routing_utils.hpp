@@ -24,9 +24,6 @@ namespace fiction
 template <typename Lyt>
 struct routing_objective
 {
-    /**
-     * Source and target of the objective.
-     */
     const coordinate<Lyt> source, target;
     /**
      * Equality operator.
