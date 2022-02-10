@@ -9,7 +9,6 @@
 
 #include <bill/sat/cardinality.hpp>
 #include <bill/sat/solver.hpp>
-#include <bill/sat/tseytin.hpp>
 
 #include <algorithm>
 #include <memory>
@@ -251,17 +250,15 @@ class sat_coloring_handler
             for (std::size_t c2 = c1 + 1; c2 < instance->k; ++c2)
             {
                 // for each vertex
-                std::for_each(
-                    graph.begin_vertices(), graph.end_vertices(),
-                    [this, &instance, &c1, &c2](const auto& vp)
-                    {
-                        const auto& v = vp.first;
-                        // not vertex has color 1 OR not vertex has color 2
-                        bill::add_tseytin_or(
-                            instance->solver,
-                            bill::lit_type{instance->variables[{v, c1}], bill::lit_type::polarities::negative},
-                            bill::lit_type{instance->variables[{v, c2}], bill::lit_type::polarities::negative});
-                    });
+                std::for_each(graph.begin_vertices(), graph.end_vertices(),
+                              [this, &instance, &c1, &c2](const auto& vp)
+                              {
+                                  const auto& v = vp.first;
+                                  // not vertex has color 1 OR not vertex has color 2
+                                  instance->solver.add_clause(
+                                      {{bill::lit_type{instance->variables[{v, c1}], bill::negative_polarity},
+                                        bill::lit_type{instance->variables[{v, c2}], bill::negative_polarity}}});
+                              });
             }
         }
     }
@@ -279,10 +276,9 @@ class sat_coloring_handler
                           for (std::size_t c = 0; c < instance->k; ++c)
                           {
                               // not vertex 1 has color OR not vertex 2 has color
-                              bill::add_tseytin_or(
-                                  instance->solver,
-                                  bill::lit_type{instance->variables[{v1, c}], bill::lit_type::polarities::negative},
-                                  bill::lit_type{instance->variables[{v2, c}], bill::lit_type::polarities::negative});
+                              instance->solver.add_clause(
+                                  {{bill::lit_type{instance->variables[{v1, c}], bill::negative_polarity},
+                                    bill::lit_type{instance->variables[{v2, c}], bill::negative_polarity}}});
                           }
                       });
     }
@@ -347,70 +343,25 @@ class graph_coloring_impl
 
     vertex_coloring<Graph, Color> run()
     {
-        // TODO create functions: is_brian_crites_engine and determine_brian_crites_coloring
-        if (ps.engine == graph_coloring_engine::DSATUR || ps.engine == graph_coloring_engine::MCS ||
-            ps.engine == graph_coloring_engine::LMXRLF || ps.engine == graph_coloring_engine::TABUCOL)
+        vertex_coloring<Graph, Color> coloring{};
+
+        if (is_brian_crites_engine(ps.engine))
         {
-            const auto translated_graph = translate_to_brian_crites_graph(graph);
-
-            std::unique_ptr<GraphColoring::GraphColor> coloring_engine_ptr;
-
-            // select engine
-            switch (ps.engine)
-            {
-                case graph_coloring_engine::MCS:
-                {
-                    coloring_engine_ptr = std::make_unique<GraphColoring::Mcs>(translated_graph);
-                    break;
-                }
-                case graph_coloring_engine::DSATUR:
-                {
-                    coloring_engine_ptr = std::make_unique<GraphColoring::Dsatur>(translated_graph);
-                    break;
-                }
-                case graph_coloring_engine::LMXRLF:
-                {
-                    coloring_engine_ptr = std::make_unique<GraphColoring::Lmxrlf>(translated_graph);
-                    break;
-                }
-                case graph_coloring_engine::TABUCOL:
-                {
-                    coloring_engine_ptr = std::make_unique<GraphColoring::Tabucol>(translated_graph, ps.k_color_value);
-                    break;
-                }
-                default:
-                {
-                    // unreachable
-                    break;
-                }
-            }
-
-            const auto brian_crites_clr = coloring_engine_ptr->color();
-            pst.chromatic_number        = static_cast<std::size_t>(coloring_engine_ptr->get_num_colors());
-
-            if (ps.verify_coloring_after_computation)
-            {
-                pst.coloring_verified = coloring_engine_ptr->is_valid();
-            }
-
-            return translate_to_vertex_coloring(brian_crites_clr);
+            coloring = run_brian_crites_engine();
         }
         else if (ps.engine == graph_coloring_engine::SAT)
         {
             sat_coloring_handler<Graph, Color> sat_handler{graph, pst};  // TODO pass largest SCC
 
-            const auto coloring = sat_handler.color(ps.k_color_value);
-
-            if (ps.verify_coloring_after_computation)
-            {
-                pst.coloring_verified = is_valid_vertex_coloring(coloring);
-            }
-
-            return coloring;
+            coloring = sat_handler.color(ps.k_color_value);
         }
 
-        // unreachable code; silence compiler warning
-        return {};
+        if (ps.verify_coloring_after_computation)
+        {
+            pst.coloring_verified = is_valid_vertex_coloring(coloring);
+        }
+
+        return coloring;
     }
 
   private:
@@ -436,12 +387,24 @@ class graph_coloring_impl
      */
     using brian_crites_coloring = std::map<std::string, int>;
     /**
+     * Checks whether the given engine points towards the usage of an algorithm from the graph-coloring library by Brian
+     * Crites.
+     *
+     * @param engine Graph coloring engine to check.
+     * @return True iff the given engine is DSATUR, MCS, LMXRLF, or TABUCOL.
+     */
+    [[nodiscard]] bool is_brian_crites_engine(const graph_coloring_engine& engine) const noexcept
+    {
+        return engine == graph_coloring_engine::DSATUR || engine == graph_coloring_engine::MCS ||
+               engine == graph_coloring_engine::LMXRLF || engine == graph_coloring_engine::TABUCOL;
+    }
+    /**
      * Converts the given node ID of a Brian Crites graph to the corresponding one used in Graph.
      *
      * @param node Node ID to convert between graph structures.
      * @return Corresponding node ID in Graph.
      */
-    typename Graph::vertex_id_type convert_node_index(const std::string& node) const noexcept
+    [[nodiscard]] typename Graph::vertex_id_type convert_node_index(const std::string& node) const noexcept
     {
         if constexpr (std::is_same_v<typename Graph::vertex_id_type, std::string>)
         {
@@ -462,7 +425,7 @@ class graph_coloring_impl
      */
     template <typename Graph_ = Graph,
               typename        = std::enable_if_t<!std::is_same_v<typename Graph_::vertex_id_type, std::string>>>
-    std::string convert_node_index(const typename Graph::vertex_id_type& node) const noexcept
+    [[nodiscard]] std::string convert_node_index(const typename Graph::vertex_id_type& node) const noexcept
     {
         return std::to_string(node);
     }
@@ -472,7 +435,7 @@ class graph_coloring_impl
      * @param g Graph to translate.
      * @return Translated graph.
      */
-    brian_crites_graph translate_to_brian_crites_graph(const Graph& g) noexcept
+    [[nodiscard]] brian_crites_graph translate_to_brian_crites_graph(const Graph& g) const noexcept
     {
         brian_crites_graph translated_graph{};
 
@@ -511,7 +474,8 @@ class graph_coloring_impl
      * @param bc_coloring Brian Crites coloring to translate.
      * @return Translated vertex coloring.
      */
-    vertex_coloring<Graph, Color> translate_to_vertex_coloring(const brian_crites_coloring& bc_coloring) const noexcept
+    [[nodiscard]] vertex_coloring<Graph, Color>
+    translate_to_vertex_coloring(const brian_crites_coloring& bc_coloring) const noexcept
     {
         vertex_coloring<Graph, Color> v_coloring{};
 
@@ -538,6 +502,48 @@ class graph_coloring_impl
 
         return v_coloring;
     }
+
+    [[nodiscard]] vertex_coloring<Graph, Color> run_brian_crites_engine() const noexcept
+    {
+        const auto translated_graph = translate_to_brian_crites_graph(graph);
+
+        std::unique_ptr<GraphColoring::GraphColor> coloring_engine_ptr;
+
+        // select engine
+        switch (ps.engine)
+        {
+            case graph_coloring_engine::MCS:
+            {
+                coloring_engine_ptr = std::make_unique<GraphColoring::Mcs>(translated_graph);
+                break;
+            }
+            case graph_coloring_engine::DSATUR:
+            {
+                coloring_engine_ptr = std::make_unique<GraphColoring::Dsatur>(translated_graph);
+                break;
+            }
+            case graph_coloring_engine::LMXRLF:
+            {
+                coloring_engine_ptr = std::make_unique<GraphColoring::Lmxrlf>(translated_graph);
+                break;
+            }
+            case graph_coloring_engine::TABUCOL:
+            {
+                coloring_engine_ptr = std::make_unique<GraphColoring::Tabucol>(translated_graph, ps.k_color_value);
+                break;
+            }
+            default:
+            {
+                // unreachable
+                break;
+            }
+        }
+
+        const auto brian_crites_clr = coloring_engine_ptr->color();
+        pst.chromatic_number        = static_cast<std::size_t>(coloring_engine_ptr->get_num_colors());
+
+        return translate_to_vertex_coloring(brian_crites_clr);
+    }
     /**
      * Checks whether the given coloring is valid, i.e., if no two adjacent vertices have the same color assigned.
      *
@@ -545,16 +551,21 @@ class graph_coloring_impl
      * @return True iff no two adjacent vertices in the stored graph have the same color assigned according to the given
      * coloring.
      */
-    bool is_valid_vertex_coloring(const vertex_coloring<Graph, Color>& v_coloring) const noexcept
+    [[nodiscard]] bool is_valid_vertex_coloring(const vertex_coloring<Graph, Color>& v_coloring) const noexcept
     {
+        if (v_coloring.size() != graph.size_vertices())
+        {
+            return false;
+        }
+
         return std::none_of(graph.begin_vertices(), graph.end_vertices(),
                             [this, &v_coloring](const auto& vp1)
                             {
-                                const auto& v1 = vp1.first;
+                                const auto v1 = vp1.first;
 
                                 if (std::any_of(graph.begin_adjacent(v1), graph.end_adjacent(v1),
                                                 [&v_coloring, c1 = v_coloring.at(v1)](const auto& v2)
-                                                { return c1 != v_coloring.at(v2); }))
+                                                { return c1 == v_coloring.at(v2); }))
                                 {
                                     return true;
                                 }
