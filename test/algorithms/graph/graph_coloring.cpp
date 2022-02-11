@@ -61,7 +61,7 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
     }
     SECTION("SAT")
     {
-        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::SAT, 0, true, {}, clique}, &pst);
+        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::SAT, 0, true, {}, {{clique}}}, &pst);
 
         REQUIRE(pst.coloring_verified.has_value());
         CHECK(pst.coloring_verified.value() == true);

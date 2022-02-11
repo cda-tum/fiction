@@ -61,12 +61,10 @@ class color_routing_impl
             return false;
         }
 
-        determine_vertex_coloring_params<::fiction::edge_intersection_graph<Lyt>> dvc_ps{ps.engine};
-        if (const auto biggest_clique = std::max_element(geig_st.cliques.cbegin(), geig_st.cliques.cend());
-            biggest_clique != geig_st.cliques.cend())
-        {
-            dvc_ps.clique = *biggest_clique;
-        }
+        determine_vertex_coloring_params<::fiction::edge_intersection_graph<Lyt>> dvc_ps{};
+        dvc_ps.engine                      = ps.engine;
+        dvc_ps.cliques                     = geig_st.cliques;
+        dvc_ps.clique_size_color_frequency = true;
 
         determine_vertex_coloring_stats dvc_st{};
         const auto vertex_coloring = determine_vertex_coloring(edge_intersection_graph, dvc_ps, &dvc_st);

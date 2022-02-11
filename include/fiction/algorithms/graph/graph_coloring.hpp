@@ -9,6 +9,7 @@
 
 #include <bill/sat/cardinality.hpp>
 #include <bill/sat/solver.hpp>
+#include <bill/sat/tseytin.hpp>
 
 #include <algorithm>
 #include <memory>
@@ -93,10 +94,15 @@ struct determine_vertex_coloring_params
      */
     bill::solvers sat_engine = bill::solvers::ghack;  // TODO make use of the solver toggle
     /**
-     * If a clique in the passed graph is known, it can be used for symmetry breaking in the SAT engine which
-     * significantly speeds up runtime. The bigger the clique, the better.
+     * If cliques in the passed graph are known, they can be used for symmetry breaking in the SAT engine which
+     * significantly speeds up runtime. The bigger the cliques, the better.
      */
-    std::vector<typename Graph::vertex_id_type> clique{};
+    std::vector<std::vector<typename Graph::vertex_id_type>> cliques{};
+    /**
+     * Tries to establish the color frequency of color 0 such that it equals the largest clique size. This is only
+     * possible when the SAT engine is used.
+     */
+    bool clique_size_color_frequency = false;
 };
 
 template <typename Color = std::size_t>
@@ -135,10 +141,14 @@ class sat_coloring_handler
 
   public:
     explicit sat_coloring_handler(const Graph& g, determine_vertex_coloring_stats<Color>& st,
-                                  const std::vector<typename Graph::vertex_id_type>& cliq = {}) :
+                                  const std::vector<std::vector<typename Graph::vertex_id_type>>& cliqs = {},
+                                  const bool clique_size_color_frequency                                = false) :
             graph{g},
             pst{st},
-            clique{cliq}
+            cliques{cliqs},
+            largest_clique{std::max_element(cliques.cbegin(), cliques.cend(),
+                                            [](const auto& c1, const auto& c2) { return c1.size() < c2.size(); })},
+            enforce_color_frequency{clique_size_color_frequency}
     {}
 
     result_instance check_k_coloring(const std::size_t k) const noexcept
@@ -150,12 +160,17 @@ class sat_coloring_handler
         exclude_identical_adjacent_colors(k_color_instance);
         symmetry_breaking(k_color_instance);
 
+        if (enforce_color_frequency)
+        {
+            color_frequency_equal_to_largest_clique_size(k_color_instance);
+        }
+
         return {check_sat(k_color_instance), k_color_instance};
     }
 
     k_instance determine_k_coloring_with_linearly_ascending_search() const noexcept
     {
-        for (std::size_t k = clique.size(); k < graph.size_vertices() + 1; ++k)
+        for (std::size_t k = largest_clique->size(); k < graph.size_vertices() + 1; ++k)
         {
             if (const auto [sat, instance] = check_k_coloring(k); sat == bill::result::states::satisfiable)
             {
@@ -191,7 +206,11 @@ class sat_coloring_handler
 
     determine_vertex_coloring_stats<Color>& pst;
 
-    const std::vector<typename Graph::vertex_id_type> clique;
+    const std::vector<std::vector<typename Graph::vertex_id_type>> cliques;
+
+    const typename std::vector<std::vector<typename Graph::vertex_id_type>>::const_iterator largest_clique;
+
+    const bool enforce_color_frequency;
     /**
      * Alias for a vertex-color pair.
      */
@@ -293,6 +312,32 @@ class sat_coloring_handler
                           }
                       });
     }
+
+    void color_frequency_equal_to_largest_clique_size(const solver_instance_ptr& instance) const
+    {
+        std::vector<bill::lit_type> same_color_in_each_clique{};
+
+        // for each color
+        for (std::size_t c = 0; c < instance->k; ++c)
+        {
+            std::vector<bill::lit_type> color_c_in_each_clique{};
+            std::for_each(cliques.cbegin(), cliques.cend(),
+                          [this, &instance, &c, &color_c_in_each_clique](const auto& clique)
+                          {
+                              std::vector<bill::lit_type> vc{};
+                              std::for_each(clique.cbegin(), clique.cend(),
+                                            [this, &instance, &c, &vc](const auto& v) {
+                                                vc.push_back({instance->variables[{v, c}], bill::positive_polarity});
+                                            });
+
+                              color_c_in_each_clique.push_back(bill::add_tseytin_or(instance->solver, vc));
+                          });
+
+            same_color_in_each_clique.push_back(bill::add_tseytin_and(instance->solver, color_c_in_each_clique));
+        }
+
+        instance->solver.add_clause(same_color_in_each_clique);
+    }
     /**
      * Reduce the search space by symmetry breaking. To this end, each vertex in the provided clique gets a different
      * color assigned from the beginning.
@@ -301,11 +346,11 @@ class sat_coloring_handler
      */
     void symmetry_breaking(const solver_instance_ptr& instance) const
     {
-        // for each color index up to min(k, clique.size())
-        for (std::size_t c = 0; c < std::min(instance->k, clique.size()); ++c)
+        // for each color index up to min(k, size of the largest clique)
+        for (std::size_t c = 0; c < std::min(instance->k, largest_clique->size()); ++c)
         {
             // assign color c to vertex at index c
-            const auto v = clique[c];
+            const auto v = (*largest_clique)[c];
             instance->solver.add_clause(bill::lit_type{instance->variables[{v, c}], bill::positive_polarity});
         }
     }
@@ -346,7 +391,8 @@ class sat_coloring_handler
                           }
                       });
 
-        if (const auto it = std::max_element(color_frequency.cbegin(), color_frequency.cend());
+        if (const auto it = std::max_element(color_frequency.cbegin(), color_frequency.cend(),
+                                             [](const auto& cf1, const auto& cf2) { return cf1.second < cf2.second; });
             it != color_frequency.cend())
         {
             pst.most_frequent_color = it->first;
@@ -378,7 +424,7 @@ class graph_coloring_impl
         }
         else if (ps.engine == graph_coloring_engine::SAT)
         {
-            sat_coloring_handler<Graph, Color> sat_handler{graph, pst, ps.clique};
+            sat_coloring_handler<Graph, Color> sat_handler{graph, pst, ps.cliques, ps.clique_size_color_frequency};
 
             coloring = sat_handler.color();
         }

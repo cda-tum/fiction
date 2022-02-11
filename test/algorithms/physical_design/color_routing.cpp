@@ -11,6 +11,17 @@
 
 using namespace fiction;
 
+template <typename Spec, typename Impl>
+void check_color_routing(const Spec& spec, Impl& impl, const std::vector<routing_objective<Impl>>& objectives,
+                         color_routing_params ps = {})
+{
+    const auto success = color_routing(impl, objectives, ps);
+
+    CHECK(success);
+
+    check_eq(spec, impl);
+}
+
 TEST_CASE("Simple wire connection", "[color-routing]")
 {
     auto spec_layout = blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>();
@@ -20,11 +31,20 @@ TEST_CASE("Simple wire connection", "[color-routing]")
     impl_layout.clear_tile({1, 1});
 
     // color routing should be able to recreate the removed wire
-    const auto success = color_routing(impl_layout, {{{0, 1}, {2, 1}}});
+    const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{0, 1}, {2, 1}}};
 
-    CHECK(success);
+    color_routing_params ps{};
 
-    check_eq(spec_layout, impl_layout);
+    SECTION("MCS")
+    {
+        ps.engine = graph_coloring_engine::MCS;
+        check_color_routing(spec_layout, impl_layout, objectives, ps);
+    }
+    SECTION("SAT")
+    {
+        ps.engine = graph_coloring_engine::SAT;
+        check_color_routing(spec_layout, impl_layout, objectives, ps);
+    }
 }
 
 TEST_CASE("Two paths wire connections", "[color-routing]")
@@ -41,11 +61,20 @@ TEST_CASE("Two paths wire connections", "[color-routing]")
     impl_layout.move_node(impl_layout.get_node({2, 0}), {2, 0}, {});
 
     // color routing should be able to recreate the removed wire
-    const auto success = color_routing(impl_layout, {{{0, 2}, {2, 0}}, {{1, 0}, {2, 0}}});
+    const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{0, 2}, {2, 0}}, {{1, 0}, {2, 0}}};
 
-    CHECK(success);
+    color_routing_params ps{};
 
-    check_eq(spec_layout, impl_layout);
+    SECTION("MCS")
+    {
+        ps.engine = graph_coloring_engine::MCS;
+        check_color_routing(spec_layout, impl_layout, objectives, ps);
+    }
+    SECTION("SAT")
+    {
+        ps.engine = graph_coloring_engine::SAT;
+        check_color_routing(spec_layout, impl_layout, objectives, ps);
+    }
 }
 
 TEST_CASE("Three paths wire connections", "[color-routing]")
@@ -65,11 +94,22 @@ TEST_CASE("Three paths wire connections", "[color-routing]")
     impl_layout.clear_tile({3, 4});
 
     // color routing should be able to recreate the removed wire
-    const auto success = color_routing(impl_layout, {{{0, 0}, {4, 0}}, {{0, 2}, {4, 2}}, {{0, 4}, {4, 4}}});
+    const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{0, 0}, {4, 0}},
+                                                                       {{0, 2}, {4, 2}},
+                                                                       {{0, 4}, {4, 4}}};
 
-    CHECK(success);
+    color_routing_params ps{};
 
-    check_eq(spec_layout, impl_layout);
+    SECTION("MCS")
+    {
+        ps.engine = graph_coloring_engine::MCS;
+        check_color_routing(spec_layout, impl_layout, objectives, ps);
+    }
+    SECTION("SAT")
+    {
+        ps.engine = graph_coloring_engine::SAT;
+        check_color_routing(spec_layout, impl_layout, objectives, ps);
+    }
 }
 
 TEST_CASE("Direct gate connections", "[color-routing]")
@@ -84,17 +124,22 @@ TEST_CASE("Direct gate connections", "[color-routing]")
     impl_layout.move_node(impl_layout.get_node({0, 0}), {0, 0}, {});
 
     // color routing should be able to recreate the removed wire
-    const auto success = color_routing(impl_layout, {{{1, 1}, {2, 1}},
-                                                     {{2, 0}, {2, 1}},
-                                                     {{3, 1}, {2, 1}},
-                                                     {{1, 1}, {1, 0}},
-                                                     {{2, 0}, {1, 0}},
-                                                     {{2, 1}, {2, 2}},
-                                                     {{1, 0}, {0, 0}}});
+    const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{
+        {{1, 1}, {2, 1}}, {{2, 0}, {2, 1}}, {{3, 1}, {2, 1}}, {{1, 1}, {1, 0}},
+        {{2, 0}, {1, 0}}, {{2, 1}, {2, 2}}, {{1, 0}, {0, 0}}};
 
-    CHECK(success);
+    color_routing_params ps{};
 
-    check_eq(spec_layout, impl_layout);
+    SECTION("MCS")
+    {
+        ps.engine = graph_coloring_engine::MCS;
+        check_color_routing(spec_layout, impl_layout, objectives, ps);
+    }
+    SECTION("SAT")
+    {
+        ps.engine = graph_coloring_engine::SAT;
+        check_color_routing(spec_layout, impl_layout, objectives, ps);
+    }
 }
 
 TEST_CASE("Partial routing", "[color-routing]")
@@ -119,12 +164,17 @@ TEST_CASE("Partial routing", "[color-routing]")
     impl_layout.move_node(impl_layout.get_node({3, 2}), {3, 2}, {});
 
     // color routing should be able to recreate the removed wire
-    const auto success = color_routing(
-        impl_layout,
-        {{{0, 1}, {1, 2}}, {{3, 3}, {1, 2}}, {{1, 2}, {3, 2}}, {{0, 3}, {3, 0}}},  // additional unsatisfiable objective
-        {true});
+    const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{
+        {{0, 1}, {1, 2}},
+        {{3, 3}, {1, 2}},
+        {{1, 2}, {3, 2}},
+        {{0, 3}, {3, 0}}};  // additional unsatisfiable objective
 
-    CHECK(success);
+    color_routing_params ps{true};
 
-    check_eq(spec_layout, impl_layout);
+    SECTION("MCS")
+    {
+        ps.engine = graph_coloring_engine::MCS;
+        check_color_routing(spec_layout, impl_layout, objectives, ps);
+    }
 }
