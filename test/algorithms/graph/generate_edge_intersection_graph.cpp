@@ -61,7 +61,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unsatisfiable_objectives == 1);
-            CHECK(st.cliques.size() == 2);
+            CHECK(st.cliques.size() == 1);
 
             CHECK(graph.size_vertices() == 2);
             CHECK(graph.size_edges() == 1);
@@ -108,8 +108,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unsatisfiable_objectives == 1);
-            CHECK(st.cliques.size() == 2);
-            CHECK(st.cliques.back().empty());
+            CHECK(st.cliques.size() == 1);
 
             CHECK(graph.size_vertices() == 1);
             CHECK(graph.size_edges() == 0);
