@@ -26,8 +26,10 @@ struct color_routing_params
      * Do not abort if some objectives cannot be fulfilled, but partially route the layout as much as possible.
      */
     bool conduct_partial_routing = false;
-
-    determine_vertex_coloring_params dvc_ps{};
+    /**
+     * The engine to use.
+     */
+    graph_coloring_engine engine = graph_coloring_engine::MCS;
 };
 
 struct color_routing_stats
@@ -59,8 +61,16 @@ class color_routing_impl
             return false;
         }
 
+        determine_vertex_coloring_params<::fiction::edge_intersection_graph<Lyt>> dvc_ps{ps.engine};
+        if (const auto biggest_scc = std::max_element(geig_st.strongly_connected_components.cbegin(),
+                                                      geig_st.strongly_connected_components.cend());
+            biggest_scc != geig_st.strongly_connected_components.cend())
+        {
+            dvc_ps.strongly_connected_component = *biggest_scc;
+        }
+
         determine_vertex_coloring_stats dvc_st{};
-        const auto vertex_coloring = determine_vertex_coloring(edge_intersection_graph, ps.dvc_ps, &dvc_st);
+        const auto vertex_coloring = determine_vertex_coloring(edge_intersection_graph, dvc_ps, &dvc_st);
 
         // if no partial routing is allowed, abort if the coloring does not satisfy all objectives
         if (!ps.conduct_partial_routing && dvc_st.color_frequency != geig_st.strongly_connected_components.size())
