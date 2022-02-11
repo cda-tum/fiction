@@ -62,18 +62,17 @@ class color_routing_impl
         }
 
         determine_vertex_coloring_params<::fiction::edge_intersection_graph<Lyt>> dvc_ps{ps.engine};
-        if (const auto biggest_scc = std::max_element(geig_st.strongly_connected_components.cbegin(),
-                                                      geig_st.strongly_connected_components.cend());
-            biggest_scc != geig_st.strongly_connected_components.cend())
+        if (const auto biggest_clique = std::max_element(geig_st.cliques.cbegin(), geig_st.cliques.cend());
+            biggest_clique != geig_st.cliques.cend())
         {
-            dvc_ps.strongly_connected_component = *biggest_scc;
+            dvc_ps.clique = *biggest_clique;
         }
 
         determine_vertex_coloring_stats dvc_st{};
         const auto vertex_coloring = determine_vertex_coloring(edge_intersection_graph, dvc_ps, &dvc_st);
 
         // if no partial routing is allowed, abort if the coloring does not satisfy all objectives
-        if (!ps.conduct_partial_routing && dvc_st.color_frequency != geig_st.strongly_connected_components.size())
+        if (!ps.conduct_partial_routing && dvc_st.color_frequency != geig_st.cliques.size())
         {
             return false;
         }

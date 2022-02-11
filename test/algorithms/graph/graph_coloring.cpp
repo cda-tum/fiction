@@ -18,7 +18,7 @@ using namespace fiction;
 
 template <typename Graph>
 void check_coloring_engines(const Graph& graph, const std::size_t expected_chromatic_number,
-                            std::vector<typename Graph::vertex_id_type> scc = {})
+                            std::vector<typename Graph::vertex_id_type> clique = {})
 {
     determine_vertex_coloring_stats pst{};
 
@@ -61,7 +61,7 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
     }
     SECTION("SAT")
     {
-        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::SAT, 0, true, {}, scc}, &pst);
+        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::SAT, 0, true, {}, clique}, &pst);
 
         REQUIRE(pst.coloring_verified.has_value());
         CHECK(pst.coloring_verified.value() == true);

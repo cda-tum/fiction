@@ -93,10 +93,10 @@ struct determine_vertex_coloring_params
      */
     bill::solvers sat_engine = bill::solvers::ghack;  // TODO make use of the solver toggle
     /**
-     * If an SCC in the passed graph is known, it can be used for symmetry breaking in the SAT engine which
-     * significantly speeds up runtime. The bigger the SCC, the better.
+     * If a clique in the passed graph is known, it can be used for symmetry breaking in the SAT engine which
+     * significantly speeds up runtime. The bigger the clique, the better.
      */
-    std::vector<typename Graph::vertex_id_type> strongly_connected_component{};
+    std::vector<typename Graph::vertex_id_type> clique{};
 };
 
 template <typename Color = std::size_t>
@@ -135,10 +135,10 @@ class sat_coloring_handler
 
   public:
     explicit sat_coloring_handler(const Graph& g, determine_vertex_coloring_stats<Color>& st,
-                                  const std::vector<typename Graph::vertex_id_type>& scc = {}) :
+                                  const std::vector<typename Graph::vertex_id_type>& cliq = {}) :
             graph{g},
             pst{st},
-            strongly_connected_component{scc}
+            clique{cliq}
     {}
 
     result_instance check_k_coloring(const std::size_t k) const noexcept
@@ -155,7 +155,7 @@ class sat_coloring_handler
 
     k_instance determine_k_coloring_with_linearly_ascending_search() const noexcept
     {
-        for (std::size_t k = strongly_connected_component.size(); k < graph.size_vertices() + 1; ++k)
+        for (std::size_t k = clique.size(); k < graph.size_vertices() + 1; ++k)
         {
             if (const auto [sat, instance] = check_k_coloring(k); sat == bill::result::states::satisfiable)
             {
@@ -191,7 +191,7 @@ class sat_coloring_handler
 
     determine_vertex_coloring_stats<Color>& pst;
 
-    const std::vector<typename Graph::vertex_id_type> strongly_connected_component;
+    const std::vector<typename Graph::vertex_id_type> clique;
     /**
      * Alias for a vertex-color pair.
      */
@@ -294,18 +294,18 @@ class sat_coloring_handler
                       });
     }
     /**
-     * Reduce the search space by symmetry breaking. To this end, each vertex in the provided SCC gets a different color
-     * assigned from the beginning.
+     * Reduce the search space by symmetry breaking. To this end, each vertex in the provided clique gets a different
+     * color assigned from the beginning.
      *
      * @param instance Pointer to the solver instance.
      */
     void symmetry_breaking(const solver_instance_ptr& instance) const
     {
-        // for each color index up to min(k, scc.size())
-        for (std::size_t c = 0; c < std::min(instance->k, strongly_connected_component.size()); ++c)
+        // for each color index up to min(k, clique.size())
+        for (std::size_t c = 0; c < std::min(instance->k, clique.size()); ++c)
         {
             // assign color c to vertex at index c
-            const auto v = strongly_connected_component[c];
+            const auto v = clique[c];
             instance->solver.add_clause(bill::lit_type{instance->variables[{v, c}], bill::positive_polarity});
         }
     }
@@ -378,7 +378,7 @@ class graph_coloring_impl
         }
         else if (ps.engine == graph_coloring_engine::SAT)
         {
-            sat_coloring_handler<Graph, Color> sat_handler{graph, pst, ps.strongly_connected_component};
+            sat_coloring_handler<Graph, Color> sat_handler{graph, pst, ps.clique};
 
             coloring = sat_handler.color();
         }
