@@ -17,7 +17,8 @@
 using namespace fiction;
 
 template <typename Graph>
-void check_coloring_engines(const Graph& graph, const std::size_t expected_chromatic_number)
+void check_coloring_engines(const Graph& graph, const std::size_t expected_chromatic_number,
+                            std::vector<typename Graph::vertex_id_type> scc = {})
 {
     determine_vertex_coloring_stats pst{};
 
@@ -60,8 +61,7 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
     }
     SECTION("SAT")
     {
-        const auto coloring =
-            determine_vertex_coloring(graph, {graph_coloring_engine::SAT, expected_chromatic_number, true}, &pst);
+        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::SAT, 0, true, {}, scc}, &pst);
 
         REQUIRE(pst.coloring_verified.has_value());
         CHECK(pst.coloring_verified.value() == true);
@@ -96,7 +96,7 @@ TEST_CASE("Petersen graph", "[graph-coloring]")
     petersen_graph.insert_edge(7, 9, {});
     petersen_graph.insert_edge(8, 5, {});
 
-    check_coloring_engines(petersen_graph, 3);
+    check_coloring_engines(petersen_graph, 3, {0, 1});
 }
 
 TEST_CASE("Golomb graph", "[graph-coloring]")
@@ -129,7 +129,7 @@ TEST_CASE("Golomb graph", "[graph-coloring]")
     golomb_graph.insert_edge(7, 8, {});
     golomb_graph.insert_edge(8, 6, {});
 
-    check_coloring_engines(golomb_graph, 4);
+    check_coloring_engines(golomb_graph, 4, {0, 1});
 }
 
 TEST_CASE("Moser spindle", "[graph-coloring]")
@@ -155,7 +155,7 @@ TEST_CASE("Moser spindle", "[graph-coloring]")
     moser_spindle.insert_edge(4, 0, {});
     moser_spindle.insert_edge(4, 6, {});
 
-    check_coloring_engines(moser_spindle, 4);
+    check_coloring_engines(moser_spindle, 4, {0, 1, 5});
 }
 
 template <typename Graph>
@@ -185,37 +185,37 @@ TEST_CASE("K", "[graph-coloring]")
     {
         std::vector<std::size_t> vertices{{0, 1}};
 
-        check_coloring_engines(create_complete_graph<graph>(vertices), 2);
+        check_coloring_engines(create_complete_graph<graph>(vertices), 2, {{0, 1}});
     }
     SECTION("3")
     {
         std::vector<std::size_t> vertices{{0, 1, 2}};
 
-        check_coloring_engines(create_complete_graph<graph>(vertices), 3);
+        check_coloring_engines(create_complete_graph<graph>(vertices), 3, {{0, 1, 2}});
     }
     SECTION("4")
     {
         std::vector<std::size_t> vertices{{0, 1, 2, 3}};
 
-        check_coloring_engines(create_complete_graph<graph>(vertices), 4);
+        check_coloring_engines(create_complete_graph<graph>(vertices), 4, {{0, 1, 2, 3}});
     }
     SECTION("5")
     {
         std::vector<std::size_t> vertices{{0, 1, 2, 3, 4}};
 
-        check_coloring_engines(create_complete_graph<graph>(vertices), 5);
+        check_coloring_engines(create_complete_graph<graph>(vertices), 5, {{0, 1, 2, 3, 4}});
     }
     SECTION("6")
     {
         std::vector<std::size_t> vertices{{0, 1, 2, 3, 4, 5}};
 
-        check_coloring_engines(create_complete_graph<graph>(vertices), 6);
+        check_coloring_engines(create_complete_graph<graph>(vertices), 6, {{0, 1, 2, 3, 4, 5}});
     }
     SECTION("10")
     {
         std::vector<std::size_t> vertices{{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}};
 
-        check_coloring_engines(create_complete_graph<graph>(vertices), 10);
+        check_coloring_engines(create_complete_graph<graph>(vertices), 10, {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}});
     }
 }
 
@@ -236,5 +236,5 @@ TEST_CASE("String IDs (mostly a compile test)", "[graph-coloring]")
     c5.insert_edge("3", "4", {});
     c5.insert_edge("4", "0", {});
 
-    check_coloring_engines(c5, 3);
+    check_coloring_engines(c5, 3, {"0", "1"});
 }

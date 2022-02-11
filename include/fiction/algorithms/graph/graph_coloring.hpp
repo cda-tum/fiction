@@ -70,9 +70,10 @@ enum class graph_coloring_engine
     /**
      * Custom iterative SAT-based encoding that finds optimal colorings.
      */
-    SAT,
+    SAT
 };
 
+template <typename Graph>
 struct determine_vertex_coloring_params
 {
     /**
@@ -90,7 +91,12 @@ struct determine_vertex_coloring_params
     /**
      * If engine == SAT, this selects the SAT solver to use.
      */
-    bill::solvers sat_engine = bill::solvers::ghack;
+    bill::solvers sat_engine = bill::solvers::ghack;  // TODO make use of the solver toggle
+    /**
+     * If an SCC in the passed graph is known, it can be used for symmetry breaking in the SAT engine which
+     * significantly speeds up runtime. The bigger the SCC, the better.
+     */
+    std::vector<typename Graph::vertex_id_type> strongly_connected_component{};
 };
 
 template <typename Color = std::size_t>
@@ -125,6 +131,7 @@ class sat_coloring_handler
     struct solver_instance;
     using solver_instance_ptr = std::shared_ptr<solver_instance>;
     using result_instance     = std::pair<bill::result::states, solver_instance_ptr>;
+    using k_instance          = std::pair<std::size_t, solver_instance_ptr>;
 
   public:
     explicit sat_coloring_handler(const Graph& g, determine_vertex_coloring_stats<Color>& st,
@@ -141,13 +148,22 @@ class sat_coloring_handler
         at_least_one_color_per_vertex(k_color_instance);
         at_most_one_color_per_vertex(k_color_instance);
         exclude_identical_adjacent_colors(k_color_instance);
+        symmetry_breaking(k_color_instance);
 
         return {check_sat(k_color_instance), k_color_instance};
     }
 
-    void determine_k_coloring_with_linearly_ascending_search() const noexcept
+    k_instance determine_k_coloring_with_linearly_ascending_search() const noexcept
     {
-        // TODO increase k (starting at scc.size()) and call check_k_coloring
+        for (std::size_t k = strongly_connected_component.size(); k < graph.size_vertices() + 1; ++k)
+        {
+            if (const auto [sat, instance] = check_k_coloring(k); sat == bill::result::states::satisfiable)
+            {
+                return {k, instance};
+            }
+        }
+
+        return {};  // unreachable
     }
 
     void determine_k_coloring_with_linearly_descending_search() const noexcept
@@ -162,17 +178,12 @@ class sat_coloring_handler
         // TODO Binary search for Color(G) in range [2^𝑘−1, 2^k]
     }
 
-    vertex_coloring<Graph, Color> color(const std::size_t k) noexcept
+    vertex_coloring<Graph, Color> color() noexcept
     {
-        const auto [sat, instance] = check_k_coloring(k);
+        const auto [k, instance] = determine_k_coloring_with_linearly_ascending_search();
 
-        if (sat == bill::result::states::satisfiable)
-        {
-            pst.chromatic_number = k;
-            return extract_vertex_coloring(instance, get_model(instance));
-        }
-
-        return {};
+        pst.chromatic_number = k;
+        return extract_vertex_coloring(instance, get_model(instance));
     }
 
   private:
@@ -282,6 +293,22 @@ class sat_coloring_handler
                           }
                       });
     }
+    /**
+     * Reduce the search space by symmetry breaking. To this end, each vertex in the provided SCC gets a different color
+     * assigned from the beginning.
+     *
+     * @param instance Pointer to the solver instance.
+     */
+    void symmetry_breaking(const solver_instance_ptr& instance) const
+    {
+        // for each color index up to min(k, scc.size())
+        for (std::size_t c = 0; c < std::min(instance->k, strongly_connected_component.size()); ++c)
+        {
+            // assign color c to vertex at index c
+            const auto v = strongly_connected_component[c];
+            instance->solver.add_clause(bill::lit_type{instance->variables[{v, c}], bill::positive_polarity});
+        }
+    }
 
     auto check_sat(const solver_instance_ptr& instance) const
     {
@@ -334,7 +361,7 @@ template <typename Graph, typename Color>
 class graph_coloring_impl
 {
   public:
-    graph_coloring_impl(const Graph& g, const determine_vertex_coloring_params& p,
+    graph_coloring_impl(const Graph& g, const determine_vertex_coloring_params<Graph>& p,
                         determine_vertex_coloring_stats<Color>& st) :
             graph{g},
             ps{p},
@@ -351,9 +378,9 @@ class graph_coloring_impl
         }
         else if (ps.engine == graph_coloring_engine::SAT)
         {
-            sat_coloring_handler<Graph, Color> sat_handler{graph, pst};  // TODO pass largest SCC
+            sat_coloring_handler<Graph, Color> sat_handler{graph, pst, ps.strongly_connected_component};
 
-            coloring = sat_handler.color(ps.k_color_value);
+            coloring = sat_handler.color();
         }
 
         if (ps.verify_coloring_after_computation)
@@ -372,7 +399,7 @@ class graph_coloring_impl
     /**
      * Parameters.
      */
-    const determine_vertex_coloring_params ps;
+    const determine_vertex_coloring_params<Graph> ps;
     /**
      * Statistics.
      */
@@ -596,7 +623,8 @@ class graph_coloring_impl
  * @return An assignment of graph vertices to colors such that no two adjacent vertices share the same color.
  */
 template <typename Graph, typename Color = std::size_t>
-vertex_coloring<Graph, Color> determine_vertex_coloring(const Graph& graph, determine_vertex_coloring_params ps = {},
+vertex_coloring<Graph, Color> determine_vertex_coloring(const Graph&                            graph,
+                                                        determine_vertex_coloring_params<Graph> ps  = {},
                                                         determine_vertex_coloring_stats<Color>* pst = nullptr)
 {
     determine_vertex_coloring_stats st{};
