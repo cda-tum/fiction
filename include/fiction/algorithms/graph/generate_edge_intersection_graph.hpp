@@ -209,7 +209,10 @@ class generate_edge_intersection_graph_impl
                           clique.push_back(p.label);
                       });
 
-        pst.cliques.push_back(clique);
+        if (!clique.empty())
+        {
+            pst.cliques.push_back(clique);
+        }
     }
     /**
      * Given a collection of paths belonging to the same objective, this function creates edges in the edge intersection

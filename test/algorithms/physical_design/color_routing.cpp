@@ -177,4 +177,9 @@ TEST_CASE("Partial routing", "[color-routing]")
         ps.engine = graph_coloring_engine::MCS;
         check_color_routing(spec_layout, impl_layout, objectives, ps);
     }
+    SECTION("SAT")
+    {
+        ps.engine = graph_coloring_engine::SAT;
+        check_color_routing(spec_layout, impl_layout, objectives, ps);
+    }
 }
