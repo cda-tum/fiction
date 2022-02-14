@@ -169,6 +169,40 @@ std::vector<routing_objective<Lyt>> extract_routing_objectives(const Lyt& lyt) n
 
     return objectives;
 }
+/**
+ * Removes the entire wire routing from the passed layout. This involves deleting all wire segments that have been
+ * placed on any tile as well as removing stored connections (children pointers) from all gates.
+ *
+ * @tparam Lyt Gate-level Layout type.
+ * @param lyt The layout whose routing is to be deleted.
+ */
+template <typename Lyt>
+void clear_routing(Lyt& lyt) noexcept
+{
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(has_is_buf_v<Lyt>, "Lyt does not implement the is_buf function");
+    static_assert(has_is_fanout_v<Lyt>, "Lyt does not implement the is_fanout function");
+    static_assert(mockturtle::has_foreach_node_v<Lyt>, "Lyt does not implement the foreach_node function");
+
+    lyt.foreach_node(
+        [&lyt](const auto& g)
+        {
+            if (!lyt.is_constant(g))  // skip constants
+            {
+                const auto t = lyt.get_tile(g);
+
+                if (lyt.is_buf(g) && !lyt.is_fanout(g) && !lyt.is_pi(g) &&
+                    !lyt.is_po(g))  // remove all wires that are not fan-outs or primary I/Os
+                {
+                    lyt.clear_tile(t);
+                }
+                else  // delete children pointers of gates by re-placing them
+                {
+                    lyt.move_node(g, t);
+                }
+            }
+        });
+}
 
 }  // namespace fiction
 
