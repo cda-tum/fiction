@@ -8,6 +8,7 @@
 #include "fiction/utils/hash.hpp"
 
 #include <bill/sat/cardinality.hpp>
+#include <bill/sat/interface/common.hpp>
 #include <bill/sat/solver.hpp>
 #include <bill/sat/tseytin.hpp>
 
