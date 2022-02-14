@@ -11,6 +11,7 @@
 #include <bill/sat/interface/common.hpp>
 #include <bill/sat/solver.hpp>
 #include <bill/sat/tseytin.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
 #include <memory>
@@ -109,6 +110,10 @@ struct determine_vertex_coloring_params
 template <typename Color = std::size_t>
 struct determine_vertex_coloring_stats
 {
+    /**
+     * Runtime measurement.
+     */
+    mockturtle::stopwatch<>::duration time_total{0};
     /**
      * The determined chromatic number (could be non-optimal depending on the applied engine).
      */
@@ -417,6 +422,9 @@ class graph_coloring_impl
 
     vertex_coloring<Graph, Color> run()
     {
+        // measure runtime
+        mockturtle::stopwatch stop{pst.time_total};
+
         vertex_coloring<Graph, Color> coloring{};
 
         if (is_brian_crites_engine(ps.engine))

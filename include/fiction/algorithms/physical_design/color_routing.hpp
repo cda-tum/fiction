@@ -11,6 +11,7 @@
 #include "fiction/utils/routing_utils.hpp"
 
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
 #include <map>
@@ -33,7 +34,14 @@ struct color_routing_params
 };
 
 struct color_routing_stats
-{};
+{
+    /**
+     * Runtime measurement.
+     */
+    mockturtle::stopwatch<>::duration time_total{0};
+    mockturtle::stopwatch<>::duration time_edge_intersection_graph{0};
+    mockturtle::stopwatch<>::duration time_graph_coloring{0};
+};
 
 namespace detail
 {
@@ -52,8 +60,12 @@ class color_routing_impl
 
     bool run()
     {
+        // measure runtime
+        mockturtle::stopwatch stop{pst.time_total};
+
         generate_edge_intersection_graph_stats geig_st{};
         const auto edge_intersection_graph = generate_edge_intersection_graph(layout, objectives, {}, &geig_st);
+        pst.time_edge_intersection_graph   = geig_st.time_total;
 
         // if no partial routing is allowed, abort if some objectives cannot be satisfied by path enumeration
         if (!ps.conduct_partial_routing && geig_st.number_of_unsatisfiable_objectives > 0)
@@ -68,6 +80,7 @@ class color_routing_impl
 
         determine_vertex_coloring_stats dvc_st{};
         const auto vertex_coloring = determine_vertex_coloring(edge_intersection_graph, dvc_ps, &dvc_st);
+        pst.time_graph_coloring    = dvc_st.time_total;
 
         // if no partial routing is allowed, abort if the coloring does not satisfy all objectives
         if (!ps.conduct_partial_routing && dvc_st.color_frequency != geig_st.cliques.size())

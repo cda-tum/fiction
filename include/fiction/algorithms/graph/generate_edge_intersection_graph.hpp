@@ -9,6 +9,8 @@
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
 
+#include <mockturtle/utils/stopwatch.hpp>
+
 #include <algorithm>
 #include <set>
 #include <vector>
@@ -40,6 +42,10 @@ struct generate_edge_intersection_graph_params
 struct generate_edge_intersection_graph_stats
 {
     /**
+     * Runtime measurement.
+     */
+    mockturtle::stopwatch<>::duration time_total{0};
+    /**
      * For each routing objective that cannot be fulfilled in the given layout, this counter is incremented.
      */
     std::size_t number_of_unsatisfiable_objectives{0};
@@ -69,6 +75,9 @@ class generate_edge_intersection_graph_impl
 
     edge_intersection_graph<Lyt> run()
     {
+        // measure runtime
+        mockturtle::stopwatch stop{pst.time_total};
+
         std::for_each(objectives.cbegin(), objectives.cend(),
                       [this](const auto& obj)
                       {
