@@ -8,7 +8,7 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/routing_utils.hpp"
 
-#include <vector>
+#include <unordered_map>
 
 namespace fiction
 {
@@ -31,8 +31,7 @@ class enumerate_all_clocking_paths_impl
             layout{lyt},
             source{src},
             target{tgt},
-            ps{p},
-            visited(layout.area(), false)
+            ps{p}
     {}
 
     [[nodiscard]] path_collection<Path> run()
@@ -50,35 +49,30 @@ class enumerate_all_clocking_paths_impl
 
     enumerate_all_clocking_paths_params ps;
 
-    std::vector<bool> visited;
+    std::unordered_map<coordinate<Lyt>, bool> visited;
 
     path_collection<Path> collection{};
 
-    /**
-     * Calculates the index position of a coordinate. Indices are not a reliable way to associate information with
-     * coordinates because they shift whenever the layout is resized.
-     *
-     * @param c Coordinate whose index is desired.
-     * @return Index of coordinate c.
-     */
-    [[nodiscard]] std::size_t to_index(const coordinate<Lyt>& c) const noexcept
-    {
-        return c.x + (layout.y() + 1) * c.y;
-    }
-
     void mark_visited(const coordinate<Lyt>& c) noexcept
     {
-        visited[to_index(c)] = true;
+        visited[c] = true;
     }
 
     void mark_unvisited(const coordinate<Lyt>& c) noexcept
     {
-        visited[to_index(c)] = false;
+        visited[c] = false;
     }
 
     [[nodiscard]] bool is_visited(const coordinate<Lyt>& c) const noexcept
     {
-        return visited[to_index(c)];
+        if (auto it = visited.find(c); it != visited.cend())
+        {
+            return it->second;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     void recursively_enumerate_all_paths(const coordinate<Lyt>& src, const coordinate<Lyt>& tgt, Path p) noexcept
