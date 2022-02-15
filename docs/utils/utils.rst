@@ -100,6 +100,14 @@ Array Utils
 .. doxygenfunction:: fiction::convert_array_of_arrays
 
 
+STL Extensions
+--------------
+
+**Header:** ``fiction/utils/stl_utils.hpp``
+
+.. doxygenfunction:: fiction::find_first_two_of
+
+
 Ranges
 ------
 

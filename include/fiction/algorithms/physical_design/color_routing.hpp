@@ -28,6 +28,10 @@ struct color_routing_params
      */
     bool conduct_partial_routing = false;
     /**
+     * Enable crossings.
+     */
+    bool crossings = false;
+    /**
      * The engine to use.
      */
     graph_coloring_engine engine = graph_coloring_engine::MCS;
@@ -69,7 +73,11 @@ class color_routing_impl
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
 
-        const auto edge_intersection_graph = generate_edge_intersection_graph(layout, objectives, {}, &pst.epg_stats);
+        generate_edge_intersection_graph_params epg_params{};
+        epg_params.crossings = ps.crossings;
+
+        const auto edge_intersection_graph =
+            generate_edge_intersection_graph(layout, objectives, epg_params, &pst.epg_stats);
 
         // if no partial routing is allowed, abort if some objectives cannot be satisfied by path enumeration
         if (!ps.conduct_partial_routing && pst.epg_stats.number_of_unsatisfiable_objectives > 0)

@@ -8,6 +8,7 @@
 #include "fiction/algorithms/graph/enumerate_all_paths.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/stl_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -184,6 +185,30 @@ class generate_edge_intersection_graph_impl
                                [this](const auto& c) { return path_elements.count(c) > 0; });
         }
         /**
+         * Like has_intersection_with but allows paths to share crossings, i.e., single-tile intersections.
+         *
+         * Similar to has_intersection_with, this function also returns true if source and target are matching in both
+         * paths.
+         *
+         * @tparam Path Type of other path.
+         * @param other The other path.
+         * @return True iff this path and the given one are overlapping, i.e., share at least one coordinate segment of
+         * size 2.
+         */
+        template <typename Path>
+        bool has_overlap_with(const Path& other) const noexcept
+        {
+            // if source and target are identical, an intersection was found
+            if (this->source() == other.source() && this->target() == other.target())
+            {
+                return true;
+            }
+
+            // else, check if any of the coordinates (including I/Os) form a shared segment in the stored path
+            return find_first_two_of(std::cbegin(other), std::cend(other), std::cbegin(*this), std::cend(*this)) !=
+                   std::cend(other);
+        }
+        /**
          * Label to identify the path in the edge intersection graph.
          */
         std::size_t label{};
@@ -262,7 +287,8 @@ class generate_edge_intersection_graph_impl
                           std::for_each(all_paths.cbegin(), all_paths.cend(),
                                         [this, &obj_p](const auto& stored_p)
                                         {
-                                            if (obj_p.has_intersection_with(stored_p))
+                                            if (ps.crossings ? obj_p.has_overlap_with(stored_p) :
+                                                               obj_p.has_intersection_with(stored_p))
                                             {
                                                 graph.insert_edge(obj_p.label, stored_p.label, edge_id++);
                                             }

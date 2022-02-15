@@ -84,8 +84,8 @@ class path_collection : public std::vector<Path>
  * Establishes a wire routing along the given path in the given layout. To this end, the given path's source and target
  * coordinates are assumed to be populated by other gates or wires that the new path shall connect to.
  *
- * This function overwrites any nodes that might already be placed at any of the path's coordinates other than source
- * and target. If path contains exactly source and target, no wires are created but source and target are connected.
+ * If path contains a tile that is allocated already, it will instead switch to the crossing layer. If path contains
+ * exactly source and target, no wires are created but source and target are connected.
  *
  * @tparam Lyt Gate-level layout type.
  * @tparam Path Path type.
@@ -101,8 +101,10 @@ void route_path(Lyt& lyt, const Path& path) noexcept
 
     // exclude source and target
     std::for_each(path.cbegin() + 1, path.cend() - 1,
-                  [&lyt, &incoming_signal](const auto& coord)
-                  { incoming_signal = lyt.create_buf(incoming_signal, coord); });
+                  [&lyt, &incoming_signal](const auto& coord) {
+                      incoming_signal =
+                          lyt.create_buf(incoming_signal, lyt.is_empty_tile(coord) ? coord : lyt.above(coord));
+                  });
 
     // establish final connection to target node
     lyt.connect(incoming_signal, lyt.get_node(path.target()));

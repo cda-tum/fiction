@@ -116,7 +116,52 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
     }
 }
 
-TEST_CASE("4x4 clocked layouts", "[generate-edge-intersection-graph]")
+TEST_CASE("3x3 layouts", "[generate-edge-intersection-graph]")
+{
+    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+    generate_edge_intersection_graph_stats st{};
+
+    SECTION("2DDWave")
+    {
+        gate_lyt layout{{2, 2}, twoddwave_clocking<gate_lyt>()};
+
+        SECTION("(0,1) to (2,1) and (1,0) to (1,2)")
+        {
+            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 1}, {2, 1}}, {{1, 0}, {1, 2}}};
+
+            SECTION("without crossings")
+            {
+                // disable crossings
+                generate_edge_intersection_graph_params ps{false};
+
+                const auto graph = generate_edge_intersection_graph(layout, objectives, ps, &st);
+
+                CHECK(st.cliques.size() == 2);
+                CHECK(st.cliques.front().size() == 1);
+                CHECK(st.cliques.back().size() == 1);
+
+                CHECK(graph.size_vertices() == 2);  // 2 valid paths == 2 vertices
+                CHECK(graph.size_edges() == 1);     // paths are mutual exclusive
+            }
+            SECTION("with crossings")
+            {
+                // enable crossings
+                generate_edge_intersection_graph_params ps{true};
+
+                const auto graph = generate_edge_intersection_graph(layout, objectives, ps, &st);
+
+                CHECK(st.cliques.size() == 2);
+                CHECK(st.cliques.front().size() == 1);
+                CHECK(st.cliques.back().size() == 1);
+
+                CHECK(graph.size_vertices() == 2);  // 2 valid paths == 2 vertices
+                CHECK(graph.size_edges() == 0);     // paths are NOT mutual exclusive due to crossings
+            }
+        }
+    }
+}
+
+TEST_CASE("4x4 layouts", "[generate-edge-intersection-graph]")
 {
     using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     generate_edge_intersection_graph_stats st{};
@@ -133,7 +178,7 @@ TEST_CASE("4x4 clocked layouts", "[generate-edge-intersection-graph]")
 
             CHECK(st.number_of_unsatisfiable_objectives == 0);
             CHECK(st.cliques.size() == 1);
-            CHECK(st.cliques.size() == 1);
+            CHECK(st.cliques.front().size() == 20);
 
             CHECK(graph.size_vertices() == 20);  // 20 valid paths == 20 vertices
             CHECK(graph.size_edges() == 190);    // a complete graph has (n(n-1))/2 edges
@@ -159,7 +204,7 @@ TEST_CASE("4x4 clocked layouts", "[generate-edge-intersection-graph]")
     }
 }
 
-TEST_CASE("4x4 gate-level layouts with obstruction", "[generate-edge-intersection-graph]")
+TEST_CASE("4x4 layouts with obstruction", "[generate-edge-intersection-graph]")
 {
     using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     generate_edge_intersection_graph_stats st{};
