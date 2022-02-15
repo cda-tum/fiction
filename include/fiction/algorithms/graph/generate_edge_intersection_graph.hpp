@@ -55,6 +55,10 @@ struct generate_edge_intersection_graph_stats
      * to have in certain algorithms.
      */
     std::vector<std::vector<std::size_t>> cliques{};
+    /**
+     * Stores the size of the generated edge intersection graph.
+     */
+    std::size_t num_vertices, num_edges;
 };
 
 namespace detail
@@ -104,6 +108,10 @@ class generate_edge_intersection_graph_impl
                           // add the collection to all paths gathered thus far
                           all_paths.insert(all_paths.end(), obj_paths.cbegin(), obj_paths.cend());
                       });
+
+        // store size of the generated graph
+        pst.num_vertices = graph.size_vertices();
+        pst.num_edges    = graph.size_edges();
 
         return graph;
     }

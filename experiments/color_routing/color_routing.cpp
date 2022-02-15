@@ -24,23 +24,26 @@ int main()
     const std::string layouts_folder = fmt::format("{}/color_routing/layouts", EXPERIMENTS_PATH);
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t,
-                            uint32_t, double, double, double, double, bool>
+                            uint64_t, uint64_t, uint64_t, uint64_t, double, double, double, double, bool>
 
         bestagon_exp{"color_routing",
                      "benchmark",
                      "inputs",
                      "outputs",
                      "initial nodes",
-                     "layout width (in tiles)",
-                     "layout height (in tiles)",
-                     "layout area (in tiles)",
+                     "layout width (tiles)",
+                     "layout height (tiles)",
+                     "layout area (tiles)",
                      "gates",
                      "wires",
                      "routing objectives",
-                     "runtime exact (in sec)",
-                     "runtime color routing (in sec)",
-                     "runtime edge intersection graph (in sec)",
-                     "runtime graph coloring (in sec)",
+                     "unsat. objectives",
+                     "EPG vertices",
+                     "EPG edges",
+                     "runtime exact (sec)",
+                     "runtime color routing (sec)",
+                     "runtime EPG (sec)",
+                     "runtime graph coloring (sec)",
                      "equivalent"};
 
     // parameters for SMT-based physical design
@@ -53,9 +56,10 @@ int main()
     fiction::exact_physical_design_stats exact_stats{};
 
     // parameters for SAT-based color routing
-    fiction::color_routing_params color_params{};
-    color_params.engine = fiction::graph_coloring_engine::SAT;
-    fiction::color_routing_stats color_stats{};
+    fiction::color_routing_params routing_params{};
+    routing_params.conduct_partial_routing = true;
+    routing_params.engine                  = fiction::graph_coloring_engine::SAT;
+    fiction::color_routing_stats routing_stats{};
 
     constexpr const uint64_t bench_select =
         fiction_experiments::all & ~fiction_experiments::par_check & ~fiction_experiments::parity &
@@ -85,7 +89,7 @@ int main()
             clear_routing(*gate_level_layout);
 
             // perform routing
-            const auto success = fiction::color_routing(*gate_level_layout, objectives, color_params, &color_stats);
+            const auto success = fiction::color_routing(*gate_level_layout, objectives, routing_params, &routing_stats);
 
             if (success)
             {
@@ -98,9 +102,11 @@ int main()
                 benchmark, network.num_pis(), network.num_pos(), network.num_gates(), gate_level_layout->x() + 1,
                 gate_level_layout->y() + 1, (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1),
                 gate_level_layout->num_gates(), gate_level_layout->num_wires(), objectives.size(),
-                mockturtle::to_seconds(exact_stats.time_total), mockturtle::to_seconds(color_stats.time_total),
-                mockturtle::to_seconds(color_stats.time_edge_intersection_graph),
-                mockturtle::to_seconds(color_stats.time_graph_coloring), equiv_stats.eq != fiction::eq_type::NO);
+                routing_stats.epg_stats.number_of_unsatisfiable_objectives, routing_stats.epg_stats.num_vertices,
+                routing_stats.epg_stats.num_edges, mockturtle::to_seconds(exact_stats.time_total),
+                mockturtle::to_seconds(routing_stats.time_total),
+                mockturtle::to_seconds(routing_stats.epg_stats.time_total),
+                mockturtle::to_seconds(routing_stats.color_stats.time_total), equiv_stats.eq != fiction::eq_type::NO);
         }
 
         bestagon_exp.save();

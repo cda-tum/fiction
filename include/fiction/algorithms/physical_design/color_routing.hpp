@@ -39,8 +39,14 @@ struct color_routing_stats
      * Runtime measurement.
      */
     mockturtle::stopwatch<>::duration time_total{0};
-    mockturtle::stopwatch<>::duration time_edge_intersection_graph{0};
-    mockturtle::stopwatch<>::duration time_graph_coloring{0};
+    /**
+     * Statistics of the edge intersection graph generation.
+     */
+    generate_edge_intersection_graph_stats epg_stats{};
+    /**
+     * Statistics of the vertex coloring.
+     */
+    determine_vertex_coloring_stats<> color_stats{};
 };
 
 namespace detail
@@ -63,32 +69,28 @@ class color_routing_impl
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
 
-        generate_edge_intersection_graph_stats geig_st{};
-        const auto edge_intersection_graph = generate_edge_intersection_graph(layout, objectives, {}, &geig_st);
-        pst.time_edge_intersection_graph   = geig_st.time_total;
+        const auto edge_intersection_graph = generate_edge_intersection_graph(layout, objectives, {}, &pst.epg_stats);
 
         // if no partial routing is allowed, abort if some objectives cannot be satisfied by path enumeration
-        if (!ps.conduct_partial_routing && geig_st.number_of_unsatisfiable_objectives > 0)
+        if (!ps.conduct_partial_routing && pst.epg_stats.number_of_unsatisfiable_objectives > 0)
         {
             return false;
         }
 
         determine_vertex_coloring_params<::fiction::edge_intersection_graph<Lyt>> dvc_ps{};
         dvc_ps.engine                      = ps.engine;
-        dvc_ps.cliques                     = geig_st.cliques;
+        dvc_ps.cliques                     = pst.epg_stats.cliques;
         dvc_ps.clique_size_color_frequency = true;
 
-        determine_vertex_coloring_stats dvc_st{};
-        const auto vertex_coloring = determine_vertex_coloring(edge_intersection_graph, dvc_ps, &dvc_st);
-        pst.time_graph_coloring    = dvc_st.time_total;
+        const auto vertex_coloring = determine_vertex_coloring(edge_intersection_graph, dvc_ps, &pst.color_stats);
 
         // if no partial routing is allowed, abort if the coloring does not satisfy all objectives
-        if (!ps.conduct_partial_routing && dvc_st.color_frequency != geig_st.cliques.size())
+        if (!ps.conduct_partial_routing && pst.color_stats.color_frequency != pst.epg_stats.cliques.size())
         {
             return false;
         }
 
-        conduct_routing(edge_intersection_graph, vertex_coloring, dvc_st.most_frequent_color);
+        conduct_routing(edge_intersection_graph, vertex_coloring, pst.color_stats.most_frequent_color);
 
         return true;
     }
