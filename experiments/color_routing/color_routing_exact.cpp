@@ -49,7 +49,7 @@ int main()
     // parameters for SMT-based physical design
     fiction::exact_physical_design_params<gate_lyt> exact_params{};
     exact_params.scheme        = fiction::ptr<gate_lyt>(fiction::twoddwave_clocking<gate_lyt>(fiction::num_clks::FOUR));
-    exact_params.crossings     = false;
+    exact_params.crossings     = true;
     exact_params.border_io     = false;
     exact_params.desynchronize = true;
     exact_params.timeout       = 3'600'000;  // 1h in ms
@@ -58,6 +58,7 @@ int main()
     // parameters for SAT-based color routing
     fiction::color_routing_params routing_params{};
     routing_params.conduct_partial_routing = true;
+    routing_params.crossings               = true;
     routing_params.engine                  = fiction::graph_coloring_engine::SAT;
     fiction::color_routing_stats routing_stats{};
 
