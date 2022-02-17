@@ -5,7 +5,7 @@
 #ifndef FICTION_GENERATE_EDGE_INTERSECTION_GRAPH_HPP
 #define FICTION_GENERATE_EDGE_INTERSECTION_GRAPH_HPP
 
-#include "fiction/algorithms/graph/enumerate_all_paths.hpp"
+#include "fiction/algorithms/path_finding/enumerate_all_paths.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl_utils.hpp"

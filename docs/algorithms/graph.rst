@@ -1,18 +1,3 @@
-Distance Functions
-------------------
-
-**Header:** ``fiction/algorithms/graph/distance.hpp``
-
-.. doxygenfunction:: fiction::manhattan_distance
-.. doxygenfunction:: fiction::euclidean_distance
-
-Enumerate All Paths
--------------------
-
-**Header:** ``fiction/algorithms/graph/enumerate_all_paths.hpp``
-
-.. doxygenfunction:: fiction::enumerate_all_clocking_paths
-
 Generate Edge Intersection Graph
 --------------------------------
 

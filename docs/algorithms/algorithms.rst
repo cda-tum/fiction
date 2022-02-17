@@ -6,6 +6,15 @@ Iterators
 
    iterators.rst
 
+Path Finding
+============
+
+.. toctree::
+   :maxdepth: 1
+
+   path_finding.rst
+
+
 Graph Algorithms
 ================
 
