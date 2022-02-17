@@ -4,7 +4,7 @@
 
 #include "catch.hpp"
 
-#include "fiction/algorithms/path_finding/enumerate_all_paths.hpp"
+#include <fiction/algorithms/path_finding/enumerate_all_paths.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>

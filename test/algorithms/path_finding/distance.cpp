@@ -4,7 +4,7 @@
 
 #include "catch.hpp"
 
-#include "fiction/algorithms/path_finding/distance.hpp"
+#include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 
