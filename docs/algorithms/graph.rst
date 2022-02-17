@@ -1,3 +1,11 @@
+Distance Functions
+------------------
+
+**Header:** ``fiction/algorithms/graph/distance.hpp``
+
+.. doxygenfunction:: fiction::manhattan_distance
+.. doxygenfunction:: fiction::euclidean_distance
+
 Enumerate All Paths
 -------------------
 
