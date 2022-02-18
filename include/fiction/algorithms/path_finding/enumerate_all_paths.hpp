@@ -8,7 +8,7 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/routing_utils.hpp"
 
-#include <unordered_map>
+#include <unordered_set>
 
 namespace fiction
 {
@@ -49,30 +49,23 @@ class enumerate_all_clocking_paths_impl
 
     enumerate_all_clocking_paths_params ps;
 
-    std::unordered_map<coordinate<Lyt>, bool> visited;
+    std::unordered_set<coordinate<Lyt>> visited{};
 
     path_collection<Path> collection{};
 
     void mark_visited(const coordinate<Lyt>& c) noexcept
     {
-        visited[c] = true;
+        visited.insert(c);
     }
 
     void mark_unvisited(const coordinate<Lyt>& c) noexcept
     {
-        visited[c] = false;
+        visited.erase(c);
     }
 
     [[nodiscard]] bool is_visited(const coordinate<Lyt>& c) const noexcept
     {
-        if (auto it = visited.find(c); it != visited.cend())
-        {
-            return it->second;
-        }
-        else
-        {
-            return false;
-        }
+        return visited.count(c) > 0;
     }
 
     void recursively_enumerate_all_paths(const coordinate<Lyt>& src, const coordinate<Lyt>& tgt, Path p) noexcept
@@ -91,21 +84,21 @@ class enumerate_all_clocking_paths_impl
             // recurse for all outgoing clock zones
             layout.foreach_outgoing_clocked_zone(
                 src,
-                [this, &tgt, &p](const auto& cz)
+                [this, &tgt, &p](const auto& successor)
                 {
                     if constexpr (has_is_obstructed_v<Lyt>)
                     {
-                        if (layout.is_obstructed(cz) && cz != tgt)
+                        if (layout.is_obstructed(successor) && successor != tgt)
                         {
                             return true;  // skip the obstructed coordinate and keep looping
                         }
                     }
 
                     // if it has not yet been visited
-                    if (!is_visited(cz))
+                    if (!is_visited(successor))
                     {
                         // recurse
-                        recursively_enumerate_all_paths(cz, tgt, p);
+                        recursively_enumerate_all_paths(successor, tgt, p);
                     }
 
                     return true;  // keep looping
@@ -124,6 +117,9 @@ class enumerate_all_clocking_paths_impl
  * Enumerates all possible paths in a clocked layout that start at coordinate source and lead to coordinate target while
  * respecting the information flow imposed by the clocking scheme. This algorithm does neither generate duplicate nor
  * looping paths, even in a cyclic clocking scheme. That is, along each path, each coordinate can occur at maximum once.
+ *
+ * If the given layout implements the is_obstructed interface (see obstruction_layout.hpp), paths will not be routed via
+ * obstructed coordinates.
  *
  * @tparam Path Type of the returned individual paths.
  * @tparam Lyt Type of the clocked layout to perform path finding on.
