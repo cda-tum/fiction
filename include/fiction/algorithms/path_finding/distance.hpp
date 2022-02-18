@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <functional>
 #include <type_traits>
 
 namespace fiction
@@ -26,7 +27,7 @@ namespace fiction
  * @return Manhattan distance between source and target.
  */
 template <typename Lyt, typename Dist = uint64_t>
-Dist manhattan_distance(const coordinate<Lyt>& source, const coordinate<Lyt>& target) noexcept
+[[nodiscard]] Dist manhattan_distance(const coordinate<Lyt>& source, const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
@@ -46,7 +47,7 @@ Dist manhattan_distance(const coordinate<Lyt>& source, const coordinate<Lyt>& ta
  * @return Euclidean distance between source and target.
  */
 template <typename Lyt, typename Dist = double>
-Dist euclidean_distance(const coordinate<Lyt>& source, const coordinate<Lyt>& target) noexcept
+[[nodiscard]] Dist euclidean_distance(const coordinate<Lyt>& source, const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(std::is_floating_point_v<Dist>, "Dist is not a floating-point type");
@@ -58,6 +59,74 @@ Dist euclidean_distance(const coordinate<Lyt>& source, const coordinate<Lyt>& ta
     // https://stackoverflow.com/questions/2940367/what-is-more-efficient-using-pow-to-square-or-just-multiply-it-with-itself
     return static_cast<Dist>(std::sqrt((x * x) + (y * y)));
 }
+/**
+ * A functor that computes distances between coordinates and can be passed as an object to, e.g., path finding
+ * algorithms with a standardized signature. This class is intended to be instantiated with concrete distance functions
+ * passed to the constructor.
+ *
+ * @tparam Lyt Coordinate layout type.
+ * @tparam Dist Distance value type.
+ */
+template <typename Lyt, typename Dist>
+class distance_functor
+{
+  public:
+    /**
+     * Standard constructor that instantiates the distance function.
+     *
+     * @param dist_fn A function that maps from layout coordinates to a distance value.
+     */
+    explicit distance_functor(const std::function<Dist(const coordinate<Lyt>&, const coordinate<Lyt>&)>& dist_fn) :
+            distance_function{dist_fn}
+    {
+        static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    }
+    /**
+     * Destructor.
+     */
+    virtual ~distance_functor() = default;
+    /**
+     * Operator to call the distance function.
+     *
+     * @param source Source coordinate.
+     * @param target Target coordinate.
+     * @return Distance between source and target.
+     */
+    [[nodiscard]] virtual Dist operator()(const coordinate<Lyt>& source, const coordinate<Lyt>& target) const
+    {
+        return distance_function(source, target);
+    }
+
+  protected:
+    /**
+     * Distance function.
+     */
+    const std::function<Dist(const coordinate<Lyt>&, const coordinate<Lyt>&)> distance_function;
+};
+/**
+ * A pre-defined distance functor that uses the Manhattan distance.
+ *
+ * @tparam Lyt Coordinate layout type.
+ * @tparam Dist Integral distance type.
+ */
+template <typename Lyt, typename Dist = uint64_t>
+class manhattan_distance_functor : public distance_functor<Lyt, Dist>
+{
+  public:
+    manhattan_distance_functor() : distance_functor<Lyt, Dist>(&manhattan_distance<Lyt>) {}
+};
+/**
+ * A pre-defined distance functor that uses the Euclidean distance.
+ *
+ * @tparam Lyt Coordinate layout type.
+ * @tparam Dist Floating-point distance type.
+ */
+template <typename Lyt, typename Dist = double>
+class euclidean_distance_functor : public distance_functor<Lyt, Dist>
+{
+  public:
+    euclidean_distance_functor() : distance_functor<Lyt, Dist>(&euclidean_distance<Lyt>) {}
+};
 
 }  // namespace fiction
 
