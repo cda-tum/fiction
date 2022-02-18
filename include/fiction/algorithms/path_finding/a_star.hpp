@@ -9,9 +9,11 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl_utils.hpp"
 
+#include <algorithm>
 #include <cassert>
+#include <iterator>
+#include <unordered_map>
 #include <unordered_set>
-#include <utility>
 #include <vector>
 
 namespace fiction
