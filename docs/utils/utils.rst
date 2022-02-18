@@ -107,6 +107,8 @@ STL Extensions
 
 .. doxygenfunction:: fiction::find_first_two_of
 
+.. doxygenclass:: fiction::searchable_priority_queue
+
 
 Ranges
 ------

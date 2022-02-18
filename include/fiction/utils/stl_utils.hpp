@@ -5,6 +5,10 @@
 #ifndef FICTION_STL_UTILS_HPP
 #define FICTION_STL_UTILS_HPP
 
+#include <functional>
+#include <queue>
+#include <vector>
+
 namespace fiction
 {
 
@@ -44,6 +48,103 @@ InputIt find_first_two_of(InputIt first, InputIt last, ForwardIt s_first, Forwar
 
     return last;
 }
+/**
+ * An extension of std::priority_queue that allows searching the underlying container. The implementation is based on
+ * https://stackoverflow.com/questions/16749723/how-i-can-find-value-in-priority-queue.
+ *
+ * @tparam T The type of the stored elements.
+ * @tparam Container The type of the underlying container.
+ * @tparam Compare A Compare type providing a strict weak ordering.
+ */
+template <class T, class Container = std::vector<T>, class Compare = std::less<typename Container::value_type>>
+class searchable_priority_queue : public std::priority_queue<T, Container, Compare>
+{
+  public:
+    using iterator       = typename std::priority_queue<T, Container, Compare>::container_type::iterator;
+    using const_iterator = typename std::priority_queue<T, Container, Compare>::container_type::const_iterator;
+
+    iterator begin() noexcept
+    {
+        return this->c.begin();
+    }
+    const_iterator begin() const noexcept
+    {
+        return this->c.begin();
+    }
+    iterator end() noexcept
+    {
+        return this->c.end();
+    }
+    const_iterator end() const noexcept
+    {
+        return this->c.end();
+    }
+    const_iterator cbegin() const noexcept
+    {
+        return this->c.cbegin();
+    }
+    const_iterator cend() const noexcept
+    {
+        return this->c.cend();
+    }
+    /**
+     * Returns an iterator to the provided value if it is contained in the priority queue. Returns an iterator to
+     * the end of the stored container otherwise.
+     *
+     * @param val Value to search for.
+     * @return Iterator to the stored value or to the end of the container if val is not contained.
+     */
+    iterator find(const T& val)
+    {
+        auto first = begin(), last = end();
+
+        while (first != last)
+        {
+            if (*first == val)
+            {
+                return first;
+            }
+
+            ++first;
+        }
+
+        return last;
+    }
+    /**
+     * Returns a const_iterator to the provided value if it is contained in the priority queue. Returns an iterator to
+     * the end of the stored container otherwise.
+     *
+     * @param val Value to search for.
+     * @return Iterator to the stored value or to the end of the container if val is not contained.
+     */
+    const_iterator find(const T& val) const
+    {
+        auto       first = cbegin();
+        const auto last  = cend();
+
+        while (first != last)
+        {
+            if (*first == val)
+            {
+                return first;
+            }
+
+            ++first;
+        }
+
+        return last;
+    }
+    /**
+     * Returns true if the provided value is stored in the queue and false otherwise.
+     *
+     * @param val Value to search for.
+     * @return True iff val is contained in the priority queue.
+     */
+    bool contains(const T& val) const
+    {
+        return find(val) != this->c.cend();
+    }
+};
 
 }  // namespace fiction
 

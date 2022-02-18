@@ -10,6 +10,13 @@ Distance Functions
 .. doxygenclass:: fiction::manhattan_distance_functor
 .. doxygenclass:: fiction::euclidean_distance_functor
 
+A* Shortest Path
+----------------
+
+**Header:** ``fiction/algorithms/path_finding/a_star.hpp``
+
+.. doxygenfunction:: fiction::a_star
+
 Enumerate All Paths
 -------------------
 
