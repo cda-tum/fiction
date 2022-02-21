@@ -87,12 +87,26 @@ class obstruction_layout<Lyt, false> : public Lyt
         strg->obstructed_connections.insert({src, tgt});
     }
     /**
+     * Clears all obstructed coordinates that were manually marked via obstruct_coordinate.
+     */
+    void clear_obstructed_coordinates() noexcept
+    {
+        strg->obstructed_coordinates.clear();
+    }
+    /**
+     * Clears all obstructed connections that were manually marked via obstruct_connections.
+     */
+    void clear_obstructed_connections() noexcept
+    {
+        strg->obstructed_connections.clear();
+    }
+    /**
      * Checks if the given coordinate is obstructed of some sort.
      *
      * @param c Coordinate to check.
      * @return True iff c is obstructed.
      */
-    bool is_obstructed_coordinate(const coordinate<Lyt>& c) const noexcept
+    [[nodiscard]] bool is_obstructed_coordinate(const coordinate<Lyt>& c) const noexcept
     {
         if (strg->obstructed_coordinates.count(c) > 0)
         {
@@ -118,7 +132,7 @@ class obstruction_layout<Lyt, false> : public Lyt
      * @param tgt Target coordinate.
      * @return True iff the connection from c1 to c2 is obstructed.
      */
-    bool is_obstructed_connection(const coordinate<Lyt>& src, const coordinate<Lyt>& tgt) const noexcept
+    [[nodiscard]] bool is_obstructed_connection(const coordinate<Lyt>& src, const coordinate<Lyt>& tgt) const noexcept
     {
         return strg->obstructed_connections.count({src, tgt}) > 0;
     }

@@ -118,6 +118,14 @@ TEST_CASE("Coordinate obstruction", "[obstruction-layout]")
         CHECK(obstr_lyt.is_obstructed_coordinate({2, 0}));
         CHECK(obstr_lyt.is_obstructed_coordinate({3, 0}));
         CHECK(obstr_lyt.is_obstructed_coordinate({4, 0}));
+
+        obstr_lyt.clear_obstructed_coordinates();
+
+        CHECK(!obstr_lyt.is_obstructed_coordinate({0, 0}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({1, 0}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({2, 0}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({3, 0}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({4, 0}));
     }
     SECTION("Gate-level layout")
     {
@@ -151,6 +159,14 @@ TEST_CASE("Coordinate obstruction", "[obstruction-layout]")
         CHECK(obstr_lyt.is_obstructed_coordinate({1, 2}));
         CHECK(!obstr_lyt.is_obstructed_coordinate({3, 0}));
         CHECK(obstr_lyt.is_obstructed_coordinate({3, 2}));
+
+        obstr_lyt.clear_obstructed_coordinates();
+
+        CHECK(!obstr_lyt.is_obstructed_coordinate({0, 1}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({0, 2}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({1, 2}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({3, 0}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({3, 2}));
     }
     SECTION("Cell-level layout")
     {
@@ -213,6 +229,25 @@ TEST_CASE("Coordinate obstruction", "[obstruction-layout]")
         CHECK(!obstr_lyt.is_obstructed_coordinate({4, 1}));
         CHECK(!obstr_lyt.is_obstructed_coordinate({4, 3}));
         CHECK(!obstr_lyt.is_obstructed_coordinate({4, 4}));
+
+        obstr_lyt.clear_obstructed_coordinates();
+
+        CHECK(!obstr_lyt.is_obstructed_coordinate({0, 0}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({0, 1}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({0, 3}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({0, 4}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({1, 0}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({1, 1}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({1, 3}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({1, 4}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({3, 0}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({3, 1}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({3, 3}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({3, 4}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({4, 0}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({4, 1}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({4, 3}));
+        CHECK(!obstr_lyt.is_obstructed_coordinate({4, 4}));
     }
 }
 
@@ -243,6 +278,20 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
         CHECK(obstr_lyt.is_obstructed_connection({2, 2}, {2, 3}));
         CHECK(!obstr_lyt.is_obstructed_connection({2, 3}, {2, 2}));
         CHECK(obstr_lyt.is_obstructed_connection({2, 4}, {4, 0}));
+        CHECK(!obstr_lyt.is_obstructed_connection({4, 0}, {2, 4}));
+
+        CHECK(!obstr_lyt.is_obstructed_connection({0, 0}, {0, 0}));
+        CHECK(!obstr_lyt.is_obstructed_connection({0, 0}, {1, 0}));
+        CHECK(!obstr_lyt.is_obstructed_connection({3, 3}, {2, 2}));
+        CHECK(!obstr_lyt.is_obstructed_connection({3, 3}, {2, 3}));
+
+        obstr_lyt.clear_obstructed_connections();
+
+        CHECK(!obstr_lyt.is_obstructed_connection({0, 0}, {0, 1}));
+        CHECK(!obstr_lyt.is_obstructed_connection({1, 0}, {0, 0}));
+        CHECK(!obstr_lyt.is_obstructed_connection({2, 2}, {2, 3}));
+        CHECK(!obstr_lyt.is_obstructed_connection({2, 3}, {2, 2}));
+        CHECK(!obstr_lyt.is_obstructed_connection({2, 4}, {4, 0}));
         CHECK(!obstr_lyt.is_obstructed_connection({4, 0}, {2, 4}));
 
         CHECK(!obstr_lyt.is_obstructed_connection({0, 0}, {0, 0}));
@@ -281,6 +330,20 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
         CHECK(!obstr_lyt.is_obstructed_connection({0, 0}, {1, 0}));
         CHECK(!obstr_lyt.is_obstructed_connection({3, 3}, {2, 2}));
         CHECK(!obstr_lyt.is_obstructed_connection({3, 3}, {2, 3}));
+
+        obstr_lyt.clear_obstructed_connections();
+
+        CHECK(!obstr_lyt.is_obstructed_connection({0, 0}, {0, 1}));
+        CHECK(!obstr_lyt.is_obstructed_connection({1, 0}, {0, 0}));
+        CHECK(!obstr_lyt.is_obstructed_connection({2, 2}, {2, 3}));
+        CHECK(!obstr_lyt.is_obstructed_connection({2, 3}, {2, 2}));
+        CHECK(!obstr_lyt.is_obstructed_connection({2, 4}, {4, 0}));
+        CHECK(!obstr_lyt.is_obstructed_connection({4, 0}, {2, 4}));
+
+        CHECK(!obstr_lyt.is_obstructed_connection({0, 0}, {0, 0}));
+        CHECK(!obstr_lyt.is_obstructed_connection({0, 0}, {1, 0}));
+        CHECK(!obstr_lyt.is_obstructed_connection({3, 3}, {2, 2}));
+        CHECK(!obstr_lyt.is_obstructed_connection({3, 3}, {2, 3}));
     }
     SECTION("Cell-level layout")
     {
@@ -307,6 +370,20 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
         CHECK(obstr_lyt.is_obstructed_connection({2, 2}, {2, 3}));
         CHECK(!obstr_lyt.is_obstructed_connection({2, 3}, {2, 2}));
         CHECK(obstr_lyt.is_obstructed_connection({2, 4}, {4, 0}));
+        CHECK(!obstr_lyt.is_obstructed_connection({4, 0}, {2, 4}));
+
+        CHECK(!obstr_lyt.is_obstructed_connection({0, 0}, {0, 0}));
+        CHECK(!obstr_lyt.is_obstructed_connection({0, 0}, {1, 0}));
+        CHECK(!obstr_lyt.is_obstructed_connection({3, 3}, {2, 2}));
+        CHECK(!obstr_lyt.is_obstructed_connection({3, 3}, {2, 3}));
+
+        obstr_lyt.clear_obstructed_connections();
+
+        CHECK(!obstr_lyt.is_obstructed_connection({0, 0}, {0, 1}));
+        CHECK(!obstr_lyt.is_obstructed_connection({1, 0}, {0, 0}));
+        CHECK(!obstr_lyt.is_obstructed_connection({2, 2}, {2, 3}));
+        CHECK(!obstr_lyt.is_obstructed_connection({2, 3}, {2, 2}));
+        CHECK(!obstr_lyt.is_obstructed_connection({2, 4}, {4, 0}));
         CHECK(!obstr_lyt.is_obstructed_connection({4, 0}, {2, 4}));
 
         CHECK(!obstr_lyt.is_obstructed_connection({0, 0}, {0, 0}));
