@@ -15,8 +15,10 @@ namespace fiction
 
 struct enumerate_all_clocking_paths_params
 {
-    // should paths be considered that extend into the crossing layer?
-    bool consider_crossing_layer = false;
+    /**
+     * Allow paths to cross over obstructed tiles if they are occupied by wire segments.
+     */
+    bool crossings = false;
 };
 
 namespace detail
@@ -86,9 +88,9 @@ class enumerate_all_clocking_paths_impl
                 src,
                 [this, &tgt, &p](const auto& successor)
                 {
-                    if constexpr (has_is_obstructed_v<Lyt>)
+                    if constexpr (has_is_obstructed_coordinate_v<Lyt>)
                     {
-                        if (layout.is_obstructed(successor) && successor != tgt)
+                        if (layout.is_obstructed_coordinate(successor) && successor != tgt)
                         {
                             return true;  // skip the obstructed coordinate and keep looping
                         }
@@ -118,7 +120,7 @@ class enumerate_all_clocking_paths_impl
  * respecting the information flow imposed by the clocking scheme. This algorithm does neither generate duplicate nor
  * looping paths, even in a cyclic clocking scheme. That is, along each path, each coordinate can occur at maximum once.
  *
- * If the given layout implements the is_obstructed interface (see obstruction_layout.hpp), paths will not be routed via
+ * If the given layout implements the obstruction interface (see obstruction_layout.hpp), paths will not be routed via
  * obstructed coordinates.
  *
  * @tparam Path Type of the returned individual paths.

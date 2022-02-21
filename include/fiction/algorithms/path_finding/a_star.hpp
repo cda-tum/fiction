@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstdint>
 #include <iterator>
 #include <unordered_map>
 #include <unordered_set>
@@ -21,8 +22,10 @@ namespace fiction
 
 struct a_star_params
 {
-    // should paths be considered that extend into the crossing layer?
-    bool consider_crossing_layer = false;
+    /**
+     * Allow paths to cross over obstructed tiles if they are occupied by wire segments.
+     */
+    bool crossings = false;
 };
 
 namespace detail
@@ -156,9 +159,9 @@ class a_star_impl
             current,
             [this, current](const auto& successor)
             {
-                if constexpr (has_is_obstructed_v<Lyt>)
+                if constexpr (has_is_obstructed_coordinate_v<Lyt>)
                 {
-                    if (layout.is_obstructed(successor) && successor != target)
+                    if (layout.is_obstructed_coordinate(successor) && successor != target)
                     {
                         return true;  // skip the obstructed coordinate and keep looping
                     }
@@ -280,7 +283,7 @@ class a_star_impl
  * should neither be complex to calculate nor overestimating the remaining costs. Common heuristics to be used are the
  * Manhattan and the Euclidean distance functions. See distance.hpp for implementations.
  *
- * If the given layout implements the is_obstructed interface (see obstruction_layout.hpp), paths will not be routed via
+ * If the given layout implements the obstruction interface (see obstruction_layout.hpp), paths will not be routed via
  * obstructed coordinates.
  *
  * @tparam Path Path type to create.

@@ -6,6 +6,12 @@
 #define FICTION_OBSTRUCTION_LAYOUT_HPP
 
 #include "fiction/traits.hpp"
+#include "fiction/utils/hash.hpp"
+
+#include <memory>
+#include <type_traits>
+#include <unordered_set>
+#include <utility>
 
 namespace fiction
 {
@@ -20,7 +26,8 @@ namespace fiction
  * @tparam Lyt Any coordinate layout type that is to be extended by an obstruction interface.
  * @tparam has_obstruction_interface Automatically determines whether an obstruction interface is already present.
  */
-template <typename Lyt, bool has_obstruction_interface = has_is_obstructed_v<Lyt>>
+template <typename Lyt, bool has_obstruction_interface =
+                            std::conjunction_v<has_is_obstructed_coordinate<Lyt>, has_is_obstructed_connection<Lyt>>>
 class obstruction_layout : public Lyt
 {};
 
@@ -35,10 +42,19 @@ template <typename Lyt>
 class obstruction_layout<Lyt, false> : public Lyt
 {
   public:
+    struct obstruction_layout_storage
+    {
+        std::unordered_set<coordinate<Lyt>> obstructed_coordinates{};
+
+        std::unordered_set<std::pair<coordinate<Lyt>, coordinate<Lyt>>> obstructed_connections{};
+    };
+
+    using storage = std::shared_ptr<obstruction_layout_storage>;
+
     /**
      * Standard constructor for empty layouts.
      */
-    obstruction_layout() : Lyt()
+    obstruction_layout() : Lyt(), strg{std::make_shared<obstruction_layout_storage>()}
     {
         static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     }
@@ -47,9 +63,28 @@ class obstruction_layout<Lyt, false> : public Lyt
      *
      * @param lyt Existing layout that is to be extended by an obstruction interface.
      */
-    explicit obstruction_layout(const Lyt& lyt) : Lyt(lyt)
+    explicit obstruction_layout(const Lyt& lyt) : Lyt(lyt), strg{std::make_shared<obstruction_layout_storage>()}
     {
         static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    }
+    /**
+     * Marks the given coordinate as obstructed.
+     *
+     * @param c Coordinate to obstruct.
+     */
+    void obstruct_coordinate(const coordinate<Lyt>& c) noexcept
+    {
+        strg->obstructed_coordinates.insert(c);
+    }
+    /**
+     * Marks the connection from coordinate src to coordinate tgt as obstructed.
+     *
+     * @param src Source coordinate.
+     * @param tgt Target coordinate.
+     */
+    void obstruct_connection(const coordinate<Lyt>& src, const coordinate<Lyt>& tgt) noexcept
+    {
+        strg->obstructed_connections.insert({src, tgt});
     }
     /**
      * Checks if the given coordinate is obstructed of some sort.
@@ -57,8 +92,12 @@ class obstruction_layout<Lyt, false> : public Lyt
      * @param c Coordinate to check.
      * @return True iff c is obstructed.
      */
-    bool is_obstructed(const coordinate<Lyt> c) const noexcept
+    bool is_obstructed_coordinate(const coordinate<Lyt>& c) const noexcept
     {
+        if (strg->obstructed_coordinates.count(c) > 0)
+        {
+            return true;
+        }
         if constexpr (is_gate_level_layout_v<Lyt>)
         {
             return !Lyt::is_empty_tile(c);
@@ -72,6 +111,20 @@ class obstruction_layout<Lyt, false> : public Lyt
 
         return false;
     }
+    /**
+     * Checks if the given coordinate-coordinate connection is obstructed of some sort.
+     *
+     * @param src Source coordinate.
+     * @param tgt Target coordinate.
+     * @return True iff the connection from c1 to c2 is obstructed.
+     */
+    bool is_obstructed_connection(const coordinate<Lyt>& src, const coordinate<Lyt>& tgt) const noexcept
+    {
+        return strg->obstructed_connections.count({src, tgt}) > 0;
+    }
+
+  private:
+    storage strg;
 };
 
 template <class T>

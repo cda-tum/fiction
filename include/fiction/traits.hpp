@@ -688,18 +688,34 @@ inline constexpr bool has_is_empty_v = has_is_empty<Lyt>::value;
  * Obstruction layout
  */
 
-#pragma region has_is_obstructed
+#pragma region has_is_obstructed_coordinate
 template <class Lyt, class = void>
-struct has_is_obstructed : std::false_type
+struct has_is_obstructed_coordinate : std::false_type
 {};
 
 template <class Lyt>
-struct has_is_obstructed<Lyt, std::void_t<decltype(std::declval<Lyt>().is_obstructed(std::declval<coordinate<Lyt>>()))>>
+struct has_is_obstructed_coordinate<
+    Lyt, std::void_t<decltype(std::declval<Lyt>().is_obstructed_coordinate(std::declval<coordinate<Lyt>>()))>>
         : std::true_type
 {};
 
 template <class Lyt>
-inline constexpr bool has_is_obstructed_v = has_is_obstructed<Lyt>::value;
+inline constexpr bool has_is_obstructed_coordinate_v = has_is_obstructed_coordinate<Lyt>::value;
+#pragma endregion
+
+#pragma region has_is_obstructed_connection
+template <class Lyt, class = void>
+struct has_is_obstructed_connection : std::false_type
+{};
+
+template <class Lyt>
+struct has_is_obstructed_connection<Lyt, std::void_t<decltype(std::declval<Lyt>().is_obstructed_connection(
+                                             std::declval<coordinate<Lyt>>(), std::declval<coordinate<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_is_obstructed_connection_v = has_is_obstructed_connection<Lyt>::value;
 #pragma endregion
 
 /**
