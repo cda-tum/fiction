@@ -60,6 +60,13 @@ class layout_coordinate_path : public std::vector<coordinate<Lyt>>
     {
         return this->empty() ? coordinate<Lyt>{} : this->back();
     }
+
+  protected:
+    using base = std::vector<coordinate<Lyt>>;
+
+  public:
+    // make all inherited constructors available
+    using base::base;
 };
 /**
  * A collection of multiple paths in a layout.
@@ -79,6 +86,13 @@ class path_collection : public std::vector<Path>
     {
         return std::find(std::cbegin(*this), std::cend(*this), p) != std::cend(*this);
     }
+
+  protected:
+    using base = std::vector<Path>;
+
+  public:
+    // make all inherited constructors available
+    using base::base;
 };
 /**
  * Establishes a wire routing along the given path in the given layout. To this end, the given path's source and target
