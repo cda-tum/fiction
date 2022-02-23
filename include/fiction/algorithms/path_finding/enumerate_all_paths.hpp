@@ -86,8 +86,16 @@ class enumerate_all_clocking_paths_impl
             // recurse for all outgoing clock zones
             layout.foreach_outgoing_clocked_zone(
                 src,
-                [this, &tgt, &p](const auto& successor)
+                [&, this](const auto& successor)
                 {
+                    if constexpr (has_is_obstructed_connection_v<Lyt>)
+                    {
+                        if (layout.is_obstructed_connection(src, successor))
+                        {
+                            return true;  // skip the obstructed connection and keep looping
+                        }
+                    }
+
                     if constexpr (has_is_obstructed_coordinate_v<Lyt>)
                     {
                         if (layout.is_obstructed_coordinate(successor) && successor != tgt)

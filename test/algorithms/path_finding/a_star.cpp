@@ -109,7 +109,7 @@ TEST_CASE("4x4 clocked layouts", "[A*]")
     }
 }
 
-TEST_CASE("4x4 gate-level layouts with obstruction", "[A*]")
+TEST_CASE("4x4 gate-level layouts with coordinate obstruction", "[A*]")
 {
     using gate_lyt   = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     using coord_path = layout_coordinate_path<gate_lyt>;
@@ -118,7 +118,7 @@ TEST_CASE("4x4 gate-level layouts with obstruction", "[A*]")
     {
         gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
 
-        SECTION("(0,0) to (3,3) with obstruction")  // path of length 7
+        SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
         {
             obstruction_layout obstr_lyt{layout};
 
@@ -145,12 +145,68 @@ TEST_CASE("4x4 gate-level layouts with obstruction", "[A*]")
     {
         gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
 
-        SECTION("(0,0) to (3,3) with obstruction")  // path of length 7
+        SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
         {
             obstruction_layout obstr_lyt{layout};
 
             // create a PI as obstruction
             obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
+
+            const auto path = a_star<coord_path>(obstr_lyt, {0, 0}, {3, 3});  // only one path possible
+
+            CHECK(path.size() == 7);
+            CHECK(path.source() == coordinate<gate_lyt>{0, 0});
+            CHECK(path.target() == coordinate<gate_lyt>{3, 3});
+            CHECK(path[1] == coordinate<gate_lyt>{1, 0});
+            CHECK(path[2] == coordinate<gate_lyt>{1, 1});
+            CHECK(path[3] == coordinate<gate_lyt>{1, 2});
+            CHECK(path[4] == coordinate<gate_lyt>{2, 2});
+            CHECK(path[5] == coordinate<gate_lyt>{3, 2});
+        }
+    }
+}
+
+TEST_CASE("4x4 gate-level layouts with connection obstruction", "[A*]")
+{
+    using gate_lyt   = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+    using coord_path = layout_coordinate_path<gate_lyt>;
+
+    SECTION("2DDWave")
+    {
+        gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
+
+        SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
+        {
+            obstruction_layout obstr_lyt{layout};
+
+            // create some connection obstructions
+            obstr_lyt.obstruct_connection({0, 0}, {1, 0});
+            obstr_lyt.obstruct_connection({0, 1}, {1, 1});
+            obstr_lyt.obstruct_connection({0, 2}, {1, 2});
+            // leaving only one valid path via (0,4)
+
+            const auto path = a_star<coord_path>(obstr_lyt, {0, 0}, {3, 3});  // only one path possible
+
+            CHECK(path.size() == 7);
+            CHECK(path.source() == coordinate<gate_lyt>{0, 0});
+            CHECK(path.target() == coordinate<gate_lyt>{3, 3});
+            CHECK(path[1] == coordinate<gate_lyt>{0, 1});
+            CHECK(path[2] == coordinate<gate_lyt>{0, 2});
+            CHECK(path[3] == coordinate<gate_lyt>{0, 3});
+            CHECK(path[4] == coordinate<gate_lyt>{1, 3});
+            CHECK(path[5] == coordinate<gate_lyt>{2, 3});
+        }
+    }
+    SECTION("USE")
+    {
+        gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
+
+        SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
+        {
+            obstruction_layout obstr_lyt{layout};
+
+            // create a PI as obstruction
+            obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
 
             const auto path = a_star<coord_path>(obstr_lyt, {0, 0}, {3, 3});  // only one path possible
 

@@ -103,7 +103,7 @@ TEST_CASE("4x4 clocked layouts", "[enumerate-all-paths]")
     }
 }
 
-TEST_CASE("4x4 gate-level layouts with obstruction", "[enumerate-all-paths]")
+TEST_CASE("4x4 gate-level layouts with coordinate obstruction", "[enumerate-all-paths]")
 {
     using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     using path     = layout_coordinate_path<gate_lyt>;
@@ -112,7 +112,7 @@ TEST_CASE("4x4 gate-level layouts with obstruction", "[enumerate-all-paths]")
     {
         gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
 
-        SECTION("(0,0) to (3,3) with obstruction")  // 19 valid paths
+        SECTION("(0,0) to (3,3) with coordinate obstruction")  // 19 valid paths
         {
             obstruction_layout obstr_lyt{layout};
 
@@ -128,12 +128,51 @@ TEST_CASE("4x4 gate-level layouts with obstruction", "[enumerate-all-paths]")
     {
         gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
 
-        SECTION("(0,0) to (3,3) with obstruction")  // 1 valid path
+        SECTION("(0,0) to (3,3) with coordinate obstruction")  // 1 valid path
         {
             obstruction_layout obstr_lyt{layout};
 
             // create a PI as obstruction
             obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
+
+            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {0, 0}, {3, 3});
+
+            CHECK(collection.size() == 1);
+        }
+    }
+}
+
+TEST_CASE("4x4 gate-level layouts with connection obstruction", "[enumerate-all-paths]")
+{
+    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+    using path     = layout_coordinate_path<gate_lyt>;
+
+    SECTION("2DDWave")
+    {
+        gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
+
+        SECTION("(0,0) to (3,3) with connection obstruction")  // 19 valid paths
+        {
+            obstruction_layout obstr_lyt{layout};
+
+            // create a connection obstruction
+            obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 1 path
+
+            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {0, 0}, {3, 3});
+
+            CHECK(collection.size() == 19);
+        }
+    }
+    SECTION("USE")
+    {
+        gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
+
+        SECTION("(0,0) to (3,3) with connection obstruction")  // 1 valid path
+        {
+            obstruction_layout obstr_lyt{layout};
+
+            // create a PI as obstruction
+            obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
 
             const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {0, 0}, {3, 3});
 

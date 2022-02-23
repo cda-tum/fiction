@@ -159,6 +159,14 @@ class a_star_impl
             current,
             [this, current](const auto& successor)
             {
+                if constexpr (has_is_obstructed_connection_v<Lyt>)
+                {
+                    if (layout.is_obstructed_connection(current, successor))
+                    {
+                        return true;  // skip the obstructed connection and keep looping
+                    }
+                }
+
                 if constexpr (has_is_obstructed_coordinate_v<Lyt>)
                 {
                     if (layout.is_obstructed_coordinate(successor) && successor != target)
