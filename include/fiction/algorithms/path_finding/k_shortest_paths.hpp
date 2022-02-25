@@ -38,6 +38,7 @@ class yen_k_shortest_paths_impl
             num_shortest_paths{k},
             ps{p}
     {
+        // start by determining the shortest path between source and target
         k_shortest_paths.push_back(a_star<Path>(layout, source, target));
     }
 
@@ -49,6 +50,7 @@ class yen_k_shortest_paths_impl
             return {};
         }
 
+        // for the number of shortest paths k
         for (uint32_t k = 1; k < num_shortest_paths; ++k)
         {
             const auto& latest_path = k_shortest_paths[k - 1];
@@ -56,10 +58,10 @@ class yen_k_shortest_paths_impl
             // for all coordinates of the latest path except the last one
             for (uint32_t i = 0; i < static_cast<int64_t>(latest_path.size()) - 1; ++i)
             {
-                // the spur is the ith coordinate of the latest path
+                // create a spur, which is the ith coordinate of the latest path
                 const auto spur = latest_path[i];
 
-                // path from the source to the spur coordinate
+                // the root path is the path from the source to the spur coordinate
                 Path root_path{latest_path.cbegin(), latest_path.cbegin() + i};
 
                 // for all previous paths
@@ -73,49 +75,53 @@ class yen_k_shortest_paths_impl
                     }
                 }
 
+                // for all coordinates in the root path...
                 for (const auto& root : root_path)
                 {
+                    // ... that are not the spur
                     if (root != spur)
                     {
-                        // additionally, block every coordinate from the root path except the spur
+                        // block them from further exploration
                         layout.obstruct_coordinate(root);
                     }
                 }
 
+                // find an alternative path from the spur coordinate to the target and check that it is not empty
                 if (auto spur_path = a_star<Path>(layout, spur, target); !spur_path.empty())
                 {
-                    // allocate more memory for the root path
-                    root_path.reserve(root_path.size() + spur_path.size());
-                    // concatenate root_path and spur_path to get the final path
-                    root_path.insert(root_path.end(), std::make_move_iterator(spur_path.begin()),
-                                     std::make_move_iterator(spur_path.end()));
+                    // the final path will be a concatenation of the root path and the spur path
+                    auto& final_path = root_path;
+                    // allocate more memory for the final path (prepare concatenation)
+                    final_path.reserve(root_path.size() + spur_path.size());
+                    // concatenate root path and spur path to get the final path
+                    final_path.insert(final_path.end(), std::make_move_iterator(spur_path.begin()),
+                                      std::make_move_iterator(spur_path.end()));
 
-                    // if B does not already contain the path, it is a potential k-shortest path
-                    if (!root_path.empty())
+                    // if the candidates do not already contain the path, it is a potential k-shortest path
+                    if (!final_path.empty())  // NOTE a contains check needs to be added back in if no set is used here
                     {
-                        shortest_path_candidates.add(root_path);
+                        shortest_path_candidates.add(final_path);
                     }
                 }
 
-                // clear obstructions
+                // clear obstructions again (prepare for the next potential path)
                 layout.clear_obstructed_coordinates();
                 layout.clear_obstructed_connections();
             }
 
-            // if there were no spur paths or if all spur paths have been added to A already
+            // if there were no spur paths or if all spur paths have been added to k_shortest_paths already
             if (shortest_path_candidates.empty())
             {
                 break;
             }
 
-            // fetch and remove the lowest cost path from B and add it to A
-            const auto lowest_cost_path_it =
-                std::min_element(shortest_path_candidates.cbegin(), shortest_path_candidates.cend(),
-                                 [](const auto& p1, const auto& p2) { return path_cost(p1) < path_cost(p2); });
-
-            if (lowest_cost_path_it != shortest_path_candidates.cend())
+            // fetch and remove the lowest cost path from the candidates and add it to k_shortest_paths
+            if (const auto lowest_cost_path_it =
+                    std::min_element(shortest_path_candidates.cbegin(), shortest_path_candidates.cend(),
+                                     [](const auto& p1, const auto& p2) { return path_cost(p1) < path_cost(p2); });
+                lowest_cost_path_it != shortest_path_candidates.cend())
             {
-                k_shortest_paths.push_back(*lowest_cost_path_it);
+                k_shortest_paths.add(*lowest_cost_path_it);
                 shortest_path_candidates.erase(lowest_cost_path_it);
             }
         }
