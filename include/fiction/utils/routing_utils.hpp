@@ -39,7 +39,7 @@ struct routing_objective
     }
 };
 /**
- * A path in a layout defined as a ordered sequence of coordinates.
+ * A path in a layout defined as an ordered sequence of coordinates.
  *
  * @tparam Lyt Coordinate layout type.
  */

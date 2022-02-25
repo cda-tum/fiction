@@ -69,6 +69,8 @@ Routing Utils
 
 .. doxygenclass:: fiction::path_collection
    :members:
+.. doxygenclass:: fiction::path_set
+   :members:
 
 .. doxygenfunction:: fiction::route_path
 .. doxygenfunction:: fiction::extract_routing_objectives

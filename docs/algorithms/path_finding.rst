@@ -17,8 +17,8 @@ A* Shortest Path
 
 .. doxygenfunction:: fiction::a_star
 
-\f$ k \f$ Shortest Paths
-------------------------
+k Shortest Paths
+----------------
 
 **Header:** ``fiction/algorithms/path_finding/k_shortest_paths.hpp``
 
