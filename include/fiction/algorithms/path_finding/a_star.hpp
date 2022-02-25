@@ -285,13 +285,13 @@ class a_star_impl
 }  // namespace detail
 
 /**
- * The A* path finding algorithm for shortest paths between a given source and target coordinate in a clocked layout. A*
- * is an extension of Dijkstra's algorithm for shortest paths but offers better average complexity. It uses a heuristic
- * distance function that estimates the remaining costs towards the target in every step. Thus, this heuristic function
- * should neither be complex to calculate nor overestimating the remaining costs. Common heuristics to be used are the
- * Manhattan and the Euclidean distance functions. See distance.hpp for implementations.
+ * The A* path finding algorithm for shortest loopless paths between a given source and target coordinate in a clocked
+ * layout. A* is an extension of Dijkstra's algorithm for shortest paths but offers better average complexity. It uses a
+ * heuristic distance function that estimates the remaining costs towards the target in every step. Thus, this heuristic
+ * function should neither be complex to calculate nor overestimating the remaining costs. Common heuristics to be used
+ * are the Manhattan and the Euclidean distance functions. See distance.hpp for implementations.
  *
- * If the given layout implements the obstruction interface (see obstruction_layout.hpp), paths will not be routed via
+ * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
  * obstructed coordinates.
  *
  * @tparam Path Path type to create.
@@ -302,7 +302,7 @@ class a_star_impl
  * @param target Goal coordinate.
  * @param dist_fn A distance functor that implements the desired heuristic cost function.
  * @param ps Parameters.
- * @return The shortest path from source to target.
+ * @return The shortest loopless path in layout from source to target.
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t>
 [[nodiscard]] Path a_star(const Lyt& layout, const coordinate<Lyt>& source, const coordinate<Lyt>& target,

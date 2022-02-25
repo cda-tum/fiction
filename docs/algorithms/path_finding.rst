@@ -17,6 +17,13 @@ A* Shortest Path
 
 .. doxygenfunction:: fiction::a_star
 
+k Shortest Paths
+----------------
+
+**Header:** ``fiction/algorithms/path_finding/k_shortest_paths.hpp``
+
+.. doxygenfunction:: fiction::yen_k_shortest_paths
+
 Enumerate All Paths
 -------------------
 

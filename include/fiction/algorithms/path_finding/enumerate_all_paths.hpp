@@ -128,7 +128,7 @@ class enumerate_all_clocking_paths_impl
  * respecting the information flow imposed by the clocking scheme. This algorithm does neither generate duplicate nor
  * looping paths, even in a cyclic clocking scheme. That is, along each path, each coordinate can occur at maximum once.
  *
- * If the given layout implements the obstruction interface (see obstruction_layout.hpp), paths will not be routed via
+ * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
  * obstructed coordinates.
  *
  * @tparam Path Type of the returned individual paths.
