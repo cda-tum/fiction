@@ -18,7 +18,7 @@ namespace fiction
 /**
  * The Manhattan distance between two layout coordinates given by
  *
- *  |x1 - x2| + |y1 - y2|
+ *  \f$ |x_1 - x_2| + |y_1 - y_2| \f$
  *
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Integral type for the distance.
@@ -38,7 +38,7 @@ template <typename Lyt, typename Dist = uint64_t>
 /**
  * The Euclidean distance between two layout coordinates given by
  *
- *  sqrt((x1 - x2)^2 + (y1 - y2)^2)
+ *  \f$ \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2} \f$
  *
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Floating-point type for the distance.
