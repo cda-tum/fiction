@@ -171,13 +171,13 @@ class yen_k_shortest_paths_impl
 }  // namespace detail
 
 /**
- * Yen's algorithm for finding up to k shortest paths without loops from source to target. This implementation works on
- * clocked layouts and uses the A* algorithm with the Manhattan distance function internally. The algorithm was
+ * Yen's algorithm for finding up to \f$ k \f$ shortest paths without loops from source to target. This implementation
+ * works on clocked layouts and uses the A* algorithm with the Manhattan distance function internally. The algorithm was
  * originally described in "An algorithm for finding shortest routes from all source nodes to a given destination in
  * general networks" by Jin Y. Yen in Quarterly of Applied Mathematics, 1970.
  *
- * If k is larger than the number of possible paths from source to target, the size of the returned path collection will
- * be smaller than k.
+ * If \f$ k \f$ is larger than the number of possible paths from source to target, the size of the returned path
+ * collection will be smaller than \f$ k \f$.
  *
  * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
  * obstructed coordinates.

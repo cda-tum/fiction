@@ -16,9 +16,9 @@ namespace fiction
 {
 
 /**
- * The Manhattan distance between two layout coordinates given by
+ * The Manhattan distance \f$ D \f$ between two layout coordinates given by
  *
- *  \f$ |x_1 - x_2| + |y_1 - y_2| \f$
+ *  \f$ D = |x_1 - x_2| + |y_1 - y_2| \f$
  *
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Integral type for the distance.
@@ -36,9 +36,9 @@ template <typename Lyt, typename Dist = uint64_t>
                              std::abs(static_cast<int64_t>(source.y) - static_cast<int64_t>(target.y)));
 }
 /**
- * The Euclidean distance between two layout coordinates given by
+ * The Euclidean distance \f$ D \f$ between two layout coordinates given by
  *
- *  \f$ \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2} \f$
+ *  \f$ D = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2} \f$
  *
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Floating-point type for the distance.
