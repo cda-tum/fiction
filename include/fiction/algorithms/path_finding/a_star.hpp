@@ -7,6 +7,7 @@
 
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/routing_utils.hpp"
 #include "fiction/utils/stl_utils.hpp"
 
 #include <algorithm>
@@ -35,11 +36,11 @@ template <typename Path, typename Lyt, typename Dist>
 class a_star_impl
 {
   public:
-    a_star_impl(const Lyt& lyt, const coordinate<Lyt>& src, const coordinate<Lyt>& tgt,
-                const distance_functor<Lyt, Dist>& dist_fn, const a_star_params p) :
+    a_star_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const distance_functor<Lyt, Dist>& dist_fn,
+                const a_star_params p) :
             layout{lyt},
-            source{src},
-            target{tgt},
+            source{obj.source},
+            target{obj.target},
             distance{dist_fn},
             ps{p}
     {
@@ -76,7 +77,7 @@ class a_star_impl
   private:
     const Lyt& layout;
 
-    const coordinate<Lyt>&source, target;
+    const coordinate<Lyt> source, target;
 
     const distance_functor<Lyt, Dist> distance;
 
@@ -298,20 +299,19 @@ class a_star_impl
  * @tparam Lyt Clocked layout type.
  * @tparam Dist Distance value type to be used in the heuristic cost function.
  * @param layout The clocked layout in which the shortest path between source and target is to be found.
- * @param source Starting coordinate.
- * @param target Goal coordinate.
+ * @param objective Source-target coordinate pair.
  * @param dist_fn A distance functor that implements the desired heuristic cost function.
  * @param ps Parameters.
  * @return The shortest loopless path in layout from source to target.
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t>
-[[nodiscard]] Path a_star(const Lyt& layout, const coordinate<Lyt>& source, const coordinate<Lyt>& target,
+[[nodiscard]] Path a_star(const Lyt& layout, const routing_objective<Lyt>& objective,
                           const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, Dist>(),
                           a_star_params                      ps      = {}) noexcept
 {
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
 
-    return detail::a_star_impl<Path, Lyt, Dist>{layout, source, target, dist_fn, ps}.run();
+    return detail::a_star_impl<Path, Lyt, Dist>{layout, objective, dist_fn, ps}.run();
 }
 
 }  // namespace fiction

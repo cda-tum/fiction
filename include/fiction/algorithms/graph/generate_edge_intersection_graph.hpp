@@ -8,6 +8,7 @@
 #include "fiction/algorithms/path_finding/enumerate_all_paths.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/routing_utils.hpp"
 #include "fiction/utils/stl_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -87,8 +88,12 @@ class generate_edge_intersection_graph_impl
                       [this](const auto& obj)
                       {
                           // enumerate all paths for the current objective
-                          auto obj_paths = enumerate_all_clocking_paths<clk_path>(obstruction_layout{layout},
-                                                                                  obj.source, obj.target);
+                          auto obj_paths = enumerate_all_clocking_paths<clk_path>(
+                              obstruction_layout{layout}, {obj.source, obj.target}, {ps.crossings});
+                          std::cout << fmt::format("Enumerated {} paths for objective {}-->{}", obj_paths.size(),
+                                                   obj.source, obj.target)
+                                    << std::endl;
+
                           // assign a unique label to each path and create a corresponding node in the graph
                           initiate_objective_nodes(obj_paths);
 
@@ -99,8 +104,8 @@ class generate_edge_intersection_graph_impl
                           }
                           else if (obj_paths.size() > 1)
                           {
-                              // since all paths of the same objective have intersections by definition, create edges
-                              // between all of them by iterating over all possible combinations of size 2
+                              // since all paths of the same objective have intersections by definition, create
+                              // edges between all of them by iterating over all possible combinations of size 2
                               connect_clique(obj_paths);
                           }
                           // for each previously stored path, create an edge if there is an intersection

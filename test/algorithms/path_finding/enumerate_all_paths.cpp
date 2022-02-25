@@ -25,7 +25,7 @@ TEST_CASE("2x2 clocked layouts", "[enumerate-all-paths]")
 
         SECTION("(0,0) to (1,1)")  // two valid paths
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {0, 0}, {1, 1});
+            const auto collection = enumerate_all_clocking_paths<path>(layout, {{0, 0}, {1, 1}});
 
             CHECK(collection.size() == 2);
             CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1}}}));
@@ -33,7 +33,7 @@ TEST_CASE("2x2 clocked layouts", "[enumerate-all-paths]")
         }
         SECTION("(1,1) to (0,0)")  // no valid paths
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {1, 1}, {0, 0});
+            const auto collection = enumerate_all_clocking_paths<path>(layout, {{1, 1}, {0, 0}});
 
             CHECK(collection.empty());
             CHECK(!collection.contains({{{0, 0}, {0, 1}, {1, 1}}}));
@@ -41,7 +41,7 @@ TEST_CASE("2x2 clocked layouts", "[enumerate-all-paths]")
         }
         SECTION("(0,0) to (0,0)")  // source and target are identical
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {0, 0}, {0, 0});
+            const auto collection = enumerate_all_clocking_paths<path>(layout, {{0, 0}, {0, 0}});
 
             CHECK(collection.size() == 1);
             CHECK(collection.contains({{{0, 0}}}));
@@ -55,7 +55,7 @@ TEST_CASE("2x2 clocked layouts", "[enumerate-all-paths]")
 
         SECTION("(0,0) to (0,1)")  // one valid path
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {0, 0}, {0, 1});
+            const auto collection = enumerate_all_clocking_paths<path>(layout, {{0, 0}, {0, 1}});
 
             CHECK(collection.size() == 1);
             CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}));
@@ -64,7 +64,7 @@ TEST_CASE("2x2 clocked layouts", "[enumerate-all-paths]")
         }
         SECTION("(0,0) to (0,0)")  // source and target are identical
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {0, 0}, {0, 0});
+            const auto collection = enumerate_all_clocking_paths<path>(layout, {{0, 0}, {0, 0}});
 
             CHECK(collection.size() == 1);
             CHECK(collection.contains({{{0, 0}}}));
@@ -85,7 +85,7 @@ TEST_CASE("4x4 clocked layouts", "[enumerate-all-paths]")
 
         SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {0, 0}, {3, 3});
+            const auto collection = enumerate_all_clocking_paths<path>(layout, {{0, 0}, {3, 3}});
 
             CHECK(collection.size() == 20);
         }
@@ -96,7 +96,7 @@ TEST_CASE("4x4 clocked layouts", "[enumerate-all-paths]")
 
         SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {0, 0}, {3, 3});
+            const auto collection = enumerate_all_clocking_paths<path>(layout, {{0, 0}, {3, 3}});
 
             CHECK(collection.size() == 4);
         }
@@ -119,7 +119,7 @@ TEST_CASE("4x4 gate-level layouts with coordinate obstruction", "[enumerate-all-
             // create a PI as obstruction
             obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 1 path
 
-            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {0, 0}, {3, 3});
+            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
 
             CHECK(collection.size() == 19);
         }
@@ -135,7 +135,7 @@ TEST_CASE("4x4 gate-level layouts with coordinate obstruction", "[enumerate-all-
             // create a PI as obstruction
             obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
 
-            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {0, 0}, {3, 3});
+            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
 
             CHECK(collection.size() == 1);
         }
@@ -158,7 +158,7 @@ TEST_CASE("4x4 gate-level layouts with connection obstruction", "[enumerate-all-
             // create a connection obstruction
             obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 1 path
 
-            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {0, 0}, {3, 3});
+            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
 
             CHECK(collection.size() == 19);
         }
@@ -174,7 +174,7 @@ TEST_CASE("4x4 gate-level layouts with connection obstruction", "[enumerate-all-
             // create a PI as obstruction
             obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
 
-            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {0, 0}, {3, 3});
+            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
 
             CHECK(collection.size() == 1);
         }

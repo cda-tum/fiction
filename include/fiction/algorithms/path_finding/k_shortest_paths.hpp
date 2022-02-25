@@ -30,16 +30,15 @@ template <typename Path, typename Lyt>
 class yen_k_shortest_paths_impl
 {
   public:
-    yen_k_shortest_paths_impl(const Lyt& lyt, const coordinate<Lyt>& src, const coordinate<Lyt>& tgt, const uint32_t k,
+    yen_k_shortest_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const uint32_t k,
                               const yen_k_shortest_paths_params p) :
             layout{lyt},
-            source{src},
-            target{tgt},
+            objective{obj.source, obj.target},
             num_shortest_paths{k},
             ps{p}
     {
         // start by determining the shortest path between source and target
-        k_shortest_paths.push_back(a_star<Path>(layout, source, target));
+        k_shortest_paths.push_back(a_star<Path>(layout, objective));
     }
 
     path_collection<Path> run()
@@ -87,7 +86,7 @@ class yen_k_shortest_paths_impl
                 }
 
                 // find an alternative path from the spur coordinate to the target and check that it is not empty
-                if (auto spur_path = a_star<Path>(layout, spur, target); !spur_path.empty())
+                if (auto spur_path = a_star<Path>(layout, {spur, objective.target}); !spur_path.empty())
                 {
                     // the final path will be a concatenation of the root path and the spur path
                     auto& final_path = root_path;
@@ -137,7 +136,7 @@ class yen_k_shortest_paths_impl
     /**
      * Source and target coordinates.
      */
-    const coordinate<Lyt>&source, target;
+    const routing_objective<obstruction_layout<Lyt>> objective;
     /**
      * The number of paths to determine, i.e., k.
      */
@@ -185,20 +184,18 @@ class yen_k_shortest_paths_impl
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
  * @param layout The clocked layout in which the k shortest paths between source and target are to be found.
- * @param source Starting coordinate.
- * @param target Goal coordinate.
+ * @param objective Source-target coordinate pair.
  * @param k Maximum number of shortest paths to find.
  * @param ps Parameters.
  * @return A collection of up to k shortest loopless paths in layout from source to target.
  */
 template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path> yen_k_shortest_paths(const Lyt& layout, const coordinate<Lyt>& source,
-                                                         const coordinate<Lyt>& target, const uint32_t k,
-                                                         yen_k_shortest_paths_params ps = {}) noexcept
+[[nodiscard]] path_collection<Path> yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
+                                                         const uint32_t k, yen_k_shortest_paths_params ps = {}) noexcept
 {
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
 
-    return detail::yen_k_shortest_paths_impl<Path, Lyt>{layout, source, target, k, ps}.run();
+    return detail::yen_k_shortest_paths_impl<Path, Lyt>{layout, objective, k, ps}.run();
 }
 
 }  // namespace fiction

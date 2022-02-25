@@ -28,18 +28,17 @@ template <typename Path, typename Lyt>
 class enumerate_all_clocking_paths_impl
 {
   public:
-    enumerate_all_clocking_paths_impl(const Lyt& lyt, const coordinate<Lyt>& src, const coordinate<Lyt>& tgt,
+    enumerate_all_clocking_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj,
                                       const enumerate_all_clocking_paths_params p) :
             layout{lyt},
-            source{src},
-            target{tgt},
+            objective{obj},
             ps{p}
     {}
 
     [[nodiscard]] path_collection<Path> run()
     {
         Path p{};
-        recursively_enumerate_all_paths(source, target, p);
+        recursively_enumerate_all_paths(objective.source, objective.target, p);
 
         return collection;
     }
@@ -47,7 +46,7 @@ class enumerate_all_clocking_paths_impl
   private:
     const Lyt& layout;
 
-    const coordinate<Lyt>&source, target;
+    const routing_objective<Lyt> objective;
 
     enumerate_all_clocking_paths_params ps;
 
@@ -134,19 +133,18 @@ class enumerate_all_clocking_paths_impl
  * @tparam Path Type of the returned individual paths.
  * @tparam Lyt Type of the clocked layout to perform path finding on.
  * @param layout The clocked layout whose paths are to be enumerated.
- * @param source Starting coordinate.
- * @param target Goal coordinate.
+ * @param objective Source-target coordinate pair.
  * @param ps Parameters.
  * @return A collection of all unique paths in layout from source to target.
  */
 template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path> enumerate_all_clocking_paths(const Lyt& layout, const coordinate<Lyt>& source,
-                                                                 const coordinate<Lyt>&              target,
+[[nodiscard]] path_collection<Path> enumerate_all_clocking_paths(const Lyt&                          layout,
+                                                                 const routing_objective<Lyt>&       objective,
                                                                  enumerate_all_clocking_paths_params ps = {}) noexcept
 {
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
 
-    return detail::enumerate_all_clocking_paths_impl<Path, Lyt>{layout, source, target, ps}.run();
+    return detail::enumerate_all_clocking_paths_impl<Path, Lyt>{layout, objective, ps}.run();
 }
 
 }  // namespace fiction

@@ -29,7 +29,7 @@ TEST_CASE("Yen's 2x2 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (1,1)")  // two valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {1, 1}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {1, 1}}, k);
 
                 CHECK(collection.size() == 1);
                 CHECK(collection[0].source() == coordinate<clk_lyt>{0, 0});
@@ -37,13 +37,13 @@ TEST_CASE("Yen's 2x2 clocked layouts", "[k-shortest-paths]")
             }
             SECTION("(1,1) to (0,0)")  // no valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {1, 1}, {0, 0}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{1, 1}, {0, 0}}, k);
 
                 CHECK(collection.empty());
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {0, 0}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {0, 0}}, k);
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}}}));
@@ -55,7 +55,7 @@ TEST_CASE("Yen's 2x2 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (1,1)")  // two valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {1, 1}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {1, 1}}, k);
 
                 CHECK(collection.size() == 2);
                 CHECK(collection.contains({{0, 0}, {1, 0}, {1, 1}}));
@@ -63,13 +63,13 @@ TEST_CASE("Yen's 2x2 clocked layouts", "[k-shortest-paths]")
             }
             SECTION("(1,1) to (0,0)")  // no valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {1, 1}, {0, 0}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{1, 1}, {0, 0}}, k);
 
                 CHECK(collection.empty());
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {0, 0}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {0, 0}}, k);
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}}}));
@@ -81,7 +81,7 @@ TEST_CASE("Yen's 2x2 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (1,1)")  // two valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {1, 1}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {1, 1}}, k);
 
                 CHECK(collection.size() == 2);
                 CHECK(collection.contains({{0, 0}, {1, 0}, {1, 1}}));
@@ -89,13 +89,13 @@ TEST_CASE("Yen's 2x2 clocked layouts", "[k-shortest-paths]")
             }
             SECTION("(1,1) to (0,0)")  // no valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {1, 1}, {0, 0}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{1, 1}, {0, 0}}, k);
 
                 CHECK(collection.empty());
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {0, 0}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {0, 0}}, k);
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}}}));
@@ -112,14 +112,14 @@ TEST_CASE("Yen's 2x2 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (0,1)")  // one valid path
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {0, 1}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {0, 1}}, k);
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}));
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {0, 0}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {0, 0}}, k);
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}}}));
@@ -131,14 +131,14 @@ TEST_CASE("Yen's 2x2 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (0,1)")  // one valid path
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {0, 1}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {0, 1}}, k);
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}));
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {0, 0}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {0, 0}}, k);
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}}}));
@@ -150,14 +150,14 @@ TEST_CASE("Yen's 2x2 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (0,1)")  // one valid path
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {0, 1}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {0, 1}}, k);
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}));
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {0, 0}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {0, 0}}, k);
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}}}));
@@ -181,7 +181,7 @@ TEST_CASE("Yen's 4x4 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {3, 3}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {3, 3}}, k);
 
                 CHECK(collection.size() == k);
             }
@@ -192,7 +192,7 @@ TEST_CASE("Yen's 4x4 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {3, 3}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {3, 3}}, k);
 
                 CHECK(collection.size() == k);
             }
@@ -203,7 +203,7 @@ TEST_CASE("Yen's 4x4 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {3, 3}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {3, 3}}, k);
 
                 CHECK(collection.size() == k);
             }
@@ -214,7 +214,7 @@ TEST_CASE("Yen's 4x4 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {3, 3}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {3, 3}}, k);
 
                 CHECK(collection.size() == k);
             }
@@ -230,7 +230,7 @@ TEST_CASE("Yen's 4x4 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {3, 3}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {3, 3}}, k);
 
                 CHECK(collection.size() == k);
             }
@@ -241,7 +241,7 @@ TEST_CASE("Yen's 4x4 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {3, 3}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {3, 3}}, k);
 
                 CHECK(collection.size() == k);
             }
@@ -252,7 +252,7 @@ TEST_CASE("Yen's 4x4 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {3, 3}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {3, 3}}, k);
 
                 CHECK(collection.size() == k);
             }
@@ -263,7 +263,7 @@ TEST_CASE("Yen's 4x4 clocked layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {0, 0}, {3, 3}, k);
+                const auto collection = yen_k_shortest_paths<path>(layout, {{0, 0}, {3, 3}}, k);
 
                 CHECK(collection.size() == k);
             }
@@ -292,7 +292,7 @@ TEST_CASE("Yen's 4x4 gate-level layouts with coordinate obstruction", "[k-shorte
             // effectively blocking (3,2) as well
 
             const auto collection =
-                yen_k_shortest_paths<coord_path>(obstr_lyt, {0, 0}, {3, 3}, 1);  // only one path possible
+                yen_k_shortest_paths<coord_path>(obstr_lyt, {{0, 0}, {3, 3}}, 1);  // only one path possible
 
             REQUIRE(collection.size() == 1);
             const auto& path = collection[0];
@@ -316,7 +316,7 @@ TEST_CASE("Yen's 4x4 gate-level layouts with coordinate obstruction", "[k-shorte
             obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
 
             const auto collection =
-                yen_k_shortest_paths<coord_path>(obstr_lyt, {0, 0}, {3, 3}, 1);  // only one path possible
+                yen_k_shortest_paths<coord_path>(obstr_lyt, {{0, 0}, {3, 3}}, 1);  // only one path possible
 
             REQUIRE(collection.size() == 1);
             const auto& path = collection[0];
@@ -350,7 +350,7 @@ TEST_CASE("Yen's 4x4 gate-level layouts with connection obstruction", "[k-shorte
             // leaving only one valid path via (0,4)
 
             const auto collection =
-                yen_k_shortest_paths<coord_path>(obstr_lyt, {0, 0}, {3, 3}, 1);  // only one path possible
+                yen_k_shortest_paths<coord_path>(obstr_lyt, {{0, 0}, {3, 3}}, 1);  // only one path possible
 
             REQUIRE(collection.size() == 1);
             const auto& path = collection[0];
@@ -373,7 +373,7 @@ TEST_CASE("Yen's 4x4 gate-level layouts with connection obstruction", "[k-shorte
             obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
 
             const auto collection =
-                yen_k_shortest_paths<coord_path>(obstr_lyt, {0, 0}, {3, 3}, 1);  // only one path possible
+                yen_k_shortest_paths<coord_path>(obstr_lyt, {{0, 0}, {3, 3}}, 1);  // only one path possible
 
             REQUIRE(collection.size() == 1);
             const auto& path = collection[0];
