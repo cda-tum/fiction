@@ -65,10 +65,8 @@ class yen_k_shortest_paths_impl
                 // for all previous paths
                 for (const auto& p : k_shortest_paths)
                 {
-                    // TODO this equality should be done without new memory allocation
-                    const Path partial_path(p.cbegin(), p.cbegin() + i);
-
-                    if (root_path == partial_path)
+                    // if the root path is equal to a previous partial path
+                    if (std::equal(root_path.cbegin(), root_path.cend(), p.cbegin(), p.cbegin() + i))
                     {
                         // block the connection that was already used in the previous shortest path
                         layout.obstruct_connection(p[i], p[i + 1]);
@@ -92,11 +90,10 @@ class yen_k_shortest_paths_impl
                     root_path.insert(root_path.end(), std::make_move_iterator(spur_path.begin()),
                                      std::make_move_iterator(spur_path.end()));
 
-                    // TODO can b_list be implemented as a set (heap)?
                     // if B does not already contain the path, it is a potential k-shortest path
-                    if (!root_path.empty() && !b_list.contains(root_path))
+                    if (!root_path.empty())
                     {
-                        b_list.push_back(root_path);
+                        shortest_path_candidates.add(root_path);
                     }
                 }
 
@@ -106,20 +103,20 @@ class yen_k_shortest_paths_impl
             }
 
             // if there were no spur paths or if all spur paths have been added to A already
-            if (b_list.empty())
+            if (shortest_path_candidates.empty())
             {
                 break;
             }
 
             // fetch and remove the lowest cost path from B and add it to A
             const auto lowest_cost_path_it =
-                std::min_element(b_list.cbegin(), b_list.cend(),
+                std::min_element(shortest_path_candidates.cbegin(), shortest_path_candidates.cend(),
                                  [](const auto& p1, const auto& p2) { return path_cost(p1) < path_cost(p2); });
 
-            if (lowest_cost_path_it != b_list.cend())
+            if (lowest_cost_path_it != shortest_path_candidates.cend())
             {
                 k_shortest_paths.push_back(*lowest_cost_path_it);
-                b_list.erase(lowest_cost_path_it);
+                shortest_path_candidates.erase(lowest_cost_path_it);
             }
         }
 
@@ -127,18 +124,30 @@ class yen_k_shortest_paths_impl
     }
 
   private:
+    /**
+     * The layout in which k shortest paths are to be found extended by an obstruction functionality layer.
+     */
     obstruction_layout<Lyt> layout;
-
+    /**
+     * Source and target coordinates.
+     */
     const coordinate<Lyt>&source, target;
-
+    /**
+     * The number of paths to determine, i.e., k.
+     */
     const uint32_t num_shortest_paths;
-
+    /**
+     * Parameters.
+     */
     yen_k_shortest_paths_params ps;
-
-    // A list of paths
+    /**
+     * The list of k shortest paths that is created during the algorithm.
+     */
     path_collection<Path> k_shortest_paths{};
-    // B heap of paths
-    path_collection<Path> b_list{};
+    /**
+     * A set of potential shortest paths.
+     */
+    path_set<Path> shortest_path_candidates{};
     /**
      * Computes the cost of a path. This function can be adjusted to fetch paths of differing costs.
      *

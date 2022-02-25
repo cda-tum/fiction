@@ -370,7 +370,6 @@ TEST_CASE("Yen's 4x4 gate-level layouts with connection obstruction", "[k-shorte
         {
             obstruction_layout obstr_lyt{layout};
 
-            // create a PI as obstruction
             obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
 
             const auto collection =

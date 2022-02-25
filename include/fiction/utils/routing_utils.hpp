@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <set>
 #include <vector>
 
 namespace fiction
@@ -89,6 +90,32 @@ class path_collection : public std::vector<Path>
 
   protected:
     using base = std::vector<Path>;
+
+  public:
+    // make all inherited constructors available
+    using base::base;
+};
+/**
+ * A collection of multiple paths in a layout.
+ *
+ * @tparam Path Path type.
+ */
+template <typename Path>
+class path_set : public std::set<Path>
+{
+  public:
+    void add(const Path& p) noexcept
+    {
+        this->insert(p);
+    }
+
+    [[nodiscard]] bool contains(const Path& p) const noexcept
+    {
+        return this->count(p) > 0;
+    }
+
+  protected:
+    using base = std::set<Path>;
 
   public:
     // make all inherited constructors available
