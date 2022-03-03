@@ -6,6 +6,7 @@
 #define FICTION_GENERATE_EDGE_INTERSECTION_GRAPH_HPP
 
 #include "fiction/algorithms/path_finding/enumerate_all_paths.hpp"
+#include "fiction/algorithms/path_finding/k_shortest_paths.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/routing_utils.hpp"
@@ -14,6 +15,8 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <cstdint>
+#include <optional>
 #include <set>
 #include <vector>
 
@@ -39,6 +42,11 @@ struct generate_edge_intersection_graph_params
      * Allow crossings by not creating edges between paths that only share single-coordinate sub-paths.
      */
     bool crossings = false;
+    /**
+     * If a value is given, for each objective, only up to the path_limit shortest paths will be enumerated (using Yen's
+     * algorithm) instead of all paths.
+     */
+    std::optional<uint32_t> path_limit = std::nullopt;
 };
 
 struct generate_edge_intersection_graph_stats
@@ -87,12 +95,28 @@ class generate_edge_intersection_graph_impl
         std::for_each(objectives.cbegin(), objectives.cend(),
                       [this](const auto& obj)
                       {
-                          // enumerate all paths for the current objective
-                          auto obj_paths = enumerate_all_clocking_paths<clk_path>(
-                              obstruction_layout{layout}, {obj.source, obj.target}, {ps.crossings});
-                          std::cout << fmt::format("Enumerated {} paths for objective {}-->{}", obj_paths.size(),
-                                                   obj.source, obj.target)
-                                    << std::endl;
+                          path_collection<clk_path> obj_paths{};
+
+                          if (!ps.path_limit.has_value())
+                          {
+                              // enumerate all paths for the current objective
+                              obj_paths = enumerate_all_clocking_paths<clk_path>(
+                                  obstruction_layout{layout}, {obj.source, obj.target}, {ps.crossings});
+                              //                              std::cout << fmt::format("Enumerated {} paths for
+                              //                              objective {}-->{}", obj_paths.size(),
+                              //                                                       obj.source, obj.target)
+                              //                                        << std::endl;
+                          }
+                          else
+                          {
+                              // enumerate k paths for the current objective
+                              obj_paths = yen_k_shortest_paths<clk_path>(obstruction_layout{layout},
+                                                                         {obj.source, obj.target}, *ps.path_limit);
+                              //                              std::cout << fmt::format("Enumerated {} paths for
+                              //                              objective {}-->{}", obj_paths.size(),
+                              //                                                       obj.source, obj.target)
+                              //                                        << std::endl;
+                          }
 
                           // assign a unique label to each path and create a corresponding node in the graph
                           initiate_objective_nodes(obj_paths);
@@ -217,6 +241,13 @@ class generate_edge_intersection_graph_impl
          * Label to identify the path in the edge intersection graph.
          */
         std::size_t label{};
+
+      protected:
+        using base = layout_coordinate_path<Lyt>;
+
+      public:
+        // make all inherited constructors available
+        using base::base;
 
       private:
         /**

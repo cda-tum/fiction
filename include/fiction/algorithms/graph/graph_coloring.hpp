@@ -178,6 +178,8 @@ class sat_coloring_handler
     {
         for (std::size_t k = largest_clique->size(); k < graph.size_vertices() + 1; ++k)
         {
+            //            std::cout << fmt::format("Attempting to color with {} colors", k) << std::endl;
+
             if (const auto [sat, instance] = check_k_coloring(k); sat == bill::result::states::satisfiable)
             {
                 return {k, instance};

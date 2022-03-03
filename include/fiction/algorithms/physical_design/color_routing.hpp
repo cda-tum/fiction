@@ -31,10 +31,21 @@ struct color_routing_params
      * Enable crossings.
      */
     bool crossings = false;
+    //    /**
+    //     * For routing objectives that are more than distance_threshold units apart measured by the Manhattan
+    //     distance, only
+    //     * the shortest path is determined and included in the edge intersection graph via the A* algorithm.
+    //     */
+    //    uint32_t distance_threshold = 10;
+    /**
+     * If a value is given, for each objective, only up to the path_limit shortest paths will be enumerated (using Yen's
+     * algorithm) instead of all paths.
+     */
+    std::optional<uint32_t> path_limit = std::nullopt;
     /**
      * The engine to use.
      */
-    graph_coloring_engine engine = graph_coloring_engine::MCS;
+    graph_coloring_engine engine = graph_coloring_engine::SAT;
 };
 
 struct color_routing_stats
@@ -74,10 +85,16 @@ class color_routing_impl
         mockturtle::stopwatch stop{pst.time_total};
 
         generate_edge_intersection_graph_params epg_params{};
-        epg_params.crossings = ps.crossings;
+        epg_params.crossings  = ps.crossings;
+        epg_params.path_limit = ps.path_limit;
 
         const auto edge_intersection_graph =
             generate_edge_intersection_graph(layout, objectives, epg_params, &pst.epg_stats);
+
+        //        std::cout << fmt::format("Generated EPG with {} vertices and {} edges in {} cliques",
+        //                                 pst.epg_stats.num_vertices, pst.epg_stats.num_edges,
+        //                                 pst.epg_stats.cliques.size())
+        //                  << std::endl;
 
         // if no partial routing is allowed, abort if some objectives cannot be satisfied by path enumeration
         if (!ps.conduct_partial_routing && pst.epg_stats.number_of_unsatisfiable_objectives > 0)

@@ -70,7 +70,7 @@ class layout_coordinate_path : public std::vector<coordinate<Lyt>>
     using base::base;
 };
 /**
- * A collection of multiple paths in a layout.
+ * An ordered collection of multiple paths in a layout.
  *
  * @tparam Path Path type.
  */
@@ -96,7 +96,7 @@ class path_collection : public std::vector<Path>
     using base::base;
 };
 /**
- * A collection of multiple paths in a layout.
+ * A set of multiple paths in a layout.
  *
  * @tparam Path Path type.
  */
