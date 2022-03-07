@@ -7,6 +7,7 @@
 
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 
 #include <mockturtle/traits.hpp>
 
@@ -636,6 +637,35 @@ struct has_get_layout_name<Ntk, std::void_t<decltype(std::declval<Ntk>().get_lay
 
 template <class Ntk>
 inline constexpr bool has_get_layout_name_v = has_get_layout_name<Ntk>::value;
+#pragma endregion
+
+#pragma region has_assign_sidb_defect
+template <class Lyt, class = void>
+struct has_assign_sidb_defect : std::false_type
+{};
+
+template <class Lyt>
+struct has_assign_sidb_defect<
+    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_sidb_defect(coordinate<Lyt>(), sidb_defect_type()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_assign_sidb_defect_v = has_assign_sidb_defect<Lyt>::value;
+#pragma endregion
+
+#pragma region has_get_sidb_defect
+template <class Lyt, class = void>
+struct has_get_sidb_defect : std::false_type
+{};
+
+template <class Lyt>
+struct has_get_sidb_defect<Lyt, std::void_t<decltype(std::declval<Lyt>().get_sidb_defect(coordinate<Lyt>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_get_sidb_defect_v = has_get_sidb_defect<Lyt>::value;
 #pragma endregion
 
 /**

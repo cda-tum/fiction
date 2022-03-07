@@ -47,6 +47,7 @@ Let there be a *fiction*
    :caption: Technology
 
    technology/cell_technologies.rst
+   technology/defects.rst
    technology/gate_libraries.rst
    technology/properties.rst
 
