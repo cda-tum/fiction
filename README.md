@@ -94,7 +94,11 @@ File formats:
 
 Many thanks to Umberto Garlando and Fabrizio Riente for their support!
 
-### Silicon Dangling Bond (SiDB)
+### Silicon Dangling Bonds (SiDBs)
+
+Gate libraries:
+
+- [Bestagon](https://fiction.readthedocs.io/en/latest/technology/gate_libraries.html#sidb-bestagon-library)
 
 File formats:
 
