@@ -15,6 +15,7 @@
 
 namespace fiction_experiments
 {
+
 // clang-format off
 
 /* Trindade et al. 2016 benchmarks */
@@ -60,7 +61,7 @@ static const char* benchmarks[] = {
 
 std::vector<std::string> trindade16_benchmarks(uint64_t selection = trindade16)
 {
-    std::vector<std::string> result;
+    std::vector<std::string> result{};
     for (uint32_t i = 0u; i < 7u; ++i)
     {
         if ((selection >> i) & 1)
@@ -68,32 +69,35 @@ std::vector<std::string> trindade16_benchmarks(uint64_t selection = trindade16)
             result.emplace_back(benchmarks[i]);
         }
     }
+
     return result;
 }
 
 std::vector<std::string> fontes18_benchmarks(uint64_t selection = fontes18)
 {
-    std::vector<std::string> result;
-    for (uint32_t i = 7u; i < 17u; ++i)
+    std::vector<std::string> result{};
+    for (uint32_t i = 7u; i < 23u; ++i)
     {
         if ((selection >> i) & 1)
         {
             result.emplace_back(benchmarks[i]);
         }
     }
+
     return result;
 }
 
 std::vector<std::string> all_benchmarks(uint64_t selection = all)
 {
-    std::vector<std::string> result;
-    for (uint32_t i = 0u; i < 17u; ++i)
+    std::vector<std::string> result{};
+    for (uint32_t i = 0u; i < 23u; ++i)
     {
         if ((selection >> i) & 1)
         {
             result.emplace_back(benchmarks[i]);
         }
     }
+
     return result;
 }
 
