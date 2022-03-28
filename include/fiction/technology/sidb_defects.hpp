@@ -33,7 +33,7 @@ enum class sidb_defect_type
  * @param defect Defect type to check.
  * @return True iff defect is charged.
  */
-[[nodiscard]] constexpr static bool is_charged_defect(const sidb_defect_type defect) noexcept
+[[nodiscard]] static constexpr bool is_charged_defect(const sidb_defect_type defect) noexcept
 {
     return defect == sidb_defect_type::DB || defect == sidb_defect_type::SI_VACANCY;
 }
@@ -45,10 +45,30 @@ enum class sidb_defect_type
  * @param defect Defect type to check.
  * @return True iff defect is not charged.
  */
-[[nodiscard]] constexpr static bool is_neutral_defect(const sidb_defect_type defect) noexcept
+[[nodiscard]] static constexpr bool is_neutral_defect(const sidb_defect_type defect) noexcept
 {
     return !is_charged_defect(defect) && defect != sidb_defect_type::NONE;
 }
+/**
+ * Horizontal distance to keep from charged SiDB defects. The value is to be understood as the number of DB positions
+ * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
+ */
+static constexpr const uint16_t sidb_charged_defect_horizontal_spacing = 3u;
+/**
+ * Vertical distance to keep from charged SiDB defects. The value is to be understood as the number of DB positions
+ * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
+ */
+static constexpr const uint16_t sidb_charged_defect_vertical_spacing = 3u;
+/**
+ * Horizontal distance to keep from neutral SiDB defects. The value is to be understood as the number of DB positions
+ * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
+ */
+static constexpr const uint16_t sidb_neutral_defect_horizontal_spacing = 1u;
+/**
+ * Vertical distance to keep from neutral SiDB defects. The value is to be understood as the number of DB positions
+ * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
+ */
+static constexpr const uint16_t sidb_neutral_defect_vertical_spacing = 0u;
 
 }  // namespace fiction
 
