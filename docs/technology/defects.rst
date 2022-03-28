@@ -9,7 +9,6 @@ SiDB Defects
 **Header:** ``fiction/technology/sidb_defects.hpp``
 
 .. doxygenenum:: fiction::sidb_defect_type
-   :members:
 
 .. doxygenfunction:: fiction::is_charged_defect
 .. doxygenfunction:: fiction::is_neutral_defect
