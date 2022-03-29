@@ -126,16 +126,23 @@ TEMPLATE_TEST_CASE(
         defect_layout.assign_sidb_defect({5, 5}, sidb_defect_type::SI_VACANCY);
 
         CHECK(defect_layout.affected_sidbs({5, 4}) ==
-              std::set<coordinate<TestType>>{{2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2}, {2, 3}, {3, 3},
-                                             {4, 3}, {5, 3}, {6, 3}, {7, 3}, {8, 3}, {2, 4}, {3, 4}, {4, 4}, {5, 4},
-                                             {6, 4}, {7, 4}, {8, 4}, {2, 5}, {3, 5}, {4, 5}, {5, 5}, {6, 5}, {7, 5},
-                                             {8, 5}, {2, 6}, {3, 6}, {4, 6}, {5, 6}, {6, 6}, {7, 6}, {8, 6}});
+              decltype(defect_layout.affected_sidbs({5, 4})){
+                  {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2}, {2, 3}, {3, 3}, {4, 3}, {5, 3}, {6, 3},
+                  {7, 3}, {8, 3}, {2, 4}, {3, 4}, {4, 4}, {5, 4}, {6, 4}, {7, 4}, {8, 4}, {2, 5}, {3, 5}, {4, 5},
+                  {5, 5}, {6, 5}, {7, 5}, {8, 5}, {2, 6}, {3, 6}, {4, 6}, {5, 6}, {6, 6}, {7, 6}, {8, 6}});
 
         CHECK(defect_layout.affected_sidbs({5, 5}) ==
-              std::set<coordinate<TestType>>{{2, 3}, {3, 3}, {4, 3}, {5, 3}, {6, 3}, {7, 3}, {8, 3}, {2, 4}, {3, 4},
-                                             {4, 4}, {5, 4}, {6, 4}, {7, 4}, {8, 4}, {2, 5}, {3, 5}, {4, 5}, {5, 5},
-                                             {6, 5}, {7, 5}, {8, 5}, {2, 6}, {3, 6}, {4, 6}, {5, 6}, {6, 6}, {7, 6},
-                                             {8, 6}, {2, 7}, {3, 7}, {4, 7}, {5, 7}, {6, 7}, {7, 7}, {8, 7}});
+              decltype(defect_layout.affected_sidbs({5, 5})){
+                  {2, 3}, {3, 3}, {4, 3}, {5, 3}, {6, 3}, {7, 3}, {8, 3}, {2, 4}, {3, 4}, {4, 4}, {5, 4}, {6, 4},
+                  {7, 4}, {8, 4}, {2, 5}, {3, 5}, {4, 5}, {5, 5}, {6, 5}, {7, 5}, {8, 5}, {2, 6}, {3, 6}, {4, 6},
+                  {5, 6}, {6, 6}, {7, 6}, {8, 6}, {2, 7}, {3, 7}, {4, 7}, {5, 7}, {6, 7}, {7, 7}, {8, 7}});
+
+        CHECK(defect_layout.all_affected_sidbs() ==
+              decltype(defect_layout.all_affected_sidbs()){
+                  {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2}, {2, 3}, {3, 3}, {4, 3}, {5, 3},
+                  {6, 3}, {7, 3}, {8, 3}, {2, 4}, {3, 4}, {4, 4}, {5, 4}, {6, 4}, {7, 4}, {8, 4}, {2, 5},
+                  {3, 5}, {4, 5}, {5, 5}, {6, 5}, {7, 5}, {8, 5}, {2, 6}, {3, 6}, {4, 6}, {5, 6}, {6, 6},
+                  {7, 6}, {8, 6}, {2, 7}, {3, 7}, {4, 7}, {5, 7}, {6, 7}, {7, 7}, {8, 7}});
     }
     SECTION("neutral defects")
     {
@@ -143,9 +150,14 @@ TEMPLATE_TEST_CASE(
         defect_layout.assign_sidb_defect({5, 4}, sidb_defect_type::SILOXANE);
         defect_layout.assign_sidb_defect({5, 5}, sidb_defect_type::SILOXANE);
 
-        CHECK(defect_layout.affected_sidbs({5, 4}) == std::set<coordinate<TestType>>{{4, 4}, {5, 4}, {6, 4}});
+        CHECK(defect_layout.affected_sidbs({5, 4}) ==
+              decltype(defect_layout.affected_sidbs({5, 4})){{4, 4}, {5, 4}, {6, 4}});
 
-        CHECK(defect_layout.affected_sidbs({5, 5}) == std::set<coordinate<TestType>>{{4, 5}, {5, 5}, {6, 5}});
+        CHECK(defect_layout.affected_sidbs({5, 5}) ==
+              decltype(defect_layout.affected_sidbs({5, 5})){{4, 5}, {5, 5}, {6, 5}});
+
+        CHECK(defect_layout.all_affected_sidbs() ==
+              decltype(defect_layout.all_affected_sidbs()){{4, 4}, {5, 4}, {6, 4}, {4, 5}, {5, 5}, {6, 5}});
     }
 }
 
@@ -168,14 +180,21 @@ TEMPLATE_TEST_CASE(
         defect_layout.assign_sidb_defect({0, 5}, sidb_defect_type::SI_VACANCY);
 
         CHECK(defect_layout.affected_sidbs({5, 0}) ==
-              std::set<coordinate<TestType>>{{2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0},
-                                             {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1},
-                                             {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2}});
+              decltype(defect_layout.affected_sidbs({5, 0})){{2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0},
+                                                             {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1},
+                                                             {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2}});
 
         CHECK(defect_layout.affected_sidbs({0, 5}) ==
-              std::set<coordinate<TestType>>{{0, 3}, {1, 3}, {2, 3}, {3, 3}, {0, 4}, {1, 4}, {2, 4},
-                                             {3, 4}, {0, 5}, {1, 5}, {2, 5}, {3, 5}, {0, 6}, {1, 6},
-                                             {2, 6}, {3, 6}, {0, 7}, {1, 7}, {2, 7}, {3, 7}});
+              decltype(defect_layout.affected_sidbs({0, 5})){{0, 3}, {1, 3}, {2, 3}, {3, 3}, {0, 4}, {1, 4}, {2, 4},
+                                                             {3, 4}, {0, 5}, {1, 5}, {2, 5}, {3, 5}, {0, 6}, {1, 6},
+                                                             {2, 6}, {3, 6}, {0, 7}, {1, 7}, {2, 7}, {3, 7}});
+
+        CHECK(defect_layout.all_affected_sidbs() ==
+              decltype(defect_layout.all_affected_sidbs()){
+                  {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {2, 1}, {3, 1}, {4, 1}, {5, 1},
+                  {6, 1}, {7, 1}, {8, 1}, {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2}, {0, 3},
+                  {1, 3}, {2, 3}, {3, 3}, {0, 4}, {1, 4}, {2, 4}, {3, 4}, {0, 5}, {1, 5}, {2, 5}, {3, 5},
+                  {0, 6}, {1, 6}, {2, 6}, {3, 6}, {0, 7}, {1, 7}, {2, 7}, {3, 7}});
     }
     SECTION("neutral defects")
     {
@@ -183,8 +202,12 @@ TEMPLATE_TEST_CASE(
         defect_layout.assign_sidb_defect({5, 0}, sidb_defect_type::SILOXANE);
         defect_layout.assign_sidb_defect({0, 5}, sidb_defect_type::SILOXANE);
 
-        CHECK(defect_layout.affected_sidbs({5, 0}) == std::set<coordinate<TestType>>{{4, 0}, {5, 0}, {6, 0}});
+        CHECK(defect_layout.affected_sidbs({5, 0}) ==
+              decltype(defect_layout.affected_sidbs({5, 0})){{4, 0}, {5, 0}, {6, 0}});
 
-        CHECK(defect_layout.affected_sidbs({0, 5}) == std::set<coordinate<TestType>>{{0, 5}, {1, 5}});
+        CHECK(defect_layout.affected_sidbs({0, 5}) == decltype(defect_layout.affected_sidbs({0, 5})){{0, 5}, {1, 5}});
+
+        CHECK(defect_layout.all_affected_sidbs() ==
+              decltype(defect_layout.all_affected_sidbs()){{4, 0}, {5, 0}, {6, 0}, {0, 5}, {1, 5}});
     }
 }

@@ -129,6 +129,27 @@ class sidb_surface<Lyt, false> : public Lyt
 
         return influenced_sidbs;
     }
+    /**
+     * Returns all SiDB positions affected by any defect on the surface. This function relies on the defect_extent
+     * function defined in sidb_defects.hpp that computes the extent of charged and neutral defect types.
+     *
+     * If the given surface is defect-free, the empty set is returned.
+     *
+     * @return All SiDB positions affected by any defect on the surface.
+     */
+    [[nodiscard]] std::set<coordinate<Lyt>> all_affected_sidbs() const noexcept
+    {
+        std::set<coordinate<Lyt>> influenced_sidbs{};
+
+        std::for_each(strg->defective_coordinates.cbegin(), strg->defective_coordinates.cend(),
+                      [&influenced_sidbs, this](const auto& it)
+                      {
+                          const auto& [c, d] = it;
+                          influenced_sidbs.merge(affected_sidbs(c));
+                      });
+
+        return influenced_sidbs;
+    }
 
   private:
     storage strg;
