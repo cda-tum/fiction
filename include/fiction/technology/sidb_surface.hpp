@@ -9,6 +9,7 @@
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 
+#include <set>
 #include <type_traits>
 #include <unordered_map>
 
@@ -96,6 +97,37 @@ class sidb_surface<Lyt, false> : public Lyt
         {
             return sidb_defect_type::NONE;
         }
+    }
+    /**
+     * Returns all SiDB positions affected by the defect at the given coordinate. This function relies on the
+     * defect_extent function defined in sidb_defects.hpp that computes the extent of charged and neutral defect types.
+     *
+     * If the given coordinate is defect-free, the empty set is returned.
+     *
+     * @param c Coordinate whose defect extent is to be determined.
+     * @return All SiDB positions affected by the defect at coordinate c.
+     */
+    [[nodiscard]] std::set<coordinate<Lyt>> affected_sidbs(const coordinate<Lyt>& c) const noexcept
+    {
+        std::set<coordinate<Lyt>> influenced_sidbs{};
+
+        if (const auto d = get_sidb_defect(c); d != sidb_defect_type::NONE)
+        {
+            const auto& [horizontal_extent, vertical_extent] = defect_extent(d);
+
+            for (auto y = c.y - vertical_extent; y <= c.y + vertical_extent; ++y)
+            {
+                for (auto x = c.x - horizontal_extent; x <= c.x + horizontal_extent; ++x)
+                {
+                    if (const auto affected = coordinate<Lyt>{x, y, c.z}; Lyt::is_within_bounds(affected))
+                    {
+                        influenced_sidbs.insert(affected);
+                    }
+                }
+            }
+        }
+
+        return influenced_sidbs;
     }
 
   private:

@@ -106,3 +106,85 @@ TEMPLATE_TEST_CASE(
     defect_layout.foreach_coordinate([&defect_layout](const auto& c)
                                      { CHECK(defect_layout.get_sidb_defect(c) == sidb_defect_type::NONE); });
 }
+
+TEMPLATE_TEST_CASE(
+    "Charged and neutral defect extent", "[sidb-surface]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+{
+    TestType lyt{aspect_ratio<TestType>{11, 9}};
+
+    sidb_surface<TestType> defect_layout{lyt};
+
+    SECTION("charged defects")
+    {
+        // assign defects
+        defect_layout.assign_sidb_defect({5, 4}, sidb_defect_type::SI_VACANCY);
+        defect_layout.assign_sidb_defect({5, 5}, sidb_defect_type::SI_VACANCY);
+
+        CHECK(defect_layout.affected_sidbs({5, 4}) ==
+              std::set<coordinate<TestType>>{{2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2}, {2, 3}, {3, 3},
+                                             {4, 3}, {5, 3}, {6, 3}, {7, 3}, {8, 3}, {2, 4}, {3, 4}, {4, 4}, {5, 4},
+                                             {6, 4}, {7, 4}, {8, 4}, {2, 5}, {3, 5}, {4, 5}, {5, 5}, {6, 5}, {7, 5},
+                                             {8, 5}, {2, 6}, {3, 6}, {4, 6}, {5, 6}, {6, 6}, {7, 6}, {8, 6}});
+
+        CHECK(defect_layout.affected_sidbs({5, 5}) ==
+              std::set<coordinate<TestType>>{{2, 3}, {3, 3}, {4, 3}, {5, 3}, {6, 3}, {7, 3}, {8, 3}, {2, 4}, {3, 4},
+                                             {4, 4}, {5, 4}, {6, 4}, {7, 4}, {8, 4}, {2, 5}, {3, 5}, {4, 5}, {5, 5},
+                                             {6, 5}, {7, 5}, {8, 5}, {2, 6}, {3, 6}, {4, 6}, {5, 6}, {6, 6}, {7, 6},
+                                             {8, 6}, {2, 7}, {3, 7}, {4, 7}, {5, 7}, {6, 7}, {7, 7}, {8, 7}});
+    }
+    SECTION("neutral defects")
+    {
+        // assign defects
+        defect_layout.assign_sidb_defect({5, 4}, sidb_defect_type::SILOXANE);
+        defect_layout.assign_sidb_defect({5, 5}, sidb_defect_type::SILOXANE);
+
+        CHECK(defect_layout.affected_sidbs({5, 4}) == std::set<coordinate<TestType>>{{4, 4}, {5, 4}, {6, 4}});
+
+        CHECK(defect_layout.affected_sidbs({5, 5}) == std::set<coordinate<TestType>>{{4, 5}, {5, 5}, {6, 5}});
+    }
+}
+
+TEMPLATE_TEST_CASE(
+    "Charged and neutral defect extent at layout edges", "[sidb-surface]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+{
+    TestType lyt{aspect_ratio<TestType>{11, 9}};
+
+    sidb_surface<TestType> defect_layout{lyt};
+
+    SECTION("charged defects")
+    {
+        // assign defects
+        defect_layout.assign_sidb_defect({5, 0}, sidb_defect_type::SI_VACANCY);
+        defect_layout.assign_sidb_defect({0, 5}, sidb_defect_type::SI_VACANCY);
+
+        CHECK(defect_layout.affected_sidbs({5, 0}) ==
+              std::set<coordinate<TestType>>{{2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0},
+                                             {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1},
+                                             {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2}});
+
+        CHECK(defect_layout.affected_sidbs({0, 5}) ==
+              std::set<coordinate<TestType>>{{0, 3}, {1, 3}, {2, 3}, {3, 3}, {0, 4}, {1, 4}, {2, 4},
+                                             {3, 4}, {0, 5}, {1, 5}, {2, 5}, {3, 5}, {0, 6}, {1, 6},
+                                             {2, 6}, {3, 6}, {0, 7}, {1, 7}, {2, 7}, {3, 7}});
+    }
+    SECTION("neutral defects")
+    {
+        // assign defects
+        defect_layout.assign_sidb_defect({5, 0}, sidb_defect_type::SILOXANE);
+        defect_layout.assign_sidb_defect({0, 5}, sidb_defect_type::SILOXANE);
+
+        CHECK(defect_layout.affected_sidbs({5, 0}) == std::set<coordinate<TestType>>{{4, 0}, {5, 0}, {6, 0}});
+
+        CHECK(defect_layout.affected_sidbs({0, 5}) == std::set<coordinate<TestType>>{{0, 5}, {1, 5}});
+    }
+}

@@ -18,6 +18,8 @@ SiDB Defects
 .. doxygenvariable:: fiction::sidb_neutral_defect_horizontal_spacing
 .. doxygenvariable:: fiction::sidb_neutral_defect_vertical_spacing
 
+.. doxygenfunction:: fiction::defect_extent
+
 
 **Header:** ``fiction/technology/sidb_surface.hpp``
 

@@ -5,6 +5,8 @@
 #ifndef FICTION_SIDB_DEFECTS_HPP
 #define FICTION_SIDB_DEFECTS_HPP
 
+#include <utility>
+
 namespace fiction
 {
 
@@ -58,7 +60,7 @@ static constexpr const uint16_t sidb_charged_defect_horizontal_spacing = 3u;
  * Vertical distance to keep from charged SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
-static constexpr const uint16_t sidb_charged_defect_vertical_spacing = 3u;
+static constexpr const uint16_t sidb_charged_defect_vertical_spacing = 2u;
 /**
  * Horizontal distance to keep from neutral SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
@@ -69,6 +71,26 @@ static constexpr const uint16_t sidb_neutral_defect_horizontal_spacing = 1u;
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
 static constexpr const uint16_t sidb_neutral_defect_vertical_spacing = 0u;
+/**
+ * Returns the extent of a defect type as a pair of SiDB distances in horizontal and vertical direction. If defect is
+ * the NONE defect type, {0, 0} is returned.
+ *
+ * @param defect Defect type to evaluate.
+ * @return Number of horizontal and vertical SiDBs that are affected by the given defect type.
+ */
+[[nodiscard]] static constexpr std::pair<uint16_t, uint16_t> defect_extent(const sidb_defect_type defect) noexcept
+{
+    if (is_charged_defect(defect))
+    {
+        return {sidb_charged_defect_horizontal_spacing, sidb_charged_defect_vertical_spacing};
+    }
+    else if (is_neutral_defect(defect))
+    {
+        return {sidb_neutral_defect_horizontal_spacing, sidb_neutral_defect_vertical_spacing};
+    }
+
+    return {};
+}
 
 }  // namespace fiction
 
