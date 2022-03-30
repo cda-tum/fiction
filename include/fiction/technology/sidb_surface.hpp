@@ -115,9 +115,9 @@ class sidb_surface<Lyt, false> : public Lyt
         {
             const auto [horizontal_extent, vertical_extent] = defect_extent(d);
 
-            for (auto y = c.y - vertical_extent; y <= c.y + vertical_extent; ++y)
+            for (auto y = static_cast<int64_t>(c.y - vertical_extent); y <= c.y + vertical_extent; ++y)
             {
-                for (auto x = c.x - horizontal_extent; x <= c.x + horizontal_extent; ++x)
+                for (auto x = static_cast<int64_t>(c.x - horizontal_extent); x <= c.x + horizontal_extent; ++x)
                 {
                     if (const auto affected = coordinate<Lyt>{x, y, c.z}; Lyt::is_within_bounds(affected))
                     {
