@@ -113,7 +113,7 @@ class sidb_surface<Lyt, false> : public Lyt
 
         if (const auto d = get_sidb_defect(c); d != sidb_defect_type::NONE)
         {
-            const auto& [horizontal_extent, vertical_extent] = defect_extent(d);
+            const auto [horizontal_extent, vertical_extent] = defect_extent(d);
 
             for (auto y = c.y - vertical_extent; y <= c.y + vertical_extent; ++y)
             {
