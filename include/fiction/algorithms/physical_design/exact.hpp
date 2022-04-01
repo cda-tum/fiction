@@ -2336,13 +2336,13 @@ class exact_impl
                 for (const auto& tt : functions)
                 {
                     network.foreach_node(
-                        [this, &tt, &tile](const auto& n)
+                        [this, &tt, t = tile](const auto& n)
                         {
                             if (!skip_const_or_io_node(n))
                             {
                                 if (kitty::equal(tt, network.node_function(n)))
                                 {
-                                    solver->add(not get_tn(tile, n));
+                                    solver->add(not get_tn(t, n));
                                 }
                             }
                         });
@@ -2351,11 +2351,11 @@ class exact_impl
                     if (kitty::equal(tt, identity))
                     {
                         foreach_edge(network,
-                                     [this, &tile](const auto& e)
+                                     [this, t = tile](const auto& e)
                                      {
                                          if (!skip_const_or_io_edge(e))
                                          {
-                                             solver->add(not get_te(tile, e));
+                                             solver->add(not get_te(t, e));
                                          }
                                      });
                     }
