@@ -115,8 +115,8 @@ class sidb_surface<Lyt, false> : public Lyt
         {
             const auto [horizontal_extent, vertical_extent] = defect_extent(d);
 
-            for (auto y = static_cast<int64_t>(c.y - vertical_extent);
-                 y <= static_cast<int64_t>(c.y + vertical_extent); ++y)
+            for (auto y = static_cast<int64_t>(c.y - vertical_extent); y <= static_cast<int64_t>(c.y + vertical_extent);
+                 ++y)
             {
                 for (auto x = static_cast<int64_t>(c.x - horizontal_extent);
                      x <= static_cast<int64_t>(c.x + horizontal_extent); ++x)

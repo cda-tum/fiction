@@ -133,6 +133,45 @@ exact_physical_design_params<Lyt>&& topolinano(exact_physical_design_params<Lyt>
 }
 
 template <typename Lyt>
+exact_physical_design_params<Lyt>&& blacklist_wire(const tile<Lyt>& t, exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    // truth table representing the identity
+    kitty::dynamic_truth_table      identity{1};
+    static constexpr const uint64_t lit_id = 0x2;
+    kitty::create_from_words(identity, &lit_id, &lit_id + 1);
+
+    ps.black_list[t].push_back(identity);
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& blacklist_and(const tile<Lyt>& t, exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    // truth table representing the AND function
+    kitty::dynamic_truth_table      conjunction{2};
+    static constexpr const uint64_t lit_and = 0x8;
+    kitty::create_from_words(conjunction, &lit_and, &lit_and + 1);
+
+    ps.black_list[t].push_back(conjunction);
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& blacklist_or(const tile<Lyt>& t, exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    // truth table representing the OR function
+    kitty::dynamic_truth_table      disjunction{2};
+    static constexpr const uint64_t lit_or = 0xe;
+    kitty::create_from_words(disjunction, &lit_or, &lit_or + 1);
+
+    ps.black_list[t].push_back(disjunction);
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
 exact_physical_design_params<Lyt>&& async(const std::size_t t, exact_physical_design_params<Lyt>&& ps) noexcept
 {
     ps.num_threads = t;
@@ -316,6 +355,20 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
                          use(desynchronize(configuration<cart_gate_clk_lyt>()))),
                      2);
         }
+    }
+    SECTION("Blacklist gates & wires")
+    {
+        const auto lyt = generate_layout<cart_gate_clk_lyt>(
+            blueprints::and_or_network<technology_network>(),
+            twoddwave(crossings(blacklist_and(
+                {2, 2},
+                blacklist_wire({2, 2},
+                               blacklist_or({1, 2}, blacklist_wire({2, 0}, configuration<cart_gate_clk_lyt>())))))));
+
+        CHECK(!lyt.is_and(lyt.get_node({2, 2})));
+        CHECK(!lyt.is_wire(lyt.get_node({2, 2})));
+        CHECK(!lyt.is_or(lyt.get_node({1, 2})));
+        CHECK(!lyt.is_wire(lyt.get_node({2, 0})));
     }
     //    SECTION("Asynchronicity")
     //    {

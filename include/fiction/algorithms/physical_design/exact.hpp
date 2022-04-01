@@ -18,6 +18,8 @@
 #include "fiction/utils/placement_utils.hpp"
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
+#include <kitty/operations.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -38,11 +40,13 @@
 #include <cstdint>
 #include <functional>
 #include <future>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <optional>
 #include <set>
 #include <thread>
+#include <unordered_map>
 #include <vector>
 
 namespace fiction
@@ -74,7 +78,7 @@ struct exact_physical_design_params
     /**
      * If set to > 0, only aspect ratios with the given number of tiles will be investigated.
      */
-    uint16_t fixed_size = 0ul;
+    uint16_t fixed_size = 0u;
     /**
      * Number of threads to use for exploring the possible aspect ratios. NOTE: THIS IS AN UNSTABLE BETA FEATURE.
      */
@@ -119,6 +123,12 @@ struct exact_physical_design_params
      * Technology-specific constraints that are only to be added for a certain target technology.
      */
     technology_constraints technology_specifics = technology_constraints::NONE;
+    /**
+     * Maps tiles to blacklisted gate types via their truth tables.
+     */
+    std::unordered_map<tile<Lyt>, std::vector<kitty::dynamic_truth_table>> black_list{};
+
+    // TODO banned tiles for certain gates and orientations (maybe via ports)?
 };
 /**
  * Statistics.
@@ -2311,6 +2321,48 @@ class exact_impl
             // more target technology constraints go here
         }
         /**
+         * Adds constraints to the solver to enforce blacklisting of certain gates.
+         */
+        void black_list_gates()
+        {
+            // the identity function as a truth table
+            kitty::dynamic_truth_table      identity{1};
+            static constexpr const uint64_t lit_id = 0x2;
+            kitty::create_from_words(identity, &lit_id, &lit_id + 1);
+
+            // for each tile-functions pair
+            for (const auto& [tile, functions] : params.black_list)
+            {
+                for (const auto& tt : functions)
+                {
+                    network.foreach_node(
+                        [this, &tt, &tile](const auto& n)
+                        {
+                            if (!skip_const_or_io_node(n))
+                            {
+                                if (kitty::equal(tt, network.node_function(n)))
+                                {
+                                    solver->add(not get_tn(tile, n));
+                                }
+                            }
+                        });
+
+                    // truth table represents the identity; wires need to be additionally excluded
+                    if (kitty::equal(tt, identity))
+                    {
+                        foreach_edge(network,
+                                     [this, &tile](const auto& e)
+                                     {
+                                         if (!skip_const_or_io_edge(e))
+                                         {
+                                             solver->add(not get_te(tile, e));
+                                         }
+                                     });
+                    }
+                }
+            }
+        }
+        /**
          * Adds constraints to the given optimize to minimize the number of crossing tiles to use.
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
@@ -2432,6 +2484,8 @@ class exact_impl
 
             // technology-specific constraints
             technology_specific_constraints();
+            // blacklisting constraints
+            black_list_gates();
 
             // symmetry breaking constraints
             prevent_insufficiencies();
