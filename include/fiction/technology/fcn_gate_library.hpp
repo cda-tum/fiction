@@ -6,8 +6,13 @@
 #define FICTION_FCN_GATE_LIBRARY_HPP
 
 #include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/utils/array_utils.hpp"
+#include "fiction/utils/hash.hpp"
+
+#include <kitty/dynamic_truth_table.hpp>
+#include <kitty/hash.hpp>
 
 #include <array>
 #include <initializer_list>
@@ -106,6 +111,11 @@ class fcn_gate_library
      * Each gate is thus a cell_list of cell types defined in Technology.
      */
     using fcn_gate = cell_list<typename Technology::cell_type>;
+    /**
+     * Maps FCN gate implementations to respective truth tables.
+     */
+    using gate_functions =
+        std::unordered_map<kitty::dynamic_truth_table, fcn_gate, kitty::hash<kitty::dynamic_truth_table>>;
     /**
      * Gate libraries should not be instantiated but used as static objects.
      */

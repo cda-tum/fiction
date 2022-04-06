@@ -11,6 +11,7 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/array_utils.hpp"
 #include "fiction/utils/hash.hpp"
+#include "fiction/utils/truth_table_utils.hpp"
 
 #include <fmt/format.h>
 
@@ -129,6 +130,20 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
         }
 
         throw unsupported_gate_type_exception(t);
+    }
+
+    static gate_functions get_functional_implementations() noexcept
+    {
+        static const gate_functions implementations{{{create_id_tt(), straight_wire},
+                                                     {create_not_tt(), straight_inverter},
+                                                     {create_and_tt(), conjunction},
+                                                     {create_or_tt(), disjunction},
+                                                     {create_nand_tt(), negated_conjunction},
+                                                     {create_nor_tt(), negated_disjunction},
+                                                     {create_xor_tt(), exclusive_disjunction},
+                                                     {create_xnor_tt(), negated_exclusive_disjunction}}};
+
+        return implementations;
     }
 
   private:

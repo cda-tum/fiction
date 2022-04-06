@@ -718,6 +718,21 @@ inline constexpr bool has_is_empty_v = has_is_empty<Lyt>::value;
  * Gate libraries
  */
 
+#pragma region has_get_functional_implementations
+template <class Lib, class = void>
+struct has_get_functional_implementations : std::false_type
+{};
+
+template <class Lib>
+struct has_get_functional_implementations<
+    Lib, std::enable_if_t<std::is_same_v<decltype(std::declval<Lib>().get_functional_implementations()),
+                                         typename Lib::gate_functions>>> : std::true_type
+{};
+
+template <class Lib>
+inline constexpr bool has_get_functional_implementations_v = has_get_functional_implementations<Lib>::value;
+#pragma endregion
+
 #pragma region has_post_layout_optimization
 template <class Lib, class Lyt, class = void>
 struct has_post_layout_optimization : std::false_type
@@ -726,7 +741,7 @@ struct has_post_layout_optimization : std::false_type
 template <class Lib, class Lyt>
 struct has_post_layout_optimization<
     Lib, Lyt,
-    std::enable_if_t<is_cell_level_layout_v<Lyt>,
+    std::enable_if_t<std::conjunction_v<is_cell_level_layout<Lyt>, std::is_same<technology<Lib>, technology<Lyt>>>,
                      std::void_t<decltype(std::declval<Lib>().post_layout_optimization(std::declval<Lyt>))>>>
         : std::true_type
 {};
