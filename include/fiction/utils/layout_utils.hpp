@@ -31,7 +31,8 @@ template <typename Lyt>
     return static_cast<uint8_t>(lyt.template adjacent_coordinates<std::set<coordinate<Lyt>>>(c).size());
 }
 /**
- * Converts a relative cell position within a tile to an absolute cell position within a layout.
+ * Converts a relative cell position within a tile to an absolute cell position within a layout. To compute the absolute
+ * position, the layout topology is taken into account.
  *
  * @tparam GateSizeX Horizontal tile size.
  * @tparam GateSizeY Vertical tile size.
@@ -59,7 +60,7 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Cel
     {
         absolute_c = {t.x * GateSizeX, t.y * GateSizeY, t.z};
     }
-    // Shifted Cartesian layouts
+    // shifted Cartesian layouts
     else if constexpr (is_shifted_cartesian_layout_v<GateLyt>)
     {
         if constexpr (has_horizontally_shifted_cartesian_orientation_v<GateLyt>)

@@ -19,6 +19,18 @@
 namespace fiction
 {
 
+/**
+ * Analyzes a given defective SiDB surface and matches it against gate tiles provided by a library. Any gate type that
+ * cannot be realized on a certain tile due to disturbances caused by defects gets blacklisted on said tile. The black
+ * list is then returned by this function.
+ *
+ * @tparam GateLibrary FCN gate library type to fetch the gate descriptions from.
+ * @tparam GateLyt Gate-level layout type that specifies the tiling of the SiDB surface.
+ * @tparam CellLyt Cell-level layout type that is underlying to the SiDB surface.
+ * @param gate_lyt Gate-level layout instance that specifies the aspect ratio.
+ * @param surface SiDB surface that instantiates the defects.
+ * @return A black list of gate functions associated with tiles.
+ */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
 std::unordered_map<tile<GateLyt>, std::vector<kitty::dynamic_truth_table>>
 sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surface) noexcept

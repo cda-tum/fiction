@@ -26,3 +26,7 @@ SiDB Defects
 .. doxygenclass:: fiction::sidb_surface
    :members:
 
+
+**Header:** ``fiction/technology/sidb_surface_analysis.hpp``
+
+.. doxygenfunction:: fiction::sidb_surface_analysis

@@ -30,12 +30,29 @@ Network Utils
 .. doxygenfunction:: fiction::inverse_levels
 
 
+Truth Table Utils
+-----------------
+
+**Header:** ``fiction/utils/truth_table_utils.hpp``
+
+.. doxygenfunction:: fiction::create_id_tt
+.. doxygenfunction:: fiction::create_not_tt
+.. doxygenfunction:: fiction::create_and_tt
+.. doxygenfunction:: fiction::create_or_tt
+.. doxygenfunction:: fiction::create_nand_tt
+.. doxygenfunction:: fiction::create_nor_tt
+.. doxygenfunction:: fiction::create_xor_tt
+.. doxygenfunction:: fiction::create_xnor_tt
+.. doxygenfunction:: fiction::create_maj_tt
+
+
 Layout Utils
 ------------
 
 **Header:** ``fiction/utils/layout_utils.hpp``
 
 .. doxygenfunction:: fiction::num_adjacent_coordinates
+.. doxygenfunction:: fiction::relative_to_absolute_cell_position
 
 
 Placement Utils

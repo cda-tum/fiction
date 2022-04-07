@@ -92,6 +92,16 @@ class unsupported_gate_orientation_exception : public std::exception
  * can optionally be provided if some cleanup or optimization is necessary on the cell-level layout after each gate has
  * been mapped.
  *
+ * Finally, a
+ *
+ * .. code-block:: c++
+ *
+ *    static gate_functions get_functional_implementations()
+ *
+ * can optionally be provided to allow reverse access to the gate structures by functional implementation. This
+ * interface is for example used to determine which gate types to blacklist on tiles in P&R algorithms by considering
+ * gate implementation.
+ *
  * @tparam Technology FCN technology type of the implementing gate library.
  * @tparam GateSizeX Tile size in x-dimension.
  * @tparam GateSizeY Tile size in y-dimension.
