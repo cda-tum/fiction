@@ -24,7 +24,7 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
 
     SECTION("MCS")
     {
-        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::MCS, 0, true}, &pst);
+        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::MCS, {}, {}, true}, &pst);
 
         REQUIRE(pst.coloring_verified.has_value());
         CHECK(pst.coloring_verified.value() == true);
@@ -33,7 +33,7 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
     }
     SECTION("DSATUR")
     {
-        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::DSATUR, 0, true}, &pst);
+        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::DSATUR, {}, {}, true}, &pst);
 
         REQUIRE(pst.coloring_verified.has_value());
         CHECK(pst.coloring_verified.value() == true);
@@ -42,7 +42,7 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
     }
     SECTION("LmXRLF")
     {
-        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::LMXRLF, 0, true}, &pst);
+        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::LMXRLF, {}, {}, true}, &pst);
 
         REQUIRE(pst.coloring_verified.has_value());
         CHECK(pst.coloring_verified.value() == true);
@@ -51,8 +51,8 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
     }
     SECTION("TabuCol")
     {
-        const auto coloring =
-            determine_vertex_coloring(graph, {graph_coloring_engine::TABUCOL, expected_chromatic_number, true}, &pst);
+        const auto coloring = determine_vertex_coloring(
+            graph, {graph_coloring_engine::TABUCOL, {}, {expected_chromatic_number}, true}, &pst);
 
         REQUIRE(pst.coloring_verified.has_value());
         CHECK(pst.coloring_verified.value() == true);
@@ -61,12 +61,37 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
     }
     SECTION("SAT")
     {
-        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::SAT, 0, true, {}, {{clique}}}, &pst);
+        determine_vertex_coloring_sat_params<Graph> sat_params{};
+        sat_params.cliques = {{clique}};
 
-        REQUIRE(pst.coloring_verified.has_value());
-        CHECK(pst.coloring_verified.value() == true);
-        CHECK(pst.chromatic_number == expected_chromatic_number);
-        CHECK(pst.color_frequency > 0);
+        SECTION("linear ascending search")
+        {
+            sat_params.sat_search_tactic = graph_coloring_sat_search_tactic::LINEARLY_ASCENDING;
+
+            const auto coloring =
+                determine_vertex_coloring(graph, {graph_coloring_engine::SAT, sat_params, {}, true}, &pst);
+
+            REQUIRE(pst.coloring_verified.has_value());
+            CHECK(pst.coloring_verified.value() == true);
+            CHECK(pst.chromatic_number == expected_chromatic_number);
+            CHECK(pst.color_frequency > 0);
+        }
+        SECTION("linear descending search")
+        {
+            sat_params.sat_search_tactic = graph_coloring_sat_search_tactic::LINEARLY_DESCENDING;
+
+            const auto coloring =
+                determine_vertex_coloring(graph, {graph_coloring_engine::SAT, sat_params, {}, true}, &pst);
+
+            REQUIRE(pst.coloring_verified.has_value());
+            CHECK(pst.coloring_verified.value() == true);
+            CHECK(pst.chromatic_number == expected_chromatic_number);
+            CHECK(pst.color_frequency > 0);
+        }
+        SECTION("binary search")
+        {
+            // TODO
+        }
     }
 }
 
@@ -79,7 +104,10 @@ TEST_CASE("Petersen graph", "[graph-coloring]")
     graph petersen_graph{};
 
     // create 10 vertices
-    for (std::size_t i = 0; i < 10; i++) { petersen_graph.insert_vertex(i, {}); }
+    for (std::size_t i = 0; i < 10; i++)
+    {
+        petersen_graph.insert_vertex(i, {});
+    }
 
     petersen_graph.insert_edge(0, 1, {});
     petersen_graph.insert_edge(0, 5, {});
@@ -108,7 +136,10 @@ TEST_CASE("Golomb graph", "[graph-coloring]")
     graph golomb_graph{};
 
     // create 10 vertices
-    for (std::size_t i = 0; i < 10; i++) { golomb_graph.insert_vertex(i, {}); }
+    for (std::size_t i = 0; i < 10; i++)
+    {
+        golomb_graph.insert_vertex(i, {});
+    }
 
     golomb_graph.insert_edge(0, 1, {});
     golomb_graph.insert_edge(0, 6, {});
@@ -141,7 +172,10 @@ TEST_CASE("Moser spindle", "[graph-coloring]")
     graph moser_spindle{};
 
     // create 7 vertices
-    for (std::size_t i = 0; i < 7; i++) { moser_spindle.insert_vertex(i, {}); }
+    for (std::size_t i = 0; i < 7; i++)
+    {
+        moser_spindle.insert_vertex(i, {});
+    }
 
     moser_spindle.insert_edge(0, 1, {});
     moser_spindle.insert_edge(0, 5, {});
@@ -228,7 +262,10 @@ TEST_CASE("String IDs (mostly a compile test)", "[graph-coloring]")
     graph c5{};
 
     // create 5 vertices
-    for (std::size_t i = 0; i < 5; i++) { c5.insert_vertex(std::to_string(i), {}); }
+    for (std::size_t i = 0; i < 5; i++)
+    {
+        c5.insert_vertex(std::to_string(i), {});
+    }
 
     c5.insert_edge("0", "1", {});
     c5.insert_edge("1", "2", {});

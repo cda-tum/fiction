@@ -103,9 +103,9 @@ class color_routing_impl
         }
 
         determine_vertex_coloring_params<::fiction::edge_intersection_graph<Lyt>> dvc_ps{};
-        dvc_ps.engine                      = ps.engine;
-        dvc_ps.cliques                     = pst.epg_stats.cliques;
-        dvc_ps.clique_size_color_frequency = true;
+        dvc_ps.engine                                 = ps.engine;
+        dvc_ps.sat_params.cliques                     = pst.epg_stats.cliques;
+        dvc_ps.sat_params.clique_size_color_frequency = true;
 
         const auto vertex_coloring = determine_vertex_coloring(edge_intersection_graph, dvc_ps, &pst.color_stats);
 
