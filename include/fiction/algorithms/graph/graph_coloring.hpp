@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <numeric>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -217,43 +218,83 @@ class sat_coloring_handler
     {
         for (std::size_t k = largest_clique->size(); k < graph.size_vertices() + 1; ++k)
         {
-            //            std::cout << fmt::format("Attempting to color with {} colors", k) << std::endl;
-
             if (const auto [sat, instance] = check_k_coloring(k); sat == bill::result::states::satisfiable)
             {
                 return {k, instance};
             }
         }
 
+        assert(false);
         return {};  // unreachable
     }
 
     k_instance determine_min_coloring_with_linearly_descending_search() const noexcept
     {
-        result_instance most_recent_sat_instance{};
+        k_instance most_recent_sat_instance{};
 
         for (std::size_t k = graph.size_vertices(); k >= largest_clique->size() - 1; --k)
         {
             if (const auto [sat, instance] = check_k_coloring(k); sat == bill::result::states::unsatisfiable)
             {
-                return {k + 1, most_recent_sat_instance.second};
+                return most_recent_sat_instance;
             }
             else
             {
-                most_recent_sat_instance = {sat, instance};
+                most_recent_sat_instance = {k, instance};
             }
         }
 
+        assert(false);
         return {};  // unreachable
     }
 
     k_instance determine_min_coloring_with_binary_search() const noexcept
     {
-        // TODO find a k by checking for 1, 2, 4, 8, 16, ... colors
-        // TODO Stop at smallest value 2^𝑘 such that G is 2^k-colorable
-        // TODO Binary search for Color(G) in range [2^𝑘−1, 2^k]
+        k_instance most_recent_sat_instance{};
 
-        return {};  // unreachable
+        std::size_t h{largest_clique->size()};
+
+        // exponentially ascending search
+        for (; h < graph.size_vertices() + 1; h *= 2)
+        {
+            if (const auto [sat, instance] = check_k_coloring(h); sat == bill::result::states::satisfiable)
+            {
+                most_recent_sat_instance = {h, instance};
+
+                // optimization to immediately return the found instance if h is equal to the clique size because the
+                // clique size represents a lower bound. Thus, no binary search needs to be conducted
+                if (h == largest_clique->size())
+                {
+                    return most_recent_sat_instance;
+                }
+
+                break;  // upper bound h has been found
+            }
+        }
+
+        // create a vector of h / 2 + 1 numbers
+        std::vector<std::size_t> potential_chromatic_numbers(h / 2 + 1);
+        // fill the vector with the range of numbers [2^(h-1), 2^h]
+        std::iota(potential_chromatic_numbers.begin(), potential_chromatic_numbers.end(), h / 2);
+
+        // binary search for the chromatic number, i.e., the lower bound of potential ones
+        std::lower_bound(potential_chromatic_numbers.cbegin(), potential_chromatic_numbers.cend(), h,
+                         [this, &most_recent_sat_instance](const auto& k1, [[maybe_unused]] const auto& k2)
+                         {
+                             if (const auto [sat, instance] = check_k_coloring(k1);
+                                 sat == bill::result::states::satisfiable)
+                             {
+                                 most_recent_sat_instance = {k1, instance};
+
+                                 return false;
+                             }
+                             else
+                             {
+                                 return true;
+                             }
+                         });
+
+        return most_recent_sat_instance;
     }
 
     vertex_coloring<Graph, Color> color() noexcept
@@ -292,6 +333,7 @@ class sat_coloring_handler
 
     determine_vertex_coloring_stats<Color>& pst;
 
+    // TODO handle the case that no clique is given
     const typename std::vector<std::vector<typename Graph::vertex_id_type>>::const_iterator largest_clique;
     /**
      * Alias for a vertex-color pair.
