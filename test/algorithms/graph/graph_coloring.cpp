@@ -132,7 +132,14 @@ TEST_CASE("Petersen graph", "[graph-coloring]")
     petersen_graph.insert_edge(7, 9, {});
     petersen_graph.insert_edge(8, 5, {});
 
-    check_coloring_engines(petersen_graph, 3, {0, 1});
+    SECTION("with clique information")
+    {
+        check_coloring_engines(petersen_graph, 3, {0, 1});
+    }
+    SECTION("without clique information")
+    {
+        check_coloring_engines(petersen_graph, 3, {});
+    }
 }
 
 TEST_CASE("Golomb graph", "[graph-coloring]")
@@ -168,7 +175,14 @@ TEST_CASE("Golomb graph", "[graph-coloring]")
     golomb_graph.insert_edge(7, 8, {});
     golomb_graph.insert_edge(8, 6, {});
 
-    check_coloring_engines(golomb_graph, 4, {0, 1});
+    SECTION("with clique information")
+    {
+        check_coloring_engines(golomb_graph, 4, {0, 1});
+    }
+    SECTION("without clique information")
+    {
+        check_coloring_engines(golomb_graph, 4);
+    }
 }
 
 TEST_CASE("Moser spindle", "[graph-coloring]")
@@ -197,7 +211,14 @@ TEST_CASE("Moser spindle", "[graph-coloring]")
     moser_spindle.insert_edge(4, 0, {});
     moser_spindle.insert_edge(4, 6, {});
 
-    check_coloring_engines(moser_spindle, 4, {0, 1, 5});
+    SECTION("with clique information")
+    {
+        check_coloring_engines(moser_spindle, 4, {0, 1, 5});
+    }
+    SECTION("without clique information")
+    {
+        check_coloring_engines(moser_spindle, 4);
+    }
 }
 
 template <typename Graph>

@@ -194,7 +194,8 @@ class sat_coloring_handler
             ps{p},
             pst{st},
             largest_clique{std::max_element(ps.cliques.cbegin(), ps.cliques.cend(),
-                                            [](const auto& c1, const auto& c2) { return c1.size() < c2.size(); })}
+                                            [](const auto& c1, const auto& c2) { return c1.size() < c2.size(); })},
+            q{largest_clique == ps.cliques.cend() ? 1 : (largest_clique->size() ? largest_clique->size() : 1)}
     {}
 
     result_instance check_k_coloring(const std::size_t k) const noexcept
@@ -216,7 +217,7 @@ class sat_coloring_handler
 
     k_instance determine_min_coloring_with_linearly_ascending_search() const noexcept
     {
-        for (std::size_t k = largest_clique->size(); k < graph.size_vertices() + 1; ++k)
+        for (std::size_t k = q; k < graph.size_vertices() + 1; ++k)
         {
             if (const auto [sat, instance] = check_k_coloring(k); sat == bill::result::states::satisfiable)
             {
@@ -232,7 +233,7 @@ class sat_coloring_handler
     {
         k_instance most_recent_sat_instance{};
 
-        for (std::size_t k = graph.size_vertices(); k >= largest_clique->size() - 1; --k)
+        for (std::size_t k = graph.size_vertices(); k >= q - 1; --k)
         {
             if (const auto [sat, instance] = check_k_coloring(k); sat == bill::result::states::unsatisfiable)
             {
@@ -252,7 +253,7 @@ class sat_coloring_handler
     {
         k_instance most_recent_sat_instance{};
 
-        std::size_t h{largest_clique->size()};
+        std::size_t h{q};
 
         // exponentially ascending search
         for (; h < graph.size_vertices() + 1; h *= 2)
@@ -263,7 +264,7 @@ class sat_coloring_handler
 
                 // optimization to immediately return the found instance if h is equal to the clique size because the
                 // clique size represents a lower bound. Thus, no binary search needs to be conducted
-                if (h == largest_clique->size())
+                if (h == q)
                 {
                     return most_recent_sat_instance;
                 }
@@ -327,14 +328,26 @@ class sat_coloring_handler
     }
 
   private:
+    /**
+     * A reference to the graph to be colored.
+     */
     const Graph& graph;
-
+    /**
+     * Parameters.
+     */
     const determine_vertex_coloring_sat_params<Graph> ps;
-
+    /**
+     * Statistics.
+     */
     determine_vertex_coloring_stats<Color>& pst;
-
-    // TODO handle the case that no clique is given
+    /**
+     * Iterator to the largest given clique.
+     */
     const typename std::vector<std::vector<typename Graph::vertex_id_type>>::const_iterator largest_clique;
+    /**
+     * Largest clique size.
+     */
+    const std::size_t q;
     /**
      * Alias for a vertex-color pair.
      */
@@ -473,12 +486,39 @@ class sat_coloring_handler
      */
     void symmetry_breaking(const solver_instance_ptr& instance) const
     {
-        // for each color index up to min(k, size of the largest clique)
-        for (std::size_t c = 0; c < std::min(instance->k, largest_clique->size()); ++c)
+        // if there is no clique given, this symmetry breaking cannot be performed
+        if (largest_clique != ps.cliques.cend() && !largest_clique->empty())
         {
-            // assign color c to vertex at index c
-            const auto v = (*largest_clique)[c];
-            instance->solver.add_clause(bill::lit_type{instance->variables[{v, c}], bill::positive_polarity});
+            // for each color index up to min(k, size of the largest clique)
+            for (std::size_t c = 0; c < std::min(instance->k, q); ++c)
+            {
+                // assign color c to vertex at index c
+                const auto v = (*largest_clique)[c];
+                instance->solver.add_clause(bill::lit_type{instance->variables[{v, c}], bill::positive_polarity});
+            }
+        }
+        else  // without clique information, at least the first vertex can be painted
+        {
+            std::find_if(
+                graph.begin_vertices(), graph.end_vertices(),
+                [this, &instance](const auto& vp)
+                {
+                    const auto& v = vp.first;
+                    // assign color 0 to any vertex
+                    instance->solver.add_clause(bill::lit_type{instance->variables[{v, 0}], bill::positive_polarity});
+
+                    std::find_if(graph.begin_adjacent(v), graph.end_adjacent(v),
+                                 [this, &instance](const auto& av)
+                                 {
+                                     // assign color 1 to an adjacent vertex
+                                     instance->solver.add_clause(
+                                         bill::lit_type{instance->variables[{av, 1}], bill::positive_polarity});
+
+                                     return true;  // abort loop after first iteration
+                                 });
+
+                    return true;  // abort loop after first iteration
+                });
         }
     }
 
