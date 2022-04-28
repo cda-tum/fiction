@@ -104,7 +104,7 @@ struct determine_vertex_coloring_sat_params
     /**
      * The SAT solver to use.
      */
-    bill::solvers sat_engine = bill::solvers::ghack;  // TODO make use of the solver toggle
+    bill::solvers sat_engine = bill::solvers::ghack;
     /**
      * The search tactic to apply.
      */
@@ -571,9 +571,50 @@ class graph_coloring_impl
         }
         else if (ps.engine == graph_coloring_engine::SAT)
         {
-            sat_coloring_handler<Graph, Color> sat_handler{graph, ps.sat_params, pst};
+            switch (ps.sat_params.sat_engine)
+            {
+                case bill::solvers::ghack:
+                {
+                    coloring =
+                        sat_coloring_handler<Graph, Color, bill::solvers::ghack>{graph, ps.sat_params, pst}.color();
+                    break;
+                }
+                case bill::solvers::glucose_41:
+                {
+                    coloring = sat_coloring_handler<Graph, Color, bill::solvers::glucose_41>{graph, ps.sat_params, pst}
+                                   .color();
+                    break;
+                }
+                case bill::solvers::bsat2:
+                {
+                    assert(false && "At the time of writing this code, bsat2 was not able to solve coloring instances "
+                                    "properly. It is, therefore, not recommended using it. If in the future an update "
+                                    "to bill and/or bsat2 has been published, feel free to remove this assertion.");
 
-            coloring = sat_handler.color();
+                    coloring =
+                        sat_coloring_handler<Graph, Color, bill::solvers::bsat2>{graph, ps.sat_params, pst}.color();
+                    break;
+                }
+#if !defined(BILL_WINDOWS_PLATFORM)
+                case bill::solvers::maple:
+                {
+                    coloring =
+                        sat_coloring_handler<Graph, Color, bill::solvers::maple>{graph, ps.sat_params, pst}.color();
+                    break;
+                }
+                case bill::solvers::bmcg:
+                {
+                    coloring =
+                        sat_coloring_handler<Graph, Color, bill::solvers::bmcg>{graph, ps.sat_params, pst}.color();
+                    break;
+                }
+#endif
+                default:
+                {
+                    coloring = sat_coloring_handler<Graph, Color>{graph, ps.sat_params, pst}.color();
+                    break;
+                }
+            }
         }
 
         if (ps.verify_coloring_after_computation)

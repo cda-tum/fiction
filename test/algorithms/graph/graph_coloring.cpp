@@ -17,8 +17,111 @@
 using namespace fiction;
 
 template <typename Graph>
-void check_coloring_engines(const Graph& graph, const std::size_t expected_chromatic_number,
-                            std::vector<typename Graph::vertex_id_type> clique = {})
+void check_statistics_with_exact_chromatic_number(const determine_vertex_coloring_stats<Graph>& pst,
+                                                  const std::size_t                             expected)
+{
+    REQUIRE(pst.coloring_verified.has_value());
+    CHECK(pst.coloring_verified.value() == true);
+    CHECK(pst.chromatic_number == expected);
+    CHECK(pst.color_frequency > 0);
+}
+template <typename Graph>
+void check_statistics_with_lower_bound_chromatic_number(const determine_vertex_coloring_stats<Graph>& pst,
+                                                        const std::size_t                             expected)
+{
+    REQUIRE(pst.coloring_verified.has_value());
+    CHECK(pst.coloring_verified.value() == true);
+    CHECK(pst.chromatic_number >= expected);
+    CHECK(pst.color_frequency > 0);
+}
+
+template <typename Graph>
+void check_sat_search_tactics(const Graph& graph, const std::size_t expected_chromatic_number,
+                              determine_vertex_coloring_sat_params<Graph> sat_params)
+{
+    determine_vertex_coloring_stats pst{};
+
+    SECTION("linear ascending search")
+    {
+        sat_params.sat_search_tactic = graph_coloring_sat_search_tactic::LINEARLY_ASCENDING;
+
+        const auto coloring =
+            determine_vertex_coloring(graph, {graph_coloring_engine::SAT, sat_params, {}, true}, &pst);
+
+        check_statistics_with_exact_chromatic_number(pst, expected_chromatic_number);
+    }
+    SECTION("linear descending search")
+    {
+        sat_params.sat_search_tactic = graph_coloring_sat_search_tactic::LINEARLY_DESCENDING;
+
+        const auto coloring =
+            determine_vertex_coloring(graph, {graph_coloring_engine::SAT, sat_params, {}, true}, &pst);
+
+        check_statistics_with_exact_chromatic_number(pst, expected_chromatic_number);
+    }
+    SECTION("binary search")
+    {
+        sat_params.sat_search_tactic = graph_coloring_sat_search_tactic::BINARY_SEARCH;
+
+        const auto coloring =
+            determine_vertex_coloring(graph, {graph_coloring_engine::SAT, sat_params, {}, true}, &pst);
+
+        check_statistics_with_exact_chromatic_number(pst, expected_chromatic_number);
+    }
+}
+
+template <typename Graph>
+void check_sat_coloring_engine(const Graph& graph, const std::size_t expected_chromatic_number,
+                               std::vector<typename Graph::vertex_id_type> clique = {})
+{
+    determine_vertex_coloring_sat_params<Graph> sat_params{};
+    sat_params.cliques = {{clique}};
+
+    SECTION("SAT")
+    {
+        SECTION("ghack")
+        {
+            sat_params.sat_engine = bill::solvers::ghack;
+
+            check_sat_search_tactics(graph, expected_chromatic_number, sat_params);
+        }
+        SECTION("glucose_41")
+        {
+            sat_params.sat_engine = bill::solvers::glucose_41;
+
+            check_sat_search_tactics(graph, expected_chromatic_number, sat_params);
+        }
+        /**
+         * NOTE: At the time of writing this code, bsat2 was not able to solve coloring instances properly. It is,
+         * therefore, not recommended using it. If in the future an update to bill and/or bsat2 has been published, feel
+         * free to uncomment this test section.
+         */
+//
+//        SECTION("bsat2")
+//        {
+//            sat_params.sat_engine = bill::solvers::bsat2;
+//
+//            check_sat_search_tactics(graph, expected_chromatic_number, sat_params);
+//        }
+#if !defined(BILL_WINDOWS_PLATFORM)
+        SECTION("maple")
+        {
+            sat_params.sat_engine = bill::solvers::maple;
+
+            check_sat_search_tactics(graph, expected_chromatic_number, sat_params);
+        }
+        SECTION("bmcg")
+        {
+            sat_params.sat_engine = bill::solvers::bmcg;
+
+            check_sat_search_tactics(graph, expected_chromatic_number, sat_params);
+        }
+#endif
+    }
+}
+
+template <typename Graph>
+void check_brian_crites_engine(const Graph& graph, const std::size_t expected_chromatic_number)
 {
     determine_vertex_coloring_stats pst{};
 
@@ -26,79 +129,46 @@ void check_coloring_engines(const Graph& graph, const std::size_t expected_chrom
     {
         const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::MCS, {}, {}, true}, &pst);
 
-        REQUIRE(pst.coloring_verified.has_value());
-        CHECK(pst.coloring_verified.value() == true);
-        CHECK(pst.chromatic_number == expected_chromatic_number);
-        CHECK(pst.color_frequency > 0);
+        check_statistics_with_exact_chromatic_number(pst, expected_chromatic_number);
     }
     SECTION("DSATUR")
     {
         const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::DSATUR, {}, {}, true}, &pst);
 
-        REQUIRE(pst.coloring_verified.has_value());
-        CHECK(pst.coloring_verified.value() == true);
-        CHECK(pst.chromatic_number == expected_chromatic_number);
-        CHECK(pst.color_frequency > 0);
+        check_statistics_with_exact_chromatic_number(pst, expected_chromatic_number);
     }
     SECTION("LmXRLF")
     {
         const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::LMXRLF, {}, {}, true}, &pst);
 
-        REQUIRE(pst.coloring_verified.has_value());
-        CHECK(pst.coloring_verified.value() == true);
-        CHECK(pst.chromatic_number >= expected_chromatic_number);  // randomized, could be non-optimal
-        CHECK(pst.color_frequency > 0);
+        // randomized, could be non-optimal
+        check_statistics_with_lower_bound_chromatic_number(pst, expected_chromatic_number);
     }
     SECTION("TabuCol")
     {
         const auto coloring = determine_vertex_coloring(
             graph, {graph_coloring_engine::TABUCOL, {}, {expected_chromatic_number}, true}, &pst);
 
-        REQUIRE(pst.coloring_verified.has_value());
-        CHECK(pst.coloring_verified.value() == true);
-        CHECK(pst.chromatic_number == expected_chromatic_number);
-        CHECK(pst.color_frequency > 0);
+        check_statistics_with_exact_chromatic_number(pst, expected_chromatic_number);
     }
-    SECTION("SAT")
+}
+
+template <typename Graph>
+void check_coloring_engines(const Graph& graph, const std::size_t expected_chromatic_number,
+                            std::vector<typename Graph::vertex_id_type> clique = {})
+{
+    check_brian_crites_engine(graph, expected_chromatic_number);
+
+    SECTION("with clique information")
     {
-        determine_vertex_coloring_sat_params<Graph> sat_params{};
-        sat_params.cliques = {{clique}};
-
-        SECTION("linear ascending search")
+        check_sat_coloring_engine(graph, expected_chromatic_number, clique);
+    }
+    SECTION("without clique information")
+    {
+        // do not bother with K9 and K10 to save some runtime here in the tests
+        if (graph.size_edges() < 30)
         {
-            sat_params.sat_search_tactic = graph_coloring_sat_search_tactic::LINEARLY_ASCENDING;
-
-            const auto coloring =
-                determine_vertex_coloring(graph, {graph_coloring_engine::SAT, sat_params, {}, true}, &pst);
-
-            REQUIRE(pst.coloring_verified.has_value());
-            CHECK(pst.coloring_verified.value() == true);
-            CHECK(pst.chromatic_number == expected_chromatic_number);
-            CHECK(pst.color_frequency > 0);
-        }
-        SECTION("linear descending search")
-        {
-            sat_params.sat_search_tactic = graph_coloring_sat_search_tactic::LINEARLY_DESCENDING;
-
-            const auto coloring =
-                determine_vertex_coloring(graph, {graph_coloring_engine::SAT, sat_params, {}, true}, &pst);
-
-            REQUIRE(pst.coloring_verified.has_value());
-            CHECK(pst.coloring_verified.value() == true);
-            CHECK(pst.chromatic_number == expected_chromatic_number);
-            CHECK(pst.color_frequency > 0);
-        }
-        SECTION("binary search")
-        {
-            sat_params.sat_search_tactic = graph_coloring_sat_search_tactic::BINARY_SEARCH;
-
-            const auto coloring =
-                determine_vertex_coloring(graph, {graph_coloring_engine::SAT, sat_params, {}, true}, &pst);
-
-            REQUIRE(pst.coloring_verified.has_value());
-            CHECK(pst.coloring_verified.value() == true);
-            CHECK(pst.chromatic_number == expected_chromatic_number);
-            CHECK(pst.color_frequency > 0);
+            check_sat_coloring_engine(graph, expected_chromatic_number);
         }
     }
 }
@@ -132,14 +202,7 @@ TEST_CASE("Petersen graph", "[graph-coloring]")
     petersen_graph.insert_edge(7, 9, {});
     petersen_graph.insert_edge(8, 5, {});
 
-    SECTION("with clique information")
-    {
-        check_coloring_engines(petersen_graph, 3, {0, 1});
-    }
-    SECTION("without clique information")
-    {
-        check_coloring_engines(petersen_graph, 3, {});
-    }
+    check_coloring_engines(petersen_graph, 3, {0, 1});
 }
 
 TEST_CASE("Golomb graph", "[graph-coloring]")
@@ -175,14 +238,7 @@ TEST_CASE("Golomb graph", "[graph-coloring]")
     golomb_graph.insert_edge(7, 8, {});
     golomb_graph.insert_edge(8, 6, {});
 
-    SECTION("with clique information")
-    {
-        check_coloring_engines(golomb_graph, 4, {0, 1});
-    }
-    SECTION("without clique information")
-    {
-        check_coloring_engines(golomb_graph, 4);
-    }
+    check_coloring_engines(golomb_graph, 4, {0, 1});
 }
 
 TEST_CASE("Moser spindle", "[graph-coloring]")
@@ -211,14 +267,7 @@ TEST_CASE("Moser spindle", "[graph-coloring]")
     moser_spindle.insert_edge(4, 0, {});
     moser_spindle.insert_edge(4, 6, {});
 
-    SECTION("with clique information")
-    {
-        check_coloring_engines(moser_spindle, 4, {0, 1, 5});
-    }
-    SECTION("without clique information")
-    {
-        check_coloring_engines(moser_spindle, 4);
-    }
+    check_coloring_engines(moser_spindle, 4, {0, 1, 5});
 }
 
 template <typename Graph>
