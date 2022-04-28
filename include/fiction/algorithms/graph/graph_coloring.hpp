@@ -203,7 +203,6 @@ class sat_coloring_handler
         const auto k_color_instance = std::make_shared<solver_instance>(graph, k);
 
         at_least_one_color_per_vertex(k_color_instance);
-        at_most_one_color_per_vertex(k_color_instance);
         exclude_identical_adjacent_colors(k_color_instance);
         symmetry_breaking(k_color_instance);
 
@@ -409,28 +408,6 @@ class sat_coloring_handler
 
                           bill::at_least_one(vc, instance->solver);
                       });
-    }
-
-    void at_most_one_color_per_vertex(const solver_instance_ptr& instance) const
-    {
-        // for each pair of colors
-        for (std::size_t c1 = 0; c1 < instance->k; ++c1)
-        {
-            // use an optimization here: c2 > c1 instead of c2 != c1 to save half the clauses
-            for (std::size_t c2 = c1 + 1; c2 < instance->k; ++c2)
-            {
-                // for each vertex
-                std::for_each(graph.begin_vertices(), graph.end_vertices(),
-                              [this, &instance, &c1, &c2](const auto& vp)
-                              {
-                                  const auto& v = vp.first;
-                                  // not vertex has color 1 OR not vertex has color 2
-                                  instance->solver.add_clause(
-                                      {{bill::lit_type{instance->variables[{v, c1}], bill::negative_polarity},
-                                        bill::lit_type{instance->variables[{v, c2}], bill::negative_polarity}}});
-                              });
-            }
-        }
     }
 
     void exclude_identical_adjacent_colors(const solver_instance_ptr& instance) const
