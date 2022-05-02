@@ -203,11 +203,8 @@ class sat_coloring_handler
     {
         const auto k_color_instance = std::make_shared<solver_instance>(graph, k);
 
-#if !__linux__
-        at_most_one_color_per_vertex(k_color_instance);
-#endif
-
         at_least_one_color_per_vertex(k_color_instance);
+        at_most_one_color_per_vertex(k_color_instance);
         exclude_identical_adjacent_colors(k_color_instance);
         symmetry_breaking(k_color_instance);
 
@@ -415,7 +412,6 @@ class sat_coloring_handler
                       });
     }
 
-#if !__linux__
     void at_most_one_color_per_vertex(const solver_instance_ptr& instance) const
     {
         // for each pair of colors
@@ -437,7 +433,6 @@ class sat_coloring_handler
             }
         }
     }
-#endif
 
     void exclude_identical_adjacent_colors(const solver_instance_ptr& instance) const
     {
