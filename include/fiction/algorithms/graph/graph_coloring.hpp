@@ -14,6 +14,7 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <cassert>
 #include <memory>
 #include <numeric>
 #include <optional>
@@ -438,10 +439,14 @@ class sat_coloring_handler
         for (std::size_t c = 0; c < instance->k; ++c)
         {
             std::vector<bill::lit_type> color_c_in_each_clique{};
+
+            // for each clique
             std::for_each(ps.cliques.cbegin(), ps.cliques.cend(),
                           [this, &instance, &c, &color_c_in_each_clique](const auto& clique)
                           {
                               std::vector<bill::lit_type> vc{};
+
+                              // for each vertex in clique
                               std::for_each(clique.cbegin(), clique.cend(),
                                             [this, &instance, &c, &vc](const auto& v) {
                                                 vc.push_back({instance->variables[{v, c}], bill::positive_polarity});
@@ -460,9 +465,14 @@ class sat_coloring_handler
      * color assigned from the beginning.
      *
      * @param instance Pointer to the solver instance.
+     * @return A clique-first ordering of the vertices that assigns the clique vertices the lowest indices.
      */
-    void symmetry_breaking(const solver_instance_ptr& instance) const
+    std::vector<typename Graph::vertex_id_type> pre_assign_largest_clique(const solver_instance_ptr& instance) const
     {
+        // a particular ordering of the graph's vertices to use in the subsequent lexicographical solution transformer
+        // that ensures that the pre-assigned clique vertices are of the lowest indices
+        std::vector<typename Graph::vertex_id_type> clique_first_ordering{};
+
         // if there is no clique given, this symmetry breaking cannot be performed
         if (largest_clique != ps.cliques.cend() && !largest_clique->empty())
         {
@@ -472,24 +482,33 @@ class sat_coloring_handler
                 // assign color c to vertex at index c
                 const auto v = (*largest_clique)[c];
                 instance->solver.add_clause(bill::lit_type{instance->variables[{v, c}], bill::positive_polarity});
+
+                // create a clique first vertex ordering
+                clique_first_ordering.push_back(v);
             }
         }
         else  // without clique information, at least the first vertex can be painted
         {
             std::find_if(
                 graph.begin_vertices(), graph.end_vertices(),
-                [this, &instance](const auto& vp)
+                [this, &instance, &clique_first_ordering](const auto& vp)
                 {
                     const auto& v = vp.first;
                     // assign color 0 to any vertex
                     instance->solver.add_clause(bill::lit_type{instance->variables[{v, 0}], bill::positive_polarity});
 
+                    // create a clique first vertex ordering
+                    clique_first_ordering.push_back(v);
+
                     std::find_if(graph.begin_adjacent(v), graph.end_adjacent(v),
-                                 [this, &instance](const auto& av)
+                                 [this, &instance, &clique_first_ordering](const auto& av)
                                  {
                                      // assign color 1 to an adjacent vertex
                                      instance->solver.add_clause(
                                          bill::lit_type{instance->variables[{av, 1}], bill::positive_polarity});
+
+                                     // create a clique first vertex ordering
+                                     clique_first_ordering.push_back(av);
 
                                      return true;  // abort loop after first iteration
                                  });
@@ -497,6 +516,74 @@ class sat_coloring_handler
                     return true;  // abort loop after first iteration
                 });
         }
+
+        // thus far, the ordering only contains the clique vertices; add the missing ones in an arbitrary order
+        std::for_each(graph.begin_vertices(), graph.end_vertices(),
+                      [&clique_first_ordering](const auto& vp)
+                      {
+                          const auto& v = vp.first;
+                          // if vertex v is not yet in the ordering
+                          if (std::find(clique_first_ordering.cbegin(), clique_first_ordering.cend(), v) ==
+                              clique_first_ordering.cend())
+                          {
+                              clique_first_ordering.push_back(v);
+                          }
+                      });
+
+        return clique_first_ordering;
+    }
+    /**
+     * Reduce the search space by symmetry breaking. To this end, the solution is transformed to be lexicographical
+     * minimal, i.e., no vertex is assigned color c unless color c - 1 has been assigned to any vertex of lower index.
+     *
+     * @param instance Pointer to the solver instance.
+     */
+    void transform_solution_to_lexicographical_minimum(
+        const solver_instance_ptr&                         instance,
+        const std::vector<typename Graph::vertex_id_type>& clique_first_ordering) const
+    {
+        // for each vertex v1
+        for (auto v1i = clique_first_ordering.cbegin(); v1i != clique_first_ordering.cend(); ++v1i)
+        {
+            const auto& v1 = *v1i;
+
+            // for each color c1 starting with the second
+            for (std::size_t c1 = 1; c1 < instance->k; ++c1)
+            {
+                // create a vector of literals and already add the first one being NOT assign color c1 to vertex v1
+                std::vector<bill::lit_type> vc{
+                    {bill::lit_type{instance->variables[{v1, c1}], bill::negative_polarity}}};
+
+                // for each vertex v2 up to v1
+                for (auto v2i = clique_first_ordering.cbegin(); v2i != v1i + 1; ++v2i)
+                {
+                    const auto& v2 = *v2i;
+
+                    // for each color c2 starting from c1 - 1
+                    for (std::size_t c2 = c1 - 1; c2 < instance->k; ++c2)
+                    {
+                        // add a literal to the vector stating assign c2 to v2
+                        vc.emplace_back(instance->variables[{v2, c2}], bill::positive_polarity);
+                    }
+                }
+
+                // add the disjunction of literals to the solver
+                instance->solver.add_clause(vc);
+            }
+        }
+    }
+    /**
+     * Reduce the search space by symmetry breaking. Two tactics are implemented:
+     *
+     *  - pre-assigning different colors to the largest given clique, and
+     *  - transforming the coloring solution to be lexicographically minimal
+     *
+     * @param instance Pointer to the solver instance.
+     */
+    void symmetry_breaking(const solver_instance_ptr& instance) const
+    {
+        const auto clique_first_ordering = pre_assign_largest_clique(instance);
+        transform_solution_to_lexicographical_minimum(instance, clique_first_ordering);
     }
 
     auto check_sat(const solver_instance_ptr& instance) const
