@@ -46,6 +46,10 @@ struct color_routing_params
      * The engine to use.
      */
     graph_coloring_engine engine = graph_coloring_engine::SAT;
+    /**
+     * Allow partial solutions when the SAT engine is used.
+     */
+    bool partial_sat = false;
 };
 
 struct color_routing_stats
@@ -54,6 +58,10 @@ struct color_routing_stats
      * Runtime measurement.
      */
     mockturtle::stopwatch<>::duration time_total{0};
+    /**
+     * For each routing objective that was not fulfilled by the coloring engine, this counter is incremented.
+     */
+    std::size_t number_of_unsatisfied_objectives{0};
     /**
      * Statistics of the edge intersection graph generation.
      */
@@ -81,6 +89,8 @@ class color_routing_impl
 
     bool run()
     {
+        std::cout << fmt::format("Numer of routing objectives: {}", objectives.size()) << std::endl;
+
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
 
@@ -91,13 +101,12 @@ class color_routing_impl
         const auto edge_intersection_graph =
             generate_edge_intersection_graph(layout, objectives, epg_params, &pst.epg_stats);
 
-        //        std::cout << fmt::format("Generated EPG with {} vertices and {} edges in {} cliques",
-        //                                 pst.epg_stats.num_vertices, pst.epg_stats.num_edges,
-        //                                 pst.epg_stats.cliques.size())
-        //                  << std::endl;
+        std::cout << fmt::format("Generated EPG with {} vertices and {} edges in {} cliques",
+                                 pst.epg_stats.num_vertices, pst.epg_stats.num_edges, pst.epg_stats.cliques.size())
+                  << std::endl;
 
         // if no partial routing is allowed, abort if some objectives cannot be satisfied by path enumeration
-        if (!ps.conduct_partial_routing && pst.epg_stats.number_of_unsatisfiable_objectives > 0)
+        if (!ps.conduct_partial_routing && pst.epg_stats.number_of_unroutable_objectives > 0)
         {
             return false;
         }
@@ -105,9 +114,14 @@ class color_routing_impl
         determine_vertex_coloring_params<::fiction::edge_intersection_graph<Lyt>> dvc_ps{};
         dvc_ps.engine                                 = ps.engine;
         dvc_ps.sat_params.cliques                     = pst.epg_stats.cliques;
-        dvc_ps.sat_params.clique_size_color_frequency = true;
+        dvc_ps.sat_params.clique_size_color_frequency = !ps.partial_sat;
+        dvc_ps.sat_params.sat_search_tactic           = graph_coloring_sat_search_tactic::BINARY_SEARCH;
+
+        std::cout << "Started coloring..." << std::endl;
 
         const auto vertex_coloring = determine_vertex_coloring(edge_intersection_graph, dvc_ps, &pst.color_stats);
+
+        std::cout << "... done!" << std::endl;
 
         // if no partial routing is allowed, abort if the coloring does not satisfy all objectives
         if (!ps.conduct_partial_routing && pst.color_stats.color_frequency != pst.epg_stats.cliques.size())
@@ -132,15 +146,21 @@ class color_routing_impl
     template <typename Graph, typename Color>
     void conduct_routing(const Graph& graph, const vertex_coloring<Graph, Color>& coloring, const Color& color) noexcept
     {
+        std::size_t num_satisfied_objectives{0};
+
         std::for_each(graph.begin_vertices(), graph.end_vertices(),
-                      [this, &graph, &coloring, &color](const auto& v_path_pair)
+                      [this, &graph, &coloring, &color, &num_satisfied_objectives](const auto& v_path_pair)
                       {
                           const auto& [vertex, path] = v_path_pair;
                           if (coloring.at(vertex) == color)
                           {
                               route_path(layout, path);
+                              ++num_satisfied_objectives;
                           }
                       });
+
+        // log the number of unsatisfied objectives
+        pst.number_of_unsatisfied_objectives = objectives.size() - num_satisfied_objectives;
     }
 };
 

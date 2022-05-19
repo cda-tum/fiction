@@ -62,10 +62,12 @@ int main()
     routing_params.engine                  = fiction::graph_coloring_engine::SAT;
     fiction::color_routing_stats routing_stats{};
 
-    constexpr const uint64_t bench_select =
-        fiction_experiments::all & ~fiction_experiments::par_check & ~fiction_experiments::parity &
-        ~fiction_experiments::xor5_maj & ~fiction_experiments::two_bit_add_maj & ~fiction_experiments::cm82a_5 &
-        ~fiction_experiments::xor5_r1 & ~fiction_experiments::b1_r2 & ~fiction_experiments::clpl;
+    constexpr const uint64_t bench_select = fiction_experiments::all;
+
+//    constexpr const uint64_t bench_select =
+//        fiction_experiments::all & ~fiction_experiments::par_check & ~fiction_experiments::parity &
+//        ~fiction_experiments::xor5_maj & ~fiction_experiments::two_bit_add_maj & ~fiction_experiments::cm82a_5 &
+//        ~fiction_experiments::xor5_r1 & ~fiction_experiments::b1_r2 & ~fiction_experiments::clpl;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
@@ -103,7 +105,7 @@ int main()
                 benchmark, network.num_pis(), network.num_pos(), network.num_gates(), gate_level_layout->x() + 1,
                 gate_level_layout->y() + 1, (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1),
                 gate_level_layout->num_gates(), gate_level_layout->num_wires(), objectives.size(),
-                routing_stats.epg_stats.number_of_unsatisfiable_objectives, routing_stats.epg_stats.num_vertices,
+                routing_stats.number_of_unsatisfied_objectives, routing_stats.epg_stats.num_vertices,
                 routing_stats.epg_stats.num_edges, mockturtle::to_seconds(exact_stats.time_total),
                 mockturtle::to_seconds(routing_stats.time_total),
                 mockturtle::to_seconds(routing_stats.epg_stats.time_total),
