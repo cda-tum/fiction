@@ -12,6 +12,7 @@
 #include <iterator>
 #include <set>
 #include <unordered_map>
+#include <vector>
 
 namespace fiction
 {
@@ -101,7 +102,7 @@ class synchronization_element_layout : public ClockedLayout
      * @param se Number of full clock cycles to extend cz's Hold phase by. If this value is 0, cz is turned back into a
      * normal clock zone.
      */
-    void assign_synchronization_element(const typename ClockedLayout::clock_zone& cz, const sync_elem_t se) noexcept
+    void assign_synchronization_element(const clock_zone<ClockedLayout>& cz, const sync_elem_t se) noexcept
     {
         if (se == sync_elem_t{0})
         {
@@ -118,7 +119,7 @@ class synchronization_element_layout : public ClockedLayout
      * @param cz Clock zone to check.
      * @return True iff cz is a synchronization element.
      */
-    [[nodiscard]] sync_elem_t is_synchronization_element(const typename ClockedLayout::clock_zone& cz) const noexcept
+    [[nodiscard]] sync_elem_t is_synchronization_element(const clock_zone<ClockedLayout>& cz) const noexcept
     {
         if (auto it = strg->se_map.find(static_cast<uint64_t>(cz)); it != strg->se_map.end())
         {
@@ -133,7 +134,7 @@ class synchronization_element_layout : public ClockedLayout
      * @param cz Clock zone to check.
      * @return Synchronization element value, i.e., Hold phase extension, of clock zone cz.
      */
-    [[nodiscard]] sync_elem_t get_synchronization_element(const typename ClockedLayout::clock_zone& cz) const noexcept
+    [[nodiscard]] sync_elem_t get_synchronization_element(const clock_zone<ClockedLayout>& cz) const noexcept
     {
         if (auto it = strg->se_map.find(static_cast<uint64_t>(cz)); it != strg->se_map.end())
         {
@@ -153,8 +154,8 @@ class synchronization_element_layout : public ClockedLayout
      * @return True iff cz2's clock number is lower by 1 modulo num_clocks() or if cz1 or cz2 are synchronization
      * elements.
      */
-    [[nodiscard]] bool is_incoming_clocked(const typename ClockedLayout::clock_zone& cz1,
-                                           const typename ClockedLayout::clock_zone& cz2) const noexcept
+    [[nodiscard]] bool is_incoming_clocked(const clock_zone<ClockedLayout>& cz1,
+                                           const clock_zone<ClockedLayout>& cz2) const noexcept
     {
         if (cz1 == cz2)
             return false;
@@ -173,8 +174,8 @@ class synchronization_element_layout : public ClockedLayout
      * @return True iff cz2's clock number is higher by 1 modulo num_clocks() or if cz1 or cz2 are synchronization
      * elements.
      */
-    [[nodiscard]] bool is_outgoing_clocked(const typename ClockedLayout::clock_zone& cz1,
-                                           const typename ClockedLayout::clock_zone& cz2) const noexcept
+    [[nodiscard]] bool is_outgoing_clocked(const clock_zone<ClockedLayout>& cz1,
+                                           const clock_zone<ClockedLayout>& cz2) const noexcept
     {
         if (cz1 == cz2)
             return false;
@@ -188,22 +189,23 @@ class synchronization_element_layout : public ClockedLayout
 #pragma region Iteration
 
     /**
-     * Overwrites the function from ClockedLayout to account for synchronization elements. Returns a container of type
-     * Container with all clock zones that are incoming to the given one.
+     * Overwrites the function from ClockedLayout to account for synchronization elements. Returns a container with all
+     * clock zones that are incoming to the given one.
      *
-     * @tparam Container Container type that holds clock zones.
      * @param cz Base clock zone.
-     * @return A container of type Container with all clock zones that are incoming to cz.
+     * @return A container with all clock zones that are incoming to cz.
      */
-    template <typename Container>
-    [[nodiscard]] Container incoming_clocked_zones(const typename ClockedLayout::clock_zone& cz) const noexcept
+    [[nodiscard]] auto incoming_clocked_zones(const clock_zone<ClockedLayout>& cz) const noexcept
     {
-        const auto adj = ClockedLayout::template adjacent_coordinates<Container>(cz);
+        const auto adj = ClockedLayout::adjacent_coordinates(cz);
 
-        Container incoming{};
+        std::vector<clock_zone<ClockedLayout>> incoming{};
+        incoming.reserve(adj.size());  // reserve memory
 
-        std::copy_if(std::cbegin(adj), std::cend(adj), std::inserter(incoming, std::cend(incoming)),
+        std::copy_if(std::cbegin(adj), std::cend(adj), std::back_inserter(incoming),
                      [this, &cz](const auto& ct) { return is_incoming_clocked(cz, ct); });
+
+//        incoming.shrink_to_fit();  // return unused memory
 
         return incoming;
     }
@@ -216,29 +218,30 @@ class synchronization_element_layout : public ClockedLayout
      * @param fn Functor to apply to each of cz's incoming clock zones.
      */
     template <typename Fn>
-    void foreach_incoming_clocked_zone(const typename ClockedLayout::clock_zone& cz, Fn&& fn) const
+    void foreach_incoming_clocked_zone(const clock_zone<ClockedLayout>& cz, Fn&& fn) const
     {
-        const auto incoming = incoming_clocked_zones<std::set<typename ClockedLayout::clock_zone>>(cz);
+        const auto incoming = incoming_clocked_zones(cz);
 
         mockturtle::detail::foreach_element(incoming.cbegin(), incoming.cend(), fn);
     }
     /**
-     * Overwrites the function from ClockedLayout to account for synchronization elements. Returns a container of type
-     * Container with all clock zones that are outgoing from the given one.
+     * Overwrites the function from ClockedLayout to account for synchronization elements. Returns a container with all
+     * clock zones that are outgoing from the given one.
      *
-     * @tparam Container Container type that holds clock zones.
      * @param cz Base clock zone.
-     * @return A container of type Container with all clock zones that are outgoing from cz.
+     * @return A container with all clock zones that are outgoing from cz.
      */
-    template <typename Container>
-    [[nodiscard]] Container outgoing_clocked_zones(const typename ClockedLayout::clock_zone& cz) const noexcept
+    [[nodiscard]] auto outgoing_clocked_zones(const clock_zone<ClockedLayout>& cz) const noexcept
     {
-        const auto adj = ClockedLayout::template adjacent_coordinates<Container>(cz);
+        const auto adj = ClockedLayout::adjacent_coordinates(cz);
 
-        Container outgoing{};
+        std::vector<clock_zone<ClockedLayout>> outgoing{};
+        outgoing.reserve(adj.size());  // reserve memory
 
-        std::copy_if(std::cbegin(adj), std::cend(adj), std::inserter(outgoing, std::cend(outgoing)),
+        std::copy_if(std::cbegin(adj), std::cend(adj), std::back_inserter(outgoing),
                      [this, &cz](const auto& ct) { return is_outgoing_clocked(cz, ct); });
+
+//        outgoing.shrink_to_fit();  // return unused memory
 
         return outgoing;
     }
@@ -251,9 +254,9 @@ class synchronization_element_layout : public ClockedLayout
      * @param fn Functor to apply to each of cz's outgoing clock zones.
      */
     template <typename Fn>
-    void foreach_outgoing_clocked_zone(const typename ClockedLayout::clock_zone& cz, Fn&& fn) const
+    void foreach_outgoing_clocked_zone(const clock_zone<ClockedLayout>& cz, Fn&& fn) const
     {
-        const auto outgoing = outgoing_clocked_zones<std::set<typename ClockedLayout::clock_zone>>(cz);
+        const auto outgoing = outgoing_clocked_zones(cz);
 
         mockturtle::detail::foreach_element(outgoing.cbegin(), outgoing.cend(), fn);
     }
@@ -278,11 +281,9 @@ class synchronization_element_layout : public ClockedLayout
      * @param cz Base clock zone.
      * @return Number of cz's incoming clock zones.
      */
-    [[nodiscard]] typename ClockedLayout::degree_t
-    in_degree(const typename ClockedLayout::clock_zone& cz) const noexcept
+    [[nodiscard]] typename ClockedLayout::degree_t in_degree(const clock_zone<ClockedLayout>& cz) const noexcept
     {
-        return static_cast<typename ClockedLayout::degree_t>(
-            incoming_clocked_zones<std::set<typename ClockedLayout::clock_zone>>(cz).size());
+        return static_cast<typename ClockedLayout::degree_t>(incoming_clocked_zones(cz).size());
     }
     /**
      * Overwrites the function from ClockedLayout to account for synchronization elements. Returns the number of
@@ -291,11 +292,9 @@ class synchronization_element_layout : public ClockedLayout
      * @param cz Base clock zone.
      * @return Number of cz's outgoing clock zones.
      */
-    [[nodiscard]] typename ClockedLayout::degree_t
-    out_degree(const typename ClockedLayout::clock_zone& cz) const noexcept
+    [[nodiscard]] typename ClockedLayout::degree_t out_degree(const clock_zone<ClockedLayout>& cz) const noexcept
     {
-        return static_cast<typename ClockedLayout::degree_t>(
-            outgoing_clocked_zones<std::set<typename ClockedLayout::clock_zone>>(cz).size());
+        return static_cast<typename ClockedLayout::degree_t>(outgoing_clocked_zones(cz).size());
     }
     /**
      * Overwrites the function from ClockedLayout to account for synchronization elements. Returns the number of
@@ -304,12 +303,12 @@ class synchronization_element_layout : public ClockedLayout
      * @param cz Base clock zone.
      * @return Number of cz's incoming plus outgoing clock zones.
      */
-    [[nodiscard]] typename ClockedLayout::degree_t degree(const typename ClockedLayout::clock_zone& cz) const noexcept
+    [[nodiscard]] typename ClockedLayout::degree_t degree(const clock_zone<ClockedLayout>& cz) const noexcept
     {
-        const auto incoming = incoming_clocked_zones<std::set<typename ClockedLayout::clock_zone>>(cz);
-        const auto outgoing = outgoing_clocked_zones<std::set<typename ClockedLayout::clock_zone>>(cz);
+        const auto incoming = incoming_clocked_zones(cz);
+        const auto outgoing = outgoing_clocked_zones(cz);
 
-        std::set<typename ClockedLayout::clock_zone> merged_clock_zones{};
+        std::set<clock_zone<ClockedLayout>> merged_clock_zones{};
         std::merge(incoming.cbegin(), incoming.cend(), outgoing.cbegin(), outgoing.cend(),
                    std::inserter(merged_clock_zones, merged_clock_zones.end()));
 

@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
-#include <set>
+#include <vector>
 
 namespace fiction
 {
@@ -199,21 +199,22 @@ class clocked_layout : public CoordinateLayout
 #pragma region Iteration
 
     /**
-     * Returns a container of type Container with all clock zones that are incoming to the given one.
+     * Returns a container with all clock zones that are incoming to the given one.
      *
-     * @tparam Container Container type that holds clock zones.
      * @param cz Base clock zone.
-     * @return A container of type Container with all clock zones that are incoming to cz.
+     * @return A container with all clock zones that are incoming to cz.
      */
-    template <typename Container>
-    [[nodiscard]] Container incoming_clocked_zones(const clock_zone& cz) const noexcept
+    [[nodiscard]] auto incoming_clocked_zones(const clock_zone& cz) const noexcept
     {
-        const auto adj = CoordinateLayout::template adjacent_coordinates<Container>(cz);
+        const auto adj = CoordinateLayout::adjacent_coordinates(cz);
 
-        Container incoming{};
+        std::vector<clock_zone> incoming{};
+        incoming.reserve(adj.size());  // reserve memory
 
-        std::copy_if(std::cbegin(adj), std::cend(adj), std::inserter(incoming, std::cend(incoming)),
+        std::copy_if(std::cbegin(adj), std::cend(adj), std::back_inserter(incoming),
                      [this, &cz](const auto& ct) { return is_incoming_clocked(cz, ct); });
+
+//        incoming.shrink_to_fit();  // return unused memory
 
         return incoming;
     }
@@ -227,26 +228,27 @@ class clocked_layout : public CoordinateLayout
     template <typename Fn>
     void foreach_incoming_clocked_zone(const clock_zone& cz, Fn&& fn) const
     {
-        const auto incoming = incoming_clocked_zones<std::set<clock_zone>>(cz);
+        const auto incoming = incoming_clocked_zones(cz);
 
         mockturtle::detail::foreach_element(incoming.cbegin(), incoming.cend(), fn);
     }
     /**
-     * Returns a container of type Container with all clock zones that are outgoing from the given one.
+     * Returns a container with all clock zones that are outgoing from the given one.
      *
-     * @tparam Container Container type that holds clock zones.
      * @param cz Base clock zone.
-     * @return A container of type Container with all clock zones that are outgoing from cz.
+     * @return A container with all clock zones that are outgoing from cz.
      */
-    template <typename Container>
-    [[nodiscard]] Container outgoing_clocked_zones(const clock_zone& cz) const noexcept
+    [[nodiscard]] auto outgoing_clocked_zones(const clock_zone& cz) const noexcept
     {
-        const auto adj = CoordinateLayout::template adjacent_coordinates<Container>(cz);
+        const auto adj = CoordinateLayout::adjacent_coordinates(cz);
 
-        Container outgoing{};
+        std::vector<clock_zone> outgoing{};
+        outgoing.reserve(adj.size());  // reserve memory
 
-        std::copy_if(std::cbegin(adj), std::cend(adj), std::inserter(outgoing, std::cend(outgoing)),
+        std::copy_if(std::cbegin(adj), std::cend(adj), std::back_inserter(outgoing),
                      [this, &cz](const auto& ct) { return is_outgoing_clocked(cz, ct); });
+
+//        outgoing.shrink_to_fit();  // return unused memory
 
         return outgoing;
     }
@@ -260,7 +262,7 @@ class clocked_layout : public CoordinateLayout
     template <typename Fn>
     void foreach_outgoing_clocked_zone(const clock_zone& cz, Fn&& fn) const
     {
-        const auto outgoing = outgoing_clocked_zones<std::set<clock_zone>>(cz);
+        const auto outgoing = outgoing_clocked_zones(cz);
 
         mockturtle::detail::foreach_element(outgoing.cbegin(), outgoing.cend(), fn);
     }
@@ -276,7 +278,7 @@ class clocked_layout : public CoordinateLayout
      */
     [[nodiscard]] degree_t in_degree(const clock_zone& cz) const noexcept
     {
-        return static_cast<degree_t>(incoming_clocked_zones<std::set<clock_zone>>(cz).size());
+        return static_cast<degree_t>(incoming_clocked_zones(cz).size());
     }
     /**
      * Returns the number of outgoing clock zones from the given one.
@@ -286,7 +288,7 @@ class clocked_layout : public CoordinateLayout
      */
     [[nodiscard]] degree_t out_degree(const clock_zone& cz) const noexcept
     {
-        return static_cast<degree_t>(outgoing_clocked_zones<std::set<clock_zone>>(cz).size());
+        return static_cast<degree_t>(outgoing_clocked_zones(cz).size());
     }
     /**
      * Returns the number of incoming plus outgoing clock zones of the given one.

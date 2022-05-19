@@ -24,7 +24,10 @@
 #include <cstdint>
 #include <string>
 
-using gate_lyt = fiction::cart_gate_clk_lyt;
+// using gate_lyt = fiction::cart_gate_clk_lyt;
+
+using gate_lyt = fiction::gate_level_layout<
+    fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
 
 using color_routing_experiment =
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t,

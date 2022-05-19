@@ -531,7 +531,7 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] auto fanin_size(const node n) const
     {
-        return static_cast<uint32_t>(incoming_data_flow<std::set<tile>>(get_tile(n)).size());
+        return static_cast<uint32_t>(incoming_data_flow(get_tile(n)).size());
     }
     /**
      * Returns the number of outgoing, adjacently placed, and properly clocked signals of the given node.
@@ -541,7 +541,7 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] auto fanout_size(const node n) const
     {
-        return static_cast<uint32_t>(outgoing_data_flow<std::set<tile>>(get_tile(n)).size());
+        return static_cast<uint32_t>(outgoing_data_flow(get_tile(n)).size());
     }
 
 #pragma endregion
@@ -938,21 +938,20 @@ class gate_level_layout : public ClockedLayout
             r.begin(), r.end(), [this](const auto n) { return is_wire(n) && !is_dead(n); }, fn);
     }
     /**
-     * Returns a container of a given type that contains all tiles that feed information to the given one. Thereby, only
+     * Returns a container that contains all tiles that feed information to the given one. Thereby, only
      * incoming clocked zones (+/- one layer to include crossings) are being considered whose data flow connections are
      * respectively established. That is, the returned container contains all tiles that host nodes that are connected
      * to the one assigned to t as fanins.
      *
-     * @tparam Container Container type that has to provide an insert member function.
      * @param t Tile whose incoming data flow ones are desired.
-     * @return A container of type Container that contains all of t's incoming data flow tiles.
+     * @return A container that contains all of t's incoming data flow tiles.
      */
-    template <typename Container>
-    [[nodiscard]] Container incoming_data_flow(const tile& t) const noexcept
+    [[nodiscard]] auto incoming_data_flow(const tile& t) const noexcept
     {
-        const auto incoming = ClockedLayout::template incoming_clocked_zones<Container>(t);
+        const auto incoming = ClockedLayout::incoming_clocked_zones(t);
 
-        Container data_flow{};
+        std::vector<tile> data_flow{};
+        data_flow.reserve(incoming.size());  // reserve memory
 
         for (const auto& in : incoming)
         {
@@ -960,28 +959,29 @@ class gate_level_layout : public ClockedLayout
                 std::initializer_list<tile>{in, ClockedLayout::above(in), ClockedLayout::below(in)}};
 
             std::copy_if(std::cbegin(incoming_above_below), std::cend(incoming_above_below),
-                         std::inserter(data_flow, std::cend(data_flow)),
+                         std::back_inserter(data_flow),
                          [this, &t](const auto& dt) { return is_child(get_node(t), static_cast<signal>(dt)); });
         }
+
+//        data_flow.shrink_to_fit();  // return unused memory
 
         return data_flow;
     }
     /**
-     * Returns a container of a given type that contains all tiles that accept information from the given one. Thereby,
+     * Returns a container that contains all tiles that accept information from the given one. Thereby,
      * only outgoing clocked zones (+/- one layer to include crossings) are being considered whose data flow connections
      * are respectively established. That is, the returned container contains all tiles that host nodes that are
      * connected to the one assigned to t as fanouts.
      *
-     * @tparam Container Container type that has to provide an insert member function.
      * @param t Tile whose outgoing data flow ones are desired.
-     * @return A container of type Container that contains all of t's outgoing data flow tiles.
+     * @return A container that contains all of t's outgoing data flow tiles.
      */
-    template <typename Container>
-    [[nodiscard]] Container outgoing_data_flow(const tile& t) const noexcept
+    [[nodiscard]] auto outgoing_data_flow(const tile& t) const noexcept
     {
-        const auto outgoing = ClockedLayout::template outgoing_clocked_zones<Container>(t);
+        const auto outgoing = ClockedLayout::outgoing_clocked_zones(t);
 
-        Container data_flow{};
+        std::vector<tile> data_flow{};
+        data_flow.reserve(outgoing.size());  // reserve memory
 
         for (const auto& out : outgoing)
         {
@@ -989,9 +989,11 @@ class gate_level_layout : public ClockedLayout
                 std::initializer_list<tile>{out, ClockedLayout::above(out), ClockedLayout::below(out)}};
 
             std::copy_if(std::cbegin(outgoing_above_below), std::cend(outgoing_above_below),
-                         std::inserter(data_flow, std::cend(data_flow)),
+                         std::back_inserter(data_flow),
                          [this, &t](const auto& dt) { return is_child(get_node(dt), static_cast<signal>(t)); });
         }
+
+//        data_flow.shrink_to_fit();  // return unused memory
 
         return data_flow;
     }
@@ -1009,7 +1011,7 @@ class gate_level_layout : public ClockedLayout
         if (n <= 1)  // const-0 or const-1
             return;
 
-        const auto fanin = incoming_data_flow<std::set<tile>>(get_tile(n));
+        const auto fanin = incoming_data_flow(get_tile(n));
 
         using IteratorType = decltype(fanin.cbegin());
         mockturtle::detail::foreach_element_transform<IteratorType, signal>(
@@ -1029,7 +1031,7 @@ class gate_level_layout : public ClockedLayout
         if (n <= 1)  // const-0 or const-1
             return;
 
-        const auto fanout = outgoing_data_flow<std::set<tile>>(get_tile(n));
+        const auto fanout = outgoing_data_flow(get_tile(n));
 
         using IteratorType = decltype(fanout.cbegin());
         mockturtle::detail::foreach_element_transform<IteratorType, node>(
@@ -1109,7 +1111,7 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] bool is_incoming_signal(const tile& t, const signal& s) const noexcept
     {
-        const auto incoming = incoming_data_flow<std::set<tile>>(t);
+        const auto incoming = incoming_data_flow(t);
         return std::any_of(incoming.cbegin(), incoming.cend(),
                            [this, &s](const auto& i)
                            { return i == s || ClockedLayout::above(i) == s || ClockedLayout::below(i) == s; });
@@ -1202,7 +1204,7 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] bool has_no_incoming_signal(const tile& t) const noexcept
     {
-        return incoming_data_flow<std::set<tile>>(t).empty();
+        return incoming_data_flow(t).empty();
     }
     /**
      * Checks whether signal s is outgoing from tile t. That is, whether tile t hosts a node that has a fanout assigned
@@ -1214,7 +1216,7 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] bool is_outgoing_signal(const tile& t, const signal& s) const noexcept
     {
-        const auto outgoing = outgoing_data_flow<std::set<tile>>(t);
+        const auto outgoing = outgoing_data_flow(t);
         return std::any_of(outgoing.cbegin(), outgoing.cend(),
                            [this, &s](const auto& o)
                            { return o == s || ClockedLayout::above(o) == s || ClockedLayout::below(o) == s; });
@@ -1307,7 +1309,7 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] bool has_no_outgoing_signal(const tile& t) const noexcept
     {
-        return outgoing_data_flow<std::set<tile>>(t).empty();
+        return outgoing_data_flow(t).empty();
     }
     /**
      * Checks whether the given tile t has its incoming and outgoing signals on opposite sides of the tile. For this
@@ -1496,13 +1498,19 @@ class gate_level_layout : public ClockedLayout
         strg->nodes.push_back(node_data);
 
         /* increase ref-count to children */
-        for (const auto& c : children) { strg->nodes[get_node(c)].data[0].h1++; }
+        for (const auto& c : children)
+        {
+            strg->nodes[get_node(c)].data[0].h1++;
+        }
 
         set_value(n, 0);
 
         assign_node(t, n);
 
-        for (auto const& fn : evnts->on_add) { (*fn)(n); }
+        for (auto const& fn : evnts->on_add)
+        {
+            (*fn)(n);
+        }
 
         return static_cast<signal>(t);
     }

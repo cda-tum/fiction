@@ -13,9 +13,9 @@
 #include <algorithm>
 #include <array>
 #include <memory>
-#include <set>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -539,7 +539,9 @@ class hexagonal_layout
      */
     [[nodiscard]] bool is_adjacent_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
     {
-        return adjacent_coordinates<std::set<coordinate>>(c1).count(c2) != 0;
+        const auto adj = adjacent_coordinates(c1);
+
+        return std::find(adj.cbegin(), adj.cend(), c2) != adj.cend();
     }
     /**
      * Similar to is_adjacent_of but also considers c1's elevation, i.e., if c2 is adjacent to above(c1) or below(c1).
@@ -830,21 +832,19 @@ class hexagonal_layout
             offset::coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
     }
     /**
-     * Returns a container of a given type that contains all coordinates that are adjacent to a given one. Thereby, only
-     * cardinal directions are being considered, i.e., the container contains all coordinates ac for which
-     * is_adjacent(c, ac) returns true.
+     * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, only cardinal
+     * directions are being considered, i.e., the container contains all coordinates ac for which is_adjacent(c, ac)
+     * returns true.
      *
      * Coordinates that are outside of the layout bounds are not considered. Thereby, the size of the returned container
      * is at max 6.
      *
-     * @tparam Container Container type that has to provide an insert member function.
      * @param c Coordinate whose adjacent ones are desired.
-     * @return A container of type Container that contains all of c's adjacent coordinates.
+     * @return A container that contains all of c's adjacent coordinates.
      */
-    template <typename Container>
-    Container adjacent_coordinates(const OffsetCoordinateType& c) const noexcept
+    auto adjacent_coordinates(const OffsetCoordinateType& c) const noexcept
     {
-        Container cnt{};
+        std::vector<OffsetCoordinateType> cnt{};
 
         // six possible directions in cube coordinates
         constexpr const std::array<CubeCoordinateType, 6> cube_directions{
@@ -862,7 +862,7 @@ class hexagonal_layout
                           // add neighboring coordinate if there was no over-/underflow
                           if (is_within_bounds(neighbor))
                           {
-                              cnt.insert(cnt.end(), neighbor);
+                              cnt.push_back(neighbor);
                           }
                       });
 
@@ -878,12 +878,12 @@ class hexagonal_layout
     template <typename Fn>
     void foreach_adjacent_coordinate(const OffsetCoordinateType& c, Fn&& fn) const
     {
-        const auto adj = adjacent_coordinates<std::set<OffsetCoordinateType>>(c);
+        const auto adj = adjacent_coordinates(c);
 
         mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
     }
     /**
-     * Returns a container of a given type that contains all coordinates pairs of opposing adjacent coordinates with
+     * Returns a container that contains all coordinates pairs of opposing adjacent coordinates with
      * respect to a given one. In this hexagonal layout, the container content depends on the hexagonal orientation.
      *
      * In case of a pointy_top orientation, the container will contain (east(c), west(c)), (north_east(c),
@@ -894,20 +894,19 @@ class hexagonal_layout
      *
      * Coordinates outside of the layout bounds are not being considered.
      *
-     * @tparam Container Container type that has to provide an insert member function and holds pairs of coordinates.
      * @param c Coordinate whose opposite ones are desired.
-     * @return A container of type Container that contains pairs of c's opposing coordinates.
+     * @return A container that contains pairs of c's opposing coordinates.
      */
-    template <typename Container>
-    Container adjacent_opposite_coordinates(const OffsetCoordinateType& c) const noexcept
+    auto adjacent_opposite_coordinates(const OffsetCoordinateType& c) const noexcept
     {
-        Container cnt{};
+        std::vector<std::pair<OffsetCoordinateType, OffsetCoordinateType>> cnt{};
+        cnt.reserve((max_fanin_size + 1) / 2);  // reserve memory
 
-        const auto add_if_not_c = [&c, &cnt](OffsetCoordinateType cardinal1, OffsetCoordinateType cardinal2)
+        const auto add_if_not_c = [&c, &cnt](OffsetCoordinateType cardinal1, OffsetCoordinateType cardinal2) noexcept
         {
             if (cardinal1 != c && cardinal2 != c)
             {
-                cnt.insert(cnt.end(), {std::move(cardinal1), std::move(cardinal2)});
+                cnt.emplace_back(std::move(cardinal1), std::move(cardinal2));
             }
         };
 
@@ -923,6 +922,8 @@ class hexagonal_layout
         add_if_not_c(north_east(c), south_west(c));
         add_if_not_c(north_west(c), south_east(c));
 
+        cnt.shrink_to_fit();  // return unused memory
+
         return cnt;
     }
     /**
@@ -936,8 +937,7 @@ class hexagonal_layout
     template <typename Fn>
     void foreach_adjacent_opposite_coordinates(const OffsetCoordinateType& c, Fn&& fn) const
     {
-        const auto adj =
-            adjacent_opposite_coordinates<std::set<std::pair<OffsetCoordinateType, OffsetCoordinateType>>>(c);
+        const auto adj = adjacent_opposite_coordinates(c);
 
         mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
     }
