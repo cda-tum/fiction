@@ -963,8 +963,6 @@ class gate_level_layout : public ClockedLayout
                          [this, &t](const auto& dt) { return is_child(get_node(t), static_cast<signal>(dt)); });
         }
 
-//        data_flow.shrink_to_fit();  // return unused memory
-
         return data_flow;
     }
     /**
@@ -992,8 +990,6 @@ class gate_level_layout : public ClockedLayout
                          std::back_inserter(data_flow),
                          [this, &t](const auto& dt) { return is_child(get_node(dt), static_cast<signal>(t)); });
         }
-
-//        data_flow.shrink_to_fit();  // return unused memory
 
         return data_flow;
     }

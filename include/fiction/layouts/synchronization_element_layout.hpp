@@ -205,8 +205,6 @@ class synchronization_element_layout : public ClockedLayout
         std::copy_if(std::cbegin(adj), std::cend(adj), std::back_inserter(incoming),
                      [this, &cz](const auto& ct) { return is_incoming_clocked(cz, ct); });
 
-//        incoming.shrink_to_fit();  // return unused memory
-
         return incoming;
     }
     /**
@@ -240,8 +238,6 @@ class synchronization_element_layout : public ClockedLayout
 
         std::copy_if(std::cbegin(adj), std::cend(adj), std::back_inserter(outgoing),
                      [this, &cz](const auto& ct) { return is_outgoing_clocked(cz, ct); });
-
-//        outgoing.shrink_to_fit();  // return unused memory
 
         return outgoing;
     }

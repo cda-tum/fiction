@@ -690,8 +690,6 @@ class cartesian_layout
         add_if_not_c(south(c));
         add_if_not_c(west(c));
 
-//        cnt.shrink_to_fit();  // return unused memory
-
         return cnt;
     }
     /**
@@ -734,8 +732,6 @@ class cartesian_layout
 
         add_if_not_c(north(c), south(c));
         add_if_not_c(east(c), west(c));
-
-//        cnt.shrink_to_fit();  // return unused memory
 
         return cnt;
     }
