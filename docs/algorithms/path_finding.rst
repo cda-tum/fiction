@@ -17,6 +17,13 @@ A* Shortest Path
 
 .. doxygenfunction:: fiction::a_star
 
+Jump Point Search Shortest Path in a Cartesian Grid
+---------------------------------------------------
+
+**Header:** ``fiction/algorithms/path_finding/jump_point_search.hpp``
+
+.. doxygenfunction:: fiction::jump_point_search
+
 k Shortest Paths
 ----------------
 
