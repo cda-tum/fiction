@@ -472,6 +472,11 @@ class jump_point_search_impl
  * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
  * obstructed coordinates.
  *
+ * JPS was introduced in "Online Graph Pruning for Pathfinding on Grid Maps" by Daniel Harabor and Alban Grastien in
+ * AAAI 2011.
+ *
+ * This implementation is based on https://github.com/qiao/PathFinding.js.
+ *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
  * @tparam Dist Distance value type to be used in the heuristic cost function.

@@ -274,7 +274,10 @@ class a_star_impl
         Path path{};
 
         // iterate backwards over the found connections and add them to the path
-        for (auto current = target; current != source; current = came_from.at(current)) { path.push_back(current); }
+        for (auto current = target; current != source; current = came_from.at(current))
+        {
+            path.push_back(current);
+        }
         // finally, add the source coordinate
         path.push_back(source);
         // and reverse the path to bring it in proper order
@@ -294,6 +297,11 @@ class a_star_impl
  *
  * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
  * obstructed coordinates.
+ *
+ * A* was introduced in "A Formal Basis for the Heuristic Determination of Minimum Cost Paths" by Peter E. Hart, Nils J.
+ * Nilsson, and Bertram Raphael in IEEE Transactions on Systems Science and Cybernetics 1968, Volume 4, Issue 2.
+ *
+ * This implementation is based on the pseudocode at https://en.wikipedia.org/wiki/A*_search_algorithm.
  *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
