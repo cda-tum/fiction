@@ -101,9 +101,10 @@ class color_routing_impl
         const auto edge_intersection_graph =
             generate_edge_intersection_graph(layout, objectives, epg_params, &pst.epg_stats);
 
-        std::cout << fmt::format("Generated EPG with {} vertices and {} edges in {} cliques",
-                                 pst.epg_stats.num_vertices, pst.epg_stats.num_edges, pst.epg_stats.cliques.size())
-                  << std::endl;
+        //        std::cout << fmt::format("Generated EPG with {} vertices and {} edges in {} cliques",
+        //                                 pst.epg_stats.num_vertices, pst.epg_stats.num_edges,
+        //                                 pst.epg_stats.cliques.size())
+        //                  << std::endl;
 
         // if no partial routing is allowed, abort if some objectives cannot be satisfied by path enumeration
         if (!ps.conduct_partial_routing && pst.epg_stats.number_of_unroutable_objectives > 0)
@@ -115,13 +116,14 @@ class color_routing_impl
         dvc_ps.engine                                 = ps.engine;
         dvc_ps.sat_params.cliques                     = pst.epg_stats.cliques;
         dvc_ps.sat_params.clique_size_color_frequency = !ps.partial_sat;
-        dvc_ps.sat_params.sat_search_tactic           = graph_coloring_sat_search_tactic::BINARY_SEARCH;
+        dvc_ps.sat_params.sat_search_tactic           = graph_coloring_sat_search_tactic::LINEARLY_ASCENDING;
+        dvc_ps.sat_params.sat_engine                  = bill::solvers::glucose_41;
 
-        std::cout << "Started coloring..." << std::endl;
+        //        std::cout << "Started coloring..." << std::endl;
 
         const auto vertex_coloring = determine_vertex_coloring(edge_intersection_graph, dvc_ps, &pst.color_stats);
 
-        std::cout << "... done!" << std::endl;
+        //        std::cout << "... done!" << std::endl;
 
         // if no partial routing is allowed, abort if the coloring does not satisfy all objectives
         if (!ps.conduct_partial_routing && pst.color_stats.color_frequency != pst.epg_stats.cliques.size())
