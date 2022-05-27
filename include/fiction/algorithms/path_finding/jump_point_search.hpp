@@ -467,7 +467,7 @@ class jump_point_search_impl
  * on uniform-cost grids. It uses a heuristic distance function that estimates the remaining costs towards the target in
  * every step. Thus, this heuristic function should neither be complex to calculate nor overestimating the remaining
  * costs. Common heuristics to be used are the Manhattan and the Euclidean distance functions. See distance.hpp for
- * implementations.
+ * implementations. Since JPS assumes a unit-cost grid, the use of cost functions together with JPS is not possible.
  *
  * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
  * obstructed coordinates.
@@ -483,10 +483,10 @@ class jump_point_search_impl
  *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
- * @tparam Dist Distance value type to be used in the heuristic cost function.
+ * @tparam Dist Distance value type to be used in the heuristic estimatation function.
  * @param layout The clocked layout in which the shortest path between source and target is to be found.
  * @param objective Source-target coordinate pair.
- * @param dist_fn A distance functor that implements the desired heuristic cost function.
+ * @param dist_fn A distance functor that implements the desired heuristic estimation function.
  * @param ps Parameters.
  * @return The shortest loopless path in layout from source to target.
  */

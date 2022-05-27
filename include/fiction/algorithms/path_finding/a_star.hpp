@@ -314,10 +314,12 @@ class a_star_impl
  *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
- * @tparam Dist Distance value type to be used in the heuristic cost function.
+ * @tparam Dist Distance value type to be used in the heuristic estimation function.
+ * @tparam Cost Cost value type to be used when determining moving cost between coordinates.
  * @param layout The clocked layout in which the shortest path between source and target is to be found.
  * @param objective Source-target coordinate pair.
- * @param dist_fn A distance functor that implements the desired heuristic cost function.
+ * @param dist_fn A distance functor that implements the desired heuristic estimation function.
+ * @param cost_fn A cost functor that implements the desired cost function.
  * @param ps Parameters.
  * @return The shortest loopless path in layout from source to target.
  */
