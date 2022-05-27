@@ -5,6 +5,7 @@
 #ifndef FICTION_A_STAR_HPP
 #define FICTION_A_STAR_HPP
 
+#include "fiction/algorithms/path_finding/cost.hpp"
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/routing_utils.hpp"
@@ -14,6 +15,7 @@
 #include <cassert>
 #include <cstdint>
 #include <iterator>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -32,16 +34,17 @@ struct a_star_params
 namespace detail
 {
 
-template <typename Path, typename Lyt, typename Dist>
+template <typename Path, typename Lyt, typename Dist, typename Cost>
 class a_star_impl
 {
   public:
     a_star_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const distance_functor<Lyt, Dist>& dist_fn,
-                const a_star_params p) :
+                const cost_functor<Lyt, Cost>& cost_fn, const a_star_params p) :
             layout{lyt},
             source{obj.source},
             target{obj.target},
             distance{dist_fn},
+            cost{cost_fn},
             ps{p}
     {
         open_list.push(coordinate_f{source, 0});
@@ -81,8 +84,14 @@ class a_star_impl
 
     const distance_functor<Lyt, Dist> distance;
 
+    const cost_functor<Lyt, Cost> cost;
+
     a_star_params ps;
 
+    /**
+     * The values used for g and f have a type in accordance with Dist and Cost.
+     */
+    using g_f_type = std::common_type_t<Dist, Cost>;
     /**
      * Stores a coordinate and its f-value.
      */
@@ -90,7 +99,7 @@ class a_star_impl
     {
         coordinate<Lyt> coord;
 
-        Dist f;
+        g_f_type f;
 
         /**
          * Comparator for the priority queue. Compares only the f-values.
@@ -132,7 +141,7 @@ class a_star_impl
     /**
      * Stores the g-cost for each coordinate c, i.e., the length of the shortest path from source to c found so far.
      */
-    std::unordered_map<coordinate<Lyt>, uint32_t> g_values{};
+    std::unordered_map<coordinate<Lyt>, g_f_type> g_values{};
     /**
      * Tracks the origin of each coordinate to recreate the path.
      */
@@ -181,8 +190,8 @@ class a_star_impl
                     return true;  // skip any coordinate that is already in the closed list
                 }
 
-                // compute the g-value of cz. In this implementation, each 'step' has uniform costs of 1
-                const auto tentative_g = g(current) + 1;
+                // compute the g-value of cz. In this implementation, the costs of each 'step' are given by a function
+                const auto tentative_g = g(current) + cost(current, successor);
 
                 // f-value does not matter because the comparator compares only the coordinates
                 if (const auto it = open_list.find({successor, 0});
@@ -197,7 +206,7 @@ class a_star_impl
                     set_g(successor, tentative_g);
 
                     // compute new f-value
-                    const auto f = tentative_g + distance(successor, target);
+                    const auto f = tentative_g + static_cast<g_f_type>(distance(successor, target));
 
                     // if successor is contained in the open list (frontier)
                     if (it != open_list.end())
@@ -231,7 +240,7 @@ class a_star_impl
      * @param c Coordinate whose g-value is desired.
      * @return g-value of coordinate c or 0 if no value has been stored.
      */
-    uint32_t g(const coordinate<Lyt>& c) const noexcept
+    g_f_type g(const coordinate<Lyt>& c) const noexcept
     {
         if (const auto it = g_values.find(c); it != g_values.cend())
         {
@@ -248,7 +257,7 @@ class a_star_impl
      * @param c Coordinate whose g-value is to be updated to g_val.
      * @param g_val New g-value for c.
      */
-    void set_g(const coordinate<Lyt>& c, const uint32_t g_val) noexcept
+    void set_g(const coordinate<Lyt>& c, const g_f_type g_val) noexcept
     {
         g_values.insert_or_assign(c, g_val);
     }
@@ -260,7 +269,7 @@ class a_star_impl
      * @param g_val g-value to compare to c's.
      * @return True iff the given g-value does not mean an improvement for the given coordinate.
      */
-    bool no_improvement(const coordinate<Lyt>& c, const uint32_t g_val) noexcept
+    bool no_improvement(const coordinate<Lyt>& c, const g_f_type g_val) noexcept
     {
         return g_val >= g(c);
     }
@@ -312,14 +321,15 @@ class a_star_impl
  * @param ps Parameters.
  * @return The shortest loopless path in layout from source to target.
  */
-template <typename Path, typename Lyt, typename Dist = uint64_t>
+template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
 [[nodiscard]] Path a_star(const Lyt& layout, const routing_objective<Lyt>& objective,
                           const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, Dist>(),
+                          const cost_functor<Lyt, Cost>&     cost_fn = unit_cost_functor<Lyt, Cost>(),
                           a_star_params                      ps      = {}) noexcept
 {
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
 
-    return detail::a_star_impl<Path, Lyt, Dist>{layout, objective, dist_fn, ps}.run();
+    return detail::a_star_impl<Path, Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, ps}.run();
 }
 
 }  // namespace fiction
