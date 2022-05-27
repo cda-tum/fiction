@@ -5,6 +5,7 @@
 #include "catch.hpp"
 
 #include <fiction/algorithms/path_finding/a_star.hpp>
+#include <fiction/algorithms/path_finding/cost.hpp>
 #include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -227,7 +228,7 @@ TEST_CASE("10x10 clocked layouts with varying distance functions", "[A*]")
     using clk_lyt    = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using coord_path = layout_coordinate_path<clk_lyt>;
 
-    SECTION("Manhattan")
+    SECTION("Manhattan distance")
     {
         SECTION("RES")
         {
@@ -257,7 +258,7 @@ TEST_CASE("10x10 clocked layouts with varying distance functions", "[A*]")
             }
         }
     }
-    SECTION("Euclidean")
+    SECTION("Euclidean distance")
     {
         SECTION("RES")
         {
@@ -286,5 +287,32 @@ TEST_CASE("10x10 clocked layouts with varying distance functions", "[A*]")
                 CHECK(path.target() == coordinate<clk_lyt>{9, 9});
             }
         }
+    }
+}
+
+TEST_CASE("4x4 clocked layouts with varying cost functions", "[A*]")
+{
+    using clk_lyt    = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using coord_path = layout_coordinate_path<clk_lyt>;
+
+    clk_lyt layout{{3, 3}, use_clocking<clk_lyt>()};
+
+    SECTION("Unit cost")
+    {
+        const auto path = a_star<coord_path, clk_lyt>(layout, {{0, 0}, {3, 3}}, manhattan_distance_functor<clk_lyt>(),
+                                                      unit_cost_functor<clk_lyt>());
+
+        CHECK(path.size() == 7);
+        CHECK(path.source() == coordinate<clk_lyt>{0, 0});
+        CHECK(path.target() == coordinate<clk_lyt>{3, 3});
+    }
+    SECTION("Random cost")
+    {
+        const auto path = a_star<coord_path, clk_lyt>(layout, {{0, 0}, {3, 3}}, manhattan_distance_functor<clk_lyt>(),
+                                                      random_cost_functor<clk_lyt>());
+
+        CHECK(path.size() == 7);
+        CHECK(path.source() == coordinate<clk_lyt>{0, 0});
+        CHECK(path.target() == coordinate<clk_lyt>{3, 3});
     }
 }
