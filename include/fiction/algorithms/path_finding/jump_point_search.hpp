@@ -463,7 +463,7 @@ class jump_point_search_impl
 
 /**
  * The Jump Point Search (JPS) path finding algorithm for shortest loopless paths between a given source and target
- * coordinate in a clocked layout. JPS is an optimization of A* for shortest paths but offers better average complexity
+ * coordinate in a clocked layout. JPS is an optimization of A* for shortest paths and offers better average complexity
  * on uniform-cost grids. It uses a heuristic distance function that estimates the remaining costs towards the target in
  * every step. Thus, this heuristic function should neither be complex to calculate nor overestimating the remaining
  * costs. Common heuristics to be used are the Manhattan and the Euclidean distance functions. See distance.hpp for
@@ -472,10 +472,14 @@ class jump_point_search_impl
  * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
  * obstructed coordinates.
  *
+ * The original JPS highly relies on diagonal paths in the grid which are not possible in most Cartesian grid-based FCN
+ * technologies. Therefore, this implementation disallows diagonal paths. Consequently, and due to non-uniform clocking
+ * schemes, JPS might perform worse than A* in terms of runtime.
+ *
  * JPS was introduced in "Online Graph Pruning for Pathfinding on Grid Maps" by Daniel Harabor and Alban Grastien in
  * AAAI 2011.
  *
- * This implementation is based on https://github.com/qiao/PathFinding.js.
+ * Parts of this implementation are based on https://github.com/qiao/PathFinding.js.
  *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
