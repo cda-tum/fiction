@@ -113,7 +113,7 @@ template <typename Lyt, typename Dist = uint64_t>
 class manhattan_distance_functor : public distance_functor<Lyt, Dist>
 {
   public:
-    manhattan_distance_functor() : distance_functor<Lyt, Dist>(&manhattan_distance<Lyt>) {}
+    manhattan_distance_functor() : distance_functor<Lyt, Dist>(&manhattan_distance<Lyt, Dist>) {}
 };
 /**
  * A pre-defined distance functor that uses the Euclidean distance.
@@ -125,7 +125,7 @@ template <typename Lyt, typename Dist = double>
 class euclidean_distance_functor : public distance_functor<Lyt, Dist>
 {
   public:
-    euclidean_distance_functor() : distance_functor<Lyt, Dist>(&euclidean_distance<Lyt>) {}
+    euclidean_distance_functor() : distance_functor<Lyt, Dist>(&euclidean_distance<Lyt, Dist>) {}
 };
 
 }  // namespace fiction
