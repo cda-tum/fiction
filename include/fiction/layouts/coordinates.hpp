@@ -235,7 +235,7 @@ struct ucoord_t
     }
 };
 
-std::ostream& operator<<(std::ostream& os, const ucoord_t& t)
+inline std::ostream& operator<<(std::ostream& os, const ucoord_t& t)
 {
     os << t.str();
     return os;
