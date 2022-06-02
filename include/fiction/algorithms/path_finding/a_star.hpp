@@ -97,6 +97,7 @@ class a_star_impl
      */
     struct coordinate_f
     {
+        // cannot be const because operator= is required by std::priority_queue
         coordinate<Lyt> coord;
 
         g_f_type f;
@@ -191,7 +192,7 @@ class a_star_impl
                 }
 
                 // compute the g-value of cz. In this implementation, the costs of each 'step' are given by a function
-                const auto tentative_g = g(current) + cost(current, successor);
+                const g_f_type tentative_g = g(current) + cost(current, successor);
 
                 // f-value does not matter because the comparator compares only the coordinates
                 if (const auto it = open_list.find({successor, 0});
@@ -325,8 +326,8 @@ class a_star_impl
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
 [[nodiscard]] Path a_star(const Lyt& layout, const routing_objective<Lyt>& objective,
-                          const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, Dist>(),
-                          const cost_functor<Lyt, Cost>&     cost_fn = unit_cost_functor<Lyt, Cost>(),
+                          const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, uint64_t>(),
+                          const cost_functor<Lyt, Cost>&     cost_fn = unit_cost_functor<Lyt, uint8_t>(),
                           a_star_params                      ps      = {}) noexcept
 {
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
