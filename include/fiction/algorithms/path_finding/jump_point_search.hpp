@@ -188,7 +188,7 @@ class jump_point_search_impl
                     }
 
                     // compute the g-value of current. Add the distance to the jump point as it might not be adjacent
-                    const auto tentative_g = g(current) + distance(*jump_point, current);
+                    const auto tentative_g = g(current) + distance(layout, *jump_point, current);
 
                     // f-value does not matter because the comparator compares only the coordinates
                     if (const auto it = open_list.find({*jump_point, 0});
@@ -203,7 +203,7 @@ class jump_point_search_impl
                         set_g(*jump_point, tentative_g);
 
                         // compute new f-value
-                        const auto f = tentative_g + distance(*jump_point, target);
+                        const auto f = tentative_g + distance(layout, *jump_point, target);
 
                         // if successor is contained in the open list (frontier)
                         if (it != open_list.end())

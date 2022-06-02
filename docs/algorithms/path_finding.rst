@@ -34,6 +34,8 @@ A* Shortest Path
 **Header:** ``fiction/algorithms/path_finding/a_star.hpp``
 
 .. doxygenfunction:: fiction::a_star
+.. doxygenfunction:: fiction::a_star_distance
+.. doxygenclass:: fiction::a_star_distance_functor
 
 Jump Point Search Shortest Path in a Cartesian Grid
 ---------------------------------------------------

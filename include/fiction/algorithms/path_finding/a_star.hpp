@@ -207,7 +207,7 @@ class a_star_impl
                     set_g(successor, tentative_g);
 
                     // compute new f-value
-                    const auto f = tentative_g + static_cast<g_f_type>(distance(successor, target));
+                    const auto f = tentative_g + static_cast<g_f_type>(distance(layout, successor, target));
 
                     // if successor is contained in the open list (frontier)
                     if (it != open_list.end())
@@ -334,6 +334,37 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
 
     return detail::a_star_impl<Path, Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, ps}.run();
 }
+/**
+ * A distance function that does not approximate but compute the actual minimum path length on the given layout via A*
+ * traversal. Naturally, this function cannot be evaluated in O(1) but has the polynomial complexity of A*.
+ *
+ * @tparam Lyt Clocked layout type.
+ * @tparam Dist Distance type.
+ * @param lyt Layout.
+ * @param source Source coordinate.
+ * @param target Target coordinate.
+ * @return Minimum path length between source and target.
+ */
+template <typename Lyt, typename Dist = uint64_t>
+[[nodiscard]] Dist a_star_distance(const Lyt& lyt, const coordinate<Lyt>& source,
+                                   const coordinate<Lyt>& target) noexcept
+{
+    static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
+
+    return static_cast<Dist>(a_star<layout_coordinate_path<Lyt>>(lyt, {source, target}).size());
+}
+/**
+ * A pre-defined distance functor that uses the A* distance.
+ *
+ * @tparam Lyt Clocked layout type.
+ * @tparam Dist Distance type.
+ */
+template <typename Lyt, typename Dist = double>
+class a_star_distance_functor : public distance_functor<Lyt, Dist>
+{
+  public:
+    a_star_distance_functor() : distance_functor<Lyt, Dist>(&a_star_distance<Lyt, Dist>) {}
+};
 
 }  // namespace fiction
 

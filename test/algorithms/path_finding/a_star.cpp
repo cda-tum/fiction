@@ -30,8 +30,10 @@ TEST_CASE("2x2 clocked layouts", "[A*]")
         SECTION("(0,0) to (1,1)")  // path of length 3
         {
             const auto path = a_star<coord_path>(layout, {{0, 0}, {1, 1}});
+            const auto dist = a_star_distance(layout, {0, 0}, {1, 1});
 
             CHECK(path.size() == 3);
+            CHECK(dist == 3);
             CHECK(path.source() == coordinate<clk_lyt>{0, 0});
             CHECK(path.target() == coordinate<clk_lyt>{1, 1});
             // path could either go east-south or south-east
@@ -40,14 +42,18 @@ TEST_CASE("2x2 clocked layouts", "[A*]")
         SECTION("(1,1) to (0,0)")  // no valid paths
         {
             const auto path = a_star<coord_path>(layout, {{1, 1}, {0, 0}});
+            const auto dist = a_star_distance(layout, {1, 1}, {0, 0});
 
             CHECK(path.empty());
+            CHECK(dist == 0);
         }
         SECTION("(0,0) to (0,0)")  // source and target are identical
         {
             const auto path = a_star<coord_path>(layout, {{0, 0}, {0, 0}});
+            const auto dist = a_star_distance(layout, {0, 0}, {0, 0});
 
             CHECK(path.size() == 1);
+            CHECK(dist == 1);
             CHECK(path.source() == coordinate<clk_lyt>{0, 0});
             CHECK(path.target() == coordinate<clk_lyt>{0, 0});
         }
@@ -59,8 +65,10 @@ TEST_CASE("2x2 clocked layouts", "[A*]")
         SECTION("(0,0) to (0,1)")  // path of length 4
         {
             const auto path = a_star<coord_path>(layout, {{0, 0}, {0, 1}});
+            const auto dist = a_star_distance(layout, {0, 0}, {0, 1});
 
             CHECK(path.size() == 4);
+            CHECK(dist == 4);
             CHECK(path.source() == coordinate<clk_lyt>{0, 0});
             CHECK(path.target() == coordinate<clk_lyt>{0, 1});
             CHECK(path[1] == coordinate<clk_lyt>{1, 0});
@@ -69,8 +77,10 @@ TEST_CASE("2x2 clocked layouts", "[A*]")
         SECTION("(0,0) to (0,0)")  // source and target are identical
         {
             const auto path = a_star<coord_path>(layout, {{0, 0}, {0, 0}});
+            const auto dist = a_star_distance(layout, {0, 0}, {0, 0});
 
             CHECK(path.size() == 1);
+            CHECK(dist == 1);
             CHECK(path.source() == coordinate<clk_lyt>{0, 0});
             CHECK(path.target() == coordinate<clk_lyt>{0, 0});
         }
@@ -314,5 +324,38 @@ TEST_CASE("4x4 clocked layouts with varying cost functions", "[A*]")
         CHECK(path.size() == 7);
         CHECK(path.source() == coordinate<clk_lyt>{0, 0});
         CHECK(path.target() == coordinate<clk_lyt>{3, 3});
+    }
+}
+
+TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]")
+{
+    using clk_lyt    = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using coord_path = layout_coordinate_path<clk_lyt>;
+
+    SECTION("2DDWave")
+    {
+        clk_lyt layout{{3, 3}, twoddwave_clocking<clk_lyt>()};
+
+        SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
+        {
+            const auto path = a_star<coord_path>(layout, {{0, 0}, {3, 3}}, a_star_distance_functor<clk_lyt>());
+
+            CHECK(path.size() == 7);
+            CHECK(path.source() == coordinate<clk_lyt>{0, 0});
+            CHECK(path.target() == coordinate<clk_lyt>{3, 3});
+        }
+    }
+    SECTION("USE")
+    {
+        clk_lyt layout{{3, 3}, use_clocking<clk_lyt>()};
+
+        SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
+        {
+            const auto path = a_star<coord_path>(layout, {{0, 0}, {3, 3}}, a_star_distance_functor<clk_lyt>());
+
+            CHECK(path.size() == 7);
+            CHECK(path.source() == coordinate<clk_lyt>{0, 0});
+            CHECK(path.target() == coordinate<clk_lyt>{3, 3});
+        }
     }
 }
