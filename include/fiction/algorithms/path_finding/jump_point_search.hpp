@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <iterator>
 #include <optional>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -422,7 +423,8 @@ class jump_point_search_impl
     {
         Path line{};
 
-        const int64_t dx = std::abs(c2.x - c1.x), dy = std::abs(c2.y - c1.y);
+        const int64_t dx = std::abs(static_cast<std::make_signed_t<decltype(c1.x)>>(c2.x - c1.x)),
+                      dy = std::abs(static_cast<std::make_signed_t<decltype(c1.y)>>(c2.y - c1.y));
 
         const int64_t sx = (c1.x < c2.x) ? 1 : -1, sy = (c1.y < c2.y) ? 1 : -1;
 
