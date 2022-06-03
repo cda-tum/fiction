@@ -197,16 +197,51 @@ class sat_coloring_handler
             largest_clique{std::max_element(ps.cliques.cbegin(), ps.cliques.cend(),
                                             [](const auto& c1, const auto& c2) { return c1.size() < c2.size(); })},
             q{largest_clique == ps.cliques.cend() ? 1 : (largest_clique->size() ? largest_clique->size() : 1)}
-    {}
+    {
+//
+//        std::for_each(graph.begin_vertices(), graph.end_vertices(),
+//                      [](const auto& vp)
+//                      {
+//                          // source and target of edge e
+//                          const auto& v = vp.first;
+//
+//                          std::cout << fmt::format("{} ;", v) << std::endl;
+//                      });
+//
+//        std::for_each(graph.begin_edges(), graph.end_edges(),
+//                      [](const auto& e)
+//                      {
+//                          // source and target of edge e
+//                          const auto& [v1, v2] = e.first;
+//
+//                          std::cout << fmt::format("{} -- {} ;", v1, v2) << std::endl;
+//                      });
+//
+//        std::cout << fmt::format("graph has {} cliques:", ps.cliques.size()) << std::endl;
+//        std::for_each(ps.cliques.cbegin(), ps.cliques.cend(),
+//                      [](const auto& c)
+//                      { std::cout << fmt::format("{}", fmt::join(c.cbegin(), c.cend(), ", ")) << std::endl; });
+//        std::cout << fmt::format("largest clique is of size {}: ", q);
+//        if (largest_clique != ps.cliques.cend())
+//            std::cout << fmt::format("{}", fmt::join(largest_clique->cbegin(), largest_clique->cend(), ", "))
+//                      << std::endl;
+    }
 
     result_instance check_k_coloring(const std::size_t k) const noexcept
     {
+//        std::cout << fmt::format("k = {}/{}", k, graph.size_vertices()) << std::endl;
+
         const auto k_color_instance = std::make_shared<solver_instance>(graph, k);
 
         at_least_one_color_per_vertex(k_color_instance);
         at_most_one_color_per_vertex(k_color_instance);
         exclude_identical_adjacent_colors(k_color_instance);
         symmetry_breaking(k_color_instance);
+
+        // TODO There is a problem with this color frequency constraint. It's best explained using an example: Let there
+        // be two cliques of size 1. Color frequency says, they must both be assigned color 0 for frequency reasons. Now
+        // let the respective paths be mutex, i.e., their nodes share an edge. Suddenly, the graph is not colorable
+        // anymore. It would actually work fine if the cliques were total.
 
         if (ps.clique_size_color_frequency)
         {

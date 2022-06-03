@@ -22,12 +22,14 @@ namespace fiction
  *
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Integral type for the distance.
+ * @param lyt Layout.
  * @param source Source coordinate.
  * @param target Target coordinate.
  * @return Manhattan distance between source and target.
  */
 template <typename Lyt, typename Dist = uint64_t>
-[[nodiscard]] Dist manhattan_distance(const coordinate<Lyt>& source, const coordinate<Lyt>& target) noexcept
+[[nodiscard]] Dist manhattan_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
+                                      const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
@@ -42,12 +44,14 @@ template <typename Lyt, typename Dist = uint64_t>
  *
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Floating-point type for the distance.
+ * @param lyt Layout.
  * @param source Source coordinate.
  * @param target Target coordinate.
  * @return Euclidean distance between source and target.
  */
 template <typename Lyt, typename Dist = double>
-[[nodiscard]] Dist euclidean_distance(const coordinate<Lyt>& source, const coordinate<Lyt>& target) noexcept
+[[nodiscard]] Dist euclidean_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
+                                      const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(std::is_floating_point_v<Dist>, "Dist is not a floating-point type");
@@ -76,7 +80,8 @@ class distance_functor
      *
      * @param dist_fn A function that maps from layout coordinates to a distance value.
      */
-    explicit distance_functor(const std::function<Dist(const coordinate<Lyt>&, const coordinate<Lyt>&)>& dist_fn) :
+    explicit distance_functor(
+        const std::function<Dist(const Lyt& lyt, const coordinate<Lyt>&, const coordinate<Lyt>&)>& dist_fn) :
             distance_function{dist_fn}
     {
         static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
@@ -88,20 +93,22 @@ class distance_functor
     /**
      * Operator to call the distance function.
      *
+     * @param lyt Layout.
      * @param source Source coordinate.
      * @param target Target coordinate.
      * @return Distance between source and target.
      */
-    [[nodiscard]] virtual Dist operator()(const coordinate<Lyt>& source, const coordinate<Lyt>& target) const
+    [[nodiscard]] virtual Dist operator()(const Lyt& lyt, const coordinate<Lyt>& source,
+                                          const coordinate<Lyt>& target) const
     {
-        return distance_function(source, target);
+        return distance_function(lyt, source, target);
     }
 
   protected:
     /**
      * Distance function.
      */
-    const std::function<Dist(const coordinate<Lyt>&, const coordinate<Lyt>&)> distance_function;
+    const std::function<Dist(const Lyt& lyt, const coordinate<Lyt>&, const coordinate<Lyt>&)> distance_function;
 };
 /**
  * A pre-defined distance functor that uses the Manhattan distance.
@@ -113,7 +120,7 @@ template <typename Lyt, typename Dist = uint64_t>
 class manhattan_distance_functor : public distance_functor<Lyt, Dist>
 {
   public:
-    manhattan_distance_functor() : distance_functor<Lyt, Dist>(&manhattan_distance<Lyt>) {}
+    manhattan_distance_functor() : distance_functor<Lyt, Dist>(&manhattan_distance<Lyt, Dist>) {}
 };
 /**
  * A pre-defined distance functor that uses the Euclidean distance.
@@ -125,7 +132,7 @@ template <typename Lyt, typename Dist = double>
 class euclidean_distance_functor : public distance_functor<Lyt, Dist>
 {
   public:
-    euclidean_distance_functor() : distance_functor<Lyt, Dist>(&euclidean_distance<Lyt>) {}
+    euclidean_distance_functor() : distance_functor<Lyt, Dist>(&euclidean_distance<Lyt, Dist>) {}
 };
 
 }  // namespace fiction
