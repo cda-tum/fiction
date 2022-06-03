@@ -9,6 +9,7 @@
 #include "pybind11/stl.h"
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/traits.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -28,7 +29,7 @@ inline void cartesian_layout(pybind11::module& m)
      */
     py::class_<cart_lyt>(m, "cartesian_layout")
         .def(py::init<>())
-        .def(py::init<const fiction::offset::ucoord_t&>(), "dimension"_a)
+        .def(py::init<const fiction::aspect_ratio<cart_lyt>&>(), "dimension"_a)
         .def("x", &cart_lyt::x)
         .def("y", &cart_lyt::y)
         .def("z", &cart_lyt::z)
@@ -78,21 +79,21 @@ inline void cartesian_layout(pybind11::module& m)
         .def("coordinates",
              [](const cart_lyt& lyt)
              {
-                 std::vector<fiction::offset::ucoord_t> coords{};
+                 std::vector<fiction::coordinate<cart_lyt>> coords{};
                  lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); });
                  return coords;
              })
         .def("ground_coordinates",
              [](const cart_lyt& lyt)
              {
-                 std::vector<fiction::offset::ucoord_t> coords{};
+                 std::vector<fiction::coordinate<cart_lyt>> coords{};
                  lyt.foreach_ground_coordinate([&coords](const auto& c) { coords.push_back(c); });
                  return coords;
              })
         .def("adjacent_coordinates",
-             [](const cart_lyt& lyt, const fiction::offset::ucoord_t& c)
+             [](const cart_lyt& lyt, const fiction::coordinate<cart_lyt>& c)
              {
-                 std::vector<fiction::offset::ucoord_t> coords{};
+                 std::vector<fiction::coordinate<cart_lyt>> coords{};
                  lyt.foreach_adjacent_coordinate(c, [&coords](const auto& ac) { coords.push_back(ac); });
                  return coords;
              })
