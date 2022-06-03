@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 build = "cp3*"
 archs = "auto64"
 test-skip = "*_arm64 *-musllinux_x86_64 *_universal2:arm64"
-test-command = "python3 -c \"from fiction import pyfiction as pyfcn\""
+test-command = "cd bindings/pyfiction/; python3 -m unittest discover"
 #test-requires = ["qiskit-terra"]
 environment = { DEPLOY = "ON" }
 build-verbosity = 1

@@ -25,8 +25,11 @@ class CMakeBuild(build_ext):
 
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
-                      '-DFICTION_PYTHON_BINDINGS=ON'
-                      '-DFICTION_Z3=ON'
+                      '-DFICTION_CLI=OFF',
+                      '-DFICTION_TEST=OFF',
+                      '-DFICTION_EXPERIMENTS=OFF',
+                      '-DFICTION_PYTHON_BINDINGS=ON',
+                      '-DFICTION_Z3=ON',
                       '-DFICTION_ENABLE_MUGEN=ON']
         if self.compiler.compiler_type != "msvc":
             # Using Ninja-build since it a) is available as a wheel and b)
