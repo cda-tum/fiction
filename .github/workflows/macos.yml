@@ -77,8 +77,18 @@ jobs:
 
         run: cmake --build . --config ${{matrix.build_type}} -j3  # macOS runners provide 3 cores
 
-      - name: Test
+      - name: Test fiction
         working-directory: ${{github.workspace}}/build
         # Execute tests defined by the CMake configuration.
         # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
         run: ctest -C ${{matrix.build_type}} --verbose
+
+      - name: Install Python Bindings
+        working-directory: ${{github.workspace}}
+        run: |
+          pip3 -v install .
+
+      - name: Test Python Bindings
+        working-directory: ${{github.workspace}}/bindings/pyfiction/
+        run: |
+          python3 -m unittest discover
