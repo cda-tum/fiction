@@ -2,13 +2,13 @@
 // Created by marcel on 26.01.22.
 //
 
-#include <fiction/algorithms/verification/design_rule_violations.hpp>
-#include <fiction/algorithms/verification/equivalence_checking.hpp>
-#include <fiction/io/network_reader.hpp>
-#include <fiction/io/print_layout.hpp>
-#include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/traits.hpp>
-#include <fiction/types.hpp>
+#include "fiction/algorithms/verification/design_rule_violations.hpp"
+#include "fiction/algorithms/verification/equivalence_checking.hpp"
+#include "fiction/io/network_reader.hpp"
+#include "fiction/io/print_layout.hpp"
+#include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 
 #include <kitty/print.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
@@ -181,7 +181,7 @@ std::tuple<fiction::eq_type, int64_t, std::string> equivalence_checking(const Sp
     return {st.eq, st.tp_diff, cex};
 }
 
-PYBIND11_MODULE(pyfiction, m)
+PYBIND11_MODULE(pyfiction_test, m)
 {
     // docstring
     m.doc() = "Python interface for the fiction framework for Field-coupled Nanotechnologies";

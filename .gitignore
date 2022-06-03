@@ -10,3 +10,4 @@ build/
 *.json
 __pycache__
 lcov.info
+*.egg-info/
