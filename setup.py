@@ -29,8 +29,9 @@ class CMakeBuild(build_ext):
                       '-DFICTION_TEST=OFF',
                       '-DFICTION_EXPERIMENTS=OFF',
                       '-DFICTION_PYTHON_BINDINGS=ON',
-                      '-DFICTION_Z3=ON',
-                      '-DFICTION_ENABLE_MUGEN=ON']
+                      # '-DFICTION_Z3=ON',
+                      # '-DFICTION_ENABLE_MUGEN=ON'
+                      ]
         if self.compiler.compiler_type != "msvc":
             # Using Ninja-build since it a) is available as a wheel and b)
             # multithreads automatically. MSVC would require all variables be
