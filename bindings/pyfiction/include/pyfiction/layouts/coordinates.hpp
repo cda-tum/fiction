@@ -5,9 +5,10 @@
 #ifndef PYFICTION_COORDINATES_HPP
 #define PYFICTION_COORDINATES_HPP
 
-#include "fiction/layouts/coordinates.hpp"
 #include "pybind11/operators.h"
 #include "pybind11/pybind11.h"
+
+#include <fiction/layouts/coordinates.hpp>
 
 #include <cstdint>
 #include <exception>
@@ -41,6 +42,7 @@ inline void coordinates(pybind11::module& m)
 
                 throw std::runtime_error("Wrong number of dimensions provided for coordinate");
             }))
+
         .def_property(
             "x", [](fiction::offset::ucoord_t& self) -> decltype(self.x) { return self.x; },
             [](fiction::offset::ucoord_t& self, const decltype(self.x) value) { self.x = value; })
@@ -50,13 +52,17 @@ inline void coordinates(pybind11::module& m)
         .def_property(
             "z", [](fiction::offset::ucoord_t& self) -> decltype(self.z) { return self.z; },
             [](fiction::offset::ucoord_t& self, const decltype(self.z) value) { self.z = value; })
+
         .def(py::self == py::self)
         .def(py::self != py::self)
         .def(py::self < py::self)
         .def(py::self > py::self)
         .def(py::self <= py::self)
         .def(py::self >= py::self)
-        .def("__repr__", &fiction::offset::ucoord_t::str);
+
+        .def("__repr__", &fiction::offset::ucoord_t::str)
+
+        ;
 
     py::implicitly_convertible<py::tuple, fiction::offset::ucoord_t>();
 }
