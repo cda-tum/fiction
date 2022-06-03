@@ -31,6 +31,20 @@ class TestClockedLayout(unittest.TestCase):
         for icz in layout.outgoing_clocked_zones((1, 1)):
             self.assertIn(icz, [pyfiction.coordinate(1, 2), pyfiction.coordinate(2, 1)])
 
+    def test_fetch_clocking_scheme(self):
+        pyfiction.clocked_cartesian_layout((1, 1), "USE")
+        pyfiction.clocked_cartesian_layout((2, 2), "2DDWave")
+        pyfiction.clocked_cartesian_layout((3, 3), "RES")
+        pyfiction.clocked_cartesian_layout((4, 4), "ESP")
+        pyfiction.clocked_cartesian_layout((5, 5), "BANCS")
+
+        with self.assertRaises(RuntimeError):
+            pyfiction.clocked_cartesian_layout((1, 2), "3DDWave")
+        with self.assertRaises(RuntimeError):
+            pyfiction.clocked_cartesian_layout((1, 2), "SUE")
+        with self.assertRaises(RuntimeError):
+            pyfiction.clocked_cartesian_layout((1, 2), "PES")
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -26,7 +26,7 @@ inline void clocked_cartesian_layout(pybind11::module& m)
     using cart_clk_lyt = fiction::clocked_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>;
 
     /**
-     * Cartesian layout.
+     * Clocked Cartesian layout.
      */
     py::class_<cart_clk_lyt, fiction::cartesian_layout<fiction::offset::ucoord_t>>(m, "clocked_cartesian_layout")
         .def(py::init<>())
