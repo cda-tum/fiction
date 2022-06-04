@@ -12,6 +12,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/traits.hpp>
 
@@ -25,15 +26,15 @@ inline void gate_level_clocked_cartesian_layout(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    using gate_clk_cart_lyt = fiction::gate_level_layout<
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
+    using gate_clk_cart_lyt = fiction::gate_level_layout<fiction::synchronization_element_layout<
+        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>;
 
     /**
      * Gate-level clocked Cartesian layout.
      */
-    py::class_<
-        gate_clk_cart_lyt,
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>(
+    py::class_<gate_clk_cart_lyt,
+               fiction::synchronization_element_layout<fiction::clocked_layout<
+                   fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>(
         m, "gate_level_clocked_cartesian_layout")
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<gate_clk_cart_lyt>&>(), "dimension"_a)

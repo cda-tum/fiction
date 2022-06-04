@@ -11,6 +11,7 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/traits.hpp>
 
@@ -24,8 +25,8 @@ inline void clocked_cartesian_layout(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    using clk_cart_lyt =
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>;
+    using clk_cart_lyt = fiction::synchronization_element_layout<
+        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
 
     /**
      * Clocked Cartesian layout.
@@ -53,6 +54,10 @@ inline void clocked_cartesian_layout(pybind11::module& m)
         .def("num_clocks", &clk_cart_lyt::num_clocks)
         .def("is_regularly_clocked", &clk_cart_lyt::is_regularly_clocked)
 
+        .def("assign_synchronization_element", &clk_cart_lyt::assign_synchronization_element)
+        .def("is_synchronization_element", &clk_cart_lyt::is_synchronization_element)
+        .def("get_synchronization_element", &clk_cart_lyt::get_synchronization_element)
+
         .def("is_incoming_clocked", &clk_cart_lyt::is_incoming_clocked)
         .def("is_outgoing_clocked", &clk_cart_lyt::is_outgoing_clocked)
 
@@ -64,6 +69,7 @@ inline void clocked_cartesian_layout(pybind11::module& m)
         .def("in_degree", &clk_cart_lyt::in_degree)
         .def("out_degree", &clk_cart_lyt::out_degree)
         .def("degree", &clk_cart_lyt::degree)
+        .def("num_se", &clk_cart_lyt::num_se)
 
         ;
 }
