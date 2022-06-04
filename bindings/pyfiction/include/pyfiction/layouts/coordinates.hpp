@@ -26,6 +26,7 @@ inline void coordinates(pybind11::module& m)
      */
     py::class_<fiction::offset::ucoord_t>(m, "coordinate")
         .def(py::init<>())
+        .def(py::init<const uint64_t>(), "int_repr"_a)
         .def(py::init<const uint64_t, const uint64_t, const uint64_t>(), "x"_a, "y"_a, "z"_a = 0)
         .def(py::init<const fiction::offset::ucoord_t>(), "c"_a)
         .def(py::init(
@@ -61,6 +62,8 @@ inline void coordinates(pybind11::module& m)
         .def(py::self >= py::self)
 
         .def("__repr__", &fiction::offset::ucoord_t::str)
+        .def("__hash__",
+             [](const fiction::offset::ucoord_t& self) { return std::hash<fiction::offset::ucoord_t>{}(self); })
 
         ;
 
