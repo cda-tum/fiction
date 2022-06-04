@@ -1,3 +1,6 @@
+# Include pybind11
+add_subdirectory(pybind11/)
+
 # Include alice
 add_subdirectory(alice/)
 
