@@ -25,7 +25,7 @@ inline void hexagonal_layout(pybind11::module& m)
     using hex_lyt = fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::even_row_hex>;
 
     /**
-     * Cartesian layout.
+     * Hexagonal layout.
      */
     py::class_<hex_lyt>(m, "hexagonal_layout")
         .def(py::init<>())

@@ -9,6 +9,7 @@
 #include "pyfiction/layouts/coordinates.hpp"
 #include "pyfiction/layouts/gate_level_layout.hpp"
 #include "pyfiction/layouts/hexagonal_layout.hpp"
+#include "pyfiction/networks/logic_network.hpp"
 
 PYBIND11_MODULE(pyfiction, m)
 {
@@ -24,4 +25,8 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::clocked_cartesian_layout(m);
     pyfiction::gate_level_clocked_cartesian_layout(m);
     pyfiction::cell_level_clocked_cartesian_layout(m);
+    /**
+     * Networks
+     */
+    pyfiction::logic_network(m);
 }
