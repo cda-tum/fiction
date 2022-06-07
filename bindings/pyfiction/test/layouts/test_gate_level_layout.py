@@ -5,7 +5,7 @@ import unittest
 class TestGateLevelLayout(unittest.TestCase):
 
     def test_gate_level_layout_inheritance(self):
-        layout = pyfiction.gate_level_clocked_cartesian_layout((2, 2, 0), "2DDWave", "Layout")
+        layout = pyfiction.cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")
 
         self.assertEqual(layout.incoming_clocked_zones((0, 0)), set())
         self.assertEqual(layout.outgoing_clocked_zones((2, 2)), set())
@@ -17,7 +17,7 @@ class TestGateLevelLayout(unittest.TestCase):
             self.assertIn(icz, [pyfiction.coordinate(1, 2), pyfiction.coordinate(2, 1)])
 
     def test_gate_level_layout_iteration(self):
-        layout = pyfiction.gate_level_clocked_cartesian_layout((3, 3, 1), "2DDWave", "Layout")
+        layout = pyfiction.cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")
 
         self.assertTrue(layout.is_empty())
 

@@ -35,7 +35,7 @@ inline void gate_level_clocked_cartesian_layout(pybind11::module& m)
     py::class_<gate_clk_cart_lyt,
                fiction::synchronization_element_layout<fiction::clocked_layout<
                    fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>(
-        m, "gate_level_clocked_cartesian_layout")
+        m, "cartesian_gate_layout")
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<gate_clk_cart_lyt>&>(), "dimension"_a)
         .def(py::init(
