@@ -2,6 +2,8 @@
 // Created by marcel on 16.11.21.
 //
 
+#if (FICTION_Z3_SOLVER)
+
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
@@ -176,3 +178,5 @@ int main()
 
     return 0;
 }
+
+#endif  // FICTION_Z3_SOLVER
