@@ -25,11 +25,13 @@ class CMakeBuild(build_ext):
 
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
+                      '-DMOCKTURTLE_EXAMPLES=OFF',
+                      '-DFICTION_PROGRESS_BARS=OFF',
                       '-DFICTION_CLI=OFF',
                       '-DFICTION_TEST=OFF',
                       '-DFICTION_EXPERIMENTS=OFF',
                       '-DFICTION_PYTHON_BINDINGS=ON',
-                      # '-DFICTION_Z3=ON',
+                      '-DFICTION_Z3=ON',
                       # '-DFICTION_ENABLE_MUGEN=ON'
                       ]
         if self.compiler.compiler_type != "msvc":

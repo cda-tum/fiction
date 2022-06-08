@@ -10,6 +10,7 @@
 #include "pyfiction/layouts/gate_level_layout.hpp"
 #include "pyfiction/layouts/hexagonal_layout.hpp"
 #include "pyfiction/networks/logic_network.hpp"
+#include "pyfiction/algorithms/physical_design/exact.hpp"
 
 PYBIND11_MODULE(pyfiction, m)
 {
@@ -29,4 +30,8 @@ PYBIND11_MODULE(pyfiction, m)
      * Networks
      */
     pyfiction::logic_network(m);
+    /**
+     * Algorithms
+     */
+     pyfiction::exact(m);
 }

@@ -8,6 +8,7 @@
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 
+#include <fiction/io/print_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -17,6 +18,7 @@
 #include <fiction/traits.hpp>
 
 #include <set>
+#include <sstream>
 
 namespace pyfiction
 {
@@ -125,6 +127,14 @@ inline void gate_level_clocked_cartesian_layout(pybind11::module& m)
 
         .def("incoming_data_flow", &gate_clk_cart_lyt::incoming_data_flow<std::set<fiction::tile<gate_clk_cart_lyt>>>)
         .def("outgoing_data_flow", &gate_clk_cart_lyt::outgoing_data_flow<std::set<fiction::tile<gate_clk_cart_lyt>>>)
+
+        .def("__repr__",
+             [](const gate_clk_cart_lyt& lyt) -> std::string
+             {
+                 std::stringstream stream{};
+                 fiction::print_gate_level_layout(stream, lyt);
+                 return stream.str();
+             })
 
         ;
 }
