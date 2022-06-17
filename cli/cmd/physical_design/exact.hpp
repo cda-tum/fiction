@@ -219,7 +219,7 @@ class exact_command : public command
         }
         catch (const fiction::unsupported_clocking_scheme_exception&)
         {
-            env->out() << fmt::format("{} does not refer to a supported clocking scheme", ps.scheme) << std::endl;
+            env->out() << fmt::format("\"{}\" does not refer to a supported clocking scheme", ps.scheme) << std::endl;
         }
         catch (const fiction::high_degree_fanin_exception& e)
         {
