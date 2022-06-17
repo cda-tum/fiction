@@ -3,6 +3,8 @@
 //
 
 #include "pybind11/pybind11.h"
+#include "pyfiction/algorithms/physical_design/exact.hpp"
+#include "pyfiction/algorithms/physical_design/orthogonal.hpp"
 #include "pyfiction/layouts/cartesian_layout.hpp"
 #include "pyfiction/layouts/cell_level_layout.hpp"
 #include "pyfiction/layouts/clocked_layout.hpp"
@@ -10,7 +12,6 @@
 #include "pyfiction/layouts/gate_level_layout.hpp"
 #include "pyfiction/layouts/hexagonal_layout.hpp"
 #include "pyfiction/networks/logic_network.hpp"
-#include "pyfiction/algorithms/physical_design/exact.hpp"
 
 PYBIND11_MODULE(pyfiction, m)
 {
@@ -33,5 +34,6 @@ PYBIND11_MODULE(pyfiction, m)
     /**
      * Algorithms
      */
-     pyfiction::exact(m);
+    pyfiction::exact(m);
+    pyfiction::orthogonal(m);
 }
