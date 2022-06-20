@@ -72,12 +72,14 @@ one_pass_synthesis_params&& maj(one_pass_synthesis_params&& ps) noexcept
     return std::move(ps);
 }
 
+#if !defined(__APPLE__)
 one_pass_synthesis_params&& async(const std::size_t t, one_pass_synthesis_params&& ps) noexcept
 {
     ps.num_threads = t;
 
     return std::move(ps);
 }
+#endif
 
 void check_stats(const one_pass_synthesis_stats& st) noexcept
 {
@@ -122,19 +124,23 @@ TEST_CASE("One-pass synthesis", "[one-pass]")
 {
     SECTION("2DDWave clocking")
     {
-        check<cart_gate_clk_lyt>(blueprints::and_or_network<mockturtle::mig_network>(), twoddwave(crossings(configuration())));
+        check<cart_gate_clk_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                 twoddwave(crossings(configuration())));
     }
     SECTION("USE clocking")
     {
-        check<cart_gate_clk_lyt>(blueprints::and_or_network<mockturtle::mig_network>(), use(crossings(configuration())));
+        check<cart_gate_clk_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                 use(crossings(configuration())));
     }
     SECTION("RES clocking")
     {
-        check<cart_gate_clk_lyt>(blueprints::and_or_network<mockturtle::mig_network>(), res(crossings(configuration())));
+        check<cart_gate_clk_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                 res(crossings(configuration())));
     }
     SECTION("Planar")
     {
-        check<cart_gate_clk_lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), twoddwave(configuration()));
+        check<cart_gate_clk_lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+                                 twoddwave(configuration()));
     }
     SECTION("MAJ network")
     {
@@ -143,17 +149,18 @@ TEST_CASE("One-pass synthesis", "[one-pass]")
     SECTION("Constant input MAJ network")
     {
         check<cart_gate_clk_lyt>(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>(),
-              twoddwave(crossings(configuration())));
+                                 twoddwave(crossings(configuration())));
     }
     SECTION("Multi-output network")
     {
-        check<cart_gate_clk_lyt>(blueprints::multi_output_and_network<mockturtle::aig_network>(), twoddwave(crossings(configuration())));
+        check<cart_gate_clk_lyt>(blueprints::multi_output_and_network<mockturtle::aig_network>(),
+                                 twoddwave(crossings(configuration())));
     }
 #if !defined(__APPLE__)
     SECTION("Async")
     {
         check<cart_gate_clk_lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
-              res(crossings(async(2, configuration()))));
+                                 res(crossings(async(2, configuration()))));
     }
 #endif
 }
