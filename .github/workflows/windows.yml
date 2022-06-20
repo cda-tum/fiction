@@ -11,6 +11,7 @@ defaults:
 
 env:
   Z3_GIT_TAG: z3-4.8.12
+  FICTION_Z3_SEARCH_PATHS: ${{github.workspace}}\z3lib
 
 jobs:
   build_and_test:

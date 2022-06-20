@@ -34,6 +34,10 @@ class CMakeBuild(build_ext):
                       '-DFICTION_Z3=ON',
                       # '-DFICTION_ENABLE_MUGEN=ON'
                       ]
+
+        if "FICTION_Z3_SEARCH_PATHS" in os.environ:
+            cmake_args += ['-DFICTION_Z3_SEARCH_PATHS={}'.format(os.environ.get("FICTION_Z3_SEARCH_PATHS"))]
+
         if self.compiler.compiler_type != "msvc":
             # Using Ninja-build since it a) is available as a wheel and b)
             # multithreads automatically. MSVC would require all variables be
