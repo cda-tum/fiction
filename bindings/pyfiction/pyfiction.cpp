@@ -3,6 +3,7 @@
 //
 
 #include "pybind11/pybind11.h"
+#include "pyfiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "pyfiction/algorithms/physical_design/exact.hpp"
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
 #include "pyfiction/layouts/cartesian_layout.hpp"
@@ -24,9 +25,9 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::coordinates(m);
     pyfiction::cartesian_layout(m);
     pyfiction::hexagonal_layout(m);
-    pyfiction::clocked_cartesian_layout(m);
-    pyfiction::gate_level_clocked_cartesian_layout(m);
-    pyfiction::cell_level_clocked_cartesian_layout(m);
+    pyfiction::clocked_layouts(m);
+    pyfiction::gate_level_layouts(m);
+    pyfiction::cell_level_layouts(m);
     /**
      * Networks
      */
@@ -38,4 +39,5 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::orthogonal(m);
     // NOTE: currently not functioning because the Python interpreter can only run as a single instance
     // pyfiction::one_pass_synthesis(m);
+    pyfiction::apply_gate_library(m);
 }

@@ -29,6 +29,9 @@ inline void exact(pybind11::module& m)
     using gate_clk_cart_lyt = fiction::gate_level_layout<fiction::synchronization_element_layout<
         fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>;
 
+    using gate_clk_hex_lyt = fiction::gate_level_layout<fiction::synchronization_element_layout<fiction::clocked_layout<
+        fiction::tile_based_layout<fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::even_row_hex>>>>>;
+
     py::class_<fiction::exact_physical_design_params>(m, "exact_params")
         .def(py::init<>())
         .def_readwrite("scheme", &fiction::exact_physical_design_params::scheme)
@@ -58,7 +61,10 @@ inline void exact(pybind11::module& m)
 
         ;
 
-    m.def("exact", &fiction::exact<gate_clk_cart_lyt, fiction::tec_nt>, "network"_a,
+    m.def("exact_cartesian", &fiction::exact<gate_clk_cart_lyt, fiction::tec_nt>, "network"_a,
+          "parameters"_a = fiction::exact_physical_design_params{}, "statistics"_a = nullptr);
+
+    m.def("exact_hexagonal", &fiction::exact<gate_clk_hex_lyt, fiction::tec_nt>, "network"_a,
           "parameters"_a = fiction::exact_physical_design_params{}, "statistics"_a = nullptr);
 }
 

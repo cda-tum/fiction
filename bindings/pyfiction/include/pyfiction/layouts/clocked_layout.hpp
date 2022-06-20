@@ -15,32 +15,39 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/traits.hpp>
 
+#include <fmt/format.h>
+
 #include <set>
+#include <string>
 
 namespace pyfiction
 {
 
-inline void clocked_cartesian_layout(pybind11::module& m)
+namespace detail
+{
+
+template <typename LytBase>
+void clocked_layout(pybind11::module& m, const std::string& topology)
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    using clk_cart_lyt = fiction::synchronization_element_layout<
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
+    using clocked_layout =
+        fiction::synchronization_element_layout<fiction::clocked_layout<fiction::tile_based_layout<LytBase>>>;
 
     /**
      * Clocked Cartesian layout.
      */
-    py::class_<clk_cart_lyt, fiction::cartesian_layout<fiction::offset::ucoord_t>>(m, "clocked_cartesian_layout")
+    py::class_<clocked_layout, LytBase>(m, fmt::format("clocked_{}_layout", topology).c_str())
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<clk_cart_lyt>&>(), "dimension"_a)
+        .def(py::init<const fiction::aspect_ratio<clocked_layout>&>(), "dimension"_a)
         .def(py::init(
-                 [](const fiction::aspect_ratio<clk_cart_lyt>& dimension, const std::string& scheme_name)
+                 [](const fiction::aspect_ratio<clocked_layout>& dimension, const std::string& scheme_name)
                  {
-                     if (const auto scheme = fiction::get_clocking_scheme<clk_cart_lyt>(scheme_name);
+                     if (const auto scheme = fiction::get_clocking_scheme<clocked_layout>(scheme_name);
                          scheme.has_value())
                      {
-                         return clk_cart_lyt{dimension, *scheme};
+                         return clocked_layout{dimension, *scheme};
                      }
                      else
                      {
@@ -49,29 +56,40 @@ inline void clocked_cartesian_layout(pybind11::module& m)
                  }),
              "dimension"_a, "clocking_scheme"_a = "2DDWave")
 
-        .def("assign_clock_number", &clk_cart_lyt::assign_clock_number)
-        .def("get_clock_number", &clk_cart_lyt::get_clock_number)
-        .def("num_clocks", &clk_cart_lyt::num_clocks)
-        .def("is_regularly_clocked", &clk_cart_lyt::is_regularly_clocked)
+        .def("assign_clock_number", &clocked_layout::assign_clock_number)
+        .def("get_clock_number", &clocked_layout::get_clock_number)
+        .def("num_clocks", &clocked_layout::num_clocks)
+        .def("is_regularly_clocked", &clocked_layout::is_regularly_clocked)
 
-        .def("assign_synchronization_element", &clk_cart_lyt::assign_synchronization_element)
-        .def("is_synchronization_element", &clk_cart_lyt::is_synchronization_element)
-        .def("get_synchronization_element", &clk_cart_lyt::get_synchronization_element)
+        .def("assign_synchronization_element", &clocked_layout::assign_synchronization_element)
+        .def("is_synchronization_element", &clocked_layout::is_synchronization_element)
+        .def("get_synchronization_element", &clocked_layout::get_synchronization_element)
 
-        .def("is_incoming_clocked", &clk_cart_lyt::is_incoming_clocked)
-        .def("is_outgoing_clocked", &clk_cart_lyt::is_outgoing_clocked)
+        .def("is_incoming_clocked", &clocked_layout::is_incoming_clocked)
+        .def("is_outgoing_clocked", &clocked_layout::is_outgoing_clocked)
 
         .def("incoming_clocked_zones",
-             &clk_cart_lyt::incoming_clocked_zones<std::set<fiction::clock_zone<clk_cart_lyt>>>)
+             &clocked_layout::template incoming_clocked_zones<std::set<fiction::clock_zone<clocked_layout>>>)
         .def("outgoing_clocked_zones",
-             &clk_cart_lyt::outgoing_clocked_zones<std::set<fiction::clock_zone<clk_cart_lyt>>>)
+             &clocked_layout::template outgoing_clocked_zones<std::set<fiction::clock_zone<clocked_layout>>>)
 
-        .def("in_degree", &clk_cart_lyt::in_degree)
-        .def("out_degree", &clk_cart_lyt::out_degree)
-        .def("degree", &clk_cart_lyt::degree)
-        .def("num_se", &clk_cart_lyt::num_se)
+        .def("in_degree", &clocked_layout::in_degree)
+        .def("out_degree", &clocked_layout::out_degree)
+        .def("degree", &clocked_layout::degree)
+        .def("num_se", &clocked_layout::num_se)
 
         ;
+}
+
+}  // namespace detail
+
+void clocked_layouts(pybind11::module& m)
+{
+    using clk_cart_lyt_base = fiction::cartesian_layout<fiction::offset::ucoord_t>;
+    detail::clocked_layout<clk_cart_lyt_base>(m, "cartesian");
+
+    using clk_hex_lyt_base = fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::even_row_hex>;
+    detail::clocked_layout<clk_hex_lyt_base>(m, "hexagonal");
 }
 
 }  // namespace pyfiction
