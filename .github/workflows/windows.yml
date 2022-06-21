@@ -75,13 +75,13 @@ jobs:
 
       # As long as pip/setuptools/wheels do not offer dynamically configured builds, disable pyfiction for Debug builds
       - name: Install Python Bindings
-        if: ${{matrix.build_type}} == Release
         working-directory: ${{github.workspace}}
+        if: ${{matrix.build_type == 'Release'}}
         run: |
           pip3 -v install .
 
       - name: Test Python Bindings
-        if: ${{matrix.build_type}} == Release
         working-directory: ${{github.workspace}}\bindings\pyfiction\
+        if: ${{matrix.build_type == 'Release'}}
         run: |
           python3 -m unittest discover -v
