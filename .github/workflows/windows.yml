@@ -73,12 +73,15 @@ jobs:
         # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
         run: ctest -C ${{matrix.build_type}} --verbose
 
+      # As long as pip/setuptools/wheels do not offer dynamically configured builds, disable pyfiction for Debug builds
       - name: Install Python Bindings
+        if: ${{matrix.build_type}} == Release
         working-directory: ${{github.workspace}}
         run: |
           pip3 -v install .
 
       - name: Test Python Bindings
-        working-directory: ${{github.workspace}}/bindings/pyfiction/
+        if: ${{matrix.build_type}} == Release
+        working-directory: ${{github.workspace}}\bindings\pyfiction\
         run: |
           python3 -m unittest discover -v
