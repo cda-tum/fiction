@@ -48,7 +48,7 @@ jobs:
 
       - name: Cache Z3 Solver
         id: cache-z3-solver
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{github.workspace}}/z3lib
           key: ${{matrix.os}}-${{matrix.compiler}}-z3lib-${{env.Z3_GIT_TAG}}  # use compiler in key because linking z3 to fiction when compiled differently does not work under macOS

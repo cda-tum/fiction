@@ -36,7 +36,7 @@ jobs:
 
       - name: Cache Z3 Solver
         id: cache-z3-solver
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{github.workspace}}\z3lib
           key: ${{matrix.os}}-${{matrix.toolset}}-z3lib-${{matrix.build_type}}-${{env.Z3_GIT_TAG}}  # use build_type in the key because linking z3 to fiction with different build types does not work under windows
