@@ -8,6 +8,9 @@
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 
+#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
+#include <fiction/algorithms/verification/design_rule_violations.hpp>
+#include <fiction/algorithms/verification/equivalence_checking.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -23,6 +26,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 
 namespace pyfiction
 {
@@ -137,12 +141,45 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
              })
 
         ;
+
+    /**
+     * Algorithms defined on gate-level layouts.
+     */
+    m.def("critical_path_length_and_throughput",
+          [](const gate_layout& lyt) -> std::pair<uint64_t, uint64_t>
+          {
+              fiction::critical_path_length_and_throughput_stats stats{};
+              fiction::critical_path_length_and_throughput(lyt, &stats);
+
+              return {stats.critical_path_length, stats.throughput};
+          });
+
+    m.def("gate_level_drvs", [](const gate_layout& lyt) { fiction::gate_level_drvs(lyt); });
+
+    m.def("equivalence_checking",
+          [](const fiction::tec_nt& spec, const gate_layout& impl) -> fiction::eq_type
+          {
+              fiction::equivalence_checking_stats stats{};
+              fiction::equivalence_checking(spec, impl, &stats);
+
+              return stats.eq;
+          });
 }
 
 }  // namespace detail
 
 inline void gate_level_layouts(pybind11::module& m)
 {
+    /**
+     * Result type for equivalence checking.
+     */
+    pybind11::enum_<fiction::eq_type>(m, "eq_type")
+        .value("NO", fiction::eq_type::NO)
+        .value("WEAK", fiction::eq_type::WEAK)
+        .value("STRONG", fiction::eq_type::STRONG)
+
+        ;
+
     using gate_clk_cart_lyt_base = fiction::synchronization_element_layout<
         fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
 

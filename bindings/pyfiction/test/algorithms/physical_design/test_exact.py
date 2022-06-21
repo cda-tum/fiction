@@ -10,6 +10,7 @@ class TestExactCartesianPhysicalDesign(unittest.TestCase):
     def test_exact_default(self):
         network = pyfiction.read_logic_network(dir_path + "/../../resources/mux21.v")
         layout = pyfiction.exact_cartesian(network)
+        self.assertEqual(pyfiction.equivalence_checking(network, layout), pyfiction.eq_type.STRONG)
 
     def test_exact_with_parameters(self):
         network = pyfiction.read_logic_network(dir_path + "/../../resources/mux21.v")
@@ -21,6 +22,8 @@ class TestExactCartesianPhysicalDesign(unittest.TestCase):
 
         layout = pyfiction.exact_cartesian(network, params)
 
+        self.assertEqual(pyfiction.equivalence_checking(network, layout), pyfiction.eq_type.STRONG)
+
     def test_exact_with_stats(self):
         network = pyfiction.read_logic_network(dir_path + "/../../resources/mux21.v")
 
@@ -28,12 +31,15 @@ class TestExactCartesianPhysicalDesign(unittest.TestCase):
 
         layout = pyfiction.exact_cartesian(network, statistics=stats)
 
+        self.assertEqual(pyfiction.equivalence_checking(network, layout), pyfiction.eq_type.STRONG)
+
 
 class TestExactHexagonalPhysicalDesign(unittest.TestCase):
 
     def test_exact_default(self):
         network = pyfiction.read_logic_network(dir_path + "/../../resources/mux21.v")
         layout = pyfiction.exact_hexagonal(network)
+        self.assertEqual(pyfiction.equivalence_checking(network, layout), pyfiction.eq_type.STRONG)
 
     def test_exact_with_parameters(self):
         network = pyfiction.read_logic_network(dir_path + "/../../resources/mux21.v")
@@ -45,9 +51,13 @@ class TestExactHexagonalPhysicalDesign(unittest.TestCase):
 
         layout = pyfiction.exact_hexagonal(network, params)
 
+        self.assertEqual(pyfiction.equivalence_checking(network, layout), pyfiction.eq_type.STRONG)
+
     def test_exact_with_stats(self):
         network = pyfiction.read_logic_network(dir_path + "/../../resources/mux21.v")
 
         stats = pyfiction.exact_stats()
 
         layout = pyfiction.exact_hexagonal(network, statistics=stats)
+
+        self.assertEqual(pyfiction.equivalence_checking(network, layout), pyfiction.eq_type.STRONG)

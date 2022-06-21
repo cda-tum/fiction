@@ -86,7 +86,7 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
         inf1 = layout.incoming_data_flow(pyfiction.coordinate(f1))
         self.assertEqual(len(inf1), 1)
         self.assertIn(pyfiction.coordinate(c), inf1)
-        
+
         ina2 = layout.incoming_data_flow(pyfiction.coordinate(a2))
         self.assertEqual(len(ina2), 2)
         self.assertIn(pyfiction.coordinate(b1), ina2)
@@ -103,6 +103,12 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
         outa2 = layout.outgoing_data_flow(pyfiction.coordinate(a2))
         self.assertEqual(len(outa2), 1)
         self.assertIn(pyfiction.coordinate(f2), outa2)
+
+        cp, tp = pyfiction.critical_path_length_and_throughput(layout)
+        self.assertEqual(cp, 4)
+        self.assertEqual(tp, 1)
+
+        pyfiction.gate_level_drvs(layout)
 
 
 class TestHexagonalGateLevelLayout(unittest.TestCase):
@@ -206,6 +212,12 @@ class TestHexagonalGateLevelLayout(unittest.TestCase):
         outa2 = layout.outgoing_data_flow(pyfiction.coordinate(a2))
         self.assertEqual(len(outa2), 1)
         self.assertIn(pyfiction.coordinate(f2), outa2)
+
+        cp, tp = pyfiction.critical_path_length_and_throughput(layout)
+        self.assertEqual(cp, 4)
+        self.assertEqual(tp, 1)
+
+        pyfiction.gate_level_drvs(layout)
 
 
 if __name__ == '__main__':
