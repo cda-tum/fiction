@@ -87,6 +87,8 @@ jobs:
       - name: Install Python Bindings
         working-directory: ${{github.workspace}}
         run: |
+          export CC=$(which ${{matrix.ccompiler}})
+          export CXX=$(which ${{matrix.compiler}})
           pip3 -v install .
 
       - name: Test Python Bindings
