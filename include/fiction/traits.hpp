@@ -13,6 +13,7 @@
 
 #include <cstdint>
 #include <string>
+#include <utility>
 
 namespace fiction
 {
@@ -666,6 +667,21 @@ struct has_get_sidb_defect<Lyt, std::void_t<decltype(std::declval<Lyt>().get_sid
 
 template <class Lyt>
 inline constexpr bool has_get_sidb_defect_v = has_get_sidb_defect<Lyt>::value;
+#pragma endregion
+
+#pragma region has_foreach_sidb_defect
+template <class Lyt, class = void>
+struct has_foreach_sidb_defect : std::false_type
+{};
+
+template <class Lyt>
+struct has_foreach_sidb_defect<Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_sidb_defect(
+                                        std::declval<void(std::pair<coordinate<Lyt>, sidb_defect_type>, uint32_t)>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_foreach_sidb_defect_v = has_foreach_sidb_defect<Lyt>::value;
 #pragma endregion
 
 /**

@@ -99,6 +99,19 @@ class sidb_surface<Lyt, false> : public Lyt
         }
     }
     /**
+     * Applies a function to all defects on the surface. Since the defects are fetched directly from the storage map,
+     * the given function has to receive a pair of a coordinate and a defect type as its parameter.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * @param fn Functor to apply to each defect.
+     */
+    template <typename Fn>
+    void foreach_sidb_defect(Fn&& fn) const
+    {
+        mockturtle::detail::foreach_element(strg->defective_coordinates.cbegin(), strg->defective_coordinates.cend(),
+                                            fn);
+    }
+    /**
      * Returns all SiDB positions affected by the defect at the given coordinate. This function relies on the
      * defect_extent function defined in sidb_defects.hpp that computes the extent of charged and neutral defect types.
      *

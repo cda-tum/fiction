@@ -45,51 +45,60 @@ static constexpr const char* GUI_BLOCK = "    <gui>\n"
                                          "        <scroll x=\"{}\" y=\"{}\"/>\n"
                                          "    </gui>\n";
 
-static constexpr const char* LAYERS_BLOCK = "<layers>\n"
-                                            "        <layer_prop>\n"
-                                            "            <name>Lattice</name>\n"
-                                            "            <type>Lattice</type>\n"
-                                            "            <role>Design</role>\n"
-                                            "            <zoffset>0</zoffset>\n"
-                                            "            <zheight>0</zheight>\n"
-                                            "            <visible>1</visible>\n"
-                                            "            <active>0</active>\n"
-                                            "            <lat_vec>\n"
-                                            "                <a1 x=\"3.84\" y=\"0\"/>\n"
-                                            "                <a2 x=\"0\" y=\"7.68\"/>\n"
-                                            "                <N>2</N>\n"
-                                            "                <b1 x=\"0\" y=\"0\"/>\n"
-                                            "                <b2 x=\"0\" y=\"2.25\"/>\n"
-                                            "            </lat_vec>\n"
-                                            "        </layer_prop>\n"
-                                            "        <layer_prop>\n"
-                                            "            <name>Screenshot Overlay</name>\n"
-                                            "            <type>Misc</type>\n"
-                                            "            <role>Overlay</role>\n"
-                                            "            <zoffset>0</zoffset>\n"
-                                            "            <zheight>0</zheight>\n"
-                                            "            <visible>0</visible>\n"
-                                            "            <active>0</active>\n"
-                                            "        </layer_prop>\n"
-                                            "        <layer_prop>\n"
-                                            "            <name>Surface</name>\n"
-                                            "            <type>DB</type>\n"
-                                            "            <role>Design</role>\n"
-                                            "            <zoffset>0</zoffset>\n"
-                                            "            <zheight>0</zheight>\n"
-                                            "            <visible>1</visible>\n"
-                                            "            <active>0</active>\n"
-                                            "        </layer_prop>\n"
-                                            "        <layer_prop>\n"
-                                            "            <name>Metal</name>\n"
-                                            "            <type>Electrode</type>\n"
-                                            "            <role>Design</role>\n"
-                                            "            <zoffset>1000</zoffset>\n"
-                                            "            <zheight>100</zheight>\n"
-                                            "            <visible>1</visible>\n"
-                                            "            <active>0</active>\n"
-                                            "        </layer_prop>\n"
-                                            "    </layers>\n";
+static constexpr const char* LAYERS_BLOCK     = "    <layers>\n{}"
+                                                "    </layers>\n";
+static constexpr const char* LATTICE_LAYER    = "        <layer_prop>\n"
+                                                "            <name>Lattice</name>\n"
+                                                "            <type>Lattice</type>\n"
+                                                "            <role>Design</role>\n"
+                                                "            <zoffset>0</zoffset>\n"
+                                                "            <zheight>0</zheight>\n"
+                                                "            <visible>1</visible>\n"
+                                                "            <active>0</active>\n"
+                                                "            <lat_vec>\n"
+                                                "                <a1 x=\"3.84\" y=\"0\"/>\n"
+                                                "                <a2 x=\"0\" y=\"7.68\"/>\n"
+                                                "                <N>2</N>\n"
+                                                "                <b1 x=\"0\" y=\"0\"/>\n"
+                                                "                <b2 x=\"0\" y=\"2.25\"/>\n"
+                                                "            </lat_vec>\n"
+                                                "        </layer_prop>\n";
+static constexpr const char* SCREENSHOT_LAYER = "        <layer_prop>\n"
+                                                "            <name>Screenshot Overlay</name>\n"
+                                                "            <type>Misc</type>\n"
+                                                "            <role>Overlay</role>\n"
+                                                "            <zoffset>0</zoffset>\n"
+                                                "            <zheight>0</zheight>\n"
+                                                "            <visible>0</visible>\n"
+                                                "            <active>0</active>\n"
+                                                "        </layer_prop>\n";
+static constexpr const char* SURFACE_LAYER    = "        <layer_prop>\n"
+                                                "            <name>Surface</name>\n"
+                                                "            <type>DB</type>\n"
+                                                "            <role>Design</role>\n"
+                                                "            <zoffset>0</zoffset>\n"
+                                                "            <zheight>0</zheight>\n"
+                                                "            <visible>1</visible>\n"
+                                                "            <active>0</active>\n"
+                                                "        </layer_prop>\n";
+static constexpr const char* ELECTRODE_LAYER  = "        <layer_prop>\n"
+                                                "            <name>Metal</name>\n"
+                                                "            <type>Electrode</type>\n"
+                                                "            <role>Design</role>\n"
+                                                "            <zoffset>1000</zoffset>\n"
+                                                "            <zheight>100</zheight>\n"
+                                                "            <visible>1</visible>\n"
+                                                "            <active>0</active>\n"
+                                                "        </layer_prop>\n";
+static constexpr const char* DEFECT_LAYER     = "        <layer_prop>\n"
+                                                "            <name>Defect</name>\n"
+                                                "            <type>Defect</type>\n"
+                                                "            <role>Design</role>\n"
+                                                "            <zoffset>1000</zoffset>\n"
+                                                "            <zheight>100</zheight>\n"
+                                                "            <visible>1</visible>\n"
+                                                "            <active>0</active>\n"
+                                                "        </layer_prop>\n";
 
 static constexpr const char* OPEN_DESIGN  = "    <design>\n"
                                             "        <layer type=\"Lattice\"/>\n"
@@ -97,11 +106,21 @@ static constexpr const char* OPEN_DESIGN  = "    <design>\n"
                                             "        <layer type=\"DB\">\n";
 static constexpr const char* CLOSE_DESIGN = "    </design>\n";
 
+static constexpr const char* LATTICE_COORDINATE = R"(<latcoord n ="{}" m="{}" l="{}"/>)";
+
 static constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"
                                            "                <layer_id>2</layer_id>\n"
-                                           "                <latcoord n=\"{}\" m=\"{}\" l=\"{}\"/>\n"
+                                           "                {}\n"
                                            "                <color>{}</color>\n"
                                            "            </dbdot>\n";
+
+static constexpr const char* DEFECT_BLOCK = "            <defect>\n"
+                                            "                <layer_id>5</layer_id>\n"
+                                            "                <incl_coords>\n"
+                                            "                    {}\n"
+                                            "                </incl_coords>\n"
+                                            "                <coulomb charge=\"{}\" eps_r=\"{}\" lambda_tf=\"{}\"/>\n"
+                                            "            </defect>\n";
 
 // color format is Alpha RBG
 static constexpr const char* NORMAL_COLOR = "#ffc8c8c8";
@@ -129,14 +148,26 @@ class write_sqd_layout_impl
 
         header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
 
-        design << siqad::LAYERS_BLOCK << siqad::OPEN_DESIGN;
+        std::vector<const char*> active_layers{siqad::LATTICE_LAYER, siqad::SCREENSHOT_LAYER, siqad::SURFACE_LAYER,
+                                               siqad::ELECTRODE_LAYER};
+
+        // add the defect layer if Lyt implements the defect interface
+        if constexpr (has_get_sidb_defect_v<Lyt>)
+        {
+            active_layers.push_back(siqad::DEFECT_LAYER);
+        }
+
+        design << fmt::format(siqad::LAYERS_BLOCK, fmt::join(active_layers, "")) << siqad::OPEN_DESIGN;
 
         generate_db_blocks(design);
+        generate_defect_blocks(design);
 
         design << siqad::CLOSE_DESIGN;
 
         if (!file.is_open())
+        {
             throw std::ofstream::failure("could not open file");
+        }
 
         file << header.str();
         file << gui.str();
@@ -158,7 +189,9 @@ class write_sqd_layout_impl
                 // generate SiDB cells
                 if constexpr (std::is_same_v<technology<Lyt>, sidb_technology>)
                 {
-                    design << fmt::format(siqad::DBDOT_BLOCK, c.x, c.y / 2, c.y % 2, siqad::NORMAL_COLOR);
+                    design << fmt::format(siqad::DBDOT_BLOCK,
+                                          fmt::format(siqad::LATTICE_COORDINATE, c.x, c.y / 2, c.y % 2),
+                                          siqad::NORMAL_COLOR);
                 }
                 // generate QCA cell blocks
                 else if constexpr (std::is_same_v<technology<Lyt>, qca_technology>)
@@ -173,19 +206,48 @@ class write_sqd_layout_impl
                     if (!qca_technology::is_const_1_cell(type))
                     {
                         // top left
-                        design << fmt::format(siqad::DBDOT_BLOCK, c.x * 14, c.y * 7, 0, color);
+                        design << fmt::format(siqad::DBDOT_BLOCK,
+                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, c.y * 7, 0), color);
                         // bottom right
-                        design << fmt::format(siqad::DBDOT_BLOCK, (c.x * 14) + 6, (c.y * 7) + 3, 0, color);
+                        design << fmt::format(siqad::DBDOT_BLOCK,
+                                              fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, (c.y * 7) + 3, 0),
+                                              color);
                     }
                     if (!qca_technology::is_const_0_cell(type))
                     {
                         // top right
-                        design << fmt::format(siqad::DBDOT_BLOCK, (c.x * 14) + 6, c.y * 7, 0, color);
+                        design << fmt::format(siqad::DBDOT_BLOCK,
+                                              fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, c.y * 7, 0),
+                                              color);
                         // bottom left
-                        design << fmt::format(siqad::DBDOT_BLOCK, c.x * 14, (c.y * 7) + 3, 0, color);
+                        design << fmt::format(siqad::DBDOT_BLOCK,
+                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, (c.y * 7) + 3, 0),
+                                              color);
                     }
                 }
             });
+    }
+
+    void generate_defect_blocks(std::stringstream& design) noexcept
+    {
+        if constexpr (has_foreach_sidb_defect_v<Lyt>)
+        {
+            lyt.foreach_sidb_defect(
+                [this, &design](const auto& cd)
+                {
+                    const auto& cell   = cd.first;
+                    const auto& defect = cd.second;
+
+                    // TODO add charge, eps_r, and lambda_tf to the defect type to print the correct values
+                    const auto charge    = -1;   // defect.charge;
+                    const auto eps_r     = 5.6;  // defect.eps_r;
+                    const auto lambda_tf = 5;    // defect.lambda_tf;
+
+                    design << fmt::format(siqad::DEFECT_BLOCK,
+                                          fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y / 2, cell.y % 2),
+                                          charge, eps_r, lambda_tf);
+                });
+        }
     }
 };
 
