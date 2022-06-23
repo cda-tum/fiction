@@ -41,7 +41,7 @@ class sidb_surface<Lyt, false> : public Lyt
   public:
     struct sidb_surface_storage
     {
-        std::unordered_map<coordinate<Lyt>, sidb_defect_type> defective_coordinates{};
+        std::unordered_map<coordinate<Lyt>, sidb_defect> defective_coordinates{};
     };
 
     using storage = std::shared_ptr<sidb_surface_storage>;
@@ -70,15 +70,15 @@ class sidb_surface<Lyt, false> : public Lyt
      * @param c Coordinate to assign defect d to.
      * @param d Defect to assign to coordinate c.
      */
-    void assign_sidb_defect(const coordinate<Lyt>& c, const sidb_defect_type d) noexcept
+    void assign_sidb_defect(const coordinate<Lyt>& c, const sidb_defect d) noexcept
     {
-        if (d == sidb_defect_type::NONE)
+        if (d.type == sidb_defect_type::NONE)
         {
             strg->defective_coordinates.erase(c);
         }
         else
         {
-            strg->defective_coordinates[c] = d;
+            strg->defective_coordinates.insert({c, d});
         }
     }
     /**
@@ -87,7 +87,7 @@ class sidb_surface<Lyt, false> : public Lyt
      * @param c Coordinate to check.
      * @return Defect type previously assigned to c or NONE if no defect was yet assigned.
      */
-    [[nodiscard]] sidb_defect_type get_sidb_defect(const coordinate<Lyt>& c) const noexcept
+    [[nodiscard]] sidb_defect get_sidb_defect(const coordinate<Lyt>& c) const noexcept
     {
         if (auto it = strg->defective_coordinates.find(c); it != strg->defective_coordinates.cend())
         {
@@ -95,7 +95,7 @@ class sidb_surface<Lyt, false> : public Lyt
         }
         else
         {
-            return sidb_defect_type::NONE;
+            return sidb_defect{sidb_defect_type::NONE, 0.0};  // TODO what are default values for NONE sidb_defects?
         }
     }
     /**
@@ -124,7 +124,7 @@ class sidb_surface<Lyt, false> : public Lyt
     {
         std::set<coordinate<Lyt>> influenced_sidbs{};
 
-        if (const auto d = get_sidb_defect(c); d != sidb_defect_type::NONE)
+        if (const auto d = get_sidb_defect(c); d.type != sidb_defect_type::NONE)
         {
             const auto [horizontal_extent, vertical_extent] = defect_extent(d);
 

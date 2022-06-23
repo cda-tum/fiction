@@ -127,7 +127,7 @@ class read_sidb_surface_defects_impl
                 try
                 {
                     // assign the defect
-                    lyt.assign_sidb_defect({x, y}, sidb_defects::index_to_defect.at(defect_index));
+                    lyt.assign_sidb_defect({x, y}, sidb_defect{sidb_defects::index_to_defect.at(defect_index)});
                 }
                 catch (const std::out_of_range&)
                 {

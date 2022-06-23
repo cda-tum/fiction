@@ -39,7 +39,7 @@ TEMPLATE_TEST_CASE(
         CHECK(lyt.y() == 0);
         CHECK(lyt.area() == 1);
         CHECK(lyt.is_empty_cell({0, 0}));
-        CHECK(lyt.get_sidb_defect({0, 0}) == sidb_defect_type::NONE);
+        CHECK(lyt.get_sidb_defect({0, 0}).type == sidb_defect_type::NONE);
     };
 
     check(read_sidb_surface_defects<TestType>(empty_surface_stream));
@@ -68,7 +68,7 @@ TEMPLATE_TEST_CASE(
         [&lyt](const auto& c)
         {
             CHECK(lyt.is_empty_cell(c));
-            CHECK(lyt.get_sidb_defect(c) == sidb_defect_type::NONE);
+            CHECK(lyt.get_sidb_defect(c).type == sidb_defect_type::NONE);
         });
 }
 
@@ -91,18 +91,18 @@ TEMPLATE_TEST_CASE(
     CHECK(lyt.x() == 3);
     CHECK(lyt.y() == 2);
 
-    CHECK(lyt.get_sidb_defect({0, 0}) == sidb_defect_type::NONE);
-    CHECK(lyt.get_sidb_defect({1, 0}) == sidb_defect_type::DB);
-    CHECK(lyt.get_sidb_defect({2, 0}) == sidb_defect_type::SI_VACANCY);
-    CHECK(lyt.get_sidb_defect({3, 0}) == sidb_defect_type::DIHYDRIDE_PAIR);
-    CHECK(lyt.get_sidb_defect({0, 1}) == sidb_defect_type::SINGLE_DIHYDRIDE);
-    CHECK(lyt.get_sidb_defect({1, 1}) == sidb_defect_type::ONE_BY_ONE);
-    CHECK(lyt.get_sidb_defect({2, 1}) == sidb_defect_type::THREE_BY_ONE);
-    CHECK(lyt.get_sidb_defect({3, 1}) == sidb_defect_type::SILOXANE);
-    CHECK(lyt.get_sidb_defect({0, 2}) == sidb_defect_type::RAISED_SI);
-    CHECK(lyt.get_sidb_defect({1, 2}) == sidb_defect_type::ETCH_PIT);
-    CHECK(lyt.get_sidb_defect({2, 2}) == sidb_defect_type::MISSING_DIMER);
-    CHECK(lyt.get_sidb_defect({3, 2}) == sidb_defect_type::NONE);
+    CHECK(lyt.get_sidb_defect({0, 0}).type == sidb_defect_type::NONE);
+    CHECK(lyt.get_sidb_defect({1, 0}).type == sidb_defect_type::DB);
+    CHECK(lyt.get_sidb_defect({2, 0}).type == sidb_defect_type::SI_VACANCY);
+    CHECK(lyt.get_sidb_defect({3, 0}).type == sidb_defect_type::DIHYDRIDE_PAIR);
+    CHECK(lyt.get_sidb_defect({0, 1}).type == sidb_defect_type::SINGLE_DIHYDRIDE);
+    CHECK(lyt.get_sidb_defect({1, 1}).type == sidb_defect_type::ONE_BY_ONE);
+    CHECK(lyt.get_sidb_defect({2, 1}).type == sidb_defect_type::THREE_BY_ONE);
+    CHECK(lyt.get_sidb_defect({3, 1}).type == sidb_defect_type::SILOXANE);
+    CHECK(lyt.get_sidb_defect({0, 2}).type == sidb_defect_type::RAISED_SI);
+    CHECK(lyt.get_sidb_defect({1, 2}).type == sidb_defect_type::ETCH_PIT);
+    CHECK(lyt.get_sidb_defect({2, 2}).type == sidb_defect_type::MISSING_DIMER);
+    CHECK(lyt.get_sidb_defect({3, 2}).type == sidb_defect_type::NONE);
 }
 
 TEMPLATE_TEST_CASE(

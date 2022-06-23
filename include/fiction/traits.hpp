@@ -647,7 +647,7 @@ struct has_assign_sidb_defect : std::false_type
 
 template <class Lyt>
 struct has_assign_sidb_defect<
-    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_sidb_defect(coordinate<Lyt>(), sidb_defect_type()))>>
+    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_sidb_defect(coordinate<Lyt>(), sidb_defect()))>>
         : std::true_type
 {};
 
@@ -676,7 +676,7 @@ struct has_foreach_sidb_defect : std::false_type
 
 template <class Lyt>
 struct has_foreach_sidb_defect<Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_sidb_defect(
-                                        std::declval<void(std::pair<coordinate<Lyt>, sidb_defect_type>, uint32_t)>()))>>
+                                        std::declval<void(std::pair<coordinate<Lyt>, sidb_defect>, uint32_t)>()))>>
         : std::true_type
 {};
 

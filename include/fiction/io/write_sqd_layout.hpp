@@ -237,14 +237,9 @@ class write_sqd_layout_impl
                     const auto& cell   = cd.first;
                     const auto& defect = cd.second;
 
-                    // TODO add charge, eps_r, and lambda_tf to the defect type to print the correct values
-                    const auto charge    = -1;   // defect.charge;
-                    const auto eps_r     = 5.6;  // defect.eps_r;
-                    const auto lambda_tf = 5;    // defect.lambda_tf;
-
                     design << fmt::format(siqad::DEFECT_BLOCK,
                                           fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y / 2, cell.y % 2),
-                                          charge, eps_r, lambda_tf);
+                                          defect.charge, defect.epsilon_r, defect.lambda_tf);
                 });
         }
     }

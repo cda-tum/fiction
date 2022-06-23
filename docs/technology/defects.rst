@@ -10,6 +10,9 @@ SiDB Defects
 
 .. doxygenenum:: fiction::sidb_defect_type
 
+.. doxygenstruct:: fiction::sidb_defect
+   :members:
+
 .. doxygenfunction:: fiction::is_charged_defect
 .. doxygenfunction:: fiction::is_neutral_defect
 

@@ -24,32 +24,74 @@ enum class sidb_defect_type
     SINGLE_DIHYDRIDE,
     ONE_BY_ONE,  // collection of dihydride pairs
     THREE_BY_ONE,
-    SILOXANE,      // oxidized silicon
-    RAISED_SI,     // raised silicon
-    ETCH_PIT,      // collection of missing dimers
-    MISSING_DIMER  // dimer missing altogether
+    SILOXANE,       // oxidized silicon
+    RAISED_SI,      // raised silicon
+    ETCH_PIT,       // collection of missing dimers
+    MISSING_DIMER,  // dimer missing altogether
+    UNKNOWN         // unknown defect
 };
 /**
- * Checks whether the given defect type is charged. Charged defects are to be avoided by a larger distance.
+ * In accordance with the paper mentioned above, the sidb_defect struct is used to represent a specific defect on the
+ * H-Si(100) surface that has a charge as well as relative permittivity (epsilon_r) and Thomas-Fermi screening distance
+ * (lambda_tf) values associated to it.
+ *
+ * See "SiQAD: A Design and Simulation Tool for Atomic Silicon Quantum Dot Circuits" by S. S. H. Ng, J. Retallick, H. N.
+ * Chiu, R. Lupoiu, L. Livadaru, T. Huff, M. Rashidi, W. Vine, T. Dienel, R. A. Wolkow, and K. Walus in IEEE
+ * Transactions on Nanotechnology for more details on these values.
+ */
+struct sidb_defect
+{
+    /**
+     * Standard constructor.
+     */
+    constexpr explicit sidb_defect(const sidb_defect_type defect_type = sidb_defect_type::UNKNOWN,
+                                   const double electric_charge = -1.0, const double relative_permittivity = 5.6,
+                                   const double screening_distance = 5.0) noexcept :
+            type{defect_type},
+            charge{electric_charge},
+            epsilon_r{relative_permittivity},
+            lambda_tf{screening_distance}
+    {}
+    /**
+     * Type of defect.
+     */
+    const sidb_defect_type type;
+    /**
+     * Electrical charge.
+     */
+    const double charge;
+    /**
+     * Electric permittivity.
+     */
+    const double epsilon_r;
+    /**
+     * Thomas-Fermi screening distance in nm.
+     */
+    const double lambda_tf;
+};
+/**
+ * Checks whether the given defect is charged. Charged defects are to be avoided by a larger distance.
  *
  * @param defect Defect type to check.
  * @return True iff defect is charged.
  */
-[[nodiscard]] static constexpr bool is_charged_defect(const sidb_defect_type defect) noexcept
+[[nodiscard]] static constexpr bool is_charged_defect(const sidb_defect& defect) noexcept
 {
-    return defect == sidb_defect_type::DB || defect == sidb_defect_type::SI_VACANCY;
+    return defect.type == sidb_defect_type::DB || defect.type == sidb_defect_type::SI_VACANCY;
 }
 /**
- * Checks whether the given defect type is not charged. Neutral defects are to be avoided but not by such a large
- * distance. Even though the NONE defect is technically neutral, it is not a defect per se which is why this function
- * returns false on the NONE defect input.
+ * Checks whether the given defect is not charged. Neutral defects are to be avoided but not by such a large distance.
+ * Even though the NONE defect type is technically neutral, it is not a defect per se which is why this function returns
+ * false on the NONE defect input. Additionally, the UNKNOWN defect cannot be guaranteed to be either neutral or charged
+ * which is why this function returns false for UNKNOWN defect inputs as well.
  *
  * @param defect Defect type to check.
  * @return True iff defect is not charged.
  */
-[[nodiscard]] static constexpr bool is_neutral_defect(const sidb_defect_type defect) noexcept
+[[nodiscard]] static constexpr bool is_neutral_defect(const sidb_defect& defect) noexcept
 {
-    return !is_charged_defect(defect) && defect != sidb_defect_type::NONE;
+    return !is_charged_defect(defect) && defect.type != sidb_defect_type::NONE &&
+           defect.type != sidb_defect_type::UNKNOWN;
 }
 /**
  * Horizontal distance to keep from charged SiDB defects. The value is to be understood as the number of DB positions
@@ -72,13 +114,13 @@ static constexpr const uint16_t sidb_neutral_defect_horizontal_spacing = 1u;
  */
 static constexpr const uint16_t sidb_neutral_defect_vertical_spacing = 0u;
 /**
- * Returns the extent of a defect type as a pair of SiDB distances in horizontal and vertical direction. If defect is
- * the NONE defect type, {0, 0} is returned.
+ * Returns the extent of a defect as a pair of SiDB distances in horizontal and vertical direction. If defect is the
+ * NONE defect type, {0, 0} is returned.
  *
  * @param defect Defect type to evaluate.
  * @return Number of horizontal and vertical SiDBs that are affected by the given defect type.
  */
-[[nodiscard]] static constexpr std::pair<uint16_t, uint16_t> defect_extent(const sidb_defect_type defect) noexcept
+[[nodiscard]] static constexpr std::pair<uint16_t, uint16_t> defect_extent(const sidb_defect& defect) noexcept
 {
     if (is_charged_defect(defect))
     {
