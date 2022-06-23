@@ -106,7 +106,7 @@ TEMPLATE_TEST_CASE(
         { defect_layout.assign_sidb_defect(cd.first, sidb_defect{sidb_defect_type::NONE}); });
 
     // read defects
-    defect_layout.foreach_sidb_defect([]([[maybe_unused]] const auto& cd) { CHECK(false); });
+    defect_layout.foreach_sidb_defect([](const auto&) { CHECK(false); });
     defect_layout.foreach_coordinate([&defect_layout](const auto& c)
                                      { CHECK(defect_layout.get_sidb_defect(c).type == sidb_defect_type::NONE); });
 }
