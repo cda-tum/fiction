@@ -4,3 +4,6 @@
 [submodule "libs/mockturtle"]
 	path = libs/mockturtle
 	url = https://github.com/marcelwa/mockturtle.git
+[submodule "libs/tinyxml2"]
+	path = libs/tinyxml2
+	url = git@github.com:leethomason/tinyxml2.git

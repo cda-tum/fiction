@@ -3,6 +3,12 @@ add_subdirectory(alice/)
 
 # Include mockturtle
 add_subdirectory(mockturtle/)
+target_link_libraries(libfiction INTERFACE mockturtle)
+
+# Include tinyXML2
+set(tinyxml2_BUILD_TESTING OFF)
+add_subdirectory(tinyxml2/)
+target_link_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
 
 # Mugen is not available under Windows
 if (NOT WIN32)
