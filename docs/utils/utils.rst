@@ -79,6 +79,7 @@ Name Utils
 **Header:** ``fiction/utils/name_utils.hpp``
 
 .. doxygenfunction:: fiction::get_name
+.. doxygenfunction:: fiction::set_name
 .. doxygenfunction:: fiction::restore_network_name
 .. doxygenfunction:: fiction::restore_input_names
 .. doxygenfunction:: fiction::restore_output_names

@@ -22,6 +22,11 @@ Truth Tables
 Cell-level Layouts
 ##################
 
+**Header:** ``fiction/io/read_sqd_layout.hpp``
+
+.. doxygenfunction:: fiction::read_sqd_layout(std::istream& is, const std::string& name = "")
+.. doxygenfunction:: fiction::read_sqd_layout(const std::string& filename, const std::string& name = "")
+
 **Header:** ``fiction/io/read_fqca_layout.hpp``
 
 .. doxygenfunction:: fiction::read_fqca_layout(std::istream& is, const std::string& name = "")

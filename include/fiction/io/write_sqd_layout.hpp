@@ -99,11 +99,15 @@ static constexpr const char* DEFECT_LAYER     = "        <layer_prop>\n"
                                                 "            <active>0</active>\n"
                                                 "        </layer_prop>\n";
 
-static constexpr const char* OPEN_DESIGN  = "    <design>\n"
-                                            "        <layer type=\"Lattice\"/>\n"
-                                            "        <layer type=\"Misc\"/>\n"
-                                            "        <layer type=\"DB\">\n";
-static constexpr const char* CLOSE_DESIGN = "    </design>\n";
+static constexpr const char* OPEN_DESIGN         = "    <design>\n"
+                                                   "        <layer type=\"Lattice\"/>\n"
+                                                   "        <layer type=\"Misc\"/>\n"
+                                                   "        <layer type=\"Electrode\"/>\n";
+static constexpr const char* OPEN_DB_LAYER       = "        <layer type=\"DB\">\n";
+static constexpr const char* CLOSE_DB_LAYER      = "        </layer>\n";
+static constexpr const char* OPEN_DEFECTS_LAYER  = "        <layer type=\"Defects\">\n";
+static constexpr const char* CLOSE_DEFECTS_LAYER = "        </layer>\n";
+static constexpr const char* CLOSE_DESIGN        = "    </design>\n";
 
 static constexpr const char* LATTICE_COORDINATE = R"(<latcoord n ="{}" m="{}" l="{}"/>)";
 
@@ -158,8 +162,13 @@ class write_sqd_layout_impl
 
         design << fmt::format(siqad::LAYERS_BLOCK, fmt::join(active_layers, "")) << siqad::OPEN_DESIGN;
 
+        design << siqad::OPEN_DB_LAYER;
         generate_db_blocks(design);
+        design << siqad::CLOSE_DB_LAYER;
+
+        design << siqad::OPEN_DEFECTS_LAYER;
         generate_defect_blocks(design);
+        design << siqad::CLOSE_DEFECTS_LAYER;
 
         design << siqad::CLOSE_DESIGN;
 

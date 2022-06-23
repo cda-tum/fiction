@@ -1,0 +1,236 @@
+//
+// Created by marcel on 23.06.22.
+//
+
+#include "catch.hpp"
+
+#include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/sidb_surface.hpp>
+
+#include <set>
+#include <sstream>
+#include <string>
+#include <type_traits>
+
+using namespace fiction;
+
+TEST_CASE("Read empty layout", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\"/>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    const auto check = [](const auto& lyt)
+    {
+        CHECK(lyt.x() == 0);
+        CHECK(lyt.y() == 0);
+        CHECK(lyt.area() == 1);
+        CHECK(lyt.is_empty_cell({0, 0}));
+    };
+
+    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+    check(read_sqd_layout<sidb_layout>(layout_stream));
+}
+
+TEST_CASE("Read single-dot layout", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\" l=\"0\"/>\n"
+                                              "          <physloc x=\"0\" y=\"0\"/>\n"
+                                              "          <color>#ffc8c8c8</color>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    const auto check = [](const auto& lyt)
+    {
+        CHECK(lyt.x() == 0);
+        CHECK(lyt.y() == 0);
+        CHECK(lyt.area() == 1);
+        CHECK(lyt.get_cell_type({0, 0}) == sidb_technology::cell_type::NORMAL);
+    };
+
+    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+    check(read_sqd_layout<sidb_layout>(layout_stream));
+}
+
+TEST_CASE("Read multi-dot layout", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\" l=\"0\"/>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\" l=\"1\"/>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"2\" m=\"2\" l=\"0\"/>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"2\" m=\"2\" l=\"1\"/>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+    const auto layout = read_sqd_layout<sidb_layout>(layout_stream);
+
+    CHECK(layout.x() == 2);
+    CHECK(layout.y() == 5);
+
+    CHECK(layout.get_cell_type({0, 0}) == sidb_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({0, 1}) == sidb_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 4}) == sidb_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 5}) == sidb_technology::cell_type::NORMAL);
+}
+
+TEST_CASE("Read single defect", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "    </layer>\n"
+                                              "    <layer type=\"Defects\">\n"
+                                              "      <defect>\n"
+                                              "          <layer_id>5</layer_id>\n"
+                                              "          <incl_coords>\n"
+                                              "              <latcoord n=\"5\" m=\"2\" l=\"0\" />\n"
+                                              "          </incl_coords>\n"
+                                              "          <coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"5\" />\n"
+                                              "      </defect>"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+    const auto layout = read_sqd_layout<sidb_layout>(layout_stream);
+
+    CHECK(layout.x() == 5);
+    CHECK(layout.y() == 4);
+    CHECK(layout.is_empty());
+
+    const auto defect = layout.get_sidb_defect({5, 4});
+    CHECK(defect.type == sidb_defect_type::UNKNOWN);
+    CHECK(defect.charge == -1);
+    CHECK(defect.epsilon_r == 5.6);
+    CHECK(defect.lambda_tf == 5.0);
+}
+
+TEST_CASE("Read multi-dot layout with defects", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\" l=\"0\"/>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\" l=\"1\"/>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"2\" m=\"2\" l=\"0\"/>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"2\" m=\"2\" l=\"1\"/>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "    <layer type=\"Defects\">\n"
+                                              "      <defect>\n"
+                                              "          <layer_id>5</layer_id>\n"
+                                              "          <incl_coords>\n"
+                                              "              <latcoord n=\"5\" m=\"2\" l=\"0\" />\n"
+                                              "              <latcoord n=\"5\" m=\"2\" l=\"1\" />\n"
+                                              "              <latcoord n=\"4\" m=\"2\" l=\"0\" />\n"
+                                              "              <latcoord n=\"4\" m=\"2\" l=\"1\" />\n"
+                                              "          </incl_coords>\n"
+                                              "          <coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"5\" />\n"
+                                              "          <property_map>\n"
+                                              "              <type_label>\n"
+                                              "                  <val>DB</val>\n"
+                                              "              </type_label>\n"
+                                              "          </property_map>\n"
+                                              "      </defect>"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+    const auto layout = read_sqd_layout<sidb_layout>(layout_stream);
+
+    CHECK(layout.x() == 5);
+    CHECK(layout.y() == 5);
+
+    CHECK(layout.get_cell_type({0, 0}) == sidb_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({0, 1}) == sidb_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 4}) == sidb_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 5}) == sidb_technology::cell_type::NORMAL);
+
+    const std::set<cell<sidb_layout>> defect_positions{{5, 4}, {5, 5}, {4, 4}, {4, 5}};
+
+    layout.foreach_sidb_defect(
+        [&defect_positions](const auto& cd)
+        {
+            const auto& cell   = cd.first;
+            const auto& defect = cd.second;
+
+            CHECK(defect_positions.count(cell) > 0);
+
+            CHECK(defect.charge == -1);
+            CHECK(defect.epsilon_r == 5.6);
+            CHECK(defect.lambda_tf == 5.0);
+        });
+}
