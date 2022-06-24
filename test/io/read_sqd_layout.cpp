@@ -234,3 +234,286 @@ TEST_CASE("Read multi-dot layout with defects", "[sqd]")
             CHECK(defect.lambda_tf == 5.0);
         });
 }
+
+TEST_CASE("Parsing error: missing <siqad> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: missing <design> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: missing 'type' attribute in <layer> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: missing <latcoord> element in <dbdot> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: missing 'n' attribute in <latcoord> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord m=\"0\" l=\"0\"/>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: missing 'm' attribute in <latcoord> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" l=\"0\"/>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: missing 'l' attribute in <latcoord> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\"/>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: missing <latcoord> element in <incl_coords> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"Defects\">\n"
+                                              "      <defect>\n"
+                                              "          <layer_id>5</layer_id>\n"
+                                              "          <incl_coords>\n"
+                                              "          </incl_coords>\n"
+                                              "          <coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"5\" />\n"
+                                              "      </defect>"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: missing <coulomb> element in <defect> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"Defects\">\n"
+                                              "      <defect>\n"
+                                              "          <layer_id>5</layer_id>\n"
+                                              "          <incl_coords>\n"
+                                              "              <latcoord n=\"0\" m=\"0\" l=\"0\" />\n"
+                                              "          </incl_coords>\n"
+                                              "      </defect>"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: missing 'charge' attribute in <coulomb> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"Defects\">\n"
+                                              "      <defect>\n"
+                                              "          <layer_id>5</layer_id>\n"
+                                              "          <incl_coords>\n"
+                                              "              <latcoord n=\"0\" m=\"0\" l=\"0\" />\n"
+                                              "          </incl_coords>\n"
+                                              "          <coulomb eps_r=\"5.6\" lambda_tf=\"5\" />\n"
+                                              "      </defect>"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: missing 'eps_r' attribute in <coulomb> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"Defects\">\n"
+                                              "      <defect>\n"
+                                              "          <layer_id>5</layer_id>\n"
+                                              "          <incl_coords>\n"
+                                              "              <latcoord n=\"0\" m=\"0\" l=\"0\" />\n"
+                                              "          </incl_coords>\n"
+                                              "          <coulomb charge=\"-1\" lambda_tf=\"5\" />\n"
+                                              "      </defect>"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: missing 'lambda_tf' attribute in <coulomb> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"Defects\">\n"
+                                              "      <defect>\n"
+                                              "          <layer_id>5</layer_id>\n"
+                                              "          <incl_coords>\n"
+                                              "              <latcoord n=\"0\" m=\"0\" l=\"0\" />\n"
+                                              "          </incl_coords>\n"
+                                              "          <coulomb charge=\"-1\" eps_r=\"5.6\" />\n"
+                                              "      </defect>"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}

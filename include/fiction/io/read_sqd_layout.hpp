@@ -23,10 +23,10 @@
 namespace fiction
 {
 
-class sqd_parsing_exception : public std::runtime_error
+class sqd_parsing_error : public std::runtime_error
 {
   public:
-    explicit sqd_parsing_exception(const std::string& msg) noexcept : std::runtime_error(msg) {}
+    explicit sqd_parsing_error(const std::string& msg) noexcept : std::runtime_error(msg) {}
 };
 
 namespace detail
@@ -50,18 +50,18 @@ class read_sqd_layout_impl
 
         if (xml_document.ErrorID() != 0)
         {
-            throw sqd_parsing_exception("Error parsing SQD file: " + std::string(xml_document.ErrorName()));
+            throw sqd_parsing_error("Error parsing SQD file: " + std::string(xml_document.ErrorName()));
         }
 
         if (const auto siqad_root = xml_document.FirstChildElement("siqad"); siqad_root == nullptr)
         {
-            throw sqd_parsing_exception("Error parsing SQD file: no root element 'siqad'");
+            throw sqd_parsing_error("Error parsing SQD file: no root element 'siqad'");
         }
         else
         {
             if (const auto design_element = siqad_root->FirstChildElement("design"); design_element == nullptr)
             {
-                throw sqd_parsing_exception("Error parsing SQD file: no element 'design'");
+                throw sqd_parsing_error("Error parsing SQD file: no element 'design'");
             }
             else
             {
@@ -70,7 +70,7 @@ class read_sqd_layout_impl
                 {
                     if (const auto layer_type = layer->Attribute("type"); layer_type == nullptr)
                     {
-                        throw sqd_parsing_exception("Error parsing SQD file: no attribute 'type' in element 'layer'");
+                        throw sqd_parsing_error("Error parsing SQD file: no attribute 'type' in element 'layer'");
                     }
                     else if (layer_type == std::string{"DB"})
                     {
@@ -119,7 +119,7 @@ class read_sqd_layout_impl
     {
         if (n < 0 || m < 0 || l < 0)
         {
-            throw sqd_parsing_exception("Error parsing SQD file: dimer has negative coordinates");
+            throw sqd_parsing_error("Error parsing SQD file: dimer has negative coordinates");
         }
 
         const cell<Lyt> cell{n, m * 2 + l};
@@ -151,7 +151,7 @@ class read_sqd_layout_impl
         if (const auto n = latcoord->Attribute("n"), m = latcoord->Attribute("m"), l = latcoord->Attribute("l");
             n == nullptr || m == nullptr || l == nullptr)
         {
-            throw sqd_parsing_exception("Error parsing SQD file: no attribute 'n', 'm' or 'l' in element 'latcoord'");
+            throw sqd_parsing_error("Error parsing SQD file: no attribute 'n', 'm' or 'l' in element 'latcoord'");
         }
         else
         {
@@ -167,7 +167,7 @@ class read_sqd_layout_impl
     {
         if (const auto latcoord = db_dot->FirstChildElement("latcoord"); latcoord == nullptr)
         {
-            throw sqd_parsing_exception("Error parsing SQD file: no element 'latcoord' in element 'dbdot'");
+            throw sqd_parsing_error("Error parsing SQD file: no element 'latcoord' in element 'dbdot'");
         }
         else
         {
@@ -215,8 +215,7 @@ class read_sqd_layout_impl
                 }
                 if (incl_cells.empty())
                 {
-                    throw sqd_parsing_exception(
-                        "Error parsing SQD file: no element 'latcoord' in element 'incl_coords'");
+                    throw sqd_parsing_error("Error parsing SQD file: no element 'latcoord' in element 'incl_coords'");
                 }
             }
             if (const auto property_map = defect->FirstChildElement("property_map"); property_map != nullptr)
@@ -231,7 +230,7 @@ class read_sqd_layout_impl
             }
             if (const auto coulomb = defect->FirstChildElement("coulomb"); coulomb == nullptr)
             {
-                throw sqd_parsing_exception("Error parsing SQD file: no element 'coulomb' in element 'defect'");
+                throw sqd_parsing_error("Error parsing SQD file: no element 'coulomb' in element 'defect'");
             }
             else
             {
@@ -239,7 +238,7 @@ class read_sqd_layout_impl
                     lambda_tf = coulomb->Attribute("lambda_tf");
                     charge == nullptr || eps_r == nullptr || lambda_tf == nullptr)
                 {
-                    throw sqd_parsing_exception(
+                    throw sqd_parsing_error(
                         "Error parsing SQD file: no attribute 'charge', 'eps_r', or 'lambda_tf' in element 'coulomb'");
                 }
                 else
