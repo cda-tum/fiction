@@ -43,5 +43,10 @@ SiQAD
 
 **Header:** ``fiction/io/write_sqd_layout.hpp``
 
-.. doxygenfunction:: fiction::write_sqd_layout(const Lyt& lyt, std::ofstream& os)
+.. doxygenfunction:: fiction::write_sqd_layout(const Lyt& lyt, std::ostream& os)
 .. doxygenfunction:: fiction::write_sqd_layout(const Lyt& lyt, const std::string& filename)
+
+**Header:** ``fiction/io/read_sqd_layout.hpp``
+
+.. doxygenfunction:: fiction::read_sqd_layout(std::istream& is, const std::string& name = "")
+.. doxygenfunction:: fiction::read_sqd_layout(const std::string& filename, const std::string& name = "")
