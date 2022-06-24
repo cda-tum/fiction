@@ -136,7 +136,7 @@ TEST_CASE("Read single defect", "[sqd]")
                                               "          <incl_coords>\n"
                                               "              <latcoord n=\"5\" m=\"2\" l=\"0\" />\n"
                                               "          </incl_coords>\n"
-                                              "          <coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"5\" />\n"
+                                              "          <coulomb charge=\"2\" eps_r=\"-1.2\" lambda_tf=\"3.4\" />\n"
                                               "      </defect>"
                                               "    </layer>\n"
                                               "  </design>\n"
@@ -154,9 +154,9 @@ TEST_CASE("Read single defect", "[sqd]")
 
     const auto defect = layout.get_sidb_defect({5, 4});
     CHECK(defect.type == sidb_defect_type::UNKNOWN);
-    CHECK(defect.charge == -1);
-    CHECK(defect.epsilon_r == 5.6);
-    CHECK(defect.lambda_tf == 5.0);
+    CHECK(defect.charge == 2);
+    CHECK(defect.epsilon_r == -1.2);
+    CHECK(defect.lambda_tf == 3.4);
 }
 
 TEST_CASE("Read multiple defects", "[sqd]")
