@@ -380,6 +380,106 @@ TEST_CASE("Parsing error: missing 'l' attribute in <latcoord> element", "[sqd]")
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
+TEST_CASE("Parsing error: negative 'n' attribute in <latcoord> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"-1\" m=\"0\" l=\"0\"/>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: negative 'm' attribute in <latcoord> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"-3\" l=\"0\"/>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: negative 'l' attribute in <latcoord> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\" l=\"-15\"/>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
+TEST_CASE("Parsing error: out-of-bounds 'l' attribute in <latcoord> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\" l=\"2\"/>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+}
+
 TEST_CASE("Parsing error: missing <latcoord> element in <incl_coords> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"

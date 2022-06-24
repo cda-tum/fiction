@@ -117,9 +117,13 @@ class read_sqd_layout_impl
      */
     cell<Lyt> dimer_to_cell(const int64_t n, const int64_t m, const int64_t l)
     {
-        if (n < 0 || m < 0 || l < 0)
+        if (n < 0 || m < 0)
         {
             throw sqd_parsing_error("Error parsing SQD file: dimer has negative coordinates");
+        }
+        if (l < 0 || l > 1)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: dimer has invalid dot index");
         }
 
         const cell<Lyt> cell{n, m * 2 + l};
