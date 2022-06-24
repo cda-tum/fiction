@@ -277,6 +277,26 @@ GateLyt shifted_cart_and_or_inv_gate_layout() noexcept
     return layout;
 }
 
+template <typename GateLyt>
+GateLyt row_clocked_and_xor_gate_layout() noexcept
+{
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 3, 0}, fiction::row_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {1, 0});
+    const auto x3 = layout.create_pi("x3", {2, 0});
+
+    const auto a1 = layout.create_and(x1, x2, {1, 1});
+
+    const auto w1 = layout.create_buf(x3, {2, 1});
+
+    const auto xor1 = layout.create_xor(w1, a1, {1, 2});
+
+    layout.create_po(xor1, "f1", {1, 3});
+
+    return layout;
+}
+
 template <typename CellLyt>
 CellLyt single_layer_qca_and_gate() noexcept
 {

@@ -159,7 +159,114 @@ TEST_CASE("Read single defect", "[sqd]")
     CHECK(defect.lambda_tf == 5.0);
 }
 
-TEST_CASE("Read multi-dot layout with defects", "[sqd]")
+TEST_CASE("Read multiple defects", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "    </layer>\n"
+                                              "    <layer type=\"Defects\">\n"
+                                              "      <defect>\n"
+                                              "          <layer_id>5</layer_id>\n"
+                                              "          <incl_coords>\n"
+                                              "              <latcoord n=\"5\" m=\"2\" l=\"0\" />\n"
+                                              "          </incl_coords>\n"
+                                              "          <coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"5\" />\n"
+                                              "          <property_map>\n"
+                                              "              <type_label>\n"
+                                              "                  <val>Dot</val>\n"
+                                              "              </type_label>\n"
+                                              "          </property_map>\n"
+                                              "      </defect>\n"
+                                              "      <defect>\n"
+                                              "          <layer_id>5</layer_id>\n"
+                                              "          <incl_coords>\n"
+                                              "              <latcoord n=\"3\" m=\"2\" l=\"0\" />\n"
+                                              "              <latcoord n=\"3\" m=\"2\" l=\"1\" />\n"
+                                              "          </incl_coords>\n"
+                                              "          <coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"5\" />\n"
+                                              "          <property_map>\n"
+                                              "              <type_label>\n"
+                                              "                  <val>Missing_Dimer</val>\n"
+                                              "              </type_label>\n"
+                                              "          </property_map>\n"
+                                              "      </defect>\n"
+                                              "      <defect>\n"
+                                              "          <layer_id>5</layer_id>\n"
+                                              "          <incl_coords>\n"
+                                              "              <latcoord n=\"0\" m=\"2\" l=\"0\" />\n"
+                                              "              <latcoord n=\"0\" m=\"2\" l=\"1\" />\n"
+                                              "              <latcoord n=\"1\" m=\"2\" l=\"0\" />\n"
+                                              "              <latcoord n=\"1\" m=\"2\" l=\"1\" />\n"
+                                              "          </incl_coords>\n"
+                                              "          <coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"5\" />\n"
+                                              "          <property_map>\n"
+                                              "              <type_label>\n"
+                                              "                  <val>Etch_Pit</val>\n"
+                                              "              </type_label>\n"
+                                              "          </property_map>\n"
+                                              "      </defect>\n"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+    const auto layout = read_sqd_layout<sidb_layout>(layout_stream);
+
+    CHECK(layout.x() == 5);
+    CHECK(layout.y() == 5);
+    CHECK(layout.is_empty());
+    {
+        const auto defect = layout.get_sidb_defect({5, 4});
+        CHECK(defect.type == sidb_defect_type::SILOXANE);
+        CHECK(defect.charge == -1);
+        CHECK(defect.epsilon_r == 5.6);
+        CHECK(defect.lambda_tf == 5.0);
+    }
+    {
+        const auto defect1 = layout.get_sidb_defect({3, 4});
+        const auto defect2 = layout.get_sidb_defect({3, 5});
+        CHECK(defect1.type == sidb_defect_type::MISSING_DIMER);
+        CHECK(defect1.charge == -1);
+        CHECK(defect1.epsilon_r == 5.6);
+        CHECK(defect1.lambda_tf == 5.0);
+        CHECK(defect2.type == sidb_defect_type::MISSING_DIMER);
+        CHECK(defect2.charge == -1);
+        CHECK(defect2.epsilon_r == 5.6);
+        CHECK(defect2.lambda_tf == 5.0);
+    }
+    {
+        const auto defect1 = layout.get_sidb_defect({0, 4});
+        const auto defect2 = layout.get_sidb_defect({0, 5});
+        const auto defect3 = layout.get_sidb_defect({1, 4});
+        const auto defect4 = layout.get_sidb_defect({1, 5});
+        CHECK(defect1.type == sidb_defect_type::ETCH_PIT);
+        CHECK(defect1.charge == -1);
+        CHECK(defect1.epsilon_r == 5.6);
+        CHECK(defect1.lambda_tf == 5.0);
+        CHECK(defect2.type == sidb_defect_type::ETCH_PIT);
+        CHECK(defect2.charge == -1);
+        CHECK(defect2.epsilon_r == 5.6);
+        CHECK(defect2.lambda_tf == 5.0);
+        CHECK(defect3.type == sidb_defect_type::ETCH_PIT);
+        CHECK(defect3.charge == -1);
+        CHECK(defect3.epsilon_r == 5.6);
+        CHECK(defect3.lambda_tf == 5.0);
+        CHECK(defect4.type == sidb_defect_type::ETCH_PIT);
+        CHECK(defect4.charge == -1);
+        CHECK(defect4.epsilon_r == 5.6);
+        CHECK(defect4.lambda_tf == 5.0);
+    }
+}
+
+TEST_CASE("Read multi-dot layout with multi-cell defect", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -228,6 +335,8 @@ TEST_CASE("Read multi-dot layout with defects", "[sqd]")
             const auto& defect = cd.second;
 
             CHECK(defect_positions.count(cell) > 0);
+
+            CHECK(defect.type == sidb_defect_type::DB);
 
             CHECK(defect.charge == -1);
             CHECK(defect.epsilon_r == 5.6);

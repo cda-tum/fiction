@@ -14,6 +14,7 @@
 #include <chrono>
 #include <ctime>
 #include <fstream>
+#include <map>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -123,6 +124,11 @@ static constexpr const char* DEFECT_BLOCK = "            <defect>\n"
                                             "                    {}\n"
                                             "                </incl_coords>\n"
                                             "                <coulomb charge=\"{}\" eps_r=\"{}\" lambda_tf=\"{}\"/>\n"
+                                            "                <property_map>\n"
+                                            "                    <type_label>\n"
+                                            "                        <val>{}</val>\n"
+                                            "                    </type_label>\n"
+                                            "                </property_map>\n"
                                             "            </defect>\n";
 
 // color format is Alpha RBG
@@ -131,13 +137,28 @@ static constexpr const char* INPUT_COLOR  = "#ff008dc8";
 static constexpr const char* OUTPUT_COLOR = "#ffe28686";
 static constexpr const char* CONST_COLOR  = "#ff000000";
 
+// maps defect types to their respective string representation
+static const std::map<sidb_defect_type, const char*> defect_type_to_name{
+    {{sidb_defect_type::NONE, "H-Si"},
+     {sidb_defect_type::DB, "DB"},
+     {sidb_defect_type::SI_VACANCY, "Vacancy"},
+     {sidb_defect_type::DIHYDRIDE_PAIR, "Dihydride"},
+     {sidb_defect_type::SINGLE_DIHYDRIDE, "Single_Dihydride"},
+     {sidb_defect_type::ONE_BY_ONE, "1By1"},
+     {sidb_defect_type::THREE_BY_ONE, "3By1"},
+     {sidb_defect_type::SILOXANE, "Dot"},
+     {sidb_defect_type::RAISED_SI, "Raised_Silicon"},
+     {sidb_defect_type::ETCH_PIT, "Etch_Pit"},
+     {sidb_defect_type::MISSING_DIMER, "Missing_Dimer"},
+     {sidb_defect_type::UNKNOWN, "Unknown"}}};
+
 }  // namespace siqad
 
 template <typename Lyt>
 class write_sqd_layout_impl
 {
   public:
-    write_sqd_layout_impl(const Lyt& src, std::ofstream& s) : lyt{src}, file{s} {}
+    write_sqd_layout_impl(const Lyt& src, std::ostream& s) : lyt{src}, os{s} {}
 
     void run()
     {
@@ -172,22 +193,17 @@ class write_sqd_layout_impl
 
         design << siqad::CLOSE_DESIGN;
 
-        if (!file.is_open())
-        {
-            throw std::ofstream::failure("could not open file");
-        }
+        os << header.str();
+        os << gui.str();
+        os << design.str();
 
-        file << header.str();
-        file << gui.str();
-        file << design.str();
-
-        file << siqad::CLOSE_SIQAD;
+        os << siqad::CLOSE_SIQAD;
     }
 
   private:
     Lyt lyt;
 
-    std::ofstream& file;
+    std::ostream& os;
 
     void generate_db_blocks(std::stringstream& design) noexcept
     {
@@ -236,19 +252,25 @@ class write_sqd_layout_impl
             });
     }
 
+    [[nodiscard]] static const char* get_defect_type_name(const sidb_defect_type& type) noexcept
+    {
+        const auto it = siqad::defect_type_to_name.find(type);
+        return it == siqad::defect_type_to_name.cend() ? "Unknown" : it->second;
+    }
+
     void generate_defect_blocks(std::stringstream& design) noexcept
     {
         if constexpr (has_foreach_sidb_defect_v<Lyt>)
         {
             lyt.foreach_sidb_defect(
-                [this, &design](const auto& cd)
+                [&design](const auto& cd)
                 {
                     const auto& cell   = cd.first;
                     const auto& defect = cd.second;
 
-                    design << fmt::format(siqad::DEFECT_BLOCK,
-                                          fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y / 2, cell.y % 2),
-                                          defect.charge, defect.epsilon_r, defect.lambda_tf);
+                    design << fmt::format(
+                        siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y / 2, cell.y % 2),
+                        defect.charge, defect.epsilon_r, defect.lambda_tf, get_defect_type_name(defect.type));
                 });
         }
     }
@@ -267,7 +289,7 @@ class write_sqd_layout_impl
  * @param os The output stream to write into.
  */
 template <typename Lyt>
-void write_sqd_layout(const Lyt& lyt, std::ofstream& os)
+void write_sqd_layout(const Lyt& lyt, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(std::is_same_v<technology<Lyt>, qca_technology> || std::is_same_v<technology<Lyt>, sidb_technology>,
@@ -291,6 +313,10 @@ template <typename Lyt>
 void write_sqd_layout(const Lyt& lyt, const std::string& filename)
 {
     std::ofstream os{filename.c_str(), std::ofstream::out};
+
+    if (!os.is_open())
+        throw std::ofstream::failure("could not open file");
+
     write_sqd_layout(lyt, os);
     os.close();
 }

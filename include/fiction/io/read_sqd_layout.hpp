@@ -13,6 +13,7 @@
 #include <tinyxml2.h>
 
 #include <algorithm>
+#include <cctype>
 #include <exception>
 #include <fstream>
 #include <istream>
@@ -185,17 +186,28 @@ class read_sqd_layout_impl
      * @param label The <type_label> element's <val> attribute.
      * @return The SiDB defect type corresponding to the given label.
      */
-    sidb_defect_type parse_defect_label(const char* label)
+    [[nodiscard]] static sidb_defect_type parse_defect_label(const char* label) noexcept
     {
-        if (label == std::string{"DB"})
-        {
-            return sidb_defect_type::DB;
-        }
-        // NOTE more defect types can be added here
-        else
-        {
-            return sidb_defect_type::UNKNOWN;
-        }
+        // maps defect names to their respective types
+        static const std::map<std::string, sidb_defect_type> defect_name_to_type{
+            {{"h-si", sidb_defect_type::NONE},
+             {"db", sidb_defect_type::DB},
+             {"vacancy", sidb_defect_type::SI_VACANCY},
+             {"dihydride", sidb_defect_type::DIHYDRIDE_PAIR},
+             {"single_dihydride", sidb_defect_type::SINGLE_DIHYDRIDE},
+             {"1by1", sidb_defect_type::ONE_BY_ONE},
+             {"3by1", sidb_defect_type::THREE_BY_ONE},
+             {"dot", sidb_defect_type::SILOXANE},
+             {"raised_silicon", sidb_defect_type::RAISED_SI},
+             {"etch_pit", sidb_defect_type::ETCH_PIT},
+             {"missing_dimer", sidb_defect_type::MISSING_DIMER},
+             {"unknown", sidb_defect_type::UNKNOWN}}};
+
+        std::string name{label};
+        std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+
+        const auto it = defect_name_to_type.find(name);
+        return it == defect_name_to_type.cend() ? sidb_defect_type::UNKNOWN : it->second;
     }
     /**
      * Parses a <defect> element from the SQD file and adds the respective defect to the layout if it implements the
@@ -226,9 +238,9 @@ class read_sqd_layout_impl
             {
                 if (const auto type_label = property_map->FirstChildElement("type_label"); type_label != nullptr)
                 {
-                    if (const auto val = type_label->Attribute("val"); val != nullptr)
+                    if (const auto val = type_label->FirstChildElement("val"); val != nullptr)
                     {
-                        defect_type = parse_defect_label(val);
+                        defect_type = parse_defect_label(val->GetText());
                     }
                 }
             }
