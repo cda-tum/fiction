@@ -122,14 +122,15 @@ static constexpr const char* DEFECT_BLOCK = "            <defect>\n"
                                             "                <layer_id>5</layer_id>\n"
                                             "                <incl_coords>\n"
                                             "                    {}\n"
-                                            "                </incl_coords>\n"
-                                            "                <coulomb charge=\"{}\" eps_r=\"{}\" lambda_tf=\"{}\"/>\n"
+                                            "                </incl_coords>\n{}"
                                             "                <property_map>\n"
                                             "                    <type_label>\n"
                                             "                        <val>{}</val>\n"
                                             "                    </type_label>\n"
                                             "                </property_map>\n"
                                             "            </defect>\n";
+
+static constexpr const char* COULOMB = "                <coulomb charge=\"{}\" eps_r=\"{}\" lambda_tf=\"{}\"/>\n";
 
 // color format is Alpha RBG
 static constexpr const char* NORMAL_COLOR = "#ffc8c8c8";
@@ -268,9 +269,12 @@ class write_sqd_layout_impl
                     const auto& cell   = cd.first;
                     const auto& defect = cd.second;
 
-                    design << fmt::format(
-                        siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y / 2, cell.y % 2),
-                        defect.charge, defect.epsilon_r, defect.lambda_tf, get_defect_type_name(defect.type));
+                    design << fmt::format(siqad::DEFECT_BLOCK,
+                                          fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y / 2, cell.y % 2),
+                                          is_charged_defect(defect) ? fmt::format(siqad::COULOMB, defect.charge,
+                                                                                  defect.epsilon_r, defect.lambda_tf) :
+                                                                      "",
+                                          get_defect_type_name(defect.type));
                 });
         }
     }

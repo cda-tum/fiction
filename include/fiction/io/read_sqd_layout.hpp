@@ -221,6 +221,7 @@ class read_sqd_layout_impl
         {
             std::vector<cell<Lyt>> incl_cells{};
             sidb_defect_type       defect_type{sidb_defect_type::UNKNOWN};
+            double                 charge{0.0}, eps_r{0.0}, lambda_tf{0.0};
 
             if (const auto incl_coords = defect->FirstChildElement("incl_coords"); incl_coords != nullptr)
             {
@@ -246,31 +247,29 @@ class read_sqd_layout_impl
             }
             if (const auto coulomb = defect->FirstChildElement("coulomb"); coulomb == nullptr)
             {
-                throw sqd_parsing_error("Error parsing SQD file: no element 'coulomb' in element 'defect'");
+                // no coulomb data available; use default values
             }
             else
             {
-                if (const auto charge = coulomb->Attribute("charge"), eps_r = coulomb->Attribute("eps_r"),
-                    lambda_tf = coulomb->Attribute("lambda_tf");
-                    charge == nullptr || eps_r == nullptr || lambda_tf == nullptr)
+                if (const auto charge_string = coulomb->Attribute("charge"), eps_r_string = coulomb->Attribute("eps_r"),
+                    lambda_tf_string = coulomb->Attribute("lambda_tf");
+                    charge_string == nullptr || eps_r_string == nullptr || lambda_tf_string == nullptr)
                 {
                     throw sqd_parsing_error(
                         "Error parsing SQD file: no attribute 'charge', 'eps_r', or 'lambda_tf' in element 'coulomb'");
                 }
                 else
                 {
-                    const auto coulomb_charge_val = std::stod(charge);
-                    const auto eps_r_val          = std::stod(eps_r);
-                    const auto lambda_tf_val      = std::stod(lambda_tf);
-
-                    std::for_each(
-                        incl_cells.begin(), incl_cells.end(),
-                        [this, &defect_type, &coulomb_charge_val, &eps_r_val, &lambda_tf_val](const auto& cell) {
-                            lyt.assign_sidb_defect(
-                                cell, sidb_defect{defect_type, coulomb_charge_val, eps_r_val, lambda_tf_val});
-                        });
+                    charge    = std::stod(charge_string);
+                    eps_r     = std::stod(eps_r_string);
+                    lambda_tf = std::stod(lambda_tf_string);
                 }
             }
+
+            std::for_each(incl_cells.begin(), incl_cells.end(),
+                          [this, &defect_type, &charge, &eps_r, &lambda_tf](const auto& cell) {
+                              lyt.assign_sidb_defect(cell, sidb_defect{defect_type, charge, eps_r, lambda_tf});
+                          });
         }
     }
 };
