@@ -11,7 +11,6 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/traits.hpp>
 
@@ -32,8 +31,7 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    using clocked_layout =
-        fiction::synchronization_element_layout<fiction::clocked_layout<fiction::tile_based_layout<LytBase>>>;
+    using clocked_layout = fiction::clocked_layout<fiction::tile_based_layout<LytBase>>;
 
     /**
      * Clocked Cartesian layout.
@@ -61,10 +59,6 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
         .def("num_clocks", &clocked_layout::num_clocks)
         .def("is_regularly_clocked", &clocked_layout::is_regularly_clocked)
 
-        .def("assign_synchronization_element", &clocked_layout::assign_synchronization_element)
-        .def("is_synchronization_element", &clocked_layout::is_synchronization_element)
-        .def("get_synchronization_element", &clocked_layout::get_synchronization_element)
-
         .def("is_incoming_clocked", &clocked_layout::is_incoming_clocked)
         .def("is_outgoing_clocked", &clocked_layout::is_outgoing_clocked)
 
@@ -76,7 +70,6 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
         .def("in_degree", &clocked_layout::in_degree)
         .def("out_degree", &clocked_layout::out_degree)
         .def("degree", &clocked_layout::degree)
-        .def("num_se", &clocked_layout::num_se)
 
         ;
 }

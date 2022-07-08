@@ -17,7 +17,6 @@
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
-#include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/traits.hpp>
 
@@ -180,16 +179,16 @@ inline void gate_level_layouts(pybind11::module& m)
 
         ;
 
-    using gate_clk_cart_lyt_base = fiction::synchronization_element_layout<
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
+    using gate_clk_cart_lyt_base =
+        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>;
 
     /**
      * Gate-level clocked Cartesian layout.
      */
     detail::gate_level_layout<gate_clk_cart_lyt_base>(m, "cartesian");
 
-    using gate_clk_hex_lyt_base = fiction::synchronization_element_layout<fiction::clocked_layout<
-        fiction::tile_based_layout<fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::even_row_hex>>>>;
+    using gate_clk_hex_lyt_base = fiction::clocked_layout<
+        fiction::tile_based_layout<fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::even_row_hex>>>;
 
     /**
      * Gate-level clocked hexagonal layout.

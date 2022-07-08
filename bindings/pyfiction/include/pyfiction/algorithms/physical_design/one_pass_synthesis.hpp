@@ -27,8 +27,8 @@ inline void one_pass_synthesis(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    using gate_clk_cart_lyt = fiction::gate_level_layout<fiction::synchronization_element_layout<
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>;
+    using gate_clk_cart_lyt = fiction::gate_level_layout<
+        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
 
     py::class_<fiction::one_pass_synthesis_params>(m, "one_pass_synthesis_params")
         .def(py::init<>())

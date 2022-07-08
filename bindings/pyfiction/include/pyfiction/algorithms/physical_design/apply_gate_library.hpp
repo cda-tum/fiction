@@ -14,7 +14,6 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/fcn_gate_library.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
@@ -39,8 +38,7 @@ void apply_fcn_gate_library(pybind11::module& m, const std::string& lib_name)
 
     using cell_clk_cart_lyt = fiction::cell_level_layout<
         fiction::technology<GateLibrary>,
-        fiction::synchronization_element_layout<
-            fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>;
+        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
 
     m.def(fmt::format("apply_{}_library", lib_name).c_str(),
           &fiction::apply_gate_library<cell_clk_cart_lyt, GateLibrary, GateLyt>, "gate_layout"_a);
@@ -50,12 +48,12 @@ void apply_fcn_gate_library(pybind11::module& m, const std::string& lib_name)
 
 inline void apply_gate_library(pybind11::module& m)
 {
-    using gate_clk_cart_lyt = fiction::gate_level_layout<fiction::synchronization_element_layout<
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>;
+    using gate_clk_cart_lyt = fiction::gate_level_layout<
+        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
     detail::apply_fcn_gate_library<fiction::qca_one_library, gate_clk_cart_lyt>(m, "qca_one");
 
-    using gate_clk_hex_lyt = fiction::gate_level_layout<fiction::synchronization_element_layout<fiction::clocked_layout<
-        fiction::tile_based_layout<fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::even_row_hex>>>>>;
+    using gate_clk_hex_lyt = fiction::gate_level_layout<fiction::clocked_layout<
+        fiction::tile_based_layout<fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::even_row_hex>>>>;
     detail::apply_fcn_gate_library<fiction::sidb_bestagon_library, gate_clk_hex_lyt>(m, "bestagon");
 }
 

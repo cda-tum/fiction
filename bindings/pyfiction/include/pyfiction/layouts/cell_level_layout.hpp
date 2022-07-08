@@ -11,7 +11,6 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
@@ -73,15 +72,15 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
     // NOTE: more technologies go here
 
     using cell_clk_cart_lyt = fiction::cell_level_layout<
-        Technology, fiction::synchronization_element_layout<fiction::clocked_layout<
-                        fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>;
+        Technology,
+        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
 
     /**
      * Cell-level clocked Cartesian layout.
      */
-    py::class_<cell_clk_cart_lyt,
-               fiction::synchronization_element_layout<fiction::clocked_layout<
-                   fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>(
+    py::class_<
+        cell_clk_cart_lyt,
+        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>(
         m, fmt::format("{}_layout", tech_name).c_str())
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<cell_clk_cart_lyt>&>(), "dimension"_a)

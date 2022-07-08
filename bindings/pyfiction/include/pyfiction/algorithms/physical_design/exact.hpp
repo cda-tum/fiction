@@ -26,11 +26,11 @@ inline void exact(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    using gate_clk_cart_lyt = fiction::gate_level_layout<fiction::synchronization_element_layout<
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>;
+    using gate_clk_cart_lyt = fiction::gate_level_layout<
+        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
 
-    using gate_clk_hex_lyt = fiction::gate_level_layout<fiction::synchronization_element_layout<fiction::clocked_layout<
-        fiction::tile_based_layout<fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::even_row_hex>>>>>;
+    using gate_clk_hex_lyt = fiction::gate_level_layout<fiction::clocked_layout<
+        fiction::tile_based_layout<fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::even_row_hex>>>>;
 
     py::class_<fiction::exact_physical_design_params>(m, "exact_params")
         .def(py::init<>())
@@ -40,7 +40,6 @@ inline void exact(pybind11::module& m)
         .def_readwrite("num_threads", &fiction::exact_physical_design_params::num_threads)
         .def_readwrite("crossings", &fiction::exact_physical_design_params::crossings)
         .def_readwrite("border_io", &fiction::exact_physical_design_params::border_io)
-        .def_readwrite("synchronization_elements", &fiction::exact_physical_design_params::synchronization_elements)
         .def_readwrite("straight_inverters", &fiction::exact_physical_design_params::straight_inverters)
         .def_readwrite("desynchronize", &fiction::exact_physical_design_params::desynchronize)
         .def_readwrite("minimize_wires", &fiction::exact_physical_design_params::minimize_wires)
