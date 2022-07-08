@@ -633,7 +633,10 @@ class write_qca_layout_svg_impl
             }
 
             // Delete empty tiles
-            for (const auto& coord : empty_tiles) { coord_to_tile.erase(coord); }
+            for (const auto& coord : empty_tiles)
+            {
+                coord_to_tile.erase(coord);
+            }
 
             if constexpr (has_synchronization_elements_v<Lyt>)
             {

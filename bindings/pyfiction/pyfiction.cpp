@@ -6,6 +6,9 @@
 #include "pyfiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "pyfiction/algorithms/physical_design/exact.hpp"
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
+#include "pyfiction/io/write_qca_layout.hpp"
+#include "pyfiction/io/write_sqd_layout.hpp"
+#include "pyfiction/io/write_svg_layout.hpp"
 #include "pyfiction/layouts/cartesian_layout.hpp"
 #include "pyfiction/layouts/cell_level_layout.hpp"
 #include "pyfiction/layouts/clocked_layout.hpp"
@@ -40,4 +43,10 @@ PYBIND11_MODULE(pyfiction, m)
     // NOTE: currently not functioning because the Python interpreter can only run as a single instance
     // pyfiction::one_pass_synthesis(m);
     pyfiction::apply_gate_library(m);
+    /**
+     * Input/Output
+     */
+    pyfiction::write_qca_layout(m);
+    pyfiction::write_sqd_layout(m);
+    pyfiction::write_svg_layout(m);
 }
