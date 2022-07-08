@@ -344,6 +344,41 @@ TEST_CASE("Read multi-dot layout with multi-cell defect", "[sqd]")
         });
 }
 
+TEST_CASE("Read defect despite missing <coulomb> element", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"Defects\">\n"
+                                              "      <defect>\n"
+                                              "          <layer_id>5</layer_id>\n"
+                                              "          <incl_coords>\n"
+                                              "              <latcoord n=\"0\" m=\"0\" l=\"0\" />\n"
+                                              "          </incl_coords>\n"
+                                              "      </defect>"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    const auto layout = read_sqd_layout<sidb_layout>(layout_stream);
+
+    const auto defect = layout.get_sidb_defect({0, 0});
+
+    CHECK(defect.type == sidb_defect_type::UNKNOWN);
+
+    CHECK(defect.charge == 0.0);
+    CHECK(defect.epsilon_r == 0.0);
+    CHECK(defect.lambda_tf == 0.0);
+}
+
 TEST_CASE("Parsing error: missing <siqad> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -603,33 +638,6 @@ TEST_CASE("Parsing error: missing <latcoord> element in <incl_coords> element", 
                                               "          <incl_coords>\n"
                                               "          </incl_coords>\n"
                                               "          <coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"5\" />\n"
-                                              "      </defect>"
-                                              "    </layer>\n"
-                                              "  </design>\n"
-                                              "</siqad>\n";
-
-    std::istringstream layout_stream{sqd_layout};
-
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
-    CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
-}
-
-TEST_CASE("Parsing error: missing <coulomb> element in <defect> element", "[sqd]")
-{
-    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<siqad>\n"
-                                              "  <design>\n"
-                                              "    <layer type=\"Lattice\"/>\n"
-                                              "    <layer type=\"Misc\"/>\n"
-                                              "    <layer type=\"Electrode\"/>\n"
-                                              "    <layer type=\"Defects\">\n"
-                                              "      <defect>\n"
-                                              "          <layer_id>5</layer_id>\n"
-                                              "          <incl_coords>\n"
-                                              "              <latcoord n=\"0\" m=\"0\" l=\"0\" />\n"
-                                              "          </incl_coords>\n"
                                               "      </defect>"
                                               "    </layer>\n"
                                               "  </design>\n"
