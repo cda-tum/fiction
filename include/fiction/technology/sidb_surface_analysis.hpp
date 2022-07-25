@@ -5,19 +5,38 @@
 #ifndef FICTION_SIDB_SURFACE_ANALYSIS_HPP
 #define FICTION_SIDB_SURFACE_ANALYSIS_HPP
 
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
+#include <kitty/hash.hpp>
 
 #include <algorithm>
 #include <cstdint>
 #include <type_traits>
+#include <unordered_map>
+#include <vector>
 
 namespace fiction
 {
+
+/**
+ * This alias represents a black list of gates that cannot be placed on certain positions on a (layout) surface in
+ * certain rotations. The type is just a map of tile positions to another map that associates gate functions with port
+ * lists. The second map ensures that each gate function stays unique while the port lists represent the black listed
+ * gate rotations.
+ *
+ * An empty port list vector means that the gate cannot be placed on the associated tile position AT ALL. This notion is
+ * to be used preferably as it, e.g., helps the exact physical design algorithm to convert these assertions into unit
+ * clauses which significantly helps runtime.
+ */
+template <typename Lyt>
+using surface_black_list =
+    std::unordered_map<tile<Lyt>, std::unordered_map<kitty::dynamic_truth_table, std::vector<port_list<port_direction>>,
+                                                     kitty::hash<kitty::dynamic_truth_table>>>;
 
 /**
  * Analyzes a given defective SiDB surface and matches it against gate tiles provided by a library. Any gate type that
@@ -32,8 +51,8 @@ namespace fiction
  * @return A black list of gate functions associated with tiles.
  */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
-std::unordered_map<tile<GateLyt>, std::vector<kitty::dynamic_truth_table>>
-sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surface) noexcept
+[[nodiscard]] surface_black_list<GateLyt> sidb_surface_analysis(const GateLyt&               gate_lyt,
+                                                                const sidb_surface<CellLyt>& surface) noexcept
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
@@ -44,7 +63,7 @@ sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surf
     static_assert(std::is_same_v<technology<CellLyt>, technology<GateLibrary>>,
                   "CellLyt and GateLibrary must implement the same technology");
 
-    std::unordered_map<tile<GateLyt>, std::vector<kitty::dynamic_truth_table>> black_list{};
+    surface_black_list<GateLyt> black_list{};
 
     const auto sidbs_affected_by_defects = surface.all_affected_sidbs();
     const auto gate_implementations      = GateLibrary::get_functional_implementations();
@@ -68,7 +87,7 @@ sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surf
                             if (const auto cell_type = gate[y][x]; cell_type != technology<CellLyt>::cell_type::EMPTY)
                             {
                                 // cell position within the gate
-                                const auto relative_cell_pos = cell<CellLyt>{x, y, t.z};
+                                const cell<CellLyt> relative_cell_pos{x, y, t.z};
 
                                 const auto sidb_pos =
                                     relative_to_absolute_cell_position<GateLibrary::gate_x_size(),
@@ -79,8 +98,8 @@ sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surf
                                 if (sidbs_affected_by_defects.count(sidb_pos) > 0)
                                 {
                                     // add this gate's function to the black list of tile t
-                                    black_list[t].push_back(fun);
-                                    return true;  // skip to next gate
+                                    black_list[t].insert({fun, {}});  // TODO add port list
+                                    return true;                      // skip to next gate
                                 }
                             }
                         }

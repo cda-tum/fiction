@@ -133,40 +133,31 @@ exact_physical_design_params<Lyt>&& topolinano(exact_physical_design_params<Lyt>
 }
 
 template <typename Lyt>
-exact_physical_design_params<Lyt>&& blacklist_wire(const tile<Lyt>& t, exact_physical_design_params<Lyt>&& ps) noexcept
+exact_physical_design_params<Lyt>&& blacklist_wire(const tile<Lyt>&                              t,
+                                                   const std::vector<port_list<port_direction>>& ports,
+                                                   exact_physical_design_params<Lyt>&&           ps) noexcept
 {
-    // truth table representing the identity
-    kitty::dynamic_truth_table      identity{1};
-    static constexpr const uint64_t lit_id = 0x2;
-    kitty::create_from_words(identity, &lit_id, &lit_id + 1);
-
-    ps.black_list[t].push_back(identity);
+    ps.black_list[t].insert({create_id_tt(), ports});
 
     return std::move(ps);
 }
 
 template <typename Lyt>
-exact_physical_design_params<Lyt>&& blacklist_and(const tile<Lyt>& t, exact_physical_design_params<Lyt>&& ps) noexcept
+exact_physical_design_params<Lyt>&& blacklist_and(const tile<Lyt>&                              t,
+                                                  const std::vector<port_list<port_direction>>& ports,
+                                                  exact_physical_design_params<Lyt>&&           ps) noexcept
 {
-    // truth table representing the AND function
-    kitty::dynamic_truth_table      conjunction{2};
-    static constexpr const uint64_t lit_and = 0x8;
-    kitty::create_from_words(conjunction, &lit_and, &lit_and + 1);
-
-    ps.black_list[t].push_back(conjunction);
+    ps.black_list[t].insert({create_and_tt(), ports});
 
     return std::move(ps);
 }
 
 template <typename Lyt>
-exact_physical_design_params<Lyt>&& blacklist_or(const tile<Lyt>& t, exact_physical_design_params<Lyt>&& ps) noexcept
+exact_physical_design_params<Lyt>&& blacklist_or(const tile<Lyt>&                              t,
+                                                 const std::vector<port_list<port_direction>>& ports,
+                                                 exact_physical_design_params<Lyt>&&           ps) noexcept
 {
-    // truth table representing the OR function
-    kitty::dynamic_truth_table      disjunction{2};
-    static constexpr const uint64_t lit_or = 0xe;
-    kitty::create_from_words(disjunction, &lit_or, &lit_or + 1);
-
-    ps.black_list[t].push_back(disjunction);
+    ps.black_list[t].insert({create_or_tt(), ports});
 
     return std::move(ps);
 }

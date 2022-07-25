@@ -11,11 +11,13 @@
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/technology/sidb_surface_analysis.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/network_utils.hpp"
 #include "fiction/utils/placement_utils.hpp"
+#include "fiction/utils/truth_table_utils.hpp"
 
 #include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
@@ -126,7 +128,7 @@ struct exact_physical_design_params
     /**
      * Maps tiles to blacklisted gate types via their truth tables.
      */
-    std::unordered_map<tile<Lyt>, std::vector<kitty::dynamic_truth_table>> black_list{};
+    surface_black_list<Lyt> black_list{};
 
     // TODO banned tiles for certain gates and orientations (maybe via ports)?
 };
@@ -598,7 +600,10 @@ class exact_impl
                 std::set<tile<Lyt>> added_tiles{};
                 for (decltype(ar.y) y = 0; y <= ar.y; ++y)
                 {
-                    for (decltype(ar.x) x = 0; x <= ar.x; ++x) { added_tiles.emplace(x, y); }
+                    for (decltype(ar.x) x = 0; x <= ar.x; ++x)
+                    {
+                        added_tiles.emplace(x, y);
+                    }
                 }
 
                 // create new state
@@ -815,7 +820,10 @@ class exact_impl
         [[nodiscard]] z3::expr mk_eq(const z3::expr_vector& v) const
         {
             z3::expr_vector eq{*ctx};
-            for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i) { eq.push_back(v[i - 1] == v[i]); }
+            for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i)
+            {
+                eq.push_back(v[i - 1] == v[i]);
+            }
 
             return z3::mk_and(eq);
         }
@@ -1046,7 +1054,10 @@ class exact_impl
                     // ints over reals is due to Z3's quantifier-free finite domain (QF_FD) solver.
                     // TL;DR one-hot encoding rules!
                     z3::expr_vector tcl{*ctx};
-                    for (auto i = 0u; i < layout.num_clocks(); ++i) { tcl.push_back(get_tcl(t, i)); }
+                    for (auto i = 0u; i < layout.num_clocks(); ++i)
+                    {
+                        tcl.push_back(get_tcl(t, i));
+                    }
                     solver->add(z3::atleast(tcl, 1) and z3::atmost(tcl, 1));
                 });
         }
@@ -1385,7 +1396,10 @@ class exact_impl
                     [this](const auto& n)
                     {
                         z3::expr_vector ncl{*ctx};
-                        for (auto i = 0u; i < layout.num_clocks(); ++i) { ncl.push_back(get_ncl(n, i)); }
+                        for (auto i = 0u; i < layout.num_clocks(); ++i)
+                        {
+                            ncl.push_back(get_ncl(n, i));
+                        }
                         solver->add(z3::atleast(ncl, 1) and z3::atmost(ncl, 1));
                     });
 
@@ -2323,39 +2337,43 @@ class exact_impl
         /**
          * Adds constraints to the solver to enforce blacklisting of certain gates.
          */
-        void black_list_gates()
+        void black_list_gates()  // TODO take advantage of incremental solving
         {
             // the identity function as a truth table
-            kitty::dynamic_truth_table      identity{1};
-            static constexpr const uint64_t lit_id = 0x2;
-            kitty::create_from_words(identity, &lit_id, &lit_id + 1);
+            const auto identity = create_id_tt();
 
             // for each tile-functions pair
-            for (const auto& [tile, functions] : params.black_list)
+            for (const auto& [tile, exclusions] : params.black_list)
             {
-                for (const auto& tt : functions)
+                for (const auto& [gate, port_list] : exclusions)
                 {
                     network.foreach_node(
-                        [this, &tt, t = tile](const auto& n)
+                        [this, &t = tile, &tt = gate, &ports = port_list](const auto& n)
                         {
                             if (!skip_const_or_io_node(n))
                             {
                                 if (kitty::equal(tt, network.node_function(n)))
                                 {
-                                    solver->add(not get_tn(t, n));
+                                    if (ports.empty())
+                                    {
+                                        solver->add(not get_tn(t, n));
+                                    }
                                 }
                             }
                         });
 
                     // truth table represents the identity; wires need to be additionally excluded
-                    if (kitty::equal(tt, identity))
+                    if (kitty::equal(gate, identity))
                     {
                         foreach_edge(network,
-                                     [this, t = tile](const auto& e)
+                                     [this, &t = tile, &ports = port_list](const auto& e)
                                      {
                                          if (!skip_const_or_io_edge(e))
                                          {
-                                             solver->add(not get_te(t, e));
+                                             if (ports.empty())
+                                             {
+                                                 solver->add(not get_te(t, e));
+                                             }
                                          }
                                      });
                     }
@@ -2511,10 +2529,16 @@ class exact_impl
                 auto optimizer = std::make_shared<z3::optimize>(*ctx);
 
                 // add all solver constraints
-                for (const auto& e : solver->assertions()) { optimizer->add(e); }
+                for (const auto& e : solver->assertions())
+                {
+                    optimizer->add(e);
+                }
 
                 // add assumptions as constraints, too, because optimize::check with assumptions is broken
-                for (const auto& e : check_point->assumptions) { optimizer->add(e); }
+                for (const auto& e : check_point->assumptions)
+                {
+                    optimizer->add(e);
+                }
 
                 // wire minimization constraints
                 if (wires)

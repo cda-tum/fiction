@@ -50,9 +50,10 @@ class dummy_gate_library : public fcn_gate_library<sidb_technology, 3, 3>
     }})};
 };
 
-bool contains_tt(const std::vector<kitty::dynamic_truth_table>& v, const kitty::dynamic_truth_table& elem) noexcept
+template <typename TTMap>
+bool contains_tt(const TTMap& m, const kitty::dynamic_truth_table& elem) noexcept
 {
-    return std::find_if(v.cbegin(), v.cend(), [&elem](const auto& tt) { return kitty::equal(elem, tt); }) != v.cend();
+    return m.count(elem) > 0;
 }
 
 TEST_CASE("Dummy gate library traits", "[sidb-surface-analysis]")
