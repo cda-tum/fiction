@@ -359,6 +359,8 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
                         {2, 2}, {},
                         blacklist_or({1, 2}, {}, blacklist_wire({2, 0}, {}, configuration<cart_gate_clk_lyt>())))))));
 
+            check_eq(blueprints::and_or_network<technology_network>(), lyt);
+
             CHECK(!lyt.is_and(lyt.get_node({2, 2})));
             CHECK(!lyt.is_wire(lyt.get_node({2, 2})));
             CHECK(!lyt.is_or(lyt.get_node({1, 2})));
@@ -366,7 +368,6 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
         }
         SECTION("With port info")
         {
-
             const auto lyt = generate_layout<cart_gate_clk_lyt>(
                 blueprints::and_or_network<technology_network>(),
                 twoddwave(crossings(blacklist_and(
@@ -383,6 +384,8 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
                                        {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH)},
                                                                   {port_direction(port_direction::cardinal::SOUTH)})},
                                        configuration<cart_gate_clk_lyt>()))))));
+
+            check_eq(blueprints::and_or_network<technology_network>(), lyt);
 
             CHECK((!lyt.is_and(lyt.get_node({2, 2})) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
