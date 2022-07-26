@@ -369,16 +369,31 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
 
             const auto lyt = generate_layout<cart_gate_clk_lyt>(
                 blueprints::and_or_network<technology_network>(),
-                twoddwave(crossings(
-                    blacklist_and({2, 2},
-                                  {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH),
-                                                              port_direction(port_direction::cardinal::WEST)},
-                                                             {port_direction(port_direction::cardinal::SOUTH)})},
-                                  configuration<cart_gate_clk_lyt>()))));
+                twoddwave(crossings(blacklist_and(
+                    {2, 2},
+                    {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH),
+                                                port_direction(port_direction::cardinal::WEST)},
+                                               {port_direction(port_direction::cardinal::SOUTH)})},
+                    blacklist_or(
+                        {2, 2},
+                        {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH),
+                                                    port_direction(port_direction::cardinal::WEST)},
+                                                   {port_direction(port_direction::cardinal::SOUTH)})},
+                        blacklist_wire({2, 2},
+                                       {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH)},
+                                                                  {port_direction(port_direction::cardinal::SOUTH)})},
+                                       configuration<cart_gate_clk_lyt>()))))));
 
             CHECK((!lyt.is_and(lyt.get_node({2, 2})) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
                      lyt.has_southern_outgoing_signal({2, 2}))));
+
+            CHECK((!lyt.is_or(lyt.get_node({2, 2})) ||
+                   !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
+                     lyt.has_southern_outgoing_signal({2, 2}))));
+
+            CHECK((!lyt.is_wire(lyt.get_node({2, 2})) ||
+                   !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_southern_outgoing_signal({2, 2}))));
 
             print_gate_level_layout(std::cout, lyt);
         }

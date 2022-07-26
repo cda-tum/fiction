@@ -28,6 +28,7 @@ Abstract Gate Library
    :members:
 .. doxygenstruct:: fiction::port_direction
    :members:
+.. doxygenfunction:: fiction::port_direction_to_coordinate
 .. doxygenstruct:: fiction::port_list
    :members:
 

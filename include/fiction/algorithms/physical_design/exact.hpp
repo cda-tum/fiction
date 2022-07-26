@@ -11,6 +11,7 @@
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
@@ -2339,6 +2340,22 @@ class exact_impl
          */
         void black_list_gates()  // TODO take advantage of incremental solving
         {
+            const auto gather_black_list_expr = [this](const auto& port, const auto& t) noexcept
+            {
+                z3::expr_vector iop{*ctx};
+
+                for (const auto& i : port.inp)
+                {
+                    iop.push_back(not get_tc(port_direction_to_coordinate(layout, t, i), t));
+                }
+                for (const auto& o : port.out)
+                {
+                    iop.push_back(not get_tc(t, port_direction_to_coordinate(layout, t, o)));
+                }
+
+                return iop;
+            };
+
             // the identity function as a truth table
             const auto identity = create_id_tt();
 
@@ -2348,7 +2365,7 @@ class exact_impl
                 for (const auto& [gate, port_list] : exclusions)
                 {
                     network.foreach_node(
-                        [this, &t = tile, &tt = gate, &ports = port_list](const auto& n)
+                        [this, &gather_black_list_expr, &t = tile, &tt = gate, &ports = port_list](const auto& n)
                         {
                             if (!skip_const_or_io_node(n))
                             {
@@ -2358,6 +2375,14 @@ class exact_impl
                                     {
                                         solver->add(not get_tn(t, n));
                                     }
+                                    else
+                                    {
+                                        for (const auto& p : ports)
+                                        {
+                                            solver->add(
+                                                z3::implies(get_tn(t, n), z3::mk_and(gather_black_list_expr(p, t))));
+                                        }
+                                    }
                                 }
                             }
                         });
@@ -2366,13 +2391,18 @@ class exact_impl
                     if (kitty::equal(gate, identity))
                     {
                         foreach_edge(network,
-                                     [this, &t = tile, &ports = port_list](const auto& e)
+                                     [this, &gather_black_list_expr, &t = tile, &ports = port_list](const auto& e)
                                      {
                                          if (!skip_const_or_io_edge(e))
                                          {
                                              if (ports.empty())
                                              {
                                                  solver->add(not get_te(t, e));
+                                             }
+                                             for (const auto& p : ports)
+                                             {
+                                                 solver->add(z3::implies(get_te(t, e),
+                                                                         z3::mk_and(gather_black_list_expr(p, t))));
                                              }
                                          }
                                      });
