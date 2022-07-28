@@ -106,7 +106,7 @@ class unsupported_gate_orientation_exception : public std::exception
  * Finally, a
  *
  * \code{.cpp}
- *    static gate_ports<PortType> get_gate_ports() noexcept
+ *    static gate_ports<PortType> get_gate_ports()
  * \endcode
  *
  * can optionally be provided to allow reverse access to the gate ports given a gate implementation. This interface is
