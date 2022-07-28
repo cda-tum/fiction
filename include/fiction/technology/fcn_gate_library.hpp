@@ -78,30 +78,39 @@ class unsupported_gate_orientation_exception : public std::exception
  * extend fcn_gate_library if it benefits from its features but does not have to. The only requirement is that it must
  * be a static class that provides a
  *
- * .. code-block:: c++
- *
+ * \code{.cpp}
  *    template <typename GateLyt>
  *    static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
+ * \endcode
  *
  * public member function. Additionally, a
  *
- * .. code-block:: c++
- *
+ * \code{.cpp}
  *    template <typename CellLyt>
  *    static void post_layout_optimization(CellLyt& lyt)
+ * \endcode
  *
  * can optionally be provided if some cleanup or optimization is necessary on the cell-level layout after each gate has
  * been mapped.
  *
- * Finally, a
+ * Additionally, a
  *
- * .. code-block:: c++
- *
+ * \code{.cpp}
  *    static gate_functions get_functional_implementations()
+ * \endcode
  *
  * can optionally be provided to allow reverse access to the gate structures by functional implementation. This
  * interface is for example used to determine which gate types to blacklist on tiles in P&R algorithms by considering
  * gate implementation.
+ *
+ * Finally, a
+ *
+ * \code{.cpp}
+ *    static gate_ports<PortType> get_gate_ports() noexcept
+ * \endcode
+ *
+ * can optionally be provided to allow reverse access to the gate ports given a gate implementation. This interface is
+ * for example used in sidb_surface_analysis to determine which ports to blacklist.
  *
  * @tparam Technology FCN technology type of the implementing gate library.
  * @tparam GateSizeX Tile size in x-dimension.

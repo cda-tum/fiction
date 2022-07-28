@@ -42,6 +42,8 @@ using surface_black_list =
  * cannot be realized on a certain tile due to disturbances caused by defects gets blacklisted on said tile. The black
  * list is then returned by this function.
  *
+ * The given gate library must implement both the 'get_functional_implementations()' and 'get_gate_ports()' functions.
+ *
  * @tparam GateLibrary FCN gate library type to fetch the gate descriptions from.
  * @tparam GateLyt Gate-level layout type that specifies the tiling of the SiDB surface.
  * @tparam CellLyt Cell-level layout type that is underlying to the SiDB surface.
