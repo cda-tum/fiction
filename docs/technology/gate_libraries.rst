@@ -48,3 +48,11 @@ iNML ToPoliNano Library
 .. doxygenclass:: fiction::inml_topolinano_library
    :members:
 
+
+SiDB Bestagon Library
+---------------------
+
+**Header:** ``fiction/technology/sidb_bestagon_library.hpp``
+
+.. doxygenclass:: fiction::sidb_bestagon_library
+   :members:

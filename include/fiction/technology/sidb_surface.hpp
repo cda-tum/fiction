@@ -18,7 +18,7 @@ namespace fiction
 
 /**
  * A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
- * fabrication defects on the H-Si(100) surface.
+ * fabrication defects on the H-Si(100) 2x1 surface.
  *
  * @tparam Lyt SiDB cell-level layout.
  * @tparam has_sidb_defect_interface Automatically determines whether a defect interface is already present.

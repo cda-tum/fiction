@@ -11,7 +11,7 @@ namespace fiction
 {
 
 /**
- * Specifies the types of fabrication defects that can occur on the H-Si(100) surface according to "Atomic defect
+ * Specifies the types of fabrication defects that can occur on the H-Si(100) 2x1 surface according to "Atomic defect
  * classification of the H–Si(100) surface through multi-mode scanning probe microscopy" by Jeremiah Croshaw, Thomas
  * Dienel, Taleana Huff, and Robert Wolkow in Journal of Nanotechnology in 2020.
  */
@@ -32,8 +32,8 @@ enum class sidb_defect_type
 };
 /**
  * In accordance with the paper mentioned above, the sidb_defect struct is used to represent a specific defect on the
- * H-Si(100) surface that has a charge as well as relative permittivity (epsilon_r) and Thomas-Fermi screening distance
- * (lambda_tf) values associated to it.
+ * H-Si(100) 2x1 surface that has a charge as well as relative permittivity (epsilon_r) and Thomas-Fermi screening
+ * distance (lambda_tf) values associated to it.
  *
  * See "SiQAD: A Design and Simulation Tool for Atomic Silicon Quantum Dot Circuits" by S. S. H. Ng, J. Retallick, H. N.
  * Chiu, R. Lupoiu, L. Livadaru, T. Huff, M. Rashidi, W. Vine, T. Dienel, R. A. Wolkow, and K. Walus in IEEE

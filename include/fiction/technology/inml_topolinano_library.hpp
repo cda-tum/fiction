@@ -31,20 +31,20 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
   public:
     explicit inml_topolinano_library() = delete;
     /**
-     * Overrides the corresponding function in fcn_gate_library. Given a tile t, this function takes all
-     * necessary information from the stored grid into account to choose the correct fcn_gate representation for
-     * that tile. May it be a gate or wires. Rotation and special marks like input and output, const cells etc.
-     * are computed additionally.
+     * Overrides the corresponding function in fcn_gate_library. Given a tile t hosted in a layout lyt, this function
+     * chooses the correct fcn_gate representation for that tile taking into account gate function and information flow.
+     * Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
-     * @tparam GateLyt Gate-level layout type.
-     * @param lyt Gate-level layout that hosts tile t.
-     * @param t Tile to be realized in the ToPoliNano library.
+     * @tparam GateLyt Shifted Cartesian gate-level layout type.
+     * @param lyt Layout that hosts tile t.
+     * @param t Tile to be realized as a ToPoliNano gate.
      * @return ToPoliNano gate representation of t including I/Os, rotation, etc.
      */
     template <typename GateLyt>
     [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "Lyt must be a gate-level layout");
+        static_assert(is_shifted_cartesian_layout_v<GateLyt>, "Lyt must be a shifted Cartesian layout");
 
         const auto n = lyt.get_node(t);
 

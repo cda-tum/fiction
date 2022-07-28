@@ -21,11 +21,28 @@
 namespace fiction
 {
 
+/**
+ * A concrete FCN gate library for the SiDB technology. This library was proposed in "Hexagons are the Bestagons: Design
+ * Automation for Silicon Dangling Bond Logic" by M. Walter, S. S. H. Ng, K. Walus, and R. Wille in DAC, 2022. The
+ * Bestagon library is intended for hexagonal, pointy-top layouts that are clocked with a row-based clocking scheme,
+ * i.e., where the information flow direction is north to south. Since the hexagonal tiles are to be mapped onto a
+ * H-Si(100) 2x1 surface, the gate dimensions need to be accommodating for the necessary overlap between tiles.
+ */
 class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
 {
   public:
-    sidb_bestagon_library() = delete;
+    explicit sidb_bestagon_library() = delete;
 
+    /**
+     * Overrides the corresponding function in fcn_gate_library. Given a tile t hosted in a layout lyt, this function
+     * chooses the correct fcn_gate representation for that tile taking into account gate function and information flow.
+     * Mirroring is computed additionally.
+     *
+     * @tparam Lyt Pointy-top hexagonal gate-level layout type.
+     * @param lyt Layout that hosts tile t.
+     * @param t Tile to be realized as a Bestagon gate.
+     * @return Bestagon gate representation of t including mirroring.
+     */
     template <typename Lyt>
     [[nodiscard]] static fcn_gate set_up_gate(const Lyt& lyt, const tile<Lyt>& t)
     {
@@ -131,7 +148,14 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
 
         throw unsupported_gate_type_exception(t);
     }
-
+    /**
+     * Returns a map of all gate functions supported by the library and their respectively possible implementations.
+     *
+     * This is an optional interface function that is required by some algorithms.
+     *
+     * @return Map of all gate functions supported by the library and their respective implementations as Bestagon
+     * gates.
+     */
     static gate_functions get_functional_implementations() noexcept
     {
         static const gate_functions implementations{
@@ -149,7 +173,13 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
 
         return implementations;
     }
-
+    /**
+     * Returns a map of all different gate implementations and their respective port information.
+     *
+     * This is an optional interface function that is required by some algorithms.
+     *
+     * @return Map of all different gate implementations and their respective port information.
+     */
     static gate_ports<port_direction> get_gate_ports() noexcept
     {
         static const gate_ports<port_direction> ports{{// wires
