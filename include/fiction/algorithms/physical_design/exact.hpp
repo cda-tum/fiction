@@ -127,11 +127,9 @@ struct exact_physical_design_params
      */
     technology_constraints technology_specifics = technology_constraints::NONE;
     /**
-     * Maps tiles to blacklisted gate types via their truth tables.
+     * Maps tiles to blacklisted gate types via their truth tables and port information.
      */
-    surface_black_list<Lyt> black_list{};
-
-    // TODO banned tiles for certain gates and orientations (maybe via ports)?
+    surface_black_list<Lyt, port_direction> black_list{};
 };
 /**
  * Statistics.

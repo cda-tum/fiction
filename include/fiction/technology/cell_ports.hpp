@@ -5,7 +5,6 @@
 #ifndef FICTION_CELL_PORTS_HPP
 #define FICTION_CELL_PORTS_HPP
 
-#include "fiction/traits.hpp"
 #include "fiction/utils/hash.hpp"
 
 #include <fmt/format.h>
@@ -136,64 +135,6 @@ struct port_direction
     }
 };
 /**
- * Port directions address coordinates relative to each other by specifying cardinal directions. This function converts
- * such a relative direction to an absolute coordinate when given a layout and a coordinate therein to consider. That
- * is, when presented with, e.g., a NORTH_EAST direction, it will return the coordinate that is to the NORTH_EAST of the
- * given coordinate c in the layout lyt.
- *
- * @tparam Lyt Coordinate layout type.
- * @param lyt Coordinate layout.
- * @param c Coordinate to consider.
- * @param port Port direction.
- * @return Absolute coordinate specified by a coordinate c in layout lyt and a port direction.
- */
-template <typename Lyt>
-[[nodiscard]] coordinate<Lyt> port_direction_to_coordinate(const Lyt& lyt, const coordinate<Lyt>& c,
-                                                           const port_direction& port) noexcept
-{
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-
-    switch (port.dir)
-    {
-        case port_direction::cardinal::NORTH:
-        {
-            return lyt.north(c);
-        }
-        case port_direction::cardinal::NORTH_EAST:
-        {
-            return lyt.north_east(c);
-        }
-        case port_direction::cardinal::EAST:
-        {
-            return lyt.east(c);
-        }
-        case port_direction::cardinal::SOUTH_EAST:
-        {
-            return lyt.south_east(c);
-        }
-        case port_direction::cardinal::SOUTH:
-        {
-            return lyt.south(c);
-        }
-        case port_direction::cardinal::SOUTH_WEST:
-        {
-            return lyt.south_west(c);
-        }
-        case port_direction::cardinal::WEST:
-        {
-            return lyt.west(c);
-        }
-        case port_direction::cardinal::NORTH_WEST:
-        {
-            return lyt.north_west(c);
-        }
-        default:
-        {
-            assert(false && "Given port does not specify a cardinal direction");
-        }
-    }
-}
-/**
  * Port lists are collections of input and output ports.
  *
  * @tparam PortType A port type, e.g., port_position or port_direction.
@@ -201,6 +142,10 @@ template <typename Lyt>
 template <typename PortType>
 struct port_list
 {
+    /**
+     * Exposing the underlying port type.
+     */
+    using port_type = PortType;
     /**
      * Default constructor.
      */

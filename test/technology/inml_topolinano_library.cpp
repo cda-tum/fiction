@@ -19,6 +19,7 @@ TEST_CASE("Traits", "[inml-topolinano-library]")
     CHECK(!has_post_layout_optimization_v<inml_topolinano_library, sidb_cell_clk_lyt>);
     CHECK(!has_post_layout_optimization_v<inml_topolinano_library, cart_gate_clk_lyt>);
     CHECK(!has_get_functional_implementations_v<inml_topolinano_library>);
+    CHECK(!has_get_gate_ports_v<inml_topolinano_library>);
 }
 
 TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]")

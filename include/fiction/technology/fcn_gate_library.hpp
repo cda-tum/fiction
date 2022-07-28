@@ -17,6 +17,7 @@
 #include <array>
 #include <initializer_list>
 #include <memory>
+#include <vector>
 
 namespace fiction
 {
@@ -122,10 +123,15 @@ class fcn_gate_library
      */
     using fcn_gate = cell_list<typename Technology::cell_type>;
     /**
-     * Maps FCN gate implementations to respective truth tables.
+     * Maps truth tables to respective FCN gate implementations.
      */
     using gate_functions =
-        std::unordered_map<kitty::dynamic_truth_table, fcn_gate, kitty::hash<kitty::dynamic_truth_table>>;
+        std::unordered_map<kitty::dynamic_truth_table, std::vector<fcn_gate>, kitty::hash<kitty::dynamic_truth_table>>;
+    /**
+     * Maps FCN gate implementations to respective port lists indicating their possible orientations.
+     */
+    template <typename PortType>
+    using gate_ports = std::unordered_map<fcn_gate, std::vector<port_list<PortType>>>;
     /**
      * Gate libraries should not be instantiated but used as static objects.
      */
@@ -250,7 +256,10 @@ class fcn_gate_library
 
         for (auto x = 0ul; x < GateSizeX; ++x)
         {
-            for (auto y = 0ul; y < GateSizeY; ++y) { trans[y][x] = g[x][y]; }
+            for (auto y = 0ul; y < GateSizeY; ++y)
+            {
+                trans[y][x] = g[x][y];
+            }
         }
 
         return trans;

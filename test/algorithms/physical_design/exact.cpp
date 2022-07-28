@@ -397,8 +397,6 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
 
             CHECK((!lyt.is_wire(lyt.get_node({2, 2})) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_southern_outgoing_signal({2, 2}))));
-
-            print_gate_level_layout(std::cout, lyt);
         }
     }
     //    SECTION("Asynchronicity")

@@ -33,11 +33,10 @@ namespace fiction
  * to be used preferably as it, e.g., helps the exact physical design algorithm to convert these assertions into unit
  * clauses which significantly helps runtime.
  */
-template <typename Lyt>
+template <typename Lyt, typename PortType>
 using surface_black_list =
-    std::unordered_map<tile<Lyt>, std::unordered_map<kitty::dynamic_truth_table, std::vector<port_list<port_direction>>,
+    std::unordered_map<tile<Lyt>, std::unordered_map<kitty::dynamic_truth_table, std::vector<port_list<PortType>>,
                                                      kitty::hash<kitty::dynamic_truth_table>>>;
-
 /**
  * Analyzes a given defective SiDB surface and matches it against gate tiles provided by a library. Any gate type that
  * cannot be realized on a certain tile due to disturbances caused by defects gets blacklisted on said tile. The black
@@ -51,8 +50,7 @@ using surface_black_list =
  * @return A black list of gate functions associated with tiles.
  */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
-[[nodiscard]] surface_black_list<GateLyt> sidb_surface_analysis(const GateLyt&               gate_lyt,
-                                                                const sidb_surface<CellLyt>& surface) noexcept
+[[nodiscard]] auto sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surface) noexcept
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
@@ -60,46 +58,60 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
 
     static_assert(has_get_functional_implementations_v<GateLibrary>,
                   "GateLibrary does not implement the get_functional_implementations function");
+    static_assert(has_get_gate_ports_v<GateLibrary>, "GateLibrary does not implement the get_gate_ports function");
     static_assert(std::is_same_v<technology<CellLyt>, technology<GateLibrary>>,
                   "CellLyt and GateLibrary must implement the same technology");
 
-    surface_black_list<GateLyt> black_list{};
+    // fetch the port type used by the gate library
+    using port_type = typename decltype(GateLibrary::get_gate_ports())::mapped_type::value_type::port_type;
+
+    surface_black_list<GateLyt, port_type> black_list{};
 
     const auto sidbs_affected_by_defects = surface.all_affected_sidbs();
     const auto gate_implementations      = GateLibrary::get_functional_implementations();
+    const auto gate_ports                = GateLibrary::get_gate_ports();
 
     gate_lyt.foreach_tile(
-        [&gate_lyt, &black_list, &sidbs_affected_by_defects, &gate_implementations](const auto& t)
+        [&gate_ports, &gate_lyt, &black_list, &sidbs_affected_by_defects, &gate_implementations](const auto& t)
         {
             // for each gate in the library
             mockturtle::detail::foreach_element(
                 gate_implementations.cbegin(), gate_implementations.cend(),
-                [&gate_lyt, &t, &black_list, &sidbs_affected_by_defects](const auto& it)
+                [&gate_ports, &gate_lyt, &t, &black_list, &sidbs_affected_by_defects](const auto& it)
                 {
-                    const auto& [fun, gate] = it;
+                    const auto& [fun, implementations] = it;
 
-                    // for each cell position in the gate
-                    for (auto y = 0u; y < GateLibrary::gate_y_size(); ++y)
+                    // for each gate in the list of possible implementations
+                    for (const auto& gate : implementations)
                     {
-                        for (auto x = 0u; x < GateLibrary::gate_x_size(); ++x)
+                        // for each cell position in the gate
+                        for (auto y = 0u; y < GateLibrary::gate_y_size(); ++y)
                         {
-                            // if the cell type at position (x, y) in the gate is non-empty
-                            if (const auto cell_type = gate[y][x]; cell_type != technology<CellLyt>::cell_type::EMPTY)
+                            for (auto x = 0u; x < GateLibrary::gate_x_size(); ++x)
                             {
-                                // cell position within the gate
-                                const cell<CellLyt> relative_cell_pos{x, y, t.z};
+                                // if the cell type at position (x, y) in the gate is non-empty
+                                if (const auto cell_type = gate[y][x];
+                                    cell_type != technology<CellLyt>::cell_type::EMPTY)
+                                {
+                                    // cell position within the gate
+                                    const cell<CellLyt> relative_cell_pos{x, y, t.z};
 
-                                const auto sidb_pos =
-                                    relative_to_absolute_cell_position<GateLibrary::gate_x_size(),
-                                                                       GateLibrary::gate_y_size(), GateLyt, CellLyt>(
+                                    const auto sidb_pos = relative_to_absolute_cell_position<
+                                        GateLibrary::gate_x_size(), GateLibrary::gate_y_size(), GateLyt, CellLyt>(
                                         gate_lyt, t, relative_cell_pos);
 
-                                // if any SiDB position of the current gate is compromised
-                                if (sidbs_affected_by_defects.count(sidb_pos) > 0)
-                                {
-                                    // add this gate's function to the black list of tile t
-                                    black_list[t].insert({fun, {}});  // TODO add port list
-                                    return true;                      // skip to next gate
+                                    // if any SiDB position of the current gate is compromised
+                                    if (sidbs_affected_by_defects.count(sidb_pos) > 0)
+                                    {
+                                        // add this gate's function to the black list of tile t using the ports
+                                        // specified by get_gate_ports in GateLibrary
+                                        for (const auto& port : gate_ports.at(gate))
+                                        {
+                                            black_list[t][fun].push_back(port);
+                                        }
+
+                                        return true;  // skip to next gate
+                                    }
                                 }
                             }
                         }

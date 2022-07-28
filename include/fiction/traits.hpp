@@ -7,6 +7,7 @@
 
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -747,6 +748,24 @@ struct has_get_functional_implementations<
 
 template <class Lib>
 inline constexpr bool has_get_functional_implementations_v = has_get_functional_implementations<Lib>::value;
+#pragma endregion
+
+#pragma region has_get_gate_ports
+template <class Lib, class = void>
+struct has_get_gate_ports : std::false_type
+{};
+
+template <class Lib>
+struct has_get_gate_ports<Lib,
+                          std::enable_if_t<std::is_same_v<decltype(std::declval<Lib>().get_gate_ports()),
+                                                          typename Lib::template gate_ports<fiction::port_position>> ||
+                                           std::is_same_v<decltype(std::declval<Lib>().get_gate_ports()),
+                                                          typename Lib::template gate_ports<fiction::port_direction>>>>
+        : std::true_type
+{};
+
+template <class Lib>
+inline constexpr bool has_get_gate_ports_v = has_get_gate_ports<Lib>::value;
 #pragma endregion
 
 #pragma region has_post_layout_optimization

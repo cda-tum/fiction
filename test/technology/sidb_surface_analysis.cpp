@@ -13,11 +13,7 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
-#include <kitty/operations.hpp>
-
-#include <algorithm>
-#include <type_traits>
-#include <vector>
+#include <kitty/dynamic_truth_table.hpp>
 
 using namespace fiction;
 
@@ -31,9 +27,18 @@ class dummy_gate_library : public fcn_gate_library<sidb_technology, 3, 3>
 
     static gate_functions get_functional_implementations() noexcept
     {
-        static const gate_functions implementations{{{create_id_tt(), line}, {create_and_tt(), y}}};
+        static const gate_functions implementations{{{create_id_tt(), {line}}, {create_and_tt(), {y}}}};
 
         return implementations;
+    }
+
+    static gate_ports<port_position> get_gate_ports() noexcept
+    {
+        static const gate_ports<port_position> ports{
+            {{line, {{{port_position(0, 1)}, {port_position(2, 1)}}}},
+             {y, {{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}}}}}};
+
+        return ports;
     }
 
   private:
@@ -68,6 +73,9 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 
     sidb_surface defect_layout{cell_lyt};
 
+    static const port_list<port_position> line_ports{{port_position(0, 1)}, {port_position(2, 1)}};
+    static const port_list<port_position> y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
+
     SECTION("defect-free")
     {
         const auto black_list = sidb_surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
@@ -85,21 +93,30 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
         REQUIRE(black_list.at({1, 0}).size() == 2);
         CHECK(contains_tt(black_list.at({1, 0}), create_id_tt()));
         CHECK(contains_tt(black_list.at({1, 0}), create_and_tt()));
+        CHECK(black_list.at({1, 0}).at(create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({1, 0}).at(create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({2, 0}).size() == 2);
         CHECK(contains_tt(black_list.at({2, 0}), create_id_tt()));
         CHECK(contains_tt(black_list.at({2, 0}), create_and_tt()));
+        CHECK(black_list.at({2, 0}).at(create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({2, 0}).at(create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({1, 1}).size() == 2);
         CHECK(contains_tt(black_list.at({1, 1}), create_id_tt()));
         CHECK(contains_tt(black_list.at({1, 1}), create_and_tt()));
+        CHECK(black_list.at({1, 1}).at(create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({1, 1}).at(create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({2, 1}).size() == 2);
         CHECK(contains_tt(black_list.at({2, 1}), create_id_tt()));
         CHECK(contains_tt(black_list.at({2, 1}), create_and_tt()));
+        CHECK(black_list.at({2, 1}).at(create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({2, 1}).at(create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({3, 1}).size() == 1);
         CHECK(contains_tt(black_list.at({3, 1}), create_and_tt()));
+        CHECK(black_list.at({3, 1}).at(create_and_tt()).front() == y_ports);
     }
     SECTION("single uncharged defect")
     {
@@ -112,6 +129,8 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
         REQUIRE(black_list.at({0, 0}).size() == 2);
         CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_and_tt()));
+        CHECK(black_list.at({0, 0}).at(create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({0, 0}).at(create_and_tt()).front() == y_ports);
     }
     SECTION("multi-defect")
     {
@@ -128,35 +147,50 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
         REQUIRE(black_list.at({1, 0}).size() == 2);
         CHECK(contains_tt(black_list.at({1, 0}), create_id_tt()));
         CHECK(contains_tt(black_list.at({1, 0}), create_and_tt()));
+        CHECK(black_list.at({1, 0}).at(create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({1, 0}).at(create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({2, 0}).size() == 2);
         CHECK(contains_tt(black_list.at({2, 0}), create_id_tt()));
         CHECK(contains_tt(black_list.at({2, 0}), create_and_tt()));
+        CHECK(black_list.at({2, 0}).at(create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({2, 0}).at(create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({3, 0}).size() == 1);
         CHECK(contains_tt(black_list.at({3, 0}), create_and_tt()));
+        CHECK(black_list.at({3, 0}).at(create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({1, 1}).size() == 2);
         CHECK(contains_tt(black_list.at({1, 1}), create_id_tt()));
         CHECK(contains_tt(black_list.at({1, 1}), create_and_tt()));
+        CHECK(black_list.at({1, 1}).at(create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({1, 1}).at(create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({2, 1}).size() == 2);
         CHECK(contains_tt(black_list.at({2, 1}), create_id_tt()));
         CHECK(contains_tt(black_list.at({2, 1}), create_and_tt()));
+        CHECK(black_list.at({2, 1}).at(create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({2, 1}).at(create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({3, 1}).size() == 1);
         CHECK(contains_tt(black_list.at({3, 1}), create_and_tt()));
+        CHECK(black_list.at({3, 1}).at(create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({0, 2}).size() == 1);
         CHECK(contains_tt(black_list.at({0, 2}), create_and_tt()));
+        CHECK(black_list.at({0, 2}).at(create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({1, 2}).size() == 2);
         CHECK(contains_tt(black_list.at({1, 2}), create_id_tt()));
         CHECK(contains_tt(black_list.at({1, 2}), create_and_tt()));
+        CHECK(black_list.at({1, 2}).at(create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({1, 2}).at(create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({2, 2}).size() == 2);
         CHECK(contains_tt(black_list.at({2, 2}), create_id_tt()));
         CHECK(contains_tt(black_list.at({2, 2}), create_and_tt()));
+        CHECK(black_list.at({2, 2}).at(create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({2, 2}).at(create_and_tt()).front() == y_ports);
     }
 }
 
@@ -182,7 +216,8 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
 
         CHECK(black_list.size() == 1);
 
-        REQUIRE(black_list.at({0, 0}).size() == 7);
+        REQUIRE(black_list.at({0, 0}).size() == 8);
+        CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_not_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_and_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_or_tt()));
@@ -199,7 +234,8 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
 
         CHECK(black_list.size() == 1);
 
-        REQUIRE(black_list.at({0, 0}).size() == 1);
+        REQUIRE(black_list.at({0, 0}).size() == 2);
+        CHECK(contains_tt(black_list.at({0, 0}), create_not_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_xnor_tt()));
     }
     SECTION("multi-defect")
@@ -214,7 +250,8 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
 
         CHECK(black_list.size() == 1);
 
-        REQUIRE(black_list.at({0, 0}).size() == 5);
+        REQUIRE(black_list.at({0, 0}).size() == 6);
+        CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_not_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_and_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_or_tt()));
