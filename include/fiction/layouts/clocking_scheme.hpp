@@ -350,11 +350,23 @@ static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
 template <typename Lyt>
 static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
 {
-    static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u>
-        odd_3_cutout{{{{0, 1, 2}}, {{1, 2, 0}}, {{1, 2, 0}}, {{2, 0, 1}}, {{2, 0, 1}}, {{0, 1, 2}}}};
+    // clang-format off
 
     static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u>
-        even_3_cutout{{{{0, 1, 2}}, {{0, 1, 2}}, {{1, 2, 0}}, {{1, 2, 0}}, {{2, 0, 1}}, {{2, 0, 1}}}};
+        odd_3_cutout{{{{0, 1, 2}},
+                      {{1, 2, 0}},
+                      {{1, 2, 0}},
+                      {{2, 0, 1}},
+                      {{2, 0, 1}},
+                      {{0, 1, 2}}}};
+
+    static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u>
+        even_3_cutout{{{{0, 1, 2}},
+                       {{0, 1, 2}},
+                       {{1, 2, 0}},
+                       {{1, 2, 0}},
+                       {{2, 0, 1}},
+                       {{2, 0, 1}}}};
 
     static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 8u>
         odd_4_cutout{{{{0, 1, 2, 3}},
@@ -375,6 +387,8 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
                        {{2, 3, 0, 1}},
                        {{3, 0, 1, 2}},
                        {{3, 0, 1, 2}}}};
+
+    // clang-format on
 
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function odd_row_twoddwave_hex_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept { return odd_3_cutout[cz.y % 6ul][cz.x % 3ul]; };
@@ -517,16 +531,23 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
 template <typename Lyt>
 static auto use_clocking() noexcept
 {
+    // clang-format off
+
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function use_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
         constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
-            {{{0, 1, 2, 3}}, {{3, 2, 1, 0}}, {{2, 3, 0, 1}}, {{1, 0, 3, 2}}}};
+            {{{0, 1, 2, 3}},
+             {{3, 2, 1, 0}},
+             {{2, 3, 0, 1}},
+             {{1, 0, 3, 2}}}};
 
         return cutout[cz.y % 4ul][cz.x % 4ul];
     };
 
     return clocking_scheme{clock_name::use, use_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
+
+    // clang-format on
 }
 /**
  * Returns the RES clocking as defined in "An efficient clocking scheme for quantum-dot cellular automata" by
@@ -539,16 +560,23 @@ static auto use_clocking() noexcept
 template <typename Lyt>
 static auto res_clocking() noexcept
 {
+    // clang-format off
+
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function res_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
         constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
-            {{{3, 0, 1, 2}}, {{0, 1, 0, 3}}, {{1, 2, 3, 0}}, {{0, 3, 2, 1}}}};
+            {{{3, 0, 1, 2}},
+             {{0, 1, 0, 3}},
+             {{1, 2, 3, 0}},
+             {{0, 3, 2, 1}}}};
 
         return cutout[cz.y % 4ul][cz.x % 4ul];
     };
 
     return clocking_scheme{clock_name::res, res_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
+
+    // clang-format on
 }
 /**
  * Returns the ESP (Zig-Zag) clocking as defined in "Regular Clocking based Emerging Technique in QCA Targeting Low
@@ -561,16 +589,23 @@ static auto res_clocking() noexcept
 template <typename Lyt>
 static auto esp_clocking() noexcept
 {
+    // clang-format off
+
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function esp_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
         constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
-            {{{3, 0, 1, 2}}, {{0, 1, 2, 3}}, {{1, 2, 3, 0}}, {{0, 3, 2, 1}}}};
+            {{{3, 0, 1, 2}},
+             {{0, 1, 2, 3}},
+             {{1, 2, 3, 0}},
+             {{0, 3, 2, 1}}}};
 
         return cutout[cz.y % 4ul][cz.x % 4ul];
     };
 
     return clocking_scheme{clock_name::esp, esp_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
+
+    // clang-format on
 }
 /**
  * Returns the CFE clocking as defined in "CFE: a convenient, flexible, and efficient clocking scheme for quantum-dot
@@ -583,6 +618,8 @@ static auto esp_clocking() noexcept
 template <typename Lyt>
 static auto cfe_clocking() noexcept
 {
+    // clang-format off
+
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function cfe_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
@@ -596,6 +633,8 @@ static auto cfe_clocking() noexcept
     };
 
     return clocking_scheme{clock_name::cfe, cfe_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
+
+    // clang-format on
 }
 /**
  * Returns the BANCS clocking as defined in "BANCS: Bidirectional Alternating Nanomagnetic Clocking Scheme" by
@@ -607,16 +646,25 @@ static auto cfe_clocking() noexcept
 template <typename Lyt>
 static auto bancs_clocking() noexcept
 {
+    // clang-format off
+
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function bancs_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
         constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u> cutout{
-            {{{0, 1, 2}}, {{2, 1, 0}}, {{2, 0, 1}}, {{1, 0, 2}}, {{1, 2, 0}}, {{0, 2, 1}}}};
+            {{{0, 1, 2}},
+             {{2, 1, 0}},
+             {{2, 0, 1}},
+             {{1, 0, 2}},
+             {{1, 2, 0}},
+             {{0, 2, 1}}}};
 
         return cutout[cz.y % 6ul][cz.x % 3ul];
     };
 
     return clocking_scheme{clock_name::bancs, bancs_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 3u, true};
+
+    // clang-format on
 }
 /**
  * Returns a smart pointer to the given scheme.
