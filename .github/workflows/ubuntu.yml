@@ -13,8 +13,8 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ ubuntu-20.04, ubuntu-18.04 ]
-        compiler: [ g++-9, g++-10, clang++-9, clang++-10 ]
+        os: [ ubuntu-18.04, ubuntu-20.04, ubuntu-22.04 ]
+        compiler: [ g++-9, g++-10, clang++-10, clang++-11, clang++-12 ]
         build_type: [ Debug, Release ]
         include:
           - os: ubuntu-20.04
