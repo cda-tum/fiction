@@ -25,7 +25,7 @@ jobs:
             compiler: g++-9
             ccompiler: gcc
           - os: macos-11
-          - compiler: g++-10
+            compiler: g++-10
             ccompiler: gcc
 
     name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode)
