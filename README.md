@@ -124,9 +124,9 @@ Built-in schemes are
 |:--------------------------------------------------------:|:------------------------------------------------------------------------:|:-------------------------------------------------------------------------:|
 | <img src="docs/_static/use.png" alt="USE" height="200"/> |         <img src="docs/_static/res.png" alt="RES" height="200"/>         |       <img src="docs/_static/esp.png" alt="2DDWave" height="200"/>        |
 
-|    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
-|:------------------------------------------------------------:|
-| <img src="docs/_static/bancs.png" alt="BANCS" height="300"/> |
+|   [USE](https://ieeexplore.ieee.org/document/7219390)    |      [BANCS](https://ieeexplore.ieee.org/document/8533251)   |
+|:--------------------------------------------------------:|:------------------------------------------------------------:|
+| <img src="docs/_static/cfe.png" alt="CFE" height="200"/> | <img src="docs/_static/bancs.png" alt="BANCS" height="300"/> |
 
 plus the mentioned irregular open clocking that works via a clock map instead of a regular extrapolated cutout.
 
