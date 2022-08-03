@@ -46,15 +46,15 @@ jobs:
         with:
           python-version: '3.9.x'
 
-      - name: Install pip packages
-        uses: BSFishy/pip-action@v1
-        with:
-          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
-
       - name: Clone Repository
         uses: actions/checkout@v3
         with:
           submodules: recursive
+
+      - name: Install pip packages
+        uses: BSFishy/pip-action@v1
+        with:
+          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
 
       - name: Cache Z3 Solver
         id: cache-z3-solver
