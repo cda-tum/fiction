@@ -24,8 +24,13 @@ jobs:
         include:
           - os: ubuntu-18.04
             compiler: clang++-9
+            build_type: Debug
+          - os: ubuntu-18.04
+            compiler: clang++-9
+            build_type: Release
           - os: ubuntu-20.04
             compiler: g++-10
+            build_type: Release
             cppstandard: -DFICTION_CXX_STANDARD=20
             cppname: C++20
 
