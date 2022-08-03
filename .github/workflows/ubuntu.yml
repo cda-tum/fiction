@@ -49,10 +49,7 @@ jobs:
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
         with:
-          packages: |
-            graphviz
-            python-sat==0.1.6.dev6
-            wrapt_timeout_decorator
+          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
 
       - name: Clone Repository
         uses: actions/checkout@v3
