@@ -23,10 +23,19 @@ jobs:
             ccompiler: gcc
           - os: macos-11
             compiler: g++-9
+            build_type: Debug
+          - os: macos-11
+            compiler: g++-9
+            build_type: Release
             ccompiler: gcc
           - os: macos-11
             compiler: g++-10
             ccompiler: gcc
+            build_type: Debug
+          - os: macos-11
+            compiler: g++-10
+            ccompiler: gcc
+            build_type: Release
 
     name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode)
     runs-on: ${{matrix.os}}
