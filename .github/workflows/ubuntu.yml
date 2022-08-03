@@ -21,6 +21,8 @@ jobs:
             compiler: clang++-11
           - os: ubuntu-18.04
             compiler: clang++-12
+          - os: ubuntu-22.04
+            compiler: clang++-10
         include:
           - os: ubuntu-18.04
             compiler: clang++-9
