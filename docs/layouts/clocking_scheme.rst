@@ -72,6 +72,14 @@ ESP
 
 .. doxygenfunction:: fiction::esp_clocking
 
+CFE
+###
+
+.. figure:: /_static/cfe.png
+   :width: 200
+
+.. doxygenfunction:: fiction::cfe_clocking
+
 BANCS
 #####
 
