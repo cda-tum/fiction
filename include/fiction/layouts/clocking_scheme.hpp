@@ -158,6 +158,7 @@ static constexpr const char* twoddwave_hex = "2DDWAVEHEX";
 static constexpr const char* use           = "USE";
 static constexpr const char* res           = "RES";
 static constexpr const char* esp           = "ESP";
+static constexpr const char* cfe           = "CFE";
 static constexpr const char* bancs         = "BANCS";
 }  // namespace clock_name
 
@@ -572,6 +573,31 @@ static auto esp_clocking() noexcept
     return clocking_scheme{clock_name::esp, esp_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
 }
 /**
+ * Returns the CFE clocking as defined in "CFE: a convenient, flexible, and efficient clocking scheme for quantum-dot
+ * cellular automata" by Feifei Deng, Guang-Jun Xie, Xin Cheng, Zhang Zhang, and Yongqiang Zhang in IET Circuits,
+ * Devices & Systems 2020.
+ *
+ * @tparam Lyt Clocked layout type.
+ * @return CFE clocking scheme.
+ */
+template <typename Lyt>
+static auto cfe_clocking() noexcept
+{
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function cfe_clock_function =
+        [](const clock_zone<Lyt>& cz) noexcept
+    {
+        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+            {{{0, 1, 0, 1}},
+             {{3, 2, 3, 2}},
+             {{0, 1, 0, 1}},
+             {{3, 2, 3, 2}}}};
+
+        return cutout[cz.y % 4ul][cz.x % 4ul];
+    };
+
+    return clocking_scheme{clock_name::cfe, cfe_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
+}
+/**
  * Returns the BANCS clocking as defined in "BANCS: Bidirectional Alternating Nanomagnetic Clocking Scheme" by
  * Ruan Evangelista Formigoni, Omar P. Vilela Neto, and Jose Augusto M. Nacif in SBCCI 2018.
  *
@@ -655,6 +681,7 @@ std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::s
         {clock_name::use, use_clocking<Lyt>()},
         {clock_name::res, res_clocking<Lyt>()},
         {clock_name::esp, esp_clocking<Lyt>()},
+        {clock_name::cfe, cfe_clocking<Lyt>()},
         {clock_name::bancs, bancs_clocking<Lyt>()}};
 
     auto upper_name = name;
