@@ -13,16 +13,20 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ macos-10.15 ]  # macos-11 when supported
-        compiler: [ g++-9, g++-10, clang++ ]  # clang++12
+        os: [ macos-11, macos-12 ]
+        compiler: [ g++-11, clang++ ]
         build_type: [ Debug, Release ]
         include:
-          - compiler: g++-9
-            ccompiler: gcc
-          - compiler: g++-10
-            ccompiler: gcc
           - compiler: clang++
             ccompiler: clang
+          - compiler: g++-11
+            ccompiler: gcc
+          - os: macos-11
+            compiler: g++-9
+            ccompiler: gcc
+          - os: macos-11
+          - compiler: g++-10
+            ccompiler: gcc
 
     name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode)
     runs-on: ${{matrix.os}}
