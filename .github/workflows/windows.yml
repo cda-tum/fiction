@@ -7,28 +7,25 @@ defaults:
     shell: pwsh  # use pwsh as directory handling does not seem to work with bash
 
 env:
-  Z3_GIT_TAG: z3-4.8.12
+  Z3_GIT_TAG: z3-4.10.0
 
 jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ windows-2019 ]
+        os: [ windows-2019, windows-2022 ]
         toolset: [ v142, ClangCL ]
         build_type: [ Debug, Release ]
         include:
           - os: windows-2019
             env: "Visual Studio 16 2019"
+          - os: windows-2022
+            env: "Visual Studio 17 2022"
 
     name: ${{matrix.os}} with ${{matrix.env}} and ${{matrix.toolset}} toolset (${{matrix.build_type}} mode)
     runs-on: ${{matrix.os}}
 
     steps:
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9.x'
-
       - name: Clone Repository
         uses: actions/checkout@v3
         with:
