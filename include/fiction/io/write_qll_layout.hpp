@@ -335,21 +335,30 @@ class write_qll_layout_impl
                     {
                         os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_LENGTH, 4);
                     }
+
+                    os << qll::CLOSE_LAYOUT_ITEM;
                 }
                 // write mQCA cell
                 else if constexpr (std::is_same_v<technology<Lyt>, qca_technology>)
                 {
                     // write normal cell
-                    os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z);
-                    os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, lyt.get_clock_number(c));
-
-                    // TODO what about constant cells?
+                    if (qca_technology::is_normal_cell(type))
+                    {
+                        os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z);
+                        os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, lyt.get_clock_number(c));
+                        os << qll::CLOSE_LAYOUT_ITEM;
+                    }
+                    // constant cells are handled as input pins
+                    else if (qca_technology::is_constant_cell(type))
+                    {
+                        const auto const_name = qca_technology::is_const_0_cell(type) ? "const0" : "const1";
+                        os << fmt::format(qll::PIN, tech_name, const_name, 0, cell_id++, bb_x(c), bb_y(c), c.z);
+                    }
                 }
-
-                os << qll::CLOSE_LAYOUT_ITEM;
             }
         }
 
+        // I/O cells are not considered in the cases above because they need to be handled separately
         write_pins();
 
         os << qll::CLOSE_LAYOUT;
