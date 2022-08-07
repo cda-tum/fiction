@@ -20,7 +20,7 @@ RUN cmake -S z3 -B z3/build -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED
     && cmake --build z3/build --config Release -j${NUMBER_OF_JOBS} --target install
 
 # Clone fiction's repository including submodules
-RUN git clone --recursive --branch v0.4.0 https://github.com/marcelwa/fiction.git
+RUN git clone --recursive --branch https://github.com/marcelwa/fiction.git
 
 # Build fiction
 RUN cmake -S fiction -B fiction/build -DCMAKE_BUILD_TYPE=Release -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=z3lib -DFICTION_ENABLE_MUGEN=OFF -DFICTION_PROGRESS_BARS=ON -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF \
