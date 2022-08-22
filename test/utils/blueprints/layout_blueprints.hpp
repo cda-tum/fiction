@@ -300,6 +300,43 @@ CellLyt single_layer_qca_and_gate() noexcept
 }
 
 template <typename CellLyt>
+CellLyt two_layer_qca_wire_crossing() noexcept
+{
+    CellLyt layout{{4, 4, 1}, "Crossover"};
+
+    layout.assign_cell_type({0, 2}, fiction::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 0}, fiction::qca_technology::cell_type::INPUT);
+
+    layout.assign_cell_type({2, 1}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, fiction::qca_technology::cell_type::NORMAL);
+
+    layout.assign_cell_type({0, 2, 1}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2, 1}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 1}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2, 1}, fiction::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2, 1}, fiction::qca_technology::cell_type::NORMAL);
+
+    layout.assign_cell_mode({0, 2}, fiction::qca_technology::cell_mode::VERTICAL);
+    layout.assign_cell_mode({0, 2, 1}, fiction::qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({1, 2, 1}, fiction::qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 2, 1}, fiction::qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({3, 2, 1}, fiction::qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({4, 2, 1}, fiction::qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({4, 2}, fiction::qca_technology::cell_mode::VERTICAL);
+
+    layout.assign_cell_type({4, 2}, fiction::qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({2, 4}, fiction::qca_technology::cell_type::OUTPUT);
+
+    layout.assign_cell_name({0, 2}, "a");
+    layout.assign_cell_name({2, 0}, "b");
+    layout.assign_cell_name({4, 2}, "a'");
+    layout.assign_cell_name({2, 4}, "b'");
+
+    return layout;
+}
+
+template <typename CellLyt>
 CellLyt single_layer_inml_maj_gate() noexcept
 {
     CellLyt layout{{4, 4}, "MAJ"};
