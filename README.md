@@ -89,10 +89,10 @@ Gate libraries:
 
 File formats:
 
-- `*.qll` for [ToPoliNano and MagCAD](https://topolinano.polito.it/)
-- `*.qcc` for [ToPoliNano and MagCAD](https://topolinano.polito.it/)
+- `*.qcc` for [ToPoliNano](https://topolinano.polito.it/)
+- `*.qll` for [MagCAD](https://topolinano.polito.it/) and [SCERPA](https://ieeexplore.ieee.org/document/8935211)
 
-Many thanks to Umberto Garlando and Fabrizio Riente for their support!
+Many thanks to Umberto Garlando, Fabrizio Riente, and Giuliana Beretta for their support!
 
 ### Silicon Dangling Bonds (SiDBs)
 
