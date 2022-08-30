@@ -340,7 +340,7 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
             check_tp(generate_layout<cart_gate_clk_lyt>(
                          blueprints::one_to_five_path_difference_network<technology_network>(),
                          use(desynchronize(configuration<cart_gate_clk_lyt>()))),
-                     2);
+                     3);
         }
     }
     //    SECTION("Asynchronicity")
