@@ -157,7 +157,7 @@ static constexpr const char* twoddwave     = "2DDWAVE";
 static constexpr const char* twoddwave_hex = "2DDWAVEHEX";
 static constexpr const char* use           = "USE";
 static constexpr const char* res           = "RES";
-static constexpr const char* esp           = "ESP";
+static constexpr const char* esr           = "ESR";
 static constexpr const char* cfe           = "CFE";
 static constexpr const char* bancs         = "BANCS";
 }  // namespace clock_name
@@ -579,19 +579,19 @@ static auto res_clocking() noexcept
     // clang-format on
 }
 /**
- * Returns the ESP (Zig-Zag) clocking as defined in "Regular Clocking based Emerging Technique in QCA Targeting Low
- * Power Nano Circuit" by Jayanta Pal, Amit Kumar Pramanik, Mrinal Goswami, Apu Kumar Saha, and Bibhash Sen in
- * International Journal of Electronics 2021.
+ * Returns the ESR clocking as defined in "An efficient, scalable, regular clocking scheme based on quantum dot cellular
+ * automata" by Jayanta Pal, Amit Kumar Pramanik, Jyotirmoy Sil Sharma, Apu Kumar Saha, and Bibhash Sen in Analog
+ * Integrated Circuits and Signal Processing 2021.
  *
  * @tparam Lyt Clocked layout type.
- * @return ESP clocking scheme.
+ * @return ESR clocking scheme.
  */
 template <typename Lyt>
-static auto esp_clocking() noexcept
+static auto esr_clocking() noexcept
 {
     // clang-format off
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function esp_clock_function =
+    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function esr_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
         constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
@@ -603,7 +603,7 @@ static auto esp_clocking() noexcept
         return cutout[cz.y % 4ul][cz.x % 4ul];
     };
 
-    return clocking_scheme{clock_name::esp, esp_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
+    return clocking_scheme{clock_name::esr, esr_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
 
     // clang-format on
 }
@@ -728,7 +728,7 @@ std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::s
         {"2DDWAVEHEX4", twoddwave_hex_clocking<Lyt>(num_clks::FOUR)},
         {clock_name::use, use_clocking<Lyt>()},
         {clock_name::res, res_clocking<Lyt>()},
-        {clock_name::esp, esp_clocking<Lyt>()},
+        {clock_name::esr, esr_clocking<Lyt>()},
         {clock_name::cfe, cfe_clocking<Lyt>()},
         {clock_name::bancs, bancs_clocking<Lyt>()}};
 
