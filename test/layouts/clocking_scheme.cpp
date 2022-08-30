@@ -1829,7 +1829,7 @@ TEST_CASE("4-phase ESP", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
-    const auto esp4 = esp_clocking<clk_lyt>();
+    const auto esp4 = esr_clocking<clk_lyt>();
 
     CHECK(esp4.num_clocks == 4u);
     CHECK(esp4.max_in_degree == 3u);
@@ -1926,7 +1926,7 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
     check({"2DDwavehex", "2DdWaVeHeX", "2ddwavehex", "2DDWAVEHEX", "2DDWaveHex"}, clock_name::twoddwave);
     check({"use", "USE", "uSe", "UsE"}, clock_name::use);
     check({"res", "RES", "rEs", "ReS"}, clock_name::res);
-    check({"esp", "ESP", "eSp", "EsP"}, clock_name::esp);
+    check({"esr", "ESR", "eSr", "EsR"}, clock_name::esr);
     check({"cfe", "CFE", "cFe", "CfE"}, clock_name::cfe);
     check({"bancs", "BANCS", "BaNCs", "banCS"}, clock_name::bancs);
 
@@ -1936,8 +1936,8 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
     CHECK(!get_clocking_scheme<clk_lyt>("TwoDDWave").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("2DDWave6").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("SUE").has_value());
+    CHECK(!get_clocking_scheme<clk_lyt>("SER").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("ERS").has_value());
-    CHECK(!get_clocking_scheme<clk_lyt>("EPS").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("CEF").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("BNCS").has_value());
 }
@@ -1954,7 +1954,7 @@ TEST_CASE("Linear schemes", "[clocking-scheme]")
     CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::open)));
     CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::use)));
     CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::res)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::esp)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::esr)));
     CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::cfe)));
     CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::bancs)));
 }

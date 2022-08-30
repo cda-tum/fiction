@@ -116,13 +116,13 @@ with variable amounts of clock numbers as QCA for instance uses four clock phase
 
 Built-in schemes are
 
-|    [Columnar](https://ieeexplore.ieee.org/document/573740)    |    [Row](https://ieeexplore.ieee.org/document/573740)    |     [2DDWave](https://ieeexplore.ieee.org/document/1717097)      |
-|:-------------------------------------------------------------:|:--------------------------------------------------------:|:----------------------------------------------------------------:|
-| <img src="docs/_static/columnar.png" alt="USE" height="200"/> | <img src="docs/_static/row.png" alt="RES" height="200"/> | <img src="docs/_static/2ddwave.png" alt="2DDWave" height="200"/> |
+|      [Columnar](https://ieeexplore.ieee.org/document/573740)       |    [Row](https://ieeexplore.ieee.org/document/573740)    |     [2DDWave](https://ieeexplore.ieee.org/document/1717097)      |
+|:------------------------------------------------------------------:|:--------------------------------------------------------:|:----------------------------------------------------------------:|
+| <img src="docs/_static/columnar.png" alt="Columnar" height="200"/> | <img src="docs/_static/row.png" alt="Row" height="200"/> | <img src="docs/_static/2ddwave.png" alt="2DDWave" height="200"/> |
 
-|   [USE](https://ieeexplore.ieee.org/document/7219390)    | [RES](https://www.tandfonline.com/doi/abs/10.1080/21681724.2019.1570551) | [ESP](https://www.tandfonline.com/doi/full/10.1080/00207217.2021.1972473) |
-|:--------------------------------------------------------:|:------------------------------------------------------------------------:|:-------------------------------------------------------------------------:|
-| <img src="docs/_static/use.png" alt="USE" height="200"/> |         <img src="docs/_static/res.png" alt="RES" height="200"/>         |       <img src="docs/_static/esp.png" alt="2DDWave" height="200"/>        |
+|   [USE](https://ieeexplore.ieee.org/document/7219390)    | [RES](https://www.tandfonline.com/doi/abs/10.1080/21681724.2019.1570551) | [ESR](https://link.springer.com/content/pdf/10.1007/s10470-020-01760-4.pdf) |
+|:--------------------------------------------------------:|:------------------------------------------------------------------------:|:---------------------------------------------------------------------------:|
+| <img src="docs/_static/use.png" alt="USE" height="200"/> |         <img src="docs/_static/res.png" alt="RES" height="200"/>         |          <img src="docs/_static/esr.png" alt="ESR" height="200"/>           |
 
 |   [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096)   |    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
 |:------------------------------------------------------------------------------------:|:------------------------------------------------------------:|
