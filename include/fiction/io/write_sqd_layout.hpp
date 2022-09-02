@@ -46,66 +46,66 @@ static constexpr const char* GUI_BLOCK = "    <gui>\n"
                                          "        <scroll x=\"{}\" y=\"{}\"/>\n"
                                          "    </gui>\n";
 
-static constexpr const char* LAYERS_BLOCK     = "    <layers>\n{}"
-                                                "    </layers>\n";
-static constexpr const char* LATTICE_LAYER    = "        <layer_prop>\n"
-                                                "            <name>Lattice</name>\n"
-                                                "            <type>Lattice</type>\n"
-                                                "            <role>Design</role>\n"
-                                                "            <zoffset>0</zoffset>\n"
-                                                "            <zheight>0</zheight>\n"
-                                                "            <visible>1</visible>\n"
-                                                "            <active>0</active>\n"
-                                                "            <lat_vec>\n"
-                                                "                <a1 x=\"3.84\" y=\"0\"/>\n"
-                                                "                <a2 x=\"0\" y=\"7.68\"/>\n"
-                                                "                <N>2</N>\n"
-                                                "                <b1 x=\"0\" y=\"0\"/>\n"
-                                                "                <b2 x=\"0\" y=\"2.25\"/>\n"
-                                                "            </lat_vec>\n"
-                                                "        </layer_prop>\n";
-static constexpr const char* SCREENSHOT_LAYER = "        <layer_prop>\n"
-                                                "            <name>Screenshot Overlay</name>\n"
-                                                "            <type>Misc</type>\n"
-                                                "            <role>Overlay</role>\n"
-                                                "            <zoffset>0</zoffset>\n"
-                                                "            <zheight>0</zheight>\n"
-                                                "            <visible>0</visible>\n"
-                                                "            <active>0</active>\n"
-                                                "        </layer_prop>\n";
-static constexpr const char* SURFACE_LAYER    = "        <layer_prop>\n"
-                                                "            <name>Surface</name>\n"
-                                                "            <type>DB</type>\n"
-                                                "            <role>Design</role>\n"
-                                                "            <zoffset>0</zoffset>\n"
-                                                "            <zheight>0</zheight>\n"
-                                                "            <visible>1</visible>\n"
-                                                "            <active>0</active>\n"
-                                                "        </layer_prop>\n";
-static constexpr const char* ELECTRODE_LAYER  = "        <layer_prop>\n"
-                                                "            <name>Metal</name>\n"
-                                                "            <type>Electrode</type>\n"
-                                                "            <role>Design</role>\n"
-                                                "            <zoffset>1000</zoffset>\n"
-                                                "            <zheight>100</zheight>\n"
-                                                "            <visible>1</visible>\n"
-                                                "            <active>0</active>\n"
-                                                "        </layer_prop>\n";
-static constexpr const char* DEFECT_LAYER     = "        <layer_prop>\n"
-                                                "            <name>Defects</name>\n"
-                                                "            <type>Defects</type>\n"
-                                                "            <zoffset>0</zoffset>\n"
-                                                "            <zheight>0</zheight>\n"
-                                                "            <visible>1</visible>\n"
-                                                "            <active>0</active>\n"
-                                                "        </layer_prop>\n";
+static constexpr const char* LAYERS_BLOCK                = "    <layers>\n{}"
+                                                           "    </layers>\n";
+static constexpr const char* LATTICE_LAYER_DEFINITION    = "        <layer_prop>\n"
+                                                           "            <name>Lattice</name>\n"
+                                                           "            <type>Lattice</type>\n"
+                                                           "            <role>Design</role>\n"
+                                                           "            <zoffset>0</zoffset>\n"
+                                                           "            <zheight>0</zheight>\n"
+                                                           "            <visible>1</visible>\n"
+                                                           "            <active>0</active>\n"
+                                                           "            <lat_vec>\n"
+                                                           "                <a1 x=\"3.84\" y=\"0\"/>\n"
+                                                           "                <a2 x=\"0\" y=\"7.68\"/>\n"
+                                                           "                <N>2</N>\n"
+                                                           "                <b1 x=\"0\" y=\"0\"/>\n"
+                                                           "                <b2 x=\"0\" y=\"2.25\"/>\n"
+                                                           "            </lat_vec>\n"
+                                                           "        </layer_prop>\n";
+static constexpr const char* SCREENSHOT_LAYER_DEFINITION = "        <layer_prop>\n"
+                                                           "            <name>Screenshot Overlay</name>\n"
+                                                           "            <type>Misc</type>\n"
+                                                           "            <role>Overlay</role>\n"
+                                                           "            <zoffset>0</zoffset>\n"
+                                                           "            <zheight>0</zheight>\n"
+                                                           "            <visible>0</visible>\n"
+                                                           "            <active>0</active>\n"
+                                                           "        </layer_prop>\n";
+static constexpr const char* SURFACE_LAYER_DEFINITION    = "        <layer_prop>\n"
+                                                           "            <name>Surface</name>\n"
+                                                           "            <type>DB</type>\n"
+                                                           "            <role>Design</role>\n"
+                                                           "            <zoffset>0</zoffset>\n"
+                                                           "            <zheight>0</zheight>\n"
+                                                           "            <visible>1</visible>\n"
+                                                           "            <active>0</active>\n"
+                                                           "        </layer_prop>\n";
+static constexpr const char* ELECTRODE_LAYER_DEFINITION  = "        <layer_prop>\n"
+                                                           "            <name>Metal</name>\n"
+                                                           "            <type>Electrode</type>\n"
+                                                           "            <role>Design</role>\n"
+                                                           "            <zoffset>1000</zoffset>\n"
+                                                           "            <zheight>100</zheight>\n"
+                                                           "            <visible>1</visible>\n"
+                                                           "            <active>0</active>\n"
+                                                           "        </layer_prop>\n";
+static constexpr const char* DEFECT_LAYER_DEFINITION     = "        <layer_prop>\n"
+                                                           "            <name>Defects</name>\n"
+                                                           "            <type>Defects</type>\n"
+                                                           "            <zoffset>0</zoffset>\n"
+                                                           "            <zheight>0</zheight>\n"
+                                                           "            <visible>1</visible>\n"
+                                                           "            <active>0</active>\n"
+                                                           "        </layer_prop>\n";
 
-static constexpr const char* OPEN_DESIGN         = "    <design>\n"
-                                                   "        <layer type=\"Lattice\"/>\n"
-                                                   "        <layer type=\"Misc\"/>\n"
-                                                   "        <layer type=\"Electrode\"/>\n";
+static constexpr const char* OPEN_DESIGN         = "    <design>\n";
+static constexpr const char* LATTICE_LAYER       = "        <layer type=\"Lattice\"/>\n";
+static constexpr const char* MISC_LAYER          = "        <layer type=\"Misc\"/>\n";
 static constexpr const char* OPEN_DB_LAYER       = "        <layer type=\"DB\">\n";
 static constexpr const char* CLOSE_DB_LAYER      = "        </layer>\n";
+static constexpr const char* ELECTRODE_LAYER     = "        <layer type=\"Electrode\"/>\n";
 static constexpr const char* OPEN_DEFECTS_LAYER  = "        <layer type=\"Defects\">\n";
 static constexpr const char* CLOSE_DEFECTS_LAYER = "        </layer>\n";
 static constexpr const char* CLOSE_DESIGN        = "    </design>\n";
@@ -173,16 +173,17 @@ class write_sqd_layout_impl
 
         header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
 
-        std::vector<const char*> active_layers{siqad::LATTICE_LAYER, siqad::SCREENSHOT_LAYER, siqad::SURFACE_LAYER,
-                                               siqad::ELECTRODE_LAYER};
+        std::vector<const char*> active_layers{siqad::LATTICE_LAYER_DEFINITION, siqad::SCREENSHOT_LAYER_DEFINITION,
+                                               siqad::SURFACE_LAYER_DEFINITION, siqad::ELECTRODE_LAYER_DEFINITION};
 
         // add the defect layer if Lyt implements the defect interface
         if constexpr (has_get_sidb_defect_v<Lyt>)
         {
-            active_layers.push_back(siqad::DEFECT_LAYER);
+            active_layers.push_back(siqad::DEFECT_LAYER_DEFINITION);
         }
 
-        design << fmt::format(siqad::LAYERS_BLOCK, fmt::join(active_layers, "")) << siqad::OPEN_DESIGN;
+        design << fmt::format(siqad::LAYERS_BLOCK, fmt::join(active_layers, "")) << siqad::OPEN_DESIGN
+               << siqad::LATTICE_LAYER << siqad::MISC_LAYER;
 
         design << siqad::OPEN_DB_LAYER;
         generate_db_blocks(design);
@@ -194,6 +195,8 @@ class write_sqd_layout_impl
             generate_defect_blocks(design);
             design << siqad::CLOSE_DEFECTS_LAYER;
         }
+
+        design << siqad::ELECTRODE_LAYER;
 
         design << siqad::CLOSE_DESIGN;
 
