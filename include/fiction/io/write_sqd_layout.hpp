@@ -110,7 +110,7 @@ static constexpr const char* OPEN_DEFECTS_LAYER  = "        <layer type=\"Defect
 static constexpr const char* CLOSE_DEFECTS_LAYER = "        </layer>\n";
 static constexpr const char* CLOSE_DESIGN        = "    </design>\n";
 
-static constexpr const char* LATTICE_COORDINATE = R"(<latcoord n ="{}" m="{}" l="{}"/>)";
+static constexpr const char* LATTICE_COORDINATE = R"(<latcoord n="{}" m="{}" l="{}"/>)";
 
 static constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"
                                            "                <layer_id>2</layer_id>\n"
@@ -188,9 +188,12 @@ class write_sqd_layout_impl
         generate_db_blocks(design);
         design << siqad::CLOSE_DB_LAYER;
 
-        design << siqad::OPEN_DEFECTS_LAYER;
-        generate_defect_blocks(design);
-        design << siqad::CLOSE_DEFECTS_LAYER;
+        if constexpr (has_get_sidb_defect_v<Lyt>)
+        {
+            design << siqad::OPEN_DEFECTS_LAYER;
+            generate_defect_blocks(design);
+            design << siqad::CLOSE_DEFECTS_LAYER;
+        }
 
         design << siqad::CLOSE_DESIGN;
 
