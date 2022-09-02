@@ -40,8 +40,10 @@ class exact_command : public command
                    "Clocking scheme to use {OPEN[3|4], COLUMNAR[3|4], ROW[3|4] 2DDWAVE[3|4], 2DDWAVEHEX[3|4], USE, "
                    "RES, ESP, BANCS}",
                    true);
-        add_option("--upper_bound,-u", ps.upper_bound, "Number of FCN gate tiles to use at maximum");
-        add_option("--fixed_size,-f", ps.fixed_size, "Execute only one iteration with the given number of tiles");
+        add_option("--upper_x", ps.upper_bound_x, "Number of FCN gate tiles to use at maximum in x-direction");
+        add_option("--upper_y", ps.upper_bound_y, "Number of FCN gate tiles to use at maximum in y-direction");
+        add_option("--fixed_size,-f", ps.fixed_size,
+                   "Execute only one iteration with the given number of upper bound tiles");
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
         add_option("--async,-a", ps.num_threads, "Number of layout dimensions to examine in parallel (beta feature)");
 
@@ -83,19 +85,6 @@ class exact_command : public command
             env->out() << "[w] no logic network in store" << std::endl;
             reset_flags();
             return;
-        }
-
-        // error case: -f and -u are both set
-        if (this->is_set("fixed_size") && this->is_set("upper_bound"))
-        {
-            env->out() << "[e] -u and -f cannot be set together" << std::endl;
-            reset_flags();
-            return;
-        }
-        // set the value of fixed_size as the upper bound if set
-        else if (this->is_set("fixed_size"))
-        {
-            ps.upper_bound = ps.fixed_size;
         }
 
         // fetch number of threads available on the system
@@ -203,7 +192,8 @@ class exact_command : public command
     {
         fiction::exact_physical_design_params<LytDest> ps_dest{};
 
-        ps_dest.upper_bound              = ps_src.upper_bound;
+        ps_dest.upper_bound_x            = ps_src.upper_bound_x;
+        ps_dest.upper_bound_y            = ps_src.upper_bound_y;
         ps_dest.fixed_size               = ps_src.fixed_size;
         ps_dest.num_threads              = ps_src.num_threads;
         ps_dest.crossings                = ps_src.crossings;
