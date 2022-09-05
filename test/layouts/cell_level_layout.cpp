@@ -12,7 +12,6 @@
 #include <fiction/types.hpp>
 
 #include <string>
-#include <type_traits>
 
 using namespace fiction;
 
@@ -113,8 +112,6 @@ TEST_CASE("Cell type assignment", "[cell-level-layout]")
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 4}, "b");
     layout.assign_cell_name({4, 2}, "f");
-
-    CHECK(std::is_same_v<typename cell_layout::technology, qca_technology>);
 
     CHECK(layout.get_layout_name() == "AND");
     CHECK(layout.get_cell_name({0, 2}) == "a");
