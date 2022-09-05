@@ -7,11 +7,13 @@
 
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 
 #include <mockturtle/traits.hpp>
 
 #include <cstdint>
 #include <string>
+#include <type_traits>
 
 namespace fiction
 {
@@ -557,6 +559,13 @@ using cell = typename Lyt::cell;
 
 template <typename Lyt>
 using technology = typename Lyt::technology;
+
+template <typename Lyt>
+inline constexpr const bool has_qca_technology = std::is_same_v<technology<Lyt>, qca_technology>;
+template <typename Lyt>
+inline constexpr const bool has_inml_technology = std::is_same_v<technology<Lyt>, inml_technology>;
+template <typename Lyt>
+inline constexpr const bool has_sidb_technology = std::is_same_v<technology<Lyt>, sidb_technology>;
 
 #pragma region is_cell_level_layout
 template <class Lyt, class = void>
