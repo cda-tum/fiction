@@ -51,9 +51,7 @@ class technology_network : public mockturtle::klut_network
      */
     [[nodiscard]] bool is_po(const node& n) const
     {
-        const auto end = _storage->outputs.cbegin() + _storage->data.num_pos;
-
-        return std::find_if(_storage->outputs.cbegin(), end,
+        return std::find_if(_storage->outputs.cbegin(), _storage->outputs.cend(),
                             [this, &n](const auto& p)
                             { return this->get_node(p.index) == n; }) != _storage->outputs.cend();
     }
@@ -183,11 +181,17 @@ class technology_network : public mockturtle::klut_network
         _storage->nodes.push_back(node_data);
 
         /* increase ref-count to children */
-        for (auto c : children) { _storage->nodes[c].data[0].h1++; }
+        for (auto c : children)
+        {
+            _storage->nodes[c].data[0].h1++;
+        }
 
         set_value(index, 0);
 
-        for (auto const& fn : _events->on_add) { (*fn)(index); }
+        for (auto const& fn : _events->on_add)
+        {
+            (*fn)(index);
+        }
 
         return index;
     }
