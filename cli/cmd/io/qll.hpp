@@ -61,13 +61,14 @@ class qll_command : public command
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-            if constexpr (std::is_same_v<fiction::technology<Lyt>, fiction::inml_technology>)
+            if constexpr (std::is_same_v<fiction::technology<Lyt>, fiction::inml_technology> ||
+                          std::is_same_v<fiction::technology<Lyt>, fiction::qca_technology>)
             {
                 fiction::write_qll_layout(*lyt_ptr, filename);
             }
             else
             {
-                env->out() << fmt::format("[e] {}'s cell technology is not iNML but {}", get_name(lyt_ptr),
+                env->out() << fmt::format("[e] {}'s cell technology is neither iNML nor QCA but {}", get_name(lyt_ptr),
                                           fiction::tech_impl_name<fiction::technology<Lyt>>)
                            << std::endl;
             }

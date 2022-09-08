@@ -75,6 +75,7 @@ Gate libraries:
 File formats:
 
 - `*.qca` for [QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/)
+- `*.qll` for [MagCAD](https://topolinano.polito.it/) and [SCERPA](https://ieeexplore.ieee.org/document/8935211)
 - `*.fqca` for [QCA-STACK](https://github.com/wlambooy/QCA-STACK)
 - `*.svg` for visual representation
 
@@ -89,10 +90,10 @@ Gate libraries:
 
 File formats:
 
-- `*.qll` for [ToPoliNano and MagCAD](https://topolinano.polito.it/)
-- `*.qcc` for [ToPoliNano and MagCAD](https://topolinano.polito.it/)
+- `*.qcc` for [ToPoliNano](https://topolinano.polito.it/)
+- `*.qll` for [ToPoliNano & MagCAD](https://topolinano.polito.it/)
 
-Many thanks to Umberto Garlando and Fabrizio Riente for their support!
+Many thanks to Umberto Garlando, Fabrizio Riente, and Giuliana Beretta for their support!
 
 ### Silicon Dangling Bonds (SiDBs)
 

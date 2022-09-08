@@ -254,8 +254,8 @@ Cell-level layouts can be written to files parsable by various physical simulato
 simulators are currently supported:
 
 - ``qca <filename>`` creates a `QCADesigner <https://waluslab.ece.ubc.ca/qcadesigner/>`_ QCA file
-- ``qll <filename>`` creates a `ToPoliNano & MagCAD <https://topolinano.polito.it/>`_ QLL file
-- ``qcc <filename>`` creates a `ToPoliNano & MagCAD <https://topolinano.polito.it/>`_ QCC file
+- ``qcc <filename>`` creates a `ToPoliNano <https://topolinano.polito.it/>`_ design component QCC file
+- ``qll <filename>`` creates a `ToPoliNano & MagCAD <https://topolinano.polito.it/>`_ or `SCERPA <https://ieeexplore.ieee.org/document/8935211>`_ layout QLL file
 - ``sqd <filename>`` creates a `SiQAD <https://github.com/siqad/siqad>`_ SQD file
 - ``fqca <filename>`` creates a `QCA-STACK <https://github.com/wlambooy/QCA-STACK>`_ FQCA file
 
