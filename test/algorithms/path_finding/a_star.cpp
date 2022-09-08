@@ -256,7 +256,7 @@ TEST_CASE("10x10 clocked layouts with varying distance functions", "[A*]")
         }
         SECTION("ESP")
         {
-            clk_lyt layout{{9, 9}, esp_clocking<clk_lyt>()};
+            clk_lyt layout{{9, 9}, esr_clocking<clk_lyt>()};
 
             SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
             {
@@ -286,7 +286,7 @@ TEST_CASE("10x10 clocked layouts with varying distance functions", "[A*]")
         }
         SECTION("ESP")
         {
-            clk_lyt layout{{9, 9}, esp_clocking<clk_lyt>()};
+            clk_lyt layout{{9, 9}, esr_clocking<clk_lyt>()};
 
             SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
             {
