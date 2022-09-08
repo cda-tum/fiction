@@ -42,6 +42,7 @@
 #include <mutex>
 #include <optional>
 #include <set>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -59,14 +60,12 @@ enum class technology_constraints
 /**
  * Parameters.
  */
-template <typename Lyt>
 struct exact_physical_design_params
 {
     /**
      * Clocking scheme to be used.
      */
-    std::shared_ptr<clocking_scheme<tile<Lyt>>> scheme =
-        std::make_shared<clocking_scheme<tile<Lyt>>>(twoddwave_clocking<Lyt>());
+    std::string scheme = "2DDWave";
     /**
      * Number of tiles to use as an upper bound.
      */
@@ -148,13 +147,14 @@ template <typename Lyt, typename Ntk>
 class exact_impl
 {
   public:
-    exact_impl(const Ntk& src, const exact_physical_design_params<Lyt>& p, exact_physical_design_stats& st) :
+    exact_impl(const Ntk& src, const exact_physical_design_params& p, exact_physical_design_stats& st) :
             ps{p},
-            pst{st}
+            pst{st},
+            scheme{*get_clocking_scheme<Lyt>(ps.scheme)}
     {
         mockturtle::names_view<technology_network> intermediate_ntk{
             fanout_substitution<mockturtle::names_view<technology_network>>(
-                src, {fanout_substitution_params::substitution_strategy::BREADTH, ps.scheme->max_out_degree, 1ul})};
+                src, {fanout_substitution_params::substitution_strategy::BREADTH, scheme.max_out_degree, 1ul})};
 
         // create PO nodes in the network
         intermediate_ntk.substitute_po_signals();
@@ -191,11 +191,15 @@ class exact_impl
     /**
      * Parameters.
      */
-    exact_physical_design_params<Lyt> ps;
+    exact_physical_design_params ps;
     /**
      * Statistics.
      */
     exact_physical_design_stats& pst;
+    /**
+     * The utilized clocking scheme.
+     */
+    clocking_scheme<tile<Lyt>> scheme;
     /**
      * Lower bound for the number of layout tiles.
      */
@@ -232,8 +236,8 @@ class exact_impl
          * @param lyt The empty gate-level layout that is going to contain the created layout.
          * @param ps The parameters to respect in the SMT instance generation process.
          */
-        smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk,
-                    const exact_physical_design_params<Lyt>& ps) noexcept :
+        smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk, const exact_physical_design_params& ps) noexcept
+                :
                 ctx{std::move(ctxp)},
                 layout{lyt},
                 network{ntk},
@@ -452,7 +456,7 @@ class exact_impl
         /**
          * Configurations specifying layout restrictions. Used in instance generation among other places.
          */
-        const exact_physical_design_params<Lyt> params;
+        const exact_physical_design_params params;
         /**
          * Maps nodes to tile positions when creating the layout from the SMT model.
          */
@@ -588,7 +592,10 @@ class exact_impl
                 std::set<tile<Lyt>> added_tiles{};
                 for (decltype(ar.y) y = 0; y <= ar.y; ++y)
                 {
-                    for (decltype(ar.x) x = 0; x <= ar.x; ++x) { added_tiles.emplace(x, y); }
+                    for (decltype(ar.x) x = 0; x <= ar.x; ++x)
+                    {
+                        added_tiles.emplace(x, y);
+                    }
                 }
 
                 // create new state
@@ -805,7 +812,10 @@ class exact_impl
         [[nodiscard]] z3::expr mk_eq(const z3::expr_vector& v) const
         {
             z3::expr_vector eq{*ctx};
-            for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i) { eq.push_back(v[i - 1] == v[i]); }
+            for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i)
+            {
+                eq.push_back(v[i - 1] == v[i]);
+            }
 
             return z3::mk_and(eq);
         }
@@ -1036,7 +1046,10 @@ class exact_impl
                     // ints over reals is due to Z3's quantifier-free finite domain (QF_FD) solver.
                     // TL;DR one-hot encoding rules!
                     z3::expr_vector tcl{*ctx};
-                    for (auto i = 0u; i < layout.num_clocks(); ++i) { tcl.push_back(get_tcl(t, i)); }
+                    for (auto i = 0u; i < layout.num_clocks(); ++i)
+                    {
+                        tcl.push_back(get_tcl(t, i));
+                    }
                     solver->add(z3::atleast(tcl, 1) and z3::atmost(tcl, 1));
                 });
         }
@@ -1375,7 +1388,10 @@ class exact_impl
                     [this](const auto& n)
                     {
                         z3::expr_vector ncl{*ctx};
-                        for (auto i = 0u; i < layout.num_clocks(); ++i) { ncl.push_back(get_ncl(n, i)); }
+                        for (auto i = 0u; i < layout.num_clocks(); ++i)
+                        {
+                            ncl.push_back(get_ncl(n, i));
+                        }
                         solver->add(z3::atleast(ncl, 1) and z3::atmost(ncl, 1));
                     });
 
@@ -2457,10 +2473,16 @@ class exact_impl
                 auto optimizer = std::make_shared<z3::optimize>(*ctx);
 
                 // add all solver constraints
-                for (const auto& e : solver->assertions()) { optimizer->add(e); }
+                for (const auto& e : solver->assertions())
+                {
+                    optimizer->add(e);
+                }
 
                 // add assumptions as constraints, too, because optimize::check with assumptions is broken
-                for (const auto& e : check_point->assumptions) { optimizer->add(e); }
+                for (const auto& e : check_point->assumptions)
+                {
+                    optimizer->add(e);
+                }
 
                 // wire minimization constraints
                 if (wires)
@@ -2722,7 +2744,7 @@ class exact_impl
     {
         const auto ctx = std::make_shared<z3::context>();
 
-        Lyt layout{{}, *ps.scheme};
+        Lyt layout{{}, scheme};
 
         smt_handler handler{
             ctx,
@@ -2845,7 +2867,7 @@ class exact_impl
     {
         std::cout << "You have called an unstable beta feature that might crash." << std::endl;
 
-        Lyt layout{{}, *ps.scheme};
+        Lyt layout{{}, scheme};
 
         {
             mockturtle::stopwatch stop{pst.time_total};
@@ -2932,7 +2954,7 @@ class exact_impl
      */
     [[nodiscard]] std::optional<Lyt> run_synchronously() noexcept
     {
-        Lyt layout{{}, *ps.scheme};
+        Lyt layout{{}, scheme};
 
         smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps};
 
@@ -3038,7 +3060,7 @@ class exact_impl
  * parameters; std::nullopt, otherwise.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = {},
+std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params ps = {},
                          exact_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
@@ -3047,8 +3069,12 @@ std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = 
                   "Ntk is not a network type");  // Ntk is being converted to a topology_network anyway, therefore,
                                                  // this is the only relevant check here
 
+    if (const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme); !clocking_scheme.has_value())
+    {
+        throw unsupported_clocking_scheme_exception();
+    }
     // check for input degree
-    if (has_high_degree_fanin_nodes(ntk, ps.scheme->max_in_degree))
+    else if (has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
     {
         throw high_degree_fanin_exception();
     }

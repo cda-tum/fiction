@@ -49,14 +49,12 @@
 namespace fiction
 {
 
-template <typename Lyt>
 struct one_pass_synthesis_params
 {
     /**
      * Clocking scheme to be used.
      */
-    std::shared_ptr<clocking_scheme<coordinate<Lyt>>> scheme =
-        std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
+    std::string scheme = "2DDWave";
     /**
      * Number of tiles to use.
      */
@@ -150,7 +148,7 @@ class mugen_handler
      * @param lyt Reference to an empty layout that serves as a floor plan for S&P&R by Mugen.
      * @param p The configurations to respect in the SAT instance generation process.
      */
-    mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params<Lyt> p) noexcept :
+    mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params p) noexcept :
             tts{spec},
             num_pis{spec[0].num_vars()},  // since all tts have to have the same number of variables
             lyt{sketch},
@@ -242,7 +240,7 @@ class mugen_handler
     /**
      * Configurations specifying layout restrictions. Used in instance generation among other places.
      */
-    one_pass_synthesis_params<Lyt> ps;
+    one_pass_synthesis_params ps;
     /**
      * Pre-allocate PIs to preserve their order.
      */
@@ -689,7 +687,7 @@ template <typename Lyt, typename TT>
 class one_pass_synthesis_impl
 {
   public:
-    one_pass_synthesis_impl(const std::vector<TT>& spec, const one_pass_synthesis_params<Lyt>& p,
+    one_pass_synthesis_impl(const std::vector<TT>& spec, const one_pass_synthesis_params& p,
                             one_pass_synthesis_stats& st) :
             tts{spec},
             ps{p},
@@ -705,7 +703,7 @@ class one_pass_synthesis_impl
         }
 
         // empty layout with an initial size of 1 x 1 tiles
-        Lyt layout{{0, 0}, *ps.scheme};
+        Lyt layout{{0, 0}, *get_clocking_scheme<Lyt>(ps.scheme)};
 
         // handler for the Python interaction
         mugen_handler handler{tts, layout, ps};
@@ -768,8 +766,8 @@ class one_pass_synthesis_impl
   private:
     const std::vector<TT> tts;
 
-    one_pass_synthesis_params<Lyt> ps;
-    one_pass_synthesis_stats&      pst;
+    one_pass_synthesis_params ps;
+    one_pass_synthesis_stats& pst;
 
     /**
      * Factorizes a number of layout tiles into all possible aspect ratios for iteration.
@@ -922,10 +920,26 @@ class one_pass_synthesis_impl
  * std::nullopt, otherwise.
  */
 template <typename Lyt, typename TT>
-std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params<Lyt> ps = {},
+std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+
+    if (ps.scheme == clock_name::open || ps.scheme == clock_name::columnar || ps.scheme == clock_name::row)
+    {
+        throw unsupported_clocking_scheme_exception();
+    }
+    if (const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme); !clocking_scheme.has_value())
+    {
+        throw unsupported_clocking_scheme_exception();
+    }
+    else if (clocking_scheme->max_out_degree < 3 && ps.enable_maj)
+    {
+        ps.enable_maj = false;
+        std::cout << fmt::format("[w] disabling MAJ gates as they are not supported by the {} clocking scheme",
+                                 ps.scheme)
+                  << std::endl;
+    }
 
     // tts cannot be empty
     assert(!tts.empty());
@@ -960,7 +974,7 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
  * std::nullopt, otherwise.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<Lyt> ps = {},
+std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(
