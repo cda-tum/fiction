@@ -64,13 +64,21 @@ RES
 
 .. doxygenfunction:: fiction::res_clocking
 
-ESP
+ESR
 ###
 
-.. figure:: /_static/esp.png
+.. figure:: /_static/esr.png
    :width: 200
 
-.. doxygenfunction:: fiction::esp_clocking
+.. doxygenfunction:: fiction::esr_clocking
+
+CFE
+###
+
+.. figure:: /_static/cfe.png
+   :width: 200
+
+.. doxygenfunction:: fiction::cfe_clocking
 
 BANCS
 #####

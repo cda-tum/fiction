@@ -28,7 +28,6 @@
 #include <map>
 #include <memory>
 #include <optional>
-#include <string>
 #include <vector>
 
 // pybind11 has quite some warnings in its code; let's silence them a little
@@ -50,12 +49,14 @@
 namespace fiction
 {
 
+template <typename Lyt>
 struct one_pass_synthesis_params
 {
     /**
      * Clocking scheme to be used.
      */
-    std::string scheme = "2DDWave";
+    std::shared_ptr<clocking_scheme<coordinate<Lyt>>> scheme =
+        std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
     /**
      * Number of tiles to use.
      */
@@ -67,19 +68,19 @@ struct one_pass_synthesis_params
     /**
      * Enable the use of wire elements.
      */
-    bool enable_wires = true;
+    bool enable_wires = false;
     /**
      * Enable the use of NOT gates.
      */
-    bool enable_not = true;
+    bool enable_not = false;
     /**
      * Enable the use of AND gates.
      */
-    bool enable_and = true;
+    bool enable_and = false;
     /**
      * Enable the use of OR gates.
      */
-    bool enable_or = true;
+    bool enable_or = false;
     /**
      * Enable the use of MAJ gates.
      */
@@ -149,7 +150,7 @@ class mugen_handler
      * @param lyt Reference to an empty layout that serves as a floor plan for S&P&R by Mugen.
      * @param p The configurations to respect in the SAT instance generation process.
      */
-    mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params p) noexcept :
+    mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params<Lyt> p) noexcept :
             tts{spec},
             num_pis{spec[0].num_vars()},  // since all tts have to have the same number of variables
             lyt{sketch},
@@ -241,7 +242,7 @@ class mugen_handler
     /**
      * Configurations specifying layout restrictions. Used in instance generation among other places.
      */
-    one_pass_synthesis_params ps;
+    one_pass_synthesis_params<Lyt> ps;
     /**
      * Pre-allocate PIs to preserve their order.
      */
@@ -688,12 +689,11 @@ template <typename Lyt, typename TT>
 class one_pass_synthesis_impl
 {
   public:
-    one_pass_synthesis_impl(const std::vector<TT>& spec, const one_pass_synthesis_params& p,
+    one_pass_synthesis_impl(const std::vector<TT>& spec, const one_pass_synthesis_params<Lyt>& p,
                             one_pass_synthesis_stats& st) :
             tts{spec},
             ps{p},
-            pst{st},
-            scheme{*get_clocking_scheme<Lyt>(ps.scheme)}
+            pst{st}
     {}
 
     std::optional<Lyt> run()
@@ -705,7 +705,7 @@ class one_pass_synthesis_impl
         }
 
         // empty layout with an initial size of 1 x 1 tiles
-        Lyt layout{{0, 0}, scheme};
+        Lyt layout{{0, 0}, *ps.scheme};
 
         // handler for the Python interaction
         mugen_handler handler{tts, layout, ps};
@@ -766,22 +766,11 @@ class one_pass_synthesis_impl
     }
 
   private:
-    /**
-     * Specification truth tables.
-     */
     const std::vector<TT> tts;
-    /**
-     * Parameters.
-     */
-    one_pass_synthesis_params ps;
-    /**
-     * Statistics.
-     */
-    one_pass_synthesis_stats& pst;
-    /**
-     * The utilized clocking scheme.
-     */
-    clocking_scheme<tile<Lyt>> scheme;
+
+    one_pass_synthesis_params<Lyt> ps;
+    one_pass_synthesis_stats&      pst;
+
     /**
      * Factorizes a number of layout tiles into all possible aspect ratios for iteration.
      */
@@ -933,7 +922,7 @@ class one_pass_synthesis_impl
  * std::nullopt, otherwise.
  */
 template <typename Lyt, typename TT>
-std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params ps = {},
+std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params<Lyt> ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
@@ -960,10 +949,7 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
  * An overload of one_pass_synthesis above that utilizes a logic network as specification instead of a vector of truth
  * tables. It first generates truth tables from the given network and then calls the function above.
  *
- * This function might throw an 'unsupported_clocking_scheme_exception' in case the provided clocking scheme name does
- * not refer to a supported scheme.
- *
- * This function might throw an 'std::bad_alloc' exception in case the provided logic network has too many inputs.
+ * This function might throw an 'std::bad_alloc' exception if the provided logic network has too many inputs.
  *
  * @tparam Lyt Gate-level layout type to generate.
  * @tparam Ntk Logic network type used as specification.
@@ -974,26 +960,14 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
  * std::nullopt, otherwise.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params ps = {},
+std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<Lyt> ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(
         mockturtle::is_network_type_v<Ntk>,
         "Ntk is not a network type");  // Ntk is simulated anyway, therefore, this is the only relevant check here
 
-    if (const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme); !clocking_scheme.has_value())
-    {
-        throw unsupported_clocking_scheme_exception();
-    }
-    else if (clocking_scheme->max_out_degree < 3 && ps.enable_maj)
-    {
-        ps.enable_maj = false;
-        std::cout << fmt::format("[w] disabling MAJ gates as they are not supported by the {} clocking scheme",
-                                 ps.scheme)
-                  << std::endl;
-    }
-
-    // might throw an std::bad_alloc exception in case ntk has too many inputs
+    // might throw an std::bad_alloc exception if ntk has too many inputs
     const auto tts = mockturtle::simulate<kitty::dynamic_truth_table>(
         ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>(static_cast<unsigned>(ntk.num_pis())));
 

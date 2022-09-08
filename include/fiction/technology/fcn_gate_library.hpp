@@ -6,6 +6,7 @@
 #define FICTION_FCN_GATE_LIBRARY_HPP
 
 #include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/utils/array_utils.hpp"
 
@@ -230,7 +231,10 @@ class fcn_gate_library
 
         for (auto x = 0ul; x < GateSizeX; ++x)
         {
-            for (auto y = 0ul; y < GateSizeY; ++y) { trans[y][x] = g[x][y]; }
+            for (auto y = 0ul; y < GateSizeY; ++y)
+            {
+                trans[y][x] = g[x][y];
+            }
         }
 
         return trans;

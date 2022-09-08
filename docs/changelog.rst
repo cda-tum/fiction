@@ -5,6 +5,96 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+v0.4.0 - 2022-01-27
+-------------------
+*There are people who think that things that happen in fiction do not really happen. These people are wrong.* --- Neil Gaiman
+
+Added
+#####
+- Technology:
+    - Support for the Silicon Dangling Bond (SiDB) technology with `SiQAD <https://github.com/siqad/siqad>`_ tool support. Many thanks to Samuel Sze Hang Ng for the collaboration!
+    - Support for 3D QCA layouts with `QCA-STACK <https://github.com/wlambooy/QCA-STACK>`_ tool support. Many thanks to Willem Lambooy for the collaboration!
+- Data types:
+    - New coordinate type ``cube::coord_t`` representing signed cube coordinates
+    - New layout type ``hexagonal_layout`` representing a grid of hexagonal tiles
+    - New layout type ``shifted_cartesian_layout`` replacing the ``offset`` parameter of legacy ``fcn_layout``
+    - New layout type ``synchronization_element_layout`` replacing the ``clock_latch`` member of legacy ``fcn_layout``
+    - New layout types ``cartesian_layout``, ``tile_based_layout``, ``gate_level_layout``, and ``cell_level_layout`` replacing various aspects of legacy ``fcn_layout``, ``fcn_gate_layout``, and ``fcn_cell_layout`` types
+    - All layout types can be layered to expand their functionality, e.g., a clocked Cartesian layout type with offset coordinates results from ``clocked_layout<cartesian_layout<offset::ucoord_t>>``
+    - Support for arbitrary ``mockturtle`` logic networks as layout specifications
+    - New logic network type ``technology_network`` replacing legacy ``logic_network`` type
+    - New view types that can be layered on top of networks ``reverse_topo_view`` and ``out_of_place_edge_color_view`` refactoring aspects from the ``ortho`` algorithm out into their own data structures
+- Traits:
+    - Added a trait system that can identify the appropriateness of a data type for the usage as parameter to an algorithm at compile time
+    - Many traits are provided out-of-the-box like checks for the existence of certain functions or members, e.g., ``is_clocked_layout`` or ``has_foreach_tile``
+    - Some pre-defined types used within the CLI can be found in the ``types.hpp`` file
+- Algorithms:
+    - ``convert_network`` as an extension of ``mockturtle::cleanup_dangling`` to convert between extended logic network types
+    - ``apply_gate_library`` to provide an interface that generates any cell-level layout type from any gate-level layout type via the application of any gate library type
+- Clocking schemes:
+    - Columnar
+    - Row-based
+    - ESP
+- Visualization:
+    - Custom ``write_dot_layout`` function that creates Graphviz DOT files from gate-level layouts together with custom DOT drawers for various layout types
+    - Custom ``technology_dot_drawer`` as an extension to ``mockturtle::gate_dot_drawer`` that supports more gate types
+- CLI:
+    - Command ``map`` for `technology mapping <https://mockturtle.readthedocs.io/en/latest/algorithms/mapper.html>`_ of logic networks using a given set of gate functions. Many thanks to Alessandro Tempia Calvino for his support!
+    - Command ``sqd`` to write SiDB layouts to `SiQAD <https://github.com/siqad/siqad>`_ files
+    - Command ``qll`` to write iNML layouts to `ToPoliNano & MagCAD <https://topolinano.polito.it/>`_ files (complements the existing ``qcc`` command)
+    - Command ``fqca`` to write QCA layouts to `QCA-STACK <https://github.com/wlambooy/QCA-STACK>`_ files
+    - Command ``blif`` to write logic networks to BLIF files
+    - Added option ``--hex`` to ``exact`` and ``ortho`` instructing the algorithms to create a hexagonal layout instead of a Cartesian one. The option expects a hexagonal orientation that has to be one of the following ``odd_row``, ``even_row``, ``odd_column``, or ``even_column``
+- Utility:
+    - Added utility functions for networks, layouts, placement, names, arrays, ranges, and hashing to the ``utils`` folder
+- Build and documentation:
+    - Option to disable the CLI to be built
+    - Option to enable tests to be built
+    - Option to enable experiments to be built
+    - Code coverage CI via `Codecov <https://app.codecov.io/gh/marcelwa/fiction>`_
+    - Online documentation via `Readthedocs <https://fiction.readthedocs.io/>`_
+    - Code quality analysis via `LGTM <https://lgtm.com/projects/g/marcelwa/fiction/logs/languages/lang:cpp>`_. Many thanks to Stefan Hillmich for his support!
+
+Changed
+#######
+- Architecture:
+    - Reworked *fiction* into a platform that offers
+        (1) a header-only template library for use in external projects,
+        (2) a CLI built upon said library that provides the established functionality (plus the new additions),
+        (3) a framework for experiments that allows to quickly prototype ideas and compile them as stand-alone binaries built with *fiction*
+    - Reworked the CMake build system to be simpler to use, yet more capable
+    - Templatized all algorithms and data structures and switched to a trait-based API system. This allows for far more flexible system and the support of any type that implements certain functionality via duck typing
+- CLI:
+    - Command ``read`` can now also parse BLIF and FQCA files
+    - Command ``read`` can now create various types of logic networks from parsing input files. A flag determines which one to create, e.g., ``--aig``, ``--mig``, or ``--xag``
+    - Command ``gates`` supports more gate types now including the 3-input gates presented in `Marakkalage et al. <https://ieeexplore.ieee.org/document/9233431>`_
+    - ``exact --clock_latches/-l`` has been renamed to ``exact --sync_elems/-e``
+    - A technology flag ``--topolinano`` has been added to ``exact`` instructing it to respect ToPoliNano's requirements for iNML layouts
+    - The ``ToPoliNano`` clocking scheme has been renamed to ``Columnar``
+- Continuous Integration:
+    - Moved from Travis CI to GitHub Actions with CI builds and testing under ubuntu, macOS, and Windows
+- Build & Documentation:
+    - Z3 is now an optional dependency that can be found automatically by *fiction* when ``-DFICTION_Z3=ON`` is passed to ``cmake``. If it is not found, some algorithms are simply excluded from compilation
+    - Trimmed README in favor of Readthedocs
+
+Fixed
+#####
+- Compilation issues under Windows
+- SEGFAULT when using ``ortho`` under rare circumstances
+
+Removed
+#######
+- Third-party dependencies:
+    - Boost
+    - Z3 (now optional)
+    - cppitertools
+- Data types:
+    - ``fcn_gate_layout`` (replaced with the ``is_gate_level_layout`` trait)
+    - ``fcn_cell_layout`` (replaced with the ``is_cell_level_layout`` trait)
+    - ``logic_network`` (replaced with the ``mockturtle::is_network_type`` trait)
+- CLI:
+    - ``ortho -b`` flag because routing border I/Os is the default behavior now
+
 v0.3.2 - 2021-01-06
 -------------------
 *Sometimes fiction is more easily understood than true events.* --- Young-ha Kim
@@ -12,7 +102,7 @@ v0.3.2 - 2021-01-06
 Added
 #####
 - Command ``onepass`` for a combined SAT-based logic synthesis and physical design using `Mugen <https://github.com/whaaswijk/mugen>`_. Thanks to Winston Haaswijk for cooperating with us on this project!
-- SVG output for irregular (cell-based) clocked ``fcn_cell_layout``\ s (thanks to Gregor Kuhn!)
+- SVG output for irregular (cell-based) clocked ``fcn_cell_layout``\ s (thanks to Sophia Kuhn!)
 - ``csv_writer`` for conveniently formatting experiments' results
 - ``tt_reader`` for reading truth tables from a `file format used by Alan Mishchenko <https://people.eecs.berkeley.edu/~alanmi/temp5/>`_
 
@@ -164,7 +254,7 @@ Fixed
 - TP calculation for layouts without designated I/O pins (thanks to Mario Kneidinger!)
 - I/O port orientation of PI/PO gates using QCA-ONE library
 - Usage of non-PI/PO MAJ gates in QCA-ONE library
-- Visualization of clock latches in ``show -c`` (thanks to Gregor Kuhn!)
+- Visualization of clock latches in ``show -c`` (thanks to Sophia Kuhn!)
 - Multi direction assignment to wires and gates in ``exact`` leading to physically impossible layouts
 - ``shrink_to_fit`` in ``fcn_gate_layout`` incorporates the BGL bug now. Minimum size in each dimension is 2. For more information, see https://svn.boost.org/trac10/ticket/11735
 - Parameters for ``exact`` no longer get stuck once set

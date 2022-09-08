@@ -1,28 +1,28 @@
 name: Ubuntu CI
 
-on:
-  push:
-    branches-ignore:
-      - master
+on: push
 
 defaults:
   run:
     shell: bash
 
 env:
-  Z3_GIT_TAG: z3-4.8.12
-  FICTION_Z3_SEARCH_PATHS: ${{github.workspace}}/z3lib
+  Z3_GIT_TAG: z3-4.10.0
 
 jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ ubuntu-20.04, ubuntu-18.04 ]
-        compiler: [ g++-9, g++-10, clang++-9, clang++-10 ]
+        os: [ ubuntu-20.04, ubuntu-22.04 ]
+        compiler: [ g++-9, g++-10, clang++-10, clang++-11, clang++-12 ]
         build_type: [ Debug, Release ]
+        exclude:
+          - os: ubuntu-22.04
+            compiler: clang++-10
         include:
           - os: ubuntu-20.04
             compiler: g++-10
+            build_type: Release
             cppstandard: -DFICTION_CXX_STANDARD=20
             cppname: C++20
 
@@ -34,26 +34,23 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}}
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9.x'
+
+      - name: Clone Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
         with:
-          packages: |
-            graphviz
-            python-sat==0.1.6.dev6
-            wrapt_timeout_decorator
-
-      - name: Clone Repository
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
+          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
 
       - name: Cache Z3 Solver
         id: cache-z3-solver
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{github.workspace}}/z3lib
           key: ${{matrix.os}}-${{matrix.compiler}}-z3lib-${{env.Z3_GIT_TAG}}
@@ -79,19 +76,8 @@ jobs:
 
         run: cmake --build . --config ${{matrix.build_type}} -j2
 
-      - name: Test fiction
+      - name: Test
         working-directory: ${{github.workspace}}/build
         # Execute tests defined by the CMake configuration.
         # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
         run: ctest -C ${{matrix.build_type}} --verbose
-
-      - name: Install Python Bindings
-        working-directory: ${{github.workspace}}
-        run: |
-          export CXX=$(which ${{matrix.compiler}})
-          pip3 -v install .
-
-      - name: Test Python Bindings
-        working-directory: ${{github.workspace}}/bindings/pyfiction/
-        run: |
-          python3 -m unittest discover -v

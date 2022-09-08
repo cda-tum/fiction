@@ -24,9 +24,10 @@
 
 using namespace fiction;
 
-one_pass_synthesis_params configuration() noexcept
+template <typename Lyt>
+one_pass_synthesis_params<Lyt> configuration() noexcept
 {
-    one_pass_synthesis_params ps{};
+    one_pass_synthesis_params<Lyt> ps{};
 
     ps.enable_and   = true;
     ps.enable_not   = true;
@@ -36,50 +37,54 @@ one_pass_synthesis_params configuration() noexcept
     return ps;
 }
 
-one_pass_synthesis_params&& twoddwave(one_pass_synthesis_params&& ps) noexcept
+template <typename Lyt>
+one_pass_synthesis_params<Lyt>&& twoddwave(one_pass_synthesis_params<Lyt>&& ps) noexcept
 {
-    ps.scheme = "2DDWave";
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
 
     return std::move(ps);
 }
 
-one_pass_synthesis_params&& use(one_pass_synthesis_params&& ps) noexcept
+template <typename Lyt>
+one_pass_synthesis_params<Lyt>&& use(one_pass_synthesis_params<Lyt>&& ps) noexcept
 {
-    ps.scheme = "USE";
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(use_clocking<Lyt>());
 
     return std::move(ps);
 }
 
-one_pass_synthesis_params&& res(one_pass_synthesis_params&& ps) noexcept
+template <typename Lyt>
+one_pass_synthesis_params<Lyt>&& res(one_pass_synthesis_params<Lyt>&& ps) noexcept
 {
-    ps.scheme     = "RES";
+    ps.scheme     = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_clocking<Lyt>());
     ps.enable_maj = true;
 
     return std::move(ps);
 }
 
-one_pass_synthesis_params&& crossings(one_pass_synthesis_params&& ps) noexcept
+template <typename Lyt>
+one_pass_synthesis_params<Lyt>&& crossings(one_pass_synthesis_params<Lyt>&& ps) noexcept
 {
     ps.crossings = true;
 
     return std::move(ps);
 }
 
-one_pass_synthesis_params&& maj(one_pass_synthesis_params&& ps) noexcept
+template <typename Lyt>
+one_pass_synthesis_params<Lyt>&& maj(one_pass_synthesis_params<Lyt>&& ps) noexcept
 {
     ps.enable_maj = true;
 
     return std::move(ps);
 }
 
-#if !defined(__APPLE__)
-one_pass_synthesis_params&& async(const std::size_t t, one_pass_synthesis_params&& ps) noexcept
+template <typename Lyt>
+one_pass_synthesis_params<Lyt>&& async(const std::size_t t, one_pass_synthesis_params<Lyt>&& ps) noexcept
 {
     ps.num_threads = t;
 
     return std::move(ps);
 }
-#endif
 
 void check_stats(const one_pass_synthesis_stats& st) noexcept
 {
@@ -91,7 +96,7 @@ void check_stats(const one_pass_synthesis_stats& st) noexcept
 }
 
 template <typename Lyt, typename Ntk>
-Lyt generate_layout(const Ntk& ntk, const one_pass_synthesis_params& ps)
+Lyt generate_layout(const Ntk& ntk, const one_pass_synthesis_params<Lyt>& ps)
 {
     one_pass_synthesis_stats stats{};
 
@@ -111,8 +116,8 @@ void apply_gate_library(const Lyt& lyt)
     CHECK_NOTHROW(apply_gate_library<qca_cell_clk_lyt, qca_one_library>(lyt));
 }
 
-template <typename Lyt, typename Ntk>
-void check(const Ntk& ntk, const one_pass_synthesis_params& ps)
+template <typename Ntk, typename Lyt>
+void check(const Ntk& ntk, const one_pass_synthesis_params<Lyt>& ps)
 {
     const auto layout = generate_layout<Lyt>(ntk, ps);
 
@@ -124,50 +129,50 @@ TEST_CASE("One-pass synthesis", "[one-pass]")
 {
     SECTION("2DDWave clocking")
     {
-        check<cart_gate_clk_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
-                                 twoddwave(crossings(configuration())));
+        check(blueprints::and_or_network<mockturtle::mig_network>(),
+              twoddwave(crossings(configuration<cart_gate_clk_lyt>())));
     }
     SECTION("USE clocking")
     {
-        check<cart_gate_clk_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
-                                 use(crossings(configuration())));
+        check(blueprints::and_or_network<mockturtle::mig_network>(),
+              use(crossings(configuration<cart_gate_clk_lyt>())));
     }
     SECTION("RES clocking")
     {
-        check<cart_gate_clk_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
-                                 res(crossings(configuration())));
+        check(blueprints::and_or_network<mockturtle::mig_network>(),
+              res(crossings(configuration<cart_gate_clk_lyt>())));
     }
     SECTION("Planar")
     {
-        check<cart_gate_clk_lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
-                                 twoddwave(configuration()));
+        check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+              twoddwave(configuration<cart_gate_clk_lyt>()));
     }
     SECTION("MAJ network")
     {
-        check<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(), res(maj(configuration())));
+        check(blueprints::maj1_network<mockturtle::mig_network>(), res(maj(configuration<cart_gate_clk_lyt>())));
     }
     SECTION("Constant input MAJ network")
     {
-        check<cart_gate_clk_lyt>(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>(),
-                                 twoddwave(crossings(configuration())));
+        check(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>(),
+              twoddwave(crossings(configuration<cart_gate_clk_lyt>())));
     }
     SECTION("Multi-output network")
     {
-        check<cart_gate_clk_lyt>(blueprints::multi_output_and_network<mockturtle::aig_network>(),
-                                 twoddwave(crossings(configuration())));
+        check(blueprints::multi_output_and_network<mockturtle::aig_network>(),
+              twoddwave(crossings(configuration<cart_gate_clk_lyt>())));
     }
 #if !defined(__APPLE__)
     SECTION("Async")
     {
-        check<cart_gate_clk_lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
-                                 res(crossings(async(2, configuration()))));
+        check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+              res(crossings(async(2, configuration<cart_gate_clk_lyt>()))));
     }
 #endif
 }
 
 TEST_CASE("Timeout", "[one-pass]")
 {
-    auto timeout_config    = use(configuration());
+    auto timeout_config    = use(configuration<cart_gate_clk_lyt>());
     timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
 
     const auto half_adder = blueprints::full_adder_network<mockturtle::aig_network>();
@@ -182,7 +187,7 @@ TEST_CASE("Name conservation", "[one-pass]")
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");
 
-    const auto layout = one_pass_synthesis<cart_gate_clk_lyt>(maj, res(configuration()));
+    const auto layout = one_pass_synthesis<cart_gate_clk_lyt>(maj, res(configuration<cart_gate_clk_lyt>()));
 
     REQUIRE(layout.has_value());
 

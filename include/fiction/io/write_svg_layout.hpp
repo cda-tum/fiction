@@ -1,5 +1,5 @@
 //
-// Created by gregor on 12/30/18.
+// Created by sophia on 12/30/18.
 //
 
 #ifndef FICTION_WRITE_SVG_LAYOUT_HPP
@@ -633,10 +633,7 @@ class write_qca_layout_svg_impl
             }
 
             // Delete empty tiles
-            for (const auto& coord : empty_tiles)
-            {
-                coord_to_tile.erase(coord);
-            }
+            for (const auto& coord : empty_tiles) { coord_to_tile.erase(coord); }
 
             if constexpr (has_synchronization_elements_v<Lyt>)
             {

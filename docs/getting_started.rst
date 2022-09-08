@@ -4,6 +4,7 @@ Getting started
 The *fiction* framework provides stand-alone CLI tool as well as a header-only library that can be used in external projects.
 Both are written in C++17 and are continuously tested on ubuntu, macOS, and Windows with multiple compilers. See the build badges in the README file for more information.
 
+
 Compilation requirements
 ------------------------
 
@@ -46,10 +47,20 @@ As an alternative to this build workflow, the CLI tool is also available as an i
 
 .. _header-only:
 
+
 Using *fiction* as a header-only library
 ----------------------------------------
 
-All data types and algorithms provided by *fiction* can be used independently by simply including its ``include/`` directory into a source build tree and using, e.g.,
+All data types and algorithms provided by *fiction* can be used independently to build custom projects. The following
+snippets illustrate how *fiction* can be included and linked against your project. Assume, the project
+is called *fanfiction*. Clone *fiction* within the project folder ``fanfiction/`` and add the following lines of code
+to your ``CMakeLists.txt``::
+
+    add_subdirectory(fiction/)
+    target_link_libraries(fanfiction libfiction)
+
+Note that ``target_link_libraries`` must be called after the respective ``add_executable`` statement that defines
+``fanfiction``. Within your code files, you can then call
 
 .. code-block:: c++
 
@@ -59,7 +70,8 @@ All data types and algorithms provided by *fiction* can be used independently by
    #include <fiction/io/write_qca_layout.hpp>
    #include <fiction/...>
 
-for each used file. Everything that can safely be used is located inside the ``fiction`` namespace.
+for each used header file to include *fiction*'s data types and algorithms. Everything that can safely be used is
+directly located inside the ``fiction`` namespace.
 
 
 Enabling dependent functions
@@ -79,7 +91,6 @@ Finally, before building *fiction*, pass ``-DFICTION_Z3=ON`` to the ``cmake`` ca
 Z3's include path and link against the binary automatically if installed correctly. Otherwise, you can use
 ``-DFICTION_Z3_SEARCH_PATHS=<path_to_z3>`` to set a list of locations that are to be searched for the installed solver.
 
-
 SAT-based ``onepass`` synthesis
 ###############################
 
@@ -90,9 +101,10 @@ It has some further Python dependencies that can be installed via ``pip3``::
     pip3 install python-sat==0.1.6.dev6 wrapt_timeout_decorator graphviz
 
 The Python3 integration is experimental and may cause issues on some systems. It is currently not available on Windows
-due to issues with ``python-sat``. Mugen requires at least Python 3.7!
+and some macOS versions due to issues with ``python-sat``. Mugen requires at least Python 3.7!
 
 Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``cmake`` call.
+
 
 Building tests
 --------------
@@ -105,6 +117,7 @@ Unit tests can be built with CMake via a respective flag on the command line and
   make
   ctest
 
+
 Building experiments
 --------------------
 
@@ -116,6 +129,7 @@ linked against *fiction* and compiled as a stand-alone binary using the followin
   cd build
   cmake -DFICTION_EXPERIMENTS=ON ..
   make
+
 
 Uninstall
 ---------

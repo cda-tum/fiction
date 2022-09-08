@@ -1,16 +1,18 @@
 # Let there be a *fiction*
 
-[![Ubuntu CI](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml/badge.svg?branch=v0.4.0)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
-[![macOS CI](https://github.com/marcelwa/fiction/actions/workflows/macos.yml/badge.svg?branch=v0.4.0)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
-[![Windows CI](https://github.com/marcelwa/fiction/actions/workflows/windows.yml/badge.svg?branch=v0.4.0)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
-[![codecov](https://codecov.io/gh/marcelwa/fiction/branch/v0.4.0/graph/badge.svg?token=SUPC5N6KFU)](https://codecov.io/gh/marcelwa/fiction)
-[![Documentation Status](https://img.shields.io/readthedocs/fiction?logo=readthedocs)](https://fiction.readthedocs.io/en/latest/?badge=latest)
-[![Release](https://img.shields.io/github/v/tag/marcelwa/fiction?label=fiction&logo=github&logoColor=darkgray)](https://img.shields.io/github/v/tag/marcelwa/fiction?label=fiction&logo=github&logoColor=darkgray)
+[![Ubuntu CI](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
+[![macOS CI](https://github.com/marcelwa/fiction/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
+[![Windows CI](https://github.com/marcelwa/fiction/actions/workflows/windows.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
+[![codecov](https://codecov.io/gh/marcelwa/fiction/branch/main/graph/badge.svg?token=SUPC5N6KFU)](https://codecov.io/gh/marcelwa/fiction)
+[![Documentation Status](https://img.shields.io/readthedocs/fiction?logo=readthedocs)](https://fiction.readthedocs.io/)
+[![Release](https://img.shields.io/github/v/tag/marcelwa/fiction?label=fiction&logo=github&logoColor=darkgray)](https://github.com/marcelwa/fiction/releases)
+[![License](https://img.shields.io/github/license/marcelwa/fiction)](https://github.com/marcelwa/fiction/blob/main/LICENSE.txt)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/marcelwa/fiction.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/marcelwa/fiction/context:cpp)
 
 This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
-in C++17 using the [EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). *fiction* focuses on the
-physical design of emerging nanotechnologies. As a promising class of post-CMOS technologies,
+in C++17 using the [EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). Thereby, *fiction*
+focuses on the logic synthesis, placement, routing, clocking, and verification of emerging nanotechnologies. As a
+promising class of post-CMOS technologies,
 [Field-coupled Nanocomputing (FCN)](https://www.springer.com/de/book/9783662437216) devices like Quantum-dot Cellular
 Automata (QCA) in manifold forms (e.g. atomic or molecular), Nanomagnet Logic (NML) devices, Silicon Dangling Bonds
 (SiDBs), and many more, allow for high computing performance with tremendously low power consumption without the flow of
@@ -77,7 +79,7 @@ File formats:
 - `*.svg` for visual representation
 
 Many thanks to Frank Sill Torres for his support with the QCADesigner format, to Willem Lambooy for his support with the
-QCA-STACK format, and to Gregor Kuhn for implementing the SVG writer!
+QCA-STACK format, and to Sophia Kuhn for implementing the SVG writer!
 
 ### in-plane Nanomagnet Logic (iNML)
 
@@ -92,7 +94,11 @@ File formats:
 
 Many thanks to Umberto Garlando and Fabrizio Riente for their support!
 
-### Silicon Dangling Bond (SiDB)
+### Silicon Dangling Bonds (SiDBs)
+
+Gate libraries:
+
+- [Bestagon](https://fiction.readthedocs.io/en/latest/technology/gate_libraries.html#sidb-bestagon-library)
 
 File formats:
 
@@ -110,17 +116,17 @@ with variable amounts of clock numbers as QCA for instance uses four clock phase
 
 Built-in schemes are
 
-|    [Columnar](https://ieeexplore.ieee.org/document/573740)    |    [Row](https://ieeexplore.ieee.org/document/573740)    |     [2DDWave](https://ieeexplore.ieee.org/document/1717097)      |
-|:-------------------------------------------------------------:|:--------------------------------------------------------:|:----------------------------------------------------------------:|
-| <img src="docs/_static/columnar.png" alt="USE" height="200"/> | <img src="docs/_static/row.png" alt="RES" height="200"/> | <img src="docs/_static/2ddwave.png" alt="2DDWave" height="200"/> |
+|      [Columnar](https://ieeexplore.ieee.org/document/573740)       |    [Row](https://ieeexplore.ieee.org/document/573740)    |     [2DDWave](https://ieeexplore.ieee.org/document/1717097)      |
+|:------------------------------------------------------------------:|:--------------------------------------------------------:|:----------------------------------------------------------------:|
+| <img src="docs/_static/columnar.png" alt="Columnar" height="200"/> | <img src="docs/_static/row.png" alt="Row" height="200"/> | <img src="docs/_static/2ddwave.png" alt="2DDWave" height="200"/> |
 
-|   [USE](https://ieeexplore.ieee.org/document/7219390)    | [RES](https://www.tandfonline.com/doi/abs/10.1080/21681724.2019.1570551) | [ESP](https://www.tandfonline.com/doi/full/10.1080/00207217.2021.1972473) |
-|:--------------------------------------------------------:|:------------------------------------------------------------------------:|:-------------------------------------------------------------------------:|
-| <img src="docs/_static/use.png" alt="USE" height="200"/> |         <img src="docs/_static/res.png" alt="RES" height="200"/>         |       <img src="docs/_static/esp.png" alt="2DDWave" height="200"/>        |
+|   [USE](https://ieeexplore.ieee.org/document/7219390)    | [RES](https://www.tandfonline.com/doi/abs/10.1080/21681724.2019.1570551) | [ESR](https://link.springer.com/content/pdf/10.1007/s10470-020-01760-4.pdf) |
+|:--------------------------------------------------------:|:------------------------------------------------------------------------:|:---------------------------------------------------------------------------:|
+| <img src="docs/_static/use.png" alt="USE" height="200"/> |         <img src="docs/_static/res.png" alt="RES" height="200"/>         |          <img src="docs/_static/esr.png" alt="ESR" height="200"/>           |
 
-|    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
-|:------------------------------------------------------------:|
-| <img src="docs/_static/bancs.png" alt="BANCS" height="300"/> |
+|   [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096)   |    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
+|:------------------------------------------------------------------------------------:|:------------------------------------------------------------:|
+|               <img src="docs/_static/cfe.png" alt="CFE" height="200"/>               | <img src="docs/_static/bancs.png" alt="BANCS" height="300"/> |
 
 plus the mentioned irregular open clocking that works via a clock map instead of a regular extrapolated cutout.
 
@@ -186,7 +192,3 @@ Cell-level layouts:
 - Number of cells
 - Bounding box
 - Area usage in nm²
-
-## Disclaimer
-
-This is academic software made available under the CRAPL license. For more information see the LICENSE file.
