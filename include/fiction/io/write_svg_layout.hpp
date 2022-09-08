@@ -1,5 +1,5 @@
 //
-// Created by gregor on 12/30/18.
+// Created by sophia on 12/30/18.
 //
 
 #ifndef FICTION_WRITE_SVG_LAYOUT_HPP

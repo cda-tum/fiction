@@ -48,7 +48,8 @@ class onepass_command : public command
                        "resulting from this approach might be desynchronized. I/Os are always located at the "
                        "layout's borders.")
     {
-        add_option("--clk_scheme,-s", clocking, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, ESP, BANCS}", true);
+        add_option("--clk_scheme,-s", clocking, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, ESR, CFE, BANCS}",
+                   true);
         add_option("--upper_bound,-u", ps.upper_bound, "Number of FCN gate tiles to use at maximum");
         add_option("--fixed_size,-f", ps.fixed_size, "Execute only one iteration with the given number of tiles");
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
