@@ -22,11 +22,16 @@ namespace fiction
 {
 
 /**
- * A concrete FCN gate library for the SiDB technology. This library was proposed in "Hexagons are the Bestagons: Design
- * Automation for Silicon Dangling Bond Logic" by M. Walter, S. S. H. Ng, K. Walus, and R. Wille in DAC, 2022. The
- * Bestagon library is intended for hexagonal, pointy-top layouts that are clocked with a row-based clocking scheme,
- * i.e., where the information flow direction is north to south. Since the hexagonal tiles are to be mapped onto a
- * H-Si(100) 2x1 surface, the gate dimensions need to be accommodating for the necessary overlap between tiles.
+ * A gate library for the SiDB technology that is based on Y-shaped gates in hexagonal tiles. Y-shaped gates have been
+ * first introduced in "Binary Atomic Silicon Logic" by Taleana Huff, Hatem Labidi, Mohammad Rashidi, Lucian Livadaru,
+ * Thomas Dienel, Roshan Achal, Wyatt Vine, Jason Pitters, and Robert A. Wolkow in Nature Electronics 2018. The Bestagon
+ * library was later proposed in "Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic" by
+ * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille in Design Automation Conference 2022. The goal of
+ * the Bestagon library is to be as close to physically realizable SiDB circuits as possible by taking fabrication
+ * limitations of, e.g., clocking electrodes into account while also relying on established gate shape. Thus, the
+ * hexagonal tiles in the Bestagon library are quite large with a lot of free space to avoid unwanted gate interactions.
+ * The Bestagon library is intended for hexagonal, pointy-top layouts that are clocked with a row-based clocking scheme,
+ * i.e., where the information flow direction is north to south.
  */
 class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
 {

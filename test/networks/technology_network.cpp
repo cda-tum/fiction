@@ -11,6 +11,7 @@
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/operations.hpp>
 #include <kitty/operators.hpp>
+#include <mockturtle/networks/sequential.hpp>
 
 #include <vector>
 
@@ -88,14 +89,16 @@ TEST_CASE("create and use primary outputs in a technology network", "[technology
 
 TEST_CASE("create and use register in a technology network", "[technology-network]")
 {
-    technology_network tec{};
+    using sequential_technology_network = mockturtle::sequential<technology_network>;
 
-    CHECK(mockturtle::has_foreach_po_v<technology_network>);
-    CHECK(mockturtle::has_create_po_v<technology_network>);
-    CHECK(mockturtle::has_create_pi_v<technology_network>);
-    CHECK(mockturtle::has_create_ro_v<technology_network>);
-    CHECK(mockturtle::has_create_ri_v<technology_network>);
-    CHECK(mockturtle::has_create_maj_v<technology_network>);
+    sequential_technology_network tec{};
+
+    REQUIRE(mockturtle::has_foreach_po_v<sequential_technology_network>);
+    REQUIRE(mockturtle::has_create_po_v<sequential_technology_network>);
+    REQUIRE(mockturtle::has_create_pi_v<sequential_technology_network>);
+    REQUIRE(mockturtle::has_create_ro_v<sequential_technology_network>);
+    REQUIRE(mockturtle::has_create_ri_v<sequential_technology_network>);
+    REQUIRE(mockturtle::has_create_maj_v<sequential_technology_network>);
 
     const auto c0 = tec.get_constant(false);
     const auto x1 = tec.create_pi();

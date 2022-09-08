@@ -2,6 +2,8 @@
 // Created by marcel on 16.11.21.
 //
 
+#if (FICTION_Z3_SOLVER)
+
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
@@ -100,10 +102,9 @@ int main()
     exact_params.timeout       = 3'600'000;  // 1h in ms
     fiction::exact_physical_design_stats exact_stats{};
 
-    constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::parity &
-                                            ~fiction_experiments::xor5_maj & ~fiction_experiments::two_bit_add_maj &
-                                            ~fiction_experiments::cm82a_5 & ~fiction_experiments::xor5_r1 &
-                                            ~fiction_experiments::b1_r2 & ~fiction_experiments::clpl;
+    static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::b1_r2 &
+                                                   ~fiction_experiments::clpl & ~fiction_experiments::two_bit_add_maj &
+                                                   ~fiction_experiments::parity;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
@@ -177,3 +178,5 @@ int main()
 
     return 0;
 }
+
+#endif  // FICTION_Z3_SOLVER

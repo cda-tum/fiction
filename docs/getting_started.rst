@@ -101,7 +101,7 @@ It has some further Python dependencies that can be installed via ``pip3``::
     pip3 install python-sat==0.1.6.dev6 wrapt_timeout_decorator graphviz
 
 The Python3 integration is experimental and may cause issues on some systems. It is currently not available on Windows
-due to issues with ``python-sat``. Mugen requires at least Python 3.7!
+and some macOS versions due to issues with ``python-sat``. Mugen requires at least Python 3.7!
 
 Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``cmake`` call.
 

@@ -85,6 +85,22 @@ exact_physical_design_params<Lyt>&& res(exact_physical_design_params<Lyt>&& ps) 
 }
 
 template <typename Lyt>
+exact_physical_design_params<Lyt>&& esr(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(esr_clocking<Lyt>());
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& cfe(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(cfe_clocking<Lyt>());
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
 exact_physical_design_params<Lyt>&& crossings(exact_physical_design_params<Lyt>&& ps) noexcept
 {
     ps.crossings = true;
@@ -308,6 +324,16 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
     {
         check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
             blueprints::and_or_network<mockturtle::mig_network>(), res(crossings(configuration<cart_gate_clk_lyt>())));
+    }
+    SECTION("ESR clocking")
+    {
+        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
+            blueprints::and_or_network<mockturtle::mig_network>(), esr(crossings(configuration<cart_gate_clk_lyt>())));
+    }
+    SECTION("CFE clocking")
+    {
+        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
+            blueprints::and_or_network<mockturtle::mig_network>(), cfe(crossings(configuration<cart_gate_clk_lyt>())));
     }
     SECTION("Border I/O")
     {
