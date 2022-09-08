@@ -237,6 +237,10 @@ class gate_level_layout : public ClockedLayout
     {
         return std::find(strg->inputs.cbegin(), strg->inputs.cend(), n) != strg->inputs.cend();
     }
+    [[nodiscard]] bool is_ci(const node n) const noexcept
+    {
+        return is_pi(n);
+    }
     /**
      * Check whether tile t hosts a primary input.
      *
@@ -252,6 +256,11 @@ class gate_level_layout : public ClockedLayout
     {
         return std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
                             [this, &n](const auto& p) { return this->get_node(p.index) == n; }) != strg->outputs.cend();
+    }
+
+    [[nodiscard]] bool is_co(const node n) const noexcept
+    {
+        return is_po(n);
     }
     /**
      * Check whether tile t hosts a primary output.
@@ -1448,13 +1457,19 @@ class gate_level_layout : public ClockedLayout
         strg->nodes.push_back(node_data);
 
         /* increase ref-count to children */
-        for (const auto& c : children) { strg->nodes[get_node(c)].data[0].h1++; }
+        for (const auto& c : children)
+        {
+            strg->nodes[get_node(c)].data[0].h1++;
+        }
 
         set_value(n, 0);
 
         assign_node(t, n);
 
-        for (auto const& fn : evnts->on_add) { (*fn)(n); }
+        for (auto const& fn : evnts->on_add)
+        {
+            (*fn)(n);
+        }
 
         return static_cast<signal>(t);
     }

@@ -9,7 +9,6 @@
 #include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/networks/views/edge_color_view.hpp"
-#include "fiction/networks/views/reverse_topo_view.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/network_utils.hpp"
@@ -148,7 +147,7 @@ template <typename Ntk>
 coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
 {
     coloring_container<Ntk> ctn{ntk};
-    reverse_topo_view       rtv{ntk};  // reverse topological order of nodes
+    mockturtle::topo_view   rtv{ntk};
 
 #if (PROGRESS_BARS)
     // initialize a progress bar
@@ -156,7 +155,7 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
                                  "[i] determining relative positions: |{0}|"};
 #endif
 
-    rtv.foreach_gate(
+    rtv.foreach_gate_reverse(
         [&](const auto& n, [[maybe_unused]] const auto i)
         {
             const auto finc = fanin_edges(ctn.color_ntk, n);
@@ -400,7 +399,7 @@ class orthogonal_impl
 
 #if (PROGRESS_BARS)
         // initialize a progress bar
-        mockturtle::progress_bar bar{static_cast<uint32_t>(ctn.color_ntk.size()), "[i] arranging layout: |{0}|"};
+        mockturtle::progress_bar bar{ctn.color_ntk.size(), "[i] arranging layout: |{0}|"};
 #endif
 
         ctn.color_ntk.foreach_node(
