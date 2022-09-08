@@ -31,7 +31,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
-            CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 2);
 
             CHECK(graph.size_vertices() == 2);
@@ -47,7 +47,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
-            CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 2);
 
             CHECK(graph.size_vertices() == 3);
@@ -60,7 +60,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
-            CHECK(st.number_of_unsatisfiable_objectives == 1);
+            CHECK(st.number_of_unroutable_objectives == 1);
             CHECK(st.cliques.size() == 1);
 
             CHECK(graph.size_vertices() == 2);
@@ -78,7 +78,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
-            CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 2);
 
             CHECK(graph.size_vertices() == 2);
@@ -94,7 +94,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
-            CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 2);
 
             CHECK(graph.size_vertices() == 2);
@@ -107,7 +107,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
-            CHECK(st.number_of_unsatisfiable_objectives == 1);
+            CHECK(st.number_of_unroutable_objectives == 1);
             CHECK(st.cliques.size() == 1);
 
             CHECK(graph.size_vertices() == 1);
@@ -176,7 +176,7 @@ TEST_CASE("4x4 layouts", "[generate-edge-intersection-graph]")
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
-            CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 1);
             CHECK(st.cliques.front().size() == 20);
 
@@ -194,7 +194,7 @@ TEST_CASE("4x4 layouts", "[generate-edge-intersection-graph]")
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
-            CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 1);
             CHECK(st.cliques.front().size() == 4);
 
@@ -222,7 +222,7 @@ TEST_CASE("4x4 layouts with obstruction", "[generate-edge-intersection-graph]")
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
-            CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 1);
             CHECK(st.cliques.front().size() == 19);
 
@@ -243,7 +243,7 @@ TEST_CASE("4x4 layouts with obstruction", "[generate-edge-intersection-graph]")
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
-            CHECK(st.number_of_unsatisfiable_objectives == 0);
+            CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 1);
             CHECK(st.cliques.front().size() == 1);
 

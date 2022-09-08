@@ -54,14 +54,17 @@ int main()
     fiction::color_routing_params routing_params{};
     routing_params.conduct_partial_routing = true;
     routing_params.crossings               = true;
-    routing_params.path_limit              = 8;
-    routing_params.engine                  = fiction::graph_coloring_engine::SAT;
+    routing_params.path_limit              = 12;
+    routing_params.engine                  = fiction::graph_coloring_engine::MCS;
     fiction::color_routing_stats routing_stats{};
 
-    constexpr const uint64_t bench_select =
-        fiction_experiments::all & ~fiction_experiments::par_check & ~fiction_experiments::one_bit_add_aoig &
-        ~fiction_experiments::c17 & ~fiction_experiments::majority & ~fiction_experiments::t  // t works but takes long
-        & ~fiction_experiments::majority_5_r1 & ~fiction_experiments::newtag & ~fiction_experiments::clpl;
+    constexpr const uint64_t bench_select = fiction_experiments::all;
+
+    //    constexpr const uint64_t bench_select =
+    //        fiction_experiments::all & ~fiction_experiments::par_check & ~fiction_experiments::one_bit_add_aoig &
+    //        ~fiction_experiments::c17 &
+    //        ~fiction_experiments::majority  //& ~fiction_experiments::t  // t works but takes long
+    //        & ~fiction_experiments::majority_5_r1 & ~fiction_experiments::newtag & ~fiction_experiments::clpl;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
@@ -89,7 +92,10 @@ int main()
 
         std::cout << "Extracted the following objectives:" << std::endl;
 
-        for (const auto& o : objectives) { std::cout << fmt::format("\t{}-->{}", o.source, o.target) << std::endl; }
+        for (const auto& o : objectives)
+        {
+            std::cout << fmt::format("\t{}-->{}", o.source, o.target) << std::endl;
+        }
 
         std::cout << "Extracted objectives" << std::endl;
 
@@ -118,7 +124,7 @@ int main()
         bestagon_exp(benchmark, network.num_pis(), network.num_pos(), network.num_gates(), gate_level_layout.x() + 1,
                      gate_level_layout.y() + 1, (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1),
                      gate_level_layout.num_gates(), gate_level_layout.num_wires(), objectives.size(),
-                     routing_stats.epg_stats.number_of_unsatisfiable_objectives, routing_stats.epg_stats.num_vertices,
+                     routing_stats.number_of_unsatisfied_objectives, routing_stats.epg_stats.num_vertices,
                      routing_stats.epg_stats.num_edges, mockturtle::to_seconds(ortho_stats.time_total),
                      mockturtle::to_seconds(routing_stats.time_total),
                      mockturtle::to_seconds(routing_stats.epg_stats.time_total),

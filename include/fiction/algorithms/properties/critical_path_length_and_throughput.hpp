@@ -80,7 +80,7 @@ class critical_path_length_and_throughput_impl
             return {};
         }
 
-        if (const auto idf = lyt.template incoming_data_flow<std::set<tile<Lyt>>>(t); idf.empty())
+        if (const auto idf = lyt.incoming_data_flow(t); idf.empty())
         {
             return {1, lyt.get_clock_number(t), 0};
         }

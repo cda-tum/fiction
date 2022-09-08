@@ -58,7 +58,7 @@ struct generate_edge_intersection_graph_stats
     /**
      * For each routing objective that cannot be fulfilled in the given layout, this counter is incremented.
      */
-    std::size_t number_of_unsatisfiable_objectives{0};
+    std::size_t number_of_unroutable_objectives{0};
     /**
      * Stores all cliques in the resulting graph that were created during path enumeration. There might be more cliques
      * in the overall graph but these ones correspond to one routing objective each, which could be useful information
@@ -124,7 +124,7 @@ class generate_edge_intersection_graph_impl
                           // if there are no paths, the objective could not be fulfilled
                           if (obj_paths.empty())
                           {
-                              pst.number_of_unsatisfiable_objectives++;
+                              pst.number_of_unroutable_objectives++;
                           }
                           else if (obj_paths.size() > 1)
                           {
