@@ -90,8 +90,7 @@ struct sidb_defect
  */
 [[nodiscard]] static constexpr bool is_neutral_defect(const sidb_defect& defect) noexcept
 {
-    return !is_charged_defect(defect) && defect.type != sidb_defect_type::NONE &&
-           defect.type != sidb_defect_type::UNKNOWN;
+    return defect.type != sidb_defect_type::NONE && !is_charged_defect(defect);
 }
 /**
  * Horizontal distance to keep from charged SiDB defects. The value is to be understood as the number of DB positions
