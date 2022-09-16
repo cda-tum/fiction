@@ -63,7 +63,8 @@ bool contains_tt(const TTMap& m, const kitty::dynamic_truth_table& elem) noexcep
 
 TEST_CASE("Dummy gate library traits", "[sidb-surface-analysis]")
 {
-    CHECK(has_get_functional_implementations_v<dummy_gate_library>);
+    REQUIRE(has_get_functional_implementations_v<dummy_gate_library>);
+    REQUIRE(has_get_gate_ports_v<dummy_gate_library>);
 }
 
 TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
