@@ -159,7 +159,7 @@ class sidb_surface<Lyt, false> : public Lyt
         std::for_each(strg->defective_coordinates.cbegin(), strg->defective_coordinates.cend(),
                       [&influenced_sidbs, this](const auto& it)
                       {
-                          const auto& [c, d] = it;
+                          const auto [c, d] = it;
                           influenced_sidbs.merge(affected_sidbs(c));
                       });
 
