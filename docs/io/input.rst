@@ -25,7 +25,9 @@ Cell-level Layouts
 **Header:** ``fiction/io/read_sqd_layout.hpp``
 
 .. doxygenfunction:: fiction::read_sqd_layout(std::istream& is, const std::string& name = "")
+.. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, std::istream& is)
 .. doxygenfunction:: fiction::read_sqd_layout(const std::string& filename, const std::string& name = "")
+.. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, const std::string& filename)
 
 **Header:** ``fiction/io/read_fqca_layout.hpp``
 
