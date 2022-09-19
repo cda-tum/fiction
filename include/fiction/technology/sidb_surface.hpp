@@ -9,12 +9,23 @@
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 
+#include <cassert>
 #include <set>
 #include <type_traits>
 #include <unordered_map>
 
 namespace fiction
 {
+
+struct sidb_surface_params
+{
+    /**
+     * Specifies which defects are to be ignored, e.g., when they are not relevant for the current analysis.
+     *
+     * @note Ignored defects are not stored in the surface instance!
+     */
+    std::set<sidb_defect_type> ignore{};
+};
 
 /**
  * A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
@@ -32,7 +43,7 @@ template <typename Lyt>
 class sidb_surface<Lyt, true> : public Lyt
 {
   public:
-    explicit sidb_surface(const Lyt& lyt) : Lyt(lyt) {}
+    explicit sidb_surface(const Lyt& lyt, [[maybe_unused]] const sidb_surface_params& ps = {}) : Lyt(lyt) {}
 };
 
 template <typename Lyt>
@@ -41,6 +52,9 @@ class sidb_surface<Lyt, false> : public Lyt
   public:
     struct sidb_surface_storage
     {
+        explicit sidb_surface_storage(const sidb_surface_params& ps = {}) : params(ps) {}
+
+        sidb_surface_params                              params{};
         std::unordered_map<coordinate<Lyt>, sidb_defect> defective_coordinates{};
     };
 
@@ -49,20 +63,26 @@ class sidb_surface<Lyt, false> : public Lyt
     /**
      * Standard constructor for empty layouts.
      */
-    sidb_surface() : Lyt(), strg{std::make_shared<sidb_surface_storage>()}
+    explicit sidb_surface(const sidb_surface_params& ps = {}) : Lyt(), strg{std::make_shared<sidb_surface_storage>(ps)}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(std::is_same_v<technology<Lyt>, sidb_technology>, "Lyt is not an SiDB layout");
+
+        assert(strg->params.ignore.count(sidb_defect_type::NONE) == 0 && "The defect type 'NONE' cannot be ignored");
     }
     /**
      * Standard constructor that layers the SiDB defect interface onto an existing layout.
      *
      * @param lyt Existing layout that is to be extended by an SiDB defect interface.
      */
-    explicit sidb_surface(const Lyt& lyt) : Lyt(lyt), strg{std::make_shared<sidb_surface_storage>()}
+    explicit sidb_surface(const Lyt& lyt, const sidb_surface_params& ps = {}) :
+            Lyt(lyt),
+            strg{std::make_shared<sidb_surface_storage>(ps)}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(std::is_same_v<technology<Lyt>, sidb_technology>, "Lyt is not an SiDB layout");
+
+        assert(strg->params.ignore.count(sidb_defect_type::NONE) == 0 && "The defect type 'NONE' cannot be ignored");
     }
     /**
      * Assigns a given defect type to the given coordinate.
@@ -72,11 +92,11 @@ class sidb_surface<Lyt, false> : public Lyt
      */
     void assign_sidb_defect(const coordinate<Lyt>& c, const sidb_defect d) noexcept
     {
-        if (d.type == sidb_defect_type::NONE)
+        if (d.type == sidb_defect_type::NONE)  // delete defect
         {
             strg->defective_coordinates.erase(c);
         }
-        else
+        else if (strg->params.ignore.count(d.type) == 0)  // add defect if this type is not ignored
         {
             strg->defective_coordinates.insert({c, d});
         }
@@ -95,8 +115,17 @@ class sidb_surface<Lyt, false> : public Lyt
         }
         else
         {
-            return sidb_defect{sidb_defect_type::NONE, 0.0};  // TODO what are default values for NONE sidb_defects?
+            return sidb_defect{sidb_defect_type::NONE};  // TODO what are default values for NONE sidb_defects?
         }
+    }
+    /**
+     * Returns the number of defective coordinates on the surface.
+     *
+     * @return Number of defective coordinates.
+     */
+    [[nodiscard]] uint64_t num_defects() const noexcept
+    {
+        return strg->defective_coordinates.size();
     }
     /**
      * Applies a function to all defects on the surface. Since the defects are fetched directly from the storage map,
@@ -156,12 +185,12 @@ class sidb_surface<Lyt, false> : public Lyt
     {
         std::set<coordinate<Lyt>> influenced_sidbs{};
 
-        std::for_each(strg->defective_coordinates.cbegin(), strg->defective_coordinates.cend(),
-                      [&influenced_sidbs, this](const auto& it)
-                      {
-                          const auto& [c, d] = it;
-                          influenced_sidbs.merge(affected_sidbs(c));
-                      });
+        foreach_sidb_defect(
+            [&influenced_sidbs, this](const auto& it)
+            {
+                const auto& [c, d] = it;
+                influenced_sidbs.merge(affected_sidbs(c));
+            });
 
         return influenced_sidbs;
     }
