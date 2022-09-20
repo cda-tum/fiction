@@ -178,7 +178,7 @@ TEST_CASE("Read multiple defects", "[sqd]")
                                               "          <coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"5\" />\n"
                                               "          <property_map>\n"
                                               "              <type_label>\n"
-                                              "                  <val>Dot</val>\n"
+                                              "                  <val>siloxane</val>\n"
                                               "              </type_label>\n"
                                               "          </property_map>\n"
                                               "      </defect>\n"

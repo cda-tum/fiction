@@ -46,7 +46,7 @@ class read_sqd_layout_impl
 
     Lyt run()
     {
-        std::string sqd_content(std::istreambuf_iterator<char>(is), {});
+        const std::string sqd_content{std::istreambuf_iterator<char>(is), {}};
 
         tinyxml2::XMLDocument xml_document{};
         xml_document.Parse(sqd_content.c_str());
@@ -195,14 +195,16 @@ class read_sqd_layout_impl
             {{"h-si", sidb_defect_type::NONE},
              {"db", sidb_defect_type::DB},
              {"vacancy", sidb_defect_type::SI_VACANCY},
-             {"dihydride", sidb_defect_type::DIHYDRIDE_PAIR},
              {"single_dihydride", sidb_defect_type::SINGLE_DIHYDRIDE},
+             {"dihydride", sidb_defect_type::DIHYDRIDE_PAIR},
              {"1by1", sidb_defect_type::ONE_BY_ONE},
              {"3by1", sidb_defect_type::THREE_BY_ONE},
-             {"dot", sidb_defect_type::SILOXANE},
+             {"siloxane", sidb_defect_type::SILOXANE},
              {"raised_silicon", sidb_defect_type::RAISED_SI},
-             {"etch_pit", sidb_defect_type::ETCH_PIT},
              {"missing_dimer", sidb_defect_type::MISSING_DIMER},
+             {"etch_pit", sidb_defect_type::ETCH_PIT},
+             {"step_edge", sidb_defect_type::STEP_EDGE},
+             {"gunk", sidb_defect_type::GUNK},
              {"unknown", sidb_defect_type::UNKNOWN}}};
 
         std::string name{label};

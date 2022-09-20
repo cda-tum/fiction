@@ -143,14 +143,16 @@ static const std::map<sidb_defect_type, const char*> defect_type_to_name{
     {{sidb_defect_type::NONE, "H-Si"},
      {sidb_defect_type::DB, "DB"},
      {sidb_defect_type::SI_VACANCY, "Vacancy"},
-     {sidb_defect_type::DIHYDRIDE_PAIR, "Dihydride"},
      {sidb_defect_type::SINGLE_DIHYDRIDE, "Single_Dihydride"},
+     {sidb_defect_type::DIHYDRIDE_PAIR, "Dihydride"},
      {sidb_defect_type::ONE_BY_ONE, "1By1"},
      {sidb_defect_type::THREE_BY_ONE, "3By1"},
-     {sidb_defect_type::SILOXANE, "Dot"},
+     {sidb_defect_type::SILOXANE, "Siloxane"},
      {sidb_defect_type::RAISED_SI, "Raised_Silicon"},
-     {sidb_defect_type::ETCH_PIT, "Etch_Pit"},
      {sidb_defect_type::MISSING_DIMER, "Missing_Dimer"},
+     {sidb_defect_type::ETCH_PIT, "Etch_Pit"},
+     {sidb_defect_type::STEP_EDGE, "Step_Edge"},
+     {sidb_defect_type::GUNK, "Gunk"},
      {sidb_defect_type::UNKNOWN, "Unknown"}}};
 
 }  // namespace siqad

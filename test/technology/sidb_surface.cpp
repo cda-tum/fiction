@@ -74,22 +74,25 @@ TEMPLATE_TEST_CASE(
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
 {
-    TestType lyt{aspect_ratio<TestType>{0, 11}};
+    static const std::map<cell<TestType>, sidb_defect> defect_map{
+        {{{0, 0}, sidb_defect{sidb_defect_type::NONE}},
+         {{0, 1}, sidb_defect{sidb_defect_type::DB}},
+         {{0, 2}, sidb_defect{sidb_defect_type::SI_VACANCY}},
+         {{0, 3}, sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE}},
+         {{0, 4}, sidb_defect{sidb_defect_type::DIHYDRIDE_PAIR}},
+         {{0, 5}, sidb_defect{sidb_defect_type::ONE_BY_ONE}},
+         {{0, 6}, sidb_defect{sidb_defect_type::THREE_BY_ONE}},
+         {{0, 7}, sidb_defect{sidb_defect_type::SILOXANE}},
+         {{0, 8}, sidb_defect{sidb_defect_type::RAISED_SI}},
+         {{0, 9}, sidb_defect{sidb_defect_type::MISSING_DIMER}},
+         {{0, 10}, sidb_defect{sidb_defect_type::ETCH_PIT}},
+         {{0, 11}, sidb_defect{sidb_defect_type::STEP_EDGE}},
+         {{0, 12}, sidb_defect{sidb_defect_type::GUNK}},
+         {{0, 13}, sidb_defect{sidb_defect_type::UNKNOWN}}}};
+
+    TestType lyt{aspect_ratio<TestType>{0, defect_map.size() - 1}};
 
     sidb_surface<TestType> defect_layout{lyt};
-
-    const std::map<cell<TestType>, sidb_defect> defect_map{{{{0, 0}, sidb_defect{sidb_defect_type::NONE}},
-                                                            {{0, 1}, sidb_defect{sidb_defect_type::DB}},
-                                                            {{0, 2}, sidb_defect{sidb_defect_type::SI_VACANCY}},
-                                                            {{0, 3}, sidb_defect{sidb_defect_type::DIHYDRIDE_PAIR}},
-                                                            {{0, 4}, sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE}},
-                                                            {{0, 5}, sidb_defect{sidb_defect_type::ONE_BY_ONE}},
-                                                            {{0, 6}, sidb_defect{sidb_defect_type::THREE_BY_ONE}},
-                                                            {{0, 7}, sidb_defect{sidb_defect_type::SILOXANE}},
-                                                            {{0, 8}, sidb_defect{sidb_defect_type::RAISED_SI}},
-                                                            {{0, 9}, sidb_defect{sidb_defect_type::ETCH_PIT}},
-                                                            {{0, 10}, sidb_defect{sidb_defect_type::MISSING_DIMER}},
-                                                            {{0, 11}, sidb_defect{sidb_defect_type::UNKNOWN}}}};
 
     // assign defects
     for (const auto& [c, d] : defect_map)
