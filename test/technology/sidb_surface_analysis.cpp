@@ -235,9 +235,8 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
 
         CHECK(black_list.size() == 1);
 
-        REQUIRE(black_list.at({0, 0}).size() == 2);
+        REQUIRE(black_list.at({0, 0}).size() == 1);
         CHECK(contains_tt(black_list.at({0, 0}), create_not_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_xnor_tt()));
     }
     SECTION("multi-defect")
     {
@@ -251,10 +250,9 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
 
         CHECK(black_list.size() == 1);
 
-        REQUIRE(black_list.at({0, 0}).size() == 6);
+        REQUIRE(black_list.at({0, 0}).size() == 5);
         CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_not_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_and_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_or_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_xor_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_xnor_tt()));
