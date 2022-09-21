@@ -43,31 +43,24 @@ TEST_CASE("Charged and uncharged defect types", "[sidb-defects]")
 
 TEST_CASE("Defect extent", "[sidb-defects]")
 {
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::NONE}) == std::pair<uint16_t, uint16_t>{0, 0});
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::DB}) ==
-          std::pair<uint16_t, uint16_t>{sidb_charged_defect_horizontal_spacing, sidb_charged_defect_vertical_spacing});
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::SI_VACANCY}) ==
-          std::pair<uint16_t, uint16_t>{sidb_charged_defect_horizontal_spacing, sidb_charged_defect_vertical_spacing});
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE}) ==
-          std::pair<uint16_t, uint16_t>{sidb_neutral_defect_horizontal_spacing, sidb_neutral_defect_vertical_spacing});
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::DIHYDRIDE_PAIR}) ==
-          std::pair<uint16_t, uint16_t>{sidb_neutral_defect_horizontal_spacing, sidb_neutral_defect_vertical_spacing});
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::ONE_BY_ONE}) ==
-          std::pair<uint16_t, uint16_t>{sidb_neutral_defect_horizontal_spacing, sidb_neutral_defect_vertical_spacing});
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::THREE_BY_ONE}) ==
-          std::pair<uint16_t, uint16_t>{sidb_neutral_defect_horizontal_spacing, sidb_neutral_defect_vertical_spacing});
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::SILOXANE}) ==
-          std::pair<uint16_t, uint16_t>{sidb_neutral_defect_horizontal_spacing, sidb_neutral_defect_vertical_spacing});
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::RAISED_SI}) ==
-          std::pair<uint16_t, uint16_t>{sidb_neutral_defect_horizontal_spacing, sidb_neutral_defect_vertical_spacing});
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::MISSING_DIMER}) ==
-          std::pair<uint16_t, uint16_t>{sidb_neutral_defect_horizontal_spacing, sidb_neutral_defect_vertical_spacing});
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::ETCH_PIT}) ==
-          std::pair<uint16_t, uint16_t>{sidb_neutral_defect_horizontal_spacing, sidb_neutral_defect_vertical_spacing});
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::STEP_EDGE}) ==
-          std::pair<uint16_t, uint16_t>{sidb_neutral_defect_horizontal_spacing, sidb_neutral_defect_vertical_spacing});
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::GUNK}) ==
-          std::pair<uint16_t, uint16_t>{sidb_neutral_defect_horizontal_spacing, sidb_neutral_defect_vertical_spacing});
-    CHECK(defect_extent(sidb_defect{sidb_defect_type::UNKNOWN}) ==
-          std::pair<uint16_t, uint16_t>{sidb_neutral_defect_horizontal_spacing, sidb_neutral_defect_vertical_spacing});
+    static constexpr std::pair<uint16_t, uint16_t> no_spacing{0, 0};
+    static constexpr std::pair<uint16_t, uint16_t> neutral_spacing{sidb_neutral_defect_horizontal_spacing,
+                                                                   sidb_neutral_defect_vertical_spacing};
+    static constexpr std::pair<uint16_t, uint16_t> charged_spacing{sidb_charged_defect_horizontal_spacing,
+                                                                   sidb_charged_defect_vertical_spacing};
+
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::NONE}) == no_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::DB}) == charged_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::SI_VACANCY}) == charged_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE}) == neutral_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::DIHYDRIDE_PAIR}) == neutral_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::ONE_BY_ONE}) == neutral_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::THREE_BY_ONE}) == neutral_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::SILOXANE}) == neutral_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::RAISED_SI}) == neutral_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::MISSING_DIMER}) == neutral_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::ETCH_PIT}) == neutral_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::STEP_EDGE}) == neutral_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::GUNK}) == neutral_spacing);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::UNKNOWN}) == neutral_spacing);
 }
