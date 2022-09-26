@@ -83,16 +83,13 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     find_package(TBB)
     if (TBB_FOUND)
         # Status update
-        message(STATUS "Found TBB version: ${TBB_VERSION}")
-        message(STATUS "Found TBB library: ${TBB_LIBRARIES}")
+        message(STATUS "Found TBB version: ${TBB_VERSION_MAJOR}.${TBB_VERSION_MINOR}")
         message(STATUS "Parallel STL algorithms are enabled")
 
-        # Compile definitions
-        target_compile_definitions(libfiction INTERFACE ${TBB_DEFINITIONS})
         # Include TBB
         target_include_directories(libfiction INTERFACE ${TBB_INCLUDE_DIRS})
         # Link TBB
-        target_link_libraries(libfiction INTERFACE ${TBB_LIBRARIES})
+        target_link_libraries(libfiction INTERFACE TBB::tbb)
     else ()
         message(STATUS "Parallel STL algorithms are disabled. If you want to use them, please install TBB and set the TBB_ROOT_DIR, TBB_INCLUDE_DIR, and TBB_LIBRARY variables accordingly.")
     endif ()
