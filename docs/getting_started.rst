@@ -19,6 +19,10 @@ them automatically. Should the repository have been cloned before, the commands:
 
 will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++17 compiler are required.
 
+At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (``libtbb-dev`` on ubuntu) is
+needed. It is an optional dependency that can be installed for a performance boost in certain scenarios. For your
+preferred compiler, see the current implementation state of `P0024R2 <https://en.cppreference.com/w/cpp/compiler_support/17>`_.
+
 
 Using *fiction* as a stand-alone CLI tool
 -----------------------------------------
