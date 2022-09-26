@@ -67,3 +67,15 @@ Furthermore, if you use any of the physical design algorithms :ref:`exact <exact
       booktitle={Design Automation Conference},
       year={2020}
     }
+
+The same holds for the :ref:`Bestagon <bestagon>` gate library:
+
+.. code-block:: tex
+
+    @inproceedings{walter2022hexagons,
+      title={{Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic}},
+      author={Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
+      booktitle={Design Automation Conference},
+      pages = {739--744},
+      year={2022}
+    }

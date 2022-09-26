@@ -99,7 +99,7 @@ Many thanks to Umberto Garlando, Fabrizio Riente, and Giuliana Beretta for their
 
 Gate libraries:
 
-- [Bestagon](https://fiction.readthedocs.io/en/latest/technology/gate_libraries.html#sidb-bestagon-library)
+- [Bestagon](https://dl.acm.org/doi/10.1145/3489517.3530525)
 
 File formats:
 

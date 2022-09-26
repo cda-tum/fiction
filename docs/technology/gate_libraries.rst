@@ -49,6 +49,8 @@ iNML ToPoliNano Library
    :members:
 
 
+.. _bestagon:
+
 SiDB Bestagon Library
 ---------------------
 

@@ -245,6 +245,7 @@ library to use. The following ones are currently supported:
 
 - ``-l QCAONE`` represents `QCA-ONE <https://ieeexplore.ieee.org/document/7538997/>`_ which is the default setting
 - ``-l ToPoliNano`` refers to `ToPoliNano <https://topolinano.polito.it/>`_'s gate library for iNML circuits. Note that only ``exact`` can be used in the moment to create layouts mappable to iNML. Suggested parameters are ``exact -xnbds columnar --topolinano``.
+- ``-l Bestagon`` chooses the `Bestagon <https://dl.acm.org/doi/10.1145/3489517.3530525>`_ gate library for SiDB circuits. Note that only ``exact`` can be used in the moment to create layouts that are properly mappable. Suggested parameters are ``exact -xdbs row --hex even_row``.
 
 Cell-based layouts are also saved in stores which can be accessed by typing ``store -c``. Due to significantly larger size of
 cell layouts compared to gate layouts, the ``print -c`` command to write layouts to the terminal should be used
