@@ -176,7 +176,7 @@ int main()
         bestagon_exp.table();
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 #endif  // FICTION_Z3_SOLVER
