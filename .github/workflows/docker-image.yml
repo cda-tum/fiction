@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag fiction:$(date +%s)
+      run: docker build --build-arg NUMBER_OF_JOBS=2 . --file Dockerfile --tag fiction:$(date +%s)
