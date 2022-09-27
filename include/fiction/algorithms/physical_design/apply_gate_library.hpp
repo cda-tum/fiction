@@ -246,7 +246,7 @@ CellLyt apply_gate_library(const GateLyt& lyt)
     static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
     static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
 
-    static_assert(std::is_same_v<typename CellLyt::technology, typename GateLibrary::technology>,
+    static_assert(std::is_same_v<technology<CellLyt>, technology<GateLibrary>>,
                   "CellLyt and GateLibrary must implement the same technology");
 
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};

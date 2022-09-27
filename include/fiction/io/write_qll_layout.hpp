@@ -23,7 +23,6 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
-#include <type_traits>
 #include <unordered_set>
 #include <vector>
 
@@ -396,8 +395,7 @@ template <typename Lyt>
 void write_qll_layout(const Lyt& lyt, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(std::is_same_v<technology<Lyt>, inml_technology> || std::is_same_v<technology<Lyt>, qca_technology>,
-                  "Lyt must be a QCA or an iNML layout");
+    static_assert(has_inml_technology<Lyt> || has_qca_technology<Lyt>, "Lyt must be an iNML or a QCA layout");
 
     detail::write_qll_layout_impl p{lyt, os};
 

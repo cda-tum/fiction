@@ -14,7 +14,6 @@
 #include <fstream>
 #include <ostream>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 namespace fiction
@@ -497,7 +496,10 @@ class write_qca_layout_impl
         os << qcad::STATUS << "0\n";
         os << qcad::PSZ_DESCRIPTION << "Via Layer " << std::to_string(via_counter++) << '\n';
 
-        for (auto& v : via_layer_cells) { write_cell(v, false); }
+        for (auto& v : via_layer_cells)
+        {
+            write_cell(v, false);
+        }
 
         // close design layer
         os << qcad::CLOSE_QCAD_LAYER;
@@ -523,7 +525,7 @@ template <typename Lyt>
 void write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(std::is_same_v<technology<Lyt>, qca_technology>, "Lyt must be a QCA layout");
+    static_assert(has_qca_technology<Lyt>, "Lyt must be a QCA layout");
 
     detail::write_qca_layout_impl p{lyt, os, ps};
 

@@ -23,7 +23,6 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
-#include <type_traits>
 #include <unordered_set>
 #include <vector>
 
@@ -192,8 +191,14 @@ class write_qcc_layout_impl
         auto store_pin_data = [this, &pin_data](const auto& io)
         { pin_data.push_back(fmt::format("{}{}{}{}", lyt.get_cell_name(io), bb_x(io), bb_y(io), io.z)); };
 
-        for (const auto& pi : sorted_pi_list) { store_pin_data(pi); }
-        for (const auto& po : sorted_po_list) { store_pin_data(po); }
+        for (const auto& pi : sorted_pi_list)
+        {
+            store_pin_data(pi);
+        }
+        for (const auto& po : sorted_po_list)
+        {
+            store_pin_data(po);
+        }
         std::sort(pin_data.begin(), pin_data.end());
 
         return pin_data;
@@ -340,7 +345,7 @@ template <typename Lyt>
 void write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(std::is_same_v<technology<Lyt>, inml_technology>, "Lyt must be an iNML layout");
+    static_assert(has_inml_technology<Lyt>, "Lyt must be an iNML layout");
 
     detail::write_qcc_layout_impl p{lyt, os, ps};
 

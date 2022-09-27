@@ -633,7 +633,10 @@ class write_qca_layout_svg_impl
             }
 
             // Delete empty tiles
-            for (const auto& coord : empty_tiles) { coord_to_tile.erase(coord); }
+            for (const auto& coord : empty_tiles)
+            {
+                coord_to_tile.erase(coord);
+            }
 
             if constexpr (has_synchronization_elements_v<Lyt>)
             {
@@ -719,7 +722,7 @@ template <typename Lyt>
 void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg_params ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(std::is_same_v<technology<Lyt>, qca_technology>, "Lyt must be a QCA layout");
+    static_assert(has_qca_technology<Lyt>, "Lyt must be a QCA layout");
     static_assert(std::is_same_v<coordinate<Lyt>, offset::ucoord_t>, "Lyt must use unsigned Cartesian coordinates");
 
     detail::write_qca_layout_svg_impl<Lyt> p{lyt, os, ps};

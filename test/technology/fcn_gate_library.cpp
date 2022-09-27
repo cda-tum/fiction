@@ -6,8 +6,7 @@
 
 #include <fiction/technology/cell_ports.hpp>
 #include <fiction/technology/fcn_gate_library.hpp>
-
-#include <type_traits>
+#include <fiction/traits.hpp>
 
 using namespace fiction;
 
@@ -15,7 +14,7 @@ TEST_CASE("Construction & traits", "[fcn-gate-library]")
 {
     using lib_t = fcn_gate_library<qca_technology, 2, 3>;
 
-    CHECK(std::is_same_v<lib_t::technology, qca_technology>);
+    CHECK(has_qca_technology<lib_t>);
     CHECK(lib_t::gate_x_size() == 2);
     CHECK(lib_t::gate_y_size() == 3);
 }
