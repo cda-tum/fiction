@@ -60,7 +60,7 @@ jobs:
       - name: Configure CMake
         working-directory: ${{github.workspace}}/build
 
-        run: cmake ${{github.workspace}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}/z3lib -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF -DENABLE_COVERAGE=ON
+        run: cmake ${{github.workspace}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DFICTION_CLI=OFF -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}/z3lib -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF -DENABLE_COVERAGE=ON
 
       - name: Build
         working-directory: ${{github.workspace}}/build
