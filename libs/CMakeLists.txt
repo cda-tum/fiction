@@ -46,6 +46,7 @@ endif ()
 option(FICTION_Z3 "Find, include, and utilize the Z3 solver by Microsoft Research. It needs to be installed manually.")
 if (FICTION_Z3)
     message(STATUS "Usage of the Z3 solver was enabled. Make sure that it is installed on your system!")
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/") # include FindZ3.cmake
     set(FICTION_Z3_SEARCH_PATHS "" CACHE STRING "Hints CMake where to search for the Z3 package. Usually only necessary if Z3 cannot be found automatically.")
     # Try to locate Z3
     find_package(Z3 PATHS ${FICTION_Z3_SEARCH_PATHS})
