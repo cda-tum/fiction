@@ -1,6 +1,7 @@
 name: Coverage CI
 
-on: push
+on:
+  pull_request:
 
 defaults:
   run:
@@ -8,7 +9,7 @@ defaults:
 
 env:
   BUILD_TYPE: Debug
-  Z3_GIT_TAG: z3-4.10.0
+  Z3_VERSION: 4.10.0
 
 jobs:
   build_and_test:
@@ -39,20 +40,15 @@ jobs:
         with:
           requirements: ${{github.workspace}}/libs/mugen/requirements.txt
 
-      - name: Cache Z3 Solver
-        id: cache-z3-solver
-        uses: actions/cache@v3
+      - name: Setup Z3 Solver
+        id: z3
+        uses: cda-tum/setup-z3@v1
         with:
-          path: ${{github.workspace}}/z3lib
-          key: ${{matrix.os}}-${{matrix.compiler}}-z3lib-${{env.Z3_GIT_TAG}}
-
-      - name: Build Z3 Solver
-        if: steps.cache-z3-solver.outputs.cache-hit != 'true'
-        working-directory: ${{github.workspace}}
-        run: |
-          git clone --branch $Z3_GIT_TAG --depth 1 https://github.com/Z3Prover/z3.git
-          cmake -S z3 -B z3/build -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=OFF -DZ3_BUILD_TEST_EXECUTABLES=OFF -DZ3_ENABLE_EXAMPLE_TARGETS=OFF
-          cmake --build z3/build --config Release -j2 --target install
+          version: ${{env.Z3_VERSION}}
+          platform: linux
+          architecture: x64
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
@@ -60,7 +56,7 @@ jobs:
       - name: Configure CMake
         working-directory: ${{github.workspace}}/build
 
-        run: cmake ${{github.workspace}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}/z3lib -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF -DENABLE_COVERAGE=ON
+        run: cmake ${{github.workspace}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF -DENABLE_COVERAGE=ON
 
       - name: Build
         working-directory: ${{github.workspace}}/build

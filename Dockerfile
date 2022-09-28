@@ -6,11 +6,9 @@ ARG NUMBER_OF_JOBS=1
 # Configure apt and install packages
 RUN apk add --no-cache \
     # Install cmake with its dependencies
-    build-base gcc abuild binutils binutils-doc gcc-doc \
-    cmake cmake-doc extra-cmake-modules extra-cmake-modules-doc \
-    #
+    build-base gcc abuild binutils cmake \
     # Install packages needed to build fiction
-    git g++ cmake python3 python3-dev readline-dev zlib-dev xdg-utils
+    git g++ python3 python3-dev readline-dev xdg-utils
 
 # Setup Z3
 RUN git clone --depth 1 --branch z3-4.10.0 https://github.com/Z3Prover/z3.git
