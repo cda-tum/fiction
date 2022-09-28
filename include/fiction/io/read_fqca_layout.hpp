@@ -81,9 +81,9 @@ static const std::regex re_cell_definition_offset{
 
 /* Strings */
 
-static constexpr const char* cell_definition_input     = "-input";
-static constexpr const char* cell_definition_output    = "-output";
-static constexpr const char* cell_definition_propagate = "-propagate";
+inline constexpr const char* cell_definition_input     = "-input";
+inline constexpr const char* cell_definition_output    = "-output";
+inline constexpr const char* cell_definition_propagate = "-propagate";
 
 }  // namespace qca_stack
 

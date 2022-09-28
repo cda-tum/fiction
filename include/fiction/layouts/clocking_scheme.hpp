@@ -150,16 +150,16 @@ class clocking_scheme
 
 namespace clock_name
 {
-static constexpr const char* open          = "OPEN";
-static constexpr const char* columnar      = "COLUMNAR";
-static constexpr const char* row           = "ROW";
-static constexpr const char* twoddwave     = "2DDWAVE";
-static constexpr const char* twoddwave_hex = "2DDWAVEHEX";
-static constexpr const char* use           = "USE";
-static constexpr const char* res           = "RES";
-static constexpr const char* esr           = "ESR";
-static constexpr const char* cfe           = "CFE";
-static constexpr const char* bancs         = "BANCS";
+inline constexpr const char* open          = "OPEN";
+inline constexpr const char* columnar      = "COLUMNAR";
+inline constexpr const char* row           = "ROW";
+inline constexpr const char* twoddwave     = "2DDWAVE";
+inline constexpr const char* twoddwave_hex = "2DDWAVEHEX";
+inline constexpr const char* use           = "USE";
+inline constexpr const char* res           = "RES";
+inline constexpr const char* esr           = "ESR";
+inline constexpr const char* cfe           = "CFE";
+inline constexpr const char* bancs         = "BANCS";
 }  // namespace clock_name
 
 enum class num_clks
@@ -735,7 +735,7 @@ std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::s
     auto upper_name = name;
     std::transform(upper_name.begin(), upper_name.end(), upper_name.begin(), ::toupper);
 
-    if (auto it = scheme_lookup.find(upper_name); it != scheme_lookup.end())
+    if (const auto it = scheme_lookup.find(upper_name); it != scheme_lookup.cend())
     {
         return it->second;
     }

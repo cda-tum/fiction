@@ -28,23 +28,23 @@ namespace detail
 namespace siqad
 {
 
-static constexpr const char* XML_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-static constexpr const char* OPEN_SIQAD    = "<siqad>\n";
-static constexpr const char* CLOSE_SIQAD   = "</siqad>\n";
-static constexpr const char* PROGRAM_BLOCK = "    <program>\n"
+inline constexpr const char* XML_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+inline constexpr const char* OPEN_SIQAD    = "<siqad>\n";
+inline constexpr const char* CLOSE_SIQAD   = "</siqad>\n";
+inline constexpr const char* PROGRAM_BLOCK = "    <program>\n"
                                              "        <file_purpose>{}</file_purpose>\n"
                                              "        <created_by>{}</created_by>\n"
                                              "        <available_at>{}</available_at>\n"
                                              "        <date>{}</date>\n"
                                              "    </program>\n";
 
-static constexpr const char* GUI_BLOCK = "    <gui>\n"
+inline constexpr const char* GUI_BLOCK = "    <gui>\n"
                                          "        <zoom>{}</zoom>\n"
                                          "        <displayed_region x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>\n"
                                          "        <scroll x=\"{}\" y=\"{}\"/>\n"
                                          "    </gui>\n";
 
-static constexpr const char* LAYERS_BLOCK = "<layers>\n"
+inline constexpr const char* LAYERS_BLOCK = "<layers>\n"
                                             "        <layer_prop>\n"
                                             "            <name>Lattice</name>\n"
                                             "            <type>Lattice</type>\n"
@@ -90,23 +90,23 @@ static constexpr const char* LAYERS_BLOCK = "<layers>\n"
                                             "        </layer_prop>\n"
                                             "    </layers>\n";
 
-static constexpr const char* OPEN_DESIGN  = "    <design>\n"
+inline constexpr const char* OPEN_DESIGN  = "    <design>\n"
                                             "        <layer type=\"Lattice\"/>\n"
                                             "        <layer type=\"Misc\"/>\n"
                                             "        <layer type=\"DB\">\n";
-static constexpr const char* CLOSE_DESIGN = "    </design>\n";
+inline constexpr const char* CLOSE_DESIGN = "    </design>\n";
 
-static constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"
+inline constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"
                                            "                <layer_id>2</layer_id>\n"
                                            "                <latcoord n=\"{}\" m=\"{}\" l=\"{}\"/>\n"
                                            "                <color>{}</color>\n"
                                            "            </dbdot>\n";
 
 // color format is Alpha RBG
-static constexpr const char* NORMAL_COLOR = "#ffc8c8c8";
-static constexpr const char* INPUT_COLOR  = "#ff008dc8";
-static constexpr const char* OUTPUT_COLOR = "#ffe28686";
-static constexpr const char* CONST_COLOR  = "#ff000000";
+inline constexpr const char* NORMAL_COLOR = "#ffc8c8c8";
+inline constexpr const char* INPUT_COLOR  = "#ff008dc8";
+inline constexpr const char* OUTPUT_COLOR = "#ffe28686";
+inline constexpr const char* CONST_COLOR  = "#ff000000";
 
 }  // namespace siqad
 
