@@ -15,7 +15,6 @@
 #include <regex>
 #include <sstream>
 #include <string>
-#include <type_traits>
 
 namespace fiction
 {
@@ -334,7 +333,7 @@ template <typename Lyt>
 Lyt read_fqca_layout(std::istream& is, const std::string& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(std::is_same_v<technology<Lyt>, qca_technology>, "Lyt must be a QCA layout");
+    static_assert(has_qca_technology<Lyt>, "Lyt must be a QCA layout");
 
     detail::read_fqca_layout_impl<Lyt> p{is, name};
 

@@ -15,7 +15,6 @@
 #include <ostream>
 #include <sstream>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 namespace fiction
@@ -135,7 +134,10 @@ class write_fqca_layout_impl
 
     void write_layer_separator()
     {
-        for (decltype(lyt.x()) i = 0; i <= lyt.x(); i++) { os << qca_stack::COLUMN << qca_stack::CELL_SEPARATOR; }
+        for (decltype(lyt.x()) i = 0; i <= lyt.x(); i++)
+        {
+            os << qca_stack::COLUMN << qca_stack::CELL_SEPARATOR;
+        }
 
         os << '\n';
     }
@@ -273,7 +275,10 @@ class write_fqca_layout_impl
 
     void write_cell_definition()
     {
-        for (const auto& lc : labeled_cells) { write_labeled_cell(lc); }
+        for (const auto& lc : labeled_cells)
+        {
+            write_labeled_cell(lc);
+        }
     }
 };
 
@@ -295,7 +300,7 @@ template <typename Lyt>
 void write_fqca_layout(const Lyt& lyt, std::ostream& os, write_fqca_layout_params ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(std::is_same_v<technology<Lyt>, qca_technology>, "Lyt must be a QCA layout");
+    static_assert(has_qca_technology<Lyt>, "Lyt must be a QCA layout");
 
     detail::write_fqca_layout_impl p{lyt, os, ps};
 

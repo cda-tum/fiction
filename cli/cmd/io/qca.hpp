@@ -15,7 +15,6 @@
 #include <filesystem>
 #include <ostream>
 #include <string>
-#include <type_traits>
 #include <variant>
 
 namespace alice
@@ -69,7 +68,7 @@ class qca_command : public command
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-            if constexpr (std::is_same_v<fiction::technology<Lyt>, fiction::qca_technology>)
+            if constexpr (fiction::has_qca_technology<Lyt>)
             {
                 fiction::write_qca_layout(*lyt_ptr, filename, ps);
             }

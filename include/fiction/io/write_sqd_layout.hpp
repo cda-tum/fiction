@@ -18,7 +18,6 @@
 #include <ostream>
 #include <sstream>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 namespace fiction
@@ -220,14 +219,14 @@ class write_sqd_layout_impl
             [this, &design](const auto& c)
             {
                 // generate SiDB cells
-                if constexpr (std::is_same_v<technology<Lyt>, sidb_technology>)
+                if constexpr (has_sidb_technology<Lyt>)
                 {
                     design << fmt::format(siqad::DBDOT_BLOCK,
                                           fmt::format(siqad::LATTICE_COORDINATE, c.x, c.y / 2, c.y % 2),
                                           siqad::NORMAL_COLOR);
                 }
                 // generate QCA cell blocks
-                else if constexpr (std::is_same_v<technology<Lyt>, qca_technology>)
+                else if constexpr (has_qca_technology<Lyt>)
                 {
                     const auto type = this->lyt.get_cell_type(c);
 
@@ -304,8 +303,7 @@ template <typename Lyt>
 void write_sqd_layout(const Lyt& lyt, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(std::is_same_v<technology<Lyt>, qca_technology> || std::is_same_v<technology<Lyt>, sidb_technology>,
-                  "Lyt must be a QCA or SiDB layout");
+    static_assert(has_qca_technology<Lyt> || has_sidb_technology<Lyt>, "Lyt must be a QCA or SiDB layout");
 
     detail::write_sqd_layout_impl p{lyt, os};
 
