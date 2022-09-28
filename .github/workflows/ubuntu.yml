@@ -30,8 +30,8 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
-      - name: Install the respective compiler
-        run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}}
+      - name: Install libraries and the respective compiler
+        run: sudo apt-get update && sudo apt-get install -yq libtbb-dev ${{matrix.compiler}}
 
       - name: Setup Python
         uses: actions/setup-python@v4

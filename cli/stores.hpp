@@ -454,7 +454,7 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        if constexpr (!std::is_same_v<fiction::technology<Lyt>, fiction::qca_technology>)
+        if constexpr (!fiction::has_qca_technology<Lyt>)
         {
             cmd.env->out() << fmt::format("[e] {} is not a QCA layout", lyt_ptr->get_layout_name()) << std::endl;
         }
