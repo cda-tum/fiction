@@ -46,7 +46,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: ccache
+      - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: "ccache-${{matrix.os}}-${{matrix.compiler}}-${{matrix.build_type}}"

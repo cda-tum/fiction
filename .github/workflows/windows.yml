@@ -36,7 +36,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: ccache
+      - name: Setup sccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: "sccache-${{matrix.os}}-${{matrix.compiler}}-${{matrix.build_type}}"
