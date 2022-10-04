@@ -29,25 +29,25 @@ namespace detail
 namespace siqad
 {
 
-static constexpr const char* XML_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-static constexpr const char* OPEN_SIQAD    = "<siqad>\n";
-static constexpr const char* CLOSE_SIQAD   = "</siqad>\n";
-static constexpr const char* PROGRAM_BLOCK = "    <program>\n"
+inline constexpr const char* XML_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+inline constexpr const char* OPEN_SIQAD    = "<siqad>\n";
+inline constexpr const char* CLOSE_SIQAD   = "</siqad>\n";
+inline constexpr const char* PROGRAM_BLOCK = "    <program>\n"
                                              "        <file_purpose>{}</file_purpose>\n"
                                              "        <created_by>{}</created_by>\n"
                                              "        <available_at>{}</available_at>\n"
                                              "        <date>{}</date>\n"
                                              "    </program>\n";
 
-static constexpr const char* GUI_BLOCK = "    <gui>\n"
+inline constexpr const char* GUI_BLOCK = "    <gui>\n"
                                          "        <zoom>{}</zoom>\n"
                                          "        <displayed_region x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>\n"
                                          "        <scroll x=\"{}\" y=\"{}\"/>\n"
                                          "    </gui>\n";
 
-static constexpr const char* LAYERS_BLOCK                = "    <layers>\n{}"
+inline constexpr const char* LAYERS_BLOCK                = "    <layers>\n{}"
                                                            "    </layers>\n";
-static constexpr const char* LATTICE_LAYER_DEFINITION    = "        <layer_prop>\n"
+inline constexpr const char* LATTICE_LAYER_DEFINITION    = "        <layer_prop>\n"
                                                            "            <name>Lattice</name>\n"
                                                            "            <type>Lattice</type>\n"
                                                            "            <role>Design</role>\n"
@@ -63,7 +63,7 @@ static constexpr const char* LATTICE_LAYER_DEFINITION    = "        <layer_prop>
                                                            "                <b2 x=\"0\" y=\"2.25\"/>\n"
                                                            "            </lat_vec>\n"
                                                            "        </layer_prop>\n";
-static constexpr const char* SCREENSHOT_LAYER_DEFINITION = "        <layer_prop>\n"
+inline constexpr const char* SCREENSHOT_LAYER_DEFINITION = "        <layer_prop>\n"
                                                            "            <name>Screenshot Overlay</name>\n"
                                                            "            <type>Misc</type>\n"
                                                            "            <role>Overlay</role>\n"
@@ -72,7 +72,7 @@ static constexpr const char* SCREENSHOT_LAYER_DEFINITION = "        <layer_prop>
                                                            "            <visible>0</visible>\n"
                                                            "            <active>0</active>\n"
                                                            "        </layer_prop>\n";
-static constexpr const char* SURFACE_LAYER_DEFINITION    = "        <layer_prop>\n"
+inline constexpr const char* SURFACE_LAYER_DEFINITION    = "        <layer_prop>\n"
                                                            "            <name>Surface</name>\n"
                                                            "            <type>DB</type>\n"
                                                            "            <role>Design</role>\n"
@@ -81,7 +81,7 @@ static constexpr const char* SURFACE_LAYER_DEFINITION    = "        <layer_prop>
                                                            "            <visible>1</visible>\n"
                                                            "            <active>0</active>\n"
                                                            "        </layer_prop>\n";
-static constexpr const char* ELECTRODE_LAYER_DEFINITION  = "        <layer_prop>\n"
+inline constexpr const char* ELECTRODE_LAYER_DEFINITION  = "        <layer_prop>\n"
                                                            "            <name>Metal</name>\n"
                                                            "            <type>Electrode</type>\n"
                                                            "            <role>Design</role>\n"
@@ -90,7 +90,7 @@ static constexpr const char* ELECTRODE_LAYER_DEFINITION  = "        <layer_prop>
                                                            "            <visible>1</visible>\n"
                                                            "            <active>0</active>\n"
                                                            "        </layer_prop>\n";
-static constexpr const char* DEFECT_LAYER_DEFINITION     = "        <layer_prop>\n"
+inline constexpr const char* DEFECT_LAYER_DEFINITION     = "        <layer_prop>\n"
                                                            "            <name>Defects</name>\n"
                                                            "            <type>Defects</type>\n"
                                                            "            <zoffset>0</zoffset>\n"
@@ -99,25 +99,25 @@ static constexpr const char* DEFECT_LAYER_DEFINITION     = "        <layer_prop>
                                                            "            <active>0</active>\n"
                                                            "        </layer_prop>\n";
 
-static constexpr const char* OPEN_DESIGN         = "    <design>\n";
-static constexpr const char* LATTICE_LAYER       = "        <layer type=\"Lattice\"/>\n";
-static constexpr const char* MISC_LAYER          = "        <layer type=\"Misc\"/>\n";
-static constexpr const char* OPEN_DB_LAYER       = "        <layer type=\"DB\">\n";
-static constexpr const char* CLOSE_DB_LAYER      = "        </layer>\n";
-static constexpr const char* ELECTRODE_LAYER     = "        <layer type=\"Electrode\"/>\n";
-static constexpr const char* OPEN_DEFECTS_LAYER  = "        <layer type=\"Defects\">\n";
-static constexpr const char* CLOSE_DEFECTS_LAYER = "        </layer>\n";
-static constexpr const char* CLOSE_DESIGN        = "    </design>\n";
+inline constexpr const char* OPEN_DESIGN         = "    <design>\n";
+inline constexpr const char* LATTICE_LAYER       = "        <layer type=\"Lattice\"/>\n";
+inline constexpr const char* MISC_LAYER          = "        <layer type=\"Misc\"/>\n";
+inline constexpr const char* OPEN_DB_LAYER       = "        <layer type=\"DB\">\n";
+inline constexpr const char* CLOSE_DB_LAYER      = "        </layer>\n";
+inline constexpr const char* ELECTRODE_LAYER     = "        <layer type=\"Electrode\"/>\n";
+inline constexpr const char* OPEN_DEFECTS_LAYER  = "        <layer type=\"Defects\">\n";
+inline constexpr const char* CLOSE_DEFECTS_LAYER = "        </layer>\n";
+inline constexpr const char* CLOSE_DESIGN        = "    </design>\n";
 
-static constexpr const char* LATTICE_COORDINATE = R"(<latcoord n="{}" m="{}" l="{}"/>)";
+inline constexpr const char* LATTICE_COORDINATE = R"(<latcoord n="{}" m="{}" l="{}"/>)";
 
-static constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"
+inline constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"
                                            "                <layer_id>2</layer_id>\n"
                                            "                {}\n"
                                            "                <color>{}</color>\n"
                                            "            </dbdot>\n";
 
-static constexpr const char* DEFECT_BLOCK = "            <defect>\n"
+inline constexpr const char* DEFECT_BLOCK = "            <defect>\n"
                                             "                <layer_id>5</layer_id>\n"
                                             "                <incl_coords>\n"
                                             "                    {}\n"
@@ -129,13 +129,13 @@ static constexpr const char* DEFECT_BLOCK = "            <defect>\n"
                                             "                </property_map>\n"
                                             "            </defect>\n";
 
-static constexpr const char* COULOMB = "                <coulomb charge=\"{}\" eps_r=\"{}\" lambda_tf=\"{}\"/>\n";
+inline constexpr const char* COULOMB = "                <coulomb charge=\"{}\" eps_r=\"{}\" lambda_tf=\"{}\"/>\n";
 
 // color format is Alpha RBG
-static constexpr const char* NORMAL_COLOR = "#ffc8c8c8";
-static constexpr const char* INPUT_COLOR  = "#ff008dc8";
-static constexpr const char* OUTPUT_COLOR = "#ffe28686";
-static constexpr const char* CONST_COLOR  = "#ff000000";
+inline constexpr const char* NORMAL_COLOR = "#ffc8c8c8";
+inline constexpr const char* INPUT_COLOR  = "#ff008dc8";
+inline constexpr const char* OUTPUT_COLOR = "#ffe28686";
+inline constexpr const char* CONST_COLOR  = "#ff000000";
 
 // maps defect types to their respective string representation
 static const std::map<sidb_defect_type, const char*> defect_type_to_name{
