@@ -178,7 +178,7 @@ TEST_CASE("Read multiple defects", "[sqd]")
                                               "          <coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"5\" />\n"
                                               "          <property_map>\n"
                                               "              <type_label>\n"
-                                              "                  <val>Dot</val>\n"
+                                              "                  <val>siloxane</val>\n"
                                               "              </type_label>\n"
                                               "          </property_map>\n"
                                               "      </defect>\n"
@@ -342,6 +342,74 @@ TEST_CASE("Read multi-dot layout with multi-cell defect", "[sqd]")
             CHECK(defect.epsilon_r == 5.6);
             CHECK(defect.lambda_tf == 5.0);
         });
+}
+
+TEST_CASE("In-place reader with ignored defects", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\" l=\"0\"/>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\" l=\"1\"/>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"2\" m=\"2\" l=\"0\"/>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"2\" m=\"2\" l=\"1\"/>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "    <layer type=\"Defects\">\n"
+                                              "      <defect>\n"
+                                              "          <layer_id>5</layer_id>\n"
+                                              "          <incl_coords>\n"
+                                              "              <latcoord n=\"5\" m=\"2\" l=\"0\" />\n"
+                                              "              <latcoord n=\"5\" m=\"2\" l=\"1\" />\n"
+                                              "              <latcoord n=\"4\" m=\"2\" l=\"0\" />\n"
+                                              "              <latcoord n=\"4\" m=\"2\" l=\"1\" />\n"
+                                              "          </incl_coords>\n"
+                                              "          <coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"5\" />\n"
+                                              "          <property_map>\n"
+                                              "              <type_label>\n"
+                                              "                  <val>DB</val>\n"
+                                              "              </type_label>\n"
+                                              "          </property_map>\n"
+                                              "      </defect>"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    using sidb_layout =
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    sidb_surface_params params{std::set<sidb_defect_type>{sidb_defect_type::DB}};
+    sidb_layout         layout{params};
+
+    read_sqd_layout(layout, layout_stream);
+
+    CHECK(layout.x() == 5);
+    CHECK(layout.y() == 5);
+
+    CHECK(layout.get_cell_type({0, 0}) == sidb_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({0, 1}) == sidb_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 4}) == sidb_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 5}) == sidb_technology::cell_type::NORMAL);
+
+    // should have ignored the DB defects
+    CHECK(layout.num_defects() == 0);
 }
 
 TEST_CASE("Read defect despite missing <coulomb> element", "[sqd]")

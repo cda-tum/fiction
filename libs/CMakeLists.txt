@@ -52,13 +52,14 @@ endif ()
 option(FICTION_Z3 "Find, include, and utilize the Z3 solver by Microsoft Research. It needs to be installed manually.")
 if (FICTION_Z3)
     message(STATUS "Usage of the Z3 solver was enabled. Make sure that it is installed on your system!")
-    set(FICTION_Z3_SEARCH_PATHS "" CACHE STRING "Hints CMake where to search for the Z3 package. Usually only necessary if Z3 cannot be found automatically.")
-    # Try to locate Z3
-    find_package(Z3 PATHS ${FICTION_Z3_SEARCH_PATHS})
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/") # include FindZ3.cmake
+
+    # Try to locate Z3 (minimum required version is 4.8.5 due to its performance improvements on the QBF solver)
+    find_package(Z3 4.8.5)
 
     if (Z3_FOUND)
         # Status update
-        message(STATUS "Found Z3 solver version: ${Z3_VERSION}")
+        message(STATUS "Found Z3 solver version: ${Z3_VERSION_STRING}")
         message(STATUS "Found Z3 library: ${Z3_LIBRARIES}")
         message(STATUS "Found Z3 include directories: ${Z3_CXX_INCLUDE_DIRS}")
 
@@ -81,4 +82,22 @@ if (FICTION_Z3)
         message(SEND_ERROR "Z3 solver could not be detected")
     endif ()
 
+endif ()
+
+# If using GCC, find TBB if installed
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/") # include FindTBB.cmake
+    find_package(TBB)
+    if (TBB_FOUND)
+        # Status update
+        message(STATUS "Found TBB version: ${TBB_VERSION_MAJOR}.${TBB_VERSION_MINOR}")
+        message(STATUS "Parallel STL algorithms are enabled")
+
+        # Include TBB
+        target_include_directories(libfiction INTERFACE ${TBB_INCLUDE_DIRS})
+        # Link TBB
+        target_link_libraries(libfiction INTERFACE TBB::tbb)
+    else ()
+        message(STATUS "Parallel STL algorithms are disabled. If you want to use them, please install TBB and set the TBB_ROOT_DIR, TBB_INCLUDE_DIR, and TBB_LIBRARY variables accordingly.")
+    endif ()
 endif ()

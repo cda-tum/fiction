@@ -8,12 +8,14 @@
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/cell_ports.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 
 #include <mockturtle/traits.hpp>
 
 #include <cstdint>
 #include <string>
+#include <type_traits>
 #include <utility>
 
 namespace fiction
@@ -358,19 +360,22 @@ inline constexpr bool is_hexagonal_layout_v = is_hexagonal_layout<Lyt>::value;
 
 #pragma region hexagonal orientation and arrangement
 template <typename Lyt>
-constexpr bool has_pointy_top_hex_orientation_v =
+inline constexpr const bool has_pointy_top_hex_orientation_v =
     std::is_same_v<typename Lyt::hex_arrangement::orientation, pointy_top_hex>;
 template <typename Lyt>
-constexpr bool has_flat_top_hex_orientation_v =
+inline constexpr const bool has_flat_top_hex_orientation_v =
     std::is_same_v<typename Lyt::hex_arrangement::orientation, flat_top_hex>;
 template <typename Lyt>
-constexpr bool has_odd_row_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, odd_row_hex>;
+inline constexpr const bool has_odd_row_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, odd_row_hex>;
 template <typename Lyt>
-constexpr bool has_even_row_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, even_row_hex>;
+inline constexpr const bool has_even_row_hex_arrangement_v =
+    std::is_same_v<typename Lyt::hex_arrangement, even_row_hex>;
 template <typename Lyt>
-constexpr bool has_odd_column_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, odd_column_hex>;
+inline constexpr const bool has_odd_column_hex_arrangement_v =
+    std::is_same_v<typename Lyt::hex_arrangement, odd_column_hex>;
 template <typename Lyt>
-constexpr bool has_even_column_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, even_column_hex>;
+inline constexpr const bool has_even_column_hex_arrangement_v =
+    std::is_same_v<typename Lyt::hex_arrangement, even_column_hex>;
 #pragma endregion
 
 /**
@@ -560,6 +565,13 @@ using cell = typename Lyt::cell;
 
 template <typename Lyt>
 using technology = typename Lyt::technology;
+
+template <typename Lyt>
+inline constexpr const bool has_qca_technology = std::is_same_v<technology<Lyt>, qca_technology>;
+template <typename Lyt>
+inline constexpr const bool has_inml_technology = std::is_same_v<technology<Lyt>, inml_technology>;
+template <typename Lyt>
+inline constexpr const bool has_sidb_technology = std::is_same_v<technology<Lyt>, sidb_technology>;
 
 #pragma region is_cell_level_layout
 template <class Lyt, class = void>

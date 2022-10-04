@@ -37,14 +37,16 @@ template <typename Lyt>
 class read_sqd_layout_impl
 {
   public:
-    explicit read_sqd_layout_impl(std::istream& s, const std::string& name) : lyt{}, is{s}
+    read_sqd_layout_impl(std::istream& s, const std::string& name) : lyt{}, is{s}
     {
         set_name(lyt, name);
     }
 
+    read_sqd_layout_impl(Lyt& tgt, std::istream& s) : lyt{tgt}, is{s} {}
+
     Lyt run()
     {
-        std::string sqd_content(std::istreambuf_iterator<char>(is), {});
+        const std::string sqd_content{std::istreambuf_iterator<char>(is), {}};
 
         tinyxml2::XMLDocument xml_document{};
         xml_document.Parse(sqd_content.c_str());
@@ -193,14 +195,16 @@ class read_sqd_layout_impl
             {{"h-si", sidb_defect_type::NONE},
              {"db", sidb_defect_type::DB},
              {"vacancy", sidb_defect_type::SI_VACANCY},
-             {"dihydride", sidb_defect_type::DIHYDRIDE_PAIR},
              {"single_dihydride", sidb_defect_type::SINGLE_DIHYDRIDE},
+             {"dihydride", sidb_defect_type::DIHYDRIDE_PAIR},
              {"1by1", sidb_defect_type::ONE_BY_ONE},
              {"3by1", sidb_defect_type::THREE_BY_ONE},
-             {"dot", sidb_defect_type::SILOXANE},
+             {"siloxane", sidb_defect_type::SILOXANE},
              {"raised_silicon", sidb_defect_type::RAISED_SI},
-             {"etch_pit", sidb_defect_type::ETCH_PIT},
              {"missing_dimer", sidb_defect_type::MISSING_DIMER},
+             {"etch_pit", sidb_defect_type::ETCH_PIT},
+             {"step_edge", sidb_defect_type::STEP_EDGE},
+             {"gunk", sidb_defect_type::GUNK},
              {"unknown", sidb_defect_type::UNKNOWN}}};
 
         std::string name{label};
@@ -299,6 +303,28 @@ Lyt read_sqd_layout(std::istream& is, const std::string& name = "")
     return lyt;
 }
 /**
+ * Reads a cell-level SiDB layout from an sqd file provided as an input stream. The format is used by SiQAD
+ * (https://github.com/siqad/siqad).
+ *
+ * May throw an sqd_parsing_exception if the sqd file is malformed.
+ *
+ * This is an in-place version of read_sqd_layout that utilizes the given layout as a target to write to.
+ *
+ * @tparam Lyt The layout type to be used as input. Must be a cell-level SiDB layout.
+ * @param lyt The layout to write to.
+ * @param is The input stream to read from.
+ */
+template <typename Lyt>
+void read_sqd_layout(Lyt& lyt, std::istream& is)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(std::is_same_v<technology<Lyt>, sidb_technology>, "Lyt must be an SiDB layout");
+
+    detail::read_sqd_layout_impl<Lyt> p{lyt, is};
+
+    lyt = p.run();
+}
+/**
  * Reads a cell-level SiDB layout from an sqd file provided as a file name. The format is used by SiQAD
  * (https://github.com/siqad/siqad).
  *
@@ -320,6 +346,29 @@ Lyt read_sqd_layout(const std::string& filename, const std::string& name = "")
     is.close();
 
     return lyt;
+}
+/**
+ * Reads a cell-level SiDB layout from an sqd file provided as a file name. The format is used by SiQAD
+ * (https://github.com/siqad/siqad).
+ *
+ * May throw an sqd_parsing_exception if the sqd file is malformed.
+ *
+ * This is an in-place version of read_sqd_layout that utilizes the given layout as a target to write to.
+ *
+ * @tparam Lyt The layout type to be used as input. Must be a cell-level SiDB layout.
+ * @param lyt The layout to write to.
+ * @param filename The file name to open and read from.
+ */
+template <typename Lyt>
+void read_sqd_layout(Lyt& lyt, const std::string& filename)
+{
+    std::ifstream is{filename.c_str(), std::ifstream::in};
+
+    if (!is.is_open())
+        throw std::ifstream::failure("could not open file");
+
+    read_sqd_layout<Lyt>(lyt, is);
+    is.close();
 }
 
 }  // namespace fiction

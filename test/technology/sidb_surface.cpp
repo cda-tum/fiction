@@ -12,6 +12,7 @@
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/traits.hpp>
 
+#include <set>
 #include <type_traits>
 
 using namespace fiction;
@@ -61,6 +62,8 @@ TEMPLATE_TEST_CASE(
 
     defect_layout.foreach_coordinate([&defect_layout](const auto& c)
                                      { CHECK(defect_layout.get_sidb_defect(c).type == sidb_defect_type::NONE); });
+
+    CHECK(defect_layout.num_defects() == 0);
 }
 
 TEMPLATE_TEST_CASE(
@@ -71,22 +74,25 @@ TEMPLATE_TEST_CASE(
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
 {
-    TestType lyt{aspect_ratio<TestType>{0, 11}};
+    static const std::map<cell<TestType>, sidb_defect> defect_map{
+        {{{0, 0}, sidb_defect{sidb_defect_type::NONE}},
+         {{0, 1}, sidb_defect{sidb_defect_type::DB}},
+         {{0, 2}, sidb_defect{sidb_defect_type::SI_VACANCY}},
+         {{0, 3}, sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE}},
+         {{0, 4}, sidb_defect{sidb_defect_type::DIHYDRIDE_PAIR}},
+         {{0, 5}, sidb_defect{sidb_defect_type::ONE_BY_ONE}},
+         {{0, 6}, sidb_defect{sidb_defect_type::THREE_BY_ONE}},
+         {{0, 7}, sidb_defect{sidb_defect_type::SILOXANE}},
+         {{0, 8}, sidb_defect{sidb_defect_type::RAISED_SI}},
+         {{0, 9}, sidb_defect{sidb_defect_type::MISSING_DIMER}},
+         {{0, 10}, sidb_defect{sidb_defect_type::ETCH_PIT}},
+         {{0, 11}, sidb_defect{sidb_defect_type::STEP_EDGE}},
+         {{0, 12}, sidb_defect{sidb_defect_type::GUNK}},
+         {{0, 13}, sidb_defect{sidb_defect_type::UNKNOWN}}}};
+
+    TestType lyt{aspect_ratio<TestType>{0, defect_map.size() - 1}};
 
     sidb_surface<TestType> defect_layout{lyt};
-
-    const std::map<cell<TestType>, sidb_defect> defect_map{{{{0, 0}, sidb_defect{sidb_defect_type::NONE}},
-                                                            {{0, 1}, sidb_defect{sidb_defect_type::DB}},
-                                                            {{0, 2}, sidb_defect{sidb_defect_type::SI_VACANCY}},
-                                                            {{0, 3}, sidb_defect{sidb_defect_type::DIHYDRIDE_PAIR}},
-                                                            {{0, 4}, sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE}},
-                                                            {{0, 5}, sidb_defect{sidb_defect_type::ONE_BY_ONE}},
-                                                            {{0, 6}, sidb_defect{sidb_defect_type::THREE_BY_ONE}},
-                                                            {{0, 7}, sidb_defect{sidb_defect_type::SILOXANE}},
-                                                            {{0, 8}, sidb_defect{sidb_defect_type::RAISED_SI}},
-                                                            {{0, 9}, sidb_defect{sidb_defect_type::ETCH_PIT}},
-                                                            {{0, 10}, sidb_defect{sidb_defect_type::MISSING_DIMER}},
-                                                            {{0, 11}, sidb_defect{sidb_defect_type::UNKNOWN}}}};
 
     // assign defects
     for (const auto& [c, d] : defect_map)
@@ -100,6 +106,8 @@ TEMPLATE_TEST_CASE(
         CHECK(defect_layout.get_sidb_defect(c).type == d.type);
     }
 
+    CHECK(defect_layout.num_defects() == defect_map.size() - 1);  // NONE is not a defect
+
     // erase defects
     defect_layout.foreach_sidb_defect(
         [&defect_layout](const auto& cd)
@@ -109,6 +117,8 @@ TEMPLATE_TEST_CASE(
     defect_layout.foreach_sidb_defect([](const auto&) { CHECK(false); });
     defect_layout.foreach_coordinate([&defect_layout](const auto& c)
                                      { CHECK(defect_layout.get_sidb_defect(c).type == sidb_defect_type::NONE); });
+
+    CHECK(defect_layout.num_defects() == 0);
 }
 
 TEMPLATE_TEST_CASE(
@@ -128,6 +138,8 @@ TEMPLATE_TEST_CASE(
         // assign defects
         defect_layout.assign_sidb_defect({5, 4}, sidb_defect{sidb_defect_type::SI_VACANCY});
         defect_layout.assign_sidb_defect({5, 5}, sidb_defect{sidb_defect_type::SI_VACANCY});
+
+        CHECK(defect_layout.num_defects() == 2);
 
         CHECK(defect_layout.affected_sidbs({5, 4}) ==
               decltype(defect_layout.affected_sidbs({5, 4})){
@@ -153,6 +165,8 @@ TEMPLATE_TEST_CASE(
         // assign defects
         defect_layout.assign_sidb_defect({5, 4}, sidb_defect{sidb_defect_type::SILOXANE});
         defect_layout.assign_sidb_defect({5, 5}, sidb_defect{sidb_defect_type::SILOXANE});
+
+        CHECK(defect_layout.num_defects() == 2);
 
         CHECK(defect_layout.affected_sidbs({5, 4}) ==
               decltype(defect_layout.affected_sidbs({5, 4})){{4, 4}, {5, 4}, {6, 4}});
@@ -183,6 +197,8 @@ TEMPLATE_TEST_CASE(
         defect_layout.assign_sidb_defect({5, 0}, sidb_defect{sidb_defect_type::SI_VACANCY});
         defect_layout.assign_sidb_defect({0, 5}, sidb_defect{sidb_defect_type::SI_VACANCY});
 
+        CHECK(defect_layout.num_defects() == 2);
+
         CHECK(defect_layout.affected_sidbs({5, 0}) ==
               decltype(defect_layout.affected_sidbs({5, 0})){{2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0},
                                                              {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1},
@@ -206,6 +222,8 @@ TEMPLATE_TEST_CASE(
         defect_layout.assign_sidb_defect({5, 0}, sidb_defect{sidb_defect_type::SILOXANE});
         defect_layout.assign_sidb_defect({0, 5}, sidb_defect{sidb_defect_type::SILOXANE});
 
+        CHECK(defect_layout.num_defects() == 2);
+
         CHECK(defect_layout.affected_sidbs({5, 0}) ==
               decltype(defect_layout.affected_sidbs({5, 0})){{4, 0}, {5, 0}, {6, 0}});
 
@@ -213,5 +231,39 @@ TEMPLATE_TEST_CASE(
 
         CHECK(defect_layout.all_affected_sidbs() ==
               decltype(defect_layout.all_affected_sidbs()){{4, 0}, {5, 0}, {6, 0}, {0, 5}, {1, 5}});
+    }
+}
+
+TEMPLATE_TEST_CASE(
+    "Ignore defect types", "[sidb-surface]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+{
+    TestType lyt{aspect_ratio<TestType>{4, 4}};
+
+    SECTION("DB")
+    {
+        sidb_surface_params    params{std::set<sidb_defect_type>{sidb_defect_type::DB}};
+        sidb_surface<TestType> defect_layout{lyt, params};
+
+        defect_layout.assign_sidb_defect({2, 2}, sidb_defect{sidb_defect_type::DB});
+
+        // number of defects should not count the ignored defect
+        CHECK(defect_layout.num_defects() == 0);
+    }
+    SECTION("Siloxane + Silicon Vacancy")
+    {
+        sidb_surface_params params{
+            std::set<sidb_defect_type>{{sidb_defect_type::SILOXANE, sidb_defect_type::SI_VACANCY}}};
+        sidb_surface<TestType> defect_layout{lyt, params};
+
+        defect_layout.assign_sidb_defect({2, 2}, sidb_defect{sidb_defect_type::SILOXANE});
+        defect_layout.assign_sidb_defect({2, 3}, sidb_defect{sidb_defect_type::SI_VACANCY});
+
+        // number of defects should not count the ignored defect
+        CHECK(defect_layout.num_defects() == 0);
     }
 }

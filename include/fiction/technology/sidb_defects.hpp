@@ -17,18 +17,20 @@ namespace fiction
  */
 enum class sidb_defect_type
 {
-    NONE,        // HSi
-    DB,          // an extra dangling bond
-    SI_VACANCY,  // missing silicon
-    DIHYDRIDE_PAIR,
-    SINGLE_DIHYDRIDE,
-    ONE_BY_ONE,  // collection of dihydride pairs
-    THREE_BY_ONE,
-    SILOXANE,       // oxidized silicon
-    RAISED_SI,      // raised silicon
-    ETCH_PIT,       // collection of missing dimers
-    MISSING_DIMER,  // dimer missing altogether
-    UNKNOWN         // unknown defect
+    NONE,              // H-Si
+    DB,                // an extra dangling bond
+    SI_VACANCY,        // missing silicon
+    SINGLE_DIHYDRIDE,  // double hydrogen passivation
+    DIHYDRIDE_PAIR,    // missing bond between dimers leading to two double hydrogen passivations
+    ONE_BY_ONE,        // collection of dihydride pairs
+    THREE_BY_ONE,      // collection of 1 by 1's
+    SILOXANE,          // oxidized dimer
+    RAISED_SI,         // raised silicon dimer
+    MISSING_DIMER,     // dimer missing altogether
+    ETCH_PIT,          // collection of missing dimers
+    STEP_EDGE,         // break in the surface
+    GUNK,              // residual material
+    UNKNOWN            // unknown defect
 };
 /**
  * In accordance with the paper mentioned above, the sidb_defect struct is used to represent a specific defect on the
@@ -90,8 +92,7 @@ struct sidb_defect
  */
 [[nodiscard]] static constexpr bool is_neutral_defect(const sidb_defect& defect) noexcept
 {
-    return !is_charged_defect(defect) && defect.type != sidb_defect_type::NONE &&
-           defect.type != sidb_defect_type::UNKNOWN;
+    return defect.type != sidb_defect_type::NONE && !is_charged_defect(defect);
 }
 /**
  * Horizontal distance to keep from charged SiDB defects. The value is to be understood as the number of DB positions
