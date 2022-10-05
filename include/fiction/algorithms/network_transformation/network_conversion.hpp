@@ -81,7 +81,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
         ntk.foreach_gate(
             [&, this](const auto& g, [[maybe_unused]] auto i)
             {
-                auto children = gather_fanin_signals(g);
+                const auto children = gather_fanin_signals(g);
 
 #if (PROGRESS_BARS)
                 // update progress

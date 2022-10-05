@@ -16,8 +16,9 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/networks/buffered.hpp>
+#include <mockturtle/networks/crossed.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/traits.hpp>
@@ -27,7 +28,7 @@
 using namespace fiction;
 
 template <typename Ntk>
-void to_x(Ntk ntk)
+void to_x(const Ntk& ntk)
 {
     SECTION("MIG")
     {
@@ -55,6 +56,54 @@ void to_x(Ntk ntk)
         const auto converted_tec = convert_network<technology_network>(ntk);
 
         check_eq(ntk, converted_tec);
+    }
+}
+
+template <typename Ntk>
+uint32_t get_num_buffers(const Ntk& ntk)
+{
+    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
+    static_assert(mockturtle::has_is_pi_v<Ntk>, "Ntk does not implement the is_pi function");
+    static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant function");
+    static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node function");
+    static_assert(mockturtle::has_is_buf_v<Ntk>, "Ntk does not implement the is_buf function");
+
+    uint32_t num_buffers = 0u;
+
+    ntk.foreach_node(
+        [&ntk, &num_buffers](const auto& n)
+        {
+            if (ntk.is_constant(n) || ntk.is_pi(n))
+            {
+                return;
+            }
+
+            if (ntk.is_buf(n))
+            {
+                ++num_buffers;
+            }
+        });
+
+    return num_buffers;
+}
+
+template <typename Ntk>
+void to_buf_x(const Ntk& ntk)
+{
+    SECTION("BUF MIG")
+    {
+        const auto converted_mig = convert_network<mockturtle::buffered_mig_network>(ntk);
+
+        CHECK(get_num_buffers(ntk) == get_num_buffers(converted_mig));
+        check_eq(ntk, converted_mig);
+    }
+
+    SECTION("BUF AIG")
+    {
+        const auto converted_aig = convert_network<mockturtle::buffered_aig_network>(ntk);
+
+        CHECK(get_num_buffers(ntk) == get_num_buffers(converted_aig));
+        check_eq(ntk, converted_aig);
     }
 }
 
@@ -148,15 +197,21 @@ TEST_CASE("Constant inverted signal recovery conversion", "[network-conversion]"
 
 TEST_CASE("Layout conversion", "[network-conversion]")
 {
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
     SECTION("Gate layout to X")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-
-        REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
-
-        const auto layout = blueprints::xor_maj_gate_layout<gate_layout>();
-
-        to_x(layout);
+        to_x(blueprints::and_or_gate_layout<gate_layout>());
+        to_x(blueprints::xor_maj_gate_layout<gate_layout>());
+    }
+    SECTION("Gate layout to buffered Ntk")
+    {
+        to_buf_x(blueprints::unbalanced_and_layout<gate_layout>());
+        to_buf_x(blueprints::crossing_layout<gate_layout>());
+    }
+    SECTION("Gate layout to crossed Ntk")
+    {
+        // TODO: implement
     }
 }
 
