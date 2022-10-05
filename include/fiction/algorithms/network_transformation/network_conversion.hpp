@@ -144,6 +144,22 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                         return true;
                     }
                 }
+                if constexpr (mockturtle::has_is_not_v<TopoNtkSrc> && mockturtle::has_create_not_v<NtkDest>)
+                {
+                    if (ntk.is_not(g))
+                    {
+                        old2new[g] = ntk_dest.create_not(children[0]);
+                        return true;
+                    }
+                }
+                if constexpr (mockturtle::has_is_crossing_v<TopoNtkSrc> && mockturtle::has_create_crossing_v<NtkDest>)
+                {
+                    if (ntk.is_crossing(g))
+                    {
+                        old2new[g] = ntk_dest.create_crossing(children[0], children[1]);
+                        return true;
+                    }
+                }
                 if constexpr (fiction::has_is_buf_v<TopoNtkSrc> && mockturtle::has_create_buf_v<NtkDest>)
                 {
                     if (ntk.is_buf(g))
@@ -151,6 +167,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                         old2new[g] = ntk_dest.create_buf(children[0]);
                         return true;
                     }
+                    // TODO if TopoNtkSrc is a gate-level layout, we can do a crossing check here
                 }
                 if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<NtkDest>)
                 {
