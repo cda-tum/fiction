@@ -25,6 +25,7 @@
 #include <memory>
 #include <set>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -96,6 +97,8 @@ class gate_level_layout : public ClockedLayout
             {{const0, static_cast<Node>(0ull)}, {const1, static_cast<Node>(1ull)}}};
         std::unordered_map<Node, Tile> node_tile_map{
             {{static_cast<Node>(0ull), const0}, {static_cast<Node>(1ull), const1}}};
+
+        std::unordered_set<Tile> crossing_tiles{};
 
         uint32_t num_gates = 0ull;
         uint32_t num_wires = 0ull;
@@ -524,6 +527,15 @@ class gate_level_layout : public ClockedLayout
         return strg->data.num_wires;
     }
     /**
+     * Returns the number of crossings in the layout, i.e., the number of wire segments placed in a crossing layer.
+     *
+     * @return Number of crossings in the layout.
+     */
+    [[nodiscard]] auto num_crossings() const noexcept
+    {
+        return strg->data.crossing_tiles.size();
+    }
+    /**
      * Checks whether there are no gates or wires assigned to the layout's coordinates.
      *
      * @return True iff the layout is empty.
@@ -604,7 +616,7 @@ class gate_level_layout : public ClockedLayout
      * if they are dangling (see the mockturtle API). In this layout type, nodes are also marked dead when they are not
      * assigned to a tile (which is considered equivalent to dangling).
      *
-     * @param n Node to check for lifeliness.
+     * @param n Node to check for liveliness.
      * @return True iff n is dead.
      */
     [[nodiscard]] bool is_dead(const node n) const noexcept
@@ -852,7 +864,7 @@ class gate_level_layout : public ClockedLayout
     {
         using IteratorType = decltype(strg->outputs.cbegin());
         mockturtle::detail::foreach_element_transform<IteratorType, signal>(
-            strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return o.index; }, fn);
+            strg->outputs.cbegin(), strg->outputs.cend(), [](const auto& o) { return o.index; }, fn);
     }
     /**
      * Applies a function to all nodes (excluding dead ones) in the layout.
@@ -897,6 +909,17 @@ class gate_level_layout : public ClockedLayout
         auto r = mockturtle::range<node>(2u, static_cast<node>(strg->nodes.size()));  // start from 2 to avoid constants
         mockturtle::detail::foreach_element_if(
             r.begin(), r.end(), [this](const auto n) { return is_wire(n) && !is_dead(n); }, fn);
+    }
+    /**
+     * Applies a function to all crossing wires in the layout.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * @param fn Functor to apply to each crossing wire.
+     */
+    template <typename Fn>
+    void foreach_crossing(Fn&& fn) const
+    {
+        mockturtle::detail::foreach_element(strg->data.crossing_tiles.cbegin(), strg->data.crossing_tiles.cend(), fn);
     }
     /**
      * Returns a container of a given type that contains all tiles that feed information to the given one. Thereby, only
@@ -1423,6 +1446,12 @@ class gate_level_layout : public ClockedLayout
             if (is_wire(n))
             {
                 strg->data.num_wires++;
+
+                // keep track of the crossing tiles
+                if (ClockedLayout::is_crossing_layer(t))
+                {
+                    strg->data.crossing_tiles.insert(static_cast<signal>(t));
+                }
             }
             else  // is gate
             {
