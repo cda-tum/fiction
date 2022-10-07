@@ -317,6 +317,16 @@ class cartesian_layout
         return bc;
     }
     /**
+     * Returns the coordinate that is all the way below a given coordinate c, i.e., the face whose z-dimension is 0.
+     *
+     * @param c Coordinate whose ground counterpart is desired.
+     * @return Coordinate all the way below c.
+     */
+    [[nodiscard]] constexpr OffsetCoordinateType ground(const OffsetCoordinateType& c) const noexcept
+    {
+        return OffsetCoordinateType{c.x, c.y, 0ull};
+    }
+    /**
      * Returns true iff coordinate c2 is directly north of coordinate c1.
      *
      * @param c1 Base coordinate.

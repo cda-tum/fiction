@@ -184,7 +184,11 @@ void check_visited_coordinates()
         visited.insert(c);
     };
 
-    for (auto&& t : layout.coordinates()) { check1(t); }
+    for (auto&& t : layout.coordinates())
+    {
+        check1(t);
+    }
+
     CHECK(visited.size() == 200);
 
     visited.clear();
@@ -211,7 +215,11 @@ void check_visited_coordinates()
         visited.insert(c);
     };
 
-    for (auto&& t : layout.ground_coordinates()) { check2(t); }
+    for (auto&& t : layout.ground_coordinates())
+    {
+        check2(t);
+    }
+
     CHECK(visited.size() == 100);
 
     visited.clear();
@@ -238,7 +246,11 @@ void check_visited_coordinates()
         visited.insert(c);
     };
 
-    for (auto&& t : layout.coordinates(start, stop)) { check3(t); }
+    for (auto&& t : layout.coordinates(start, stop))
+    {
+        check3(t);
+    }
+
     CHECK(visited.size() == 23);
 
     visited.clear();
@@ -291,6 +303,7 @@ TEST_CASE("Cardinal and ordinal operations", "[hexagonal-layout]")
 
         CHECK(lyt.is_above(c, ac));
         CHECK(lyt.is_below(ac, c));
+        CHECK(lyt.ground(ac) == c);
 
         CHECK(lyt.north(c) == nc);
         CHECK(lyt.is_north_of(c, nc));
@@ -361,6 +374,7 @@ TEST_CASE("Cardinal and ordinal operations", "[hexagonal-layout]")
 
         CHECK(lyt.is_above(c, ac));
         CHECK(lyt.is_below(ac, c));
+        CHECK(lyt.ground(ac) == c);
 
         CHECK(lyt.north(c) == nc);
         CHECK(lyt.is_north_of(c, nc));
@@ -431,6 +445,7 @@ TEST_CASE("Cardinal and ordinal operations", "[hexagonal-layout]")
 
         CHECK(lyt.is_above(c, ac));
         CHECK(lyt.is_below(ac, c));
+        CHECK(lyt.ground(ac) == c);
 
         CHECK(lyt.north(c) == nc);
         CHECK(lyt.is_north_of(c, nc));
@@ -501,6 +516,7 @@ TEST_CASE("Cardinal and ordinal operations", "[hexagonal-layout]")
 
         CHECK(lyt.is_above(c, ac));
         CHECK(lyt.is_below(ac, c));
+        CHECK(lyt.ground(ac) == c);
 
         CHECK(lyt.north(c) == nc);
         CHECK(lyt.is_north_of(c, nc));

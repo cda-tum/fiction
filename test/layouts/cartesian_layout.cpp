@@ -58,7 +58,11 @@ TEST_CASE("Coordinate iteration", "[cartesian-layout]")
         visited.insert(t);
     };
 
-    for (auto&& t : layout.coordinates()) { check1(t); }
+    for (auto&& t : layout.coordinates())
+    {
+        check1(t);
+    }
+
     CHECK(visited.size() == 200);
 
     visited.clear();
@@ -84,7 +88,11 @@ TEST_CASE("Coordinate iteration", "[cartesian-layout]")
         visited.insert(t);
     };
 
-    for (auto&& t : layout.ground_coordinates()) { check2(t); }
+    for (auto&& t : layout.ground_coordinates())
+    {
+        check2(t);
+    }
+
     CHECK(visited.size() == 100);
 
     visited.clear();
@@ -111,7 +119,11 @@ TEST_CASE("Coordinate iteration", "[cartesian-layout]")
         visited.insert(t);
     };
 
-    for (auto&& t : layout.coordinates(start, stop)) { check3(t); }
+    for (auto&& t : layout.coordinates(start, stop))
+    {
+        check3(t);
+    }
+
     CHECK(visited.size() == 23);
 
     visited.clear();
@@ -217,6 +229,9 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
 
     auto bt  = layout.below(at);
     auto bbt = layout.below(bt);
+    auto gt  = layout.ground(t);
+    auto gat = layout.ground(at);
+    auto gbt = layout.ground(bt);
 
     CHECK(!bt.is_dead());
     CHECK(bt == t);
@@ -224,6 +239,9 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(!bbt.is_dead());
     CHECK(bt == bbt);
     CHECK(layout.is_ground_layer(bbt));
+    CHECK(layout.is_ground_layer(gt));
+    CHECK(layout.is_ground_layer(gat));
+    CHECK(layout.is_ground_layer(gbt));
 
     auto s1 = layout.adjacent_coordinates<std::set<cartesian_layout<offset::ucoord_t>::coordinate>>({5, 5});
     auto s2 = std::set<cartesian_layout<offset::ucoord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
