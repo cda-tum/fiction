@@ -8,12 +8,16 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
+#include "fiction/utils/network_utils.hpp"
 
+#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
+#include <cassert>
 #include <type_traits>
+#include <vector>
 
 #if (PROGRESS_BARS)
 #include <mockturtle/utils/progress_bar.hpp>
@@ -58,7 +62,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
 
         const auto gather_fanin_signals = [this, &ntk_dest, &old2new](const auto& n)
         {
-            std::vector<typename NtkDest::signal> children{};
+            std::vector<mockturtle::signal<NtkDest>> children{};
 
             ntk.foreach_fanin(n,
                               [this, &ntk_dest, &old2new, &children](const auto& f)
@@ -152,14 +156,6 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                         return true;
                     }
                 }
-                if constexpr (mockturtle::has_is_crossing_v<TopoNtkSrc> && mockturtle::has_create_crossing_v<NtkDest>)
-                {
-                    if (ntk.is_crossing(g))
-                    {
-                        old2new[g] = ntk_dest.create_crossing(children[0], children[1]);
-                        return true;
-                    }
-                }
                 if constexpr (fiction::has_is_buf_v<TopoNtkSrc> && mockturtle::has_create_buf_v<NtkDest>)
                 {
                     if (ntk.is_buf(g))
@@ -167,7 +163,6 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                         old2new[g] = ntk_dest.create_buf(children[0]);
                         return true;
                     }
-                    // TODO if TopoNtkSrc is a gate-level layout, we can do a crossing check here
                 }
                 if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<NtkDest>)
                 {
@@ -189,6 +184,26 @@ class convert_network_impl<NtkDest, NtkSrc, false>
 
         // restore signal names if applicable
         fiction::restore_names(ntk, ntk_dest, old2new);
+
+        // if TopoNtkSrc is a gate-level layout and NtkDest supports crossings, we can merge them here
+        if constexpr (is_gate_level_layout_v<TopoNtkSrc> && mockturtle::has_merge_into_crossing_v<NtkDest>)
+        {
+            ntk.foreach_crossing(
+                [this, &ntk_dest, &old2new](const auto& cx)
+                {
+                    const auto cxn = ntk.get_node(cx);
+                    const auto gn  = ntk.get_node(ntk.below(ntk.get_tile(cxn)));
+                    assert(cxn != gn);
+
+                    const auto buf1 = ntk_dest.get_node(old2new[cxn]);
+                    const auto buf2 = ntk_dest.get_node(old2new[gn]);
+                    assert(buf1 != buf2);
+
+                    ntk_dest.merge_into_crossing(buf1, buf2);
+                });
+
+            ntk_dest = mockturtle::cleanup_dangling(ntk_dest);
+        }
 
         return ntk_dest;
     }
