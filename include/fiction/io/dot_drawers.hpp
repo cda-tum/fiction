@@ -38,8 +38,10 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
     {
         if constexpr (DrawIndexes)
         {
-            if (!ntk.is_constant(n) && !ntk.is_pi(n))
+            if (!ntk.is_constant(n) && !ntk.is_ci(n))
+            {
                 return fmt::format("{}: {}", ntk.node_to_index(n), node_label_callback(ntk, n));
+            }
         }
 
         return node_label_callback(ntk, n);
@@ -60,7 +62,7 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
         }
         if constexpr (has_is_buf_v<Ntk>)
         {
-            if (ntk.is_buf(n))
+            if (ntk.is_buf(n) && !ntk.is_ci(n))
             {
                 return "palegoldenrod";
             }
@@ -109,7 +111,7 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
         }
         if constexpr (has_is_buf_v<Ntk>)
         {
-            if (ntk.is_buf(n))
+            if (ntk.is_buf(n) && !ntk.is_ci(n))
             {
                 return "BUF";
             }
@@ -353,10 +355,14 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
         else
         {
             if (lyt.is_empty_tile(t))
+            {
                 return "white";
+            }
 
             if (lyt.is_pi_tile(t) || lyt.is_po_tile(t))
+            {
                 return "snow2";
+            }
 
             return technology_dot_drawer<Lyt, DrawIndexes>::node_fillcolor(lyt, lyt.get_node(t));
         }
@@ -370,7 +376,10 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
         for (auto y = 0ul; y <= lyt.y(); ++y)
         {
             std::vector<std::string> row{};
-            for (auto x = 0ul; x <= lyt.x(); ++x) { row.emplace_back(tile_id({x, y})); }
+            for (auto x = 0ul; x <= lyt.x(); ++x)
+            {
+                row.emplace_back(tile_id({x, y}));
+            }
             rows.push_back(row);
         }
 
@@ -384,7 +393,10 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
         for (auto x = 0ul; x <= lyt.x(); ++x)
         {
             std::vector<std::string> col{};
-            for (auto y = 0ul; y <= lyt.y(); ++y) { col.emplace_back(tile_id({x, y})); }
+            for (auto y = 0ul; y <= lyt.y(); ++y)
+            {
+                col.emplace_back(tile_id({x, y}));
+            }
             columns.push_back(col);
         }
 
@@ -455,7 +467,10 @@ class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, 
 
         const auto enforce_same_cardinal_row = [this, &lyt, &topology]()
         {
-            for (const auto& row : base_drawer::rows(lyt)) { topology << base_drawer::same_rank(row); }
+            for (const auto& row : base_drawer::rows(lyt))
+            {
+                topology << base_drawer::same_rank(row);
+            }
         };
 
         enforce_same_cardinal_column();
@@ -535,28 +550,40 @@ class gate_layout_shifted_cartesian_drawer : public simple_gate_layout_tile_draw
             enforce_same_shifted_row(lyt, topology);
 
             // shift odd rows
-            for (auto i = 1ul; i <= lyt.y(); i += 2) { shift_row(lyt, i, topology); }
+            for (auto i = 1ul; i <= lyt.y(); i += 2)
+            {
+                shift_row(lyt, i, topology);
+            }
         }
         else if constexpr (has_even_row_cartesian_arrangement_v<Lyt>)
         {
             enforce_same_shifted_row(lyt, topology);
 
             // shift even rows
-            for (auto i = 0ul; i <= lyt.y(); i += 2) { shift_row(lyt, i, topology); }
+            for (auto i = 0ul; i <= lyt.y(); i += 2)
+            {
+                shift_row(lyt, i, topology);
+            }
         }
         else if constexpr (has_odd_column_cartesian_arrangement_v<Lyt>)
         {
             enforce_same_shifted_column(lyt, topology);
 
             // shift odd columns
-            for (auto i = 1ul; i <= lyt.x(); i += 2) { shift_column(lyt, i, topology); }
+            for (auto i = 1ul; i <= lyt.x(); i += 2)
+            {
+                shift_column(lyt, i, topology);
+            }
         }
         else if constexpr (has_even_column_cartesian_arrangement_v<Lyt>)
         {
             enforce_same_shifted_column(lyt, topology);
 
             // shift even columns
-            for (auto i = 0ul; i <= lyt.x(); i += 2) { shift_column(lyt, i, topology); }
+            for (auto i = 0ul; i <= lyt.x(); i += 2)
+            {
+                shift_column(lyt, i, topology);
+            }
         }
 
         // enforce connections other than those in direct row/column via edges
@@ -609,12 +636,18 @@ class gate_layout_shifted_cartesian_drawer : public simple_gate_layout_tile_draw
 
     void enforce_same_shifted_column(const Lyt& lyt, std::stringstream& stream) const noexcept
     {
-        for (const auto& col : base_drawer::columns(lyt)) { stream << base_drawer::same_rank(col); }
+        for (const auto& col : base_drawer::columns(lyt))
+        {
+            stream << base_drawer::same_rank(col);
+        }
     }
 
     void enforce_same_shifted_row(const Lyt& lyt, std::stringstream& stream) const noexcept
     {
-        for (const auto& row : base_drawer::rows(lyt)) { stream << base_drawer::same_rank(row); }
+        for (const auto& row : base_drawer::rows(lyt))
+        {
+            stream << base_drawer::same_rank(row);
+        }
     }
 
     void shift_column(const Lyt& lyt, const uint64_t col, std::stringstream& stream) const noexcept
@@ -730,28 +763,40 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
             enforce_same_hexagonal_row(lyt, topology);
 
             // shift odd rows
-            for (auto i = 1ul; i <= lyt.y(); i += 2) { shift_row(lyt, i, topology); }
+            for (auto i = 1ul; i <= lyt.y(); i += 2)
+            {
+                shift_row(lyt, i, topology);
+            }
         }
         else if constexpr (has_even_row_hex_arrangement_v<Lyt>)
         {
             enforce_same_hexagonal_row(lyt, topology);
 
             // shift even rows
-            for (auto i = 0ul; i <= lyt.y(); i += 2) { shift_row(lyt, i, topology); }
+            for (auto i = 0ul; i <= lyt.y(); i += 2)
+            {
+                shift_row(lyt, i, topology);
+            }
         }
         else if constexpr (has_odd_column_hex_arrangement_v<Lyt>)
         {
             enforce_same_hexagonal_column(lyt, topology);
 
             // shift odd columns
-            for (auto i = 1ul; i <= lyt.x(); i += 2) { shift_column(lyt, i, topology); }
+            for (auto i = 1ul; i <= lyt.x(); i += 2)
+            {
+                shift_column(lyt, i, topology);
+            }
         }
         else if constexpr (has_even_column_hex_arrangement_v<Lyt>)
         {
             enforce_same_hexagonal_column(lyt, topology);
 
             // shift even columns
-            for (auto i = 0ul; i <= lyt.x(); i += 2) { shift_column(lyt, i, topology); }
+            for (auto i = 0ul; i <= lyt.x(); i += 2)
+            {
+                shift_column(lyt, i, topology);
+            }
         }
 
         // enforce connections other than those in direct row/column via edges
@@ -804,12 +849,18 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
 
     void enforce_same_hexagonal_column(const Lyt& lyt, std::stringstream& stream) const noexcept
     {
-        for (const auto& col : base_drawer::columns(lyt)) { stream << base_drawer::same_rank(col); }
+        for (const auto& col : base_drawer::columns(lyt))
+        {
+            stream << base_drawer::same_rank(col);
+        }
     }
 
     void enforce_same_hexagonal_row(const Lyt& lyt, std::stringstream& stream) const noexcept
     {
-        for (const auto& row : base_drawer::rows(lyt)) { stream << base_drawer::same_rank(row); }
+        for (const auto& row : base_drawer::rows(lyt))
+        {
+            stream << base_drawer::same_rank(row);
+        }
     }
 
     void shift_column(const Lyt& lyt, const uint64_t col, std::stringstream& stream) const noexcept
