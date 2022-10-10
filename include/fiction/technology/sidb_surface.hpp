@@ -188,7 +188,7 @@ class sidb_surface<Lyt, false> : public Lyt
         foreach_sidb_defect(
             [&influenced_sidbs, this](const auto& it)
             {
-                const auto [c, d] = it;
+                const auto c = it.first;
                 influenced_sidbs.merge(affected_sidbs(c));
             });
 

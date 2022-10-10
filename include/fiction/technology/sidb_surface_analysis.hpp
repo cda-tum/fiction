@@ -83,10 +83,11 @@ sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surf
                 gate_implementations.cbegin(), gate_implementations.cend(),
                 [&gate_ports, &gate_lyt, &t, &black_list, &sidbs_affected_by_defects](const auto& it)
                 {
-                    const auto [fun, implementations] = it;
+                    const auto fun   = it.first;
+                    const auto impls = it.second;
 
                     // for each gate in the list of possible implementations
-                    for (const auto& gate : implementations)
+                    for (const auto& gate : impls)
                     {
                         // for each cell position in the gate
                         for (auto y = 0u; y < GateLibrary::gate_y_size(); ++y)
