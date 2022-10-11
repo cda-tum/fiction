@@ -185,12 +185,8 @@ class sidb_surface<Lyt, false> : public Lyt
     {
         std::set<coordinate<Lyt>> influenced_sidbs{};
 
-        foreach_sidb_defect(
-            [&influenced_sidbs, this](const auto& it)
-            {
-                const auto& [c, d] = it;
-                influenced_sidbs.merge(affected_sidbs(c));
-            });
+        foreach_sidb_defect([&influenced_sidbs, this](const auto& it)
+                            { influenced_sidbs.merge(affected_sidbs(it.first)); });
 
         return influenced_sidbs;
     }
