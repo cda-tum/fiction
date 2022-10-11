@@ -77,6 +77,9 @@ sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surf
     const auto gate_ports                = GateLibrary::get_gate_ports();
 
     // a lambda that analyzes defect impact on a gate at a given layout tile
+    // it had to be extracted from the foreach_tile lambda because its nesting caused an C1001: internal compiler error
+    // on Visual Studio 17 (2022) as it could not access GateLibrary::gate_x_size() and GateLibrary::gate_y_size()
+    // even though that should be possible and is perfectly valid C++ code... either way, this workaround fixes it
     const auto analyze_gate = [&](const auto& it, const auto& t) noexcept
     {
         const auto& [fun, impls] = it;
