@@ -65,8 +65,8 @@ struct exact_physical_design_params
     /**
      * Clocking scheme to be used.
      */
-    std::shared_ptr<clocking_scheme<tile<Lyt>>> scheme =
-        std::make_shared<clocking_scheme<tile<Lyt>>>(twoddwave_clocking<Lyt>());
+    std::shared_ptr<clocking_scheme<typename Lyt::tile>> scheme =
+        std::make_shared<clocking_scheme<typename Lyt::tile>>(twoddwave_clocking<Lyt>());
     /**
      * Number of tiles to use as an upper bound.
      */
@@ -163,7 +163,7 @@ class exact_impl
 
         lower_bound = static_cast<decltype(lower_bound)>(ntk->num_gates() + ntk->num_pis());
 
-        ari = aspect_ratio_iterator<aspect_ratio<Lyt>>{ps.fixed_size ? ps.fixed_size : lower_bound};
+        ari = aspect_ratio_iterator<typename Lyt::aspect_ratio>{ps.fixed_size ? ps.fixed_size : lower_bound};
     }
 
     std::optional<Lyt> run()
@@ -203,11 +203,11 @@ class exact_impl
     /**
      * Iterator for the factorization of possible aspect ratios.
      */
-    aspect_ratio_iterator<aspect_ratio<Lyt>> ari{0};
+    aspect_ratio_iterator<typename Lyt::aspect_ratio> ari{0};
     /**
      * Aspect ratio of found result. Only needed for the asynchronous case.
      */
-    std::optional<aspect_ratio<Lyt>> result_aspect_ratio;
+    std::optional<typename Lyt::aspect_ratio> result_aspect_ratio;
     /**
      * Restricts access to the aspect_ratio_iterator and the result_aspect_ratio.
      */
@@ -251,7 +251,7 @@ class exact_impl
          * @param ar Aspect ratio to evaluate.
          * @return True if ar can safely be skipped because it is UNSAT anyway.
          */
-        [[nodiscard]] bool skippable(const aspect_ratio<Lyt>& ar) const noexcept
+        [[nodiscard]] bool skippable(const typename Lyt::aspect_ratio& ar) const noexcept
         {
             // OPEN clocking optimization
             if (!layout.is_regularly_clocked())
@@ -299,7 +299,7 @@ class exact_impl
          *
          * @param ar Current aspect ratio to work on.
          */
-        void update(const aspect_ratio<Lyt>& ar) noexcept
+        void update(const typename Lyt::aspect_ratio& ar) noexcept
         {
             layout.resize({ar.x, ar.y, params.crossings ? 1 : 0});
             check_point = std::make_shared<solver_check_point>(fetch_solver(ar));
@@ -359,7 +359,7 @@ class exact_impl
          *
          * @param ar Key to storing the current solver state.
          */
-        void store_solver_state(const aspect_ratio<Lyt>& ar) noexcept
+        void store_solver_state(const typename Lyt::aspect_ratio& ar) noexcept
         {
             solver_tree[ar] = check_point->state;
         }
@@ -426,7 +426,7 @@ class exact_impl
              * contains the column (eastern) or row (southern) of tiles that used to be at the border but is not anymore
              * now. In these tiles, certain assertions change so that their previous assertions need to be reformulated.
              */
-            std::set<tile<Lyt>> added_tiles, updated_tiles;
+            std::set<typename Lyt::tile> added_tiles, updated_tiles;
             /**
              * Assumptions that are true for only one solver run. Always includes the assumption literal that did not
              * change.
@@ -485,7 +485,7 @@ class exact_impl
          * strategy using factorizations is kept and several solvers are employed that can be reused at a later point.
          * In the example, the 4 x 4 solver would be stored and revisited when 4 x 5 is to be explored.
          */
-        std::map<aspect_ratio<Lyt>, state_ptr> solver_tree{};
+        std::map<typename Lyt::aspect_ratio, state_ptr> solver_tree{};
         /**
          * Current solver checkpoint extracted from the solver tree.
          */
@@ -523,7 +523,7 @@ class exact_impl
          * @return Solver state associated with an aspect ratio of size x - 1 * y or x * y - 1 and, additionally, the
          * tiles new to the solver. If no such solver is available, a new one is created.
          */
-        [[nodiscard]] solver_check_point fetch_solver(const aspect_ratio<Lyt>& ar) noexcept
+        [[nodiscard]] solver_check_point fetch_solver(const typename Lyt::aspect_ratio& ar) noexcept
         {
             const auto create_assumptions = [this](const solver_state& state) -> z3::expr_vector
             {
@@ -538,7 +538,7 @@ class exact_impl
             if (const auto it_x = solver_tree.find({ar.x - 1, ar.y}); it_x != solver_tree.end())
             {
                 // gather additional y-tiles and updated tiles
-                std::set<tile<Lyt>> added_tiles{}, updated_tiles{};
+                std::set<typename Lyt::tile> added_tiles{}, updated_tiles{};
                 for (decltype(ar.y) y = 0; y <= ar.y; ++y)
                 {
                     added_tiles.emplace(ar.x, y);
@@ -550,7 +550,7 @@ class exact_impl
                 solver_state new_state = {state->solver, {get_lit_e(), state->lit.s}};
 
                 // reset eastern constraints
-                new_state.solver->add(not state->lit.e);
+                new_state.solver->add(not (state->lit.e));
 
                 // remove solver
                 solver_tree.erase(it_x);
@@ -562,7 +562,7 @@ class exact_impl
             else if (const auto it_y = solver_tree.find({ar.x, ar.y - 1}); it_y != solver_tree.end())
             {
                 // gather additional x-tiles
-                std::set<tile<Lyt>> added_tiles{}, updated_tiles{};
+                std::set<typename Lyt::tile> added_tiles{}, updated_tiles{};
                 for (decltype(ar.x) x = 0; x <= ar.x; ++x)
                 {
                     added_tiles.emplace(x, ar.y);
@@ -574,7 +574,7 @@ class exact_impl
                 solver_state new_state = {state->solver, {state->lit.e, get_lit_s()}};
 
                 // reset southern constraints
-                new_state.solver->add(not state->lit.s);
+                new_state.solver->add(not (state->lit.s));
 
                 // remove solver
                 solver_tree.erase(it_y);
@@ -585,7 +585,7 @@ class exact_impl
             else  // no existing solver state; create a new one
             {
                 // all tiles are additional ones
-                std::set<tile<Lyt>> added_tiles{};
+                std::set<typename Lyt::tile> added_tiles{};
                 for (decltype(ar.y) y = 0; y <= ar.y; ++y)
                 {
                     for (decltype(ar.x) x = 0; x <= ar.x; ++x) { added_tiles.emplace(x, y); }
@@ -603,7 +603,7 @@ class exact_impl
          * @param t Tile to check.
          * @return True iff t is contained in check_point->added_tiles.
          */
-        [[nodiscard]] bool is_added_tile(const tile<Lyt>& t) const noexcept
+        [[nodiscard]] bool is_added_tile(const typename Lyt::tile& t) const noexcept
         {
             return check_point->added_tiles.count(t) != 0;
         }
@@ -613,7 +613,7 @@ class exact_impl
          * @param t Tile to check.
          * @return True iff t is contained in check_point->updated_tiles.
          */
-        [[nodiscard]] bool is_updated_tile(const tile<Lyt>& t) const noexcept
+        [[nodiscard]] bool is_updated_tile(const typename Lyt::tile& t) const noexcept
         {
             return check_point->updated_tiles.count(t) != 0;
         }
@@ -729,7 +729,7 @@ class exact_impl
          * @param n Node to be considered.
          * @return tn variable from ctx.
          */
-        [[nodiscard]] z3::expr get_tn(const tile<Lyt>& t, const mockturtle::node<topology_ntk_t>& n)
+        [[nodiscard]] z3::expr get_tn(const typename Lyt::tile& t, const mockturtle::node<topology_ntk_t>& n)
         {
             return ctx->bool_const(fmt::format("tn_({},{})_{}", t.x, t.y, n).c_str());
         }
@@ -740,7 +740,7 @@ class exact_impl
          * @param e Edge to be considered.
          * @return te variable from ctx.
          */
-        [[nodiscard]] z3::expr get_te(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e)
+        [[nodiscard]] z3::expr get_te(const typename Lyt::tile& t, const mockturtle::edge<topology_ntk_t>& e)
         {
             return ctx->bool_const(fmt::format("te_({},{})_({},{})", t.x, t.y, e.source, e.target).c_str());
         }
@@ -751,7 +751,7 @@ class exact_impl
          * @param t2 Tile 2 to be considered that is adjacent to t1.
          * @return tc variable from ctx.
          */
-        [[nodiscard]] z3::expr get_tc(const tile<Lyt>& t1, const tile<Lyt>& t2)
+        [[nodiscard]] z3::expr get_tc(const typename Lyt::tile& t1, const typename Lyt::tile& t2)
         {
             return ctx->bool_const(fmt::format("tc_({},{})_({},{})", t1.x, t1.y, t2.x, t2.y).c_str());
         }
@@ -762,7 +762,7 @@ class exact_impl
          * @param t2 Tile 2 to be considered.
          * @return tp variable from ctx.
          */
-        [[nodiscard]] z3::expr get_tp(const tile<Lyt>& t1, const tile<Lyt>& t2)
+        [[nodiscard]] z3::expr get_tp(const typename Lyt::tile& t1, const typename Lyt::tile& t2)
         {
             return ctx->bool_const(fmt::format("tp_({},{})_({},{})", t1.x, t1.y, t2.x, t2.y).c_str());
         }
@@ -782,7 +782,7 @@ class exact_impl
          * @param t Tile to be considered.
          * @return tcl variable from ctx.
          */
-        [[nodiscard]] z3::expr get_tcl(const tile<Lyt>& t, const unsigned clk)
+        [[nodiscard]] z3::expr get_tcl(const typename Lyt::tile& t, const unsigned clk)
         {
             return ctx->bool_const(fmt::format("tcl_({},{})_{}", t.x, t.y, clk).c_str());
         }
@@ -792,7 +792,7 @@ class exact_impl
          * @param t Tile to be considered.
          * @return tse variable from ctx.
          */
-        [[nodiscard]] z3::expr get_tse(const tile<Lyt>& t)
+        [[nodiscard]] z3::expr get_tse(const typename Lyt::tile& t)
         {
             return ctx->int_const(fmt::format("tse_({},{})", t.x, t.y).c_str());
         }
@@ -829,7 +829,7 @@ class exact_impl
          * @param t Tile to consider for literal picking.
          * @return lit -> constraint.
          */
-        [[nodiscard]] z3::expr mk_as_if_se(const z3::expr& constraint, const tile<Lyt>& t) const
+        [[nodiscard]] z3::expr mk_as_if_se(const z3::expr& constraint, const typename Lyt::tile& t) const
         {
             if (const auto east = layout.is_at_eastern_border(t), south = layout.is_at_southern_border(t);
                 east && south)
@@ -861,7 +861,7 @@ class exact_impl
          * @return An expression of the form tcl(t1, 0) --> tcl(t2, 1) and tcl(t1, 1) --> tcl(t2, 2) and ... up to the
          * number of clock phases in the layout.
          */
-        [[nodiscard]] z3::expr mk_clk_mod(const tile<Lyt>& t1, const tile<Lyt>& t2)
+        [[nodiscard]] z3::expr mk_clk_mod(const typename Lyt::tile& t1, const typename Lyt::tile& t2)
         {
             z3::expr_vector clk_mod{*ctx};
 
@@ -1799,7 +1799,7 @@ class exact_impl
                                 {
                                     for (auto row = 0u; row <= layout.y(); ++row)
                                     {
-                                        if (const auto t = tile<Lyt>{column, row}; is_added_tile(t))
+                                        if (const auto t = typename Lyt::tile{column, row}; is_added_tile(t))
                                         {
                                             solver->add(not get_tn(t, n));
 
@@ -1821,7 +1821,7 @@ class exact_impl
                                 {
                                     for (auto row = 0u; row <= layout.y(); ++row)
                                     {
-                                        const auto t = tile<Lyt>{column, row};
+                                        const auto t = typename Lyt::tile{column, row};
 
                                         // use assumptions here because the south-east corner moves away in the
                                         // following iterations
@@ -1863,7 +1863,7 @@ class exact_impl
                                 {
                                     for (auto column = 0u; column <= layout.x(); ++column)
                                     {
-                                        if (const auto t = tile<Lyt>{column, row}; is_added_tile(t))
+                                        if (const auto t = typename Lyt::tile{column, row}; is_added_tile(t))
                                         {
                                             solver->add(not get_tn(t, n));
 
@@ -1885,7 +1885,7 @@ class exact_impl
                                 {
                                     for (auto column = 0u; column <= layout.x(); ++column)
                                     {
-                                        const auto t = tile<Lyt>{column, row};
+                                        const auto t = typename Lyt::tile{column, row};
 
                                         // use assumptions here because the south-east corner moves away in the
                                         // following iterations
@@ -2489,7 +2489,7 @@ class exact_impl
          * @param t Tile to place the PO pin.
          * @param n Node in the stored network representing a PO.
          */
-        void place_output(const tile<Lyt>& t, const mockturtle::node<topology_ntk_t>& n)
+        void place_output(const typename Lyt::tile& t, const mockturtle::node<topology_ntk_t>& n)
         {
             const auto output_signal = network.make_signal(fanins(network, n).fanin_nodes[0]);
 
@@ -2533,7 +2533,7 @@ class exact_impl
          * @param t Initial tile to start recursion from (not included in model evaluations).
          * @param e Edge to check for.
          */
-        void route(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e, const z3::model& model)
+        void route(const typename Lyt::tile& t, const mockturtle::edge<topology_ntk_t>& e, const z3::model& model)
         {
             layout.foreach_outgoing_clocked_zone(
                 t,
@@ -2705,7 +2705,7 @@ class exact_impl
         /**
          * Currently examined layout aspect ratio.
          */
-        aspect_ratio<Lyt> worker_aspect_ratio;
+        typename Lyt::aspect_ratio worker_aspect_ratio;
     };
     /**
      * Thread function for the asynchronous solving strategy. It registers its own context in the given list of
@@ -2734,7 +2734,7 @@ class exact_impl
 
         while (true)
         {
-            aspect_ratio<Lyt> ar;
+            typename Lyt::aspect_ratio ar;
 
             // mutually exclusive access to the aspect ratio iterator
             {

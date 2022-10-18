@@ -144,7 +144,7 @@ class gate_level_layout : public ClockedLayout
      * @param ar Highest possible position in the layout.
      * @param name Layout name.
      */
-    explicit gate_level_layout(const aspect_ratio<ClockedLayout>& ar = {}, std::string name = {}) :
+    explicit gate_level_layout(const typename ClockedLayout::aspect_ratio& ar = {}, std::string name = {}) :
             ClockedLayout(ar),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
@@ -162,7 +162,7 @@ class gate_level_layout : public ClockedLayout
      * @param scheme Clocking scheme to apply to this layout.
      * @param name Layout name.
      */
-    gate_level_layout(const aspect_ratio<ClockedLayout>& ar, const clocking_scheme<tile>& scheme,
+    gate_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<tile>& scheme,
                       std::string name = {}) :
             ClockedLayout(ar, scheme),
             strg{std::make_shared<gate_level_layout_storage>()},
