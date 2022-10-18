@@ -80,8 +80,6 @@ function(set_project_warnings project_name)
 
     if (MSVC)
       add_compile_options(/bigobj)
-    else ()
-      add_compile_options(-Wa,-mbig-obj)
     endif ()
 
 endfunction()
