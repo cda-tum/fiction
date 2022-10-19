@@ -98,13 +98,13 @@ int main(int argc, char* argv[])
     // check if file path exists
     if (!std::filesystem::exists(file_path))
     {
-        std::cout << fmt::format("[e] given file path '{}' does not exist", file_path.c_str()) << std::endl;
+        std::cout << fmt::format("[e] given file path '{}' does not exist", file_path.string()) << std::endl;
         return EXIT_FAILURE;
     }
     // check if file path points to a regular file
     if (!std::filesystem::is_regular_file(file_path))
     {
-        std::cout << fmt::format("[e] given file path '{}' does not point to a regular file", file_path.c_str())
+        std::cout << fmt::format("[e] given file path '{}' does not point to a regular file", file_path.string())
                   << std::endl;
         return EXIT_FAILURE;
     }
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     if (lorina::read_verilog(file_path.string(), mockturtle::verilog_reader(ntk)) != lorina::return_code::success)
     {
         std::cout << fmt::format("[e] given file '{}' could not be parsed as a valid Verilog network",
-                                 file_path.c_str())
+                                 file_path.string())
                   << std::endl;
         return EXIT_FAILURE;
     }
