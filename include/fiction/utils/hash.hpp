@@ -47,7 +47,10 @@ struct hash<std::set<T>>
     std::size_t operator()(const std::set<T>& s) const noexcept
     {
         std::size_t h = 0;
-        for (const auto& e : s) fiction::hash_combine(h, e);
+        for (const auto& e : s)
+        {
+            fiction::hash_combine(h, e);
+        }
 
         return h;
     }

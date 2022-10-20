@@ -51,28 +51,28 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {
             if (lyt.is_fanout(n))
             {
-                return coupler;
+                return COUPLER;
             }
         }
         if constexpr (mockturtle::has_is_and_v<GateLyt>)
         {
             if (lyt.is_and(n))
             {
-                return conjunction;
+                return CONJUNCTION;
             }
         }
         if constexpr (mockturtle::has_is_or_v<GateLyt>)
         {
             if (lyt.is_or(n))
             {
-                return disjunction;
+                return DISJUNCTION;
             }
         }
         if constexpr (mockturtle::has_is_maj_v<GateLyt>)
         {
             if (lyt.is_maj(n))
             {
-                return majority;
+                return MAJORITY;
             }
         }
 
@@ -84,7 +84,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
             {
                 if (lyt.is_inv(n))
                 {
-                    return inverter_map.at(p);
+                    return INVERTER_MAP.at(p);
                 }
             }
             if constexpr (fiction::has_is_buf_v<GateLyt>)
@@ -94,10 +94,10 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                     // crossing case
                     if (const auto a = lyt.above(t); t != a && lyt.is_wire_tile(a))
                     {
-                        return crosswire;
+                        return CROSSWIRE;
                     }
 
-                    auto wire = wire_map.at(p);
+                    auto wire = WIRE_MAP.at(p);
 
                     if (lyt.is_pi(n))
                     {
@@ -142,7 +142,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
             SKIP
         };
 
-        bool improvement_found;
+        bool improvement_found{false};
 
         const auto handle = [&lyt, &improvement_found](const auto& hump)
         {
@@ -385,6 +385,8 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
 
         const auto n = lyt.get_node(t);
 
+        // NOLINTBEGIN(*-branch-clone)
+
         // wires within the circuit
         if (lyt.is_buf(n) && !lyt.is_pi(n) && !lyt.is_po(n))
         {
@@ -520,7 +522,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                     return p;
                 }
                 // if output is north-eastern, input port is at (0,0)
-                else if (lyt.has_north_eastern_outgoing_signal(t))
+                if (lyt.has_north_eastern_outgoing_signal(t))
                 {
                     p.inp.emplace(0u, 0u);
                 }
@@ -549,6 +551,8 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
             }
         }
 
+        // NOLINTEND(*-branch-clone)
+
         return p;
     }
 
@@ -572,7 +576,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
     // ************************** Gates ***************************
     // ************************************************************
 
-    static constexpr const fcn_gate conjunction{cell_list_to_gate<char>(
+    static constexpr const fcn_gate CONJUNCTION{cell_list_to_gate<char>(
     {{
         {'d', ' ', ' ', ' '},
         {'d', 'x', 'x', 'x'},
@@ -580,7 +584,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate disjunction{cell_list_to_gate<char>(
+    static constexpr const fcn_gate DISJUNCTION{cell_list_to_gate<char>(
     {{
         {'u', ' ', ' ', ' '},
         {'u', 'x', 'x', 'x'},
@@ -588,7 +592,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate majority{cell_list_to_gate<char>(
+    static constexpr const fcn_gate MAJORITY{cell_list_to_gate<char>(
     {{
         {'x', 'x', ' ', ' '},
         {' ', 'x', ' ', ' '},
@@ -596,7 +600,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate lower_straight_inverter{cell_list_to_gate<char>(
+    static constexpr const fcn_gate LOWER_STRAIGHT_INVERTER{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' '},
@@ -604,7 +608,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate bottom_lower_straight_inverter{cell_list_to_gate<char>(
+    static constexpr const fcn_gate BOTTOM_LOWER_STRAIGHT_INVERTER{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' '},
@@ -612,7 +616,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {'x', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate upper_straight_inverter{cell_list_to_gate<char>(
+    static constexpr const fcn_gate UPPER_STRAIGHT_INVERTER{cell_list_to_gate<char>(
     {{
         {'n', 'n', 'n', 'n'},
         {' ', ' ', ' ', ' '},
@@ -620,7 +624,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate top_down_bent_inverter{cell_list_to_gate<char>(
+    static constexpr const fcn_gate TOP_DOWN_BENT_INVERTER{cell_list_to_gate<char>(
     {{
         {'x', ' ', ' ', ' '},
         {'x', ' ', ' ', ' '},
@@ -628,7 +632,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate bottom_up_bent_inverter{cell_list_to_gate<char>(
+    static constexpr const fcn_gate BOTTOM_UP_BENT_INVERTER{cell_list_to_gate<char>(
     {{
         {'n', 'n', 'n', 'n'},
         {'x', ' ', ' ', ' '},
@@ -636,7 +640,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate bottom_lower_up_bent_inverter{cell_list_to_gate<char>(
+    static constexpr const fcn_gate BOTTOM_LOWER_UP_BENT_INVERTER{cell_list_to_gate<char>(
     {{
         {'n', 'n', 'n', 'n'},
         {'x', ' ', ' ', ' '},
@@ -648,7 +652,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
     // ************************** Wires ***************************
     // ************************************************************
 
-    static constexpr const fcn_gate crosswire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate CROSSWIRE{cell_list_to_gate<char>(
     {{
         {'c', ' ', 'c', 'x'},
         {' ', 'c', ' ', ' '},
@@ -656,7 +660,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate coupler{cell_list_to_gate<char>(
+    static constexpr const fcn_gate COUPLER{cell_list_to_gate<char>(
     {{
         {'f', 'f', 'x', 'x'},
         {'f', ' ', ' ', ' '},
@@ -664,7 +668,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate lower_wire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate LOWER_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' '},
@@ -672,7 +676,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate upper_wire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate UPPER_WIRE{cell_list_to_gate<char>(
     {{
         {'x', 'x', 'x', 'x'},
         {' ', ' ', ' ', ' '},
@@ -680,7 +684,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate top_down_bent_wire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate TOP_DOWN_BENT_WIRE{cell_list_to_gate<char>(
     {{
         {'x', ' ', ' ', ' '},
         {'x', 'x', 'x', ' '},
@@ -688,7 +692,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate bottom_up_bent_wire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate BOTTOM_UP_BENT_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', 'x'},
         {'x', 'x', 'x', 'x'},
@@ -696,7 +700,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate top_down_staircase_wire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate TOP_DOWN_STAIRCASE_WIRE{cell_list_to_gate<char>(
     {{
         {'x', ' ', ' ', ' '},
         {'x', 'x', 'x', ' '},
@@ -704,7 +708,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', 'x', 'x'}
     }})};
 
-    static constexpr const fcn_gate bottom_up_staircase_wire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate BOTTOM_UP_STAIRCASE_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', 'x'},
         {' ', ' ', 'x', ' '},
@@ -712,7 +716,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {'x', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate bottom_down_bent_wire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate BOTTOM_DOWN_BENT_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' '},
@@ -720,7 +724,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', 'x', 'x'}
     }})};
 
-    static constexpr const fcn_gate majority_wire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate MAJORITY_WIRE{cell_list_to_gate<char>(
     {{
         {'x', 'x', ' ', ' '},
         {' ', ' ', ' ', ' '},
@@ -728,7 +732,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate coupler_wire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate COUPLER_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' '},
@@ -740,47 +744,47 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
 
     using port_gate_map = std::unordered_map<port_list<port_position>, fcn_gate>;
 
-    static inline const port_gate_map wire_map = {
+    static inline const port_gate_map WIRE_MAP = {
         // straight wires
-        {{{port_position(0, 2)}, {port_position(3, 2)}}, lower_wire},
-        {{{}, {port_position(3, 2)}}, lower_wire},
-        {{{port_position(0, 2)}, {}}, lower_wire},
-        {{{port_position(0, 0)}, {port_position(3, 0)}}, upper_wire},
-        {{{}, {port_position(3, 0)}}, upper_wire},
-        {{{port_position(0, 0)}, {}}, upper_wire},
-        {{{port_position(0, 3)}, {port_position(3, 3)}}, rotate_180(upper_wire)},
-        {{{}, {port_position(3, 3)}}, rotate_180(upper_wire)},
-        {{{port_position(0, 3)}, {}}, rotate_180(upper_wire)},
+        {{{port_position(0, 2)}, {port_position(3, 2)}}, LOWER_WIRE},
+        {{{}, {port_position(3, 2)}}, LOWER_WIRE},
+        {{{port_position(0, 2)}, {}}, LOWER_WIRE},
+        {{{port_position(0, 0)}, {port_position(3, 0)}}, UPPER_WIRE},
+        {{{}, {port_position(3, 0)}}, UPPER_WIRE},
+        {{{port_position(0, 0)}, {}}, UPPER_WIRE},
+        {{{port_position(0, 3)}, {port_position(3, 3)}}, rotate_180(UPPER_WIRE)},
+        {{{}, {port_position(3, 3)}}, rotate_180(UPPER_WIRE)},
+        {{{port_position(0, 3)}, {}}, rotate_180(UPPER_WIRE)},
         // bent wires
-        {{{port_position(0, 0)}, {port_position(3, 2)}}, top_down_bent_wire},
-        {{{port_position(0, 2)}, {port_position(3, 0)}}, bottom_up_bent_wire},
-        {{{port_position(0, 2)}, {port_position(3, 3)}}, bottom_down_bent_wire},
+        {{{port_position(0, 0)}, {port_position(3, 2)}}, TOP_DOWN_BENT_WIRE},
+        {{{port_position(0, 2)}, {port_position(3, 0)}}, BOTTOM_UP_BENT_WIRE},
+        {{{port_position(0, 2)}, {port_position(3, 3)}}, BOTTOM_DOWN_BENT_WIRE},
         // staircase wires
-        {{{port_position(0, 0)}, {port_position(3, 3)}}, top_down_staircase_wire},
-        {{{port_position(0, 3)}, {port_position(3, 0)}}, bottom_up_staircase_wire},
+        {{{port_position(0, 0)}, {port_position(3, 3)}}, TOP_DOWN_STAIRCASE_WIRE},
+        {{{port_position(0, 3)}, {port_position(3, 0)}}, BOTTOM_UP_STAIRCASE_WIRE},
         // special wires
-        {{{port_position(0, 0)}, {port_position(1, 0)}}, majority_wire},
-        {{{port_position(0, 3)}, {port_position(3, 2)}}, coupler_wire}
+        {{{port_position(0, 0)}, {port_position(1, 0)}}, MAJORITY_WIRE},
+        {{{port_position(0, 3)}, {port_position(3, 2)}}, COUPLER_WIRE}
         // NOTE more wires go here!
     };
     /**
      * Lookup table for inverter rotations. Maps ports to corresponding inverters.
      */
-    static inline const port_gate_map inverter_map = {
+    static inline const port_gate_map INVERTER_MAP = {
         // straight inverters
-        {{{port_position(0, 2)}, {port_position(3, 2)}}, lower_straight_inverter},
-        {{{port_position(0, 3)}, {port_position(3, 2)}}, bottom_lower_straight_inverter},
-        {{{port_position(0, 0)}, {port_position(3, 0)}}, upper_straight_inverter},
+        {{{port_position(0, 2)}, {port_position(3, 2)}}, LOWER_STRAIGHT_INVERTER},
+        {{{port_position(0, 3)}, {port_position(3, 2)}}, BOTTOM_LOWER_STRAIGHT_INVERTER},
+        {{{port_position(0, 0)}, {port_position(3, 0)}}, UPPER_STRAIGHT_INVERTER},
         // without outputs
-        {{{port_position(0, 2)}, {}}, lower_straight_inverter},
-        {{{port_position(0, 0)}, {}}, upper_straight_inverter},
+        {{{port_position(0, 2)}, {}}, LOWER_STRAIGHT_INVERTER},
+        {{{port_position(0, 0)}, {}}, UPPER_STRAIGHT_INVERTER},
         // without inputs
-        {{{}, {port_position(3, 2)}}, lower_straight_inverter},
-        {{{}, {port_position(3, 0)}}, upper_straight_inverter},
+        {{{}, {port_position(3, 2)}}, LOWER_STRAIGHT_INVERTER},
+        {{{}, {port_position(3, 0)}}, UPPER_STRAIGHT_INVERTER},
         // bent inverters
-        {{{port_position(0, 0)}, {port_position(3, 2)}}, top_down_bent_inverter},
-        {{{port_position(0, 2)}, {port_position(3, 0)}}, bottom_up_bent_inverter},
-        {{{port_position(0, 3)}, {port_position(3, 0)}}, bottom_lower_up_bent_inverter}};
+        {{{port_position(0, 0)}, {port_position(3, 2)}}, TOP_DOWN_BENT_INVERTER},
+        {{{port_position(0, 2)}, {port_position(3, 0)}}, BOTTOM_UP_BENT_INVERTER},
+        {{{port_position(0, 3)}, {port_position(3, 0)}}, BOTTOM_LOWER_UP_BENT_INVERTER}};
 };
 }  // namespace fiction
 

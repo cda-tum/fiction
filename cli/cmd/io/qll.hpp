@@ -60,7 +60,7 @@ class qll_command : public command
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-            if constexpr (fiction::has_inml_technology<Lyt> || fiction::has_qca_technology<Lyt>)
+            if constexpr (fiction::has_inml_technology_v<Lyt> || fiction::has_qca_technology_v<Lyt>)
             {
                 fiction::write_qll_layout(*lyt_ptr, filename);
             }

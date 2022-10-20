@@ -101,7 +101,7 @@ class onepass_command : public command
         // choose clocking
         if (auto clk = fiction::get_clocking_scheme<fiction::cart_gate_clk_lyt>(clocking); clk.has_value())
         {
-            if (auto name = clk->name; name == fiction::clock_name::open || name == fiction::clock_name::columnar)
+            if (auto name = clk->name; name == fiction::clock_name::OPEN || name == fiction::clock_name::COLUMNAR)
             {
                 env->out() << fmt::format("[e] the \"{}\" clocking scheme is not supported by this approach", name)
                            << std::endl;

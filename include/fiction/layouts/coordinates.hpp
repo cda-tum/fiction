@@ -49,6 +49,8 @@ struct ucoord_t
      */
     uint64_t x : 31;
 
+    // NOLINTBEGIN(readability-identifier-naming)
+
     /**
      * Default constructor. Creates a dead coordinate at (0, 0, 0).
      */
@@ -106,6 +108,9 @@ struct ucoord_t
             y{static_cast<decltype(y)>((t << 2) >> 33)},
             x{static_cast<decltype(x)>((t << 33) >> 33)}
     {}
+
+    // NOLINTEND(readability-identifier-naming)
+
     /**
      * Allows explicit conversion to uint64_t. Segments an unsigned 64-bit integer into four parts (from MSB to LSB):
      *  - 1 bit for the dead indicator
@@ -175,12 +180,16 @@ struct ucoord_t
     constexpr bool operator<(const ucoord_t& other) const noexcept
     {
         if (z < other.z)
+        {
             return true;
+        }
 
         if (z == other.z)
         {
             if (y < other.y)
+            {
                 return true;
+            }
 
             if (y == other.y)
             {
@@ -229,7 +238,7 @@ struct ucoord_t
      *
      * @return String representation of the form "(x, y, z)".
      */
-    [[nodiscard]] std::string str() const noexcept
+    [[nodiscard]] std::string str() const
     {
         return fmt::format("({},{},{})", x, y, z);
     }
@@ -310,7 +319,7 @@ class coord_iterator
         return *this;
     }
 
-    constexpr const coord_iterator operator++(int) noexcept
+    constexpr coord_iterator operator++(int) noexcept
     {
         const auto result{*this};
 
@@ -367,7 +376,7 @@ struct coord_t
     /**
      * Dead indicator.
      */
-    bool d;
+    bool d{true};  // default-constructed coordinates are dead
     /**
      * z coordinate.
      */
@@ -381,11 +390,12 @@ struct coord_t
      */
     int32_t x;
 
+    // NOLINTBEGIN(readability-identifier-naming)
+
     /**
      * Default constructor. Creates a dead coordinate at (0, 0, 0).
      */
     constexpr coord_t() noexcept :
-            d{true},  // default-constructed coord_ts are dead
             z{static_cast<decltype(z)>(0)},
             y{static_cast<decltype(y)>(0)},
             x{static_cast<decltype(x)>(0)}
@@ -422,6 +432,9 @@ struct coord_t
             y{static_cast<decltype(y)>(y_)},
             x{static_cast<decltype(x)>(x_)}
     {}
+
+    // NOLINTEND(readability-identifier-naming)
+
     /**
      * Returns whether the coordinate is dead.
      *
@@ -472,12 +485,16 @@ struct coord_t
     constexpr bool operator<(const coord_t& other) const noexcept
     {
         if (z < other.z)
+        {
             return true;
+        }
 
         if (z == other.z)
         {
             if (y < other.y)
+            {
                 return true;
+            }
 
             if (y == other.y)
             {
@@ -546,7 +563,7 @@ struct coord_t
      *
      * @return String representation of the form "(x, y, z)".
      */
-    [[nodiscard]] std::string str() const noexcept
+    [[nodiscard]] std::string str() const
     {
         return fmt::format("({},{},{})", x, y, z);
     }

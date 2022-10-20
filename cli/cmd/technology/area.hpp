@@ -62,19 +62,19 @@ class area_command : public command
 
             if (!is_set("width"))
             {
-                width = Tech::cell_width;
+                width = Tech::CELL_WIDTH;
             }
             if (!is_set("height"))
             {
-                height = Tech::cell_height;
+                height = Tech::CELL_HEIGHT;
             }
             if (!is_set("hspace"))
             {
-                hspace = Tech::cell_hspace;
+                hspace = Tech::CELL_HSPACE;
             }
             if (!is_set("vspace"))
             {
-                vspace = Tech::cell_vspace;
+                vspace = Tech::CELL_VSPACE;
             }
 
             fiction::area_params<Tech, double> ps{width, height, hspace, vspace};

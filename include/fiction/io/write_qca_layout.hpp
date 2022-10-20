@@ -487,7 +487,9 @@ class write_qca_layout_impl
     void write_via_cells()
     {
         if (via_layer_cells.empty())
+        {
             return;
+        }
 
         // open via layer
         os << qcad::OPEN_QCAD_LAYER;
@@ -496,7 +498,7 @@ class write_qca_layout_impl
         os << qcad::STATUS << "0\n";
         os << qcad::PSZ_DESCRIPTION << "Via Layer " << std::to_string(via_counter++) << '\n';
 
-        for (auto& v : via_layer_cells)
+        for (const auto& v : via_layer_cells)
         {
             write_cell(v, false);
         }
@@ -525,7 +527,7 @@ template <typename Lyt>
 void write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_qca_technology<Lyt>, "Lyt must be a QCA layout");
+    static_assert(has_qca_technology_v<Lyt>, "Lyt must be a QCA layout");
 
     detail::write_qca_layout_impl p{lyt, os, ps};
 
@@ -548,7 +550,9 @@ void write_qca_layout(const Lyt& lyt, const std::string& filename, write_qca_lay
     std::ofstream os{filename.c_str(), std::ofstream::out};
 
     if (!os.is_open())
+    {
         throw std::ofstream::failure("could not open file");
+    }
 
     write_qca_layout(lyt, os, ps);
     os.close();

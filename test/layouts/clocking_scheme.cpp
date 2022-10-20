@@ -1919,16 +1919,16 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
         }
     };
 
-    check({"open", "OPEN", "oPeN", "OpEn"}, clock_name::open);
-    check({"columnar", "COLUMNAR", "CoLumNar", "COLUMnar"}, clock_name::columnar);
-    check({"row", "ROW", "RoW", "rOw"}, clock_name::row);
-    check({"2DDwave", "2DdWaVe", "2ddwave", "2DDWAVE", "2DDWave"}, clock_name::twoddwave);
-    check({"2DDwavehex", "2DdWaVeHeX", "2ddwavehex", "2DDWAVEHEX", "2DDWaveHex"}, clock_name::twoddwave);
-    check({"use", "USE", "uSe", "UsE"}, clock_name::use);
-    check({"res", "RES", "rEs", "ReS"}, clock_name::res);
-    check({"esr", "ESR", "eSr", "EsR"}, clock_name::esr);
-    check({"cfe", "CFE", "cFe", "CfE"}, clock_name::cfe);
-    check({"bancs", "BANCS", "BaNCs", "banCS"}, clock_name::bancs);
+    check({"open", "OPEN", "oPeN", "OpEn"}, clock_name::OPEN);
+    check({"columnar", "COLUMNAR", "CoLumNar", "COLUMnar"}, clock_name::COLUMNAR);
+    check({"row", "ROW", "RoW", "rOw"}, clock_name::ROW);
+    check({"2DDwave", "2DdWaVe", "2ddwave", "2DDWAVE", "2DDWave"}, clock_name::TWODDWAVE);
+    check({"2DDwavehex", "2DdWaVeHeX", "2ddwavehex", "2DDWAVEHEX", "2DDWaveHex"}, clock_name::TWODDWAVE);
+    check({"use", "USE", "uSe", "UsE"}, clock_name::USE);
+    check({"res", "RES", "rEs", "ReS"}, clock_name::RES);
+    check({"esr", "ESR", "eSr", "EsR"}, clock_name::ESR);
+    check({"cfe", "CFE", "cFe", "CfE"}, clock_name::CFE);
+    check({"bancs", "BANCS", "BaNCs", "banCS"}, clock_name::BANCS);
 
     CHECK(!get_clocking_scheme<clk_lyt>("").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("Column").has_value());
@@ -1946,15 +1946,15 @@ TEST_CASE("Linear schemes", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
-    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::columnar)));
-    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::row)));
-    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::twoddwave)));
-    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::twoddwave_hex)));
+    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::COLUMNAR)));
+    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::ROW)));
+    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::TWODDWAVE)));
+    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::TWODDWAVE_HEX)));
 
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::open)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::use)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::res)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::esr)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::cfe)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::bancs)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::OPEN)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::USE)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::RES)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::ESR)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::CFE)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::BANCS)));
 }

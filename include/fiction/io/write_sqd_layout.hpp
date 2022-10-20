@@ -135,7 +135,9 @@ class write_sqd_layout_impl
         design << siqad::CLOSE_DESIGN;
 
         if (!file.is_open())
+        {
             throw std::ofstream::failure("could not open file");
+        }
 
         file << header.str();
         file << gui.str();
@@ -155,12 +157,12 @@ class write_sqd_layout_impl
             [this, &design](const auto& c)
             {
                 // generate SiDB cells
-                if constexpr (has_sidb_technology<Lyt>)
+                if constexpr (has_sidb_technology_v<Lyt>)
                 {
                     design << fmt::format(siqad::DBDOT_BLOCK, c.x, c.y / 2, c.y % 2, siqad::NORMAL_COLOR);
                 }
                 // generate QCA cell blocks
-                else if constexpr (has_qca_technology<Lyt>)
+                else if constexpr (has_qca_technology_v<Lyt>)
                 {
                     const auto type = this->lyt.get_cell_type(c);
 
@@ -204,7 +206,7 @@ template <typename Lyt>
 void write_sqd_layout(const Lyt& lyt, std::ofstream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_qca_technology<Lyt> || has_sidb_technology<Lyt>, "Lyt must be a QCA or SiDB layout");
+    static_assert(has_qca_technology_v<Lyt> || has_sidb_technology_v<Lyt>, "Lyt must be a QCA or SiDB layout");
 
     detail::write_sqd_layout_impl p{lyt, os};
 

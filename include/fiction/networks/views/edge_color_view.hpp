@@ -29,7 +29,6 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
     using edge        = typename mockturtle::edge<out_of_place_edge_color_view<Ntk>>;
     using parent_view = typename mockturtle::out_of_place_color_view<Ntk>;
 
-  public:
     /**
      * Standard constructor.
      *
@@ -59,10 +58,8 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
         {
             return it->second;
         }
-        else
-        {
-            return 0u;
-        }
+
+        return 0u;
     }
     /**
      * Paint a given edge with the current color.
