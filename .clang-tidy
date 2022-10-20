@@ -45,9 +45,13 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.TypeTemplateParameterCase
     value: CamelCase
+  - key: readability-identifier-naming.ValueTemplateParameterCase
+    value: aNy_CasE
   - key: readability-identifier-naming.VariableCase
     value: lower_case
   - key: readability-identifier-naming.LocalVariableCase
+    value: lower_case
+  - key: readability-identifier-naming.StaticVariableCase
     value: lower_case
   - key: readability-identifier-naming.EnumCase
     value: lower_case
@@ -57,6 +61,8 @@ CheckOptions:
     value: UPPER_CASE
   - key: readability-identifier-naming.GlobalConstantCase
     value: UPPER_CASE
+  - key: readability-identifier-naming.GlobalConstantIgnoredRegexp
+    value: "^has_.*_v$|^is_.*_v$|^.*_name$"
   - key: readability-identifier-naming.LocalConstantCase
     value: lower_case
   - key: readability-identifier-naming.StaticConstantCase
@@ -69,5 +75,7 @@ CheckOptions:
     value: lower_case
   - key: readability-identifier-naming.UnionCase
     value: lower_case
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
   - key: readability-identifier-naming.IgnoreMainLikeFunctions
     value: "true"
