@@ -15,7 +15,7 @@ jobs:
       # Optionally generate compile_commands.json
 
       - name: Review code with Clang-Tidy
-      - uses: ZedThree/clang-tidy-review@v0.10.0
+        uses: ZedThree/clang-tidy-review@v0.10.0
         with:
           config_file: '.clang-tidy'
           exclude: 'libs/*, docs/*, benchmarks/*, bib/*'
