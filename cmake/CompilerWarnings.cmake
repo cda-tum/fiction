@@ -29,7 +29,6 @@ function(set_project_warnings project_name)
             /w14906 # string literal cast to 'LPWSTR'
             /w14928 # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
             /permissive- # standards conformance mode for MSVC compiler.
-            /bigobj
             )
 
     set(CLANG_WARNINGS
@@ -78,5 +77,9 @@ function(set_project_warnings project_name)
     endif ()
 
     target_compile_options(${project_name} INTERFACE ${PROJECT_WARNINGS})
+
+    if (MSVC)
+      add_compile_options(/bigobj)
+    endif ()
 
 endfunction()
