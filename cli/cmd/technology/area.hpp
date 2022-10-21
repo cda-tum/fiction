@@ -58,26 +58,26 @@ class area_command : public command
 
         const auto calculate_area = [this](auto&& lyt_ptr)
         {
-            using Tech = typename std::decay_t<decltype(lyt_ptr)>::element_type::technology;
+            using tech = typename std::decay_t<decltype(lyt_ptr)>::element_type::technology;
 
             if (!is_set("width"))
             {
-                width = Tech::CELL_WIDTH;
+                width = tech::CELL_WIDTH;
             }
             if (!is_set("height"))
             {
-                height = Tech::CELL_HEIGHT;
+                height = tech::CELL_HEIGHT;
             }
             if (!is_set("hspace"))
             {
-                hspace = Tech::CELL_HSPACE;
+                hspace = tech::CELL_HSPACE;
             }
             if (!is_set("vspace"))
             {
-                vspace = Tech::CELL_VSPACE;
+                vspace = tech::CELL_VSPACE;
             }
 
-            fiction::area_params<Tech, double> ps{width, height, hspace, vspace};
+            fiction::area_params<tech, double> ps{width, height, hspace, vspace};
 
             fiction::area(*lyt_ptr, ps, &st);
         };
