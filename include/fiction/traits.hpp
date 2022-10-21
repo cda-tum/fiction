@@ -564,11 +564,11 @@ template <typename Lyt>
 using technology = typename Lyt::technology;
 
 template <typename Lyt>
-inline constexpr const bool has_qca_technology = std::is_same_v<technology<Lyt>, qca_technology>;
+inline constexpr const bool has_qca_technology_v = std::is_same_v<technology<Lyt>, qca_technology>;
 template <typename Lyt>
-inline constexpr const bool has_inml_technology = std::is_same_v<technology<Lyt>, inml_technology>;
+inline constexpr const bool has_inml_technology_v = std::is_same_v<technology<Lyt>, inml_technology>;
 template <typename Lyt>
-inline constexpr const bool has_sidb_technology = std::is_same_v<technology<Lyt>, sidb_technology>;
+inline constexpr const bool has_sidb_technology_v = std::is_same_v<technology<Lyt>, sidb_technology>;
 
 #pragma region is_cell_level_layout
 template <class Lyt, class = void>

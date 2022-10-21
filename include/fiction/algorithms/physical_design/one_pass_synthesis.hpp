@@ -132,7 +132,7 @@ namespace detail
  * scoped and only need to exist. No operations are to be performed on this object. It handles creation and proper
  * destruction of all Python objects used during this session and deals with the CPython API.
  */
-inline static const pybind11::scoped_interpreter instance{};
+inline static const pybind11::scoped_interpreter INSTANCE{};
 
 // suppress warning 'declared with greater visibility than the type of its field'
 #pragma GCC visibility push(hidden)
@@ -150,7 +150,7 @@ class mugen_handler
      * @param lyt Reference to an empty layout that serves as a floor plan for S&P&R by Mugen.
      * @param p The configurations to respect in the SAT instance generation process.
      */
-    mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params<Lyt> p) noexcept :
+    mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params<Lyt> p) :
             tts{spec},
             num_pis{spec[0].num_vars()},  // since all tts have to have the same number of variables
             lyt{sketch},
@@ -169,12 +169,14 @@ class mugen_handler
     [[nodiscard]] bool skippable(const aspect_ratio<Lyt>& ratio) const noexcept
     {
         // OPEN clocking optimization: rotated aspect ratios don't need to be explored
-        if (lyt.is_clocking_scheme(clock_name::open))
+        if (lyt.is_clocking_scheme(clock_name::OPEN))
         {
             if (ratio.x != ratio.y && ratio.x == lyt.y() && ratio.y == lyt.x())
+            {
                 return true;
+            }
         }
-        // TODO more conditions go here
+        // more conditions go here
 
         return false;
     }
@@ -216,7 +218,9 @@ class mugen_handler
         for (auto net_it = nets.begin(); net_it != nets.end(); ++net_it)
         {
             if (net_it->is_none())
+            {
                 return false;
+            }
 
             to_gate_layout(*net_it);
 
@@ -543,7 +547,7 @@ class mugen_handler
                 continue;
             }
             // if node is a wire segment
-            else if (is_wire(node))
+            if (is_wire(node))
             {
                 // if it is a primary input pin
                 if (const auto pi = has_pi_fanin(node);
@@ -613,34 +617,32 @@ class mugen_handler
                 continue;
             }
             // POs are also skipped and only retrieved at the very end
-            else if (is_wire(py_node) && is_po(py_node))
+            if (is_wire(py_node) && is_po(py_node))
             {
                 continue;
             }
-            else
+
+            // its position on the layout
+            const auto node_pos = lyt.get_tile(lyt_node);
+
+            // skip empty tiles
+            if (lyt.is_empty_tile(node_pos))
             {
-                // its position on the layout
-                const auto node_pos = lyt.get_tile(lyt_node);
-
-                // skip empty tiles
-                if (lyt.is_empty_tile(node_pos))
-                {
-                    continue;
-                }
-                // skip nodes already in place
-                if (nodes_in_place.count(lyt_node) > 0)
-                {
-                    continue;
-                }
-
-                // children (incoming signals) of the layout node
-                const auto fanins = get_fanins(py_node);
-
-                // the node is not moved, but its children are updated
-                lyt.move_node(lyt_node, node_pos, fanins);
-
-                nodes_in_place.insert(lyt_node);
+                continue;
             }
+            // skip nodes already in place
+            if (nodes_in_place.count(lyt_node) > 0)
+            {
+                continue;
+            }
+
+            // children (incoming signals) of the layout node
+            const auto fanins = get_fanins(py_node);
+
+            // the node is not moved, but its children are updated
+            lyt.move_node(lyt_node, node_pos, fanins);
+
+            nodes_in_place.insert(lyt_node);
         }
     }
 
@@ -720,7 +722,9 @@ class one_pass_synthesis_impl
             const auto aspect_ratio = typename Lyt::aspect_ratio{(*ari).x, (*ari).y, ps.crossings ? 1 : 0};
 
             if (handler.skippable(aspect_ratio))
+            {
                 continue;
+            }
 
 #if (PROGRESS_BARS)
             bar(aspect_ratio.x + 1, aspect_ratio.y + 1);
@@ -749,10 +753,10 @@ class one_pass_synthesis_impl
 
                     return layout;
                 }
-                else  // update timeout and retry
+                // update timeout and retry
+                if (ps.timeout)
                 {
-                    if (ps.timeout)
-                        update_timeout(handler, pst.time_total);
+                    update_timeout(handler, pst.time_total);
                 }
             }
             // timeout reached
@@ -969,7 +973,7 @@ std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<
 
     // might throw an std::bad_alloc exception if ntk has too many inputs
     const auto tts = mockturtle::simulate<kitty::dynamic_truth_table>(
-        ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>(static_cast<unsigned>(ntk.num_pis())));
+        ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>{static_cast<unsigned>(ntk.num_pis())});
 
     auto lyt = one_pass_synthesis<Lyt>(tts, ps, pst);
 

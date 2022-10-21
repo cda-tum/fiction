@@ -28,7 +28,7 @@ TEST_CASE("Clocking", "[synchronization-element-layout]")
 
     layout.assign_synchronization_element({1, 1}, 1);
 
-    CHECK(layout.is_clocking_scheme(clock_name::twoddwave));
+    CHECK(layout.is_clocking_scheme(clock_name::TWODDWAVE));
     CHECK(layout.is_regularly_clocked());
     CHECK(layout.num_clocks() == 4);
 

@@ -33,12 +33,13 @@
 #include <mockturtle/utils/tech_library.hpp>                   // technology library utils
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 
+#include <cassert>
 #include <cstdint>
 #include <sstream>
 #include <string>
 #include <vector>
 
-int main()
+int main()  // NOLINT
 {
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt;

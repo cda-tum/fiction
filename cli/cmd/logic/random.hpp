@@ -87,7 +87,7 @@ class random_command : public command
      * @tparam Ntk Network type to generate.
      */
     template <typename Ntk, typename Generator>
-    void generate(Generator gen) const noexcept
+    void generate(Generator gen) const
     {
         store<fiction::logic_network_t>().extend() =
             std::make_shared<Ntk>(fiction::convert_network<Ntk>(gen.generate()), std::to_string(ps.seed));

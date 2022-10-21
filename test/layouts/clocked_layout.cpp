@@ -30,8 +30,8 @@ TEST_CASE("Clocking", "[clocked-layout]")
 
     SECTION("2DDWave Clocking")
     {
-        CHECK(layout.is_clocking_scheme(clock_name::twoddwave));
-        CHECK(!layout.is_clocking_scheme(clock_name::res));
+        CHECK(layout.is_clocking_scheme(clock_name::TWODDWAVE));
+        CHECK(!layout.is_clocking_scheme(clock_name::RES));
         CHECK(layout.is_regularly_clocked());
         CHECK(layout.num_clocks() == 4);
 
@@ -80,8 +80,8 @@ TEST_CASE("Clocking", "[clocked-layout]")
     {
         layout.replace_clocking_scheme(use_clocking<clk_lyt>());
 
-        CHECK(!layout.is_clocking_scheme(clock_name::twoddwave));
-        CHECK(layout.is_clocking_scheme(clock_name::use));
+        CHECK(!layout.is_clocking_scheme(clock_name::TWODDWAVE));
+        CHECK(layout.is_clocking_scheme(clock_name::USE));
         CHECK(layout.is_regularly_clocked());
 
         CHECK(layout.get_clock_number({0, 0}) == 0);

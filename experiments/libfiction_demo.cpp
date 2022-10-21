@@ -2,6 +2,8 @@
 // Created by marcel on 27.10.21.
 //
 
+#if (FICTION_Z3_SOLVER)
+
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>  // substitute multi-output gates with fan-out cascades
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
 #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
@@ -79,7 +81,7 @@ void print_cell_layout_properties(const CellLyt& cell_lyt)
         << std::endl;
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv[])  // NOLINT
 {
     // check arguments
     if (argc == 1)
@@ -93,7 +95,7 @@ int main(int argc, char* argv[])
     /**************************************************************/
 
     // convert input to a file path
-    std::filesystem::path file_path{argv[1]};
+    std::filesystem::path file_path{argv[1]};  // NOLINT: pointer arithmetic is okay here
 
     // check if file path exists
     if (!std::filesystem::exists(file_path))
@@ -293,3 +295,5 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
+
+#endif  // FICTION_Z3_SOLVER

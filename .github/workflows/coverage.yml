@@ -1,7 +1,6 @@
 name: Coverage CI
 
-on:
-  pull_request:
+on: [ pull_request ]
 
 defaults:
   run:

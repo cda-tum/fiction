@@ -27,7 +27,7 @@ namespace fiction
 template <typename T, typename... Rest>
 void hash_combine(std::size_t& seed, const T& v, const Rest&... rest)
 {
-    seed ^= std::hash<T>{}(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    seed ^= std::hash<T>{}(v) + 0x9e3779b9 + (seed << 6u) + (seed >> 2u);
     (hash_combine(seed, rest), ...);
 }
 
@@ -47,7 +47,10 @@ struct hash<std::set<T>>
     std::size_t operator()(const std::set<T>& s) const noexcept
     {
         std::size_t h = 0;
-        for (const auto& e : s) fiction::hash_combine(h, e);
+        for (const auto& e : s)
+        {
+            fiction::hash_combine(h, e);
+        }
 
         return h;
     }

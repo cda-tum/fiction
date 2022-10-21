@@ -88,10 +88,10 @@ inline constexpr const char* PROPERTY_LENGTH      = "length";
 inline constexpr const char* PIN =
     "\t\t<pin tech=\"{}\" name=\"{}\" direction=\"{}\" id=\"{}\" x=\"{}\" y=\"{}\" layer=\"{}\"/>\n";
 
-inline constexpr const std::array<const char*, 6> components{"Magnet", "Coupler",  "Cross Wire",
+inline constexpr const std::array<const char*, 6> COMPONENTS{"Magnet", "Coupler",  "Cross Wire",
                                                              "And",    "Inverter", "Or"};
 
-static const std::map<inml_technology::cell_type, uint8_t> inml_component_selector{
+static const std::map<inml_technology::cell_type, uint8_t> INML_COMPONENT_SELECTOR{
     {inml_technology::cell_type::NORMAL, 0},           {inml_technology::cell_type::INPUT, 0},
     {inml_technology::cell_type::OUTPUT, 0},           {inml_technology::cell_type::FANOUT_COUPLER_MAGNET, 1},
     {inml_technology::cell_type::CROSSWIRE_MAGNET, 2}, {inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET, 3},
@@ -237,7 +237,7 @@ class write_qll_layout_impl
 
         if constexpr (std::is_same_v<technology<Lyt>, inml_technology>)
         {
-            for (const auto& comp : qll::components)
+            for (const auto& comp : qll::COMPONENTS)
             {
                 os << fmt::format(qll::INML_COMPONENT_ITEM, tech_name, comp);
             }
@@ -319,8 +319,8 @@ class write_qll_layout_impl
                             skip.insert({c.x + 3, c.y});
                         }
 
-                        if (const auto it = qll::inml_component_selector.find(type);
-                            it != qll::inml_component_selector.end())
+                        if (const auto it = qll::INML_COMPONENT_SELECTOR.find(type);
+                            it != qll::INML_COMPONENT_SELECTOR.end())
                         {
                             os << fmt::format(qll::OPEN_INML_LAYOUT_ITEM, it->second, cell_id++, bb_x(c), bb_y(c));
                         }
@@ -394,7 +394,7 @@ template <typename Lyt>
 void write_qll_layout(const Lyt& lyt, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_inml_technology<Lyt> || has_qca_technology<Lyt>, "Lyt must be an iNML or a QCA layout");
+    static_assert(has_inml_technology_v<Lyt> || has_qca_technology_v<Lyt>, "Lyt must be an iNML or a QCA layout");
 
     detail::write_qll_layout_impl p{lyt, os};
 
@@ -418,7 +418,9 @@ void write_qll_layout(const Lyt& lyt, const std::string& filename)
     std::ofstream os{filename.c_str(), std::ofstream::out};
 
     if (!os.is_open())
+    {
         throw std::ofstream::failure("could not open file");
+    }
 
     write_qll_layout(lyt, os);
     os.close();

@@ -19,13 +19,13 @@ struct area_params
     /**
      * Width and height of each cell.
      */
-    AreaType width{static_cast<AreaType>(Technology::cell_width)},
-        height{static_cast<AreaType>(Technology::cell_height)};
+    AreaType width{static_cast<AreaType>(Technology::CELL_WIDTH)},
+        height{static_cast<AreaType>(Technology::CELL_HEIGHT)};
     /**
      * Horizontal and vertical spacing between cells.
      */
-    AreaType hspace{static_cast<AreaType>(Technology::cell_hspace)},
-        vspace{static_cast<AreaType>(Technology::cell_vspace)};
+    AreaType hspace{static_cast<AreaType>(Technology::CELL_HSPACE)},
+        vspace{static_cast<AreaType>(Technology::CELL_VSPACE)};
 };
 
 template <typename AreaType = double>

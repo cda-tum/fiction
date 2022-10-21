@@ -184,7 +184,10 @@ void check_visited_coordinates()
         visited.insert(c);
     };
 
-    for (auto&& t : layout.coordinates()) { check1(t); }
+    for (auto&& t : layout.coordinates())
+    {
+        check1(t);
+    }
     CHECK(visited.size() == 200);
 
     visited.clear();
@@ -211,7 +214,10 @@ void check_visited_coordinates()
         visited.insert(c);
     };
 
-    for (auto&& t : layout.ground_coordinates()) { check2(t); }
+    for (auto&& t : layout.ground_coordinates())
+    {
+        check2(t);
+    }
     CHECK(visited.size() == 100);
 
     visited.clear();
@@ -238,7 +244,10 @@ void check_visited_coordinates()
         visited.insert(c);
     };
 
-    for (auto&& t : layout.coordinates(start, stop)) { check3(t); }
+    for (auto&& t : layout.coordinates(start, stop))
+    {
+        check3(t);
+    }
     CHECK(visited.size() == 23);
 
     visited.clear();

@@ -48,8 +48,8 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
 
         CHECK(tech_impl_name<qca_technology> == std::string{"QCA"});
 
-        CHECK(has_qca_technology<qca_cell_clk_lyt>);
-        CHECK(has_qca_technology<stacked_qca_cell_clk_lyt>);
+        CHECK(has_qca_technology_v<qca_cell_clk_lyt>);
+        CHECK(has_qca_technology_v<stacked_qca_cell_clk_lyt>);
     }
     SECTION("iNML")
     {
@@ -69,7 +69,7 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
 
         CHECK(tech_impl_name<inml_technology> == std::string{"iNML"});
 
-        CHECK(has_inml_technology<inml_cell_clk_lyt>);
+        CHECK(has_inml_technology_v<inml_cell_clk_lyt>);
     }
     SECTION("SiDB")
     {
@@ -82,7 +82,7 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
 
         CHECK(tech_impl_name<sidb_technology> == std::string{"SiDB"});
 
-        CHECK(has_sidb_technology<sidb_cell_clk_lyt>);
+        CHECK(has_sidb_technology_v<sidb_cell_clk_lyt>);
     }
 }
 

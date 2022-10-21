@@ -63,7 +63,7 @@ class fqca_command : public command
         {
             using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
 
-            if constexpr (fiction::has_qca_technology<Lyt>)
+            if constexpr (fiction::has_qca_technology_v<Lyt>)
             {
                 fiction::write_fqca_layout(*lyt, filename, ps);
             }

@@ -13,7 +13,7 @@
 using namespace fiction;
 
 template <typename Lyt>
-gate_level_drv_stats get_drvs(const Lyt& lyt) noexcept
+gate_level_drv_stats get_drvs(const Lyt& lyt)
 {
     gate_level_drv_params ps{};
     gate_level_drv_stats  st{};
@@ -28,7 +28,7 @@ gate_level_drv_stats get_drvs(const Lyt& lyt) noexcept
 }
 
 template <typename Lyt>
-void check_for_drvs(const Lyt& lyt, const std::size_t num_drvs, const std::size_t num_warnings) noexcept
+void check_for_drvs(const Lyt& lyt, const std::size_t num_drvs, const std::size_t num_warnings)
 {
     const auto st = get_drvs(lyt);
 

@@ -28,8 +28,6 @@ struct write_fqca_layout_params
 class out_of_cell_names_exception : public std::exception
 {
   public:
-    out_of_cell_names_exception() noexcept : std::exception() {}
-
     [[nodiscard]] const char* what() const noexcept override
     {
         return "no more single-character cell designators available";
@@ -96,7 +94,7 @@ class write_fqca_layout_impl
 
     struct labeled_cell
     {
-        labeled_cell(const cell<Lyt>& c_, const char d_) noexcept : c{c_}, designator{d_} {}
+        labeled_cell(const cell<Lyt>& lc, const char ld) noexcept : c{lc}, designator{ld} {}
 
         cell<Lyt> c;
 
@@ -115,14 +113,12 @@ class write_fqca_layout_impl
         if (const auto designator = *alphabet_iterator; designator)
         {
             // increment iterator only after its value has been fetched to include 'a' on first call
-            ++alphabet_iterator;
+            ++alphabet_iterator;  // NOLINT(*-pointer-arithmetic)
 
             return designator;
         }
-        else
-        {
-            throw out_of_cell_names_exception();
-        }
+
+        throw out_of_cell_names_exception();
     }
 
     void write_header()
@@ -300,7 +296,7 @@ template <typename Lyt>
 void write_fqca_layout(const Lyt& lyt, std::ostream& os, write_fqca_layout_params ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_qca_technology<Lyt>, "Lyt must be a QCA layout");
+    static_assert(has_qca_technology_v<Lyt>, "Lyt must be a QCA layout");
 
     detail::write_fqca_layout_impl p{lyt, os, ps};
 
@@ -324,7 +320,9 @@ void write_fqca_layout(const Lyt& lyt, const std::string& filename, write_fqca_l
     std::ofstream os{filename.c_str(), std::ofstream::out};
 
     if (!os.is_open())
+    {
         throw std::ofstream::failure("could not open file");
+    }
 
     write_fqca_layout(lyt, os, ps);
     os.close();
