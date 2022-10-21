@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Clone Repository
         uses: actions/checkout@v3
         with:
           submodules: recursive
@@ -20,7 +20,7 @@ jobs:
           cmake_command: cmake . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_EXPERIMENTS=ON -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
           config_file: '.clang-tidy'
-          exclude: 'libs/*, docs/*, benchmarks/*, bib/*, test/catch2/catch.hpp'
+          exclude: 'libs/*, docs/*, benchmarks/*, bib/*, */catch2/*.hpp'
         id: review
 
         # If there are any comments, fail the check

@@ -2,6 +2,8 @@
 // Created by marcel on 27.10.21.
 //
 
+#if (FICTION_Z3_SOLVER)
+
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>  // substitute multi-output gates with fan-out cascades
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
 #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
@@ -293,3 +295,5 @@ int main(int argc, char* argv[])  // NOLINT
 
     return EXIT_SUCCESS;
 }
+
+#endif  // FICTION_Z3_SOLVER
