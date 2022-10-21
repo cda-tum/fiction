@@ -18,7 +18,7 @@
 using namespace fiction;
 
 template <typename Spec, typename Impl>
-void check_for_strong_equiv(const Spec& spec, const Impl& impl) noexcept
+void check_for_strong_equiv(const Spec& spec, const Impl& impl)
 {
     equivalence_checking_stats st{};
 
@@ -32,7 +32,7 @@ void check_for_strong_equiv(const Spec& spec, const Impl& impl) noexcept
 }
 
 template <typename Spec, typename Impl>
-void check_for_weak_equiv(const Spec& spec, const Impl& impl) noexcept
+void check_for_weak_equiv(const Spec& spec, const Impl& impl)
 {
     equivalence_checking_stats st{};
 
@@ -46,7 +46,7 @@ void check_for_weak_equiv(const Spec& spec, const Impl& impl) noexcept
 }
 
 template <typename Spec, typename Impl>
-void check_for_no_equiv(const Spec& spec, const Impl& impl) noexcept
+void check_for_no_equiv(const Spec& spec, const Impl& impl)
 {
     equivalence_checking_stats st{};
 

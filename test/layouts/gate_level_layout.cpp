@@ -172,7 +172,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level-layout]")
     CHECK(layout.num_pos() == 0);
 
     const auto f1 = layout.create_po(x1, "f1", gate_layout::tile{0, 1});
-    const auto f2 = layout.create_po(!x1, "f2", gate_layout::tile{1, 1});
+    const auto f2 = layout.create_po(static_cast<mockturtle::signal<gate_layout>>(!x1), "f2", gate_layout::tile{1, 1});
 
     CHECK(layout.is_po(layout.get_node(f1)));
     CHECK(layout.is_po(layout.get_node(f2)));
