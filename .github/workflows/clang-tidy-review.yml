@@ -17,7 +17,7 @@ jobs:
       - name: Review code with Clang-Tidy
         uses: ZedThree/clang-tidy-review@v0.10.0
         with:
-          cmake_command: cmake -E make_directory ${{github.workspace}}/build && cmake . -B ${{github.workspace}}/build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cmake_command: cmake . -B ${{github.workspace}}/build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
           build_dir: build
           config_file: '.clang-tidy'
           exclude: 'libs/*, docs/*, benchmarks/*, bib/*, test/catch2/catch.hpp'
