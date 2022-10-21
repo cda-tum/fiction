@@ -973,7 +973,7 @@ std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<
 
     // might throw an std::bad_alloc exception if ntk has too many inputs
     const auto tts = mockturtle::simulate<kitty::dynamic_truth_table>(
-        ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>(static_cast<unsigned>(ntk.num_pis())));
+        ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>{static_cast<unsigned>(ntk.num_pis())});
 
     auto lyt = one_pass_synthesis<Lyt>(tts, ps, pst);
 

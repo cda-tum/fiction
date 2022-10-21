@@ -103,10 +103,10 @@ struct ucoord_t
      * @param t Unsigned 64-bit integer to instantiate the coordinate from.
      */
     constexpr explicit ucoord_t(const uint64_t t) noexcept :
-            d{static_cast<decltype(d)>(t >> 63)},
-            z{static_cast<decltype(z)>((t << 1) >> 63)},
-            y{static_cast<decltype(y)>((t << 2) >> 33)},
-            x{static_cast<decltype(x)>((t << 33) >> 33)}
+            d{static_cast<decltype(d)>(t >> 63ull)},
+            z{static_cast<decltype(z)>((t << 1ull) >> 63ull)},
+            y{static_cast<decltype(y)>((t << 2ull) >> 33ull)},
+            x{static_cast<decltype(x)>((t << 33ull) >> 33ull)}
     {}
 
     // NOLINTEND(readability-identifier-naming)
@@ -120,7 +120,7 @@ struct ucoord_t
      */
     explicit constexpr operator uint64_t() const noexcept
     {
-        return (((((((0ull | d) << 1) | z) << 31) | y) << 31) | x);
+        return (((((((static_cast<uint64_t>(d)) << 1ull) | z) << 31ull) | y) << 31ull) | x);
     }
     /**
      * Returns whether the coordinate is dead.

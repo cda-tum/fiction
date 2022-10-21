@@ -1017,7 +1017,7 @@ class gate_level_layout : public ClockedLayout
         uint32_t index{0};
         while (begin != end)
         {
-            index <<= 1;
+            index <<= 1u;
             index ^= *begin++ ? 1 : 0;
         }
 

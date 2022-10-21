@@ -79,7 +79,7 @@ void print_cell_layout_properties(const CellLyt& cell_lyt)
         << std::endl;
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv[])  // NOLINT
 {
     // check arguments
     if (argc == 1)
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
     /**************************************************************/
 
     // convert input to a file path
-    std::filesystem::path file_path{argv[1]};
+    std::filesystem::path file_path{argv[1]};  // NOLINT: pointer arithmetic is okay here
 
     // check if file path exists
     if (!std::filesystem::exists(file_path))

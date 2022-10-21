@@ -67,7 +67,7 @@ std::vector<std::string> trindade16_benchmarks(uint64_t selection = trindade16)
     std::vector<std::string> result{};
     for (uint64_t i = 0u; i < 7u; ++i)
     {
-        if (((selection >> i) & 1) != 0u)
+        if (((selection >> i) & 1u) != 0u)
         {
             result.emplace_back(benchmarks.at(i));
         }
@@ -81,7 +81,7 @@ std::vector<std::string> fontes18_benchmarks(uint64_t selection = fontes18)
     std::vector<std::string> result{};
     for (uint64_t i = 7u; i < 23u; ++i)
     {
-        if (((selection >> i) & 1) != 0u)
+        if (((selection >> i) & 1u) != 0u)
         {
             result.emplace_back(benchmarks.at(i));
         }
@@ -95,7 +95,7 @@ std::vector<std::string> all_benchmarks(uint64_t selection = all)
     std::vector<std::string> result{};
     for (uint64_t i = 0u; i < 23u; ++i)
     {
-        if (((selection >> i) & 1) != 0u)
+        if (((selection >> i) & 1u) != 0u)
         {
             result.emplace_back(benchmarks.at(i));
         }
