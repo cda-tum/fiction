@@ -10,17 +10,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          submodules: false # don't checkout submodules
+          submodules: true
 
       # Optionally generate compile_commands.json
 
       - name: Review code with Clang-Tidy
         uses: ZedThree/clang-tidy-review@v0.10.0
         with:
+          cmake_command: |
+            cmake -E make_directory ${{github.workspace}}/build
+            cmake . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          build_dir: build
           config_file: '.clang-tidy'
           exclude: 'libs/*, docs/*, benchmarks/*, bib/*, test/catch2/catch.hpp'
-
         id: review
-      # If there are any comments, fail the check
-      - if: steps.review.outputs.total_comments > 0
+
+        # If there are any comments, fail the check
+      - name: Fail check if there are any comments
+        if: steps.review.outputs.total_comments > 0
         run: exit 1
