@@ -98,22 +98,22 @@ struct sidb_defect
  * Horizontal distance to keep from charged SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
-static constexpr const uint16_t sidb_charged_defect_horizontal_spacing = 3u;
+static constexpr const uint16_t SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING = 3u;
 /**
  * Vertical distance to keep from charged SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
-static constexpr const uint16_t sidb_charged_defect_vertical_spacing = 2u;
+static constexpr const uint16_t SIDB_CHARGED_DEFECT_VERTICAL_SPACING = 2u;
 /**
  * Horizontal distance to keep from neutral SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
-static constexpr const uint16_t sidb_neutral_defect_horizontal_spacing = 1u;
+static constexpr const uint16_t SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING = 1u;
 /**
  * Vertical distance to keep from neutral SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
-static constexpr const uint16_t sidb_neutral_defect_vertical_spacing = 0u;
+static constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
 /**
  * Returns the extent of a defect as a pair of SiDB distances in horizontal and vertical direction. If defect is the
  * NONE defect type, {0, 0} is returned.
@@ -125,11 +125,11 @@ static constexpr const uint16_t sidb_neutral_defect_vertical_spacing = 0u;
 {
     if (is_charged_defect(defect))
     {
-        return {sidb_charged_defect_horizontal_spacing, sidb_charged_defect_vertical_spacing};
+        return {SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING, SIDB_CHARGED_DEFECT_VERTICAL_SPACING};
     }
-    else if (is_neutral_defect(defect))
+    if (is_neutral_defect(defect))
     {
-        return {sidb_neutral_defect_horizontal_spacing, sidb_neutral_defect_vertical_spacing};
+        return {SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING, SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING};
     }
 
     return {};

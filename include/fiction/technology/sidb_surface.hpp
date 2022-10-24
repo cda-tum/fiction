@@ -13,6 +13,7 @@
 #include <set>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 
 namespace fiction
 {
@@ -52,7 +53,7 @@ class sidb_surface<Lyt, false> : public Lyt
   public:
     struct sidb_surface_storage
     {
-        explicit sidb_surface_storage(const sidb_surface_params& ps = {}) : params(ps) {}
+        explicit sidb_surface_storage(sidb_surface_params ps = {}) : params(std::move(ps)) {}
 
         sidb_surface_params                              params{};
         std::unordered_map<coordinate<Lyt>, sidb_defect> defective_coordinates{};
@@ -90,7 +91,7 @@ class sidb_surface<Lyt, false> : public Lyt
      * @param c Coordinate to assign defect d to.
      * @param d Defect to assign to coordinate c.
      */
-    void assign_sidb_defect(const coordinate<Lyt>& c, const sidb_defect d) noexcept
+    void assign_sidb_defect(const coordinate<Lyt>& c, const sidb_defect& d) noexcept
     {
         if (d.type == sidb_defect_type::NONE)  // delete defect
         {
@@ -113,10 +114,8 @@ class sidb_surface<Lyt, false> : public Lyt
         {
             return it->second;
         }
-        else
-        {
-            return sidb_defect{sidb_defect_type::NONE};  // TODO what are default values for NONE sidb_defects?
-        }
+
+        return sidb_defect{sidb_defect_type::NONE};  // TODO what are default values for NONE sidb_defects?
     }
     /**
      * Returns the number of defective coordinates on the surface.
@@ -138,7 +137,7 @@ class sidb_surface<Lyt, false> : public Lyt
     void foreach_sidb_defect(Fn&& fn) const
     {
         mockturtle::detail::foreach_element(strg->defective_coordinates.cbegin(), strg->defective_coordinates.cend(),
-                                            fn);
+                                            std::forward<Fn>(fn));
     }
     /**
      * Returns all SiDB positions affected by the defect at the given coordinate. This function relies on the

@@ -44,10 +44,10 @@ TEST_CASE("Charged and uncharged defect types", "[sidb-defects]")
 TEST_CASE("Defect extent", "[sidb-defects]")
 {
     static constexpr std::pair<uint16_t, uint16_t> no_spacing{0, 0};
-    static constexpr std::pair<uint16_t, uint16_t> neutral_spacing{sidb_neutral_defect_horizontal_spacing,
-                                                                   sidb_neutral_defect_vertical_spacing};
-    static constexpr std::pair<uint16_t, uint16_t> charged_spacing{sidb_charged_defect_horizontal_spacing,
-                                                                   sidb_charged_defect_vertical_spacing};
+    static constexpr std::pair<uint16_t, uint16_t> neutral_spacing{SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING,
+                                                                   SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING};
+    static constexpr std::pair<uint16_t, uint16_t> charged_spacing{SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING,
+                                                                   SIDB_CHARGED_DEFECT_VERTICAL_SPACING};
 
     CHECK(defect_extent(sidb_defect{sidb_defect_type::NONE}) == no_spacing);
     CHECK(defect_extent(sidb_defect{sidb_defect_type::DB}) == charged_spacing);
