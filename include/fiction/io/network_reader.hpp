@@ -43,11 +43,11 @@ class network_reader
      */
     network_reader(const std::string& filename, std::ostream& o) : out{o}
     {
-        constexpr const char* VERILOG_EXT = ".v";
-        constexpr const char* AIG_EXT     = ".aig";
-        constexpr const char* BLIF_EXT    = ".blif";
+        constexpr const char* verilog_ext = ".v";
+        constexpr const char* aig_ext     = ".aig";
+        constexpr const char* blif_ext    = ".blif";
 
-        constexpr const std::array<const char*, 3> extensions{{VERILOG_EXT, AIG_EXT, BLIF_EXT}};
+        constexpr const std::array<const char*, 3> extensions{{verilog_ext, aig_ext, blif_ext}};
 
         // checks for extension validity
         auto is_valid_extension = [&](const auto& p) -> bool
@@ -65,47 +65,55 @@ class network_reader
             {
                 // collect valid files only
                 if (is_valid_extension(filename))
+                {
                     paths.push_back(filename);
+                }
             }
 
             else if (std::filesystem::is_directory(filename))
             {
                 // iterate over each file in the directory
-                for (auto& file : std::filesystem::directory_iterator(filename))
+                for (const auto& file : std::filesystem::directory_iterator(filename))
                 {
                     if (std::filesystem::is_regular_file(file))
                     {
                         // collect valid files only
                         if (is_valid_extension(file))
+                        {
                             paths.push_back(file.path().string());
+                        }
                     }
                 }
             }
-            else  // existing file but a weird one
+            else
+            {  // existing file but a weird one
                 out << "[e] given file name does not point to a regular file" << std::endl;
+            }
         }
-        else  // path leads nowhere
+        else
+        {  // path leads nowhere
             out << "[e] given file name does not exist" << std::endl;
+        }
 
         // handle collected files
         for (const auto& p : paths)
         {
             // parse Verilog
-            if (std::filesystem::path(p).extension() == VERILOG_EXT)
+            if (std::filesystem::path(p).extension() == verilog_ext)
             {
                 read<mockturtle::verilog_reader<Ntk>,
                      lorina::return_code(const std::string&, const lorina::verilog_reader&,
                                          lorina::diagnostic_engine*)>(p, lorina::read_verilog);
             }
             // parse Aiger
-            else if (std::filesystem::path(p).extension() == AIG_EXT)
+            else if (std::filesystem::path(p).extension() == aig_ext)
             {
                 read<mockturtle::aiger_reader<Ntk>,
                      lorina::return_code(const std::string&, const lorina::aiger_reader&, lorina::diagnostic_engine*)>(
                     p, lorina::read_aiger);
             }
             // parse Blif
-            else if (std::filesystem::path(p).extension() == BLIF_EXT)
+            else if (std::filesystem::path(p).extension() == blif_ext)
             {
                 if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::aig_network>)
                 {
@@ -142,7 +150,7 @@ class network_reader
         if (sorted)
         {
             std::sort(networks.begin(), networks.end(),
-                      [](auto n1, auto n2) { return n1->num_gates() >= n2->num_gates(); });
+                      [](const auto& n1, const auto& n2) { return n1->num_gates() >= n2->num_gates(); });
         }
 
         return networks;

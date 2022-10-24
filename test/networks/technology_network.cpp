@@ -370,13 +370,13 @@ TEST_CASE("create nodes and compute a function in a technology network", "[techn
 
     CHECK(tec.size() == 5);
 
-    const auto _const0 = tec.create_node({}, tt_const0);
-    const auto _const1 = tec.create_node({}, ~tt_const0);
-    CHECK(_const0 == tec.get_constant(false));
-    CHECK(_const1 == tec.get_constant(true));
+    const auto const0 = tec.create_node({}, tt_const0);
+    const auto const1 = tec.create_node({}, ~tt_const0);
+    CHECK(const0 == tec.get_constant(false));
+    CHECK(const1 == tec.get_constant(true));
 
-    const auto _maj = tec.create_node({a, b, c}, tt_maj);
-    const auto _xor = tec.create_node({a, b, c}, tt_xor);
+    const auto maj_n = tec.create_node({a, b, c}, tt_maj);
+    const auto xor_n = tec.create_node({a, b, c}, tt_xor);
 
     CHECK(tec.size() == 7);
 
@@ -388,8 +388,8 @@ TEST_CASE("create nodes and compute a function in a technology network", "[techn
     kitty::create_nth_var(xs[1], 1);
     kitty::create_nth_var(xs[2], 2);
 
-    const auto sim_maj = tec.compute(tec.get_node(_maj), xs.begin(), xs.end());
-    const auto sim_xor = tec.compute(tec.get_node(_xor), xs.begin(), xs.end());
+    const auto sim_maj = tec.compute(tec.get_node(maj_n), xs.begin(), xs.end());
+    const auto sim_xor = tec.compute(tec.get_node(xor_n), xs.begin(), xs.end());
 
     CHECK(sim_maj == kitty::ternary_majority(xs[0], xs[1], xs[2]));
     CHECK(sim_xor == (xs[0] ^ xs[1] ^ xs[2]));
@@ -410,11 +410,11 @@ TEST_CASE("create fanouts and nodes and compute a function in a technology netwo
     kitty::create_from_hex_string(tt_maj, "e8");
     kitty::create_from_hex_string(tt_xor, "96");
 
-    const auto _foa = tec.create_buf(a);
-    const auto _fob = tec.create_buf(b);
-    const auto _foc = tec.create_buf(c);
-    const auto _maj = tec.create_node({_foa, _fob, _foc}, tt_maj);
-    const auto _xor = tec.create_node({_foa, _fob, _foc}, tt_xor);
+    const auto foa   = tec.create_buf(a);
+    const auto fob   = tec.create_buf(b);
+    const auto foc   = tec.create_buf(c);
+    const auto maj_n = tec.create_node({foa, fob, foc}, tt_maj);
+    const auto xor_n = tec.create_node({foa, fob, foc}, tt_xor);
 
     std::vector<kitty::dynamic_truth_table> xs;
     xs.emplace_back(3u);
@@ -424,8 +424,8 @@ TEST_CASE("create fanouts and nodes and compute a function in a technology netwo
     kitty::create_nth_var(xs[1], 1);
     kitty::create_nth_var(xs[2], 2);
 
-    const auto sim_maj = tec.compute(tec.get_node(_maj), xs.begin(), xs.end());
-    const auto sim_xor = tec.compute(tec.get_node(_xor), xs.begin(), xs.end());
+    const auto sim_maj = tec.compute(tec.get_node(maj_n), xs.begin(), xs.end());
+    const auto sim_xor = tec.compute(tec.get_node(xor_n), xs.begin(), xs.end());
 
     CHECK(sim_maj == kitty::ternary_majority(xs[0], xs[1], xs[2]));
     CHECK(sim_xor == (xs[0] ^ xs[1] ^ xs[2]));

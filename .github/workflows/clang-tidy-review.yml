@@ -1,0 +1,29 @@
+name: Clang-Tidy Review
+
+on: [ pull_request ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      # Optionally generate compile_commands.json
+
+      - name: Review code with Clang-Tidy
+        uses: ZedThree/clang-tidy-review@v0.10.0
+        with:
+          cmake_command: cmake . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_EXPERIMENTS=ON -DMOCKTURTLE_EXAMPLES=OFF
+          build_dir: build
+          config_file: '.clang-tidy'
+          exclude: 'libs/*, docs/*, benchmarks/*, bib/*, */catch2/*.hpp'
+        id: review
+
+        # If there are any comments, fail the check
+      - name: Fail check if there are any comments
+        if: steps.review.outputs.total_comments > 0
+        run: exit 1

@@ -60,7 +60,7 @@ class clocked_layout : public CoordinateLayout
      *
      * @param ar Highest possible position in the layout.
      */
-    explicit clocked_layout(const aspect_ratio<CoordinateLayout>& ar = {}) :
+    explicit clocked_layout(const typename CoordinateLayout::aspect_ratio& ar = {}) :
             CoordinateLayout(ar),
             strg{std::make_shared<clocked_layout_storage>(
                 open_clocking<clocked_layout<CoordinateLayout>>(num_clks::FOUR))}
@@ -74,7 +74,7 @@ class clocked_layout : public CoordinateLayout
      * @param ar Highest possible position in the layout.
      * @param scheme Clocking scheme to apply to this layout.
      */
-    clocked_layout(const aspect_ratio<CoordinateLayout>& ar, const clocking_scheme_t& scheme) :
+    clocked_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking_scheme_t& scheme) :
             CoordinateLayout(ar),
             strg{std::make_shared<clocked_layout_storage>(scheme)}
     {
@@ -172,7 +172,9 @@ class clocked_layout : public CoordinateLayout
     [[nodiscard]] bool is_incoming_clocked(const clock_zone& cz1, const clock_zone& cz2) const noexcept
     {
         if (cz1 == cz2)
+        {
             return false;
+        }
 
         return static_cast<clock_number_t>((get_clock_number(cz2) + static_cast<clock_number_t>(1)) % num_clocks()) ==
                get_clock_number(cz1);
@@ -188,7 +190,9 @@ class clocked_layout : public CoordinateLayout
     [[nodiscard]] bool is_outgoing_clocked(const clock_zone& cz1, const clock_zone& cz2) const noexcept
     {
         if (cz1 == cz2)
+        {
             return false;
+        }
 
         return static_cast<clock_number_t>((get_clock_number(cz1) + static_cast<clock_number_t>(1)) % num_clocks()) ==
                get_clock_number(cz2);

@@ -48,13 +48,21 @@ class clear_command : public command
         }
 
         if (cell)
+        {
             store<fiction::cell_layout_t>().clear();
+        }
         if (gate)
+        {
             store<fiction::gate_layout_t>().clear();
+        }
         if (network)
+        {
             store<fiction::logic_network_t>().clear();
+        }
         if (table)
+        {
             store<fiction::truth_table_t>().clear();
+        }
 
         // reset flags, necessary for some reason... alice bug?
         cell    = false;

@@ -55,7 +55,7 @@ struct range_t
      *
      * @return const begin iterator.
      */
-    constexpr const I cbegin() const
+    constexpr I cbegin() const
     {
         return b;
     }
@@ -64,7 +64,7 @@ struct range_t
      *
      * @return const end iterator.
      */
-    constexpr const I cend() const
+    constexpr I cend() const
     {
         return e;
     }

@@ -218,10 +218,8 @@ class exact_command : public command
         {
             return fiction::ptr<Lyt>(std::move(*clk));
         }
-        else
-        {
-            return nullptr;
-        }
+
+        return nullptr;
     }
 
     template <typename Lyt>

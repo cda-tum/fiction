@@ -14,7 +14,7 @@ TEST_CASE("Construction & traits", "[fcn-gate-library]")
 {
     using lib_t = fcn_gate_library<qca_technology, 2, 3>;
 
-    CHECK(has_qca_technology<lib_t>);
+    CHECK(has_qca_technology_v<lib_t>);
     CHECK(lib_t::gate_x_size() == 2);
     CHECK(lib_t::gate_y_size() == 3);
 }

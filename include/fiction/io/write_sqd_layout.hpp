@@ -169,7 +169,8 @@ class write_sqd_layout_impl
         header << siqad::XML_HEADER << siqad::OPEN_SIQAD;
 
         const auto now      = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-        auto       time_str = std::string{std::ctime(&now)};
+        auto       time_str = std::string{std::ctime(&now)};  // NOLINT(concurrency-mt-unsafe): concurrency not needed
+
         time_str.pop_back();  // remove trailing new line
 
         header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
@@ -219,14 +220,14 @@ class write_sqd_layout_impl
             [this, &design](const auto& c)
             {
                 // generate SiDB cells
-                if constexpr (has_sidb_technology<Lyt>)
+                if constexpr (has_sidb_technology_v<Lyt>)
                 {
                     design << fmt::format(siqad::DBDOT_BLOCK,
                                           fmt::format(siqad::LATTICE_COORDINATE, c.x, c.y / 2, c.y % 2),
                                           siqad::NORMAL_COLOR);
                 }
                 // generate QCA cell blocks
-                else if constexpr (has_qca_technology<Lyt>)
+                else if constexpr (has_qca_technology_v<Lyt>)
                 {
                     const auto type = this->lyt.get_cell_type(c);
 
@@ -303,7 +304,7 @@ template <typename Lyt>
 void write_sqd_layout(const Lyt& lyt, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_qca_technology<Lyt> || has_sidb_technology<Lyt>, "Lyt must be a QCA or SiDB layout");
+    static_assert(has_qca_technology_v<Lyt> || has_sidb_technology_v<Lyt>, "Lyt must be a QCA or SiDB layout");
 
     detail::write_sqd_layout_impl p{lyt, os};
 
@@ -325,7 +326,9 @@ void write_sqd_layout(const Lyt& lyt, const std::string& filename)
     std::ofstream os{filename.c_str(), std::ofstream::out};
 
     if (!os.is_open())
+    {
         throw std::ofstream::failure("could not open file");
+    }
 
     write_sqd_layout(lyt, os);
     os.close();

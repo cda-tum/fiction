@@ -149,7 +149,9 @@ class fanout_substitution_impl
         if constexpr (has_is_fanout_v<NtkDest>)
         {
             if (ntk_topo.is_fanout(n) && ntk_topo.fanout_size(n) <= ps.degree)
+            {
                 return;
+            }
         }
 
         auto num_fanouts = static_cast<uint32_t>(
@@ -160,7 +162,9 @@ class fanout_substitution_impl
         auto child = old2new[n];
 
         if (num_fanouts == 0)
+        {
             return;
+        }
 
         if (ps.strategy == fanout_substitution_params::substitution_strategy::DEPTH)
         {
@@ -182,7 +186,10 @@ class fanout_substitution_impl
                 q.pop();
                 child = substituted.create_buf(child);
 
-                for (auto i = 0u; i < ps.degree; ++i) q.push(child);
+                for (auto i = 0u; i < ps.degree; ++i)
+                {
+                    q.push(child);
+                }
             }
             available_fanouts[n] = q;
         }
@@ -199,9 +206,13 @@ class fanout_substitution_impl
                 do {
                     child = fanouts.front();
                     if (substituted.fanout_size(child) >= ps.degree)
+                    {
                         fanouts.pop();
+                    }
                     else
+                    {
                         break;
+                    }
                 } while (true);
             }
         }
@@ -223,7 +234,9 @@ class is_fanout_substituted_impl
             {
                 // skip constants
                 if (ntk.is_constant(n))
+                {
                     return substituted;
+                }
 
                 // check degree of fanout nodes
                 if constexpr (fiction::has_is_fanout_v<Ntk>)

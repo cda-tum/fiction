@@ -27,6 +27,9 @@ struct port_position
      * Default constructor.
      */
     constexpr port_position() = default;
+
+    // NOLINTBEGIN(readability-identifier-naming)
+
     /**
      * Standard constructor.
      */
@@ -36,6 +39,9 @@ struct port_position
             pi{pi_},
             po{po_}
     {}
+
+    // NOLINTEND(readability-identifier-naming)
+
     /**
      * Positions.
      */
@@ -93,6 +99,9 @@ struct port_direction
      * Default constructor.
      */
     constexpr port_direction() = default;
+
+    // NOLINTBEGIN(readability-identifier-naming)
+
     /**
      * Standard constructor.
      */
@@ -101,6 +110,9 @@ struct port_direction
             pi{pi_},
             po{po_}
     {}
+
+    // NOLINTEND(readability-identifier-naming)
+
     /**
      * Direction.
      */
@@ -153,7 +165,10 @@ struct port_list
     /**
      * Standard constructor.
      */
-    port_list(std::set<PortType> inp_, std::set<PortType> out_) : inp{std::move(inp_)}, out{std::move(out_)} {}
+    port_list(std::set<PortType> input_ports, std::set<PortType> output_ports) :
+            inp{std::move(input_ports)},
+            out{std::move(output_ports)}
+    {}
     /**
      * Input and output positions.
      */

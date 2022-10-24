@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <vector>
 
 namespace fiction
@@ -32,7 +33,7 @@ class aspect_ratio_iterator
      *
      * @param n Starting value of the aspect ratio iteration.
      */
-    explicit aspect_ratio_iterator(uint64_t n = 0ul) noexcept : num{n ? n - 1 : 0}
+    explicit aspect_ratio_iterator([[maybe_unused]] uint64_t n = 0ul) noexcept : num{n != 0ul ? n - 1 : 0ul}
     {
         next();
     }
@@ -122,7 +123,7 @@ class aspect_ratio_iterator
     /**
      * Number to factorize into dimensions.
      */
-    uint64_t num;
+    uint64_t num{};
     /**
      * Factors of num.
      */
