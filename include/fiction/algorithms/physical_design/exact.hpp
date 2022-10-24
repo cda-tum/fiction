@@ -2347,11 +2347,11 @@ class exact_impl
 
                 for (const auto& i : port.inp)
                 {
-                    iop.push_back(not get_tc(port_direction_to_coordinate(layout, t, i), t));
+                    iop.push_back(!(get_tc(port_direction_to_coordinate(layout, t, i), t)));
                 }
                 for (const auto& o : port.out)
                 {
-                    iop.push_back(not get_tc(t, port_direction_to_coordinate(layout, t, o)));
+                    iop.push_back(!(get_tc(t, port_direction_to_coordinate(layout, t, o))));
                 }
 
                 return iop;
@@ -2374,7 +2374,7 @@ class exact_impl
                                 {
                                     if (ports.empty())
                                     {
-                                        solver->add(not get_tn(t, n));
+                                        solver->add(!(get_tn(t, n)));
                                     }
                                     else
                                     {
@@ -2398,7 +2398,7 @@ class exact_impl
                                          {
                                              if (ports.empty())
                                              {
-                                                 solver->add(not get_te(t, e));
+                                                 solver->add(!(get_te(t, e)));
                                              }
                                              for (const auto& p : ports)
                                              {
