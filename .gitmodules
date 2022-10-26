@@ -4,3 +4,6 @@
 [submodule "libs/mockturtle"]
 	path = libs/mockturtle
 	url = https://github.com/marcelwa/mockturtle.git
+[submodule "experiments/crossing_synthesis/4-input-npn-exact"]
+	path = experiments/crossing_synthesis/4-input-npn-exact
+	url = https://github.com/mdsudara/4-input-npn-exact.git
