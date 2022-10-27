@@ -975,7 +975,7 @@ template <class Lyt, class Drawer>
 void write_dot_layout(const Lyt& lyt, const std::string& filename, const Drawer& drawer = {})
 {
     std::ofstream os{filename.c_str(), std::ofstream::out};
-    write_dot(lyt, os, drawer);
+    write_dot_layout(lyt, os, drawer);
     os.close();
 }
 
