@@ -551,9 +551,11 @@ TEST_CASE("Node functions of a technology network", "[technology-network]")
     technology_network tec{};
 
     CHECK(mockturtle::has_is_and_v<technology_network>);
+    CHECK(fiction::has_is_nand_v<technology_network>);
     CHECK(mockturtle::has_is_or_v<technology_network>);
-    CHECK(mockturtle::has_is_or_v<technology_network>);
+    CHECK(fiction::has_is_nor_v<technology_network>);
     CHECK(mockturtle::has_is_xor_v<technology_network>);
+    CHECK(fiction::has_is_xnor_v<technology_network>);
     CHECK(mockturtle::has_is_maj_v<technology_network>);
     CHECK(mockturtle::has_is_ite_v<technology_network>);
     CHECK(mockturtle::has_is_xor3_v<technology_network>);
