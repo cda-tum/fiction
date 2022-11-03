@@ -2086,7 +2086,7 @@ class exact_impl
                             [this, &t](const auto& inv)
                             {
                                 // skip all operations except for inverters
-                                if (network.is_inv(inv))
+                                if (network.is_not(inv))
                                 {
                                     // I/Os inverters are always straight, so they can be skipped as well
                                     if (!skip_const_or_io_node(inv))
@@ -2253,7 +2253,7 @@ class exact_impl
                                     // only argue about AND/OR/MAJ/fan-out and, additionally, about NOT if straight
                                     // inverters are enforced
                                     if (network.is_and(n2) || network.is_or(n2) || network.is_maj(n2) ||
-                                        network.is_fanout(n2) || (network.is_inv(n2) && params.straight_inverters))
+                                        network.is_fanout(n2) || (network.is_not(n2) && params.straight_inverters))
                                     {
                                         layout.foreach_ground_tile(
                                             [this, &n1, &n2](const auto& t)

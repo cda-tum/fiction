@@ -75,7 +75,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             return "&";
         else if (layout.is_or(n))
             return "|";
-        else if (layout.is_inv(n))
+        else if (layout.is_not(n))
             return "¬";
         else if (layout.is_maj(n))
             return "M";

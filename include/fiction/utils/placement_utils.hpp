@@ -122,9 +122,9 @@ template <typename Lyt, typename Ntk>
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
-    if constexpr (has_is_inv_v<Ntk>)
+    if constexpr (mockturtle::has_is_not_v<Ntk>)
     {
-        if (ntk.is_inv(n))
+        if (ntk.is_not(n))
         {
             return lyt.create_not(a, t);
         }

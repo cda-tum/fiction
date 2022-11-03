@@ -60,7 +60,7 @@ namespace fiction
  * - each node has an associated gate function. PIs, POs, and buffers compute the identity function.
  *
  * - signals (pointers to tiles) cannot be inverting. Thereby, inverter nodes (gates) have to be created that can be
- * checked for via is_inv.
+ * checked for via is_not.
  *
  * - each create_... function requires a tile parameter that determines its placement. If the provided tile is dead, the
  * location will not be stored and the node will not count towards number of gates or wires.
@@ -741,7 +741,7 @@ class gate_level_layout : public ClockedLayout
      * @param n Node to check.
      * @return True iff n is a NOT gate.
      */
-    [[nodiscard]] bool is_inv(const node n) const noexcept
+    [[nodiscard]] bool is_not(const node n) const noexcept
     {
         return strg->nodes[n].data[1].h1 == 3;
     }

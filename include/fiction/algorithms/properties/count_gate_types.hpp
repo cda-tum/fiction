@@ -104,9 +104,9 @@ class count_gate_types_impl
                             return true;
                         }
                     }
-                    if constexpr (fiction::has_is_inv_v<Ntk>)
+                    if constexpr (mockturtle::has_is_not_v<Ntk>)
                     {
-                        if (ntk.is_inv(n))
+                        if (ntk.is_not(n))
                         {
                             ++pst.num_inv;
                             return true;

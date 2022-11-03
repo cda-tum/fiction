@@ -247,7 +247,7 @@ class technology_network : public mockturtle::klut_network
      * @param n Node to consider.
      * @return True iff n is an inverter node.
      */
-    [[nodiscard]] bool is_inv(const node& n) const noexcept
+    [[nodiscard]] bool is_not(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 3;
     }

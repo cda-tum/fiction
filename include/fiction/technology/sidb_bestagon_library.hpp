@@ -92,9 +92,9 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
                     }
                 }
             }
-            if constexpr (fiction::has_is_inv_v<Lyt>)
+            if constexpr (mockturtle::has_is_not_v<Lyt>)
             {
-                if (lyt.is_inv(n))
+                if (lyt.is_not(n))
                 {
                     return inverter_map.at(p);
                 }
@@ -169,7 +169,7 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
             p.out.emplace(port_direction::cardinal::SOUTH_WEST);
 
         // has no connector ports
-        if (const auto n = lyt.get_node(t); !lyt.is_wire(n) && !lyt.is_inv(n))
+        if (const auto n = lyt.get_node(t); !lyt.is_wire(n) && !lyt.is_not(n))
         {
             if (lyt.has_no_incoming_signal(t))
                 p.inp.emplace(port_direction::cardinal::NORTH_WEST);

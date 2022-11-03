@@ -53,6 +53,13 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
         {
             return "snow2";
         }
+        if constexpr (mockturtle::has_is_not_v<Ntk>)
+        {
+            if (ntk.is_not(n))
+            {
+                return "paleturquoise";
+            }
+        }
         if constexpr (has_is_fanout_v<Ntk>)
         {
             if (ntk.is_fanout(n))
@@ -65,13 +72,6 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
             if (ntk.is_buf(n) && !ntk.is_ci(n))
             {
                 return "palegoldenrod";
-            }
-        }
-        if constexpr (has_is_inv_v<Ntk>)
-        {
-            if (ntk.is_inv(n))
-            {
-                return "paleturquoise";
             }
         }
         if constexpr (has_is_nand_v<Ntk>)
@@ -102,6 +102,13 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
   private:
     [[nodiscard]] std::string node_label_callback(const Ntk& ntk, const mockturtle::node<Ntk>& n) const
     {
+        if constexpr (mockturtle::has_is_not_v<Ntk>)
+        {
+            if (ntk.is_not(n))
+            {
+                return "INV";
+            }
+        }
         if constexpr (has_is_fanout_v<Ntk>)
         {
             if (ntk.is_fanout(n))
@@ -114,13 +121,6 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
             if (ntk.is_buf(n) && !ntk.is_ci(n))
             {
                 return "BUF";
-            }
-        }
-        if constexpr (has_is_inv_v<Ntk>)
-        {
-            if (ntk.is_inv(n))
-            {
-                return "INV";
             }
         }
         if constexpr (has_is_nand_v<Ntk>)

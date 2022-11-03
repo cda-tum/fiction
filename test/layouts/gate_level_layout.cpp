@@ -883,9 +883,9 @@ TEST_CASE("Functional properties", "[gate-level-layout]")
     CHECK(layout.is_maj(layout.get_node(m)));
     CHECK(layout.is_fanout(layout.get_node(f)));
     CHECK(layout.is_wire(layout.get_node(w)));
-    CHECK(!layout.is_inv(layout.get_node(w)));
+    CHECK(!layout.is_not(layout.get_node(w)));
 
-    CHECK(layout.is_inv(layout.get_node(n)));
+    CHECK(layout.is_not(layout.get_node(n)));
     CHECK(!layout.is_wire(layout.get_node(n)));
     CHECK(layout.is_po(layout.get_node(po)));
 

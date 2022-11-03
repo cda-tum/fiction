@@ -171,9 +171,9 @@ class qca_energy_dissipation_impl
                             return true;
                         }
                     }
-                    if constexpr (fiction::has_is_inv_v<Lyt>)
+                    if constexpr (mockturtle::has_is_not_v<Lyt>)
                     {
-                        if (lyt.is_inv(n))
+                        if (lyt.is_not(n))
                         {
                             // straight inverter
                             if (const auto t = lyt.get_tile(n); lyt.has_opposite_incoming_and_outgoing_signals(t))

@@ -80,9 +80,9 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
 
         try
         {
-            if constexpr (fiction::has_is_inv_v<GateLyt>)
+            if constexpr (mockturtle::has_is_not_v<GateLyt>)
             {
-                if (lyt.is_inv(n))
+                if (lyt.is_not(n))
                 {
                     return inverter_map.at(p);
                 }
@@ -374,8 +374,8 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
     template <typename Lyt>
     [[nodiscard]] static port_list<port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
     {
-        static_assert(fiction::has_is_inv_v<Lyt>, "Lyt must implement the is_inv function");
         static_assert(fiction::has_is_po_v<Lyt>, "Lyt must implement the is_po function");
+        static_assert(mockturtle::has_is_not_v<Lyt>, "Lyt must implement the is_not function");
         static_assert(mockturtle::has_is_pi_v<Lyt>, "Lyt must implement the is_pi function");
         static_assert(mockturtle::has_is_and_v<Lyt>, "Lyt must implement the is_and function");
         static_assert(mockturtle::has_is_or_v<Lyt>, "Lyt must implement the is_or function");
@@ -491,7 +491,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
             }
             if (lyt.has_south_western_incoming_signal(t))
             {
-                if (lyt.is_po(n) || lyt.is_inv(n))
+                if (lyt.is_po(n) || lyt.is_not(n))
                 {
                     // special case: if predecessor is AND, OR, MAJ, input port is at (0,3)
                     if (has_and_or_maj_fanin(lyt, n))

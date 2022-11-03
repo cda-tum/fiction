@@ -254,9 +254,9 @@ bool has_straight_inverters(const Lyt& lyt) noexcept
     lyt.foreach_gate(
         [&lyt, &only_straight_inverters](const auto& g)
         {
-            if constexpr (has_is_inv_v<Lyt>)
+            if constexpr (mockturtle::has_is_not_v<Lyt>)
             {
-                if (lyt.is_inv(g))
+                if (lyt.is_not(g))
                 {
                     if (!lyt.has_opposite_incoming_and_outgoing_signals(lyt.get_tile(g)))
                     {

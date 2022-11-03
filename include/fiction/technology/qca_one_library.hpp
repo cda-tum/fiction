@@ -66,9 +66,9 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
                 if (lyt.is_buf(n))
                     return wire_map.at(p);
             }
-            if constexpr (fiction::has_is_inv_v<GateLyt>)
+            if constexpr (mockturtle::has_is_not_v<GateLyt>)
             {
-                if (lyt.is_inv(n))
+                if (lyt.is_not(n))
                     return inverter_map.at(p);
             }
             if constexpr (mockturtle::has_is_and_v<GateLyt>)
@@ -159,7 +159,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
             p.out.emplace(0u, 2u);
 
         // has no connector ports
-        if (const auto n = lyt.get_node(t); !lyt.is_wire(n) && !lyt.is_inv(n))
+        if (const auto n = lyt.get_node(t); !lyt.is_wire(n) && !lyt.is_not(n))
         {
             if (lyt.has_no_incoming_signal(t))
                 p.inp.emplace(0u, 2u);
