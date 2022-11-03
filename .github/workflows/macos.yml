@@ -53,7 +53,7 @@ jobs:
           xcode-version: "^13.2"
 
       - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@v1.2.4
         with:
           key: "ccache-${{matrix.os}}-${{matrix.compiler}}-${{matrix.build_type}}"
           variant: ccache
