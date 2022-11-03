@@ -9,7 +9,6 @@
 [![Documentation Status](https://img.shields.io/readthedocs/fiction?logo=readthedocs)](https://fiction.readthedocs.io/)
 [![Release](https://img.shields.io/github/v/tag/marcelwa/fiction?label=fiction&logo=github&logoColor=darkgray)](https://github.com/marcelwa/fiction/releases)
 [![License](https://img.shields.io/github/license/marcelwa/fiction)](https://github.com/marcelwa/fiction/blob/main/LICENSE.txt)
-[![Clang-Tidy](https://img.shields.io/github/workflow/status/marcelwa/fiction/Clang-Tidy%20Review?label=Clang-Tidy&logo=LLVM)](https://github.com/marcelwa/fiction/actions/workflows/clang-tidy-review.yml)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/marcelwa/fiction.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/marcelwa/fiction/context:cpp)
 
 This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
