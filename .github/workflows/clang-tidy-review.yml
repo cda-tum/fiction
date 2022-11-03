@@ -22,11 +22,6 @@ jobs:
           exclude: 'libs/*, docs/*, benchmarks/*, bib/*, */catch2/*.hpp'
           split_workflow: true
 
-        # If there are any comments, fail the check
-      - name: Fail check if there are any comments
-        if: steps.review.outputs.total_comments > 0
-        run: exit 1
-
       - name: Upload review artifact
         uses: actions/upload-artifact@v3
         with:
