@@ -10,7 +10,6 @@
 #include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/network_utils.hpp"
 
-#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/topo_view.hpp>
@@ -199,10 +198,14 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                     const auto buf2 = ntk_dest.get_node(old2new[gn]);
                     assert(buf1 != buf2);
 
-                    ntk_dest.merge_into_crossing(buf1, buf2);
-                });
+                    [[maybe_unused]] const auto cross_node = ntk_dest.merge_into_crossing(buf1, buf2);
 
-            ntk_dest = mockturtle::cleanup_dangling(ntk_dest);
+                    if constexpr (mockturtle::has_swap_v<NtkDest>)  // if rank information is available
+                    {
+                        // insert the crossing node at the same position as the original buffer node
+                        ntk_dest.swap(buf1, cross_node);
+                    }
+                });
         }
 
         return ntk_dest;
