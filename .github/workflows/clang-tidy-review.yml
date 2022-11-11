@@ -13,7 +13,7 @@ jobs:
           submodules: recursive
 
       - name: Review code with Clang-Tidy
-        uses: ZedThree/clang-tidy-review@v0.10.0
+        uses: ZedThree/clang-tidy-review@v0.10.1
         id: review
         with:
           cmake_command: cmake . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_EXPERIMENTS=ON -DMOCKTURTLE_EXAMPLES=OFF
