@@ -39,4 +39,4 @@ jobs:
 
       # Posts the comments
       - name: Post review comments
-        uses: ZedThree/clang-tidy-review/post@v0.10.0
+        uses: ZedThree/clang-tidy-review/post@v0.10.1
