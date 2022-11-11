@@ -168,6 +168,13 @@ class exact_impl
 
     std::optional<Lyt> run()
     {
+        // if network is empty, return an empty layout
+        // that is expressed by the following conditional because each PO is substituted with a buffer already
+        if (ntk->num_gates() == ntk->num_pos())
+        {
+            return assign_empty_layout();
+        }
+
         if (ps.num_threads > 1)
         {
             return run_asynchronously();
@@ -588,7 +595,10 @@ class exact_impl
                 std::set<tile<Lyt>> added_tiles{};
                 for (decltype(ar.y) y = 0; y <= ar.y; ++y)
                 {
-                    for (decltype(ar.x) x = 0; x <= ar.x; ++x) { added_tiles.emplace(x, y); }
+                    for (decltype(ar.x) x = 0; x <= ar.x; ++x)
+                    {
+                        added_tiles.emplace(x, y);
+                    }
                 }
 
                 // create new state
@@ -805,7 +815,10 @@ class exact_impl
         [[nodiscard]] z3::expr mk_eq(const z3::expr_vector& v) const
         {
             z3::expr_vector eq{*ctx};
-            for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i) { eq.push_back(v[i - 1] == v[i]); }
+            for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i)
+            {
+                eq.push_back(v[i - 1] == v[i]);
+            }
 
             return z3::mk_and(eq);
         }
@@ -1036,7 +1049,10 @@ class exact_impl
                     // ints over reals is due to Z3's quantifier-free finite domain (QF_FD) solver.
                     // TL;DR one-hot encoding rules!
                     z3::expr_vector tcl{*ctx};
-                    for (auto i = 0u; i < layout.num_clocks(); ++i) { tcl.push_back(get_tcl(t, i)); }
+                    for (auto i = 0u; i < layout.num_clocks(); ++i)
+                    {
+                        tcl.push_back(get_tcl(t, i));
+                    }
                     solver->add(z3::atleast(tcl, 1) and z3::atmost(tcl, 1));
                 });
         }
@@ -1375,7 +1391,10 @@ class exact_impl
                     [this](const auto& n)
                     {
                         z3::expr_vector ncl{*ctx};
-                        for (auto i = 0u; i < layout.num_clocks(); ++i) { ncl.push_back(get_ncl(n, i)); }
+                        for (auto i = 0u; i < layout.num_clocks(); ++i)
+                        {
+                            ncl.push_back(get_ncl(n, i));
+                        }
                         solver->add(z3::atleast(ncl, 1) and z3::atmost(ncl, 1));
                     });
 
@@ -1658,7 +1677,11 @@ class exact_impl
                                 const auto aon  = network_out_degree(n);
                                 const auto iaon = network_in_degree(n);
 
-                                ow.push_back(tn);
+                                // for nodes without connections to the rest of the network, optimizations do not apply
+                                if (!(aon == 0 && iaon == 0))
+                                {
+                                    ow.push_back(tn);
+                                }
 
                                 // if node n is assigned to a tile, the number of connections need to correspond
                                 if (!acc.empty())
@@ -2457,10 +2480,16 @@ class exact_impl
                 auto optimizer = std::make_shared<z3::optimize>(*ctx);
 
                 // add all solver constraints
-                for (const auto& e : solver->assertions()) { optimizer->add(e); }
+                for (const auto& e : solver->assertions())
+                {
+                    optimizer->add(e);
+                }
 
                 // add assumptions as constraints, too, because optimize::check with assumptions is broken
-                for (const auto& e : check_point->assumptions) { optimizer->add(e); }
+                for (const auto& e : check_point->assumptions)
+                {
+                    optimizer->add(e);
+                }
 
                 // wire minimization constraints
                 if (wires)
@@ -2671,6 +2700,20 @@ class exact_impl
         }
     };
 
+    /**
+     * Returns an empty layout for the case that the given network is empty. This prevents calling the SMT solver.
+     *
+     * @return An empty layout with the given clocking scheme and restored PI names.
+     */
+    Lyt assign_empty_layout()
+    {
+        Lyt layout{{ntk->num_pis() - 1, 0}, *ps.scheme};
+
+        ntk->foreach_pi([&layout](const auto& pi, const auto i) { layout.create_pi("", {i, 0}); });
+        restore_names(*ntk, layout);
+
+        return layout;
+    }
     /**
      * Calculates the time left for solving by subtracting the time passed from the configured timeout and updates
      * Z3's timeout accordingly.
