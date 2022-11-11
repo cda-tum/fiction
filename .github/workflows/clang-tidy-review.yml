@@ -23,8 +23,19 @@ jobs:
           split_workflow: true
 
       - name: Make sure that the review file exists
-        run: |
-          touch clang-tidy-review-metadata.json
+        id: check-review-output
+        uses: andstor/file-existence-action@v2.0.0
+        with:
+          files: "clang-tidy-review.json"
+          ignore_case: true
+
+      # Workaround to fix an issue with non-existing review artifacts in the review posting workflow
+      - name: Create empty review artifact
+        if: steps.check-review-output.outputs.files_exists == 'false'
+        uses: finnp/create-file-action@1.0.0
+        env:
+          FILE_NAME: "clang-tidy-review.json"
+          FILE_DATA: "{}"
 
       - name: Upload review artifact
         uses: actions/upload-artifact@v3
