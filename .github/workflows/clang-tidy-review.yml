@@ -12,18 +12,35 @@ jobs:
         with:
           submodules: recursive
 
-      # Optionally generate compile_commands.json
-
       - name: Review code with Clang-Tidy
         uses: ZedThree/clang-tidy-review@v0.10.0
+        id: review
         with:
           cmake_command: cmake . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_EXPERIMENTS=ON -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
           config_file: '.clang-tidy'
           exclude: 'libs/*, docs/*, benchmarks/*, bib/*, */catch2/*.hpp'
-        id: review
+          split_workflow: true
 
-        # If there are any comments, fail the check
-      - name: Fail check if there are any comments
-        if: steps.review.outputs.total_comments > 0
-        run: exit 1
+      - name: Make sure that the review file exists
+        id: check-review-output
+        uses: andstor/file-existence-action@v2.0.0
+        with:
+          files: "clang-tidy-review-output.json"
+          ignore_case: true
+
+      # Workaround to fix an issue with non-existing review artifacts in the review posting workflow
+      - name: Create empty review artifact
+        if: steps.check-review-output.outputs.files_exists == 'false'
+        uses: finnp/create-file-action@1.0.0
+        env:
+          FILE_NAME: "clang-tidy-review-output.json"
+          FILE_DATA: "{}"
+
+      - name: Upload review artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: clang-tidy-review
+          path: |
+            clang-tidy-review-output.json
+            clang-tidy-review-metadata.json
