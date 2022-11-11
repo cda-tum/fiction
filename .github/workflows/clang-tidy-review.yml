@@ -22,9 +22,8 @@ jobs:
           exclude: 'libs/*, docs/*, benchmarks/*, bib/*, */catch2/*.hpp'
           split_workflow: true
 
-      - name: Make sure both review files exist
+      - name: Make sure that the review file exists
         run: |
-          touch clang-tidy-review-output.json
           touch clang-tidy-review-metadata.json
 
       - name: Upload review artifact
