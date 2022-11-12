@@ -119,6 +119,11 @@ struct exact_physical_design_params
      * Technology-specific constraints that are only to be added for a certain target technology.
      */
     technology_constraints technology_specifics = technology_constraints::NONE;
+    /**
+     * If not empty, enforces a specific PI permutation in the resulting layout. The vector must contain the PI indices
+     * in the order they should be placed.
+     */
+    std::vector<uint32_t> pi_permutation{};
 };
 /**
  * Statistics.
@@ -337,6 +342,8 @@ class exact_impl
         [[nodiscard]] bool is_satisfiable()
         {
             generate_smt_instance();
+
+            //            std::cout << solver->assertions() << std::endl;
 
             switch (solver->check(check_point->assumptions))
             {
@@ -815,7 +822,7 @@ class exact_impl
         [[nodiscard]] z3::expr mk_eq(const z3::expr_vector& v) const
         {
             z3::expr_vector eq{*ctx};
-            for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i)
+            for (auto i = 1u; i < v.size(); ++i)
             {
                 eq.push_back(v[i - 1] == v[i]);
             }
@@ -2334,6 +2341,62 @@ class exact_impl
             // more target technology constraints go here
         }
         /**
+         * Adds constraints to the solver that ensure a PI permutation on the layout as specified by the parameters.
+         */
+        void enforce_pi_permutation()
+        {
+            assert(params.pi_permutation.size() == network.num_pis());
+
+            std::vector<mockturtle::node<Ntk>> pi_order(network.num_pis());
+            // create a vector of PIs in the order specified by the parameters
+            std::generate(pi_order.rbegin(), pi_order.rend(),
+                          [this, i = 0u]() mutable { return network.pi_at(params.pi_permutation[i++]); });
+
+            // for each PI pi1 in reverse permutation order
+            std::for_each(pi_order.cbegin(), pi_order.cend(),
+                          [this, &pi_order, i = 1u](const auto& pi1) mutable
+                          {
+                              // for each tile t1
+                              layout.foreach_ground_tile(
+                                  [this, &pi_order, &pi1, i](const auto& t1)
+                                  {
+                                      z3::expr_vector pit{*ctx};
+
+                                      // for each PI that comes before pi1 in the permutation order
+                                      std::for_each(pi_order.cbegin() + i, pi_order.cend(),
+                                                    [this, &t1, &pit](const auto& pi2)
+                                                    {
+                                                        // for each other tile t2
+                                                        layout.foreach_ground_tile(
+                                                            [this, &t1, &pi2, &pit](const auto& t2)
+                                                            {
+                                                                if (t1 < t2)
+                                                                {
+                                                                    pit.push_back(!get_tn(t2, pi2));
+                                                                }
+                                                                // if (t2 >= t1)
+                                                                // {
+                                                                //     pit.push_back(get_tn(t2, pi2));
+                                                                // }
+                                                            });
+                                                    });
+
+                                      if (!pit.empty())
+                                      {
+                                          // if pi1 is placed on t1, then no PI that comes before pi1 can be placed on a
+                                          // later tile as determined by operator>
+                                          solver->add(z3::implies(get_tn(t1, pi1), z3::mk_and(pit)));
+                                      }
+                                      // if (!pit.empty())
+                                      // {
+                                      //     solver->add(!get_tn(t1, pi1) || z3::mk_or(pit));
+                                      // }
+                                  });
+
+                              ++i;
+                          });
+        }
+        /**
          * Adds constraints to the given optimize to minimize the number of crossing tiles to use.
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
@@ -2455,6 +2518,12 @@ class exact_impl
 
             // technology-specific constraints
             technology_specific_constraints();
+
+            // PI permutation constraints
+            if (!params.pi_permutation.empty())
+            {
+                enforce_pi_permutation();
+            }
 
             // symmetry breaking constraints
             prevent_insufficiencies();
@@ -2709,7 +2778,7 @@ class exact_impl
     {
         Lyt layout{{ntk->num_pis() - 1, 0}, *ps.scheme};
 
-        ntk->foreach_pi([&layout](const auto& pi, const auto i) { layout.create_pi("", {i, 0}); });
+        ntk->foreach_pi([&layout](const auto&, const auto i) { layout.create_pi("", {i, 0}); });
         restore_names(*ntk, layout);
 
         return layout;

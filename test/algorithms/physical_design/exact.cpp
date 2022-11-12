@@ -157,6 +157,15 @@ exact_physical_design_params<Lyt>&& async(const std::size_t t, exact_physical_de
 }
 
 template <typename Lyt>
+exact_physical_design_params<Lyt>&& permutation(const std::vector<uint32_t>&        perm,
+                                                exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.pi_permutation = perm;
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
 exact_physical_design_params<Lyt>&& minimize_wires(exact_physical_design_params<Lyt>&& ps) noexcept
 {
     ps.minimize_wires = true;
@@ -359,18 +368,41 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
             blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
             use(border_io(sync_elems(configuration<cart_gate_clk_lyt>()))));
     }
-    SECTION("Minimize wires")
+    SECTION("PI permutation")
     {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
-            blueprints::one_to_five_path_difference_network<mockturtle::aig_network>(),
-            res(crossings(minimize_wires(configuration<cart_gate_clk_lyt>()))));
+        SECTION("0 < 1 < 2")
+        {
+            const auto lyt = generate_layout<cart_gate_clk_lyt>(
+                blueprints::mux21_network<technology_network>(),
+                twoddwave(
+                    crossings(border_io(desynchronize(permutation({0, 1, 2}, configuration<cart_gate_clk_lyt>()))))));
+
+            CHECK(lyt.get_tile(lyt.pi_at(0)) < lyt.get_tile(lyt.pi_at(1)));
+            CHECK(lyt.get_tile(lyt.pi_at(1)) < lyt.get_tile(lyt.pi_at(2)));
+        }
+        SECTION("2 < 1 < 0")
+        {
+            const auto lyt = generate_layout<cart_gate_clk_lyt>(
+                blueprints::mux21_network<technology_network>(),
+                twoddwave(
+                    crossings(border_io(desynchronize(permutation({2, 1, 0}, configuration<cart_gate_clk_lyt>()))))));
+
+            CHECK(lyt.get_tile(lyt.pi_at(2)) < lyt.get_tile(lyt.pi_at(1)));
+            CHECK(lyt.get_tile(lyt.pi_at(1)) < lyt.get_tile(lyt.pi_at(0)));
+        }
     }
-    SECTION("Minimize crossings")
-    {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
-            blueprints::one_to_five_path_difference_network<mockturtle::aig_network>(),
-            res(crossings(minimize_crossings(configuration<cart_gate_clk_lyt>()))));
-    }
+    //    SECTION("Minimize wires")
+    //    {
+    //        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
+    //            blueprints::one_to_five_path_difference_network<mockturtle::aig_network>(),
+    //            res(crossings(minimize_wires(configuration<cart_gate_clk_lyt>()))));
+    //    }
+    //    SECTION("Minimize crossings")
+    //    {
+    //        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
+    //            blueprints::one_to_five_path_difference_network<mockturtle::aig_network>(),
+    //            res(crossings(minimize_crossings(configuration<cart_gate_clk_lyt>()))));
+    //    }
 }
 
 TEST_CASE("Exact shifted Cartesian physical design", "[exact]")
@@ -468,6 +500,29 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         {
             CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
                                                                   use(straight_inverter(configuration<hex_lyt>())))));
+        }
+        SECTION("PI permutations")
+        {
+            SECTION("0 < 1 < 2")
+            {
+                const auto lyt = generate_layout<hex_even_row_gate_clk_lyt>(
+                    blueprints::mux21_network<technology_network>(),
+                    row(crossings(
+                        border_io(desynchronize(permutation({0, 1, 2}, configuration<hex_even_row_gate_clk_lyt>()))))));
+
+                CHECK(lyt.get_tile(lyt.pi_at(0)) < lyt.get_tile(lyt.pi_at(1)));
+                CHECK(lyt.get_tile(lyt.pi_at(1)) < lyt.get_tile(lyt.pi_at(2)));
+            }
+            SECTION("2 < 0 < 1")
+            {
+                const auto lyt = generate_layout<hex_even_row_gate_clk_lyt>(
+                    blueprints::mux21_network<technology_network>(),
+                    row(crossings(
+                        border_io(desynchronize(permutation({2, 0, 1}, configuration<hex_even_row_gate_clk_lyt>()))))));
+
+                CHECK(lyt.get_tile(lyt.pi_at(2)) < lyt.get_tile(lyt.pi_at(0)));
+                CHECK(lyt.get_tile(lyt.pi_at(0)) < lyt.get_tile(lyt.pi_at(1)));
+            }
         }
     }
     SECTION("odd column")
