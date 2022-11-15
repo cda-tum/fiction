@@ -56,41 +56,44 @@ class read_sqd_layout_impl
             throw sqd_parsing_error("Error parsing SQD file: " + std::string(xml_document.ErrorName()));
         }
 
-        if (const auto siqad_root = xml_document.FirstChildElement("siqad"); siqad_root == nullptr)
+        auto* const siqad_root = xml_document.FirstChildElement("siqad");
+
+        if (siqad_root == nullptr)
         {
             throw sqd_parsing_error("Error parsing SQD file: no root element 'siqad'");
         }
-        else
+
+        const auto* const design_element = siqad_root->FirstChildElement("design");
+
+        if (design_element == nullptr)
         {
-            if (const auto design_element = siqad_root->FirstChildElement("design"); design_element == nullptr)
+            throw sqd_parsing_error("Error parsing SQD file: no element 'design'");
+        }
+
+        for (const auto* layer = design_element->FirstChildElement("layer"); layer != nullptr;
+             layer             = layer->NextSiblingElement("layer"))
+        {
+            const auto* const layer_type = layer->Attribute("type");
+
+            if (layer_type == nullptr)
             {
-                throw sqd_parsing_error("Error parsing SQD file: no element 'design'");
+                throw sqd_parsing_error("Error parsing SQD file: no attribute 'type' in element 'layer'");
             }
-            else
+
+            if (layer_type == std::string{"DB"})
             {
-                for (auto layer = design_element->FirstChildElement("layer"); layer != nullptr;
-                     layer      = layer->NextSiblingElement("layer"))
+                for (const auto* db_dot = layer->FirstChildElement("dbdot"); db_dot != nullptr;
+                     db_dot             = db_dot->NextSiblingElement("dbdot"))
                 {
-                    if (const auto layer_type = layer->Attribute("type"); layer_type == nullptr)
-                    {
-                        throw sqd_parsing_error("Error parsing SQD file: no attribute 'type' in element 'layer'");
-                    }
-                    else if (layer_type == std::string{"DB"})
-                    {
-                        for (auto db_dot = layer->FirstChildElement("dbdot"); db_dot != nullptr;
-                             db_dot      = db_dot->NextSiblingElement("dbdot"))
-                        {
-                            parse_db_dot(db_dot);
-                        }
-                    }
-                    else if (layer_type == std::string{"Defects"})
-                    {
-                        for (auto defect = layer->FirstChildElement("defect"); defect != nullptr;
-                             defect      = defect->NextSiblingElement("defect"))
-                        {
-                            parse_defect(defect);
-                        }
-                    }
+                    parse_db_dot(db_dot);
+                }
+            }
+            else if (layer_type == std::string{"Defects"})
+            {
+                for (const auto* defect = layer->FirstChildElement("defect"); defect != nullptr;
+                     defect             = defect->NextSiblingElement("defect"))
+                {
+                    parse_defect(defect);
                 }
             }
         }
@@ -155,15 +158,14 @@ class read_sqd_layout_impl
      */
     cell<Lyt> parse_latcoord(const tinyxml2::XMLElement* latcoord)
     {
-        if (const auto n = latcoord->Attribute("n"), m = latcoord->Attribute("m"), l = latcoord->Attribute("l");
-            n == nullptr || m == nullptr || l == nullptr)
+        const auto n = latcoord->Attribute("n"), m = latcoord->Attribute("m"), l = latcoord->Attribute("l");
+
+        if (n == nullptr || m == nullptr || l == nullptr)
         {
             throw sqd_parsing_error("Error parsing SQD file: no attribute 'n', 'm' or 'l' in element 'latcoord'");
         }
-        else
-        {
-            return dimer_to_cell(std::stoll(n), std::stoll(m), std::stoll(l));
-        }
+
+        return dimer_to_cell(std::stoll(n), std::stoll(m), std::stoll(l));
     }
     /**
      * Parses a <dbdot> element from the SQD file and adds the respective dot to the layout.
@@ -172,14 +174,14 @@ class read_sqd_layout_impl
      */
     void parse_db_dot(const tinyxml2::XMLElement* db_dot)
     {
-        if (const auto latcoord = db_dot->FirstChildElement("latcoord"); latcoord == nullptr)
+        const auto* const latcoord = db_dot->FirstChildElement("latcoord");
+
+        if (latcoord == nullptr)
         {
             throw sqd_parsing_error("Error parsing SQD file: no element 'latcoord' in element 'dbdot'");
         }
-        else
-        {
-            lyt.assign_cell_type(parse_latcoord(latcoord), sidb_technology::cell_type::NORMAL);
-        }
+
+        lyt.assign_cell_type(parse_latcoord(latcoord), sidb_technology::cell_type::NORMAL);
     }
     /**
      * Parses a <val> attribute of a <type_label> element of a <property_map> element from the SQD file and converts it
@@ -227,10 +229,10 @@ class read_sqd_layout_impl
             sidb_defect_type       defect_type{sidb_defect_type::UNKNOWN};
             double                 charge{0.0}, eps_r{0.0}, lambda_tf{0.0};
 
-            if (const auto incl_coords = defect->FirstChildElement("incl_coords"); incl_coords != nullptr)
+            if (const auto* const incl_coords = defect->FirstChildElement("incl_coords"); incl_coords != nullptr)
             {
-                for (auto latcoord = incl_coords->FirstChildElement("latcoord"); latcoord != nullptr;
-                     latcoord      = latcoord->NextSiblingElement("latcoord"))
+                for (const auto* latcoord = incl_coords->FirstChildElement("latcoord"); latcoord != nullptr;
+                     latcoord             = latcoord->NextSiblingElement("latcoord"))
                 {
                     incl_cells.push_back(parse_latcoord(latcoord));
                 }
@@ -239,35 +241,34 @@ class read_sqd_layout_impl
                     throw sqd_parsing_error("Error parsing SQD file: no element 'latcoord' in element 'incl_coords'");
                 }
             }
-            if (const auto property_map = defect->FirstChildElement("property_map"); property_map != nullptr)
+            if (const auto* const property_map = defect->FirstChildElement("property_map"); property_map != nullptr)
             {
-                if (const auto type_label = property_map->FirstChildElement("type_label"); type_label != nullptr)
+                if (const auto* const type_label = property_map->FirstChildElement("type_label"); type_label != nullptr)
                 {
-                    if (const auto val = type_label->FirstChildElement("val"); val != nullptr)
+                    if (const auto* const val = type_label->FirstChildElement("val"); val != nullptr)
                     {
                         defect_type = parse_defect_label(val->GetText());
                     }
                 }
             }
-            if (const auto coulomb = defect->FirstChildElement("coulomb"); coulomb == nullptr)
+            if (const auto* const coulomb = defect->FirstChildElement("coulomb"); coulomb == nullptr)
             {
                 // no coulomb data available; use default values
             }
             else
             {
-                if (const auto charge_string = coulomb->Attribute("charge"), eps_r_string = coulomb->Attribute("eps_r"),
-                    lambda_tf_string = coulomb->Attribute("lambda_tf");
-                    charge_string == nullptr || eps_r_string == nullptr || lambda_tf_string == nullptr)
+                const auto charge_string = coulomb->Attribute("charge"), eps_r_string = coulomb->Attribute("eps_r"),
+                           lambda_tf_string = coulomb->Attribute("lambda_tf");
+
+                if (charge_string == nullptr || eps_r_string == nullptr || lambda_tf_string == nullptr)
                 {
                     throw sqd_parsing_error(
                         "Error parsing SQD file: no attribute 'charge', 'eps_r', or 'lambda_tf' in element 'coulomb'");
                 }
-                else
-                {
-                    charge    = std::stod(charge_string);
-                    eps_r     = std::stod(eps_r_string);
-                    lambda_tf = std::stod(lambda_tf_string);
-                }
+
+                charge    = std::stod(charge_string);
+                eps_r     = std::stod(eps_r_string);
+                lambda_tf = std::stod(lambda_tf_string);
             }
 
             std::for_each(incl_cells.begin(), incl_cells.end(),
@@ -340,7 +341,9 @@ Lyt read_sqd_layout(const std::string& filename, const std::string& name = "")
     std::ifstream is{filename.c_str(), std::ifstream::in};
 
     if (!is.is_open())
+    {
         throw std::ifstream::failure("could not open file");
+    }
 
     const auto lyt = read_sqd_layout<Lyt>(is, name);
     is.close();
@@ -365,7 +368,9 @@ void read_sqd_layout(Lyt& lyt, const std::string& filename)
     std::ifstream is{filename.c_str(), std::ifstream::in};
 
     if (!is.is_open())
+    {
         throw std::ifstream::failure("could not open file");
+    }
 
     read_sqd_layout<Lyt>(lyt, is);
     is.close();
