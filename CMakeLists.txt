@@ -71,7 +71,7 @@ endif ()
 
 # Python Bindings
 option(FICTION_PYTHON_BINDINGS "Build fiction Python bindings" OFF)
-if (FICTION_EXPERIMENTS)
+if (FICTION_PYTHON_BINDINGS)
     message(STATUS "Building fiction experiments")
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/bindings/)
 endif ()
