@@ -16,6 +16,10 @@
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #pragma GCC diagnostic ignored "-Wconversion"
 
+
+
+
+
 namespace fiction
 {
 
@@ -665,6 +669,17 @@ struct formatter<fiction::cube::coord_t>
 };
 }  // namespace fmt
 
-#pragma GCC diagnostic pop
+using namespace fiction;
+template <typename CoordinateType>
+CoordinateType siqad_to_Coord(const cube::coord_t & coord) noexcept
+{
+    CoordinateType c_out = CoordinateType{};
+    c_out.x = coord.x;
+    c_out.y = coord.y + coord.z ;
+    return c_out;
+}
 
+
+
+#pragma GCC diagnostic pop
 #endif  // FICTION_COORDINATES_HPP
