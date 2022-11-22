@@ -669,17 +669,21 @@ struct formatter<fiction::cube::coord_t>
 };
 }  // namespace fmt
 
-using namespace fiction;
-template <typename CoordinateType>
-CoordinateType siqad_to_Coord(const cube::coord_t & coord) noexcept
+namespace siqad
 {
-    CoordinateType c_out = CoordinateType{};
-    c_out.x = coord.x;
-    c_out.y = coord.y + coord.z ;
-    return c_out;
-}
+using coord_t = fiction::cube::coord_t;
+template <typename CoordinateType>
+CoordinateType constexpr siqad_to_other(const coord_t& coord) noexcept
+{
+    return {coord.x, coord.y*2 + coord.z};
+};
 
-
+template <typename CoordinateType>
+coord_t constexpr other_to_siqad(const CoordinateType& coord) noexcept
+{
+    return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};
+};
+}  // namespace siqad
 
 #pragma GCC diagnostic pop
 #endif  // FICTION_COORDINATES_HPP
