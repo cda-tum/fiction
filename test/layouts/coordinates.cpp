@@ -84,6 +84,38 @@ TEST_CASE("Unsigned offset coordinates", "[coordinates]")
     CHECK(os.str() == "(3,2,1)");
 }
 
+TEST_CASE("siqad coordinate conversion", "[coordinates]")
+{
+    using namespace siqad;
+    using coordinate = siqad::coord_t;
+    using coordinate_other = offset::ucoord_t;
+
+    auto td = coordinate{};
+    auto other_d = siqad_to_other<coordinate_other>(td);
+    CHECK(other_d.is_dead());
+
+    auto t0 = coordinate{0, 0, 0};
+    auto other_0 = siqad_to_other<coordinate_other>(t0);
+    CHECK(!other_0.is_dead());
+
+
+    auto t1 = coordinate{1, 3, 1};
+    auto t1_other = siqad_to_other<coordinate_other>(t1);
+    CHECK(t1_other.x == t1.x);
+    CHECK(t1_other.y == 7);
+    auto t2 = other_to_siqad<coordinate_other>(t1_other);
+    CHECK(t1 == t2);
+
+    auto t3_other = coordinate_other{1,2};
+    auto t3_siqad = other_to_siqad<coordinate_other>(t3_other);
+
+    CHECK(t3_siqad.x == t3_other.x);
+    CHECK(t3_siqad.y == 1);
+    CHECK(t3_siqad.z == 0);
+
+}
+
+
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
