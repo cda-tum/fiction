@@ -81,7 +81,8 @@ jobs:
 
       - name: Configure CMake
         working-directory: ${{github.workspace}}/build
-        run: cmake ${{github.workspace}} \
+        run: |
+          cmake ${{github.workspace}} \
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}} \
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}} \
           -DFICTION_CLI=ON \
