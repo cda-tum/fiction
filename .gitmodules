@@ -4,3 +4,6 @@
 [submodule "libs/mockturtle"]
 	path = libs/mockturtle
 	url = https://github.com/marcelwa/mockturtle.git
+[submodule "libs/Catch2"]
+	path = libs/Catch2
+	url = https://github.com/catchorg/Catch2.git

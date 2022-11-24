@@ -4,6 +4,11 @@ add_subdirectory(alice/)
 # Include mockturtle
 add_subdirectory(mockturtle/)
 
+# Include Catch2
+if (FICTION_TEST)
+    add_subdirectory(Catch2/)
+endif ()
+
 # Mugen is not available under Windows
 if (NOT WIN32)
     # Option to enable Mugen

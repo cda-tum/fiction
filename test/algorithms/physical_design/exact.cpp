@@ -4,7 +4,8 @@
 
 #if (FICTION_Z3_SOLVER)
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
@@ -559,7 +560,7 @@ TEST_CASE("High degree input networks", "[exact]")
                                            res(configuration<cart_gate_clk_lyt>())));
 }
 
-TEST_CASE("Timeout", "[exact]")
+TEST_CASE("Exact physical design timeout", "[exact]")
 {
     auto timeout_config    = use(crossings(configuration<cart_gate_clk_lyt>()));
     timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
@@ -571,7 +572,7 @@ TEST_CASE("Timeout", "[exact]")
     CHECK(!layout.has_value());
 }
 
-TEST_CASE("Name conservation", "[exact]")
+TEST_CASE("Name conservation after exact physical design", "[exact]")
 {
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");

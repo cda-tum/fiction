@@ -2,7 +2,8 @@
 // Created by marcel on 02.06.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
@@ -153,7 +154,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
     check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
 }
 
-TEST_CASE("Name conservation", "[orthogonal]")
+TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
