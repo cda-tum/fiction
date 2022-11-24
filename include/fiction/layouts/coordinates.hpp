@@ -244,6 +244,7 @@ struct ucoord_t
     }
 };
 
+
 inline std::ostream& operator<<(std::ostream& os, const ucoord_t& t)
 {
     os << t.str();
@@ -665,31 +666,256 @@ struct formatter<fiction::cube::coord_t>
 };
 }  // namespace fmt
 
-template <typename CoordinateType>
-constexpr CoordinateType to_fiction_coord(const fiction::offset::ucoord_t& coord) noexcept
+namespace siqad
 {
-    return {coord.x, coord.y * 2 + coord.z};
-};
 /**
- * convertes SiQAD coordinates into Offset coordinates.
+ * siqad coordinates.
+ * Coordinates span from (-2^31, -2^31, 0) to (2^31 - 1 , 2^31 - 1, 1). x is the SiDB's x-coordinate, y is the dimer pair's row number,
+ and z represents the two possible SiDB positions in one SiDB dimer pair.
+ * Each coordinate has a dead indicator that can be used to represent that it is not in use.
+ */
+struct coord_t
+{
+    /**
+     * MSB acts as dead indicator.
+     */
+    uint64_t d : 1;
+    /**
+     * 1 bit for the z coordinate.
+     */
+    uint32_t z : 1;
+    /**
+     * 31 bit for the y coordinate.
+     */
+    int32_t y ;
+    /**
+     * 31 bit for the x coordinate.
+     */
+    int32_t x ;
+
+    // NOLINTBEGIN(readability-identifier-naming)
+
+    /**
+     * Default constructor. Creates a dead coordinate at (0, 0, 0).
+     */
+    constexpr coord_t() noexcept :
+            d{static_cast<decltype(d)>(1u)},  // default-constructed ucoord_ts are dead
+            z{static_cast<decltype(z)>(0u)},
+            y{static_cast<decltype(y)>(0u)},
+            x{static_cast<decltype(x)>(0u)}
+    {}
+    /**
+     * Standard constructor. Creates a non-dead coordinate at (x_, y_, z_).
+     *
+     * @tparam X Type of x.
+     * @tparam Y Type of y.
+     * @tparam Z Type of z.
+     * @param x_ x position.
+     * @param y_ y position.
+     * @param z_ z position.
+     */
+    template <class X, class Y, class Z>
+    constexpr coord_t(X x_, Y y_, Z z_) noexcept :
+            d{static_cast<decltype(d)>(0u)},
+            z{static_cast<decltype(z)>(z_)},
+            y{static_cast<decltype(y)>(y_)},
+            x{static_cast<decltype(x)>(x_)}
+    {}
+    /**
+     * Standard constructor. Creates a non-dead coordinate at (x_, y_, 0).
+     *
+     * @tparam X Type of x.
+     * @tparam Y Type of y.
+     * @param x_ x position.
+     * @param y_ y position.
+     */
+    template <class X, class Y>
+    constexpr coord_t(X x_, Y y_) noexcept :
+            d{static_cast<decltype(d)>(0u)},
+            z{static_cast<decltype(z)>(0u)},
+            y{static_cast<decltype(y)>(y_)},
+            x{static_cast<decltype(x)>(x_)}
+    {}
+    /**
+     * Standard constructor. Instantiates a coordinate from an uint64_t, where the positions are encoded in the
+     * following four parts of the unsigned 64-bit integer (from MSB to LSB):
+     *  - 1 bit for the dead indicator
+     *  - 1 bit for the z position
+     *  - 31 bit for the y position
+     *  - 31 bit for the x position
+     *
+     * @param t Unsigned 64-bit integer to instantiate the coordinate from.
+     */
+    constexpr explicit coord_t(const uint64_t t) noexcept :
+            d{static_cast<decltype(d)>(t >> 63ull)},
+            z{static_cast<decltype(z)>((t << 1ull) >> 63ull)},
+            y{static_cast<decltype(y)>((t << 2ull) >> 33ull)},
+            x{static_cast<decltype(x)>((t << 33ull) >> 33ull)}
+    {}
+
+    // NOLINTEND(readability-identifier-naming)
+
+    /**
+     * Allows explicit conversion to uint64_t. Segments an unsigned 64-bit integer into four parts (from MSB to LSB):
+     *  - 1 bit for the dead indicator
+     *  - 1 bit for the z position
+     *  - 31 bit for the y position
+     *  - 31 bit for the x position
+     */
+    explicit constexpr operator uint64_t() const noexcept
+    {
+        return (((((((static_cast<uint64_t>(d)) << 1ull) | z) << 31ull) | y) << 31ull) | x);
+    }
+    /**
+     * Returns whether the coordinate is dead.
+     *
+     * @return True iff coordinate is dead.
+     */
+    [[nodiscard]] constexpr bool is_dead() const noexcept
+    {
+        return static_cast<bool>(d);
+    }
+    /**
+     * Returns a dead copy of the coordinate, i.e., (1, x, y, z).
+     *
+     * @return A dead copy of the coordinate.
+     */
+    [[nodiscard]] constexpr coord_t get_dead() const noexcept
+    {
+        return coord_t{static_cast<uint64_t>(*this) | static_cast<uint64_t>(coord_t{})};
+    }
+    /**
+     * Compares against another coordinate for equality. Respects the dead indicator.
+     *
+     * @param other Right-hand side coordinate.
+     * @return True iff both coordinates are identical.
+     */
+    constexpr bool operator==(const coord_t& other) const noexcept
+    {
+        return d == other.d && z == other.z && y == other.y && x == other.x;
+    }
+    /**
+     * Compares against another coordinate's uint64_t representation for equality. Respects the dead indicator.
+     *
+     * @param other Right-hand side coordinate representation in uint64_t format.
+     * @return True iff this coordinate is equal to the converted one.
+     */
+    constexpr bool operator==(const uint64_t& other) const noexcept
+    {
+        return static_cast<uint64_t>(*this) == other;
+    }
+    /**
+     * Compares against another coordinate for inequality. Respects the dead indicator.
+     *
+     * @param other Right-hand side coordinate.
+     * @return True iff both coordinates are not identical.
+     */
+    constexpr bool operator!=(const coord_t& other) const noexcept
+    {
+        return !(*this == other);
+    }
+    /**
+     * Determine whether this coordinate is "less than" another one. This is the case if z is smaller, or if z is equal
+     * but y is smaller, or if z and y are equal but x is smaller.
+     *
+     * @param other Right-hand side coordinate.
+     * @return True iff this coordinate is "less than" the other coordinate.
+     */
+    constexpr bool operator<(const coord_t& other) const noexcept
+    {
+        if (z < other.z)
+        {
+            return true;
+        }
+
+        if (z == other.z)
+        {
+            if (y < other.y)
+            {
+                return true;
+            }
+
+            if (y == other.y)
+            {
+                return x < other.x;
+            }
+        }
+
+        return false;
+    }
+    /**
+     * Determine whether this coordinate is "greater than" another one. This is the case if the other one is "less
+     * than".
+     *
+     * @param other Right-hand side coordinate.
+     * @return True iff this coordinate is "greater than" the other coordinate.
+     */
+    constexpr bool operator>(const coord_t& other) const noexcept
+    {
+        return other < *this;
+    }
+    /**
+     * Determine whether this coordinate is "less than or equal to" another one. This is the case if this one is not
+     * "greater than" the other.
+     *
+     * @param other Right-hand side coordinate.
+     * @return True iff this coordinate is "less than or equal to" the other coordinate.
+     */
+    constexpr bool operator<=(const coord_t& other) const noexcept
+    {
+        return !(*this > other);
+    }
+    /**
+     * Determine whether this coordinate is "greater than or equal to" another one. This is the case if this one is not
+     * "less than" the other.
+     *
+     * @param other Right-hand side coordinate.
+     * @return True iff this coordinate is "greater than or equal to" the other coordinate.
+     */
+    constexpr bool operator>=(const coord_t& other) const noexcept
+    {
+        return !(*this < other);
+    }
+    /**
+     * Returns a string representation of the coordinate of the form "(x, y, z)" that does not respect the dead
+     * indicator.
+     *
+     * @return String representation of the form "(x, y, z)".
+     */
+    [[nodiscard]] std::string str() const
+    {
+        return fmt::format("({},{},{})", x, y, z);
+    }
+};
+
+/**
+ * convertes SiQAD coordinates into other coordinates (offset, cube).
  *
  * @tparam CoordinateType Coordinate type.
  * @param coord Coordinate.
  * @return CoordinateType coord.
  */
-
 template <typename CoordinateType>
-constexpr fiction::offset::ucoord_t to_siqad_coord(const CoordinateType& coord) noexcept
+constexpr CoordinateType to_fiction_coord(const coord_t& coord) noexcept
 {
-    return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};
+    return {coord.x, coord.y * 2 + coord.z};
 };
+
 /**
-* convertes Offset coordinates into SiQAD coordinates.
+* convertes coordinates (offset cube) into SiQAD coordinates.
 *
 * @tparam CoordinateType Coordinate type.
 * @param coord Coordinate type.
 * @return Offset coordinates as SiQAD coordinates.
-*/
+ */
+template <typename CoordinateType>
+constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
+{
+    if (coord.y < 0)
+        {return {coord.x, (coord.y - coord.y % 2) / 2, -coord.y % 2};}
+    else {return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};}
+};
 
+}; // namespace siqad
 #pragma GCC diagnostic pop
 #endif  // FICTION_COORDINATES_HPP

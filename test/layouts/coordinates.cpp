@@ -87,29 +87,41 @@ TEST_CASE("Unsigned offset coordinates", "[coordinates]")
 TEST_CASE("siqad coordinate conversion", "[coordinates]")
 {
 
-    using coordinate         = offset::ucoord_t;
-    using coordinate_fiction = offset::ucoord_t;
+    using coordinate         = siqad::coord_t;
+    using coordinate_fiction = cube::coord_t;
 
     auto td        = coordinate{};
-    auto fiction_d = to_fiction_coord<coordinate_fiction>(td);
+    auto fiction_d = siqad::to_fiction_coord<coordinate_fiction>(td);
     CHECK(fiction_d.is_dead());
 
     auto t0        = coordinate{0, 0, 0};
-    auto fiction_0 = to_fiction_coord<coordinate_fiction>(t0);
+    auto fiction_0 = siqad::to_fiction_coord<coordinate_fiction>(t0);
     CHECK(!fiction_0.is_dead());
 
     auto t1         = coordinate{1, 3, 1};
-    auto t1_fiction = to_fiction_coord<coordinate_fiction>(t1);
+    auto t1_fiction = siqad::to_fiction_coord<coordinate_fiction>(t1);
     CHECK(t1_fiction.x == t1.x);
     CHECK(t1_fiction.y == 7);
-    auto t2 = to_siqad_coord<coordinate_fiction>(t1_fiction);
+    auto t2 = siqad::to_siqad_coord<coordinate_fiction>(t1_fiction);
     CHECK(t1 == t2);
 
     auto t3_fiction = coordinate_fiction{1, 2};
-    auto t3_siqad   = to_siqad_coord<coordinate_fiction>(t3_fiction);
+    auto t3_siqad   = siqad::to_siqad_coord<coordinate_fiction>(t3_fiction);
     CHECK(t3_siqad.x == t3_fiction.x);
     CHECK(t3_siqad.y == 1);
     CHECK(t3_siqad.z == 0);
+
+    auto t4_fiction = coordinate_fiction{-1,-2};
+    auto t4_siqad = siqad::to_siqad_coord<coordinate_fiction>(t4_fiction);
+    CHECK(t4_siqad.x == t4_fiction.x);
+    CHECK(t4_siqad.y == -1);
+    CHECK(t4_siqad.z == 0);
+
+    auto t5_siqad = coordinate{-1,-2,1};
+    auto t5_fiction = siqad::to_fiction_coord<coordinate_fiction>(t5_siqad);
+    CHECK(t5_fiction.x == -1);
+    CHECK(t5_fiction.y == -3);
+
 }
 
 #if defined(__GNUC__)
