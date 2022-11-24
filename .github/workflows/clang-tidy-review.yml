@@ -26,7 +26,7 @@ jobs:
         id: check-review-output
         uses: andstor/file-existence-action@v2.0.0
         with:
-          files: "clang-tidy-review-output.json"
+          files: 'clang-tidy-review-output.json'
           ignore_case: true
 
       # Workaround to fix an issue with non-existing review artifacts in the review posting workflow
@@ -34,8 +34,8 @@ jobs:
         if: steps.check-review-output.outputs.files_exists == 'false'
         uses: finnp/create-file-action@1.0.0
         env:
-          FILE_NAME: "clang-tidy-review-output.json"
-          FILE_DATA: "{}"
+          FILE_NAME: 'clang-tidy-review-output.json'
+          FILE_DATA: '{}'
 
       - name: Upload review artifact
         uses: actions/upload-artifact@v3
