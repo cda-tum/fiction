@@ -4,6 +4,8 @@
 
 // This file is based on mockturtle/test/networks/klut.cpp
 
+#include <catch2/catch_test_macros.hpp>
+
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/traits.hpp>
 
@@ -14,8 +16,6 @@
 #include <mockturtle/networks/sequential.hpp>
 
 #include <vector>
-
-#include <catch.hpp>
 
 using namespace fiction;
 

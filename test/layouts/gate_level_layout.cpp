@@ -2,7 +2,8 @@
 // Created by marcel on 31.03.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -19,7 +20,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[gate-level-layout]")
+TEST_CASE("Gate-level layout traits", "[gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
@@ -807,7 +808,7 @@ TEST_CASE("node and signal iteration", "[gate-level-layout]")
     CHECK(mask == 128);
 }
 
-TEST_CASE("Structural properties", "[gate-level-layout]")
+TEST_CASE("Gate-level layout properties", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -1109,7 +1110,7 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
     CHECK(layout.num_wires() == 3);  // PO is gone now
 }
 
-TEST_CASE("Cardinal operations", "[gate-level-layout]")
+TEST_CASE("Gate-level cardinal operations", "[gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 

@@ -2,7 +2,8 @@
 // Created by marcel on 19.05.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/io/print_layout.hpp>
