@@ -2,9 +2,19 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ 'main' ]
+    paths:
+      - '**.hpp'
+      - '**.cpp'
+      - 'libs/**'
+      - '.github/workflows/docker-image.yml'
   pull_request:
-    branches: [ "main" ]
+    branches: [ 'main' ]
+    paths:
+      - '**.hpp'
+      - '**.cpp'
+      - 'libs/**'
+      - '.github/workflows/docker-image.yml'
 
 jobs:
 

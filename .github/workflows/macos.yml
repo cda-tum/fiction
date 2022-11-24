@@ -1,6 +1,12 @@
 name: macOS CI
 
-on: push
+on:
+  push:
+    paths:
+      - '**.hpp'
+      - '**.cpp'
+      - 'libs/**'
+      - '.github/workflows/macos.yml'
 
 defaults:
   run:
