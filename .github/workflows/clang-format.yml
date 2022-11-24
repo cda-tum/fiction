@@ -16,7 +16,7 @@ jobs:
         # regular checkout
         uses: actions/checkout@v3
         with:
-        submodules: recursive
+          submodules: recursive
 
       - name: Clone Repository (for PR events)
         if: ${{ github.event_name == 'pull_request' }}
