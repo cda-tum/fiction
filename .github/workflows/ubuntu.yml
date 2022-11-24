@@ -77,17 +77,17 @@ jobs:
 
       - name: Configure CMake
         working-directory: ${{github.workspace}}/build
-        run: |
-          cmake ${{github.workspace}} ${{matrix.cppstandard}} \
-          -DCMAKE_CXX_COMPILER=${{matrix.compiler}} \
-          -DCMAKE_BUILD_TYPE=${{matrix.build_type}} \
-          -DFICTION_CLI=ON \
-          -DFICTION_TEST=ON \
-          -DFICTION_EXPERIMENTS=ON \
-          -DFICTION_Z3=ON \
-          -DFICTION_ENABLE_MUGEN=ON \
-          -DFICTION_PROGRESS_BARS=OFF \
-          -DMOCKTURTLE_EXAMPLES=OFF \
+        run: >
+          cmake ${{github.workspace}} ${{matrix.cppstandard}}
+          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
+          -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+          -DFICTION_CLI=ON
+          -DFICTION_TEST=ON
+          -DFICTION_EXPERIMENTS=ON
+          -DFICTION_Z3=ON
+          -DFICTION_ENABLE_MUGEN=ON
+          -DFICTION_PROGRESS_BARS=OFF
+          -DMOCKTURTLE_EXAMPLES=OFF
           -DWARNINGS_AS_ERRORS=OFF
 
       - name: Build fiction
