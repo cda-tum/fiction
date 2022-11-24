@@ -41,8 +41,9 @@ jobs:
       - uses: EndBug/add-and-commit@v9
         with:
           add: 'include test experiments'
-          author_name: ClangFormat
           commit: '--signoff'
           message: ':art: ClangFormat changes'
+          author_name: ClangFormat
+          author_email: ClangFormat@users.noreply.github.com
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
