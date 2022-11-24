@@ -16,10 +16,6 @@
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #pragma GCC diagnostic ignored "-Wconversion"
 
-
-
-
-
 namespace fiction
 {
 
@@ -669,21 +665,31 @@ struct formatter<fiction::cube::coord_t>
 };
 }  // namespace fmt
 
-namespace siqad
-{
-using coord_t = fiction::cube::coord_t;
 template <typename CoordinateType>
-CoordinateType constexpr siqad_to_other(const coord_t& coord) noexcept
+constexpr CoordinateType to_fiction_coord(const fiction::offset::ucoord_t& coord) noexcept
 {
-    return {coord.x, coord.y*2 + coord.z};
+    return {coord.x, coord.y * 2 + coord.z};
 };
+/**
+ * convertes SiQAD coordinates into Offset coordinates.
+ *
+ * @tparam CoordinateType Coordinate type.
+ * @param coord Coordinate.
+ * @return CoordinateType coord.
+ */
 
 template <typename CoordinateType>
-coord_t constexpr other_to_siqad(const CoordinateType& coord) noexcept
+constexpr fiction::offset::ucoord_t to_siqad_coord(const CoordinateType& coord) noexcept
 {
     return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};
 };
-}  // namespace siqad
+/**
+* convertes Offset coordinates into SiQAD coordinates.
+*
+* @tparam CoordinateType Coordinate type.
+* @param coord Coordinate type.
+* @return Offset coordinates as SiQAD coordinates.
+*/
 
 #pragma GCC diagnostic pop
 #endif  // FICTION_COORDINATES_HPP

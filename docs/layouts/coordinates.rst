@@ -22,8 +22,11 @@ At the same time, they can be used to address 3-dimensional grids.
 
 .. doxygenstruct:: fiction::cube::coord_t
 
+
 Utility functions
 -----------------
 
 .. doxygenfunction:: fiction::area(const CoordinateType& coord) noexcept
 .. doxygenfunction:: fiction::volume(const CoordinateType& coord) noexcept
+.. doxygenfunction:: fiction::to_fiction_coord(const fiction::offset::ucoord_t& coord) noexcept
+.. doxygenfunction:: fiction::to_siqad_coord(const CoordinateType& coord) noexcept
