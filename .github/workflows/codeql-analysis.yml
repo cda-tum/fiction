@@ -10,7 +10,7 @@ on:
     - cron: '30 5 * * 6'
 
 jobs:
-  analyze:
+  codeql:
     name: Analyze
     runs-on: ubuntu-latest
     permissions:

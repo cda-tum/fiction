@@ -10,7 +10,7 @@ env:
   Z3_VERSION: 4.10.0
 
 jobs:
-  build_and_test:
+  windows:
     strategy:
       matrix:
         os: [ windows-2019, windows-2022 ]

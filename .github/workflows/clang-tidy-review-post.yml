@@ -7,7 +7,7 @@ on:
       - completed
 
 jobs:
-  build:
+  clang-tidy-post:
     runs-on: ubuntu-latest
 
     steps:
