@@ -21,15 +21,16 @@ jobs:
 
       - name: Configure CMake to create compilation database
         working-directory: ${{github.workspace}}
-        run: cmake . -B build \
-          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-          -DFICTION_CLI=ON \
-          -DFICTION_TEST=ON \
-          -DFICTION_EXPERIMENTS=ON \
+        run: >
+          cmake . -B build
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          -DFICTION_CLI=ON
+          -DFICTION_TEST=ON
+          -DFICTION_EXPERIMENTS=ON
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Run Include What You Use
-        uses: EmilGedda/include-what-you-use-action@v1
+        uses: EmilGedda/include-what-you-use-action@v1.0
         with:
           compilation-database-path: ${{github.workspace}}/build/
           output-format: 'iwyu' # Or 'clang'
