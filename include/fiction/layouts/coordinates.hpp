@@ -244,7 +244,6 @@ struct ucoord_t
     }
 };
 
-
 inline std::ostream& operator<<(std::ostream& os, const ucoord_t& t)
 {
     os << t.str();
@@ -670,8 +669,8 @@ namespace siqad
 {
 /**
  * siqad coordinates.
- * Coordinates span from (-2^31, -2^31, 0) to (2^31 - 1 , 2^31 - 1, 1). x is the SiDB's x-coordinate, y is the dimer pair's row number,
- and z represents the two possible SiDB positions in one SiDB dimer pair.
+ * Coordinates span from (-2^31, -2^31, 0) to (2^31 - 1 , 2^31 - 1, 1). x is the SiDB's x-coordinate, y is the dimer
+ pair's row number, and z represents the two possible SiDB positions in one SiDB dimer pair.
  * Each coordinate has a dead indicator that can be used to represent that it is not in use.
  */
 struct coord_t
@@ -687,11 +686,11 @@ struct coord_t
     /**
      * 31 bit for the y coordinate.
      */
-    int32_t y ;
+    int32_t y;
     /**
      * 31 bit for the x coordinate.
      */
-    int32_t x ;
+    int32_t x;
 
     // NOLINTBEGIN(readability-identifier-naming)
 
@@ -892,30 +891,42 @@ struct coord_t
  * convertes SiQAD coordinates into other coordinates (offset, cube).
  *
  * @tparam CoordinateType Coordinate type.
- * @param coord Coordinate.
+ * @param coord Coordinate (siqad).
  * @return CoordinateType coord.
  */
 template <typename CoordinateType>
 constexpr CoordinateType to_fiction_coord(const coord_t& coord) noexcept
 {
-    return {coord.x, coord.y * 2 + coord.z};
+    if (!coord.is_dead())
+    {
+        return {coord.x, coord.y * 2 + coord.z};
+    }
+    else
+    {
+        return CoordinateType{};
+    }
 };
 
 /**
-* convertes coordinates (offset cube) into SiQAD coordinates.
-*
-* @tparam CoordinateType Coordinate type.
-* @param coord Coordinate type.
-* @return Offset coordinates as SiQAD coordinates.
+ * convertes coordinates (offset, cube) into SiQAD coordinates.
+ *
+ * @tparam CoordinateType Coordinate type.
+ * @param coord Coordinate type.
+ * @return siqad coordinates.
  */
 template <typename CoordinateType>
 constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 {
     if (coord.y < 0)
-        {return {coord.x, (coord.y - coord.y % 2) / 2, -coord.y % 2};}
-    else {return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};}
+    {
+        return {coord.x, (coord.y - coord.y % 2) / 2, -coord.y % 2};
+    }
+    else
+    {
+        return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};
+    }
 };
 
-}; // namespace siqad
+};  // namespace siqad
 #pragma GCC diagnostic pop
 #endif  // FICTION_COORDINATES_HPP

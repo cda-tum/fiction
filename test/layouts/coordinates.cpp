@@ -90,8 +90,9 @@ TEST_CASE("siqad coordinate conversion", "[coordinates]")
     using coordinate         = siqad::coord_t;
     using coordinate_fiction = cube::coord_t;
 
-    auto td        = coordinate{};
-    auto fiction_d = siqad::to_fiction_coord<coordinate_fiction>(td);
+    auto t = coordinate{};
+    CHECK(t.is_dead());
+    auto fiction_d = siqad::to_fiction_coord<coordinate_fiction>(t);
     CHECK(fiction_d.is_dead());
 
     auto t0        = coordinate{0, 0, 0};
@@ -111,17 +112,16 @@ TEST_CASE("siqad coordinate conversion", "[coordinates]")
     CHECK(t3_siqad.y == 1);
     CHECK(t3_siqad.z == 0);
 
-    auto t4_fiction = coordinate_fiction{-1,-2};
-    auto t4_siqad = siqad::to_siqad_coord<coordinate_fiction>(t4_fiction);
+    auto t4_fiction = coordinate_fiction{-1, -2};
+    auto t4_siqad   = siqad::to_siqad_coord<coordinate_fiction>(t4_fiction);
     CHECK(t4_siqad.x == t4_fiction.x);
     CHECK(t4_siqad.y == -1);
     CHECK(t4_siqad.z == 0);
 
-    auto t5_siqad = coordinate{-1,-2,1};
+    auto t5_siqad   = coordinate{-1, -2, 1};
     auto t5_fiction = siqad::to_fiction_coord<coordinate_fiction>(t5_siqad);
     CHECK(t5_fiction.x == -1);
     CHECK(t5_fiction.y == -3);
-
 }
 
 #if defined(__GNUC__)
