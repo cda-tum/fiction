@@ -1,6 +1,20 @@
 name: Coverage CI
 
-on: [ pull_request ]
+on:
+  push:
+    branches: [ 'main' ]
+    paths:
+      - '**.hpp'
+      - '**.cpp'
+      - 'libs/**'
+      - '.github/workflows/coverage.yml'
+  pull_request:
+    branches: [ 'main' ]
+    paths:
+      - '**.hpp'
+      - '**.cpp'
+      - 'libs/**'
+      - '.github/workflows/coverage.yml'
 
 defaults:
   run:
