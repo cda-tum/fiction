@@ -901,10 +901,8 @@ constexpr CoordinateType to_fiction_coord(const coord_t& coord) noexcept
     {
         return {coord.x, coord.y * 2 + coord.z};
     }
-    else
-    {
-        return CoordinateType{};
-    }
+
+    return CoordinateType{};
 };
 
 /**
@@ -917,14 +915,7 @@ constexpr CoordinateType to_fiction_coord(const coord_t& coord) noexcept
 template <typename CoordinateType>
 constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 {
-    if (coord.y < 0)
-    {
-        return {coord.x, (coord.y - coord.y % 2) / 2, -coord.y % 2};
-    }
-    else
-    {
-        return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};
-    }
+    return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};
 };
 
 };  // namespace siqad
