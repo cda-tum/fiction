@@ -1,4 +1,4 @@
-# Let there be a *fiction*
+# *fiction* &ndash; Design Automation for Field-coupled Nanotechnologies
 
 [![Ubuntu CI](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
 [![macOS CI](https://github.com/marcelwa/fiction/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
@@ -36,30 +36,41 @@ Additionally, *fiction* comes with an
 ABC-like [CLI tool](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-stand-alone-cli-tool)
 that allows quick access to its core functionality.
 
-Learn more by referring to the [full documentation](https://fiction.readthedocs.io/).
+
+<p align="center">
+  <a href="https://fiction.readthedocs.io/en/latest/">
+  <img width=30% src="https://img.shields.io/badge/documentation-blue?style=for-the-badge&logo=read%20the%20docs" alt="Documentation" />
+  </a>
+</p>
 
 If you have any questions, comments, or suggestions, please do not hesitate to get in touch.
 
-## Implemented Physical Design Algorithms
+## Quick Start
 
-For automatic FCN layout obtainment, *fiction* provides implementations of state-of-the-art
-[physical design algorithms](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#physical-design).
+> Clone the repository and its submodules:
 
-Among these are
+```bash
+git clone --recursive https://github.com/marcelwa/fiction.git
+```
 
-- SMT-based [exact placement and routing](https://ieeexplore.ieee.org/document/8342060)
-- OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
-- SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
+> Inside the newly cloned `fiction` folder, trigger the build process:
 
-Furthermore, layout correctness can
-be [validated](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#verification) using
+```bash
+cmake . -B build
+cd build
+cmake --build . -j4
+```
 
-- SAT-based [formal verification](https://ieeexplore.ieee.org/document/9218641)
+> Run the CLI tool:
 
-For logic synthesis, *fiction* relies on the [mockturtle library](https://github.com/lsils/mockturtle) that offers logic
-network types and optimization algorithms. Optimized logic networks can then be passed as specifications to physical
-design algorithms. Alternatively, logic synthesis can be performed in external tools and resulting
-Verilog/AIGER/BLIF/... files can be parsed by *fiction*.
+```bash
+cli/fiction
+```
+
+![CLI example](docs/_static/fiction_cli_example.gif)
+
+For a full getting started guide, please refer to
+the [documentation](https://fiction.readthedocs.io/en/latest/getting_started.html).
 
 ## Supported Technologies
 
@@ -177,6 +188,27 @@ further asymmetric clock signals with extended *Hold* phases that are assigned t
 tiles, [synchronization elements](https://ieeexplore.ieee.org/document/8626294) can be created that stall signals over
 multiple clock cycles. These artificial latches are able to feed information to any other clock number, but their usage
 reduces the overall throughput of the layout. In return, long wire detours for signal synchronization can be prevented.
+
+## Implemented Physical Design Algorithms
+
+For automatic FCN layout obtainment, *fiction* provides implementations of state-of-the-art
+[physical design algorithms](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#physical-design).
+
+Among these are
+
+- SMT-based [exact placement and routing](https://ieeexplore.ieee.org/document/8342060)
+- OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
+- SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
+
+Furthermore, layout correctness can
+be [validated](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#verification) using
+
+- SAT-based [formal verification](https://ieeexplore.ieee.org/document/9218641)
+
+For logic synthesis, *fiction* relies on the [mockturtle library](https://github.com/lsils/mockturtle) that offers logic
+network types and optimization algorithms. Optimized logic networks can then be passed as specifications to physical
+design algorithms. Alternatively, logic synthesis can be performed in external tools and resulting
+Verilog/AIGER/BLIF/... files can be parsed by *fiction*.
 
 ## Cost Metrics
 
