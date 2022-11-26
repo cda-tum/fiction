@@ -70,6 +70,8 @@ Additionally, output formats for state-of-the-art physical simulator engines are
 
 ### Quantum-dot Cellular Automata (QCA)
 
+<img src="docs/_static/qca_cells.png" alt="Input pin and cell output" align="right" height="70"/>
+
 Gate libraries:
 
 - [QCA ONE](https://ieeexplore.ieee.org/document/7538997/)
@@ -86,6 +88,8 @@ QCA-STACK format, and to Sophia Kuhn for implementing the SVG writer!
 
 ### in-plane Nanomagnet Logic (iNML)
 
+<img src="docs/_static/nml_cells.png" alt="Input pin and cell output" align="right" height="70"/>
+
 Gate libraries:
 
 - [ToPoliNano](https://topolinano.polito.it/supported-technologies/)
@@ -98,6 +102,8 @@ File formats:
 Many thanks to Umberto Garlando, Fabrizio Riente, and Giuliana Beretta for their support!
 
 ### Silicon Dangling Bonds (SiDBs)
+
+<img src="docs/_static/sidb_cells.png" alt="Input pin and cell output" align="right" height="70"/>
 
 Gate libraries:
 
