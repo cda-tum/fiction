@@ -69,32 +69,56 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     const auto gate_repr = [&layout](const auto& t)
     {
         if (layout.is_empty_tile(t))
+        {
             return "▢";
+        }
+
+        // NOLINTBEGIN(*-else-after-return)
 
         if (const auto n = layout.get_node(t); layout.is_and(n))
+        {
             return "&";
+        }
         else if (layout.is_or(n))
+        {
             return "|";
+        }
         else if (layout.is_inv(n))
+        {
             return "¬";
+        }
         else if (layout.is_maj(n))
+        {
             return "M";
+        }
         else if (layout.is_xor(n))
+        {
             return "X";
+        }
         else if (layout.is_fanout(n))
+        {
             return "F";
+        }
         else if (layout.is_wire(n))
         {
             // second-layer wire indicates a crossing
             if (const auto at = layout.above(t); (at != t) && layout.is_wire_tile(at))
+            {
                 return "+";
-            else if (layout.is_pi(n))
+            }
+            if (layout.is_pi(n))
+            {
                 return "I";
-            else if (layout.is_po(n))
+            }
+            if (layout.is_po(n))
+            {
                 return "O";
+            }
 
             return "=";
         }
+
+        // NOLINTEND(*-else-after-return)
 
         return "?";
     };
@@ -111,18 +135,26 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             {
                 const auto ft = layout.get_tile(n);
                 if (layout.is_east_of(t1, ft) || layout.is_east_of(t2, ft))
+                {
                     x_dirs[i][j] = "→";
+                }
                 if (layout.is_west_of(t1, ft) || layout.is_west_of(t2, ft))
+                {
                     x_dirs[i][j - 1] = "←";
+                }
             };
 
             const auto north_south_connections = [&layout, &y_dirs, &t1, &t2, i, j](const auto n)
             {
                 const auto ft = layout.get_tile(n);
                 if (layout.is_north_of(t1, ft) || layout.is_north_of(t2, ft))
+                {
                     y_dirs[i][j] = "↑";
+                }
                 if (layout.is_south_of(t1, ft) || layout.is_south_of(t2, ft))
+                {
                     y_dirs[i + 1u][j] = "↓";
+                }
             };
 
             layout.foreach_fanout(layout.get_node(t1), east_west_connections);
@@ -133,10 +165,14 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     }
 
     // actual printing
-    auto r_ctr = 0u, c_ctr = 0u;
+    auto r_ctr = 0u;
+    auto c_ctr = 0u;
     for (const auto& row : reprs)
     {
-        for (auto& d : y_dirs[r_ctr]) os << d << " ";
+        for (const auto& d : y_dirs[r_ctr])
+        {
+            os << d << " ";
+        }
         os << '\n';
 
         for (const auto& gate : row)
@@ -146,16 +182,24 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             fmt::text_style color{};
 
             if (clk_color)
+            {
                 color = color | detail::CLOCK_COLOR[layout.get_clock_number(t)];
+            }
             if constexpr (has_synchronization_elements_v<Lyt>)
             {
                 if (io_color && layout.is_synchronization_element(t))
+                {
                     color = color | detail::SE_COLOR;
+                }
             }
             if (io_color && layout.is_pi_tile(t))
+            {
                 color = color | detail::INP_COLOR;
+            }
             else if (io_color && layout.is_po_tile(t))
+            {
                 color = color | detail::OUT_COLOR;
+            }
 
             os << fmt::format(color, gate);
 
@@ -214,7 +258,9 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             fmt::text_style color{};
 
             if (clk_color)
+            {
                 color = color | detail::CLOCK_COLOR[layout.get_clock_number(c)];
+            }
 
             // crossing case
             if (has_cell_above(c))
@@ -228,12 +274,18 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
                 if constexpr (has_synchronization_elements_v<Lyt>)
                 {
                     if (io_color && layout.is_synchronization_element(c))
+                    {
                         color = color | detail::SE_COLOR;
+                    }
                 }
                 if (io_color && Lyt::technology::is_input_cell(ct))
+                {
                     color = color | detail::INP_COLOR;
+                }
                 else if (io_color && Lyt::technology::is_output_cell(ct))
+                {
                     color = color | detail::OUT_COLOR;
+                }
 
                 os << fmt::format(color,
                                   (Lyt::technology::is_normal_cell(ct) ? "▢" : std::string(1u, static_cast<char>(ct))));

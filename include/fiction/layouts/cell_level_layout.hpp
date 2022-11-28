@@ -92,7 +92,7 @@ class cell_level_layout : public ClockedLayout
      * @param tile_size_x Clock zone size in x-dimension in cells.
      * @param tile_size_y Clock zone size in y-dimension in cells.
      */
-    explicit cell_level_layout(const aspect_ratio<ClockedLayout>& ar = {}, const std::string& name = "",
+    explicit cell_level_layout(const typename ClockedLayout::aspect_ratio& ar = {}, const std::string& name = "",
                                const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
             ClockedLayout(ar),
             strg{std::make_shared<cell_level_layout_storage<cell>>(name, tile_size_x, tile_size_y)}
@@ -109,7 +109,7 @@ class cell_level_layout : public ClockedLayout
      * @param tile_size_x Clock zone size in x-dimension in cells.
      * @param tile_size_y Clock zone size in y-dimension in cells.
      */
-    cell_level_layout(const aspect_ratio<ClockedLayout>& ar, const clocking_scheme<cell>& scheme,
+    cell_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<cell>& scheme,
                       const std::string& name = "", const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
             ClockedLayout(ar, scheme),
             strg{std::make_shared<cell_level_layout_storage<cell>>(name, tile_size_x, tile_size_y)}
@@ -142,7 +142,7 @@ class cell_level_layout : public ClockedLayout
 
             return;
         }
-        else if (Technology::is_input_cell(ct))
+        if (Technology::is_input_cell(ct))
         {
             strg->inputs.insert(c);
         }
@@ -165,10 +165,8 @@ class cell_level_layout : public ClockedLayout
         {
             return it->second;
         }
-        else
-        {
-            return Technology::cell_type::EMPTY;
-        }
+
+        return Technology::cell_type::EMPTY;
     }
     /**
      * Returns true if no cell type is assigned to cell position c or if the empty type was assigned.
@@ -210,10 +208,8 @@ class cell_level_layout : public ClockedLayout
         {
             return it->second;
         }
-        else
-        {
-            return {};
-        }
+
+        return {};
     }
     /**
      * Assigns a cell name n to a cell position c in the layout. If n is the empty string, a potentially stored cell
@@ -245,10 +241,8 @@ class cell_level_layout : public ClockedLayout
         {
             return it->second;
         }
-        else
-        {
-            return {};
-        }
+
+        return {};
     }
 
 #pragma endregion
@@ -394,8 +388,8 @@ class cell_level_layout : public ClockedLayout
     template <typename Fn>
     void foreach_cell(Fn&& fn) const
     {
-        using IteratorType = decltype(strg->cell_type_map.cbegin());
-        mockturtle::detail::foreach_element_transform<IteratorType, cell>(
+        using iterator_type = decltype(strg->cell_type_map.cbegin());
+        mockturtle::detail::foreach_element_transform<iterator_type, cell>(
             strg->cell_type_map.cbegin(), strg->cell_type_map.cend(),
             [](const auto& ct) { return static_cast<cell>(ct.first); }, fn);
     }
@@ -422,8 +416,8 @@ class cell_level_layout : public ClockedLayout
     template <typename Fn>
     void foreach_pi(Fn&& fn) const
     {
-        using IteratorType = decltype(strg->inputs.cbegin());
-        mockturtle::detail::foreach_element_transform<IteratorType, cell>(
+        using iterator_type = decltype(strg->inputs.cbegin());
+        mockturtle::detail::foreach_element_transform<iterator_type, cell>(
             strg->inputs.cbegin(), strg->inputs.cend(), [](const auto& i) { return static_cast<cell>(i); }, fn);
     }
     /**
@@ -436,8 +430,8 @@ class cell_level_layout : public ClockedLayout
     template <typename Fn>
     void foreach_po(Fn&& fn) const
     {
-        using IteratorType = decltype(strg->outputs.cbegin());
-        mockturtle::detail::foreach_element_transform<IteratorType, cell>(
+        using iterator_type = decltype(strg->outputs.cbegin());
+        mockturtle::detail::foreach_element_transform<iterator_type, cell>(
             strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return static_cast<cell>(o); }, fn);
     }
 

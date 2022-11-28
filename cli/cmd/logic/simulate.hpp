@@ -147,7 +147,8 @@ class simulate_command : public command
         {
             tables = mockturtle::simulate<fiction::tt>(
                 *ntk_or_lyt_ptr,
-                mockturtle::default_simulator<fiction::tt>(static_cast<unsigned>(ntk_or_lyt_ptr->num_pis())));
+                // NOLINTNEXTLINE
+                mockturtle::default_simulator<fiction::tt>{static_cast<unsigned>(ntk_or_lyt_ptr->num_pis())});
         };
 
         std::visit(store_po_names, network_or_layout_variant);

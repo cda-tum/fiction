@@ -2,7 +2,7 @@
 // Created by marcel on 31.03.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -12,7 +12,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[clocked-layout]")
+TEST_CASE("Clocked layout traits", "[clocked-layout]")
 {
     using layout = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
@@ -22,7 +22,7 @@ TEST_CASE("Traits", "[clocked-layout]")
     CHECK(has_foreach_outgoing_clocked_zone_v<layout>);
 }
 
-TEST_CASE("Clocking", "[clocked-layout]")
+TEST_CASE("Clock zone assignment", "[clocked-layout]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
@@ -30,8 +30,8 @@ TEST_CASE("Clocking", "[clocked-layout]")
 
     SECTION("2DDWave Clocking")
     {
-        CHECK(layout.is_clocking_scheme(clock_name::twoddwave));
-        CHECK(!layout.is_clocking_scheme(clock_name::res));
+        CHECK(layout.is_clocking_scheme(clock_name::TWODDWAVE));
+        CHECK(!layout.is_clocking_scheme(clock_name::RES));
         CHECK(layout.is_regularly_clocked());
         CHECK(layout.num_clocks() == 4);
 
@@ -80,8 +80,8 @@ TEST_CASE("Clocking", "[clocked-layout]")
     {
         layout.replace_clocking_scheme(use_clocking<clk_lyt>());
 
-        CHECK(!layout.is_clocking_scheme(clock_name::twoddwave));
-        CHECK(layout.is_clocking_scheme(clock_name::use));
+        CHECK(!layout.is_clocking_scheme(clock_name::TWODDWAVE));
+        CHECK(layout.is_clocking_scheme(clock_name::USE));
         CHECK(layout.is_regularly_clocked());
 
         CHECK(layout.get_clock_number({0, 0}) == 0);
@@ -115,7 +115,7 @@ TEST_CASE("Clocking", "[clocked-layout]")
     }
 }
 
-TEST_CASE("Iteration", "[clocked-layout]")
+TEST_CASE("Iteration over clocking zones", "[clocked-layout]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
@@ -143,7 +143,7 @@ TEST_CASE("Iteration", "[clocked-layout]")
     layout.foreach_outgoing_clocked_zone({1, 1}, [&s4](const auto& cz) { CHECK(s4.count(cz) > 0); });
 }
 
-TEST_CASE("Structural properties", "[clocked-layout]")
+TEST_CASE("Clocked layout properties", "[clocked-layout]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 

@@ -56,8 +56,8 @@ class cartesian_layout
         aspect_ratio dimension;
     };
 
-    static constexpr auto min_fanin_size = 0u;
-    static constexpr auto max_fanin_size = 3u;
+    static constexpr auto min_fanin_size = 0u;  // NOLINT(readability-identifier-naming): mockturtle requirement
+    static constexpr auto max_fanin_size = 3u;  // NOLINT(readability-identifier-naming): mockturtle requirement
 
     using base_type = cartesian_layout;
 
@@ -139,7 +139,9 @@ class cartesian_layout
     [[nodiscard]] constexpr OffsetCoordinateType north(const OffsetCoordinateType& c) const noexcept
     {
         if (c.y == 0ull)
+        {
             return c;
+        }
 
         auto nc = c;
         --nc.y;
@@ -157,7 +159,9 @@ class cartesian_layout
     [[nodiscard]] constexpr OffsetCoordinateType north_east(const OffsetCoordinateType& c) const noexcept
     {
         if (c.x == x() || c.y == 0ull)
+        {
             return c;
+        }
 
         auto nec = c;
         ++nec.x;
@@ -177,9 +181,13 @@ class cartesian_layout
         auto ec = c;
 
         if (c.x > x())
+        {
             ec.d = 1;
+        }
         else if (c.x < x())
+        {
             ++ec.x;
+        }
 
         return ec;
     }
@@ -196,7 +204,9 @@ class cartesian_layout
         auto sec = c;
 
         if (c.x > x() || c.y > y())
+        {
             sec.d = 1;
+        }
         else if (c.x < x() && c.y < y())
         {
             ++sec.x;
@@ -217,9 +227,13 @@ class cartesian_layout
         auto sc = c;
 
         if (c.y > y())
+        {
             sc.d = 1;
+        }
         else if (c.y < y())
+        {
             ++sc.y;
+        }
 
         return sc;
     }
@@ -236,7 +250,9 @@ class cartesian_layout
         auto swc = c;
 
         if (c.y > y())
+        {
             swc.d = 1;
+        }
         else if (c.x > 0ull && c.y < y())
         {
             --swc.x;
@@ -255,7 +271,9 @@ class cartesian_layout
     [[nodiscard]] constexpr OffsetCoordinateType west(const OffsetCoordinateType& c) const noexcept
     {
         if (c.x == 0ull)
+        {
             return c;
+        }
 
         auto wc = c;
         --wc.x;
@@ -273,7 +291,9 @@ class cartesian_layout
     [[nodiscard]] constexpr OffsetCoordinateType north_west(const OffsetCoordinateType& c) const noexcept
     {
         if (c.x == 0ull || c.y == 0ull)
+        {
             return c;
+        }
 
         auto nwc = c;
         --nwc.x;
@@ -293,9 +313,13 @@ class cartesian_layout
         auto ac = c;
 
         if (c.z > z())
+        {
             ac.d = 1;
+        }
         else if (c.z < z())
+        {
             ++ac.z;
+        }
 
         return ac;
     }
@@ -309,7 +333,9 @@ class cartesian_layout
     [[nodiscard]] constexpr OffsetCoordinateType below(const OffsetCoordinateType& c) const noexcept
     {
         if (c.z == 0ull)
+        {
             return c;
+        }
 
         auto bc = c;
         --bc.z;

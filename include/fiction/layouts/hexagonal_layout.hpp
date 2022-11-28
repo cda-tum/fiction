@@ -163,8 +163,8 @@ class hexagonal_layout
         aspect_ratio dimension;
     };
 
-    static constexpr auto min_fanin_size = 0u;
-    static constexpr auto max_fanin_size = 5u;
+    static constexpr auto min_fanin_size = 0u;  // NOLINT(readability-identifier-naming): mockturtle requirement
+    static constexpr auto max_fanin_size = 5u;  // NOLINT(readability-identifier-naming): mockturtle requirement
 
     using base_type = hexagonal_layout;
 
@@ -305,7 +305,9 @@ class hexagonal_layout
     [[nodiscard]] constexpr OffsetCoordinateType north(const OffsetCoordinateType& c) const noexcept
     {
         if (c.y == 0ull)
+        {
             return c;
+        }
 
         auto nc = c;
         --nc.y;
@@ -339,9 +341,13 @@ class hexagonal_layout
         auto ec = c;
 
         if (c.x > x())
+        {
             ec.d = 1;
+        }
         else if (c.x < x())
+        {
             ++ec.x;
+        }
 
         return ec;
     }
@@ -383,9 +389,13 @@ class hexagonal_layout
         auto sc = c;
 
         if (c.y > y())
+        {
             sc.d = 1;
+        }
         else if (c.y < y())
+        {
             ++sc.y;
+        }
 
         return sc;
     }
@@ -414,7 +424,9 @@ class hexagonal_layout
     [[nodiscard]] constexpr OffsetCoordinateType west(const OffsetCoordinateType& c) const noexcept
     {
         if (c.x == 0ull)
+        {
             return c;
+        }
 
         auto wc = c;
         --wc.x;
@@ -459,9 +471,13 @@ class hexagonal_layout
         auto ac = c;
 
         if (c.z > z())
+        {
             ac.d = 1;
+        }
         else if (c.z < z())
+        {
             ++ac.z;
+        }
 
         return ac;
     }
@@ -475,7 +491,9 @@ class hexagonal_layout
     [[nodiscard]] constexpr OffsetCoordinateType below(const OffsetCoordinateType& c) const noexcept
     {
         if (c.z == 0ull)
+        {
             return c;
+        }
 
         auto bc = c;
         --bc.z;

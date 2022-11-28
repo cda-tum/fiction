@@ -2,7 +2,7 @@
 // Created by marcel on 23.02.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/path_finding/k_shortest_paths.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -14,7 +14,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Yen's 2x2 clocked layouts", "[k-shortest-paths]")
+TEST_CASE("Yen's algorithm on 2x2 clocked layouts", "[k-shortest-paths]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using path    = layout_coordinate_path<clk_lyt>;
@@ -166,7 +166,7 @@ TEST_CASE("Yen's 2x2 clocked layouts", "[k-shortest-paths]")
     }
 }
 
-TEST_CASE("Yen's 4x4 clocked layouts", "[k-shortest-paths]")
+TEST_CASE("Yen's algorithm on 4x4 clocked layouts", "[k-shortest-paths]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using path    = layout_coordinate_path<clk_lyt>;
@@ -271,7 +271,7 @@ TEST_CASE("Yen's 4x4 clocked layouts", "[k-shortest-paths]")
     }
 }
 
-TEST_CASE("Yen's 4x4 gate-level layouts with coordinate obstruction", "[k-shortest-paths]")
+TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction", "[k-shortest-paths]")
 {
     using gate_lyt   = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     using coord_path = layout_coordinate_path<gate_lyt>;
@@ -330,7 +330,7 @@ TEST_CASE("Yen's 4x4 gate-level layouts with coordinate obstruction", "[k-shorte
     }
 }
 
-TEST_CASE("Yen's 4x4 gate-level layouts with connection obstruction", "[k-shortest-paths]")
+TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction", "[k-shortest-paths]")
 {
     using gate_lyt   = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     using coord_path = layout_coordinate_path<gate_lyt>;

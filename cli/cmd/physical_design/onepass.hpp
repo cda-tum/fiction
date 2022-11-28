@@ -48,7 +48,8 @@ class onepass_command : public command
                        "resulting from this approach might be desynchronized. I/Os are always located at the "
                        "layout's borders.")
     {
-        add_option("--clk_scheme,-s", clocking, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, ESP, BANCS}", true);
+        add_option("--clk_scheme,-s", clocking, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, ESR, CFE, BANCS}",
+                   true);
         add_option("--upper_bound,-u", ps.upper_bound, "Number of FCN gate tiles to use at maximum");
         add_option("--fixed_size,-f", ps.fixed_size, "Execute only one iteration with the given number of tiles");
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
@@ -82,7 +83,7 @@ class onepass_command : public command
             return;
         }
         // set the value of fixed_size as the upper bound if set
-        else if (this->is_set("fixed_size"))
+        if (this->is_set("fixed_size"))
         {
             ps.upper_bound = ps.fixed_size;
         }
@@ -100,7 +101,7 @@ class onepass_command : public command
         // choose clocking
         if (auto clk = fiction::get_clocking_scheme<fiction::cart_gate_clk_lyt>(clocking); clk.has_value())
         {
-            if (auto name = clk->name; name == fiction::clock_name::open || name == fiction::clock_name::columnar)
+            if (auto name = clk->name; name == fiction::clock_name::OPEN || name == fiction::clock_name::COLUMNAR)
             {
                 env->out() << fmt::format("[e] the \"{}\" clocking scheme is not supported by this approach", name)
                            << std::endl;

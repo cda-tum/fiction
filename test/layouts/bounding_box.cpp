@@ -2,7 +2,8 @@
 // Created by marcel on 13.01.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>
@@ -102,7 +103,6 @@ TEST_CASE("Update 2D cell-level bounding box", "[bounding-box]")
     lyt_and.assign_cell_type({3, 6}, qca_technology::cell_type::NORMAL);
     lyt_and.assign_cell_type({4, 6}, qca_technology::cell_type::NORMAL);
     lyt_and.assign_cell_type({5, 6}, qca_technology::cell_type::NORMAL);
-
 
     // still the old bounding box
     CHECK(bb_and.get_min() == tile<cart_gate_clk_lyt>{0, 0});

@@ -28,7 +28,7 @@ class technology_network : public mockturtle::klut_network
   public:
 #pragma region Types and constructors
 
-    technology_network() : mockturtle::klut_network()
+    technology_network()
     {
         add_additional_functions();
     }
@@ -51,9 +51,7 @@ class technology_network : public mockturtle::klut_network
      */
     [[nodiscard]] bool is_po(const node& n) const
     {
-        const auto end = _storage->outputs.cbegin() + _storage->data.num_pos;
-
-        return std::find_if(_storage->outputs.cbegin(), end,
+        return std::find_if(_storage->outputs.cbegin(), _storage->outputs.cend(),
                             [this, &n](const auto& p)
                             { return this->get_node(p.index) == n; }) != _storage->outputs.cend();
     }
@@ -183,11 +181,17 @@ class technology_network : public mockturtle::klut_network
         _storage->nodes.push_back(node_data);
 
         /* increase ref-count to children */
-        for (auto c : children) { _storage->nodes[c].data[0].h1++; }
+        for (auto c : children)
+        {
+            _storage->nodes[c].data[0].h1++;
+        }
 
         set_value(index, 0);
 
-        for (auto const& fn : _events->on_add) { (*fn)(index); }
+        for (auto const& fn : _events->on_add)
+        {
+            (*fn)(index);
+        }
 
         return index;
     }
@@ -360,6 +364,8 @@ class technology_network : public mockturtle::klut_network
      */
     void add_additional_functions() noexcept
     {
+        // NOLINTBEGIN(*-pointer-arithmetic): mockturtle requirement
+
         // create dot function: a xor (c or a and b)
         static uint64_t dot = 0x52;
 
@@ -408,6 +414,8 @@ class technology_network : public mockturtle::klut_network
         kitty::dynamic_truth_table tt_and_xor(3);
         kitty::create_from_words(tt_and_xor, &and_xor, &and_xor + 1);
         _storage->data.cache.insert(tt_and_xor);
+
+        // NOLINTEND(*-pointer-arithmetic): mockturtle requirement
     }
 };
 

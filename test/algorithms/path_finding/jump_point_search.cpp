@@ -2,7 +2,7 @@
 // Created by marcel on 19.05.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/algorithms/path_finding/jump_point_search.hpp>
@@ -17,7 +17,7 @@
 
 using namespace fiction;
 
-TEST_CASE("2x2 clocked layouts", "[A*]")
+TEST_CASE("JPS on 2x2 clocked layouts", "[JPS]")
 {
     using clk_lyt    = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using coord_path = layout_coordinate_path<clk_lyt>;
@@ -76,7 +76,7 @@ TEST_CASE("2x2 clocked layouts", "[A*]")
     }
 }
 
-TEST_CASE("4x4 clocked layouts", "[A*]")
+TEST_CASE("JPS on 4x4 clocked layouts", "[JPS]")
 {
     using clk_lyt    = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using coord_path = layout_coordinate_path<clk_lyt>;
@@ -109,7 +109,7 @@ TEST_CASE("4x4 clocked layouts", "[A*]")
     }
 }
 
-TEST_CASE("4x4 gate-level layouts with coordinate obstruction", "[A*]")
+TEST_CASE("JPS on 4x4 gate-level layouts with coordinate obstruction", "[JPS]")
 {
     using gate_lyt   = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     using coord_path = layout_coordinate_path<gate_lyt>;
@@ -166,7 +166,7 @@ TEST_CASE("4x4 gate-level layouts with coordinate obstruction", "[A*]")
     }
 }
 
-TEST_CASE("4x4 gate-level layouts with connection obstruction", "[A*]")
+TEST_CASE("JPS on 4x4 gate-level layouts with connection obstruction", "[JPS]")
 {
     using gate_lyt   = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     using coord_path = layout_coordinate_path<gate_lyt>;
@@ -222,7 +222,7 @@ TEST_CASE("4x4 gate-level layouts with connection obstruction", "[A*]")
     }
 }
 
-TEST_CASE("10x10 clocked layouts with varying distance functions", "[A*]")
+TEST_CASE("JPS on 10x10 clocked layouts with varying distance functions", "[JPS]")
 {
     using clk_lyt    = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using coord_path = layout_coordinate_path<clk_lyt>;
@@ -243,9 +243,9 @@ TEST_CASE("10x10 clocked layouts with varying distance functions", "[A*]")
                 CHECK(path.target() == coordinate<clk_lyt>{9, 9});
             }
         }
-        SECTION("ESP")
+        SECTION("ESR")
         {
-            clk_lyt layout{{9, 9}, esp_clocking<clk_lyt>()};
+            clk_lyt layout{{9, 9}, esr_clocking<clk_lyt>()};
 
             SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
             {
@@ -274,9 +274,9 @@ TEST_CASE("10x10 clocked layouts with varying distance functions", "[A*]")
                 CHECK(path.target() == coordinate<clk_lyt>{9, 9});
             }
         }
-        SECTION("ESP")
+        SECTION("ESR")
         {
-            clk_lyt layout{{9, 9}, esp_clocking<clk_lyt>()};
+            clk_lyt layout{{9, 9}, esr_clocking<clk_lyt>()};
 
             SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
             {

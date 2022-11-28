@@ -6,6 +6,7 @@
 #define FICTION_FCN_GATE_LIBRARY_HPP
 
 #include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/utils/array_utils.hpp"
 
@@ -162,7 +163,7 @@ class fcn_gate_library
      */
     static constexpr fcn_gate merge(const std::vector<fcn_gate>& gates) noexcept
     {
-        auto merged = empty_gate;
+        auto merged = EMPTY_GATE;
 
         for (auto x = 0ul; x < GateSizeX; ++x)
         {
@@ -226,11 +227,14 @@ class fcn_gate_library
      */
     static constexpr fcn_gate transpose(const fcn_gate& g) noexcept
     {
-        auto trans = empty_gate;
+        auto trans = EMPTY_GATE;
 
         for (auto x = 0ul; x < GateSizeX; ++x)
         {
-            for (auto y = 0ul; y < GateSizeY; ++y) { trans[y][x] = g[x][y]; }
+            for (auto y = 0ul; y < GateSizeY; ++y)
+            {
+                trans[y][x] = g[x][y];
+            }
         }
 
         return trans;
@@ -268,7 +272,7 @@ class fcn_gate_library
      * Single empty gate in given technology and tile size. Used as a blue print to create new ones in merge and
      * transpose for example.
      */
-    static constexpr const fcn_gate empty_gate =
+    static constexpr const fcn_gate EMPTY_GATE =
         fiction::create_array<GateSizeY>(fiction::create_array<GateSizeX>(Technology::cell_type::EMPTY));
 };
 

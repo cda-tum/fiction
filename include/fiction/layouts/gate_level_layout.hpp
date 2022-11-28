@@ -122,8 +122,8 @@ class gate_level_layout : public ClockedLayout
         }
     };
 
-    static constexpr auto min_fanin_size = std::max(ClockedLayout::min_fanin_size, 1u);
-    static constexpr auto max_fanin_size = ClockedLayout::max_fanin_size;
+    static constexpr auto min_fanin_size = std::max(ClockedLayout::min_fanin_size, 1u);  // NOLINT(*-identifier-naming)
+    static constexpr auto max_fanin_size = ClockedLayout::max_fanin_size;                // NOLINT(*-identifier-naming)
 
     using base_type = gate_level_layout;
     using node      = uint32_t;
@@ -144,7 +144,7 @@ class gate_level_layout : public ClockedLayout
      * @param ar Highest possible position in the layout.
      * @param name Layout name.
      */
-    explicit gate_level_layout(const aspect_ratio<ClockedLayout>& ar = {}, std::string name = {}) :
+    explicit gate_level_layout(const typename ClockedLayout::aspect_ratio& ar = {}, const std::string& name = {}) :
             ClockedLayout(ar),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
@@ -152,7 +152,7 @@ class gate_level_layout : public ClockedLayout
         static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
 
         initialize_truth_table_cache();
-        strg->data.layout_name = std::move(name);
+        strg->data.layout_name = name;
     }
     /**
      * Standard constructor. Creates a gate-level layout of the given aspect ratio and clocks it via the given clocking
@@ -162,8 +162,8 @@ class gate_level_layout : public ClockedLayout
      * @param scheme Clocking scheme to apply to this layout.
      * @param name Layout name.
      */
-    gate_level_layout(const aspect_ratio<ClockedLayout>& ar, const clocking_scheme<tile>& scheme,
-                      std::string name = {}) :
+    gate_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<tile>& scheme,
+                      const std::string& name = {}) :
             ClockedLayout(ar, scheme),
             strg{std::make_shared<gate_level_layout_storage>()},
             evnts{std::make_shared<typename event_storage::element_type>()}
@@ -171,7 +171,7 @@ class gate_level_layout : public ClockedLayout
         static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
 
         initialize_truth_table_cache();
-        strg->data.layout_name = std::move(name);
+        strg->data.layout_name = name;
     }
     /**
      * Copy constructor from another layout's storage.
@@ -237,6 +237,10 @@ class gate_level_layout : public ClockedLayout
     {
         return std::find(strg->inputs.cbegin(), strg->inputs.cend(), n) != strg->inputs.cend();
     }
+    [[nodiscard]] bool is_ci(const node n) const noexcept
+    {
+        return is_pi(n);
+    }
     /**
      * Check whether tile t hosts a primary input.
      *
@@ -252,6 +256,11 @@ class gate_level_layout : public ClockedLayout
     {
         return std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
                             [this, &n](const auto& p) { return this->get_node(p.index) == n; }) != strg->outputs.cend();
+    }
+
+    [[nodiscard]] bool is_co(const node n) const noexcept
+    {
+        return is_po(n);
     }
     /**
      * Check whether tile t hosts a primary output.
@@ -311,10 +320,8 @@ class gate_level_layout : public ClockedLayout
         {
             return it->second;
         }
-        else
-        {
-            return {};
-        }
+
+        return {};
     }
 
     [[nodiscard]] std::string get_name(const signal s) const noexcept
@@ -346,10 +353,8 @@ class gate_level_layout : public ClockedLayout
         {
             return get_name(static_cast<node>(strg->inputs[index]));
         }
-        else
-        {
-            return {};
-        }
+
+        return {};
     }
 
     [[nodiscard]] bool has_input_name(const uint32_t index) const noexcept
@@ -371,10 +376,8 @@ class gate_level_layout : public ClockedLayout
         {
             return get_name(get_node(strg->outputs[index].index));
         }
-        else
-        {
-            return {};
-        }
+
+        return {};
     }
 
     [[nodiscard]] bool has_output_name(const uint32_t index) const noexcept
@@ -873,8 +876,8 @@ class gate_level_layout : public ClockedLayout
     template <typename Fn>
     void foreach_pi(Fn&& fn) const
     {
-        using IteratorType = decltype(strg->inputs.cbegin());
-        mockturtle::detail::foreach_element_transform<IteratorType, node>(
+        using iterator_type = decltype(strg->inputs.cbegin());
+        mockturtle::detail::foreach_element_transform<iterator_type, node>(
             strg->inputs.cbegin(), strg->inputs.cend(), [](const auto& i) { return static_cast<node>(i); }, fn);
     }
     /**
@@ -889,8 +892,8 @@ class gate_level_layout : public ClockedLayout
     template <typename Fn>
     void foreach_po(Fn&& fn) const
     {
-        using IteratorType = decltype(strg->outputs.cbegin());
-        mockturtle::detail::foreach_element_transform<IteratorType, signal>(
+        using iterator_type = decltype(strg->outputs.cbegin());
+        mockturtle::detail::foreach_element_transform<iterator_type, signal>(
             strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return o.index; }, fn);
     }
     /**
@@ -1004,13 +1007,15 @@ class gate_level_layout : public ClockedLayout
     template <typename Fn>
     void foreach_fanin(const node n, Fn&& fn) const
     {
-        if (n <= 1)  // const-0 or const-1
+        if (n <= 1)
+        {  // const-0 or const-1
             return;
+        }
 
         const auto fanin = incoming_data_flow(get_tile(n));
 
-        using IteratorType = decltype(fanin.cbegin());
-        mockturtle::detail::foreach_element_transform<IteratorType, signal>(
+        using iterator_type = decltype(fanin.cbegin());
+        mockturtle::detail::foreach_element_transform<iterator_type, signal>(
             fanin.cbegin(), fanin.cend(), [](const auto& t) { return static_cast<signal>(t); }, fn);
     }
     /**
@@ -1024,13 +1029,15 @@ class gate_level_layout : public ClockedLayout
     template <typename Fn>
     void foreach_fanout(const node n, Fn&& fn) const
     {
-        if (n <= 1)  // const-0 or const-1
+        if (n <= 1)
+        {  // const-0 or const-1
             return;
+        }
 
         const auto fanout = outgoing_data_flow(get_tile(n));
 
-        using IteratorType = decltype(fanout.cbegin());
-        mockturtle::detail::foreach_element_transform<IteratorType, node>(
+        using iterator_type = decltype(fanout.cbegin());
+        mockturtle::detail::foreach_element_transform<iterator_type, node>(
             fanout.cbegin(), fanout.cend(), [this](const auto& t) { return this->get_node(t); }, fn);
     }
 
@@ -1056,7 +1063,7 @@ class gate_level_layout : public ClockedLayout
         uint32_t index{0};
         while (begin != end)
         {
-            index <<= 1;
+            index <<= 1u;
             index ^= *begin++ ? 1 : 0;
         }
 
@@ -1360,12 +1367,12 @@ class gate_level_layout : public ClockedLayout
         strg->nodes[n].data[0].h2 = v;
     }
 
-    uint32_t incr_value(const node n) const
+    [[nodiscard]] uint32_t incr_value(const node n) const
     {
         return static_cast<uint32_t>(strg->nodes[n].data[0].h2++);
     }
 
-    uint32_t decr_value(const node n) const
+    [[nodiscard]] uint32_t decr_value(const node n) const
     {
         return static_cast<uint32_t>(--strg->nodes[n].data[0].h2);
     }

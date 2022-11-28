@@ -1,8 +1,10 @@
-# Let there be a *fiction*
+# *fiction* &ndash; Design Automation for Field-coupled Nanotechnologies
 
 [![Ubuntu CI](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
 [![macOS CI](https://github.com/marcelwa/fiction/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
 [![Windows CI](https://github.com/marcelwa/fiction/actions/workflows/windows.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
+[![CodeQL](https://github.com/marcelwa/fiction/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/marcelwa/fiction/actions/workflows/codeql-analysis.yml)
+[![Docker Image](https://img.shields.io/github/workflow/status/marcelwa/fiction/Docker%20Image%20CI?label=Docker&logo=Docker)](https://github.com/marcelwa/fiction/actions/workflows/docker-image.yml)
 [![codecov](https://codecov.io/gh/marcelwa/fiction/branch/main/graph/badge.svg?token=SUPC5N6KFU)](https://codecov.io/gh/marcelwa/fiction)
 [![Documentation Status](https://img.shields.io/readthedocs/fiction?logo=readthedocs)](https://fiction.readthedocs.io/)
 [![Release](https://img.shields.io/github/v/tag/marcelwa/fiction?label=fiction&logo=github&logoColor=darkgray)](https://github.com/marcelwa/fiction/releases)
@@ -12,7 +14,7 @@
 This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
 in C++17 using the [EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). Thereby, *fiction*
 focuses on the logic synthesis, placement, routing, clocking, and verification of emerging nanotechnologies. As a
-promising class of post-CMOS technologies,
+promising class of beyond-CMOS technologies,
 [Field-coupled Nanocomputing (FCN)](https://www.springer.com/de/book/9783662437216) devices like Quantum-dot Cellular
 Automata (QCA) in manifold forms (e.g. atomic or molecular), Nanomagnet Logic (NML) devices, Silicon Dangling Bonds
 (SiDBs), and many more, allow for high computing performance with tremendously low power consumption without the flow of
@@ -34,30 +36,66 @@ Additionally, *fiction* comes with an
 ABC-like [CLI tool](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-stand-alone-cli-tool)
 that allows quick access to its core functionality.
 
-Learn more by referring to the [full documentation](https://fiction.readthedocs.io/).
+
+<p align="center">
+  <a href="https://fiction.readthedocs.io/en/latest/">
+  <img width=30% src="https://img.shields.io/badge/documentation-blue?style=for-the-badge&logo=read%20the%20docs" alt="Documentation" />
+  </a>
+</p>
 
 If you have any questions, comments, or suggestions, please do not hesitate to get in touch.
 
-## Implemented Physical Design Algorithms
+## Quick Start
 
-For automatic FCN layout obtainment, *fiction* provides implementations of state-of-the-art
-[physical design algorithms](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#physical-design).
+> Clone the repository and its submodules:
 
-Among these are
+```bash
+git clone --recursive https://github.com/marcelwa/fiction.git
+```
 
-- SMT-based [exact placement and routing](https://ieeexplore.ieee.org/document/8342060)
-- OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
-- SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
+### The CLI
 
-Furthermore, layout correctness can
-be [validated](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#verification) using
+> Inside the newly cloned `fiction` folder, trigger the build process:
 
-- SAT-based [formal verification](https://ieeexplore.ieee.org/document/9218641)
+```bash
+cmake . -B build
+cd build
+cmake --build . -j4
+```
 
-For logic synthesis, *fiction* relies on the [mockturtle library](https://github.com/lsils/mockturtle) that offers logic
-network types and optimization algorithms. Optimized logic networks can then be passed as specifications to physical
-design algorithms. Alternatively, logic synthesis can be performed in external tools and resulting
-Verilog/AIGER/BLIF/... files can be parsed by *fiction*.
+> Run the CLI tool:
+
+```bash
+cli/fiction
+```
+
+> Here is an example of running *fiction* to perform a full physical design flow on a QCA circuit layout that can
+> afterward be simulated in QCADesigner:
+
+![CLI example](docs/_static/fiction_cli_example.gif)
+
+### The Header-only Library
+
+> Add `fiction` as a sub-directory to your CMake project and link against `libfiction` (assuming your project is
+> called `fanfiction`):
+
+```CMake
+add_subdirectory(fiction/)
+target_link_libraries(fanfiction libfiction)
+```
+
+> Include the headers you need:
+
+```C++
+#include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/technology/qca_one_library.hpp>
+#include <fiction/io/write_qca_layout.hpp>
+#include <fiction/...>
+```
+
+For a full getting started guide, please refer to
+the [documentation](https://fiction.readthedocs.io/en/latest/getting_started.html).
 
 ## Supported Technologies
 
@@ -68,6 +106,8 @@ Additionally, output formats for state-of-the-art physical simulator engines are
 
 ### Quantum-dot Cellular Automata (QCA)
 
+<img src="docs/_static/qca_cells.png" alt="Input pin and cell output" align="right" height="70"/>
+
 Gate libraries:
 
 - [QCA ONE](https://ieeexplore.ieee.org/document/7538997/)
@@ -75,13 +115,16 @@ Gate libraries:
 File formats:
 
 - `*.qca` for [QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/)
+- `*.qll` for [MagCAD](https://topolinano.polito.it/) and [SCERPA](https://ieeexplore.ieee.org/document/8935211)
 - `*.fqca` for [QCA-STACK](https://github.com/wlambooy/QCA-STACK)
 - `*.svg` for visual representation
 
 Many thanks to Frank Sill Torres for his support with the QCADesigner format, to Willem Lambooy for his support with the
-QCA-STACK format, and to Gregor Kuhn for implementing the SVG writer!
+QCA-STACK format, and to Sophia Kuhn for implementing the SVG writer!
 
 ### in-plane Nanomagnet Logic (iNML)
+
+<img src="docs/_static/nml_cells.png" alt="Input pin and cell output" align="right" height="70"/>
 
 Gate libraries:
 
@@ -89,12 +132,18 @@ Gate libraries:
 
 File formats:
 
-- `*.qll` for [ToPoliNano and MagCAD](https://topolinano.polito.it/)
-- `*.qcc` for [ToPoliNano and MagCAD](https://topolinano.polito.it/)
+- `*.qcc` for [ToPoliNano](https://topolinano.polito.it/)
+- `*.qll` for [ToPoliNano & MagCAD](https://topolinano.polito.it/)
 
-Many thanks to Umberto Garlando and Fabrizio Riente for their support!
+Many thanks to Umberto Garlando, Fabrizio Riente, and Giuliana Beretta for their support!
 
-### Silicon Dangling Bond (SiDB)
+### Silicon Dangling Bonds (SiDBs)
+
+<img src="docs/_static/sidb_cells.png" alt="Input pin and cell output" align="right" height="70"/>
+
+Gate libraries:
+
+- [Bestagon](https://dl.acm.org/doi/10.1145/3489517.3530525)
 
 File formats:
 
@@ -112,17 +161,17 @@ with variable amounts of clock numbers as QCA for instance uses four clock phase
 
 Built-in schemes are
 
-|    [Columnar](https://ieeexplore.ieee.org/document/573740)    |    [Row](https://ieeexplore.ieee.org/document/573740)    |     [2DDWave](https://ieeexplore.ieee.org/document/1717097)      |
-|:-------------------------------------------------------------:|:--------------------------------------------------------:|:----------------------------------------------------------------:|
-| <img src="docs/_static/columnar.png" alt="USE" height="200"/> | <img src="docs/_static/row.png" alt="RES" height="200"/> | <img src="docs/_static/2ddwave.png" alt="2DDWave" height="200"/> |
+|      [Columnar](https://ieeexplore.ieee.org/document/573740)       |    [Row](https://ieeexplore.ieee.org/document/573740)    |     [2DDWave](https://ieeexplore.ieee.org/document/1717097)      |
+|:------------------------------------------------------------------:|:--------------------------------------------------------:|:----------------------------------------------------------------:|
+| <img src="docs/_static/columnar.png" alt="Columnar" height="200"/> | <img src="docs/_static/row.png" alt="Row" height="200"/> | <img src="docs/_static/2ddwave.png" alt="2DDWave" height="200"/> |
 
-|   [USE](https://ieeexplore.ieee.org/document/7219390)    | [RES](https://www.tandfonline.com/doi/abs/10.1080/21681724.2019.1570551) | [ESP](https://www.tandfonline.com/doi/full/10.1080/00207217.2021.1972473) |
-|:--------------------------------------------------------:|:------------------------------------------------------------------------:|:-------------------------------------------------------------------------:|
-| <img src="docs/_static/use.png" alt="USE" height="200"/> |         <img src="docs/_static/res.png" alt="RES" height="200"/>         |       <img src="docs/_static/esp.png" alt="2DDWave" height="200"/>        |
+|   [USE](https://ieeexplore.ieee.org/document/7219390)    | [RES](https://www.tandfonline.com/doi/abs/10.1080/21681724.2019.1570551) | [ESR](https://link.springer.com/content/pdf/10.1007/s10470-020-01760-4.pdf) |
+|:--------------------------------------------------------:|:------------------------------------------------------------------------:|:---------------------------------------------------------------------------:|
+| <img src="docs/_static/use.png" alt="USE" height="200"/> |         <img src="docs/_static/res.png" alt="RES" height="200"/>         |          <img src="docs/_static/esr.png" alt="ESR" height="200"/>           |
 
-|    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
-|:------------------------------------------------------------:|
-| <img src="docs/_static/bancs.png" alt="BANCS" height="300"/> |
+|   [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096)   |    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
+|:------------------------------------------------------------------------------------:|:------------------------------------------------------------:|
+|               <img src="docs/_static/cfe.png" alt="CFE" height="200"/>               | <img src="docs/_static/bancs.png" alt="BANCS" height="300"/> |
 
 plus the mentioned irregular open clocking that works via a clock map instead of a regular extrapolated cutout.
 
@@ -164,6 +213,29 @@ further asymmetric clock signals with extended *Hold* phases that are assigned t
 tiles, [synchronization elements](https://ieeexplore.ieee.org/document/8626294) can be created that stall signals over
 multiple clock cycles. These artificial latches are able to feed information to any other clock number, but their usage
 reduces the overall throughput of the layout. In return, long wire detours for signal synchronization can be prevented.
+
+## Implemented Physical Design Algorithms
+
+For automatic FCN layout obtainment, *fiction* provides implementations of state-of-the-art
+[physical design algorithms](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#physical-design) that
+take [mockturtle logic networks](https://mockturtle.readthedocs.io/en/latest/implementations.html) as input
+specification and output placed, routed, and clocked circuits.
+
+Among these algorithms are
+
+- SMT-based [exact placement and routing](https://ieeexplore.ieee.org/document/8342060)
+- OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
+- SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
+
+Furthermore, layout correctness can
+be [validated](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#verification) using
+
+- SAT-based [formal verification](https://ieeexplore.ieee.org/document/9218641)
+
+For logic synthesis, *fiction* relies on the [mockturtle library](https://github.com/lsils/mockturtle) that offers logic
+network types and optimization algorithms. Logic synthesis can be performed in external tools and resulting
+Verilog/AIGER/BLIF/... files can be parsed by *fiction*. Alternatively, since *mockturtle* is included in *fiction*,
+synthesis can be applied in the same evaluation script.
 
 ## Cost Metrics
 

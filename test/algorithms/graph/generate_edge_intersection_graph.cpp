@@ -2,7 +2,7 @@
 // Created by marcel on 03.02.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/graph/generate_edge_intersection_graph.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -15,7 +15,7 @@
 
 using namespace fiction;
 
-TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
+TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 {
     using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     generate_edge_intersection_graph_stats st{};
@@ -116,7 +116,7 @@ TEST_CASE("2x2 layouts", "[generate-edge-intersection-graph]")
     }
 }
 
-TEST_CASE("3x3 layouts", "[generate-edge-intersection-graph]")
+TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 {
     using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     generate_edge_intersection_graph_stats st{};
@@ -161,7 +161,7 @@ TEST_CASE("3x3 layouts", "[generate-edge-intersection-graph]")
     }
 }
 
-TEST_CASE("4x4 layouts", "[generate-edge-intersection-graph]")
+TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 {
     using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     generate_edge_intersection_graph_stats st{};
@@ -204,7 +204,7 @@ TEST_CASE("4x4 layouts", "[generate-edge-intersection-graph]")
     }
 }
 
-TEST_CASE("4x4 layouts with obstruction", "[generate-edge-intersection-graph]")
+TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-graph]")
 {
     using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     generate_edge_intersection_graph_stats st{};

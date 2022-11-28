@@ -2,7 +2,8 @@
 // Created by marcel on 14.10.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 
@@ -18,7 +19,7 @@
 using namespace fiction;
 
 template <typename Spec, typename Impl>
-void check_for_strong_equiv(const Spec& spec, const Impl& impl) noexcept
+void check_for_strong_equiv(const Spec& spec, const Impl& impl)
 {
     equivalence_checking_stats st{};
 
@@ -32,7 +33,7 @@ void check_for_strong_equiv(const Spec& spec, const Impl& impl) noexcept
 }
 
 template <typename Spec, typename Impl>
-void check_for_weak_equiv(const Spec& spec, const Impl& impl) noexcept
+void check_for_weak_equiv(const Spec& spec, const Impl& impl)
 {
     equivalence_checking_stats st{};
 
@@ -46,7 +47,7 @@ void check_for_weak_equiv(const Spec& spec, const Impl& impl) noexcept
 }
 
 template <typename Spec, typename Impl>
-void check_for_no_equiv(const Spec& spec, const Impl& impl) noexcept
+void check_for_no_equiv(const Spec& spec, const Impl& impl)
 {
     equivalence_checking_stats st{};
 

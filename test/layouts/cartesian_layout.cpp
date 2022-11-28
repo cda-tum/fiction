@@ -2,7 +2,7 @@
 // Created by marcel on 31.03.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/traits.hpp>
@@ -11,7 +11,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[cartesian-layout]")
+TEST_CASE("Cartesian layout traits", "[cartesian-layout]")
 {
     using layout = cartesian_layout<offset::ucoord_t>;
 
@@ -38,7 +38,7 @@ TEST_CASE("Traits", "[cartesian-layout]")
     CHECK(has_foreach_adjacent_opposite_coordinates_v<layout>);
 }
 
-TEST_CASE("Coordinate iteration", "[cartesian-layout]")
+TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 {
     cartesian_layout<offset::ucoord_t>::aspect_ratio ar{9, 9, 1};
 
@@ -129,7 +129,7 @@ TEST_CASE("Coordinate iteration", "[cartesian-layout]")
     CHECK(visited.size() == 23);
 }
 
-TEST_CASE("Cardinal operations", "[cartesian-layout]")
+TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
 {
     cartesian_layout<offset::ucoord_t>::aspect_ratio ar{10, 10, 1};
 

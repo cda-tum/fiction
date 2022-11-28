@@ -2,7 +2,7 @@
 // Created by marcel on 01.02.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/path_finding/enumerate_all_paths.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -14,7 +14,7 @@
 
 using namespace fiction;
 
-TEST_CASE("2x2 clocked layouts", "[enumerate-all-paths]")
+TEST_CASE("Enumerate all paths on 2x2 clocked layouts", "[enumerate-all-paths]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using path    = layout_coordinate_path<clk_lyt>;
@@ -74,7 +74,7 @@ TEST_CASE("2x2 clocked layouts", "[enumerate-all-paths]")
     }
 }
 
-TEST_CASE("4x4 clocked layouts", "[enumerate-all-paths]")
+TEST_CASE("Enumerate all paths on 4x4 clocked layouts", "[enumerate-all-paths]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using path    = layout_coordinate_path<clk_lyt>;
@@ -103,7 +103,7 @@ TEST_CASE("4x4 clocked layouts", "[enumerate-all-paths]")
     }
 }
 
-TEST_CASE("4x4 gate-level layouts with coordinate obstruction", "[enumerate-all-paths]")
+TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruction", "[enumerate-all-paths]")
 {
     using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     using path     = layout_coordinate_path<gate_lyt>;
@@ -142,7 +142,7 @@ TEST_CASE("4x4 gate-level layouts with coordinate obstruction", "[enumerate-all-
     }
 }
 
-TEST_CASE("4x4 gate-level layouts with connection obstruction", "[enumerate-all-paths]")
+TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruction", "[enumerate-all-paths]")
 {
     using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     using path     = layout_coordinate_path<gate_lyt>;

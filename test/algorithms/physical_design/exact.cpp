@@ -4,7 +4,8 @@
 
 #if (FICTION_Z3_SOLVER)
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
@@ -80,6 +81,22 @@ template <typename Lyt>
 exact_physical_design_params<Lyt>&& res(exact_physical_design_params<Lyt>&& ps) noexcept
 {
     ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(res_clocking<Lyt>());
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& esr(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(esr_clocking<Lyt>());
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& cfe(exact_physical_design_params<Lyt>&& ps) noexcept
+{
+    ps.scheme = std::make_shared<clocking_scheme<coordinate<Lyt>>>(cfe_clocking<Lyt>());
 
     return std::move(ps);
 }
@@ -278,6 +295,16 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
     {
         check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
             blueprints::and_or_network<mockturtle::mig_network>(), res(crossings(configuration<cart_gate_clk_lyt>())));
+    }
+    SECTION("ESR clocking")
+    {
+        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
+            blueprints::and_or_network<mockturtle::mig_network>(), esr(crossings(configuration<cart_gate_clk_lyt>())));
+    }
+    SECTION("CFE clocking")
+    {
+        check_with_gate_library<qca_cell_clk_lyt, qca_one_library>(
+            blueprints::and_or_network<mockturtle::mig_network>(), cfe(crossings(configuration<cart_gate_clk_lyt>())));
     }
     SECTION("Border I/O")
     {
@@ -533,7 +560,7 @@ TEST_CASE("High degree input networks", "[exact]")
                                            res(configuration<cart_gate_clk_lyt>())));
 }
 
-TEST_CASE("Timeout", "[exact]")
+TEST_CASE("Exact physical design timeout", "[exact]")
 {
     auto timeout_config    = use(crossings(configuration<cart_gate_clk_lyt>()));
     timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
@@ -545,7 +572,7 @@ TEST_CASE("Timeout", "[exact]")
     CHECK(!layout.has_value());
 }
 
-TEST_CASE("Name conservation", "[exact]")
+TEST_CASE("Name conservation after exact physical design", "[exact]")
 {
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");

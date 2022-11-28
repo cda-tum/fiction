@@ -2,7 +2,7 @@
 // Created by marcel on 15.09.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
@@ -39,7 +39,7 @@ void check_common_traits()
     CHECK(has_foreach_adjacent_opposite_coordinates_v<Lyt>);
 }
 
-TEST_CASE("Traits", "[hexagonal-layout]")
+TEST_CASE("Hexagonal layout traits", "[hexagonal-layout]")
 {
     SECTION("odd row")
     {
@@ -257,7 +257,7 @@ void check_visited_coordinates()
     CHECK(visited.size() == 23);
 }
 
-TEST_CASE("Coordinate iteration", "[hexagonal-layout]")
+TEST_CASE("Hexagonal coordinate iteration", "[hexagonal-layout]")
 {
     using odd_row_layout     = hexagonal_layout<offset::ucoord_t, odd_row_hex>;
     using even_row_layout    = hexagonal_layout<offset::ucoord_t, even_row_hex>;

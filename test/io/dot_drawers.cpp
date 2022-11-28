@@ -2,7 +2,8 @@
 // Created by marcel on 17.09.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/io/dot_drawers.hpp>
