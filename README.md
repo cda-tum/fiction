@@ -1,4 +1,4 @@
-# Let there be a *fiction*
+# *fiction* &ndash; Design Automation for Field-coupled Nanotechnologies
 
 [![Ubuntu CI](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
 [![macOS CI](https://github.com/marcelwa/fiction/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
@@ -14,7 +14,7 @@
 This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
 in C++17 using the [EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). Thereby, *fiction*
 focuses on the logic synthesis, placement, routing, clocking, and verification of emerging nanotechnologies. As a
-promising class of post-CMOS technologies,
+promising class of beyond-CMOS technologies,
 [Field-coupled Nanocomputing (FCN)](https://www.springer.com/de/book/9783662437216) devices like Quantum-dot Cellular
 Automata (QCA) in manifold forms (e.g. atomic or molecular), Nanomagnet Logic (NML) devices, Silicon Dangling Bonds
 (SiDBs), and many more, allow for high computing performance with tremendously low power consumption without the flow of
@@ -36,30 +36,66 @@ Additionally, *fiction* comes with an
 ABC-like [CLI tool](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-stand-alone-cli-tool)
 that allows quick access to its core functionality.
 
-Learn more by referring to the [full documentation](https://fiction.readthedocs.io/).
+
+<p align="center">
+  <a href="https://fiction.readthedocs.io/en/latest/">
+  <img width=30% src="https://img.shields.io/badge/documentation-blue?style=for-the-badge&logo=read%20the%20docs" alt="Documentation" />
+  </a>
+</p>
 
 If you have any questions, comments, or suggestions, please do not hesitate to get in touch.
 
-## Implemented Physical Design Algorithms
+## Quick Start
 
-For automatic FCN layout obtainment, *fiction* provides implementations of state-of-the-art
-[physical design algorithms](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#physical-design).
+> Clone the repository and its submodules:
 
-Among these are
+```bash
+git clone --recursive https://github.com/marcelwa/fiction.git
+```
 
-- SMT-based [exact placement and routing](https://ieeexplore.ieee.org/document/8342060)
-- OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
-- SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
+### The CLI
 
-Furthermore, layout correctness can
-be [validated](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#verification) using
+> Inside the newly cloned `fiction` folder, trigger the build process:
 
-- SAT-based [formal verification](https://ieeexplore.ieee.org/document/9218641)
+```bash
+cmake . -B build
+cd build
+cmake --build . -j4
+```
 
-For logic synthesis, *fiction* relies on the [mockturtle library](https://github.com/lsils/mockturtle) that offers logic
-network types and optimization algorithms. Optimized logic networks can then be passed as specifications to physical
-design algorithms. Alternatively, logic synthesis can be performed in external tools and resulting
-Verilog/AIGER/BLIF/... files can be parsed by *fiction*.
+> Run the CLI tool:
+
+```bash
+cli/fiction
+```
+
+> Here is an example of running *fiction* to perform a full physical design flow on a QCA circuit layout that can
+> afterward be simulated in QCADesigner:
+
+![CLI example](docs/_static/fiction_cli_example.gif)
+
+### The Header-only Library
+
+> Add `fiction` as a sub-directory to your CMake project and link against `libfiction` (assuming your project is
+> called `fanfiction`):
+
+```CMake
+add_subdirectory(fiction/)
+target_link_libraries(fanfiction libfiction)
+```
+
+> Include the headers you need:
+
+```C++
+#include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/technology/qca_one_library.hpp>
+#include <fiction/io/write_qca_layout.hpp>
+#include <fiction/...>
+```
+
+For a full getting started guide, please refer to
+the [documentation](https://fiction.readthedocs.io/en/latest/getting_started.html).
 
 ## Supported Technologies
 
@@ -69,6 +105,8 @@ implementations together with gate libraries to compile gate-level layout abstra
 Additionally, output formats for state-of-the-art physical simulator engines are supported.
 
 ### Quantum-dot Cellular Automata (QCA)
+
+<img src="docs/_static/qca_cells.png" alt="Input pin and cell output" align="right" height="70"/>
 
 Gate libraries:
 
@@ -86,6 +124,8 @@ QCA-STACK format, and to Sophia Kuhn for implementing the SVG writer!
 
 ### in-plane Nanomagnet Logic (iNML)
 
+<img src="docs/_static/nml_cells.png" alt="Input pin and cell output" align="right" height="70"/>
+
 Gate libraries:
 
 - [ToPoliNano](https://topolinano.polito.it/supported-technologies/)
@@ -98,6 +138,8 @@ File formats:
 Many thanks to Umberto Garlando, Fabrizio Riente, and Giuliana Beretta for their support!
 
 ### Silicon Dangling Bonds (SiDBs)
+
+<img src="docs/_static/sidb_cells.png" alt="Input pin and cell output" align="right" height="70"/>
 
 Gate libraries:
 
@@ -171,6 +213,29 @@ further asymmetric clock signals with extended *Hold* phases that are assigned t
 tiles, [synchronization elements](https://ieeexplore.ieee.org/document/8626294) can be created that stall signals over
 multiple clock cycles. These artificial latches are able to feed information to any other clock number, but their usage
 reduces the overall throughput of the layout. In return, long wire detours for signal synchronization can be prevented.
+
+## Implemented Physical Design Algorithms
+
+For automatic FCN layout obtainment, *fiction* provides implementations of state-of-the-art
+[physical design algorithms](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#physical-design) that
+take [mockturtle logic networks](https://mockturtle.readthedocs.io/en/latest/implementations.html) as input
+specification and output placed, routed, and clocked circuits.
+
+Among these algorithms are
+
+- SMT-based [exact placement and routing](https://ieeexplore.ieee.org/document/8342060)
+- OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
+- SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
+
+Furthermore, layout correctness can
+be [validated](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#verification) using
+
+- SAT-based [formal verification](https://ieeexplore.ieee.org/document/9218641)
+
+For logic synthesis, *fiction* relies on the [mockturtle library](https://github.com/lsils/mockturtle) that offers logic
+network types and optimization algorithms. Logic synthesis can be performed in external tools and resulting
+Verilog/AIGER/BLIF/... files can be parsed by *fiction*. Alternatively, since *mockturtle* is included in *fiction*,
+synthesis can be applied in the same evaluation script.
 
 ## Cost Metrics
 
