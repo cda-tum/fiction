@@ -97,7 +97,6 @@ jobs:
 
       - name: Build
         working-directory: ${{github.workspace}}/build
-
         run: cmake --build . --config ${{matrix.build_type}} -j3  # macOS runners provide 3 cores
 
       - name: Test
