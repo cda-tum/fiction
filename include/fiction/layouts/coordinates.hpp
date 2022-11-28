@@ -599,6 +599,7 @@ uint64_t volume(const CoordinateType& coord) noexcept
 
 }  // namespace fiction
 
+
 namespace std
 {
 // define std::hash overload for offset::ucoord_t
@@ -678,11 +679,11 @@ struct coord_t
     /**
      * MSB acts as dead indicator.
      */
-    uint64_t d : 1;
+    bool d{true};
     /**
      * 1 bit for the z coordinate.
      */
-    uint32_t z : 1;
+    bool z;
     /**
      * 31 bit for the y coordinate.
      */
@@ -698,10 +699,9 @@ struct coord_t
      * Default constructor. Creates a dead coordinate at (0, 0, 0).
      */
     constexpr coord_t() noexcept :
-            d{static_cast<decltype(d)>(1u)},  // default-constructed ucoord_ts are dead
-            z{static_cast<decltype(z)>(0u)},
-            y{static_cast<decltype(y)>(0u)},
-            x{static_cast<decltype(x)>(0u)}
+            z{static_cast<decltype(z)>(0)},
+            y{static_cast<decltype(y)>(0)},
+            x{static_cast<decltype(x)>(0)}
     {}
     /**
      * Standard constructor. Creates a non-dead coordinate at (x_, y_, z_).
@@ -715,7 +715,7 @@ struct coord_t
      */
     template <class X, class Y, class Z>
     constexpr coord_t(X x_, Y y_, Z z_) noexcept :
-            d{static_cast<decltype(d)>(0u)},
+            d{false},
             z{static_cast<decltype(z)>(z_)},
             y{static_cast<decltype(y)>(y_)},
             x{static_cast<decltype(x)>(x_)}
@@ -730,41 +730,14 @@ struct coord_t
      */
     template <class X, class Y>
     constexpr coord_t(X x_, Y y_) noexcept :
-            d{static_cast<decltype(d)>(0u)},
-            z{static_cast<decltype(z)>(0u)},
+            d{false},
+            z{static_cast<decltype(z)>(0)},
             y{static_cast<decltype(y)>(y_)},
             x{static_cast<decltype(x)>(x_)}
-    {}
-    /**
-     * Standard constructor. Instantiates a coordinate from an uint64_t, where the positions are encoded in the
-     * following four parts of the unsigned 64-bit integer (from MSB to LSB):
-     *  - 1 bit for the dead indicator
-     *  - 1 bit for the z position
-     *  - 31 bit for the y position
-     *  - 31 bit for the x position
-     *
-     * @param t Unsigned 64-bit integer to instantiate the coordinate from.
-     */
-    constexpr explicit coord_t(const uint64_t t) noexcept :
-            d{static_cast<decltype(d)>(t >> 63ull)},
-            z{static_cast<decltype(z)>((t << 1ull) >> 63ull)},
-            y{static_cast<decltype(y)>((t << 2ull) >> 33ull)},
-            x{static_cast<decltype(x)>((t << 33ull) >> 33ull)}
     {}
 
     // NOLINTEND(readability-identifier-naming)
 
-    /**
-     * Allows explicit conversion to uint64_t. Segments an unsigned 64-bit integer into four parts (from MSB to LSB):
-     *  - 1 bit for the dead indicator
-     *  - 1 bit for the z position
-     *  - 31 bit for the y position
-     *  - 31 bit for the x position
-     */
-    explicit constexpr operator uint64_t() const noexcept
-    {
-        return (((((((static_cast<uint64_t>(d)) << 1ull) | z) << 31ull) | y) << 31ull) | x);
-    }
     /**
      * Returns whether the coordinate is dead.
      *
@@ -781,7 +754,9 @@ struct coord_t
      */
     [[nodiscard]] constexpr coord_t get_dead() const noexcept
     {
-        return coord_t{static_cast<uint64_t>(*this) | static_cast<uint64_t>(coord_t{})};
+        auto dead_coord{*this};
+        dead_coord.d = true;
+        return dead_coord;
     }
     /**
      * Compares against another coordinate for equality. Respects the dead indicator.
@@ -792,16 +767,6 @@ struct coord_t
     constexpr bool operator==(const coord_t& other) const noexcept
     {
         return d == other.d && z == other.z && y == other.y && x == other.x;
-    }
-    /**
-     * Compares against another coordinate's uint64_t representation for equality. Respects the dead indicator.
-     *
-     * @param other Right-hand side coordinate representation in uint64_t format.
-     * @return True iff this coordinate is equal to the converted one.
-     */
-    constexpr bool operator==(const uint64_t& other) const noexcept
-    {
-        return static_cast<uint64_t>(*this) == other;
     }
     /**
      * Compares against another coordinate for inequality. Respects the dead indicator.
@@ -822,7 +787,7 @@ struct coord_t
      */
     constexpr bool operator<(const coord_t& other) const noexcept
     {
-        if (z < other.z)
+        if (static_cast<int>(z) < static_cast<int>(other.z))
         {
             return true;
         }
@@ -876,6 +841,26 @@ struct coord_t
         return !(*this < other);
     }
     /**
+     * Adds another coordinate to this one and returns the result. Does not modify this coordinate.
+     *
+     * @param other Coordinate to add.
+     * @return Sum of both coordinates.
+     */
+    constexpr coord_t operator+(const coord_t& other) const noexcept
+    {
+        return coord_t{x + other.x, y + other.y, static_cast<int>(z) + static_cast<int>(other.z)};
+    }
+    /**
+     * Subtracts another coordinate from this one and returns the result. Does not modify this coordinate.
+     *
+     * @param other Coordinate to subtract.
+     * @return Difference of both coordinates.
+     */
+    constexpr coord_t operator-(const coord_t& other) const noexcept
+    {
+        return coord_t{x - other.x, y - other.y, static_cast<int>(z) - static_cast<int>(other.z)};
+    }
+    /**
      * Returns a string representation of the coordinate of the form "(x, y, z)" that does not respect the dead
      * indicator.
      *
@@ -899,11 +884,11 @@ constexpr CoordinateType to_fiction_coord(const coord_t& coord) noexcept
 {
     if (!coord.is_dead())
     {
-        return {coord.x, coord.y * 2 + coord.z};
+        return {coord.x, coord.y * 2 + static_cast<decltype(coord.y)>(coord.z)};
     }
 
     return CoordinateType{};
-};
+}
 
 /**
  * convertes coordinates (offset, cube) into SiQAD coordinates.
@@ -916,8 +901,9 @@ template <typename CoordinateType>
 constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 {
     return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};
-};
+}
 
-};  // namespace siqad
+}  // namespace siqad
+
 #pragma GCC diagnostic pop
 #endif  // FICTION_COORDINATES_HPP
