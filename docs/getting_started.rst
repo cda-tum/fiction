@@ -42,6 +42,13 @@ The CLI tool can then be run using::
 
   cli/fiction
 
+
+Here is an example of running *fiction* to perform a full physical design flow on a QCA circuit layout that can afterward be simulated in QCADesigner:
+
+.. figure:: /_static/fiction_cli_example.gif
+   :alt: CLI example
+   :align: center
+
 See :ref:`cli` for a full user guide.
 
 
