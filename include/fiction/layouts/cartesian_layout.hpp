@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -693,7 +694,7 @@ class cartesian_layout
      * returns true.
      *
      * Coordinates that are outside of the layout bounds are not considered. Thereby, the size of the returned container
-     * is at max 4.
+     * is at most 4.
      *
      * @param c Coordinate whose adjacent ones are desired.
      * @return A container that contains all of c's adjacent coordinates.
@@ -703,34 +704,35 @@ class cartesian_layout
         std::vector<OffsetCoordinateType> cnt{};
         cnt.reserve(max_fanin_size + 1);  // reserve memory
 
-        const auto add_if_not_c = [&c, &cnt](const auto& cardinal) noexcept
-        {
-            if (cardinal != c)
-            {
-                cnt.push_back(cardinal);
-            }
-        };
-
-        add_if_not_c(north(c));
-        add_if_not_c(east(c));
-        add_if_not_c(south(c));
-        add_if_not_c(west(c));
+        foreach_adjacent_coordinate(c, [&cnt](const auto& ac) noexcept { cnt.push_back(ac); });
 
         return cnt;
     }
     /**
-     * Applies a function to all coordinates adjacent to a given one in accordance with adjacent_coordinates.
+     * Applies a function to all coordinates adjacent to a given one. Thereby, only cardinal directions are being
+     * considered, i.e., the function is applied to all coordinates ac for which is_adjacent(c, ac) returns true.
      *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * Coordinates that are outside of the layout bounds are not considered. Thereby, at most 4 coordinates are touched.
+     *
+     * @tparam Fn Functor type.
      * @param c Coordinate whose adjacent ones are desired.
      * @param fn Functor to apply to each of c's adjacent coordinates.
      */
     template <typename Fn>
     void foreach_adjacent_coordinate(const OffsetCoordinateType& c, Fn&& fn) const
     {
-        const auto adj = adjacent_coordinates(c);
+        const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
+        {
+            if (cardinal != c)
+            {
+                std::invoke(std::forward<Fn>(fn), cardinal);
+            }
+        };
 
-        mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
+        apply_if_not_c(north(c));
+        apply_if_not_c(east(c));
+        apply_if_not_c(south(c));
+        apply_if_not_c(west(c));
     }
     /**
      * Returns a container that contains all coordinates pairs of opposing adjacent coordinates with respect to a given
@@ -748,33 +750,31 @@ class cartesian_layout
         std::vector<std::pair<OffsetCoordinateType, OffsetCoordinateType>> cnt{};
         cnt.reserve((max_fanin_size + 1) / 2);  // reserve memory
 
-        const auto add_if_not_c = [&c, &cnt](OffsetCoordinateType cardinal1, OffsetCoordinateType cardinal2) noexcept
-        {
-            if (cardinal1 != c && cardinal2 != c)
-            {
-                cnt.emplace_back(std::move(cardinal1), std::move(cardinal2));
-            }
-        };
-
-        add_if_not_c(north(c), south(c));
-        add_if_not_c(east(c), west(c));
+        foreach_adjacent_opposite_coordinates(c, [&cnt](const auto& cp) noexcept { cnt.push_back(cp); });
 
         return cnt;
     }
     /**
-     * Applies a function to all opposing coordinate pairs adjacent to a given one in accordance with
-     * adjacent_opposite_coordinates.
+     * Applies a function to all opposing coordinate pairs adjacent to a given one. In this Cartesian layout, the
+     * function will be applied to (north(c), south(c)) and (east(c), west(c)).
      *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * @tparam Fn Functor type.
      * @param c Coordinate whose opposite adjacent ones are desired.
      * @param fn Functor to apply to each of c's opposite adjacent coordinate pairs.
      */
     template <typename Fn>
     void foreach_adjacent_opposite_coordinates(const OffsetCoordinateType& c, Fn&& fn) const
     {
-        const auto adj = adjacent_opposite_coordinates(c);
+        const auto apply_if_not_c = [&c, &fn](const auto cardinal1, auto cardinal2) noexcept
+        {
+            if (cardinal1 != c && cardinal2 != c)
+            {
+                std::invoke(std::forward<Fn>(fn), std::make_pair(std::move(cardinal1), std::move(cardinal2)));
+            }
+        };
 
-        mockturtle::detail::foreach_element(adj.cbegin(), adj.cend(), fn);
+        apply_if_not_c(north(c), south(c));
+        apply_if_not_c(east(c), west(c));
     }
 
 #pragma endregion
