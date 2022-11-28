@@ -5,6 +5,8 @@ on:
     paths:
       - '**.hpp'
       - '**.cpp'
+      - '**.cmake'
+      - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/ubuntu.yml'
 

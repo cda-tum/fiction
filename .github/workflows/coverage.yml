@@ -6,6 +6,8 @@ on:
     paths:
       - '**.hpp'
       - '**.cpp'
+      - '**.cmake'
+      - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/coverage.yml'
   pull_request:
@@ -13,6 +15,8 @@ on:
     paths:
       - '**.hpp'
       - '**.cpp'
+      - '**.cmake'
+      - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/coverage.yml'
 
