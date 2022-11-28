@@ -77,7 +77,7 @@ cli/fiction
 ### The Header-only Library
 
 > Add `fiction` as a sub-directory to your CMake project and link against `libfiction` (assuming your project is
-> called (`fanfiction`):
+> called `fanfiction`):
 
 ```CMake
 add_subdirectory(fiction/)
