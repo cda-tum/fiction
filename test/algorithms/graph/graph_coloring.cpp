@@ -2,7 +2,7 @@
 // Created by marcel on 04.02.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/graph/graph_coloring.hpp>
 

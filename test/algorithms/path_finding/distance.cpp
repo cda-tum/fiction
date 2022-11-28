@@ -2,7 +2,7 @@
 // Created by marcel on 17.02.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>

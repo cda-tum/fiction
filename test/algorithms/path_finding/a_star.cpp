@@ -2,7 +2,7 @@
 // Created by marcel on 17.02.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/path_finding/a_star.hpp>
 #include <fiction/algorithms/path_finding/cost.hpp>
@@ -18,7 +18,7 @@
 
 using namespace fiction;
 
-TEST_CASE("2x2 clocked layouts", "[A*]")
+TEST_CASE("A* on 2x2 clocked layouts", "[A*]")
 {
     using clk_lyt    = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using coord_path = layout_coordinate_path<clk_lyt>;
@@ -87,7 +87,7 @@ TEST_CASE("2x2 clocked layouts", "[A*]")
     }
 }
 
-TEST_CASE("4x4 clocked layouts", "[A*]")
+TEST_CASE("A* on 4x4 clocked layouts", "[A*]")
 {
     using clk_lyt    = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using coord_path = layout_coordinate_path<clk_lyt>;
@@ -120,7 +120,7 @@ TEST_CASE("4x4 clocked layouts", "[A*]")
     }
 }
 
-TEST_CASE("4x4 gate-level layouts with coordinate obstruction", "[A*]")
+TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 {
     using gate_lyt   = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     using coord_path = layout_coordinate_path<gate_lyt>;
@@ -177,7 +177,7 @@ TEST_CASE("4x4 gate-level layouts with coordinate obstruction", "[A*]")
     }
 }
 
-TEST_CASE("4x4 gate-level layouts with connection obstruction", "[A*]")
+TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 {
     using gate_lyt   = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     using coord_path = layout_coordinate_path<gate_lyt>;
@@ -233,7 +233,7 @@ TEST_CASE("4x4 gate-level layouts with connection obstruction", "[A*]")
     }
 }
 
-TEST_CASE("10x10 clocked layouts with varying distance functions", "[A*]")
+TEST_CASE("A* on 10x10 clocked layouts with varying distance functions", "[A*]")
 {
     using clk_lyt    = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using coord_path = layout_coordinate_path<clk_lyt>;
@@ -300,7 +300,7 @@ TEST_CASE("10x10 clocked layouts with varying distance functions", "[A*]")
     }
 }
 
-TEST_CASE("4x4 clocked layouts with varying cost functions", "[A*]")
+TEST_CASE("A* on 4x4 clocked layouts with varying cost functions", "[A*]")
 {
     using clk_lyt    = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using coord_path = layout_coordinate_path<clk_lyt>;
@@ -327,7 +327,7 @@ TEST_CASE("4x4 clocked layouts with varying cost functions", "[A*]")
     }
 }
 
-TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]")
+TEST_CASE("A* on A* path finding with the A* distance functor (don't do this!)", "[A*]")
 {
     using clk_lyt    = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using coord_path = layout_coordinate_path<clk_lyt>;
