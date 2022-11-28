@@ -5,6 +5,8 @@ on:
     paths:
       - '**.hpp'
       - '**.cpp'
+      - '**.cmake'
+      - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/ubuntu.yml'
 
@@ -92,7 +94,6 @@ jobs:
 
       - name: Build fiction
         working-directory: ${{github.workspace}}/build
-
         run: cmake --build . --config ${{matrix.build_type}} -j2
 
       - name: Test
