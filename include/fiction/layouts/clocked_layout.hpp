@@ -12,7 +12,11 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <iterator>
+#include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -210,29 +214,31 @@ class clocked_layout : public CoordinateLayout
      */
     [[nodiscard]] auto incoming_clocked_zones(const clock_zone& cz) const noexcept
     {
-        const auto adj = CoordinateLayout::adjacent_coordinates(cz);
-
         std::vector<clock_zone> incoming{};
-        incoming.reserve(adj.size());  // reserve memory
+        incoming.reserve(strg->clocking->max_in_degree);  // reserve memory
 
-        std::copy_if(std::cbegin(adj), std::cend(adj), std::back_inserter(incoming),
-                     [this, &cz](const auto& ct) { return is_incoming_clocked(cz, ct); });
+        foreach_incoming_clocked_zone(cz, [&incoming](const auto& ct) { incoming.push_back(ct); });
 
         return incoming;
     }
     /**
-     * Applies a function to all incoming clock zones of a given one in accordance with incoming_clocked_zones.
+     * Applies a function to all incoming clock zones of a given one.
      *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * @tparam Fn Functor type.
      * @param cz Base clock zone.
      * @param fn Functor to apply to each of cz's incoming clock zones.
      */
     template <typename Fn>
     void foreach_incoming_clocked_zone(const clock_zone& cz, Fn&& fn) const
     {
-        const auto incoming = incoming_clocked_zones(cz);
-
-        mockturtle::detail::foreach_element(incoming.cbegin(), incoming.cend(), fn);
+        CoordinateLayout::foreach_adjacent_coordinate(cz,
+                                                      [this, &cz, &fn](const auto& ct)
+                                                      {
+                                                          if (is_incoming_clocked(cz, ct))
+                                                          {
+                                                              std::invoke(std::forward<Fn>(fn), ct);
+                                                          }
+                                                      });
     }
     /**
      * Returns a container with all clock zones that are outgoing from the given one.
@@ -242,29 +248,31 @@ class clocked_layout : public CoordinateLayout
      */
     [[nodiscard]] auto outgoing_clocked_zones(const clock_zone& cz) const noexcept
     {
-        const auto adj = CoordinateLayout::adjacent_coordinates(cz);
-
         std::vector<clock_zone> outgoing{};
-        outgoing.reserve(adj.size());  // reserve memory
+        outgoing.reserve(strg->clocking->max_out_degree);  // reserve memory
 
-        std::copy_if(std::cbegin(adj), std::cend(adj), std::back_inserter(outgoing),
-                     [this, &cz](const auto& ct) { return is_outgoing_clocked(cz, ct); });
+        foreach_outgoing_clocked_zone(cz, [&outgoing](const auto& ct) { outgoing.push_back(ct); });
 
         return outgoing;
     }
     /**
-     * Applies a function to all outgoing clock zones of a given one in accordance with outgoing_clocked_zones.
+     * Applies a function to all outgoing clock zones of a given one.
      *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * @tparam Fn Functor type.
      * @param cz Base clock zone.
      * @param fn Functor to apply to each of cz's outgoing clock zones.
      */
     template <typename Fn>
     void foreach_outgoing_clocked_zone(const clock_zone& cz, Fn&& fn) const
     {
-        const auto outgoing = outgoing_clocked_zones(cz);
-
-        mockturtle::detail::foreach_element(outgoing.cbegin(), outgoing.cend(), fn);
+        CoordinateLayout::foreach_adjacent_coordinate(cz,
+                                                      [this, &cz, &fn](const auto& ct)
+                                                      {
+                                                          if (is_outgoing_clocked(cz, ct))
+                                                          {
+                                                              std::invoke(std::forward<Fn>(fn), ct);
+                                                          }
+                                                      });
     }
 
 #pragma endregion
@@ -278,7 +286,10 @@ class clocked_layout : public CoordinateLayout
      */
     [[nodiscard]] degree_t in_degree(const clock_zone& cz) const noexcept
     {
-        return static_cast<degree_t>(incoming_clocked_zones(cz).size());
+        degree_t idg{0};
+        foreach_incoming_clocked_zone(cz, [&idg](const auto&) { ++idg; });
+
+        return idg;
     }
     /**
      * Returns the number of outgoing clock zones from the given one.
@@ -288,7 +299,10 @@ class clocked_layout : public CoordinateLayout
      */
     [[nodiscard]] degree_t out_degree(const clock_zone& cz) const noexcept
     {
-        return static_cast<degree_t>(outgoing_clocked_zones(cz).size());
+        degree_t odg{0};
+        foreach_outgoing_clocked_zone(cz, [&odg](const auto&) { ++odg; });
+
+        return odg;
     }
     /**
      * Returns the number of incoming plus outgoing clock zones of the given one.
