@@ -67,7 +67,9 @@ class bounding_box_2d
 
             min.x = x;
             if (elem_found)
+            {
                 break;
+            }
         }
 
         // calculate min.y
@@ -85,7 +87,9 @@ class bounding_box_2d
 
             min.y = y;
             if (elem_found)
+            {
                 break;
+            }
         }
 
         // calculate max.x
@@ -103,7 +107,9 @@ class bounding_box_2d
 
             max.x = x;
             if (elem_found)
+            {
                 break;
+            }
         }
 
         // calculate max.y
@@ -121,7 +127,9 @@ class bounding_box_2d
 
             max.y = y;
             if (elem_found)
+            {
                 break;
+            }
         }
 
         x_size = max.x - min.x;

@@ -17,7 +17,6 @@
 #include <ostream>
 #include <sstream>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 namespace fiction
@@ -29,23 +28,23 @@ namespace detail
 namespace siqad
 {
 
-static constexpr const char* XML_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-static constexpr const char* OPEN_SIQAD    = "<siqad>\n";
-static constexpr const char* CLOSE_SIQAD   = "</siqad>\n";
-static constexpr const char* PROGRAM_BLOCK = "    <program>\n"
+inline constexpr const char* XML_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+inline constexpr const char* OPEN_SIQAD    = "<siqad>\n";
+inline constexpr const char* CLOSE_SIQAD   = "</siqad>\n";
+inline constexpr const char* PROGRAM_BLOCK = "    <program>\n"
                                              "        <file_purpose>{}</file_purpose>\n"
                                              "        <created_by>{}</created_by>\n"
                                              "        <available_at>{}</available_at>\n"
                                              "        <date>{}</date>\n"
                                              "    </program>\n";
 
-static constexpr const char* GUI_BLOCK = "    <gui>\n"
+inline constexpr const char* GUI_BLOCK = "    <gui>\n"
                                          "        <zoom>{}</zoom>\n"
                                          "        <displayed_region x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>\n"
                                          "        <scroll x=\"{}\" y=\"{}\"/>\n"
                                          "    </gui>\n";
 
-static constexpr const char* LAYERS_BLOCK = "<layers>\n"
+inline constexpr const char* LAYERS_BLOCK = "<layers>\n"
                                             "        <layer_prop>\n"
                                             "            <name>Lattice</name>\n"
                                             "            <type>Lattice</type>\n"
@@ -91,23 +90,23 @@ static constexpr const char* LAYERS_BLOCK = "<layers>\n"
                                             "        </layer_prop>\n"
                                             "    </layers>\n";
 
-static constexpr const char* OPEN_DESIGN  = "    <design>\n"
+inline constexpr const char* OPEN_DESIGN  = "    <design>\n"
                                             "        <layer type=\"Lattice\"/>\n"
                                             "        <layer type=\"Misc\"/>\n"
                                             "        <layer type=\"DB\">\n";
-static constexpr const char* CLOSE_DESIGN = "    </design>\n";
+inline constexpr const char* CLOSE_DESIGN = "    </design>\n";
 
-static constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"
+inline constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"
                                            "                <layer_id>2</layer_id>\n"
                                            "                <latcoord n=\"{}\" m=\"{}\" l=\"{}\"/>\n"
                                            "                <color>{}</color>\n"
                                            "            </dbdot>\n";
 
 // color format is Alpha RBG
-static constexpr const char* NORMAL_COLOR = "#ffc8c8c8";
-static constexpr const char* INPUT_COLOR  = "#ff008dc8";
-static constexpr const char* OUTPUT_COLOR = "#ffe28686";
-static constexpr const char* CONST_COLOR  = "#ff000000";
+inline constexpr const char* NORMAL_COLOR = "#ffc8c8c8";
+inline constexpr const char* INPUT_COLOR  = "#ff008dc8";
+inline constexpr const char* OUTPUT_COLOR = "#ffe28686";
+inline constexpr const char* CONST_COLOR  = "#ff000000";
 
 }  // namespace siqad
 
@@ -124,7 +123,8 @@ class write_sqd_layout_impl
         header << siqad::XML_HEADER << siqad::OPEN_SIQAD;
 
         const auto now      = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-        auto       time_str = std::string{std::ctime(&now)};
+        auto       time_str = std::string{std::ctime(&now)};  // NOLINT(concurrency-mt-unsafe): concurrency not needed
+
         time_str.pop_back();  // remove trailing new line
 
         header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
@@ -136,7 +136,9 @@ class write_sqd_layout_impl
         design << siqad::CLOSE_DESIGN;
 
         if (!file.is_open())
+        {
             throw std::ofstream::failure("could not open file");
+        }
 
         file << header.str();
         file << gui.str();
@@ -156,12 +158,12 @@ class write_sqd_layout_impl
             [this, &design](const auto& c)
             {
                 // generate SiDB cells
-                if constexpr (std::is_same_v<technology<Lyt>, sidb_technology>)
+                if constexpr (has_sidb_technology_v<Lyt>)
                 {
                     design << fmt::format(siqad::DBDOT_BLOCK, c.x, c.y / 2, c.y % 2, siqad::NORMAL_COLOR);
                 }
                 // generate QCA cell blocks
-                else if constexpr (std::is_same_v<technology<Lyt>, qca_technology>)
+                else if constexpr (has_qca_technology_v<Lyt>)
                 {
                     const auto type = this->lyt.get_cell_type(c);
 
@@ -205,8 +207,7 @@ template <typename Lyt>
 void write_sqd_layout(const Lyt& lyt, std::ofstream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(std::is_same_v<technology<Lyt>, qca_technology> || std::is_same_v<technology<Lyt>, sidb_technology>,
-                  "Lyt must be a QCA or SiDB layout");
+    static_assert(has_qca_technology_v<Lyt> || has_sidb_technology_v<Lyt>, "Lyt must be a QCA or SiDB layout");
 
     detail::write_sqd_layout_impl p{lyt, os};
 

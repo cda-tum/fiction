@@ -30,7 +30,7 @@ class tile_based_layout : public CoordinateLayout
 
     using base_type = tile_based_layout;
 
-    explicit tile_based_layout(const aspect_ratio<CoordinateLayout>& ar = {}) : CoordinateLayout(ar)
+    explicit tile_based_layout(const typename CoordinateLayout::aspect_ratio& ar = {}) : CoordinateLayout(ar)
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
     }

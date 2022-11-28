@@ -58,7 +58,10 @@ class network_balancing_impl
         // insert num buffers after child in balance_ntk
         const auto insert_buf_chain = [](auto& balance_ntk, const auto& num, auto& child)
         {
-            for (auto i = 0u; i < num; ++i) { child = balance_ntk.create_buf(child); }
+            for (auto i = 0u; i < num; ++i)
+            {
+                child = balance_ntk.create_buf(child);
+            }
         };
 
         // initialize a network copy

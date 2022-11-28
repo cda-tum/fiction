@@ -3,6 +3,8 @@
 [![Ubuntu CI](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
 [![macOS CI](https://github.com/marcelwa/fiction/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
 [![Windows CI](https://github.com/marcelwa/fiction/actions/workflows/windows.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
+[![CodeQL](https://github.com/marcelwa/fiction/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/marcelwa/fiction/actions/workflows/codeql-analysis.yml)
+[![Docker Image](https://img.shields.io/github/workflow/status/marcelwa/fiction/Docker%20Image%20CI?label=Docker&logo=Docker)](https://github.com/marcelwa/fiction/actions/workflows/docker-image.yml)
 [![codecov](https://codecov.io/gh/marcelwa/fiction/branch/main/graph/badge.svg?token=SUPC5N6KFU)](https://codecov.io/gh/marcelwa/fiction)
 [![Documentation Status](https://img.shields.io/readthedocs/fiction?logo=readthedocs)](https://fiction.readthedocs.io/)
 [![Release](https://img.shields.io/github/v/tag/marcelwa/fiction?label=fiction&logo=github&logoColor=darkgray)](https://github.com/marcelwa/fiction/releases)
@@ -75,6 +77,7 @@ Gate libraries:
 File formats:
 
 - `*.qca` for [QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/)
+- `*.qll` for [MagCAD](https://topolinano.polito.it/) and [SCERPA](https://ieeexplore.ieee.org/document/8935211)
 - `*.fqca` for [QCA-STACK](https://github.com/wlambooy/QCA-STACK)
 - `*.svg` for visual representation
 
@@ -89,16 +92,16 @@ Gate libraries:
 
 File formats:
 
-- `*.qll` for [ToPoliNano and MagCAD](https://topolinano.polito.it/)
-- `*.qcc` for [ToPoliNano and MagCAD](https://topolinano.polito.it/)
+- `*.qcc` for [ToPoliNano](https://topolinano.polito.it/)
+- `*.qll` for [ToPoliNano & MagCAD](https://topolinano.polito.it/)
 
-Many thanks to Umberto Garlando and Fabrizio Riente for their support!
+Many thanks to Umberto Garlando, Fabrizio Riente, and Giuliana Beretta for their support!
 
 ### Silicon Dangling Bonds (SiDBs)
 
 Gate libraries:
 
-- [Bestagon](https://fiction.readthedocs.io/en/latest/technology/gate_libraries.html#sidb-bestagon-library)
+- [Bestagon](https://dl.acm.org/doi/10.1145/3489517.3530525)
 
 File formats:
 

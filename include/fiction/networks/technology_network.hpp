@@ -28,7 +28,7 @@ class technology_network : public mockturtle::klut_network
   public:
 #pragma region Types and constructors
 
-    technology_network() : mockturtle::klut_network()
+    technology_network()
     {
         add_additional_functions();
     }
@@ -364,6 +364,8 @@ class technology_network : public mockturtle::klut_network
      */
     void add_additional_functions() noexcept
     {
+        // NOLINTBEGIN(*-pointer-arithmetic): mockturtle requirement
+
         // create dot function: a xor (c or a and b)
         static uint64_t dot = 0x52;
 
@@ -412,6 +414,8 @@ class technology_network : public mockturtle::klut_network
         kitty::dynamic_truth_table tt_and_xor(3);
         kitty::create_from_words(tt_and_xor, &and_xor, &and_xor + 1);
         _storage->data.cache.insert(tt_and_xor);
+
+        // NOLINTEND(*-pointer-arithmetic): mockturtle requirement
     }
 };
 

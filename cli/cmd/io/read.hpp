@@ -58,7 +58,10 @@ class read_command : public command
     {
         const auto store_ntks = [&](auto&& reader)
         {
-            for (const auto& ln : reader.get_networks(sort)) store<fiction::logic_network_t>().extend() = ln;
+            for (const auto& ln : reader.get_networks(sort))
+            {
+                store<fiction::logic_network_t>().extend() = ln;
+            }
         };
 
         if (!is_set("aig") && !is_set("xag") && !is_set("mig") && !is_set("tec") && !is_set("qca"))

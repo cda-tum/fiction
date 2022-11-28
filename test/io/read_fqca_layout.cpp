@@ -2,7 +2,8 @@
 // Created by marcel on 04.10.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/io/read_fqca_layout.hpp>

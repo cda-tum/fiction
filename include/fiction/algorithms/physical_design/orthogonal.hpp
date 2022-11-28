@@ -267,7 +267,9 @@ aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn) noex
                                                  [&ctn, &x](const auto& fon)
                                                  {
                                                      if (ctn.color_ntk.color(fon) == ctn.color_south)
+                                                     {
                                                          ++x;
+                                                     }
                                                  });
                 }
                 else if (const auto clr = ctn.color_ntk.color(n); clr == ctn.color_east)
@@ -287,9 +289,13 @@ aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn) noex
                 if (ctn.color_ntk.is_po(n))
                 {
                     if (is_eastern_po_orientation_available(ctn, n))
+                    {
                         ++x;
+                    }
                     else
+                    {
                         ++y;
+                    }
                 }
             }
 
@@ -347,7 +353,9 @@ mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Nt
 {
     // make sure pre1_t is the northwards tile and pre2_t is the westwards one
     if (pre2_t < pre1_t)
+    {
         std::swap(pre1_t, pre2_t);
+    }
 
     return place(lyt, t, ntk, n, wire_south(lyt, pre1_t, t), wire_east(lyt, pre2_t, t), c);
 }
@@ -360,7 +368,7 @@ mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Nt
     {
         return place(lyt, t, ntk, n, wire_east(lyt, pre_t, t));
     }
-    else if (lyt.is_northwards_of(t, pre_t))
+    if (lyt.is_northwards_of(t, pre_t))
     {
         return place(lyt, t, ntk, n, wire_south(lyt, pre_t, t));
     }
@@ -472,7 +480,9 @@ class orthogonal_impl
                         {
                             // make sure pre1_t is the northwards tile and pre2_t is the westwards one
                             if (pre2_t.y < pre1_t.y)
+                            {
                                 std::swap(pre1_t, pre2_t);
+                            }
 
                             // use larger y position of predecessors
                             t = {latest_pos.x, pre2_t.y};
@@ -487,7 +497,9 @@ class orthogonal_impl
                         {
                             // make sure pre1_t is the northwards tile and pre2_t is the westwards one
                             if (pre2_t.x > pre1_t.x)
+                            {
                                 std::swap(pre1_t, pre2_t);
+                            }
 
                             // use larger x position of predecessors
                             t = {pre1_t.x, latest_pos.y};
@@ -503,7 +515,9 @@ class orthogonal_impl
                             // make sure pre1_t has an empty tile to its east and pre2_t to its south
                             if (!layout.is_empty_tile(layout.east(pre1_t)) ||
                                 !layout.is_empty_tile(layout.south(pre2_t)))
+                            {
                                 std::swap(pre1_t, pre2_t);
+                            }
 
                             t = latest_pos;
 

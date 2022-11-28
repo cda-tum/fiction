@@ -251,8 +251,6 @@ uint32_t num_constant_fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noe
 class high_degree_fanin_exception : public std::exception
 {
   public:
-    explicit high_degree_fanin_exception() : std::exception() {}
-
     [[nodiscard]] const char* what() const noexcept override
     {
         return "network contains nodes that exceed the supported non-constant fanin size";
@@ -401,7 +399,10 @@ std::vector<edge_path<Ntk>> all_incoming_edge_paths(const Ntk& ntk, const mocktu
                               {
                                   auto ps = all_incoming_edge_paths(ntk, e.source);
 
-                                  for (auto& p : ps) { p.push_back(e); }
+                                  for (auto& p : ps)
+                                  {
+                                      p.push_back(e);
+                                  }
 
                                   paths.insert(paths.end(), std::make_move_iterator(ps.begin()),
                                                std::make_move_iterator(ps.end()));

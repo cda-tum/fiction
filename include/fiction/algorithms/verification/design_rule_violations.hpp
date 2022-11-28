@@ -97,7 +97,7 @@ class gate_level_drvs_impl
      *   - Non-wire I/O
      *   - Non-border I/O
      */
-    void run() noexcept
+    void run()
     {
         *ps.out << "[i] Topology:\n";
         if (ps.unplaced_nodes)
@@ -150,9 +150,9 @@ class gate_level_drvs_impl
 
         *ps.out << fmt::format(
                        "[i] DRVs: {}, Warnings: {}",
-                       (pst.drvs ? fmt::format(fmt::fg(fmt::color::red), std::to_string(pst.drvs)) : ZERO_ISSUES),
-                       (pst.warnings ? fmt::format(fmt::fg(fmt::color::yellow), std::to_string(pst.warnings)) :
-                                       ZERO_ISSUES))
+                       (pst.drvs != 0u ? fmt::format(fmt::fg(fmt::color::red), std::to_string(pst.drvs)) : ZERO_ISSUES),
+                       (pst.warnings != 0u ? fmt::format(fmt::fg(fmt::color::yellow), std::to_string(pst.warnings)) :
+                                             ZERO_ISSUES))
                 << std::endl;
 
         pst.report["DRVs"]     = pst.drvs;
@@ -249,7 +249,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string unplaced_nodes_check() noexcept
+    std::string unplaced_nodes_check()
     {
         nlohmann::json unplaced_report{};
 
@@ -279,7 +279,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string placed_dead_nodes_check() noexcept
+    std::string placed_dead_nodes_check()
     {
         nlohmann::json placed_dead_report{};
 
@@ -311,7 +311,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string non_adjacent_connections_check() noexcept
+    std::string non_adjacent_connections_check()
     {
         nlohmann::json non_adjacency_report{};
 
@@ -347,7 +347,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string missing_connections_check() noexcept
+    std::string missing_connections_check()
     {
         nlohmann::json connections_report{};
 
@@ -381,7 +381,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string crossing_gates_check() noexcept
+    std::string crossing_gates_check()
     {
         nlohmann::json crossing_report{};
 
@@ -409,7 +409,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string clocked_data_flow_check() noexcept
+    std::string clocked_data_flow_check()
     {
         nlohmann::json data_flow_report{};
 
@@ -445,7 +445,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string has_io_check() noexcept
+    std::string has_io_check()
     {
         nlohmann::json has_io_report{};
 
@@ -485,7 +485,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string empty_io_check() noexcept
+    std::string empty_io_check()
     {
         nlohmann::json empty_io_report{};
 
@@ -513,7 +513,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string io_pin_check() noexcept
+    std::string io_pin_check()
     {
         nlohmann::json io_pin_report{};
 
@@ -541,7 +541,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string border_io_check() noexcept
+    std::string border_io_check()
     {
         nlohmann::json border_report{};
 

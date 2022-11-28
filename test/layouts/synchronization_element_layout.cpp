@@ -2,7 +2,7 @@
 // Created by marcel on 30.08.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -13,14 +13,14 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[synchronization-element-layout]")
+TEST_CASE("Synchronization element layout traits", "[synchronization-element-layout]")
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
     CHECK(has_synchronization_elements_v<se_layout>);
 }
 
-TEST_CASE("Clocking", "[synchronization-element-layout]")
+TEST_CASE("Shifted clocking with synchronization elements", "[synchronization-element-layout]")
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
@@ -28,7 +28,7 @@ TEST_CASE("Clocking", "[synchronization-element-layout]")
 
     layout.assign_synchronization_element({1, 1}, 1);
 
-    CHECK(layout.is_clocking_scheme(clock_name::twoddwave));
+    CHECK(layout.is_clocking_scheme(clock_name::TWODDWAVE));
     CHECK(layout.is_regularly_clocked());
     CHECK(layout.num_clocks() == 4);
 
@@ -55,7 +55,7 @@ TEST_CASE("Clocking", "[synchronization-element-layout]")
     CHECK(layout.is_outgoing_clocked({1, 2}, {1, 1}));
 }
 
-TEST_CASE("Iteration", "[synchronization-element-layout]")
+TEST_CASE("Iteration over synchronization elements", "[synchronization-element-layout]")
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
@@ -82,7 +82,7 @@ TEST_CASE("Iteration", "[synchronization-element-layout]")
     CHECK(s3 == s4);
 }
 
-TEST_CASE("Structural properties", "[synchronization-element-layout]")
+TEST_CASE("Synchronization element layout properties", "[synchronization-element-layout]")
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 

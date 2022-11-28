@@ -119,7 +119,7 @@ class synchronization_element_layout : public ClockedLayout
      * @param cz Clock zone to check.
      * @return True iff cz is a synchronization element.
      */
-    [[nodiscard]] sync_elem_t is_synchronization_element(const clock_zone<ClockedLayout>& cz) const noexcept
+    [[nodiscard]] bool is_synchronization_element(const clock_zone<ClockedLayout>& cz) const noexcept
     {
         if (auto it = strg->se_map.find(static_cast<uint64_t>(cz)); it != strg->se_map.end())
         {
@@ -158,7 +158,9 @@ class synchronization_element_layout : public ClockedLayout
                                            const clock_zone<ClockedLayout>& cz2) const noexcept
     {
         if (cz1 == cz2)
+        {
             return false;
+        }
 
         return ClockedLayout::is_incoming_clocked(cz1, cz2) || is_synchronization_element(cz1) ||
                is_synchronization_element(cz2);
@@ -178,7 +180,9 @@ class synchronization_element_layout : public ClockedLayout
                                            const clock_zone<ClockedLayout>& cz2) const noexcept
     {
         if (cz1 == cz2)
+        {
             return false;
+        }
 
         return ClockedLayout::is_outgoing_clocked(cz1, cz2) || is_synchronization_element(cz1) ||
                is_synchronization_element(cz2);
