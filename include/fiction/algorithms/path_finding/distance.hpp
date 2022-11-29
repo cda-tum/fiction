@@ -59,9 +59,7 @@ template <typename Lyt, typename Dist = double>
     const auto x = static_cast<double>(source.x) - static_cast<double>(target.x);
     const auto y = static_cast<double>(source.y) - static_cast<double>(target.y);
 
-    // do not use std::pow as it is supposedly slower if not compiled with -ffast-math and -O3 according to
-    // https://stackoverflow.com/questions/2940367/what-is-more-efficient-using-pow-to-square-or-just-multiply-it-with-itself
-    return static_cast<Dist>(std::sqrt((x * x) + (y * y)));
+    return static_cast<Dist>(std::hypot(x, y));
 }
 /**
  * A functor that computes distances between coordinates and can be passed as an object to, e.g., path finding
