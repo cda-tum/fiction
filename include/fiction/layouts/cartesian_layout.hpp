@@ -765,7 +765,7 @@ class cartesian_layout
     template <typename Fn>
     void foreach_adjacent_opposite_coordinates(const OffsetCoordinateType& c, Fn&& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](const auto cardinal1, auto cardinal2) noexcept
+        const auto apply_if_not_c = [&c, &fn](auto cardinal1, auto cardinal2) noexcept
         {
             if (cardinal1 != c && cardinal2 != c)
             {
