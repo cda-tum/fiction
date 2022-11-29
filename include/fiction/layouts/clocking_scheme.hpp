@@ -73,7 +73,7 @@ class clocking_scheme
     {
         if (regular)
         {
-            return fn(cz);
+            return std::invoke(fn, cz);
         }
 
         if (auto it = override.find(cz); it != override.end())
@@ -81,7 +81,7 @@ class clocking_scheme
             return it->second;
         }
 
-        return fn(cz);
+        return std::invoke(fn, cz);
     }
     /**
      * Compares the stored name against a given one.

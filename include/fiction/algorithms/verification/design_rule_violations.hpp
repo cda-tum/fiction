@@ -360,8 +360,8 @@ class gate_level_drvs_impl
                 {
                     const auto t = lyt.get_tile(n);
 
-                    bool dangling_inp_connection = lyt.incoming_data_flow(t).empty() && !lyt.is_pi_tile(t);
-                    bool dangling_out_connection = lyt.outgoing_data_flow(t).empty() && !lyt.is_po_tile(t);
+                    const bool dangling_inp_connection = lyt.fanin_size(t) == 0 && !lyt.is_pi_tile(t);
+                    const bool dangling_out_connection = lyt.fanout_size(t) == 0 && !lyt.is_po_tile(t);
 
                     if (dangling_out_connection || dangling_inp_connection)
                     {
