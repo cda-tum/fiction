@@ -174,7 +174,7 @@ class a_star_impl
                 {
                     if (layout.is_obstructed_connection(current, successor))
                     {
-                        return true;  // skip the obstructed connection and keep looping
+                        return;  // skip the obstructed connection and keep looping
                     }
                 }
 
@@ -182,46 +182,42 @@ class a_star_impl
                 {
                     if (layout.is_obstructed_coordinate(successor) && successor != target)
                     {
-                        return true;  // skip the obstructed coordinate and keep looping
+                        return;  // skip the obstructed coordinate and keep looping
                     }
                 }
 
                 if (is_visited(successor))
                 {
-                    return true;  // skip any coordinate that is already in the closed list
+                    return;  // skip any coordinate that is already in the closed list
                 }
 
                 // compute the g-value of cz. In this implementation, the costs of each 'step' are given by a function
                 const g_f_type tentative_g = g(current) + cost(current, successor);
 
                 // f-value does not matter because the comparator compares only the coordinates
-                if (const auto it = open_list.find({successor, 0});
-                    it != open_list.end() && no_improvement(successor, tentative_g))
+                const auto it = open_list.find({successor, 0});
+                if (it != open_list.end() && no_improvement(successor, tentative_g))
                 {
-                    return true;  // skip the coordinate if it does not offer improvement
+                    return;  // skip the coordinate if it does not offer improvement
+                }
+
+                // track origin
+                came_from[successor] = current;
+                set_g(successor, tentative_g);
+
+                // compute new f-value
+                const auto f = tentative_g + static_cast<g_f_type>(distance(layout, successor, target));
+
+                // if successor is contained in the open list (frontier)
+                if (it != open_list.end())
+                {
+                    // update its f-value
+                    it->f = f;
                 }
                 else
                 {
-                    // track origin
-                    came_from[successor] = current;
-                    set_g(successor, tentative_g);
-
-                    // compute new f-value
-                    const auto f = tentative_g + static_cast<g_f_type>(distance(layout, successor, target));
-
-                    // if successor is contained in the open list (frontier)
-                    if (it != open_list.end())
-                    {
-                        // update its f-value
-                        it->f = f;
-                    }
-                    else
-                    {
-                        // add successor to the open list
-                        open_list.push({successor, f});
-                    }
-
-                    return true;  // keep looping
+                    // add successor to the open list
+                    open_list.push({successor, f});
                 }
             });
     }
@@ -247,10 +243,8 @@ class a_star_impl
         {
             return it->second;
         }
-        else
-        {
-            return 0ul;
-        }
+
+        return 0ul;
     }
     /**
      * Updates the g-value of the given coordinate to the given value.

@@ -191,31 +191,29 @@ class jump_point_search_impl
                     const auto tentative_g = g(current) + distance(layout, *jump_point, current);
 
                     // f-value does not matter because the comparator compares only the coordinates
-                    if (const auto it = open_list.find({*jump_point, 0});
-                        it != open_list.end() && no_improvement(*jump_point, tentative_g))
+                    const auto it = open_list.find({*jump_point, 0});
+                    if (it != open_list.end() && no_improvement(*jump_point, tentative_g))
                     {
                         return true;  // skip the coordinate if it does not offer improvement
                     }
+
+                    // track origin
+                    came_from[*jump_point] = current;
+                    set_g(*jump_point, tentative_g);
+
+                    // compute new f-value
+                    const auto f = tentative_g + distance(layout, *jump_point, target);
+
+                    // if successor is contained in the open list (frontier)
+                    if (it != open_list.end())
+                    {
+                        // update its f-value
+                        it->f = f;
+                    }
                     else
                     {
-                        // track origin
-                        came_from[*jump_point] = current;
-                        set_g(*jump_point, tentative_g);
-
-                        // compute new f-value
-                        const auto f = tentative_g + distance(layout, *jump_point, target);
-
-                        // if successor is contained in the open list (frontier)
-                        if (it != open_list.end())
-                        {
-                            // update its f-value
-                            it->f = f;
-                        }
-                        else
-                        {
-                            // add successor to the open list
-                            open_list.push({*jump_point, f});
-                        }
+                        // add successor to the open list
+                        open_list.push({*jump_point, f});
                     }
                 }
 
@@ -332,10 +330,8 @@ class jump_point_search_impl
         {
             return it->second;
         }
-        else
-        {
-            return 0ul;
-        }
+
+        return 0ul;
     }
     /**
      * Updates the g-value of the given coordinate to the given value.
