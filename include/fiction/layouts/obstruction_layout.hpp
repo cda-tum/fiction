@@ -72,7 +72,7 @@ class obstruction_layout<Lyt, false> : public Lyt
      *
      * @param c Coordinate to obstruct.
      */
-    void obstruct_coordinate(const coordinate<Lyt>& c) noexcept
+    void obstruct_coordinate(const typename Lyt::coordinate& c) noexcept
     {
         strg->obstructed_coordinates.insert(c);
     }
@@ -82,7 +82,7 @@ class obstruction_layout<Lyt, false> : public Lyt
      * @param src Source coordinate.
      * @param tgt Target coordinate.
      */
-    void obstruct_connection(const coordinate<Lyt>& src, const coordinate<Lyt>& tgt) noexcept
+    void obstruct_connection(const typename Lyt::coordinate& src, const typename Lyt::coordinate& tgt) noexcept
     {
         strg->obstructed_connections.insert({src, tgt});
     }
@@ -106,7 +106,7 @@ class obstruction_layout<Lyt, false> : public Lyt
      * @param c Coordinate to check.
      * @return True iff c is obstructed.
      */
-    [[nodiscard]] bool is_obstructed_coordinate(const coordinate<Lyt>& c) const noexcept
+    [[nodiscard]] bool is_obstructed_coordinate(const typename Lyt::coordinate& c) const noexcept
     {
         if (strg->obstructed_coordinates.count(c) > 0)
         {
@@ -132,7 +132,8 @@ class obstruction_layout<Lyt, false> : public Lyt
      * @param tgt Target coordinate.
      * @return True iff the connection from c1 to c2 is obstructed.
      */
-    [[nodiscard]] bool is_obstructed_connection(const coordinate<Lyt>& src, const coordinate<Lyt>& tgt) const noexcept
+    [[nodiscard]] bool is_obstructed_connection(const typename Lyt::coordinate& src,
+                                                const typename Lyt::coordinate& tgt) const noexcept
     {
         return strg->obstructed_connections.count({src, tgt}) > 0;
     }
