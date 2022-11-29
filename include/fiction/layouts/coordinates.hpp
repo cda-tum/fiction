@@ -599,7 +599,6 @@ uint64_t volume(const CoordinateType& coord) noexcept
 
 }  // namespace fiction
 
-
 namespace std
 {
 // define std::hash overload for offset::ucoord_t
@@ -683,7 +682,7 @@ struct coord_t
     /**
      * 1 bit for the z coordinate.
      */
-    bool z;
+    uint8_t z : 1;
     /**
      * 31 bit for the y coordinate.
      */
@@ -787,7 +786,7 @@ struct coord_t
      */
     constexpr bool operator<(const coord_t& other) const noexcept
     {
-        if (static_cast<int>(z) < static_cast<int>(other.z))
+        if (z < other.z)
         {
             return true;
         }
@@ -848,7 +847,7 @@ struct coord_t
      */
     constexpr coord_t operator+(const coord_t& other) const noexcept
     {
-        return coord_t{x + other.x, y + other.y, static_cast<int>(z) + static_cast<int>(other.z)};
+        return coord_t{x + other.x, y + other.y, z + other.z};
     }
     /**
      * Subtracts another coordinate from this one and returns the result. Does not modify this coordinate.
@@ -858,7 +857,7 @@ struct coord_t
      */
     constexpr coord_t operator-(const coord_t& other) const noexcept
     {
-        return coord_t{x - other.x, y - other.y, static_cast<int>(z) - static_cast<int>(other.z)};
+        return coord_t{x - other.x, y - other.y, z - other.z};
     }
     /**
      * Returns a string representation of the coordinate of the form "(x, y, z)" that does not respect the dead
@@ -884,7 +883,7 @@ constexpr CoordinateType to_fiction_coord(const coord_t& coord) noexcept
 {
     if (!coord.is_dead())
     {
-        return {coord.x, coord.y * 2 + static_cast<decltype(coord.y)>(coord.z)};
+        return {coord.x, coord.y * 2 + coord.z};
     }
 
     return CoordinateType{};
