@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <optional>
-#include <set>
+#include <unordered_set>
 #include <vector>
 
 #include <combinations.h>
@@ -253,7 +253,7 @@ class generate_edge_intersection_graph_impl
         /**
          * Uniquely identify path elements in a set and make them searchable fast.
          */
-        std::set<coordinate<Lyt>> path_elements{};
+        std::unordered_set<coordinate<Lyt>> path_elements{};
     };
     /**
      * Alias for the path type.

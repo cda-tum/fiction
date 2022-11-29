@@ -10,8 +10,8 @@
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
-#include <set>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace fiction
@@ -308,7 +308,7 @@ class synchronization_element_layout : public ClockedLayout
         const auto incoming = incoming_clocked_zones(cz);
         const auto outgoing = outgoing_clocked_zones(cz);
 
-        std::set<clock_zone<ClockedLayout>> merged_clock_zones{};
+        std::unordered_set<clock_zone<ClockedLayout>> merged_clock_zones{};
         std::merge(incoming.cbegin(), incoming.cend(), outgoing.cbegin(), outgoing.cend(),
                    std::inserter(merged_clock_zones, merged_clock_zones.end()));
 

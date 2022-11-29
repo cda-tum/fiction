@@ -106,7 +106,7 @@ class gate_level_layout : public ClockedLayout
 
         std::string layout_name{};
 
-        std::map<Node, std::string> node_names{};
+        std::unordered_map<Node, std::string> node_names{};
     };
 
     /*! \brief gate-level layout node

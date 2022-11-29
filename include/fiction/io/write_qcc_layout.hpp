@@ -19,10 +19,10 @@
 #include <filesystem>
 #include <fstream>
 #include <functional>
-#include <map>
 #include <ostream>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -73,7 +73,7 @@ inline constexpr const char* PROPERTY_LENGTH      = "length";
 inline constexpr const std::array<const char*, 6> COMPONENTS{"Magnet", "Coupler",  "Cross Wire",
                                                              "And",    "Inverter", "Or"};
 
-static const std::map<inml_technology::cell_type, uint8_t> COMPONENT_SELECTOR{
+static const std::unordered_map<inml_technology::cell_type, uint8_t> COMPONENT_SELECTOR{
     {inml_technology::cell_type::NORMAL, 0},           {inml_technology::cell_type::INPUT, 0},
     {inml_technology::cell_type::OUTPUT, 0},           {inml_technology::cell_type::FANOUT_COUPLER_MAGNET, 1},
     {inml_technology::cell_type::CROSSWIRE_MAGNET, 2}, {inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET, 3},
