@@ -72,6 +72,7 @@ Routing Utils
 .. doxygenclass:: fiction::path_set
    :members:
 
+.. doxygenfunction:: fiction::is_crossable_wire
 .. doxygenfunction:: fiction::route_path
 .. doxygenfunction:: fiction::extract_routing_objectives
 .. doxygenfunction:: fiction::clear_routing

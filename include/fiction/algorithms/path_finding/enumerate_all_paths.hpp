@@ -37,8 +37,7 @@ class enumerate_all_clocking_paths_impl
 
     [[nodiscard]] path_collection<Path> run()
     {
-        Path p{};
-        recursively_enumerate_all_paths(objective.source, objective.target, p);
+        recursively_enumerate_all_paths(objective.source, objective.target, Path{});
 
         return collection;
     }
@@ -85,32 +84,56 @@ class enumerate_all_clocking_paths_impl
             // recurse for all outgoing clock zones
             layout.foreach_outgoing_clocked_zone(
                 src,
-                [&, this](const auto& successor)
+                [&, this](auto successor)  // make a copy
                 {
-                    if constexpr (has_is_obstructed_connection_v<Lyt>)
-                    {
-                        if (layout.is_obstructed_connection(src, successor))
-                        {
-                            return true;  // skip the obstructed connection and keep looping
-                        }
-                    }
+                    // return to ground layer to avoid being stuck in crossing layer
+                    successor = layout.below(successor);
 
+                    // check if successor is obstructed
                     if constexpr (has_is_obstructed_coordinate_v<Lyt>)
                     {
                         if (layout.is_obstructed_coordinate(successor) && successor != tgt)
                         {
-                            return true;  // skip the obstructed coordinate and keep looping
+                            // if crossings are enabled, check if it is possible to switch to the crossing layer
+                            if (ps.crossings && is_crossable_wire(layout, src, successor))
+                            {
+                                // if the crossing layer is not obstructed
+                                if (const auto above_successor = layout.above(successor);
+                                    above_successor != successor && above_successor != tgt &&
+                                    !layout.is_obstructed_coordinate(above_successor))
+                                {
+                                    // allow exploring the crossing layer
+                                    successor = above_successor;
+                                }
+                                else
+                                {
+                                    return;  // skip the obstructed coordinate and keep looping
+                                }
+                            }
+                            else
+                            {
+                                return;  // skip the obstructed coordinate and keep looping
+                            }
                         }
                     }
 
-                    // if it has not yet been visited
+                    // check if the connection to the successor is obstructed
+                    if constexpr (has_is_obstructed_connection_v<Lyt>)
+                    {
+                        if (layout.is_obstructed_connection(src, successor))
+                        {
+                            return;  // skip the obstructed connection and keep looping
+                        }
+                    }
+
+                    // if the successor has not yet been visited
                     if (!is_visited(successor))
                     {
                         // recurse
                         recursively_enumerate_all_paths(successor, tgt, p);
                     }
 
-                    return true;  // keep looping
+                    return;  // keep looping
                 });
         }
 

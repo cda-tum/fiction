@@ -121,6 +121,51 @@ class path_set : public std::set<Path>
     // make all inherited constructors available
     using base::base;
 };
+
+/**
+ * Checks whether a a given coordinate successor hosts a crossable wire when coming from coordinate src in a given
+ * layout. A wire is said to be crossable if a potential cross-over would not result in running along the same
+ * information flow direction. For example, a wire segment hosted by successor that is horizontal and runs from west to
+ * east is crossable by a wire segment coming from src that is vertical and runs from north to south. However, if the
+ * wire segment coming from src were also horizontal and ran from west to east, the cross-over would be prohibited.
+ *
+ * @Note This function can be called on layouts types other than gate-level layouts, but will then always return false.
+ * This is helpful for general routing in, e.g., clocked layouts.
+ *
+ * @tparam Lyt Layout type.
+ * @param lyt The layout.
+ * @param src Source coordinate in lyt.
+ * @param successor Successor coordinate in lyt reachable from src.
+ * @return True iff successor hosts a wire that is crossable from src.
+ */
+template <typename Lyt>
+[[nodiscard]] bool is_crossable_wire(const Lyt& lyt, const coordinate<Lyt>& src, const coordinate<Lyt>& successor) noexcept
+{
+    assert(lyt.is_adjacent_elevation_of(src, successor));
+
+    if constexpr (is_gate_level_layout_v<Lyt>)
+    {
+        const auto successor_node = lyt.get_node(successor);
+
+        // one can only cross over wire segments, but not over I/Os
+        if (lyt.is_wire(successor_node) && !lyt.is_pi(successor_node) && !lyt.is_po(successor_node))
+        {
+            // if src is in the ground layer, crossing is easily possible
+            if (lyt.is_ground_layer(src))
+            {
+                return true;
+            }
+            // otherwise, decide based on the information flow direction
+            if (const auto below_source_node = lyt.get_node(lyt.below(src));
+                !lyt.is_incoming_signal(successor, lyt.make_signal(below_source_node)))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
 /**
  * Establishes a wire routing along the given path in the given layout. To this end, the given path's source and target
  * coordinates are assumed to be populated by other gates or wires that the new path shall connect to.

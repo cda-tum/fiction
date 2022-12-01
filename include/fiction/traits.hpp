@@ -669,6 +669,34 @@ template <class Lyt>
 inline constexpr bool is_gate_level_layout_v = is_gate_level_layout<Lyt>::value;
 #pragma endregion
 
+#pragma region has_is_gate_tile
+template <class Lyt, class = void>
+struct has_is_gate_tile : std::false_type
+{};
+
+template <class Lyt>
+struct has_is_gate_tile<Lyt, std::void_t<decltype(std::declval<Lyt>().is_gate_tile(std::declval<tile<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_is_gate_tile_v = has_is_gate_tile<Lyt>::value;
+#pragma endregion
+
+#pragma region has_is_wire_tile
+template <class Lyt, class = void>
+struct has_is_wire_tile : std::false_type
+{};
+
+template <class Lyt>
+struct has_is_wire_tile<Lyt, std::void_t<decltype(std::declval<Lyt>().is_wire_tile(std::declval<tile<Lyt>>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_is_wire_tile_v = has_is_wire_tile<Lyt>::value;
+#pragma endregion
+
 #pragma region has_is_empty_tile
 template <class Lyt, class = void>
 struct has_is_empty_tile : std::false_type
