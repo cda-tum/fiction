@@ -170,6 +170,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {2, 2}}, params);
 
                     CHECK(collection.size() == 1);
+                    CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1}, {2, 2}}}));
                 }
             }
             SECTION("USE")
@@ -188,6 +189,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {2, 2}}, params);
 
                     CHECK(collection.size() == 1);
+                    CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1, 1}, {1, 2}, {2, 2}}}));
                 }
             }
         }
@@ -218,6 +220,8 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {3, 3}}, params);
 
                     CHECK(collection.size() == 2);
+                    CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {3, 1}, {3, 2}, {3, 3}}}));
+                    CHECK(collection.contains({{{0, 0}, {0, 1}, {0, 2}, {1, 2, 1}, {2, 2, 1}, {3, 2}, {3, 3}}}));
                 }
             }
         }
@@ -246,6 +250,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {3, 2}}, params);
 
                     CHECK(collection.size() == 1);
+                    CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {2, 2}, {3, 2}}}));
                 }
             }
         }
