@@ -22,7 +22,7 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 
     SECTION("2DDWave")
     {
-        gate_lyt layout{{1, 1}, twoddwave_clocking<gate_lyt>()};
+        const gate_lyt layout{{1, 1}, twoddwave_clocking<gate_lyt>()};
 
         SECTION("Disjoint paths")
         {
@@ -102,8 +102,9 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
         }
         SECTION("Unsatisfiable objective")
         {
-            // (0,0) --> (1,1), (1,1) --> (2,0)
-            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 0}, {1, 1}}, {{1, 1}, {2, 0}}};
+            layout.resize({0, 2});
+            // (0,2) --> (0,0), (0,0) --> (0,2)
+            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 2}, {0, 0}}, {{0, 0}, {0, 2}}};
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
@@ -123,7 +124,7 @@ TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 
     SECTION("2DDWave")
     {
-        gate_lyt layout{{2, 2}, twoddwave_clocking<gate_lyt>()};
+        const gate_lyt layout{{2, 2}, twoddwave_clocking<gate_lyt>()};
 
         SECTION("(0,1) to (2,1) and (1,0) to (1,2)")
         {
@@ -132,7 +133,7 @@ TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
             SECTION("without crossings")
             {
                 // disable crossings
-                generate_edge_intersection_graph_params ps{false};
+                const generate_edge_intersection_graph_params ps{false};
 
                 const auto graph = generate_edge_intersection_graph(layout, objectives, ps, &st);
 
@@ -146,7 +147,7 @@ TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
             SECTION("with crossings")
             {
                 // enable crossings
-                generate_edge_intersection_graph_params ps{true};
+                const generate_edge_intersection_graph_params ps{true};
 
                 const auto graph = generate_edge_intersection_graph(layout, objectives, ps, &st);
 
@@ -168,7 +169,7 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 
     SECTION("2DDWave")
     {
-        gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
+        const gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
@@ -186,7 +187,7 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
     }
     SECTION("USE")
     {
-        gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
+        const gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
