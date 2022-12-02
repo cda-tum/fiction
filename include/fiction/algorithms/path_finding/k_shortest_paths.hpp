@@ -21,7 +21,12 @@ namespace fiction
 {
 
 struct yen_k_shortest_paths_params
-{};
+{
+    /**
+     * Parameters for the internal A* algorithm.
+     */
+    a_star_params astar_params{};
+};
 
 namespace detail
 {
@@ -38,11 +43,19 @@ class yen_k_shortest_paths_impl
             ps{p}
     {
         // start by determining the shortest path between source and target
-        k_shortest_paths.push_back(a_star<Path>(layout, objective));
+        k_shortest_paths.push_back(
+            a_star<Path>(layout, objective, manhattan_distance_functor<obstruction_layout<Lyt>, uint64_t>(),
+                         unit_cost_functor<obstruction_layout<Lyt>, uint8_t>(), ps.astar_params));
     }
 
     path_collection<Path> run()
     {
+        assert(!objective.source.is_dead() && !objective.target.is_dead() &&
+               "Neither source nor target coordinate can be dead");
+
+        assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
+               "Both source and target coordinate have to be within the layout bounds");
+
         // if there was no path to begin with
         if (k_shortest_paths.back().empty())
         {
@@ -86,7 +99,11 @@ class yen_k_shortest_paths_impl
                 }
 
                 // find an alternative path from the spur coordinate to the target and check that it is not empty
-                if (auto spur_path = a_star<Path>(layout, {spur, objective.target}); !spur_path.empty())
+                if (auto spur_path =
+                        a_star<Path>(layout, {spur, objective.target},
+                                     manhattan_distance_functor<obstruction_layout<Lyt>, uint64_t>(),
+                                     unit_cost_functor<obstruction_layout<Lyt>, uint8_t>(), ps.astar_params);
+                    !spur_path.empty())
                 {
                     // the final path will be a concatenation of the root path and the spur path
                     auto& final_path = root_path;
@@ -178,8 +195,10 @@ class yen_k_shortest_paths_impl
  * If \f$k\f$ is larger than the number of possible paths from source to target, the size of the returned path
  * collection will be smaller than \f$k\f$.
  *
- * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
- * obstructed coordinates.
+ * If the given layout is a gate-level layout and implements the obstruction interface (see obstruction_layout), paths
+ * may contain wire crossings if specified in the parameters. Wire crossings are only allowed over other wires and only
+ * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
+ * cross only in a single point (orthogonal crossings + knock-knees/double wires).
  *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
