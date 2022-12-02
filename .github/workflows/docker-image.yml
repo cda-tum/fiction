@@ -4,18 +4,18 @@ on:
   push:
     branches: [ 'main' ]
     paths:
-      - '**.hpp'
-      - '**.cpp'
-      - '**.cmake'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/docker-image.yml'
   pull_request:
     branches: [ 'main' ]
     paths:
-      - '**.hpp'
-      - '**.cpp'
-      - '**.cmake'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/docker-image.yml'

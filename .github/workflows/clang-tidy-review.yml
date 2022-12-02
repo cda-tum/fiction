@@ -3,8 +3,8 @@ name: Clang-Tidy Review
 on:
   pull_request:
     paths:
-      - '**.hpp'
-      - '**.cpp'
+      - '**/*.hpp'
+      - '**/*.cpp'
       - 'libs/**'
       - '.github/workflows/clang-tidy-review.yml'
 
