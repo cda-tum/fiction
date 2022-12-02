@@ -41,6 +41,7 @@ Physical Design
    exact.rst
    orthogonal.rst
    one_pass_synthesis.rst
+   color_routing.rst
    apply_gate_library.rst
 
 
