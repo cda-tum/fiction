@@ -15,6 +15,7 @@
 #include <cassert>
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
@@ -168,21 +169,45 @@ class a_star_impl
     {
         layout.foreach_outgoing_clocked_zone(
             current,
-            [this, current](const auto& successor)
+            [this, current](auto successor)  // make a copy
             {
+                // return to ground layer to avoid getting stuck in crossing layer
+                successor = layout.below(successor);
+
+                // check if successor is obstructed
+                if constexpr (has_is_obstructed_coordinate_v<Lyt>)
+                {
+                    if (layout.is_obstructed_coordinate(successor) && successor != target)
+                    {
+                        // if crossings are enabled, check if it is possible to switch to the crossing layer
+                        if (ps.crossings && is_crossable_wire(layout, current, successor))
+                        {
+                            // if the crossing layer is not obstructed
+                            if (const auto above_successor = layout.above(successor);
+                                above_successor != successor && above_successor != target &&
+                                !layout.is_obstructed_coordinate(above_successor))
+                            {
+                                // allow exploring the crossing layer
+                                successor = above_successor;
+                            }
+                            else
+                            {
+                                return;  // skip the obstructed coordinate and keep looping
+                            }
+                        }
+                        else
+                        {
+                            return;  // skip the obstructed coordinate and keep looping
+                        }
+                    }
+                }
+
+                // check if the connection to the successor is obstructed
                 if constexpr (has_is_obstructed_connection_v<Lyt>)
                 {
                     if (layout.is_obstructed_connection(current, successor))
                     {
                         return;  // skip the obstructed connection and keep looping
-                    }
-                }
-
-                if constexpr (has_is_obstructed_coordinate_v<Lyt>)
-                {
-                    if (layout.is_obstructed_coordinate(successor) && successor != target)
-                    {
-                        return;  // skip the obstructed coordinate and keep looping
                     }
                 }
 
@@ -300,7 +325,12 @@ class a_star_impl
  * are the Manhattan and the Euclidean distance functions. See distance.hpp for implementations.
  *
  * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
- * obstructed coordinates.
+ * obstructed coordinates and connections.
+ *
+ * If the given layout is a gate-level layout and implements the obstruction interface (see obstruction_layout), paths
+ * may contain wire crossings if specified in the parameters. Wire crossings are only allowed over other wires and only
+ * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
+ * cross only in a single point (orthogonal crossings + knock-knees/double wires).
  *
  * A* was introduced in "A Formal Basis for the Heuristic Determination of Minimum Cost Paths" by Peter E. Hart, Nils J.
  * Nilsson, and Bertram Raphael in IEEE Transactions on Systems Science and Cybernetics 1968, Volume 4, Issue 2.
@@ -330,7 +360,10 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
 }
 /**
  * A distance function that does not approximate but compute the actual minimum path length on the given layout via A*
- * traversal. Naturally, this function cannot be evaluated in O(1) but has the polynomial complexity of A*.
+ * traversal. Naturally, this function cannot be evaluated in O(1), but has the polynomial complexity of A*.
+ *
+ * If no path between source and target exists in lyt, the returned distance is std::numeric_limits<Dist>::infinity() if
+ * that value is supported by Dist, or std::numeric_limits<Dist>::max(), otherwise.
  *
  * @tparam Lyt Clocked layout type.
  * @tparam Dist Distance type.
@@ -345,7 +378,19 @@ template <typename Lyt, typename Dist = uint64_t>
 {
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
 
-    return static_cast<Dist>(a_star<layout_coordinate_path<Lyt>>(lyt, {source, target}).size());
+    const auto path_length = a_star<layout_coordinate_path<Lyt>>(lyt, {source, target}).size();
+
+    if (path_length == 0ul)
+    {
+        if constexpr (std::numeric_limits<Dist>::has_infinity)
+        {
+            return std::numeric_limits<Dist>::infinity();
+        }
+
+        return std::numeric_limits<Dist>::max();
+    }
+
+    return static_cast<Dist>(path_length - 1);
 }
 /**
  * A pre-defined distance functor that uses the A* distance.
@@ -353,7 +398,7 @@ template <typename Lyt, typename Dist = uint64_t>
  * @tparam Lyt Clocked layout type.
  * @tparam Dist Distance type.
  */
-template <typename Lyt, typename Dist = double>
+template <typename Lyt, typename Dist = uint64_t>
 class a_star_distance_functor : public distance_functor<Lyt, Dist>
 {
   public:

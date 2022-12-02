@@ -99,7 +99,7 @@ class distance_functor
     [[nodiscard]] virtual Dist operator()(const Lyt& lyt, const coordinate<Lyt>& source,
                                           const coordinate<Lyt>& target) const
     {
-        return distance_function(lyt, source, target);
+        return static_cast<Dist>(std::invoke(distance_function, lyt, source, target));
     }
 
   protected:

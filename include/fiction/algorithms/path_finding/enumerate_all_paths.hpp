@@ -37,6 +37,12 @@ class enumerate_all_clocking_paths_impl
 
     [[nodiscard]] path_collection<Path> run()
     {
+        assert(!objective.source.is_dead() && !objective.target.is_dead() &&
+               "Neither source nor target coordinate can be dead");
+
+        assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
+               "Both source and target coordinate have to be within the layout bounds");
+
         recursively_enumerate_all_paths(objective.source, objective.target, Path{});
 
         return collection;
@@ -86,7 +92,7 @@ class enumerate_all_clocking_paths_impl
                 src,
                 [&, this](auto successor)  // make a copy
                 {
-                    // return to ground layer to avoid being stuck in crossing layer
+                    // return to ground layer to avoid getting stuck in crossing layer
                     successor = layout.below(successor);
 
                     // check if successor is obstructed
