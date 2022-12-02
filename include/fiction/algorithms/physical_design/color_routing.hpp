@@ -206,7 +206,7 @@ class color_routing_impl
  *
  * @tparam Lyt The gate-level layout type to route.
  * @param lyt A gate-level layout to route.
- * @param objectives The routing objectives to fulfill.
+ * @param objectives The routing objectives as source-target pairs to fulfill.
  * @param ps Parameters.
  * @param pst Statistics.
  * @return True iff routing was successful, i.e., iff all objectives could be satisfied.

@@ -102,20 +102,12 @@ class generate_edge_intersection_graph_impl
                               // enumerate all paths for the current objective
                               obj_paths = enumerate_all_clocking_paths<clk_path>(
                                   obstruction_layout{layout}, {obj.source, obj.target}, {ps.crossings});
-                              //                              std::cout << fmt::format("Enumerated {} paths for
-                              //                              objective {}-->{}", obj_paths.size(),
-                              //                                                       obj.source, obj.target)
-                              //                                        << std::endl;
                           }
                           else
                           {
                               // enumerate k paths for the current objective
                               obj_paths = yen_k_shortest_paths<clk_path>(obstruction_layout{layout},
                                                                          {obj.source, obj.target}, *ps.path_limit);
-                              //                              std::cout << fmt::format("Enumerated {} paths for
-                              //                              objective {}-->{}", obj_paths.size(),
-                              //                                                       obj.source, obj.target)
-                              //                                        << std::endl;
                           }
 
                           // assign a unique label to each path and create a corresponding node in the graph
@@ -301,7 +293,7 @@ class generate_edge_intersection_graph_impl
     void connect_clique(path_collection<clk_path>& objective_paths) noexcept
     {
         combinations::for_each_combination(objective_paths.begin(), objective_paths.begin() + 2, objective_paths.end(),
-                                           [this, &objective_paths](const auto begin, [[maybe_unused]] const auto end)
+                                           [this](const auto begin, [[maybe_unused]] const auto end)
                                            {
                                                graph.insert_edge(begin->label, (begin + 1)->label, edge_id++);
 
@@ -344,7 +336,7 @@ class generate_edge_intersection_graph_impl
  *
  * @tparam Lyt Type of the clocked layout.
  * @param lyt The layout to generate the edge intersection graph for.
- * @param objectives A list of routing objectives given as source-target tuples.
+ * @param objectives A list of routing objectives given as source-target pairs.
  * @param ps Parameters.
  * @param pst Statistics.
  * @return An edge intersection graph of paths satisfying the given routing objectives in lyt.

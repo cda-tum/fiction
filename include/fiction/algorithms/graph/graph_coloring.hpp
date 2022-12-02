@@ -197,40 +197,10 @@ class sat_coloring_handler
             largest_clique{std::max_element(ps.cliques.cbegin(), ps.cliques.cend(),
                                             [](const auto& c1, const auto& c2) { return c1.size() < c2.size(); })},
             q{largest_clique == ps.cliques.cend() ? 1 : (largest_clique->size() ? largest_clique->size() : 1)}
-    {
-//
-//        std::for_each(graph.begin_vertices(), graph.end_vertices(),
-//                      [](const auto& vp)
-//                      {
-//                          // source and target of edge e
-//                          const auto& v = vp.first;
-//
-//                          std::cout << fmt::format("{} ;", v) << std::endl;
-//                      });
-//
-//        std::for_each(graph.begin_edges(), graph.end_edges(),
-//                      [](const auto& e)
-//                      {
-//                          // source and target of edge e
-//                          const auto& [v1, v2] = e.first;
-//
-//                          std::cout << fmt::format("{} -- {} ;", v1, v2) << std::endl;
-//                      });
-//
-//        std::cout << fmt::format("graph has {} cliques:", ps.cliques.size()) << std::endl;
-//        std::for_each(ps.cliques.cbegin(), ps.cliques.cend(),
-//                      [](const auto& c)
-//                      { std::cout << fmt::format("{}", fmt::join(c.cbegin(), c.cend(), ", ")) << std::endl; });
-//        std::cout << fmt::format("largest clique is of size {}: ", q);
-//        if (largest_clique != ps.cliques.cend())
-//            std::cout << fmt::format("{}", fmt::join(largest_clique->cbegin(), largest_clique->cend(), ", "))
-//                      << std::endl;
-    }
+    {}
 
     result_instance check_k_coloring(const std::size_t k) const noexcept
     {
-//        std::cout << fmt::format("k = {}/{}", k, graph.size_vertices()) << std::endl;
-
         const auto k_color_instance = std::make_shared<solver_instance>(graph, k);
 
         at_least_one_color_per_vertex(k_color_instance);
@@ -238,7 +208,7 @@ class sat_coloring_handler
         exclude_identical_adjacent_colors(k_color_instance);
         symmetry_breaking(k_color_instance);
 
-        // TODO There is a problem with this color frequency constraint. It's best explained using an example: Let there
+        // NOTE There is a problem with this color frequency constraint. It's best explained using an example: Let there
         // be two cliques of size 1. Color frequency says, they must both be assigned color 0 for frequency reasons. Now
         // let the respective paths be mutex, i.e., their nodes share an edge. Suddenly, the graph is not colorable
         // anymore. It would actually work fine if the cliques were total.
@@ -271,14 +241,14 @@ class sat_coloring_handler
 
         for (std::size_t k = graph.size_vertices(); k >= q - 1; --k)
         {
-            if (const auto [sat, instance] = check_k_coloring(k); sat == bill::result::states::unsatisfiable)
+            const auto [sat, instance] = check_k_coloring(k);
+
+            if (sat == bill::result::states::unsatisfiable)
             {
                 return most_recent_sat_instance;
             }
-            else
-            {
-                most_recent_sat_instance = {k, instance};
-            }
+
+            most_recent_sat_instance = {k, instance};
         }
 
         assert(false);
@@ -325,10 +295,8 @@ class sat_coloring_handler
 
                                  return false;
                              }
-                             else
-                             {
-                                 return true;
-                             }
+
+                             return true;
                          });
 
         return most_recent_sat_instance;
@@ -681,7 +649,7 @@ class sat_coloring_handler
                       });
 
         if (const auto it = std::max_element(color_frequency.cbegin(), color_frequency.cend(),
-                                             [](const auto&cf1, const auto&cf2) { return cf1.second < cf2.second; });
+                                             [](const auto& cf1, const auto& cf2) { return cf1.second < cf2.second; });
             it != color_frequency.cend())
         {
             pst.most_frequent_color = it->first;
@@ -829,8 +797,8 @@ class graph_coloring_impl
      * @param node Node ID to convert between graph structures.
      * @return Corresponding node ID in the Brian Crites graph.
      */
-    template <typename Graph_ = Graph,
-              typename        = std::enable_if_t<!std::is_same_v<typename Graph_::vertex_id_type, std::string>>>
+    template <typename GraphProxy = Graph,
+              typename            = std::enable_if_t<!std::is_same_v<typename GraphProxy::vertex_id_type, std::string>>>
     [[nodiscard]] std::string convert_node_index(const typename Graph::vertex_id_type& node) const noexcept
     {
         return std::to_string(node);
@@ -970,14 +938,10 @@ class graph_coloring_impl
                             {
                                 const auto v1 = vp1.first;
 
-                                if (std::any_of(graph.begin_adjacent(v1), graph.end_adjacent(v1),
+                                return static_cast<bool>(
+                                    std::any_of(graph.begin_adjacent(v1), graph.end_adjacent(v1),
                                                 [&v_coloring, c1 = v_coloring.at(v1)](const auto& v2)
-                                                { return c1 == v_coloring.at(v2); }))
-                                {
-                                    return true;
-                                }
-
-                                return false;
+                                                { return c1 == v_coloring.at(v2); }));
                             });
     }
 };
