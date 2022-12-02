@@ -13,9 +13,9 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 #include <utility>
+
+#include <phmap.h>
 
 namespace fiction
 {
@@ -69,12 +69,12 @@ class cell_level_layout : public ClockedLayout
         const uint16_t tile_size_x;
         const uint16_t tile_size_y;
 
-        std::unordered_map<Cell, cell_type> cell_type_map{};
-        std::unordered_map<Cell, cell_mode> cell_mode_map{};
+        phmap::parallel_flat_hash_map<Cell, cell_type> cell_type_map{};
+        phmap::parallel_flat_hash_map<Cell, cell_mode> cell_mode_map{};
 
-        std::unordered_map<Cell, std::string> cell_name_map{};
+        phmap::flat_hash_map<Cell, std::string> cell_name_map{};
 
-        std::unordered_set<Cell> inputs{}, outputs{};
+        phmap::flat_hash_set<Cell> inputs{}, outputs{};
     };
 
     using base_type = cell_level_layout;

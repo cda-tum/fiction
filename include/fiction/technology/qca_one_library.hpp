@@ -14,8 +14,9 @@
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 
-#include <unordered_map>
 #include <vector>
+
+#include <phmap.h>
 
 namespace fiction
 {
@@ -390,7 +391,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 
     // clang-format on
 
-    using port_gate_map = std::unordered_map<port_list<port_position>, fcn_gate>;
+    using port_gate_map = phmap::flat_hash_map<port_list<port_position>, fcn_gate>;
     /**
      * Lookup table for wire rotations. Maps ports to corresponding wires.
      */

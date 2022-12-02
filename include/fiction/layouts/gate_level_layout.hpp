@@ -25,10 +25,10 @@
 #include <functional>
 #include <initializer_list>
 #include <memory>
-#include <set>
-#include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include <phmap.h>
 
 namespace fiction
 {
@@ -94,9 +94,10 @@ class gate_level_layout : public ClockedLayout
         const Tile const0{0x8000000000000000ull};
         const Tile const1{0xc000000000000000ull};
 
-        std::unordered_map<Tile, Node> tile_node_map{
+        // these maps grow large! use parallel_flat_hashmap for better performance
+        phmap::parallel_flat_hash_map<Tile, Node> tile_node_map{
             {{const0, static_cast<Node>(0ull)}, {const1, static_cast<Node>(1ull)}}};
-        std::unordered_map<Node, Tile> node_tile_map{
+        phmap::parallel_flat_hash_map<Node, Tile> node_tile_map{
             {{static_cast<Node>(0ull), const0}, {static_cast<Node>(1ull), const1}}};
 
         uint32_t num_gates = 0ull;
@@ -106,7 +107,8 @@ class gate_level_layout : public ClockedLayout
 
         std::string layout_name{};
 
-        std::unordered_map<Node, std::string> node_names{};
+        // usually quite a small map, use flat_hash_map
+        phmap::flat_hash_map<Node, std::string> node_names{};
     };
 
     /*! \brief gate-level layout node

@@ -10,8 +10,9 @@
 
 #include <memory>
 #include <type_traits>
-#include <unordered_set>
 #include <utility>
+
+#include <phmap.h>
 
 namespace fiction
 {
@@ -44,9 +45,10 @@ class obstruction_layout<Lyt, false> : public Lyt
   public:
     struct obstruction_layout_storage
     {
-        std::unordered_set<typename Lyt::coordinate> obstructed_coordinates{};
+        phmap::parallel_flat_hash_set<typename Lyt::coordinate> obstructed_coordinates{};
 
-        std::unordered_set<std::pair<typename Lyt::coordinate, typename Lyt::coordinate>> obstructed_connections{};
+        phmap::parallel_flat_hash_set<std::pair<typename Lyt::coordinate, typename Lyt::coordinate>>
+            obstructed_connections{};
     };
 
     using storage = std::shared_ptr<obstruction_layout_storage>;
