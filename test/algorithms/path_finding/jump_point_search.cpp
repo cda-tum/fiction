@@ -24,7 +24,7 @@ TEST_CASE("JPS on 2x2 clocked layouts", "[JPS]")
 
     SECTION("2DDWave")
     {
-        clk_lyt layout{{1, 1}, twoddwave_clocking<clk_lyt>()};
+        const clk_lyt layout{{1, 1}, twoddwave_clocking<clk_lyt>()};
 
         SECTION("(0,0) to (1,1)")  // path of length 3
         {
@@ -53,7 +53,7 @@ TEST_CASE("JPS on 2x2 clocked layouts", "[JPS]")
     }
     SECTION("USE")
     {
-        clk_lyt layout{{1, 1}, use_clocking<clk_lyt>()};
+        const clk_lyt layout{{1, 1}, use_clocking<clk_lyt>()};
 
         SECTION("(0,0) to (0,1)")  // path of length 4
         {
@@ -83,7 +83,7 @@ TEST_CASE("JPS on 4x4 clocked layouts", "[JPS]")
 
     SECTION("2DDWave")
     {
-        clk_lyt layout{{3, 3}, twoddwave_clocking<clk_lyt>()};
+        const clk_lyt layout{{3, 3}, twoddwave_clocking<clk_lyt>()};
 
         SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
         {
@@ -96,7 +96,7 @@ TEST_CASE("JPS on 4x4 clocked layouts", "[JPS]")
     }
     SECTION("USE")
     {
-        clk_lyt layout{{3, 3}, use_clocking<clk_lyt>()};
+        const clk_lyt layout{{3, 3}, use_clocking<clk_lyt>()};
 
         SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
         {
@@ -116,7 +116,7 @@ TEST_CASE("JPS on 4x4 gate-level layouts with coordinate obstruction", "[JPS]")
 
     SECTION("2DDWave")
     {
-        gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
+        const gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
         {
@@ -143,7 +143,7 @@ TEST_CASE("JPS on 4x4 gate-level layouts with coordinate obstruction", "[JPS]")
     }
     SECTION("USE")
     {
-        gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
+        const gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
         {
@@ -173,7 +173,7 @@ TEST_CASE("JPS on 4x4 gate-level layouts with connection obstruction", "[JPS]")
 
     SECTION("2DDWave")
     {
-        gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
+        const gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
         {
@@ -199,7 +199,7 @@ TEST_CASE("JPS on 4x4 gate-level layouts with connection obstruction", "[JPS]")
     }
     SECTION("USE")
     {
-        gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
+        const gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
         {
@@ -231,7 +231,7 @@ TEST_CASE("JPS on 10x10 clocked layouts with varying distance functions", "[JPS]
     {
         SECTION("RES")
         {
-            clk_lyt layout{{9, 9}, res_clocking<clk_lyt>()};
+            const clk_lyt layout{{9, 9}, res_clocking<clk_lyt>()};
 
             SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
             {
@@ -245,7 +245,7 @@ TEST_CASE("JPS on 10x10 clocked layouts with varying distance functions", "[JPS]
         }
         SECTION("ESR")
         {
-            clk_lyt layout{{9, 9}, esr_clocking<clk_lyt>()};
+            const clk_lyt layout{{9, 9}, esr_clocking<clk_lyt>()};
 
             SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
             {
@@ -262,7 +262,7 @@ TEST_CASE("JPS on 10x10 clocked layouts with varying distance functions", "[JPS]
     {
         SECTION("RES")
         {
-            clk_lyt layout{{9, 9}, res_clocking<clk_lyt>()};
+            const clk_lyt layout{{9, 9}, res_clocking<clk_lyt>()};
 
             SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
             {
@@ -276,7 +276,7 @@ TEST_CASE("JPS on 10x10 clocked layouts with varying distance functions", "[JPS]
         }
         SECTION("ESR")
         {
-            clk_lyt layout{{9, 9}, esr_clocking<clk_lyt>()};
+            const clk_lyt layout{{9, 9}, esr_clocking<clk_lyt>()};
 
             SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
             {

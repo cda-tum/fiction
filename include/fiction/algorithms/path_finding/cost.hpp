@@ -88,7 +88,7 @@ class cost_functor
      */
     [[nodiscard]] virtual Cost operator()(const coordinate<Lyt>& source, const coordinate<Lyt>& target) const
     {
-        return std::invoke(cost_function, source, target);
+        return static_cast<Cost>(std::invoke(cost_function, source, target));
     }
 
   protected:

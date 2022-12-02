@@ -24,14 +24,6 @@
 namespace fiction
 {
 
-struct jump_point_search_params
-{
-    /**
-     * Allow paths to cross over obstructed tiles if they are occupied by wire segments.
-     */
-    bool crossings = false;
-};
-
 namespace detail
 {
 
@@ -40,12 +32,11 @@ class jump_point_search_impl
 {
   public:
     jump_point_search_impl(const Lyt& lyt, const routing_objective<Lyt>& obj,
-                           const distance_functor<Lyt, Dist>& dist_fn, const jump_point_search_params p) :
+                           const distance_functor<Lyt, Dist>& dist_fn) :
             layout{lyt},
             source{obj.source},
             target{obj.target},
-            distance{dist_fn},
-            ps{p}
+            distance{dist_fn}
     {
         open_list.push(coordinate_f{source, 0});
     }
@@ -83,8 +74,6 @@ class jump_point_search_impl
     const coordinate<Lyt> source, target;
 
     const distance_functor<Lyt, Dist> distance;
-
-    jump_point_search_params ps;
 
     /**
      * Stores a coordinate and its f-value.
@@ -163,19 +152,21 @@ class jump_point_search_impl
             current,
             [this, current](const auto& successor)
             {
+                // check if the connection to the successor is obstructed
                 if constexpr (has_is_obstructed_connection_v<Lyt>)
                 {
                     if (layout.is_obstructed_connection(current, successor))
                     {
-                        return true;  // skip the obstructed connection and keep looping
+                        return;  // skip the obstructed connection and keep looping
                     }
                 }
 
+                // check if successor is obstructed
                 if constexpr (has_is_obstructed_coordinate_v<Lyt>)
                 {
                     if (layout.is_obstructed_coordinate(successor) && successor != target)
                     {
-                        return true;  // skip the obstructed coordinate and keep looping
+                        return;  // skip the obstructed coordinate and keep looping
                     }
                 }
 
@@ -184,7 +175,7 @@ class jump_point_search_impl
                 {
                     if (is_visited(*jump_point))
                     {
-                        return true;  // skip any jump point that is already in the closed list
+                        return;  // skip any jump point that is already in the closed list
                     }
 
                     // compute the g-value of current. Add the distance to the jump point as it might not be adjacent
@@ -194,7 +185,7 @@ class jump_point_search_impl
                     const auto it = open_list.find({*jump_point, 0});
                     if (it != open_list.end() && no_improvement(*jump_point, tentative_g))
                     {
-                        return true;  // skip the coordinate if it does not offer improvement
+                        return;  // skip the coordinate if it does not offer improvement
                     }
 
                     // track origin
@@ -217,7 +208,7 @@ class jump_point_search_impl
                     }
                 }
 
-                return true;  // keep looping
+                return;  // keep looping
             });
     }
     /**
@@ -462,27 +453,35 @@ class jump_point_search_impl
 
 /**
  * The Jump Point Search (JPS) path finding algorithm for shortest loopless paths between a given source and target
- * coordinate in a clocked layout. JPS is an optimization of A* for shortest paths and offers better average complexity
- * on uniform-cost grids. It uses a heuristic distance function that estimates the remaining costs towards the target in
- * every step. Thus, this heuristic function should neither be complex to calculate nor overestimating the remaining
- * costs. Common heuristics to be used are the Manhattan and the Euclidean distance functions. See distance.hpp for
- * implementations. Since JPS assumes a unit-cost grid, the use of cost functions together with JPS is not possible.
+ * coordinate in a clocked layout. JPS was proposed as an optimization of A* for shortest paths and offers better
+ * average complexity on uniform-cost grids that allow diagonal connections. It uses a heuristic distance function that
+ * estimates the remaining costs towards the target in every step. Thus, this heuristic function should neither be
+ * complex to calculate nor overestimating the remaining costs. Common heuristics to be used are the Manhattan and the
+ * Euclidean distance functions. See distance.hpp for implementations. Since JPS assumes a unit-cost grid, the use of
+ * cost functions together with JPS is not possible.
  *
  * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
- * obstructed coordinates.
+ * obstructed coordinates and connections.
  *
- * The original JPS highly relies on diagonal paths in the grid which are not possible in most Cartesian grid-based FCN
- * technologies. Therefore, this implementation disallows diagonal paths. Consequently, and due to non-uniform clocking
- * schemes, JPS might perform worse than A* in terms of runtime.
+ * If the given layout is a gate-level layout and implements the obstruction interface (see obstruction_layout), paths
+ * may contain wire crossings if specified in the parameters. Wire crossings are only allowed over other wires and only
+ * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
+ * cross only in a single point (orthogonal crossings + knock-knees/double wires).
  *
  * JPS was introduced in "Online Graph Pruning for Pathfinding on Grid Maps" by Daniel Harabor and Alban Grastien in
  * AAAI 2011.
  *
  * Parts of this implementation are based on https://github.com/qiao/PathFinding.js.
  *
+ * @note The original JPS highly relies on diagonal paths in the grid which are not possible in most Cartesian
+ * grid-based FCN technologies. Therefore, this implementation disallows diagonal paths. Consequently, and due to
+ * non-uniform clocking schemes, JPS might perform worse than A* in terms of runtime. It is recommended to use A*.
+ *
+ * @note JPS does not support wire crossings.
+ *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
- * @tparam Dist Distance value type to be used in the heuristic estimatation function.
+ * @tparam Dist Distance value type to be used in the heuristic estimation function.
  * @param layout The clocked layout in which the shortest path between source and target is to be found.
  * @param objective Source-target coordinate pair.
  * @param dist_fn A distance functor that implements the desired heuristic estimation function.
@@ -492,13 +491,12 @@ class jump_point_search_impl
 template <typename Path, typename Lyt, typename Dist = uint64_t>
 [[nodiscard]] Path
 jump_point_search(const Lyt& layout, const routing_objective<Lyt>& objective,
-                  const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, Dist>(),
-                  jump_point_search_params           ps      = {}) noexcept
+                  const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, Dist>()) noexcept
 {
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
 
-    return detail::jump_point_search_impl<Path, Lyt, Dist>{layout, objective, dist_fn, ps}.run();
+    return detail::jump_point_search_impl<Path, Lyt, Dist>{layout, objective, dist_fn}.run();
 }
 
 }  // namespace fiction
