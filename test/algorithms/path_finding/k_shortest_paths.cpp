@@ -336,9 +336,6 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
     using obst_lyt   = obstruction_layout<gate_lyt>;
     using coord_path = layout_coordinate_path<obst_lyt>;
 
-    using dist = manhattan_distance_functor<obstruction_layout<gate_lyt>, uint64_t>;
-    using cost = unit_cost_functor<obstruction_layout<gate_lyt>, uint8_t>;
-
     // enable crossings
     const yen_k_shortest_paths_params params{a_star_params{true}};
 
