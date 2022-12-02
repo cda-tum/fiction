@@ -4,22 +4,22 @@ on:
   push:
     branches: [ 'main' ]
     paths:
-      - '**.hpp'
-      - '**.cpp'
-      - '**.cmake'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
       - '**/CMakeLists.txt'
-      - '**.py'
+      - '**/*.py'
       - 'libs/**'
       - '.github/workflows/codeql-analysis.yml'
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ 'main' ]
     paths:
-      - '**.hpp'
-      - '**.cpp'
-      - '**.cmake'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
       - '**/CMakeLists.txt'
-      - '**.py'
+      - '**/*.py'
       - 'libs/**'
       - '.github/workflows/codeql-analysis.yml'
   schedule:
