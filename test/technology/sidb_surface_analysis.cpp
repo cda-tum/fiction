@@ -235,8 +235,9 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
 
         CHECK(black_list.size() == 1);
 
-        REQUIRE(black_list.at({0, 0}).size() == 1);
+        REQUIRE(black_list.at({0, 0}).size() == 2);
         CHECK(contains_tt(black_list.at({0, 0}), create_not_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
     }
     SECTION("multi-defect")
     {

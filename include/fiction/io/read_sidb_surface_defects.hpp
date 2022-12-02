@@ -9,10 +9,10 @@
 #include "fiction/technology/sidb_surface.hpp"
 #include "fiction/traits.hpp"
 
+#include <array>
 #include <exception>
 #include <fstream>
 #include <istream>
-#include <map>
 #include <regex>
 #include <string>
 #include <type_traits>
@@ -23,7 +23,7 @@ namespace fiction
 class unsupported_defect_index_exception : public std::exception
 {
   public:
-    explicit unsupported_defect_index_exception(const int i) noexcept : std::exception(), unsupported_index{i} {}
+    explicit unsupported_defect_index_exception(const int i) noexcept : unsupported_index{i} {}
 
     [[nodiscard]] int which() const noexcept
     {
@@ -37,7 +37,7 @@ class unsupported_defect_index_exception : public std::exception
 class missing_sidb_position_exception : public std::exception
 {
   public:
-    explicit missing_sidb_position_exception(const uint32_t n) noexcept : std::exception(), line{n} {}
+    explicit missing_sidb_position_exception(const uint32_t n) noexcept : line{n} {}
 
     [[nodiscard]] uint32_t where() const noexcept
     {
@@ -56,23 +56,17 @@ namespace sidb_defects
 
 /* Regex */
 
-static const std::regex re_defect_matrix{R"(\[(?:\s*\d+\s*)+\])"};  // each match is one row
-static const std::regex re_row_indices{R"((\d+))"};                 // each match is one index
+static const std::regex RE_DEFECT_MATRIX{R"(\[(?:\s*\d+\s*)+\])"};  // each match is one row
+static const std::regex RE_ROW_INDICES{R"((\d+))"};                 // each match is one index
 
 /**
  * Maps indices in the data format to defect types.
  */
-static const std::map<int, sidb_defect_type> index_to_defect{{{0, sidb_defect_type::NONE},
-                                                              {1, sidb_defect_type::DB},
-                                                              {2, sidb_defect_type::SI_VACANCY},
-                                                              {3, sidb_defect_type::DIHYDRIDE_PAIR},
-                                                              {4, sidb_defect_type::SINGLE_DIHYDRIDE},
-                                                              {5, sidb_defect_type::ONE_BY_ONE},
-                                                              {6, sidb_defect_type::THREE_BY_ONE},
-                                                              {7, sidb_defect_type::SILOXANE},
-                                                              {8, sidb_defect_type::RAISED_SI},
-                                                              {9, sidb_defect_type::ETCH_PIT},
-                                                              {10, sidb_defect_type::MISSING_DIMER}}};
+inline constexpr std::array<sidb_defect_type, 11> INDEX_TO_DEFECT{
+    {sidb_defect_type::NONE, sidb_defect_type::DB, sidb_defect_type::SI_VACANCY, sidb_defect_type::DIHYDRIDE_PAIR,
+     sidb_defect_type::SINGLE_DIHYDRIDE, sidb_defect_type::ONE_BY_ONE, sidb_defect_type::THREE_BY_ONE,
+     sidb_defect_type::SILOXANE, sidb_defect_type::RAISED_SI, sidb_defect_type::ETCH_PIT,
+     sidb_defect_type::MISSING_DIMER}};
 
 }  // namespace sidb_defects
 
@@ -94,7 +88,7 @@ class read_sidb_surface_defects_impl
     {
         // each match is one row
         const std::vector<std::smatch> matrix_matches{
-            std::sregex_iterator(std::cbegin(defect_matrix), std::cend(defect_matrix), sidb_defects::re_defect_matrix),
+            std::sregex_iterator(std::cbegin(defect_matrix), std::cend(defect_matrix), sidb_defects::RE_DEFECT_MATRIX),
             std::sregex_iterator()};
 
         // iterate over the row matches
@@ -105,7 +99,7 @@ class read_sidb_surface_defects_impl
 
             // each match is a defect index
             const std::vector<std::smatch> row_matches{
-                std::sregex_iterator(std::cbegin(row_str), std::cend(row_str), sidb_defects::re_row_indices),
+                std::sregex_iterator(std::cbegin(row_str), std::cend(row_str), sidb_defects::RE_ROW_INDICES),
                 std::sregex_iterator()};
 
             // track x-dimension of the surface
@@ -127,7 +121,8 @@ class read_sidb_surface_defects_impl
                 try
                 {
                     // assign the defect
-                    lyt.assign_sidb_defect({x, y}, sidb_defect{sidb_defects::index_to_defect.at(defect_index)});
+                    lyt.assign_sidb_defect(
+                        {x, y}, sidb_defect{sidb_defects::INDEX_TO_DEFECT.at(static_cast<std::size_t>(defect_index))});
                 }
                 catch (const std::out_of_range&)
                 {
@@ -196,7 +191,9 @@ sidb_surface<Lyt> read_sidb_surface_defects(const std::string& filename, const s
     std::ifstream is{filename.c_str(), std::ifstream::in};
 
     if (!is.is_open())
+    {
         throw std::ifstream::failure("could not open file");
+    }
 
     const auto lyt = read_sidb_surface_defects<Lyt>(is, name);
     is.close();
