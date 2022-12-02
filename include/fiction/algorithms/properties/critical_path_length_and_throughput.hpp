@@ -11,8 +11,8 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <set>
-#include <unordered_map>
+
+#include <phmap.h>
 
 namespace fiction
 {
@@ -71,7 +71,7 @@ class critical_path_length_and_throughput_impl
         uint64_t length{0ull}, delay{0ull}, diff{0ull};
     };
 
-    std::unordered_map<tile<Lyt>, path_info> delay_cache{};
+    phmap::flat_hash_map<tile<Lyt>, path_info> delay_cache{};
 
     path_info signal_delay(const tile<Lyt> t) noexcept
     {

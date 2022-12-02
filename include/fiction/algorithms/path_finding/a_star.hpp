@@ -17,9 +17,9 @@
 #include <iterator>
 #include <limits>
 #include <type_traits>
-#include <unordered_map>
-#include <unordered_set>
 #include <vector>
+
+#include <phmap.h>
 
 namespace fiction
 {
@@ -139,15 +139,15 @@ class a_star_impl
     /**
      * Closed list that acts as a set of already visited coordinates.
      */
-    std::unordered_set<coordinate<Lyt>> closed_list{};
+    phmap::flat_hash_set<coordinate<Lyt>> closed_list{};
     /**
      * Stores the g-cost for each coordinate c, i.e., the length of the shortest path from source to c found so far.
      */
-    std::unordered_map<coordinate<Lyt>, g_f_type> g_values{};
+    phmap::parallel_flat_hash_map<coordinate<Lyt>, g_f_type> g_values{};
     /**
      * Tracks the origin of each coordinate to recreate the path.
      */
-    std::unordered_map<coordinate<Lyt>, coordinate<Lyt>> came_from{};
+    phmap::parallel_flat_hash_map<coordinate<Lyt>, coordinate<Lyt>> came_from{};
     /**
      * Fetches and pops the coordinate with the lowest f-value from the open list priority queue.
      *
