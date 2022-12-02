@@ -3,9 +3,9 @@ name: Ubuntu CI
 on:
   push:
     paths:
-      - '**.hpp'
-      - '**.cpp'
-      - '**.cmake'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/ubuntu.yml'
