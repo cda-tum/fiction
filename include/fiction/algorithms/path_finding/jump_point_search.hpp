@@ -463,11 +463,6 @@ class jump_point_search_impl
  * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
  * obstructed coordinates and connections.
  *
- * If the given layout is a gate-level layout and implements the obstruction interface (see obstruction_layout), paths
- * may contain wire crossings if specified in the parameters. Wire crossings are only allowed over other wires and only
- * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
- * cross only in a single point (orthogonal crossings + knock-knees/double wires).
- *
  * JPS was introduced in "Online Graph Pruning for Pathfinding on Grid Maps" by Daniel Harabor and Alban Grastien in
  * AAAI 2011.
  *
