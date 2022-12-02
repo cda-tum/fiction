@@ -107,6 +107,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif ()
 endif ()
 
+# Include parallel_hashmap by Gregory Popovitch
+target_include_directories(libfiction SYSTEM INTERFACE parallel-hashmap/parallel_hashmap/)
+
 # Include undirected_graph by Fabian Löschner
 target_include_directories(libfiction SYSTEM INTERFACE undirected_graph/source/)
 
