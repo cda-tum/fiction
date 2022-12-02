@@ -44,9 +44,9 @@ class obstruction_layout<Lyt, false> : public Lyt
   public:
     struct obstruction_layout_storage
     {
-        std::unordered_set<coordinate<Lyt>> obstructed_coordinates{};
+        std::unordered_set<typename Lyt::coordinate> obstructed_coordinates{};
 
-        std::unordered_set<std::pair<coordinate<Lyt>, coordinate<Lyt>>> obstructed_connections{};
+        std::unordered_set<std::pair<typename Lyt::coordinate, typename Lyt::coordinate>> obstructed_connections{};
     };
 
     using storage = std::shared_ptr<obstruction_layout_storage>;
