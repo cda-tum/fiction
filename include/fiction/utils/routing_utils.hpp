@@ -139,7 +139,8 @@ class path_set : public std::set<Path>
  * @return True iff successor hosts a wire that is crossable from src.
  */
 template <typename Lyt>
-[[nodiscard]] bool is_crossable_wire(const Lyt& lyt, const coordinate<Lyt>& src, const coordinate<Lyt>& successor) noexcept
+[[nodiscard]] bool is_crossable_wire(const Lyt& lyt, const coordinate<Lyt>& src,
+                                     const coordinate<Lyt>& successor) noexcept
 {
     assert(lyt.is_adjacent_elevation_of(src, successor));
 
