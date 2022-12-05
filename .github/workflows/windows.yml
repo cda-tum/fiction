@@ -1,6 +1,14 @@
 name: Windows CI
 
-on: push
+on:
+  push:
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/windows.yml'
 
 defaults:
   run:
@@ -18,9 +26,9 @@ jobs:
         build_type: [ Debug, Release ]
         include:
           - os: windows-2019
-            env: "Visual Studio 16 2019"
+            env: 'Visual Studio 16 2019'
           - os: windows-2022
-            env: "Visual Studio 17 2022"
+            env: 'Visual Studio 17 2022'
         exclude:
           - os: windows-2019
             toolset: v143
@@ -39,7 +47,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "ccache-${{matrix.os}}-${{matrix.toolset}}-${{matrix.build_type}}"
+          key: '${{matrix.os}}-${{matrix.toolset}}-${{matrix.build_type}}'
           variant: ccache
           save: true
           max-size: 10G
@@ -59,11 +67,18 @@ jobs:
 
       - name: Configure CMake
         working-directory: ${{github.workspace}}\build
-        run: cmake ${{github.workspace}} -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_EXPERIMENTS=ON -DFICTION_Z3=ON -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
+        run: >
+          cmake ${{github.workspace}} -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}}
+          -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+          -DFICTION_CLI=ON
+          -DFICTION_TEST=ON
+          -DFICTION_EXPERIMENTS=ON
+          -DFICTION_Z3=ON
+          -DMOCKTURTLE_EXAMPLES=OFF
+          -DWARNINGS_AS_ERRORS=OFF
 
       - name: Build
         working-directory: ${{github.workspace}}\build
-
         run: cmake --build . --config ${{matrix.build_type}} -j2
 
       - name: Test

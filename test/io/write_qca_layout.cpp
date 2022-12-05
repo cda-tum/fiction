@@ -2,7 +2,8 @@
 // Created by marcel on 24.09.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/version_info.hpp"
 
 #include <fiction/io/write_qca_layout.hpp>
@@ -18,7 +19,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Write empty layout", "[qcad]")
+TEST_CASE("Write empty QCAD layout", "[qcad]")
 {
     using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
@@ -140,7 +141,7 @@ TEST_CASE("Write empty layout", "[qcad]")
     }
 }
 
-TEST_CASE("Write single-layer AND gate", "[qcad]")
+TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
 {
     using qca_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 

@@ -2,14 +2,14 @@
 // Created by marcel on 13.09.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/iter/aspect_ratio_iterator.hpp>
 #include <fiction/layouts/coordinates.hpp>
 
 using namespace fiction;
 
-TEST_CASE("Iteration", "[aspect-ratio-iterator]")
+TEST_CASE("Aspect ratio iteration", "[aspect-ratio-iterator]")
 {
     aspect_ratio_iterator<offset::ucoord_t> ari{1};
 

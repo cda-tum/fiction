@@ -2,8 +2,9 @@
 // Created by marcel on 03.07.21.
 //
 
+#include <catch2/catch_test_macros.hpp>
+
 #include "../utils/blueprints/layout_blueprints.hpp"
-#include "catch.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -15,7 +16,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[qca-one-library]")
+TEST_CASE("QCA ONE library traits", "[qca-one-library]")
 {
     CHECK(has_post_layout_optimization_v<qca_one_library, qca_cell_clk_lyt>);
     CHECK(!has_post_layout_optimization_v<qca_one_library, inml_cell_clk_lyt>);

@@ -2,7 +2,8 @@
 // Created by marcel on 24.06.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -15,8 +16,8 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("Traits", "[cell-level-layout]", qca_cell_clk_lyt, stacked_qca_cell_clk_lyt, inml_cell_clk_lyt,
-                   sidb_cell_clk_lyt)
+TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", qca_cell_clk_lyt, stacked_qca_cell_clk_lyt,
+                   inml_cell_clk_lyt, sidb_cell_clk_lyt)
 {
     CHECK(is_cell_level_layout_v<TestType>);
     CHECK(has_foreach_cell_v<TestType>);
@@ -247,7 +248,7 @@ TEST_CASE("Cell mode assignment", "[cell-level-layout]")
     CHECK(layout.get_cell_mode({2, 3, 1}) == qca_technology::cell_mode::NORMAL);
 }
 
-TEST_CASE("Clocking", "[cell-level-layout]")
+TEST_CASE("Clock zone assignment to cells", "[cell-level-layout]")
 {
     using clk_cell_lyt = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 

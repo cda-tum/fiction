@@ -2,8 +2,9 @@
 // Created by marcel on 17.01.22.
 //
 
+#include <catch2/catch_test_macros.hpp>
+
 #include "../utils/blueprints/layout_blueprints.hpp"
-#include "catch.hpp"
 #include "fiction/io/print_layout.hpp"
 
 #include <fiction/technology/inml_topolinano_library.hpp>
@@ -12,7 +13,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[inml-topolinano-library]")
+TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
 {
     CHECK(!has_post_layout_optimization_v<inml_topolinano_library, qca_cell_clk_lyt>);
     CHECK(has_post_layout_optimization_v<inml_topolinano_library, inml_cell_clk_lyt>);

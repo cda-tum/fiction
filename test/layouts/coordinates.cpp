@@ -2,7 +2,7 @@
 // Created by marcel on 15.09.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/coordinates.hpp>
 

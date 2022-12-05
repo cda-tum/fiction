@@ -1,6 +1,24 @@
 name: Coverage CI
 
-on: [ pull_request ]
+on:
+  push:
+    branches: [ 'main' ]
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/coverage.yml'
+  pull_request:
+    branches: [ 'main' ]
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/coverage.yml'
 
 defaults:
   run:
@@ -37,7 +55,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "ccache-${{matrix.os}}-${{matrix.compiler}}-${{matrix.build_type}}"
+          key: '${{matrix.os}}-${{matrix.compiler}}-${{matrix.build_type}}'
           variant: ccache
           save: true
           max-size: 10G
@@ -62,11 +80,21 @@ jobs:
 
       - name: Configure CMake
         working-directory: ${{github.workspace}}/build
-        run: cmake ${{github.workspace}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DFICTION_CLI=OFF -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF -DENABLE_COVERAGE=ON
+        run: >
+          cmake ${{github.workspace}}
+          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+          -DFICTION_CLI=OFF
+          -DFICTION_TEST=ON
+          -DFICTION_Z3=ON
+          -DFICTION_ENABLE_MUGEN=ON
+          -DFICTION_PROGRESS_BARS=OFF
+          -DMOCKTURTLE_EXAMPLES=OFF
+          -DWARNINGS_AS_ERRORS=OFF
+          -DENABLE_COVERAGE=ON
 
       - name: Build
         working-directory: ${{github.workspace}}/build
-
         run: cmake --build . --config $BUILD_TYPE
 
       - name: Test

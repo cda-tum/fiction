@@ -2,7 +2,8 @@
 // Created by marcel on 05.11.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>

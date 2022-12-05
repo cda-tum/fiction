@@ -2,7 +2,8 @@
 // Created by marcel on 13.01.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>
