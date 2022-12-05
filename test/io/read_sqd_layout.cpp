@@ -2,7 +2,7 @@
 // Created by marcel on 23.06.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -18,7 +18,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Read empty layout", "[sqd]")
+TEST_CASE("Read empty SQD layout", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -44,7 +44,7 @@ TEST_CASE("Read empty layout", "[sqd]")
     check(read_sqd_layout<sidb_layout>(layout_stream));
 }
 
-TEST_CASE("Read single-dot layout", "[sqd]")
+TEST_CASE("Read single-dot SQD layout", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -77,7 +77,7 @@ TEST_CASE("Read single-dot layout", "[sqd]")
     check(read_sqd_layout<sidb_layout>(layout_stream));
 }
 
-TEST_CASE("Read multi-dot layout", "[sqd]")
+TEST_CASE("Read multi-dot SQD layout", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -120,7 +120,7 @@ TEST_CASE("Read multi-dot layout", "[sqd]")
     CHECK(layout.get_cell_type({2, 5}) == sidb_technology::cell_type::NORMAL);
 }
 
-TEST_CASE("Read single defect", "[sqd]")
+TEST_CASE("Read single defect SQD layout", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -159,7 +159,7 @@ TEST_CASE("Read single defect", "[sqd]")
     CHECK(defect.lambda_tf == 3.4);
 }
 
-TEST_CASE("Read multiple defects", "[sqd]")
+TEST_CASE("Read multiple defects SQD layout", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -266,7 +266,7 @@ TEST_CASE("Read multiple defects", "[sqd]")
     }
 }
 
-TEST_CASE("Read multi-dot layout with multi-cell defect", "[sqd]")
+TEST_CASE("Read multi-dot SQD layout with multi-cell defect", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -344,7 +344,7 @@ TEST_CASE("Read multi-dot layout with multi-cell defect", "[sqd]")
         });
 }
 
-TEST_CASE("In-place reader with ignored defects", "[sqd]")
+TEST_CASE("In-place SQD reader with ignored defects", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -395,7 +395,7 @@ TEST_CASE("In-place reader with ignored defects", "[sqd]")
     using sidb_layout =
         sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    sidb_surface_params params{std::set<sidb_defect_type>{sidb_defect_type::DB}};
+    const sidb_surface_params params{std::set<sidb_defect_type>{sidb_defect_type::DB}};
     sidb_layout         layout{params};
 
     read_sqd_layout(layout, layout_stream);
@@ -412,7 +412,7 @@ TEST_CASE("In-place reader with ignored defects", "[sqd]")
     CHECK(layout.num_defects() == 0);
 }
 
-TEST_CASE("Read defect despite missing <coulomb> element", "[sqd]")
+TEST_CASE("Read SQD defect despite missing <coulomb> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -447,7 +447,7 @@ TEST_CASE("Read defect despite missing <coulomb> element", "[sqd]")
     CHECK(defect.lambda_tf == 0.0);
 }
 
-TEST_CASE("Parsing error: missing <siqad> element", "[sqd]")
+TEST_CASE("SQD parsing error: missing <siqad> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 
@@ -459,7 +459,7 @@ TEST_CASE("Parsing error: missing <siqad> element", "[sqd]")
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: missing <design> element", "[sqd]")
+TEST_CASE("SQD parsing error: missing <design> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -473,7 +473,7 @@ TEST_CASE("Parsing error: missing <design> element", "[sqd]")
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: missing 'type' attribute in <layer> element", "[sqd]")
+TEST_CASE("SQD parsing error: missing 'type' attribute in <layer> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -492,7 +492,7 @@ TEST_CASE("Parsing error: missing 'type' attribute in <layer> element", "[sqd]")
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: missing <latcoord> element in <dbdot> element", "[sqd]")
+TEST_CASE("SQD parsing error: missing <latcoord> element in <dbdot> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -517,7 +517,7 @@ TEST_CASE("Parsing error: missing <latcoord> element in <dbdot> element", "[sqd]
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: missing 'n' attribute in <latcoord> element", "[sqd]")
+TEST_CASE("SQD parsing error: missing 'n' attribute in <latcoord> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -542,7 +542,7 @@ TEST_CASE("Parsing error: missing 'n' attribute in <latcoord> element", "[sqd]")
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: missing 'm' attribute in <latcoord> element", "[sqd]")
+TEST_CASE("SQD parsing error: missing 'm' attribute in <latcoord> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -567,7 +567,7 @@ TEST_CASE("Parsing error: missing 'm' attribute in <latcoord> element", "[sqd]")
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: missing 'l' attribute in <latcoord> element", "[sqd]")
+TEST_CASE("SQD parsing error: missing 'l' attribute in <latcoord> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -592,7 +592,7 @@ TEST_CASE("Parsing error: missing 'l' attribute in <latcoord> element", "[sqd]")
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: negative 'n' attribute in <latcoord> element", "[sqd]")
+TEST_CASE("SQD parsing error: negative 'n' attribute in <latcoord> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -617,7 +617,7 @@ TEST_CASE("Parsing error: negative 'n' attribute in <latcoord> element", "[sqd]"
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: negative 'm' attribute in <latcoord> element", "[sqd]")
+TEST_CASE("SQD parsing error: negative 'm' attribute in <latcoord> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -642,7 +642,7 @@ TEST_CASE("Parsing error: negative 'm' attribute in <latcoord> element", "[sqd]"
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: negative 'l' attribute in <latcoord> element", "[sqd]")
+TEST_CASE("SQD parsing error: negative 'l' attribute in <latcoord> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -667,7 +667,7 @@ TEST_CASE("Parsing error: negative 'l' attribute in <latcoord> element", "[sqd]"
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: out-of-bounds 'l' attribute in <latcoord> element", "[sqd]")
+TEST_CASE("SQD parsing error: out-of-bounds 'l' attribute in <latcoord> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -692,7 +692,7 @@ TEST_CASE("Parsing error: out-of-bounds 'l' attribute in <latcoord> element", "[
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: missing <latcoord> element in <incl_coords> element", "[sqd]")
+TEST_CASE("SQD parsing error: missing <latcoord> element in <incl_coords> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -719,7 +719,7 @@ TEST_CASE("Parsing error: missing <latcoord> element in <incl_coords> element", 
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: missing 'charge' attribute in <coulomb> element", "[sqd]")
+TEST_CASE("SQD parsing error: missing 'charge' attribute in <coulomb> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -747,7 +747,7 @@ TEST_CASE("Parsing error: missing 'charge' attribute in <coulomb> element", "[sq
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: missing 'eps_r' attribute in <coulomb> element", "[sqd]")
+TEST_CASE("SQD parsing error: missing 'eps_r' attribute in <coulomb> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -775,7 +775,7 @@ TEST_CASE("Parsing error: missing 'eps_r' attribute in <coulomb> element", "[sqd
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("Parsing error: missing 'lambda_tf' attribute in <coulomb> element", "[sqd]")
+TEST_CASE("SQD parsing error: missing 'lambda_tf' attribute in <coulomb> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
