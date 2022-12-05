@@ -29,7 +29,6 @@ using color_routing_experiment =
                             uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, double, double, double, double,
                             bool>;
 
-
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
 static fiction::exact_physical_design_stats      exact_stats{};
 static fiction::orthogonal_physical_design_stats ortho_stats{};
