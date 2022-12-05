@@ -2,24 +2,21 @@
 // Created by marcel on 14.02.21.
 //
 
+#if (FICTION_Z3_SOLVER)
+
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/color_routing.hpp>      // routing based on graph coloring
 #include <fiction/algorithms/physical_design/exact.hpp>              // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/physical_design/orthogonal.hpp>         // OGD-based physical design of FCN layouts
 #include <fiction/algorithms/verification/equivalence_checking.hpp>  // equivalence checking of FCN layouts
-#include <fiction/technology/technology_mapping_library.hpp>         // pre-defined gate types for technology mapping
 #include <fiction/types.hpp>                                         // pre-defined types suitable for the FCN domain
 #include <fiction/utils/routing_utils.hpp>                           // routing utility functions
 
-#include <fmt/format.h>                                        // output formatting
-#include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
-#include <mockturtle/algorithms/cut_rewriting.hpp>             // logic optimization with cut rewriting
-#include <mockturtle/algorithms/mapper.hpp>                    // Technology mapping on the logic level
-#include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
-#include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
-#include <mockturtle/networks/aig.hpp>                         // AND-inverter graphs
-#include <mockturtle/utils/tech_library.hpp>                   // technology library utils
+#include <fmt/format.h>                      // output formatting
+#include <lorina/lorina.hpp>                 // Verilog/BLIF/AIGER/... file parsing
+#include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
+#include <mockturtle/networks/aig.hpp>       // AND-inverter graphs
 
 #include <cstdint>
 #include <string>
@@ -32,10 +29,13 @@ using color_routing_experiment =
                             uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, double, double, double, double,
                             bool>;
 
+
+// NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
 static fiction::exact_physical_design_stats      exact_stats{};
 static fiction::orthogonal_physical_design_stats ortho_stats{};
 static fiction::color_routing_stats              routing_stats{};
 static fiction::equivalence_checking_stats       equiv_stats{};
+// NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
 template <typename Ntk>
 Ntk read_ntk(const std::string& name)
@@ -249,3 +249,5 @@ int main()  // NOLINT
 
     return EXIT_SUCCESS;
 }
+
+#endif  // FICTION_Z3_SOLVER

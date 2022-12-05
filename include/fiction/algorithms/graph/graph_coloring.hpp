@@ -399,7 +399,7 @@ class sat_coloring_handler
     {
         // for each vertex
         std::for_each(graph.begin_vertices(), graph.end_vertices(),
-                      [this, &instance](const auto& vp)
+                      [&instance](const auto& vp)
                       {
                           const auto& v = vp.first;
 
@@ -425,7 +425,7 @@ class sat_coloring_handler
             {
                 // for each vertex
                 std::for_each(graph.begin_vertices(), graph.end_vertices(),
-                              [this, &instance, &c1, &c2](const auto& vp)
+                              [&instance, &c1, &c2](const auto& vp)
                               {
                                   const auto& v = vp.first;
                                   // not vertex has color 1 OR not vertex has color 2
@@ -474,7 +474,7 @@ class sat_coloring_handler
 
                               // for each vertex in clique
                               std::for_each(clique.cbegin(), clique.cend(),
-                                            [this, &instance, &c, &vc](const auto& v) {
+                                            [&instance, &c, &vc](const auto& v) {
                                                 vc.push_back({instance->variables[{v, c}], bill::positive_polarity});
                                             });
 
@@ -527,7 +527,7 @@ class sat_coloring_handler
                     clique_first_ordering.push_back(v);
 
                     std::find_if(graph.begin_adjacent(v), graph.end_adjacent(v),
-                                 [this, &instance, &clique_first_ordering](const auto& av)
+                                 [&instance, &clique_first_ordering](const auto& av)
                                  {
                                      // assign color 1 to an adjacent vertex
                                      instance->solver.add_clause(
@@ -631,7 +631,7 @@ class sat_coloring_handler
 
         // for each vertex
         std::for_each(graph.begin_vertices(), graph.end_vertices(),
-                      [this, &instance, &model, &coloring, &color_frequency](const auto& vp)
+                      [&instance, &model, &coloring, &color_frequency](const auto& vp)
                       {
                           const auto& v = vp.first;
                           // for each color

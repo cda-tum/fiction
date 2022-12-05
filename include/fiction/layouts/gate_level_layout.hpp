@@ -1022,9 +1022,9 @@ class gate_level_layout : public ClockedLayout
 
         ClockedLayout::foreach_outgoing_clocked_zone(
             nt,
-            [this, &n, &fn, &nt](const auto& out_t)
+            [this, &fn, &nt](const auto& out_t)
             {
-                const auto apply_functor = [this, &n, &fn](const auto& parent_t)
+                const auto apply_functor = [this, &fn](const auto& parent_t)
                 {
                     const auto parent_index = node_to_index(parent_t);
                     auto       parents      = mockturtle::range(parent_index, parent_index + 1);
