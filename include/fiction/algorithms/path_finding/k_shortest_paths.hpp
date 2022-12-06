@@ -80,7 +80,7 @@ class yen_k_shortest_paths_impl
                 for (const auto& p : k_shortest_paths)
                 {
                     // if the root path is equal to a previous partial path
-                    if (std::equal(root_path.cbegin(), root_path.cend(), p.cbegin(), p.cbegin() + i))
+                    if (p.size() >= i && std::equal(root_path.cbegin(), root_path.cend(), p.cbegin(), p.cbegin() + i))
                     {
                         // block the connection that was already used in the previous shortest path
                         layout.obstruct_connection(p[i], p[i + 1]);
