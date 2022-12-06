@@ -317,7 +317,7 @@ class synchronization_element_layout : public ClockedLayout
     [[nodiscard]] typename ClockedLayout::degree_t degree(const clock_zone<ClockedLayout>& cz) const noexcept
     {
         const auto clock_degree = static_cast<typename ClockedLayout::degree_t>(ClockedLayout::degree(cz));
-        const auto se_degree = static_cast<typename ClockedLayout::degree_t>(in_degree(cz) + out_degree(cz));
+        const auto se_degree    = static_cast<typename ClockedLayout::degree_t>(in_degree(cz) + out_degree(cz));
         return se_degree > clock_degree ? clock_degree : se_degree;
     }
 
