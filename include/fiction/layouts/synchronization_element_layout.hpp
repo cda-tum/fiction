@@ -12,6 +12,7 @@
 #include <iterator>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -201,13 +202,10 @@ class synchronization_element_layout : public ClockedLayout
      */
     [[nodiscard]] auto incoming_clocked_zones(const clock_zone<ClockedLayout>& cz) const noexcept
     {
-        const auto adj = ClockedLayout::adjacent_coordinates(cz);
-
         std::vector<clock_zone<ClockedLayout>> incoming{};
-        incoming.reserve(adj.size());  // reserve memory
+        // don't reserve memory; not worth copying the clocking scheme from ClockedLayout to make an estimation
 
-        std::copy_if(std::cbegin(adj), std::cend(adj), std::back_inserter(incoming),
-                     [this, &cz](const auto& ct) { return is_incoming_clocked(cz, ct); });
+        foreach_incoming_clocked_zone(cz, [&incoming](const auto& ct) { incoming.push_back(ct); });
 
         return incoming;
     }
@@ -222,9 +220,14 @@ class synchronization_element_layout : public ClockedLayout
     template <typename Fn>
     void foreach_incoming_clocked_zone(const clock_zone<ClockedLayout>& cz, Fn&& fn) const
     {
-        const auto incoming = incoming_clocked_zones(cz);
-
-        mockturtle::detail::foreach_element(incoming.cbegin(), incoming.cend(), fn);
+        ClockedLayout::foreach_adjacent_coordinate(cz,
+                                                   [this, &cz, &fn](const auto& ct)
+                                                   {
+                                                       if (is_incoming_clocked(cz, ct))
+                                                       {
+                                                           std::invoke(std::forward<Fn>(fn), ct);
+                                                       }
+                                                   });
     }
     /**
      * Overwrites the function from ClockedLayout to account for synchronization elements. Returns a container with all
@@ -235,13 +238,10 @@ class synchronization_element_layout : public ClockedLayout
      */
     [[nodiscard]] auto outgoing_clocked_zones(const clock_zone<ClockedLayout>& cz) const noexcept
     {
-        const auto adj = ClockedLayout::adjacent_coordinates(cz);
-
         std::vector<clock_zone<ClockedLayout>> outgoing{};
-        outgoing.reserve(adj.size());  // reserve memory
+        // don't reserve memory; not worth copying the clocking scheme from ClockedLayout to make an estimation
 
-        std::copy_if(std::cbegin(adj), std::cend(adj), std::back_inserter(outgoing),
-                     [this, &cz](const auto& ct) { return is_outgoing_clocked(cz, ct); });
+        foreach_outgoing_clocked_zone(cz, [&outgoing](const auto& ct) { outgoing.push_back(ct); });
 
         return outgoing;
     }
@@ -256,9 +256,14 @@ class synchronization_element_layout : public ClockedLayout
     template <typename Fn>
     void foreach_outgoing_clocked_zone(const clock_zone<ClockedLayout>& cz, Fn&& fn) const
     {
-        const auto outgoing = outgoing_clocked_zones(cz);
-
-        mockturtle::detail::foreach_element(outgoing.cbegin(), outgoing.cend(), fn);
+        ClockedLayout::foreach_adjacent_coordinate(cz,
+                                                   [this, &cz, &fn](const auto& ct)
+                                                   {
+                                                       if (is_outgoing_clocked(cz, ct))
+                                                       {
+                                                           std::invoke(std::forward<Fn>(fn), ct);
+                                                       }
+                                                   });
     }
 
 #pragma endregion
@@ -283,7 +288,10 @@ class synchronization_element_layout : public ClockedLayout
      */
     [[nodiscard]] typename ClockedLayout::degree_t in_degree(const clock_zone<ClockedLayout>& cz) const noexcept
     {
-        return static_cast<typename ClockedLayout::degree_t>(incoming_clocked_zones(cz).size());
+        typename ClockedLayout::degree_t idg{0};
+        foreach_incoming_clocked_zone(cz, [&idg](const auto&) { ++idg; });
+
+        return idg;
     }
     /**
      * Overwrites the function from ClockedLayout to account for synchronization elements. Returns the number of
@@ -294,7 +302,10 @@ class synchronization_element_layout : public ClockedLayout
      */
     [[nodiscard]] typename ClockedLayout::degree_t out_degree(const clock_zone<ClockedLayout>& cz) const noexcept
     {
-        return static_cast<typename ClockedLayout::degree_t>(outgoing_clocked_zones(cz).size());
+        typename ClockedLayout::degree_t odg{0};
+        foreach_outgoing_clocked_zone(cz, [&odg](const auto&) { ++odg; });
+
+        return odg;
     }
     /**
      * Overwrites the function from ClockedLayout to account for synchronization elements. Returns the number of
@@ -305,14 +316,7 @@ class synchronization_element_layout : public ClockedLayout
      */
     [[nodiscard]] typename ClockedLayout::degree_t degree(const clock_zone<ClockedLayout>& cz) const noexcept
     {
-        const auto incoming = incoming_clocked_zones(cz);
-        const auto outgoing = outgoing_clocked_zones(cz);
-
-        std::unordered_set<clock_zone<ClockedLayout>> merged_clock_zones{};
-        std::merge(incoming.cbegin(), incoming.cend(), outgoing.cbegin(), outgoing.cend(),
-                   std::inserter(merged_clock_zones, merged_clock_zones.end()));
-
-        return static_cast<typename ClockedLayout::degree_t>(merged_clock_zones.size());
+        return static_cast<typename ClockedLayout::degree_t>(in_degree(cz) + out_degree(cz));
     }
 
 #pragma endregion
