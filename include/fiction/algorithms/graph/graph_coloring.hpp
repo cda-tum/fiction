@@ -857,7 +857,8 @@ class graph_coloring_impl
         std::vector<Color> color_frequency(pst.chromatic_number, Color{0});
 
         std::for_each(bc_coloring.cbegin(), bc_coloring.cend(),
-                      [this, &v_coloring, &color_frequency](const auto& c_pair)
+                      [this,  // NOLINT(clang-diagnostic-unused-lambda-capture): false positive
+                       &v_coloring, &color_frequency](const auto& c_pair)
                       {
                           // convert color
                           v_coloring[convert_node_index(c_pair.first)] = static_cast<Color>(c_pair.second);

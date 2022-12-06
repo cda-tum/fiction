@@ -161,7 +161,7 @@ class color_routing_impl
         std::size_t num_satisfied_objectives{0};
 
         std::for_each(graph.begin_vertices(), graph.end_vertices(),
-                      [this, &graph, &coloring, &color, &num_satisfied_objectives](const auto& v_path_pair)
+                      [this, &coloring, &color, &num_satisfied_objectives](const auto& v_path_pair)
                       {
                           const auto& [vertex, path] = v_path_pair;
                           if (coloring.at(vertex) == color)

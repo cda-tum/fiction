@@ -61,6 +61,9 @@ template <typename Lyt, typename Dist = double>
 
     return static_cast<Dist>(std::hypot(x, y));
 }
+
+// NOLINTBEGIN(cppcoreguidelines-special-member-functions): virtual destructor is prudent
+
 /**
  * A functor that computes distances between coordinates and can be passed as an object to, e.g., path finding
  * algorithms with a standardized signature. This class is intended to be instantiated with concrete distance functions
@@ -108,6 +111,9 @@ class distance_functor
      */
     const std::function<Dist(const Lyt& lyt, const coordinate<Lyt>&, const coordinate<Lyt>&)> distance_function;
 };
+
+// NOLINTEND(cppcoreguidelines-special-member-functions)
+
 /**
  * A pre-defined distance functor that uses the Manhattan distance.
  *
