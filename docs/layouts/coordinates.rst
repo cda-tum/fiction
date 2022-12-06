@@ -22,12 +22,12 @@ At the same time, they can be used to address 3-dimensional grids.
 
 .. doxygenstruct:: fiction::cube::coord_t
 
-Siqad coordinates
+SiQAD coordinates
 ----------------
 
-Siqad coordinates are used to describe the Silicon Dangling Bond's location on the H-Si(100) 2x1 surface. The coordinates are originally from https://github.com/siqad.
+SiQAD coordinates are used to describe the Silicon Dangling Bond's location on the H-Si(100) 2x1 surface. The coordinates are originally from https://github.com/siqad.
 
-.. doxygenstruct:: fiction::siqad:coord_t
+.. doxygenstruct:: fiction::siqad::coord_t
 
 Utility functions
 -----------------
