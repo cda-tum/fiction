@@ -3039,7 +3039,8 @@ class exact_impl
 
         smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps};
 
-        for (; ari <= ps.upper_bound_x * ps.upper_bound_y; ++ari)  // <= to prevent overflow
+        for (; ari <= static_cast<uint64_t>(ps.upper_bound_x) * static_cast<uint64_t>(ps.upper_bound_y);
+             ++ari)  // <= to prevent overflow
         {
 
 #if (PROGRESS_BARS)

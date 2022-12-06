@@ -2,17 +2,30 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ 'main' ]
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/docker-image.yml'
   pull_request:
-    branches: [ "main" ]
+    branches: [ 'main' ]
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/docker-image.yml'
 
 jobs:
-
   build:
     name: Build Docker image
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build --build-arg NUMBER_OF_JOBS=2 . --file Dockerfile --tag fiction:$(date +%s)
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        run: docker build --build-arg NUMBER_OF_JOBS=2 . --file Dockerfile --tag fiction:$(date +%s)

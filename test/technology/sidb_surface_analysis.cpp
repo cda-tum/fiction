@@ -2,7 +2,7 @@
 // Created by marcel on 07.03.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/fcn_gate_library.hpp>
@@ -89,7 +89,7 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 
         static const auto black_list = sidb_surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
 
-        CHECK(black_list.size() == 5);
+        CHECK(black_list.size() == 12);
 
         REQUIRE(black_list.at({1, 0}).size() == 2);
         CHECK(contains_tt(black_list.at({1, 0}), create_id_tt()));
@@ -115,7 +115,7 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
         CHECK(black_list.at({2, 1}).at(create_id_tt()).front() == line_ports);
         CHECK(black_list.at({2, 1}).at(create_and_tt()).front() == y_ports);
 
-        REQUIRE(black_list.at({3, 1}).size() == 1);
+        REQUIRE(black_list.at({3, 1}).size() == 2);
         CHECK(contains_tt(black_list.at({3, 1}), create_and_tt()));
         CHECK(black_list.at({3, 1}).at(create_and_tt()).front() == y_ports);
     }
@@ -143,7 +143,7 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 
         static const auto black_list = sidb_surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
 
-        CHECK(black_list.size() == 9);
+        CHECK(black_list.size() == 12);
 
         REQUIRE(black_list.at({1, 0}).size() == 2);
         CHECK(contains_tt(black_list.at({1, 0}), create_id_tt()));
@@ -157,7 +157,7 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
         CHECK(black_list.at({2, 0}).at(create_id_tt()).front() == line_ports);
         CHECK(black_list.at({2, 0}).at(create_and_tt()).front() == y_ports);
 
-        REQUIRE(black_list.at({3, 0}).size() == 1);
+        REQUIRE(black_list.at({3, 0}).size() == 2);
         CHECK(contains_tt(black_list.at({3, 0}), create_and_tt()));
         CHECK(black_list.at({3, 0}).at(create_and_tt()).front() == y_ports);
 
@@ -173,11 +173,11 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
         CHECK(black_list.at({2, 1}).at(create_id_tt()).front() == line_ports);
         CHECK(black_list.at({2, 1}).at(create_and_tt()).front() == y_ports);
 
-        REQUIRE(black_list.at({3, 1}).size() == 1);
+        REQUIRE(black_list.at({3, 1}).size() == 2);
         CHECK(contains_tt(black_list.at({3, 1}), create_and_tt()));
         CHECK(black_list.at({3, 1}).at(create_and_tt()).front() == y_ports);
 
-        REQUIRE(black_list.at({0, 2}).size() == 1);
+        REQUIRE(black_list.at({0, 2}).size() == 2);
         CHECK(contains_tt(black_list.at({0, 2}), create_and_tt()));
         CHECK(black_list.at({0, 2}).at(create_and_tt()).front() == y_ports);
 
@@ -251,7 +251,7 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
 
         CHECK(black_list.size() == 1);
 
-        REQUIRE(black_list.at({0, 0}).size() == 5);
+        REQUIRE(black_list.at({0, 0}).size() == 8);
         CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_not_tt()));
         CHECK(contains_tt(black_list.at({0, 0}), create_or_tt()));

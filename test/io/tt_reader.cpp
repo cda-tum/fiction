@@ -2,7 +2,7 @@
 // Created by marcel on 13.08.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/io/tt_reader.hpp>
 

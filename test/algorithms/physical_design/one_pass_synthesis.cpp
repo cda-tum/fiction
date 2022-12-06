@@ -4,7 +4,8 @@
 
 #if (MUGEN)
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
@@ -170,7 +171,7 @@ TEST_CASE("One-pass synthesis", "[one-pass]")
 #endif
 }
 
-TEST_CASE("Timeout", "[one-pass]")
+TEST_CASE("One-pass synthesis timeout", "[one-pass]")
 {
     auto timeout_config    = use(configuration<cart_gate_clk_lyt>());
     timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
@@ -182,7 +183,7 @@ TEST_CASE("Timeout", "[one-pass]")
     CHECK(!layout.has_value());
 }
 
-TEST_CASE("Name conservation", "[one-pass]")
+TEST_CASE("Name conservation after one-pass synthesis", "[one-pass]")
 {
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");
