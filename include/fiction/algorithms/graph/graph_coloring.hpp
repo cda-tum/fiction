@@ -468,7 +468,7 @@ class sat_coloring_handler
 
             // for each clique
             std::for_each(ps.cliques.cbegin(), ps.cliques.cend(),
-                          [this, &instance, &c, &color_c_in_each_clique](const auto& clique)
+                          [&instance, &c, &color_c_in_each_clique](const auto& clique)
                           {
                               std::vector<bill::lit_type> vc{};
 

@@ -54,7 +54,7 @@ template <typename Lyt, typename Cost = double>
     return distr(engine);
 }
 
-// NOLINTBEGIN(cppcoreguidelines-special-member-functions): virtual destructor is prudent
+// NOLINTBEGIN(*-special-member-functions): virtual destructor is prudent
 
 /**
  * A functor that computes costs between coordinates and can be passed as an object to, e.g., path finding algorithms
@@ -101,7 +101,7 @@ class cost_functor
     const std::function<Cost(const coordinate<Lyt>&, const coordinate<Lyt>&)> cost_function;
 };
 
-// NOLINTEND(cppcoreguidelines-special-member-functions)
+// NOLINTEND(*-special-member-functions)
 
 /**
  * A pre-defined cost functor that uses unit costs.
