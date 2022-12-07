@@ -19,6 +19,38 @@ namespace blueprints
 {
 
 template <typename GateLyt>
+GateLyt straight_wire_gate_layout() noexcept
+{
+    GateLyt layout{{2, 2}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 1});
+    const auto w1 = layout.create_buf(x1, {1, 1});
+    layout.create_po(w1, "f1", {2, 1});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt three_wire_paths_gate_layout() noexcept
+{
+    GateLyt layout{{4, 4}, fiction::use_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {0, 2});
+    const auto x3 = layout.create_pi("x3", {0, 4});
+
+    const auto p1 = layout.create_buf(layout.create_buf(layout.create_buf(x1, {1, 0}), {2, 0}), {3, 0});
+    const auto p2 = layout.create_buf(layout.create_buf(layout.create_buf(x2, {1, 2}), {2, 2}), {3, 2});
+    const auto p3 = layout.create_buf(layout.create_buf(layout.create_buf(x3, {1, 4}), {2, 4}), {3, 4});
+
+    layout.create_po(p1, "f1", {4, 0});
+    layout.create_po(p2, "f2", {4, 2});
+    layout.create_po(p3, "f3", {4, 4});
+
+    return layout;
+}
+
+template <typename GateLyt>
 GateLyt xor_maj_gate_layout() noexcept
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
@@ -108,6 +140,32 @@ GateLyt or_not_gate_layout() noexcept
     const auto o1 = layout.create_or(x1, x2, {1, 1});
     const auto n1 = layout.create_not(o1, {1, 2});
     layout.create_po(n1, "f1", {2, 2});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt use_and_gate_layout() noexcept
+{
+    GateLyt layout{typename GateLyt::aspect_ratio{3, 3, 0}, fiction::use_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 1});
+    const auto x2 = layout.create_pi("x2", {3, 3});
+
+    const auto w1 = layout.create_buf(x1, {0, 0});
+    const auto w2 = layout.create_buf(w1, {1, 0});
+    const auto w3 = layout.create_buf(w2, {1, 1});
+
+    const auto w4 = layout.create_buf(x2, {2, 3});
+    const auto w5 = layout.create_buf(w4, {1, 3});
+    const auto w6 = layout.create_buf(w5, {0, 3});
+    const auto w7 = layout.create_buf(w6, {0, 2});
+
+    const auto a1 = layout.create_and(w3, w7, {1, 2});
+
+    const auto w8 = layout.create_buf(a1, {2, 2});
+
+    layout.create_po(w8, "f1", {3, 2});
 
     return layout;
 }

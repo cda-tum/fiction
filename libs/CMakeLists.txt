@@ -8,6 +8,7 @@ set(MOCKTURTLE_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(MOCKTURTLE_EXPERIMENTS OFF CACHE BOOL "" FORCE)
 set(MOCKTURTLE_TEST OFF CACHE BOOL "" FORCE)
 add_subdirectory(mockturtle/)
+target_link_libraries(libfiction INTERFACE mockturtle)
 
 # Include Catch2
 if (FICTION_TEST)
@@ -105,3 +106,17 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         message(STATUS "Parallel STL algorithms are disabled. If you want to use them, please install TBB and set the TBB_ROOT_DIR, TBB_INCLUDE_DIR, and TBB_LIBRARY variables accordingly.")
     endif ()
 endif ()
+
+# Include parallel_hashmap by Gregory Popovitch
+target_include_directories(libfiction SYSTEM INTERFACE parallel-hashmap/parallel_hashmap/)
+
+# Include undirected_graph by Fabian Löschner
+target_include_directories(libfiction SYSTEM INTERFACE undirected_graph/source/)
+
+# Include combinations by Howard Hinnant
+target_include_directories(libfiction SYSTEM INTERFACE combinations/)
+
+# Include graph-coloring by Brian Crites
+add_subdirectory(graph-coloring/)
+target_include_directories(libfiction SYSTEM INTERFACE graph-coloring/Header)
+target_link_libraries(libfiction INTERFACE graph-coloring)

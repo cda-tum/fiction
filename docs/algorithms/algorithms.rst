@@ -6,6 +6,22 @@ Iterators
 
    iterators.rst
 
+Path Finding
+============
+
+.. toctree::
+   :maxdepth: 1
+
+   path_finding.rst
+
+
+Graph Algorithms
+================
+
+.. toctree::
+   :maxdepth: 1
+
+   graph.rst
 
 Network Transformation
 ======================
@@ -25,6 +41,7 @@ Physical Design
    exact.rst
    orthogonal.rst
    one_pass_synthesis.rst
+   color_routing.rst
    apply_gate_library.rst
 
 

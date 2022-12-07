@@ -234,8 +234,11 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
     CHECK(bt == bbt);
     CHECK(layout.is_ground_layer(bbt));
 
-    auto s1 = layout.adjacent_coordinates<std::set<cartesian_layout<offset::ucoord_t>::coordinate>>({5, 5});
-    auto s2 = std::set<cartesian_layout<offset::ucoord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
+    const auto v1 = layout.adjacent_coordinates({5, 5});
+    const auto s1 = std::set<cartesian_layout<offset::ucoord_t>::coordinate>{v1.cbegin(), v1.cend()};
+    const auto s2 = std::set<cartesian_layout<offset::ucoord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
+
+    CHECK(s1 == s2);
 
     layout.foreach_adjacent_coordinate(
         {5, 5},
@@ -243,6 +246,4 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
             CHECK(
                 std::set<cartesian_layout<offset::ucoord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}}.count(adj));
         });
-
-    CHECK(s1 == s2);
 }

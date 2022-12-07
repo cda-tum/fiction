@@ -2,7 +2,7 @@
 
 add_library(fiction_experiments INTERFACE)
 target_include_directories(fiction_experiments INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/libs/mockturtle/experiments/)
-target_link_libraries(fiction_experiments INTERFACE libfiction mockturtle)
+target_link_libraries(fiction_experiments INTERFACE libfiction)
 if (ENABLE_MATPLOTLIB)
     target_link_libraries(fiction_experiments INTERFACE matplot)
 endif ()
