@@ -36,7 +36,7 @@ struct fanout_substitution_params
     /**
      * Breadth-first vs. depth-first fanout-tree substitution strategies.
      */
-    enum class substitution_strategy
+    enum substitution_strategy
     {
         BREADTH,
         DEPTH
@@ -45,7 +45,7 @@ struct fanout_substitution_params
     /**
      * Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
      */
-    substitution_strategy strategy = substitution_strategy::BREADTH;
+    substitution_strategy strategy = BREADTH;
     /**
      * Maximum output degree of each fan-out node.
      */
