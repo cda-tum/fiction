@@ -20,7 +20,7 @@ namespace fiction
  * necessary to know exactly which space the associated layout internals occupy. A bounding box computes coordinates
  * that span a minimum-sized rectangle that encloses all non-empty layout coordinates.
  *
- * The bounding box does not automatically updated when the layout changes. Call update_bounding_box() to recompute it.
+ * The bounding box does not automatically updated when the layout changes. Call `update_bounding_box()` to recompute it.
  *
  * @tparam Lyt Gate-level or cell-level layout type.
  */

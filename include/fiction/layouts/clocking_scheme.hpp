@@ -22,7 +22,7 @@ namespace fiction
 {
 
 /**
- * Clocking scheme type that assigns a clock number to each element of the provided type ClockZone. Clocking scheme
+ * Clocking scheme type that assigns a clock number to each element of the provided type `ClockZone`. Clocking scheme
  * objects are utilized, e.g., in clocked_layout.
  *
  * Usually, a clocking scheme is defined by the means of a cutout that can be seamlessly extended in all directions to
@@ -88,7 +88,7 @@ class clocking_scheme
      * Compares the stored name against a given one.
      *
      * @param n Name to compare.
-     * @return True iff the stored name is equal to n.
+     * @return `true` iff the stored name is equal to n.
      */
     bool operator==(const std::string& n) const noexcept
     {
@@ -97,7 +97,7 @@ class clocking_scheme
     /**
      * Checks for the clocking scheme's regularity.
      *
-     * @return True iff the clocking scheme is regular.
+     * @return `true` iff the clocking scheme is regular.
      */
     [[nodiscard]] bool is_regular() const noexcept
     {
@@ -677,7 +677,7 @@ static auto bancs_clocking() noexcept
  *
  * @tparam Lyt Layout type.
  * @param scheme Universal reference to a clocking scheme.
- * @return A shared pointer to the given scheme.
+ * @return A shared pointer to the given `scheme`.
  */
 template <typename Lyt>
 std::shared_ptr<clocking_scheme<clock_zone<Lyt>>> ptr(clocking_scheme<clock_zone<Lyt>>&& scheme) noexcept
@@ -694,7 +694,7 @@ std::shared_ptr<clocking_scheme<clock_zone<Lyt>>> ptr(clocking_scheme<clock_zone
  *
  * @tparam Lyt Layout type.
  * @param scheme Clocking scheme to check.
- * @return true iff scheme is listed as one of the linear clocking schemes.
+ * @return `true` iff `scheme` is listed as one of the linear clocking schemes.
  */
 template <typename Lyt>
 bool is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
@@ -710,8 +710,8 @@ bool is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
  *
  * @tparam Lyt Layout type.
  * @param name Name of the desired clocking scheme.
- * @return Clocking scheme object that matches the given name or std::nullopt if no clocking scheme by the given name
- * exists.
+ * @return Clocking scheme object that matches the given `name`, or `std::nullopt` if no clocking scheme by the given
+ * `name` exists.
  */
 template <typename Lyt>
 std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::string& name) noexcept
