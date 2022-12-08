@@ -335,7 +335,7 @@ class a_star_impl
  * A* was introduced in \"A Formal Basis for the Heuristic Determination of Minimum Cost Paths\" by Peter E. Hart, Nils J.
  * Nilsson, and Bertram Raphael in IEEE Transactions on Systems Science and Cybernetics 1968, Volume 4, Issue 2.
  *
- * This implementation is based on the pseudocode from `Wikipedia <https://en.wikipedia.org/wiki/A*_search_algorithm>`_.
+ * This implementation is based on the pseudocode from https://en.wikipedia.org/wiki/A_star_search_algorithm.
  *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
