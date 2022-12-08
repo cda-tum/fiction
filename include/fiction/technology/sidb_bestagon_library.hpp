@@ -23,9 +23,9 @@ namespace fiction
 
 /**
  * A gate library for the SiDB technology that is based on Y-shaped gates in hexagonal tiles. Y-shaped gates have been
- * first introduced in "Binary Atomic Silicon Logic" by Taleana Huff, Hatem Labidi, Mohammad Rashidi, Lucian Livadaru,
+ * first introduced in \"Binary Atomic Silicon Logic\" by Taleana Huff, Hatem Labidi, Mohammad Rashidi, Lucian Livadaru,
  * Thomas Dienel, Roshan Achal, Wyatt Vine, Jason Pitters, and Robert A. Wolkow in Nature Electronics 2018. The Bestagon
- * library was later proposed in "Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic" by
+ * library was later proposed in \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" by
  * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille in Design Automation Conference 2022. The goal of
  * the Bestagon library is to be as close to physically realizable SiDB circuits as possible by taking fabrication
  * limitations of, e.g., clocking electrodes into account while also relying on established gate shape. Thus, the

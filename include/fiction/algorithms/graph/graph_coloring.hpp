@@ -49,24 +49,24 @@ class vertex_coloring : public std::unordered_map<typename Graph::vertex_id_type
 enum class graph_coloring_engine
 {
     /**
-     * Optimal coloring for chordal graphs proposed in "Register Allocation via Coloring of Chordal Graphs" by Jens
+     * Optimal coloring for chordal graphs proposed in \"Register Allocation via Coloring of Chordal Graphs\" by Jens
      * Palsberg in CATS 2007.
      */
     MCS,
     /**
-     * Saturation degree algorithm proposed in "New Methods to Color the Vertices of a Graph" by Daniel Brélaz in
+     * Saturation degree algorithm proposed in \"New Methods to Color the Vertices of a Graph\" by Daniel Brélaz in
      * Communications of the ACM, 1979. This algorithm is a heuristic but is exact for bipartite graphs.
      */
     DSATUR,
     /**
      * A randomized heuristic algorithm that combines various paradigms like divide-and-conquer, objective functions,
-     * reuse of intermediate solutions etc. It was proposed in "Efficient Coloring of a Large Spectrum of Graphs" by
+     * reuse of intermediate solutions etc. It was proposed in \"Efficient Coloring of a Large Spectrum of Graphs\" by
      * Darko Kirovski and Miodrag Potkonjak in DAC 1998. While this algorithm is really performant, it tends to find
      * non-optimal solutions even for small instances.
      */
     LMXRLF,  // randomized
     /**
-     * A k-coloring algorithm using tabu search proposed in "Using Tabu Search Techniques for Graph Coloring" by A.
+     * A k-coloring algorithm using tabu search proposed in \"Using Tabu Search Techniques for Graph Coloring\" by A.
      * Hertz and D. de Werra in Computing 1987. The authors claim that it significantly outperforms simulated annealing.
      * However, since it is a k-coloring algorithm, it is required to set k_color_value in
      * determine_vertex_coloring_params to the chromatic number that is to be checked for.

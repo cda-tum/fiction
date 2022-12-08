@@ -332,8 +332,8 @@ class a_star_impl
  * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
  * cross only in a single point (orthogonal crossings + knock-knees/double wires).
  *
- * A* was introduced in \"A Formal Basis for the Heuristic Determination of Minimum Cost Paths\" by Peter E. Hart, Nils J.
- * Nilsson, and Bertram Raphael in IEEE Transactions on Systems Science and Cybernetics 1968, Volume 4, Issue 2.
+ * A* was introduced in \"A Formal Basis for the Heuristic Determination of Minimum Cost Paths\" by Peter E. Hart, Nils
+ * J. Nilsson, and Bertram Raphael in IEEE Transactions on Systems Science and Cybernetics 1968, Volume 4, Issue 2.
  *
  * This implementation is based on the pseudocode from https://en.wikipedia.org/wiki/A_star_search_algorithm.
  *
@@ -341,7 +341,7 @@ class a_star_impl
  * @tparam Lyt Clocked layout type.
  * @tparam Dist Distance value type to be used in the heuristic estimation function.
  * @tparam Cost Cost value type to be used when determining moving cost between coordinates.
- * @param layout The clocked layout in which the shortest path between source and target is to be found.
+ * @param layout The clocked layout in which the shortest path between `source` and `target` is to be found.
  * @param objective Source-target coordinate pair.
  * @param dist_fn A distance functor that implements the desired heuristic estimation function.
  * @param cost_fn A cost functor that implements the desired cost function.
@@ -362,23 +362,24 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
  * A distance function that does not approximate but compute the actual minimum path length on the given layout via A*
  * traversal. Naturally, this function cannot be evaluated in \f$ O(1) \f$, but has the polynomial complexity of A*.
  *
- * If no path between source and target exists in `lyt`, the returned distance is `std::numeric_limits<Dist>::infinity()`
- * if that value is supported by `Dist`, or `std::numeric_limits<Dist>::max()`, otherwise.
+ * If no path between source and target exists in `lyt`, the returned distance is
+ * `std::numeric_limits<Dist>::infinity()` if that value is supported by `Dist`, or `std::numeric_limits<Dist>::max()`,
+ * otherwise.
  *
  * @tparam Lyt Clocked layout type.
  * @tparam Dist Distance type.
- * @param lyt Layout.
+ * @param layout The clocked layout in which the distance between `source` and `target` is to be determined.
  * @param source Source coordinate.
  * @param target Target coordinate.
  * @return Minimum path length between `source` and `target`.
  */
 template <typename Lyt, typename Dist = uint64_t>
-[[nodiscard]] Dist a_star_distance(const Lyt& lyt, const coordinate<Lyt>& source,
+[[nodiscard]] Dist a_star_distance(const Lyt& layout, const coordinate<Lyt>& source,
                                    const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
 
-    const auto path_length = a_star<layout_coordinate_path<Lyt>>(lyt, {source, target}).size();
+    const auto path_length = a_star<layout_coordinate_path<Lyt>>(layout, {source, target}).size();
 
     if (path_length == 0ul)
     {

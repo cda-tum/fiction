@@ -206,8 +206,8 @@ static auto open_clocking(const num_clks& n = num_clks::FOUR) noexcept
     return clocking_scheme{clock_name::OPEN, open_clock_function, Lyt::max_fanin_size, Lyt::max_fanin_size, 4u, false};
 }
 /**
- * Returns a linear 1D clocking as originally introduced in "A device architecture for computing with
- * quantum dots" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE 1997.
+ * Returns a linear 1D clocking as originally introduced in \"A device architecture for computing with quantum dots\" by
+ * C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE 1997.
  *
  * @tparam Lyt Clocked layout type.
  * @param n Number of clocks.
@@ -253,8 +253,8 @@ static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
         clock_name::COLUMNAR, columnar_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
 }
 /**
- * Returns a 90° rotated linear 1D clocking based on the one originally introduced in "A device architecture for
- * computing with quantum dots" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE 1997.
+ * Returns a 90° rotated linear 1D clocking based on the one originally introduced in \"A device architecture for
+ * computing with quantum dots\" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE 1997.
  *
  * @tparam Lyt Clocked layout type.
  * @param n Number of clocks.
@@ -299,7 +299,7 @@ static auto row_clocking(const num_clks& n = num_clks::FOUR) noexcept
     return clocking_scheme{clock_name::ROW, row_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
 }
 /**
- * Returns the 2DDWave clocking as defined in "Clocking and Cell Placement for QCA" by V. Vankamamidi, M. Ottavi,
+ * Returns the 2DDWave clocking as defined in \"Clocking and Cell Placement for QCA\" by V. Vankamamidi, M. Ottavi,
  * and F. Lombardi in IEEE Conference on Nanotechnology 2006.
  *
  * @tparam Lyt Clocked layout type.
@@ -346,8 +346,8 @@ static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
         clock_name::TWODDWAVE, twoddwave_4_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
 }
 /**
- * Returns a hexagonal variation of the 2DDWave clocking as originally defined in "Clocking and Cell Placement for QCA"
- * by V. Vankamamidi, M. Ottavi, and F. Lombardi in IEEE Conference on Nanotechnology 2006.
+ * Returns a hexagonal variation of the 2DDWave clocking as originally defined in \"Clocking and Cell Placement for
+ * QCA\" by V. Vankamamidi, M. Ottavi, and F. Lombardi in IEEE Conference on Nanotechnology 2006.
  *
  * @tparam Lyt Clocked layout type.
  * @param n Number of clocks.
@@ -528,7 +528,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
     }
 }
 /**
- * Returns the USE clocking as defined in "USE: A Universal, Scalable, and Efficient Clocking Scheme for QCA"
+ * Returns the USE clocking as defined in \"USE: A Universal, Scalable, and Efficient Clocking Scheme for QCA\"
  * by Caio Araujo T. Campos, Abner L. Marciano, Omar P. Vilela Neto, and Frank Sill Torres in TCAD 2015.
  *
  * @tparam Lyt Clocked layout type.
@@ -556,7 +556,7 @@ static auto use_clocking() noexcept
     // clang-format on
 }
 /**
- * Returns the RES clocking as defined in "An efficient clocking scheme for quantum-dot cellular automata" by
+ * Returns the RES clocking as defined in \"An efficient clocking scheme for quantum-dot cellular automata\" by
  * Mrinal Goswami, Anindan Mondal, Mahabub Hasan Mahalat, Bibhash Sen, and Biplab K. Sikdar in International Journal
  * of Electronics Letters 2019.
  *
@@ -585,9 +585,9 @@ static auto res_clocking() noexcept
     // clang-format on
 }
 /**
- * Returns the ESR clocking as defined in "An efficient, scalable, regular clocking scheme based on quantum dot cellular
- * automata" by Jayanta Pal, Amit Kumar Pramanik, Jyotirmoy Sil Sharma, Apu Kumar Saha, and Bibhash Sen in Analog
- * Integrated Circuits and Signal Processing 2021.
+ * Returns the ESR clocking as defined in \"An efficient, scalable, regular clocking scheme based on quantum dot
+ * cellular automata\" by Jayanta Pal, Amit Kumar Pramanik, Jyotirmoy Sil Sharma, Apu Kumar Saha, and Bibhash Sen in
+ * Analog Integrated Circuits and Signal Processing 2021.
  *
  * @tparam Lyt Clocked layout type.
  * @return ESR clocking scheme.
@@ -614,8 +614,8 @@ static auto esr_clocking() noexcept
     // clang-format on
 }
 /**
- * Returns the CFE clocking as defined in "CFE: a convenient, flexible, and efficient clocking scheme for quantum-dot
- * cellular automata" by Feifei Deng, Guang-Jun Xie, Xin Cheng, Zhang Zhang, and Yongqiang Zhang in IET Circuits,
+ * Returns the CFE clocking as defined in \"CFE: a convenient, flexible, and efficient clocking scheme for quantum-dot
+ * cellular automata\" by Feifei Deng, Guang-Jun Xie, Xin Cheng, Zhang Zhang, and Yongqiang Zhang in IET Circuits,
  * Devices & Systems 2020.
  *
  * @tparam Lyt Clocked layout type.
@@ -643,7 +643,7 @@ static auto cfe_clocking() noexcept
     // clang-format on
 }
 /**
- * Returns the BANCS clocking as defined in "BANCS: Bidirectional Alternating Nanomagnetic Clocking Scheme" by
+ * Returns the BANCS clocking as defined in \"BANCS: Bidirectional Alternating Nanomagnetic Clocking Scheme\" by
  * Ruan Evangelista Formigoni, Omar P. Vilela Neto, and Jose Augusto M. Nacif in SBCCI 2018.
  *
  * @tparam Lyt Clocked layout type.

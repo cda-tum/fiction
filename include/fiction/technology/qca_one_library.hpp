@@ -22,7 +22,7 @@ namespace fiction
 {
 
 /**
- * A concrete FCN gate library based on QCA ONE proposed in "A Methodology for Standard Cell Design for QCA" by Dayane
+ * A concrete FCN gate library based on QCA ONE proposed in \"A Methodology for Standard Cell Design for QCA\" by Dayane
  * Alfenas Reis, Caio Araújo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba V. Neto, and Frank Sill Torres in
  * IEEE International Symposium on Circuits and Systems, 2016. QCA ONE was originally proposed for the USE clocking
  * scheme. The version used here is an extension to the original QCA ONE by also theoretically allowing multiple wires

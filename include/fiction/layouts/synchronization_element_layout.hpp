@@ -20,9 +20,9 @@ namespace fiction
 
 /**
  * This layout provides synchronization elements on top of a clocked layout as a technology extension to the FCN concept
- * proposed in "Synchronization of Clocked Field-Coupled Circuits" by F. Sill Torres, M. Walter, R. Wille, D. Große, and
- * R. Drechsler in IEEE NANO 2018. More in-depth information can be found in "Design Automation for Field-coupled
- * Nanotechnologies" by M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
+ * proposed in \"Synchronization of Clocked Field-Coupled Circuits\" by F. Sill Torres, M. Walter, R. Wille, D. Große,
+ * and R. Drechsler in IEEE NANO 2018. More in-depth information can be found in \"Design Automation for Field-coupled
+ * Nanotechnologies\" by M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
  *
  * A synchronization element is a clock zone whose clock signal is altered such that it provides an extended Hold phase
  * of a multitude of full clock cycles. It thereby stalls information in place and acts as a latch. Additionally, the

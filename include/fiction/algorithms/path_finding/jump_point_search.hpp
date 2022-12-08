@@ -463,25 +463,26 @@ class jump_point_search_impl
  * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
  * obstructed coordinates and connections.
  *
- * JPS was introduced in "Online Graph Pruning for Pathfinding on Grid Maps" by Daniel Harabor and Alban Grastien in
+ * JPS was introduced in \"Online Graph Pruning for Pathfinding on Grid Maps\" by Daniel Harabor and Alban Grastien in
  * AAAI 2011.
  *
  * Parts of this implementation are based on https://github.com/qiao/PathFinding.js.
  *
  * @note The original JPS highly relies on diagonal paths in the grid which are not possible in most Cartesian
  * grid-based FCN technologies. Therefore, this implementation disallows diagonal paths. Consequently, and due to
- * non-uniform clocking schemes, JPS might perform worse than A* in terms of runtime. It is recommended to use A*.
+ * non-uniform clocking schemes, JPS might perform worse than A* in terms of runtime. It is recommended to use A* (see
+ * a_star).
  *
  * @note JPS does not support wire crossings.
  *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
  * @tparam Dist Distance value type to be used in the heuristic estimation function.
- * @param layout The clocked layout in which the shortest path between source and target is to be found.
+ * @param layout The clocked layout in which the shortest path between `source` and `target` is to be found.
  * @param objective Source-target coordinate pair.
  * @param dist_fn A distance functor that implements the desired heuristic estimation function.
  * @param ps Parameters.
- * @return The shortest loopless path in layout from source to target.
+ * @return The shortest loopless path in `layout` from `source` to `target`.
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t>
 [[nodiscard]] Path

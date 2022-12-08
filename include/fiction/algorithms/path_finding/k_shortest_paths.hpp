@@ -202,11 +202,11 @@ class yen_k_shortest_paths_impl
  *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
- * @param layout The clocked layout in which the k shortest paths between source and target are to be found.
+ * @param layout The clocked layout in which the \f$ k \f$ shortest paths between `source` and `target` are to be found.
  * @param objective Source-target coordinate pair.
  * @param k Maximum number of shortest paths to find.
  * @param ps Parameters.
- * @return A collection of up to k shortest loopless paths in layout from source to target.
+ * @return A collection of up to \f$ k \f$ shortest loopless paths in `layout` from `source` to `target`.
  */
 template <typename Path, typename Lyt>
 [[nodiscard]] path_collection<Path> yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective,

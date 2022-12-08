@@ -606,10 +606,10 @@ class orthogonal_impl
 }  // namespace detail
 
 /**
- * A scalable placement & routing approach based on orthogonal graph drawing as originally proposed in "Scalable Design
- * for Field-coupled Nanocomputing Circuits" by M. Walter, R. Wille, F. Sill Torres, D. Große, and R. Drechsler in
- * ASP-DAC 2019. A more extensive description can be found in "Design Automation for Field-coupled Nanotechnologies" by
- * M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
+ * A scalable placement & routing approach based on orthogonal graph drawing as originally proposed in \"Scalable Design
+ * for Field-coupled Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D. Große, and R. Drechsler in
+ * ASP-DAC 2019. A more extensive description can be found in \"Design Automation for Field-coupled Nanotechnologies\"
+ * by M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
  *
  * Via certain restrictions to the degrees of freedom in FCN physical design, this algorithm achieves a polynomial time
  * complexity. However, these restrictions lead to an overall approximation of optimal layout quality within several
@@ -625,17 +625,18 @@ class orthogonal_impl
  * according to its DFS tree, ordering the vertices using topological sorting instead of DFS, and adding an extra
  * placement rule for nodes without predecessors.
  *
- * The algorithm works in polynomial time O(3|N| + |L|) where |N| is the number of nodes in the given network and |L| is
- * the resulting layout size given by x * y, which approaches (|N|/2)^2 asymptotically.
+ * The algorithm works in polynomial time \f$ O(3|N| + |L|) \f$ where \f$ |N| \f$ is the number of nodes in the given
+ * network and \f$ |L| \f$ is the resulting layout size given by \f$ x \cdot y \f$, which approaches \f$ (|N|/2)^2 \f$
+ * asymptotically.
  *
- * May throw an 'high_degree_fanin_exception'.
+ * May throw a `high_degree_fanin_exception`.
  *
  * @tparam Lyt Desired gate-level layout type.
  * @tparam Ntk Network type that acts as specification.
  * @param ntk The network that is to place and route.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return A gate-level layout of type Lyt that implements ntk as an FCN circuit.
+ * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit.
  */
 template <typename Lyt, typename Ntk>
 Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
