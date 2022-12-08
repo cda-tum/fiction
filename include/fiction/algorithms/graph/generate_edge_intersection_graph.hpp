@@ -36,6 +36,9 @@ template <typename Lyt>
 using edge_intersection_graph =
     undirected_graph<std::size_t, layout_coordinate_path<Lyt>, undirected_pair<std::size_t>, std::size_t>;
 
+/**
+ * Parameters for the edge intersection graph generation algorithm.
+ */
 struct generate_edge_intersection_graph_params
 {
     /**
