@@ -23,6 +23,9 @@
 namespace fiction
 {
 
+/**
+ * Parameters for writing SVG QCA layouts.
+ */
 struct write_qca_layout_svg_params
 {
     bool simple = false;
@@ -711,12 +714,12 @@ class write_qca_layout_svg_impl
 
 /**
  * Writes an SVG representation of a cell-level QCA layout into an output stream. Both tile- and cell-based layouts are
- * supported. For tile-based layouts, QCA layouts of tile size 5 x 5 are supported exclusively so far.
+ * supported. For tile-based layouts, QCA layouts of tile size \f$ 5 \times 5 \f$ are supported exclusively so far.
  *
  * The utilized color scheme is based on the standard scheme used in QCADesigner
  * (https://waluslab.ece.ubc.ca/qcadesigner/).
  *
- * May throw an 'unsupported_cell_type_exception'.
+ * May throw an unsupported_cell_type_exception.
  *
  * @tparam Lyt Cell-level QCA layout type.
  * @param lyt The layout to be written.
@@ -736,16 +739,16 @@ void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg
 }
 /**
  * Writes an SVG representation of a cell-level QCA layout into a file. Both tile- and cell-based layouts are supported.
- * For tile-based layouts, QCA layouts of tile size 5 x 5 are supported exclusively so far.
+ * For tile-based layouts, QCA layouts of tile size \f$ 5 \times 5 \f$ are supported exclusively so far.
  *
  * The utilized color scheme is based on the standard scheme used in QCADesigner
  * (https://waluslab.ece.ubc.ca/qcadesigner/).
  *
- * May throw an 'unsupported_cell_type_exception'.
+ * May throw an unsupported_cell_type_exception.
  *
  * @tparam Lyt Cell-level QCA layout type.
  * @param lyt The layout to be written.
- * @param filename The file name to create and write into. Should preferably use the ".svg" extension.
+ * @param filename The file name to create and write into. Should preferably use the `.svg` extension.
  * @param ps Parameters.
  */
 template <typename Lyt>

@@ -409,7 +409,7 @@ void write_qll_layout(const Lyt& lyt, std::ostream& os)
  *
  * @tparam Lyt Cell-level iNML layout type.
  * @param lyt The layout to be written.
- * @param filename The file name to create and write into. Should preferably use the ".qll" extension.
+ * @param filename The file name to create and write into. Should preferably use the `.qll` extension.
  * @param ps Parameters.
  */
 template <typename Lyt>

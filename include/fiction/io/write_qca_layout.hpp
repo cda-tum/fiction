@@ -19,6 +19,9 @@
 namespace fiction
 {
 
+/**
+ * Parameters for writing QCADesigner layouts.
+ */
 struct write_qca_layout_params
 {
     bool create_inter_layer_via_cells = true;
@@ -541,7 +544,7 @@ void write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params 
  *
  * @tparam Lyt Cell-level QCA layout type.
  * @param lyt The layout to be written.
- * @param filename The file name to create and write into. Should preferably use the ".qca" extension.
+ * @param filename The file name to create and write into. Should preferably use the `.qca` extension.
  * @param ps Parameters.
  */
 template <typename Lyt>
