@@ -21,7 +21,7 @@ namespace fiction
 {
 
 /**
- * Specify the checks that are to be executed.
+ * Parameters for design rule violation checking that specify the checks that are to be executed.
  */
 struct gate_level_drv_params
 {
@@ -577,8 +577,8 @@ class gate_level_drvs_impl
  * Furthermore, this function does not only find and log DRVs but can also warn for instances that are not per se errors
  * but defy best practices of layout generation, e.g., I/Os not being placed at the layout borders.
  *
- * For this function to work, detail::gate_level_drvs_impl need to be declared as a friend class to the layout type that
- * is going to be examined.
+ * For this function to work, `detail::gate_level_drvs_impl` need to be declared as a `friend class` to the layout type
+ * that is going to be examined.
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt The gate-level layout that is to be examined for DRVs and warnings.

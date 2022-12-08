@@ -50,6 +50,11 @@
 namespace fiction
 {
 
+/**
+ * Parameters for the one-pass synthesis algorithm.
+ *
+ * @tparam Lyt Gate-level layout type to create.
+ */
 template <typename Lyt>
 struct one_pass_synthesis_params
 {

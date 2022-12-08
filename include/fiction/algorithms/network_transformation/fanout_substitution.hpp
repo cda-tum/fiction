@@ -28,18 +28,24 @@
 namespace fiction
 {
 
+/**
+ * Parameters for the fanout substitution algorithm.
+ */
 struct fanout_substitution_params
 {
-    enum substitution_strategy
+    /**
+     * Breadth-first vs. depth-first fanout-tree substitution strategies.
+     */
+    enum class substitution_strategy
     {
         BREADTH,
         DEPTH
     };
 
     /**
-     * Decomposition strategy (DEPTH vs. BREADTH).
+     * Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
      */
-    substitution_strategy strategy = BREADTH;
+    substitution_strategy strategy = substitution_strategy::BREADTH;
     /**
      * Maximum output degree of each fan-out node.
      */
@@ -275,24 +281,24 @@ class is_fanout_substituted_impl
 
 /**
  * Substitutes high-output degrees in a logic network with fanout nodes that compute the identity function. For this
- * purpose, create_buf is utilized. Therefore, NtkDest should support identity nodes. If it does not, no new nodes will
- * in fact be created. In either case, the returned network will be logically equivalent to the input one.
+ * purpose, `create_buf` is utilized. Therefore, `NtkDest` should support identity nodes. If it does not, no new nodes
+ * will in fact be created. In either case, the returned network will be logically equivalent to the input one.
  *
  * The process is rather naive with two possible strategies to pick from: breath-first and depth-first. The former
  * creates partially balanced fanout trees while the latter leads to fanout chains. Further parameterization includes
  * thresholds for the maximum number of output each node and fanout is allowed to have.
  *
- * The returned network is newly created from scratch because its type NtkDest may differ from NtkSrc.
+ * The returned network is newly created from scratch because its type `NtkDest` may differ from `NtkSrc`.
  *
- * NOTE: The physical design algorithms natively provided in fiction do not require their input networks to be
+ * @note The physical design algorithms natively provided in fiction do not require their input networks to be
  * fanout-substituted. If that is necessary, they will do it themselves. Providing already substituted networks does
- * however allows for the control over maximum output degrees.
+ * however allow for the control over maximum output degrees.
  *
  * @tparam NtkDest Type of the returned logic network.
  * @tparam NtkSrc Type of the input logic network.
  * @param ntk_src The input logic network.
  * @param ps Parameters.
- * @return A fanout-substituted logic network of type NtkDest that is logically equivalent to ntk_src.
+ * @return A fanout-substituted logic network of type `NtkDest` that is logically equivalent to `ntk_src`.
  */
 template <typename NtkDest, typename NtkSrc>
 NtkDest fanout_substitution(const NtkSrc& ntk_src, fanout_substitution_params ps = {})
@@ -324,7 +330,7 @@ NtkDest fanout_substitution(const NtkSrc& ntk_src, fanout_substitution_params ps
  * @tparam Ntk Logic network type.
  * @param ntk The logic network to check.
  * @param ps Parameters.
- * @return True iff ntk is properly fanout-substituted with regard to ps.
+ * @return True iff `ntk` is properly fanout-substituted with regard to `ps`.
  */
 template <typename Ntk>
 bool is_fanout_substituted(const Ntk& ntk, fanout_substitution_params ps = {}) noexcept

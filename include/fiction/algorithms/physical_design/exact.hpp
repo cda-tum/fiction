@@ -58,7 +58,9 @@ enum class technology_constraints
     TOPOLINANO
 };
 /**
- * Parameters.
+ * Parameters for the exact physical design algorithm.
+ *
+ * @tparam Lyt Gate-level layout type to create.
  */
 template <typename Lyt>
 struct exact_physical_design_params
@@ -3031,6 +3033,9 @@ class exact_impl
  *
  * This approach requires the Z3 SMT solver to be installed on the system. Due to this circumstance, it is excluded from
  * (CLI) compilation by default. To enable it, pass `-DFICTION_Z3=ON` to the cmake call.
+ *
+ * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in too large to be handled by the
+ * specified clocking scheme.
  *
  * @tparam Lyt Desired gate-level layout type.
  * @tparam Ntk Network type that acts as specification.

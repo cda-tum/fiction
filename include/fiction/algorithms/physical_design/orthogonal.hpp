@@ -33,6 +33,9 @@
 namespace fiction
 {
 
+/**
+ * Parameters for the orthogonal physical design algorithm.
+ */
 struct orthogonal_physical_design_params
 {
     /**
@@ -619,17 +622,17 @@ class orthogonal_impl
  * The imposed restrictions are that the input logic network has to be a 3-graph, i.e., cannot have any node exceeding
  * degree 3 (combined input and output), and that the resulting layout is always 2DDWave-clocked.
  *
- * This algorithm is based on a modification of "Improved orthogonal drawings of 3-graphs" by Therese C. Biedl in CCCG
+ * This algorithm is based on a modification of \"Improved orthogonal drawings of 3-graphs\" by Therese C. Biedl in CCCG
  * 1996. The original one works for undirected graphs only while this modification respects information flow of directed
  * logic networks. To this end, the edge directions of the logic network directly used instead of relabeling the edges
  * according to its DFS tree, ordering the vertices using topological sorting instead of DFS, and adding an extra
  * placement rule for nodes without predecessors.
  *
  * The algorithm works in polynomial time \f$ O(3|N| + |L|) \f$ where \f$ |N| \f$ is the number of nodes in the given
- * network and \f$ |L| \f$ is the resulting layout size given by \f$ x \cdot y \f$, which approaches \f$ (|N|/2)^2 \f$
- * asymptotically.
+ * network and \f$ |L| \f$ is the resulting layout size given by \f$ x \cdot y \f$, which approaches \f$
+ * (\frac{|N|}{2})^2 \f$ asymptotically.
  *
- * May throw a `high_degree_fanin_exception`.
+ * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in larger than 2.
  *
  * @tparam Lyt Desired gate-level layout type.
  * @tparam Ntk Network type that acts as specification.

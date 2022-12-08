@@ -25,15 +25,24 @@
 namespace fiction
 {
 /**
- * The different equivalence types possible:
- *  - STRONG equivalence: Spec and Impl are logically equivalent AND Impl has a throughput of 1/1
- *  - WEAK equivalence: Spec and Impl are logically equivalent BUT Impl has a throughput of 1/x with x > 1
- *  - NO equivalence: Spec and Impl are logically not equivalent OR Impl has DRVs
+ * The different equivalence types possible.
+ *  - `STRONG` equivalence
+ *  - `WEAK` equivalence
+ *  - `NO` equivalence
  */
 enum class eq_type
 {
+    /**
+     * `Spec` and `Impl` are logically not equivalent OR `Impl` has DRVs.
+     */
     NO,
+    /**
+     * `Spec` and `Impl` are logically equivalent BUT `Impl` has a throughput of \f$ \frac{1}{x} \f$ with \f$ x > 1 \f$.
+     */
     WEAK,
+    /**
+     * `Spec` and `Impl` are logically equivalent AND `Impl` has a throughput of \f$ \frac{1}{1} \f$.
+     */
     STRONG
 };
 
@@ -197,12 +206,12 @@ class equivalence_checking_impl
  *
  * Thereby, three different types of equivalences arise:
  *
- * - NO equivalence: Spec and Impl are not logically equivalent or one of them is a gate-level layout that contains DRVs
- * and, thus, cannot be checked for equivalence.
- * - WEAK equivalence: Spec and Impl are logically equivalent but either one of them is a gate-level layout with TP of
+ * - `NO` equivalence: Spec and Impl are not logically equivalent or one of them is a gate-level layout that contains
+ * DRVs and, thus, cannot be checked for equivalence.
+ * - `WEAK` equivalence: Spec and Impl are logically equivalent but either one of them is a gate-level layout with TP of
  * \f$ \frac{1}{x} \f$ with \f$ x > 1 \f$ or both of them are gate-level layouts with TP of \f$ \frac{1}{x} \f$ and \f$
  * \frac{1}{y} \f$, respectively, where \f$ x \neq y \f$.
- * - STRONG equivalence: Spec and Impl are logically equivalent and all involved gate-level layouts have TP of \f$
+ * - `STRONG` equivalence: Spec and Impl are logically equivalent and all involved gate-level layouts have TP of \f$
  * \frac{1}{1} \f$.
  *
  * This approach was first proposed in \"Verification for Field-coupled Nanocomputing Circuits\" by M. Walter, R. Wille,

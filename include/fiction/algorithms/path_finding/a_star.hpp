@@ -24,6 +24,9 @@
 namespace fiction
 {
 
+/**
+ * Parameters for the A* algorithm.
+ */
 struct a_star_params
 {
     /**

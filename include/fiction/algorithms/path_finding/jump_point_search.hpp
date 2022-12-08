@@ -457,8 +457,8 @@ class jump_point_search_impl
  * average complexity on uniform-cost grids that allow diagonal connections. It uses a heuristic distance function that
  * estimates the remaining costs towards the target in every step. Thus, this heuristic function should neither be
  * complex to calculate nor overestimating the remaining costs. Common heuristics to be used are the Manhattan and the
- * Euclidean distance functions. See distance.hpp for implementations. Since JPS assumes a unit-cost grid, the use of
- * cost functions together with JPS is not possible.
+ * Euclidean distance functions. See distance_functor for implementations. Since JPS assumes a unit-cost grid, the use
+ * of cost functions together with JPS is not possible.
  *
  * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
  * obstructed coordinates and connections.

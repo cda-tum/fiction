@@ -66,9 +66,9 @@ enum class graph_coloring_engine
      */
     LMXRLF,  // randomized
     /**
-     * A k-coloring algorithm using tabu search proposed in \"Using Tabu Search Techniques for Graph Coloring\" by A.
-     * Hertz and D. de Werra in Computing 1987. The authors claim that it significantly outperforms simulated annealing.
-     * However, since it is a \f$ k \f$-coloring algorithm, it is required to set `k_color_value` in
+     * A \f$ k \f$-coloring algorithm using tabu search proposed in \"Using Tabu Search Techniques for Graph Coloring\"
+     * by A. Hertz and D. de Werra in Computing 1987. The authors claim that it significantly outperforms simulated
+     * annealing. However, since it is a \f$ k \f$-coloring algorithm, it is required to set `k_color_value` in
      * `determine_vertex_coloring_params` to the chromatic number that is to be checked for.
      */
     TABUCOL,  // k-coloring
@@ -100,6 +100,11 @@ enum class graph_coloring_sat_search_tactic
     BINARY_SEARCH
 };
 
+/**
+ * Parameters for SAT-based graph coloring.
+ *
+ * @tparam Graph Type of the graph to color.
+ */
 template <typename Graph>
 struct determine_vertex_coloring_sat_params
 {
@@ -121,15 +126,21 @@ struct determine_vertex_coloring_sat_params
      */
     bool clique_size_color_frequency = false;
 };
-
+/**
+ * Parameters for heuristic graph coloring.
+ */
 struct determine_vertex_coloring_heuristic_params
 {
     /**
-     * k-color value for \f$ k \f$-coloring algorithms, e.g., TABUCOL.
+     * \f$ k \f$-color value for \f$ k \f$-coloring algorithms, e.g., TABUCOL.
      */
     std::size_t k_color_value = 0;
 };
-
+/**
+ * Common parameters for the graph coloring algorithm.
+ *
+ * @tparam Graph Type of the graph to color.
+ */
 template <typename Graph>
 struct determine_vertex_coloring_params
 {
@@ -138,11 +149,11 @@ struct determine_vertex_coloring_params
      */
     graph_coloring_engine engine = graph_coloring_engine::MCS;
     /**
-     * Parameters for engine == SAT.
+     * Parameters for `engine == SAT`.
      */
     determine_vertex_coloring_sat_params<Graph> sat_params{};
     /**
-     * Parameters for engine != SAT.
+     * Parameters for `engine != SAT`.
      */
     determine_vertex_coloring_heuristic_params heuristic_params{};
     /**

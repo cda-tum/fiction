@@ -33,6 +33,8 @@ A* Shortest Path
 
 **Header:** ``fiction/algorithms/path_finding/a_star.hpp``
 
+.. doxygenstruct:: fiction::a_star_params
+   :members:
 .. doxygenfunction:: fiction::a_star
 .. doxygenfunction:: fiction::a_star_distance
 .. doxygenclass:: fiction::a_star_distance_functor
@@ -49,6 +51,8 @@ k Shortest Paths
 
 **Header:** ``fiction/algorithms/path_finding/k_shortest_paths.hpp``
 
+.. doxygenstruct:: fiction::yen_k_shortest_paths_params
+   :members:
 .. doxygenfunction:: fiction::yen_k_shortest_paths
 
 Enumerate All Paths
@@ -56,4 +60,6 @@ Enumerate All Paths
 
 **Header:** ``fiction/algorithms/path_finding/enumerate_all_paths.hpp``
 
+.. doxygenstruct:: fiction::enumerate_all_clocking_paths_params
+   :members:
 .. doxygenfunction:: fiction::enumerate_all_clocking_paths

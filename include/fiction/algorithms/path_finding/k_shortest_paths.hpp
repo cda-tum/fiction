@@ -20,6 +20,9 @@
 namespace fiction
 {
 
+/**
+ * Parameters for Yen's \f$ k \f$-shortest paths algorithm.
+ */
 struct yen_k_shortest_paths_params
 {
     /**
