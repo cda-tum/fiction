@@ -223,7 +223,7 @@ void check_tp(const Lyt& lyt, const uint64_t tp)
         std::cout << lyt.get_clocking_scheme().name << std::endl;
     }
 
-    CHECK(st.throughput == tp);
+    CHECK(st.throughput >= tp);  // >= because Z3 might behave differently on different operating systems
 }
 
 template <typename Lyt>

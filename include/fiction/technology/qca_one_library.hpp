@@ -14,8 +14,9 @@
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 
-#include <unordered_map>
 #include <vector>
+
+#include <phmap.h>
 
 namespace fiction
 {
@@ -125,7 +126,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
                     if (!lyt.is_empty_cell(c))
                     {
                         // gather adjacent cell positions
-                        auto adjacent_cells = lyt.template adjacent_coordinates<std::vector<cell<CellLyt>>>(c);
+                        auto adjacent_cells = lyt.adjacent_coordinates(c);
                         // remove all empty cells
                         adjacent_cells.erase(std::remove_if(adjacent_cells.begin(), adjacent_cells.end(),
                                                             [&lyt](const auto& ac) { return lyt.is_empty_cell(ac); }),
@@ -389,7 +390,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 
     // clang-format on
 
-    using port_gate_map = std::unordered_map<port_list<port_position>, fcn_gate>;
+    using port_gate_map = phmap::flat_hash_map<port_list<port_position>, fcn_gate>;
     /**
      * Lookup table for wire rotations. Maps ports to corresponding wires.
      */

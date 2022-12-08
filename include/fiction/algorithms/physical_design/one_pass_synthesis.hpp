@@ -28,6 +28,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <unordered_set>
 #include <vector>
 
 // pybind11 has quite some warnings in its code; let's silence them a little
@@ -599,7 +600,7 @@ class mugen_handler
     void establish_connections(const pybind11::handle& net)
     {
         // nodes can be present multiple times in the 'nodes' list, this set makes sure to visit them exactly once
-        std::set<mockturtle::node<Lyt>> nodes_in_place{};
+        std::unordered_set<mockturtle::node<Lyt>> nodes_in_place{};
 
         // list of all nodes; first num_pi nodes are primary inputs
         const auto nodes = net.attr("nodes");
