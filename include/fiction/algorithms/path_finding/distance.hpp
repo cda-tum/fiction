@@ -28,8 +28,8 @@ namespace fiction
  * @return Manhattan distance between source and target.
  */
 template <typename Lyt, typename Dist = uint64_t>
-[[nodiscard]] Dist manhattan_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
-                                      const coordinate<Lyt>& target) noexcept
+[[nodiscard]] constexpr Dist manhattan_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
+                                                const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
@@ -50,8 +50,8 @@ template <typename Lyt, typename Dist = uint64_t>
  * @return Euclidean distance between source and target.
  */
 template <typename Lyt, typename Dist = double>
-[[nodiscard]] Dist euclidean_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
-                                      const coordinate<Lyt>& target) noexcept
+[[nodiscard]] constexpr Dist euclidean_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
+                                                const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(std::is_floating_point_v<Dist>, "Dist is not a floating-point type");
