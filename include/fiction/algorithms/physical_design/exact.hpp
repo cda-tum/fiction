@@ -79,7 +79,9 @@ struct exact_physical_design_params
      */
     uint16_t fixed_size = 0ul;
     /**
-     * Number of threads to use for exploring the possible aspect ratios. NOTE: THIS IS AN UNSTABLE BETA FEATURE.
+     * Number of threads to use for exploring the possible aspect ratios.
+     *
+     * @note This is an unstable beta feature.
      */
     std::size_t num_threads = 1ul;
     /**

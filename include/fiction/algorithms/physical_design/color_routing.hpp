@@ -34,15 +34,9 @@ struct color_routing_params
      * Enable crossings.
      */
     bool crossings = false;
-    //    /**
-    //     * For routing objectives that are more than distance_threshold units apart measured by the Manhattan
-    //     distance, only
-    //     * the shortest path is determined and included in the edge intersection graph via the A* algorithm.
-    //     */
-    //    uint32_t distance_threshold = 10;
     /**
-     * If a value is given, for each objective, only up to the path_limit shortest paths will be enumerated (using Yen's
-     * algorithm) instead of all paths.
+     * If a value is given, for each objective, only up to the `path_limit` shortest paths will be enumerated (using
+     * Yen's algorithm) instead of all paths.
      */
     std::optional<uint32_t> path_limit = std::nullopt;
     /**

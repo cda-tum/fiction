@@ -622,11 +622,11 @@ class orthogonal_impl
  * The imposed restrictions are that the input logic network has to be a 3-graph, i.e., cannot have any node exceeding
  * degree 3 (combined input and output), and that the resulting layout is always 2DDWave-clocked.
  *
- * This algorithm is based on a modification of \"Improved orthogonal drawings of 3-graphs\" by Therese C. Biedl in CCCG
- * 1996. The original one works for undirected graphs only while this modification respects information flow of directed
- * logic networks. To this end, the edge directions of the logic network directly used instead of relabeling the edges
- * according to its DFS tree, ordering the vertices using topological sorting instead of DFS, and adding an extra
- * placement rule for nodes without predecessors.
+ * This algorithm is based on a modification of \"Improved orthogonal drawings of 3-graphs\" by Therese C. Biedl in
+ * Canadian Conference on Computational Geometry 1996. Biedl's original algorithm works for undirected graphs only while
+ * this modification respects information flow of directed logic networks. To this end, the edge directions of the logic
+ * network directly used instead of relabeling the edges according to its DFS tree, ordering the vertices using
+ * topological sorting instead of DFS, and adding an extra placement rule for nodes without predecessors.
  *
  * The algorithm works in polynomial time \f$ O(3|N| + |L|) \f$ where \f$ |N| \f$ is the number of nodes in the given
  * network and \f$ |L| \f$ is the resulting layout size given by \f$ x \cdot y \f$, which approaches \f$

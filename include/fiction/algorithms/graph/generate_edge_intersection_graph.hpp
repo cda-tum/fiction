@@ -46,8 +46,8 @@ struct generate_edge_intersection_graph_params
      */
     bool crossings = false;
     /**
-     * If a value is given, for each objective, only up to the path_limit shortest paths will be enumerated (using Yen's
-     * algorithm) instead of all paths.
+     * If a value is given, for each objective, only up to the `path_limit` shortest paths will be enumerated (using
+     * Yen's algorithm) instead of all paths.
      */
     std::optional<uint32_t> path_limit = std::nullopt;
 };

@@ -23,9 +23,9 @@ namespace fiction
 {
 /**
  * A concrete FCN gate library as used in \"ToPoliNano\" (https://topolinano.polito.it/) for the iNML technology. In
- * fiction, this is emulated by using vertically shifted layouts and implementing the ToPoliNano library with 4 x 4
- * magnet positions with one empty row in most tiles (except for MAJ which needs to be handled differently as this
- * library is not uniform otherwise). Theoretically, it allows for multiple wires in the same tile.
+ * fiction, this is emulated by using vertically shifted layouts and implementing the ToPoliNano library with \f$ 4
+ * \times 4 \f$ magnet positions with one empty row in most tiles (except for MAJ which needs to be handled differently
+ * as this library is not uniform otherwise). Theoretically, it allows for multiple wires in the same tile.
  */
 class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
 {

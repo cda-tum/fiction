@@ -26,19 +26,52 @@ namespace fiction
 struct gate_level_drv_params
 {
     // Topology
-    bool unplaced_nodes           = true;
-    bool placed_dead_nodes        = true;
+
+    /**
+     * Check for nodes without locations.
+     */
+    bool unplaced_nodes = true;
+    /**
+     * Check for placed but dead nodes.
+     */
+    bool placed_dead_nodes = true;
+    /*
+     * Check for nodes that are connected to non-adjacent ones.
+     */
     bool non_adjacent_connections = true;
-    bool missing_connections      = true;
-    bool crossing_gates           = true;
+    /**
+     * Check for nodes without connections.
+     */
+    bool missing_connections = true;
+    /**
+     * Check for wires that are crossing gates.
+     */
+    bool crossing_gates = true;
 
     // Clocking
+
+    /**
+     * Check if all node connections obey the clocking scheme data flow.
+     */
     bool clocked_data_flow = true;
 
     // I/O
-    bool has_io    = true;
-    bool empty_io  = true;
-    bool io_pins   = true;
+
+    /**
+     * Check if the layout has I/Os.
+     */
+    bool has_io = true;
+    /**
+     * Check if the I/Os are assigned to empty tiles.
+     */
+    bool empty_io = true;
+    /**
+     * Check if the I/Os are assigned to wire segments.
+     */
+    bool io_pins = true;
+    /**
+     * Check if the I/Os are located at the layout's border.
+     */
     bool border_io = true;
 
     /**
