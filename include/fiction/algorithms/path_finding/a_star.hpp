@@ -322,7 +322,7 @@ class a_star_impl
  * layout. A* is an extension of Dijkstra's algorithm for shortest paths but offers better average complexity. It uses a
  * heuristic distance function that estimates the remaining costs towards the target in every step. Thus, this heuristic
  * function should neither be complex to calculate nor overestimating the remaining costs. Common heuristics to be used
- * are the Manhattan and the Euclidean distance functions. See distance.hpp for implementations.
+ * are the Manhattan and the Euclidean distance functions. See distance_functor for implementations.
  *
  * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
  * obstructed coordinates and connections.
@@ -332,10 +332,10 @@ class a_star_impl
  * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
  * cross only in a single point (orthogonal crossings + knock-knees/double wires).
  *
- * A* was introduced in "A Formal Basis for the Heuristic Determination of Minimum Cost Paths" by Peter E. Hart, Nils J.
+ * A* was introduced in \"A Formal Basis for the Heuristic Determination of Minimum Cost Paths\" by Peter E. Hart, Nils J.
  * Nilsson, and Bertram Raphael in IEEE Transactions on Systems Science and Cybernetics 1968, Volume 4, Issue 2.
  *
- * This implementation is based on the pseudocode at https://en.wikipedia.org/wiki/A*_search_algorithm.
+ * This implementation is based on the pseudocode from `Wikipedia <https://en.wikipedia.org/wiki/A*_search_algorithm>`_.
  *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
@@ -346,7 +346,7 @@ class a_star_impl
  * @param dist_fn A distance functor that implements the desired heuristic estimation function.
  * @param cost_fn A cost functor that implements the desired cost function.
  * @param ps Parameters.
- * @return The shortest loopless path in layout from source to target.
+ * @return The shortest loopless path in `layout` from `source` to `target`.
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
 [[nodiscard]] Path a_star(const Lyt& layout, const routing_objective<Lyt>& objective,
@@ -360,17 +360,17 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
 }
 /**
  * A distance function that does not approximate but compute the actual minimum path length on the given layout via A*
- * traversal. Naturally, this function cannot be evaluated in O(1), but has the polynomial complexity of A*.
+ * traversal. Naturally, this function cannot be evaluated in \f$ O(1) \f$, but has the polynomial complexity of A*.
  *
- * If no path between source and target exists in lyt, the returned distance is std::numeric_limits<Dist>::infinity() if
- * that value is supported by Dist, or std::numeric_limits<Dist>::max(), otherwise.
+ * If no path between source and target exists in `lyt`, the returned distance is `std::numeric_limits<Dist>::infinity()`
+ * if that value is supported by `Dist`, or `std::numeric_limits<Dist>::max()`, otherwise.
  *
  * @tparam Lyt Clocked layout type.
  * @tparam Dist Distance type.
  * @param lyt Layout.
  * @param source Source coordinate.
  * @param target Target coordinate.
- * @return Minimum path length between source and target.
+ * @return Minimum path length between `source` and `target`.
  */
 template <typename Lyt, typename Dist = uint64_t>
 [[nodiscard]] Dist a_star_distance(const Lyt& lyt, const coordinate<Lyt>& source,
