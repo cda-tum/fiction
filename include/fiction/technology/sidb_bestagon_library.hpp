@@ -15,8 +15,9 @@
 
 #include <fmt/format.h>
 
-#include <unordered_map>
 #include <vector>
+
+#include <phmap.h>
 
 namespace fiction
 {
@@ -1517,9 +1518,9 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
 
     // clang-format on
 
-    using port_gate_map = std::unordered_map<port_list<port_direction>, fcn_gate>;
+    using port_gate_map = phmap::flat_hash_map<port_list<port_direction>, fcn_gate>;
     using double_port_gate_map =
-        std::unordered_map<std::pair<port_list<port_direction>, port_list<port_direction>>, fcn_gate>;
+        phmap::flat_hash_map<std::pair<port_list<port_direction>, port_list<port_direction>>, fcn_gate>;
     /**
      * Lookup table for wire mirroring. Maps ports to corresponding wires.
      */

@@ -15,8 +15,9 @@
 #include <optional>
 #include <string>
 #include <type_traits>
-#include <unordered_map>
 #include <utility>
+
+#include <phmap.h>
 
 namespace fiction
 {
@@ -74,7 +75,7 @@ class clocking_scheme
     {
         if (regular)
         {
-            return fn(cz);
+            return std::invoke(fn, cz);
         }
 
         if (auto it = override.find(cz); it != override.end())
@@ -82,7 +83,7 @@ class clocking_scheme
             return it->second;
         }
 
-        return fn(cz);
+        return std::invoke(fn, cz);
     }
     /**
      * Compares the stored name against a given one.
@@ -145,7 +146,7 @@ class clocking_scheme
     /**
      * Alias for a hash map that overrides clock zones.
      */
-    using clocking_map = std::unordered_map<clock_zone, clock_number>;
+    using clocking_map = phmap::parallel_flat_hash_map<clock_zone, clock_number>;
     /**
      * Stores mappings clock_zone -> clock_number to override clock zones.
      */
@@ -716,7 +717,7 @@ bool is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
 template <typename Lyt>
 std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::string& name) noexcept
 {
-    static const std::unordered_map<std::string, clocking_scheme<clock_zone<Lyt>>> scheme_lookup{
+    static const phmap::flat_hash_map<std::string, clocking_scheme<clock_zone<Lyt>>> scheme_lookup{
         {clock_name::OPEN, open_clocking<Lyt>(num_clks::FOUR)},
         {"OPEN3", open_clocking<Lyt>(num_clks::THREE)},
         {"OPEN4", open_clocking<Lyt>(num_clks::FOUR)},

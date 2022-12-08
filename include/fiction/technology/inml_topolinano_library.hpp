@@ -15,8 +15,9 @@
 #include <mockturtle/traits.hpp>
 
 #include <algorithm>
-#include <unordered_map>
 #include <vector>
+
+#include <phmap.h>
 
 namespace fiction
 {
@@ -559,7 +560,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
 
     static port_position opposite(const port_position& p)
     {
-        using port_port_map = std::unordered_map<port_position, port_position>;
+        using port_port_map = phmap::flat_hash_map<port_position, port_position>;
 
         static const port_port_map pp_map = {
             {port_position(0, 0), port_position(3, 0)}, {port_position(0, 1), port_position(3, 1)},
@@ -743,7 +744,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
 
     // clang-format on
 
-    using port_gate_map = std::unordered_map<port_list<port_position>, fcn_gate>;
+    using port_gate_map = phmap::flat_hash_map<port_list<port_position>, fcn_gate>;
 
     static inline const port_gate_map WIRE_MAP = {
         // straight wires

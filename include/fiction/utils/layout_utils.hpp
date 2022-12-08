@@ -29,7 +29,7 @@ template <typename Lyt>
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
-    return static_cast<uint8_t>(lyt.template adjacent_coordinates<std::set<coordinate<Lyt>>>(c).size());
+    return static_cast<uint8_t>(lyt.adjacent_coordinates(c).size());
 }
 /**
  * Converts a relative cell position within a tile to an absolute cell position within a layout. To compute the absolute

@@ -121,17 +121,19 @@ TEST_CASE("Iteration over clocking zones", "[clocked-layout]")
 
     clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, twoddwave_clocking<clk_lyt>()};
 
-    CHECK(layout.incoming_clocked_zones<std::set<clk_lyt::coordinate>>({0, 0}).empty());
-    CHECK(layout.outgoing_clocked_zones<std::set<clk_lyt::coordinate>>({2, 2}).empty());
+    CHECK(layout.incoming_clocked_zones({0, 0}).empty());
+    CHECK(layout.outgoing_clocked_zones({2, 2}).empty());
 
-    auto s1 = layout.incoming_clocked_zones<std::set<clk_lyt::coordinate>>({1, 1});
+    auto v1 = layout.incoming_clocked_zones({1, 1});
+    auto s1 = std::set<clk_lyt::coordinate>{v1.cbegin(), v1.cend()};
     auto s2 = std::set<clk_lyt::coordinate>{{{1, 0}, {0, 1}}};
 
     CHECK(s1 == s2);
 
     layout.foreach_incoming_clocked_zone({1, 1}, [&s2](const auto& cz) { CHECK(s2.count(cz) > 0); });
 
-    auto s3 = layout.outgoing_clocked_zones<std::set<clk_lyt::coordinate>>({1, 1});
+    auto v3 = layout.outgoing_clocked_zones({1, 1});
+    auto s3 = std::set<clk_lyt::coordinate>{v3.cbegin(), v3.cend()};
     auto s4 = std::set<clk_lyt::coordinate>{{{1, 2}, {2, 1}}};
 
     layout.foreach_outgoing_clocked_zone({1, 1}, [&s4](const auto& cz) { CHECK(s4.count(cz) > 0); });

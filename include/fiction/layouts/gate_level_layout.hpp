@@ -8,6 +8,7 @@
 #include "fiction/algorithms/verification/design_rule_violations.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/mockturtle_utils.hpp"
 #include "fiction/utils/range.hpp"
 
 #include <kitty/constructors.hpp>
@@ -21,12 +22,13 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <initializer_list>
 #include <memory>
-#include <set>
-#include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include <phmap.h>
 
 namespace fiction
 {
@@ -92,9 +94,10 @@ class gate_level_layout : public ClockedLayout
         const Tile const0{0x8000000000000000ull};
         const Tile const1{0xc000000000000000ull};
 
-        std::unordered_map<Tile, Node> tile_node_map{
+        // these maps grow large! use parallel_flat_hashmap for better performance
+        phmap::parallel_flat_hash_map<Tile, Node> tile_node_map{
             {{const0, static_cast<Node>(0ull)}, {const1, static_cast<Node>(1ull)}}};
-        std::unordered_map<Node, Tile> node_tile_map{
+        phmap::parallel_flat_hash_map<Node, Tile> node_tile_map{
             {{static_cast<Node>(0ull), const0}, {static_cast<Node>(1ull), const1}}};
 
         uint32_t num_gates = 0ull;
@@ -104,7 +107,8 @@ class gate_level_layout : public ClockedLayout
 
         std::string layout_name{};
 
-        std::map<Node, std::string> node_names{};
+        // usually quite a small map, use flat_hash_map
+        phmap::flat_hash_map<Node, std::string> node_names{};
     };
 
     /*! \brief gate-level layout node
@@ -534,7 +538,10 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] auto fanin_size(const node n) const
     {
-        return static_cast<uint32_t>(incoming_data_flow<std::set<tile>>(get_tile(n)).size());
+        uint32_t fin_size{0u};
+        foreach_fanin(n, [&fin_size](auto const&) { ++fin_size; });
+
+        return fin_size;
     }
     /**
      * Returns the number of outgoing, adjacently placed, and properly clocked signals of the given node.
@@ -544,7 +551,10 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] auto fanout_size(const node n) const
     {
-        return static_cast<uint32_t>(outgoing_data_flow<std::set<tile>>(get_tile(n)).size());
+        uint32_t fout_size{0u};
+        foreach_fanout(n, [&fout_size](auto const&) { ++fout_size; });
+
+        return fout_size;
     }
 
 #pragma endregion
@@ -667,6 +677,54 @@ class gate_level_layout : public ClockedLayout
         }
 
         return static_cast<signal>(t);
+    }
+    /**
+     * Connects the given signal s to the given node n as a child. The new child s is appended at the end of n's list of
+     * children. Thus, if the order of children is important, move_node should be used instead. Otherwise, this function
+     * has a smaller overhead and is to be preferred.
+     *
+     * @param s New incoming signal to n.
+     * @param n Node that should add s as its child.
+     * @return Signal pointing to n.
+     */
+    signal connect(const signal& s, const node n) noexcept
+    {
+        if (!is_constant(n))
+        {
+            strg->nodes[n].children.push_back(s);
+        }
+
+        return make_signal(n);
+    }
+    /**
+     * Removes all assigned nodes from the given tile and marks them as dead.
+     *
+     * @param t Tile whose nodes are to be removed.
+     */
+    void clear_tile(const tile& t) noexcept
+    {
+        if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
+        {
+            if (!t.is_dead())
+            {
+                // decrease wire count
+                if (is_wire(it->second))
+                {
+                    strg->data.num_wires--;
+                }
+                else  // decrease gate count
+                {
+                    strg->data.num_gates--;
+                }
+            }
+            // mark node as dead
+            kill_node(it->second);
+
+            // remove node-tile
+            strg->data.node_tile_map.erase(it->second);
+            // remove tile-node
+            strg->data.tile_node_map.erase(it);
+        }
     }
     /**
      * Necessary function in the mockturtle API. However, in this layout type, signals cannot be complemented.
@@ -893,65 +951,10 @@ class gate_level_layout : public ClockedLayout
             r.begin(), r.end(), [this](const auto n) { return is_wire(n) && !is_dead(n); }, fn);
     }
     /**
-     * Returns a container of a given type that contains all tiles that feed information to the given one. Thereby, only
-     * incoming clocked zones (+/- one layer to include crossings) are being considered whose data flow connections are
-     * respectively established. That is, the returned container contains all tiles that host nodes that are connected
-     * to the one assigned to t as fanins.
-     *
-     * @tparam Container Container type that has to provide an insert member function.
-     * @param t Tile whose incoming data flow ones are desired.
-     * @return A container of type Container that contains all of t's incoming data flow tiles.
-     */
-    template <typename Container>
-    [[nodiscard]] Container incoming_data_flow(const tile& t) const noexcept
-    {
-        const auto incoming = ClockedLayout::template incoming_clocked_zones<Container>(t);
-
-        Container data_flow{};
-
-        for (const auto& in : incoming)
-        {
-            const std::set<tile> incoming_above_below{
-                std::initializer_list<tile>{in, ClockedLayout::above(in), ClockedLayout::below(in)}};
-
-            std::copy_if(std::cbegin(incoming_above_below), std::cend(incoming_above_below),
-                         std::inserter(data_flow, std::cend(data_flow)),
-                         [this, &t](const auto& dt) { return is_child(get_node(t), static_cast<signal>(dt)); });
-        }
-
-        return data_flow;
-    }
-    /**
-     * Returns a container of a given type that contains all tiles that accept information from the given one. Thereby,
-     * only outgoing clocked zones (+/- one layer to include crossings) are being considered whose data flow connections
-     * are respectively established. That is, the returned container contains all tiles that host nodes that are
-     * connected to the one assigned to t as fanouts.
-     *
-     * @tparam Container Container type that has to provide an insert member function.
-     * @param t Tile whose outgoing data flow ones are desired.
-     * @return A container of type Container that contains all of t's outgoing data flow tiles.
-     */
-    template <typename Container>
-    [[nodiscard]] Container outgoing_data_flow(const tile& t) const noexcept
-    {
-        const auto outgoing = ClockedLayout::template outgoing_clocked_zones<Container>(t);
-
-        Container data_flow{};
-
-        for (const auto& out : outgoing)
-        {
-            const std::set<tile> outgoing_above_below{
-                std::initializer_list<tile>{out, ClockedLayout::above(out), ClockedLayout::below(out)}};
-
-            std::copy_if(std::cbegin(outgoing_above_below), std::cend(outgoing_above_below),
-                         std::inserter(data_flow, std::cend(data_flow)),
-                         [this, &t](const auto& dt) { return is_child(get_node(dt), static_cast<signal>(t)); });
-        }
-
-        return data_flow;
-    }
-    /**
-     * Applies a function to all nodes that are incoming to a given one in accordance with incoming_data_flow.
+     * Applies a function to all nodes that are incoming to a given one. Thereby, only incoming clocked zones (+/- one
+     * layer to include crossings) are being considered whose data flow connections are respectively established. That
+     * is, the given function is applied to all nodes that are connected to the one assigned to t as fanins on
+     * neighboring tiles.
      *
      * @tparam Fn Functor type that has to comply with the restrictions imposed by
      * mockturtle::foreach_element_transform.
@@ -966,14 +969,41 @@ class gate_level_layout : public ClockedLayout
             return;
         }
 
-        const auto fanin = incoming_data_flow<std::set<tile>>(get_tile(n));
+        const auto nt = get_tile(n);
 
-        using iterator_type = decltype(fanin.cbegin());
-        mockturtle::detail::foreach_element_transform<iterator_type, signal>(
-            fanin.cbegin(), fanin.cend(), [](const auto& t) { return static_cast<signal>(t); }, fn);
+        using iterator_type = decltype(strg->nodes[n].children.cbegin());
+        mockturtle::detail::foreach_element_if_transform<iterator_type, signal>(
+            strg->nodes[n].children.cbegin(), strg->nodes[n].children.cend(),
+            [this, &nt](const auto& c)
+            {
+                const auto ct = get_tile(get_node(c.index));
+                return ClockedLayout::is_adjacent_elevation_of(nt, ct) && ClockedLayout::is_incoming_clocked(nt, ct);
+            },
+            [this](const auto& c) -> signal { return make_signal(get_node(c.index)); }, std::forward<Fn>(fn));
     }
     /**
-     * Applies a function to all nodes that are outgoing from a given one in accordance with outgoing_data_flow.
+     * Returns a container that contains all tiles that feed information to the given one. Thereby, only
+     * incoming clocked zones (+/- one layer to include crossings) are being considered whose data flow connections are
+     * respectively established. That is, the returned container contains all tiles that host nodes that are connected
+     * to the one assigned to t as fanins.
+     *
+     * @param t Tile whose incoming data flow ones are desired.
+     * @return A container that contains all of t's incoming data flow tiles.
+     */
+    [[nodiscard]] auto incoming_data_flow(const tile& t) const noexcept
+    {
+        std::vector<tile> data_flow{};
+        data_flow.reserve(ClockedLayout::get_clocking_scheme().max_in_degree);  // reserve memory
+
+        foreach_fanin(get_node(t), [&data_flow](const auto& fin) { data_flow.push_back(static_cast<tile>(fin)); });
+
+        return data_flow;
+    }
+    /**
+     * Applies a function to all nodes that are outgoing from a given one. Thereby, only outgoing clocked zones (+/- one
+     * layer to include crossings) are being considered whose data flow connections are respectively established. That
+     * is, the given function is applied to all nodes that are connected to the one assigned to t as fanouts on
+     * neighboring tiles.
      *
      * @tparam Fn Functor type that has to comply with the restrictions imposed by
      * mockturtle::foreach_element_transform.
@@ -988,11 +1018,59 @@ class gate_level_layout : public ClockedLayout
             return;
         }
 
-        const auto fanout = outgoing_data_flow<std::set<tile>>(get_tile(n));
+        const auto nt = get_tile(n);
 
-        using iterator_type = decltype(fanout.cbegin());
-        mockturtle::detail::foreach_element_transform<iterator_type, node>(
-            fanout.cbegin(), fanout.cend(), [this](const auto& t) { return this->get_node(t); }, fn);
+        ClockedLayout::foreach_outgoing_clocked_zone(
+            nt,
+            [this, &fn, &nt](const auto& out_t)
+            {
+                const auto apply_functor = [this, &fn](const auto& parent_t)
+                {
+                    const auto parent_index = node_to_index(parent_t);
+                    auto       parents      = mockturtle::range(parent_index, parent_index + 1);
+                    using iterator_type     = decltype(parents.begin());
+                    mockturtle::detail::foreach_element_transform<iterator_type, node>(
+                        parents.begin(), parents.end(), [this](const auto& p) -> node { return index_to_node(p); },
+                        std::forward<Fn>(fn));
+                };
+
+                const auto apply_if_parent = [this, &nt, &apply_functor](const auto& adj_t)
+                {
+                    if (const auto adj_n = get_node(adj_t); is_child(adj_n, static_cast<signal>(nt)))
+                    {
+                        apply_functor(adj_n);
+                    }
+                };
+
+                apply_if_parent(out_t);
+
+                if (const auto above_t = ClockedLayout::above(out_t); above_t != out_t)
+                {
+                    apply_if_parent(above_t);
+                }
+                if (const auto below_t = ClockedLayout::below(out_t); below_t != out_t)
+                {
+                    apply_if_parent(below_t);
+                }
+            });
+    }
+    /**
+     * Returns a container that contains all tiles that accept information from the given one. Thereby,
+     * only outgoing clocked zones (+/- one layer to include crossings) are being considered whose data flow connections
+     * are respectively established. That is, the returned container contains all tiles that host nodes that are
+     * connected to the one assigned to t as fanouts.
+     *
+     * @param t Tile whose outgoing data flow ones are desired.
+     * @return A container that contains all of t's outgoing data flow tiles.
+     */
+    [[nodiscard]] auto outgoing_data_flow(const tile& t) const noexcept
+    {
+        std::vector<tile> data_flow{};
+        data_flow.reserve(ClockedLayout::get_clocking_scheme().max_out_degree);  // reserve memory
+
+        foreach_fanout(get_node(t), [this, &data_flow](const auto& fout) { data_flow.push_back(get_tile(fout)); });
+
+        return data_flow;
     }
 
     template <typename Fn>
@@ -1068,10 +1146,22 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] bool is_incoming_signal(const tile& t, const signal& s) const noexcept
     {
-        const auto incoming = incoming_data_flow<std::set<tile>>(t);
-        return std::any_of(incoming.cbegin(), incoming.cend(),
-                           [this, &s](const auto& i)
-                           { return i == s || ClockedLayout::above(i) == s || ClockedLayout::below(i) == s; });
+        bool incoming_signal = false;
+
+        foreach_fanin(get_node(t),
+                      [this, &s, &incoming_signal](const auto& i)
+                      {
+                          if (const auto it = static_cast<tile>(i);
+                              i == s || ClockedLayout::above(it) == s || ClockedLayout::below(it) == s)
+                          {
+                              incoming_signal = true;
+                              return false;  // abort iteration
+                          }
+
+                          return true;  // keep looping
+                      });
+
+        return incoming_signal;
     }
     /**
      * Checks whether the given tile has an incoming one in northern direction.
@@ -1161,7 +1251,7 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] bool has_no_incoming_signal(const tile& t) const noexcept
     {
-        return incoming_data_flow<std::set<tile>>(t).empty();
+        return fanin_size(get_node(t)) == 0u;
     }
     /**
      * Checks whether signal s is outgoing from tile t. That is, whether tile t hosts a node that has a fanout assigned
@@ -1173,10 +1263,22 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] bool is_outgoing_signal(const tile& t, const signal& s) const noexcept
     {
-        const auto outgoing = outgoing_data_flow<std::set<tile>>(t);
-        return std::any_of(outgoing.cbegin(), outgoing.cend(),
-                           [this, &s](const auto& o)
-                           { return o == s || ClockedLayout::above(o) == s || ClockedLayout::below(o) == s; });
+        bool outgoing_signal = false;
+
+        foreach_fanout(get_node(t),
+                       [this, &s, &outgoing_signal](const auto& o)
+                       {
+                           if (const auto ot = get_tile(o);
+                               ot == s || ClockedLayout::above(ot) == s || ClockedLayout::below(ot) == s)
+                           {
+                               outgoing_signal = true;
+                               return false;  // abort iteration
+                           }
+
+                           return true;  // keep looping
+                       });
+
+        return outgoing_signal;
     }
     /**
      * Checks whether the given tile has an outgoing one in northern direction.
@@ -1266,7 +1368,7 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] bool has_no_outgoing_signal(const tile& t) const noexcept
     {
-        return outgoing_data_flow<std::set<tile>>(t).empty();
+        return fanout_size(get_node(t)) == 0u;
     }
     /**
      * Checks whether the given tile t has its incoming and outgoing signals on opposite sides of the tile. For this
@@ -1476,32 +1578,6 @@ class gate_level_layout : public ClockedLayout
     {
         const auto& node_data = strg->nodes[n];
         return std::find(node_data.children.cbegin(), node_data.children.cend(), s) != node_data.children.cend();
-    }
-
-    void clear_tile(const tile& t) noexcept
-    {
-        if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
-        {
-            if (!t.is_dead())
-            {
-                // decrease wire count
-                if (is_wire(it->second))
-                {
-                    strg->data.num_wires--;
-                }
-                else  // decrease gate count
-                {
-                    strg->data.num_gates--;
-                }
-            }
-            // mark node as dead
-            kill_node(it->second);
-
-            // remove node-tile
-            strg->data.node_tile_map.erase(it->second);
-            // remove tile-node
-            strg->data.tile_node_map.erase(it);
-        }
     }
 };
 

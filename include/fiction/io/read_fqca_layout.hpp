@@ -15,6 +15,7 @@
 #include <regex>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 
 namespace fiction
 {
@@ -245,7 +246,7 @@ class read_fqca_layout_impl
 
     cell<Lyt> max_cell_pos{}, current_labeled_cell{};
 
-    std::map<char, cell<Lyt>> cell_label_map{};
+    std::unordered_map<char, cell<Lyt>> cell_label_map{};
 
     typename Lyt::clock_number_t to_clock_number(const char c) const noexcept
     {
