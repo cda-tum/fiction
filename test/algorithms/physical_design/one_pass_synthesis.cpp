@@ -2,9 +2,9 @@
 // Created by marcel on 24.09.21.
 //
 
-#if (MUGEN)
-
 #include <catch2/catch_test_macros.hpp>
+
+#if (MUGEN)
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -202,6 +202,13 @@ TEST_CASE("Name conservation after one-pass synthesis", "[one-pass]")
 
     // PO names
     CHECK(layout->get_output_name(0) == "f");
+}
+
+#else  // MUGEN
+
+TEST_CASE("One-pass synthesis", "[one-pass]")
+{
+    CHECK(true);  // workaround for empty test case
 }
 
 #endif  // MUGEN
