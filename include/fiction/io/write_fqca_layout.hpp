@@ -25,6 +25,9 @@ namespace fiction
  */
 struct write_fqca_layout_params
 {
+    /**
+     * Create via cells in between each layer.
+     */
     bool create_inter_layer_via_cells = false;
 };
 

@@ -35,8 +35,13 @@ namespace fiction
  */
 struct write_qcc_layout_params
 {
+    /**
+     * Use the given filename as the component name inside the QCC file.
+     */
     bool use_filename_as_component_name = false;
-
+    /**
+     * Filename of the QCC file.
+     */
     std::string filename{};
 };
 

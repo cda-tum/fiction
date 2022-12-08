@@ -21,6 +21,7 @@ Graphviz (DOT) Drawers
 .. doxygenclass:: fiction::edge_color_view_drawer
 .. doxygenclass:: fiction::simple_gate_layout_tile_drawer
 .. doxygenclass:: fiction::gate_layout_cartesian_drawer
+.. doxygenclass:: fiction::gate_layout_shifted_cartesian_drawer
 .. doxygenclass:: fiction::gate_layout_hexagonal_drawer
 
 .. doxygenfunction:: fiction::write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {})

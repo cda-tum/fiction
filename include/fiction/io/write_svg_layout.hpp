@@ -28,6 +28,9 @@ namespace fiction
  */
 struct write_qca_layout_svg_params
 {
+    /**
+     * Limit details to create smaller file sizes.
+     */
     bool simple = false;
 };
 
