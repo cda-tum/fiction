@@ -339,7 +339,7 @@ class generate_edge_intersection_graph_impl
  * @param objectives A list of routing objectives given as source-target pairs.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return An edge intersection graph of paths satisfying the given routing objectives in lyt.
+ * @return An edge intersection graph of paths satisfying the given routing objectives in `lyt`.
  */
 template <typename Lyt>
 edge_intersection_graph<Lyt> generate_edge_intersection_graph(const Lyt&                                 lyt,
