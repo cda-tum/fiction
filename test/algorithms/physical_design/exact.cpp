@@ -2,9 +2,9 @@
 // Created by marcel on 08.10.21.
 //
 
-#if (FICTION_Z3_SOLVER)
-
 #include <catch2/catch_test_macros.hpp>
+
+#if (FICTION_Z3_SOLVER)
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -223,7 +223,7 @@ void check_tp(const Lyt& lyt, const uint64_t tp)
         std::cout << lyt.get_clocking_scheme().name << std::endl;
     }
 
-    CHECK(st.throughput == tp);
+    CHECK(st.throughput >= tp);  // >= because Z3 might behave differently on different operating systems
 }
 
 template <typename Lyt>
@@ -673,6 +673,13 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
 
     // PO names
     CHECK(layout->get_output_name(0) == "f");
+}
+
+#else  // FICTION_Z3_SOLVER
+
+TEST_CASE("Exact physical design", "[exact]")
+{
+    CHECK(true);  // workaround for empty test case
 }
 
 #endif  // FICTION_Z3_SOLVER

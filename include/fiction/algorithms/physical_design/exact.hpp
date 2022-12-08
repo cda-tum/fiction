@@ -43,13 +43,12 @@
 #include <cstdint>
 #include <functional>
 #include <future>
-#include <map>
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <set>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace fiction
@@ -447,7 +446,7 @@ class exact_impl
              * contains the column (eastern) or row (southern) of tiles that used to be at the border but is not anymore
              * now. In these tiles, certain assertions change so that their previous assertions need to be reformulated.
              */
-            std::set<typename Lyt::tile> added_tiles, updated_tiles;
+            std::unordered_set<typename Lyt::tile> added_tiles, updated_tiles;
             /**
              * Assumptions that are true for only one solver run. Always includes the assumption literal that did not
              * change.
@@ -506,7 +505,7 @@ class exact_impl
          * strategy using factorizations is kept and several solvers are employed that can be reused at a later point.
          * In the example, the 4 x 4 solver would be stored and revisited when 4 x 5 is to be explored.
          */
-        std::map<typename Lyt::aspect_ratio, state_ptr> solver_tree{};
+        std::unordered_map<typename Lyt::aspect_ratio, state_ptr> solver_tree{};
         /**
          * Current solver checkpoint extracted from the solver tree.
          */
@@ -559,7 +558,7 @@ class exact_impl
             if (const auto it_x = solver_tree.find({ar.x - 1, ar.y}); it_x != solver_tree.end())
             {
                 // gather additional y-tiles and updated tiles
-                std::set<typename Lyt::tile> added_tiles{}, updated_tiles{};
+                std::unordered_set<typename Lyt::tile> added_tiles{}, updated_tiles{};
                 for (decltype(ar.y) y = 0; y <= ar.y; ++y)
                 {
                     added_tiles.emplace(ar.x, y);
@@ -583,7 +582,7 @@ class exact_impl
             if (const auto it_y = solver_tree.find({ar.x, ar.y - 1}); it_y != solver_tree.end())
             {
                 // gather additional x-tiles
-                std::set<typename Lyt::tile> added_tiles{}, updated_tiles{};
+                std::unordered_set<typename Lyt::tile> added_tiles{}, updated_tiles{};
                 for (decltype(ar.x) x = 0; x <= ar.x; ++x)
                 {
                     added_tiles.emplace(x, ar.y);
@@ -605,7 +604,7 @@ class exact_impl
             }
             // no existing solver state; create a new one
             // all tiles are additional ones
-            std::set<typename Lyt::tile> added_tiles{};
+            std::unordered_set<typename Lyt::tile> added_tiles{};
             for (decltype(ar.y) y = 0; y <= ar.y; ++y)
             {
                 for (decltype(ar.x) x = 0; x <= ar.x; ++x)

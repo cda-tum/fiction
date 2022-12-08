@@ -11,8 +11,8 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <set>
-#include <unordered_map>
+
+#include <phmap.h>
 
 namespace fiction
 {
@@ -71,7 +71,7 @@ class critical_path_length_and_throughput_impl
         uint64_t length{0ull}, delay{0ull}, diff{0ull};
     };
 
-    std::unordered_map<tile<Lyt>, path_info> delay_cache{};
+    phmap::flat_hash_map<tile<Lyt>, path_info> delay_cache{};
 
     path_info signal_delay(const tile<Lyt> t) noexcept
     {
@@ -80,7 +80,7 @@ class critical_path_length_and_throughput_impl
             return {};
         }
 
-        const auto idf = lyt.template incoming_data_flow<std::set<tile<Lyt>>>(t);
+        const auto idf = lyt.incoming_data_flow(t);
         if (idf.empty())
         {
             return {1, lyt.get_clock_number(t), 0};
@@ -89,6 +89,7 @@ class critical_path_length_and_throughput_impl
         {
             return it->second;
         }
+
         // cache miss
         // fetch information about all incoming paths
         std::vector<path_info> infos{};
@@ -135,6 +136,7 @@ class critical_path_length_and_throughput_impl
 };
 
 }  // namespace detail
+
 /**
  * Computes the critical path length (CP) length and the throughput (TP) of a gate-level layout.
  *

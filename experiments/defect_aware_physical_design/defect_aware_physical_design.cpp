@@ -2,6 +2,8 @@
 // Created by marcel on 31.08.22.
 //
 
+#if (FICTION_Z3_SOLVER)
+
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
@@ -47,11 +49,11 @@ int main()
 
     static const std::string layouts_folder = fmt::format("{}/defect_aware_physical_design/layouts", EXPERIMENTS_PATH);
     // 740 x 545 dimers = 740 x 1090 DB positions = 12 x 31 Bestagon tiles
-     // static const std::string surface_data_path =
-     // fmt::format("{}/defect_aware_physical_design/full_scan_area/defects_full70.xml", EXPERIMENTS_PATH);
+    // static const std::string surface_data_path =
+    // fmt::format("{}/defect_aware_physical_design/full_scan_area/defects_full70.xml", EXPERIMENTS_PATH);
     // 830 x 326 dimers = 830 x 652 DB positions = 13 x 18 Bestagon tiles
-//    static const std::string surface_data_path =
-//        fmt::format("{}/defect_aware_physical_design/full_scan_area/defects_full56_Oct.xml", EXPERIMENTS_PATH);
+    //    static const std::string surface_data_path =
+    //        fmt::format("{}/defect_aware_physical_design/full_scan_area/defects_full56_Oct.xml", EXPERIMENTS_PATH);
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, bool,
@@ -107,15 +109,15 @@ int main()
     // parameterize the H-Si(100) 2x1 surface to ignore certain defect types
     fiction::sidb_surface_params surface_params{std::set<fiction::sidb_defect_type>{fiction::sidb_defect_type::DB}};
 
-//    fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
+    //    fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
 
     // read surface scan lattice data
-        const auto surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(
-            "../../experiments/defect_aware_physical_design/py_test_surface.txt", "py_test_surface");
-//    fiction::read_sqd_layout(surface_lattice, surface_data_path);
+    const auto surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(
+        "../../experiments/defect_aware_physical_design/py_test_surface.txt", "py_test_surface");
+    //    fiction::read_sqd_layout(surface_lattice, surface_data_path);
 
     const auto lattice_tiling = gate_lyt{{11, 30}};  // our surface data is 12 x 31 Bestagon tiles
-//    const auto lattice_tiling = gate_lyt{{12, 17}};  // our surface data is 13 x 18 Bestagon tiles
+    //    const auto lattice_tiling = gate_lyt{{12, 17}};  // our surface data is 13 x 18 Bestagon tiles
     const auto black_list =
         fiction::sidb_surface_analysis<fiction::sidb_bestagon_library>(lattice_tiling, surface_lattice);
 
@@ -125,10 +127,10 @@ int main()
     exact_params.crossings     = true;
     exact_params.border_io     = false;
     exact_params.desynchronize = false;
-    exact_params.upper_bound_x = 11;  // 12 x 31 tiles
-    exact_params.upper_bound_y = 30;  // 12 x 31 tiles
-//    exact_params.upper_bound_x = 12;         // 13 x 18 tiles
-//    exact_params.upper_bound_y = 17;         // 13 x 18 tiles
+    exact_params.upper_bound_x = 11;      // 12 x 31 tiles
+    exact_params.upper_bound_y = 30;      // 12 x 31 tiles
+                                          //    exact_params.upper_bound_x = 12;         // 13 x 18 tiles
+                                          //    exact_params.upper_bound_y = 17;         // 13 x 18 tiles
     exact_params.timeout    = 3'600'000;  // 1h in ms
     exact_params.black_list = black_list;
     fiction::exact_physical_design_stats exact_stats{};
@@ -209,3 +211,5 @@ int main()
 
     return 0;
 }
+
+#endif  // FICTION_Z3_SOLVER

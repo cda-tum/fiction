@@ -66,16 +66,18 @@ TEST_CASE("Iteration over synchronization elements", "[synchronization-element-l
     layout.assign_synchronization_element({1, 2}, 1);
     layout.assign_synchronization_element({2, 1}, 1);
 
-    CHECK(layout.incoming_clocked_zones<std::set<se_layout::coordinate>>({0, 0}).size() == 2);
-    CHECK(layout.outgoing_clocked_zones<std::set<se_layout::coordinate>>({2, 2}).size() == 2);
+    CHECK(layout.incoming_clocked_zones({0, 0}).size() == 2);
+    CHECK(layout.outgoing_clocked_zones({2, 2}).size() == 2);
 
-    auto s1 = layout.incoming_clocked_zones<std::set<se_layout::coordinate>>({1, 1});
-    auto s2 = std::set<se_layout::coordinate>{{{1, 0}, {0, 1}, {1, 2}, {2, 1}}};
+    const auto v1 = layout.incoming_clocked_zones({1, 1});
+    const auto s1 = std::set<se_layout::coordinate>{v1.cbegin(), v1.cend()};
+    const auto s2 = std::set<se_layout::coordinate>{{{1, 0}, {0, 1}, {1, 2}, {2, 1}}};
 
     CHECK(s1 == s2);
 
-    auto s3 = layout.outgoing_clocked_zones<std::set<se_layout::coordinate>>({1, 1});
-    auto s4 = std::set<se_layout::coordinate>{{{1, 0}, {0, 1}, {1, 2}, {2, 1}}};
+    const auto v3 = layout.outgoing_clocked_zones({1, 1});
+    const auto s3 = std::set<se_layout::coordinate>{v3.cbegin(), v3.cend()};
+    const auto s4 = std::set<se_layout::coordinate>{{{1, 0}, {0, 1}, {1, 2}, {2, 1}}};
 
     CHECK(s3 == s4);
 }
