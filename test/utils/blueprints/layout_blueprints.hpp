@@ -5,7 +5,7 @@
 #ifndef FICTION_LAYOUT_BLUEPRINTS_HPP
 #define FICTION_LAYOUT_BLUEPRINTS_HPP
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/cell_technologies.hpp>

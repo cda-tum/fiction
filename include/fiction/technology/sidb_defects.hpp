@@ -98,22 +98,22 @@ struct sidb_defect
  * Horizontal distance to keep from charged SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
-static constexpr const uint16_t SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING = 3u;
+inline constexpr const uint16_t SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING = 26u;
 /**
  * Vertical distance to keep from charged SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
-static constexpr const uint16_t SIDB_CHARGED_DEFECT_VERTICAL_SPACING = 2u;
+inline constexpr const uint16_t SIDB_CHARGED_DEFECT_VERTICAL_SPACING = 13u;
 /**
  * Horizontal distance to keep from neutral SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
-static constexpr const uint16_t SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING = 1u;
+inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING = 1u;
 /**
  * Vertical distance to keep from neutral SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
-static constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
+inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
 /**
  * Returns the extent of a defect as a pair of SiDB distances in horizontal and vertical direction. If defect is the
  * NONE defect type, {0, 0} is returned.

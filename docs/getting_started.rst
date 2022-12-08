@@ -10,7 +10,7 @@ Compilation requirements
 
 The repository should always be cloned recursively with all submodules::
 
-  git clone --recursive
+  git clone --recursive https://github.com/marcelwa/fiction.git
 
 Several third-party libraries will be cloned within the ``libs`` folder. The ``cmake`` build process will take care of
 them automatically. Should the repository have been cloned before, the commands::
@@ -31,10 +31,9 @@ It is possible to compile *fiction* as a stand-alone CLI tool. For auto-completi
 required to install the ``libreadline-dev`` package.
 The build system CMake can be invoked from the command line as follows::
 
-  mkdir build
+  cmake . -B build
   cd build
-  cmake ..
-  make
+  cmake --build . -j4
 
 Several options can be toggled during the build. For a more interactive interface, please refer to ``ccmake`` for a
 full list of supported customizations.
@@ -42,6 +41,13 @@ full list of supported customizations.
 The CLI tool can then be run using::
 
   cli/fiction
+
+
+Here is an example of running *fiction* to perform a full physical design flow on a QCA circuit layout that can afterward be simulated in QCADesigner:
+
+.. figure:: /_static/fiction_cli_example.gif
+   :alt: CLI example
+   :align: center
 
 See :ref:`cli` for a full user guide.
 

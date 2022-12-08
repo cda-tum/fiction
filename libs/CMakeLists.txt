@@ -1,7 +1,12 @@
 # Include alice
+set(ALICE_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(ALICE_TEST OFF CACHE BOOL "" FORCE)
 add_subdirectory(alice/)
 
 # Include mockturtle
+set(MOCKTURTLE_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(MOCKTURTLE_EXPERIMENTS OFF CACHE BOOL "" FORCE)
+set(MOCKTURTLE_TEST OFF CACHE BOOL "" FORCE)
 add_subdirectory(mockturtle/)
 target_link_libraries(libfiction INTERFACE mockturtle)
 
@@ -9,6 +14,11 @@ target_link_libraries(libfiction INTERFACE mockturtle)
 set(tinyxml2_BUILD_TESTING OFF)
 add_subdirectory(tinyxml2/)
 target_link_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
+
+# Include Catch2
+if (FICTION_TEST)
+    add_subdirectory(Catch2/)
+endif ()
 
 # Mugen is not available under Windows
 if (NOT WIN32)

@@ -2,7 +2,7 @@
 // Created by marcel on 29.03.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/io/read_sidb_surface_defects.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>

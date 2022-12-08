@@ -2,7 +2,7 @@
 // Created by marcel on 28.03.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/technology/sidb_defects.hpp>
 

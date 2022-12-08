@@ -2,7 +2,8 @@
 // Created by marcel on 24.06.22.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
@@ -32,8 +33,8 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt) noexcep
 {
     CHECK(wlyt.get_layout_name() == rlyt.get_layout_name());
 
-    bounding_box_2d<WLyt> wbb{wlyt};
-    bounding_box_2d<RLyt> rbb{wlyt};
+    const bounding_box_2d<WLyt> wbb{wlyt};
+    const bounding_box_2d<RLyt> rbb{wlyt};
 
     CHECK(wbb.get_min() == rbb.get_min());
     CHECK(wbb.get_max() == rbb.get_max());
@@ -65,7 +66,7 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt) noexcep
     }
 }
 
-TEST_CASE("Write empty layout", "[sqd]")
+TEST_CASE("Write empty SQD layout", "[sqd]")
 {
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
@@ -80,7 +81,7 @@ TEST_CASE("Write empty layout", "[sqd]")
     compare_written_and_read_layout(layout, read_layout);
 }
 
-TEST_CASE("Write single-dot layout", "[sqd]")
+TEST_CASE("Write single-dot SQD layout", "[sqd]")
 {
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
@@ -96,7 +97,7 @@ TEST_CASE("Write single-dot layout", "[sqd]")
     compare_written_and_read_layout(layout, read_layout);
 }
 
-TEST_CASE("Write multi-dot layout", "[sqd]")
+TEST_CASE("Write multi-dot SQD layout", "[sqd]")
 {
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
@@ -116,7 +117,7 @@ TEST_CASE("Write multi-dot layout", "[sqd]")
     compare_written_and_read_layout(layout, read_layout);
 }
 
-TEST_CASE("Write bestagon layout", "[sqd]")
+TEST_CASE("Write bestagon SQD layout", "[sqd]")
 {
     using gate_layout =
         gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>>;
@@ -136,7 +137,7 @@ TEST_CASE("Write bestagon layout", "[sqd]")
     compare_written_and_read_layout(c_layout, read_layout);
 }
 
-TEST_CASE("Write defective surface", "[sqd]")
+TEST_CASE("Write defective surface SQD layout", "[sqd]")
 {
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
@@ -156,7 +157,7 @@ TEST_CASE("Write defective surface", "[sqd]")
          {{0, 12}, sidb_defect{sidb_defect_type::GUNK}},
          {{0, 13}, sidb_defect{sidb_defect_type::UNKNOWN}}}};
 
-    sidb_layout lyt{aspect_ratio<sidb_layout>{0, defect_map.size() - 1}};
+    const sidb_layout lyt{aspect_ratio<sidb_layout>{0, defect_map.size() - 1}};
 
     sidb_surface<sidb_layout> defect_layout{lyt};
 

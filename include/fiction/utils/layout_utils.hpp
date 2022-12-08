@@ -221,6 +221,8 @@ template <typename Lyt>
             assert(false && "Given port does not specify a cardinal direction");
         }
     }
+
+    return {};
 }
 
 }  // namespace fiction

@@ -237,7 +237,7 @@ class cell_level_layout : public ClockedLayout
      */
     [[nodiscard]] std::string get_cell_name(const cell& c) const noexcept
     {
-        if (auto it = strg->cell_name_map.find(c); it != strg->cell_name_map.cend())
+        if (const auto it = strg->cell_name_map.find(c); it != strg->cell_name_map.cend())
         {
             return it->second;
         }
