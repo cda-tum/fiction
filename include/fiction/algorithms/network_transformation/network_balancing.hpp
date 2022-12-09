@@ -241,7 +241,7 @@ NtkDest network_balancing(const NtkSrc& ntk_src, network_balancing_params ps = {
  * @tparam Ntk Logic network type.
  * @param ntk The logic network to check.
  * @param ps Parameters.
- * @return True iff `ntk` is properly path-balanced with regard to `ps`.
+ * @return `true` iff `ntk` is properly path-balanced with regard to `ps`.
  */
 template <typename Ntk>
 bool is_balanced(const Ntk& ntk, network_balancing_params ps = {}) noexcept

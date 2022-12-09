@@ -37,9 +37,9 @@ namespace std
 {
 
 /**
- * Provides a hash implementation for std::set<T>.
+ * Provides a hash implementation for `std::set<T>`.
  *
- * @tparam T Object type in std::set.
+ * @tparam T Object type in `std::set`.
  */
 template <typename T>
 struct hash<std::set<T>>
@@ -56,10 +56,10 @@ struct hash<std::set<T>>
     }
 };
 /**
- * Provides a hash implementation for std::pair<T1, T2>.
+ * Provides a hash implementation for `std::pair<T1, T2>`.
  *
- * @tparam T1 First object type in std::pair.
- * @tparam T2 Second object type in std::pair.
+ * @tparam T1 First object type in `std::pair`.
+ * @tparam T2 Second object type in `std::pair`.
  */
 template <typename T1, typename T2>
 struct hash<std::pair<T1, T2>>

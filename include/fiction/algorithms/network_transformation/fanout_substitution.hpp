@@ -330,7 +330,7 @@ NtkDest fanout_substitution(const NtkSrc& ntk_src, fanout_substitution_params ps
  * @tparam Ntk Logic network type.
  * @param ntk The logic network to check.
  * @param ps Parameters.
- * @return True iff `ntk` is properly fanout-substituted with regard to `ps`.
+ * @return `true` iff `ntk` is properly fanout-substituted with regard to `ps`.
  */
 template <typename Ntk>
 bool is_fanout_substituted(const Ntk& ntk, fanout_substitution_params ps = {}) noexcept

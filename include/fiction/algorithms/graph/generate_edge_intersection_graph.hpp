@@ -193,7 +193,7 @@ class generate_edge_intersection_graph_impl
          *
          * @tparam Path Type of other path.
          * @param other The other path.
-         * @return True iff this path and the given one are not disjoint, i.e., share at least one coordinate.
+         * @return `true` iff this path and the given one are not disjoint, i.e., share at least one coordinate.
          */
         template <typename Path>
         bool has_intersection_with(const Path& other) const noexcept
@@ -216,7 +216,7 @@ class generate_edge_intersection_graph_impl
          *
          * @tparam Path Type of other path.
          * @param other The other path.
-         * @return True iff this path and the given one are overlapping, i.e., share at least one coordinate segment of
+         * @return `true` iff this path and the given one are overlapping, i.e., share at least one coordinate segment of
          * size 2.
          */
         template <typename Path>

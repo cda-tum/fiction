@@ -329,7 +329,7 @@ class exact_impl
          * If the instance was found SAT on both levels, a layout is extract from the model and stored. The function
          * returns then true.
          *
-         * @return true iff the instance generated for the current configuration is SAT.
+         * @return `true` iff the instance generated for the current configuration is SAT.
          */
         [[nodiscard]] bool is_satisfiable()
         {
@@ -606,7 +606,7 @@ class exact_impl
          * Checks whether a given tile belongs to the added tiles of the current solver check point.
          *
          * @param t Tile to check.
-         * @return True iff t is contained in check_point->added_tiles.
+         * @return `true` iff t is contained in check_point->added_tiles.
          */
         [[nodiscard]] bool is_added_tile(const typename Lyt::tile& t) const noexcept
         {
@@ -616,7 +616,7 @@ class exact_impl
          * Checks whether a given tile belongs to the updated tiles of the current solver check point.
          *
          * @param t Tile to check.
-         * @return True iff t is contained in check_point->updated_tiles.
+         * @return `true` iff t is contained in check_point->updated_tiles.
          */
         [[nodiscard]] bool is_updated_tile(const typename Lyt::tile& t) const noexcept
         {
@@ -626,7 +626,7 @@ class exact_impl
          * Returns true, iff params.io_ports is set to false and n is either a constant or PI or PO node in network.
          *
          * @param n Node in network.
-         * @return True iff n is to be skipped in a loop due to it being a constant or an I/O and params.io_ports ==
+         * @return `true` iff n is to be skipped in a loop due to it being a constant or an I/O and params.io_ports ==
          * false.
          */
         [[nodiscard]] bool skip_const_or_io_node(const mockturtle::node<topology_ntk_t>& n) const noexcept
@@ -637,7 +637,7 @@ class exact_impl
          * Returns true, iff skip_const_or_io_node returns true for either source or target of the given edge..
          *
          * @param e Edge in network.
-         * @return True iff e is to be skipped in a loop due to it having constant or I/O nodes while params.io_ports ==
+         * @return `true` iff e is to be skipped in a loop due to it having constant or I/O nodes while params.io_ports ==
          * false.
          */
         [[nodiscard]] bool skip_const_or_io_edge(const mockturtle::edge<topology_ntk_t>& e) const noexcept

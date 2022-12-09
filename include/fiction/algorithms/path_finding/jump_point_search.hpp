@@ -88,7 +88,7 @@ class jump_point_search_impl
          * Comparator for the priority queue. Compares only the f-values.
          *
          * @param other Other coordinate_f to compare with.
-         * @return True iff this f-value is greater than the other's.
+         * @return `true` iff this f-value is greater than the other's.
          */
         bool operator>(const coordinate_f& other) const
         {
@@ -99,7 +99,7 @@ class jump_point_search_impl
          * priority queue.
          *
          * @param other Other coordinate_f to compare with.
-         * @return True iff this coord value is equal to the other's.
+         * @return `true` iff this coord value is equal to the other's.
          */
         bool operator==(const coordinate_f& other) const
         {
@@ -267,7 +267,7 @@ class jump_point_search_impl
      *
      * @param c1 Start coordinate.
      * @param c2 Goal coordinate.
-     * @return True iff c2 is directly reachable from c1.
+     * @return `true` iff c2 is directly reachable from c1.
      */
     bool is_traversable(const coordinate<Lyt>& c1, const coordinate<Lyt>& c2) const noexcept
     {
@@ -303,7 +303,7 @@ class jump_point_search_impl
      * Checks if a coordinate has been visited already.
      *
      * @param c Coordinate to check.
-     * @return True iff c has already been visited.
+     * @return `true` iff c has already been visited.
      */
     bool is_visited(const coordinate<Lyt>& c) const noexcept
     {
@@ -340,7 +340,7 @@ class jump_point_search_impl
      *
      * @param c Coordinate to whose g-value is to be checked.
      * @param g_val g-value to compare to c's.
-     * @return True iff the given g-value does not mean an improvement for the given coordinate.
+     * @return `true` iff the given g-value does not mean an improvement for the given coordinate.
      */
     bool no_improvement(const coordinate<Lyt>& c, const Dist g_val) noexcept
     {

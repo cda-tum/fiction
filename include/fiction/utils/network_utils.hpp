@@ -21,7 +21,7 @@ namespace mockturtle
 /**
  * Representation of an edge between two network nodes.
  *
- * @tparam Ntk mockturtle network type.
+ * @tparam Ntk `mockturtle` network type.
  */
 template <typename Ntk>
 struct edge
@@ -31,7 +31,7 @@ struct edge
      * Equality operator.
      *
      * @param other Edge to compare to.
-     * @return True iff both sources and targets match.
+     * @return `true` iff both sources and targets match.
      */
     bool operator==(const edge<Ntk>& other) const
     {
@@ -41,7 +41,7 @@ struct edge
      * Inequality operator.
      *
      * @param other Edge to compare to.
-     * @return True iff this edge is not equal to other.
+     * @return `true` iff this edge is not equal to other.
      */
     bool operator!=(const edge<Ntk>& other) const
     {
@@ -53,7 +53,7 @@ struct edge
 namespace std
 {
 /**
- * Provides a hash implementation for mockturtle::edge<Ntk>.
+ * Provides a hash implementation for `mockturtle::edge<Ntk>`.
  *
  * @tparam Ntk Network type of edge.
  */
@@ -73,12 +73,12 @@ struct hash<mockturtle::edge<Ntk>>
 namespace fiction
 {
 /**
- * Applies a function to all edges in a mockturtle network.
+ * Applies a function to all edges in a `mockturtle` network.
  *
- * @tparam Ntk mockturtle network type.
- * @tparam Fn Unary function type that takes a mockturtle::edge<Ntk> object as parameter.
+ * @tparam Ntk `mockturtle` network type.
+ * @tparam Fn Unary function type that takes a `mockturtle::edge<Ntk>` object as parameter.
  * @param ntk Network to iterate over.
- * @param fn Function object to apply to each edge in ntk.
+ * @param fn Function object to apply to each edge in `ntk`.
  */
 template <typename Ntk, typename Fn>
 void foreach_edge(const Ntk& ntk, Fn&& fn)
@@ -100,13 +100,13 @@ void foreach_edge(const Ntk& ntk, Fn&& fn)
         });
 }
 /**
- * Applies a function to all outgoing edges in a mockturtle network.
+ * Applies a function to all outgoing edges in a `mockturtle` network.
  *
- * @tparam Ntk mockturtle network type.
- * @tparam Fn Unary function type that takes a mockturtle::edge<Ntk> object as parameter.
+ * @tparam Ntk `mockturtle` network type.
+ * @tparam Fn Unary function type that takes a `mockturtle::edge<Ntk>` object as parameter.
  * @param ntk Network to iterate over.
- * @param n Node of ntk whose outgoing edges are to be considered.
- * @param fn Function object to apply to each outgoing edge of n in ntk.
+ * @param n Node of `ntk` whose outgoing edges are to be considered.
+ * @param fn Function object to apply to each outgoing edge of n in `ntk`.
  */
 template <typename Ntk, typename Fn>
 void foreach_outgoing_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& fn)
@@ -122,13 +122,13 @@ void foreach_outgoing_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& 
                        });
 }
 /**
- * Applies a function to all incoming edges in a mockturtle network.
+ * Applies a function to all incoming edges in a `mockturtle` network.
  *
- * @tparam Ntk mockturtle network type.
- * @tparam Fn Unary function type that takes a mockturtle::edge<Ntk> object as parameter.
+ * @tparam Ntk `mockturtle` network type.
+ * @tparam Fn Unary function type that takes a `mockturtle::edge<Ntk>` object as parameter.
  * @param ntk Network to iterate over.
- * @param n Node of ntk whose incoming edges are to be considered.
- * @param fn Function object to apply to each incoming edge of n in ntk.
+ * @param n Node of `ntk` whose incoming edges are to be considered.
+ * @param fn Function object to apply to each incoming edge of n in `ntk`.
  */
 template <typename Ntk, typename Fn>
 void foreach_incoming_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& fn)
@@ -147,10 +147,10 @@ void foreach_incoming_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& 
 /**
  * Returns a vector of all fanout nodes of some given network node.
  *
- * @tparam Ntk mockturtle network type.
+ * @tparam Ntk `mockturtle` network type.
  * @param ntk Network in which the fanouts are to be gathered.
  * @param n Node whose fanouts are desired.
- * @return A vector of all outgoing nodes directly adjacent to n in ntk.
+ * @return A vector of all outgoing nodes directly adjacent to `n` in `ntk`.
  */
 template <typename Ntk>
 std::vector<mockturtle::node<Ntk>> fanouts(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
@@ -168,7 +168,7 @@ std::vector<mockturtle::node<Ntk>> fanouts(const Ntk& ntk, const mockturtle::nod
  *
  * Note that this container assumes that each node has a maximum of one constant fanin.
  *
- * @tparam Ntk mockturtle network type.
+ * @tparam Ntk `mockturtle` network type.
  */
 template <typename Ntk>
 struct fanin_container
@@ -187,10 +187,10 @@ struct fanin_container
  *
  * Note that this function assumes that each node has a maximum of one constant fanin.
  *
- * @tparam Ntk mockturtle network type.
+ * @tparam Ntk `mockturtle` network type.
  * @param ntk Network in which the fanins are to be gathered.
  * @param n Node whose fanins are desired.
- * @return A container of all incoming nodes directly adjacent to n in ntk.
+ * @return A container of all incoming nodes directly adjacent to `n` in `ntk`.
  */
 template <typename Ntk>
 fanin_container<Ntk> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
@@ -218,12 +218,12 @@ fanin_container<Ntk> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noex
     return fc;
 }
 /**
- * Computes the number of constant fanin nodes of some network node n.
+ * Computes the number of constant fanin nodes of some network node `n`.
  *
- * @tparam Ntk mockturtle network type.
+ * @tparam Ntk `mockturtle` network type.
  * @param ntk Network in which the constant fanins are to be counted.
  * @param n Node whose constant fanins are to be counted.
- * @return Number of constant fanins to n in ntk.
+ * @return Number of constant fanins to `n` in `ntk`.
  */
 template <typename Ntk>
 uint32_t num_constant_fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
@@ -259,10 +259,10 @@ class high_degree_fanin_exception : public std::exception
 /**
  * Checks if a given network exceeds a given fanin threshold in any of its nodes.
  *
- * @tparam Ntk mockturtle network type.
+ * @tparam Ntk `mockturtle` network type.
  * @param ntk Network to check.
  * @param threshold Maximum number of legal fanins.
- * @return True if any node in ntk exceeds threshold fanins.
+ * @return True if any node in `ntk` exceeds `threshold` fanins.
  */
 template <typename Ntk>
 bool has_high_degree_fanin_nodes(const Ntk& ntk, const uint32_t threshold = 2) noexcept
@@ -293,7 +293,7 @@ bool has_high_degree_fanin_nodes(const Ntk& ntk, const uint32_t threshold = 2) n
 /**
  * Container that stores fanin edges of a node in a network, including whether one of them is a constant.
  *
- * @tparam Ntk mockturtle network type.
+ * @tparam Ntk `mockturtle` network type.
  */
 template <typename Ntk>
 struct fanin_edge_container
@@ -304,12 +304,12 @@ struct fanin_edge_container
     std::vector<mockturtle::edge<Ntk>> fanin_edges{};
 };
 /**
- * Returns a fanin edge container filled with all fanin edges (fanin, node) of some given network node.
+ * Returns a fanin edge container filled with all fanin edges `(fanin, node)` of some given network node.
  *
- * @tparam Ntk mockturtle network type.
+ * @tparam Ntk `mockturtle` network type.
  * @param ntk Network in which the fanin edges are to be gathered.
  * @param n Node whose fanins are desired.
- * @return A container of all incoming edges (fanin, n) in ntk.
+ * @return A container of all incoming edges `(fanin, n)` in `ntk`.
  */
 template <typename Ntk>
 fanin_edge_container<Ntk> fanin_edges(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
@@ -334,10 +334,10 @@ fanin_edge_container<Ntk> fanin_edges(const Ntk& ntk, const mockturtle::node<Ntk
 /**
  * Checks if a given node in a given network has fanins that are primary inputs.
  *
- * @tparam Ntk mockturtle network type.
+ * @tparam Ntk `mockturtle` network type.
  * @param ntk Network to check in.
  * @param n Node to check.
- * @return True iff any of n's fanins are primary inputs.
+ * @return `true` iff any of `n`'s fanins are primary inputs.
  */
 template <typename Ntk>
 bool has_incoming_primary_input(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
@@ -413,14 +413,14 @@ std::vector<edge_path<Ntk>> all_incoming_edge_paths(const Ntk& ntk, const mocktu
 }
 /**
  * A clumsy implementation that returns the inverse level of each node in a given network. Its behavior is similar to
- * mockturtle::depth_view but starting from the primary outputs instead of the primary inputs. An implementation like
- * inv_depth_view would be a lot more sophisticated and desirable, but this quick hack does the job well so far. If
- * anyone wants to build an inv_depth_view, please be my guest.
+ * `mockturtle::depth_view` but starting from the primary outputs instead of the primary inputs. An implementation along
+ * the lines of `inv_depth_view` would be a lot more sophisticated and desirable, but this quick hack does the job well
+ * so far. If anyone wants to build an `inv_depth_view`, please be my guest.
  *
- * @tparam Ntk mockturtle network type.
+ * @tparam Ntk `mockturtle` network type.
  * @param ntk The network whose inverse levels are desired.
- * @return A vector of inverse levels for each node where ntk.node_to_index(n) is the position where n's inverse level
- * is stored.
+ * @return A vector of inverse levels for each node where `ntk.node_to_index(n)` is the position where `n`'s inverse
+ * level is stored.
  */
 template <typename Ntk>
 std::vector<uint32_t> inverse_levels(const Ntk& ntk) noexcept

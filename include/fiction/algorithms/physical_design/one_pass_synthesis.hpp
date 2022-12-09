@@ -172,7 +172,7 @@ class mugen_handler
      * losing the optimality guarantee. This function should never be overly restrictive!
      *
      * @param ratio Aspect ratio to evaluate.
-     * @return True iff ratio can safely be skipped because it is UNSAT anyways.
+     * @return `true` iff ratio can safely be skipped because it is UNSAT anyways.
      */
     [[nodiscard]] bool skippable(const aspect_ratio<Lyt>& ratio) const noexcept
     {
@@ -210,7 +210,7 @@ class mugen_handler
      * Passes the current scheme_graph to Mugen and synthesizes it. If there is an implementation on this graph
      * realizing the specification, this function returns true.
      *
-     * @return true iff the instance generated for the current configuration is SAT.
+     * @return `true` iff the instance generated for the current configuration is SAT.
      */
     bool is_satisfiable()
     {
@@ -805,7 +805,7 @@ class one_pass_synthesis_impl
     /**
      * Tests whether all needed dependencies have been installed and can be accessed via Python.
      *
-     * @return true iff all dependencies are met.
+     * @return `true` iff all dependencies are met.
      */
     [[nodiscard]] bool test_dependencies() const
     {

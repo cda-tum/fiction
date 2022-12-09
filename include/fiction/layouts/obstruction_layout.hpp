@@ -106,7 +106,7 @@ class obstruction_layout<Lyt, false> : public Lyt
      * Checks if the given coordinate is obstructed of some sort.
      *
      * @param c Coordinate to check.
-     * @return True iff `c` is obstructed.
+     * @return `true` iff `c` is obstructed.
      */
     [[nodiscard]] bool is_obstructed_coordinate(const typename Lyt::coordinate& c) const noexcept
     {
@@ -132,7 +132,7 @@ class obstruction_layout<Lyt, false> : public Lyt
      *
      * @param src Source coordinate.
      * @param tgt Target coordinate.
-     * @return True iff the connection from `c1` to `c2` is obstructed.
+     * @return `true` iff the connection from `c1` to `c2` is obstructed.
      */
     [[nodiscard]] bool is_obstructed_connection(const typename Lyt::coordinate& src,
                                                 const typename Lyt::coordinate& tgt) const noexcept
