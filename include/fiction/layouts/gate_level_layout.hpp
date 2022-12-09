@@ -296,7 +296,7 @@ class gate_level_layout : public ClockedLayout
 
 #pragma endregion
 
-#pragma region node `n`ames
+#pragma region node names
 
     void set_layout_name(const std::string& name) noexcept
     {
