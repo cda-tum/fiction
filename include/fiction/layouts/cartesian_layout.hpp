@@ -41,7 +41,7 @@ namespace fiction
  *
  * @tparam OffsetCoordinateType The coordinate implementation to be used. Offset coordinates are required.
  */
-template <typename OffsetCoordinateType>
+template <typename OffsetCoordinateType = offset::ucoord_t>
 class cartesian_layout
 {
   public:
@@ -614,16 +614,16 @@ class cartesian_layout
 
 #pragma region Iteration
     /**
-     * Returns a range of all coordinates accessible in the layout between start and stop. If no values are provided,
-     * all coordinates in the layout will be included. The returned iterator range points to the first and last
-     * coordinate, respectively. The range object can be used within a for-each loop. Incrementing the iterator is
+     * Returns a range of all coordinates accessible in the layout between `start` and `stop`. If no values are
+     * provided, all coordinates in the layout will be included. The returned iterator range points to the first and
+     * last coordinate, respectively. The range object can be used within a for-each loop. Incrementing the iterator is
      * equivalent to nested for loops in the order z, y, x. Consequently, the iteration will happen inside out, i.e., x
      * will be iterated first, then y, then z.
      *
      * @param start First coordinate to include in the range of all coordinates.
      * @param stop Last coordinate to include in the range of all coordinates.
-     * @return An iterator range from start to stop. If they are not provided, the first/last coordinate is used as a
-     * default.
+     * @return An iterator range from `start` to `stop`. If they are not provided, the first/last coordinate is used as
+     * a default.
      */
     [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
     {
@@ -632,8 +632,8 @@ class cartesian_layout
             offset::coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop})};
     }
     /**
-     * Applies a function to all coordinates accessible in the layout between start and stop. The iteration order is the
-     * same as for the coordinates function.
+     * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
+     * the same as for the coordinates function.
      *
      * @tparam Fn Functor type that has to comply with the restrictions imposed by `mockturtle::foreach_element`.
      * @param fn Functor to apply to each coordinate in the range.
@@ -649,13 +649,13 @@ class cartesian_layout
             offset::coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, fn);
     }
     /**
-     * Returns a range of all coordinates accessible in the layout's ground layer between start and stop. The iteration
-     * order is the same as for the coordinates function but without the z dimension.
+     * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
+     * iteration order is the same as for the coordinates function but without the z dimension.
      *
      * @param start First coordinate to include in the range of all ground coordinates.
      * @param stop Last coordinate to include in the range of all ground coordinates.
-     * @return An iterator range from start to stop. If they are not provided, the first/last coordinate in the ground
-     * layer is used as a default.
+     * @return An iterator range from `start` to `stop`. If they are not provided, the first/last coordinate in the
+     * ground layer is used as a default.
      */
     [[nodiscard]] auto ground_coordinates(const OffsetCoordinateType& start = {},
                                           const OffsetCoordinateType& stop  = {}) const
@@ -669,7 +669,7 @@ class cartesian_layout
                            offset::coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop})};
     }
     /**
-     * Applies a function to all coordinates accessible in the layout's ground layer between start and stop. The
+     * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
      * iteration order is the same as for the ground_coordinates function.
      *
      * @tparam Fn Functor type that has to comply with the restrictions imposed by `mockturtle::foreach_element`.
