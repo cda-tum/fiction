@@ -104,12 +104,12 @@ class fcn_gate_library
     using technology = Technology;
 
     /**
-     * A cell_list is an array of size GateSizeX x GateSizeY of type T.
+     * A cell_list is an array of size `GateSizeX` \f$ \times \f$ `GateSizeY` of type `T`.
      */
     template <typename T>
     using cell_list = std::array<std::array<T, GateSizeX>, GateSizeY>;
     /**
-     * Each gate is thus a cell_list of cell types defined in Technology.
+     * Each gate is thus a cell_list of cell types defined in `Technology`.
      */
     using fcn_gate = cell_list<typename Technology::cell_type>;
     /**
@@ -117,12 +117,12 @@ class fcn_gate_library
      */
     explicit fcn_gate_library() = delete;
     /**
-     * Converts a cell_list of type T to an fcn_gate at compile time. This function allows to conveniently specify
-     * fcn_gate instances in a semi-readable way in code. For examples usages see qca_one_library.hpp.
+     * Converts a cell_list of type `T` to an fcn_gate at compile time. This function allows to conveniently specify
+     * fcn_gate instances in a semi-readable way in code. For examples usages see `qca_one_library.hpp`.
      *
      * @tparam T Element type of given cell_list.
      * @param c Cell list to convert.
-     * @return An fcn_gate created from the representation provided in c.
+     * @return An fcn_gate created from the representation provided in `c`.
      */
     template <typename T>
     static constexpr fcn_gate cell_list_to_gate(const cell_list<T>& c) noexcept
@@ -187,7 +187,7 @@ class fcn_gate_library
         return merged;
     }
     /**
-     * Applies given mark to given fcn_gate g at given port p at compile time.
+     * Applies given mark to given fcn_gate `g` at given port `p` at compile time.
      *
      * @param g Gate to apply mark to.
      * @param p Port specifying where to apply the mark.
@@ -207,7 +207,7 @@ class fcn_gate_library
     /**
      * Returns horizontal size of gate blocks.
      *
-     * @return GateSizeX.
+     * @return `GateSizeX`.
      */
     [[nodiscard]] static constexpr uint16_t gate_x_size() noexcept
     {
@@ -216,7 +216,7 @@ class fcn_gate_library
     /**
      * Returns vertical size of gate blocks.
      *
-     * @return GateSizeY.
+     * @return `GateSizeY`.
      */
     [[nodiscard]] static constexpr uint16_t gate_y_size() noexcept
     {

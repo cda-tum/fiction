@@ -36,14 +36,14 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
   public:
     sidb_bestagon_library() = delete;
     /**
-     * Given a tile t, this function takes all necessary information from the stored grid into account to choose the
+     * Given a tile `t`, this function takes all necessary information from the stored grid into account to choose the
      * correct fcn_gate representation for that tile. May it be a gate or wires. Rotation and special marks like input
      * and output, const cells etc. are computed additionally.
      *
      * @tparam GateLyt Gate-level layout type.
-     * @param lyt Gate-level layout that hosts tile t.
+     * @param lyt Gate-level layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
-     * @return Bestagon gate representation of t including I/Os, rotation, const cells, etc.
+     * @return Bestagon gate representation of `t` including I/Os, rotation, const cells, etc.
      */
     template <typename Lyt>
     [[nodiscard]] static fcn_gate set_up_gate(const Lyt& lyt, const tile<Lyt>& t)

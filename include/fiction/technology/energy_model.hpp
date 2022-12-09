@@ -44,9 +44,9 @@ namespace detail
 {
 
 /**
- * Collection of energy values in meV for different QCA-ONE structures. The values are taken from 'An Energy-aware Model
- * for the Logic Synthesis of Quantum-Dot Cellular Automata' by Frank Sill Torres, Robert Wille, Philipp Niemann, and
- * Rolf Drechsler in TCAD 2018.
+ * Collection of energy values in meV for different QCA-ONE structures. The values are taken from \"An Energy-aware
+ * Model for the Logic Synthesis of Quantum-Dot Cellular Automata\" by Frank Sill Torres, Robert Wille, Philipp Niemann,
+ * and Rolf Drechsler in TCAD 2018.
  */
 namespace qca_energy
 {
@@ -236,8 +236,8 @@ class qca_energy_dissipation_impl
 
 /**
  * Estimates the energy dissipation of a gate-level layout if it were to be converted to a QCA cell-level layout via the
- * QCA ONE gate library. This estimation was proposed in 'An Energy-aware Model for the Logic Synthesis of Quantum-Dot
- * Cellular Automata' by Frank Sill Torres, Robert Wille, Philipp Niemann, and Rolf Drechsler in TCAD 2018.
+ * QCA ONE gate library. This estimation was proposed in \"An Energy-aware Model for the Logic Synthesis of Quantum-Dot
+ * Cellular Automata\" by Frank Sill Torres, Robert Wille, Philipp Niemann, and Rolf Drechsler in TCAD 2018.
  *
  * As done in that publication, energy dissipation values are being given in meV for slow (25 GHz) and fast (100 GHz)
  * clocking.

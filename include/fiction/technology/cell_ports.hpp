@@ -56,7 +56,7 @@ struct port_position
      * Comparator for set insertion.
      *
      * @param p Port to compare to.
-     * @return True iff this port goes before p in set.
+     * @return `true` iff this port goes before `p` in set.
      */
     constexpr bool operator<(const port_position& p) const
     {
@@ -66,7 +66,7 @@ struct port_position
      * Comparator for equality tests.
      *
      * @param p Port to compare to.
-     * @return True iff this port is equal to given port p.
+     * @return `true` iff this port is equal to given port `p`.
      */
     constexpr bool operator==(const port_position& p) const
     {
@@ -127,7 +127,7 @@ struct port_direction
      * Comparator for set insertion.
      *
      * @param p Port to compare to.
-     * @return True iff this port goes before p in set.
+     * @return `true` iff this port goes before `p` in set.
      */
     constexpr bool operator<(const port_direction& p) const
     {
@@ -137,7 +137,7 @@ struct port_direction
      * Comparator for equality tests.
      *
      * @param p Port to compare to.
-     * @return True iff this port is equal to given port p.
+     * @return `true` iff this port is equal to given port `p`.
      */
     constexpr bool operator==(const port_direction& p) const
     {
@@ -171,7 +171,7 @@ struct port_list
      * Comparator for unordered_set/map.
      *
      * @param p Ports to compare to.
-     * @return True iff these ports are equal to p.
+     * @return `true` iff these ports are equal to `p`.
      */
     bool operator==(const port_list<PortType>& p) const
     {
