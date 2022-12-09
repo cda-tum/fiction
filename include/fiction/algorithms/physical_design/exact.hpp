@@ -253,7 +253,7 @@ class exact_impl
          * overly restrictive!
          *
          * @param ar Aspect ratio to evaluate.
-         * @return True if ar can safely be skipped because it is UNSAT anyway.
+         * @return `true` if ar can safely be skipped because it is UNSAT anyway.
          */
         [[nodiscard]] bool skippable(const typename Lyt::aspect_ratio& ar) const noexcept
         {

@@ -106,7 +106,7 @@ void foreach_edge(const Ntk& ntk, Fn&& fn)
  * @tparam Fn Unary function type that takes a `mockturtle::edge<Ntk>` object as parameter.
  * @param ntk Network to iterate over.
  * @param n Node of `ntk` whose outgoing edges are to be considered.
- * @param fn Function object to apply to each outgoing edge of n in `ntk`.
+ * @param fn Function object to apply to each outgoing edge of `n` in `ntk`.
  */
 template <typename Ntk, typename Fn>
 void foreach_outgoing_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& fn)
@@ -128,7 +128,7 @@ void foreach_outgoing_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& 
  * @tparam Fn Unary function type that takes a `mockturtle::edge<Ntk>` object as parameter.
  * @param ntk Network to iterate over.
  * @param n Node of `ntk` whose incoming edges are to be considered.
- * @param fn Function object to apply to each incoming edge of n in `ntk`.
+ * @param fn Function object to apply to each incoming edge of `n` in `ntk`.
  */
 template <typename Ntk, typename Fn>
 void foreach_incoming_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& fn)
@@ -262,7 +262,7 @@ class high_degree_fanin_exception : public std::exception
  * @tparam Ntk `mockturtle` network type.
  * @param ntk Network to check.
  * @param threshold Maximum number of legal fanins.
- * @return True if any node in `ntk` exceeds `threshold` fanins.
+ * @return `true` iff any node in `ntk` exceeds `threshold` fanins.
  */
 template <typename Ntk>
 bool has_high_degree_fanin_nodes(const Ntk& ntk, const uint32_t threshold = 2) noexcept
@@ -377,7 +377,7 @@ using edge_path = std::vector<mockturtle::edge<Ntk>>;
  * Each node without predecessors is considered a terminal and a path is defined as a sequence of edges.
  *
  * @param n Node whose paths are desired.
- * @return A vector of all possible edge paths leading from terminals to v.
+ * @return A vector of all possible edge paths leading from terminals to `v`.
  */
 template <typename Ntk>
 std::vector<edge_path<Ntk>> all_incoming_edge_paths(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept

@@ -13,7 +13,7 @@ namespace fiction
 {
 
 /**
- * A recursive hash_combine implementation from
+ * A recursive `hash_combine` implementation from
  * https://stackoverflow.com/questions/2590677/how-do-i-combine-hash-values-in-c0x
  *
  * Overrides the passed seed.

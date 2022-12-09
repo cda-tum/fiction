@@ -75,7 +75,7 @@ constexpr auto convert_array(const std::array<T, N>& a)
     return detail::convert_array<ElementType>(a, std::make_index_sequence<N>());
 }
 /**
- * Same as convert_array but for 2D arrays.
+ * Same as `convert_array` but for 2D arrays.
  *
  * @tparam ElementType New type of each element in the returned array.
  * @tparam T Element type of the input array.

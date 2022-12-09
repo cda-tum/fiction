@@ -211,7 +211,7 @@ class generate_edge_intersection_graph_impl
         /**
          * Like has_intersection_with but allows paths to share crossings, i.e., single-tile intersections.
          *
-         * Similar to has_intersection_with, this function also returns true if source and target are matching in both
+         * Similar to has_intersection_with, this function also returns `true` if source and target are matching in both
          * paths.
          *
          * @tparam Path Type of other path.

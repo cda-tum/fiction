@@ -143,9 +143,9 @@ void restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
  *
  * @tparam NtkSrc Source network type.
  * @tparam NtkDest Target network type.
- * @param ntk_src Source logic network whose signal names are to be transferred to ntk_dest.
- * @param ntk_dest Target logic network whose signal names are to be assigned ntk_src's names.
- * @param old2new Mapping of signals from ntk_src to ntk_dest.
+ * @param ntk_src Source logic network whose signal names are to be transferred to `ntk_dest`.
+ * @param ntk_dest Target logic network whose signal names are to be assigned `ntk_src`'s names.
+ * @param old2new Mapping of signals from `ntk_src` to `ntk_dest`.
  */
 template <typename NtkSrc, typename NtkDest>
 void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest,
@@ -219,7 +219,7 @@ void restore_signal_names(
 }
 /**
  * Transfers all input and output names as well as the network/layout name from one network to another. This function
- * calls restore_network_name, restore_input_names, and restore_output_names.
+ * calls `restore_network_name`, `restore_input_names`, and `restore_output_names`.
  *
  * @tparam NtkSrc Source network type.
  * @tparam NtkDest Target network type.
@@ -235,7 +235,7 @@ void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
 }
 /**
  * Transfers all signal and output names as well as the network/layout name from one network to another. This function
- * calls restore_network_name, restore_signal_names, and restore_output_names.
+ * calls `restore_network_name`, `restore_signal_names`, and `restore_output_names`.
  *
  * @tparam NtkSrc Source network type.
  * @tparam NtkDest Target network type.

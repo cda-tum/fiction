@@ -359,7 +359,7 @@ struct branching_signal_container
         }
     };
     /**
-     * Accesses the branching container to find the location of a given node n. Returns the signal to that location if
+     * Accesses the branching container to find the location of a given node `n`. Returns the signal to that location if
      * it was already stored or the default signal, otherwise.
      *
      * @param n Node whose branching position is desired.
