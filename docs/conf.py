@@ -162,8 +162,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'fiction', 'fiction Documentation',
-     author, 'fiction', 'One line description of project.',
-     'Miscellaneous'),
+     author, 'fiction', 'Design Automation for Field-coupled Nanotechnologies.',
+     'Physical Design'),
 ]
 
 # -- Options for breathe --------------------------------------------------
