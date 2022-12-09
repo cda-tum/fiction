@@ -936,8 +936,8 @@ class graph_coloring_impl
      * Checks whether the given coloring is valid, i.e., if no two adjacent vertices have the same color assigned.
      *
      * @param v_coloring Vertex coloring to check.
-     * @return `true` iff no two adjacent vertices in the stored graph have the same color assigned according to the given
-     * coloring.
+     * @return `true` iff no two adjacent vertices in the stored graph have the same color assigned according to the
+     * given coloring.
      */
     [[nodiscard]] bool is_valid_vertex_coloring(const vertex_coloring<Graph, Color>& v_coloring) const noexcept
     {

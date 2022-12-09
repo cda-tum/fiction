@@ -221,8 +221,8 @@ class technology_network : public mockturtle::klut_network
 #pragma region Structural properties
 
     /**
-     * Returns whether the given node `n` is a buffer node, i.e., whether `n` computes the identity function and is not a
-     * PI. This also returns `true` on fanout nodes.
+     * Returns whether the given node `n` is a buffer node, i.e., whether `n` computes the identity function and is not
+     * a PI. This also returns `true` on fanout nodes.
      *
      * @param n Node to consider.
      * @return `true` iff `n` is a buffer node.
@@ -232,8 +232,8 @@ class technology_network : public mockturtle::klut_network
         return _storage->nodes[n].data[1].h1 == 2 && !is_pi(n);
     }
     /**
-     * Returns whether the given node `n` is a fanout node, i.e., whether `n` is a buffer node and has more than one output
-     * signal.
+     * Returns whether the given node `n` is a fanout node, i.e., whether `n` is a buffer node and has more than one
+     * output signal.
      *
      * @param n Node to consider.
      * @return `true` iff `n` is a fanout node.

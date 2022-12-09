@@ -637,8 +637,8 @@ class exact_impl
          * Returns true, iff skip_const_or_io_node returns true for either source or target of the given edge..
          *
          * @param e Edge in network.
-         * @return `true` iff e is to be skipped in a loop due to it having constant or I/O nodes while params.io_ports ==
-         * false.
+         * @return `true` iff e is to be skipped in a loop due to it having constant or I/O nodes while params.io_ports
+         * == false.
          */
         [[nodiscard]] bool skip_const_or_io_edge(const mockturtle::edge<topology_ntk_t>& e) const noexcept
         {

@@ -15,7 +15,8 @@
 namespace fiction
 {
 /**
- * A view that extends `mockturtle::out_of_place_color_view` such that it can color edges, i.e., tuples of nodes as well.
+ * A view that extends `mockturtle::out_of_place_color_view` such that it can color edges, i.e., tuples of nodes as
+ * well.
  *
  * @tparam Ntk mockturtle network type.
  */

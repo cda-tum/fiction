@@ -605,8 +605,8 @@ class gate_level_layout : public ClockedLayout
     }
     /**
      * Checks whether a node (not its assigned tile) is dead. Nodes can be dead for a variety of reasons. For instance
-     * if they are dangling (see the `mockturtle` API). In this layout type, nodes are also marked dead when they are not
-     * assigned to a tile (which is considered equivalent to dangling).
+     * if they are dangling (see the `mockturtle` API). In this layout type, nodes are also marked dead when they are
+     * not assigned to a tile (which is considered equivalent to dangling).
      *
      * @param n Node to check for lifeliness.
      * @return `true` iff `n` is dead.
@@ -680,8 +680,8 @@ class gate_level_layout : public ClockedLayout
     }
     /**
      * Connects the given signal `s` to the given node `n` as a child. The new child `s` is appended at the end of `n`'s
-     * list of children. Thus, if the order of children is important, `move_node` should be used instead. Otherwise, this
-     * function has a smaller overhead and is to be preferred.
+     * list of children. Thus, if the order of children is important, `move_node` should be used instead. Otherwise,
+     * this function has a smaller overhead and is to be preferred.
      *
      * @param s New incoming signal to `n`.
      * @param n Node that should add `s` as its child.

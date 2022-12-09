@@ -216,8 +216,8 @@ class generate_edge_intersection_graph_impl
          *
          * @tparam Path Type of other path.
          * @param other The other path.
-         * @return `true` iff this path and the given one are overlapping, i.e., share at least one coordinate segment of
-         * size 2.
+         * @return `true` iff this path and the given one are overlapping, i.e., share at least one coordinate segment
+         * of size 2.
          */
         template <typename Path>
         bool has_overlap_with(const Path& other) const noexcept
