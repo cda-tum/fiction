@@ -27,7 +27,7 @@ namespace offset
 {
 /**
  * Unsigned offset coordinates. The implementation is optimized for memory-efficiency and fits within 64 bits.
- * Coordinates span from \f$ (0, 0, 0) to (2^{31} - 1, 2^{31} - 1, 1) \f$.
+ * Coordinates span from \f$ (0, 0, 0) \f$ to \f$ (2^{31} - 1, 2^{31} - 1, 1) \f$.
  * Each coordinate has a dead indicator `d` that can be used to represent that it is not in use.
  */
 struct ucoord_t

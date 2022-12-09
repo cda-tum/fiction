@@ -691,7 +691,7 @@ class cartesian_layout
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, only cardinal
-     * directions are being considered, i.e., the container contains all coordinates ac for which `is_adjacent(c, ac)`
+     * directions are being considered, i.e., the container contains all coordinates `ac` for which `is_adjacent(c, ac)`
      * returns `true`.
      *
      * Coordinates that are outside of the layout bounds are not considered. Thereby, the size of the returned container
@@ -711,7 +711,7 @@ class cartesian_layout
     }
     /**
      * Applies a function to all coordinates adjacent to a given one. Thereby, only cardinal directions are being
-     * considered, i.e., the function is applied to all coordinates ac for which `is_adjacent(c, ac)` returns `true`.
+     * considered, i.e., the function is applied to all coordinates `ac` for which `is_adjacent(c, ac)` returns `true`.
      *
      * Coordinates that are outside of the layout bounds are not considered. Thereby, at most 4 coordinates are touched.
      *

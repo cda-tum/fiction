@@ -36,7 +36,7 @@ namespace fiction
 /**
  * A layout type to layer on top of a clocked layout that allows the assignment of gates to clock zones (aka tiles in
  * this context). This class represents a gate-level FCN layout and, thus, adds a notion of Boolean logic. The
- * gate_level_layout class fulfills the requirements of a mockturtle logic network so that it can be used in many of
+ * gate_level_layout class fulfills the requirements of a `mockturtle` logic network so that it can be used in many of
  * `mockturtle`'s algorithms. Since a layout has to assign fixed positions to its gates (logic nodes), most generative
  * member functions like `create_pi`, `create_po`, `create_and`, etc. require additional coordinate parameters.
  * Consequently, `mockturtle`'s algorithms cannot be used to generate gate_level_layout networks. To make the class
@@ -51,7 +51,7 @@ namespace fiction
  * - a signal is an unsigned integer representation of a `tile`, i.e., a coordinate in the layout. It can be seen as a
  * pointer to a position. Consequently, the utilized coordinates need to be convertible to `uint64_t`.
  *
- * - the creation of PIs and POs creates nodes (the latter in contrast to other mockturtle networks) that have a
+ * - the creation of PIs and POs creates nodes (the latter in contrast to other `mockturtle` networks) that have a
  * position on the layout.
  *
  * - the creation of buffers (`create_buf`) creates nodes as well. A buffer with more than one output is a fanout such
@@ -63,18 +63,18 @@ namespace fiction
  * - signals (pointers to tiles) cannot be inverting. Thereby, inverter nodes (gates) have to be created that can be
  * checked for via is_inv.
  *
- * - each `create_..`. function requires a tile parameter that determines its placement. If the provided tile is dead,
+ * - each `create_...` function requires a tile parameter that determines its placement. If the provided tile is dead,
  * the location will not be stored and the node will not count towards number of gates or wires.
  *
  * - a node can be overwritten by creating another node on its location. This can, however, lead to unwanted effects and
  * should be avoided.
  *
- * - nodes can be moved via the move_node function. This function can also be used to update their children, i.e.,
+ * - nodes can be moved via the `move_node` function. This function can also be used to update their children, i.e.,
  * incoming signals.
  *
- * Most implementation details regarding mockturtle specific functions are borrowed from `mockturtle/networks/klut.hpp`.
- * Therefore, mockturtle API functions are only sporadically documented where their behavior might differ. Information
- * on their functionality can be found in `mockturtle`'s docs.
+ * Most implementation details regarding `mockturtle`-specific functions are borrowed from
+ * `mockturtle/networks/klut.hpp`. Therefore, `mockturtle` API functions are only sporadically documented where their
+ * behavior might differ. Information on their functionality can be found in `mockturtle`'s docs.
  *
  * @tparam ClockedLayout The clocked layout that is to be extended by gate functions.
  */
@@ -465,7 +465,7 @@ class gate_level_layout : public ClockedLayout
 
     /**
      * Does NOT return the layout dimensions but the number of nodes (including constants and dead ones) in accordance
-     * with the mockturtle API.
+     * with the `mockturtle` API.
      *
      * @return Number of all nodes.
      */
@@ -578,7 +578,7 @@ class gate_level_layout : public ClockedLayout
         return 0;
     }
     /**
-     * Fetches the node that is placed onto the provided tile If no node is placed there, the const0 node is returned.
+     * Fetches the node that is placed onto the provided tile If no node is placed there, the `const0` node is returned.
      *
      * @param t Tile in the layout.
      * @return Node at position `t`; or 0 if no node is placed at `t`.
@@ -605,7 +605,7 @@ class gate_level_layout : public ClockedLayout
     }
     /**
      * Checks whether a node (not its assigned tile) is dead. Nodes can be dead for a variety of reasons. For instance
-     * if they are dangling (see the mockturtle API). In this layout type, nodes are also marked dead when they are not
+     * if they are dangling (see the `mockturtle` API). In this layout type, nodes are also marked dead when they are not
      * assigned to a tile (which is considered equivalent to dangling).
      *
      * @param n Node to check for lifeliness.
@@ -680,7 +680,7 @@ class gate_level_layout : public ClockedLayout
     }
     /**
      * Connects the given signal `s` to the given node `n` as a child. The new child `s` is appended at the end of `n`'s
-     * list of children. Thus, if the order of children is important, move_node should be used instead. Otherwise, this
+     * list of children. Thus, if the order of children is important, `move_node` should be used instead. Otherwise, this
      * function has a smaller overhead and is to be preferred.
      *
      * @param s New incoming signal to `n`.
@@ -727,7 +727,7 @@ class gate_level_layout : public ClockedLayout
         }
     }
     /**
-     * Necessary function in the mockturtle API. However, in this layout type, signals cannot be complemented.
+     * Necessary function in the `mockturtle` API. However, in this layout type, signals cannot be complemented.
      *
      * @param s Signal to check.
      * @return `false`.
@@ -749,7 +749,7 @@ class gate_level_layout : public ClockedLayout
     /**
      * Returns whether a given node is a gate in accordance with `mockturtle`'s definition, i.e., whether it not a
      * constant and not a PI. Thereby, any wire/buffer (including POs) is a gate if this function is used to check for
-     * it. This poses an inconsistency but is required to comply with certain mockturtle algorithms.
+     * it. This poses an inconsistency but is required to comply with certain `mockturtle` algorithms.
      *
      * @param n Node to check.
      * @return `true` iff `n` is neither a constant nor a PI.
@@ -759,7 +759,7 @@ class gate_level_layout : public ClockedLayout
         return strg->nodes[n].data[1].h1 >= 2 && !is_pi(n);
     }
     /**
-     * Returns whether n computes the identity function.
+     * Returns whether `n` computes the identity function.
      *
      * @param n Node to check.
      * @return `true` iff `n` computes the identity.
@@ -776,7 +776,7 @@ class gate_level_layout : public ClockedLayout
         return is_buf(n);
     }
     /**
-     * Returns whether n computes the binary inversion (NOT gate).
+     * Returns whether `n` computes the binary inversion (NOT gate).
      *
      * @param n Node to check.
      * @return `true` iff `n` is a NOT gate.
@@ -832,7 +832,7 @@ class gate_level_layout : public ClockedLayout
         return is_wire(n) && fanout_size(n) > 1;
     }
     /**
-     * Returns whether node `n` computes a function. That is, this function returns `true` iff `n` is not a constant.
+     * Returns whether `n`ode `n` computes a function. That is, this function returns `true` iff `n` is not a constant.
      *
      * @param n Node to check.
      * @return `true` iff `n` is not a constant.
