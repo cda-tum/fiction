@@ -15,7 +15,7 @@
 namespace fiction
 {
 /**
- * A view that extends mockturtle::out_of_place_color_view such that it can color edges, i.e., tuples of nodes as well.
+ * A view that extends `mockturtle::out_of_place_color_view` such that it can color edges, i.e., tuples of nodes as well.
  *
  * @tparam Ntk mockturtle network type.
  */
@@ -50,7 +50,7 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * Returns the assigned color of a given edge.
      *
      * @param e Edge whose color is desired.
-     * @return Color of edge e.
+     * @return Color of edge `e`.
      */
     [[nodiscard]] uint32_t edge_color(const edge& e) const
     {
@@ -74,7 +74,7 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * Paint a given edge with the given color.
      *
      * @param e Edge to paint.
-     * @param clr Color to paint e with.
+     * @param clr Color to paint `e` with.
      */
     void paint_edge(const edge& e, uint32_t clr) const
     {
@@ -84,7 +84,7 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * Paint a given edge with the color of another given edge.
      *
      * @param e Edge to paint.
-     * @param other Edge whose color is to be used to paint e.
+     * @param other Edge whose color is to be used to paint `e`.
      */
     void paint_edge(const edge& e, const edge& other) const
     {
@@ -94,9 +94,9 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * Evaluates a predicate on a given edge's color.
      *
      * @tparam Pred Predicate type.
-     * @param e Edge whose color is used as a parameter for pred.
-     * @param pred Predicate to evaluate on e's color.
-     * @return Return value of pred(color(e)).
+     * @param e Edge whose color is used as a parameter for `pred`.
+     * @param pred Predicate to evaluate on `e`'s color.
+     * @return Return value of `pred(color(e))`.
      */
     template <typename Pred>
     [[nodiscard]] bool eval_edge_color(const edge& e, Pred&& pred) const
@@ -107,10 +107,10 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * Evaluates a predicate on two given edges' colors.
      *
      * @tparam Pred Predicate type.
-     * @param a Edge whose color is used as the first parameter for pred.
-     * @param b Edge whose color is used as the second parameter for pred.
-     * @param pred Predicate to evaluate on a's and b's colors.
-     * @return Return value of pred(color(a), color(b)).
+     * @param a Edge whose color is used as the first parameter for `pred`.
+     * @param b Edge whose color is used as the second parameter for `pred`.
+     * @param pred Predicate to evaluate on `a`'s and `b`'s colors.
+     * @return Return value of `pred(color(a), color(b))`.
      */
     template <typename Pred>
     [[nodiscard]] bool eval_edge_color(const edge& a, const edge& b, Pred&& pred) const
