@@ -26,9 +26,6 @@ namespace fiction
 {
 /**
  * The different equivalence types possible.
- *  - `STRONG` equivalence
- *  - `WEAK` equivalence
- *  - `NO` equivalence
  */
 enum class eq_type
 {
@@ -197,8 +194,8 @@ class equivalence_checking_impl
 }  // namespace detail
 
 /**
- * Performs SAT-based equivalence checking between a specification of type Spec and an implementation of type Impl. Both
- * Spec and Impl need to be network types (that is, gate-level layouts can be utilized as well).
+ * Performs SAT-based equivalence checking between a specification of type `Spec` and an implementation of type `Impl`.
+ * Both `Spec` and `Impl` need to be network types (that is, gate-level layouts can be utilized as well).
  *
  * This implementation enables the comparison of two logic networks, a logic network and a gate-level layout or two
  * gate-level layouts. Since gate-level layouts have a notion of timing that logic networks do not, this function does
