@@ -554,7 +554,7 @@ class hexagonal_layout
      *
      * @param c1 Base coordinate.
      * @param c2 Coordinate to test for its location in relation to `c1`.
-     * @return `true` iff `c2` is directly adjacent to c1 in one of the six different ordinal directions possible for
+     * @return `true` iff `c2` is directly adjacent to `c1` in one of the six different ordinal directions possible for
      * the layout's hexagonal orientation.
      */
     [[nodiscard]] bool is_adjacent_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
@@ -573,7 +573,8 @@ class hexagonal_layout
         return is_adjacent;
     }
     /**
-     * Similar to is_adjacent_of but also considers `c1`'s elevation, i.e., if c2 is adjacent to above(c1) or below(c1).
+     * Similar to is_adjacent_of but also considers `c1`'s elevation, i.e., if `c2` is adjacent to `above(c1)` or
+     * `below(c1)`.
      *
      * @param c1 Base coordinate.
      * @param c2 Coordinate to test for its location in relation to `c1`.
