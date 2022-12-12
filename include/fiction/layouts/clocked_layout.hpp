@@ -110,7 +110,7 @@ class clocked_layout : public CoordinateLayout
      * Overrides a clock number in the stored scheme with the provided one.
      *
      * @param cz Clock zone to override.
-     * @param cn New clock number for cz.
+     * @param cn New clock number for `cz`.
      */
     void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
     {
@@ -120,7 +120,7 @@ class clocked_layout : public CoordinateLayout
      * Returns the clock number for the given clock zone.
      *
      * @param cz Clock zone.
-     * @return Clock number of cz.
+     * @return Clock number of `cz`.
      */
     [[nodiscard]] clock_number_t get_clock_number(const clock_zone& cz) const noexcept
     {
@@ -139,7 +139,7 @@ class clocked_layout : public CoordinateLayout
     /**
      * Returns whether the layout is clocked by a regular clocking scheme with no overwritten zones.
      *
-     * @return True iff the layout is clocked by a regular scheme and no zones have been overwritten.
+     * @return `true` iff the layout is clocked by a regular scheme and no zones have been overwritten.
      */
     [[nodiscard]] bool is_regularly_clocked() const noexcept
     {
@@ -147,10 +147,10 @@ class clocked_layout : public CoordinateLayout
     }
     /**
      * Compares the stored clocking scheme against the provided name. Names of pre-defined clocking schemes are given in
-     * the clock_name namespace.
+     * the `clock_name` namespace.
      *
      * @param name Clocking scheme name.
-     * @return True iff the layout is clocked by a clocking scheme of name name.
+     * @return `true` iff the layout is clocked by a clocking scheme of name `name`.
      */
     [[nodiscard]] bool is_clocking_scheme(std::string&& name) const noexcept
     {
@@ -166,12 +166,12 @@ class clocked_layout : public CoordinateLayout
         return *strg->clocking;
     }
     /**
-     * Evaluates whether clock zone cz2 feeds information to clock zone cz1, i.e., whether cz2 is clocked with a
-     * clock number that is lower by 1 modulo num_clocks().
+     * Evaluates whether clock zone `cz2` feeds information to clock zone `cz1`, i.e., whether cz2 is clocked with a
+     * clock number that is lower by 1 modulo `num_clocks()`.
      *
      * @param cz1 Base clock zone.
      * @param cz2 Clock zone to check whether its clock number is 1 lower.
-     * @return True iff cz2 can feed information to cz1.
+     * @return `true` iff cz2 can feed information to `cz`1.
      */
     [[nodiscard]] bool is_incoming_clocked(const clock_zone& cz1, const clock_zone& cz2) const noexcept
     {
@@ -184,12 +184,12 @@ class clocked_layout : public CoordinateLayout
                get_clock_number(cz1);
     }
     /**
-     * Evaluates whether clock zone cz2 accepts information from clock zone cz1, i.e., whether cz2 is clocked with a
-     * clock number that is higher by 1 modulo num_clocks().
+     * Evaluates whether clock zone `cz2` accepts information from clock zone `cz1`, i.e., whether cz2 is clocked with a
+     * clock number that is higher by 1 modulo `num_clocks()`.
      *
      * @param cz1 Base clock zone.
      * @param cz2 Clock zone to check whether its clock number is 1 higher.
-     * @return True iff cz2 can accept information from cz1.
+     * @return `true` iff `cz2` can accept information from `cz1`.
      */
     [[nodiscard]] bool is_outgoing_clocked(const clock_zone& cz1, const clock_zone& cz2) const noexcept
     {
@@ -210,7 +210,7 @@ class clocked_layout : public CoordinateLayout
      * Returns a container with all clock zones that are incoming to the given one.
      *
      * @param cz Base clock zone.
-     * @return A container with all clock zones that are incoming to cz.
+     * @return A container with all clock zones that are incoming to `cz`.
      */
     [[nodiscard]] auto incoming_clocked_zones(const clock_zone& cz) const noexcept
     {
@@ -226,7 +226,7 @@ class clocked_layout : public CoordinateLayout
      *
      * @tparam Fn Functor type.
      * @param cz Base clock zone.
-     * @param fn Functor to apply to each of cz's incoming clock zones.
+     * @param fn Functor to apply to each of `cz`'s incoming clock zones.
      */
     template <typename Fn>
     void foreach_incoming_clocked_zone(const clock_zone& cz, Fn&& fn) const
@@ -244,7 +244,7 @@ class clocked_layout : public CoordinateLayout
      * Returns a container with all clock zones that are outgoing from the given one.
      *
      * @param cz Base clock zone.
-     * @return A container with all clock zones that are outgoing from cz.
+     * @return A container with all clock zones that are outgoing from `cz`.
      */
     [[nodiscard]] auto outgoing_clocked_zones(const clock_zone& cz) const noexcept
     {
@@ -260,7 +260,7 @@ class clocked_layout : public CoordinateLayout
      *
      * @tparam Fn Functor type.
      * @param cz Base clock zone.
-     * @param fn Functor to apply to each of cz's outgoing clock zones.
+     * @param fn Functor to apply to each of `cz`'s outgoing clock zones.
      */
     template <typename Fn>
     void foreach_outgoing_clocked_zone(const clock_zone& cz, Fn&& fn) const
@@ -282,7 +282,7 @@ class clocked_layout : public CoordinateLayout
      * Returns the number of incoming clock zones to the given one.
      *
      * @param cz Base clock zone.
-     * @return Number of cz's incoming clock zones.
+     * @return Number of `cz`'s incoming clock zones.
      */
     [[nodiscard]] degree_t in_degree(const clock_zone& cz) const noexcept
     {
@@ -295,7 +295,7 @@ class clocked_layout : public CoordinateLayout
      * Returns the number of outgoing clock zones from the given one.
      *
      * @param cz Base clock zone.
-     * @return Number of cz's outgoing clock zones.
+     * @return Number of `cz`'s outgoing clock zones.
      */
     [[nodiscard]] degree_t out_degree(const clock_zone& cz) const noexcept
     {
@@ -308,7 +308,7 @@ class clocked_layout : public CoordinateLayout
      * Returns the number of incoming plus outgoing clock zones of the given one.
      *
      * @param cz Base clock zone.
-     * @return Number of cz's incoming plus outgoing clock zones.
+     * @return Number of `cz`'s incoming plus outgoing clock zones.
      */
     [[nodiscard]] degree_t degree(const clock_zone& cz) const noexcept
     {

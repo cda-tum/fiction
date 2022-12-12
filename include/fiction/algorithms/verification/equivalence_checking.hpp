@@ -25,15 +25,21 @@
 namespace fiction
 {
 /**
- * The different equivalence types possible:
- *  - STRONG equivalence: Spec and Impl are logically equivalent AND Impl has a throughput of 1/1
- *  - WEAK equivalence: Spec and Impl are logically equivalent BUT Impl has a throughput of 1/x with x > 1
- *  - NO equivalence: Spec and Impl are logically not equivalent OR Impl has DRVs
+ * The different equivalence types possible.
  */
 enum class eq_type
 {
+    /**
+     * `Spec` and `Impl` are logically not equivalent OR `Impl` has DRVs.
+     */
     NO,
+    /**
+     * `Spec` and `Impl` are logically equivalent BUT `Impl` has a throughput of \f$ \frac{1}{x} \f$ with \f$ x > 1 \f$.
+     */
     WEAK,
+    /**
+     * `Spec` and `Impl` are logically equivalent AND `Impl` has a throughput of \f$ \frac{1}{1} \f$.
+     */
     STRONG
 };
 
@@ -188,8 +194,8 @@ class equivalence_checking_impl
 }  // namespace detail
 
 /**
- * Performs SAT-based equivalence checking between a specification of type Spec and an implementation of type Impl. Both
- * Spec and Impl need to be network types (that is, gate-level layouts can be utilized as well).
+ * Performs SAT-based equivalence checking between a specification of type `Spec` and an implementation of type `Impl`.
+ * Both `Spec` and `Impl` need to be network types (that is, gate-level layouts can be utilized as well).
  *
  * This implementation enables the comparison of two logic networks, a logic network and a gate-level layout or two
  * gate-level layouts. Since gate-level layouts have a notion of timing that logic networks do not, this function does
@@ -197,13 +203,15 @@ class equivalence_checking_impl
  *
  * Thereby, three different types of equivalences arise:
  *
- * - NO equivalence: Spec and Impl are not logically equivalent or one of them is a gate-level layout that contains DRVs
- * and, thus, cannot be checked for equivalence.
- * - WEAK equivalence: Spec and Impl are logically equivalent but either one of them is a gate-level layout with TP of
- * 1/x with x > 1 or both of them are gate-level layouts with TP 1/x and 1/y, respectively, where x != y.
- * - STRONG equivalence: Spec and Impl are logically equivalent and all involved gate-level layouts have TP of 1/1.
+ * - `NO` equivalence: Spec and Impl are not logically equivalent or one of them is a gate-level layout that contains
+ * DRVs and, thus, cannot be checked for equivalence.
+ * - `WEAK` equivalence: Spec and Impl are logically equivalent but either one of them is a gate-level layout with TP of
+ * \f$ \frac{1}{x} \f$ with \f$ x > 1 \f$ or both of them are gate-level layouts with TP of \f$ \frac{1}{x} \f$ and \f$
+ * \frac{1}{y} \f$, respectively, where \f$ x \neq y \f$.
+ * - `STRONG` equivalence: Spec and Impl are logically equivalent and all involved gate-level layouts have TP of \f$
+ * \frac{1}{1} \f$.
  *
- * This approach was first proposed in "Verification for Field-coupled Nanocomputing Circuits" by M. Walter, R. Wille,
+ * This approach was first proposed in \"Verification for Field-coupled Nanocomputing Circuits\" by M. Walter, R. Wille,
  * F. Sill Torres. D. Große, and R. Drechsler in DAC 2020.
  *
  * @tparam Spec Specification type.

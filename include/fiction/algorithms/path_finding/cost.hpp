@@ -21,7 +21,7 @@ namespace fiction
  * @tparam Cost Integral type for the cost.
  * @param source Source coordinate.
  * @param target Target coordinate.
- * @return Unit cost between source and target, i.e., 1.
+ * @return Unit cost between `source` and `target`, i.e., 1.
  */
 template <typename Lyt, typename Cost = uint8_t>
 [[nodiscard]] constexpr Cost unit_cost([[maybe_unused]] const coordinate<Lyt>& source,
@@ -39,7 +39,7 @@ template <typename Lyt, typename Cost = uint8_t>
  * @tparam Cost Floating-point type for the cost.
  * @param source Source coordinate.
  * @param target Target coordinate.
- * @return Random cost between source and target, i.e., a random number between 0 and 1.
+ * @return Random cost between `source` and `target`, i.e., a random number between 0 and 1.
  */
 template <typename Lyt, typename Cost = double>
 [[nodiscard]] Cost random_cost([[maybe_unused]] const coordinate<Lyt>& source,

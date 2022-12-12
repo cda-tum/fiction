@@ -27,8 +27,8 @@ namespace offset
 {
 /**
  * Unsigned offset coordinates. The implementation is optimized for memory-efficiency and fits within 64 bits.
- * Coordinates span from (0, 0, 0) to (2^31 - 1, 2^31 - 1, 1).
- * Each coordinate has a dead indicator that can be used to represent that it is not in use.
+ * Coordinates span from \f$ (0, 0, 0) \f$ to \f$ (2^{31} - 1, 2^{31} - 1, 1) \f$.
+ * Each coordinate has a dead indicator `d` that can be used to represent that it is not in use.
  */
 struct ucoord_t
 {
@@ -112,7 +112,7 @@ struct ucoord_t
     // NOLINTEND(readability-identifier-naming)
 
     /**
-     * Allows explicit conversion to uint64_t. Segments an unsigned 64-bit integer into four parts (from MSB to LSB):
+     * Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit integer into four parts (from MSB to LSB):
      *  - 1 bit for the dead indicator
      *  - 1 bit for the z position
      *  - 31 bit for the y position
@@ -125,7 +125,7 @@ struct ucoord_t
     /**
      * Returns whether the coordinate is dead.
      *
-     * @return True iff coordinate is dead.
+     * @return `true` iff coordinate is dead.
      */
     [[nodiscard]] constexpr bool is_dead() const noexcept
     {
@@ -144,17 +144,17 @@ struct ucoord_t
      * Compares against another coordinate for equality. Respects the dead indicator.
      *
      * @param other Right-hand side coordinate.
-     * @return True iff both coordinates are identical.
+     * @return `true` iff both coordinates are identical.
      */
     constexpr bool operator==(const ucoord_t& other) const noexcept
     {
         return d == other.d && z == other.z && y == other.y && x == other.x;
     }
     /**
-     * Compares against another coordinate's uint64_t representation for equality. Respects the dead indicator.
+     * Compares against another coordinate's `uint64_t` representation for equality. Respects the dead indicator.
      *
-     * @param other Right-hand side coordinate representation in uint64_t format.
-     * @return True iff this coordinate is equal to the converted one.
+     * @param other Right-hand side coordinate representation in `uint64_t` format.
+     * @return `true` iff this coordinate is equal to the converted one.
      */
     constexpr bool operator==(const uint64_t& other) const noexcept
     {
@@ -164,7 +164,7 @@ struct ucoord_t
      * Compares against another coordinate for inequality. Respects the dead indicator.
      *
      * @param other Right-hand side coordinate.
-     * @return True iff both coordinates are not identical.
+     * @return `true` iff both coordinates are not identical.
      */
     constexpr bool operator!=(const ucoord_t& other) const noexcept
     {
@@ -175,7 +175,7 @@ struct ucoord_t
      * but y is smaller, or if z and y are equal but x is smaller.
      *
      * @param other Right-hand side coordinate.
-     * @return True iff this coordinate is "less than" the other coordinate.
+     * @return `true` iff this coordinate is "less than" the other coordinate.
      */
     constexpr bool operator<(const ucoord_t& other) const noexcept
     {
@@ -204,7 +204,7 @@ struct ucoord_t
      * than".
      *
      * @param other Right-hand side coordinate.
-     * @return True iff this coordinate is "greater than" the other coordinate.
+     * @return `true` iff this coordinate is "greater than" the other coordinate.
      */
     constexpr bool operator>(const ucoord_t& other) const noexcept
     {
@@ -215,7 +215,7 @@ struct ucoord_t
      * "greater than" the other.
      *
      * @param other Right-hand side coordinate.
-     * @return True iff this coordinate is "less than or equal to" the other coordinate.
+     * @return `true` iff this coordinate is "less than or equal to" the other coordinate.
      */
     constexpr bool operator<=(const ucoord_t& other) const noexcept
     {
@@ -226,17 +226,17 @@ struct ucoord_t
      * "less than" the other.
      *
      * @param other Right-hand side coordinate.
-     * @return True iff this coordinate is "greater than or equal to" the other coordinate.
+     * @return `true` iff this coordinate is "greater than or equal to" the other coordinate.
      */
     constexpr bool operator>=(const ucoord_t& other) const noexcept
     {
         return !(*this < other);
     }
     /**
-     * Returns a string representation of the coordinate of the form "(x, y, z)" that does not respect the dead
+     * Returns a string representation of the coordinate of the form `"(x, y, z)"` that does not respect the dead
      * indicator.
      *
-     * @return String representation of the form "(x, y, z)".
+     * @return String representation of the form `"(x, y, z)"`.
      */
     [[nodiscard]] std::string str() const
     {
@@ -263,7 +263,7 @@ class coord_iterator
     /**
      * Standard constructor. Initializes the iterator with a starting position and the boundary within to enumerate.
      *
-     * With dimension = (1, 2, 1) and start = (0, 0, 0), the following order would be enumerated:
+     * With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following order would be enumerated:
      *
      * - (0, 0, 0)
      * - (1, 0, 0)
@@ -438,7 +438,7 @@ struct coord_t
     /**
      * Returns whether the coordinate is dead.
      *
-     * @return True iff coordinate is dead.
+     * @return `true` iff coordinate is dead.
      */
     [[nodiscard]] constexpr bool is_dead() const noexcept
     {
@@ -459,7 +459,7 @@ struct coord_t
      * Compares against another coordinate for equality. Respects the dead indicator.
      *
      * @param other Right-hand side coordinate.
-     * @return True iff both coordinates are identical.
+     * @return `true` iff both coordinates are identical.
      */
     constexpr bool operator==(const coord_t& other) const noexcept
     {
@@ -469,7 +469,7 @@ struct coord_t
      * Compares against another coordinate for inequality. Respects the dead indicator.
      *
      * @param other Right-hand side coordinate.
-     * @return True iff both coordinates are not identical.
+     * @return `true` iff both coordinates are not identical.
      */
     constexpr bool operator!=(const coord_t& other) const noexcept
     {
@@ -480,7 +480,7 @@ struct coord_t
      * but y is smaller, or if z and y are equal but x is smaller.
      *
      * @param other Right-hand side coordinate.
-     * @return True iff this coordinate is "less than" the other coordinate.
+     * @return `true` iff this coordinate is "less than" the other coordinate.
      */
     constexpr bool operator<(const coord_t& other) const noexcept
     {
@@ -509,7 +509,7 @@ struct coord_t
      * than".
      *
      * @param other Right-hand side coordinate.
-     * @return True iff this coordinate is "greater than" the other coordinate.
+     * @return `true` iff this coordinate is "greater than" the other coordinate.
      */
     constexpr bool operator>(const coord_t& other) const noexcept
     {
@@ -520,7 +520,7 @@ struct coord_t
      * "greater than" the other.
      *
      * @param other Right-hand side coordinate.
-     * @return True iff this coordinate is "less than or equal to" the other coordinate.
+     * @return `true` iff this coordinate is "less than or equal to" the other coordinate.
      */
     constexpr bool operator<=(const coord_t& other) const noexcept
     {
@@ -531,7 +531,7 @@ struct coord_t
      * "less than" the other.
      *
      * @param other Right-hand side coordinate.
-     * @return True iff this coordinate is "greater than or equal to" the other coordinate.
+     * @return `true` iff this coordinate is "greater than or equal to" the other coordinate.
      */
     constexpr bool operator>=(const coord_t& other) const noexcept
     {
@@ -558,10 +558,10 @@ struct coord_t
         return coord_t{x - other.x, y - other.y, z - other.z};
     }
     /**
-     * Returns a string representation of the coordinate of the form "(x, y, z)" that does not respect the dead
+     * Returns a string representation of the coordinate of the form `"(x, y, z)"` that does not respect the dead
      * indicator.
      *
-     * @return String representation of the form "(x, y, z)".
+     * @return String representation of the form `"(x, y, z)"`.
      */
     [[nodiscard]] std::string str() const
     {
@@ -572,7 +572,7 @@ struct coord_t
 }  // namespace cube
 
 /**
- * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates (x + 1) * (y + 1).
+ * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (x + 1) \cdot (y + 1) \f$.
  *
  * @tparam CoordinateType Coordinate type.
  * @param coord Coordinate.
@@ -584,7 +584,8 @@ uint64_t area(const CoordinateType& coord) noexcept
     return (coord.x + static_cast<decltype(coord.x)>(1)) * (coord.y + static_cast<decltype(coord.y)>(1));
 }
 /**
- * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates (x + 1) * (y + 1) * (z + 1).
+ * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (x + 1) \cdot (y + 1)
+ * \cdot (z + 1) \f$.
  *
  * @tparam CoordinateType Coordinate type.
  * @param coord Coordinate.

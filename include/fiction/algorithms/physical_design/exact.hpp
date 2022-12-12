@@ -58,7 +58,9 @@ enum class technology_constraints
     TOPOLINANO
 };
 /**
- * Parameters.
+ * Parameters for the exact physical design algorithm.
+ *
+ * @tparam Lyt Gate-level layout type to create.
  */
 template <typename Lyt>
 struct exact_physical_design_params
@@ -77,7 +79,9 @@ struct exact_physical_design_params
      */
     uint16_t fixed_size = 0ul;
     /**
-     * Number of threads to use for exploring the possible aspect ratios. NOTE: THIS IS AN UNSTABLE BETA FEATURE.
+     * Number of threads to use for exploring the possible aspect ratios.
+     *
+     * @note This is an unstable beta feature.
      */
     std::size_t num_threads = 1ul;
     /**
@@ -249,7 +253,7 @@ class exact_impl
          * overly restrictive!
          *
          * @param ar Aspect ratio to evaluate.
-         * @return True if ar can safely be skipped because it is UNSAT anyway.
+         * @return `true` if ar can safely be skipped because it is UNSAT anyway.
          */
         [[nodiscard]] bool skippable(const typename Lyt::aspect_ratio& ar) const noexcept
         {
@@ -325,7 +329,7 @@ class exact_impl
          * If the instance was found SAT on both levels, a layout is extract from the model and stored. The function
          * returns then true.
          *
-         * @return true iff the instance generated for the current configuration is SAT.
+         * @return `true` iff the instance generated for the current configuration is SAT.
          */
         [[nodiscard]] bool is_satisfiable()
         {
@@ -602,7 +606,7 @@ class exact_impl
          * Checks whether a given tile belongs to the added tiles of the current solver check point.
          *
          * @param t Tile to check.
-         * @return True iff t is contained in check_point->added_tiles.
+         * @return `true` iff t is contained in check_point->added_tiles.
          */
         [[nodiscard]] bool is_added_tile(const typename Lyt::tile& t) const noexcept
         {
@@ -612,7 +616,7 @@ class exact_impl
          * Checks whether a given tile belongs to the updated tiles of the current solver check point.
          *
          * @param t Tile to check.
-         * @return True iff t is contained in check_point->updated_tiles.
+         * @return `true` iff t is contained in check_point->updated_tiles.
          */
         [[nodiscard]] bool is_updated_tile(const typename Lyt::tile& t) const noexcept
         {
@@ -622,7 +626,7 @@ class exact_impl
          * Returns true, iff params.io_ports is set to false and n is either a constant or PI or PO node in network.
          *
          * @param n Node in network.
-         * @return True iff n is to be skipped in a loop due to it being a constant or an I/O and params.io_ports ==
+         * @return `true` iff n is to be skipped in a loop due to it being a constant or an I/O and params.io_ports ==
          * false.
          */
         [[nodiscard]] bool skip_const_or_io_node(const mockturtle::node<topology_ntk_t>& n) const noexcept
@@ -633,8 +637,8 @@ class exact_impl
          * Returns true, iff skip_const_or_io_node returns true for either source or target of the given edge..
          *
          * @param e Edge in network.
-         * @return True iff e is to be skipped in a loop due to it having constant or I/O nodes while params.io_ports ==
-         * false.
+         * @return `true` iff e is to be skipped in a loop due to it having constant or I/O nodes while params.io_ports
+         * == false.
          */
         [[nodiscard]] bool skip_const_or_io_edge(const mockturtle::edge<topology_ntk_t>& e) const noexcept
         {
@@ -2997,15 +3001,15 @@ class exact_impl
 }  // namespace detail
 
 /**
- * An exact placement & routing approach using SMT solving as originally proposed in "An Exact Method for Design
- * Exploration of Quantum-dot Cellular Automata" by M. Walter, R. Wille, D. Große, F. Sill Torres, and R. Drechsler in
- * DATE 2018. A more extensive description can be found in "Design Automation for Field-coupled Nanotechnologies" by M.
- * Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
+ * An exact placement & routing approach using SMT solving as originally proposed in \"An Exact Method for Design
+ * Exploration of Quantum-dot Cellular Automata\" by M. Walter, R. Wille, D. Große, F. Sill Torres, and R. Drechsler in
+ * DATE 2018. A more extensive description can be found in \"Design Automation for Field-coupled Nanotechnologies\" by
+ * M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
  *
  * Via incremental SMT calls, an optimal gate-level layout for a given logic network will be found under constraints.
- * Starting with n tiles, where n is the number of logic network nodes, each possible layout aspect ratio will be
- * examined by factorization and tested for routability with the SMT solver Z3. When no upper bound is given, this
- * approach will run until it finds a solution to the placement & routing problem instance.
+ * Starting with \f$ n \f$ tiles, where \f$ n \f$ is the number of logic network nodes, each possible layout aspect
+ * ratio will be examined by factorization and tested for routability with the SMT solver Z3. When no upper bound is
+ * given, this approach will run until it finds a solution to the placement & routing problem instance.
  *
  * Note that there a combinations of constraints for which no valid solution under the given parameters exist for the
  * given logic network. Such combinations cannot be detected automatically. It is, thus, recommended to always set a
@@ -3021,24 +3025,27 @@ class exact_impl
  *
  * The SMT instance works with a single layer of variables even though it is possible to allow crossings in the
  * solution. The reduced number of variables saves a considerable amount of runtime. That's why
- * layout.foreach_ground_tile() is used even though the model will be mapped to a 3-dimensional layout afterwards.
+ * `layout.foreach_ground_tile()` is used even though the model will be mapped to a 3-dimensional layout afterwards.
  * Generally, the algorithm incorporates quite a few encoding optimizations to be as performant as possible on various
  * layout topologies and clocking schemes.
  *
- * The approach applies to any data structures that implement the necessary functions to comply with is_network_type and
- * is_gate_level_layout, respectively. It is, thereby, mostly technology-independent but can make certain assumptions if
- * needed, for instance for ToPoliNano-compliant circuits.
+ * The approach applies to any data structures that implement the necessary functions to comply with `is_network_type`
+ * and `is_gate_level_layout`, respectively. It is, thereby, mostly technology-independent but can make certain
+ * assumptions if needed, for instance for ToPoliNano-compliant circuits.
  *
  * This approach requires the Z3 SMT solver to be installed on the system. Due to this circumstance, it is excluded from
- * (CLI) compilation by default. To enable it, pass -DFICTION_Z3=ON to the cmake call.
+ * (CLI) compilation by default. To enable it, pass `-DFICTION_Z3=ON` to the cmake call.
+ *
+ * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in too large to be handled by the
+ * specified clocking scheme.
  *
  * @tparam Lyt Desired gate-level layout type.
  * @tparam Ntk Network type that acts as specification.
  * @param ntk The network that is to place and route.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return A gate-level layout of type Lyt that implements ntk as an FCN circuit if one is found under the given
- * parameters; std::nullopt, otherwise.
+ * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit if one is found under the given
+ * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = {},
