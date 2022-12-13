@@ -15,39 +15,52 @@
 namespace fiction
 {
 
+/**
+ * A linearly decreasing temperature schedule. The temperature is altered in decrements of `10`.
+ *
+ * @param t The current temperature.
+ * @return The next temperature, i.e. \f$ \texttt{t} - 10 \f$.
+ */
 constexpr auto linear_temperature_schedule(const double t) noexcept
 {
     return t - 10.0;
 }
-
+/**
+ * A logarithmically decreasing temperature schedule. The temperature is altered by multiplying it with `0.99`.
+ *
+ * @param t The current temperature.
+ * @return The next temperature, i.e. \f$ \texttt{t} \cdot 0.99 \f$.
+ */
 constexpr auto geometric_temperature_schedule(const double t) noexcept
 {
-    return t * 0.9;
+    return t * 0.99;
 }
-
-constexpr auto slow_temperature_schedule(const double t) noexcept
-{
-    return t / 1 + 0.5 * t;
-}
-
 /**
- * Simulated annealing is a probabilistic optimization algorithm that is used to find a local minimum of a given
- * function.
+ * Simulated annealing (SA) is a probabilistic optimization algorithm that is used to find a local minimum of a given
+ * function. SA was first proposed in \"Optimization by simulated annealing\" by S. Kirkpatrick, C. D. Gelatt Jr, and M.
+ * P. Vecchi in Science 1983. It is a metaheuristic that is inspired by the annealing process in metallurgy. The
+ * algorithm starts with a random state and iteratively improves the state by randomly selecting a neighboring state. If
+ * the neighboring state is better than the current state, it is accepted. If the neighboring state is worse than the
+ * current state, it is accepted with a probability that decreases over time. The algorithm stops when the temperature
+ * reaches a certain threshold.
+ *
+ * Some pre-defined temperature schedules are provided in this header file.
  *
  * This implementation is based on:
  * https://codereview.stackexchange.com/questions/70310/simple-simulated-annealing-template-in-c11
- * @tparam State
- * @tparam CostFunc
- * @tparam TempFunc
- * @tparam NextFunc
- * @param init_state
- * @param init_temp
- * @param final_temp
- * @param cycles
- * @param cost
- * @param schedule
- * @param next
- * @return
+ *
+ * @tparam State The state type.
+ * @tparam CostFunc The cost function type.
+ * @tparam TempFunc The temperature schedule function type.
+ * @tparam NextFunc The next state function type.
+ * @param init_state The initial state to optimize.
+ * @param init_temp The initial temperature.
+ * @param final_temp The final temperature.
+ * @param cycles The number of cycles for each temperature value.
+ * @param cost The cost function to minimize.
+ * @param schedule The temperature schedule.
+ * @param next The next state function that determines an adjacent state given a current one.
+ * @return The optimized state.
  */
 template <typename State, typename CostFunc, typename TempFunc, typename NextFunc>
 State simulated_annealing(const State& init_state, const double init_temp, const double final_temp,
@@ -85,8 +98,6 @@ State simulated_annealing(const State& init_state, const double init_temp, const
                 continue;
             }
 
-            temp = schedule(temp);
-
             const auto cost_delta = new_cost - current_cost;
 
             // shortcut to skip the expensive std::exp call
@@ -101,6 +112,9 @@ State simulated_annealing(const State& init_state, const double init_temp, const
                 current_state = std::move(new_state);
                 current_cost  = std::move(new_cost);
             }
+
+            // update temperature
+            temp = schedule(temp);
         }
     }
 
