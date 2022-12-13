@@ -21,7 +21,7 @@ using namespace fiction;
  * @param x Value to evaluate.
  * @return Schwefel function value.
  */
-constexpr double schwefel_function_1d(const double& x) noexcept
+double schwefel_function_1d(const double& x) noexcept
 {
     return 418.9829 - x * std::sin(std::sqrt(std::abs(x)));
 }
@@ -49,13 +49,13 @@ TEST_CASE("1D Schwefel function", "[sim-anneal]")
 }
 
 /**
- * The 2D Drop-Wave function is a non-convex function with many local minima. It is used to test optimization algorithms.
- * This definition is taken from: https://www.sfu.ca/~ssurjano/drop.html.
+ * The 2D Drop-Wave function is a non-convex function with many local minima. It is used to test optimization
+ * algorithms. This definition is taken from: https://www.sfu.ca/~ssurjano/drop.html.
  *
  * @param x The value to evaluate.
  * @return The Drop-Wave function value.
  */
-constexpr double drop_wave_function_2d(const std::pair<double, double>& x) noexcept
+double drop_wave_function_2d(const std::pair<double, double>& x) noexcept
 {
     return -((1.0 + std::cos(12.0 * std::sqrt(x.first * x.first + x.second * x.second))) /
              (0.5 * (x.first * x.first + x.second * x.second) + 2.0));
