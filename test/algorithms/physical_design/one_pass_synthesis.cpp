@@ -155,13 +155,13 @@ TEST_CASE("One-pass synthesis", "[one-pass]")
         check<cart_gate_clk_lyt>(blueprints::multi_output_and_network<mockturtle::aig_network>(),
                                  twoddwave(crossings(configuration())));
     }
-#if !defined(__APPLE__)
-    SECTION("Async")
-    {
-        check<cart_gate_clk_lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
-                                 res(crossings(async(2, configuration()))));
-    }
-#endif
+    // #if !defined(__APPLE__)
+    //     SECTION("Async")
+    //     {
+    //         check<cart_gate_clk_lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+    //                                  res(crossings(async(2, configuration()))));
+    //     }
+    // #endif
 }
 
 TEST_CASE("One-pass synthesis timeout", "[one-pass]")
