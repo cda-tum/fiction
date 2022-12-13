@@ -1,2 +1,2 @@
-sphinx==4.0.1
-breathe==4.30.0
+sphinx>=5.0.0
+breathe>=4.30.0
