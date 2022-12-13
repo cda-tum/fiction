@@ -70,5 +70,5 @@ jobs:
         run: pip install .
 
       - name: Test
-        working-directory: ${{github.workspace}}/bindings/pyfiction/tests
+        working-directory: ${{github.workspace}}/bindings/pyfiction/test
         run: python3 -m unittest discover --verbose
