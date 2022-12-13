@@ -32,11 +32,13 @@ inline void coordinates(pybind11::module& m)
         .def(py::init(
             [](const py::tuple& t)
             {
-                if (const auto size = t.size(); size == 2)
+                const auto size = t.size();
+
+                if (size == 2)
                 {
                     return fiction::offset::ucoord_t{py::int_(t[0]), py::int_(t[1])};
                 }
-                else if (size == 3)
+                if (size == 3)
                 {
                     return fiction::offset::ucoord_t{py::int_(t[0]), py::int_(t[1]), py::int_(t[2])};
                 }

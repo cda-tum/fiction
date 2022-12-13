@@ -80,6 +80,7 @@ inline void cartesian_layout(pybind11::module& m)
              [](const cart_lyt& lyt)
              {
                  std::vector<fiction::coordinate<cart_lyt>> coords{};
+                 coords.reserve(lyt.area() * (lyt.z() + 1));
                  lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); });
                  return coords;
              })
@@ -87,16 +88,12 @@ inline void cartesian_layout(pybind11::module& m)
              [](const cart_lyt& lyt)
              {
                  std::vector<fiction::coordinate<cart_lyt>> coords{};
+                 coords.reserve(lyt.area());
                  lyt.foreach_ground_coordinate([&coords](const auto& c) { coords.push_back(c); });
                  return coords;
              })
-        .def("adjacent_coordinates",
-             [](const cart_lyt& lyt, const fiction::coordinate<cart_lyt>& c)
-             {
-                 std::vector<fiction::coordinate<cart_lyt>> coords{};
-                 lyt.foreach_adjacent_coordinate(c, [&coords](const auto& ac) { coords.push_back(ac); });
-                 return coords;
-             })
+        .def("adjacent_coordinates", &cart_lyt::adjacent_coordinates)
+        .def("adjacent_opposite_coordinates", &cart_lyt::adjacent_opposite_coordinates)
 
         ;
 }

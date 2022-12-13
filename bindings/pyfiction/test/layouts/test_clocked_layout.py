@@ -22,8 +22,8 @@ class TestClockedLayout(unittest.TestCase):
     def test_clock_zone_iteration(self):
         layout = pyfiction.clocked_cartesian_layout((2, 2, 0), "2DDWave")
 
-        self.assertEqual(layout.incoming_clocked_zones((0, 0)), set())
-        self.assertEqual(layout.outgoing_clocked_zones((2, 2)), set())
+        self.assertEqual(layout.incoming_clocked_zones((0, 0)), [])
+        self.assertEqual(layout.outgoing_clocked_zones((2, 2)), [])
 
         for icz in layout.incoming_clocked_zones((1, 1)):
             self.assertIn(icz, [pyfiction.coordinate(1, 0), pyfiction.coordinate(0, 1)])

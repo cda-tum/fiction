@@ -52,10 +52,8 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
                      {
                          return gate_layout{dimension, *scheme, layout_name};
                      }
-                     else
-                     {
-                         throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                     }
+
+                     throw std::runtime_error("Given name does not refer to a supported clocking scheme");
                  }),
              "dimension"_a, "clocking_scheme"_a = "2DDWave", "layout_name"_a = "")
 
@@ -63,6 +61,13 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
         .def("create_po", &gate_layout::create_po)
         .def("is_pi_tile", &gate_layout::is_pi_tile)
         .def("is_po_tile", &gate_layout::is_po_tile)
+
+        .def("set_layout_name", &gate_layout::set_layout_name)
+        .def("get_layout_name", &gate_layout::get_layout_name)
+        .def("set_input_name", &gate_layout::set_input_name)
+        .def("get_input_name", &gate_layout::get_input_name)
+        .def("set_output_name", &gate_layout::set_output_name)
+        .def("get_output_name", &gate_layout::get_output_name)
 
         .def("create_buf", &gate_layout::create_buf)
         .def("create_not", &gate_layout::create_not)
@@ -80,8 +85,13 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
         .def("num_wires", &gate_layout::num_wires)
         .def("is_empty", &gate_layout::is_empty)
 
-        .def("move_node", &gate_layout::move_node)
-        //            .def("get_node", &gate_clk_cart_lyt::get_node)
+        .def("fanin_size", &gate_layout::fanin_size)
+        .def("fanout_size", &gate_layout::fanout_size)
+
+        .def("clear_tile", &gate_layout::clear_tile)
+
+        //        .def("move_node", &gate_layout::move_node)
+        //        .def("get_node", &gate_clk_cart_lyt::get_node)
 
         //        .def("is_gate", &gate_clk_cart_lyt::is_gate)
         //        .def("is_wire", &gate_clk_cart_lyt::is_wire)
@@ -103,6 +113,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
              [](const gate_layout& lyt)
              {
                  std::vector<fiction::tile<gate_layout>> pis{};
+                 pis.reserve(lyt.num_pis());
                  lyt.foreach_pi([&pis, &lyt](const auto& pi) { pis.push_back(lyt.get_tile(pi)); });
                  return pis;
              })
@@ -110,6 +121,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
              [](const gate_layout& lyt)
              {
                  std::vector<fiction::tile<gate_layout>> pos{};
+                 pos.reserve(lyt.num_pos());
                  lyt.foreach_po([&pos, &lyt](const auto& po) { pos.push_back(lyt.get_tile(lyt.get_node(po))); });
                  return pos;
              })
@@ -117,6 +129,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
              [](const gate_layout& lyt)
              {
                  std::vector<fiction::tile<gate_layout>> gates{};
+                 gates.reserve(lyt.num_gates());
                  lyt.foreach_gate([&gates, &lyt](const auto& g) { gates.push_back(lyt.get_tile(g)); });
                  return gates;
              })
@@ -124,12 +137,13 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
              [](const gate_layout& lyt)
              {
                  std::vector<fiction::tile<gate_layout>> wires{};
+                 wires.reserve(lyt.num_wires());
                  lyt.foreach_wire([&wires, &lyt](const auto& w) { wires.push_back(lyt.get_tile(w)); });
                  return wires;
              })
 
-        .def("incoming_data_flow", &gate_layout::incoming_data_flow)
-        .def("outgoing_data_flow", &gate_layout::outgoing_data_flow)
+        .def("fanins", &gate_layout::incoming_data_flow)
+        .def("fanouts", &gate_layout::outgoing_data_flow)
 
         .def("__repr__",
              [](const gate_layout& lyt) -> std::string

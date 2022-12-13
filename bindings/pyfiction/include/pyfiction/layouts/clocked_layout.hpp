@@ -47,10 +47,8 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
                      {
                          return clocked_layout{dimension, *scheme};
                      }
-                     else
-                     {
-                         throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                     }
+
+                     throw std::runtime_error("Given name does not refer to a supported clocking scheme");
                  }),
              "dimension"_a, "clocking_scheme"_a = "2DDWave")
 

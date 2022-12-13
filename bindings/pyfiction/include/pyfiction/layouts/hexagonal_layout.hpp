@@ -80,6 +80,7 @@ inline void hexagonal_layout(pybind11::module& m)
              [](const hex_lyt& lyt)
              {
                  std::vector<fiction::coordinate<hex_lyt>> coords{};
+                 coords.reserve(lyt.area() * (lyt.z() + 1));
                  lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); });
                  return coords;
              })
@@ -87,16 +88,12 @@ inline void hexagonal_layout(pybind11::module& m)
              [](const hex_lyt& lyt)
              {
                  std::vector<fiction::coordinate<hex_lyt>> coords{};
+                 coords.reserve(lyt.area());
                  lyt.foreach_ground_coordinate([&coords](const auto& c) { coords.push_back(c); });
                  return coords;
              })
-        .def("adjacent_coordinates",
-             [](const hex_lyt& lyt, const fiction::coordinate<hex_lyt>& c)
-             {
-                 std::vector<fiction::coordinate<hex_lyt>> coords{};
-                 lyt.foreach_adjacent_coordinate(c, [&coords](const auto& ac) { coords.push_back(ac); });
-                 return coords;
-             })
+        .def("adjacent_coordinates", &hex_lyt::adjacent_coordinates)
+        .def("adjacent_opposite_coordinates", &hex_lyt::adjacent_opposite_coordinates)
 
         ;
 }

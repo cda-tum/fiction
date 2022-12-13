@@ -15,9 +15,9 @@
 
 #include <fmt/format.h>
 
-//#include <mockturtle/networks/aig.hpp>
-//#include <mockturtle/networks/mig.hpp>
-//#include <mockturtle/networks/xag.hpp>
+// #include <mockturtle/networks/aig.hpp>
+// #include <mockturtle/networks/mig.hpp>
+// #include <mockturtle/networks/xag.hpp>
 
 #include <string>
 
@@ -46,10 +46,8 @@ void network(pybind11::module& m, const std::string& network_name)
               {
                   return *ntks.front();
               }
-              else
-              {
-                  throw std::runtime_error("Could not parse specification file");
-              }
+
+              throw std::runtime_error("Could not parse specification file");
           });
 }
 
@@ -57,9 +55,6 @@ void network(pybind11::module& m, const std::string& network_name)
 
 inline void logic_network(pybind11::module& m)
 {
-    namespace py = pybind11;
-    using namespace pybind11::literals;
-
     /**
      * Logic network.
      */

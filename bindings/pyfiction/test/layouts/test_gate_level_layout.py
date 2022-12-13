@@ -7,8 +7,8 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
     def test_cartesian_gate_level_layout_inheritance(self):
         layout = pyfiction.cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")
 
-        self.assertEqual(layout.incoming_clocked_zones((0, 0)), set())
-        self.assertEqual(layout.outgoing_clocked_zones((2, 2)), set())
+        self.assertEqual(layout.incoming_clocked_zones((0, 0)), [])
+        self.assertEqual(layout.outgoing_clocked_zones((2, 2)), [])
 
         for icz in layout.incoming_clocked_zones((1, 1)):
             self.assertIn(icz, [pyfiction.coordinate(1, 0), pyfiction.coordinate(0, 1)])
@@ -80,27 +80,27 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
         self.assertIn(pyfiction.coordinate(f2), wires)
 
         # incoming data flow
-        inx1 = layout.incoming_data_flow(pyfiction.coordinate(x1))
+        inx1 = layout.fanins(pyfiction.coordinate(x1))
         self.assertEqual(len(inx1), 0)
 
-        inf1 = layout.incoming_data_flow(pyfiction.coordinate(f1))
+        inf1 = layout.fanins(pyfiction.coordinate(f1))
         self.assertEqual(len(inf1), 1)
         self.assertIn(pyfiction.coordinate(c), inf1)
 
-        ina2 = layout.incoming_data_flow(pyfiction.coordinate(a2))
+        ina2 = layout.fanins(pyfiction.coordinate(a2))
         self.assertEqual(len(ina2), 2)
         self.assertIn(pyfiction.coordinate(b1), ina2)
         self.assertIn(pyfiction.coordinate(b2), ina2)
 
         # outgoing data flow
-        outx1 = layout.outgoing_data_flow(pyfiction.coordinate(x1))
+        outx1 = layout.fanouts(pyfiction.coordinate(x1))
         self.assertEqual(len(outx1), 1)
         self.assertIn(pyfiction.coordinate(a1), outx1)
 
-        outf1 = layout.outgoing_data_flow(pyfiction.coordinate(f1))
+        outf1 = layout.fanouts(pyfiction.coordinate(f1))
         self.assertEqual(len(outf1), 0)
 
-        outa2 = layout.outgoing_data_flow(pyfiction.coordinate(a2))
+        outa2 = layout.fanouts(pyfiction.coordinate(a2))
         self.assertEqual(len(outa2), 1)
         self.assertIn(pyfiction.coordinate(f2), outa2)
 
@@ -116,8 +116,8 @@ class TestHexagonalGateLevelLayout(unittest.TestCase):
     def test_hexagonal_gate_level_layout_inheritance(self):
         layout = pyfiction.hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout")
 
-        self.assertEqual(layout.incoming_clocked_zones((0, 0)), set())
-        self.assertEqual(layout.outgoing_clocked_zones((2, 2)), set())
+        self.assertEqual(layout.incoming_clocked_zones((0, 0)), [])
+        self.assertEqual(layout.outgoing_clocked_zones((2, 2)), [])
 
         for icz in layout.incoming_clocked_zones((1, 1)):
             self.assertIn(icz, [pyfiction.coordinate(1, 0), pyfiction.coordinate(0, 1)])
@@ -189,27 +189,27 @@ class TestHexagonalGateLevelLayout(unittest.TestCase):
         self.assertIn(pyfiction.coordinate(f2), wires)
 
         # incoming data flow
-        inx1 = layout.incoming_data_flow(pyfiction.coordinate(x1))
+        inx1 = layout.fanins(pyfiction.coordinate(x1))
         self.assertEqual(len(inx1), 0)
 
-        inf1 = layout.incoming_data_flow(pyfiction.coordinate(f1))
+        inf1 = layout.fanins(pyfiction.coordinate(f1))
         self.assertEqual(len(inf1), 1)
         self.assertIn(pyfiction.coordinate(c), inf1)
 
-        ina2 = layout.incoming_data_flow(pyfiction.coordinate(a2))
+        ina2 = layout.fanins(pyfiction.coordinate(a2))
         self.assertEqual(len(ina2), 2)
         self.assertIn(pyfiction.coordinate(b1), ina2)
         self.assertIn(pyfiction.coordinate(b2), ina2)
 
         # outgoing data flow
-        outx1 = layout.outgoing_data_flow(pyfiction.coordinate(x1))
+        outx1 = layout.fanouts(pyfiction.coordinate(x1))
         self.assertEqual(len(outx1), 1)
         self.assertIn(pyfiction.coordinate(a1), outx1)
 
-        outf1 = layout.outgoing_data_flow(pyfiction.coordinate(f1))
+        outf1 = layout.fanouts(pyfiction.coordinate(f1))
         self.assertEqual(len(outf1), 0)
 
-        outa2 = layout.outgoing_data_flow(pyfiction.coordinate(a2))
+        outa2 = layout.fanouts(pyfiction.coordinate(a2))
         self.assertEqual(len(outa2), 1)
         self.assertIn(pyfiction.coordinate(f2), outa2)
 

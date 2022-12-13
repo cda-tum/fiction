@@ -43,7 +43,7 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
     /**
      * FCN cell technology.
      */
-    py::class_<Technology> tech(m, fmt::format("{}_technology", tech_name).c_str());
+    const py::class_<Technology> tech(m, fmt::format("{}_technology", tech_name).c_str());
 
     py::enum_<typename Technology::cell_type> cell_type(tech, "cell_type");
 
@@ -93,10 +93,8 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
                      {
                          return cell_clk_cart_lyt{dimension, *scheme, layout_name};
                      }
-                     else
-                     {
-                         throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                     }
+
+                     throw std::runtime_error("Given name does not refer to a supported clocking scheme");
                  }),
              "dimension"_a, "clocking_scheme"_a = "2DDWave", "layout_name"_a = "")
 
@@ -117,6 +115,7 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
              [](const cell_clk_cart_lyt& lyt)
              {
                  std::vector<fiction::coordinate<cell_clk_cart_lyt>> cells{};
+                 cells.reserve(lyt.num_cells());
                  lyt.foreach_cell([&cells](const auto& c) { cells.push_back(c); });
                  return cells;
              })
@@ -124,6 +123,7 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
              [](const cell_clk_cart_lyt& lyt)
              {
                  std::vector<fiction::coordinate<cell_clk_cart_lyt>> pis{};
+                 pis.reserve(lyt.num_pis());
                  lyt.foreach_pi([&pis](const auto& c) { pis.push_back(c); });
                  return pis;
              })
@@ -131,6 +131,7 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
              [](const cell_clk_cart_lyt& lyt)
              {
                  std::vector<fiction::coordinate<cell_clk_cart_lyt>> pos{};
+                 pos.reserve(lyt.num_pos());
                  lyt.foreach_po([&pos](const auto& c) { pos.push_back(c); });
                  return pos;
              })
