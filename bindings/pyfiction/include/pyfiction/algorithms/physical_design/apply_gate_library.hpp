@@ -33,7 +33,6 @@ namespace detail
 template <typename GateLibrary, typename GateLyt>
 void apply_fcn_gate_library(pybind11::module& m, const std::string& lib_name)
 {
-    namespace py = pybind11;
     using namespace pybind11::literals;
 
     using cell_clk_cart_lyt = fiction::cell_level_layout<
