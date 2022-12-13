@@ -10,10 +10,12 @@
 #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/io/write_sqd_layout.hpp>                    // writer for SiQAD files (physical simulation)
+#include <fiction/networks/technology_network.hpp>            // technology-mapped network type
 #include <fiction/technology/area.hpp>                        // area requirement calculations
 #include <fiction/technology/cell_technologies.hpp>           // cell implementations
 #include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
+#include <fiction/traits.hpp>                                 // traits for type-checking
 #include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
@@ -26,17 +28,18 @@
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
 #include <mockturtle/io/genlib_reader.hpp>                     // call-backs to read Genlib files into gate libraries
 #include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
-#include <mockturtle/networks/klut.hpp>                        // kLUT network
+#include <mockturtle/networks/klut.hpp>                        // k-LUT network
 #include <mockturtle/networks/xag.hpp>                         // XOR-AND-inverter graphs
 #include <mockturtle/utils/tech_library.hpp>                   // technology library utils
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 
+#include <cassert>
 #include <cstdint>
 #include <sstream>
 #include <string>
 #include <vector>
 
-int main()
+int main()  // NOLINT
 {
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt;
@@ -134,7 +137,7 @@ int main()
         if (gate_level_layout.has_value())
         {
             // check equivalence
-            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, *gate_level_layout);
+            const auto miter = mockturtle::miter<fiction::technology_network>(mapped_network, *gate_level_layout);
             const auto eq    = mockturtle::equivalence_checking(*miter);
             assert(eq.has_value());
 
@@ -176,7 +179,7 @@ int main()
         bestagon_exp.table();
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 #endif  // FICTION_Z3_SOLVER

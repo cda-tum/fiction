@@ -34,17 +34,22 @@ ALICE_ADD_STORE(fiction::truth_table_t, "truth_table", "t", "truth table", "trut
 ALICE_DESCRIBE_STORE(fiction::truth_table_t, tt)
 {
     if (tt->num_vars() <= 6)
+    {
         return fmt::format("{} vars, hex: {}, bin: {}", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
-    else
-        return fmt::format("{} vars, (description omitted due to truth table size)", tt->num_vars());
+    }
+    return fmt::format("{} vars, (description omitted due to truth table size)", tt->num_vars());
 }
 
 ALICE_PRINT_STORE_STATISTICS(fiction::truth_table_t, os, tt)
 {
     if (tt->num_vars() <= 6)
+    {
         os << fmt::format("[i] {} vars, hex: {}, bin: {}\n", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
+    }
     else
+    {
         os << fmt::format("[i] {} vars, (description omitted due to truth table size)\n", tt->num_vars());
+    }
 }
 
 ALICE_LOG_STORE_STATISTICS(fiction::truth_table_t, tt)
@@ -122,6 +127,7 @@ bool can_show<fiction::logic_network_t>(std::string& extension, [[maybe_unused]]
 }
 
 template <>
+// NOLINTNEXTLINE
 void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_network_t& element, const command& cmd)
 {
     const auto show_ntk = [&os, &cmd](auto&& ntk_ptr)
@@ -262,6 +268,7 @@ bool can_show<fiction::gate_layout_t>(std::string& extension, [[maybe_unused]] c
 }
 
 template <>
+// NOLINTNEXTLINE
 void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t& element, const command& cmd)
 {
     const auto show_lyt = [&os, &cmd](auto&& lyt_ptr)
@@ -447,6 +454,7 @@ bool can_show<fiction::cell_layout_t>(std::string& extension, [[maybe_unused]] c
 }
 
 template <>
+// NOLINTNEXTLINE
 void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t& element,
                                   const command& cmd)  // const & for pointer because alice says so...
 {
@@ -454,7 +462,7 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        if constexpr (!std::is_same_v<fiction::technology<Lyt>, fiction::qca_technology>)
+        if constexpr (!fiction::has_qca_technology_v<Lyt>)
         {
             cmd.env->out() << fmt::format("[e] {} is not a QCA layout", lyt_ptr->get_layout_name()) << std::endl;
         }

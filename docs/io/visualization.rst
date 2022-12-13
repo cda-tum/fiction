@@ -21,6 +21,7 @@ Graphviz (DOT) Drawers
 .. doxygenclass:: fiction::edge_color_view_drawer
 .. doxygenclass:: fiction::simple_gate_layout_tile_drawer
 .. doxygenclass:: fiction::gate_layout_cartesian_drawer
+.. doxygenclass:: fiction::gate_layout_shifted_cartesian_drawer
 .. doxygenclass:: fiction::gate_layout_hexagonal_drawer
 
 .. doxygenfunction:: fiction::write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {})
@@ -31,5 +32,10 @@ SVG Images
 
 **Header:** ``fiction/io/write_svg_layout.hpp``
 
+.. doxygenstruct:: fiction::write_qca_layout_svg_params
+   :members:
+
 .. doxygenfunction:: fiction::write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg_params ps = {})
 .. doxygenfunction:: fiction::write_qca_layout_svg(const Lyt& lyt, const std::string& filename, write_qca_layout_svg_params ps = {})
+
+.. doxygenclass:: fiction::unsupported_cell_type_exception

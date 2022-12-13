@@ -229,14 +229,14 @@ class apply_gate_library_impl
  * fcn_gate_library to implement a new gate library. Examples are qca_one_library, inml_topolinano_library, and
  * sidb_bestagon_library.
  *
- * May pass through, and thereby throw, an 'unsupported_gate_type_exception' or an
- * 'unsupported_gate_orientation_exception'.
+ * May pass through, and thereby throw, an unsupported_gate_type_exception or an
+ * unsupported_gate_orientation_exception.
  *
  * @tparam CellLyt Type of the returned cell-level layout.
  * @tparam GateLibrary Type of the gate library to apply.
  * @tparam GateLyt Type of the gate-level layout to apply the library to.
  * @param lyt The gate-level layout.
- * @return A cell-level layout that implements lyt's gate types with building blocks defined in GateLibrary.
+ * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt>
 CellLyt apply_gate_library(const GateLyt& lyt)
@@ -246,7 +246,7 @@ CellLyt apply_gate_library(const GateLyt& lyt)
     static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
     static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
 
-    static_assert(std::is_same_v<typename CellLyt::technology, typename GateLibrary::technology>,
+    static_assert(std::is_same_v<technology<CellLyt>, technology<GateLibrary>>,
                   "CellLyt and GateLibrary must implement the same technology");
 
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};

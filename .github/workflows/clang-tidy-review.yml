@@ -1,0 +1,58 @@
+name: Clang-Tidy Review
+
+on:
+  pull_request:
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - 'libs/**'
+      - '.github/workflows/clang-tidy-review.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Review code with Clang-Tidy
+        uses: ZedThree/clang-tidy-review@v0.10.1
+        id: review
+        with:
+          cmake_command: >
+            cmake . -B build
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+            -DFICTION_CLI=ON
+            -DFICTION_TEST=ON
+            -DFICTION_EXPERIMENTS=ON
+            -DMOCKTURTLE_EXAMPLES=OFF
+          build_dir: build
+          config_file: '.clang-tidy'
+          exclude: 'libs/*, docs/*, benchmarks/*, bib/*, */catch2/*.hpp'
+          split_workflow: true
+
+      - name: Make sure that the review file exists
+        id: check-review-output
+        uses: andstor/file-existence-action@v2.0.0
+        with:
+          files: 'clang-tidy-review-output.json'
+          ignore_case: true
+
+      # Workaround to fix an issue with non-existing review artifacts in the review posting workflow
+      - name: Create empty review artifact
+        if: steps.check-review-output.outputs.files_exists == 'false'
+        uses: finnp/create-file-action@1.0.0
+        env:
+          FILE_NAME: 'clang-tidy-review-output.json'
+          FILE_DATA: '{}'
+
+      - name: Upload review artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: clang-tidy-review
+          path: |
+            clang-tidy-review-output.json
+            clang-tidy-review-metadata.json

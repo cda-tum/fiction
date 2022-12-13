@@ -5,8 +5,8 @@ project(fiction
         LANGUAGES CXX
         VERSION 0.4.0)
 
-include(cmake/StandardProjectSettings.cmake)
-include(cmake/PreventInSourceBuilds.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/StandardProjectSettings.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/PreventInSourceBuilds.cmake)
 
 # Set C++ standard; at least C++17 is required
 set(FICTION_CXX_STANDARD "17" CACHE STRING "C++ standard")
@@ -28,18 +28,18 @@ endif ()
 add_library(project_warnings INTERFACE)
 
 # Enable cache system
-include(cmake/Cache.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Cache.cmake)
 
 # Standard compiler warnings
-include(cmake/CompilerWarnings.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CompilerWarnings.cmake)
 set_project_warnings(project_warnings)
 
 # Sanitizer options if supported by compiler
-include(cmake/Sanitizers.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Sanitizers.cmake)
 enable_sanitizers(project_options)
 
 # Allow for static analysis options
-include(cmake/StaticAnalyzers.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/StaticAnalyzers.cmake)
 
 # Enable progress bars
 if (NOT WIN32)

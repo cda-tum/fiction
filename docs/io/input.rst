@@ -26,3 +26,7 @@ Cell-level Layouts
 
 .. doxygenfunction:: fiction::read_fqca_layout(std::istream& is, const std::string& name = "")
 .. doxygenfunction:: fiction::read_fqca_layout(const std::string& filename, const std::string& name = "")
+
+.. doxygenclass:: fiction::unsupported_character_exception
+.. doxygenclass:: fiction::undefined_cell_label_exception
+.. doxygenclass:: fiction::unrecognized_cell_definition_exception

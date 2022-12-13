@@ -20,7 +20,8 @@ namespace fiction
  * necessary to know exactly which space the associated layout internals occupy. A bounding box computes coordinates
  * that span a minimum-sized rectangle that encloses all non-empty layout coordinates.
  *
- * The bounding box does not automatically updated when the layout changes. Call update_bounding_box() to recompute it.
+ * The bounding box does not automatically updated when the layout changes. Call `update_bounding_box()` to recompute
+ * it.
  *
  * @tparam Lyt Gate-level or cell-level layout type.
  */
@@ -67,7 +68,9 @@ class bounding_box_2d
 
             min.x = x;
             if (elem_found)
+            {
                 break;
+            }
         }
 
         // calculate min.y
@@ -85,7 +88,9 @@ class bounding_box_2d
 
             min.y = y;
             if (elem_found)
+            {
                 break;
+            }
         }
 
         // calculate max.x
@@ -103,7 +108,9 @@ class bounding_box_2d
 
             max.x = x;
             if (elem_found)
+            {
                 break;
+            }
         }
 
         // calculate max.y
@@ -121,7 +128,9 @@ class bounding_box_2d
 
             max.y = y;
             if (elem_found)
+            {
                 break;
+            }
         }
 
         x_size = max.x - min.x;
@@ -130,8 +139,8 @@ class bounding_box_2d
     /**
      * Returns the minimum corner of the bounding box.
      *
-     * In a cartesian_layout<offset::ucoord_t> object, this location represents the most north-western coordinate of the
-     * bounding box enclosing every non-empty coordinate.
+     * In a `cartesian_layout<offset::ucoord_t>` object, this location represents the most north-western coordinate of
+     * the bounding box enclosing every non-empty coordinate.
      *
      * @return The minimum enclosing coordinate in the associated layout.
      */
@@ -142,8 +151,8 @@ class bounding_box_2d
     /**
      * Returns the maximum corner of the bounding box.
      *
-     * In a cartesian_layout<offset::ucoord_t> object, this location represents the most south-eastern coordinate of the
-     * bounding box enclosing every non-empty coordinate.
+     * In a `cartesian_layout<offset::ucoord_t>` object, this location represents the most south-eastern coordinate of
+     * the bounding box enclosing every non-empty coordinate.
      *
      * @return The maximum enclosing coordinate in the associated layout.
      */

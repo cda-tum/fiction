@@ -56,6 +56,28 @@ Placement Utils
 .. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<branching_signal_container<Lyt, Ntk, fanout_size>, Ntk>& node2pos) noexcept
 
 
+Routing Utils
+-------------
+
+**Header:** ``fiction/utils/routing_utils.hpp``
+
+.. doxygenstruct:: fiction::routing_objective
+   :members:
+
+.. doxygenclass:: fiction::layout_coordinate_path
+   :members:
+
+.. doxygenclass:: fiction::path_collection
+   :members:
+.. doxygenclass:: fiction::path_set
+   :members:
+
+.. doxygenfunction:: fiction::is_crossable_wire
+.. doxygenfunction:: fiction::route_path
+.. doxygenfunction:: fiction::extract_routing_objectives
+.. doxygenfunction:: fiction::clear_routing
+
+
 Name Utils
 ----------
 
@@ -81,6 +103,16 @@ Array Utils
 .. doxygenfunction:: fiction::convert_array_of_arrays
 
 
+STL Extensions
+--------------
+
+**Header:** ``fiction/utils/stl_utils.hpp``
+
+.. doxygenfunction:: fiction::find_first_two_of
+
+.. doxygenclass:: fiction::searchable_priority_queue
+
+
 Ranges
 ------
 
@@ -94,5 +126,7 @@ Hashing
 -------
 
 **Header:** ``fiction/utils/hash.hpp``
+
+This header defines implementations for ``std::hash`` for several data types.
 
 .. doxygenfunction:: fiction::hash_combine

@@ -93,7 +93,7 @@ class exact_command : public command
             return;
         }
         // set the value of fixed_size as the upper bound if set
-        else if (this->is_set("fixed_size"))
+        if (this->is_set("fixed_size"))
         {
             ps.upper_bound = ps.fixed_size;
         }

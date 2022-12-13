@@ -21,24 +21,57 @@ namespace fiction
 {
 
 /**
- * Specify the checks that are to be executed.
+ * Parameters for design rule violation checking that specify the checks that are to be executed.
  */
 struct gate_level_drv_params
 {
     // Topology
-    bool unplaced_nodes           = true;
-    bool placed_dead_nodes        = true;
+
+    /**
+     * Check for nodes without locations.
+     */
+    bool unplaced_nodes = true;
+    /**
+     * Check for placed but dead nodes.
+     */
+    bool placed_dead_nodes = true;
+    /*
+     * Check for nodes that are connected to non-adjacent ones.
+     */
     bool non_adjacent_connections = true;
-    bool missing_connections      = true;
-    bool crossing_gates           = true;
+    /**
+     * Check for nodes without connections.
+     */
+    bool missing_connections = true;
+    /**
+     * Check for wires that are crossing gates.
+     */
+    bool crossing_gates = true;
 
     // Clocking
+
+    /**
+     * Check if all node connections obey the clocking scheme data flow.
+     */
     bool clocked_data_flow = true;
 
     // I/O
-    bool has_io    = true;
-    bool empty_io  = true;
-    bool io_pins   = true;
+
+    /**
+     * Check if the layout has I/Os.
+     */
+    bool has_io = true;
+    /**
+     * Check if the I/Os are assigned to empty tiles.
+     */
+    bool empty_io = true;
+    /**
+     * Check if the I/Os are assigned to wire segments.
+     */
+    bool io_pins = true;
+    /**
+     * Check if the I/Os are located at the layout's border.
+     */
     bool border_io = true;
 
     /**
@@ -97,7 +130,7 @@ class gate_level_drvs_impl
      *   - Non-wire I/O
      *   - Non-border I/O
      */
-    void run() noexcept
+    void run()
     {
         *ps.out << "[i] Topology:\n";
         if (ps.unplaced_nodes)
@@ -150,9 +183,9 @@ class gate_level_drvs_impl
 
         *ps.out << fmt::format(
                        "[i] DRVs: {}, Warnings: {}",
-                       (pst.drvs ? fmt::format(fmt::fg(fmt::color::red), std::to_string(pst.drvs)) : ZERO_ISSUES),
-                       (pst.warnings ? fmt::format(fmt::fg(fmt::color::yellow), std::to_string(pst.warnings)) :
-                                       ZERO_ISSUES))
+                       (pst.drvs != 0u ? fmt::format(fmt::fg(fmt::color::red), std::to_string(pst.drvs)) : ZERO_ISSUES),
+                       (pst.warnings != 0u ? fmt::format(fmt::fg(fmt::color::yellow), std::to_string(pst.warnings)) :
+                                             ZERO_ISSUES))
                 << std::endl;
 
         pst.report["DRVs"]     = pst.drvs;
@@ -249,7 +282,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string unplaced_nodes_check() noexcept
+    std::string unplaced_nodes_check()
     {
         nlohmann::json unplaced_report{};
 
@@ -279,7 +312,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string placed_dead_nodes_check() noexcept
+    std::string placed_dead_nodes_check()
     {
         nlohmann::json placed_dead_report{};
 
@@ -311,7 +344,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string non_adjacent_connections_check() noexcept
+    std::string non_adjacent_connections_check()
     {
         nlohmann::json non_adjacency_report{};
 
@@ -347,7 +380,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string missing_connections_check() noexcept
+    std::string missing_connections_check()
     {
         nlohmann::json connections_report{};
 
@@ -360,10 +393,8 @@ class gate_level_drvs_impl
                 {
                     const auto t = lyt.get_tile(n);
 
-                    bool dangling_inp_connection =
-                        lyt.template incoming_data_flow<std::set<tile<Lyt>>>(t).empty() && !lyt.is_pi_tile(t);
-                    bool dangling_out_connection =
-                        lyt.template outgoing_data_flow<std::set<tile<Lyt>>>(t).empty() && !lyt.is_po_tile(t);
+                    const bool dangling_inp_connection = lyt.fanin_size(lyt.get_node(t)) == 0 && !lyt.is_pi_tile(t);
+                    const bool dangling_out_connection = lyt.fanout_size(lyt.get_node(t)) == 0 && !lyt.is_po_tile(t);
 
                     if (dangling_out_connection || dangling_inp_connection)
                     {
@@ -383,7 +414,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string crossing_gates_check() noexcept
+    std::string crossing_gates_check()
     {
         nlohmann::json crossing_report{};
 
@@ -411,7 +442,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string clocked_data_flow_check() noexcept
+    std::string clocked_data_flow_check()
     {
         nlohmann::json data_flow_report{};
 
@@ -447,7 +478,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string has_io_check() noexcept
+    std::string has_io_check()
     {
         nlohmann::json has_io_report{};
 
@@ -487,7 +518,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string empty_io_check() noexcept
+    std::string empty_io_check()
     {
         nlohmann::json empty_io_report{};
 
@@ -515,7 +546,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string io_pin_check() noexcept
+    std::string io_pin_check()
     {
         nlohmann::json io_pin_report{};
 
@@ -543,7 +574,7 @@ class gate_level_drvs_impl
      *
      * @return Check summary as a one liner.
      */
-    std::string border_io_check() noexcept
+    std::string border_io_check()
     {
         nlohmann::json border_report{};
 
@@ -579,8 +610,8 @@ class gate_level_drvs_impl
  * Furthermore, this function does not only find and log DRVs but can also warn for instances that are not per se errors
  * but defy best practices of layout generation, e.g., I/Os not being placed at the layout borders.
  *
- * For this function to work, detail::gate_level_drvs_impl need to be declared as a friend class to the layout type that
- * is going to be examined.
+ * For this function to work, `detail::gate_level_drvs_impl` need to be declared as a `friend class` to the layout type
+ * that is going to be examined.
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt The gate-level layout that is to be examined for DRVs and warnings.

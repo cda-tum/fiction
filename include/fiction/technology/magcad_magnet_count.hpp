@@ -9,7 +9,6 @@
 #include "fiction/traits.hpp"
 
 #include <cstdint>
-#include <type_traits>
 
 namespace fiction
 {
@@ -25,7 +24,7 @@ template <typename Lyt>
 uint64_t magcad_magnet_count(const Lyt& lyt) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(std::is_same_v<technology<Lyt>, inml_technology>, "Lyt is not an iNML layout");
+    static_assert(has_inml_technology_v<Lyt>, "Lyt is not an iNML layout");
     static_assert(has_foreach_cell_v<Lyt>, "Lyt does not implement the foreach_cell function");
 
     uint64_t num_inv_cells{0ull};

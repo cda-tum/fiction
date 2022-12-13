@@ -2,7 +2,8 @@
 // Created by marcel on 24.06.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -12,20 +13,18 @@
 #include <fiction/types.hpp>
 
 #include <string>
-#include <type_traits>
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[cell-level-layout]")
+TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", qca_cell_clk_lyt, stacked_qca_cell_clk_lyt,
+                   inml_cell_clk_lyt, sidb_cell_clk_lyt)
 {
-    using layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
-
-    CHECK(is_cell_level_layout_v<layout>);
-    CHECK(has_foreach_cell_v<layout>);
-    CHECK(has_is_empty_cell_v<layout>);
-    CHECK(has_is_empty_v<layout>);
-    CHECK(has_get_layout_name_v<layout>);
-    CHECK(has_set_layout_name_v<layout>);
+    CHECK(is_cell_level_layout_v<TestType>);
+    CHECK(has_foreach_cell_v<TestType>);
+    CHECK(has_is_empty_cell_v<TestType>);
+    CHECK(has_is_empty_v<TestType>);
+    CHECK(has_get_layout_name_v<TestType>);
+    CHECK(has_set_layout_name_v<TestType>);
 }
 
 TEST_CASE("Cell technology", "[cell-level-layout]")
@@ -49,6 +48,9 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
         CHECK(qca_technology::is_crossover_cell_mode(qca_technology::cell_mode::CROSSOVER));
 
         CHECK(tech_impl_name<qca_technology> == std::string{"QCA"});
+
+        CHECK(has_qca_technology_v<qca_cell_clk_lyt>);
+        CHECK(has_qca_technology_v<stacked_qca_cell_clk_lyt>);
     }
     SECTION("iNML")
     {
@@ -67,6 +69,8 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
         CHECK(inml_technology::is_normal_cell_mode(inml_technology::cell_mode{}));
 
         CHECK(tech_impl_name<inml_technology> == std::string{"iNML"});
+
+        CHECK(has_inml_technology_v<inml_cell_clk_lyt>);
     }
     SECTION("SiDB")
     {
@@ -78,6 +82,8 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
         CHECK(sidb_technology::is_normal_cell_mode(sidb_technology::cell_mode{}));
 
         CHECK(tech_impl_name<sidb_technology> == std::string{"SiDB"});
+
+        CHECK(has_sidb_technology_v<sidb_cell_clk_lyt>);
     }
 }
 
@@ -107,8 +113,6 @@ TEST_CASE("Cell type assignment", "[cell-level-layout]")
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 4}, "b");
     layout.assign_cell_name({4, 2}, "f");
-
-    CHECK(std::is_same_v<typename cell_layout::technology, qca_technology>);
 
     CHECK(layout.get_layout_name() == "AND");
     CHECK(layout.get_cell_name({0, 2}) == "a");
@@ -244,7 +248,7 @@ TEST_CASE("Cell mode assignment", "[cell-level-layout]")
     CHECK(layout.get_cell_mode({2, 3, 1}) == qca_technology::cell_mode::NORMAL);
 }
 
-TEST_CASE("Clocking", "[cell-level-layout]")
+TEST_CASE("Clock zone assignment to cells", "[cell-level-layout]")
 {
     using clk_cell_lyt = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 

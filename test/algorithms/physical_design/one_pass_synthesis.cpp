@@ -2,9 +2,10 @@
 // Created by marcel on 24.09.21.
 //
 
+#include <catch2/catch_test_macros.hpp>
+
 #if (MUGEN)
 
-#include "catch.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
@@ -163,7 +164,7 @@ TEST_CASE("One-pass synthesis", "[one-pass]")
 #endif
 }
 
-TEST_CASE("Timeout", "[one-pass]")
+TEST_CASE("One-pass synthesis timeout", "[one-pass]")
 {
     auto timeout_config    = use(configuration());
     timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
@@ -175,7 +176,7 @@ TEST_CASE("Timeout", "[one-pass]")
     CHECK(!layout.has_value());
 }
 
-TEST_CASE("Name conservation", "[one-pass]")
+TEST_CASE("Name conservation after one-pass synthesis", "[one-pass]")
 {
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");
@@ -194,6 +195,13 @@ TEST_CASE("Name conservation", "[one-pass]")
 
     // PO names
     CHECK(layout->get_output_name(0) == "f");
+}
+
+#else  // MUGEN
+
+TEST_CASE("One-pass synthesis", "[one-pass]")
+{
+    CHECK(true);  // workaround for empty test case
 }
 
 #endif  // MUGEN

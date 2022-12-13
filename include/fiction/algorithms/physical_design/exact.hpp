@@ -41,9 +41,10 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <set>
 #include <string>
 #include <thread>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace fiction
@@ -58,7 +59,7 @@ enum class technology_constraints
     TOPOLINANO
 };
 /**
- * Parameters.
+ * Parameters for the exact physical design algorithm.
  */
 struct exact_physical_design_params
 {
@@ -75,7 +76,9 @@ struct exact_physical_design_params
      */
     uint16_t fixed_size = 0ul;
     /**
-     * Number of threads to use for exploring the possible aspect ratios. NOTE: THIS IS AN UNSTABLE BETA FEATURE.
+     * Number of threads to use for exploring the possible aspect ratios.
+     *
+     * @note This is an unstable beta feature.
      */
     std::size_t num_threads = 1ul;
     /**
@@ -163,7 +166,8 @@ class exact_impl
 
         lower_bound = static_cast<decltype(lower_bound)>(ntk->num_gates() + ntk->num_pis());
 
-        ari = aspect_ratio_iterator<aspect_ratio<Lyt>>{ps.fixed_size ? ps.fixed_size : lower_bound};
+        // NOLINTNEXTLINE(*-prefer-member-initializer)
+        ari = aspect_ratio_iterator<typename Lyt::aspect_ratio>{ps.fixed_size ? ps.fixed_size : lower_bound};
     }
 
     std::optional<Lyt> run()
@@ -172,10 +176,8 @@ class exact_impl
         {
             return run_asynchronously();
         }
-        else
-        {
-            return run_synchronously();
-        }
+
+        return run_synchronously();
     }
 
   private:
@@ -207,11 +209,11 @@ class exact_impl
     /**
      * Iterator for the factorization of possible aspect ratios.
      */
-    aspect_ratio_iterator<aspect_ratio<Lyt>> ari{0};
+    aspect_ratio_iterator<typename Lyt::aspect_ratio> ari{0};
     /**
      * Aspect ratio of found result. Only needed for the asynchronous case.
      */
-    std::optional<aspect_ratio<Lyt>> result_aspect_ratio;
+    std::optional<typename Lyt::aspect_ratio> result_aspect_ratio;
     /**
      * Restricts access to the aspect_ratio_iterator and the result_aspect_ratio.
      */
@@ -253,9 +255,9 @@ class exact_impl
          * overly restrictive!
          *
          * @param ar Aspect ratio to evaluate.
-         * @return True if ar can safely be skipped because it is UNSAT anyway.
+         * @return `true` if ar can safely be skipped because it is UNSAT anyway.
          */
-        [[nodiscard]] bool skippable(const aspect_ratio<Lyt>& ar) const noexcept
+        [[nodiscard]] bool skippable(const typename Lyt::aspect_ratio& ar) const noexcept
         {
             // OPEN clocking optimization
             if (!layout.is_regularly_clocked())
@@ -267,7 +269,7 @@ class exact_impl
                 }
             }
             // Columnar clocking optimization
-            else if (layout.is_clocking_scheme(clock_name::columnar))
+            else if (layout.is_clocking_scheme(clock_name::COLUMNAR))
             {
                 // skip all aspect ratios that are too shallow for the network's depth
                 if (ar.x < depth_ntk.depth())
@@ -281,7 +283,7 @@ class exact_impl
                 }
             }
             // Row clocking optimization
-            else if (layout.is_clocking_scheme(clock_name::row))
+            else if (layout.is_clocking_scheme(clock_name::ROW))
             {
                 // skip all aspect ratios that are too shallow for the network's depth
                 if (ar.y < depth_ntk.depth())
@@ -303,7 +305,7 @@ class exact_impl
          *
          * @param ar Current aspect ratio to work on.
          */
-        void update(const aspect_ratio<Lyt>& ar) noexcept
+        void update(const typename Lyt::aspect_ratio& ar) noexcept
         {
             layout.resize({ar.x, ar.y, params.crossings ? 1 : 0});
             check_point = std::make_shared<solver_check_point>(fetch_solver(ar));
@@ -329,7 +331,7 @@ class exact_impl
          * If the instance was found SAT on both levels, a layout is extract from the model and stored. The function
          * returns then true.
          *
-         * @return true iff the instance generated for the current configuration is SAT.
+         * @return `true` iff the instance generated for the current configuration is SAT.
          */
         [[nodiscard]] bool is_satisfiable()
         {
@@ -363,7 +365,7 @@ class exact_impl
          *
          * @param ar Key to storing the current solver state.
          */
-        void store_solver_state(const aspect_ratio<Lyt>& ar) noexcept
+        void store_solver_state(const typename Lyt::aspect_ratio& ar) noexcept
         {
             solver_tree[ar] = check_point->state;
         }
@@ -419,7 +421,7 @@ class exact_impl
          * updated. Additionally, a container for assumptions, i.e., assertions that are only valid in this and only
          * this run, is needed. All of that is packaged in a solver check point.
          */
-        struct solver_check_point
+        struct solver_check_point  // NOLINT: assumptions cannot be default-initialized
         {
             /**
              * Solver and watched literals.
@@ -430,7 +432,7 @@ class exact_impl
              * contains the column (eastern) or row (southern) of tiles that used to be at the border but is not anymore
              * now. In these tiles, certain assertions change so that their previous assertions need to be reformulated.
              */
-            std::set<tile<Lyt>> added_tiles, updated_tiles;
+            std::unordered_set<typename Lyt::tile> added_tiles, updated_tiles;
             /**
              * Assumptions that are true for only one solver run. Always includes the assumption literal that did not
              * change.
@@ -489,7 +491,7 @@ class exact_impl
          * strategy using factorizations is kept and several solvers are employed that can be reused at a later point.
          * In the example, the 4 x 4 solver would be stored and revisited when 4 x 5 is to be explored.
          */
-        std::map<aspect_ratio<Lyt>, state_ptr> solver_tree{};
+        std::unordered_map<typename Lyt::aspect_ratio, state_ptr> solver_tree{};
         /**
          * Current solver checkpoint extracted from the solver tree.
          */
@@ -503,7 +505,7 @@ class exact_impl
          *
          * @return Eastern literal.
          */
-        [[nodiscard]] z3::expr get_lit_e() noexcept
+        [[nodiscard]] z3::expr get_lit_e()
         {
             return ctx->bool_const(fmt::format("lit_e_{}", lc).c_str());
         }
@@ -512,7 +514,7 @@ class exact_impl
          *
          * @return Southern literal.
          */
-        [[nodiscard]] z3::expr get_lit_s() noexcept
+        [[nodiscard]] z3::expr get_lit_s()
         {
             return ctx->bool_const(fmt::format("lit_s_{}", lc).c_str());
         }
@@ -527,7 +529,7 @@ class exact_impl
          * @return Solver state associated with an aspect ratio of size x - 1 * y or x * y - 1 and, additionally, the
          * tiles new to the solver. If no such solver is available, a new one is created.
          */
-        [[nodiscard]] solver_check_point fetch_solver(const aspect_ratio<Lyt>& ar) noexcept
+        [[nodiscard]] solver_check_point fetch_solver(const typename Lyt::aspect_ratio& ar)
         {
             const auto create_assumptions = [this](const solver_state& state) -> z3::expr_vector
             {
@@ -542,7 +544,7 @@ class exact_impl
             if (const auto it_x = solver_tree.find({ar.x - 1, ar.y}); it_x != solver_tree.end())
             {
                 // gather additional y-tiles and updated tiles
-                std::set<tile<Lyt>> added_tiles{}, updated_tiles{};
+                std::unordered_set<typename Lyt::tile> added_tiles{}, updated_tiles{};
                 for (decltype(ar.y) y = 0; y <= ar.y; ++y)
                 {
                     added_tiles.emplace(ar.x, y);
@@ -554,7 +556,7 @@ class exact_impl
                 solver_state new_state = {state->solver, {get_lit_e(), state->lit.s}};
 
                 // reset eastern constraints
-                new_state.solver->add(not state->lit.e);
+                new_state.solver->add(!(state->lit.e));
 
                 // remove solver
                 solver_tree.erase(it_x);
@@ -563,10 +565,10 @@ class exact_impl
                         create_assumptions(new_state)};
             }
             // does a solver state for a layout of aspect ratio of size x * y - 1 exist?
-            else if (const auto it_y = solver_tree.find({ar.x, ar.y - 1}); it_y != solver_tree.end())
+            if (const auto it_y = solver_tree.find({ar.x, ar.y - 1}); it_y != solver_tree.end())
             {
                 // gather additional x-tiles
-                std::set<tile<Lyt>> added_tiles{}, updated_tiles{};
+                std::unordered_set<typename Lyt::tile> added_tiles{}, updated_tiles{};
                 for (decltype(ar.x) x = 0; x <= ar.x; ++x)
                 {
                     added_tiles.emplace(x, ar.y);
@@ -578,7 +580,7 @@ class exact_impl
                 solver_state new_state = {state->solver, {state->lit.e, get_lit_s()}};
 
                 // reset southern constraints
-                new_state.solver->add(not state->lit.s);
+                new_state.solver->add(!(state->lit.s));
 
                 // remove solver
                 solver_tree.erase(it_y);
@@ -586,31 +588,29 @@ class exact_impl
                 return {std::make_shared<solver_state>(new_state), added_tiles, updated_tiles,
                         create_assumptions(new_state)};
             }
-            else  // no existing solver state; create a new one
+            // no existing solver state; create a new one
+            // all tiles are additional ones
+            std::unordered_set<typename Lyt::tile> added_tiles{};
+            for (decltype(ar.y) y = 0; y <= ar.y; ++y)
             {
-                // all tiles are additional ones
-                std::set<tile<Lyt>> added_tiles{};
-                for (decltype(ar.y) y = 0; y <= ar.y; ++y)
+                for (decltype(ar.x) x = 0; x <= ar.x; ++x)
                 {
-                    for (decltype(ar.x) x = 0; x <= ar.x; ++x)
-                    {
-                        added_tiles.emplace(x, y);
-                    }
+                    added_tiles.emplace(x, y);
                 }
-
-                // create new state
-                solver_state new_state{std::make_shared<z3::solver>(*ctx), {get_lit_e(), get_lit_s()}};
-
-                return {std::make_shared<solver_state>(new_state), added_tiles, {}, create_assumptions(new_state)};
             }
+
+            // create new state
+            solver_state new_state{std::make_shared<z3::solver>(*ctx), {get_lit_e(), get_lit_s()}};
+
+            return {std::make_shared<solver_state>(new_state), added_tiles, {}, create_assumptions(new_state)};
         }
         /**
          * Checks whether a given tile belongs to the added tiles of the current solver check point.
          *
          * @param t Tile to check.
-         * @return True iff t is contained in check_point->added_tiles.
+         * @return `true` iff t is contained in check_point->added_tiles.
          */
-        [[nodiscard]] bool is_added_tile(const tile<Lyt>& t) const noexcept
+        [[nodiscard]] bool is_added_tile(const typename Lyt::tile& t) const noexcept
         {
             return check_point->added_tiles.count(t) != 0;
         }
@@ -618,9 +618,9 @@ class exact_impl
          * Checks whether a given tile belongs to the updated tiles of the current solver check point.
          *
          * @param t Tile to check.
-         * @return True iff t is contained in check_point->updated_tiles.
+         * @return `true` iff t is contained in check_point->updated_tiles.
          */
-        [[nodiscard]] bool is_updated_tile(const tile<Lyt>& t) const noexcept
+        [[nodiscard]] bool is_updated_tile(const typename Lyt::tile& t) const noexcept
         {
             return check_point->updated_tiles.count(t) != 0;
         }
@@ -628,7 +628,7 @@ class exact_impl
          * Returns true, iff params.io_ports is set to false and n is either a constant or PI or PO node in network.
          *
          * @param n Node in network.
-         * @return True iff n is to be skipped in a loop due to it being a constant or an I/O and params.io_ports ==
+         * @return `true` iff n is to be skipped in a loop due to it being a constant or an I/O and params.io_ports ==
          * false.
          */
         [[nodiscard]] bool skip_const_or_io_node(const mockturtle::node<topology_ntk_t>& n) const noexcept
@@ -639,8 +639,8 @@ class exact_impl
          * Returns true, iff skip_const_or_io_node returns true for either source or target of the given edge..
          *
          * @param e Edge in network.
-         * @return True iff e is to be skipped in a loop due to it having constant or I/O nodes while params.io_ports ==
-         * false.
+         * @return `true` iff e is to be skipped in a loop due to it having constant or I/O nodes while params.io_ports
+         * == false.
          */
         [[nodiscard]] bool skip_const_or_io_edge(const mockturtle::edge<topology_ntk_t>& e) const noexcept
         {
@@ -736,7 +736,7 @@ class exact_impl
          * @param n Node to be considered.
          * @return tn variable from ctx.
          */
-        [[nodiscard]] z3::expr get_tn(const tile<Lyt>& t, const mockturtle::node<topology_ntk_t>& n)
+        [[nodiscard]] z3::expr get_tn(const typename Lyt::tile& t, const mockturtle::node<topology_ntk_t>& n)
         {
             return ctx->bool_const(fmt::format("tn_({},{})_{}", t.x, t.y, n).c_str());
         }
@@ -747,7 +747,7 @@ class exact_impl
          * @param e Edge to be considered.
          * @return te variable from ctx.
          */
-        [[nodiscard]] z3::expr get_te(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e)
+        [[nodiscard]] z3::expr get_te(const typename Lyt::tile& t, const mockturtle::edge<topology_ntk_t>& e)
         {
             return ctx->bool_const(fmt::format("te_({},{})_({},{})", t.x, t.y, e.source, e.target).c_str());
         }
@@ -758,7 +758,7 @@ class exact_impl
          * @param t2 Tile 2 to be considered that is adjacent to t1.
          * @return tc variable from ctx.
          */
-        [[nodiscard]] z3::expr get_tc(const tile<Lyt>& t1, const tile<Lyt>& t2)
+        [[nodiscard]] z3::expr get_tc(const typename Lyt::tile& t1, const typename Lyt::tile& t2)
         {
             return ctx->bool_const(fmt::format("tc_({},{})_({},{})", t1.x, t1.y, t2.x, t2.y).c_str());
         }
@@ -769,7 +769,7 @@ class exact_impl
          * @param t2 Tile 2 to be considered.
          * @return tp variable from ctx.
          */
-        [[nodiscard]] z3::expr get_tp(const tile<Lyt>& t1, const tile<Lyt>& t2)
+        [[nodiscard]] z3::expr get_tp(const typename Lyt::tile& t1, const typename Lyt::tile& t2)
         {
             return ctx->bool_const(fmt::format("tp_({},{})_({},{})", t1.x, t1.y, t2.x, t2.y).c_str());
         }
@@ -789,7 +789,7 @@ class exact_impl
          * @param t Tile to be considered.
          * @return tcl variable from ctx.
          */
-        [[nodiscard]] z3::expr get_tcl(const tile<Lyt>& t, const unsigned clk)
+        [[nodiscard]] z3::expr get_tcl(const typename Lyt::tile& t, const unsigned clk)
         {
             return ctx->bool_const(fmt::format("tcl_({},{})_{}", t.x, t.y, clk).c_str());
         }
@@ -799,7 +799,7 @@ class exact_impl
          * @param t Tile to be considered.
          * @return tse variable from ctx.
          */
-        [[nodiscard]] z3::expr get_tse(const tile<Lyt>& t)
+        [[nodiscard]] z3::expr get_tse(const typename Lyt::tile& t)
         {
             return ctx->int_const(fmt::format("tse_({},{})", t.x, t.y).c_str());
         }
@@ -814,7 +814,7 @@ class exact_impl
             z3::expr_vector eq{*ctx};
             for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i)
             {
-                eq.push_back(v[i - 1] == v[i]);
+                eq.push_back(v[static_cast<unsigned int>(i - 1)] == v[static_cast<unsigned int>(i)]);
             }
 
             return z3::mk_and(eq);
@@ -839,28 +839,24 @@ class exact_impl
          * @param t Tile to consider for literal picking.
          * @return lit -> constraint.
          */
-        [[nodiscard]] z3::expr mk_as_if_se(const z3::expr& constraint, const tile<Lyt>& t) const
+        [[nodiscard]] z3::expr mk_as_if_se(const z3::expr& constraint, const typename Lyt::tile& t) const
         {
-            if (const auto east = layout.is_at_eastern_border(t), south = layout.is_at_southern_border(t);
-                east && south)
+            const auto east = layout.is_at_eastern_border(t), south = layout.is_at_southern_border(t);
+
+            if (east && south)
             {
-                return mk_as(constraint, lit().e and lit().s);
+                return mk_as(constraint, lit().e && lit().s);
             }
-            else
+            if (east)
             {
-                if (east)
-                {
-                    return mk_as(constraint, lit().e);
-                }
-                else if (south)
-                {
-                    return mk_as(constraint, lit().s);
-                }
-                else
-                {
-                    return constraint;
-                }
+                return mk_as(constraint, lit().e);
             }
+            if (south)
+            {
+                return mk_as(constraint, lit().s);
+            }
+
+            return constraint;
         }
         /**
          * Helper function to create an expression that assigns a matching clocking to a tile given its outgoing tile.
@@ -871,7 +867,7 @@ class exact_impl
          * @return An expression of the form tcl(t1, 0) --> tcl(t2, 1) and tcl(t1, 1) --> tcl(t2, 2) and ... up to the
          * number of clock phases in the layout.
          */
-        [[nodiscard]] z3::expr mk_clk_mod(const tile<Lyt>& t1, const tile<Lyt>& t2)
+        [[nodiscard]] z3::expr mk_clk_mod(const typename Lyt::tile& t1, const typename Lyt::tile& t2)
         {
             z3::expr_vector clk_mod{*ctx};
 
@@ -1027,7 +1023,7 @@ class exact_impl
                         layout.foreach_ground_tile([this, &n, &tn](const auto& t) { tn.push_back(get_tn(t, n)); });
 
                         // use a tracking literal to disable constraints in case of UNSAT
-                        solver->add(mk_as(z3::atleast(tn, 1u), lit().e and lit().s));
+                        solver->add(mk_as(z3::atleast(tn, 1u), lit().e && lit().s));
                         solver->add(z3::atmost(tn, 1u));
                     }
                 });
@@ -1050,7 +1046,7 @@ class exact_impl
                     {
                         tcl.push_back(get_tcl(t, i));
                     }
-                    solver->add(z3::atleast(tcl, 1) and z3::atmost(tcl, 1));
+                    solver->add(z3::atleast(tcl, 1) && z3::atmost(tcl, 1));
                 });
         }
         /**
@@ -1083,7 +1079,7 @@ class exact_impl
                                                 layout.foreach_outgoing_clocked_zone(
                                                     t,
                                                     [this, &t, &disj, &tgt, &ae](const auto& at) {
-                                                        disj.push_back((get_tn(at, tgt) or get_te(at, ae)) and
+                                                        disj.push_back((get_tn(at, tgt) || get_te(at, ae)) &&
                                                                        get_tc(t, at));
                                                     });
                                             }
@@ -1096,7 +1092,7 @@ class exact_impl
                                                         // clocks must differ by 1
                                                         const auto mod = mk_clk_mod(t, at);
 
-                                                        disj.push_back(((get_tn(at, tgt) or get_te(at, ae)) and mod) and
+                                                        disj.push_back(((get_tn(at, tgt) || get_te(at, ae)) && mod) &&
                                                                        get_tc(t, at));
                                                     });
                                             }
@@ -1147,7 +1143,7 @@ class exact_impl
                                                 layout.foreach_incoming_clocked_zone(
                                                     t,
                                                     [this, &t, &disj, &src, &iae](const auto& iat) {
-                                                        disj.push_back((get_tn(iat, src) or get_te(iat, iae)) and
+                                                        disj.push_back((get_tn(iat, src) || get_te(iat, iae)) &&
                                                                        get_tc(iat, t));
                                                     });
                                             }
@@ -1161,7 +1157,7 @@ class exact_impl
                                                         const auto mod = mk_clk_mod(iat, t);
 
                                                         disj.push_back(
-                                                            ((get_tn(iat, src) or get_te(iat, iae)) and mod) and
+                                                            ((get_tn(iat, src) || get_te(iat, iae)) && mod) &&
                                                             get_tc(iat, t));
                                                     });
                                             }
@@ -1204,20 +1200,19 @@ class exact_impl
                                 {
                                     layout.foreach_outgoing_clocked_zone(
                                         t, [this, &t, &e, &te, &disj](const auto& at)
-                                        { disj.push_back((get_tn(at, te) or get_te(at, e)) and get_tc(t, at)); });
+                                        { disj.push_back((get_tn(at, te) || get_te(at, e)) && get_tc(t, at)); });
                                 }
                                 else  // irregular clocking
                                 {
-                                    layout.foreach_adjacent_tile(t,
-                                                                 [this, &t, &e, &te, &disj](const auto& at)
-                                                                 {
-                                                                     // clocks must differ by 1
-                                                                     const auto mod = mk_clk_mod(t, at);
+                                    layout.foreach_adjacent_tile(
+                                        t,
+                                        [this, &t, &e, &te, &disj](const auto& at)
+                                        {
+                                            // clocks must differ by 1
+                                            const auto mod = mk_clk_mod(t, at);
 
-                                                                     disj.push_back(
-                                                                         ((get_tn(at, te) or get_te(at, e)) and mod) and
-                                                                         get_tc(t, at));
-                                                                 });
+                                            disj.push_back(((get_tn(at, te) || get_te(at, e)) && mod) && get_tc(t, at));
+                                        });
                                 }
 
                                 if (!disj.empty())
@@ -1251,20 +1246,20 @@ class exact_impl
                                 {
                                     layout.foreach_incoming_clocked_zone(
                                         t, [this, &t, &e, &se, &disj](const auto& iat)
-                                        { disj.push_back((get_tn(iat, se) or get_te(iat, e)) and get_tc(iat, t)); });
+                                        { disj.push_back((get_tn(iat, se) || get_te(iat, e)) && get_tc(iat, t)); });
                                 }
                                 else  // irregular clocking
                                 {
-                                    layout.foreach_adjacent_tile(
-                                        t,
-                                        [this, &t, &e, &se, &disj](const auto& iat)
-                                        {
-                                            // clocks must differ by 1
-                                            const auto mod = mk_clk_mod(iat, t);
+                                    layout.foreach_adjacent_tile(t,
+                                                                 [this, &t, &e, &se, &disj](const auto& iat)
+                                                                 {
+                                                                     // clocks must differ by 1
+                                                                     const auto mod = mk_clk_mod(iat, t);
 
-                                            disj.push_back(((get_tn(iat, se) or get_te(iat, e)) and mod) and
-                                                           get_tc(iat, t));
-                                        });
+                                                                     disj.push_back(
+                                                                         ((get_tn(iat, se) || get_te(iat, e)) && mod) &&
+                                                                         get_tc(iat, t));
+                                                                 });
                                 }
 
                                 if (!disj.empty())
@@ -1339,7 +1334,7 @@ class exact_impl
                                             if (is_added_tile(t1) || is_added_tile(t2) || is_added_tile(t3))
                                             {
                                                 solver->add(
-                                                    z3::implies(get_tp(t1, t2) and get_tp(t2, t3), get_tp(t1, t3)));
+                                                    z3::implies(get_tp(t1, t2) && get_tp(t2, t3), get_tp(t1, t3)));
                                             }
                                         }
                                     });
@@ -1353,7 +1348,7 @@ class exact_impl
          */
         void eliminate_cycles()
         {
-            apply_to_added_tiles([this](const auto& t) { solver->add(not get_tp(t, t)); });
+            apply_to_added_tiles([this](const auto& t) { solver->add(!(get_tp(t, t))); });
         }
         /**
          * Adds constraints to the solver to ensure that the cl variable of primary input pi is set to the clock zone
@@ -1392,7 +1387,7 @@ class exact_impl
                         {
                             ncl.push_back(get_ncl(n, i));
                         }
-                        solver->add(z3::atleast(ncl, 1) and z3::atmost(ncl, 1));
+                        solver->add(z3::atleast(ncl, 1) && z3::atmost(ncl, 1));
                     });
 
                 if (params.io_pins)
@@ -1430,7 +1425,7 @@ class exact_impl
                     {
                         if (t.x > layout.num_clocks() - 1u || t.y > layout.num_clocks() - 1u)
                         {
-                            solver->add(not get_tn(t, pi));
+                            solver->add(!(get_tn(t, pi)));
                         }
                     });
             };
@@ -1448,7 +1443,7 @@ class exact_impl
                 }
 
                 z3::expr_vector all_path_lengths{*ctx};
-                for (auto& p : paths)
+                for (const auto& p : paths)
                 {
                     z3::expr_vector path_length{*ctx};
 
@@ -1480,12 +1475,12 @@ class exact_impl
                 }
 
                 // use a tracking literal to disable constraints in case of UNSAT
-                solver->add(mk_as(mk_eq(all_path_lengths), lit().e and lit().s));
+                solver->add(mk_as(mk_eq(all_path_lengths), lit().e && lit().s));
             };
 
             // much simpler but equisatisfiable version of the constraint for 2DDWave clocking with border I/Os
-            if (params.border_io && (layout.is_clocking_scheme(clock_name::twoddwave) ||
-                                     layout.is_clocking_scheme(clock_name::twoddwave_hex)))
+            if (params.border_io && (layout.is_clocking_scheme(clock_name::TWODDWAVE) ||
+                                     layout.is_clocking_scheme(clock_name::TWODDWAVE_HEX)))
             {
                 if (params.io_pins)
                 {
@@ -1502,7 +1497,7 @@ class exact_impl
                 }
             }
             else if (params.border_io &&
-                     (layout.is_clocking_scheme(clock_name::columnar) || layout.is_clocking_scheme(clock_name::row)))
+                     (layout.is_clocking_scheme(clock_name::COLUMNAR) || layout.is_clocking_scheme(clock_name::ROW)))
             {
                 // Columnar and row clocking scheme don't need the path length constraints when border pins are enabled
             }
@@ -1549,12 +1544,12 @@ class exact_impl
                                             if (layout.is_at_eastern_border(t) || layout.is_at_southern_border(t))
                                             {
                                                 // add restriction as assumption only
-                                                check_point->assumptions.push_back(not get_tn(t, n));
+                                                check_point->assumptions.push_back(!(get_tn(t, n)));
                                             }
                                             else  // t is an updated tile
                                             {
                                                 // add hard constraint
-                                                solver->add(not get_tn(t, n));
+                                                solver->add(!(get_tn(t, n)));
                                             }
                                         }
                                     }
@@ -1573,12 +1568,12 @@ class exact_impl
                                                          layout.is_at_southern_border(t))
                                                      {
                                                          // add restriction as assumption only
-                                                         check_point->assumptions.push_back(not get_te(t, e));
+                                                         check_point->assumptions.push_back(!(get_te(t, e)));
                                                      }
                                                      else if (is_updated_tile(t))  // nothing's about to change here
                                                      {
                                                          // add hard constraint
-                                                         solver->add(not get_te(t, e));
+                                                         solver->add(!(get_te(t, e)));
                                                      }
                                                  }
                                              }
@@ -1600,12 +1595,12 @@ class exact_impl
                                             if (layout.is_at_eastern_border(t) || layout.is_at_southern_border(t))
                                             {
                                                 // add restriction as assumption only
-                                                check_point->assumptions.push_back(not get_tn(t, n));
+                                                check_point->assumptions.push_back(!(get_tn(t, n)));
                                             }
                                             else  // nothing's about to change here
                                             {
                                                 // add hard constraint
-                                                solver->add(not get_tn(t, n));
+                                                solver->add(!(get_tn(t, n)));
                                             }
                                         }
                                     }
@@ -1679,13 +1674,13 @@ class exact_impl
                                 // if node n is assigned to a tile, the number of connections need to correspond
                                 if (!acc.empty())
                                 {
-                                    solver->add(mk_as_if_se(
-                                        z3::implies(tn, z3::atleast(acc, aon) and z3::atmost(acc, aon)), t));
+                                    solver->add(
+                                        mk_as_if_se(z3::implies(tn, z3::atleast(acc, aon) && z3::atmost(acc, aon)), t));
                                 }
                                 if (!iacc.empty())
                                 {
                                     solver->add(mk_as_if_se(
-                                        z3::implies(tn, z3::atleast(iacc, iaon) and z3::atmost(iacc, iaon)), t));
+                                        z3::implies(tn, z3::atleast(iacc, iaon) && z3::atmost(iacc, iaon)), t));
                                 }
                             }
                         });
@@ -1707,14 +1702,14 @@ class exact_impl
                     {
                         if (!acc.empty())
                         {
-                            solver->add(mk_as_if_se(z3::implies(z3::atleast(wg, 1u) and z3::atmost(wg, 1u),
-                                                                z3::atleast(acc, 1u) and z3::atmost(acc, 1u)),
+                            solver->add(mk_as_if_se(z3::implies(z3::atleast(wg, 1u) && z3::atmost(wg, 1u),
+                                                                z3::atleast(acc, 1u) && z3::atmost(acc, 1u)),
                                                     t));
                         }
                         if (!iacc.empty())
                         {
-                            solver->add(mk_as_if_se(z3::implies(z3::atleast(wg, 1u) and z3::atmost(wg, 1u),
-                                                                z3::atleast(iacc, 1u) and z3::atmost(iacc, 1u)),
+                            solver->add(mk_as_if_se(z3::implies(z3::atleast(wg, 1u) && z3::atmost(wg, 1u),
+                                                                z3::atleast(iacc, 1u) && z3::atmost(iacc, 1u)),
                                                     t));
                         }
 
@@ -1732,14 +1727,14 @@ class exact_impl
                             {
                                 if (!acc.empty())
                                 {
-                                    solver->add(mk_as_if_se(z3::implies(z3::atleast(wg, 2u) and z3::atmost(wg, 2u),
-                                                                        z3::atleast(acc, 2u) and z3::atmost(acc, 2u)),
+                                    solver->add(mk_as_if_se(z3::implies(z3::atleast(wg, 2u) && z3::atmost(wg, 2u),
+                                                                        z3::atleast(acc, 2u) && z3::atmost(acc, 2u)),
                                                             t));
                                 }
                                 if (!iacc.empty())
                                 {
-                                    solver->add(mk_as_if_se(z3::implies(z3::atleast(wg, 2u) and z3::atmost(wg, 2u),
-                                                                        z3::atleast(iacc, 2u) and z3::atmost(iacc, 2u)),
+                                    solver->add(mk_as_if_se(z3::implies(z3::atleast(wg, 2u) && z3::atmost(wg, 2u),
+                                                                        z3::atleast(iacc, 2u) && z3::atmost(iacc, 2u)),
                                                             t));
                                 }
                             }
@@ -1796,7 +1791,7 @@ class exact_impl
         void utilize_hierarchical_information()
         {
             // symmetry breaking for columnar clocking
-            if (layout.is_clocking_scheme(clock_name::columnar))
+            if (layout.is_clocking_scheme(clock_name::COLUMNAR))
             {
                 // restrict node placement according to the hierarchy level
                 if (params.io_pins && params.border_io)
@@ -1815,9 +1810,9 @@ class exact_impl
                                 {
                                     for (auto row = 0u; row <= layout.y(); ++row)
                                     {
-                                        if (const auto t = tile<Lyt>{column, row}; is_added_tile(t))
+                                        if (const auto t = typename Lyt::tile{column, row}; is_added_tile(t))
                                         {
-                                            solver->add(not get_tn(t, n));
+                                            solver->add(!(get_tn(t, n)));
 
                                             // same for the outgoing edges
                                             foreach_outgoing_edge(network, n,
@@ -1825,7 +1820,7 @@ class exact_impl
                                                                   {
                                                                       if (!skip_const_or_io_edge(e))
                                                                       {
-                                                                          solver->add(not get_te(t, e));
+                                                                          solver->add(!(get_te(t, e)));
                                                                       }
                                                                   });
                                         }
@@ -1837,11 +1832,11 @@ class exact_impl
                                 {
                                     for (auto row = 0u; row <= layout.y(); ++row)
                                     {
-                                        const auto t = tile<Lyt>{column, row};
+                                        const auto t = typename Lyt::tile{column, row};
 
                                         // use assumptions here because the south-east corner moves away in the
                                         // following iterations
-                                        check_point->assumptions.push_back(not get_tn(t, n));
+                                        check_point->assumptions.push_back(!(get_tn(t, n)));
 
                                         // same for the incoming edges
                                         foreach_incoming_edge(network, n,
@@ -1850,7 +1845,7 @@ class exact_impl
                                                                   if (!skip_const_or_io_edge(e))
                                                                   {
                                                                       check_point->assumptions.push_back(
-                                                                          not get_te(t, e));
+                                                                          !(get_te(t, e)));
                                                                   }
                                                               });
                                     }
@@ -1860,7 +1855,7 @@ class exact_impl
                 }
             }
             // symmetry breaking for row clocking
-            if (layout.is_clocking_scheme(clock_name::row))
+            if (layout.is_clocking_scheme(clock_name::ROW))
             {
                 // restrict node placement according to the hierarchy level
                 if (params.io_pins && params.border_io)
@@ -1879,9 +1874,9 @@ class exact_impl
                                 {
                                     for (auto column = 0u; column <= layout.x(); ++column)
                                     {
-                                        if (const auto t = tile<Lyt>{column, row}; is_added_tile(t))
+                                        if (const auto t = typename Lyt::tile{column, row}; is_added_tile(t))
                                         {
-                                            solver->add(not get_tn(t, n));
+                                            solver->add(!(get_tn(t, n)));
 
                                             // same for the outgoing edges
                                             foreach_outgoing_edge(network, n,
@@ -1889,7 +1884,7 @@ class exact_impl
                                                                   {
                                                                       if (!skip_const_or_io_edge(e))
                                                                       {
-                                                                          solver->add(not get_te(t, e));
+                                                                          solver->add(!(get_te(t, e)));
                                                                       }
                                                                   });
                                         }
@@ -1901,11 +1896,11 @@ class exact_impl
                                 {
                                     for (auto column = 0u; column <= layout.x(); ++column)
                                     {
-                                        const auto t = tile<Lyt>{column, row};
+                                        const auto t = typename Lyt::tile{column, row};
 
                                         // use assumptions here because the south-east corner moves away in the
                                         // following iterations
-                                        check_point->assumptions.push_back(not get_tn(t, n));
+                                        check_point->assumptions.push_back(!(get_tn(t, n)));
 
                                         // same for the incoming edges
                                         foreach_incoming_edge(network, n,
@@ -1914,7 +1909,7 @@ class exact_impl
                                                                   if (!skip_const_or_io_edge(e))
                                                                   {
                                                                       check_point->assumptions.push_back(
-                                                                          not get_te(t, e));
+                                                                          !(get_te(t, e)));
                                                                   }
                                                               });
                                     }
@@ -1924,7 +1919,7 @@ class exact_impl
                 }
             }
             // symmetry breaking for 2DDWave clocking
-            else if (layout.is_clocking_scheme(clock_name::twoddwave))
+            else if (layout.is_clocking_scheme(clock_name::TWODDWAVE))
             {
                 // restrict node placement according to its hierarchy level
                 if (params.io_pins && params.border_io)
@@ -1943,25 +1938,25 @@ class exact_impl
                                     {
                                         if (t.x + t.y < static_cast<decltype(t.x + t.y)>(l))
                                         {
-                                            solver->add(not get_tn(t, n));
+                                            solver->add(!(get_tn(t, n)));
 
                                             // same for the outgoing edges
                                             foreach_outgoing_edge(network, n,
                                                                   [this, &t](const auto& e)
-                                                                  { solver->add(not get_te(t, e)); });
+                                                                  { solver->add(!(get_te(t, e))); });
                                         }
                                         // cannot be placed with too little distance to south-east corner
                                         if (layout.x() - t.x + layout.y() - t.y < il)
                                         {
                                             // use assumptions here because the south-east corner moves away in the
                                             // following iterations
-                                            check_point->assumptions.push_back(not get_tn(t, n));
+                                            check_point->assumptions.push_back(!(get_tn(t, n)));
 
                                             // same for the incoming edges
                                             foreach_incoming_edge(
                                                 network, n,
                                                 [this, &t](const auto& e)
-                                                { check_point->assumptions.push_back(not get_te(t, e)); });
+                                                { check_point->assumptions.push_back(!(get_te(t, e))); });
                                         }
                                     });
                             }
@@ -1981,7 +1976,7 @@ class exact_impl
                     {
                         if (!layout.is_at_any_border(t))
                         {
-                            solver->add(not get_tn(t, n));
+                            solver->add(!(get_tn(t, n)));
                         }
                     });
             };
@@ -1994,7 +1989,7 @@ class exact_impl
                     {
                         if (!layout.is_at_northern_border(t))
                         {
-                            solver->add(not get_tn(t, n));
+                            solver->add(!(get_tn(t, n)));
                         }
                     });
             };
@@ -2007,7 +2002,7 @@ class exact_impl
                     {
                         if (!layout.is_at_western_border(t))
                         {
-                            solver->add(not get_tn(t, n));
+                            solver->add(!(get_tn(t, n)));
                         }
                     });
             };
@@ -2019,7 +2014,7 @@ class exact_impl
                     {
                         if (!layout.is_at_eastern_border(t))
                         {
-                            solver->add(not get_tn(t, n));
+                            solver->add(!(get_tn(t, n)));
                         }
                     });
             };
@@ -2031,7 +2026,7 @@ class exact_impl
                     {
                         if (!layout.is_at_southern_border(t))
                         {
-                            solver->add(not get_tn(t, n));
+                            solver->add(!(get_tn(t, n)));
                         }
                     });
             };
@@ -2041,15 +2036,15 @@ class exact_impl
                 network.foreach_pi(
                     [this, &assign_north, &assign_west, &assign_border](const auto& pi)
                     {
-                        layout.is_clocking_scheme(clock_name::columnar) ? assign_west(pi) :
-                        layout.is_clocking_scheme(clock_name::row)      ? assign_north(pi) :
+                        layout.is_clocking_scheme(clock_name::COLUMNAR) ? assign_west(pi) :
+                        layout.is_clocking_scheme(clock_name::ROW)      ? assign_north(pi) :
                                                                           assign_border(pi);
                     });
                 network.foreach_po(
                     [this, &assign_east, &assign_south, &assign_border](const auto& po)
                     {
-                        layout.is_clocking_scheme(clock_name::columnar) ? assign_east(network.get_node(po)) :
-                        layout.is_clocking_scheme(clock_name::row)      ? assign_south(network.get_node(po)) :
+                        layout.is_clocking_scheme(clock_name::COLUMNAR) ? assign_east(network.get_node(po)) :
+                        layout.is_clocking_scheme(clock_name::ROW)      ? assign_south(network.get_node(po)) :
                                                                           assign_border(network.get_node(po));
                     });
             }
@@ -2063,9 +2058,9 @@ class exact_impl
                                                {
                                                    if (!skip_const_or_io_node(fon))
                                                    {
-                                                       layout.is_clocking_scheme(clock_name::columnar) ?
+                                                       layout.is_clocking_scheme(clock_name::COLUMNAR) ?
                                                            assign_west(fon) :
-                                                       layout.is_clocking_scheme(clock_name::row) ? assign_north(fon) :
+                                                       layout.is_clocking_scheme(clock_name::ROW) ? assign_north(fon) :
                                                                                                     assign_border(fon);
                                                    }
                                                });
@@ -2080,8 +2075,8 @@ class exact_impl
                             {
                                 if (const auto fin = network.get_node(fi); !skip_const_or_io_node(fin))
                                 {
-                                    layout.is_clocking_scheme(clock_name::columnar) ? assign_east(fin) :
-                                    layout.is_clocking_scheme(clock_name::row)      ? assign_south(fin) :
+                                    layout.is_clocking_scheme(clock_name::COLUMNAR) ? assign_east(fin) :
+                                    layout.is_clocking_scheme(clock_name::ROW)      ? assign_south(fin) :
                                                                                       assign_border(fin);
                                 }
                             });
@@ -2120,13 +2115,13 @@ class exact_impl
                                                      layout.is_outgoing_clocked(t, t2)) ||
                                                     !layout.is_regularly_clocked())
                                                 {
-                                                    ve.push_back(get_tc(t1, t) and get_tc(t, t2));
+                                                    ve.push_back(get_tc(t1, t) && get_tc(t, t2));
                                                 }
                                                 if ((layout.is_incoming_clocked(t, t2) &&
                                                      layout.is_outgoing_clocked(t, t1)) ||
                                                     !layout.is_regularly_clocked())
                                                 {
-                                                    ve.push_back(get_tc(t2, t) and get_tc(t, t1));
+                                                    ve.push_back(get_tc(t2, t) && get_tc(t, t1));
                                                 }
                                             });
 
@@ -2140,7 +2135,7 @@ class exact_impl
                                         {
                                             // inverter cannot be placed here, add constraint to avoid this case and
                                             // speed up solving
-                                            solver->add(mk_as_if_se(not get_tn(t, inv), t));
+                                            solver->add(mk_as_if_se(!(get_tn(t, inv)), t));
                                         }
                                     }
                                 }
@@ -2212,7 +2207,7 @@ class exact_impl
                                                         if (is_added_tile(at))
                                                         {
                                                             solver->add(
-                                                                z3::implies(get_tn(t, fon), not get_tn(at, afon)));
+                                                                z3::implies(get_tn(t, fon), !(get_tn(at, afon))));
                                                         }
                                                     });
                                             });
@@ -2248,7 +2243,7 @@ class exact_impl
                                         // here
                                         else
                                         {
-                                            solver->add(not get_tn(t, fon));
+                                            solver->add(!(get_tn(t, fon)));
                                         }
                                     });
                             }
@@ -2280,7 +2275,7 @@ class exact_impl
                                                     {
                                                         if (is_added_tile(at))
                                                         {
-                                                            solver->add(z3::implies(get_tn(t, n1), not get_tn(at, n2)));
+                                                            solver->add(z3::implies(get_tn(t, n1), !(get_tn(at, n2))));
                                                         }
                                                     });
                                             });
@@ -2295,7 +2290,7 @@ class exact_impl
                                     if (auto ne = layout.north_east(t); ne == t)
                                     {
                                         // no north-eastern tile, do not place v1 here
-                                        check_point->assumptions.push_back(not get_tn(t, n1));
+                                        check_point->assumptions.push_back(!(get_tn(t, n1)));
                                     }
                                     else
                                     {
@@ -2317,7 +2312,7 @@ class exact_impl
                                         // south-eastern tile exists, do not route a connection here
                                         if (is_added_tile(se))
                                         {
-                                            solver->add(z3::implies(get_tn(t, n1), not get_tc(t, se)));
+                                            solver->add(z3::implies(get_tn(t, n1), !(get_tc(t, se))));
                                         }
                                     }
                                 });
@@ -2461,49 +2456,47 @@ class exact_impl
          */
         [[nodiscard]] optimize_ptr optimize()
         {
-            if (const auto wires = params.minimize_wires, cross = params.minimize_crossings,
-                se = params.synchronization_elements && !params.desynchronize;
-                !wires && !cross && !se)
+            const auto wires = params.minimize_wires, cross = params.minimize_crossings,
+                       se = params.synchronization_elements && !params.desynchronize;
+            if (!wires && !cross && !se)
             {
                 return nullptr;
             }
-            else
+
+            // non-const to automatically move optimizer via RVO
+            auto optimizer = std::make_shared<z3::optimize>(*ctx);
+
+            // add all solver constraints
+            for (const auto& e : solver->assertions())
             {
-                // non-const to automatically move optimizer via RVO
-                auto optimizer = std::make_shared<z3::optimize>(*ctx);
-
-                // add all solver constraints
-                for (const auto& e : solver->assertions())
-                {
-                    optimizer->add(e);
-                }
-
-                // add assumptions as constraints, too, because optimize::check with assumptions is broken
-                for (const auto& e : check_point->assumptions)
-                {
-                    optimizer->add(e);
-                }
-
-                // wire minimization constraints
-                if (wires)
-                {
-                    minimize_wires(optimizer);
-                }
-
-                // crossing minimization constraints
-                if (cross)
-                {
-                    minimize_crossings(optimizer);
-                }
-
-                // clock latches minimization constraints
-                if (se)
-                {
-                    minimize_synchronization_elements(optimizer);
-                }
-
-                return optimizer;
+                optimizer->add(e);
             }
+
+            // add assumptions as constraints, too, because optimize::check with assumptions is broken
+            for (const auto& e : check_point->assumptions)
+            {
+                optimizer->add(e);
+            }
+
+            // wire minimization constraints
+            if (wires)
+            {
+                minimize_wires(optimizer);
+            }
+
+            // crossing minimization constraints
+            if (cross)
+            {
+                minimize_crossings(optimizer);
+            }
+
+            // clock latches minimization constraints
+            if (se)
+            {
+                minimize_synchronization_elements(optimizer);
+            }
+
+            return optimizer;
         }
         /**
          * Places a primary output pin represented by node n of the stored network onto tile t in the stored layout.
@@ -2511,7 +2504,7 @@ class exact_impl
          * @param t Tile to place the PO pin.
          * @param n Node in the stored network representing a PO.
          */
-        void place_output(const tile<Lyt>& t, const mockturtle::node<topology_ntk_t>& n)
+        void place_output(const typename Lyt::tile& t, const mockturtle::node<topology_ntk_t>& n)
         {
             const auto output_signal = network.make_signal(fanins(network, n).fanin_nodes[0]);
 
@@ -2555,7 +2548,7 @@ class exact_impl
          * @param t Initial tile to start recursion from (not included in model evaluations).
          * @param e Edge to check for.
          */
-        void route(const tile<Lyt>& t, const mockturtle::edge<topology_ntk_t>& e, const z3::model& model)
+        void route(const typename Lyt::tile& t, const mockturtle::edge<topology_ntk_t>& e, const z3::model& model)
         {
             layout.foreach_outgoing_clocked_zone(
                 t,
@@ -2727,7 +2720,7 @@ class exact_impl
         /**
          * Currently examined layout aspect ratio.
          */
-        aspect_ratio<Lyt> worker_aspect_ratio;
+        typename Lyt::aspect_ratio worker_aspect_ratio;
     };
     /**
      * Thread function for the asynchronous solving strategy. It registers its own context in the given list of
@@ -2756,7 +2749,7 @@ class exact_impl
 
         while (true)
         {
-            aspect_ratio<Lyt> ar;
+            typename Lyt::aspect_ratio ar;
 
             // mutually exclusive access to the aspect ratio iterator
             {
@@ -2837,15 +2830,13 @@ class exact_impl
 
                     return layout;
                 }
-                else  // no layout with this aspect ratio possible
-                {
-                    // One could assume that interrupting other threads that are working on real smaller (not bigger
-                    // in any dimension) layouts could be beneficial here. However, testing revealed that this code
-                    // was hardly ever triggered and if it was, it impacted performance negatively because no solver
-                    // state could be stored that could positively influence performance of later SMT calls
+                // no layout with this aspect ratio possible
+                // One could assume that interrupting other threads that are working on real smaller (not bigger
+                // in any dimension) layouts could be beneficial here. However, testing revealed that this code
+                // was hardly ever triggered and if it was, it impacted performance negatively because no solver
+                // state could be stored that could positively influence performance of later SMT calls
 
-                    handler.store_solver_state(ar);
-                }
+                handler.store_solver_state(ar);
             }
             catch (const z3::exception&)  // timed out or interrupted
             {
@@ -2942,10 +2933,8 @@ class exact_impl
 
             return layout;
         }
-        else
-        {
-            return std::nullopt;
-        }
+
+        return std::nullopt;
     }
     /**
      * Does the same as explore_asynchronously but without thread synchronization overhead.
@@ -2996,10 +2985,8 @@ class exact_impl
 
                     return layout;
                 }
-                else
-                {
-                    handler.store_solver_state(ar);
-                }
+
+                handler.store_solver_state(ar);
 
                 update_timeout(handler, pst.time_total);
             }
@@ -3016,15 +3003,15 @@ class exact_impl
 }  // namespace detail
 
 /**
- * An exact placement & routing approach using SMT solving as originally proposed in "An Exact Method for Design
- * Exploration of Quantum-dot Cellular Automata" by M. Walter, R. Wille, D. Große, F. Sill Torres, and R. Drechsler in
- * DATE 2018. A more extensive description can be found in "Design Automation for Field-coupled Nanotechnologies" by M.
- * Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
+ * An exact placement & routing approach using SMT solving as originally proposed in \"An Exact Method for Design
+ * Exploration of Quantum-dot Cellular Automata\" by M. Walter, R. Wille, D. Große, F. Sill Torres, and R. Drechsler in
+ * DATE 2018. A more extensive description can be found in \"Design Automation for Field-coupled Nanotechnologies\" by
+ * M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
  *
  * Via incremental SMT calls, an optimal gate-level layout for a given logic network will be found under constraints.
- * Starting with n tiles, where n is the number of logic network nodes, each possible layout aspect ratio will be
- * examined by factorization and tested for routability with the SMT solver Z3. When no upper bound is given, this
- * approach will run until it finds a solution to the placement & routing problem instance.
+ * Starting with \f$ n \f$ tiles, where \f$ n \f$ is the number of logic network nodes, each possible layout aspect
+ * ratio will be examined by factorization and tested for routability with the SMT solver Z3. When no upper bound is
+ * given, this approach will run until it finds a solution to the placement & routing problem instance.
  *
  * Note that there a combinations of constraints for which no valid solution under the given parameters exist for the
  * given logic network. Such combinations cannot be detected automatically. It is, thus, recommended to always set a
@@ -3040,24 +3027,27 @@ class exact_impl
  *
  * The SMT instance works with a single layer of variables even though it is possible to allow crossings in the
  * solution. The reduced number of variables saves a considerable amount of runtime. That's why
- * layout.foreach_ground_tile() is used even though the model will be mapped to a 3-dimensional layout afterwards.
+ * `layout.foreach_ground_tile()` is used even though the model will be mapped to a 3-dimensional layout afterwards.
  * Generally, the algorithm incorporates quite a few encoding optimizations to be as performant as possible on various
  * layout topologies and clocking schemes.
  *
- * The approach applies to any data structures that implement the necessary functions to comply with is_network_type and
- * is_gate_level_layout, respectively. It is, thereby, mostly technology-independent but can make certain assumptions if
- * needed, for instance for ToPoliNano-compliant circuits.
+ * The approach applies to any data structures that implement the necessary functions to comply with `is_network_type`
+ * and `is_gate_level_layout`, respectively. It is, thereby, mostly technology-independent but can make certain
+ * assumptions if needed, for instance for ToPoliNano-compliant circuits.
  *
  * This approach requires the Z3 SMT solver to be installed on the system. Due to this circumstance, it is excluded from
- * (CLI) compilation by default. To enable it, pass -DFICTION_Z3=ON to the cmake call.
+ * (CLI) compilation by default. To enable it, pass `-DFICTION_Z3=ON` to the cmake call.
+ *
+ * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in too large to be handled by the
+ * specified clocking scheme.
  *
  * @tparam Lyt Desired gate-level layout type.
  * @tparam Ntk Network type that acts as specification.
  * @param ntk The network that is to place and route.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return A gate-level layout of type Lyt that implements ntk as an FCN circuit if one is found under the given
- * parameters; std::nullopt, otherwise.
+ * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit if one is found under the given
+ * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params ps = {},

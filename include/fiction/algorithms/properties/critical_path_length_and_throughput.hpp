@@ -11,8 +11,8 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <set>
-#include <unordered_map>
+
+#include <phmap.h>
 
 namespace fiction
 {
@@ -71,7 +71,7 @@ class critical_path_length_and_throughput_impl
         uint64_t length{0ull}, delay{0ull}, diff{0ull};
     };
 
-    std::unordered_map<tile<Lyt>, path_info> delay_cache{};
+    phmap::flat_hash_map<tile<Lyt>, path_info> delay_cache{};
 
     path_info signal_delay(const tile<Lyt> t) noexcept
     {
@@ -80,81 +80,82 @@ class critical_path_length_and_throughput_impl
             return {};
         }
 
-        if (const auto idf = lyt.template incoming_data_flow<std::set<tile<Lyt>>>(t); idf.empty())
+        const auto idf = lyt.incoming_data_flow(t);
+        if (idf.empty())
         {
             return {1, lyt.get_clock_number(t), 0};
         }
-        else if (const auto it = delay_cache.find(t); it != delay_cache.end())  // cache hit
+        if (const auto it = delay_cache.find(t); it != delay_cache.end())  // cache hit
         {
             return it->second;
         }
-        else  // cache miss
+
+        // cache miss
+        // fetch information about all incoming paths
+        std::vector<path_info> infos{};
+
+        std::transform(idf.cbegin(), idf.cend(), std::back_inserter(infos),
+                       [this](const auto& in_tile) { return signal_delay(in_tile); });
+
+        path_info dominant_path{};
+
+        if (lyt.is_pi_tile(t))  // primary input to the circuit
         {
-            // fetch information about all incoming paths
-            std::vector<path_info> infos{};
-
-            std::transform(idf.cbegin(), idf.cend(), std::back_inserter(infos),
-                           [this](const auto& in_tile) { return signal_delay(in_tile); });
-
-            path_info dominant_path{};
-
-            if (lyt.is_pi_tile(t))  // primary input to the circuit
-            {
-                infos.emplace_back(
-                    1ull, static_cast<uint64_t>((lyt.get_clock_number(t) + (lyt.num_clocks() - 1)) % lyt.num_clocks()),
-                    0ull);
-            }
-
-            if (infos.size() == 1)  // size cannot be 0
-            {
-                dominant_path = infos.front();
-            }
-            else  // fetch the highest delay and difference
-            {
-                // sort by path length
-                std::sort(infos.begin(), infos.end(),
-                          [](const auto& i1, const auto& i2) { return i1.length < i2.length; });
-
-                dominant_path.length = infos.back().length;
-                dominant_path.delay  = infos.back().delay;
-                dominant_path.diff =
-                    static_cast<uint64_t>(std::abs(static_cast<int64_t>(infos.back().delay - infos.front().delay)));
-            }
-
-            // incorporate self
-            ++dominant_path.length;
-            ++dominant_path.delay;
-
-            // cache value for gates only
-            if (!lyt.is_wire_tile(t))
-            {
-                delay_cache[t] = dominant_path;
-            }
-
-            return dominant_path;
+            infos.emplace_back(
+                1ull, static_cast<uint64_t>((lyt.get_clock_number(t) + (lyt.num_clocks() - 1)) % lyt.num_clocks()),
+                0ull);
         }
+
+        if (infos.size() == 1)  // size cannot be 0
+        {
+            dominant_path = infos.front();
+        }
+        else  // fetch the highest delay and difference
+        {
+            // sort by path length
+            std::sort(infos.begin(), infos.end(), [](const auto& i1, const auto& i2) { return i1.length < i2.length; });
+
+            dominant_path.length = infos.back().length;
+            dominant_path.delay  = infos.back().delay;
+            dominant_path.diff =
+                static_cast<uint64_t>(std::abs(static_cast<int64_t>(infos.back().delay - infos.front().delay)));
+        }
+
+        // incorporate self
+        ++dominant_path.length;
+        ++dominant_path.delay;
+
+        // cache value for gates only
+        if (!lyt.is_wire_tile(t))
+        {
+            delay_cache[t] = dominant_path;
+        }
+
+        return dominant_path;
     }
 };
 
 }  // namespace detail
+
 /**
  * Computes the critical path length (CP) length and the throughput (TP) of a gate-level layout.
  *
  * The critical path length is defined as the longest path from any PI to any PO in tiles.
  *
- * The throughput is defined as 1/x where x is the highest path length difference between any sets of paths that lead to
- * the same gate. This function provides only the denominator x, as the numerator is always 1. Furthermore, x is given
- * in clock cycles rather than clock phases because it is assumed that a path length difference < lyt.num_clocks() does
- * not lead to any delay. Contrary, for any throughput value 1/x with x > 1, the layout computes its represented Boolean
- * function only every x full clock cycles after the first inputs have been propagated through the design. Thereby, all
- * PIs need to be held constant for x clock phases to ensure proper computation.
+ * The throughput is defined as \f$ \frac{1}{x} \f$ where \f$ x \f$ is the highest path length difference between any
+ * sets of paths that lead to the same gate. This function provides only the denominator \f$ x \f$, as the numerator is
+ * always \f$ 1 \f$. Furthermore, \f$ x \f$ is given in clock cycles rather than clock phases because it is assumed that
+ * a path length difference smaller than `lyt.num_clocks()` does not lead to any delay. Contrary, for any throughput
+ * value \f$ \frac{1}{x} \f$ with \f$ x > 1 \f$, the layout computes its represented Boolean function only every \f$ x
+ * \f$ full clock cycles after the first inputs have been propagated through the design. Thereby, all PIs need to be
+ * held constant for \f$ x \f$ clock phases to ensure proper computation.
  *
- * For more information on the concept of throughput and delay see "Synchronization of Clocked Field-Coupled Circuits"
- * by F. Sill Torres, M. Walter, R. Wille, D. Große, and R. Drechsler in IEEE NANO 2018; or "Design Automation for
- * Field-coupled Nanotechnologies" by M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature
- * in 2022.
+ * For more information on the concept of throughput and delay see \"Synchronization of Clocked Field-Coupled Circuits\"
+ * by F. Sill Torres, M. Walter, R. Wille, D. Große, and R. Drechsler in IEEE NANO 2018; or \"Design Automation for
+ * Field-coupled Nanotechnologies\" by M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer
+ * Nature in 2022.
  *
- * The complexity of this function is O(|T|) where T is the set of all occupied tiles in the layout.
+ * The complexity of this function is \f$ O(|T|) \f$ where \f$ T \f$ is the set of all occupied tiles in `lyt`.
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt The gate-level layout whose CP and TP are desired.

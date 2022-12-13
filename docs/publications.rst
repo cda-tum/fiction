@@ -25,7 +25,8 @@ If you use *fiction* in your work, we would appreciate if you cited
     }
 
 Furthermore, if you use any of the physical design algorithms :ref:`exact <exact>`, :ref:`ortho <ortho>`,
-:ref:`onepass <onepass>`, or :ref:`equiv <equiv>`, please consider citing their respective papers as well:
+:ref:`onepass <onepass>`, :ref:`equiv <equiv>`, or :ref:`color routing <color_routing>`, please consider citing their
+respective papers as well:
 
 .. code-block:: tex
 
@@ -66,4 +67,25 @@ Furthermore, if you use any of the physical design algorithms :ref:`exact <exact
       author={Walter, Marcel and Wille, Robert and Sill Torres, Frank and D. Gro{\ss}e and Drechsler, Rolf},
       booktitle={Design Automation Conference},
       year={2020}
+    }
+
+.. code-block:: tex
+
+    @inproceedings{walter2022colorrouting,
+      title={{Efficient Multi-Path Signal Routing for Field-coupled Nanotechnologies}},
+      author={Walter, Marcel and Wille, Robert},
+      booktitle={International Symposium on Nanoscale Architectures},
+      year={2022}
+    }
+
+The same holds for the :ref:`Bestagon <bestagon>` gate library:
+
+.. code-block:: tex
+
+    @inproceedings{walter2022hexagons,
+      title={{Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic}},
+      author={Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
+      booktitle={Design Automation Conference},
+      pages = {739--744},
+      year={2022}
     }

@@ -25,6 +25,9 @@ struct port_position
      * Default constructor.
      */
     constexpr port_position() = default;
+
+    // NOLINTBEGIN(readability-identifier-naming)
+
     /**
      * Standard constructor.
      */
@@ -34,6 +37,9 @@ struct port_position
             pi{pi_},
             po{po_}
     {}
+
+    // NOLINTEND(readability-identifier-naming)
+
     /**
      * Positions.
      */
@@ -50,7 +56,7 @@ struct port_position
      * Comparator for set insertion.
      *
      * @param p Port to compare to.
-     * @return True iff this port goes before p in set.
+     * @return `true` iff this port goes before `p` in set.
      */
     constexpr bool operator<(const port_position& p) const
     {
@@ -60,7 +66,7 @@ struct port_position
      * Comparator for equality tests.
      *
      * @param p Port to compare to.
-     * @return True iff this port is equal to given port p.
+     * @return `true` iff this port is equal to given port `p`.
      */
     constexpr bool operator==(const port_position& p) const
     {
@@ -91,6 +97,9 @@ struct port_direction
      * Default constructor.
      */
     constexpr port_direction() = default;
+
+    // NOLINTBEGIN(readability-identifier-naming)
+
     /**
      * Standard constructor.
      */
@@ -99,6 +108,9 @@ struct port_direction
             pi{pi_},
             po{po_}
     {}
+
+    // NOLINTEND(readability-identifier-naming)
+
     /**
      * Direction.
      */
@@ -115,7 +127,7 @@ struct port_direction
      * Comparator for set insertion.
      *
      * @param p Port to compare to.
-     * @return True iff this port goes before p in set.
+     * @return `true` iff this port goes before `p` in set.
      */
     constexpr bool operator<(const port_direction& p) const
     {
@@ -125,7 +137,7 @@ struct port_direction
      * Comparator for equality tests.
      *
      * @param p Port to compare to.
-     * @return True iff this port is equal to given port p.
+     * @return `true` iff this port is equal to given port `p`.
      */
     constexpr bool operator==(const port_direction& p) const
     {
@@ -147,7 +159,10 @@ struct port_list
     /**
      * Standard constructor.
      */
-    port_list(std::set<PortType> inp_, std::set<PortType> out_) : inp{std::move(inp_)}, out{std::move(out_)} {}
+    port_list(std::set<PortType> input_ports, std::set<PortType> output_ports) :
+            inp{std::move(input_ports)},
+            out{std::move(output_ports)}
+    {}
     /**
      * Input and output positions.
      */
@@ -156,7 +171,7 @@ struct port_list
      * Comparator for unordered_set/map.
      *
      * @param p Ports to compare to.
-     * @return True iff these ports are equal to p.
+     * @return `true` iff these ports are equal to `p`.
      */
     bool operator==(const port_list<PortType>& p) const
     {

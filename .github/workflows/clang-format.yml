@@ -1,0 +1,49 @@
+name: ClangFormat Linter
+
+on:
+  push:
+    branches: [ 'main' ]
+  pull_request:
+    branches: [ 'main' ]
+
+jobs:
+  clangformat:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone Repository (for push events)
+        if: ${{ github.event_name == 'push' }}
+        # regular checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Clone Repository (for PR events)
+        if: ${{ github.event_name == 'pull_request' }}
+        # PR checkout
+        uses: actions/checkout@v3
+        with:
+          # checkout the repository the branch is coming from
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          # prevent checkout in detached head state
+          ref: ${{ github.event.pull_request.head.ref }}
+          submodules: recursive
+
+      - name: Run ClangFormat
+        uses: DoozyX/clang-format-lint-action@v0.15
+        with:
+          source: 'include test experiments'
+          exclude: '*/catch2/*.hpp'
+          extensions: 'hpp,cpp'
+          clangFormatVersion: 15
+          inplace: True
+
+      - uses: EndBug/add-and-commit@v9
+        with:
+          add: 'include test experiments'
+          commit: '--signoff'
+          message: ':art: ClangFormat changes'
+          author_name: ClangFormat
+          author_email: ClangFormat@users.noreply.github.com
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

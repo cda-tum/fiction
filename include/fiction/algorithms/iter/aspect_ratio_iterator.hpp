@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <vector>
 
 namespace fiction
@@ -14,8 +15,8 @@ namespace fiction
 /**
  * An iterator type that iterates over increasingly larger 2D aspect ratios via factorization, starting from a number of
  * faces n. After iterating over all possible factorizations of n, the next step increases n and continues with the
- * factorization. Thereby, a sequence of aspect ratios starting from n == 4 faces looks like this: 1 x 4, 4 x 1, 2 x 2,
- * 1 x 5, 5 x 1, 1 x 6, 6 x 1, 2 x 3, 3 x 2, ...
+ * factorization. Thereby, a sequence of aspect ratios starting from \f$ n = 4 \f$ faces looks like this: \f$ 1 \times
+ * 4, 4 \times 1, 2 \times 2, 1 \times 5, 5 \times 1, 1 \times 6, 6 \times 1, 2 \times 3, 3 \times 2, \dots \f$
  *
  * @tparam AspectRatio Aspect ratio type.
  */
@@ -25,14 +26,14 @@ class aspect_ratio_iterator
   public:
     /**
      * Standard constructor. Takes a starting value and computes an initial factorization.
-     * The value n represents the amount of faces in the desired aspect ratios. For example, n == 1 will yield
-     * aspect ratios with exactly 1 face, i.e. 1 x 1, which is equal to coord_t{0, 0}. If n == 2, the aspect ratios
-     * 1 x 2 and 2 x 1 will result, which are equal to coord_t{0, 1} and coord_t{1, 0}. Both examples with
-     * AspectRatio == coord_t.
+     * The value n represents the amount of faces in the desired aspect ratios. For example, \f$ n = 1 \f$ will yield
+     * aspect ratios with exactly \f$ 1 \f$ face, i.e. \f$ 1 \times 1 \f$ which is equal to `ucoord_t{0, 0}`. If \f$ n =
+     * 2 \f$, the aspect ratios \f$ 1 \times 2 \f$ and \f$ 2 \times 1 \f$ will result, which are equal to `ucoord_t{0,
+     * 1}` and `ucoord_t{1, 0}`. Both examples with `AspectRatio == offset::ucoord_t`.
      *
      * @param n Starting value of the aspect ratio iteration.
      */
-    explicit aspect_ratio_iterator(uint64_t n = 0ul) noexcept : num{n ? n - 1 : 0}
+    explicit aspect_ratio_iterator([[maybe_unused]] uint64_t n = 0ul) noexcept : num{n != 0ul ? n - 1 : 0ul}
     {
         next();
     }
@@ -122,7 +123,7 @@ class aspect_ratio_iterator
     /**
      * Number to factorize into dimensions.
      */
-    uint64_t num;
+    uint64_t num{};
     /**
      * Factors of num.
      */
@@ -133,8 +134,8 @@ class aspect_ratio_iterator
     typename std::vector<AspectRatio>::iterator it;
 
     /**
-     * Factorizes the current num into all possible factors (x, y) with x * y = num. The result is stored as a vector
-     * of AspectRatio objects in the attribute factors.
+     * Factorizes the current `num` into all possible factors \f$ (x, y) \f$ with \f$ x \cdot y = num \f$. The result is
+     * stored as a vector of `AspectRatio` objects in the attribute factors.
      */
     void factorize() noexcept
     {
@@ -159,7 +160,7 @@ class aspect_ratio_iterator
         it = factors.begin();
     }
     /**
-     * Computes the next possible num where a factorization (x, y) with x * y = num exists.
+     * Computes the next possible num where a factorization \f$ (x, y) \f$ with \f$ x \cdot y = num \f$ exists.
      */
     void next() noexcept
     {
@@ -172,7 +173,7 @@ class aspect_ratio_iterator
 
 }  // namespace fiction
 
-// make aspect_ratio_iterator compatible with STL iterator categories
+// make `aspect_ratio_iterator` compatible with STL iterator categories
 namespace std
 {
 template <typename AspectRatio>
