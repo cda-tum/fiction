@@ -93,7 +93,7 @@ setup(
     version='0.4.0',
     author='Marcel Walter',
     author_email='marcel.walter@tum.de',
-    description='An open-source framework for design automation of Field-coupled Nanotechnologies',
+    description='Design Automation for Field-coupled Nanotechnologies',
     long_description=README,
     long_description_content_type='text/markdown',
     license='MIT',

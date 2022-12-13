@@ -1,0 +1,82 @@
+name: pyfiction CI
+
+on:
+  push:
+    paths:
+      - 'bindings/pyfiction/**'
+      - '**/*.py'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/python-bindings.yml'
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  Z3_VERSION: 4.10.0
+
+jobs:
+  build_and_test:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        python_version: [ '3.9.x', '3.10.x', '3.11.x' ]
+        include:
+          - os: ubuntu-latest
+            z3_platform: linux
+          - os: macos-latest
+            z3_platform: macOS
+          - os: windows-latest
+            z3_platform: windows
+
+    name: pyfiction on ${{matrix.os}} with Python ${{matrix.python_version}}
+    runs-on: ${{matrix.os}}
+
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{matrix.python_version}}
+
+      - name: Clone Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: '${{matrix.os}}-pyfiction'
+          variant: ccache
+          save: true
+          max-size: 10G
+
+      - name: Install pip packages
+        uses: BSFishy/pip-action@v1
+        with:
+          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
+
+      - name: Setup Z3 Solver
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{env.Z3_VERSION}}
+          platform: ${{matrix.z3_platform}}
+          architecture: x64
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      #      - name: Create Build Environment
+      #        run: cmake -E make_directory ${{github.workspace}}/build
+
+      - name: Build pyfiction
+        working-directory: ${{github.workspace}}
+        run: pip install .
+
+      - name: Test
+        working-directory: ${{github.workspace}}/bindings/pyfiction/tests
+        run: python3 -m unittest discover --verbose
