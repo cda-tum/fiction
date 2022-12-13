@@ -2,10 +2,10 @@
 // Created by marcel on 08.06.22.
 //
 
-#if (FICTION_Z3_SOLVER)
-
 #ifndef PYFICTION_EXACT_HPP
 #define PYFICTION_EXACT_HPP
+
+#if (FICTION_Z3_SOLVER)
 
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
@@ -69,6 +69,20 @@ inline void exact(pybind11::module& m)
 
 }  // namespace pyfiction
 
-#endif  // PYFICTION_EXACT_HPP
+#else  // FICTION_Z3_SOLVER
+
+#include "pybind11/pybind11.h"
+
+namespace pyfiction
+{
+
+/**
+ * Disable SMT-based exact physical design.
+ */
+inline void exact([[maybe_unused]] pybind11::module& m) {}
+
+}  // namespace pyfiction
 
 #endif  // FICTION_Z3_SOLVER
+
+#endif  // PYFICTION_EXACT_HPP
