@@ -32,6 +32,7 @@ jobs:
             z3_platform: macOS
           - os: windows-latest
             z3_platform: windows
+      fail-fast: false  # allow other jobs to finish even if one fails
 
     name: pyfiction on ${{matrix.os}} with Python ${{matrix.python_version}}
     runs-on: ${{matrix.os}}
