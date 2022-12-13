@@ -55,11 +55,6 @@ jobs:
           save: true
           max-size: 10G
 
-      - name: Install pip packages
-        uses: BSFishy/pip-action@v1
-        with:
-          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
-
       - name: Setup Z3 Solver
         id: z3
         uses: cda-tum/setup-z3@v1
@@ -69,9 +64,6 @@ jobs:
           architecture: x64
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-      #      - name: Create Build Environment
-      #        run: cmake -E make_directory ${{github.workspace}}/build
 
       - name: Build pyfiction
         working-directory: ${{github.workspace}}
