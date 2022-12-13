@@ -18,7 +18,7 @@ class TestExactCartesianPhysicalDesign(unittest.TestCase):
         params = pyfiction.exact_params()
         params.border_io = True
         params.crossings = True
-        params.scheme = "ESP"
+        params.scheme = "ESR"
 
         layout = pyfiction.exact_cartesian(network, params)
 
@@ -47,7 +47,7 @@ class TestExactHexagonalPhysicalDesign(unittest.TestCase):
         params = pyfiction.exact_params()
         params.border_io = True
         params.crossings = True
-        params.scheme = "ESP"
+        params.scheme = "ESR"
 
         layout = pyfiction.exact_hexagonal(network, params)
 

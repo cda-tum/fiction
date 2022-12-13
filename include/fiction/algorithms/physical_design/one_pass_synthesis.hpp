@@ -935,7 +935,7 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
-    if (ps.scheme == clock_name::open || ps.scheme == clock_name::columnar || ps.scheme == clock_name::row)
+    if (ps.scheme == clock_name::OPEN || ps.scheme == clock_name::COLUMNAR || ps.scheme == clock_name::ROW)
     {
         throw unsupported_clocking_scheme_exception();
     }

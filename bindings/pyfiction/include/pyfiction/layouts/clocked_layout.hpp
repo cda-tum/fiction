@@ -62,10 +62,8 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
         .def("is_incoming_clocked", &clocked_layout::is_incoming_clocked)
         .def("is_outgoing_clocked", &clocked_layout::is_outgoing_clocked)
 
-        .def("incoming_clocked_zones",
-             &clocked_layout::template incoming_clocked_zones<std::set<fiction::clock_zone<clocked_layout>>>)
-        .def("outgoing_clocked_zones",
-             &clocked_layout::template outgoing_clocked_zones<std::set<fiction::clock_zone<clocked_layout>>>)
+        .def("incoming_clocked_zones", &clocked_layout::incoming_clocked_zones)
+        .def("outgoing_clocked_zones", &clocked_layout::outgoing_clocked_zones)
 
         .def("in_degree", &clocked_layout::in_degree)
         .def("out_degree", &clocked_layout::out_degree)

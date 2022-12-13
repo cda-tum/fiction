@@ -35,7 +35,7 @@ class TestClockedLayout(unittest.TestCase):
         pyfiction.clocked_cartesian_layout((1, 1), "USE")
         pyfiction.clocked_cartesian_layout((2, 2), "2DDWave")
         pyfiction.clocked_cartesian_layout((3, 3), "RES")
-        pyfiction.clocked_cartesian_layout((4, 4), "ESP")
+        pyfiction.clocked_cartesian_layout((4, 4), "ESR")
         pyfiction.clocked_cartesian_layout((5, 5), "BANCS")
 
         with self.assertRaises(RuntimeError):

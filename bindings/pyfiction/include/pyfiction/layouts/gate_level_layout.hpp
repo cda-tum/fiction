@@ -128,8 +128,8 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
                  return wires;
              })
 
-        .def("incoming_data_flow", &gate_layout::template incoming_data_flow<std::set<fiction::tile<gate_layout>>>)
-        .def("outgoing_data_flow", &gate_layout::template outgoing_data_flow<std::set<fiction::tile<gate_layout>>>)
+        .def("incoming_data_flow", &gate_layout::incoming_data_flow)
+        .def("outgoing_data_flow", &gate_layout::outgoing_data_flow)
 
         .def("__repr__",
              [](const gate_layout& lyt) -> std::string
