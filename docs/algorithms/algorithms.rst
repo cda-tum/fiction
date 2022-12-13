@@ -23,6 +23,15 @@ Graph Algorithms
 
    graph.rst
 
+
+Optimization
+============
+
+.. toctree::
+   :maxdepth: 1
+
+   optimization.rst
+
 Network Transformation
 ======================
 
