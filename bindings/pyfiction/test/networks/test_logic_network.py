@@ -11,9 +11,10 @@ class TestLogicNetwork(unittest.TestCase):
         network = pyfiction.read_logic_network(dir_path + "/../resources/mux21.v")
 
         self.assertEqual(network.gates(), [5, 6, 7, 8, 9])
-        # self.assertTrue(network.is_and(5))
-        # self.assertTrue(network.is_or(5))
-        # self.assertTrue(network.is_inv(5))
+        self.assertTrue(network.is_inv(5))
+        self.assertTrue(network.is_and(6))
+        self.assertTrue(network.is_and(7))
+        self.assertTrue(network.is_or(8))
 
         self.assertEqual(network.pis(), [2, 3, 4])
         self.assertTrue(network.is_pi(2))

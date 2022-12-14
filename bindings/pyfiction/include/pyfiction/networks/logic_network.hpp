@@ -93,14 +93,15 @@ void network(pybind11::module& m, const std::string& network_name)
         .def("is_pi", &Ntk::is_pi)
         .def("is_po", &Ntk::is_po)
 
-        .def("is_inv", &Ntk::is_inv)
-        .def("is_and", &Ntk::is_and)
-        .def("is_or", &Ntk::is_or)
-        .def("is_xor", &Ntk::is_xor)
-        .def("is_maj", &Ntk::is_maj)
-        .def("is_nand", &Ntk::is_nand)
-        .def("is_nor", &Ntk::is_nor)
-        .def("is_xnor", &Ntk::is_xnor)
+        // for some reason, the is_* functions need redefinition to match with Ntk
+        .def("is_inv", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_inv(n); })
+        .def("is_and", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_and(n); })
+        .def("is_or", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_or(n); })
+        .def("is_xor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xor(n); })
+        .def("is_maj", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_maj(n); })
+        .def("is_nand", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nand(n); })
+        .def("is_nor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nor(n); })
+        .def("is_xnor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xnor(n); })
 
         ;
 
