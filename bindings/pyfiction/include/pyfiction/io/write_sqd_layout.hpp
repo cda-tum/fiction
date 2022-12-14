@@ -20,7 +20,6 @@ namespace pyfiction
 
 inline void write_sqd_layout(pybind11::module& m)
 {
-    namespace py = pybind11;
     using namespace pybind11::literals;
 
     using cell_clk_cart_lyt = fiction::cell_level_layout<

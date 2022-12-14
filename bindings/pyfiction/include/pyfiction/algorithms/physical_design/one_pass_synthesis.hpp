@@ -2,10 +2,10 @@
 // Created by marcel on 08.06.22.
 //
 
-#if (MUGEN)
-
 #ifndef PYFICTION_ONE_PASS_SYNTHESIS_HPP
 #define PYFICTION_ONE_PASS_SYNTHESIS_HPP
+
+#if (MUGEN)
 
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
@@ -69,6 +69,20 @@ inline void one_pass_synthesis(pybind11::module& m)
 
 }  // namespace pyfiction
 
-#endif  // PYFICTION_ONE_PASS_SYNTHESIS_HPP
+#else  // MUGEN
+
+#include "pybind11/pybind11.h"
+
+namespace pyfiction
+{
+
+/**
+ * Disable SMT-based exact physical design.
+ */
+inline void one_pass_synthesis([[maybe_unused]] pybind11::module& m) {}
+
+}  // namespace pyfiction
 
 #endif  // MUGEN
+
+#endif  // PYFICTION_ONE_PASS_SYNTHESIS_HPP
