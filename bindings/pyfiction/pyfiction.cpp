@@ -5,6 +5,7 @@
 #include "pybind11/pybind11.h"
 #include "pyfiction/algorithms/path_finding/a_star.hpp"
 #include "pyfiction/algorithms/path_finding/distance.hpp"
+#include "pyfiction/algorithms/path_finding/k_shortest_paths.hpp"
 #include "pyfiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "pyfiction/algorithms/physical_design/exact.hpp"
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
@@ -53,6 +54,7 @@ PYBIND11_MODULE(pyfiction, m)
      */
     pyfiction::distance(m);
     pyfiction::a_star(m);
+    pyfiction::yen_k_shortest_paths(m);
     /**
      * Algorithms: Properties
      */
