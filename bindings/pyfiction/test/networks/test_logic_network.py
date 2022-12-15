@@ -1,4 +1,4 @@
-from fiction import pyfiction
+from fiction.pyfiction import *
 import unittest
 import os
 
@@ -8,7 +8,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class TestLogicNetwork(unittest.TestCase):
 
     def test_read_logic_network(self):
-        network = pyfiction.read_logic_network(dir_path + "/../resources/mux21.v")
+        network = read_logic_network(dir_path + "/../resources/mux21.v")
 
         self.assertEqual(network.gates(), [5, 6, 7, 8, 9])
         self.assertTrue(network.is_inv(5))
@@ -36,7 +36,7 @@ class TestLogicNetwork(unittest.TestCase):
         self.assertEqual(network.fanins(9), [8])
 
         with self.assertRaises(RuntimeError):
-            network = pyfiction.read_logic_network(dir_path + "/mux41.v")
+            network = read_logic_network(dir_path + "/mux41.v")
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-from fiction import pyfiction
+from fiction.pyfiction import *
 import unittest
 import os
 
@@ -8,24 +8,24 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class TestOrthogonalPhysicalDesign(unittest.TestCase):
 
     def test_orthogonal_default(self):
-        network = pyfiction.read_logic_network(dir_path + "/../../resources/mux21.v")
-        layout = pyfiction.orthogonal(network)
-        self.assertEqual(pyfiction.equivalence_checking(network, layout), pyfiction.eq_type.STRONG)
+        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+        layout = orthogonal(network)
+        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
 
     def test_orthogonal_with_parameters(self):
-        network = pyfiction.read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_logic_network(dir_path + "/../../resources/mux21.v")
 
-        params = pyfiction.orthogonal_params()
+        params = orthogonal_params()
 
-        layout = pyfiction.orthogonal(network, params)
+        layout = orthogonal(network, params)
 
-        self.assertEqual(pyfiction.equivalence_checking(network, layout), pyfiction.eq_type.STRONG)
+        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
 
     def test_orthogonal_with_stats(self):
-        network = pyfiction.read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_logic_network(dir_path + "/../../resources/mux21.v")
 
-        stats = pyfiction.orthogonal_stats()
+        stats = orthogonal_stats()
 
-        layout = pyfiction.orthogonal(network, statistics=stats)
+        layout = orthogonal(network, statistics=stats)
 
-        self.assertEqual(pyfiction.equivalence_checking(network, layout), pyfiction.eq_type.STRONG)
+        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)

@@ -1,11 +1,11 @@
-from fiction import pyfiction
+from fiction.pyfiction import *
 import unittest
 
 
 class TestCartesianLayout(unittest.TestCase):
 
     def test_coordinate_iteration(self):
-        layout = pyfiction.cartesian_layout((9, 9, 1))
+        layout = cartesian_layout((9, 9, 1))
 
         for t in layout.coordinates():
             self.assertTrue(t <= (9, 9, 1))

@@ -1,11 +1,11 @@
-from fiction import pyfiction
+from fiction.pyfiction import *
 import unittest
 
 
 class TestCellTechnology(unittest.TestCase):
 
     def test_qca_technology(self):
-        qca = pyfiction.qca_technology
+        qca = qca_technology
 
         self.assertEqual(str(qca.cell_type.EMPTY), "cell_type.EMPTY")
         self.assertEqual(str(qca.cell_type.NORMAL), "cell_type.NORMAL")
@@ -15,7 +15,7 @@ class TestCellTechnology(unittest.TestCase):
         self.assertEqual(str(qca.cell_type.CONST_1), "cell_type.CONST_1")
 
     def test_inml_technology(self):
-        inml = pyfiction.inml_technology
+        inml = inml_technology
 
         self.assertEqual(str(inml.cell_type.EMPTY), "cell_type.EMPTY")
         self.assertEqual(str(inml.cell_type.NORMAL), "cell_type.NORMAL")
@@ -27,7 +27,7 @@ class TestCellTechnology(unittest.TestCase):
         self.assertEqual(str(inml.cell_type.FANOUT_COUPLER_MAGNET), "cell_type.FANOUT_COUPLER_MAGNET")
 
     def test_sidb_technology(self):
-        sidb = pyfiction.sidb_technology
+        sidb = sidb_technology
 
         self.assertEqual(str(sidb.cell_type.EMPTY), "cell_type.EMPTY")
         self.assertEqual(str(sidb.cell_type.NORMAL), "cell_type.NORMAL")
@@ -38,7 +38,7 @@ class TestCellTechnology(unittest.TestCase):
 class TestQCACellLevelLayout(unittest.TestCase):
 
     def test_qca_cell_layout_inheritance(self):
-        layout = pyfiction.qca_layout((9, 9, 1))
+        layout = qca_layout((9, 9, 1))
 
         for t in layout.coordinates():
             self.assertTrue(t <= (9, 9, 1))
@@ -53,19 +53,19 @@ class TestQCACellLevelLayout(unittest.TestCase):
             self.assertIn(t, [(1, 2), (2, 1), (3, 2), (2, 3)])
 
     def test_cell_type_assignment(self):
-        layout = pyfiction.qca_layout((4, 4), "OPEN", "AND")
+        layout = qca_layout((4, 4), "OPEN", "AND")
 
         self.assertTrue(layout.is_empty())
 
-        layout.assign_cell_type((0, 2), pyfiction.qca_technology.cell_type.INPUT)
-        layout.assign_cell_type((2, 4), pyfiction.qca_technology.cell_type.INPUT)
-        layout.assign_cell_type((2, 0), pyfiction.qca_technology.cell_type.CONST_0)
-        layout.assign_cell_type((2, 1), pyfiction.qca_technology.cell_type.NORMAL)
-        layout.assign_cell_type((2, 2), pyfiction.qca_technology.cell_type.NORMAL)
-        layout.assign_cell_type((2, 3), pyfiction.qca_technology.cell_type.NORMAL)
-        layout.assign_cell_type((1, 2), pyfiction.qca_technology.cell_type.NORMAL)
-        layout.assign_cell_type((3, 2), pyfiction.qca_technology.cell_type.NORMAL)
-        layout.assign_cell_type((4, 2), pyfiction.qca_technology.cell_type.OUTPUT)
+        layout.assign_cell_type((0, 2), qca_technology.cell_type.INPUT)
+        layout.assign_cell_type((2, 4), qca_technology.cell_type.INPUT)
+        layout.assign_cell_type((2, 0), qca_technology.cell_type.CONST_0)
+        layout.assign_cell_type((2, 1), qca_technology.cell_type.NORMAL)
+        layout.assign_cell_type((2, 2), qca_technology.cell_type.NORMAL)
+        layout.assign_cell_type((2, 3), qca_technology.cell_type.NORMAL)
+        layout.assign_cell_type((1, 2), qca_technology.cell_type.NORMAL)
+        layout.assign_cell_type((3, 2), qca_technology.cell_type.NORMAL)
+        layout.assign_cell_type((4, 2), qca_technology.cell_type.OUTPUT)
 
         self.assertFalse(layout.is_empty())
 
@@ -86,15 +86,15 @@ class TestQCACellLevelLayout(unittest.TestCase):
         self.assertTrue(layout.is_pi((2, 4)))
         self.assertTrue(layout.is_po((4, 2)))
 
-        self.assertEqual(layout.get_cell_type((2, 0)), pyfiction.qca_technology.cell_type.CONST_0)
-        self.assertEqual(layout.get_cell_type((2, 4)), pyfiction.qca_technology.cell_type.INPUT)
-        self.assertEqual(layout.get_cell_type((0, 2)), pyfiction.qca_technology.cell_type.INPUT)
-        self.assertEqual(layout.get_cell_type((2, 1)), pyfiction.qca_technology.cell_type.NORMAL)
-        self.assertEqual(layout.get_cell_type((2, 2)), pyfiction.qca_technology.cell_type.NORMAL)
-        self.assertEqual(layout.get_cell_type((2, 3)), pyfiction.qca_technology.cell_type.NORMAL)
-        self.assertEqual(layout.get_cell_type((1, 2)), pyfiction.qca_technology.cell_type.NORMAL)
-        self.assertEqual(layout.get_cell_type((3, 2)), pyfiction.qca_technology.cell_type.NORMAL)
-        self.assertEqual(layout.get_cell_type((4, 2)), pyfiction.qca_technology.cell_type.OUTPUT)
+        self.assertEqual(layout.get_cell_type((2, 0)), qca_technology.cell_type.CONST_0)
+        self.assertEqual(layout.get_cell_type((2, 4)), qca_technology.cell_type.INPUT)
+        self.assertEqual(layout.get_cell_type((0, 2)), qca_technology.cell_type.INPUT)
+        self.assertEqual(layout.get_cell_type((2, 1)), qca_technology.cell_type.NORMAL)
+        self.assertEqual(layout.get_cell_type((2, 2)), qca_technology.cell_type.NORMAL)
+        self.assertEqual(layout.get_cell_type((2, 3)), qca_technology.cell_type.NORMAL)
+        self.assertEqual(layout.get_cell_type((1, 2)), qca_technology.cell_type.NORMAL)
+        self.assertEqual(layout.get_cell_type((3, 2)), qca_technology.cell_type.NORMAL)
+        self.assertEqual(layout.get_cell_type((4, 2)), qca_technology.cell_type.OUTPUT)
 
         self.assertTrue(layout.is_empty_cell((0, 0)))
         self.assertTrue(layout.is_empty_cell((0, 1)))

@@ -1,23 +1,23 @@
-from fiction import pyfiction
+from fiction.pyfiction import *
 import unittest
 
 
 class TestCartesianGateLevelLayout(unittest.TestCase):
 
     def test_cartesian_gate_level_layout_inheritance(self):
-        layout = pyfiction.cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")
+        layout = cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")
 
         self.assertEqual(layout.incoming_clocked_zones((0, 0)), [])
         self.assertEqual(layout.outgoing_clocked_zones((2, 2)), [])
 
         for icz in layout.incoming_clocked_zones((1, 1)):
-            self.assertIn(icz, [pyfiction.coordinate(1, 0), pyfiction.coordinate(0, 1)])
+            self.assertIn(icz, [coordinate(1, 0), coordinate(0, 1)])
 
         for icz in layout.outgoing_clocked_zones((1, 1)):
-            self.assertIn(icz, [pyfiction.coordinate(1, 2), pyfiction.coordinate(2, 1)])
+            self.assertIn(icz, [coordinate(1, 2), coordinate(2, 1)])
 
     def test_cartesian_gate_level_layout_iteration(self):
-        layout = pyfiction.cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")
+        layout = cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")
 
         self.assertTrue(layout.is_empty())
 
@@ -44,89 +44,89 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
         # Pis
         pis = layout.pis()
         self.assertEqual(len(pis), 4)
-        self.assertIn(pyfiction.coordinate(x1), pis)
-        self.assertIn(pyfiction.coordinate(x2), pis)
-        self.assertIn(pyfiction.coordinate(x3), pis)
-        self.assertIn(pyfiction.coordinate(x4), pis)
+        self.assertIn(coordinate(x1), pis)
+        self.assertIn(coordinate(x2), pis)
+        self.assertIn(coordinate(x3), pis)
+        self.assertIn(coordinate(x4), pis)
 
         # POs
         pos = layout.pos()
         self.assertEqual(len(pos), 2)
-        self.assertIn(pyfiction.coordinate(f1), pos)
-        self.assertIn(pyfiction.coordinate(f2), pos)
+        self.assertIn(coordinate(f1), pos)
+        self.assertIn(coordinate(f2), pos)
 
         # gates
         gates = layout.gates()
         self.assertEqual(len(gates), 7)
-        self.assertIn(pyfiction.coordinate(a1), gates)
-        self.assertIn(pyfiction.coordinate(a2), gates)
-        self.assertIn(pyfiction.coordinate(b1), gates)
-        self.assertIn(pyfiction.coordinate(b2), gates)
-        self.assertIn(pyfiction.coordinate(c), gates)
-        self.assertIn(pyfiction.coordinate(f1), gates)
-        self.assertIn(pyfiction.coordinate(f2), gates)
+        self.assertIn(coordinate(a1), gates)
+        self.assertIn(coordinate(a2), gates)
+        self.assertIn(coordinate(b1), gates)
+        self.assertIn(coordinate(b2), gates)
+        self.assertIn(coordinate(c), gates)
+        self.assertIn(coordinate(f1), gates)
+        self.assertIn(coordinate(f2), gates)
 
         # wires
         wires = layout.wires()
         self.assertEqual(len(wires), 9)
-        self.assertIn(pyfiction.coordinate(x1), wires)
-        self.assertIn(pyfiction.coordinate(x2), wires)
-        self.assertIn(pyfiction.coordinate(x3), wires)
-        self.assertIn(pyfiction.coordinate(x4), wires)
-        self.assertIn(pyfiction.coordinate(b1), wires)
-        self.assertIn(pyfiction.coordinate(b2), wires)
-        self.assertIn(pyfiction.coordinate(c), wires)
-        self.assertIn(pyfiction.coordinate(f1), wires)
-        self.assertIn(pyfiction.coordinate(f2), wires)
+        self.assertIn(coordinate(x1), wires)
+        self.assertIn(coordinate(x2), wires)
+        self.assertIn(coordinate(x3), wires)
+        self.assertIn(coordinate(x4), wires)
+        self.assertIn(coordinate(b1), wires)
+        self.assertIn(coordinate(b2), wires)
+        self.assertIn(coordinate(c), wires)
+        self.assertIn(coordinate(f1), wires)
+        self.assertIn(coordinate(f2), wires)
 
         # incoming data flow
-        inx1 = layout.fanins(pyfiction.coordinate(x1))
+        inx1 = layout.fanins(coordinate(x1))
         self.assertEqual(len(inx1), 0)
 
-        inf1 = layout.fanins(pyfiction.coordinate(f1))
+        inf1 = layout.fanins(coordinate(f1))
         self.assertEqual(len(inf1), 1)
-        self.assertIn(pyfiction.coordinate(c), inf1)
+        self.assertIn(coordinate(c), inf1)
 
-        ina2 = layout.fanins(pyfiction.coordinate(a2))
+        ina2 = layout.fanins(coordinate(a2))
         self.assertEqual(len(ina2), 2)
-        self.assertIn(pyfiction.coordinate(b1), ina2)
-        self.assertIn(pyfiction.coordinate(b2), ina2)
+        self.assertIn(coordinate(b1), ina2)
+        self.assertIn(coordinate(b2), ina2)
 
         # outgoing data flow
-        outx1 = layout.fanouts(pyfiction.coordinate(x1))
+        outx1 = layout.fanouts(coordinate(x1))
         self.assertEqual(len(outx1), 1)
-        self.assertIn(pyfiction.coordinate(a1), outx1)
+        self.assertIn(coordinate(a1), outx1)
 
-        outf1 = layout.fanouts(pyfiction.coordinate(f1))
+        outf1 = layout.fanouts(coordinate(f1))
         self.assertEqual(len(outf1), 0)
 
-        outa2 = layout.fanouts(pyfiction.coordinate(a2))
+        outa2 = layout.fanouts(coordinate(a2))
         self.assertEqual(len(outa2), 1)
-        self.assertIn(pyfiction.coordinate(f2), outa2)
+        self.assertIn(coordinate(f2), outa2)
 
-        cp, tp = pyfiction.critical_path_length_and_throughput(layout)
+        cp, tp = critical_path_length_and_throughput(layout)
         self.assertEqual(cp, 4)
         self.assertEqual(tp, 1)
 
-        self.assertEqual(pyfiction.gate_level_drvs(layout), (0, 0))
+        self.assertEqual(gate_level_drvs(layout), (0, 0))
 
 
 class TestHexagonalGateLevelLayout(unittest.TestCase):
 
     def test_hexagonal_gate_level_layout_inheritance(self):
-        layout = pyfiction.hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout")
+        layout = hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout")
 
         self.assertEqual(layout.incoming_clocked_zones((0, 0)), [])
         self.assertEqual(layout.outgoing_clocked_zones((2, 2)), [])
 
         for icz in layout.incoming_clocked_zones((1, 1)):
-            self.assertIn(icz, [pyfiction.coordinate(1, 0), pyfiction.coordinate(0, 1)])
+            self.assertIn(icz, [coordinate(1, 0), coordinate(0, 1)])
 
         for icz in layout.outgoing_clocked_zones((1, 1)):
-            self.assertIn(icz, [pyfiction.coordinate(1, 2), pyfiction.coordinate(2, 1)])
+            self.assertIn(icz, [coordinate(1, 2), coordinate(2, 1)])
 
     def test_hexagonal_gate_level_layout_iteration(self):
-        layout = pyfiction.hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout")
+        layout = hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout")
 
         self.assertTrue(layout.is_empty())
 
@@ -153,71 +153,71 @@ class TestHexagonalGateLevelLayout(unittest.TestCase):
         # Pis
         pis = layout.pis()
         self.assertEqual(len(pis), 4)
-        self.assertIn(pyfiction.coordinate(x1), pis)
-        self.assertIn(pyfiction.coordinate(x2), pis)
-        self.assertIn(pyfiction.coordinate(x3), pis)
-        self.assertIn(pyfiction.coordinate(x4), pis)
+        self.assertIn(coordinate(x1), pis)
+        self.assertIn(coordinate(x2), pis)
+        self.assertIn(coordinate(x3), pis)
+        self.assertIn(coordinate(x4), pis)
 
         # POs
         pos = layout.pos()
         self.assertEqual(len(pos), 2)
-        self.assertIn(pyfiction.coordinate(f1), pos)
-        self.assertIn(pyfiction.coordinate(f2), pos)
+        self.assertIn(coordinate(f1), pos)
+        self.assertIn(coordinate(f2), pos)
 
         # gates
         gates = layout.gates()
         self.assertEqual(len(gates), 7)
-        self.assertIn(pyfiction.coordinate(a1), gates)
-        self.assertIn(pyfiction.coordinate(a2), gates)
-        self.assertIn(pyfiction.coordinate(b1), gates)
-        self.assertIn(pyfiction.coordinate(b2), gates)
-        self.assertIn(pyfiction.coordinate(c), gates)
-        self.assertIn(pyfiction.coordinate(f1), gates)
-        self.assertIn(pyfiction.coordinate(f2), gates)
+        self.assertIn(coordinate(a1), gates)
+        self.assertIn(coordinate(a2), gates)
+        self.assertIn(coordinate(b1), gates)
+        self.assertIn(coordinate(b2), gates)
+        self.assertIn(coordinate(c), gates)
+        self.assertIn(coordinate(f1), gates)
+        self.assertIn(coordinate(f2), gates)
 
         # wires
         wires = layout.wires()
         self.assertEqual(len(wires), 9)
-        self.assertIn(pyfiction.coordinate(x1), wires)
-        self.assertIn(pyfiction.coordinate(x2), wires)
-        self.assertIn(pyfiction.coordinate(x3), wires)
-        self.assertIn(pyfiction.coordinate(x4), wires)
-        self.assertIn(pyfiction.coordinate(b1), wires)
-        self.assertIn(pyfiction.coordinate(b2), wires)
-        self.assertIn(pyfiction.coordinate(c), wires)
-        self.assertIn(pyfiction.coordinate(f1), wires)
-        self.assertIn(pyfiction.coordinate(f2), wires)
+        self.assertIn(coordinate(x1), wires)
+        self.assertIn(coordinate(x2), wires)
+        self.assertIn(coordinate(x3), wires)
+        self.assertIn(coordinate(x4), wires)
+        self.assertIn(coordinate(b1), wires)
+        self.assertIn(coordinate(b2), wires)
+        self.assertIn(coordinate(c), wires)
+        self.assertIn(coordinate(f1), wires)
+        self.assertIn(coordinate(f2), wires)
 
         # incoming data flow
-        inx1 = layout.fanins(pyfiction.coordinate(x1))
+        inx1 = layout.fanins(coordinate(x1))
         self.assertEqual(len(inx1), 0)
 
-        inf1 = layout.fanins(pyfiction.coordinate(f1))
+        inf1 = layout.fanins(coordinate(f1))
         self.assertEqual(len(inf1), 1)
-        self.assertIn(pyfiction.coordinate(c), inf1)
+        self.assertIn(coordinate(c), inf1)
 
-        ina2 = layout.fanins(pyfiction.coordinate(a2))
+        ina2 = layout.fanins(coordinate(a2))
         self.assertEqual(len(ina2), 2)
-        self.assertIn(pyfiction.coordinate(b1), ina2)
-        self.assertIn(pyfiction.coordinate(b2), ina2)
+        self.assertIn(coordinate(b1), ina2)
+        self.assertIn(coordinate(b2), ina2)
 
         # outgoing data flow
-        outx1 = layout.fanouts(pyfiction.coordinate(x1))
+        outx1 = layout.fanouts(coordinate(x1))
         self.assertEqual(len(outx1), 1)
-        self.assertIn(pyfiction.coordinate(a1), outx1)
+        self.assertIn(coordinate(a1), outx1)
 
-        outf1 = layout.fanouts(pyfiction.coordinate(f1))
+        outf1 = layout.fanouts(coordinate(f1))
         self.assertEqual(len(outf1), 0)
 
-        outa2 = layout.fanouts(pyfiction.coordinate(a2))
+        outa2 = layout.fanouts(coordinate(a2))
         self.assertEqual(len(outa2), 1)
-        self.assertIn(pyfiction.coordinate(f2), outa2)
+        self.assertIn(coordinate(f2), outa2)
 
-        cp, tp = pyfiction.critical_path_length_and_throughput(layout)
+        cp, tp = critical_path_length_and_throughput(layout)
         self.assertEqual(cp, 4)
         self.assertEqual(tp, 1)
 
-        self.assertEqual(pyfiction.gate_level_drvs(layout), (0, 0))
+        self.assertEqual(gate_level_drvs(layout), (0, 0))
 
 
 if __name__ == '__main__':
