@@ -19,8 +19,10 @@ namespace detail
 template <typename Lyt>
 void distance(pybind11::module& m)
 {
-    m.def("manhattan_distance", &fiction::manhattan_distance<Lyt>);
-    m.def("euclidean_distance", &fiction::euclidean_distance<Lyt>);
+    using namespace pybind11::literals;
+
+    m.def("manhattan_distance", &fiction::manhattan_distance<Lyt>, "layout"_a, "source"_a, "target"_a);
+    m.def("euclidean_distance", &fiction::euclidean_distance<Lyt>, "layout"_a, "source"_a, "target"_a);
 }
 
 }  // namespace detail
