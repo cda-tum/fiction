@@ -5,7 +5,18 @@
 #ifndef PYFICTION_TYPES_HPP
 #define PYFICTION_TYPES_HPP
 
-#include <fiction/types.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/layouts/synchronization_element_layout.hpp>
+#include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/networks/technology_network.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+
+#include <mockturtle/views/names_view.hpp>
 
 namespace pyfiction
 {
@@ -13,7 +24,7 @@ namespace pyfiction
 /**
  * Logic network.
  */
-using py_logic_network = fiction::tec_nt;
+using py_logic_network = mockturtle::names_view<fiction::technology_network>;
 /**
  * Coordinates.
  */
