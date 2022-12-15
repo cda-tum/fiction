@@ -19,14 +19,18 @@ namespace detail
 template <typename Spec, typename Impl>
 void equivalence_checking(pybind11::module& m)
 {
-    m.def("equivalence_checking",
-          [](const Spec& spec, const Impl& impl) -> fiction::eq_type
-          {
-              fiction::equivalence_checking_stats stats{};
-              fiction::equivalence_checking(spec, impl, &stats);
+    using namespace pybind11::literals;
 
-              return stats.eq;
-          });
+    m.def(
+        "equivalence_checking",
+        [](const Spec& spec, const Impl& impl) -> fiction::eq_type
+        {
+            fiction::equivalence_checking_stats stats{};
+            fiction::equivalence_checking(spec, impl, &stats);
+
+            return stats.eq;
+        },
+        "specification"_a, "implementation"_a);
 }
 
 }  // namespace detail

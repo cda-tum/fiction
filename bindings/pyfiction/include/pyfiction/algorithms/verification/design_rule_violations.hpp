@@ -19,19 +19,23 @@ namespace detail
 template <typename Lyt>
 void gate_level_drvs(pybind11::module& m)
 {
-    m.def("gate_level_drvs",
-          [](const Lyt& lyt) -> std::pair<std::size_t, std::size_t>
-          {
-              std::stringstream stream{};
+    using namespace pybind11::literals;
 
-              fiction::gate_level_drv_params params{};
-              params.out = &stream;
-              fiction::gate_level_drv_stats stats{};
+    m.def(
+        "gate_level_drvs",
+        [](const Lyt& lyt) -> std::pair<std::size_t, std::size_t>
+        {
+            std::stringstream stream{};
 
-              fiction::gate_level_drvs(lyt, {}, &stats);
+            fiction::gate_level_drv_params params{};
+            params.out = &stream;
+            fiction::gate_level_drv_stats stats{};
 
-              return {stats.warnings, stats.drvs};
-          });
+            fiction::gate_level_drvs(lyt, {}, &stats);
+
+            return {stats.warnings, stats.drvs};
+        },
+        "layout"_a);
 }
 
 }  // namespace detail
