@@ -168,7 +168,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
           });
 
     m.def("gate_level_drvs",
-          [](const gate_layout& lyt)
+          [](const gate_layout& lyt) -> std::pair<std::size_t, std::size_t>
           {
               std::stringstream stream{};
 
@@ -178,7 +178,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
 
               fiction::gate_level_drvs(lyt, {}, &stats);
 
-              return std::make_pair(stats.warnings, stats.drvs);
+              return {stats.warnings, stats.drvs};
           });
 
     m.def("equivalence_checking",
