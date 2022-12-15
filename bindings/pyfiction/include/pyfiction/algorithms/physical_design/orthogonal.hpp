@@ -7,9 +7,9 @@
 
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
+#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
-#include <fiction/types.hpp>
 
 #include <sstream>
 
@@ -23,9 +23,6 @@ inline void orthogonal(pybind11::module& m)
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
-
-    using gate_clk_cart_lyt = fiction::gate_level_layout<
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
 
     py::class_<fiction::orthogonal_physical_design_params>(m, "orthogonal_params").def(py::init<>())
 
@@ -43,7 +40,7 @@ inline void orthogonal(pybind11::module& m)
 
         ;
 
-    m.def("orthogonal", &fiction::orthogonal<gate_clk_cart_lyt, fiction::tec_nt>, "network"_a,
+    m.def("orthogonal", &fiction::orthogonal<py_cartesian_gate_layout, py_logic_network>, "network"_a,
           "parameters"_a = fiction::orthogonal_physical_design_params{}, "statistics"_a = nullptr);
 }
 

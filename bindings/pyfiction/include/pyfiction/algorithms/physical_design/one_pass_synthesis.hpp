@@ -9,9 +9,9 @@
 
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
+#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/one_pass_synthesis.hpp>
-#include <fiction/types.hpp>
 
 #include <optional>
 #include <sstream>
@@ -26,9 +26,6 @@ inline void one_pass_synthesis(pybind11::module& m)
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
-
-    using gate_clk_cart_lyt = fiction::gate_level_layout<
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
 
     py::class_<fiction::one_pass_synthesis_params>(m, "one_pass_synthesis_params")
         .def(py::init<>())
@@ -59,9 +56,9 @@ inline void one_pass_synthesis(pybind11::module& m)
 
         ;
 
-    std::optional<gate_clk_cart_lyt> (*one_pass_function_pointer)(
+    std::optional<py_cartesian_gate_layout> (*one_pass_function_pointer)(
         const fiction::tec_nt&, fiction::one_pass_synthesis_params, fiction::one_pass_synthesis_stats*) =
-        &fiction::one_pass_synthesis<gate_clk_cart_lyt, fiction::tec_nt>;
+        &fiction::one_pass_synthesis<py_cartesian_gate_layout, py_logic_network>;
 
     m.def("one_pass_synthesis", one_pass_function_pointer, "network"_a,
           "parameters"_a = fiction::one_pass_synthesis_params{}, "statistics"_a = nullptr);

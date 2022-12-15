@@ -7,11 +7,10 @@
 
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
+#include "pyfiction/types.hpp"
 
 #include <fiction/io/network_reader.hpp>
-#include <fiction/networks/technology_network.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -131,7 +130,7 @@ inline void logic_network(pybind11::module& m)
     /**
      * Logic network.
      */
-    detail::network<fiction::tec_nt>(m, "logic_network");
+    detail::network<py_logic_network>(m, "logic_network");
     //    detail::network<fiction::aig_nt>(m, "aig_network");
     //    detail::network<fiction::mig_nt>(m, "mig_network");
     //    detail::network<fiction::xag_nt>(m, "xag_network");

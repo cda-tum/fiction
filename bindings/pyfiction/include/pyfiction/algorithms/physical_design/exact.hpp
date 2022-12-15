@@ -9,9 +9,9 @@
 
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
+#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/exact.hpp>
-#include <fiction/types.hpp>
 
 #include <sstream>
 
@@ -25,12 +25,6 @@ inline void exact(pybind11::module& m)
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
-
-    using gate_clk_cart_lyt = fiction::gate_level_layout<
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
-
-    using gate_clk_hex_lyt = fiction::gate_level_layout<fiction::clocked_layout<
-        fiction::tile_based_layout<fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::even_row_hex>>>>;
 
     py::class_<fiction::exact_physical_design_params>(m, "exact_params")
         .def(py::init<>())
@@ -60,10 +54,10 @@ inline void exact(pybind11::module& m)
 
         ;
 
-    m.def("exact_cartesian", &fiction::exact<gate_clk_cart_lyt, fiction::tec_nt>, "network"_a,
+    m.def("exact_cartesian", &fiction::exact<py_cartesian_gate_layout, py_logic_network>, "network"_a,
           "parameters"_a = fiction::exact_physical_design_params{}, "statistics"_a = nullptr);
 
-    m.def("exact_hexagonal", &fiction::exact<gate_clk_hex_lyt, fiction::tec_nt>, "network"_a,
+    m.def("exact_hexagonal", &fiction::exact<py_hexagonal_gate_layout, py_logic_network>, "network"_a,
           "parameters"_a = fiction::exact_physical_design_params{}, "statistics"_a = nullptr);
 }
 

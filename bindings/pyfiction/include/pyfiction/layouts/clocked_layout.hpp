@@ -7,11 +7,9 @@
 
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
+#include "pyfiction/types.hpp"
 
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
@@ -25,47 +23,44 @@ namespace pyfiction
 namespace detail
 {
 
-template <typename LytBase>
+template <typename LytBase, typename ClockedLyt>
 void clocked_layout(pybind11::module& m, const std::string& topology)
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    using clocked_layout = fiction::clocked_layout<fiction::tile_based_layout<LytBase>>;
-
     /**
      * Clocked Cartesian layout.
      */
-    py::class_<clocked_layout, LytBase>(m, fmt::format("clocked_{}_layout", topology).c_str())
+    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout", topology).c_str())
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<clocked_layout>&>(), "dimension"_a)
+        .def(py::init<const fiction::aspect_ratio<ClockedLyt>&>(), "dimension"_a)
         .def(py::init(
-                 [](const fiction::aspect_ratio<clocked_layout>& dimension, const std::string& scheme_name)
+                 [](const fiction::aspect_ratio<ClockedLyt>& dimension, const std::string& scheme_name)
                  {
-                     if (const auto scheme = fiction::get_clocking_scheme<clocked_layout>(scheme_name);
-                         scheme.has_value())
+                     if (const auto scheme = fiction::get_clocking_scheme<ClockedLyt>(scheme_name); scheme.has_value())
                      {
-                         return clocked_layout{dimension, *scheme};
+                         return ClockedLyt{dimension, *scheme};
                      }
 
                      throw std::runtime_error("Given name does not refer to a supported clocking scheme");
                  }),
              "dimension"_a, "clocking_scheme"_a = "2DDWave")
 
-        .def("assign_clock_number", &clocked_layout::assign_clock_number)
-        .def("get_clock_number", &clocked_layout::get_clock_number)
-        .def("num_clocks", &clocked_layout::num_clocks)
-        .def("is_regularly_clocked", &clocked_layout::is_regularly_clocked)
+        .def("assign_clock_number", &ClockedLyt::assign_clock_number)
+        .def("get_clock_number", &ClockedLyt::get_clock_number)
+        .def("num_clocks", &ClockedLyt::num_clocks)
+        .def("is_regularly_clocked", &ClockedLyt::is_regularly_clocked)
 
-        .def("is_incoming_clocked", &clocked_layout::is_incoming_clocked)
-        .def("is_outgoing_clocked", &clocked_layout::is_outgoing_clocked)
+        .def("is_incoming_clocked", &ClockedLyt::is_incoming_clocked)
+        .def("is_outgoing_clocked", &ClockedLyt::is_outgoing_clocked)
 
-        .def("incoming_clocked_zones", &clocked_layout::incoming_clocked_zones)
-        .def("outgoing_clocked_zones", &clocked_layout::outgoing_clocked_zones)
+        .def("incoming_clocked_zones", &ClockedLyt::incoming_clocked_zones)
+        .def("outgoing_clocked_zones", &ClockedLyt::outgoing_clocked_zones)
 
-        .def("in_degree", &clocked_layout::in_degree)
-        .def("out_degree", &clocked_layout::out_degree)
-        .def("degree", &clocked_layout::degree)
+        .def("in_degree", &ClockedLyt::in_degree)
+        .def("out_degree", &ClockedLyt::out_degree)
+        .def("degree", &ClockedLyt::degree)
 
         ;
 }
@@ -74,11 +69,8 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
 
 void clocked_layouts(pybind11::module& m)
 {
-    using clk_cart_lyt_base = fiction::cartesian_layout<fiction::offset::ucoord_t>;
-    detail::clocked_layout<clk_cart_lyt_base>(m, "cartesian");
-
-    using clk_hex_lyt_base = fiction::hexagonal_layout<fiction::offset::ucoord_t, fiction::even_row_hex>;
-    detail::clocked_layout<clk_hex_lyt_base>(m, "hexagonal");
+    detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "cartesian");
+    detail::clocked_layout<py_hexagonal_layout, py_hexagonal_clocked_layout>(m, "hexagonal");
 }
 
 }  // namespace pyfiction

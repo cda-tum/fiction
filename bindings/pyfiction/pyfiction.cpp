@@ -3,9 +3,13 @@
 //
 
 #include "pybind11/pybind11.h"
+#include "pyfiction/algorithms/path_finding/distance.hpp"
 #include "pyfiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "pyfiction/algorithms/physical_design/exact.hpp"
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
+#include "pyfiction/algorithms/properties/critical_path_length_and_throughput.hpp"
+#include "pyfiction/algorithms/verification/design_rule_violations.hpp"
+#include "pyfiction/algorithms/verification/equivalence_checking.hpp"
 #include "pyfiction/io/write_qca_layout.hpp"
 #include "pyfiction/io/write_sqd_layout.hpp"
 #include "pyfiction/io/write_svg_layout.hpp"
@@ -36,13 +40,26 @@ PYBIND11_MODULE(pyfiction, m)
      */
     pyfiction::logic_network(m);
     /**
-     * Algorithms
+     * Algorithms: Physical Design
      */
     pyfiction::exact(m);
     pyfiction::orthogonal(m);
     // NOTE: currently not functioning because the Python interpreter can only run as a single instance
     // pyfiction::one_pass_synthesis(m);
     pyfiction::apply_gate_library(m);
+    /**
+     * Algorithms: Path Finding
+     */
+    pyfiction::distance(m);
+    /**
+     * Algorithms: Properties
+     */
+    pyfiction::critical_path_length_and_throughput(m);
+    /*
+     * Algorithms: Verification
+     */
+    pyfiction::equivalence_checking(m);
+    pyfiction::design_rule_violations(m);
     /**
      * Input/Output
      */

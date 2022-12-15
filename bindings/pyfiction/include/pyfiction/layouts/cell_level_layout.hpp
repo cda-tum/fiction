@@ -7,14 +7,10 @@
 
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
+#include "pyfiction/types.hpp"
 
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 
@@ -71,66 +67,66 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
     }
     // NOTE: more technologies go here
 
-    using cell_clk_cart_lyt = fiction::cell_level_layout<
-        Technology,
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
+    using py_cartesian_technology_cell_layout = py_cartesian_cell_layout<Technology>;
 
     /**
      * Cell-level clocked Cartesian layout.
      */
-    py::class_<
-        cell_clk_cart_lyt,
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>(
+    py::class_<py_cartesian_technology_cell_layout,
+               fiction::synchronization_element_layout<fiction::clocked_layout<
+                   fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>(
         m, fmt::format("{}_layout", tech_name).c_str())
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<cell_clk_cart_lyt>&>(), "dimension"_a)
+        .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), "dimension"_a)
         .def(py::init(
-                 [](const fiction::aspect_ratio<cell_clk_cart_lyt>& dimension, const std::string& scheme_name,
-                    const std::string& layout_name) -> cell_clk_cart_lyt
+                 [](const fiction::aspect_ratio<py_cartesian_technology_cell_layout>& dimension,
+                    const std::string&                                                scheme_name,
+                    const std::string& layout_name) -> py_cartesian_technology_cell_layout
                  {
-                     if (const auto scheme = fiction::get_clocking_scheme<cell_clk_cart_lyt>(scheme_name);
+                     if (const auto scheme =
+                             fiction::get_clocking_scheme<py_cartesian_technology_cell_layout>(scheme_name);
                          scheme.has_value())
                      {
-                         return cell_clk_cart_lyt{dimension, *scheme, layout_name};
+                         return py_cartesian_technology_cell_layout{dimension, *scheme, layout_name};
                      }
 
                      throw std::runtime_error("Given name does not refer to a supported clocking scheme");
                  }),
              "dimension"_a, "clocking_scheme"_a = "2DDWave", "layout_name"_a = "")
 
-        .def("assign_cell_type", &cell_clk_cart_lyt::assign_cell_type)
-        .def("get_cell_type", &cell_clk_cart_lyt::get_cell_type)
-        .def("is_empty_cell", &cell_clk_cart_lyt::is_empty_cell)
-        .def("get_layout_name", &cell_clk_cart_lyt::get_layout_name)
-        .def("assign_cell_name", &cell_clk_cart_lyt::assign_cell_name)
-        .def("get_cell_name", &cell_clk_cart_lyt::get_cell_name)
-        .def("num_cells", &cell_clk_cart_lyt::num_cells)
-        .def("is_empty", &cell_clk_cart_lyt::is_empty)
-        .def("num_pis", &cell_clk_cart_lyt::num_pis)
-        .def("num_pos", &cell_clk_cart_lyt::num_pos)
-        .def("is_pi", &cell_clk_cart_lyt::is_pi)
-        .def("is_po", &cell_clk_cart_lyt::is_po)
+        .def("assign_cell_type", &py_cartesian_technology_cell_layout::assign_cell_type)
+        .def("get_cell_type", &py_cartesian_technology_cell_layout::get_cell_type)
+        .def("is_empty_cell", &py_cartesian_technology_cell_layout::is_empty_cell)
+        .def("get_layout_name", &py_cartesian_technology_cell_layout::get_layout_name)
+        .def("assign_cell_name", &py_cartesian_technology_cell_layout::assign_cell_name)
+        .def("get_cell_name", &py_cartesian_technology_cell_layout::get_cell_name)
+        .def("num_cells", &py_cartesian_technology_cell_layout::num_cells)
+        .def("is_empty", &py_cartesian_technology_cell_layout::is_empty)
+        .def("num_pis", &py_cartesian_technology_cell_layout::num_pis)
+        .def("num_pos", &py_cartesian_technology_cell_layout::num_pos)
+        .def("is_pi", &py_cartesian_technology_cell_layout::is_pi)
+        .def("is_po", &py_cartesian_technology_cell_layout::is_po)
 
         .def("cells",
-             [](const cell_clk_cart_lyt& lyt)
+             [](const py_cartesian_technology_cell_layout& lyt)
              {
-                 std::vector<fiction::coordinate<cell_clk_cart_lyt>> cells{};
+                 std::vector<fiction::coordinate<py_cartesian_technology_cell_layout>> cells{};
                  cells.reserve(lyt.num_cells());
                  lyt.foreach_cell([&cells](const auto& c) { cells.push_back(c); });
                  return cells;
              })
         .def("pis",
-             [](const cell_clk_cart_lyt& lyt)
+             [](const py_cartesian_technology_cell_layout& lyt)
              {
-                 std::vector<fiction::coordinate<cell_clk_cart_lyt>> pis{};
+                 std::vector<fiction::coordinate<py_cartesian_technology_cell_layout>> pis{};
                  pis.reserve(lyt.num_pis());
                  lyt.foreach_pi([&pis](const auto& c) { pis.push_back(c); });
                  return pis;
              })
         .def("pos",
-             [](const cell_clk_cart_lyt& lyt)
+             [](const py_cartesian_technology_cell_layout& lyt)
              {
-                 std::vector<fiction::coordinate<cell_clk_cart_lyt>> pos{};
+                 std::vector<fiction::coordinate<py_cartesian_technology_cell_layout>> pos{};
                  pos.reserve(lyt.num_pos());
                  lyt.foreach_po([&pos](const auto& c) { pos.push_back(c); });
                  return pos;

@@ -7,8 +7,7 @@
 
 #include "pybind11/operators.h"
 #include "pybind11/pybind11.h"
-
-#include <fiction/layouts/coordinates.hpp>
+#include "pyfiction/types.hpp"
 
 #include <cstdint>
 #include <exception>
@@ -24,11 +23,11 @@ inline void coordinates(pybind11::module& m)
     /**
      * Unsigned Cartesian coordinates.
      */
-    py::class_<fiction::offset::ucoord_t>(m, "coordinate")
+    py::class_<py_coordinate>(m, "coordinate")
         .def(py::init<>())
         .def(py::init<const uint64_t>(), "int_repr"_a)
         .def(py::init<const uint64_t, const uint64_t, const uint64_t>(), "x"_a, "y"_a, "z"_a = 0)
-        .def(py::init<const fiction::offset::ucoord_t>(), "c"_a)
+        .def(py::init<const py_coordinate>(), "c"_a)
         .def(py::init(
             [](const py::tuple& t)
             {
@@ -36,25 +35,25 @@ inline void coordinates(pybind11::module& m)
 
                 if (size == 2)
                 {
-                    return fiction::offset::ucoord_t{py::int_(t[0]), py::int_(t[1])};
+                    return py_coordinate{py::int_(t[0]), py::int_(t[1])};
                 }
                 if (size == 3)
                 {
-                    return fiction::offset::ucoord_t{py::int_(t[0]), py::int_(t[1]), py::int_(t[2])};
+                    return py_coordinate{py::int_(t[0]), py::int_(t[1]), py::int_(t[2])};
                 }
 
                 throw std::runtime_error("Wrong number of dimensions provided for coordinate");
             }))
 
         .def_property(
-            "x", [](fiction::offset::ucoord_t& self) -> decltype(self.x) { return self.x; },
-            [](fiction::offset::ucoord_t& self, const decltype(self.x) value) { self.x = value; })
+            "x", [](py_coordinate& self) -> decltype(self.x) { return self.x; },
+            [](py_coordinate& self, const decltype(self.x) value) { self.x = value; })
         .def_property(
-            "y", [](fiction::offset::ucoord_t& self) -> decltype(self.y) { return self.y; },
-            [](fiction::offset::ucoord_t& self, const decltype(self.y) value) { self.y = value; })
+            "y", [](py_coordinate& self) -> decltype(self.y) { return self.y; },
+            [](py_coordinate& self, const decltype(self.y) value) { self.y = value; })
         .def_property(
-            "z", [](fiction::offset::ucoord_t& self) -> decltype(self.z) { return self.z; },
-            [](fiction::offset::ucoord_t& self, const decltype(self.z) value) { self.z = value; })
+            "z", [](py_coordinate& self) -> decltype(self.z) { return self.z; },
+            [](py_coordinate& self, const decltype(self.z) value) { self.z = value; })
 
         .def(py::self == py::self)
         .def(py::self != py::self)
@@ -63,13 +62,12 @@ inline void coordinates(pybind11::module& m)
         .def(py::self <= py::self)
         .def(py::self >= py::self)
 
-        .def("__repr__", &fiction::offset::ucoord_t::str)
-        .def("__hash__",
-             [](const fiction::offset::ucoord_t& self) { return std::hash<fiction::offset::ucoord_t>{}(self); })
+        .def("__repr__", &py_coordinate::str)
+        .def("__hash__", [](const py_coordinate& self) { return std::hash<py_coordinate>{}(self); })
 
         ;
 
-    py::implicitly_convertible<py::tuple, fiction::offset::ucoord_t>();
+    py::implicitly_convertible<py::tuple, py_coordinate>();
 }
 
 }  // namespace pyfiction
