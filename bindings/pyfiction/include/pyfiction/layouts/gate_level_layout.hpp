@@ -167,7 +167,19 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
               return {stats.critical_path_length, stats.throughput};
           });
 
-    m.def("gate_level_drvs", [](const gate_layout& lyt) { fiction::gate_level_drvs(lyt); });
+    m.def("gate_level_drvs",
+          [](const gate_layout& lyt)
+          {
+              std::stringstream stream{};
+
+              fiction::gate_level_drv_params params{};
+              params.out = &stream;
+              fiction::gate_level_drv_stats stats{};
+
+              fiction::gate_level_drvs(lyt, {}, &stats);
+
+              return std::make_pair(stats.warnings, stats.drvs);
+          });
 
     m.def("equivalence_checking",
           [](const fiction::tec_nt& spec, const gate_layout& impl) -> fiction::eq_type
