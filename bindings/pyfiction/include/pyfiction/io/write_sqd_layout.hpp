@@ -10,6 +10,8 @@
 
 #include <fiction/io/write_sqd_layout.hpp>
 
+#include <string>
+
 namespace pyfiction
 {
 
