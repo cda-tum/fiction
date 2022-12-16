@@ -1,0 +1,50 @@
+//
+// Created by marcel on 16.12.22.
+//
+
+#ifndef PYFICTION_WRITE_FQCA_LAYOUT_HPP
+#define PYFICTION_WRITE_FQCA_LAYOUT_HPP
+
+#include "pybind11/pybind11.h"
+#include "pyfiction/types.hpp"
+
+#include <fiction/io/write_fqca_layout.hpp>
+
+#include <string>
+
+namespace pyfiction
+{
+
+namespace detail
+{
+
+template <typename Lyt>
+void write_fqca_layout(pybind11::module& m)
+{
+    using namespace pybind11::literals;
+
+    void (*write_fqca_layout_function_pointer)(
+        const Lyt&, const std::string&, const fiction::write_fqca_layout_params) = &fiction::write_fqca_layout<Lyt>;
+
+    m.def("write_fqca_layout", write_fqca_layout_function_pointer, "layout"_a, "filename"_a,
+          "params"_a = fiction::write_fqca_layout_params{});
+}
+
+}  // namespace detail
+
+inline void write_fqca_layout(pybind11::module& m)
+{
+    namespace py = pybind11;
+
+    py::class_<fiction::write_fqca_layout_params>(m, "write_fqca_layout_params")
+        .def(py::init<>())
+        .def_readwrite("create_inter_layer_via_cells", &fiction::write_fqca_layout_params::create_inter_layer_via_cells)
+
+        ;
+
+    detail::write_fqca_layout<py_qca_layout>(m);
+}
+
+}  // namespace pyfiction
+
+#endif  // PYFICTION_WRITE_FQCA_LAYOUT_HPP
