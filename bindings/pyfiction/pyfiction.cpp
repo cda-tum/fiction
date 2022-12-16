@@ -29,6 +29,7 @@
 #include "pyfiction/layouts/gate_level_layout.hpp"
 #include "pyfiction/layouts/hexagonal_layout.hpp"
 #include "pyfiction/networks/logic_network.hpp"
+#include "pyfiction/technology/area.hpp"
 
 PYBIND11_MODULE(pyfiction, m)
 {
@@ -73,6 +74,10 @@ PYBIND11_MODULE(pyfiction, m)
      */
     pyfiction::equivalence_checking(m);
     pyfiction::design_rule_violations(m);
+    /**
+     * Technology
+     */
+    pyfiction::area(m);
     /**
      * Input/Output
      */
