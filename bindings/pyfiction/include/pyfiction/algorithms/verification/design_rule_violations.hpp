@@ -25,13 +25,13 @@ void gate_level_drvs(pybind11::module& m)
         "gate_level_drvs",
         [](const Lyt& lyt) -> std::pair<std::size_t, std::size_t>
         {
-            std::stringstream stream{};
+            std::ostringstream null_stream{};
 
             fiction::gate_level_drv_params params{};
-            params.out = &stream;
+            params.out = &null_stream;
             fiction::gate_level_drv_stats stats{};
 
-            fiction::gate_level_drvs(lyt, {}, &stats);
+            fiction::gate_level_drvs(lyt, params, &stats);
 
             return {stats.warnings, stats.drvs};
         },
