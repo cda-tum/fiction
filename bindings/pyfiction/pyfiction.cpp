@@ -14,6 +14,7 @@
 #include "pyfiction/algorithms/properties/critical_path_length_and_throughput.hpp"
 #include "pyfiction/algorithms/verification/design_rule_violations.hpp"
 #include "pyfiction/algorithms/verification/equivalence_checking.hpp"
+#include "pyfiction/io/write_dot_layout.hpp"
 #include "pyfiction/io/write_qca_layout.hpp"
 #include "pyfiction/io/write_sqd_layout.hpp"
 #include "pyfiction/io/write_svg_layout.hpp"
@@ -71,6 +72,7 @@ PYBIND11_MODULE(pyfiction, m)
     /**
      * Input/Output
      */
+    pyfiction::write_dot_layout(m);
     pyfiction::write_qca_layout(m);
     pyfiction::write_sqd_layout(m);
     pyfiction::write_svg_layout(m);
