@@ -8,6 +8,7 @@
 #include "pyfiction/algorithms/path_finding/enumerate_all_paths.hpp"
 #include "pyfiction/algorithms/path_finding/k_shortest_paths.hpp"
 #include "pyfiction/algorithms/physical_design/apply_gate_library.hpp"
+#include "pyfiction/algorithms/physical_design/color_routing.hpp"
 #include "pyfiction/algorithms/physical_design/exact.hpp"
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
 #include "pyfiction/algorithms/properties/critical_path_length_and_throughput.hpp"
@@ -50,6 +51,7 @@ PYBIND11_MODULE(pyfiction, m)
     // NOTE: currently not functioning because the Python interpreter can only run as a single instance
     // pyfiction::one_pass_synthesis(m);
     pyfiction::apply_gate_library(m);
+    pyfiction::color_routing(m);
     /**
      * Algorithms: Path Finding
      */
