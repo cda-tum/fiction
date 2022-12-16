@@ -1,0 +1,68 @@
+//
+// Created by marcel on 16.12.22.
+//
+
+#ifndef PYFICTION_ENUMERATE_ALL_PATHS_HPP
+#define PYFICTION_ENUMERATE_ALL_PATHS_HPP
+
+#include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
+#include "pyfiction/types.hpp"
+
+#include <fiction/algorithms/path_finding/enumerate_all_paths.hpp>
+#include <fiction/traits.hpp>
+#include <fiction/utils/routing_utils.hpp>
+
+namespace pyfiction
+{
+
+namespace detail
+{
+
+template <typename Lyt>
+void enumerate_all_clocking_paths(pybind11::module& m)
+{
+    using namespace pybind11::literals;
+
+    m.def(
+        "enumerate_all_clocking_paths",
+        [](const Lyt& lyt, const fiction::coordinate<Lyt>& source, const fiction::coordinate<Lyt>& target,
+           const fiction::enumerate_all_clocking_paths_params& params)
+        {
+            const auto all_paths = fiction::enumerate_all_clocking_paths<fiction::layout_coordinate_path<Lyt>, Lyt>(
+                lyt, {source, target}, params);
+
+            std::vector<std::vector<fiction::coordinate<Lyt>>> paths{};
+            paths.reserve(all_paths.size());
+
+            for (const auto& path : all_paths)
+            {
+                paths.emplace_back(path.cbegin(), path.cend());
+            }
+
+            return paths;
+        },
+        "layout"_a, "source"_a, "target"_a, "params"_a = fiction::enumerate_all_clocking_paths_params{});
+}
+
+}  // namespace detail
+
+inline void enumerate_all_clocking_paths(pybind11::module& m)
+{
+    namespace py = pybind11;
+
+    py::class_<fiction::enumerate_all_clocking_paths_params>(m, "enumerate_all_clocking_paths_params")
+        .def(py::init<>())
+        .def_readwrite("crossings", &fiction::enumerate_all_clocking_paths_params::crossings)
+
+        ;
+
+    detail::enumerate_all_clocking_paths<py_cartesian_clocked_layout>(m);
+    detail::enumerate_all_clocking_paths<py_cartesian_gate_layout>(m);
+    detail::enumerate_all_clocking_paths<py_hexagonal_clocked_layout>(m);
+    detail::enumerate_all_clocking_paths<py_hexagonal_gate_layout>(m);
+}
+
+}  // namespace pyfiction
+
+#endif  // PYFICTION_ENUMERATE_ALL_PATHS_HPP
