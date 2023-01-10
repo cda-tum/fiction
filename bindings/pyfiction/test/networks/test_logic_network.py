@@ -10,17 +10,20 @@ class TestLogicNetwork(unittest.TestCase):
     def test_read_logic_network(self):
         network = read_logic_network(dir_path + "/../resources/mux21.v")
 
+        self.assertEqual(network.num_gates(), 5)
         self.assertEqual(network.gates(), [5, 6, 7, 8, 9])
         self.assertTrue(network.is_inv(5))
         self.assertTrue(network.is_and(6))
         self.assertTrue(network.is_and(7))
         self.assertTrue(network.is_or(8))
 
+        self.assertEqual(network.num_pis(), 3)
         self.assertEqual(network.pis(), [2, 3, 4])
         self.assertTrue(network.is_pi(2))
         self.assertTrue(network.is_pi(3))
         self.assertTrue(network.is_pi(4))
 
+        self.assertEqual(network.num_pos(), 1)
         self.assertEqual(network.pos(), [9])
         self.assertTrue(network.is_po(9))
 
