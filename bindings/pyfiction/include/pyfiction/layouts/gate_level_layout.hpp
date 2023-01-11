@@ -81,6 +81,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
         .def("get_node",
              [](const GateLyt& layout, const py_coordinate& coordinate) { return layout.get_node(coordinate); })
         .def("get_tile", &GateLyt::get_tile)
+        .def("make_signal", &GateLyt::make_signal)
 
         .def("clear_tile", &GateLyt::clear_tile)
 

@@ -56,6 +56,10 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
         self.assertEqual(layout.get_tile(3), coordinate(x2))
         self.assertEqual(layout.get_tile(4), coordinate(x3))
         self.assertEqual(layout.get_tile(5), coordinate(x4))
+        self.assertEqual(layout.make_signal(2), x1)
+        self.assertEqual(layout.make_signal(3), x2)
+        self.assertEqual(layout.make_signal(4), x3)
+        self.assertEqual(layout.make_signal(5), x4)
 
         # POs
         pos = layout.pos()
@@ -66,6 +70,8 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
         self.assertEqual(layout.get_node(coordinate(f2)), 12)
         self.assertEqual(layout.get_tile(11), coordinate(f1))
         self.assertEqual(layout.get_tile(12), coordinate(f2))
+        self.assertEqual(layout.make_signal(11), f1)
+        self.assertEqual(layout.make_signal(12), f2)
 
         # gates
         gates = layout.gates()
@@ -87,6 +93,11 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
         self.assertEqual(layout.get_tile(8), coordinate(b2))
         self.assertEqual(layout.get_tile(9), coordinate(a2))
         self.assertEqual(layout.get_tile(10), coordinate(c))
+        self.assertEqual(layout.make_signal(6), a1)
+        self.assertEqual(layout.make_signal(7), b1)
+        self.assertEqual(layout.make_signal(8), b2)
+        self.assertEqual(layout.make_signal(9), a2)
+        self.assertEqual(layout.make_signal(10), c)
 
         # wires
         wires = layout.wires()
@@ -187,6 +198,10 @@ class TestHexagonalGateLevelLayout(unittest.TestCase):
         self.assertEqual(layout.get_tile(3), coordinate(x2))
         self.assertEqual(layout.get_tile(4), coordinate(x3))
         self.assertEqual(layout.get_tile(5), coordinate(x4))
+        self.assertEqual(layout.make_signal(2), x1)
+        self.assertEqual(layout.make_signal(3), x2)
+        self.assertEqual(layout.make_signal(4), x3)
+        self.assertEqual(layout.make_signal(5), x4)
 
         # POs
         pos = layout.pos()
@@ -197,6 +212,8 @@ class TestHexagonalGateLevelLayout(unittest.TestCase):
         self.assertEqual(layout.get_node(coordinate(f2)), 12)
         self.assertEqual(layout.get_tile(11), coordinate(f1))
         self.assertEqual(layout.get_tile(12), coordinate(f2))
+        self.assertEqual(layout.make_signal(11), f1)
+        self.assertEqual(layout.make_signal(12), f2)
 
         # gates
         gates = layout.gates()
@@ -218,6 +235,11 @@ class TestHexagonalGateLevelLayout(unittest.TestCase):
         self.assertEqual(layout.get_tile(8), coordinate(b2))
         self.assertEqual(layout.get_tile(9), coordinate(a2))
         self.assertEqual(layout.get_tile(10), coordinate(c))
+        self.assertEqual(layout.make_signal(6), a1)
+        self.assertEqual(layout.make_signal(7), b1)
+        self.assertEqual(layout.make_signal(8), b2)
+        self.assertEqual(layout.make_signal(9), a2)
+        self.assertEqual(layout.make_signal(10), c)
 
         # wires
         wires = layout.wires()
