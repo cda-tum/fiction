@@ -78,22 +78,11 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
         .def("fanin_size", &GateLyt::fanin_size)
         .def("fanout_size", &GateLyt::fanout_size)
 
+        .def("get_node",
+             [](const GateLyt& layout, const py_coordinate& coordinate) { return layout.get_node(coordinate); })
+        .def("get_tile", &GateLyt::get_tile)
+
         .def("clear_tile", &GateLyt::clear_tile)
-
-        //        .def("move_node", &GateLyt::move_node)
-        //        .def("get_node", &gate_clk_cart_lyt::get_node)
-
-        //        .def("is_gate", &gate_clk_cart_lyt::is_gate)
-        //        .def("is_wire", &gate_clk_cart_lyt::is_wire)
-        //        .def("is_fanout", &gate_clk_cart_lyt::is_fanout)
-        //        .def("is_inv", &gate_clk_cart_lyt::is_inv)
-        //        .def("is_and", &gate_clk_cart_lyt::is_and)
-        //        .def("is_nand", &gate_clk_cart_lyt::is_nand)
-        //        .def("is_or", &gate_clk_cart_lyt::is_or)
-        //        .def("is_nor", &gate_clk_cart_lyt::is_nor)
-        //        .def("is_xor", &gate_clk_cart_lyt::is_xor)
-        //        .def("is_xnor", &gate_clk_cart_lyt::is_xnor)
-        //        .def("is_maj", &gate_clk_cart_lyt::is_maj)
 
         .def("is_gate_tile", &GateLyt::is_gate_tile)
         .def("is_wire_tile", &GateLyt::is_wire_tile)
