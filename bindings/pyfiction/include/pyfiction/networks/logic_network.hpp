@@ -50,9 +50,19 @@ void network(pybind11::module& m, const std::string& network_name)
     py::class_<Ntk>(m, network_name.c_str())
         .def(py::init<>())
 
+        .def("size", &Ntk::size)
         .def("num_gates", &Ntk::num_gates)
         .def("num_pis", &Ntk::num_pis)
         .def("num_pos", &Ntk::num_pos)
+
+        .def("nodes",
+             [](const Ntk& ntk)
+             {
+                 std::vector<mockturtle::node<Ntk>> nodes{};
+                 nodes.reserve(ntk.size());
+                 ntk.foreach_node([&nodes](const auto& n) { nodes.push_back(n); });
+                 return nodes;
+             })
 
         .def("gates",
              [](const Ntk& ntk)
@@ -93,6 +103,9 @@ void network(pybind11::module& m, const std::string& network_name)
         .def("is_po", &Ntk::is_po)
 
         // for some reason, the is_* functions need redefinition to match with Ntk
+        .def("is_constant", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_constant(n); })
+        .def("is_buf", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_buf(n); })
+        .def("is_fanout", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_fanout(n); })
         .def("is_inv", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_inv(n); })
         .def("is_and", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_and(n); })
         .def("is_or", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_or(n); })

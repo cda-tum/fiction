@@ -10,12 +10,17 @@ class TestLogicNetwork(unittest.TestCase):
     def test_read_logic_network(self):
         network = read_logic_network(dir_path + "/../resources/mux21.v")
 
+        self.assertEqual(network.size(), 10)
+        self.assertEqual(network.nodes(), [i for i in range(10)])
         self.assertEqual(network.num_gates(), 5)
         self.assertEqual(network.gates(), [5, 6, 7, 8, 9])
         self.assertTrue(network.is_inv(5))
         self.assertTrue(network.is_and(6))
         self.assertTrue(network.is_and(7))
         self.assertTrue(network.is_or(8))
+
+        self.assertTrue(network.is_constant(0))
+        self.assertTrue(network.is_constant(1))
 
         self.assertEqual(network.num_pis(), 3)
         self.assertEqual(network.pis(), [2, 3, 4])
@@ -40,6 +45,27 @@ class TestLogicNetwork(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             network = read_logic_network(dir_path + "/mux41.v")
+
+    def test_is_gate_functions(self):
+        network = read_logic_network(dir_path + "/../resources/mux21.v")
+
+        for i in network.nodes():
+            self.assertFalse(network.is_maj(i))
+            self.assertFalse(network.is_xor(i))
+            self.assertFalse(network.is_xnor(i))
+            self.assertFalse(network.is_nand(i))
+            self.assertFalse(network.is_nor(i))
+
+        network = read_logic_network(dir_path + "/../resources/FA.v")
+
+        self.assertTrue(network.is_xor(6))
+
+        for i in network.nodes():
+            self.assertFalse(network.is_fanout(i))
+            self.assertFalse(network.is_maj(i))
+            self.assertFalse(network.is_xnor(i))
+            self.assertFalse(network.is_nand(i))
+            self.assertFalse(network.is_nor(i))
 
 
 if __name__ == '__main__':
