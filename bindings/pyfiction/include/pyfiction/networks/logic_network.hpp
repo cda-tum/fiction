@@ -103,7 +103,6 @@ void network(pybind11::module& m, const std::string& network_name)
         .def("is_po", &Ntk::is_po)
 
         // for some reason, the is_* functions need redefinition to match with Ntk
-        .def("is_constant", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_constant(n); })
         .def("is_buf", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_buf(n); })
         .def("is_fanout", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_fanout(n); })
         .def("is_inv", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_inv(n); })
