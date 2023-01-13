@@ -8,8 +8,10 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <execution>
 #include <limits>
 #include <random>
+#include <type_traits>
 #include <utility>
 
 namespace fiction
@@ -36,7 +38,7 @@ constexpr auto geometric_temperature_schedule(const double t) noexcept
     return t * 0.99;
 }
 /**
- * Simulated annealing (SA) is a probabilistic optimization algorithm that is used to find a local minimum of a given
+ * Simulated Annealing (SA) is a probabilistic optimization algorithm that is used to find a local minimum of a given
  * function. SA was first proposed in \"Optimization by simulated annealing\" by S. Kirkpatrick, C. D. Gelatt Jr, and M.
  * P. Vecchi in Science 1983. It is a metaheuristic that is inspired by the annealing process in metallurgy. The
  * algorithm starts with a random state and iteratively improves the state by randomly selecting a neighboring state. If
@@ -50,7 +52,7 @@ constexpr auto geometric_temperature_schedule(const double t) noexcept
  * https://codereview.stackexchange.com/questions/70310/simple-simulated-annealing-template-in-c11
  *
  * @tparam State The state type.
- * @tparam CostFunc The cost function type.
+ * @tparam CostFunc The cost function type (specifies the cost type via its return value).
  * @tparam TempFunc The temperature schedule function type.
  * @tparam NextFunc The next state function type.
  * @param init_state The initial state to optimize.
@@ -60,16 +62,18 @@ constexpr auto geometric_temperature_schedule(const double t) noexcept
  * @param cost The cost function to minimize.
  * @param schedule The temperature schedule.
  * @param next The next state function that determines an adjacent state given a current one.
- * @return The optimized state.
+ * @return A pair of the optimized state and its cost value.
  */
 template <typename State, typename CostFunc, typename TempFunc, typename NextFunc>
-State simulated_annealing(const State& init_state, const double init_temp, const double final_temp,
-                          const std::size_t cycles, CostFunc&& cost, TempFunc&& schedule, NextFunc&& next) noexcept
+std::pair<State, std::invoke_result_t<CostFunc, State>>
+simulated_annealing(const State& init_state, const double init_temp, const double final_temp, const std::size_t cycles,
+                    CostFunc&& cost, TempFunc&& schedule, NextFunc&& next) noexcept
 {
     assert(std::isfinite(init_temp) && "init_temp must be a finite number");
     assert(std::isfinite(final_temp) && "final_temp must be a finite number");
 
-    std::mt19937_64 generator{std::random_device{}()};
+    static std::mt19937_64 generator{std::random_device{}()};
+    static std::uniform_real_distribution<std::invoke_result_t<CostFunc, State>> random_functor(0, 1);
 
     auto current_cost  = cost(init_state);
     auto current_state = init_state;
@@ -78,8 +82,6 @@ State simulated_annealing(const State& init_state, const double init_temp, const
     auto  best_cost  = current_cost;
 
     auto temp = init_temp;
-
-    std::uniform_real_distribution<decltype(current_cost)> random_functor(0, 1);
 
     while (temp > final_temp)
     {
@@ -118,7 +120,52 @@ State simulated_annealing(const State& init_state, const double init_temp, const
         }
     }
 
-    return best_state;
+    return {best_state, best_cost};
+}
+/**
+ * This variation of Simulated Annealing (SA) does not start from just one provided initial state, but generates a
+ * number of random initial states using a provided random state generator. SA as specified above is then run on all
+ * these random initial states where the best result of all generated states is finally returned.
+ *
+ * @note If compiler support for C++17's execution policies is available, the algorithm is parallelized and/or
+ * vectorized using `std::execution::par_unseq`.
+ *
+ * @note The State type must be default constructible.
+ *
+ * @tparam RandStateFunc The random state generator function type (specifies the State type via its return value).
+ * @tparam CostFunc The cost function type (specifies the cost value via its return value).
+ * @tparam TempFunc The temperature schedule function type.
+ * @tparam NextFunc The next state function type.
+ * @param init_temp The initial temperature.
+ * @param final_temp The final temperature.
+ * @param cycles The number of cycles for each temperature value.
+ * @param instances The number of random initial states to generate.
+ * @param rand_state The random state generator function.
+ * @param cost The cost function to minimize.
+ * @param schedule The temperature schedule.
+ * @param next The next state function that determines an adjacent state given a current one.
+ * @return A pair of the overall best optimized state and its cost value.
+ */
+template <typename RandStateFunc, typename CostFunc, typename TempFunc, typename NextFunc>
+std::pair<std::invoke_result_t<RandStateFunc>, std::invoke_result_t<CostFunc, std::invoke_result_t<RandStateFunc>>>
+multi_simulated_annealing(const double init_temp, const double final_temp, const std::size_t cycles,
+                          const std::size_t instances, RandStateFunc&& rand_state, CostFunc&& cost, TempFunc&& schedule,
+                          NextFunc&& next) noexcept
+{
+    assert(std::isfinite(init_temp) && "init_temp must be a finite number");
+    assert(std::isfinite(final_temp) && "final_temp must be a finite number");
+
+    using state_t = std::invoke_result_t<RandStateFunc>;
+    using cost_t  = std::invoke_result_t<CostFunc, state_t>;
+
+    std::vector<std::pair<state_t, cost_t>> results(instances);
+    std::generate(
+        std::execution::par_unseq, results.begin(), results.end(),
+        [&init_temp, &final_temp, &cycles, &rand_state, &cost, &schedule, &next]() -> std::pair<state_t, cost_t>
+        { return simulated_annealing(rand_state(), init_temp, final_temp, cycles, cost, schedule, next); });
+
+    return *std::min_element(std::execution::par_unseq, results.cbegin(), results.cend(),
+                             [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 }
 
 }  // namespace fiction
