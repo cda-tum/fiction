@@ -125,6 +125,24 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
         .def("fanins", &GateLyt::incoming_data_flow)
         .def("fanouts", &GateLyt::outgoing_data_flow)
 
+        .def("has_northern_incoming_signal", &GateLyt::has_northern_incoming_signal)
+        .def("has_north_eastern_incoming_signal", &GateLyt::has_north_eastern_incoming_signal)
+        .def("has_eastern_incoming_signal", &GateLyt::has_eastern_incoming_signal)
+        .def("has_south_eastern_incoming_signal", &GateLyt::has_south_eastern_incoming_signal)
+        .def("has_southern_incoming_signal", &GateLyt::has_southern_incoming_signal)
+        .def("has_south_western_incoming_signal", &GateLyt::has_south_western_incoming_signal)
+        .def("has_western_incoming_signal", &GateLyt::has_western_incoming_signal)
+        .def("has_north_western_incoming_signal", &GateLyt::has_north_western_incoming_signal)
+
+        .def("has_northern_outgoing_signal", &GateLyt::has_northern_outgoing_signal)
+        .def("has_north_eastern_outgoing_signal", &GateLyt::has_north_eastern_outgoing_signal)
+        .def("has_eastern_outgoing_signal", &GateLyt::has_eastern_outgoing_signal)
+        .def("has_south_eastern_outgoing_signal", &GateLyt::has_south_eastern_outgoing_signal)
+        .def("has_southern_outgoing_signal", &GateLyt::has_southern_outgoing_signal)
+        .def("has_south_western_outgoing_signal", &GateLyt::has_south_western_outgoing_signal)
+        .def("has_western_outgoing_signal", &GateLyt::has_western_outgoing_signal)
+        .def("has_north_western_outgoing_signal", &GateLyt::has_north_western_outgoing_signal)
+
         .def("__repr__",
              [](const GateLyt& lyt) -> std::string
              {
