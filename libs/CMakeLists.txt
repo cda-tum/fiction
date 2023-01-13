@@ -89,8 +89,8 @@ if (FICTION_Z3)
 
 endif ()
 
-# If using GCC, find TBB if installed
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+# If using GCC or Clang, find TBB if installed
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/") # include FindTBB.cmake
     find_package(TBB)
     if (TBB_FOUND)
