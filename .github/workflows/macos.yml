@@ -54,6 +54,10 @@ jobs:
         with:
           submodules: recursive
 
+      # Setup TBB for parallel STL algorithms via Homebrew
+      - name: Setup TBB
+        run: brew install tbb
+
       # Use XCode 13.2 as a workaround because XCode 14.0 seems broken
       - name: Setup XCode version
         uses: maxim-lobanov/setup-xcode@v1
