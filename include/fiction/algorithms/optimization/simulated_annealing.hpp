@@ -8,11 +8,19 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <execution>
 #include <limits>
 #include <random>
 #include <type_traits>
 #include <utility>
+
+#if __cpp_lib_parallel_algorithm
+#include <execution>  // utilize execution policies only if the C++ library supports them
+
+// define the execution policy as a macro
+#define FICTION_EXECUTION_POLICY std::execution::par_unseq,
+#else
+#define FICTION_EXECUTION_POLICY
+#endif
 
 namespace fiction
 {
@@ -73,6 +81,7 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
     assert(std::isfinite(final_temp) && "final_temp must be a finite number");
 
     static std::mt19937_64 generator{std::random_device{}()};
+
     static std::uniform_real_distribution<std::invoke_result_t<CostFunc, State>> random_functor(0, 1);
 
     auto current_cost  = cost(init_state);
@@ -160,11 +169,11 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
 
     std::vector<std::pair<state_t, cost_t>> results(instances);
     std::generate(
-        std::execution::par_unseq, results.begin(), results.end(),
+        FICTION_EXECUTION_POLICY results.begin(), results.end(),
         [&init_temp, &final_temp, &cycles, &rand_state, &cost, &schedule, &next]() -> std::pair<state_t, cost_t>
         { return simulated_annealing(rand_state(), init_temp, final_temp, cycles, cost, schedule, next); });
 
-    return *std::min_element(std::execution::par_unseq, results.cbegin(), results.cend(),
+    return *std::min_element(FICTION_EXECUTION_POLICY results.cbegin(), results.cend(),
                              [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 }
 
