@@ -33,6 +33,8 @@ jobs:
             build_type: Release
             cppstandard: -DFICTION_CXX_STANDARD=20
             cppname: C++20
+          - os: ubuntu-22.04
+            compiler: g++-11
 
     name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode) ${{matrix.cppname}}
     runs-on: ${{matrix.os}}

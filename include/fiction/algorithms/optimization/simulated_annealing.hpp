@@ -13,7 +13,7 @@
 #include <type_traits>
 #include <utility>
 
-#if __cpp_lib_parallel_algorithm
+#if __cpp_lib_parallel_algorithm || __cpp_lib_execution
 #include <execution>  // utilize execution policies only if the C++ library supports them
 
 // define the execution policy as a macro
