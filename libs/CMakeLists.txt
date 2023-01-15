@@ -102,7 +102,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES ".*Cla
             elseif (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0.0 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0.0)
                 target_compile_definitions(libfiction INTERFACE _GLIBCXX_USE_TBB_PAR_BACKEND=0)
                 message(STATUS "TBB version ${TBB_VERSION_MAJOR}.${TBB_VERSION_MINOR} detected. Disabling parallel policies for GCC 10 due to incompatible interfaces.")
-            else()
+            else ()
                 # Status update
                 message(STATUS "Found TBB version: ${TBB_VERSION_MAJOR}.${TBB_VERSION_MINOR}")
                 message(STATUS "Parallel STL algorithms are enabled")
@@ -120,6 +120,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES ".*Cla
     else ()
         message(STATUS "Parallel STL algorithms are disabled. If you want to use them, please install TBB and set the TBB_ROOT_DIR, TBB_INCLUDE_DIR, and TBB_LIBRARY variables accordingly.")
     endif ()
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    # Status update
+    message(STATUS "Parallel STL algorithms are enabled on MSVC by default")
 endif ()
 
 # Include parallel_hashmap by Gregory Popovitch
