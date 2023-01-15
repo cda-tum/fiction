@@ -17,7 +17,7 @@
 #include <execution>  // utilize execution policies only if the C++ library supports them
 
 // define the execution policy as a macro
-#define FICTION_EXECUTION_POLICY std::execution::par_unseq,
+#define FICTION_EXECUTION_POLICY std::execution::par,
 #else
 #define FICTION_EXECUTION_POLICY
 #endif
