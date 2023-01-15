@@ -94,11 +94,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES ".*Cla
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/") # include FindTBB.cmake
     find_package(TBB)
     if (TBB_FOUND)
-        # If TBB version >= 2021.1 then GCC 10 does not work properly due to incompatible ABI changes
+        # If TBB version >= 2021.1 then GCC 9 and 10 do not work properly due to incompatible ABI changes
         if (${TBB_VERSION_MAJOR} GREATER_EQUAL 2021 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0.0 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0.0)
+            if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0.0)
                 target_compile_definitions(libfiction INTERFACE _GLIBCXX_USE_TBB_PAR_BACKEND=0)
-                message(STATUS "TBB version ${TBB_VERSION_MAJOR}.${TBB_VERSION_MINOR} detected. Disabling parallel policies for GCC 10 due to incompatible interfaces.")
+                message(STATUS "TBB version ${TBB_VERSION_MAJOR}.${TBB_VERSION_MINOR} detected. Disabling parallel policies for GCC 9 and 10 due to incompatible interfaces.")
             else ()
                 # Status update
                 message(STATUS "Found TBB version: ${TBB_VERSION_MAJOR}.${TBB_VERSION_MINOR}")
