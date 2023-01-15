@@ -13,11 +13,10 @@
 #include <type_traits>
 #include <utility>
 
-#if __cpp_lib_parallel_algorithm || __cpp_lib_execution
+#if (__cpp_lib_parallel_algorithm || __cpp_lib_execution) && (!__GNUC__ || __GNUC__ > 9)  // GCC Version >= 9
 #include <execution>  // utilize execution policies only if the C++ library supports them
-
 // define the execution policy as a macro
-#define FICTION_EXECUTION_POLICY std::execution::par,
+#define FICTION_EXECUTION_POLICY std::execution::par_unseq,
 #else
 #define FICTION_EXECUTION_POLICY
 #endif
