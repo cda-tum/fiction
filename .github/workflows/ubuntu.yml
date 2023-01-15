@@ -96,7 +96,7 @@ jobs:
 
       - name: Build fiction
         working-directory: ${{github.workspace}}/build
-        run: cmake --build . --config ${{matrix.build_type}}
+        run: cmake --build .
 
       - name: Test
         working-directory: ${{github.workspace}}/build
