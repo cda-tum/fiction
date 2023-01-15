@@ -20,6 +20,7 @@ env:
 jobs:
   build_and_test:
     strategy:
+      fail-fast: false # TODO take this out again!
       matrix:
         os: [ macos-11, macos-12 ]
         compiler: [ g++-11, clang++ ]
