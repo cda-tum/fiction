@@ -45,10 +45,6 @@ jobs:
         with:
           submodules: recursive
 
-      # Setup TBB for parallel STL algorithms via Chocolatey (only needed for ClangCL)
-      - name: Setup TBB
-        run: choco install tbb
-
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
