@@ -74,7 +74,7 @@ if (FICTION_Z3)
         # Compile definition to guard include files
         target_compile_definitions(libfiction INTERFACE FICTION_Z3_SOLVER)
         # Include Z3 library
-        target_include_directories(libfiction INTERFACE ${Z3_CXX_INCLUDE_DIRS})
+        target_include_directories(libfiction INTERFACE SYSTEM ${Z3_CXX_INCLUDE_DIRS})
         # Link Z3
         target_link_libraries(libfiction INTERFACE ${Z3_LIBRARIES})
 
