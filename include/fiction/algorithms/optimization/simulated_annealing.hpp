@@ -5,6 +5,8 @@
 #ifndef FICTION_SIMULATED_ANNEALING_HPP
 #define FICTION_SIMULATED_ANNEALING_HPP
 
+#include "fiction/utils/execution_utils.hpp"
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -12,14 +14,6 @@
 #include <random>
 #include <type_traits>
 #include <utility>
-
-#if (__cpp_lib_parallel_algorithm || __cpp_lib_execution) && (!__GNUC__ || __GNUC__ > 9)  // GCC Version >= 9
-#include <execution>  // utilize execution policies only if the C++ library supports them
-// define the execution policy as a macro
-#define FICTION_EXECUTION_POLICY std::execution::par_unseq,
-#else
-#define FICTION_EXECUTION_POLICY
-#endif
 
 namespace fiction
 {
@@ -168,11 +162,11 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
 
     std::vector<std::pair<state_t, cost_t>> results(instances);
     std::generate(
-        FICTION_EXECUTION_POLICY results.begin(), results.end(),
+        FICTION_EXECUTION_POLICY_PAR_UNSEQ results.begin(), results.end(),
         [&init_temp, &final_temp, &cycles, &rand_state, &cost, &schedule, &next]() -> std::pair<state_t, cost_t>
         { return simulated_annealing(rand_state(), init_temp, final_temp, cycles, cost, schedule, next); });
 
-    return *std::min_element(FICTION_EXECUTION_POLICY results.cbegin(), results.cend(),
+    return *std::min_element(FICTION_EXECUTION_POLICY_PAR_UNSEQ results.cbegin(), results.cend(),
                              [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 }
 
