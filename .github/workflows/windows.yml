@@ -20,7 +20,6 @@ env:
 jobs:
   build_and_test:
     strategy:
-      fail-fast: false # TODO take this out again!
       matrix:
         os: [ windows-2019, windows-2022 ]
         toolset: [ v142, v143, ClangCL ]
