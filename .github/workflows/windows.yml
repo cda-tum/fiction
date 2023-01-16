@@ -79,7 +79,7 @@ jobs:
 
       - name: Build
         working-directory: ${{github.workspace}}\build
-        run: cmake --build . --config ${{matrix.build_type}} -j2
+        run: cmake --build . -j2
 
       - name: Test
         working-directory: ${{github.workspace}}\build
