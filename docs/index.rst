@@ -35,6 +35,7 @@ Let there be a *fiction*
    layouts/gate_level_layout.rst
    layouts/cell_level_layout.rst
    layouts/obstruction_layout.rst
+   layouts/placement_layout.rst
    layouts/bounding_box.rst
 
 .. toctree::
