@@ -41,7 +41,6 @@ TEMPLATE_TEST_CASE(
     CHECK(has_random_tile_v<place_layout>);
     CHECK(has_random_node_v<place_layout>);
 
-    const place_layout place_lyt{ntk};
     const place_layout place_lyt_from_lyt{lyt, ntk};
 
     using place_place_layout = placement_layout<place_layout, Ntk>;
@@ -49,8 +48,6 @@ TEMPLATE_TEST_CASE(
     CHECK(has_initialize_random_placement_v<place_place_layout>);
     CHECK(has_random_tile_v<place_place_layout>);
     CHECK(has_random_node_v<place_place_layout>);
-
-    const place_place_layout place_place_lyt_from_lyt{place_lyt, ntk};
 }
 
 TEMPLATE_TEST_CASE(
@@ -74,7 +71,7 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-    "Random tile sampling", "[placement_layout]",
+    "Random tile sampling", "[placement-layout]",
     (gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>),
     (gate_level_layout<synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
     (gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>),
@@ -96,7 +93,7 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-    "Random node sampling", "[placement_layout]",
+    "Random node sampling", "[placement-layout]",
     (gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>),
     (gate_level_layout<synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
     (gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>),
@@ -115,5 +112,38 @@ TEMPLATE_TEST_CASE(
         const auto n = place_lyt.random_node();
         CHECK(!ntk.is_constant(n));
         CHECK((ntk.is_pi(n) || ntk.is_function(n)));
+        CHECK(n < ntk.size());
+    }
+}
+
+TEMPLATE_TEST_CASE(
+    "Node swapping", "[placement-layout]", (gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+    (gate_level_layout<synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
+    (gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>),
+    (gate_level_layout<clocked_layout<hexagonal_layout<offset::ucoord_t>>>))
+{
+    using Ntk      = technology_network;
+    const auto ntk = blueprints::full_adder_network<Ntk>();
+
+    const TestType lyt{{10, 20}};
+
+    placement_layout place_lyt{lyt, ntk};
+
+    place_lyt.initialize_random_placement();
+
+    for (auto i = 0u; i < 100u; ++i)
+    {
+        const auto n = place_lyt.random_node();
+        const auto t = place_lyt.random_tile();
+
+        const auto n_old_t = place_lyt.get_node_tile(n);
+        const auto t_old_n = place_lyt.get_tile_node(t);
+
+        place_lyt.swap_node_and_tile(n, t);
+
+        CHECK(place_lyt.get_node_tile(n) == t);
+        CHECK(place_lyt.get_tile_node(t) == n);
+        CHECK(place_lyt.get_node_tile(t_old_n) == n_old_t);
+        CHECK(place_lyt.get_tile_node(n_old_t) == t_old_n);
     }
 }
