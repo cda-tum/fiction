@@ -141,7 +141,8 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
         self.assertEqual(cp, 4)
         self.assertEqual(tp, 1)
 
-        self.assertEqual(gate_level_drvs(layout), (0, 0))
+        drv_params = gate_level_drv_params()
+        self.assertEqual(gate_level_drvs(layout, drv_params, False), (0, 0))
 
 
 class TestHexagonalGateLevelLayout(unittest.TestCase):
@@ -283,7 +284,8 @@ class TestHexagonalGateLevelLayout(unittest.TestCase):
         self.assertEqual(cp, 4)
         self.assertEqual(tp, 1)
 
-        self.assertEqual(gate_level_drvs(layout), (0, 0))
+        drv_params = gate_level_drv_params()
+        self.assertEqual(gate_level_drvs(layout, drv_params, False), (0, 0))
 
 
 if __name__ == '__main__':
