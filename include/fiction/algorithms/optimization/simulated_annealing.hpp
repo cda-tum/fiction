@@ -75,7 +75,7 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
 
     static std::mt19937_64 generator{std::random_device{}()};
 
-    static std::uniform_real_distribution<std::invoke_result_t<CostFunc, State>> random_functor(0, 1);
+    static std::uniform_real_distribution<double> random_functor(0, 1);
 
     auto current_cost  = cost(init_state);
     auto current_state = init_state;
