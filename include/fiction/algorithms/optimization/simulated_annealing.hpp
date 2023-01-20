@@ -102,7 +102,7 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
                 continue;
             }
 
-            const auto cost_delta = new_cost - current_cost;
+            const auto cost_delta = static_cast<double>(new_cost - current_cost);
 
             // shortcut to skip the expensive std::exp call
             if (cost_delta > 10.0 * temp)
