@@ -39,7 +39,7 @@ class technology_network : public mockturtle::klut_network
         add_additional_functions();
     }
 
-    technology_network clone() const
+    [[nodiscard]] technology_network clone() const
     {
         return technology_network{std::make_shared<mockturtle::klut_storage>(*_storage)};
     }
