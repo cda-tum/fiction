@@ -70,6 +70,14 @@ std::pair<State, std::invoke_result_t<CostFunc, State>>
 simulated_annealing(const State& init_state, const double init_temp, const double final_temp, const std::size_t cycles,
                     CostFunc&& cost, TempFunc&& schedule, NextFunc&& next) noexcept
 {
+    static_assert(std::is_invocable_v<CostFunc, State>, "CostFunc must be invocable with objects of type State");
+    static_assert(std::is_invocable_v<TempFunc, double>, "TempFunc must be invocable with double");
+    static_assert(std::is_invocable_v<NextFunc, State>, "NextFunc must be invocable with objects of type State");
+    static_assert(std::is_signed_v<std::invoke_result_t<CostFunc, State>>, "CostFunc must return a signed value");
+    static_assert(std::is_same_v<std::invoke_result_t<TempFunc, double>, double>, "TempFunc must return a double");
+    static_assert(std::is_same_v<State, std::invoke_result_t<NextFunc, State>>,
+                  "NextFunc must return an object of type State");
+
     assert(std::isfinite(init_temp) && "init_temp must be a finite number");
     assert(std::isfinite(final_temp) && "final_temp must be a finite number");
 
@@ -154,11 +162,15 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
                           const std::size_t instances, RandStateFunc&& rand_state, CostFunc&& cost, TempFunc&& schedule,
                           NextFunc&& next) noexcept
 {
-    assert(std::isfinite(init_temp) && "init_temp must be a finite number");
-    assert(std::isfinite(final_temp) && "final_temp must be a finite number");
-
     using state_t = std::invoke_result_t<RandStateFunc>;
     using cost_t  = std::invoke_result_t<CostFunc, state_t>;
+
+    static_assert(std::is_invocable_v<RandStateFunc>, "RandStateFunc must be invocable");
+    static_assert(std::is_invocable_v<CostFunc, state_t>, "CostFunc must be invocable with objects of type State");
+    static_assert(std::is_default_constructible_v<state_t>, "State must be default-constructible");
+
+    assert(std::isfinite(init_temp) && "init_temp must be a finite number");
+    assert(std::isfinite(final_temp) && "final_temp must be a finite number");
 
     std::vector<std::pair<state_t, cost_t>> results(instances);
     std::generate(
