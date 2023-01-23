@@ -16,11 +16,16 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/views/names_view.hpp>
 
 namespace pyfiction
 {
 
+/**
+ * Truth table.
+ */
+using py_tt = kitty::dynamic_truth_table;
 /**
  * Logic network.
  */

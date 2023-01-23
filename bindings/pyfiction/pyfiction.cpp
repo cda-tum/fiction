@@ -13,6 +13,7 @@
 #include "pyfiction/algorithms/physical_design/exact.hpp"
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
 #include "pyfiction/algorithms/properties/critical_path_length_and_throughput.hpp"
+#include "pyfiction/algorithms/simulation/logic_simulation.hpp"
 #include "pyfiction/algorithms/verification/design_rule_violations.hpp"
 #include "pyfiction/algorithms/verification/equivalence_checking.hpp"
 #include "pyfiction/io/read_fqca_layout.hpp"
@@ -74,6 +75,10 @@ PYBIND11_MODULE(pyfiction, m)
      * Algorithms: Properties
      */
     pyfiction::critical_path_length_and_throughput(m);
+    /**
+     * Algorithms: Simulation
+     */
+    pyfiction::logic_simulation(m);
     /*
      * Algorithms: Verification
      */
