@@ -124,10 +124,10 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
                 current_state = std::move(new_state);
                 current_cost  = std::move(new_cost);
             }
-
-            // update temperature
-            temp = schedule(temp);
         }
+
+        // update temperature
+        temp = std::clamp(schedule(temp), final_temp, init_temp);
     }
 
     return {best_state, best_cost};
