@@ -4,6 +4,7 @@
 
 #include "pybind11/pybind11.h"
 #include "pyfiction/algorithms/network_transformation/fanout_substitution.hpp"
+#include "pyfiction/algorithms/network_transformation/network_balancing.hpp"
 #include "pyfiction/algorithms/path_finding/a_star.hpp"
 #include "pyfiction/algorithms/path_finding/distance.hpp"
 #include "pyfiction/algorithms/path_finding/enumerate_all_paths.hpp"
@@ -64,6 +65,7 @@ PYBIND11_MODULE(pyfiction, m)
      * Algorithms: Network Transformation
      */
     pyfiction::fanout_substitution(m);
+    pyfiction::network_balancing(m);
     /**
      * Algorithms: Path Finding
      */
