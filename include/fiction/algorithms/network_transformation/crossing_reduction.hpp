@@ -53,8 +53,13 @@ struct crossing_reduction_stats
      * Runtime measurement.
      */
     mockturtle::stopwatch<>::duration time_total{0};
-
+    /**
+     * Number of crossings before the reduction.
+     */
     std::size_t crossings_before{0};
+    /**
+     * Number of crossings after the reduction.
+     */
     std::size_t crossings_after{0};
 };
 
@@ -238,13 +243,17 @@ class crossing_reduction_impl
     {
         mockturtle::stopwatch stop{pst.time_total};
 
+        pst.crossings_before = number_of_crossings(rank_ntk);
+
+        auto rank_ntk_opt = rank_ntk;
+
         // perform one upward sweep
-        for (uint32_t r = 0; r < rank_ntk.depth(); ++r)
+        for (uint32_t r = 0; r < rank_ntk_opt.depth(); ++r)
         {
             // initialize rank r with a random permutation
-            const auto random_rank_order = [&r, this]() -> mockturtle::rank_view<Ntk>
+            const auto random_rank_order = [&r, &rank_ntk_opt]() -> mockturtle::rank_view<Ntk>
             {
-                auto rank_ntk_copy = rank_ntk;
+                auto rank_ntk_copy = rank_ntk_opt;
                 // shuffle nodes in rank r
                 rank_ntk_copy.shuffle_rank(r);
 
@@ -279,10 +288,21 @@ class crossing_reduction_impl
             //                ps.number_of_cycles,
             //                                    crossing_cost, linear_temperature_schedule, next_rank_order);
 
-            rank_ntk = result;
+            rank_ntk_opt = result;
         }
 
-        return rank_ntk;
+        pst.crossings_after = number_of_crossings(rank_ntk_opt);
+
+        if (pst.crossings_after < pst.crossings_before)
+        {
+            return rank_ntk_opt;
+        }
+        else
+        {
+            pst.crossings_after = pst.crossings_before;
+
+            return rank_ntk;
+        }
     }
 
   private:
