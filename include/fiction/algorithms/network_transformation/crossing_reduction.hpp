@@ -229,6 +229,72 @@ std::size_t number_of_crossings(const mockturtle::rank_view<Ntk>& ntk) noexcept
     return crossings;
 }
 
+class crossing_cost  // TODO test this
+{
+  public:
+    template <typename Ntk>
+    explicit crossing_cost(const mockturtle::rank_view<Ntk>& ntk) : rank_crossings(ntk.depth() + 1, 0)
+    {
+        for (uint32_t r = 0; r < ntk.depth(); ++r)  // check every rank except the last one
+        {
+            // compute crossings with the next rank
+            const auto crossings = number_of_crossings_between_ranks(ntk, r, r + 1);
+
+            // store crossings in both directions
+            rank_crossings[r].up       = crossings;
+            rank_crossings[r + 1].down = crossings;
+        }
+    }
+
+    [[nodiscard]] std::size_t total_cost() const noexcept
+    {
+        return std::accumulate(rank_crossings.begin(), rank_crossings.end(), 0ul,
+                               [](auto cx, const auto& rc)
+                               { return cx + rc.up; });  // sum up crossings in upward direction
+    }
+
+    template <typename Ntk>
+    void update_cost(const mockturtle::rank_view<Ntk>& ntk, const uint32_t r) noexcept
+    {
+        assert(r < rank_crossings.size() && "r is out of bounds");
+
+        // if r is the last rank, there are no crossings with the next rank
+        if (r != ntk.depth())
+        {
+            // add crossings with rank r + 1
+            const auto crossings_up = number_of_crossings_between_ranks(ntk, r, r + 1);
+
+            rank_crossings[r].up       = crossings_up;
+            rank_crossings[r + 1].down = crossings_up;
+        }
+
+        // if r is 0, there are no crossings with the previous rank
+        if (r != 0)
+        {
+            // add crossings with rank r - 1
+            const auto crossings_down = number_of_crossings_between_ranks(ntk, r - 1, r);
+
+            rank_crossings[r].down   = crossings_down;
+            rank_crossings[r - 1].up = crossings_down;
+        }
+    }
+
+  private:
+    struct rank_cost
+    {
+        /**
+         * The number of crossings in the upward direction.
+         */
+        std::size_t up{0};
+        /**
+         * The number of crossings in the downward direction.
+         */
+        std::size_t down{0};
+    };
+
+    std::vector<rank_cost> rank_crossings;
+};
+
 template <typename Ntk>
 class crossing_reduction_impl
 {
@@ -279,14 +345,15 @@ class crossing_reduction_impl
                 return rank_ntk_copy;
             };
 
-            const auto [result, cost] = multi_simulated_annealing(
-                ps.initial_temperature, ps.final_temperature, ps.number_of_cycles, ps.number_of_instances,
-                random_rank_order, crossing_cost, linear_temperature_schedule, next_rank_order);
+            // TODO make depth_view and rank_view thread-safe
 
-            //            const auto [result, cost] =
-            //                simulated_annealing(rank_ntk, ps.initial_temperature, ps.final_temperature,
-            //                ps.number_of_cycles,
-            //                                    crossing_cost, linear_temperature_schedule, next_rank_order);
+            //            const auto [result, cost] = multi_simulated_annealing(
+            //                ps.initial_temperature, ps.final_temperature, ps.number_of_cycles, ps.number_of_instances,
+            //                random_rank_order, crossing_cost, linear_temperature_schedule, next_rank_order);
+
+            const auto [result, cost] =
+                simulated_annealing(rank_ntk, ps.initial_temperature, ps.final_temperature, ps.number_of_cycles,
+                                    crossing_cost, linear_temperature_schedule, next_rank_order);
 
             rank_ntk_opt = result;
         }
