@@ -10,6 +10,8 @@
 #include <fiction/algorithms/physical_design/color_routing.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/routing_utils.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
+#include <vector>
 
 using namespace fiction;
 
@@ -168,5 +170,38 @@ TEST_CASE("Routing with crossings", "[color-routing]")
     {
         ps.engine = graph_coloring_engine::SAT;
         check_color_routing(spec_layout, impl_layout, objectives, ps);
+    }
+}
+
+TEST_CASE("Routing failure", "[color-routing]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    gate_layout layout{gate_layout::aspect_ratio{3, 4, 0}};
+
+    auto x1 = layout.create_pi("x1", {0, 1});
+    auto x2 = layout.create_pi("x2", {1, 0});
+    auto x3 = layout.create_pi("x3", {0, 2});
+
+    auto a = layout.create_and(x1, x2, {1, 3});
+
+    std::vector<routing_objective<gate_layout>> objectives{};
+    objectives.push_back({{0, 1}, {1, 3}});
+    objectives.push_back({{1, 0}, {1, 3}});
+
+    color_routing_params ps{};
+    ps.crossings = true;
+
+    SECTION("MCS")
+    {
+        ps.engine = graph_coloring_engine::MCS;
+        const auto success = color_routing(layout, objectives, ps);
+        CHECK(!success);
+    }
+    SECTION("SAT")
+    {
+        ps.engine = graph_coloring_engine::SAT;
+        const auto success = color_routing(layout, objectives, ps);
+        CHECK(!success);
     }
 }
