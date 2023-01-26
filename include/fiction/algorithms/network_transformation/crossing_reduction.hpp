@@ -297,12 +297,10 @@ class crossing_reduction_impl
         {
             return rank_ntk_opt;
         }
-        else
-        {
-            pst.crossings_after = pst.crossings_before;
 
-            return rank_ntk;
-        }
+        // else, return the original network
+        pst.crossings_after = pst.crossings_before;
+        return rank_ntk;
     }
 
   private:
