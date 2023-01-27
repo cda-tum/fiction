@@ -41,7 +41,7 @@ void check_sat_search_tactics(const Graph& graph, const std::size_t expected_chr
 {
     determine_vertex_coloring_stats pst{};
 
-    SECTION("linear ascending search")
+    SECTION("linearly ascending search")
     {
         sat_params.sat_search_tactic = graph_coloring_sat_search_tactic::LINEARLY_ASCENDING;
 
@@ -50,7 +50,7 @@ void check_sat_search_tactics(const Graph& graph, const std::size_t expected_chr
 
         check_statistics_with_exact_chromatic_number(pst, expected_chromatic_number);
     }
-    SECTION("linear descending search")
+    SECTION("linearly descending search")
     {
         sat_params.sat_search_tactic = graph_coloring_sat_search_tactic::LINEARLY_DESCENDING;
 
@@ -275,7 +275,7 @@ Graph create_complete_graph(std::vector<typename Graph::vertex_id_type>& vertice
 {
     Graph k{};
 
-    std::for_each(vertices.cbegin(), vertices.cend(), [&k](const auto v) { k.insert_vertex(v, {}); });
+    std::for_each(vertices.cbegin(), vertices.cend(), [&k](const auto& v) { k.insert_vertex(v, {}); });
     combinations::for_each_combination(vertices.begin(), vertices.begin() + 2, vertices.end(),
                                        [&k](const auto begin, [[maybe_unused]] const auto end)
                                        {

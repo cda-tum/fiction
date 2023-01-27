@@ -227,7 +227,10 @@ class sat_coloring_handler
 
         if (ps.clique_size_color_frequency)
         {
-            color_frequency_equal_to_largest_clique_size(k_color_instance);
+            if (!all_cliques_are_equal_in_size())
+            {
+                color_frequency_equal_to_largest_clique_size(k_color_instance);
+            }
         }
 
         return {check_sat(k_color_instance), k_color_instance};
@@ -467,6 +470,12 @@ class sat_coloring_handler
                                     bill::lit_type{instance->variables[{v2, c}], bill::negative_polarity}}});
                           }
                       });
+    }
+
+    [[nodiscard]] bool all_cliques_are_equal_in_size() const noexcept
+    {
+        return std::all_of(ps.cliques.cbegin(), ps.cliques.cend(),
+                           [this](const auto& clique) { return clique.size() == q; });
     }
 
     void color_frequency_equal_to_largest_clique_size(const solver_instance_ptr& instance) const
