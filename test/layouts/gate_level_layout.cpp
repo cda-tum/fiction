@@ -1110,6 +1110,52 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
     CHECK(layout.num_wires() == 3);  // PO is gone now
 }
 
+TEST_CASE("Clear tiles", "[gate-level-layout]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    auto layout = blueprints::and_or_gate_layout<gate_layout>();
+
+    REQUIRE(layout.num_gates() == 2);
+    REQUIRE(layout.num_wires() == 4);
+    REQUIRE(layout.num_pis() == 2);
+    REQUIRE(layout.num_pos() == 2);
+
+    layout.clear_tile({1, 0});
+
+    CHECK(!layout.is_gate_tile({1, 0}));
+    CHECK(layout.num_gates() == 1);
+    CHECK(layout.num_wires() == 4);
+    CHECK(layout.num_pis() == 2);
+    CHECK(layout.num_pos() == 2);
+
+    layout.clear_tile({2, 1});
+
+    CHECK(!layout.is_gate_tile({2, 1}));
+    CHECK(layout.num_gates() == 0);
+    CHECK(layout.num_wires() == 4);
+    CHECK(layout.num_pis() == 2);
+    CHECK(layout.num_pos() == 2);
+
+    layout.clear_tile({2, 0});
+
+    CHECK(!layout.is_wire_tile({2, 0}));
+    CHECK(!layout.is_pi_tile({2, 0}));
+    CHECK(layout.num_gates() == 0);
+    CHECK(layout.num_wires() == 3);
+    CHECK(layout.num_pis() == 1);
+    CHECK(layout.num_pos() == 2);
+
+    layout.clear_tile({0, 0});
+
+    CHECK(!layout.is_wire_tile({0, 0}));
+    CHECK(!layout.is_po_tile({0, 0}));
+    CHECK(layout.num_gates() == 0);
+    CHECK(layout.num_wires() == 2);
+    CHECK(layout.num_pis() == 1);
+    CHECK(layout.num_pos() == 1);
+}
+
 TEST_CASE("Gate-level cardinal operations", "[gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;

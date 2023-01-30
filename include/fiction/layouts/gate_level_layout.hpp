@@ -703,14 +703,28 @@ class gate_level_layout : public ClockedLayout
      */
     void clear_tile(const tile& t) noexcept
     {
-        if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
+        if (const auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
         {
+            const auto n = it->second;
+
             if (!t.is_dead())
             {
                 // decrease wire count
-                if (is_wire(it->second))
+                if (is_wire(n))
                 {
                     strg->data.num_wires--;
+
+                    // remove PI
+                    strg->inputs.erase(std::remove(strg->inputs.begin(), strg->inputs.end(), n), strg->inputs.end());
+
+                    // find PO entry and remove it if present
+                    if (const auto po_it =
+                            std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
+                                         [this, &n](const auto& p) { return this->get_node(p.index) == n; });
+                        po_it != strg->outputs.cend())
+                    {
+                        strg->outputs.erase(po_it);
+                    }
                 }
                 else  // decrease gate count
                 {
@@ -718,10 +732,10 @@ class gate_level_layout : public ClockedLayout
                 }
             }
             // mark node as dead
-            kill_node(it->second);
+            kill_node(n);
 
             // remove node-tile
-            strg->data.node_tile_map.erase(it->second);
+            strg->data.node_tile_map.erase(n);
             // remove tile-node
             strg->data.tile_node_map.erase(it);
         }
