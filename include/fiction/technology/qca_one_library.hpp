@@ -22,25 +22,26 @@ namespace fiction
 {
 
 /**
- * A concrete FCN gate library based on QCA ONE proposed in "A Methodology for Standard Cell Design for QCA" by Dayane
+ * A concrete FCN gate library based on QCA ONE proposed in \"A Methodology for Standard Cell Design for QCA\" by Dayane
  * Alfenas Reis, Caio Araújo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba V. Neto, and Frank Sill Torres in
  * IEEE International Symposium on Circuits and Systems, 2016. QCA ONE was originally proposed for the USE clocking
  * scheme. The version used here is an extension to the original QCA ONE by also theoretically allowing multiple wires
- * in the same tile. Furthermore, it can be used for a range of clocking schemes. Tiles in QCA ONE are 5 x 5 QCA cells.
+ * in the same tile. Furthermore, it can be used for a range of clocking schemes. Tiles in QCA ONE are \f$ 5 \times 5
+ * \f$ QCA cells.
  */
 class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 {
   public:
     explicit qca_one_library() = delete;
     /**
-     * Overrides the corresponding function in fcn_gate_library. Given a tile t hosted in a layout lyt, this function
-     * chooses the correct fcn_gate representation for that tile taking into account gate function and information flow.
-     * Rotation and special marks like input and output, const cells etc. are additionally determined.
+     * Overrides the corresponding function in fcn_gate_library. Given a tile `t`, this function takes all necessary
+     * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
+     * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
-     * @tparam GateLyt Cartesian Gate-level layout type.
-     * @param lyt Layout that hosts tile t.
+     * @tparam GateLyt Cartesian gate-level layout type.
+     * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a QCA ONE gate.
-     * @return QCA ONE gate representation of t including I/Os, rotation, const cells, etc.
+     * @return QCA ONE gate representation of `t` including I/Os, rotation, const cells, etc.
      */
     template <typename GateLyt>
     [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
@@ -113,7 +114,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
      * Post-layout optimization that assigns via cell mode to wire crossings.
      *
      * @tparam CellLyt Cell-level layout type.
-     * @param lyt The cell-level layout that has been created via application of set_up_gate.
+     * @param lyt The cell-level layout that has been created via application of `set_up_gate`.
      */
     template <typename CellLyt>
     static void post_layout_optimization(CellLyt& lyt) noexcept

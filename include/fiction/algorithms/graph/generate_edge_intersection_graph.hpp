@@ -36,6 +36,9 @@ template <typename Lyt>
 using edge_intersection_graph =
     undirected_graph<std::size_t, layout_coordinate_path<Lyt>, undirected_pair<std::size_t>, std::size_t>;
 
+/**
+ * Parameters for the edge intersection graph generation algorithm.
+ */
 struct generate_edge_intersection_graph_params
 {
     /**
@@ -43,8 +46,8 @@ struct generate_edge_intersection_graph_params
      */
     bool crossings = false;
     /**
-     * If a value is given, for each objective, only up to the path_limit shortest paths will be enumerated (using Yen's
-     * algorithm) instead of all paths.
+     * If a value is given, for each objective, only up to the `path_limit` shortest paths will be enumerated (using
+     * Yen's algorithm) instead of all paths.
      */
     std::optional<uint32_t> path_limit = std::nullopt;
 };
@@ -190,7 +193,7 @@ class generate_edge_intersection_graph_impl
          *
          * @tparam Path Type of other path.
          * @param other The other path.
-         * @return True iff this path and the given one are not disjoint, i.e., share at least one coordinate.
+         * @return `true` iff this path and the given one are not disjoint, i.e., share at least one coordinate.
          */
         template <typename Path>
         bool has_intersection_with(const Path& other) const noexcept
@@ -208,13 +211,13 @@ class generate_edge_intersection_graph_impl
         /**
          * Like has_intersection_with but allows paths to share crossings, i.e., single-tile intersections.
          *
-         * Similar to has_intersection_with, this function also returns true if source and target are matching in both
+         * Similar to has_intersection_with, this function also returns `true` if source and target are matching in both
          * paths.
          *
          * @tparam Path Type of other path.
          * @param other The other path.
-         * @return True iff this path and the given one are overlapping, i.e., share at least one coordinate segment of
-         * size 2.
+         * @return `true` iff this path and the given one are overlapping, i.e., share at least one coordinate segment
+         * of size 2.
          */
         template <typename Path>
         bool has_overlap_with(const Path& other) const noexcept
@@ -339,7 +342,7 @@ class generate_edge_intersection_graph_impl
  * @param objectives A list of routing objectives given as source-target pairs.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return An edge intersection graph of paths satisfying the given routing objectives in lyt.
+ * @return An edge intersection graph of paths satisfying the given routing objectives in `lyt`.
  */
 template <typename Lyt>
 edge_intersection_graph<Lyt> generate_edge_intersection_graph(const Lyt&                                 lyt,

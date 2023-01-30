@@ -22,24 +22,24 @@
 namespace fiction
 {
 /**
- * A concrete FCN gate library as used in "ToPoliNano" (https://topolinano.polito.it/) for the iNML technology. In
- * fiction, this is emulated by using vertically shifted layouts and implementing the ToPoliNano library with 4 x 4
- * magnet positions with one empty row in most tiles (except for MAJ which needs to be handled differently as this
- * library is not uniform otherwise). Theoretically, it allows for multiple wires in the same tile.
+ * A concrete FCN gate library as used in \"ToPoliNano\" (https://topolinano.polito.it/) for the iNML technology. In
+ * fiction, this is emulated by using vertically shifted layouts and implementing the ToPoliNano library with \f$ 4
+ * \times 4 \f$ magnet positions with one empty row in most tiles (except for MAJ which needs to be handled differently
+ * as this library is not uniform otherwise). Theoretically, it allows for multiple wires in the same tile.
  */
 class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
 {
   public:
     explicit inml_topolinano_library() = delete;
     /**
-     * Overrides the corresponding function in fcn_gate_library. Given a tile t hosted in a layout lyt, this function
-     * chooses the correct fcn_gate representation for that tile taking into account gate function and information flow.
-     * Rotation and special marks like input and output, const cells etc. are computed additionally.
+     * Overrides the corresponding function in fcn_gate_library. Given a tile `t`, this function takes all necessary
+     * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
+     * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
      * @tparam GateLyt Shifted Cartesian gate-level layout type.
-     * @param lyt Layout that hosts tile t.
+     * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a ToPoliNano gate.
-     * @return ToPoliNano gate representation of t including I/Os, rotation, etc.
+     * @return ToPoliNano gate representation of `t` including I/Os, rotation, etc.
      */
     template <typename GateLyt>
     [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
@@ -130,7 +130,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
      * Post-layout optimization that straightens the wire segments to save cells.
      *
      * @tparam CellLyt Cell-level layout type.
-     * @param lyt The cell-level layout that has been created via application of set_up_gate.
+     * @param lyt The cell-level layout that has been created via application of `set_up_gate`.
      */
     template <typename CellLyt>
     static void post_layout_optimization(CellLyt& lyt) noexcept
@@ -302,7 +302,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
      * @tparam Lyt Gate-level layout type.
      * @param lyt The layout to check.
      * @param n Node whose fanins are to be considered.
-     * @return True iff n has an AND, OR, or MAJ fanin node.
+     * @return `true` iff `n` has an AND, OR, or MAJ fanin node.
      */
     template <typename Lyt>
     [[nodiscard]] static bool has_and_or_maj_fanin(const Lyt& lyt, const mockturtle::node<Lyt>& n) noexcept
@@ -349,7 +349,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
      * @tparam Lyt Gate-level layout type.
      * @param lyt The layout to check.
      * @param n Node whose fanouts are to be considered.
-     * @return True iff n has a fanout node as fanout.
+     * @return `true` iff `n` has a fanout node as fanout.
      */
     template <typename Lyt>
     [[nodiscard]] static bool has_fanout_fanout(const Lyt& lyt, const mockturtle::node<Lyt>& n) noexcept

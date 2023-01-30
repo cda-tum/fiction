@@ -24,9 +24,9 @@ namespace fiction
 
 /**
  * A gate library for the SiDB technology that is based on Y-shaped gates in hexagonal tiles. Y-shaped gates have been
- * first introduced in "Binary Atomic Silicon Logic" by Taleana Huff, Hatem Labidi, Mohammad Rashidi, Lucian Livadaru,
+ * first introduced in \"Binary Atomic Silicon Logic\" by Taleana Huff, Hatem Labidi, Mohammad Rashidi, Lucian Livadaru,
  * Thomas Dienel, Roshan Achal, Wyatt Vine, Jason Pitters, and Robert A. Wolkow in Nature Electronics 2018. The Bestagon
- * library was later proposed in "Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic" by
+ * library was later proposed in \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" by
  * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille in Design Automation Conference 2022. The goal of
  * the Bestagon library is to be as close to physically realizable SiDB circuits as possible by taking fabrication
  * limitations of, e.g., clocking electrodes into account while also relying on established gate shape. Thus, the
@@ -40,14 +40,14 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
     explicit sidb_bestagon_library() = delete;
 
     /**
-     * Overrides the corresponding function in fcn_gate_library. Given a tile t hosted in a layout lyt, this function
-     * chooses the correct fcn_gate representation for that tile taking into account gate function and information flow.
-     * Mirroring is computed additionally.
+     * Overrides the corresponding function in fcn_gate_library. Given a tile `t`, this function takes all necessary
+     * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
+     * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
      * @tparam Lyt Pointy-top hexagonal gate-level layout type.
-     * @param lyt Layout that hosts tile t.
+     * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
-     * @return Bestagon gate representation of t including mirroring.
+     * @return Bestagon gate representation of `t` including mirroring.
      */
     template <typename Lyt>
     [[nodiscard]] static fcn_gate set_up_gate(const Lyt& lyt, const tile<Lyt>& t)

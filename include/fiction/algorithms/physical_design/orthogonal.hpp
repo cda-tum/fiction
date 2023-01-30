@@ -33,6 +33,9 @@
 namespace fiction
 {
 
+/**
+ * Parameters for the orthogonal physical design algorithm.
+ */
 struct orthogonal_physical_design_params
 {
     /**
@@ -606,10 +609,10 @@ class orthogonal_impl
 }  // namespace detail
 
 /**
- * A scalable placement & routing approach based on orthogonal graph drawing as originally proposed in "Scalable Design
- * for Field-coupled Nanocomputing Circuits" by M. Walter, R. Wille, F. Sill Torres, D. Große, and R. Drechsler in
- * ASP-DAC 2019. A more extensive description can be found in "Design Automation for Field-coupled Nanotechnologies" by
- * M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
+ * A scalable placement & routing approach based on orthogonal graph drawing as originally proposed in \"Scalable Design
+ * for Field-coupled Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D. Große, and R. Drechsler in
+ * ASP-DAC 2019. A more extensive description can be found in \"Design Automation for Field-coupled Nanotechnologies\"
+ * by M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
  *
  * Via certain restrictions to the degrees of freedom in FCN physical design, this algorithm achieves a polynomial time
  * complexity. However, these restrictions lead to an overall approximation of optimal layout quality within several
@@ -619,23 +622,24 @@ class orthogonal_impl
  * The imposed restrictions are that the input logic network has to be a 3-graph, i.e., cannot have any node exceeding
  * degree 3 (combined input and output), and that the resulting layout is always 2DDWave-clocked.
  *
- * This algorithm is based on a modification of "Improved orthogonal drawings of 3-graphs" by Therese C. Biedl in CCCG
- * 1996. The original one works for undirected graphs only while this modification respects information flow of directed
- * logic networks. To this end, the edge directions of the logic network directly used instead of relabeling the edges
- * according to its DFS tree, ordering the vertices using topological sorting instead of DFS, and adding an extra
- * placement rule for nodes without predecessors.
+ * This algorithm is based on a modification of \"Improved orthogonal drawings of 3-graphs\" by Therese C. Biedl in
+ * Canadian Conference on Computational Geometry 1996. Biedl's original algorithm works for undirected graphs only while
+ * this modification respects information flow of directed logic networks. To this end, the edge directions of the logic
+ * network directly used instead of relabeling the edges according to its DFS tree, ordering the vertices using
+ * topological sorting instead of DFS, and adding an extra placement rule for nodes without predecessors.
  *
- * The algorithm works in polynomial time O(3|N| + |L|) where |N| is the number of nodes in the given network and |L| is
- * the resulting layout size given by x * y, which approaches (|N|/2)^2 asymptotically.
+ * The algorithm works in polynomial time \f$ O(3|N| + |L|) \f$ where \f$ |N| \f$ is the number of nodes in the given
+ * network and \f$ |L| \f$ is the resulting layout size given by \f$ x \cdot y \f$, which approaches \f$
+ * (\frac{|N|}{2})^2 \f$ asymptotically.
  *
- * May throw an 'high_degree_fanin_exception'.
+ * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in larger than 2.
  *
  * @tparam Lyt Desired gate-level layout type.
  * @tparam Ntk Network type that acts as specification.
  * @param ntk The network that is to place and route.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return A gate-level layout of type Lyt that implements ntk as an FCN circuit.
+ * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit.
  */
 template <typename Lyt, typename Ntk>
 Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},

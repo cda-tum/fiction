@@ -291,7 +291,7 @@ class write_sqd_layout_impl
 }  // namespace detail
 
 /**
- * Writes a cell-level SiDB or QCA layout to a sqd file that is used by SiQAD (https://github.com/siqad/siqad),
+ * Writes a cell-level SiDB or QCA layout to an sqd file that is used by SiQAD (https://github.com/siqad/siqad),
  * a physical simulator for the SiDB technology platform.
  *
  * This overload uses an output stream to write into.
@@ -311,14 +311,14 @@ void write_sqd_layout(const Lyt& lyt, std::ostream& os)
     p.run();
 }
 /**
- * Writes a cell-level SiDB or QCA layout to a sqd file that is used by SiQAD (https://github.com/siqad/siqad),
+ * Writes a cell-level SiDB or QCA layout to an sqd file that is used by SiQAD (https://github.com/siqad/siqad),
  * a physical simulator for the SiDB technology platform.
  *
- * This overload uses file name to create and write into..
+ * This overload uses file name to create and write into.
  *
  * @tparam Lyt Cell-level SiDB or QCA layout type.
  * @param lyt The layout to be written.
- * @param filename The file name to create and write into. Should preferably use the ".sqd" extension.
+ * @param filename The file name to create and write into. Should preferably use the `.sqd` extension.
  */
 template <typename Lyt>
 void write_sqd_layout(const Lyt& lyt, const std::string& filename)

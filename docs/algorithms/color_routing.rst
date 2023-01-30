@@ -12,4 +12,6 @@ schemes and layout topologies and will apply all determined paths directly to th
 settings have been specified, the ``conduct_partial_routing`` parameter must be set to apply a non-complete set of paths
 to the layout.
 
+.. doxygenstruct:: fiction::color_routing_params
+   :members:
 .. doxygenfunction:: fiction::color_routing(Lyt& lyt, const std::vector<routing_objective<Lyt>>& objectives, color_routing_params ps = {}, color_routing_stats* pst = nullptr)

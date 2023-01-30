@@ -170,3 +170,61 @@ TEST_CASE("Routing with crossings", "[color-routing]")
         check_color_routing(spec_layout, impl_layout, objectives, ps);
     }
 }
+
+TEST_CASE("Routing failure", "[color-routing]")
+{
+    cart_gate_clk_lyt layout{{3, 4, 1}, twoddwave_clocking<cart_gate_clk_lyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 1});
+    const auto x2 = layout.create_pi("x2", {1, 0});
+
+    layout.create_pi("x3", {0, 2});
+    layout.create_and(x1, x2, {1, 3});
+
+    const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{0, 1}, {1, 3}}, {{1, 0}, {1, 3}}};
+
+    color_routing_params ps{};
+    ps.crossings = true;
+
+    SECTION("MCS")
+    {
+        ps.engine = graph_coloring_engine::MCS;
+        // routing should fail
+        CHECK(!color_routing(layout, objectives, ps));
+    }
+    SECTION("SAT")
+    {
+        ps.engine = graph_coloring_engine::SAT;
+        // routing should fail
+        CHECK(!color_routing(layout, objectives, ps));
+    }
+}
+
+TEST_CASE("Routing failure 2", "[color-routing]")
+{
+    cart_gate_clk_lyt layout{{3, 4, 1}, twoddwave_clocking<cart_gate_clk_lyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 1});
+    const auto x2 = layout.create_pi("x2", {1, 0});
+
+    layout.create_pi("x3", {0, 3});
+    layout.create_and(x1, x2, {1, 3});
+
+    const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{0, 1}, {1, 3}}, {{1, 0}, {1, 3}}};
+
+    color_routing_params ps{};
+    ps.crossings = true;
+
+    SECTION("MCS")
+    {
+        ps.engine = graph_coloring_engine::MCS;
+        // routing should fail
+        CHECK(!color_routing(layout, objectives, ps));
+    }
+    SECTION("SAT")
+    {
+        ps.engine = graph_coloring_engine::SAT;
+        // routing should fail
+        CHECK(!color_routing(layout, objectives, ps));
+    }
+}

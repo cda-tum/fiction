@@ -20,6 +20,9 @@
 namespace fiction
 {
 
+/**
+ * Parameters for Yen's \f$ k \f$-shortest paths algorithm.
+ */
 struct yen_k_shortest_paths_params
 {
     /**
@@ -187,13 +190,13 @@ class yen_k_shortest_paths_impl
 }  // namespace detail
 
 /**
- * Yen's algorithm for finding up to \f$k\f$ shortest paths without loops from source to target. This implementation
+ * Yen's algorithm for finding up to \f$ k \f$ shortest paths without loops from source to target. This implementation
  * works on clocked layouts and uses the A* algorithm with the Manhattan distance function internally. The algorithm was
- * originally described in "An algorithm for finding shortest routes from all source nodes to a given destination in
- * general networks" by Jin Y. Yen in Quarterly of Applied Mathematics, 1970.
+ * originally described in \"An algorithm for finding shortest routes from all source nodes to a given destination in
+ * general networks\" by Jin Y. Yen in Quarterly of Applied Mathematics, 1970.
  *
- * If \f$k\f$ is larger than the number of possible paths from source to target, the size of the returned path
- * collection will be smaller than \f$k\f$.
+ * If \f$ k \f$ is larger than the number of possible paths from source to target, the size of the returned path
+ * collection will be smaller than \f$ k \f$.
  *
  * If the given layout is a gate-level layout and implements the obstruction interface (see obstruction_layout), paths
  * may contain wire crossings if specified in the parameters. Wire crossings are only allowed over other wires and only
@@ -202,11 +205,11 @@ class yen_k_shortest_paths_impl
  *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
- * @param layout The clocked layout in which the k shortest paths between source and target are to be found.
+ * @param layout The clocked layout in which the \f$ k \f$ shortest paths between `source` and `target` are to be found.
  * @param objective Source-target coordinate pair.
  * @param k Maximum number of shortest paths to find.
  * @param ps Parameters.
- * @return A collection of up to k shortest loopless paths in layout from source to target.
+ * @return A collection of up to \f$ k \f$ shortest loopless paths in `layout` from `source` to `target`.
  */
 template <typename Path, typename Lyt>
 [[nodiscard]] path_collection<Path> yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective,

@@ -13,19 +13,18 @@ namespace fiction
 {
 
 /**
- * A derivative of std::find_first_of that uses the example implementation given at
+ * A derivative of `std::find_first_of` that uses the example implementation given at
  * https://en.cppreference.com/w/cpp/algorithm/find_first_of.
  *
- * This version searches the range [first, last) for any two consecutive elements of the elements in the range [s_first,
- * s_last), i.e., for a 2-element sub-sequence shared between the ranges.
+ * This version searches the range `[first, last)` for any two consecutive elements of the elements in the range
+ * `[s_first, s_last)`, i.e., for a 2-element sub-sequence shared between the ranges.
  *
- * Example: Let two ranges be [0, 1, 1, 2, 3, 3] and [1, 2, 3, 3]. A call to find_first_two_of would return an iterator
- * to index 2, i.e., the second 1 in the first list, because the 2-element sub-sequence [1,2] is shared between the two
- * ranges.
+ * Example: Let two ranges be `[0, 1, 1, 2, 3, 3]` and `[1, 2, 3, 3]`. A call to `find_first_two_of` would return an
+ * iterator to index 2, i.e., the second `1` in the first list, because the 2-element sub-sequence `[1,2]` is shared
+ * between the two ranges.
  *
- *
- * @tparam InputIt must meet the requirements of LegacyInputIterator.
- * @tparam ForwardIt must meet the requirements of LegacyForwardIterator.
+ * @tparam InputIt must meet the requirements of `LegacyInputIterator`.
+ * @tparam ForwardIt must meet the requirements of `LegacyForwardIterator`.
  * @param first Begin of the range to examine.
  * @param last End of the range to examine.
  * @param s_first Begin of the range to search for.
@@ -49,7 +48,7 @@ InputIt find_first_two_of(InputIt first, InputIt last, ForwardIt s_first, Forwar
     return last;
 }
 /**
- * An extension of std::priority_queue that allows searching the underlying container. The implementation is based on
+ * An extension of `std::priority_queue` that allows searching the underlying container. The implementation is based on
  * https://stackoverflow.com/questions/16749723/how-i-can-find-value-in-priority-queue.
  *
  * @tparam T The type of the stored elements.
@@ -92,7 +91,7 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
      * the end of the stored container otherwise.
      *
      * @param val Value to search for.
-     * @return Iterator to the stored value or to the end of the container if val is not contained.
+     * @return Iterator to the stored value or to the end of the container if `val` is not contained.
      */
     iterator find(const T& val)
     {
@@ -111,11 +110,11 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
         return last;
     }
     /**
-     * Returns a const_iterator to the provided value if it is contained in the priority queue. Returns an iterator to
+     * Returns a `const_iterator` to the provided value if it is contained in the priority queue. Returns an iterator to
      * the end of the stored container otherwise.
      *
      * @param val Value to search for.
-     * @return Iterator to the stored value or to the end of the container if val is not contained.
+     * @return Iterator to the stored value or to the end of the container if `val` is not contained.
      */
     const_iterator find(const T& val) const
     {
@@ -135,10 +134,10 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
         return last;
     }
     /**
-     * Returns true if the provided value is stored in the queue and false otherwise.
+     * Returns `true` if the provided value is stored in the queue and `false` otherwise.
      *
      * @param val Value to search for.
-     * @return True iff val is contained in the priority queue.
+     * @return `true` iff `val` is contained in the priority queue.
      */
     bool contains(const T& val) const
     {

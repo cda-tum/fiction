@@ -28,19 +28,19 @@ namespace fiction
  * like QCADesigner, ToPoliNano & MagCAD, SiQAD, etc.
  *
  * In this layout, each coordinate, i.e., clock zone has the dimensions of a single cell. Clock numbers can, however, be
- * assigned in a way, that they form larger zones, e.g., of 5x5 cells. These dimensions can be specified in the
- * constructor. They affect the way, clock numbers are fetched from the underlying clocked layout.
+ * assigned in a way, that they form larger zones, e.g., of \f$ 5 \times 5 \f$ cells. These dimensions can be specified
+ * in the constructor. They affect the way, clock numbers are fetched from the underlying clocked layout.
  *
  * The de-facto standard of cell-level FCN design is to group multiple cells into tiles large enough to be addressable
- * by individual clocking electrodes buried in the layout substrate. Cell-based clocking, i.e., clock zones of size 1x1
- * cells are not recommended as they are most likely not fabricable in reality.
+ * by individual clocking electrodes buried in the layout substrate. Cell-based clocking, i.e., clock zones of size \f$
+ * 1 \times 1 \f$ cells are not recommended as they are most likely not fabricable in reality.
  *
- * On the implementation side, this layout distinguishes between cell, cell_type, and cell_mode. A cell is a coordinate,
- * i.e., a position on the layout where a cell_type can be assigned. A cell_type is a concrete variation of a fabricated
- * cell and depends on the given technology. QCA offers regular and constant cell types while SiDB only provides
- * regular ones. Cell types can also include primary input and output cells if they are being treated differently in a
- * simulator for instance. A cell_mode, on the other hand, is a variation of a cell (thus far only known from
- * QCADesigner) that provides further attributes like its functionality as a crossing or via cell.
+ * On the implementation side, this layout distinguishes between `cell`, `cell_type`, and `cell_mode`. A `cell` is a
+ * coordinate, i.e., a position on the layout where a `cell_type` can be assigned. A `cell_type` is a concrete variation
+ * of a fabricated cell and depends on the given technology. QCA offers regular and constant cell types while SiDB only
+ * provides regular ones. Cell types can also include primary input and output cells if they are being treated
+ * differently in a simulator for instance. A `cell_mode`, on the other hand, is a variation of a cell (thus far only
+ * known from QCADesigner) that provides further attributes like its functionality as a crossing or via cell.
  *
  * @tparam Technology An FCN technology that provides notions of cell types.
  * @tparam ClockedLayout The clocked layout that is to be extended by cell positions.
@@ -85,7 +85,7 @@ class cell_level_layout : public ClockedLayout
 
     /**
      * Standard constructor. Creates a named cell-level layout of the given aspect ratio. To this end, it calls
-     * ClockedLayout's standard constructor.
+     * `ClockedLayout`'s standard constructor.
      *
      * @param ar Highest possible position in the layout.
      * @param name Layout name.
@@ -101,7 +101,7 @@ class cell_level_layout : public ClockedLayout
     }
     /**
      * Standard constructor. Creates a named cell-level layout of the given aspect ratio and clocks it via the given
-     * clocking scheme. To this end, it calls ClockedLayout's standard constructor.
+     * clocking scheme. To this end, it calls `ClockedLayout`'s standard constructor.
      *
      * @param ar Highest possible position in the layout.
      * @param scheme Clocking scheme to apply to this layout.
@@ -124,12 +124,12 @@ class cell_level_layout : public ClockedLayout
 #pragma region Cell types
 
     /**
-     * Assigns a cell type ct to a cell position c in the layout. If ct is the empty cell, a potentially stored cell
-     * type is being erased. If ct is a primary input or output type, the number of primary inputs or outputs in the
-     * layout is increased respectively.
+     * Assigns a cell type `ct` to a cell position `c` in the layout. If `ct` is the empty cell, a potentially stored
+     * cell type is being erased. If `ct` is a primary input or output type, the number of primary inputs or outputs in
+     * the layout is increased respectively.
      *
      * @param c Cell position.
-     * @param ct Cell type to assign to c.
+     * @param ct Cell type to assign to `c`.
      */
     void assign_cell_type(const cell& c, const cell_type& ct) noexcept
     {
@@ -154,10 +154,10 @@ class cell_level_layout : public ClockedLayout
         strg->cell_type_map[c] = ct;
     }
     /**
-     * Returns the cell type assigned to cell position c.
+     * Returns the cell type assigned to cell position `c`.
      *
      * @param c Cell position whose assigned cell type is desired.
-     * @return Cell type assigned to cell position c.
+     * @return Cell type assigned to cell position `c`.
      */
     [[nodiscard]] cell_type get_cell_type(const cell& c) const noexcept
     {
@@ -169,21 +169,21 @@ class cell_level_layout : public ClockedLayout
         return Technology::cell_type::EMPTY;
     }
     /**
-     * Returns true if no cell type is assigned to cell position c or if the empty type was assigned.
+     * Returns `true` if no cell type is assigned to cell position `c` or if the empty type was assigned.
      *
      * @param c Cell position to check for emptiness.
-     * @return True iff no cell type was assigned to cell position c.
+     * @return `true` iff no cell type was assigned to cell position `c`.
      */
     [[nodiscard]] bool is_empty_cell(const cell& c) const noexcept
     {
         return Technology::is_empty_cell(get_cell_type(c));
     }
     /**
-     * Assigns a cell mode m to a cell position c in the layout. If m is the normal cell mode, a potentially stored cell
-     * mode is being erased.
+     * Assigns a cell mode `m` to a cell position `c` in the layout. If `m` is the normal cell mode, a potentially
+     * stored cell mode is being erased.
      *
-     * @param c Cell position to assign cell mode m to.
-     * @param m Cell mode to assign to cell position c.
+     * @param c Cell position to assign cell mode `m` to.
+     * @param m Cell mode to assign to cell position `c`.
      */
     void assign_cell_mode(const cell& c, const cell_mode& m) noexcept
     {
@@ -197,10 +197,10 @@ class cell_level_layout : public ClockedLayout
         }
     }
     /**
-     * Returns the cell mode assigned to cell position c. If no cell mode is assigned, the default mode is returned.
+     * Returns the cell mode assigned to cell position `c`. If no cell mode is assigned, the default mode is returned.
      *
      * @param c Cell position whose assigned cell mode is desired.
-     * @return Cell mode assigned to cell position c.
+     * @return Cell mode assigned to cell position `c`.
      */
     [[nodiscard]] cell_mode get_cell_mode(const cell& c) const noexcept
     {
@@ -212,11 +212,11 @@ class cell_level_layout : public ClockedLayout
         return {};
     }
     /**
-     * Assigns a cell name n to a cell position c in the layout. If n is the empty string, a potentially stored cell
-     * name is being erased.
+     * Assigns a cell name `n` to a cell position `c` in the layout. If `n` is the empty string, a potentially stored
+     * cell name is being erased.
      *
-     * @param c Cell position to assign cell name n to.
-     * @param n Cell name to assign to cell position c.
+     * @param c Cell position to assign cell name `n` to.
+     * @param n Cell name to assign to cell position `c`.
      */
     void assign_cell_name(const cell& c, const std::string& n) noexcept
     {
@@ -230,10 +230,10 @@ class cell_level_layout : public ClockedLayout
         }
     }
     /**
-     * Returns the cell name assigned to cell position c. If no cell name is assigned, the empty string is returned.
+     * Returns the cell name assigned to cell position `c`. If no cell name is assigned, the empty string is returned.
      *
      * @param c Cell position whose assigned cell name is desired.
-     * @return Cell name assigned to cell position c.
+     * @return Cell name assigned to cell position `c`.
      */
     [[nodiscard]] std::string get_cell_name(const cell& c) const noexcept
     {
@@ -279,7 +279,7 @@ class cell_level_layout : public ClockedLayout
     /**
      * Checks whether there are no cells assigned to the layout's coordinates.
      *
-     * @return True iff the layout is empty.
+     * @return `true` iff the layout is empty.
      */
     [[nodiscard]] bool is_empty() const noexcept
     {
@@ -309,7 +309,7 @@ class cell_level_layout : public ClockedLayout
      * primary input cell type automatically enlists it there.
      *
      * @param c Cell position to check.
-     * @return True iff cell position c is marked as primary input.
+     * @return `true` iff cell position `c` is marked as primary input.
      */
     [[nodiscard]] bool is_pi(const cell& c) const noexcept
     {
@@ -321,7 +321,7 @@ class cell_level_layout : public ClockedLayout
      * primary output cell type automatically enlists it there.
      *
      * @param c Cell position to check.
-     * @return True iff cell position c is marked as primary output.
+     * @return `true` iff cell position `c` is marked as primary output.
      */
     [[nodiscard]] bool is_po(const cell& c) const noexcept
     {
@@ -353,11 +353,11 @@ class cell_level_layout : public ClockedLayout
 #pragma region Clocking
 
     /**
-     * Returns the clock number of cell position c by accessing ClockedLayout's underlying clocking scheme and
+     * Returns the clock number of cell position `c` by accessing `ClockedLayout`'s underlying clocking scheme and
      * respecting this layout's clock zone size.
      *
      * @param c Cell position whose clock number is desired.
-     * @return Clock number of cell position c.
+     * @return Clock number of cell position `c`.
      */
     [[nodiscard]] typename ClockedLayout::clock_number_t get_clock_number(const cell& c) const noexcept
     {
@@ -382,7 +382,7 @@ class cell_level_layout : public ClockedLayout
      * Applies a function to all cell positions in the layout that have non-empty cell types assigned.
      *
      * @tparam Fn Functor type that has to comply with the restrictions imposed by
-     * mockturtle::foreach_element_transform.
+     * `mockturtle::foreach_element_transform`.
      * @param fn Functor to apply to each non-empty cell position.
      */
     template <typename Fn>
@@ -395,10 +395,10 @@ class cell_level_layout : public ClockedLayout
     }
     /**
      * Applies a function to all cell positions in the layout, even empty ones. This function, thereby, renames
-     * ClockedLayout::foreach_coordinate.
+     * `ClockedLayout::foreach_coordinate`.
      *
      * @tparam Fn Functor type that has to comply with the restrictions imposed by the functor type in
-     * ClockedLayout::foreach_coordinate..
+     * `ClockedLayout::foreach_coordinate`.
      * @param fn Functor to apply to each cell position.
      */
     template <typename Fn>
@@ -410,7 +410,7 @@ class cell_level_layout : public ClockedLayout
      * Applies a function to all primary input cell positions in the layout.
      *
      * @tparam Fn Functor type that has to comply with the restrictions imposed by
-     * mockturtle::foreach_element_transform.
+     * `mockturtle::foreach_element_transform`.
      * @param fn Functor to apply to each primary input cell.
      */
     template <typename Fn>
@@ -424,7 +424,7 @@ class cell_level_layout : public ClockedLayout
      * Applies a function to all primary output cells in the layout.
      *
      * @tparam Fn Functor type that has to comply with the restrictions imposed by
-     * mockturtle::foreach_element_transform.
+     * `mockturtle::foreach_element_transform`.
      * @param fn Functor to apply to each primary output cell.
      */
     template <typename Fn>

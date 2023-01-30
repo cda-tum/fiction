@@ -13,6 +13,9 @@
 namespace fiction
 {
 
+/**
+ * Parameters for the algorithm that enumerates all paths in a clocked layout.
+ */
 struct enumerate_all_clocking_paths_params
 {
     /**
@@ -169,7 +172,7 @@ class enumerate_all_clocking_paths_impl
  * @param layout The clocked layout whose paths are to be enumerated.
  * @param objective Source-target coordinate pair.
  * @param ps Parameters.
- * @return A collection of all unique paths in layout from source to target.
+ * @return A collection of all unique paths in `layout` from `source` to `target`.
  */
 template <typename Path, typename Lyt>
 [[nodiscard]] path_collection<Path> enumerate_all_clocking_paths(const Lyt&                          layout,

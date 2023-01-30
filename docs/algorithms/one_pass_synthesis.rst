@@ -10,4 +10,7 @@ layouts from truth table specifications under constraints. To this end, it combi
 into a single step. Since this algorithm is not restricted to any logic network structure up front, it has the
 opportunity to generate even smaller layouts than ``exact``. Consequently, this algorithm does also not scale.
 
+.. doxygenstruct:: fiction::one_pass_synthesis_params
+   :members:
+.. doxygenfunction:: fiction::one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params<Lyt> ps = {}, one_pass_synthesis_stats* pst = nullptr)
 .. doxygenfunction:: fiction::one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<Lyt> ps = {}, one_pass_synthesis_stats* pst = nullptr)
