@@ -29,6 +29,8 @@ Cell-level Layouts
 .. doxygenfunction:: fiction::read_sqd_layout(const std::string& filename, const std::string& name = "")
 .. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, const std::string& filename)
 
+.. doxygenclass:: fiction::sqd_parsing_error
+
 **Header:** ``fiction/io/read_fqca_layout.hpp``
 
 .. doxygenfunction:: fiction::read_fqca_layout(std::istream& is, const std::string& name = "")
@@ -37,3 +39,14 @@ Cell-level Layouts
 .. doxygenclass:: fiction::unsupported_character_exception
 .. doxygenclass:: fiction::undefined_cell_label_exception
 .. doxygenclass:: fiction::unrecognized_cell_definition_exception
+
+SiDB Surface Defects
+####################
+
+**Header:** ``fiction/io/read_sidb_surface_defects.hpp``
+
+.. doxygenfunction:: fiction::read_sidb_surface_defects(std::istream& is, const std::string& name = "")
+.. doxygenfunction:: fiction::read_sidb_surface_defects(const std::string& filename, const std::string& name = "")
+
+.. doxygenclass:: fiction::unsupported_defect_index_exception
+.. doxygenclass:: fiction::missing_sidb_position_exception

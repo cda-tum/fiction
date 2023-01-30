@@ -19,11 +19,14 @@
 #include <istream>
 #include <sstream>
 #include <string>
-#include <type_traits>
+#include <unordered_map>
 
 namespace fiction
 {
 
+/**
+ * Exception thrown when an error occurs during parsing of an SQD file.
+ */
 class sqd_parsing_error : public std::runtime_error
 {
   public:
@@ -193,7 +196,7 @@ class read_sqd_layout_impl
     [[nodiscard]] static sidb_defect_type parse_defect_label(const char* label) noexcept
     {
         // maps defect names to their respective types
-        static const std::map<std::string, sidb_defect_type> defect_name_to_type{
+        static const std::unordered_map<std::string, sidb_defect_type> defect_name_to_type{
             {{"h-si", sidb_defect_type::NONE},
              {"db", sidb_defect_type::DB},
              {"vacancy", sidb_defect_type::SI_VACANCY},
@@ -285,7 +288,7 @@ class read_sqd_layout_impl
  * Reads a cell-level SiDB layout from an sqd file provided as an input stream. The format is used by SiQAD
  * (https://github.com/siqad/siqad).
  *
- * May throw an sqd_parsing_exception if the sqd file is malformed.
+ * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input. Must be a cell-level SiDB layout.
  * @param is The input stream to read from.
@@ -295,7 +298,7 @@ template <typename Lyt>
 Lyt read_sqd_layout(std::istream& is, const std::string& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(std::is_same_v<technology<Lyt>, sidb_technology>, "Lyt must be an SiDB layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
     detail::read_sqd_layout_impl<Lyt> p{is, name};
 
@@ -307,7 +310,7 @@ Lyt read_sqd_layout(std::istream& is, const std::string& name = "")
  * Reads a cell-level SiDB layout from an sqd file provided as an input stream. The format is used by SiQAD
  * (https://github.com/siqad/siqad).
  *
- * May throw an sqd_parsing_exception if the sqd file is malformed.
+ * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
  * This is an in-place version of read_sqd_layout that utilizes the given layout as a target to write to.
  *
@@ -319,7 +322,7 @@ template <typename Lyt>
 void read_sqd_layout(Lyt& lyt, std::istream& is)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(std::is_same_v<technology<Lyt>, sidb_technology>, "Lyt must be an SiDB layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
     detail::read_sqd_layout_impl<Lyt> p{lyt, is};
 
@@ -329,7 +332,7 @@ void read_sqd_layout(Lyt& lyt, std::istream& is)
  * Reads a cell-level SiDB layout from an sqd file provided as a file name. The format is used by SiQAD
  * (https://github.com/siqad/siqad).
  *
- * May throw an sqd_parsing_exception if the sqd file is malformed.
+ * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input. Must be a cell-level SiDB layout.
  * @param filename The file name to open and read from.
@@ -354,9 +357,9 @@ Lyt read_sqd_layout(const std::string& filename, const std::string& name = "")
  * Reads a cell-level SiDB layout from an sqd file provided as a file name. The format is used by SiQAD
  * (https://github.com/siqad/siqad).
  *
- * May throw an sqd_parsing_exception if the sqd file is malformed.
+ * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
- * This is an in-place version of read_sqd_layout that utilizes the given layout as a target to write to.
+ * This is an in-place version of `read_sqd_layout` that utilizes the given layout as a target to write to.
  *
  * @tparam Lyt The layout type to be used as input. Must be a cell-level SiDB layout.
  * @param lyt The layout to write to.

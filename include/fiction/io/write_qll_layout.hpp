@@ -113,7 +113,7 @@ class write_qll_layout_impl
 
     void run()
     {
-        if (std::is_same_v<technology<Lyt>, inml_technology> && !has_border_io_pins())
+        if (has_inml_technology_v<Lyt> && !has_border_io_pins())
         {
             throw std::invalid_argument(
                 "the layout does not fulfill all requirements to be written as a QLL file because it does not have "
@@ -143,9 +143,7 @@ class write_qll_layout_impl
 
     uint64_t cell_id{1};
 
-    const char* tech_name{std::is_same_v<technology<Lyt>, inml_technology> ? "iNML" :
-                          std::is_same_v<technology<Lyt>, qca_technology>  ? "MolQCA" :
-                                                                             "?"};
+    const char* tech_name{has_inml_technology_v<Lyt> ? "iNML" : has_qca_technology_v<Lyt> ? "MolQCA" : "?"};
 
     [[nodiscard]] std::vector<cell<Lyt>> sorted_pis() const noexcept
     {
@@ -218,11 +216,11 @@ class write_qll_layout_impl
 
         os << fmt::format(qll::GENERAL_SETTINGS, lyt.x(), lyt.y(), (lyt.z() > 0 ? "true" : "false"), lyt.num_clocks());
 
-        if constexpr (std::is_same_v<technology<Lyt>, inml_technology>)
+        if constexpr (has_inml_technology_v<Lyt>)
         {
             os << qll::INML_SETTINGS;
         }
-        else if constexpr (std::is_same_v<technology<Lyt>, qca_technology>)
+        else if constexpr (has_qca_technology_v<Lyt>)
         {
             os << qll::MQCA_SETTINGS;
         }
@@ -235,14 +233,14 @@ class write_qll_layout_impl
     {
         os << qll::OPEN_COMPONENTS;
 
-        if constexpr (std::is_same_v<technology<Lyt>, inml_technology>)
+        if constexpr (has_inml_technology_v<Lyt>)
         {
             for (const auto& comp : qll::COMPONENTS)
             {
                 os << fmt::format(qll::INML_COMPONENT_ITEM, tech_name, comp);
             }
         }
-        else if constexpr (std::is_same_v<technology<Lyt>, qca_technology>)
+        else if constexpr (has_qca_technology_v<Lyt>)
         {
             os << qll::MQCA_COMPONENT_ITEM;
         }
@@ -284,7 +282,7 @@ class write_qll_layout_impl
                     }
 
                     // write iNML cell
-                    if constexpr (std::is_same_v<technology<Lyt>, inml_technology>)
+                    if constexpr (has_inml_technology_v<Lyt>)
                     {
                         // if an AND or an OR structure is encountered, the next two magnets in southern direction need
                         // to be skipped
@@ -339,7 +337,7 @@ class write_qll_layout_impl
                         os << qll::CLOSE_LAYOUT_ITEM;
                     }
                     // write mQCA cell
-                    else if constexpr (std::is_same_v<technology<Lyt>, qca_technology>)
+                    else if constexpr (has_qca_technology_v<Lyt>)
                     {
                         const auto mode = lyt.get_cell_mode(c);
 
