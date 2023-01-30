@@ -73,7 +73,7 @@ inline constexpr const char* OPEN_LAYOUT      = "\t<layout>\n";
 inline constexpr const char* CLOSE_LAYOUT     = "\t</layout>\n";
 
 inline constexpr const char* INML_COMPONENT_ITEM = "\t\t<item tech=\"{}\" name=\"{}\"/>\n";
-inline constexpr const char* MQCA_COMPONENT_ITEM = "\t\t<item tech=\"MolQCA\" name=\"Bisferrocene\"/>\n";
+inline constexpr const char* MQCA_COMPONENT_ITEM = "\t\t<item tech=\"MolFCN\" name=\"Bisferrocene\"/>\n";
 
 inline constexpr const char* OPEN_INML_LAYOUT_ITEM = "\t\t<item comp=\"{}\" id=\"{}\" x=\"{}\" y=\"{}\">\n";
 inline constexpr const char* OPEN_MQCA_LAYOUT_ITEM =
@@ -144,7 +144,7 @@ class write_qll_layout_impl
     uint64_t cell_id{1};
 
     const char* tech_name{std::is_same_v<technology<Lyt>, inml_technology> ? "iNML" :
-                          std::is_same_v<technology<Lyt>, qca_technology>  ? "MolQCA" :
+                          std::is_same_v<technology<Lyt>, qca_technology>  ? "MolFCN" :
                                                                              "?"};
 
     [[nodiscard]] std::vector<cell<Lyt>> sorted_pis() const noexcept
