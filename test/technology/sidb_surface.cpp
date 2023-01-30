@@ -12,8 +12,8 @@
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/traits.hpp>
 
-#include <set>
 #include <type_traits>
+#include <unordered_set>
 
 using namespace fiction;
 
@@ -348,7 +348,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("DB")
     {
-        const sidb_surface_params params{std::set<sidb_defect_type>{sidb_defect_type::DB}};
+        const sidb_surface_params params{std::unordered_set<sidb_defect_type>{sidb_defect_type::DB}};
         sidb_surface<TestType>    defect_layout{lyt, params};
 
         defect_layout.assign_sidb_defect({2, 2}, sidb_defect{sidb_defect_type::DB});
@@ -359,7 +359,7 @@ TEMPLATE_TEST_CASE(
     SECTION("Siloxane + Silicon Vacancy")
     {
         const sidb_surface_params params{
-            std::set<sidb_defect_type>{{sidb_defect_type::SILOXANE, sidb_defect_type::SI_VACANCY}}};
+            std::unordered_set<sidb_defect_type>{{sidb_defect_type::SILOXANE, sidb_defect_type::SI_VACANCY}}};
         sidb_surface<TestType> defect_layout{lyt, params};
 
         defect_layout.assign_sidb_defect({2, 2}, sidb_defect{sidb_defect_type::SILOXANE});
