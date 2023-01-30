@@ -9,13 +9,14 @@
 #include "fiction/technology/sidb_surface.hpp"
 #include "fiction/traits.hpp"
 
+#include <algorithm>
 #include <array>
+#include <cstdint>
 #include <exception>
 #include <fstream>
 #include <istream>
 #include <regex>
 #include <string>
-#include <type_traits>
 
 namespace fiction
 {
