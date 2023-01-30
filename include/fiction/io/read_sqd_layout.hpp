@@ -49,7 +49,10 @@ class read_sqd_layout_impl
 
     Lyt run()
     {
-        const std::string sqd_content{std::istreambuf_iterator<char>(is), {}};
+        // tinyXML2 does not support std::istream, so we have to read the whole file into a string first
+        std::stringstream buffer{};
+        buffer << is.rdbuf();
+        const std::string sqd_content{buffer.str()};
 
         tinyxml2::XMLDocument xml_document{};
         xml_document.Parse(sqd_content.c_str());

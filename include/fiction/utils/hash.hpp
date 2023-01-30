@@ -49,7 +49,10 @@ struct hash<std::array<T, N>>
     std::size_t operator()(const std::array<T, N>& a) const noexcept
     {
         std::size_t h = 0;
-        for (const auto& e : a) fiction::hash_combine(h, e);
+        for (const auto& e : a)
+        {
+            fiction::hash_combine(h, e);
+        }
 
         return h;
     }

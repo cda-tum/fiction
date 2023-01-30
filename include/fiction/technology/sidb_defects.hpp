@@ -5,6 +5,7 @@
 #ifndef FICTION_SIDB_DEFECTS_HPP
 #define FICTION_SIDB_DEFECTS_HPP
 
+#include <cstdint>
 #include <utility>
 
 namespace fiction

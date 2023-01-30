@@ -27,7 +27,7 @@ class dummy_gate_library : public fcn_gate_library<sidb_technology, 3, 3>
 
     static gate_functions get_functional_implementations() noexcept
     {
-        static const gate_functions implementations{{{create_id_tt(), {line}}, {create_and_tt(), {y}}}};
+        static const gate_functions implementations{{{create_id_tt(), {LINE}}, {create_and_tt(), {Y}}}};
 
         return implementations;
     }
@@ -35,20 +35,20 @@ class dummy_gate_library : public fcn_gate_library<sidb_technology, 3, 3>
     static gate_ports<port_position> get_gate_ports() noexcept
     {
         static const gate_ports<port_position> ports{
-            {{line, {{{port_position(0, 1)}, {port_position(2, 1)}}}},
-             {y, {{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}}}}}};
+            {{LINE, {{{port_position(0, 1)}, {port_position(2, 1)}}}},
+             {Y, {{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}}}}}};
 
         return ports;
     }
 
   private:
-    static constexpr const fcn_gate line{cell_list_to_gate<char>({{
+    static constexpr const fcn_gate LINE{cell_list_to_gate<char>({{
         {' ', 'x', ' '},
         {' ', 'x', ' '},
         {' ', 'x', ' '},
     }})};
 
-    static constexpr const fcn_gate y{cell_list_to_gate<char>({{
+    static constexpr const fcn_gate Y{cell_list_to_gate<char>({{
         {'x', ' ', 'x'},
         {' ', 'x', ' '},
         {' ', 'x', ' '},
