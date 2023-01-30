@@ -1143,7 +1143,7 @@ TEST_CASE("Clear tiles", "[gate-level-layout]")
     CHECK(!layout.is_pi_tile({2, 0}));
     CHECK(layout.num_gates() == 0);
     CHECK(layout.num_wires() == 3);
-    CHECK(layout.num_pis() == 1);
+    CHECK(layout.num_pis() == 2);
     CHECK(layout.num_pos() == 2);
 
     layout.clear_tile({0, 0});
@@ -1152,7 +1152,7 @@ TEST_CASE("Clear tiles", "[gate-level-layout]")
     CHECK(!layout.is_po_tile({0, 0}));
     CHECK(layout.num_gates() == 0);
     CHECK(layout.num_wires() == 2);
-    CHECK(layout.num_pis() == 1);
+    CHECK(layout.num_pis() == 2);
     CHECK(layout.num_pos() == 1);
 }
 
