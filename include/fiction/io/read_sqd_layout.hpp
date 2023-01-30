@@ -288,6 +288,8 @@ class read_sqd_layout_impl
  * Reads a cell-level SiDB layout from an sqd file provided as an input stream. The format is used by SiQAD
  * (https://github.com/siqad/siqad).
  *
+ * If The provided cell-level layout type can represent SiDB defects, they will be parsed from the sqd file as well.
+ *
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input. Must be a cell-level SiDB layout.
@@ -310,6 +312,8 @@ Lyt read_sqd_layout(std::istream& is, const std::string& name = "")
  * Reads a cell-level SiDB layout from an sqd file provided as an input stream. The format is used by SiQAD
  * (https://github.com/siqad/siqad).
  *
+ * If The provided cell-level layout type can represent SiDB defects, they will be parsed from the sqd file as well.
+ *
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
  * This is an in-place version of read_sqd_layout that utilizes the given layout as a target to write to.
@@ -331,6 +335,8 @@ void read_sqd_layout(Lyt& lyt, std::istream& is)
 /**
  * Reads a cell-level SiDB layout from an sqd file provided as a file name. The format is used by SiQAD
  * (https://github.com/siqad/siqad).
+ *
+ * If The provided cell-level layout type can represent SiDB defects, they will be parsed from the sqd file as well.
  *
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
@@ -356,6 +362,8 @@ Lyt read_sqd_layout(const std::string& filename, const std::string& name = "")
 /**
  * Reads a cell-level SiDB layout from an sqd file provided as a file name. The format is used by SiQAD
  * (https://github.com/siqad/siqad).
+ *
+ * If The provided cell-level layout type can represent SiDB defects, they will be parsed from the sqd file as well.
  *
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *

@@ -14,10 +14,10 @@
 #include <chrono>
 #include <ctime>
 #include <fstream>
-#include <map>
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace fiction
@@ -138,7 +138,7 @@ inline constexpr const char* OUTPUT_COLOR = "#ffe28686";
 inline constexpr const char* CONST_COLOR  = "#ff000000";
 
 // maps defect types to their respective string representation
-static const std::map<sidb_defect_type, const char*> defect_type_to_name{
+static const std::unordered_map<sidb_defect_type, const char*> defect_type_to_name{
     {{sidb_defect_type::NONE, "H-Si"},
      {sidb_defect_type::DB, "DB"},
      {sidb_defect_type::SI_VACANCY, "Vacancy"},
@@ -294,6 +294,8 @@ class write_sqd_layout_impl
  * Writes a cell-level SiDB or QCA layout to an sqd file that is used by SiQAD (https://github.com/siqad/siqad),
  * a physical simulator for the SiDB technology platform.
  *
+ * If The provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
+ *
  * This overload uses an output stream to write into.
  *
  * @tparam Lyt Cell-level SiDB or QCA layout type.
@@ -313,6 +315,8 @@ void write_sqd_layout(const Lyt& lyt, std::ostream& os)
 /**
  * Writes a cell-level SiDB or QCA layout to an sqd file that is used by SiQAD (https://github.com/siqad/siqad),
  * a physical simulator for the SiDB technology platform.
+ *
+ * If The provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
  *
  * This overload uses file name to create and write into.
  *
