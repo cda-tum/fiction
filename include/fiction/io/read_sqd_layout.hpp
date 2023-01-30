@@ -10,8 +10,6 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/name_utils.hpp"
 
-#include <tinyxml2.h>
-
 #include <algorithm>
 #include <cctype>
 #include <exception>
@@ -20,6 +18,8 @@
 #include <sstream>
 #include <string>
 #include <type_traits>
+
+#include <tinyxml2.h>
 
 namespace fiction
 {
