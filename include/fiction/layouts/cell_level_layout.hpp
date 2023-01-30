@@ -10,12 +10,11 @@
 #include "fiction/traits.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
+#include <phmap.h>
 
 #include <memory>
 #include <string>
 #include <utility>
-
-#include <phmap.h>
 
 namespace fiction
 {

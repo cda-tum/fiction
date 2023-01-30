@@ -14,10 +14,9 @@
 #include "fiction/utils/truth_table_utils.hpp"
 
 #include <fmt/format.h>
+#include <phmap.h>
 
 #include <vector>
-
-#include <phmap.h>
 
 namespace fiction
 {

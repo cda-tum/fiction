@@ -13,11 +13,10 @@
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
+#include <phmap.h>
 
 #include <algorithm>
 #include <vector>
-
-#include <phmap.h>
 
 namespace fiction
 {

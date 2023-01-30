@@ -9,10 +9,13 @@
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 
+#include <phmap.h>
+
 #include <cassert>
-#include <set>
+#include <memory>
 #include <type_traits>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 namespace fiction
@@ -25,7 +28,7 @@ struct sidb_surface_params
      *
      * @note Ignored defects are not stored in the surface instance!
      */
-    std::set<sidb_defect_type> ignore{};
+    std::unordered_set<sidb_defect_type> ignore{};
 };
 
 /**
@@ -55,8 +58,9 @@ class sidb_surface<Lyt, false> : public Lyt
     {
         explicit sidb_surface_storage(sidb_surface_params ps = {}) : params(std::move(ps)) {}
 
-        sidb_surface_params                                       params{};
-        std::unordered_map<typename Lyt::coordinate, sidb_defect> defective_coordinates{};
+        sidb_surface_params params{};
+
+        phmap::parallel_flat_hash_map<typename Lyt::coordinate, sidb_defect> defective_coordinates{};
     };
 
     using storage = std::shared_ptr<sidb_surface_storage>;
@@ -164,9 +168,10 @@ class sidb_surface<Lyt, false> : public Lyt
      * @param c Coordinate whose defect extent is to be determined.
      * @return All SiDB positions affected by the defect at coordinate c.
      */
-    [[nodiscard]] std::set<typename Lyt::coordinate> affected_sidbs(const typename Lyt::coordinate& c) const noexcept
+    [[nodiscard]] std::unordered_set<typename Lyt::coordinate>
+    affected_sidbs(const typename Lyt::coordinate& c) const noexcept
     {
-        std::set<typename Lyt::coordinate> influenced_sidbs{};
+        std::unordered_set<typename Lyt::coordinate> influenced_sidbs{};
 
         if (const auto d = get_sidb_defect(c); d.type != sidb_defect_type::NONE)
         {
@@ -196,9 +201,9 @@ class sidb_surface<Lyt, false> : public Lyt
      *
      * @return All SiDB positions affected by any defect on the surface.
      */
-    [[nodiscard]] std::set<typename Lyt::coordinate> all_affected_sidbs() const noexcept
+    [[nodiscard]] std::unordered_set<typename Lyt::coordinate> all_affected_sidbs() const noexcept
     {
-        std::set<typename Lyt::coordinate> influenced_sidbs{};
+        std::unordered_set<typename Lyt::coordinate> influenced_sidbs{};
 
         foreach_sidb_defect([&influenced_sidbs, this](const auto& it)
                             { influenced_sidbs.merge(affected_sidbs(it.first)); });
