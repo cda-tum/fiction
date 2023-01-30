@@ -16,10 +16,10 @@ SiDB Defects
 .. doxygenfunction:: fiction::is_charged_defect
 .. doxygenfunction:: fiction::is_neutral_defect
 
-.. doxygenvariable:: fiction::sidb_charged_defect_horizontal_spacing
-.. doxygenvariable:: fiction::sidb_charged_defect_vertical_spacing
-.. doxygenvariable:: fiction::sidb_neutral_defect_horizontal_spacing
-.. doxygenvariable:: fiction::sidb_neutral_defect_vertical_spacing
+.. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING
+.. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_VERTICAL_SPACING
+.. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING
+.. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING
 
 .. doxygenfunction:: fiction::defect_extent
 

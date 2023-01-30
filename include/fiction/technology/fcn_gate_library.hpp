@@ -75,7 +75,7 @@ class unsupported_gate_orientation_exception : public std::exception
 
 /**
  * Base class for various FCN libraries used to map gate-level layouts to cell-level ones. Any new gate library can
- * extend fcn_gate_library if it benefits from its features but does not have to. The only requirement is that it must
+ * extend `fcn_gate_library` if it benefits from its features but does not have to. The only requirement is that it must
  * be a static class that provides a
  *
    \verbatim embed:rst
@@ -119,7 +119,7 @@ class unsupported_gate_orientation_exception : public std::exception
    \endverbatim
  *
  * can optionally be provided to allow reverse access to the gate ports given a gate implementation. This interface is
- * for example used in sidb_surface_analysis to determine which ports to blacklist.
+ * for example used in `sidb_surface_analysis` to determine which ports to blacklist.
  *
  * @tparam Technology FCN technology type of the implementing gate library.
  * @tparam GateSizeX Tile size in x-dimension.
