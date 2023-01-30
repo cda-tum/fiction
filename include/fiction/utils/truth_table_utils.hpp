@@ -142,7 +142,7 @@ inline kitty::dynamic_truth_table create_maj_tt() noexcept
     return table;
 }
 
-// NOLINTEND
+// NOLINTEND(*-pointer-arithmetic)
 
 }  // namespace fiction
 
