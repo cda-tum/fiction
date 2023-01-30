@@ -37,9 +37,9 @@
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 
 #include <cstdint>
-#include <set>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 int main()
@@ -107,7 +107,8 @@ int main()
     mockturtle::tech_library<2> gate_lib{gates};
 
     // parameterize the H-Si(100) 2x1 surface to ignore certain defect types
-    fiction::sidb_surface_params surface_params{std::set<fiction::sidb_defect_type>{fiction::sidb_defect_type::DB}};
+    fiction::sidb_surface_params surface_params{
+        std::unordered_set<fiction::sidb_defect_type>{fiction::sidb_defect_type::DB}};
 
     //    fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
 
