@@ -42,7 +42,10 @@
 #include <unordered_set>
 #include <vector>
 
-int main()
+// NOTE: You can find the surface data in the following repository:
+// https://github.com/cda-tum/sidb-defect-aware-physical-design
+
+int main()  // NOLINT
 {
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt;
@@ -210,7 +213,16 @@ int main()
         defect_exp.table();
     }
 
-    return 0;
+    return EXIT_SUCCESS;
+}
+
+#else  // FICTION_Z3_SOLVER
+
+int main()
+{
+    std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
+
+    return EXIT_FAILURE;
 }
 
 #endif  // FICTION_Z3_SOLVER
