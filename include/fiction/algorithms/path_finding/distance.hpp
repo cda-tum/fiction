@@ -6,7 +6,7 @@
 #define FICTION_DISTANCE_HPP
 
 #include "fiction/traits.hpp"
-
+#include "fiction/technology/sidb_nm_position.hpp"
 #include <cmath>
 #include <cstdint>
 #include <functional>
@@ -60,6 +60,24 @@ template <typename Lyt, typename Dist = double>
     const auto y = static_cast<double>(source.y) - static_cast<double>(target.y);
 
     return static_cast<Dist>(std::hypot(x, y));
+}
+
+/**
+     * Computes the distance between two cells in nanometers.
+     *
+     * @param c1 The first cell.
+     * @param c2 The second cell.
+     * @return The distance between the two cells in nanometers.
+ */
+ template <typename Lyt>
+[[nodiscard]] constexpr double distance_sidb_pair(const sidb_simulation_parameters& sp,const typename Lyt::cell& c1, const typename Lyt::cell& c2)
+{
+    static_assert(std::is_same_v<typename Lyt::cell, siqad::coord_t>, "Lyt is not based on SiQAD coordinates");
+    const auto pos_c1 = sidb_nm_position<Lyt>(sp, c1);
+    const auto pos_c2 = sidb_nm_position<Lyt>(sp, c2);
+    const auto x      = static_cast<double>(pos_c1.first) - static_cast<double>(pos_c2.first);
+    const auto y      = static_cast<double>(pos_c1.second) - static_cast<double>(pos_c2.second);
+    return std::hypot(x, y);
 }
 
 // NOLINTBEGIN(*-special-member-functions): virtual destructor is prudent

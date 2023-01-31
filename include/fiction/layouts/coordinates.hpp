@@ -597,74 +597,6 @@ uint64_t volume(const CoordinateType& coord) noexcept
            (coord.z + static_cast<decltype(coord.z)>(1));
 }
 
-}  // namespace fiction
-
-namespace std
-{
-// define std::hash overload for offset::ucoord_t
-template <>
-struct hash<fiction::offset::ucoord_t>
-{
-    std::size_t operator()(const fiction::offset::ucoord_t& c) const noexcept
-    {
-        return static_cast<std::size_t>(std::hash<uint64_t>{}(static_cast<uint64_t>(c)));
-    }
-};
-// define std::hash overload for cube::coord_t
-template <>
-struct hash<fiction::cube::coord_t>
-{
-    // based on: https://stackoverflow.com/questions/25649342/hash-function-for-3d-integer-coordinates
-    std::size_t operator()(const fiction::cube::coord_t& c) const noexcept
-    {
-        return static_cast<std::size_t>((c.x * 18397ll) + (c.y * 20483ll) + (c.z * 29303ll) + static_cast<int>(c.d));
-    }
-};
-// make offset::coord_iterator compatible with STL iterator categories
-template <typename Coordinate>
-struct iterator_traits<fiction::offset::coord_iterator<Coordinate>>
-{
-    using iterator_category = std::forward_iterator_tag;
-    using value_type        = Coordinate;
-};
-}  // namespace std
-
-namespace fmt
-{
-// make offset::ucoord_t compatible with fmt::format
-template <>
-struct formatter<fiction::offset::ucoord_t>
-{
-    template <typename ParseContext>
-    constexpr auto parse(ParseContext& ctx)
-    {
-        return ctx.begin();
-    }
-
-    template <typename FormatContext>
-    auto format(const fiction::offset::ucoord_t& c, FormatContext& ctx)
-    {
-        return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
-    }
-};
-// make cube::coord_t compatible with fmt::format
-template <>
-struct formatter<fiction::cube::coord_t>
-{
-    template <typename ParseContext>
-    constexpr auto parse(ParseContext& ctx)
-    {
-        return ctx.begin();
-    }
-
-    template <typename FormatContext>
-    auto format(const fiction::cube::coord_t& c, FormatContext& ctx)
-    {
-        return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
-    }
-};
-}  // namespace fmt
-
 namespace siqad
 {
 /**
@@ -903,6 +835,85 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 }
 
 }  // namespace siqad
+
+}  // namespace fiction
+
+namespace std
+{
+// define std::hash overload for offset::ucoord_t
+template <>
+struct hash<fiction::offset::ucoord_t>
+{
+    std::size_t operator()(const fiction::offset::ucoord_t& c) const noexcept
+    {
+        return static_cast<std::size_t>(std::hash<uint64_t>{}(static_cast<uint64_t>(c)));
+    }
+};
+// define std::hash overload for cube::coord_t
+template <>
+struct hash<fiction::cube::coord_t>
+{
+    // based on: https://stackoverflow.com/questions/25649342/hash-function-for-3d-integer-coordinates
+    std::size_t operator()(const fiction::cube::coord_t& c) const noexcept
+    {
+        return static_cast<std::size_t>((c.x * 18397ll) + (c.y * 20483ll) + (c.z * 29303ll) + static_cast<int>(c.d));
+    }
+};
+// define std::hash overload for siqad::coord_t
+template <>
+struct hash<fiction::siqad::coord_t>
+{
+    // based on: https://stackoverflow.com/questions/25649342/hash-function-for-3d-integer-coordinates
+    std::size_t operator()(const fiction::siqad::coord_t& c) const noexcept
+    {
+        return static_cast<std::size_t>((c.x * 18397ll) + (c.y * 20483ll) + (c.z * 29303ll) + static_cast<int>(c.d));
+    }
+};
+
+// make offset::coord_iterator compatible with STL iterator categories
+template <typename Coordinate>
+struct iterator_traits<fiction::offset::coord_iterator<Coordinate>>
+{
+    using iterator_category = std::forward_iterator_tag;
+    using value_type        = Coordinate;
+};
+}  // namespace std
+
+namespace fmt
+{
+// make offset::ucoord_t compatible with fmt::format
+template <>
+struct formatter<fiction::offset::ucoord_t>
+{
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const fiction::offset::ucoord_t& c, FormatContext& ctx)
+    {
+        return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
+    }
+};
+// make cube::coord_t compatible with fmt::format
+template <>
+struct formatter<fiction::cube::coord_t>
+{
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const fiction::cube::coord_t& c, FormatContext& ctx)
+    {
+        return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
+    }
+};
+}  // namespace fmt
 
 #pragma GCC diagnostic pop
 #endif  // FICTION_COORDINATES_HPP
