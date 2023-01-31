@@ -259,6 +259,26 @@ void check_apply_lib(const GateLyt& lyt)
     CHECK_NOTHROW(apply_gate_library<CellLyt, Lib>(lyt));
 }
 
+// check io names
+template <typename Ntk, typename Lyt>
+void check_io_names(const Ntk& ntk, const Lyt& lyt)
+{
+    if constexpr (mockturtle::has_get_name_v<Ntk>)
+    {
+        for (auto i = 0u; i < ntk.num_pis(); ++i)
+        {
+            CHECK(lyt.get_input_name(i) == ntk.get_name(ntk.make_signal(ntk.pi_at(i))));
+        }
+    }
+    if constexpr (mockturtle::has_get_output_name_v<Ntk>)
+    {
+        for (auto i = 0u; i < ntk.num_pos(); ++i)
+        {
+            CHECK(lyt.get_output_name(i) == ntk.get_output_name(i));
+        }
+    }
+}
+
 template <typename CellLyt, typename Lib, typename Ntk, typename GateLyt>
 void check_with_gate_library(const Ntk& ntk, const exact_physical_design_params<GateLyt>& ps)
 {
@@ -267,6 +287,7 @@ void check_with_gate_library(const Ntk& ntk, const exact_physical_design_params<
     check_eq(ntk, layout);
     check_tp(layout, 1);
     check_apply_lib<CellLyt, Lib>(layout);
+    check_io_names(ntk, layout);
 }
 
 template <typename Ntk, typename Lyt>

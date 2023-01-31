@@ -269,6 +269,7 @@ template <typename NtkSrc, typename NtkDest, typename T>
 void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, mockturtle::node_map<T, NtkSrc>& old2new) noexcept
 {
     restore_network_name(ntk_src, ntk_dest);
+    restore_input_names(ntk_src, ntk_dest);
     restore_signal_names(ntk_src, ntk_dest, old2new);
     restore_output_names(ntk_src, ntk_dest);
 }

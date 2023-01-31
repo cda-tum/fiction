@@ -350,7 +350,7 @@ class technology_network : public mockturtle::klut_network
         foreach_po(
             [this](const auto& po, auto index)
             {
-                if (!is_buf(get_node(po)))
+                if (!is_buf(get_node(po)) || is_fanout(get_node(po)))
                 {
                     // decrease ref-count
                     _storage->nodes[po].data[0].h1--;
