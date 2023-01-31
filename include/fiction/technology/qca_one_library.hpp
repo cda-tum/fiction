@@ -13,10 +13,9 @@
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
+#include <phmap.h>
 
 #include <vector>
-
-#include <phmap.h>
 
 namespace fiction
 {
@@ -34,12 +33,12 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
   public:
     explicit qca_one_library() = delete;
     /**
-     * Given a tile `t`, this function takes all necessary information from the stored grid into account to choose the
-     * correct fcn_gate representation for that tile. May it be a gate or wires. Rotation and special marks like input
-     * and output, const cells etc. are computed additionally.
+     * Overrides the corresponding function in fcn_gate_library. Given a tile `t`, this function takes all necessary
+     * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
+     * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
-     * @tparam GateLyt Gate-level layout type.
-     * @param lyt Gate-level layout that hosts tile `t`.
+     * @tparam GateLyt Cartesian gate-level layout type.
+     * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a QCA ONE gate.
      * @return QCA ONE gate representation of `t` including I/Os, rotation, const cells, etc.
      */
@@ -110,7 +109,6 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 
         throw unsupported_gate_type_exception(t);
     }
-
     /**
      * Post-layout optimization that assigns via cell mode to wire crossings.
      *

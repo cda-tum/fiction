@@ -11,6 +11,8 @@
 #include "fiction/utils/routing_utils.hpp"
 #include "fiction/utils/stl_utils.hpp"
 
+#include <phmap.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -18,8 +20,6 @@
 #include <limits>
 #include <type_traits>
 #include <vector>
-
-#include <phmap.h>
 
 namespace fiction
 {

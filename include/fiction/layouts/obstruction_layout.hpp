@@ -8,11 +8,11 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/hash.hpp"
 
+#include <phmap.h>
+
 #include <memory>
 #include <type_traits>
 #include <utility>
-
-#include <phmap.h>
 
 namespace fiction
 {

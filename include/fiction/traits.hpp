@@ -7,13 +7,16 @@
 
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 
 #include <mockturtle/traits.hpp>
 
 #include <cstdint>
 #include <string>
 #include <type_traits>
+#include <utility>
 
 namespace fiction
 {
@@ -650,6 +653,50 @@ template <class Ntk>
 inline constexpr bool has_get_layout_name_v = has_get_layout_name<Ntk>::value;
 #pragma endregion
 
+#pragma region has_assign_sidb_defect
+template <class Lyt, class = void>
+struct has_assign_sidb_defect : std::false_type
+{};
+
+template <class Lyt>
+struct has_assign_sidb_defect<
+    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_sidb_defect(coordinate<Lyt>(), sidb_defect()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_assign_sidb_defect_v = has_assign_sidb_defect<Lyt>::value;
+#pragma endregion
+
+#pragma region has_get_sidb_defect
+template <class Lyt, class = void>
+struct has_get_sidb_defect : std::false_type
+{};
+
+template <class Lyt>
+struct has_get_sidb_defect<Lyt, std::void_t<decltype(std::declval<Lyt>().get_sidb_defect(coordinate<Lyt>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_get_sidb_defect_v = has_get_sidb_defect<Lyt>::value;
+#pragma endregion
+
+#pragma region has_foreach_sidb_defect
+template <class Lyt, class = void>
+struct has_foreach_sidb_defect : std::false_type
+{};
+
+template <class Lyt>
+struct has_foreach_sidb_defect<Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_sidb_defect(
+                                        std::declval<void(std::pair<coordinate<Lyt>, sidb_defect>, uint32_t)>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_foreach_sidb_defect_v = has_foreach_sidb_defect<Lyt>::value;
+#pragma endregion
+
 /**
  * Gate-level layouts
  */
@@ -762,6 +809,39 @@ inline constexpr bool has_is_obstructed_connection_v = has_is_obstructed_connect
  * Gate libraries
  */
 
+#pragma region has_get_functional_implementations
+template <class Lib, class = void>
+struct has_get_functional_implementations : std::false_type
+{};
+
+template <class Lib>
+struct has_get_functional_implementations<
+    Lib, std::enable_if_t<std::is_same_v<decltype(std::declval<Lib>().get_functional_implementations()),
+                                         typename Lib::gate_functions>>> : std::true_type
+{};
+
+template <class Lib>
+inline constexpr bool has_get_functional_implementations_v = has_get_functional_implementations<Lib>::value;
+#pragma endregion
+
+#pragma region has_get_gate_ports
+template <class Lib, class = void>
+struct has_get_gate_ports : std::false_type
+{};
+
+template <class Lib>
+struct has_get_gate_ports<Lib,
+                          std::enable_if_t<std::is_same_v<decltype(std::declval<Lib>().get_gate_ports()),
+                                                          typename Lib::template gate_ports<fiction::port_position>> ||
+                                           std::is_same_v<decltype(std::declval<Lib>().get_gate_ports()),
+                                                          typename Lib::template gate_ports<fiction::port_direction>>>>
+        : std::true_type
+{};
+
+template <class Lib>
+inline constexpr bool has_get_gate_ports_v = has_get_gate_ports<Lib>::value;
+#pragma endregion
+
 #pragma region has_post_layout_optimization
 template <class Lib, class Lyt, class = void>
 struct has_post_layout_optimization : std::false_type
@@ -770,7 +850,7 @@ struct has_post_layout_optimization : std::false_type
 template <class Lib, class Lyt>
 struct has_post_layout_optimization<
     Lib, Lyt,
-    std::enable_if_t<is_cell_level_layout_v<Lyt>,
+    std::enable_if_t<std::conjunction_v<is_cell_level_layout<Lyt>, std::is_same<technology<Lib>, technology<Lyt>>>,
                      std::void_t<decltype(std::declval<Lib>().post_layout_optimization(std::declval<Lyt>))>>>
         : std::true_type
 {};

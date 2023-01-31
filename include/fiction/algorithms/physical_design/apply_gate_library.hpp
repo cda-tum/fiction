@@ -9,10 +9,10 @@
 #include "fiction/technology/qca_one_library.hpp"
 #include "fiction/technology/sidb_bestagon_library.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/layout_utils.hpp"
 
 #include <mockturtle/traits.hpp>
 
-#include <cmath>
 #include <type_traits>
 
 #if (PROGRESS_BARS)
@@ -54,117 +54,10 @@ class apply_gate_library_impl
                 {
                     const auto t = gate_lyt.get_tile(n);
 
-                    cell<CellLyt> c{};
-
-                    // Cartesian layouts
-                    if constexpr (is_cartesian_layout_v<GateLyt>)
-                    {
-                        c = {t.x * GateLibrary::gate_x_size(), t.y * GateLibrary::gate_y_size(), t.z};
-                    }
-                    // Shifted Cartesian layouts
-                    else if constexpr (is_shifted_cartesian_layout_v<GateLyt>)
-                    {
-                        if constexpr (has_horizontally_shifted_cartesian_orientation_v<GateLyt>)
-                        {
-                            c = {t.x * GateLibrary::gate_x_size(),
-                                 static_cast<decltype(c.y)>(t.y * (GateLibrary::gate_y_size())), t.z};
-                        }
-                        else if constexpr (has_vertically_shifted_cartesian_orientation_v<GateLyt>)
-                        {
-                            c = {static_cast<decltype(c.x)>(t.x * (GateLibrary::gate_x_size())),
-                                 t.y * (GateLibrary::gate_y_size()), t.z};
-                        }
-
-                        if constexpr (has_odd_row_cartesian_arrangement_v<GateLyt>)
-                        {
-                            if (gate_lyt.is_in_odd_row(t))
-                            {
-                                // odd rows are shifted in by width / 2
-                                c.x +=
-                                    static_cast<decltype(c.x)>(static_cast<double>(GateLibrary::gate_x_size()) / 2.0);
-                            }
-                        }
-                        else if constexpr (has_even_row_cartesian_arrangement_v<GateLyt>)
-                        {
-                            if (gate_lyt.is_in_even_row(t))
-                            {
-                                // even rows are shifted in by width / 2
-                                c.x +=
-                                    static_cast<decltype(c.x)>(static_cast<double>(GateLibrary::gate_x_size()) / 2.0);
-                            }
-                        }
-                        else if constexpr (has_odd_column_cartesian_arrangement_v<GateLyt>)
-                        {
-                            if (gate_lyt.is_in_odd_column(t))
-                            {
-                                // odd columns are shifted in by height / 2
-                                c.y +=
-                                    static_cast<decltype(c.y)>(static_cast<double>(GateLibrary::gate_y_size()) / 2.0);
-                            }
-                        }
-                        else if constexpr (has_even_column_cartesian_arrangement_v<GateLyt>)
-                        {
-                            if (gate_lyt.is_in_even_column(t))
-                            {
-                                // even columns are shifted in by height / 2
-                                c.y +=
-                                    static_cast<decltype(c.y)>(static_cast<double>(GateLibrary::gate_y_size()) / 2.0);
-                            }
-                        }
-                    }
-                    // hexagonal layouts
-                    else if constexpr (is_hexagonal_layout_v<GateLyt>)
-                    {
-                        if constexpr (has_pointy_top_hex_orientation_v<GateLyt>)
-                        {
-                            // vertical distance between pointy top hexagons is height * 3/4
-                            c = {t.x * GateLibrary::gate_x_size(),
-                                 static_cast<decltype(c.y)>(t.y * (GateLibrary::gate_y_size() * 3 / 4)), t.z};
-                        }
-                        else if constexpr (has_flat_top_hex_orientation_v<GateLyt>)
-                        {
-                            // horizontal distance between flat top hexagons is width * 3/4
-                            c = {static_cast<decltype(c.x)>(t.x * (GateLibrary::gate_x_size() * 3 / 4)),
-                                 t.y * (GateLibrary::gate_y_size()), t.z};
-                        }
-
-                        if constexpr (has_odd_row_hex_arrangement_v<GateLyt>)
-                        {
-                            if (gate_lyt.is_in_odd_row(t))
-                            {
-                                // odd rows are shifted in by width / 2
-                                c.x +=
-                                    static_cast<decltype(c.x)>(static_cast<double>(GateLibrary::gate_x_size()) / 2.0);
-                            }
-                        }
-                        else if constexpr (has_even_row_hex_arrangement_v<GateLyt>)
-                        {
-                            if (gate_lyt.is_in_even_row(t))
-                            {
-                                // even rows are shifted in by width / 2
-                                c.x +=
-                                    static_cast<decltype(c.x)>(static_cast<double>(GateLibrary::gate_x_size()) / 2.0);
-                            }
-                        }
-                        else if constexpr (has_odd_column_hex_arrangement_v<GateLyt>)
-                        {
-                            if (gate_lyt.is_in_odd_column(t))
-                            {
-                                // odd columns are shifted in by height / 2
-                                c.y +=
-                                    static_cast<decltype(c.y)>(static_cast<double>(GateLibrary::gate_y_size()) / 2.0);
-                            }
-                        }
-                        else if constexpr (has_even_column_hex_arrangement_v<GateLyt>)
-                        {
-                            if (gate_lyt.is_in_even_column(t))
-                            {
-                                // even columns are shifted in by height / 2
-                                c.y +=
-                                    static_cast<decltype(c.y)>(static_cast<double>(GateLibrary::gate_y_size()) / 2.0);
-                            }
-                        }
-                    }
+                    // retrieve the top-leftmost cell in tile t
+                    const auto c =
+                        relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
+                                                           GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
 
                     assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t), n);
                 }
@@ -192,7 +85,7 @@ class apply_gate_library_impl
     GateLyt gate_lyt;
     CellLyt cell_lyt;
 
-    void assign_gate(const typename CellLyt::cell& c, const typename GateLibrary::fcn_gate& g,
+    void assign_gate(const cell<CellLyt>& c, const typename GateLibrary::fcn_gate& g,
                      const mockturtle::node<GateLyt>& n)
     {
         auto start_x = c.x;
@@ -203,8 +96,8 @@ class apply_gate_library_impl
         {
             for (auto x = 0ul; x < g[y].size(); ++x)
             {
-                const typename CellLyt::cell      pos{start_x + x, start_y + y, layer};
-                const typename CellLyt::cell_type type{g[y][x]};
+                const cell<CellLyt> pos{start_x + x, start_y + y, layer};
+                const auto          type{g[y][x]};
 
                 if (!technology<CellLyt>::is_empty_cell(type))
                 {

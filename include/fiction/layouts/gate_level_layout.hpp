@@ -19,6 +19,7 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/algorithm.hpp>
 #include <mockturtle/utils/truth_table_cache.hpp>
+#include <phmap.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -27,8 +28,6 @@
 #include <memory>
 #include <utility>
 #include <vector>
-
-#include <phmap.h>
 
 namespace fiction
 {
