@@ -157,6 +157,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
 
     /**
+     * This functions returns all SiDB charges of the placed SiDBs as a vector.
+     *
+     * @return vector of sidb charges.
+     */
+    [[nodiscard]] std::vector<sidb_charge_state> get_all_sidb_charges() const
+    {
+        return strg->cell_charge;
+    }
+
+    /**
      * This functions returns the positions of all SiDBs in nm (x,y).
      *
      * @return vector of pairs (double,double)
