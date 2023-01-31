@@ -249,7 +249,7 @@ class gate_level_layout : public ClockedLayout
      * Check whether tile `t` hosts a primary input.
      *
      * @param t Tile to be checked.
-     * @return `true` iff `t`he node located at tile `t` is a PI.
+     * @return `true` iff the node located at tile `t` is a PI.
      */
     [[nodiscard]] bool is_pi_tile(const tile& t) const noexcept
     {
@@ -270,7 +270,7 @@ class gate_level_layout : public ClockedLayout
      * Check whether tile `t` hosts a primary output.
      *
      * @param t Tile to be checked.
-     * @return `true` iff `t`he node located at tile `t` is a PO.
+     * @return `true` iff the node located at tile `t` is a PO.
      */
     [[nodiscard]] bool is_po_tile(const tile& t) const noexcept
     {
@@ -524,7 +524,7 @@ class gate_level_layout : public ClockedLayout
     /**
      * Checks whether there are no gates or wires assigned to the layout's coordinates.
      *
-     * @return `true` iff `t`he layout is empty.
+     * @return `true` iff the layout is empty.
      */
     [[nodiscard]] bool is_empty() const noexcept
     {
@@ -570,7 +570,7 @@ class gate_level_layout : public ClockedLayout
      */
     [[nodiscard]] node get_node(const signal& s) const noexcept
     {
-        if (auto it = strg->data.tile_node_map.find(s); it != strg->data.tile_node_map.cend())
+        if (const auto it = strg->data.tile_node_map.find(s); it != strg->data.tile_node_map.cend())
         {
             return it->second;
         }
@@ -608,7 +608,7 @@ class gate_level_layout : public ClockedLayout
      * if they are dangling (see the `mockturtle` API). In this layout type, nodes are also marked dead when they are
      * not assigned to a tile (which is considered equivalent to dangling).
      *
-     * @param n Node to check for lifeliness.
+     * @param n Node to check for liveliness.
      * @return `true` iff `n` is dead.
      */
     [[nodiscard]] bool is_dead(const node n) const noexcept
@@ -649,6 +649,13 @@ class gate_level_layout : public ClockedLayout
         // clear old_t only if it is different from t (this function can also be used to simply update n's children)
         if (t != old_t)
         {
+            if (!t.is_dead())
+            {
+                // if n lived on a tile that was marked as PO, update it with the new tile t
+                std::replace(strg->outputs.begin(), strg->outputs.end(), static_cast<signal>(old_t),
+                             static_cast<signal>(t));
+            }
+
             // clear n's position
             clear_tile(old_t);
             // assign n to its new position
@@ -663,24 +670,11 @@ class gate_level_layout : public ClockedLayout
         std::for_each(new_children.cbegin(), new_children.cend(),
                       [this](const auto& nc) { strg->nodes[get_node(nc)].data[0].h1++; });
 
-        if (t.is_dead())
-        {
-            // remove old_t from primary outputs if present
-            strg->outputs.erase(std::remove(strg->outputs.begin(), strg->outputs.end(), static_cast<signal>(old_t)),
-                                strg->outputs.end());
-        }
-        else if (t != old_t)
-        {
-            // if n lived on a tile that was marked as PO, update it with the new tile t
-            std::replace(strg->outputs.begin(), strg->outputs.end(), static_cast<signal>(old_t),
-                         static_cast<signal>(t));
-        }
-
         return static_cast<signal>(t);
     }
     /**
      * Connects the given signal `s` to the given node `n` as a child. The new child `s` is appended at the end of `n`'s
-     * list of children. Thus, if the order of children is important, `move_node` should be used instead. Otherwise,
+     * list of children. Thus, if the order of children is important, `move_node()` should be used instead. Otherwise,
      * this function has a smaller overhead and is to be preferred.
      *
      * @param s New incoming signal to `n`.
@@ -699,18 +693,34 @@ class gate_level_layout : public ClockedLayout
     /**
      * Removes all assigned nodes from the given tile and marks them as dead.
      *
+     * @note This function does not reduce the number of nodes in the layout nor does it reduce the number of PIs
+     * that are being returned via `num_pis()` even if the tile to clear is an input tile. However, the number of POs is
+     * reduced if the tile to clear is an output tile. While this seems counter-intuitive and inconsistent, it is in
+     * line with mockturtle's understanding of nodes and primary outputs.
+     *
      * @param t Tile whose nodes are to be removed.
      */
     void clear_tile(const tile& t) noexcept
     {
-        if (auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
+        if (const auto it = strg->data.tile_node_map.find(static_cast<signal>(t)); it != strg->data.tile_node_map.end())
         {
+            const auto n = it->second;
+
             if (!t.is_dead())
             {
                 // decrease wire count
-                if (is_wire(it->second))
+                if (is_wire(n))
                 {
                     strg->data.num_wires--;
+
+                    // find PO entry and remove it if present
+                    if (const auto po_it =
+                            std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
+                                         [this, &n](const auto& p) { return this->get_node(p.index) == n; });
+                        po_it != strg->outputs.cend())
+                    {
+                        strg->outputs.erase(po_it);
+                    }
                 }
                 else  // decrease gate count
                 {
@@ -718,10 +728,10 @@ class gate_level_layout : public ClockedLayout
                 }
             }
             // mark node as dead
-            kill_node(it->second);
+            kill_node(n);
 
             // remove node-tile
-            strg->data.node_tile_map.erase(it->second);
+            strg->data.node_tile_map.erase(n);
             // remove tile-node
             strg->data.tile_node_map.erase(it);
         }
