@@ -147,11 +147,29 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Copy assignment operator.
      */
-    charge_distribution_surface& operator=(const charge_distribution_surface& lyt) {
-        if (this != &lyt) {
+    charge_distribution_surface& operator=(const charge_distribution_surface& lyt)
+    {
+        if (this != &lyt)
+        {
             strg = std::make_shared<charge_distribution_storage>(*lyt.strg);
         }
         return *this;
+    }
+
+    /**
+     * This functions returns the positions of all SiDBs in nm (x,y).
+     *
+     * @return vector of pairs (double,double)
+     */
+    [[nodiscard]] std::vector<std::pair<double, double>> get_all_sidb_location_in_nm() const
+    {
+        std::vector<std::pair<double, double>> positions{};
+        for (auto& cell : strg->sidb_order)
+        {
+            auto pos = sidb_nm_position<Lyt>(strg->phys_params, cell);
+            positions.push_back(std::make_pair(pos.first, pos.second));
+        }
+        return positions;
     }
 
     /**
