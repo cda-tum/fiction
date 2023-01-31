@@ -37,6 +37,7 @@
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 
 #include <cstdint>
+#include <cstdlib>
 #include <sstream>
 #include <string>
 #include <unordered_set>
@@ -218,7 +219,10 @@ int main()  // NOLINT
 
 #else  // FICTION_Z3_SOLVER
 
-int main()
+#include <cstdlib>
+#include <iostream>
+
+int main()  // NOLINT
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
 
