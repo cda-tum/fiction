@@ -6,11 +6,15 @@
 #define FICTION_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP
 
 #include "fiction/algorithms/simulation_sidb/energy_distribution.hpp"
+#include "fiction/algorithms/simulation_sidb/minimum_energy.hpp"
+#include "fiction/algorithms/simulation_sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 
+#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <iostream>
+#include <vector>
 
 namespace fiction
 {
@@ -26,7 +30,7 @@ struct exgs_stats
         out << fmt::format("total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
         if (!valid_lyts.empty())
         {
-            for (auto [energy, count] : energy_distribution<Lyt>(valid_lyts))
+            for (const auto& [energy, count] : energy_distribution<Lyt>(valid_lyts))
             {
                 out << fmt::format("energy: {} | occurance: {} \n", energy, count);
             }
@@ -45,19 +49,24 @@ struct exgs_stats
 /**
  *  All metastable and physically valid charge distribution layouts are computed, stored in a vector and returned.
  *
- * @tparam Lyt cell-level layout.
- * @param lyt charge distribution layout.
- * @return a vector of different charge distribution layouts, all of which satisfy the validity test.
+ * @tparam Lyt Cell-level layout type.
+ * @param lyt Charge distribution layout.
+ * @param params Simulation parameters.
+ * @param ps Simulation statistics.
  */
 template <typename Lyt>
 void exhaustive_ground_state_simulation(charge_distribution_surface<Lyt>& lyt,
-                                        const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{},
-                                        exgs_stats<Lyt>*                  ps          = nullptr)
+                                        const sidb_simulation_parameters& params = sidb_simulation_parameters{},
+                                        exgs_stats<Lyt>*                  ps     = nullptr)
 {
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
     exgs_stats<Lyt> st{};
+
     {
         mockturtle::stopwatch stop{st.time_total};
-        lyt.set_physical_parameters(phys_params);
+        lyt.set_physical_parameters(params);
         lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
         lyt.update_after_charge_change();
 
@@ -79,11 +88,13 @@ void exhaustive_ground_state_simulation(charge_distribution_surface<Lyt>& lyt,
             st.valid_lyts.push_back(lyt_new);
         }
     }
+
     if (ps)
     {
         *ps = st;
     }
 }
+
 }  // namespace fiction
 
 #endif  // FICTION_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP
