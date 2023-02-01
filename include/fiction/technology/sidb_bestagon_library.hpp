@@ -18,10 +18,10 @@
 
 #include <vector>
 
-namespace fiction
+    namespace fiction
 {
 
-/**
+    /**
  * A gate library for the SiDB technology that is based on Y-shaped gates in hexagonal tiles. Y-shaped gates have been
  * first introduced in \"Binary Atomic Silicon Logic\" by Taleana Huff, Hatem Labidi, Mohammad Rashidi, Lucian Livadaru,
  * Thomas Dienel, Roshan Achal, Wyatt Vine, Jason Pitters, and Robert A. Wolkow in Nature Electronics 2018. The Bestagon
@@ -32,13 +32,13 @@ namespace fiction
  * hexagonal tiles in the Bestagon library are quite large with a lot of free space to avoid unwanted gate interactions.
  * The Bestagon library is intended for hexagonal, pointy-top layouts that are clocked with a row-based clocking scheme,
  * i.e., where the information flow direction is north to south.
- */
-class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
-{
-  public:
-    explicit sidb_bestagon_library() = delete;
+     */
+    class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
+    {
+      public:
+        explicit sidb_bestagon_library() = delete;
 
-    /**
+        /**
      * Overrides the corresponding function in fcn_gate_library. Given a tile `t`, this function takes all necessary
      * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
@@ -47,297 +47,297 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
      * @return Bestagon gate representation of `t` including mirroring.
-     */
-    template <typename GateLyt>
-    [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
-    {
-        static_assert(is_gate_level_layout_v<GateLyt>, "Lyt must be a gate-level layout");
-        static_assert(is_hexagonal_layout_v<GateLyt>, "Lyt must be a hexagonal layout");
-        static_assert(has_pointy_top_hex_orientation_v<GateLyt>, "Lyt must be a pointy-top hexagonal layout");
-
-        const auto n = lyt.get_node(t);
-        const auto p = determine_port_routing(lyt, t);
-
-        try
+         */
+        template <typename GateLyt>
+        [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
         {
-            if constexpr (fiction::has_is_fanout_v<GateLyt>)
+            static_assert(is_gate_level_layout_v<GateLyt>, "Lyt must be a gate-level layout");
+            static_assert(is_hexagonal_layout_v<GateLyt>, "Lyt must be a hexagonal layout");
+            static_assert(has_pointy_top_hex_orientation_v<GateLyt>, "Lyt must be a pointy-top hexagonal layout");
+
+            const auto n = lyt.get_node(t);
+            const auto p = determine_port_routing(lyt, t);
+
+            try
             {
-                if (lyt.is_fanout(n))
+                if constexpr (fiction::has_is_fanout_v<GateLyt>)
                 {
-                    if (lyt.fanout_size(n) == 2)
+                    if (lyt.is_fanout(n))
                     {
-                        return FANOUT_MAP.at(p);
-                    }
-                }
-            }
-            if constexpr (fiction::has_is_buf_v<GateLyt>)
-            {
-                if (lyt.is_buf(n))
-                {
-                    if (lyt.is_ground_layer(t))
-                    {
-                        // crossing case
-                        if (const auto at = lyt.above(t); (t != at) && lyt.is_wire_tile(at))
+                        if (lyt.fanout_size(n) == 2)
                         {
-                            // two possible options: actual crossover and (parallel) hourglass wire
-                            const auto pa = determine_port_routing(lyt, at);
-
-                            return CROSSING_MAP.at({p, pa});
+                            return FANOUT_MAP.at(p);
                         }
-                        // regular wire: look-up in the wire_map
-
-                        return WIRE_MAP.at(p);
                     }
+                }
+                if constexpr (fiction::has_is_buf_v<GateLyt>)
+                {
+                    if (lyt.is_buf(n))
+                    {
+                        if (lyt.is_ground_layer(t))
+                        {
+                            // crossing case
+                            if (const auto at = lyt.above(t); (t != at) && lyt.is_wire_tile(at))
+                            {
+                                // two possible options: actual crossover and (parallel) hourglass wire
+                                const auto pa = determine_port_routing(lyt, at);
 
-                    return EMPTY_GATE;
-                }
-            }
-            if constexpr (fiction::has_is_inv_v<GateLyt>)
-            {
-                if (lyt.is_inv(n))
-                {
-                    return INVERTER_MAP.at(p);
-                }
-            }
-            if constexpr (mockturtle::has_is_and_v<GateLyt>)
-            {
-                if (lyt.is_and(n))
-                {
-                    return CONJUNCTION_MAP.at(p);
-                }
-            }
-            if constexpr (mockturtle::has_is_or_v<GateLyt>)
-            {
-                if (lyt.is_or(n))
-                {
-                    return DISJUNCTION_MAP.at(p);
-                }
-            }
-            if constexpr (fiction::has_is_nand_v<GateLyt>)
-            {
-                if (lyt.is_nand(n))
-                {
-                    return NEGATED_CONJUNCTION_MAP.at(p);
-                }
-            }
-            if constexpr (fiction::has_is_nor_v<GateLyt>)
-            {
-                if (lyt.is_nor(n))
-                {
-                    return NEGATED_DISJUNCTION_MAP.at(p);
-                }
-            }
-            if constexpr (mockturtle::has_is_xor_v<GateLyt>)
-            {
-                if (lyt.is_xor(n))
-                {
-                    return EXCLUSIVE_DISJUNCTION_MAP.at(p);
-                }
-            }
-            if constexpr (fiction::has_is_xnor_v<GateLyt>)
-            {
-                if (lyt.is_xnor(n))
-                {
-                    return NEGATED_EXCLUSIVE_DISJUNCTION_MAP.at(p);
-                }
-            }
-        }
-        catch (const std::out_of_range&)
-        {
-            throw unsupported_gate_orientation_exception(t, p);
-        }
+                                return CROSSING_MAP.at({p, pa});
+                            }
+                            // regular wire: look-up in the wire_map
 
-        throw unsupported_gate_type_exception(t);
-    }
-    /**
+                            return WIRE_MAP.at(p);
+                        }
+
+                        return EMPTY_GATE;
+                    }
+                }
+                if constexpr (fiction::has_is_inv_v<GateLyt>)
+                {
+                    if (lyt.is_inv(n))
+                    {
+                        return INVERTER_MAP.at(p);
+                    }
+                }
+                if constexpr (mockturtle::has_is_and_v<GateLyt>)
+                {
+                    if (lyt.is_and(n))
+                    {
+                        return CONJUNCTION_MAP.at(p);
+                    }
+                }
+                if constexpr (mockturtle::has_is_or_v<GateLyt>)
+                {
+                    if (lyt.is_or(n))
+                    {
+                        return DISJUNCTION_MAP.at(p);
+                    }
+                }
+                if constexpr (fiction::has_is_nand_v<GateLyt>)
+                {
+                    if (lyt.is_nand(n))
+                    {
+                        return NEGATED_CONJUNCTION_MAP.at(p);
+                    }
+                }
+                if constexpr (fiction::has_is_nor_v<GateLyt>)
+                {
+                    if (lyt.is_nor(n))
+                    {
+                        return NEGATED_DISJUNCTION_MAP.at(p);
+                    }
+                }
+                if constexpr (mockturtle::has_is_xor_v<GateLyt>)
+                {
+                    if (lyt.is_xor(n))
+                    {
+                        return EXCLUSIVE_DISJUNCTION_MAP.at(p);
+                    }
+                }
+                if constexpr (fiction::has_is_xnor_v<GateLyt>)
+                {
+                    if (lyt.is_xnor(n))
+                    {
+                        return NEGATED_EXCLUSIVE_DISJUNCTION_MAP.at(p);
+                    }
+                }
+            }
+            catch (const std::out_of_range&)
+            {
+                throw unsupported_gate_orientation_exception(t, p);
+            }
+
+            throw unsupported_gate_type_exception(t);
+        }
+        /**
      * Returns a map of all gate functions supported by the library and their respectively possible implementations.
      *
      * This is an optional interface function that is required by some algorithms.
      *
      * @return Map of all gate functions supported by the library and their respective implementations as Bestagon
      * gates.
-     */
-    static gate_functions get_functional_implementations() noexcept
-    {
-        static const gate_functions implementations{
-            {{create_id_tt(),
-              {STRAIGHT_WIRE, MIRRORED_STRAIGHT_WIRE, DIAGONAL_WIRE, MIRRORED_DIAGONAL_WIRE, CROSSING_WIRE,
-               HOURGLASS_DOUBLE_WIRE, FANOUT_1_2, MIRRORED_FANOUT_1_2}},
-             {create_not_tt(),
-              {STRAIGHT_INVERTER, MIRRORED_STRAIGHT_INVERTER, DIAGONAL_INVERTER, MIRRORED_DIAGONAL_INVERTER}},
-             {create_and_tt(), {CONJUNCTION, MIRRORED_CONJUNCTION}},
-             {create_or_tt(), {DISJUNCTION, MIRRORED_DISJUNCTION}},
-             {create_nand_tt(), {NEGATED_CONJUNCTION, MIRRORED_NEGATED_CONJUNCTION}},
-             {create_nor_tt(), {NEGATED_DISJUNCTION, MIRRORED_NEGATED_DISJUNCTION}},
-             {create_xor_tt(), {EXCLUSIVE_DISJUNCTION, MIRRORED_EXCLUSIVE_DISJUNCTION}},
-             {create_xnor_tt(), {NEGATED_EXCLUSIVE_DISJUNCTION, MIRRORED_NEGATED_EXCLUSIVE_DISJUNCTION}}}};
+         */
+        static gate_functions get_functional_implementations() noexcept
+        {
+            static const gate_functions implementations{
+                {{create_id_tt(),
+                  {STRAIGHT_WIRE, MIRRORED_STRAIGHT_WIRE, DIAGONAL_WIRE, MIRRORED_DIAGONAL_WIRE, CROSSING_WIRE,
+                   HOURGLASS_DOUBLE_WIRE, FANOUT_1_2, MIRRORED_FANOUT_1_2}},
+                 {create_not_tt(),
+                  {STRAIGHT_INVERTER, MIRRORED_STRAIGHT_INVERTER, DIAGONAL_INVERTER, MIRRORED_DIAGONAL_INVERTER}},
+                 {create_and_tt(), {CONJUNCTION, MIRRORED_CONJUNCTION}},
+                 {create_or_tt(), {DISJUNCTION, MIRRORED_DISJUNCTION}},
+                 {create_nand_tt(), {NEGATED_CONJUNCTION, MIRRORED_NEGATED_CONJUNCTION}},
+                 {create_nor_tt(), {NEGATED_DISJUNCTION, MIRRORED_NEGATED_DISJUNCTION}},
+                 {create_xor_tt(), {EXCLUSIVE_DISJUNCTION, MIRRORED_EXCLUSIVE_DISJUNCTION}},
+                 {create_xnor_tt(), {NEGATED_EXCLUSIVE_DISJUNCTION, MIRRORED_NEGATED_EXCLUSIVE_DISJUNCTION}}}};
 
-        return implementations;
-    }
-    /**
+            return implementations;
+        }
+        /**
      * Returns a map of all different gate implementations and their respective port information.
      *
      * This is an optional interface function that is required by some algorithms.
      *
      * @return Map of all different gate implementations and their respective port information.
-     */
-    static gate_ports<port_direction> get_gate_ports() noexcept
-    {
-        static const gate_ports<port_direction> ports{{// wires
-                                                       {STRAIGHT_WIRE,
-                                                        {{{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-                                                          {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-                                                            {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}}},
-                                                       {MIRRORED_STRAIGHT_WIRE,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_EAST)}, {}},
-                                                          {{{port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                            {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}}},
-                                                       {DIAGONAL_WIRE,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST)}, {}},
-                                                          {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-                                                            {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}}},
-                                                       {MIRRORED_DIAGONAL_WIRE,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       {HOURGLASS_DOUBLE_WIRE,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST),
-                                                            port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       {CROSSING_WIRE,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST),
-                                                            port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       // inverters
-                                                       {STRAIGHT_INVERTER,
-                                                        {{{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-                                                          {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-                                                            {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}}},
-                                                       {MIRRORED_STRAIGHT_INVERTER,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_EAST)}, {}},
-                                                          {{{port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                            {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}}},
-                                                       {DIAGONAL_INVERTER,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST)}, {}},
-                                                          {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-                                                            {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}}},
-                                                       {MIRRORED_DIAGONAL_INVERTER,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       // AND gates
-                                                       {CONJUNCTION,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}},
-                                                       {MIRRORED_CONJUNCTION,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       // OR gates
-                                                       {DISJUNCTION,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}},
-                                                       {MIRRORED_DISJUNCTION,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       // NAND gates
-                                                       {NEGATED_CONJUNCTION,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}},
-                                                       {MIRRORED_NEGATED_CONJUNCTION,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       // NOR gates
-                                                       {NEGATED_DISJUNCTION,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}},
-                                                       {MIRRORED_NEGATED_DISJUNCTION,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       // XOR gates
-                                                       {EXCLUSIVE_DISJUNCTION,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}},
-                                                       {MIRRORED_EXCLUSIVE_DISJUNCTION,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       // XNOR gates
-                                                       {NEGATED_EXCLUSIVE_DISJUNCTION,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}},
-                                                       {MIRRORED_NEGATED_EXCLUSIVE_DISJUNCTION,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       // fan-outs
-                                                       {FANOUT_1_2,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST),
-                                                            port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       {MIRRORED_FANOUT_1_2,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST),
-                                                            port_direction(port_direction::cardinal::SOUTH_WEST)}}}}}
-
-        }};
-
-        return ports;
-    }
-
-  private:
-    template <typename Lyt>
-    [[nodiscard]] static port_list<port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
-    {
-        port_list<port_direction> p{};
-
-        // determine incoming connector ports
-        if (lyt.has_north_eastern_incoming_signal(t))
+         */
+        static gate_ports<port_direction> get_gate_ports() noexcept
         {
-            p.inp.emplace(port_direction::cardinal::NORTH_EAST);
-        }
-        if (lyt.has_north_western_incoming_signal(t))
-        {
-            p.inp.emplace(port_direction::cardinal::NORTH_WEST);
+            static const gate_ports<port_direction> ports{{// wires
+                                                           {STRAIGHT_WIRE,
+                                                            {{{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+                                                              {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+                                                                {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}}},
+                                                           {MIRRORED_STRAIGHT_WIRE,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_EAST)}, {}},
+                                                              {{{port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                                {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}}},
+                                                           {DIAGONAL_WIRE,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST)}, {}},
+                                                              {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+                                                                {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}}},
+                                                           {MIRRORED_DIAGONAL_WIRE,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
+                                                           {HOURGLASS_DOUBLE_WIRE,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_EAST),
+                                                                port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
+                                                           {CROSSING_WIRE,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_EAST),
+                                                                port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
+                                                           // inverters
+                                                           {STRAIGHT_INVERTER,
+                                                            {{{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+                                                              {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+                                                                {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}}},
+                                                           {MIRRORED_STRAIGHT_INVERTER,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_EAST)}, {}},
+                                                              {{{port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                                {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}}},
+                                                           {DIAGONAL_INVERTER,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST)}, {}},
+                                                              {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+                                                                {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}}},
+                                                           {MIRRORED_DIAGONAL_INVERTER,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
+                                                           // AND gates
+                                                           {CONJUNCTION,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}},
+                                                           {MIRRORED_CONJUNCTION,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
+                                                           // OR gates
+                                                           {DISJUNCTION,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}},
+                                                           {MIRRORED_DISJUNCTION,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
+                                                           // NAND gates
+                                                           {NEGATED_CONJUNCTION,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}},
+                                                           {MIRRORED_NEGATED_CONJUNCTION,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
+                                                           // NOR gates
+                                                           {NEGATED_DISJUNCTION,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}},
+                                                           {MIRRORED_NEGATED_DISJUNCTION,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
+                                                           // XOR gates
+                                                           {EXCLUSIVE_DISJUNCTION,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}},
+                                                           {MIRRORED_EXCLUSIVE_DISJUNCTION,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
+                                                           // XNOR gates
+                                                           {NEGATED_EXCLUSIVE_DISJUNCTION,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}},
+                                                           {MIRRORED_NEGATED_EXCLUSIVE_DISJUNCTION,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST),
+                                                                port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
+                                                           // fan-outs
+                                                           {FANOUT_1_2,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_WEST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_EAST),
+                                                                port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
+                                                           {MIRRORED_FANOUT_1_2,
+                                                            {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
+                                                               {port_direction(port_direction::cardinal::SOUTH_EAST),
+                                                                port_direction(port_direction::cardinal::SOUTH_WEST)}}}}}
+
+            }};
+
+            return ports;
         }
 
-        // determine outgoing connector ports
-        if (lyt.has_south_eastern_outgoing_signal(t))
+      private:
+        template <typename Lyt>
+        [[nodiscard]] static port_list<port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
         {
-            p.out.emplace(port_direction::cardinal::SOUTH_EAST);
-        }
-        if (lyt.has_south_western_outgoing_signal(t))
-        {
-            p.out.emplace(port_direction::cardinal::SOUTH_WEST);
-        }
+            port_list<port_direction> p{};
 
-        // has no connector ports
-        if (const auto n = lyt.get_node(t); !lyt.is_wire(n) && !lyt.is_inv(n))
-        {
-            if (lyt.has_no_incoming_signal(t))
+            // determine incoming connector ports
+            if (lyt.has_north_eastern_incoming_signal(t))
+            {
+                p.inp.emplace(port_direction::cardinal::NORTH_EAST);
+            }
+            if (lyt.has_north_western_incoming_signal(t))
             {
                 p.inp.emplace(port_direction::cardinal::NORTH_WEST);
             }
 
-            if (lyt.has_no_outgoing_signal(t))
+            // determine outgoing connector ports
+            if (lyt.has_south_eastern_outgoing_signal(t))
             {
                 p.out.emplace(port_direction::cardinal::SOUTH_EAST);
             }
+            if (lyt.has_south_western_outgoing_signal(t))
+            {
+                p.out.emplace(port_direction::cardinal::SOUTH_WEST);
+            }
+
+            // has no connector ports
+            if (const auto n = lyt.get_node(t); !lyt.is_wire(n) && !lyt.is_inv(n))
+            {
+                if (lyt.has_no_incoming_signal(t))
+                {
+                    p.inp.emplace(port_direction::cardinal::NORTH_WEST);
+                }
+
+                if (lyt.has_no_outgoing_signal(t))
+                {
+                    p.out.emplace(port_direction::cardinal::SOUTH_EAST);
+                }
+            }
+
+            return p;
         }
 
-        return p;
-    }
-
-    // clang-format off
+        // clang-format off
 
     static constexpr const fcn_gate STRAIGHT_WIRE{cell_list_to_gate<char>({{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -684,51 +684,51 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
 
     static constexpr const fcn_gate MIRRORED_DIAGONAL_INVERTER{cell_list_to_gate<char>({{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},        
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}        
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
     static constexpr const fcn_gate CONJUNCTION{cell_list_to_gate<char>({{
@@ -1198,7 +1198,6 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -1516,158 +1515,158 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    // clang-format on
+        // clang-format on
 
-    using port_gate_map = phmap::flat_hash_map<port_list<port_direction>, fcn_gate>;
-    using double_port_gate_map =
-        phmap::flat_hash_map<std::pair<port_list<port_direction>, port_list<port_direction>>, fcn_gate>;
-    /**
+        using port_gate_map = phmap::flat_hash_map<port_list<port_direction>, fcn_gate>;
+        using double_port_gate_map =
+            phmap::flat_hash_map<std::pair<port_list<port_direction>, port_list<port_direction>>, fcn_gate>;
+        /**
      * Lookup table for wire mirroring. Maps ports to corresponding wires.
-     */
-    static inline const port_gate_map WIRE_MAP = {
-        // primary inputs
-        {{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}}, STRAIGHT_WIRE},
-        {{{}, {port_direction(port_direction::cardinal::SOUTH_EAST)}}, DIAGONAL_WIRE},
-        // primary outputs
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)}, {}}, DIAGONAL_WIRE},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)}, {}}, MIRRORED_STRAIGHT_WIRE},
-        // straight wire
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         STRAIGHT_WIRE},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-         MIRRORED_STRAIGHT_WIRE},
-        // diagonal wire
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-         DIAGONAL_WIRE},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         MIRRORED_DIAGONAL_WIRE},
-        // empty gate (for crossing layer)
-        {{{}, {}}, EMPTY_GATE},
-    };
-    /**
+         */
+        static inline const port_gate_map WIRE_MAP = {
+            // primary inputs
+            {{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}}, STRAIGHT_WIRE},
+            {{{}, {port_direction(port_direction::cardinal::SOUTH_EAST)}}, DIAGONAL_WIRE},
+            // primary outputs
+            {{{port_direction(port_direction::cardinal::NORTH_WEST)}, {}}, DIAGONAL_WIRE},
+            {{{port_direction(port_direction::cardinal::NORTH_EAST)}, {}}, MIRRORED_STRAIGHT_WIRE},
+            // straight wire
+            {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+              {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+             STRAIGHT_WIRE},
+            {{{port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+             MIRRORED_STRAIGHT_WIRE},
+            // diagonal wire
+            {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+              {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+             DIAGONAL_WIRE},
+            {{{port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+             MIRRORED_DIAGONAL_WIRE},
+            // empty gate (for crossing layer)
+            {{{}, {}}, EMPTY_GATE},
+        };
+        /**
      * Lookup table for wire crossings and hourglass wires. Maps ports to corresponding crossovers.
-     */
-    static inline const double_port_gate_map CROSSING_MAP = {
-        {{{{port_direction(port_direction::cardinal::NORTH_WEST)},
-           {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-          {{port_direction(port_direction::cardinal::NORTH_EAST)},
-           {port_direction(port_direction::cardinal::SOUTH_EAST)}}},
-         HOURGLASS_DOUBLE_WIRE},
-        {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
-           {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-          {{port_direction(port_direction::cardinal::NORTH_WEST)},
-           {port_direction(port_direction::cardinal::SOUTH_WEST)}}},
-         HOURGLASS_DOUBLE_WIRE},
-        {{{{port_direction(port_direction::cardinal::NORTH_WEST)},
-           {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-          {{port_direction(port_direction::cardinal::NORTH_EAST)},
-           {port_direction(port_direction::cardinal::SOUTH_WEST)}}},
-         CROSSING_WIRE},
-        {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
-           {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-          {{port_direction(port_direction::cardinal::NORTH_WEST)},
-           {port_direction(port_direction::cardinal::SOUTH_EAST)}}},
-         CROSSING_WIRE},
-    };
-    /**
+         */
+        static inline const double_port_gate_map CROSSING_MAP = {
+            {{{{port_direction(port_direction::cardinal::NORTH_WEST)},
+               {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+              {{port_direction(port_direction::cardinal::NORTH_EAST)},
+               {port_direction(port_direction::cardinal::SOUTH_EAST)}}},
+             HOURGLASS_DOUBLE_WIRE},
+            {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
+               {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+              {{port_direction(port_direction::cardinal::NORTH_WEST)},
+               {port_direction(port_direction::cardinal::SOUTH_WEST)}}},
+             HOURGLASS_DOUBLE_WIRE},
+            {{{{port_direction(port_direction::cardinal::NORTH_WEST)},
+               {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+              {{port_direction(port_direction::cardinal::NORTH_EAST)},
+               {port_direction(port_direction::cardinal::SOUTH_WEST)}}},
+             CROSSING_WIRE},
+            {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
+               {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+              {{port_direction(port_direction::cardinal::NORTH_WEST)},
+               {port_direction(port_direction::cardinal::SOUTH_EAST)}}},
+             CROSSING_WIRE},
+        };
+        /**
      * Lookup table for inverter mirroring. Maps ports to corresponding inverters.
-     */
-    static inline const port_gate_map INVERTER_MAP = {
-        // straight inverters
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         STRAIGHT_INVERTER},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-         MIRRORED_STRAIGHT_INVERTER},
-        // diagonal inverters
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-         DIAGONAL_INVERTER},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         MIRRORED_DIAGONAL_INVERTER},
-        // without inputs
-        {{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}}, STRAIGHT_INVERTER},
-        {{{}, {port_direction(port_direction::cardinal::SOUTH_EAST)}}, DIAGONAL_INVERTER},
-        // without outputs
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)}, {}}, DIAGONAL_INVERTER},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)}, {}}, MIRRORED_STRAIGHT_INVERTER}};
-    /**
+         */
+        static inline const port_gate_map INVERTER_MAP = {
+            // straight inverters
+            {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+              {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+             STRAIGHT_INVERTER},
+            {{{port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+             MIRRORED_STRAIGHT_INVERTER},
+            // diagonal inverters
+            {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+              {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+             DIAGONAL_INVERTER},
+            {{{port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+             MIRRORED_DIAGONAL_INVERTER},
+            // without inputs
+            {{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}}, STRAIGHT_INVERTER},
+            {{{}, {port_direction(port_direction::cardinal::SOUTH_EAST)}}, DIAGONAL_INVERTER},
+            // without outputs
+            {{{port_direction(port_direction::cardinal::NORTH_WEST)}, {}}, DIAGONAL_INVERTER},
+            {{{port_direction(port_direction::cardinal::NORTH_EAST)}, {}}, MIRRORED_STRAIGHT_INVERTER}};
+        /**
      * Lookup table for conjunction mirroring. Maps ports to corresponding AND gates.
-     */
-    static inline const port_gate_map CONJUNCTION_MAP = {
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-         CONJUNCTION},
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         MIRRORED_CONJUNCTION}};
-    /**
+         */
+        static inline const port_gate_map CONJUNCTION_MAP = {
+            {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+             CONJUNCTION},
+            {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+             MIRRORED_CONJUNCTION}};
+        /**
      * Lookup table for disjunction mirroring. Maps ports to corresponding OR gates.
-     */
-    static inline const port_gate_map DISJUNCTION_MAP = {
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-         DISJUNCTION},
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         MIRRORED_DISJUNCTION}};
-    /**
+         */
+        static inline const port_gate_map DISJUNCTION_MAP = {
+            {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+             DISJUNCTION},
+            {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+             MIRRORED_DISJUNCTION}};
+        /**
      * Lookup table for negated conjunction mirroring. Maps ports to corresponding NAND gates.
-     */
-    static inline const port_gate_map NEGATED_CONJUNCTION_MAP = {
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-         NEGATED_CONJUNCTION},
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         MIRRORED_NEGATED_CONJUNCTION}};
-    /**
+         */
+        static inline const port_gate_map NEGATED_CONJUNCTION_MAP = {
+            {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+             NEGATED_CONJUNCTION},
+            {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+             MIRRORED_NEGATED_CONJUNCTION}};
+        /**
      * Lookup table for negated disjunction mirroring. Maps ports to corresponding NOR gates.
-     */
-    static inline const port_gate_map NEGATED_DISJUNCTION_MAP = {
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-         NEGATED_DISJUNCTION},
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         MIRRORED_NEGATED_DISJUNCTION}};
-    /**
+         */
+        static inline const port_gate_map NEGATED_DISJUNCTION_MAP = {
+            {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+             NEGATED_DISJUNCTION},
+            {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+             MIRRORED_NEGATED_DISJUNCTION}};
+        /**
      * Lookup table for exclusive disjunction mirroring. Maps ports to corresponding XOR gates.
-     */
-    static inline const port_gate_map EXCLUSIVE_DISJUNCTION_MAP = {
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-         EXCLUSIVE_DISJUNCTION},
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         MIRRORED_EXCLUSIVE_DISJUNCTION}};
-    /**
+         */
+        static inline const port_gate_map EXCLUSIVE_DISJUNCTION_MAP = {
+            {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+             EXCLUSIVE_DISJUNCTION},
+            {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+             MIRRORED_EXCLUSIVE_DISJUNCTION}};
+        /**
      * Lookup table for negated exclusive disjunction mirroring. Maps ports to corresponding XNOR gates.
-     */
-    static inline const port_gate_map NEGATED_EXCLUSIVE_DISJUNCTION_MAP = {
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-         NEGATED_EXCLUSIVE_DISJUNCTION},
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         MIRRORED_NEGATED_EXCLUSIVE_DISJUNCTION}};
-    /**
+         */
+        static inline const port_gate_map NEGATED_EXCLUSIVE_DISJUNCTION_MAP = {
+            {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+             NEGATED_EXCLUSIVE_DISJUNCTION},
+            {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+             MIRRORED_NEGATED_EXCLUSIVE_DISJUNCTION}};
+        /**
      * Lookup table for fanout mirroring. Maps ports to corresponding fan-out gates.
-     */
-    static inline const port_gate_map FANOUT_MAP = {
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST), port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         FANOUT_1_2},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST), port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         MIRRORED_FANOUT_1_2}};
-};
+         */
+        static inline const port_gate_map FANOUT_MAP = {
+            {{{port_direction(port_direction::cardinal::NORTH_WEST)},
+              {port_direction(port_direction::cardinal::SOUTH_EAST), port_direction(port_direction::cardinal::SOUTH_WEST)}},
+             FANOUT_1_2},
+            {{{port_direction(port_direction::cardinal::NORTH_EAST)},
+              {port_direction(port_direction::cardinal::SOUTH_EAST), port_direction(port_direction::cardinal::SOUTH_WEST)}},
+             MIRRORED_FANOUT_1_2}};
+    };
 
 }  // namespace fiction
 

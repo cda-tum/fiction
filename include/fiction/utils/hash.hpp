@@ -38,23 +38,6 @@ namespace std
 {
 
 /**
- * Provides a hash implementation for std::array<T, N>.
- *
- * @tparam T Object type in std::array.
- * @tparam N Size of the array.
- */
-template <typename T, std::size_t N>
-struct hash<std::array<T, N>>
-{
-    std::size_t operator()(const std::array<T, N>& a) const noexcept
-    {
-        std::size_t h = 0;
-        for (const auto& e : a) fiction::hash_combine(h, e);
-
-        return h;
-    }
-};
-/**
  * Provides a hash implementation for `std::array<T, N>`.
  *
  * @tparam T Object type in `std::array`.
