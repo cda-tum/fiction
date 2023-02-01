@@ -9,16 +9,16 @@
 #include "fiction/algorithms//simulation_sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation_sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation_sidb/quicksim.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/algorithms/simulation_sidb/quicksim_params.hpp"
+#include "fiction/technology/charge_distribution_surface.hpp"
 
 #include <chrono>
-
 
 namespace fiction
 {
 /**
- * This struct stores the time-to-solution, the simulation accuracy and the average single simulation runtime of quicksim (see quicksim.hpp).
+ * This struct stores the time-to-solution, the simulation accuracy and the average single simulation runtime of
+ * quicksim (see quicksim.hpp).
  *
  */
 struct time_to_solution_stats
@@ -39,22 +39,23 @@ struct time_to_solution_stats
  * @paramt Lyt cell-level layout.
  * @param charge_distribution_surface<Lyt> charge layout that is used for the simulation.
  * @param tts_stats struct where the results (time_to_solution, acc, single runtime) are stored.
- * @param repetitions number of repetitions to determine the simulation accuracy (repetitions = 100 ==> accuracy is precise to 1 %).
+ * @param repetitions number of repetitions to determine the simulation accuracy (repetitions = 100 ==> accuracy is
+ * precise to 1 %).
  * @param iteration_steps simulation parameter (see quicksim.hpp).
  * @param alpha simulation parameter (see quicksim.hpp).
  * @param convlevel the time-to-solution also depends one the given confidence level which can be set here.
  */
 template <typename Lyt>
 void sim_acc_tts(charge_distribution_surface<Lyt>& lyt, exgs_stats<Lyt>& result_exact,
-                 time_to_solution_stats* ps = nullptr,
-                 const uint64_t& repetitions = 100, const double convlevel = 0.997)
+                 time_to_solution_stats* ps = nullptr, const uint64_t& repetitions = 100,
+                 const double convlevel = 0.997)
 {
     static_assert(is_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     time_to_solution_stats st{};
-    int                 count = 0;
-    std::vector<double> time;
+    int                    count = 0;
+    std::vector<double>    time;
     time.reserve(repetitions);
 
     for (uint64_t i = 0; i < repetitions; i++)

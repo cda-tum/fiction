@@ -5,16 +5,16 @@
 #ifndef FICTION_NM_POSITION_HPP
 #define FICTION_NM_POSITION_HPP
 
-#include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/algorithms/simulation_sidb/sidb_simulation_parameters.hpp"
+#include "fiction/layouts/cell_level_layout.hpp"
 
 namespace fiction
 {
 /**
-     * Computes the position of a cell in nanometers.
-     *
-     * @param c The cell to compute the position for.
-     * @return A pair of double values representing the x,y position of the cell in nanometers.
+ * Computes the position of a cell in nanometers.
+ *
+ * @param c The cell to compute the position for.
+ * @return A pair of double values representing the x,y position of the cell in nanometers.
  */
 template <typename Lyt>
 std::pair<double, double> sidb_nm_position(const sidb_simulation_parameters& sp, const typename Lyt::cell& c)
@@ -25,6 +25,6 @@ std::pair<double, double> sidb_nm_position(const sidb_simulation_parameters& sp,
     return std::make_pair(x, y);
 }
 
-} // namespace fiction
+}  // namespace fiction
 
 #endif  // FICTION_NM_POSITION_HPP

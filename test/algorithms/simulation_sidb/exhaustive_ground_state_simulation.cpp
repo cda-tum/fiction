@@ -67,14 +67,12 @@ TEMPLATE_TEST_CASE(
 
     SECTION("simulation with no SiDB placed")
     {
-        TestType lyt{{20, 10}};
+        TestType                         lyt{{20, 10}};
         charge_distribution_surface      charge_layout{lyt};
         exgs_stats<TestType>             exgs_stats{};
         const sidb_simulation_parameters params{2, -0.32};
         exhaustive_ground_state_simulation<TestType>(charge_layout, params, &exgs_stats);
 
         CHECK(exgs_stats.valid_lyts.size() == 0);  // empty layout is saved.
-
     }
-
 }

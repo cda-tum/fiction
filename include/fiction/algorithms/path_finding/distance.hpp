@@ -5,8 +5,9 @@
 #ifndef FICTION_DISTANCE_HPP
 #define FICTION_DISTANCE_HPP
 
-#include "fiction/traits.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
+#include "fiction/traits.hpp"
+
 #include <cmath>
 #include <cstdint>
 #include <functional>
@@ -63,14 +64,15 @@ template <typename Lyt, typename Dist = double>
 }
 
 /**
-     * Computes the distance between two cells in nanometers.
-     *
-     * @param c1 The first cell.
-     * @param c2 The second cell.
-     * @return The distance between the two cells in nanometers.
+ * Computes the distance between two cells in nanometers.
+ *
+ * @param c1 The first cell.
+ * @param c2 The second cell.
+ * @return The distance between the two cells in nanometers.
  */
- template <typename Lyt>
-[[nodiscard]] constexpr double distance_sidb_pair(const sidb_simulation_parameters& sp,const typename Lyt::cell& c1, const typename Lyt::cell& c2)
+template <typename Lyt>
+[[nodiscard]] constexpr double distance_sidb_pair(const sidb_simulation_parameters& sp, const typename Lyt::cell& c1,
+                                                  const typename Lyt::cell& c2)
 {
     static_assert(std::is_same_v<typename Lyt::cell, siqad::coord_t>, "Lyt is not based on SiQAD coordinates");
     const auto pos_c1 = sidb_nm_position<Lyt>(sp, c1);

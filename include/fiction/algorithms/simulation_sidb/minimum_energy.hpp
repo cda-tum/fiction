@@ -6,9 +6,10 @@
 #define FICTION_MINIMUM_ENERGY_HPP
 
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include <vector>
+
 #include <algorithm>
 #include <limits>
+#include <vector>
 
 namespace fiction
 {

@@ -51,9 +51,10 @@ struct exgs_stats
  */
 template <typename Lyt>
 void exhaustive_ground_state_simulation(charge_distribution_surface<Lyt>& lyt,
-          const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{}, exgs_stats<Lyt>* ps = nullptr)
+                                        const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{},
+                                        exgs_stats<Lyt>*                  ps          = nullptr)
 {
-    exgs_stats<Lyt>       st{};
+    exgs_stats<Lyt> st{};
     {
         mockturtle::stopwatch stop{st.time_total};
         lyt.set_physical_parameters(phys_params);

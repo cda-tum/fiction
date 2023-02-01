@@ -184,7 +184,6 @@ class read_sqd_layout_impl
         return dimer_to_cell(std::stoll(n), std::stoll(m), std::stoll(l));
     }
 
-
     cell<Lyt> parse_latcoord_siqad(const tinyxml2::XMLElement* latcoord)
     {
         const auto n = latcoord->Attribute("n"), m = latcoord->Attribute("m"), l = latcoord->Attribute("l");
@@ -213,7 +212,6 @@ class read_sqd_layout_impl
 
         lyt.assign_cell_type(parse_latcoord(latcoord), sidb_technology::cell_type::NORMAL);
     }
-
 
     void parse_db_dot_siqad(const tinyxml2::XMLElement* db_dot)
     {

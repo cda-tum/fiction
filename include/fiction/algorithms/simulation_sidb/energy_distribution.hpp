@@ -6,10 +6,11 @@
 #define FICTION_ENERGY_DISTRIBUTION_HPP
 
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include <iostream>
-#include <vector>
-#include <map>
+
 #include <cmath>
+#include <iostream>
+#include <map>
+#include <vector>
 
 namespace fiction
 {
@@ -28,7 +29,7 @@ std::map<double, uint64_t> energy_distribution(const std::vector<charge_distribu
     std::map<double, uint64_t> statistics;
     for (auto& lyt : input_vec)
     {
-        const auto energy = std::round(lyt.get_system_energy() * 1000000) / 1000000; // rounding to 6 decimal place.
+        const auto energy = std::round(lyt.get_system_energy() * 1000000) / 1000000;  // rounding to 6 decimal place.
 
         statistics[energy]++;
     }

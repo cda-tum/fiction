@@ -2,8 +2,9 @@
 // Created by Jan Drewniok on 18.12.22.
 //
 
-#include <fiction/algorithms/simulation_sidb/quicksim.hpp>
 #include <catch2/catch_template_test_macros.hpp>
+
+#include <fiction/algorithms/simulation_sidb/quicksim.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -24,9 +25,9 @@ TEMPLATE_TEST_CASE(
     {
         TestType lyt{{20, 10}};
 
-        charge_distribution_surface      charge_layout{lyt};
-        quicksim_stats<TestType>         quicksimstats{};
-        const quicksim_params            quicksim_params{sidb_simulation_parameters{2, -0.30}};
+        charge_distribution_surface charge_layout{lyt};
+        quicksim_stats<TestType>    quicksimstats{};
+        const quicksim_params       quicksim_params{sidb_simulation_parameters{2, -0.30}};
         CHECK(quicksim_params.phys_params.mu == -0.30);
         quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
 
@@ -39,13 +40,13 @@ TEMPLATE_TEST_CASE(
 
         lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface      charge_layout{lyt};
-        quicksim_stats<TestType>         quicksimstats{};
-        const quicksim_params            quicksim_params{sidb_simulation_parameters{2, -0.30}};
+        charge_distribution_surface charge_layout{lyt};
+        quicksim_stats<TestType>    quicksimstats{};
+        const quicksim_params       quicksim_params{sidb_simulation_parameters{2, -0.30}};
         CHECK(quicksim_params.phys_params.mu == -0.30);
         quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
 
-        CHECK(quicksimstats.valid_lyts.size()==1);
+        CHECK(quicksimstats.valid_lyts.size() == 1);
     }
 
     SECTION("layout with several SiDBs placed")

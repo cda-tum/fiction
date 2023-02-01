@@ -7,6 +7,7 @@
 
 #include "fiction/algorithms/simulation_sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation_sidb/quicksim.hpp"
+
 #include <cmath>
 
 namespace fiction
@@ -16,7 +17,8 @@ namespace fiction
 * This function checks if the ground state is found by the quicksim algorithm.
 *
 * @tparam Lyt cell-level layout.
-* @param result_new_ap All found physically valid charge distribution surfaces obtained with the new quicksim algorithm (see quicksim.hpp).
+* @param result_new_ap All found physically valid charge distribution surfaces obtained with the new quicksim algorithm
+(see quicksim.hpp).
 * @param result_exact All valid charge distribution surfaces (ExGS, see ExGS.hpp).
 * @return Returns true if the relative difference between the lowest energies of the two sets is less than
 0.00001, false otherwise.

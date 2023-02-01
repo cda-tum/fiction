@@ -7,12 +7,13 @@
 
 #include "fiction/algorithms/simulation_sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation_sidb/minimum_energy.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/algorithms/simulation_sidb/quicksim_params.hpp"
+#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
-#include <mockturtle/utils/stopwatch.hpp>
 #include <fmt/format.h>
+#include <mockturtle/utils/stopwatch.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -65,7 +66,7 @@ struct quicksim_stats
  * @param physical_params physical parameters, they are material-specific and may vary from experiment to experiment.
  */
 template <typename Lyt>
-void quicksim(charge_distribution_surface<Lyt>& lyt, const quicksim_params &quick_params = quicksim_params{},
+void quicksim(charge_distribution_surface<Lyt>& lyt, const quicksim_params& quick_params = quicksim_params{},
               quicksim_stats<Lyt>* ps = nullptr)
 {
     quicksim_stats<Lyt> st{};

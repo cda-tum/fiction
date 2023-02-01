@@ -1,11 +1,10 @@
 # this one treats each H-Si as an array value
 
 
-import random
-import sys
-
 import matplotlib.pyplot as plt
 import numpy as np
+import random
+import sys
 
 np.set_printoptions(threshold=sys.maxsize)
 from matplotlib.axes._axes import _log as matplotlib_axes_logger

@@ -82,7 +82,8 @@ TEMPLATE_TEST_CASE(
         auto result = energy_distribution(all_lyts);
 
         // "all_lyts" collects all three layouts (charge_layout_first, charge_layout_second, charge_layout_third). The
-        // last two have an identical potential energy (it.second == 2) which is smaller than the one from the first layout.
+        // last two have an identical potential energy (it.second == 2) which is smaller than the one from the first
+        // layout.
         auto counter = 0u;
         for (const auto& it : result)
         {
