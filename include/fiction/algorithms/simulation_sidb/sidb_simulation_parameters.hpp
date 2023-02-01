@@ -12,6 +12,7 @@
 
 namespace fiction
 {
+
 /**
  * This struct collects all physical parameters. It can be useful to change them, especially when experiments bring new
  * insights.
@@ -43,7 +44,7 @@ struct sidb_simulation_parameters
             base{base_number}
 
     {
-        assert(base == 2 || base == 3 && "base must be 2 or 3");
+        assert((base == 2 || base == 3) && "base must be 2 or 3");
     }
 
     /**
@@ -84,6 +85,7 @@ struct sidb_simulation_parameters
      */
     uint8_t base;
 };
+
 }  // namespace fiction
 
 #endif  // FICTION_SIDB_SIMULATION_PARAMETERS_HPP

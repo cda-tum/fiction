@@ -574,7 +574,7 @@ inline constexpr const bool has_inml_technology_v = std::is_same_v<technology<Ly
 template <typename Lyt>
 inline constexpr const bool has_sidb_technology_v = std::is_same_v<technology<Lyt>, sidb_technology>;
 template <typename Lyt>
-inline constexpr const bool is_siqad_coord_v = std::is_same_v<coordinate<Lyt>, siqad::coord_t>;
+inline constexpr const bool has_siqad_coord_v = std::is_same_v<coordinate<Lyt>, siqad::coord_t>;
 
 #pragma region is_cell_level_layout
 template <class Lyt, class = void>

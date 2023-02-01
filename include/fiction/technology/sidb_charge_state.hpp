@@ -55,7 +55,7 @@ enum class sidb_charge_state
  */
 [[nodiscard]] constexpr sidb_charge_state sign_to_charge_state(const int8_t sg) noexcept
 {
-    assert((sg == -1) || (sg == 0) || (sg == 1) && "Invalid charge state.");
+    assert(((sg == -1) || (sg == 0) || (sg == 1)) && "Invalid charge state.");
 
     switch (sg)
     {

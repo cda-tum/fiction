@@ -108,7 +108,7 @@ void quicksim(charge_distribution_surface<Lyt>& lyt, const quicksim_params& quic
                 lyt.set_all_charge_states(sidb_charge_state::NEUTRAL);
                 lyt.assign_charge_state_by_cell_index(i, sidb_charge_state::NEGATIVE);
                 lyt.update_local_potential();
-                lyt.system_energy();
+                lyt.recompute_system_energy();
 
                 auto upperlimit = static_cast<uint64_t>(static_cast<double>(lyt.num_cells()) / 1.5);
                 for (uint64_t num = 0; num < upperlimit; num++)

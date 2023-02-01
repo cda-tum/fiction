@@ -253,19 +253,19 @@ TEMPLATE_TEST_CASE(
 
         // system energy is zero when all SiDBs are positively charged.
         charge_layout.update_local_potential();
-        charge_layout.system_energy();
+        charge_layout.recompute_system_energy();
         CHECK(charge_layout.get_system_energy() > 0);
 
         // system energy is zero when all SiDBs are neutrally charged.
         charge_layout.set_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_layout.update_local_potential();
-        charge_layout.system_energy();
+        charge_layout.recompute_system_energy();
         CHECK(charge_layout.get_system_energy() == 0);
 
         // system energy is zero when all SiDBs are positively charged.
         charge_layout.set_all_charge_states(sidb_charge_state::POSITIVE);
         charge_layout.update_local_potential();
-        charge_layout.system_energy();
+        charge_layout.recompute_system_energy();
         CHECK(charge_layout.get_system_energy() > 0);
     }
     //
@@ -283,7 +283,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout_five.get_charge_state({4, 1, 1}) == sidb_charge_state::NEGATIVE);
 
         charge_layout_five.update_local_potential();
-        charge_layout_five.system_energy();
+        charge_layout_five.recompute_system_energy();
         charge_layout_five.validity_check();
         CHECK(charge_layout_five.get_charge_index().first == 0);
 
@@ -327,7 +327,7 @@ TEMPLATE_TEST_CASE(
 
         // closely arranged SiDBs cannot be all negatively charged
         charge_layout.update_local_potential();
-        charge_layout.system_energy();
+        charge_layout.recompute_system_energy();
         charge_layout.validity_check();
         CHECK(charge_layout.is_physically_valid() == 0);
     }
