@@ -11,10 +11,10 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 
-#include <set>
 #include <sstream>
 #include <string>
 #include <type_traits>
+#include <unordered_set>
 
 using namespace fiction;
 
@@ -326,7 +326,7 @@ TEST_CASE("Read multi-dot SQD layout with multi-cell defect", "[sqd]")
     CHECK(layout.get_cell_type({2, 4}) == sidb_technology::cell_type::NORMAL);
     CHECK(layout.get_cell_type({2, 5}) == sidb_technology::cell_type::NORMAL);
 
-    const std::set<cell<sidb_layout>> defect_positions{{5, 4}, {5, 5}, {4, 4}, {4, 5}};
+    const std::unordered_set<cell<sidb_layout>> defect_positions{{5, 4}, {5, 5}, {4, 4}, {4, 5}};
 
     layout.foreach_sidb_defect(
         [&defect_positions](const auto& cd)
@@ -395,8 +395,8 @@ TEST_CASE("In-place SQD reader with ignored defects", "[sqd]")
     using sidb_layout =
         sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    const sidb_surface_params params{std::set<sidb_defect_type>{sidb_defect_type::DB}};
-    sidb_layout         layout{params};
+    const sidb_surface_params params{std::unordered_set<sidb_defect_type>{sidb_defect_type::DB}};
+    sidb_layout               layout{params};
 
     read_sqd_layout(layout, layout_stream);
 

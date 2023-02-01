@@ -14,19 +14,18 @@
 #include "fiction/utils/truth_table_utils.hpp"
 
 #include <fmt/format.h>
+#include <phmap.h>
 
 #include <vector>
-
-#include <phmap.h>
 
 namespace fiction
 {
 
 /**
  * A gate library for the SiDB technology that is based on Y-shaped gates in hexagonal tiles. Y-shaped gates have been
- * first introduced in "Binary Atomic Silicon Logic" by Taleana Huff, Hatem Labidi, Mohammad Rashidi, Lucian Livadaru,
+ * first introduced in \"Binary Atomic Silicon Logic\" by Taleana Huff, Hatem Labidi, Mohammad Rashidi, Lucian Livadaru,
  * Thomas Dienel, Roshan Achal, Wyatt Vine, Jason Pitters, and Robert A. Wolkow in Nature Electronics 2018. The Bestagon
- * library was later proposed in "Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic" by
+ * library was later proposed in \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" by
  * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille in Design Automation Conference 2022. The goal of
  * the Bestagon library is to be as close to physically realizable SiDB circuits as possible by taking fabrication
  * limitations of, e.g., clocking electrodes into account while also relying on established gate shape. Thus, the
@@ -40,28 +39,28 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
     explicit sidb_bestagon_library() = delete;
 
     /**
-     * Overrides the corresponding function in fcn_gate_library. Given a tile t hosted in a layout lyt, this function
-     * chooses the correct fcn_gate representation for that tile taking into account gate function and information flow.
-     * Mirroring is computed additionally.
+     * Overrides the corresponding function in fcn_gate_library. Given a tile `t`, this function takes all necessary
+     * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
+     * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
-     * @tparam Lyt Pointy-top hexagonal gate-level layout type.
-     * @param lyt Layout that hosts tile t.
+     * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
+     * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
-     * @return Bestagon gate representation of t including mirroring.
+     * @return Bestagon gate representation of `t` including mirroring.
      */
-    template <typename Lyt>
-    [[nodiscard]] static fcn_gate set_up_gate(const Lyt& lyt, const tile<Lyt>& t)
+    template <typename GateLyt>
+    [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
     {
-        static_assert(is_gate_level_layout_v<Lyt>, "Lyt must be a gate-level layout");
-        static_assert(is_hexagonal_layout_v<Lyt>, "Lyt must be a hexagonal layout");
-        static_assert(has_pointy_top_hex_orientation_v<Lyt>, "Lyt must be a pointy-top hexagonal layout");
+        static_assert(is_gate_level_layout_v<GateLyt>, "Lyt must be a gate-level layout");
+        static_assert(is_hexagonal_layout_v<GateLyt>, "Lyt must be a hexagonal layout");
+        static_assert(has_pointy_top_hex_orientation_v<GateLyt>, "Lyt must be a pointy-top hexagonal layout");
 
         const auto n = lyt.get_node(t);
         const auto p = determine_port_routing(lyt, t);
 
         try
         {
-            if constexpr (fiction::has_is_fanout_v<Lyt>)
+            if constexpr (fiction::has_is_fanout_v<GateLyt>)
             {
                 if (lyt.is_fanout(n))
                 {
@@ -71,7 +70,7 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
                     }
                 }
             }
-            if constexpr (fiction::has_is_buf_v<Lyt>)
+            if constexpr (fiction::has_is_buf_v<GateLyt>)
             {
                 if (lyt.is_buf(n))
                 {
@@ -93,49 +92,49 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
                     return EMPTY_GATE;
                 }
             }
-            if constexpr (fiction::has_is_inv_v<Lyt>)
+            if constexpr (fiction::has_is_inv_v<GateLyt>)
             {
                 if (lyt.is_inv(n))
                 {
                     return INVERTER_MAP.at(p);
                 }
             }
-            if constexpr (mockturtle::has_is_and_v<Lyt>)
+            if constexpr (mockturtle::has_is_and_v<GateLyt>)
             {
                 if (lyt.is_and(n))
                 {
                     return CONJUNCTION_MAP.at(p);
                 }
             }
-            if constexpr (mockturtle::has_is_or_v<Lyt>)
+            if constexpr (mockturtle::has_is_or_v<GateLyt>)
             {
                 if (lyt.is_or(n))
                 {
                     return DISJUNCTION_MAP.at(p);
                 }
             }
-            if constexpr (fiction::has_is_nand_v<Lyt>)
+            if constexpr (fiction::has_is_nand_v<GateLyt>)
             {
                 if (lyt.is_nand(n))
                 {
                     return NEGATED_CONJUNCTION_MAP.at(p);
                 }
             }
-            if constexpr (fiction::has_is_nor_v<Lyt>)
+            if constexpr (fiction::has_is_nor_v<GateLyt>)
             {
                 if (lyt.is_nor(n))
                 {
                     return NEGATED_DISJUNCTION_MAP.at(p);
                 }
             }
-            if constexpr (mockturtle::has_is_xor_v<Lyt>)
+            if constexpr (mockturtle::has_is_xor_v<GateLyt>)
             {
                 if (lyt.is_xor(n))
                 {
                     return EXCLUSIVE_DISJUNCTION_MAP.at(p);
                 }
             }
-            if constexpr (fiction::has_is_xnor_v<Lyt>)
+            if constexpr (fiction::has_is_xnor_v<GateLyt>)
             {
                 if (lyt.is_xnor(n))
                 {
@@ -1199,6 +1198,7 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},

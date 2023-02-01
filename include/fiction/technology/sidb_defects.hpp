@@ -5,14 +5,15 @@
 #ifndef FICTION_SIDB_DEFECTS_HPP
 #define FICTION_SIDB_DEFECTS_HPP
 
+#include <cstdint>
 #include <utility>
 
 namespace fiction
 {
 
 /**
- * Specifies the types of fabrication defects that can occur on the H-Si(100) 2x1 surface according to "Atomic defect
- * classification of the H–Si(100) surface through multi-mode scanning probe microscopy" by Jeremiah Croshaw, Thomas
+ * Specifies the types of fabrication defects that can occur on the H-Si(100) 2x1 surface according to \"Atomic defect
+ * classification of the H–Si(100) surface through multi-mode scanning probe microscopy\" by Jeremiah Croshaw, Thomas
  * Dienel, Taleana Huff, and Robert Wolkow in Journal of Nanotechnology in 2020.
  */
 enum class sidb_defect_type
@@ -34,11 +35,11 @@ enum class sidb_defect_type
 };
 /**
  * In accordance with the paper mentioned above, the sidb_defect struct is used to represent a specific defect on the
- * H-Si(100) 2x1 surface that has a charge as well as relative permittivity (epsilon_r) and Thomas-Fermi screening
- * distance (lambda_tf) values associated to it.
+ * H-Si(100) 2x1 surface that has a charge as well as relative permittivity (`epsilon_r`) and Thomas-Fermi screening
+ * distance (`lambda_tf`) values associated to it.
  *
- * See "SiQAD: A Design and Simulation Tool for Atomic Silicon Quantum Dot Circuits" by S. S. H. Ng, J. Retallick, H. N.
- * Chiu, R. Lupoiu, L. Livadaru, T. Huff, M. Rashidi, W. Vine, T. Dienel, R. A. Wolkow, and K. Walus in IEEE
+ * See \"SiQAD: A Design and Simulation Tool for Atomic Silicon Quantum Dot Circuits\" by S. S. H. Ng, J. Retallick, H.
+ * N. Chiu, R. Lupoiu, L. Livadaru, T. Huff, M. Rashidi, W. Vine, T. Dienel, R. A. Wolkow, and K. Walus in IEEE
  * Transactions on Nanotechnology for more details on these values.
  */
 struct sidb_defect
@@ -75,7 +76,7 @@ struct sidb_defect
  * Checks whether the given defect is charged. Charged defects are to be avoided by a larger distance.
  *
  * @param defect Defect type to check.
- * @return True iff defect is charged.
+ * @return `true` iff defect is charged.
  */
 [[nodiscard]] static constexpr bool is_charged_defect(const sidb_defect& defect) noexcept
 {
@@ -83,12 +84,12 @@ struct sidb_defect
 }
 /**
  * Checks whether the given defect is not charged. Neutral defects are to be avoided but not by such a large distance.
- * Even though the NONE defect type is technically neutral, it is not a defect per se which is why this function returns
- * false on the NONE defect input. Additionally, the UNKNOWN defect cannot be guaranteed to be either neutral or charged
- * which is why this function returns false for UNKNOWN defect inputs as well.
+ * Even though the `NONE` defect type is technically neutral, it is not a defect per se which is why this function
+ * returns false on the `NONE` defect input. Additionally, the `UNKNOWN` defect cannot be guaranteed to be either
+ * neutral or charged which is why this function returns false for `UNKNOWN` defect inputs as well.
  *
  * @param defect Defect type to check.
- * @return True iff defect is not charged.
+ * @return `true` iff defect is not charged.
  */
 [[nodiscard]] static constexpr bool is_neutral_defect(const sidb_defect& defect) noexcept
 {
@@ -116,7 +117,7 @@ inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING = 1u;
 inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
 /**
  * Returns the extent of a defect as a pair of SiDB distances in horizontal and vertical direction. If defect is the
- * NONE defect type, {0, 0} is returned.
+ * `NONE` defect type, `{0, 0}` is returned.
  *
  * @param defect Defect type to evaluate.
  * @return Number of horizontal and vertical SiDBs that are affected by the given defect type.

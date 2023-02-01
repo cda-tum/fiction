@@ -20,9 +20,9 @@ namespace fiction
 
 /**
  * This layout provides synchronization elements on top of a clocked layout as a technology extension to the FCN concept
- * proposed in "Synchronization of Clocked Field-Coupled Circuits" by F. Sill Torres, M. Walter, R. Wille, D. Große, and
- * R. Drechsler in IEEE NANO 2018. More in-depth information can be found in "Design Automation for Field-coupled
- * Nanotechnologies" by M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
+ * proposed in \"Synchronization of Clocked Field-Coupled Circuits\" by F. Sill Torres, M. Walter, R. Wille, D. Große,
+ * and R. Drechsler in IEEE NANO 2018. More in-depth information can be found in \"Design Automation for Field-coupled
+ * Nanotechnologies\" by M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
  *
  * A synchronization element is a clock zone whose clock signal is altered such that it provides an extended Hold phase
  * of a multitude of full clock cycles. It thereby stalls information in place and acts as a latch. Additionally, the
@@ -57,7 +57,7 @@ class synchronization_element_layout : public ClockedLayout
 
     /**
      * Standard constructor. Creates a clocked synchronization element layout of the given aspect ratio. To this end, it
-     * calls ClockedLayout's standard constructor.
+     * calls `ClockedLayout`'s standard constructor.
      *
      * @param ar Highest possible position in the layout.
      */
@@ -69,7 +69,7 @@ class synchronization_element_layout : public ClockedLayout
     }
     /**
      * Standard constructor. Creates a clocked synchronization element layout of the given aspect ratio and clocks it
-     * via the given clocking scheme. To this end, it calls ClockedLayout's standard constructor.
+     * via the given clocking scheme. To this end, it calls `ClockedLayout`'s standard constructor.
      *
      * @param ar Highest possible position in the layout.
      * @param scheme Clocking scheme to apply to this layout.
@@ -100,8 +100,8 @@ class synchronization_element_layout : public ClockedLayout
      * Assigns a synchronization element to the provided clock zone.
      *
      * @param cz Clock zone to turn into a synchronization element.
-     * @param se Number of full clock cycles to extend cz's Hold phase by. If this value is 0, cz is turned back into a
-     * normal clock zone.
+     * @param se Number of full clock cycles to extend `cz`'s Hold phase by. If this value is 0, `cz` is turned back
+     * into a normal clock zone.
      */
     void assign_synchronization_element(const clock_zone<ClockedLayout>& cz, const sync_elem_t se) noexcept
     {
@@ -118,7 +118,7 @@ class synchronization_element_layout : public ClockedLayout
      * Check whether the provided clock zone is a synchronization element.
      *
      * @param cz Clock zone to check.
-     * @return True iff cz is a synchronization element.
+     * @return `true` iff `cz` is a synchronization element.
      */
     [[nodiscard]] bool is_synchronization_element(const clock_zone<ClockedLayout>& cz) const noexcept
     {
@@ -130,10 +130,10 @@ class synchronization_element_layout : public ClockedLayout
         return false;
     }
     /**
-     * Returns the Hold phase extension in clock cycles of clock zone cz.
+     * Returns the Hold phase extension in clock cycles of clock zone `cz`.
      *
      * @param cz Clock zone to check.
-     * @return Synchronization element value, i.e., Hold phase extension, of clock zone cz.
+     * @return Synchronization element value, i.e., Hold phase extension, of clock zone `cz`.
      */
     [[nodiscard]] sync_elem_t get_synchronization_element(const clock_zone<ClockedLayout>& cz) const noexcept
     {
@@ -145,15 +145,15 @@ class synchronization_element_layout : public ClockedLayout
         return 0;
     }
     /**
-     * Overwrites the function from ClockedLayout to account for synchronization elements. Evaluates whether clock zone
-     * cz2 feeds information to clock zone cz1, i.e., whether cz2 is clocked with a clock number that is lower by 1
-     * modulo num_clocks() or if one of them is a synchronization element. Due to their extended Hold phase, they feed
-     * information to any clock number.
+     * Overwrites the function from `ClockedLayout` to account for synchronization elements. Evaluates whether clock
+     * zone `cz2` feeds information to clock zone `cz1`, i.e., whether `cz2` is clocked with a clock number that is
+     * lower by 1 modulo `num_clocks()` or if one of them is a synchronization element. Due to their extended Hold
+     * phase, they feed information to any clock number.
      *
      * @param cz1 Base clock zone.
-     * @param cz2 Clock zone to check whether it feeds information to cz1.
-     * @return True iff cz2's clock number is lower by 1 modulo num_clocks() or if cz1 or cz2 are synchronization
-     * elements.
+     * @param cz2 Clock zone to check whether it feeds information to `cz1`.
+     * @return `true` iff `cz2`'s clock number is lower by 1 modulo `num_clocks()` or if `cz1` or `cz2` are
+     * synchronization elements.
      */
     [[nodiscard]] bool is_incoming_clocked(const clock_zone<ClockedLayout>& cz1,
                                            const clock_zone<ClockedLayout>& cz2) const noexcept
@@ -167,15 +167,15 @@ class synchronization_element_layout : public ClockedLayout
                is_synchronization_element(cz2);
     }
     /**
-     * Overwrites the function from ClockedLayout to account for synchronization elements. Evaluates whether clock zone
-     * cz1 feeds information to clock zone cz2, i.e., whether cz2 is clocked with a clock number that is higher by 1
-     * modulo num_clocks() or if one of them is a synchronization element. Due to their extended Hold phase, they feed
-     * information to any clock number.
+     * Overwrites the function from `ClockedLayout` to account for synchronization elements. Evaluates whether clock
+     * zone `cz1` feeds information to clock zone `cz2`, i.e., whether `cz2` is clocked with a clock number that is
+     * higher by 1 modulo `num_clocks()` or if one of them is a synchronization element. Due to their extended Hold
+     * phase, they feed information to any clock number.
      *
      * @param cz1 Base clock zone.
-     * @param cz2 Clock zone to check whether it accepts information from cz1.
-     * @return True iff cz2's clock number is higher by 1 modulo num_clocks() or if cz1 or cz2 are synchronization
-     * elements.
+     * @param cz2 Clock zone to check whether it accepts information from `cz1`.
+     * @return `true` iff `cz2`'s clock number is higher by 1 modulo `num_clocks()` or if `cz1` or `cz2` are
+     * synchronization elements.
      */
     [[nodiscard]] bool is_outgoing_clocked(const clock_zone<ClockedLayout>& cz1,
                                            const clock_zone<ClockedLayout>& cz2) const noexcept
@@ -194,28 +194,28 @@ class synchronization_element_layout : public ClockedLayout
 #pragma region Iteration
 
     /**
-     * Overwrites the function from ClockedLayout to account for synchronization elements. Returns a container with all
-     * clock zones that are incoming to the given one.
+     * Overwrites the function from `ClockedLayout` to account for synchronization elements. Returns a container with
+     * all clock zones that are incoming to the given one.
      *
      * @param cz Base clock zone.
-     * @return A container with all clock zones that are incoming to cz.
+     * @return A container with all clock zones that are incoming to `cz`.
      */
     [[nodiscard]] auto incoming_clocked_zones(const clock_zone<ClockedLayout>& cz) const noexcept
     {
         std::vector<clock_zone<ClockedLayout>> incoming{};
-        // don't reserve memory; not worth copying the clocking scheme from ClockedLayout to make an estimation
+        // don't reserve memory; not worth copying the clocking scheme from `ClockedLayout` to make an estimation
 
         foreach_incoming_clocked_zone(cz, [&incoming](const auto& ct) { incoming.push_back(ct); });
 
         return incoming;
     }
     /**
-     * Overwrites the function from ClockedLayout to account for synchronization elements. Applies a function to all
-     * incoming clock zones of a given one in accordance with incoming_clocked_zones.
+     * Overwrites the function from `ClockedLayout` to account for synchronization elements. Applies a function to all
+     * incoming clock zones of a given one in accordance with `incoming_clocked_zones`.
      *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by `mockturtle::foreach_element`.
      * @param cz Base clock zone.
-     * @param fn Functor to apply to each of cz's incoming clock zones.
+     * @param fn Functor to apply to each of `cz`'s incoming clock zones.
      */
     template <typename Fn>
     void foreach_incoming_clocked_zone(const clock_zone<ClockedLayout>& cz, Fn&& fn) const
@@ -230,28 +230,28 @@ class synchronization_element_layout : public ClockedLayout
                                                    });
     }
     /**
-     * Overwrites the function from ClockedLayout to account for synchronization elements. Returns a container with all
-     * clock zones that are outgoing from the given one.
+     * Overwrites the function from `ClockedLayout` to account for synchronization elements. Returns a container with
+     * all clock zones that are outgoing from the given one.
      *
      * @param cz Base clock zone.
-     * @return A container with all clock zones that are outgoing from cz.
+     * @return A container with all clock zones that are outgoing from `cz`.
      */
     [[nodiscard]] auto outgoing_clocked_zones(const clock_zone<ClockedLayout>& cz) const noexcept
     {
         std::vector<clock_zone<ClockedLayout>> outgoing{};
-        // don't reserve memory; not worth copying the clocking scheme from ClockedLayout to make an estimation
+        // don't reserve memory; not worth copying the clocking scheme from `ClockedLayout` to make an estimation
 
         foreach_outgoing_clocked_zone(cz, [&outgoing](const auto& ct) { outgoing.push_back(ct); });
 
         return outgoing;
     }
     /**
-     * Overwrites the function from ClockedLayout to account for synchronization elements. Applies a function to all
-     * outgoing clock zones of a given one in accordance with outgoing_clocked_zones.
+     * Overwrites the function from `ClockedLayout` to account for synchronization elements. Applies a function to all
+     * outgoing clock zones of a given one in accordance with `outgoing_clocked_zones`.
      *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by `mockturtle::foreach_element`.
      * @param cz Base clock zone.
-     * @param fn Functor to apply to each of cz's outgoing clock zones.
+     * @param fn Functor to apply to each of `cz`'s outgoing clock zones.
      */
     template <typename Fn>
     void foreach_outgoing_clocked_zone(const clock_zone<ClockedLayout>& cz, Fn&& fn) const
@@ -280,11 +280,11 @@ class synchronization_element_layout : public ClockedLayout
         return static_cast<uint32_t>(strg->se_map.size());
     }
     /**
-     * Overwrites the function from ClockedLayout to account for synchronization elements. Returns the number of
+     * Overwrites the function from `ClockedLayout` to account for synchronization elements. Returns the number of
      * incoming clock zones to the given one.
      *
      * @param cz Base clock zone.
-     * @return Number of cz's incoming clock zones.
+     * @return Number of `cz`'s incoming clock zones.
      */
     [[nodiscard]] typename ClockedLayout::degree_t in_degree(const clock_zone<ClockedLayout>& cz) const noexcept
     {
@@ -294,11 +294,11 @@ class synchronization_element_layout : public ClockedLayout
         return idg;
     }
     /**
-     * Overwrites the function from ClockedLayout to account for synchronization elements. Returns the number of
+     * Overwrites the function from `ClockedLayout` to account for synchronization elements. Returns the number of
      * outgoing clock zones from the given one.
      *
      * @param cz Base clock zone.
-     * @return Number of cz's outgoing clock zones.
+     * @return Number of `cz`'s outgoing clock zones.
      */
     [[nodiscard]] typename ClockedLayout::degree_t out_degree(const clock_zone<ClockedLayout>& cz) const noexcept
     {
@@ -308,11 +308,11 @@ class synchronization_element_layout : public ClockedLayout
         return odg;
     }
     /**
-     * Overwrites the function from ClockedLayout to account for synchronization elements. Returns the number of
+     * Overwrites the function from `ClockedLayout` to account for synchronization elements. Returns the number of
      * incoming plus outgoing clock zones of the given one.
      *
      * @param cz Base clock zone.
-     * @return Number of cz's incoming plus outgoing clock zones.
+     * @return Number of `cz`'s incoming plus outgoing clock zones.
      */
     [[nodiscard]] typename ClockedLayout::degree_t degree(const clock_zone<ClockedLayout>& cz) const noexcept
     {

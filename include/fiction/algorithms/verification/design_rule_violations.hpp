@@ -21,24 +21,57 @@ namespace fiction
 {
 
 /**
- * Specify the checks that are to be executed.
+ * Parameters for design rule violation checking that specify the checks that are to be executed.
  */
 struct gate_level_drv_params
 {
     // Topology
-    bool unplaced_nodes           = true;
-    bool placed_dead_nodes        = true;
+
+    /**
+     * Check for nodes without locations.
+     */
+    bool unplaced_nodes = true;
+    /**
+     * Check for placed but dead nodes.
+     */
+    bool placed_dead_nodes = true;
+    /*
+     * Check for nodes that are connected to non-adjacent ones.
+     */
     bool non_adjacent_connections = true;
-    bool missing_connections      = true;
-    bool crossing_gates           = true;
+    /**
+     * Check for nodes without connections.
+     */
+    bool missing_connections = true;
+    /**
+     * Check for wires that are crossing gates.
+     */
+    bool crossing_gates = true;
 
     // Clocking
+
+    /**
+     * Check if all node connections obey the clocking scheme data flow.
+     */
     bool clocked_data_flow = true;
 
     // I/O
-    bool has_io    = true;
-    bool empty_io  = true;
-    bool io_pins   = true;
+
+    /**
+     * Check if the layout has I/Os.
+     */
+    bool has_io = true;
+    /**
+     * Check if the I/Os are assigned to empty tiles.
+     */
+    bool empty_io = true;
+    /**
+     * Check if the I/Os are assigned to wire segments.
+     */
+    bool io_pins = true;
+    /**
+     * Check if the I/Os are located at the layout's border.
+     */
     bool border_io = true;
 
     /**
@@ -577,8 +610,8 @@ class gate_level_drvs_impl
  * Furthermore, this function does not only find and log DRVs but can also warn for instances that are not per se errors
  * but defy best practices of layout generation, e.g., I/Os not being placed at the layout borders.
  *
- * For this function to work, detail::gate_level_drvs_impl need to be declared as a friend class to the layout type that
- * is going to be examined.
+ * For this function to work, `detail::gate_level_drvs_impl` need to be declared as a `friend class` to the layout type
+ * that is going to be examined.
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt The gate-level layout that is to be examined for DRVs and warnings.

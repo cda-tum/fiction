@@ -30,10 +30,18 @@
 namespace fiction
 {
 
+/**
+ * Parameters for writing QCC layouts.
+ */
 struct write_qcc_layout_params
 {
+    /**
+     * Use the given filename as the component name inside the QCC file.
+     */
     bool use_filename_as_component_name = false;
-
+    /**
+     * Filename of the QCC file.
+     */
     std::string filename{};
 };
 
@@ -361,7 +369,7 @@ void write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params 
  *
  * @tparam Lyt Cell-level iNML layout type.
  * @param lyt The layout to be written.
- * @param filename The file name to create and write into. Should preferably use the ".qcc" extension.
+ * @param filename The file name to create and write into. Should preferably use the `.qcc` extension.
  * @param ps Parameters.
  */
 template <typename Lyt>

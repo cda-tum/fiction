@@ -9,17 +9,21 @@
 #include "fiction/technology/sidb_surface.hpp"
 #include "fiction/traits.hpp"
 
+#include <algorithm>
 #include <array>
+#include <cstdint>
 #include <exception>
 #include <fstream>
 #include <istream>
 #include <regex>
 #include <string>
-#include <type_traits>
 
 namespace fiction
 {
 
+/**
+ * Exception thrown when an unsupported defect index is encountered in the parsed file.
+ */
 class unsupported_defect_index_exception : public std::exception
 {
   public:
@@ -33,7 +37,9 @@ class unsupported_defect_index_exception : public std::exception
   private:
     const int unsupported_index;
 };
-
+/**
+ * Exception thrown when a missing SiDB position is encountered in the parsed file.
+ */
 class missing_sidb_position_exception : public std::exception
 {
   public:
@@ -157,7 +163,10 @@ class read_sidb_surface_defects_impl
  * Reads a defective SiDB surface from a text file provided as an input stream. The format is rudimentary and consists
  * of a simple 2D array of integers representing defect indices printed by Python.
  *
- * May throw a 'missing_sidb_position_exception' or an 'unsupported_defect_index_exception'.
+ * May throw a `missing_sidb_position_exception` or an `unsupported_defect_index_exception`.
+ *
+ * @note For testing purposes, a Python script that generates defective surfaces is provided in the
+ * `experiments/defect_aware_physical_design` directory.
  *
  * @tparam Lyt The layout type underlying the SiDB surface. Must be a cell-level SiDB layout.
  * @param is The input stream to read from.
@@ -167,7 +176,7 @@ template <typename Lyt>
 sidb_surface<Lyt> read_sidb_surface_defects(std::istream& is, const std::string& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(std::is_same_v<technology<Lyt>, sidb_technology>, "Lyt must be an SiDB layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
     detail::read_sidb_surface_defects_impl<Lyt> p{is, name};
 
@@ -179,7 +188,10 @@ sidb_surface<Lyt> read_sidb_surface_defects(std::istream& is, const std::string&
  * Reads a defective SiDB surface from a text file provided as a file name. The format is rudimentary and consists
  * of a simple 2D array of integers representing defect indices printed by Python.
  *
- * May throw a 'missing_sidb_position_exception' or an 'unsupported_defect_index_exception'.
+ * May throw a `missing_sidb_position_exception` or an `unsupported_defect_index_exception`.
+ *
+ * @note For testing purposes, a Python script that generates defective surfaces is provided in the
+ * `experiments/defect_aware_physical_design` directory.
  *
  * @tparam Lyt The layout type underlying the SiDB surface. Must be a cell-level SiDB layout.
  * @param filename The file name to open and read from.

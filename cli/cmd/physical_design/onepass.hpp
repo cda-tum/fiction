@@ -50,8 +50,10 @@ class onepass_command : public command
     {
         add_option("--clk_scheme,-s", clocking, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, ESR, CFE, BANCS}",
                    true);
-        add_option("--upper_bound,-u", ps.upper_bound, "Number of FCN gate tiles to use at maximum");
-        add_option("--fixed_size,-f", ps.fixed_size, "Execute only one iteration with the given number of tiles");
+        add_option("--upper_x", ps.upper_bound_x, "Number of FCN gate tiles to use at maximum in x-direction");
+        add_option("--upper_y", ps.upper_bound_y, "Number of FCN gate tiles to use at maximum in y-direction");
+        add_option("--fixed_size,-f", ps.fixed_size,
+                   "Execute only one iteration with the given number of upper bound tiles");
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
 #if !defined(__APPLE__)
         add_option("--async,-a", ps.num_threads, "Number of threads to use for parallel solving (beta feature)");
@@ -75,19 +77,6 @@ class onepass_command : public command
      */
     void execute() override
     {
-        // error case: -f and -u are both set
-        if (this->is_set("fixed_size") && this->is_set("upper_bound"))
-        {
-            env->out() << "[e] -u and -f cannot be set together" << std::endl;
-            reset_flags();
-            return;
-        }
-        // set the value of fixed_size as the upper bound if set
-        if (this->is_set("fixed_size"))
-        {
-            ps.upper_bound = ps.fixed_size;
-        }
-
         // if no gate types are specified, enable them all
         if (!ps.enable_and && !ps.enable_or && !ps.enable_not && !ps.enable_maj && !ps.enable_wires)
         {

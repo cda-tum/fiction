@@ -37,12 +37,16 @@
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 
 #include <cstdint>
-#include <set>
+#include <cstdlib>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
-int main()
+// NOTE: You can find the surface data in the following repository:
+// https://github.com/cda-tum/sidb-defect-aware-physical-design
+
+int main()  // NOLINT
 {
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt;
@@ -107,7 +111,8 @@ int main()
     mockturtle::tech_library<2> gate_lib{gates};
 
     // parameterize the H-Si(100) 2x1 surface to ignore certain defect types
-    fiction::sidb_surface_params surface_params{std::set<fiction::sidb_defect_type>{fiction::sidb_defect_type::DB}};
+    fiction::sidb_surface_params surface_params{
+        std::unordered_set<fiction::sidb_defect_type>{fiction::sidb_defect_type::DB}};
 
     //    fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
 
@@ -209,7 +214,19 @@ int main()
         defect_exp.table();
     }
 
-    return 0;
+    return EXIT_SUCCESS;
+}
+
+#else  // FICTION_Z3_SOLVER
+
+#include <cstdlib>
+#include <iostream>
+
+int main()  // NOLINT
+{
+    std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
+
+    return EXIT_FAILURE;
 }
 
 #endif  // FICTION_Z3_SOLVER

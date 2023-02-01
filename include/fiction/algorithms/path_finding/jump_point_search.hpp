@@ -10,6 +10,8 @@
 #include "fiction/utils/routing_utils.hpp"
 #include "fiction/utils/stl_utils.hpp"
 
+#include <phmap.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -18,8 +20,6 @@
 #include <optional>
 #include <type_traits>
 #include <vector>
-
-#include <phmap.h>
 
 namespace fiction
 {
@@ -88,7 +88,7 @@ class jump_point_search_impl
          * Comparator for the priority queue. Compares only the f-values.
          *
          * @param other Other coordinate_f to compare with.
-         * @return True iff this f-value is greater than the other's.
+         * @return `true` iff this f-value is greater than the other's.
          */
         bool operator>(const coordinate_f& other) const
         {
@@ -99,7 +99,7 @@ class jump_point_search_impl
          * priority queue.
          *
          * @param other Other coordinate_f to compare with.
-         * @return True iff this coord value is equal to the other's.
+         * @return `true` iff this coord value is equal to the other's.
          */
         bool operator==(const coordinate_f& other) const
         {
@@ -267,7 +267,7 @@ class jump_point_search_impl
      *
      * @param c1 Start coordinate.
      * @param c2 Goal coordinate.
-     * @return True iff c2 is directly reachable from c1.
+     * @return `true` iff c2 is directly reachable from c1.
      */
     bool is_traversable(const coordinate<Lyt>& c1, const coordinate<Lyt>& c2) const noexcept
     {
@@ -303,7 +303,7 @@ class jump_point_search_impl
      * Checks if a coordinate has been visited already.
      *
      * @param c Coordinate to check.
-     * @return True iff c has already been visited.
+     * @return `true` iff c has already been visited.
      */
     bool is_visited(const coordinate<Lyt>& c) const noexcept
     {
@@ -340,7 +340,7 @@ class jump_point_search_impl
      *
      * @param c Coordinate to whose g-value is to be checked.
      * @param g_val g-value to compare to c's.
-     * @return True iff the given g-value does not mean an improvement for the given coordinate.
+     * @return `true` iff the given g-value does not mean an improvement for the given coordinate.
      */
     bool no_improvement(const coordinate<Lyt>& c, const Dist g_val) noexcept
     {
@@ -457,31 +457,32 @@ class jump_point_search_impl
  * average complexity on uniform-cost grids that allow diagonal connections. It uses a heuristic distance function that
  * estimates the remaining costs towards the target in every step. Thus, this heuristic function should neither be
  * complex to calculate nor overestimating the remaining costs. Common heuristics to be used are the Manhattan and the
- * Euclidean distance functions. See distance.hpp for implementations. Since JPS assumes a unit-cost grid, the use of
- * cost functions together with JPS is not possible.
+ * Euclidean distance functions. See distance_functor for implementations. Since JPS assumes a unit-cost grid, the use
+ * of cost functions together with JPS is not possible.
  *
  * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
  * obstructed coordinates and connections.
  *
- * JPS was introduced in "Online Graph Pruning for Pathfinding on Grid Maps" by Daniel Harabor and Alban Grastien in
+ * JPS was introduced in \"Online Graph Pruning for Pathfinding on Grid Maps\" by Daniel Harabor and Alban Grastien in
  * AAAI 2011.
  *
  * Parts of this implementation are based on https://github.com/qiao/PathFinding.js.
  *
  * @note The original JPS highly relies on diagonal paths in the grid which are not possible in most Cartesian
  * grid-based FCN technologies. Therefore, this implementation disallows diagonal paths. Consequently, and due to
- * non-uniform clocking schemes, JPS might perform worse than A* in terms of runtime. It is recommended to use A*.
+ * non-uniform clocking schemes, JPS might perform worse than A* in terms of runtime. It is recommended to use A* (see
+ * a_star).
  *
  * @note JPS does not support wire crossings.
  *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
  * @tparam Dist Distance value type to be used in the heuristic estimation function.
- * @param layout The clocked layout in which the shortest path between source and target is to be found.
+ * @param layout The clocked layout in which the shortest path between `source` and `target` is to be found.
  * @param objective Source-target coordinate pair.
  * @param dist_fn A distance functor that implements the desired heuristic estimation function.
  * @param ps Parameters.
- * @return The shortest loopless path in layout from source to target.
+ * @return The shortest loopless path in `layout` from `source` to `target`.
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t>
 [[nodiscard]] Path

@@ -43,7 +43,8 @@ using surface_black_list =
  * cannot be realized on a certain tile due to disturbances caused by defects gets blacklisted on said tile. The black
  * list is then returned by this function.
  *
- * The given gate library must implement both the 'get_functional_implementations()' and 'get_gate_ports()' functions.
+ * @note The given gate library must implement both the `get_functional_implementations()` and `get_gate_ports()`
+ * functions.
  *
  * @tparam GateLibrary FCN gate library type to fetch the gate descriptions from.
  * @tparam GateLyt Gate-level layout type that specifies the tiling of the SiDB surface.
@@ -119,12 +120,14 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
     };
 
     // for each tile in the layout
-    gate_lyt.foreach_tile([&](const auto& t) constexpr {
-        // for each gate in the library
-        std::for_each(gate_implementations.cbegin(), gate_implementations.cend(),
-                      // analyze the defect impact
-                      std::bind(analyze_gate, std::placeholders::_1, t));
-    });
+    gate_lyt.foreach_tile(
+        [&](const auto& t) constexpr
+        {
+            // for each gate in the library
+            std::for_each(gate_implementations.cbegin(), gate_implementations.cend(),
+                          // analyze the defect impact
+                          std::bind(analyze_gate, std::placeholders::_1, t));
+        });
 
     return black_list;
 }

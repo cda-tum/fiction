@@ -75,29 +75,36 @@ class unsupported_gate_orientation_exception : public std::exception
 
 /**
  * Base class for various FCN libraries used to map gate-level layouts to cell-level ones. Any new gate library can
- * extend fcn_gate_library if it benefits from its features but does not have to. The only requirement is that it must
+ * extend `fcn_gate_library` if it benefits from its features but does not have to. The only requirement is that it must
  * be a static class that provides a
  *
- * \code{.cpp}
- *    template <typename GateLyt>
- *    static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
- * \endcode
+   \verbatim embed:rst
+   .. code-block:: c++
+
+      template <typename GateLyt>
+      static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
+
+   \endverbatim
  *
  * public member function. Additionally, a
  *
- * \code{.cpp}
- *    template <typename CellLyt>
- *    static void post_layout_optimization(CellLyt& lyt)
- * \endcode
+   \verbatim embed:rst
+   .. code-block:: c++
+
+      template <typename CellLyt>
+      static void post_layout_optimization(CellLyt& lyt)
+   \endverbatim
  *
  * can optionally be provided if some cleanup or optimization is necessary on the cell-level layout after each gate has
  * been mapped.
  *
  * Additionally, a
  *
- * \code{.cpp}
- *    static gate_functions get_functional_implementations()
- * \endcode
+   \verbatim embed:rst
+   .. code-block:: c++
+
+      static gate_functions get_functional_implementations()
+   \endverbatim
  *
  * can optionally be provided to allow reverse access to the gate structures by functional implementation. This
  * interface is for example used to determine which gate types to blacklist on tiles in P&R algorithms by considering
@@ -105,12 +112,14 @@ class unsupported_gate_orientation_exception : public std::exception
  *
  * Finally, a
  *
- * \code{.cpp}
- *    static gate_ports<PortType> get_gate_ports()
- * \endcode
+   \verbatim embed:rst
+   .. code-block:: c++
+
+      static gate_ports<PortType> get_gate_ports()
+   \endverbatim
  *
  * can optionally be provided to allow reverse access to the gate ports given a gate implementation. This interface is
- * for example used in sidb_surface_analysis to determine which ports to blacklist.
+ * for example used in `sidb_surface_analysis` to determine which ports to blacklist.
  *
  * @tparam Technology FCN technology type of the implementing gate library.
  * @tparam GateSizeX Tile size in x-dimension.
@@ -123,12 +132,12 @@ class fcn_gate_library
     using technology = Technology;
 
     /**
-     * A cell_list is an array of size GateSizeX x GateSizeY of type T.
+     * A `cell_list` is an array of size `GateSizeX` \f$ \times \f$ `GateSizeY` of type `T`.
      */
     template <typename T>
     using cell_list = std::array<std::array<T, GateSizeX>, GateSizeY>;
     /**
-     * Each gate is thus a cell_list of cell types defined in Technology.
+     * Each gate is thus a `cell_list` of cell types defined in `Technology`.
      */
     using fcn_gate = cell_list<typename Technology::cell_type>;
     /**
@@ -146,12 +155,12 @@ class fcn_gate_library
      */
     explicit fcn_gate_library() = delete;
     /**
-     * Converts a cell_list of type T to an fcn_gate at compile time. This function allows to conveniently specify
-     * fcn_gate instances in a semi-readable way in code. For examples usages see qca_one_library.hpp.
+     * Converts a `cell_list` of type `T` to an `fcn_gate` at compile time. This function allows to conveniently
+     * specify `fcn_gate` instances in a semi-readable way in code. For examples usages see `qca_one_library.hpp`.
      *
-     * @tparam T Element type of given cell_list.
+     * @tparam T Element type of given `cell_list`.
      * @param c Cell list to convert.
-     * @return An fcn_gate created from the representation provided in c.
+     * @return An `fcn_gate` created from the representation provided in `c`.
      */
     template <typename T>
     static constexpr fcn_gate cell_list_to_gate(const cell_list<T>& c) noexcept
@@ -159,41 +168,41 @@ class fcn_gate_library
         return convert_array_of_arrays<typename Technology::cell_type, T, GateSizeY, GateSizeX>(c);
     }
     /**
-     * Rotates the given fcn_gate by 90° clockwise at compile time.
+     * Rotates the given `fcn_gate` by 90° clockwise at compile time.
      *
-     * @param g fcn_gate to rotate.
-     * @return Rotated fcn_gate.
+     * @param g `fcn_gate` to rotate.
+     * @return Rotated `fcn_gate`.
      */
     static constexpr fcn_gate rotate_90(const fcn_gate& g) noexcept
     {
         return reverse_columns(transpose(g));
     }
     /**
-     * Rotates the given fcn_gate by 180° at compile time.
+     * Rotates the given `fcn_gate` by 180° at compile time.
      *
-     * @param g fcn_gate to rotate.
-     * @return Rotated fcn_gate.
+     * @param g `fcn_gate` to rotate.
+     * @return Rotated `fcn_gate`.
      */
     static constexpr fcn_gate rotate_180(const fcn_gate& g) noexcept
     {
         return reverse_columns(reverse_rows(g));
     }
     /**
-     * Rotates the given fcn_gate by 270° clockwise at compile time.
+     * Rotates the given `fcn_gate` by 270° clockwise at compile time.
      *
-     * @param g fcn_gate to rotate.
-     * @return Rotated fcn_gate.
+     * @param g `fcn_gate` to rotate.
+     * @return Rotated `fcn_gate`.
      */
     static constexpr fcn_gate rotate_270(const fcn_gate& g) noexcept
     {
         return transpose(reverse_columns(g));
     }
     /**
-     * Merges multiple fcn_gates into one at compile time. This is intended to be used for wires. Unexpected behavior
-     * can be caused, if more than one fcn_gate has a cell at the same position.
+     * Merges multiple `fcn_gate`s into one at compile time. This is intended to be used for wires. Unexpected behavior
+     * can be caused, if more than one `fcn_gate` has a cell at the same position.
      *
      * @param gates Vector of gates to be merged.
-     * @return Merged fcn_gate.
+     * @return Merged `fcn_gate`.
      */
     static constexpr fcn_gate merge(const std::vector<fcn_gate>& gates) noexcept
     {
@@ -216,12 +225,12 @@ class fcn_gate_library
         return merged;
     }
     /**
-     * Applies given mark to given fcn_gate g at given port p at compile time.
+     * Applies given mark to given `fcn_gate` `g` at given port `p` at compile time.
      *
      * @param g Gate to apply mark to.
      * @param p Port specifying where to apply the mark.
      * @param mark Mark to be applied
-     * @return Marked fcn_gate.
+     * @return Marked `fcn_gate`.
      */
     template <typename Port>
     static constexpr fcn_gate mark_cell(const fcn_gate& g, const Port& p,
@@ -236,7 +245,7 @@ class fcn_gate_library
     /**
      * Returns horizontal size of gate blocks.
      *
-     * @return GateSizeX.
+     * @return `GateSizeX`.
      */
     [[nodiscard]] static constexpr uint16_t gate_x_size() noexcept
     {
@@ -245,7 +254,7 @@ class fcn_gate_library
     /**
      * Returns vertical size of gate blocks.
      *
-     * @return GateSizeY.
+     * @return `GateSizeY`.
      */
     [[nodiscard]] static constexpr uint16_t gate_y_size() noexcept
     {
@@ -254,10 +263,10 @@ class fcn_gate_library
 
   protected:
     /**
-     * Transposes the given fcn_gate at compile time.
+     * Transposes the given `fcn_gate` at compile time.
      *
-     * @param g fcn_gate to transpose.
-     * @return Transposed fcn_gate.
+     * @param g `fcn_gate` to transpose.
+     * @return Transposed `fcn_gate`.
      */
     static constexpr fcn_gate transpose(const fcn_gate& g) noexcept
     {
@@ -274,10 +283,10 @@ class fcn_gate_library
         return trans;
     }
     /**
-     * Reverses the columns of the given fcn_gate at compile time.
+     * Reverses the columns of the given `fcn_gate` at compile time.
      *
-     * @param g fcn_gate whose columns are to be reversed.
-     * @return fcn_gate with reversed columns.
+     * @param g `fcn_gate` whose columns are to be reversed.
+     * @return `fcn_gate` with reversed columns.
      */
     static constexpr fcn_gate reverse_columns(const fcn_gate& g) noexcept
     {
@@ -289,10 +298,10 @@ class fcn_gate_library
         return rev_cols;
     }
     /**
-     * Reverses the rows of the given fcn_gate at compile time.
+     * Reverses the rows of the given `fcn_gate` at compile time.
      *
-     * @param g fcn_gate whose rows are to be reversed.
-     * @return fcn_gate with reversed rows.
+     * @param g `fcn_gate` whose rows are to be reversed.
+     * @return `fcn_gate` with reversed rows.
      */
     static constexpr fcn_gate reverse_rows(const fcn_gate& g) noexcept
     {

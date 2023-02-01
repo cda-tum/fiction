@@ -10,19 +10,18 @@
 
 #include <cassert>
 #include <cstdint>
-#include <set>
 
 namespace fiction
 {
 
 /**
- * Returns the number of adjacent coordinates of a given one. This is not a constant value because c could be located at
- * a layout border.
+ * Returns the number of adjacent coordinates of a given one. This is not a constant value because `c` could be located
+ * at a layout border.
  *
  * @tparam Lyt Layout type.
  * @param lyt Layout.
  * @param c Coordinate whose number of adjacencies are required.
- * @return Number of c's adjacent coordinates.
+ * @return Number of `c`'s adjacent coordinates.
  */
 template <typename Lyt>
 [[nodiscard]] uint8_t num_adjacent_coordinates(const Lyt& lyt, const coordinate<Lyt>& c) noexcept
@@ -167,14 +166,14 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Cel
 /**
  * Port directions address coordinates relative to each other by specifying cardinal directions. This function converts
  * such a relative direction to an absolute coordinate when given a layout and a coordinate therein to consider. That
- * is, when presented with, e.g., a NORTH_EAST direction, it will return the coordinate that is to the NORTH_EAST of the
- * given coordinate c in the layout lyt.
+ * is, when presented with, e.g., a `NORTH_EAST` direction, it will return the coordinate that is to the `NORTH_EAST` of
+ * the given coordinate `c` in the layout `lyt`.
  *
  * @tparam Lyt Coordinate layout type.
  * @param lyt Coordinate layout.
  * @param c Coordinate to consider.
  * @param port Port direction.
- * @return Absolute coordinate specified by a coordinate c in layout lyt and a port direction.
+ * @return Absolute coordinate specified by a coordinate `c` in layout `lyt` and a port direction.
  */
 template <typename Lyt>
 [[nodiscard]] coordinate<Lyt> port_direction_to_coordinate(const Lyt& lyt, const coordinate<Lyt>& c,

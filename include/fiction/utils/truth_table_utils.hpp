@@ -13,12 +13,14 @@
 namespace fiction
 {
 
+// NOLINTBEGIN(*-pointer-arithmetic)
+
 /**
  * Creates and returns a truth table that implements the identity function in one variable.
  *
  * @return Identity function in one variable.
  */
-kitty::dynamic_truth_table create_id_tt() noexcept
+inline kitty::dynamic_truth_table create_id_tt() noexcept
 {
     constexpr const uint64_t lit = 0x2;
 
@@ -32,7 +34,7 @@ kitty::dynamic_truth_table create_id_tt() noexcept
  *
  * @return Negation in one variable.
  */
-kitty::dynamic_truth_table create_not_tt() noexcept
+inline kitty::dynamic_truth_table create_not_tt() noexcept
 {
     constexpr const uint64_t lit = 0x1;
 
@@ -46,7 +48,7 @@ kitty::dynamic_truth_table create_not_tt() noexcept
  *
  * @return Conjunction in two variables.
  */
-kitty::dynamic_truth_table create_and_tt() noexcept
+inline kitty::dynamic_truth_table create_and_tt() noexcept
 {
     constexpr const uint64_t lit = 0x8;
 
@@ -60,7 +62,7 @@ kitty::dynamic_truth_table create_and_tt() noexcept
  *
  * @return Disjunction in two variables.
  */
-kitty::dynamic_truth_table create_or_tt() noexcept
+inline kitty::dynamic_truth_table create_or_tt() noexcept
 {
     constexpr const uint64_t lit = 0xe;
 
@@ -74,7 +76,7 @@ kitty::dynamic_truth_table create_or_tt() noexcept
  *
  * @return Negated conjunction in two variables.
  */
-kitty::dynamic_truth_table create_nand_tt() noexcept
+inline kitty::dynamic_truth_table create_nand_tt() noexcept
 {
     constexpr const uint64_t lit = 0x7;
 
@@ -88,7 +90,7 @@ kitty::dynamic_truth_table create_nand_tt() noexcept
  *
  * @return Negated disjunction in two variables.
  */
-kitty::dynamic_truth_table create_nor_tt() noexcept
+inline kitty::dynamic_truth_table create_nor_tt() noexcept
 {
     constexpr const uint64_t lit = 0x1;
 
@@ -102,7 +104,7 @@ kitty::dynamic_truth_table create_nor_tt() noexcept
  *
  * @return Exclusive disjunction in two variables.
  */
-kitty::dynamic_truth_table create_xor_tt() noexcept
+inline kitty::dynamic_truth_table create_xor_tt() noexcept
 {
     constexpr const uint64_t lit = 0x6;
 
@@ -116,7 +118,7 @@ kitty::dynamic_truth_table create_xor_tt() noexcept
  *
  * @return Negated exclusive disjunction in two variables.
  */
-kitty::dynamic_truth_table create_xnor_tt() noexcept
+inline kitty::dynamic_truth_table create_xnor_tt() noexcept
 {
     constexpr const uint64_t lit = 0x9;
 
@@ -130,7 +132,7 @@ kitty::dynamic_truth_table create_xnor_tt() noexcept
  *
  * @return Majority function in three variables.
  */
-kitty::dynamic_truth_table create_maj_tt() noexcept
+inline kitty::dynamic_truth_table create_maj_tt() noexcept
 {
     constexpr const uint64_t lit = 0xe8;
 
@@ -139,6 +141,8 @@ kitty::dynamic_truth_table create_maj_tt() noexcept
 
     return table;
 }
+
+// NOLINTEND(*-pointer-arithmetic)
 
 }  // namespace fiction
 

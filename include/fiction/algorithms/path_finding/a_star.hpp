@@ -11,6 +11,8 @@
 #include "fiction/utils/routing_utils.hpp"
 #include "fiction/utils/stl_utils.hpp"
 
+#include <phmap.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -19,11 +21,12 @@
 #include <type_traits>
 #include <vector>
 
-#include <phmap.h>
-
 namespace fiction
 {
 
+/**
+ * Parameters for the A* algorithm.
+ */
 struct a_star_params
 {
     /**
@@ -107,7 +110,7 @@ class a_star_impl
          * Comparator for the priority queue. Compares only the f-values.
          *
          * @param other Other coordinate_f to compare with.
-         * @return True iff this f-value is greater than the other's.
+         * @return `true` iff this f-value is greater than the other's.
          */
         bool operator>(const coordinate_f& other) const
         {
@@ -118,7 +121,7 @@ class a_star_impl
          * priority queue.
          *
          * @param other Other coordinate_f to compare with.
-         * @return True iff this coord value is equal to the other's.
+         * @return `true` iff this coord value is equal to the other's.
          */
         bool operator==(const coordinate_f& other) const
         {
@@ -250,7 +253,7 @@ class a_star_impl
      * Checks if a coordinate has been visited already.
      *
      * @param c Coordinate to check.
-     * @return True iff c has already been visited.
+     * @return `true` iff c has already been visited.
      */
     bool is_visited(const coordinate<Lyt>& c) const noexcept
     {
@@ -287,7 +290,7 @@ class a_star_impl
      *
      * @param c Coordinate to whose g-value is to be checked.
      * @param g_val g-value to compare to c's.
-     * @return True iff the given g-value does not mean an improvement for the given coordinate.
+     * @return `true` iff the given g-value does not mean an improvement for the given coordinate.
      */
     bool no_improvement(const coordinate<Lyt>& c, const g_f_type g_val) noexcept
     {
@@ -322,7 +325,7 @@ class a_star_impl
  * layout. A* is an extension of Dijkstra's algorithm for shortest paths but offers better average complexity. It uses a
  * heuristic distance function that estimates the remaining costs towards the target in every step. Thus, this heuristic
  * function should neither be complex to calculate nor overestimating the remaining costs. Common heuristics to be used
- * are the Manhattan and the Euclidean distance functions. See distance.hpp for implementations.
+ * are the Manhattan and the Euclidean distance functions. See distance_functor for implementations.
  *
  * If the given layout implements the obstruction interface (see obstruction_layout), paths will not be routed via
  * obstructed coordinates and connections.
@@ -332,21 +335,21 @@ class a_star_impl
  * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
  * cross only in a single point (orthogonal crossings + knock-knees/double wires).
  *
- * A* was introduced in "A Formal Basis for the Heuristic Determination of Minimum Cost Paths" by Peter E. Hart, Nils J.
- * Nilsson, and Bertram Raphael in IEEE Transactions on Systems Science and Cybernetics 1968, Volume 4, Issue 2.
+ * A* was introduced in \"A Formal Basis for the Heuristic Determination of Minimum Cost Paths\" by Peter E. Hart, Nils
+ * J. Nilsson, and Bertram Raphael in IEEE Transactions on Systems Science and Cybernetics 1968, Volume 4, Issue 2.
  *
- * This implementation is based on the pseudocode at https://en.wikipedia.org/wiki/A*_search_algorithm.
+ * This implementation is based on the pseudocode from https://en.wikipedia.org/wiki/A_star_search_algorithm.
  *
  * @tparam Path Path type to create.
  * @tparam Lyt Clocked layout type.
  * @tparam Dist Distance value type to be used in the heuristic estimation function.
  * @tparam Cost Cost value type to be used when determining moving cost between coordinates.
- * @param layout The clocked layout in which the shortest path between source and target is to be found.
+ * @param layout The clocked layout in which the shortest path between `source` and `target` is to be found.
  * @param objective Source-target coordinate pair.
  * @param dist_fn A distance functor that implements the desired heuristic estimation function.
  * @param cost_fn A cost functor that implements the desired cost function.
  * @param ps Parameters.
- * @return The shortest loopless path in layout from source to target.
+ * @return The shortest loopless path in `layout` from `source` to `target`.
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
 [[nodiscard]] Path a_star(const Lyt& layout, const routing_objective<Lyt>& objective,
@@ -360,25 +363,26 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
 }
 /**
  * A distance function that does not approximate but compute the actual minimum path length on the given layout via A*
- * traversal. Naturally, this function cannot be evaluated in O(1), but has the polynomial complexity of A*.
+ * traversal. Naturally, this function cannot be evaluated in \f$ O(1) \f$, but has the polynomial complexity of A*.
  *
- * If no path between source and target exists in lyt, the returned distance is std::numeric_limits<Dist>::infinity() if
- * that value is supported by Dist, or std::numeric_limits<Dist>::max(), otherwise.
+ * If no path between source and target exists in `lyt`, the returned distance is
+ * `std::numeric_limits<Dist>::infinity()` if that value is supported by `Dist`, or `std::numeric_limits<Dist>::max()`,
+ * otherwise.
  *
  * @tparam Lyt Clocked layout type.
  * @tparam Dist Distance type.
- * @param lyt Layout.
+ * @param layout The clocked layout in which the distance between `source` and `target` is to be determined.
  * @param source Source coordinate.
  * @param target Target coordinate.
- * @return Minimum path length between source and target.
+ * @return Minimum path length between `source` and `target`.
  */
 template <typename Lyt, typename Dist = uint64_t>
-[[nodiscard]] Dist a_star_distance(const Lyt& lyt, const coordinate<Lyt>& source,
+[[nodiscard]] Dist a_star_distance(const Lyt& layout, const coordinate<Lyt>& source,
                                    const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
 
-    const auto path_length = a_star<layout_coordinate_path<Lyt>>(lyt, {source, target}).size();
+    const auto path_length = a_star<layout_coordinate_path<Lyt>>(layout, {source, target}).size();
 
     if (path_length == 0ul)
     {

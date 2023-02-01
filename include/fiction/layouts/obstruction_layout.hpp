@@ -8,11 +8,11 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/hash.hpp"
 
+#include <phmap.h>
+
 #include <memory>
 #include <type_traits>
 #include <utility>
-
-#include <phmap.h>
 
 namespace fiction
 {
@@ -79,7 +79,7 @@ class obstruction_layout<Lyt, false> : public Lyt
         strg->obstructed_coordinates.insert(c);
     }
     /**
-     * Marks the connection from coordinate src to coordinate tgt as obstructed.
+     * Marks the connection from coordinate `src` to coordinate `tgt` as obstructed.
      *
      * @param src Source coordinate.
      * @param tgt Target coordinate.
@@ -89,14 +89,14 @@ class obstruction_layout<Lyt, false> : public Lyt
         strg->obstructed_connections.insert({src, tgt});
     }
     /**
-     * Clears all obstructed coordinates that were manually marked via obstruct_coordinate.
+     * Clears all obstructed coordinates that were manually marked via `obstruct_coordinate`.
      */
     void clear_obstructed_coordinates() noexcept
     {
         strg->obstructed_coordinates.clear();
     }
     /**
-     * Clears all obstructed connections that were manually marked via obstruct_connections.
+     * Clears all obstructed connections that were manually marked via `obstruct_connections`.
      */
     void clear_obstructed_connections() noexcept
     {
@@ -106,7 +106,7 @@ class obstruction_layout<Lyt, false> : public Lyt
      * Checks if the given coordinate is obstructed of some sort.
      *
      * @param c Coordinate to check.
-     * @return True iff c is obstructed.
+     * @return `true` iff `c` is obstructed.
      */
     [[nodiscard]] bool is_obstructed_coordinate(const typename Lyt::coordinate& c) const noexcept
     {
@@ -132,7 +132,7 @@ class obstruction_layout<Lyt, false> : public Lyt
      *
      * @param src Source coordinate.
      * @param tgt Target coordinate.
-     * @return True iff the connection from c1 to c2 is obstructed.
+     * @return `true` iff the connection from `c1` to `c2` is obstructed.
      */
     [[nodiscard]] bool is_obstructed_connection(const typename Lyt::coordinate& src,
                                                 const typename Lyt::coordinate& tgt) const noexcept

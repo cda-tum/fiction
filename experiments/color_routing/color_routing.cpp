@@ -19,6 +19,7 @@
 #include <mockturtle/networks/aig.hpp>       // AND-inverter graphs
 
 #include <cstdint>
+#include <cstdlib>
 #include <string>
 
 using gate_lyt = fiction::gate_level_layout<
@@ -247,6 +248,18 @@ int main()  // NOLINT
     ortho_mcs();
 
     return EXIT_SUCCESS;
+}
+
+#else  // FICTION_Z3_SOLVER
+
+#include <cstdlib>
+#include <iostream>
+
+int main()  // NOLINT
+{
+    std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
+
+    return EXIT_FAILURE;
 }
 
 #endif  // FICTION_Z3_SOLVER

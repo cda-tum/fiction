@@ -35,6 +35,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -180,6 +181,18 @@ int main()  // NOLINT
     }
 
     return EXIT_SUCCESS;
+}
+
+#else  // FICTION_Z3_SOLVER
+
+#include <cstdlib>
+#include <iostream>
+
+int main()  // NOLINT
+{
+    std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
+
+    return EXIT_FAILURE;
 }
 
 #endif  // FICTION_Z3_SOLVER

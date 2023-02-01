@@ -146,4 +146,9 @@ Hashing
 
 **Header:** ``fiction/utils/hash.hpp``
 
+This header defines implementations for ``std::hash`` for several data types.
+
 .. doxygenfunction:: fiction::hash_combine
+.. doxygenstruct:: std::hash<std::array<T, N>>
+.. doxygenstruct:: std::hash<std::set<T>>
+.. doxygenstruct:: std::hash<std::pair<T1, T2>>

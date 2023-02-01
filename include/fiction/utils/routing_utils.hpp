@@ -30,7 +30,7 @@ struct routing_objective
      * Equality operator.
      * @tparam OtherLyt Type of other layout.
      * @param other Routing objective to compare to.
-     * @return True iff the given objective is equal to this one.
+     * @return `true` iff the given objective is equal to this one.
      */
     template <typename OtherLyt>
     bool operator==(const routing_objective<OtherLyt>& other) const noexcept
@@ -123,20 +123,21 @@ class path_set : public std::set<Path>
 };
 
 /**
- * Checks whether a a given coordinate successor hosts a crossable wire when coming from coordinate src in a given
+ * Checks whether a a given coordinate `successor` hosts a crossable wire when coming from coordinate `src` in a given
  * layout. A wire is said to be crossable if a potential cross-over would not result in running along the same
- * information flow direction. For example, a wire segment hosted by successor that is horizontal and runs from west to
- * east is crossable by a wire segment coming from src that is vertical and runs from north to south. However, if the
- * wire segment coming from src were also horizontal and ran from west to east, the cross-over would be prohibited.
+ * information flow direction. For example, a wire segment hosted by `successor` that is horizontal and runs from west
+ * to east is crossable by a wire segment coming from `src` that is vertical and runs from north to south. However, if
+ * the wire segment coming from `src` were also horizontal and ran from west to east, the cross-over would be
+ * prohibited.
  *
- * @Note This function can be called on layouts types other than gate-level layouts, but will then always return false.
- * This is helpful for general routing in, e.g., clocked layouts.
+ * @Note This function can be called on layouts types other than gate-level layouts, but will then always return
+ * `false`. This is helpful for general routing in, e.g., clocked layouts.
  *
  * @tparam Lyt Layout type.
  * @param lyt The layout.
- * @param src Source coordinate in lyt.
- * @param successor Successor coordinate in lyt reachable from src.
- * @return True iff successor hosts a wire that is crossable from src.
+ * @param src Source coordinate in `lyt`.
+ * @param successor Successor coordinate in lyt reachable from `src`.
+ * @return `true` iff `successor` hosts a wire that is crossable from `src`.
  */
 template <typename Lyt>
 [[nodiscard]] bool is_crossable_wire(const Lyt& lyt, const coordinate<Lyt>& src,
@@ -171,8 +172,8 @@ template <typename Lyt>
  * Establishes a wire routing along the given path in the given layout. To this end, the given path's source and target
  * coordinates are assumed to be populated by other gates or wires that the new path shall connect to.
  *
- * If path contains a tile that is allocated already, it will instead switch to the crossing layer. If path contains
- * exactly source and target, no wires are created but source and target are connected.
+ * If `path` contains a tile that is allocated already, it will instead switch to the crossing layer. If path contains
+ * exactly source and target, no wires are created, but the source and target are connected.
  *
  * @tparam Lyt Gate-level layout type.
  * @tparam Path Path type.
@@ -201,8 +202,9 @@ void route_path(Lyt& lyt, const Path& path) noexcept
  * starting at each PI. Whenever the next regular node (non-IO, non-constant, non-wire) is encountered, this connection
  * is added to the list of all objectives.
  *
- * Example: Let a layout have connections from (0,0) to (2,3) via a cascade of wires and a direct connection from (2,2)
- * to (2,3). The list of routing objectives extracted from that layout would contain {(0,0), (2,3)} and {(2,2), (2,3)}.
+ * Example: Let a layout have connections from `(0,0)` to `(2,3)` via a cascade of wires and a direct connection from
+ * `(2,2)` to `(2,3)`. The list of routing objectives extracted from that layout would contain `{(0,0), (2,3)}` and
+ * `{(2,2), (2,3)}`.
  *
  * In other words, if all wires were removed from the layout and all connections ripped-up, an equivalent layout could
  * be recreated from the list of routing objectives.

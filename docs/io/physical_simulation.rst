@@ -8,6 +8,9 @@ QCADesigner
 
 **Header:** ``fiction/io/write_qca_layout.hpp``
 
+.. doxygenstruct:: fiction::write_qca_layout_params
+   :members:
+
 .. doxygenfunction:: fiction::write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params ps = {})
 .. doxygenfunction:: fiction::write_qca_layout(const Lyt& lyt, const std::string& filename, write_qca_layout_params ps = {})
 
@@ -16,8 +19,13 @@ QCA-STACK
 
 **Header:** ``fiction/io/write_fqca_layout.hpp``
 
+.. doxygenstruct:: fiction::write_fqca_layout_params
+   :members:
+
 .. doxygenfunction:: fiction::write_fqca_layout(const Lyt& lyt, std::ostream& os, write_fqca_layout_params ps = {})
 .. doxygenfunction:: fiction::write_fqca_layout(const Lyt& lyt, const std::string& filename, write_fqca_layout_params ps = {})
+
+.. doxygenclass:: fiction::out_of_cell_names_exception
 
 **Header:** ``fiction/io/read_fqca_layout.hpp``
 
@@ -28,6 +36,9 @@ ToPoliNano
 ##########
 
 **Header:** ``fiction/io/write_qcc_layout.hpp``
+
+.. doxygenstruct:: fiction::write_qcc_layout_params
+   :members:
 
 .. doxygenfunction:: fiction::write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params ps = {})
 .. doxygenfunction:: fiction::write_qcc_layout(const Lyt& lyt, const std::string& filename, write_qcc_layout_params ps = {})
@@ -51,4 +62,8 @@ SiQAD
 **Header:** ``fiction/io/read_sqd_layout.hpp``
 
 .. doxygenfunction:: fiction::read_sqd_layout(std::istream& is, const std::string& name = "")
+.. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, std::istream& is)
 .. doxygenfunction:: fiction::read_sqd_layout(const std::string& filename, const std::string& name = "")
+.. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, const std::string& filename)
+
+.. doxygenclass:: fiction::sqd_parsing_error
