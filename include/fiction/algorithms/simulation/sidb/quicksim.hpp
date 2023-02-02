@@ -5,8 +5,8 @@
 #ifndef FICTION_QUICKSIM_HPP
 #define FICTION_QUICKSIM_HPP
 
-#include "fiction/algorithms/simulation_sidb/energy_distribution.hpp"
-#include "fiction/algorithms/simulation_sidb/minimum_energy.hpp"
+#include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
+#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 

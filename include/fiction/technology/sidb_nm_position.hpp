@@ -5,7 +5,7 @@
 #ifndef FICTION_NM_POSITION_HPP
 #define FICTION_NM_POSITION_HPP
 
-#include "fiction/algorithms/simulation_sidb/sidb_simulation_parameters.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/traits.hpp"
 
