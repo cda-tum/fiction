@@ -11,19 +11,18 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/algorithms/simulation_sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation_sidb/time_to_solution.hpp>
+#include <fiction/algorithms/simulation_sidb/check_groundstate.hpp>
 
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(
-    "time to solution test", "[sim_acc_tss]",
+    "check if ground state is found", "[check_groundstate]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_column_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_column_hex>>>))
 {
-
     SECTION("layout with no SiDB placed")
     {
         TestType lyt{{20, 10}};
@@ -31,12 +30,11 @@ TEMPLATE_TEST_CASE(
         exgs_stats<TestType>             exgs_stats{};
         const sidb_simulation_parameters params{2, -0.32};
         exhaustive_ground_state_simulation<TestType>(charge_layout, params, &exgs_stats);
+        quicksim_stats<TestType> quicksimstats{};
+        const quicksim_params    quicksim_params{params};
+        quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
 
-        time_to_solution_stats tts_stat{};
-        sim_acc_tts<TestType>(charge_layout, exgs_stats, &tts_stat);
-        CHECK(tts_stat.acc == 0.0);
-        CHECK(tts_stat.time_to_solution == std::numeric_limits<double>::max());
-        CHECK(tts_stat.mean_single_runtime > 0.0);
+        CHECK(!check_groundstate(quicksimstats, exgs_stats));
     }
 
     SECTION("layout with seven SiDBs placed")
@@ -57,11 +55,10 @@ TEMPLATE_TEST_CASE(
         exgs_stats<TestType>             exgs_stats{};
         const sidb_simulation_parameters params{2, -0.32};
         exhaustive_ground_state_simulation<TestType>(charge_layout, params, &exgs_stats);
+        quicksim_stats<TestType>    quicksimstats{};
+        const quicksim_params       quicksim_params{params};
+        quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
 
-        time_to_solution_stats tts_stat{};
-        sim_acc_tts<TestType>(charge_layout, exgs_stats, &tts_stat);
-        CHECK(tts_stat.acc == 100);
-        CHECK(tts_stat.time_to_solution > 0.0);
-        CHECK(tts_stat.mean_single_runtime > 0.0);
+        CHECK(check_groundstate(quicksimstats, exgs_stats));
     }
 }
