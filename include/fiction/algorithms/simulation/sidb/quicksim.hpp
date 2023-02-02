@@ -107,7 +107,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
 
         if (charge_lyt.is_physically_valid())
         {
-            st.valid_lyts.push_back(charge_distribution_surface{charge_lyt});
+            st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt});
         }
 
         charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
@@ -115,7 +115,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
 
         if (charge_lyt.is_physically_valid())
         {
-            st.valid_lyts.push_back(charge_distribution_surface{charge_lyt});
+            st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt});
         }
 
         auto       best_energy = std::numeric_limits<double>::max();
@@ -138,7 +138,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
 
                     if (charge_lyt.is_physically_valid() && (charge_lyt.get_system_energy() <= best_energy))
                     {
-                        st.valid_lyts.push_back(charge_distribution_surface{charge_lyt});
+                        st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt});
                     }
                 }
             }

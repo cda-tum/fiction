@@ -78,7 +78,7 @@ void exhaustive_ground_state_simulation(const Lyt&                        lyt,
 
             if (charge_lyt.is_physically_valid())
             {
-                st.valid_lyts.push_back(charge_distribution_surface{charge_lyt});
+                st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt});
             }
 
             charge_lyt.increase_charge_index_by_one();
@@ -86,7 +86,7 @@ void exhaustive_ground_state_simulation(const Lyt&                        lyt,
 
         if (charge_lyt.is_physically_valid())
         {
-            st.valid_lyts.push_back(charge_distribution_surface{charge_lyt});
+            st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt});
         }
     }
 
