@@ -4,14 +4,14 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
+#include <fiction/algorithms/simulation_sidb/check_groundstate.hpp>
+#include <fiction/algorithms/simulation_sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation_sidb/quicksim.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/algorithms/simulation_sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation_sidb/check_groundstate.hpp>
 
 using namespace fiction;
 
@@ -25,7 +25,7 @@ TEMPLATE_TEST_CASE(
 {
     SECTION("layout with no SiDB placed")
     {
-        TestType lyt{{20, 10}};
+        TestType                         lyt{{20, 10}};
         charge_distribution_surface      charge_layout{lyt};
         exgs_stats<TestType>             exgs_stats{};
         const sidb_simulation_parameters params{2, -0.32};
@@ -55,8 +55,8 @@ TEMPLATE_TEST_CASE(
         exgs_stats<TestType>             exgs_stats{};
         const sidb_simulation_parameters params{2, -0.32};
         exhaustive_ground_state_simulation<TestType>(charge_layout, params, &exgs_stats);
-        quicksim_stats<TestType>    quicksimstats{};
-        const quicksim_params       quicksim_params{params};
+        quicksim_stats<TestType> quicksimstats{};
+        const quicksim_params    quicksim_params{params};
         quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
 
         CHECK(check_groundstate(quicksimstats, exgs_stats));
