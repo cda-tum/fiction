@@ -42,7 +42,7 @@ template <typename Lyt>
     const auto min_energy_exact  = minimum_energy(exhaustive_results.valid_lyts);
     const auto min_energy_new_ap = minimum_energy(quicksim_results.valid_lyts);
 
-    return std::abs(min_energy_exact - min_energy_new_ap) / min_energy_exact < 0.00001;
+    return std::abs(min_energy_exact - min_energy_new_ap) / min_energy_exact < physical_constants::POP_STABILITY_ERR;
 }
 
 }  // namespace fiction
