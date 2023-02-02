@@ -59,7 +59,7 @@ void sim_acc_tts(charge_distribution_surface<Lyt>& lyt, exgs_stats<Lyt>& result_
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(is_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     time_to_solution_stats st{};
     std::size_t            count = 0;
@@ -92,6 +92,12 @@ void sim_acc_tts(charge_distribution_surface<Lyt>& lyt, exgs_stats<Lyt>& result_
     {
         tts = single_runtime;
     }
+
+    else if (acc == 0)
+    {
+        tts = std::numeric_limits<double>::max();
+    }
+
     else
     {
         tts = (single_runtime * log(1.0 - convlevel) / log(1.0 - acc));
