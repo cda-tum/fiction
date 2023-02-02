@@ -31,10 +31,24 @@ namespace fiction
  */
 struct time_to_solution_stats
 {
+    /**
+     * Time-to-solution in seconds.
+     */
     double time_to_solution{};
+    /**
+     * Accuracy of the simulation.
+     */
     double acc{};
+    /**
+     * Average single simulation runtime in seconds.
+     */
     double mean_single_runtime{};
 
+    /**
+     * Print the results to the given output stream.
+     *
+     * @param out Output stream.
+     */
     void report(std::ostream& out = std::cout)
     {
         out << fmt::format("time_to_solution: {} | acc: {} | t_(s): {} \n", time_to_solution, acc, mean_single_runtime);
@@ -52,9 +66,8 @@ struct time_to_solution_stats
  * @param confidence_level The time-to-solution also depends one the given confidence level which can be set here.
  */
 template <typename Lyt>
-void sim_acc_tts(charge_distribution_surface<Lyt>& lyt, exgs_stats<Lyt>& result_exact,
-                 time_to_solution_stats* ps = nullptr, const uint64_t& repetitions = 100,
-                 const double confidence_level = 0.997) noexcept
+void sim_acc_tts(const Lyt& lyt, exgs_stats<Lyt>& result_exact, time_to_solution_stats* ps = nullptr,
+                 const uint64_t& repetitions = 100, const double confidence_level = 0.997) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

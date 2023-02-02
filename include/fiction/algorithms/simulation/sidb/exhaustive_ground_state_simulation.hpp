@@ -50,12 +50,12 @@ struct exgs_stats
  *  All metastable and physically valid charge distribution layouts are computed, stored in a vector and returned.
  *
  * @tparam Lyt Cell-level layout type.
- * @param lyt Charge distribution layout.
+ * @param lyt The layout to simulate.
  * @param params Simulation parameters.
  * @param ps Simulation statistics.
  */
 template <typename Lyt>
-void exhaustive_ground_state_simulation(charge_distribution_surface<Lyt>& lyt,
+void exhaustive_ground_state_simulation(const Lyt&                        lyt,
                                         const sidb_simulation_parameters& params = sidb_simulation_parameters{},
                                         exgs_stats<Lyt>*                  ps     = nullptr)
 {
@@ -66,26 +66,27 @@ void exhaustive_ground_state_simulation(charge_distribution_surface<Lyt>& lyt,
 
     {
         mockturtle::stopwatch stop{st.time_total};
-        lyt.set_physical_parameters(params);
-        lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
-        lyt.update_after_charge_change();
 
-        while (lyt.get_charge_index().first < lyt.get_max_charge_index())
+        charge_distribution_surface charge_lyt{lyt};
+
+        charge_lyt.set_physical_parameters(params);
+        charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
+        charge_lyt.update_after_charge_change();
+
+        while (charge_lyt.get_charge_index().first < charge_lyt.get_max_charge_index())
         {
 
-            if (lyt.is_physically_valid())
+            if (charge_lyt.is_physically_valid())
             {
-                charge_distribution_surface<Lyt> lyt_new{lyt};
-                st.valid_lyts.push_back(lyt_new);
+                st.valid_lyts.push_back(charge_distribution_surface{charge_lyt});
             }
 
-            lyt.increase_charge_index_by_one();
+            charge_lyt.increase_charge_index_by_one();
         }
 
-        if (lyt.is_physically_valid())
+        if (charge_lyt.is_physically_valid())
         {
-            charge_distribution_surface<Lyt> lyt_new{lyt};
-            st.valid_lyts.push_back(lyt_new);
+            st.valid_lyts.push_back(charge_distribution_surface{charge_lyt});
         }
     }
 
