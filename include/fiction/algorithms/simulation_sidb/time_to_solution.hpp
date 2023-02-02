@@ -9,13 +9,20 @@
 #include "fiction/algorithms//simulation_sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation_sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation_sidb/quicksim.hpp"
-#include "fiction/algorithms/simulation_sidb/quicksim_params.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/traits.hpp"
 
+#include <fmt/format.h>
+
+#include <algorithm>
 #include <chrono>
+#include <cstdint>
+#include <iostream>
+#include <vector>
 
 namespace fiction
 {
+
 /**
  * This struct stores the time-to-solution, the simulation accuracy and the average single simulation runtime of
  * quicksim (see quicksim.hpp).
@@ -50,11 +57,12 @@ void sim_acc_tts(charge_distribution_surface<Lyt>& lyt, exgs_stats<Lyt>& result_
                  time_to_solution_stats* ps = nullptr, const uint64_t& repetitions = 100,
                  const double convlevel = 0.997)
 {
-    static_assert(is_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(is_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
     time_to_solution_stats st{};
-    int                    count = 0;
+    std::size_t            count = 0;
     std::vector<double>    time;
     time.reserve(repetitions);
 
@@ -76,8 +84,7 @@ void sim_acc_tts(charge_distribution_surface<Lyt>& lyt, exgs_stats<Lyt>& result_
     }
 
     auto single_runtime = std::accumulate(time.begin(), time.end(), 0.0) / static_cast<double>(repetitions);
-    std::cout << single_runtime << std::endl;
-    auto acc = static_cast<double>(count) / static_cast<double>(repetitions);
+    auto acc            = static_cast<double>(count) / static_cast<double>(repetitions);
 
     double tts = single_runtime;
 
@@ -99,6 +106,7 @@ void sim_acc_tts(charge_distribution_surface<Lyt>& lyt, exgs_stats<Lyt>& result_
         *ps = st;
     }
 }
+
 }  // namespace fiction
 
 #endif  // FICTION_TIME_TO_SOLUTION_HPP

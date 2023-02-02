@@ -26,9 +26,11 @@ namespace fiction
 namespace offset
 {
 /**
- * Unsigned offset coordinates. The implementation is optimized for memory-efficiency and fits within 64 bits.
- * Coordinates span from \f$ (0, 0, 0) \f$ to \f$ (2^{31} - 1, 2^{31} - 1, 1) \f$.
- * Each coordinate has a dead indicator `d` that can be used to represent that it is not in use.
+ * Unsigned offset coordinates.
+ *
+ * The implementation is optimized for memory-efficiency and fits within 64 bits. Coordinates span from \f$ (0, 0, 0)
+ * \f$ to \f$ (2^{31} - 1, 2^{31} - 1, 1) \f$. Each coordinate has a dead indicator `d` that can be used to represent
+ * that it is not in use.
  */
 struct ucoord_t
 {
@@ -600,11 +602,13 @@ uint64_t volume(const CoordinateType& coord) noexcept
 
 namespace siqad
 {
+
 /**
- * siqad coordinates.
- * Coordinates span from (-2^31, -2^31, 0) to (2^31 - 1 , 2^31 - 1, 1). x is the SiDB's x-coordinate, y is the dimer
- pair's row number, and z represents the two possible SiDB positions in one SiDB dimer pair.
- * Each coordinate has a dead indicator that can be used to represent that it is not in use.
+ * SiQAD coordinates.
+ *
+ * Coordinates span from \f$ (-2^{31}, -2^{31}, 0) \f$ to \f$ (2^{31} - 1 , 2^{31} - 1, 1) \f$. `x` is the SiDB's
+ * x-coordinate, `y` is the dimer pair's row number, and `z` represents the two possible SiDB positions in one SiDB
+ * dimer pair. Each coordinate has a dead indicator `d` that can be used to represent that it is not in use.
  */
 struct coord_t
 {
@@ -805,11 +809,11 @@ struct coord_t
 };
 
 /**
- * convertes SiQAD coordinates into other coordinates (offset, cube).
+ * Converts SiQAD coordinates to other coordinates (offset, cube).
  *
- * @tparam CoordinateType Coordinate type.
- * @param coord Coordinate (siqad).
- * @return CoordinateType coord.
+ * @tparam CoordinateType Coordinate type to convert to.
+ * @param coord SiQAD coordinate to convert.
+ * @return Coordinate of type `CoordinateType`.
  */
 template <typename CoordinateType>
 constexpr CoordinateType to_fiction_coord(const coord_t& coord) noexcept
@@ -821,13 +825,12 @@ constexpr CoordinateType to_fiction_coord(const coord_t& coord) noexcept
 
     return CoordinateType{};
 }
-
 /**
- * convertes coordinates (offset, cube) into SiQAD coordinates.
+ * Converts any coordinate type to SiQAD coordinates.
  *
- * @tparam CoordinateType Coordinate type.
- * @param coord Coordinate type.
- * @return siqad coordinates.
+ * @tparam CoordinateType Coordinate type to convert.
+ * @param coord Coordinate to convert.
+ * @return SiQAD coordinate representation of `coord`.
  */
 template <typename CoordinateType>
 constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept

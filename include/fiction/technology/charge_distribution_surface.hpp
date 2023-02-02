@@ -285,12 +285,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->charge_distribution_to_index();
     }
     /**
-     * This function assigns the given charge state to the cell (accessed by the input index) of the layout.
+     * This function assigns the given charge state to the cell (accessed by `index`) of the layout.
      *
      * @param index The index of the cell to which a charge state is to be assigned.
      * @param cs The charge state to be assigned to the cell.
      * @param update_chargeconf if set to `true`, the charge distribution index is updated after the charge distribution
-     * is changed. By default true.
+     * is changed.
      */
     void assign_charge_state_by_cell_index(const uint64_t index, const sidb_charge_state& cs,
                                            const bool update_chargeconf = true) noexcept
@@ -382,8 +382,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Calculates and returns the distance between two cells (accessed by indices).
      *
-     * @param index1 The first input index.
-     * @param index2 The second input index.
+     * @param index1 The first index.
+     * @param index2 The second index.
      * @return The distance index between `index1` and `index2` (indices correspond to unique SiDBs).
      */
     [[nodiscard]] double get_distance_by_indices(const uint64_t index1, const uint64_t index2) const noexcept
@@ -422,9 +422,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * The electrostatic potential between two cells (SiDBs) is calculated.
      *
-     * @param input1 The first index.
-     * @param input2 The second index.
-     * @return The potential between input1 and input2.
+     * @param index1 The first index.
+     * @param index1 The second index.
+     * @return The potential between `index1` and `index2`.
      */
     [[nodiscard]] double potential_between_sidbs_by_index(const uint64_t index1, const uint64_t index2) const noexcept
     {

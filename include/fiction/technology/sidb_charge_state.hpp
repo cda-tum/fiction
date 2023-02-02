@@ -51,7 +51,7 @@ enum class sidb_charge_state
  * Converts a charge state (-1,0,1) into an enum.
  *
  * @param sg Charge state as integer (-1,0,1).
- * @return sidb_charge_state.
+ * @return sidb_charge_state representation of `sg`.
  */
 [[nodiscard]] constexpr sidb_charge_state sign_to_charge_state(const int8_t sg) noexcept
 {
