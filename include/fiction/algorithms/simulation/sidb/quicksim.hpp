@@ -24,7 +24,7 @@ namespace fiction
 {
 
 /**
- * This struct stores the parameters for the quicksim algorithm.
+ * This struct stores the parameters for the *quicksim* algorithm.
  */
 struct quicksim_params
 {
@@ -37,7 +37,7 @@ struct quicksim_params
      */
     uint64_t interation_steps{80};
     /**
-     * Alpha parameter for the quicksim algorithm.
+     * Alpha parameter for the *quicksim* algorithm (should be reduced if no result is found).
      */
     double alpha{0.7};
 };
