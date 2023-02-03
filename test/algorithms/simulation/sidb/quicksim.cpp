@@ -25,8 +25,8 @@ TEMPLATE_TEST_CASE(
     {
         TestType lyt{{20, 10}};
 
-        quicksim_stats<TestType>    quicksimstats{};
-        const quicksim_params       quicksim_params{sidb_simulation_parameters{2, -0.30}};
+        quicksim_stats<TestType> quicksimstats{};
+        const quicksim_params    quicksim_params{sidb_simulation_parameters{2, -0.30}};
         CHECK(quicksim_params.phys_params.mu == -0.30);
         quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
 
@@ -39,8 +39,8 @@ TEMPLATE_TEST_CASE(
 
         lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-        quicksim_stats<TestType>    quicksimstats{};
-        const quicksim_params       quicksim_params{sidb_simulation_parameters{2, -0.30}};
+        quicksim_stats<TestType> quicksimstats{};
+        const quicksim_params    quicksim_params{sidb_simulation_parameters{2, -0.30}};
         CHECK(quicksim_params.phys_params.mu == -0.30);
         quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
 

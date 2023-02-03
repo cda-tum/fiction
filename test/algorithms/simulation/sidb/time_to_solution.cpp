@@ -26,8 +26,8 @@ TEMPLATE_TEST_CASE(
 
     SECTION("layout with no SiDB placed")
     {
-        TestType                         lyt{{20, 10}};
-        charge_distribution_surface      charge_layout{lyt};
+        TestType                    lyt{{20, 10}};
+        charge_distribution_surface charge_layout{lyt};
 
         const sidb_simulation_parameters params{2, -0.30};
         const quicksim_params            quicksim_params{params};
