@@ -759,8 +759,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         if (!candidates.empty())
         {
             const auto random_index =
-                static_cast<uint64_t>(rand()) %
-                candidates.size();  // Yes, it is correct what clang-tidy says, but the method here is very efficient.
+                static_cast<uint64_t>(std::rand()) %  // NOLINT: we use rand() due to its performance advantage; we do
+                                                      // not need cryptographic security here
+                candidates.size();
 
             const auto random_element         = index_vector[candidates[random_index]];
             strg->cell_charge[random_element] = sidb_charge_state::NEGATIVE;
