@@ -46,6 +46,12 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         static_assert(is_gate_level_layout_v<GateLyt>, "Lyt must be a gate-level layout");
         static_assert(is_shifted_cartesian_layout_v<GateLyt>, "Lyt must be a shifted Cartesian layout");
 
+        // crossing magnets are handled only in the ground layer
+        if (lyt.is_crossing_layer(t))
+        {
+            return EMPTY_GATE;
+        }
+
         const auto n = lyt.get_node(t);
 
         if constexpr (fiction::has_is_fanout_v<GateLyt>)
