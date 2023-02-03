@@ -19,8 +19,10 @@ namespace fiction
  * This function checks if the ground state is found by the *quicksim* algorithm.
  *
  * @tparam Lyt Cell-level layout type.
- * @param quicksim_results All found physically valid charge distribution surfaces obtained by the quicksim algorithm (quicksim).
- * @param exhaustive_results All valid charge distribution surfaces determined by ExGS (exhaustive_ground_state_simulation).
+ * @param quicksim_results All found physically valid charge distribution surfaces obtained by the quicksim algorithm
+ * (quicksim).
+ * @param exhaustive_results All valid charge distribution surfaces determined by ExGS
+ * (exhaustive_ground_state_simulation).
  * @return Returns `true` if the relative difference between the lowest energies of the two sets is less than 0.00001,
  * `false` otherwise.
  */
