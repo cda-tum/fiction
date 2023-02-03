@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 18.01.23.
 //
 
-#ifndef FICTION_IS_GROUNDSTATE_HPP
-#define FICTION_IS_GROUNDSTATE_HPP
+#ifndef FICTION_IS_GROUND_STATE_HPP
+#define FICTION_IS_GROUND_STATE_HPP
 
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
@@ -20,15 +20,15 @@ namespace fiction
  *
  * @tparam Lyt Cell-level layout type.
  * @param quicksim_results All found physically valid charge distribution surfaces obtained by the quicksim algorithm
- * (see quicksim.hpp).
- * @param exhaustive_results All valid charge distribution surfaces determined by ExGS (see
- * exhaustive_ground_state_simulation.hpp).
+ * (quicksim).
+ * @param exhaustive_results All valid charge distribution surfaces determined by ExGS
+ * (exhaustive_ground_state_simulation).
  * @return Returns `true` if the relative difference between the lowest energies of the two sets is less than 0.00001,
  * `false` otherwise.
  */
 template <typename Lyt>
-[[nodiscard]] bool is_groundstate(const quicksim_stats<Lyt>& quicksim_results,
-                                  const exgs_stats<Lyt>&     exhaustive_results)
+[[nodiscard]] bool is_ground_state(const quicksim_stats<Lyt>& quicksim_results,
+                                   const exgs_stats<Lyt>&     exhaustive_results) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -47,4 +47,4 @@ template <typename Lyt>
 
 }  // namespace fiction
 
-#endif  // FICTION_IS_GROUNDSTATE_HPP
+#endif  // FICTION_IS_GROUND_STATE_HPP

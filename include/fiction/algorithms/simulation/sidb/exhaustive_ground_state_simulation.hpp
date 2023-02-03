@@ -57,7 +57,7 @@ struct exgs_stats
 template <typename Lyt>
 void exhaustive_ground_state_simulation(const Lyt&                        lyt,
                                         const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-                                        exgs_stats<Lyt>*                  ps     = nullptr)
+                                        exgs_stats<Lyt>*                  ps     = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

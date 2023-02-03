@@ -6,7 +6,7 @@
 #define FICTION_TIME_TO_SOLUTION_HPP
 
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
-#include "fiction/algorithms/simulation/sidb/is_groundstate.hpp"
+#include "fiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
@@ -103,7 +103,7 @@ void sim_acc_tts(const Lyt& lyt, const quicksim_params& quicksim_params, time_to
 
         time.push_back(diff_first);
 
-        if (is_groundstate(stats_quick, stats_exhaustive))
+        if (is_ground_state(stats_quick, stats_exhaustive))
         {
             gs_count += 1;
         }

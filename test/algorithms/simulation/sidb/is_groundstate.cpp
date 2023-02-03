@@ -5,7 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/is_groundstate.hpp>
+#include <fiction/algorithms/simulation/sidb/is_ground_state.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -16,7 +16,7 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(
-    "check if ground state is found", "[is_groundstate]",
+    "check if ground state is found", "[is_ground_state]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),
@@ -34,7 +34,7 @@ TEMPLATE_TEST_CASE(
         const quicksim_params    quicksim_params{params};
         quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
 
-        CHECK(!is_groundstate(quicksimstats, exgs_stats));
+        CHECK(!is_ground_state(quicksimstats, exgs_stats));
     }
 
     SECTION("layout with seven SiDBs placed")
@@ -59,6 +59,6 @@ TEMPLATE_TEST_CASE(
         const quicksim_params    quicksim_params{params};
         quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
 
-        CHECK(is_groundstate(quicksimstats, exgs_stats));
+        CHECK(is_ground_state(quicksimstats, exgs_stats));
     }
 }
