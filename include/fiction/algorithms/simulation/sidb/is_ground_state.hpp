@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 18.01.23.
 //
 
-#ifndef FICTION_IS_GROUNDSTATE_HPP
-#define FICTION_IS_GROUNDSTATE_HPP
+#ifndef FICTION_IS_GROUND_STATE_HPP
+#define FICTION_IS_GROUND_STATE_HPP
 
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
@@ -27,8 +27,8 @@ namespace fiction
  * `false` otherwise.
  */
 template <typename Lyt>
-[[nodiscard]] bool is_groundstate(const quicksim_stats<Lyt>& quicksim_results,
-                                  const exgs_stats<Lyt>&     exhaustive_results)
+[[nodiscard]] bool is_ground_state(const quicksim_stats<Lyt>& quicksim_results,
+                                   const exgs_stats<Lyt>&     exhaustive_results) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -47,4 +47,4 @@ template <typename Lyt>
 
 }  // namespace fiction
 
-#endif  // FICTION_IS_GROUNDSTATE_HPP
+#endif  // FICTION_IS_GROUND_STATE_HPP
