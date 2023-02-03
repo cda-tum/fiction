@@ -53,7 +53,18 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     // empty layout
     if (layout.num_gates() == 0ul && layout.num_wires() == 0ul)
     {
-        os << fmt::format("[i] empty layout");
+        os << "[i] empty layout" << std::endl;
+        return;
+    }
+
+    if constexpr (is_hexagonal_layout_v<Lyt>)
+    {
+        os << "[e] hexagonal layout printing is not supported" << std::endl;
+        return;
+    }
+    else if constexpr (is_shifted_cartesian_layout_v<Lyt>)
+    {
+        os << "[e] shifted cartesian layout printing is not supported" << std::endl;
         return;
     }
 
@@ -232,7 +243,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     // empty layout
     if (layout.num_cells() == 0ul)
     {
-        os << fmt::format("[i] empty layout");
+        os << "[i] empty layout" << std::endl;
         return;
     }
 
