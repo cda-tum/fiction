@@ -28,12 +28,10 @@ TEMPLATE_TEST_CASE(
     {
         TestType                         lyt{{20, 10}};
         charge_distribution_surface      charge_layout{lyt};
-        exgs_stats<TestType>             exgs_stats{};
-        const sidb_simulation_parameters params{2, -0.32};
-        exhaustive_ground_state_simulation<TestType>(charge_layout, params, &exgs_stats);
 
-        time_to_solution_stats tts_stat{};
-        sim_acc_tts<TestType>(charge_layout, exgs_stats, &tts_stat);
+        const sidb_simulation_parameters params{2, -0.30};
+        time_to_solution_stats           tts_stat{};
+        sim_acc_tts<TestType>(charge_layout, params, &tts_stat);
         CHECK(tts_stat.acc == 0.0);
         CHECK(tts_stat.time_to_solution == std::numeric_limits<double>::max());
         CHECK(tts_stat.mean_single_runtime > 0.0);
@@ -53,13 +51,9 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface      charge_layout{lyt};
-        exgs_stats<TestType>             exgs_stats{};
-        const sidb_simulation_parameters params{2, -0.32};
-        exhaustive_ground_state_simulation<TestType>(charge_layout, params, &exgs_stats);
-
-        time_to_solution_stats tts_stat{};
-        sim_acc_tts<TestType>(charge_layout, exgs_stats, &tts_stat);
+        time_to_solution_stats           tts_stat{};
+        const sidb_simulation_parameters params{2, -0.30};
+        sim_acc_tts<TestType>(lyt, params, &tts_stat);
         CHECK(tts_stat.acc == 100);
         CHECK(tts_stat.time_to_solution > 0.0);
         CHECK(tts_stat.mean_single_runtime > 0.0);

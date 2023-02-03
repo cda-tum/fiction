@@ -25,11 +25,10 @@ TEMPLATE_TEST_CASE(
     {
         TestType lyt{{20, 10}};
 
-        charge_distribution_surface charge_layout{lyt};
         quicksim_stats<TestType>    quicksimstats{};
         const quicksim_params       quicksim_params{sidb_simulation_parameters{2, -0.30}};
         CHECK(quicksim_params.phys_params.mu == -0.30);
-        quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
 
         CHECK(quicksimstats.valid_lyts.empty());
     }
@@ -40,11 +39,10 @@ TEMPLATE_TEST_CASE(
 
         lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout{lyt};
         quicksim_stats<TestType>    quicksimstats{};
         const quicksim_params       quicksim_params{sidb_simulation_parameters{2, -0.30}};
         CHECK(quicksim_params.phys_params.mu == -0.30);
-        quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
 
         CHECK(quicksimstats.valid_lyts.size() == 1);
     }
@@ -63,12 +61,11 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface      charge_layout{lyt};
         quicksim_stats<TestType>         quicksimstats{};
         const sidb_simulation_parameters params{2, -0.30};
         const quicksim_params            quicksim_params{params};
         CHECK(quicksim_params.phys_params.mu == -0.30);
-        quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
 
         CHECK(!quicksimstats.valid_lyts.empty());
 
