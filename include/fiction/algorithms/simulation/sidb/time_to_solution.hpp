@@ -72,16 +72,15 @@ struct time_to_solution_stats
  * @param confidence_level The time-to-solution also depends one the given confidence level which can be set here.
  */
 template <typename Lyt>
-void sim_acc_tts(const Lyt& lyt, const sidb_simulation_parameters& sidb_params = sidb_simulation_parameters{},
-                 time_to_solution_stats* ps = nullptr, const uint64_t& repetitions = 100,
-                 const double confidence_level = 0.997) noexcept
+void sim_acc_tts(const Lyt& lyt, const quicksim_params& quicksim_params, time_to_solution_stats* ps = nullptr,
+                 const uint64_t& repetitions = 100, const double confidence_level = 0.997) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     exgs_stats<Lyt> stats_exhaustive{};
-    exhaustive_ground_state_simulation(lyt, sidb_params, &stats_exhaustive);
+    exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params, &stats_exhaustive);
 
     time_to_solution_stats st{};
     st.single_runtime_exhaustive = mockturtle::to_seconds(stats_exhaustive.time_total);
@@ -93,8 +92,6 @@ void sim_acc_tts(const Lyt& lyt, const sidb_simulation_parameters& sidb_params =
     for (uint64_t i = 0; i < repetitions; i++)
     {
         quicksim_stats<Lyt> stats_quick{};
-        quicksim_params     quicksim_params{};
-        quicksim_params.phys_params = sidb_params;
 
         const auto t_start = std::chrono::high_resolution_clock::now();
 

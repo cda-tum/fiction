@@ -30,8 +30,9 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface      charge_layout{lyt};
 
         const sidb_simulation_parameters params{2, -0.30};
+        const quicksim_params            quicksim_params{params};
         time_to_solution_stats           tts_stat{};
-        sim_acc_tts<TestType>(charge_layout, params, &tts_stat);
+        sim_acc_tts<TestType>(charge_layout, quicksim_params, &tts_stat);
         CHECK(tts_stat.acc == 0.0);
         CHECK(tts_stat.time_to_solution == std::numeric_limits<double>::max());
         CHECK(tts_stat.mean_single_runtime > 0.0);
@@ -53,7 +54,8 @@ TEMPLATE_TEST_CASE(
 
         time_to_solution_stats           tts_stat{};
         const sidb_simulation_parameters params{2, -0.30};
-        sim_acc_tts<TestType>(lyt, params, &tts_stat);
+        const quicksim_params            quicksim_params{params};
+        sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat);
         CHECK(tts_stat.acc == 100);
         CHECK(tts_stat.time_to_solution > 0.0);
         CHECK(tts_stat.mean_single_runtime > 0.0);
