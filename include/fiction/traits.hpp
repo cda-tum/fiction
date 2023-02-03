@@ -9,6 +9,7 @@
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -572,6 +573,8 @@ template <typename Lyt>
 inline constexpr const bool has_inml_technology_v = std::is_same_v<technology<Lyt>, inml_technology>;
 template <typename Lyt>
 inline constexpr const bool has_sidb_technology_v = std::is_same_v<technology<Lyt>, sidb_technology>;
+template <typename Lyt>
+inline constexpr const bool has_siqad_coord_v = std::is_same_v<coordinate<Lyt>, siqad::coord_t>;
 
 #pragma region is_cell_level_layout
 template <class Lyt, class = void>
@@ -695,6 +698,51 @@ struct has_foreach_sidb_defect<Lyt, std::void_t<decltype(std::declval<Lyt>().for
 
 template <class Lyt>
 inline constexpr bool has_foreach_sidb_defect_v = has_foreach_sidb_defect<Lyt>::value;
+#pragma endregion
+
+#pragma region has_assign_charge_state
+template <class Lyt, class = void>
+struct has_assign_charge_state : std::false_type
+{};
+
+template <class Lyt>
+struct has_assign_charge_state<
+    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_charge_state(coordinate<Lyt>(), sidb_charge_state()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_assign_charge_state_v = has_assign_charge_state<Lyt>::value;
+#pragma endregion
+
+#pragma region has_get_charge_state
+template <class Lyt, class = void>
+struct has_get_charge_state : std::false_type
+{};
+
+template <class Lyt>
+struct has_get_charge_state<Lyt, std::void_t<decltype(std::declval<Lyt>().get_charge_state(coordinate<Lyt>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_get_charge_state_v = has_get_charge_state<Lyt>::value;
+#pragma endregion
+
+#pragma region has_foreach_charge_state
+template <class Lyt, class = void>
+struct has_foreach_charge_state : std::false_type
+{};
+
+template <class Lyt>
+struct has_foreach_charge_state<Lyt,
+                                std::void_t<decltype(std::declval<Lyt>().foreach_charge_state(
+                                    std::declval<void(std::pair<coordinate<Lyt>, sidb_charge_state>, uint32_t)>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_foreach_charge_state_v = has_foreach_charge_state<Lyt>::value;
 #pragma endregion
 
 /**

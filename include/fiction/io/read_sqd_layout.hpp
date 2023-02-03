@@ -86,7 +86,7 @@ class read_sqd_layout_impl
                 throw sqd_parsing_error("Error parsing SQD file: no attribute 'type' in element 'layer'");
             }
 
-            if (layer_type == std::string{"DB"})
+            if (layer_type == std::string{"DB"} && !has_siqad_coord_v<Lyt>)
             {
                 for (const auto* db_dot = layer->FirstChildElement("dbdot"); db_dot != nullptr;
                      db_dot             = db_dot->NextSiblingElement("dbdot"))
@@ -94,6 +94,16 @@ class read_sqd_layout_impl
                     parse_db_dot(db_dot);
                 }
             }
+
+            if (layer_type == std::string{"DB"} && has_siqad_coord_v<Lyt>)
+            {
+                for (const auto* db_dot = layer->FirstChildElement("dbdot"); db_dot != nullptr;
+                     db_dot             = db_dot->NextSiblingElement("dbdot"))
+                {
+                    parse_db_dot_siqad(db_dot);
+                }
+            }
+
             else if (layer_type == std::string{"Defects"})
             {
                 for (const auto* defect = layer->FirstChildElement("defect"); defect != nullptr;
@@ -173,6 +183,19 @@ class read_sqd_layout_impl
 
         return dimer_to_cell(std::stoll(n), std::stoll(m), std::stoll(l));
     }
+
+    cell<Lyt> parse_latcoord_siqad(const tinyxml2::XMLElement* latcoord)
+    {
+        const auto n = latcoord->Attribute("n"), m = latcoord->Attribute("m"), l = latcoord->Attribute("l");
+
+        if (n == nullptr || m == nullptr || l == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: no attribute 'n', 'm' or 'l' in element 'latcoord'");
+        }
+
+        return cell<Lyt>(std::stoll(n), std::stoll(m), std::stoll(l));
+    }
+
     /**
      * Parses a <dbdot> element from the SQD file and adds the respective dot to the layout.
      *
@@ -188,6 +211,18 @@ class read_sqd_layout_impl
         }
 
         lyt.assign_cell_type(parse_latcoord(latcoord), sidb_technology::cell_type::NORMAL);
+    }
+
+    void parse_db_dot_siqad(const tinyxml2::XMLElement* db_dot)
+    {
+        const auto* const latcoord = db_dot->FirstChildElement("latcoord");
+
+        if (latcoord == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: no element 'latcoord' in element 'dbdot'");
+        }
+
+        lyt.assign_cell_type(parse_latcoord_siqad(latcoord), sidb_technology::cell_type::NORMAL);
     }
     /**
      * Parses a <val> attribute of a <type_label> element of a <property_map> element from the SQD file and converts it
