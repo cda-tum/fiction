@@ -3198,7 +3198,21 @@ std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params ps = {},
 
     return result;
 }
-
+/**
+ * The same as `exact` but with a black list of tiles that are not allowed to be used to a specified set of Boolean
+ * functions and their orientations. For example, a black list could be used to exclude the use of a tile only for an
+ * AND gate of a certain rotation, but not for other gates. This is useful if a tile is known to be faulty or if it is
+ * known to be used for a different purpose.
+ *
+ * @tparam Lyt Desired gate-level layout type.
+ * @tparam Ntk Network type that acts as specification.
+ * @param ntk The network that is to place and route.
+ * @param black_list The black list of tiles and their gate orientations.
+ * @param ps Parameters.
+ * @param pst Statistics.
+ * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit if one is found under the given
+ * parameters; `std::nullopt`, otherwise.
+ */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list<Lyt, port_direction>& black_list,
                                         exact_physical_design_params ps  = {},
