@@ -159,15 +159,33 @@ TEST_CASE("Routing with crossings", "[color-routing]")
     color_routing_params ps{};
     ps.crossings = true;
 
-    SECTION("MCS")
+    SECTION("Without path limit")
     {
-        ps.engine = graph_coloring_engine::MCS;
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
+        SECTION("MCS")
+        {
+            ps.engine = graph_coloring_engine::MCS;
+            check_color_routing(spec_layout, impl_layout, objectives, ps);
+        }
+        SECTION("SAT")
+        {
+            ps.engine = graph_coloring_engine::SAT;
+            check_color_routing(spec_layout, impl_layout, objectives, ps);
+        }
     }
-    SECTION("SAT")
+    SECTION("With path limit")
     {
-        ps.engine = graph_coloring_engine::SAT;
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
+        ps.path_limit = 2;
+
+        SECTION("MCS")
+        {
+            ps.engine = graph_coloring_engine::MCS;
+            check_color_routing(spec_layout, impl_layout, objectives, ps);
+        }
+        SECTION("SAT")
+        {
+            ps.engine = graph_coloring_engine::SAT;
+            check_color_routing(spec_layout, impl_layout, objectives, ps);
+        }
     }
 }
 

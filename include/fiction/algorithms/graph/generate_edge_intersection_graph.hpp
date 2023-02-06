@@ -109,8 +109,8 @@ class generate_edge_intersection_graph_impl
                           else
                           {
                               // enumerate k paths for the current objective
-                              obj_paths = yen_k_shortest_paths<clk_path>(obstruction_layout{layout},
-                                                                         {obj.source, obj.target}, *ps.path_limit);
+                              obj_paths = yen_k_shortest_paths<clk_path>(
+                                  obstruction_layout{layout}, {obj.source, obj.target}, *ps.path_limit, {ps.crossings});
                           }
 
                           // assign a unique label to each path and create a corresponding node in the graph
