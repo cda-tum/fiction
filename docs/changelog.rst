@@ -5,6 +5,92 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+unreleased - 2023-XX-XX
+-----------------------
+
+Added
+#####
+
+- Technology:
+    - Support for the SiDB *Bestagon* gate library, a standard-tile library for the SiDB technology based on hexagonal grids. Many thanks to Samuel Sze Hang Ng for the collaboration on `the paper <https://dl.acm.org/doi/abs/10.1145/3489517.3530525>`_! #32 #33
+- Algorithms:
+    - Four established path-finding algorithms on arbitrary layouts with arbitrary clocking schemes #83
+        - Recursive enumeration of all possible paths
+        - A* for the shortest path
+        - Jump Point Search (JPS) for the shortest path (proof-of-concept)
+        - `k` shortest paths via Yen's algorithm
+    - Distance functions and functors for layouts #83 #85
+        - Manhattan distance
+        - Euclidean distance
+        - A* distance
+    - Cost functions and functors for layouts #83
+        - Unit cost
+        - Random cost
+    - Graph coloring with a selection of SAT solvers or heuristic algorithms #83 #100 #101
+    - Efficient multi-path signal routing on gate-level layouts (based on `this paper <https://www.cda.cit.tum.de/files/eda/2022_nanoarch_efficient_multi-path_signal_routing_for_fcn.pdf>`_) #83 #113
+    - Specify a black list of tiles and gates to avoid in exact physical design #103
+- Data types:
+    - Obstruction layout to represent obstacles in a layout #83
+    - Edge intersection graphs from enumerated routing paths #83
+- I/O:
+    - Molecular FCN support in the QLL writer for MagCAD and SCERPA #49 #102
+    - SQD reader for the SiDB technology #103
+- Clocking Schemes:
+    - CFE #44
+- Traits:
+    - ``has_*_technology`` traits to check for specific cell technologies of layouts and libraries #53
+- Utils:
+    - Routing utils #83
+    - STL extensions #83
+    - Truth table utils #103
+- Libraries:
+    - `phmap <https://github.com/greg7mdp/parallel-hashmap>`_ for faster hash maps #83
+    - `TinyXML2 <https://github.com/leethomason/tinyxml2>`_ for XML parsing #103
+- Build and documentation:
+    - Automatic linking with TBB for parallel algorithms #57
+    - Docker image CI #55
+    - `Dependabot <https://github.com/dependabot>`_ to automatically keep the dependencies up-to-date
+    - `CodeQL <https://codeql.github.com/>`_ to automatically scan the code for security vulnerabilities #37
+
+Changed
+#######
+- CLI:
+    - Split ``exact``'s and ``onepass``' parameter ``upper_bound`` into ``upper_x`` and ``upper_y`` #103
+- Clocking schemes:
+    - Renamed ESP to ESR #51
+- Libraries:
+    - Updated all libraries to the latest versions
+    - Moved to the upstream version of `Catch2 v3 <https://github.com/catchorg/Catch2>`_ #76
+- Continuous integration:
+    - Updated CI runners to the latest versions
+    - Setup `Z3 <https://github.com/Z3Prover/z3>`_ via a designated action. Many thanks to Lukas Burgholzer for his support! #58
+    - Enabled `Ccache <https://ccache.dev/>`_ for faster compilation in CIs #60
+    - Activated experiments in CI builds to ensure that they are building correctly #63
+    - `clang-tidy <https://clang.llvm.org/extra/clang-tidy/>`_ workflow for static code analysis #64 #65 #69 #70
+    - `ClangFormat <https://clang.llvm.org/docs/ClangFormat.html>`_ workflow for automatic code formatting #75
+    - Run CI only when relevant files have changed #73 #78 #81
+    - Switched to single-threaded builds in CI to avoid out-of-memory issues #86
+- Build and documentation:
+    - Refactored the CMake buildsystem #42
+    - Improved the README and the documentation #65 #77 #87
+
+Fixed
+#####
+- Compilation issues when a certain header was included multiple times #34
+- Exclusion of experiment compilation if Z3 is not found #36 #103
+- Wrong DOT drawer in ``write_dot_layout`` #66
+- MSVC compilation issues #82
+- Performance issues with ``foreach_*`` functions on layout types #83
+- Regex in the FQCA reader #88
+- Issue with ``clear_tile`` that would lose track of PI and PO count #104
+- Duplicate crossing cells in the iNML ToPoliNano library #110
+- Several I/O issues in the CLI #111
+
+Removed
+#######
+- LGTM badge as the service is no longer available
+
+
 v0.4.0 - 2022-01-27
 -------------------
 *There are people who think that things that happen in fiction do not really happen. These people are wrong.* --- Neil Gaiman
