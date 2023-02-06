@@ -2,6 +2,16 @@ name: macOS CI
 
 on:
   push:
+    branches: [ 'main' ]
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/macos.yml'
+  pull_request:
+    branches: [ 'main' ]
     paths:
       - '**/*.hpp'
       - '**/*.cpp'

@@ -11,13 +11,18 @@
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/technology/cell_ports.hpp"
+#include "fiction/technology/sidb_surface_analysis.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/network_utils.hpp"
 #include "fiction/utils/placement_utils.hpp"
+#include "fiction/utils/truth_table_utils.hpp"
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
+#include <kitty/operations.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -68,13 +73,17 @@ struct exact_physical_design_params
      */
     std::string scheme = "2DDWave";
     /**
-     * Number of tiles to use as an upper bound.
+     * Number of tiles to use as an upper bound in x direction.
      */
-    uint16_t upper_bound = std::numeric_limits<uint16_t>::max();
+    uint16_t upper_bound_x = std::numeric_limits<uint16_t>::max();
     /**
-     * If set to > 0, only aspect ratios with the given number of tiles will be investigated.
+     * Number of tiles to use as an upper bound in y direction.
      */
-    uint16_t fixed_size = 0ul;
+    uint16_t upper_bound_y = std::numeric_limits<uint16_t>::max();
+    /**
+     * Investigate only aspect ratios with the number of tiles given as upper bound.
+     */
+    bool fixed_size = false;
     /**
      * Number of threads to use for exploring the possible aspect ratios.
      *
@@ -121,6 +130,10 @@ struct exact_physical_design_params
      * Technology-specific constraints that are only to be added for a certain target technology.
      */
     technology_constraints technology_specifics = technology_constraints::NONE;
+    /**
+     * Maps tiles to blacklisted gate types via their truth tables and port information.
+     */
+    surface_black_list<Lyt, port_direction> black_list{};
 };
 /**
  * Statistics.
@@ -167,7 +180,9 @@ class exact_impl
         lower_bound = static_cast<decltype(lower_bound)>(ntk->num_gates() + ntk->num_pis());
 
         // NOLINTNEXTLINE(*-prefer-member-initializer)
-        ari = aspect_ratio_iterator<typename Lyt::aspect_ratio>{ps.fixed_size ? ps.fixed_size : lower_bound};
+        ari = aspect_ratio_iterator<typename Lyt::aspect_ratio>{
+            ps.fixed_size ? static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y) :
+                            static_cast<uint64_t>(lower_bound)};
     }
 
     std::optional<Lyt> run()
@@ -259,6 +274,11 @@ class exact_impl
          */
         [[nodiscard]] bool skippable(const typename Lyt::aspect_ratio& ar) const noexcept
         {
+            // skip aspect ratios that extend beyond the specified upper bounds
+            if (ar.x >= params.upper_bound_x || ar.y >= params.upper_bound_y)
+            {
+                return true;
+            }
             // OPEN clocking optimization
             if (!layout.is_regularly_clocked())
             {
@@ -2322,6 +2342,81 @@ class exact_impl
             // more target technology constraints go here
         }
         /**
+         * Adds constraints to the solver to enforce blacklisting of certain gates.
+         */
+        void black_list_gates()  // TODO take advantage of incremental solving
+        {
+            const auto gather_black_list_expr = [this](const auto& port, const auto& t) noexcept
+            {
+                z3::expr_vector iop{*ctx};
+
+                for (const auto& i : port.inp)
+                {
+                    iop.push_back(!(get_tc(port_direction_to_coordinate(layout, t, i), t)));
+                }
+                for (const auto& o : port.out)
+                {
+                    iop.push_back(!(get_tc(t, port_direction_to_coordinate(layout, t, o))));
+                }
+
+                return iop;
+            };
+
+            // the identity function as a truth table
+            const auto identity = create_id_tt();
+
+            // for each tile-functions pair
+            for (const auto& [tile, exclusions] : params.black_list)
+            {
+                for (const auto& [gate, port_list] : exclusions)
+                {
+                    network.foreach_node(
+                        [this, &gather_black_list_expr, &t = tile, &tt = gate, &ports = port_list](const auto& n)
+                        {
+                            if (!skip_const_or_io_node(n))
+                            {
+                                if (kitty::equal(tt, network.node_function(n)))
+                                {
+                                    if (ports.empty())
+                                    {
+                                        solver->add(!(get_tn(t, n)));
+                                    }
+                                    else
+                                    {
+                                        for (const auto& p : ports)
+                                        {
+                                            solver->add(
+                                                z3::implies(get_tn(t, n), z3::mk_and(gather_black_list_expr(p, t))));
+                                        }
+                                    }
+                                }
+                            }
+                        });
+
+                    // truth table represents the identity; wires need to be additionally excluded
+                    if (kitty::equal(gate, identity))
+                    {
+                        foreach_edge(network,
+                                     [this, &gather_black_list_expr, &t = tile, &ports = port_list](const auto& e)
+                                     {
+                                         if (!skip_const_or_io_edge(e))
+                                         {
+                                             if (ports.empty())
+                                             {
+                                                 solver->add(!(get_te(t, e)));
+                                             }
+                                             for (const auto& p : ports)
+                                             {
+                                                 solver->add(z3::implies(get_te(t, e),
+                                                                         z3::mk_and(gather_black_list_expr(p, t))));
+                                             }
+                                         }
+                                     });
+                    }
+                }
+            }
+        }
+        /**
          * Adds constraints to the given optimize to minimize the number of crossing tiles to use.
          *
          * @param optimize Pointer to an z3::optimize to add constraints to.
@@ -2443,6 +2538,8 @@ class exact_impl
 
             // technology-specific constraints
             technology_specific_constraints();
+            // blacklisting constraints
+            black_list_gates();
 
             // symmetry breaking constraints
             prevent_insufficiencies();
@@ -2762,7 +2859,7 @@ class exact_impl
                 pst.num_aspect_ratios++;
             }
 
-            if (area(ar) > ps.upper_bound)
+            if (ar.x >= ps.upper_bound_x && ar.y >= ps.upper_bound_y)
             {
                 return std::nullopt;
             }
@@ -2947,7 +3044,8 @@ class exact_impl
 
         smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps};
 
-        for (; ari <= ps.upper_bound; ++ari)  // <= to prevent overflow
+        for (; ari <= static_cast<uint64_t>(ps.upper_bound_x) * static_cast<uint64_t>(ps.upper_bound_y);
+             ++ari)  // <= to prevent overflow
         {
 
 #if (PROGRESS_BARS)

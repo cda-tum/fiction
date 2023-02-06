@@ -9,10 +9,15 @@
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/utils/array_utils.hpp"
+#include "fiction/utils/hash.hpp"
+
+#include <kitty/dynamic_truth_table.hpp>
+#include <kitty/hash.hpp>
 
 #include <array>
 #include <initializer_list>
 #include <memory>
+#include <vector>
 
 namespace fiction
 {
@@ -70,7 +75,7 @@ class unsupported_gate_orientation_exception : public std::exception
 
 /**
  * Base class for various FCN libraries used to map gate-level layouts to cell-level ones. Any new gate library can
- * extend fcn_gate_library if it benefits from its features but does not have to. The only requirement is that it must
+ * extend `fcn_gate_library` if it benefits from its features but does not have to. The only requirement is that it must
  * be a static class that provides a
  *
    \verbatim embed:rst
@@ -80,7 +85,7 @@ class unsupported_gate_orientation_exception : public std::exception
       static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
 
    \endverbatim
-
+ *
  * public member function. Additionally, a
  *
    \verbatim embed:rst
@@ -92,6 +97,29 @@ class unsupported_gate_orientation_exception : public std::exception
  *
  * can optionally be provided if some cleanup or optimization is necessary on the cell-level layout after each gate has
  * been mapped.
+ *
+ * Additionally, a
+ *
+   \verbatim embed:rst
+   .. code-block:: c++
+
+      static gate_functions get_functional_implementations()
+   \endverbatim
+ *
+ * can optionally be provided to allow reverse access to the gate structures by functional implementation. This
+ * interface is for example used to determine which gate types to blacklist on tiles in P&R algorithms by considering
+ * gate implementation.
+ *
+ * Finally, a
+ *
+   \verbatim embed:rst
+   .. code-block:: c++
+
+      static gate_ports<PortType> get_gate_ports()
+   \endverbatim
+ *
+ * can optionally be provided to allow reverse access to the gate ports given a gate implementation. This interface is
+ * for example used in `sidb_surface_analysis` to determine which ports to blacklist.
  *
  * @tparam Technology FCN technology type of the implementing gate library.
  * @tparam GateSizeX Tile size in x-dimension.
@@ -112,6 +140,16 @@ class fcn_gate_library
      * Each gate is thus a `cell_list` of cell types defined in `Technology`.
      */
     using fcn_gate = cell_list<typename Technology::cell_type>;
+    /**
+     * Maps truth tables to respective FCN gate implementations.
+     */
+    using gate_functions =
+        std::unordered_map<kitty::dynamic_truth_table, std::vector<fcn_gate>, kitty::hash<kitty::dynamic_truth_table>>;
+    /**
+     * Maps FCN gate implementations to respective port lists indicating their possible orientations.
+     */
+    template <typename PortType>
+    using gate_ports = std::unordered_map<fcn_gate, std::vector<port_list<PortType>>>;
     /**
      * Gate libraries should not be instantiated but used as static objects.
      */

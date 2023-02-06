@@ -22,7 +22,7 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 
     gate_layout layout{gate_layout::aspect_ratio{2, 2}, open_clocking<gate_layout>(num_clks::FOUR)};
 
-    constexpr const char* layout_print = "[i] empty layout";
+    constexpr const char* layout_print = "[i] empty layout\n";
 
     std::stringstream print_stream{};
 
@@ -110,7 +110,7 @@ TEST_CASE("Print empty cell-level layout", "[print-gate-level-layout]")
 
     cell_layout layout{cell_layout::aspect_ratio{2, 2}, "Empty"};
 
-    constexpr const char* layout_print = "[i] empty layout";
+    constexpr const char* layout_print = "[i] empty layout\n";
 
     std::stringstream print_stream{};
 

@@ -9,10 +9,12 @@
 
 #include <fmt/format.h>
 
+#include <cassert>
 #include <cstdint>
 #include <functional>
 #include <set>
 #include <unordered_map>
+#include <utility>
 
 namespace fiction
 {
@@ -74,7 +76,7 @@ struct port_position
     }
 };
 /**
- * A port direction is a relative (cardinal) direction of a port within  a tile.
+ * A port direction is a relative (cardinal) direction of a port within a tile.
  * Useful, when no exact port locations within a tile are needed.
  */
 struct port_direction
@@ -114,7 +116,7 @@ struct port_direction
     /**
      * Direction.
      */
-    uint16_t dir{};
+    uint8_t dir{};
     /**
      * Primary input port.
      */
@@ -152,6 +154,10 @@ struct port_direction
 template <typename PortType>
 struct port_list
 {
+    /**
+     * Exposing the underlying port type.
+     */
+    using port_type = PortType;
     /**
      * Default constructor.
      */

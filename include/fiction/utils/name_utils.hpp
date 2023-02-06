@@ -36,6 +36,26 @@ std::string get_name(const NtkOrLyt& ntk_or_lyt) noexcept
     return {};
 }
 /**
+ * Helper function to conveniently assign a name to a layout or network as they use different function names for the
+ * same purpose.
+ *
+ * @tparam NtkOrLyt Network or layout type.
+ * @param ntk_or_lyt Network or layout object.
+ * @param name Name to assign to given network or layout.
+ */
+template <typename NtkOrLyt>
+void set_name(NtkOrLyt& ntk_or_lyt, const std::string& name) noexcept
+{
+    if constexpr (mockturtle::has_set_network_name_v<NtkOrLyt>)
+    {
+        return ntk_or_lyt.set_network_name(name);
+    }
+    else if constexpr (fiction::has_set_layout_name_v<NtkOrLyt>)
+    {
+        return ntk_or_lyt.set_layout_name(name);
+    }
+}
+/**
  * Helper function to conveniently assign the name of a source network or layout to a target network or layout as they
  * use different function names for the same purpose. This function comes in handy when networks are translated or
  * layouts are being created from networks that are supposed to have the same name.

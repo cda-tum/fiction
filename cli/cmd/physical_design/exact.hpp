@@ -40,8 +40,10 @@ class exact_command : public command
                    "Clocking scheme to use {OPEN[3|4], COLUMNAR[3|4], ROW[3|4] 2DDWAVE[3|4], 2DDWAVEHEX[3|4], USE, "
                    "RES, ESR, CFE, BANCS}",
                    true);
-        add_option("--upper_bound,-u", ps.upper_bound, "Number of FCN gate tiles to use at maximum");
-        add_option("--fixed_size,-f", ps.fixed_size, "Execute only one iteration with the given number of tiles");
+        add_option("--upper_x", ps.upper_bound_x, "Number of FCN gate tiles to use at maximum in x-direction");
+        add_option("--upper_y", ps.upper_bound_y, "Number of FCN gate tiles to use at maximum in y-direction");
+        add_option("--fixed_size,-f", ps.fixed_size,
+                   "Execute only one iteration with the given number of upper bound tiles");
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
         add_option("--async,-a", ps.num_threads, "Number of layout dimensions to examine in parallel (beta feature)");
 
@@ -83,19 +85,6 @@ class exact_command : public command
             env->out() << "[w] no logic network in store" << std::endl;
             reset_flags();
             return;
-        }
-
-        // error case: -f and -u are both set
-        if (this->is_set("fixed_size") && this->is_set("upper_bound"))
-        {
-            env->out() << "[e] -u and -f cannot be set together" << std::endl;
-            reset_flags();
-            return;
-        }
-        // set the value of fixed_size as the upper bound if set
-        if (this->is_set("fixed_size"))
-        {
-            ps.upper_bound = ps.fixed_size;
         }
 
         // fetch number of threads available on the system
@@ -190,6 +179,43 @@ class exact_command : public command
     {
         ps                   = fiction::exact_physical_design_params{};
         hexagonal_tile_shift = {};
+        clocking             = "2DDWave";
+    }
+
+    template <typename LytDest, typename LytSrc>
+    fiction::exact_physical_design_params<LytDest>
+    convert_params(const fiction::exact_physical_design_params<LytSrc>& ps_src) const noexcept
+    {
+        fiction::exact_physical_design_params<LytDest> ps_dest{};
+
+        ps_dest.upper_bound_x            = ps_src.upper_bound_x;
+        ps_dest.upper_bound_y            = ps_src.upper_bound_y;
+        ps_dest.fixed_size               = ps_src.fixed_size;
+        ps_dest.num_threads              = ps_src.num_threads;
+        ps_dest.crossings                = ps_src.crossings;
+        ps_dest.io_pins                  = ps_src.io_pins;
+        ps_dest.border_io                = ps_src.border_io;
+        ps_dest.synchronization_elements = ps_src.synchronization_elements;
+        ps_dest.straight_inverters       = ps_src.straight_inverters;
+        ps_dest.desynchronize            = ps_src.desynchronize;
+        ps_dest.minimize_wires           = ps_src.minimize_wires;
+        ps_dest.minimize_crossings       = ps_src.minimize_crossings;
+        ps_dest.timeout                  = ps_src.timeout;
+        ps_dest.technology_specifics     = ps_src.technology_specifics;
+
+        return ps_dest;
+    }
+
+    template <typename Lyt>
+    std::shared_ptr<fiction::clocking_scheme<fiction::clock_zone<Lyt>>> fetch_clocking_scheme()
+    {
+        // fetch clocking scheme
+        if (auto clk = fiction::get_clocking_scheme<Lyt>(clocking); clk.has_value())
+        {
+            return fiction::ptr<Lyt>(std::move(*clk));
+        }
+
+        return nullptr;
     }
 
     template <typename Lyt>

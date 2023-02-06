@@ -33,6 +33,7 @@
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 #include <mockturtle/views/names_view.hpp>                     // to assign names to network signals
 
+#include <cstdlib>     // exit codes
 #include <filesystem>  // filesystem access
 #include <iostream>    // output
 #include <string>      // strings
@@ -293,6 +294,18 @@ int main(int argc, char* argv[])  // NOLINT
     }
 
     return EXIT_SUCCESS;
+}
+
+#else  // FICTION_Z3_SOLVER
+
+#include <cstdlib>
+#include <iostream>
+
+int main()  // NOLINT
+{
+    std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
+
+    return EXIT_FAILURE;
 }
 
 #endif  // FICTION_Z3_SOLVER

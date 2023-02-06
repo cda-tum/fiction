@@ -50,22 +50,22 @@ using truth_table_t = tt_ptr;
 using aig_nt  = mockturtle::names_view<mockturtle::aig_network>;
 using aig_ptr = std::shared_ptr<aig_nt>;
 
-constexpr const char* aig_name = "AIG";
+inline constexpr const char* aig_name = "AIG";
 
 using xag_nt  = mockturtle::names_view<mockturtle::xag_network>;
 using xag_ptr = std::shared_ptr<xag_nt>;
 
-constexpr const char* xag_name = "XAG";
+inline constexpr const char* xag_name = "XAG";
 
 using mig_nt  = mockturtle::names_view<mockturtle::mig_network>;
 using mig_ptr = std::shared_ptr<mig_nt>;
 
-constexpr const char* mig_name = "MIG";
+inline constexpr const char* mig_name = "MIG";
 
 using tec_nt  = mockturtle::names_view<fiction::technology_network>;
 using tec_ptr = std::shared_ptr<tec_nt>;
 
-constexpr const char* tec_name = "TEC";
+inline constexpr const char* tec_name = "TEC";
 
 using logic_network_t = std::variant<aig_ptr, xag_ptr, mig_ptr, tec_ptr>;
 
@@ -150,6 +150,9 @@ using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
 
 using sidb_cell_clk_lyt     = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 using sidb_cell_clk_lyt_ptr = std::shared_ptr<sidb_cell_clk_lyt>;
+
+using sidb_cell_clk_lyt_siqad = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
+using sidb_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_cell_clk_lyt_siqad>;
 
 using cell_layout_t =
     std::variant<qca_cell_clk_lyt_ptr, stacked_qca_cell_clk_lyt_ptr, inml_cell_clk_lyt_ptr, sidb_cell_clk_lyt_ptr>;
