@@ -135,37 +135,42 @@ exact_physical_design_params&& topolinano(exact_physical_design_params&& ps) noe
 }
 
 template <typename Lyt>
-exact_physical_design_params<Lyt>&& blacklist_wire(const tile<Lyt>&                              t,
-                                                   const std::vector<port_list<port_direction>>& ports,
-                                                   exact_physical_design_params<Lyt>&&           ps) noexcept
+surface_black_list<Lyt, port_direction> blacklist() noexcept
 {
-    ps.black_list[t].insert({create_id_tt(), ports});
-
-    return std::move(ps);
+    return {};
 }
 
 template <typename Lyt>
-exact_physical_design_params<Lyt>&& blacklist_and(const tile<Lyt>&                              t,
-                                                  const std::vector<port_list<port_direction>>& ports,
-                                                  exact_physical_design_params<Lyt>&&           ps) noexcept
+surface_black_list<Lyt, port_direction>&& blacklist_wire(const tile<Lyt>&                              t,
+                                                         const std::vector<port_list<port_direction>>& ports,
+                                                         surface_black_list<Lyt, port_direction>&&     sbl) noexcept
 {
-    ps.black_list[t].insert({create_and_tt(), ports});
+    sbl[t].insert({create_id_tt(), ports});
 
-    return std::move(ps);
+    return std::move(sbl);
 }
 
 template <typename Lyt>
-exact_physical_design_params<Lyt>&& blacklist_or(const tile<Lyt>&                              t,
-                                                 const std::vector<port_list<port_direction>>& ports,
-                                                 exact_physical_design_params<Lyt>&&           ps) noexcept
+surface_black_list<Lyt, port_direction>&& blacklist_and(const tile<Lyt>&                              t,
+                                                        const std::vector<port_list<port_direction>>& ports,
+                                                        surface_black_list<Lyt, port_direction>&&     sbl) noexcept
 {
-    ps.black_list[t].insert({create_or_tt(), ports});
+    sbl[t].insert({create_and_tt(), ports});
 
-    return std::move(ps);
+    return std::move(sbl);
 }
 
 template <typename Lyt>
-exact_physical_design_params<Lyt>&& async(const std::size_t t, exact_physical_design_params<Lyt>&& ps) noexcept
+surface_black_list<Lyt, port_direction>&& blacklist_or(const tile<Lyt>&                              t,
+                                                       const std::vector<port_list<port_direction>>& ports,
+                                                       surface_black_list<Lyt, port_direction>&&     sbl) noexcept
+{
+    sbl[t].insert({create_or_tt(), ports});
+
+    return std::move(sbl);
+}
+
+exact_physical_design_params&& async(const std::size_t t, exact_physical_design_params&& ps) noexcept
 {
     ps.num_threads = t;
 
@@ -227,6 +232,21 @@ Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params& ps)
     exact_physical_design_stats stats{};
 
     const auto layout = exact<Lyt>(ntk, ps, &stats);
+
+    REQUIRE(layout.has_value());
+
+    check_drvs(*layout);
+    check_stats(stats);
+
+    return *layout;
+}
+template <typename Lyt, typename Ntk>
+Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt, port_direction>& black_list,
+                                    const exact_physical_design_params& ps)
+{
+    exact_physical_design_stats stats{};
+
+    const auto layout = exact_with_blacklist<Lyt>(ntk, black_list, ps, &stats);
 
     REQUIRE(layout.has_value());
 
@@ -375,13 +395,16 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
     {
         SECTION("Without port info")
         {
-            const auto lyt = generate_layout<cart_gate_clk_lyt>(
+            const auto lyt = generate_layout_with_black_list<cart_gate_clk_lyt>(
                 blueprints::and_or_network<technology_network>(),
-                twoddwave(crossings(blacklist_and(
+                blacklist_and<cart_gate_clk_lyt>(
                     {2, 2}, {},
-                    blacklist_wire(
+                    blacklist_wire<cart_gate_clk_lyt>(
                         {2, 2}, {},
-                        blacklist_or({1, 2}, {}, blacklist_wire({2, 0}, {}, configuration<cart_gate_clk_lyt>())))))));
+                        blacklist_or<cart_gate_clk_lyt>(
+                            {1, 2}, {},
+                            blacklist_wire<cart_gate_clk_lyt>({2, 0}, {}, blacklist<cart_gate_clk_lyt>())))),
+                twoddwave(crossings(configuration())));
 
             check_eq(blueprints::and_or_network<technology_network>(), lyt);
 
@@ -392,22 +415,24 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
         }
         SECTION("With port info")
         {
-            const auto lyt = generate_layout<cart_gate_clk_lyt>(
+            const auto lyt = generate_layout_with_black_list<cart_gate_clk_lyt>(
                 blueprints::and_or_network<technology_network>(),
-                twoddwave(crossings(blacklist_and(
+                blacklist_and<cart_gate_clk_lyt>(
                     {2, 2},
                     {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH),
                                                 port_direction(port_direction::cardinal::WEST)},
                                                {port_direction(port_direction::cardinal::SOUTH)})},
-                    blacklist_or(
+                    blacklist_or<cart_gate_clk_lyt>(
                         {2, 2},
                         {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH),
                                                     port_direction(port_direction::cardinal::WEST)},
                                                    {port_direction(port_direction::cardinal::SOUTH)})},
-                        blacklist_wire({2, 2},
-                                       {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH)},
-                                                                  {port_direction(port_direction::cardinal::SOUTH)})},
-                                       configuration<cart_gate_clk_lyt>()))))));
+                        blacklist_wire<cart_gate_clk_lyt>(
+                            {2, 2},
+                            {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH)},
+                                                       {port_direction(port_direction::cardinal::SOUTH)})},
+                            blacklist<cart_gate_clk_lyt>()))),
+                twoddwave(crossings(configuration())));
 
             check_eq(blueprints::and_or_network<technology_network>(), lyt);
 

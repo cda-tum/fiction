@@ -130,10 +130,6 @@ struct exact_physical_design_params
      * Technology-specific constraints that are only to be added for a certain target technology.
      */
     technology_constraints technology_specifics = technology_constraints::NONE;
-    /**
-     * Maps tiles to blacklisted gate types via their truth tables and port information.
-     */
-    surface_black_list<Lyt, port_direction> black_list{};
 };
 /**
  * Statistics.
@@ -163,10 +159,12 @@ template <typename Lyt, typename Ntk>
 class exact_impl
 {
   public:
-    exact_impl(const Ntk& src, const exact_physical_design_params& p, exact_physical_design_stats& st) :
+    exact_impl(const Ntk& src, const exact_physical_design_params& p, exact_physical_design_stats& st,
+               const surface_black_list<Lyt, port_direction>& sbl = {}) :
             ps{p},
             pst{st},
-            scheme{*get_clocking_scheme<Lyt>(ps.scheme)}
+            scheme{*get_clocking_scheme<Lyt>(ps.scheme)},
+            black_list{sbl}
     {
         mockturtle::names_view<technology_network> intermediate_ntk{
             fanout_substitution<mockturtle::names_view<technology_network>>(
@@ -218,6 +216,10 @@ class exact_impl
      */
     clocking_scheme<tile<Lyt>> scheme;
     /**
+     * Maps tiles to blacklisted gate types via their truth tables and port information.
+     */
+    const surface_black_list<Lyt, port_direction> black_list;
+    /**
      * Lower bound for the number of layout tiles.
      */
     uint16_t lower_bound{0u};
@@ -253,12 +255,13 @@ class exact_impl
          * @param lyt The empty gate-level layout that is going to contain the created layout.
          * @param ps The parameters to respect in the SMT instance generation process.
          */
-        smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk, const exact_physical_design_params& ps) noexcept
-                :
+        smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk, const exact_physical_design_params& ps,
+                    const surface_black_list<Lyt, port_direction>& sbl) noexcept :
                 ctx{std::move(ctxp)},
                 layout{lyt},
                 network{ntk},
                 params{ps},
+                black_list{sbl},
                 node2pos{ntk},
                 depth_ntk{ntk},
                 inv_levels{inverse_levels(ntk)}
@@ -479,6 +482,10 @@ class exact_impl
          * Configurations specifying layout restrictions. Used in instance generation among other places.
          */
         const exact_physical_design_params params;
+        /**
+         * Maps tiles to blacklisted gate types via their truth tables and port information.
+         */
+        const surface_black_list<Lyt, port_direction>& black_list;
         /**
          * Maps nodes to tile positions when creating the layout from the SMT model.
          */
@@ -2366,7 +2373,7 @@ class exact_impl
             const auto identity = create_id_tt();
 
             // for each tile-functions pair
-            for (const auto& [tile, exclusions] : params.black_list)
+            for (const auto& [tile, exclusions] : black_list)
             {
                 for (const auto& [gate, port_list] : exclusions)
                 {
@@ -2836,12 +2843,7 @@ class exact_impl
 
         Lyt layout{{}, scheme};
 
-        smt_handler handler{
-            ctx,
-            layout,
-            *ntk,
-            ps,
-        };
+        smt_handler handler{ctx, layout, *ntk, ps, black_list};
         (*ti_list)[t_num].ctx = ctx;
 
         while (true)
@@ -3042,7 +3044,7 @@ class exact_impl
     {
         Lyt layout{{}, scheme};
 
-        smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps};
+        smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps, black_list};
 
         for (; ari <= static_cast<uint64_t>(ps.upper_bound_x) * static_cast<uint64_t>(ps.upper_bound_y);
              ++ari)  // <= to prevent overflow
@@ -3186,6 +3188,57 @@ std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params ps = {},
 
     exact_physical_design_stats  st{};
     detail::exact_impl<Lyt, Ntk> p{ntk, ps, st};
+
+    auto result = p.run();
+
+    if (pst)
+    {
+        *pst = st;
+    }
+
+    return result;
+}
+
+template <typename Lyt, typename Ntk>
+std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list<Lyt, port_direction>& black_list,
+                                        exact_physical_design_params ps  = {},
+                                        exact_physical_design_stats* pst = nullptr)
+{
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
+    static_assert(mockturtle::is_network_type_v<Ntk>,
+                  "Ntk is not a network type");  // Ntk is being converted to a topology_network anyway, therefore,
+                                                 // this is the only relevant check here
+
+    if (const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme); !clocking_scheme.has_value())
+    {
+        throw unsupported_clocking_scheme_exception();
+    }
+    // check for input degree
+    else if (has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
+    {
+        throw high_degree_fanin_exception();
+    }
+
+    if constexpr (!fiction::has_foreach_adjacent_opposite_tiles_v<Lyt>)
+    {
+        if (ps.straight_inverters)
+        {
+            std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_tiles function; straight inverters "
+                         "cannot be guaranteed"
+                      << std::endl;
+        }
+    }
+    if constexpr (!fiction::has_synchronization_elements_v<Lyt>)
+    {
+        if (ps.synchronization_elements)
+        {
+            std::cout << "[w] Lyt does not support synchronization elements; not using them" << std::endl;
+        }
+    }
+
+    exact_physical_design_stats  st{};
+    detail::exact_impl<Lyt, Ntk> p{ntk, ps, st, black_list};
 
     auto result = p.run();
 
