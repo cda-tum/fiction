@@ -1,0 +1,8 @@
+//
+// Created by Jan Drewniok on 06.02.23.
+//
+
+#ifndef FICTION_CRITICAL_TEMPERATURE_H
+#define FICTION_CRITICAL_TEMPERATURE_H
+
+#endif //FICTION_CRITICAL_TEMPERATURE_H
