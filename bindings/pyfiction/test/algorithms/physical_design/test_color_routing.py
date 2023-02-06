@@ -17,6 +17,26 @@ class ColorRouting(unittest.TestCase):
 
             self.assertTrue(success)
 
+    def test_crossings(self):
+        lyt = cartesian_gate_layout((4, 2, 1), "2DDWave", "Layout")
+
+        x1 = lyt.create_pi("x1", coordinate(0, 1))
+        x2 = lyt.create_pi("x2", coordinate(3, 2))
+        x3 = lyt.create_pi("x3", (2, 0))
+
+        buf1 = lyt.create_buf(x3, (2, 1))
+        lyt.create_buf(buf1, (2, 2))
+
+        lyt.create_and(x1, x2, coordinate(4, 2))
+
+        params = color_routing_params()
+        params.crossings = True
+        params.path_limit = 1
+
+        success = color_routing(lyt, [((0, 1), (4, 2)), ((3, 2), (4, 2))], params=params)
+
+        self.assertTrue(success)
+
 
 if __name__ == '__main__':
     unittest.main()
