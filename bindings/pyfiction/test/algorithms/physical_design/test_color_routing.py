@@ -2,7 +2,7 @@ import unittest
 from fiction.pyfiction import *
 
 
-class ColorRouting(unittest.TestCase):
+class TestColorRouting(unittest.TestCase):
     def test_routing(self):
         for lyt in [cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
                     hexagonal_gate_layout((4, 4), "2DDWave", "Layout")]:
