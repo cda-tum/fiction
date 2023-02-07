@@ -179,10 +179,9 @@ class gate_level_drvs_impl
         {
             *ps.out << "[i]" << border_io_check() << '\n';
         }
-        *ps.out << '\n';
 
         *ps.out << fmt::format(
-                       "[i] DRVs: {}, Warnings: {}",
+                       "\n[i] DRVs: {}, Warnings: {}",
                        (pst.drvs != 0u ? fmt::format(fmt::fg(fmt::color::red), std::to_string(pst.drvs)) : ZERO_ISSUES),
                        (pst.warnings != 0u ? fmt::format(fmt::fg(fmt::color::yellow), std::to_string(pst.warnings)) :
                                              ZERO_ISSUES))
@@ -197,8 +196,13 @@ class gate_level_drvs_impl
      * Layout to perform design rule checks on.
      */
     Lyt lyt;
-
+    /**
+     * Parameters.
+     */
     gate_level_drv_params ps;
+    /**
+     * Statistics.
+     */
     gate_level_drv_stats& pst;
 
     /**
@@ -260,7 +264,7 @@ class gate_level_drvs_impl
         report[t.str()] = s.str();
     }
 
-    void log_node(const mockturtle::node<Lyt> n, nlohmann::json& report) const noexcept
+    void log_node(const mockturtle::node<Lyt>& n, nlohmann::json& report) const noexcept
     {
         report[n] = lyt.node_to_index(n);
     }
@@ -349,24 +353,26 @@ class gate_level_drvs_impl
         nlohmann::json non_adjacency_report{};
 
         auto adjacencies_respected = true;
-        lyt.foreach_node(
-            [this, &non_adjacency_report, &adjacencies_respected](const auto& n)
+        lyt.foreach_tile(
+            [this, &non_adjacency_report, &adjacencies_respected](const auto& t)
             {
-                // skip constants
-                if (!lyt.is_constant(n))
+                // skip empty tiles
+                if (lyt.is_empty_tile(t))
                 {
-                    const auto t = lyt.get_tile(n);
+                    return;
+                }
 
-                    for (const auto& child : lyt.strg->nodes[n].children)
+                const auto n = lyt.get_node(t);
+
+                for (const auto& child : lyt.strg->nodes[n].children)
+                {
+                    const auto ct = lyt.get_tile(lyt.get_node(child.index));
+                    if (!lyt.is_adjacent_elevation_of(t, ct))
                     {
-                        const auto ct = lyt.get_tile(lyt.get_node(child.index));
-                        if (!lyt.is_adjacent_elevation_of(t, ct))
-                        {
-                            adjacencies_respected = false;
-                            log_tile(ct, non_adjacency_report);
-                            log_tile(t, non_adjacency_report);
-                            ++pst.drvs;
-                        }
+                        adjacencies_respected = false;
+                        log_tile(ct, non_adjacency_report);
+                        log_tile(t, non_adjacency_report);
+                        ++pst.drvs;
                     }
                 }
             });
@@ -385,23 +391,24 @@ class gate_level_drvs_impl
         nlohmann::json connections_report{};
 
         auto all_connected = true;
-        lyt.foreach_node(
-            [this, &connections_report, &all_connected](const auto& n)
+        lyt.foreach_tile(
+            [this, &connections_report, &all_connected](const auto& t)
             {
-                // skip constants
-                if (!lyt.is_constant(n))
+                if (lyt.is_empty_tile(t))
                 {
-                    const auto t = lyt.get_tile(n);
+                    return;
+                }
 
-                    const bool dangling_inp_connection = lyt.fanin_size(lyt.get_node(t)) == 0 && !lyt.is_pi_tile(t);
-                    const bool dangling_out_connection = lyt.fanout_size(lyt.get_node(t)) == 0 && !lyt.is_po_tile(t);
+                const auto n = lyt.get_node(t);
 
-                    if (dangling_out_connection || dangling_inp_connection)
-                    {
-                        all_connected = false;
-                        log_tile(t, connections_report);
-                        ++pst.drvs;
-                    }
+                const bool dangling_inp_connection = lyt.fanin_size(n) == 0 && !lyt.is_pi_tile(t);
+                const bool dangling_out_connection = lyt.fanout_size(n) == 0 && !lyt.is_po_tile(t);
+
+                if (dangling_out_connection || dangling_inp_connection)
+                {
+                    all_connected = false;
+                    log_tile(t, connections_report);
+                    ++pst.drvs;
                 }
             });
 
@@ -447,24 +454,25 @@ class gate_level_drvs_impl
         nlohmann::json data_flow_report{};
 
         auto data_flow_respected = true;
-        lyt.foreach_node(
-            [this, &data_flow_report, &data_flow_respected](const auto& n)
+        lyt.foreach_tile(
+            [this, &data_flow_report, &data_flow_respected](const auto& t)
             {
-                // skip constants
-                if (!lyt.is_constant(n))
+                if (lyt.is_empty_tile(t))
                 {
-                    const auto t = lyt.get_tile(n);
+                    return;
+                }
 
-                    for (const auto& child : lyt.strg->nodes[n].children)
+                const auto n = lyt.get_node(t);
+
+                for (const auto& child : lyt.strg->nodes[n].children)
+                {
+                    const auto ct = lyt.get_tile(lyt.get_node(child.index));
+                    if (!lyt.is_incoming_clocked(t, ct))
                     {
-                        const auto ct = lyt.get_tile(lyt.get_node(child.index));
-                        if (!lyt.is_incoming_clocked(t, ct))
-                        {
-                            data_flow_respected = false;
-                            log_tile(ct, data_flow_report);
-                            log_tile(t, data_flow_report);
-                            ++pst.drvs;
-                        }
+                        data_flow_respected = false;
+                        log_tile(ct, data_flow_report);
+                        log_tile(t, data_flow_report);
+                        ++pst.drvs;
                     }
                 }
             });
@@ -498,7 +506,8 @@ class gate_level_drvs_impl
             ++pst.drvs;
         }
 
-        num_io                         = 0ul;
+        num_io = 0ul;
+
         has_io_report["Specified POs"] = lyt.num_pos();
         lyt.foreach_po([this, &count_io](const auto& o) { count_io(lyt.get_node(o)); });
         has_io_report["Counted POs"] = num_io;

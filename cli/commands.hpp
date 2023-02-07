@@ -15,6 +15,7 @@
 #include "cmd/io/read.hpp"
 #include "cmd/io/sqd.hpp"
 #include "cmd/io/tt.hpp"
+#include "cmd/io/verilog.hpp"
 #include "cmd/logic/akers.hpp"
 #include "cmd/logic/balance.hpp"
 #include "cmd/logic/fanouts.hpp"
