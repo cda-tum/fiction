@@ -192,38 +192,41 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Vector of SiDB nanometer positions.
      */
-    [[nodiscard]] std::vector<std::pair<double, double>> get_all_sidb_location_in_nm() const noexcept
-    {
+    [[nodiscard]] std::vector<std::pair<double, double>> get_all_sidb_location_in_nm() const noexcept {
         std::vector<std::pair<double, double>> positions{};
         positions.reserve(strg->sidb_order.size());
 
-        for (const auto& cell : strg->sidb_order)
-        {
+        for (const auto &cell: strg->sidb_order) {
             auto pos = sidb_nm_position<Lyt>(strg->phys_params, cell);
             positions.push_back(std::make_pair(pos.first, pos.second));
         }
-
         return positions;
     }
+
+    /**
+    * Returns all SiDB cells.
+    *
+    * @return Vector of SiDB cells.
+    */
+    [[nodiscard]] std::vector<typename Lyt::cell> get_all_sidb_cells() const noexcept {
+        return strg->sidb_order;
+    }
+
     /**
      * Set the physical parameters for the simulation.
      *
      * @param params Physical parameters to be set.
      */
-    void set_physical_parameters(const sidb_simulation_parameters& params) noexcept
-    {
+    void set_physical_parameters(const sidb_simulation_parameters &params) noexcept {
         if ((strg->phys_params.lat_a == params.lat_a) && (strg->phys_params.lat_b == params.lat_b) &&
-            (strg->phys_params.lat_c == params.lat_c))
-        {
-            strg->phys_params         = params;
+            (strg->phys_params.lat_c == params.lat_c)) {
+            strg->phys_params = params;
             strg->charge_index.second = params.base;
-            strg->max_charge_index    = static_cast<uint64_t>(std::pow(strg->phys_params.base, this->num_cells())) - 1;
+            strg->max_charge_index = static_cast<uint64_t>(std::pow(strg->phys_params.base, this->num_cells())) - 1;
             this->update_local_potential();
             this->recompute_system_energy();
             this->validity_check();
-        }
-        else
-        {
+        } else {
             strg->phys_params = params;
             this->initialize_distance_matrix();
             this->initialize_potential_matrix();

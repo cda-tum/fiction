@@ -18,19 +18,15 @@ TEST_CASE("occupation function for simple energy distribution", "[occupation_fun
 
     SECTION("a few states with degeneracy")
     {
-        std::map<double, uint64_t> test_map{};
-        test_map.insert(std::make_pair(0, 1));
-        test_map.insert(std::make_pair(0.2, 3));
-        test_map.insert(std::make_pair(0.4, 4));
-        test_map.insert(std::make_pair(0.5, 6));
-        test_map.insert(std::make_pair(1.5, 1));
-        test_map.insert(std::make_pair(1.7, 0));
+        std::map<double, std::pair<uint64_t, bool>> test_map{};
+        test_map[0] = std::make_pair(1, true);
+        test_map[0.2] = std::make_pair(3, true);
+        test_map[0.4] = std::make_pair(6, false);
+        test_map[1.0] = std::make_pair(4, true);
+        test_map[0.8] = std::make_pair(5, false);
 
         CHECK(occupation_propability_pi(test_map, 10, 3) > 0);
-        CHECK(occupation_propability_pi(test_map, 10, 5) == 0);
         CHECK(occupation_propability_pi(test_map, 0, 0) == 1);
 
-        test_map.insert(std::make_pair(0, 2));
-        CHECK(occupation_propability_pi(test_map, 0, 0) == 1);
     }
 }
