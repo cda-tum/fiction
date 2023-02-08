@@ -9,7 +9,7 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
-#include "fiction/algorithms/simulation/sidb/occupation_function_pi.hpp"
+#include "fiction/algorithms/simulation/sidb/occupation_function_erroneous.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/sort_function.hpp"
 #include "fiction/utils/gate_logic_map.hpp"
@@ -24,6 +24,8 @@ namespace fiction {
     struct critical_temperature_stats {
         double critical_temperature{};
         std::map<double, std::pair<uint64_t, bool>> valid_lyts{};
+        uint64_t num_valid_lyt{};
+        double emingrounderror = std::numeric_limits<double>::max();
 
         void report(std::ostream &out = std::cout) const {
             out << fmt::format("critical temperature  = {:.2f} K\n", critical_temperature);
@@ -45,7 +47,7 @@ namespace fiction {
     void critical_temperature(const Lyt &lyt, const std::string &gate, const std::string &input_bits,
                               const sidb_simulation_parameters &params = sidb_simulation_parameters{},
                               critical_temperature_stats<Lyt> *pst = nullptr,
-                              const double convlevel = 0.997, const uint64_t temp_limit = 400) {
+                              const double convlevel = 0.99, const uint64_t temp_limit = 400) {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
         static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
@@ -54,11 +56,12 @@ namespace fiction {
         // all physically valid charge cofigurations are determined for the given layout.
         exgs_stats<Lyt> stats_exhaustive{};
         exhaustive_ground_state_simulation(lyt, params, &stats_exhaustive);
+        cs.num_valid_lyt = stats_exhaustive.valid_lyts.size();
 
         // vector with temperature values from 0 to 400 K in 0.2 K steps is generated.
         std::vector<double> temp_values{};
-        for (uint64_t i = 0; i <= temp_limit * 5; i++) {
-            temp_values.push_back(static_cast<double>(i) / 5.0);
+        for (uint64_t i = 1; i <= temp_limit * 100; i++) {
+            temp_values.push_back(static_cast<double>(i) / 100.0);
         }
 
         // all cells of the given layout are collected.
@@ -110,15 +113,22 @@ namespace fiction {
 
         cs.valid_lyts = degeneracy_transparent_errenous;
 
+
+        for (const auto &[energy, count]: degeneracy_transparent_errenous) {
+            if (!count.second) {
+                cs.emingrounderror = (energy - degeneracy_transparent_errenous.begin()->first) * 1000;
+                break;
+            }
+        }
+
         // this function determines the critical temperature (CT) for a confidence level of 99 %.
         for (const auto &temp: temp_values) {
-            if (occupation_propability_pi(degeneracy_transparent_errenous, temp, 1) < convlevel) {
+            if (occupation_propability_erroneous(degeneracy_transparent_errenous, temp) > (1 - convlevel)) {
                 cs.critical_temperature = temp;
                 break;
             }
             if (std::abs(temp - static_cast<double>(temp_limit)) < 0.001) {
                 cs.critical_temperature = static_cast<double>(temp_limit);
-                break;
             }
         }
 

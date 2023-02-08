@@ -43,6 +43,6 @@ TEMPLATE_TEST_CASE(
         critical_temperature_stats<TestType> criticalstats{};
         critical_temperature(lyt, "or", "10", params, &criticalstats);
 
-        CHECK(criticalstats.critical_temperature == 0);
+        CHECK(criticalstats.critical_temperature == 0.01);
     }
 }

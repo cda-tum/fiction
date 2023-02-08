@@ -13,26 +13,12 @@
 #include <numeric>
 
 namespace fiction {
-    double occupation_propability_pi(const std::map<double, std::pair<uint64_t, bool>> &energy_deg, const double &temp,
-                                     const uint64_t &state_number) {
+    double occupation_propability_erroneous(const std::map<double, std::pair<uint64_t, bool>> &energy_deg, const double &temp) {
 
         assert(!energy_deg.empty() && "map is empty");
-        assert(!(energy_deg.size() < state_number) && "state_number is too large");
+        assert((temp > 0) && "temperature should be slightly above 0 K");
 
         double min_energy = energy_deg.begin()->first;
-
-        if (temp == 0) {
-            auto it = energy_deg.begin();
-            for (uint64_t i = 0; i < state_number; i++) {
-                it++;
-            }
-
-            if (it != energy_deg.begin()) {
-                return 0;
-            }
-            return 1;
-
-        }
 
         double part_func = std::accumulate(energy_deg.begin(), energy_deg.end(), 0.0,
                                            [&](double sum, const auto &it) {
@@ -42,9 +28,9 @@ namespace fiction {
 
         if (energy_deg.size() == 1) {
             if (!energy_deg.begin()->second.second) {
-                return 0.0;
+                return 1.0;
             }
-            return 1.0;
+            return 0.0;
         }
 
         double p = 0;
