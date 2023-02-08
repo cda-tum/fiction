@@ -32,7 +32,7 @@ namespace fiction {
 
         if(!at_least_one_true)
         {
-            return -1.0;
+            return 1.0;
         }
 
         double part_func = std::accumulate(energy_distribution_transparent_erroneous.begin(), energy_distribution_transparent_erroneous.end(), 0.0,

@@ -7,7 +7,7 @@
 
 using namespace fiction;
 
-TEST_CASE("occupation function for simple energy distribution", "[occupation_function_pi]")
+TEST_CASE("occupation probability of all erroneous charge distribution states", "[occupation_function_erroneous]")
 {
     SECTION("a few states with degeneracy")
     {
@@ -20,5 +20,25 @@ TEST_CASE("occupation function for simple energy distribution", "[occupation_fun
 
         CHECK(occupation_propability_erroneous(test_map, 10) > 0.0);
         CHECK(occupation_propability_erroneous(test_map, 0.01) > 0.0);
+    }
+
+    SECTION("one state / true")
+    {
+        std::map<double, std::pair<uint64_t, bool>> test_map{};
+        test_map[0] = std::make_pair(1, true);
+
+        CHECK(occupation_propability_erroneous(test_map, 1000) == 0.0);
+        CHECK(occupation_propability_erroneous(test_map, 10) == 0.0);
+        CHECK(occupation_propability_erroneous(test_map, 0.01) == 0.0);
+    }
+
+    SECTION("one state / false")
+    {
+        std::map<double, std::pair<uint64_t, bool>> test_map{};
+        test_map[0] = std::make_pair(1, false);
+
+        CHECK(occupation_propability_erroneous(test_map, 1000) == 1.0);
+        CHECK(occupation_propability_erroneous(test_map, 10) == 1.0);
+        CHECK(occupation_propability_erroneous(test_map, 0.01) == 1.0);
     }
 }
