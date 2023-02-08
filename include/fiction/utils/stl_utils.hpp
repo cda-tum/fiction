@@ -6,7 +6,9 @@
 #define FICTION_STL_UTILS_HPP
 
 #include <functional>
+#include <iterator>
 #include <queue>
+#include <type_traits>
 #include <vector>
 
 namespace fiction
@@ -29,11 +31,19 @@ namespace fiction
  * @param last End of the range to examine.
  * @param s_first Begin of the range to search for.
  * @param s_last End of the range to search for.
- * @return Iterator to the first position of the first shared 2-element sub-sequence shared between the two ranges.
+ * @return Iterator in the range `[first, last)` to the first position of the first 2-element sub-sequence shared
+ * between the two ranges, or `last` if no such shared sub-sequence exists.
  */
 template <class InputIt, class ForwardIt>
 InputIt find_first_two_of(InputIt first, InputIt last, ForwardIt s_first, ForwardIt s_last) noexcept
 {
+    static_assert(
+        std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>::value,
+        "InputIt must meet the requirements of LegacyInputIterator");
+    static_assert(
+        std::is_base_of<std::forward_iterator_tag, typename std::iterator_traits<ForwardIt>::iterator_category>::value,
+        "ForwardIt must meet the requirements of LegacyForwardIterator");
+
     for (; first != last - 1; ++first)
     {
         for (ForwardIt it = s_first; it != s_last - 1; ++it)
