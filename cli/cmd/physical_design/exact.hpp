@@ -179,38 +179,13 @@ class exact_command : public command
     {
         ps                   = fiction::exact_physical_design_params{};
         hexagonal_tile_shift = {};
-        clocking             = "2DDWave";
-    }
-
-    template <typename LytDest, typename LytSrc>
-    fiction::exact_physical_design_params<LytDest>
-    convert_params(const fiction::exact_physical_design_params<LytSrc>& ps_src) const noexcept
-    {
-        fiction::exact_physical_design_params<LytDest> ps_dest{};
-
-        ps_dest.upper_bound_x            = ps_src.upper_bound_x;
-        ps_dest.upper_bound_y            = ps_src.upper_bound_y;
-        ps_dest.fixed_size               = ps_src.fixed_size;
-        ps_dest.num_threads              = ps_src.num_threads;
-        ps_dest.crossings                = ps_src.crossings;
-        ps_dest.io_pins                  = ps_src.io_pins;
-        ps_dest.border_io                = ps_src.border_io;
-        ps_dest.synchronization_elements = ps_src.synchronization_elements;
-        ps_dest.straight_inverters       = ps_src.straight_inverters;
-        ps_dest.desynchronize            = ps_src.desynchronize;
-        ps_dest.minimize_wires           = ps_src.minimize_wires;
-        ps_dest.minimize_crossings       = ps_src.minimize_crossings;
-        ps_dest.timeout                  = ps_src.timeout;
-        ps_dest.technology_specifics     = ps_src.technology_specifics;
-
-        return ps_dest;
     }
 
     template <typename Lyt>
     std::shared_ptr<fiction::clocking_scheme<fiction::clock_zone<Lyt>>> fetch_clocking_scheme()
     {
         // fetch clocking scheme
-        if (auto clk = fiction::get_clocking_scheme<Lyt>(clocking); clk.has_value())
+        if (auto clk = fiction::get_clocking_scheme<Lyt>(ps.scheme); clk.has_value())
         {
             return fiction::ptr<Lyt>(std::move(*clk));
         }
