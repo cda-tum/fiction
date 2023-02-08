@@ -123,14 +123,14 @@ class path_set : public std::set<Path>
 };
 
 /**
- * Checks whether a a given coordinate `successor` hosts a crossable wire when coming from coordinate `src` in a given
+ * Checks whether a given coordinate `successor` hosts a crossable wire when coming from coordinate `src` in a given
  * layout. A wire is said to be crossable if a potential cross-over would not result in running along the same
  * information flow direction. For example, a wire segment hosted by `successor` that is horizontal and runs from west
  * to east is crossable by a wire segment coming from `src` that is vertical and runs from north to south. However, if
  * the wire segment coming from `src` were also horizontal and ran from west to east, the cross-over would be
  * prohibited.
  *
- * @Note This function can be called on layouts types other than gate-level layouts, but will then always return
+ * @Note This function can be called on layout types other than gate-level layouts, but will then always return
  * `false`. This is helpful for general routing in, e.g., clocked layouts.
  *
  * @tparam Lyt Layout type.
@@ -143,6 +143,8 @@ template <typename Lyt>
 [[nodiscard]] bool is_crossable_wire(const Lyt& lyt, const coordinate<Lyt>& src,
                                      const coordinate<Lyt>& successor) noexcept
 {
+    static_assert(is_coordinate_layout_v<Lyt>, "Lyt must be a coordinate layout type");
+
     assert(lyt.is_adjacent_elevation_of(src, successor));
 
     if constexpr (is_gate_level_layout_v<Lyt>)
@@ -152,6 +154,12 @@ template <typename Lyt>
         // one can only cross over wire segments, but not over I/Os
         if (lyt.is_wire(successor_node) && !lyt.is_pi(successor_node) && !lyt.is_po(successor_node))
         {
+            // if wire has missing connections, it is up to no good (could be a dangling fanout)
+            if (lyt.has_no_incoming_signal(successor) || lyt.has_no_outgoing_signal(successor))
+            {
+                // don't cross over weird wires
+                return false;
+            }
             // if src is in the ground layer, crossing is easily possible
             if (lyt.is_ground_layer(src))
             {
@@ -278,19 +286,22 @@ void clear_routing(Lyt& lyt) noexcept
     lyt.foreach_node(
         [&lyt](const auto& g)
         {
-            if (!lyt.is_constant(g))  // skip constants
+            // skip constants
+            if (lyt.is_constant(g))
             {
-                const auto t = lyt.get_tile(g);
+                return;
+            }
 
-                if (lyt.is_buf(g) && !lyt.is_fanout(g) && !lyt.is_pi(g) &&
-                    !lyt.is_po(g))  // remove all wires that are not fan-outs or primary I/Os
-                {
-                    lyt.clear_tile(t);
-                }
-                else  // delete children pointers of gates by re-placing them
-                {
-                    lyt.move_node(g, t);
-                }
+            const auto t = lyt.get_tile(g);
+
+            if (lyt.is_buf(g) && !lyt.is_fanout(g) && !lyt.is_pi(g) &&
+                !lyt.is_po(g))  // remove all wires that are not fan-outs or primary I/Os
+            {
+                lyt.clear_tile(t);
+            }
+            else  // delete children pointers of gates by re-placing them
+            {
+                lyt.move_node(g, t);
             }
         });
 }
