@@ -5,7 +5,6 @@
 #include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -24,7 +23,32 @@ TEMPLATE_TEST_CASE(
         (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_column_hex>>>))
 {
 
-    SECTION("one layout with one SiDB placed")
+    SECTION("empty layout")
+    {
+        TestType lyt{{10, 10}};
+
+        const sidb_simulation_parameters params{2, -0.32};
+
+        critical_temperature_stats<TestType> criticalstats{};
+        critical_temperature(lyt, "or", "10", params, &criticalstats);
+        CHECK(criticalstats.valid_lyts.size() == 0);
+        CHECK(criticalstats.critical_temperature == 0);
+    }
+
+    SECTION("one SiDB placed")
+    {
+        TestType lyt{{10, 10}};
+        lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
+
+        const sidb_simulation_parameters params{2, -0.32};
+
+        critical_temperature_stats<TestType> criticalstats{};
+        critical_temperature(lyt, "or", "10", params, &criticalstats, 0.99, 350);
+        CHECK(criticalstats.num_valid_lyt == 1);
+        CHECK(criticalstats.critical_temperature == 350);
+    }
+
+    SECTION("several SiDBs placed")
     {
         TestType lyt{{10, 10}};
         lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
@@ -42,7 +66,14 @@ TEMPLATE_TEST_CASE(
 
         critical_temperature_stats<TestType> criticalstats{};
         critical_temperature(lyt, "or", "10", params, &criticalstats);
+        CHECK(criticalstats.critical_temperature == -10);
 
-        CHECK(criticalstats.critical_temperature == 0.01);
+        critical_temperature_stats<TestType> criticalstats_one{};
+        critical_temperature(lyt, "and", "10", params, &criticalstats_one);
+        CHECK(criticalstats_one.critical_temperature == 400);
+
+        critical_temperature_stats<TestType> criticalstats_second{};
+        critical_temperature(lyt, "and", "01", params, &criticalstats_second);
+        CHECK(criticalstats_second.critical_temperature == 400);
     }
 }

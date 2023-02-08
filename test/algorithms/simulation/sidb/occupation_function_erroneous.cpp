@@ -9,13 +9,6 @@ using namespace fiction;
 
 TEST_CASE("occupation function for simple energy distribution", "[occupation_function_pi]")
 {
-
-
-    SECTION("no states")
-    {
-        std::map<double, uint64_t> test_map{};
-    }
-
     SECTION("a few states with degeneracy")
     {
         std::map<double, std::pair<uint64_t, bool>> test_map{};
@@ -27,6 +20,5 @@ TEST_CASE("occupation function for simple energy distribution", "[occupation_fun
 
         CHECK(occupation_propability_erroneous(test_map, 10) > 0.0);
         CHECK(occupation_propability_erroneous(test_map, 0.01) > 0.0);
-
     }
 }

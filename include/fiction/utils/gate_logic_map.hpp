@@ -8,9 +8,9 @@
 #include <map>
 #include <string>
 
-namespace fiction::gate_log {
+namespace fiction::gate_logic {
 
-    const std::map<std::string, std::map<std::string, std::string>> GATE_LOGIC = {
+    const std::map<std::string, std::map<std::string, std::string>> GATE_TRUTH_TABLE = {
             {"and",       {{"00", "0"},  {"01", "0"},  {"10", "0"},  {"11", "1"}}},
             {"or",        {{"00", "0"},  {"01", "1"},  {"10", "1"},  {"11", "1"}}},
             {"nor",       {{"00", "1"},  {"01", "0"},  {"10", "0"},  {"11", "0"}}},
@@ -45,6 +45,6 @@ namespace fiction::gate_log {
             {"wire_diag", {{"in", "1"}, {"out", "1"}}}
     };
 
-}  // namespace fiction::gate_log
+}  // namespace fiction::gate_logic
 
 #endif //FICTION_GATE_LOGIC_MAP_HPP
