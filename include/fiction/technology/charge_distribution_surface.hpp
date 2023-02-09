@@ -178,15 +178,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         return *this;
     }
+
     /**
      * Returns all SiDB charges of the placed SiDBs as a vector.
      *
      * @return Vector of SiDB charges.
      */
-    [[nodiscard]] std::vector<sidb_charge_state> get_all_sidb_charges() const noexcept
-    {
+    [[nodiscard]] std::vector<sidb_charge_state> get_all_sidb_charges() const noexcept {
         return strg->cell_charge;
     }
+
     /**
      * Returns the positions of all SiDBs in nm of the form `(x,y)`.
      *
@@ -200,6 +201,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             auto pos = sidb_nm_position<Lyt>(strg->phys_params, cell);
             positions.push_back(std::make_pair(pos.first, pos.second));
         }
+
         return positions;
     }
 
@@ -226,12 +228,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             this->update_local_potential();
             this->recompute_system_energy();
             this->validity_check();
-        } else {
+        }
+        else {
             strg->phys_params = params;
             this->initialize_distance_matrix();
             this->initialize_potential_matrix();
             strg->charge_index.second = params.base;
-            strg->max_charge_index    = static_cast<uint64_t>(std::pow(strg->phys_params.base, this->num_cells())) - 1;
+            strg->max_charge_index = static_cast<uint64_t>(std::pow(strg->phys_params.base, this->num_cells())) - 1;
             this->update_local_potential();
             this->recompute_system_energy();
             this->validity_check();

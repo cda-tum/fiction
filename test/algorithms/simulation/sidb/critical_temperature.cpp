@@ -77,4 +77,3 @@ TEMPLATE_TEST_CASE(
         CHECK(criticalstats_second.critical_temperature == 400);
     }
 }
-
