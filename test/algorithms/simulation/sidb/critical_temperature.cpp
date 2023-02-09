@@ -31,7 +31,7 @@ TEMPLATE_TEST_CASE(
 
         critical_temperature_stats<TestType> criticalstats{};
         critical_temperature(lyt, "or", "10", params, &criticalstats);
-        CHECK(criticalstats.valid_lyts.size() == 0);
+        CHECK(criticalstats.num_valid_lyt == 0);
         CHECK(criticalstats.critical_temperature == 0);
     }
 
@@ -66,7 +66,7 @@ TEMPLATE_TEST_CASE(
 
         critical_temperature_stats<TestType> criticalstats{};
         critical_temperature(lyt, "or", "10", params, &criticalstats);
-        CHECK(criticalstats.critical_temperature == -10);
+        CHECK(criticalstats.critical_temperature == 0);
 
         critical_temperature_stats<TestType> criticalstats_one{};
         critical_temperature(lyt, "and", "10", params, &criticalstats_one);
@@ -77,3 +77,4 @@ TEMPLATE_TEST_CASE(
         CHECK(criticalstats_second.critical_temperature == 400);
     }
 }
+

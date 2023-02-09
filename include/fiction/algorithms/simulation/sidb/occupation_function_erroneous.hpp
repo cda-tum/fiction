@@ -13,51 +13,43 @@
 #include <numeric>
 
 namespace fiction {
-    double occupation_propability_erroneous(const std::map<double, std::pair<uint64_t, bool>> &energy_distribution_transparent_erroneous, const double &temp) {
 
-        assert(!energy_distribution_transparent_erroneous.empty() && "map is empty");
-        assert((temp > 0) && "temperature should be slightly above 0 K");
+/**
+* This function computes the occupation probability of all erroneous charge distribution states at a given temperature.
+*
+* @param energy_distribution_transparent_erroneous This map holds the energies of all possible charge distributions as keys
+* and the values are a pairs with the corresponding degeneracies and the type of excited states (transparent = false, erroneous = true)
+* @param ps Physical parameters. They are material-specific and may vary from experiment to experiment.
+* @param pst Statistics. They store the simulation results.
+* @param confidence_level Confidence level for the presence of a working gate.
+* @param max_temperature The maximal critical temperature is set at 400 K.
+* @return The criticaltemperature is returned. -10 as return says that either no charge distribution satisfies logic, or at least not the ground state as it should be.
+* Changing the physical parameter µ_ might help.
+*/
+    double occupation_propability_erroneous(
+            const std::vector<std::pair<double, bool>> &energy_distribution_transparent_erroneous,
+            const double &temperature) {
+
+        assert(!energy_distribution_transparent_erroneous.empty() && "vector is empty");
+        assert((temperature > 0) && "temperature should be slightly above 0 K");
 
         double min_energy = energy_distribution_transparent_erroneous.begin()->first;
 
-        bool at_least_one_true = false;
-        for (const auto &[energy, pair]: energy_distribution_transparent_erroneous)
-        {
-            if (pair.second)
-            {
-                at_least_one_true = true;
-                break;
-            }
-        }
-
-        if(!at_least_one_true)
-        {
-            return 1.0;
-        }
-
-        double part_func = std::accumulate(energy_distribution_transparent_erroneous.begin(), energy_distribution_transparent_erroneous.end(), 0.0,
+        // The partition function is obtained by summing up all the Boltzmann factors.
+        double part_func = std::accumulate(energy_distribution_transparent_erroneous.begin(),
+                                           energy_distribution_transparent_erroneous.end(), 0.0,
                                            [&](double sum, const auto &it) {
-                                               return sum + static_cast<double>(it.second.first) *
-                                                            std::exp(-(it.first - min_energy) * 12000 / temp);
+                                               return sum + std::exp(-(it.first - min_energy) * 12000 / temperature);
                                            });
 
-        if (energy_distribution_transparent_erroneous.size() == 1) {
-            if (!energy_distribution_transparent_erroneous.begin()->second.second) {
-                return -1.0;
-            }
-            return 0.0;
-        }
-
+        // All Boltzmann factors of the erroneous states are summed.
         double p = 0;
-        for (const auto &[energies, count]: energy_distribution_transparent_erroneous) {
-            if (!count.second) {
-                p += static_cast<double>(count.first) *
-                     std::exp(-(energies - min_energy) * 12000 / temp) / part_func;
+        for (const auto &[energies, state_transparent_erroneous]: energy_distribution_transparent_erroneous) {
+            if (!state_transparent_erroneous) {
+                p += std::exp(-(energies - min_energy) * 12000 / temperature);
             }
         }
-        return p / part_func;
-
-
+        return p / part_func; // occupation probability of the erroneous states.
     }
 
 } // namespace fiction
