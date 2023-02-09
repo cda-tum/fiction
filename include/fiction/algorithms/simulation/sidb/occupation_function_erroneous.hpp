@@ -17,8 +17,7 @@ namespace fiction {
 /**
 * This function computes the occupation probability of all erroneous charge distribution states at a given temperature.
 *
-* @param energy_distribution_transparent_erroneous This map holds the energies of all possible charge distributions as keys
-* and the values are a pairs with the corresponding degeneracies and the type of excited states (transparent = false, erroneous = true)
+* @param energy_distribution_transparent_erroneous This vector contains the energies of all possible charge distributions as the information if state is an transparent or erroneous excited state.
 * @param ps Physical parameters. They are material-specific and may vary from experiment to experiment.
 * @param pst Statistics. They store the simulation results.
 * @param confidence_level Confidence level for the presence of a working gate.

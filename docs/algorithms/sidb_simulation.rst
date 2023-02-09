@@ -44,3 +44,11 @@ are a crucial step in the physical design flow of SiDB layouts, as they are used
 **Header:** ``fiction/algorithms/simulation/sidb/time_to_solution.hpp``
 
 .. doxygenfunction:: fiction::sim_acc_tts(const Lyt& lyt, const quicksim_params& quicksim_params, time_to_solution_stats* ps = nullptr, const uint64_t& repetitions = 100, const double confidence_level = 0.997) noexcept
+
+**Header:** ``fiction/algorithms/simulation/sidb/critical_temperature.hpp``
+
+.. doxygenfunction:: fiction::critical_temperature(const Lyt &lyt, const std::string &gate, const std::string &input_bits, const sidb_simulation_parameters &params = sidb_simulation_parameters{}, critical_temperature_stats<Lyt> *pst = nullptr, const double confidence_level = 0.99, const uint64_t max_temperature = 400) noexcept
+
+**Header:** ``fiction/algorithms/simulation/sidb/occupation_function_erroneous.hpp``
+
+.. doxygenfunction:: fiction::occupation_propability_erroneous(const std::vector<std::pair<double, bool>> &energy_distribution_transparent_erroneous, const double &temperature) noexcept
