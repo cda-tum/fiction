@@ -17,8 +17,8 @@
 #include "fiction/utils/gate_logic_map.hpp"
 #include "fiction/utils/hash.hpp"
 
-#include <cmath>
 #include <cassert>
+#include <cmath>
 
 namespace fiction
 {

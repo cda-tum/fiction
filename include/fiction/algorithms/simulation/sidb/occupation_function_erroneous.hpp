@@ -5,13 +5,13 @@
 #ifndef FICTION_OCCUPATION_FUNCTION_HPP
 #define FICTION_OCCUPATION_FUNCTION_HPP
 
+#include <cassert>
 #include <cmath>
 #include <iostream>
 #include <iterator>
 #include <map>
 #include <numeric>
 #include <vector>
-#include <cassert>
 
 namespace fiction
 {
@@ -28,8 +28,9 @@ namespace fiction
  * @return The criticaltemperature is returned. -10 as return says that either no charge distribution satisfies logic,
  * or at least not the ground state as it should be. Changing the physical parameter µ_ might help.
  */
-double occupation_propability_erroneous(const std::vector<std::pair<double, bool>>& energy_distribution_transparent_erroneous,
-                                 const double& temperature)
+double
+occupation_propability_erroneous(const std::vector<std::pair<double, bool>>& energy_distribution_transparent_erroneous,
+                                 const double&                               temperature)
 {
 
     assert(!energy_distribution_transparent_erroneous.empty() && "vector is empty");
