@@ -308,12 +308,15 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
 
         obstruction_layout obstr_lyt{lyt};
 
-        obstr_lyt.foreach_coordinate(
-            [&obstr_lyt](const auto& c)
-            {
-                obstr_lyt.foreach_adjacent_coordinate(c, [&obstr_lyt, &c](const auto& ac)
-                                                      { CHECK(!obstr_lyt.is_obstructed_connection(c, ac)); });
-            });
+        CHECK(obstr_lyt.is_obstructed_connection({1, 1}, {2, 1}));
+        CHECK(obstr_lyt.is_obstructed_connection({2, 0}, {2, 1}));
+        CHECK(obstr_lyt.is_obstructed_connection({3, 1}, {2, 1}));
+
+        CHECK(obstr_lyt.is_obstructed_connection({1, 1}, {1, 0}));
+        CHECK(obstr_lyt.is_obstructed_connection({2, 0}, {1, 0}));
+
+        CHECK(obstr_lyt.is_obstructed_connection({2, 1}, {2, 2}));
+        CHECK(obstr_lyt.is_obstructed_connection({1, 0}, {0, 0}));
 
         // add artificial obstruction
         obstr_lyt.obstruct_connection({0, 0}, {0, 1});
@@ -321,7 +324,6 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
         obstr_lyt.obstruct_connection({2, 4}, {4, 0});
 
         CHECK(obstr_lyt.is_obstructed_connection({0, 0}, {0, 1}));
-        CHECK(!obstr_lyt.is_obstructed_connection({1, 0}, {0, 0}));
         CHECK(obstr_lyt.is_obstructed_connection({2, 2}, {2, 3}));
         CHECK(!obstr_lyt.is_obstructed_connection({2, 3}, {2, 2}));
         CHECK(obstr_lyt.is_obstructed_connection({2, 4}, {4, 0}));
@@ -335,7 +337,6 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
         obstr_lyt.clear_obstructed_connections();
 
         CHECK(!obstr_lyt.is_obstructed_connection({0, 0}, {0, 1}));
-        CHECK(!obstr_lyt.is_obstructed_connection({1, 0}, {0, 0}));
         CHECK(!obstr_lyt.is_obstructed_connection({2, 2}, {2, 3}));
         CHECK(!obstr_lyt.is_obstructed_connection({2, 3}, {2, 2}));
         CHECK(!obstr_lyt.is_obstructed_connection({2, 4}, {4, 0}));

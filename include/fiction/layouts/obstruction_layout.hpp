@@ -137,7 +137,18 @@ class obstruction_layout<Lyt, false> : public Lyt
     [[nodiscard]] bool is_obstructed_connection(const typename Lyt::coordinate& src,
                                                 const typename Lyt::coordinate& tgt) const noexcept
     {
-        return strg->obstructed_connections.count({src, tgt}) > 0;
+        if (strg->obstructed_connections.count({src, tgt}) > 0)
+        {
+            return true;
+        }
+        if constexpr (is_gate_level_layout_v<Lyt>)
+        {
+            return Lyt::is_incoming_signal(tgt, static_cast<mockturtle::signal<Lyt>>(src));
+        }
+
+        // more implementations go here
+
+        return false;
     }
 
   private:
