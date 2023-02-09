@@ -102,7 +102,7 @@ class yen_k_shortest_paths_impl
                 }
 
                 // find an alternative path from the spur coordinate to the target and check that it is not empty
-                if (auto spur_path =
+                if (const auto spur_path =
                         a_star<Path>(layout, {spur, objective.target},
                                      manhattan_distance_functor<obstruction_layout<Lyt>, uint64_t>(),
                                      unit_cost_functor<obstruction_layout<Lyt>, uint8_t>(), ps.astar_params);

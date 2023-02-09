@@ -159,15 +159,33 @@ TEST_CASE("Routing with crossings", "[color-routing]")
     color_routing_params ps{};
     ps.crossings = true;
 
-    SECTION("MCS")
+    SECTION("Without path limit")
     {
-        ps.engine = graph_coloring_engine::MCS;
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
+        SECTION("MCS")
+        {
+            ps.engine = graph_coloring_engine::MCS;
+            check_color_routing(spec_layout, impl_layout, objectives, ps);
+        }
+        SECTION("SAT")
+        {
+            ps.engine = graph_coloring_engine::SAT;
+            check_color_routing(spec_layout, impl_layout, objectives, ps);
+        }
     }
-    SECTION("SAT")
+    SECTION("With path limit")
     {
-        ps.engine = graph_coloring_engine::SAT;
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
+        ps.path_limit = 2;
+
+        SECTION("MCS")
+        {
+            ps.engine = graph_coloring_engine::MCS;
+            check_color_routing(spec_layout, impl_layout, objectives, ps);
+        }
+        SECTION("SAT")
+        {
+            ps.engine = graph_coloring_engine::SAT;
+            check_color_routing(spec_layout, impl_layout, objectives, ps);
+        }
     }
 }
 
@@ -226,5 +244,52 @@ TEST_CASE("Routing failure 2", "[color-routing]")
         ps.engine = graph_coloring_engine::SAT;
         // routing should fail
         CHECK(!color_routing(layout, objectives, ps));
+    }
+}
+
+TEST_CASE("Routing failure 3", "[color-routing]")
+{
+    cart_gate_clk_lyt layout{{2, 4, 1}, twoddwave_clocking<cart_gate_clk_lyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto w1 = layout.create_buf(x1, {0, 1});
+    const auto x2 = layout.create_pi("x2", {1, 0});
+    const auto w2 = layout.create_buf(x2, {1, 1});
+    const auto a1 = layout.create_and(w1, w2, {2, 1});
+
+    color_routing_params ps{};
+    ps.crossings = true;
+
+    SECTION("Wires without connections")
+    {
+        layout.move_node(layout.get_node(a1), {2, 1});
+
+        const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{0, 1}, {2, 1}}, {{1, 1}, {2, 1}}};
+
+        SECTION("k = 3")
+        {
+            ps.path_limit = 3;
+            CHECK(!color_routing(layout, objectives, ps));
+        }
+        SECTION("no path limit")
+        {
+            CHECK(!color_routing(layout, objectives, ps));
+        }
+    }
+    SECTION("Goal node behind wire crossing")
+    {
+        layout.move_node(layout.get_node(a1), {2, 1}, {w2});
+
+        const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{0, 1}, {2, 1}}, {{1, 1}, {2, 1}}};
+
+        SECTION("k = 3")
+        {
+            ps.path_limit = 3;
+            CHECK(!color_routing(layout, objectives, ps));
+        }
+        SECTION("no path limit")
+        {
+            CHECK(!color_routing(layout, objectives, ps));
+        }
     }
 }

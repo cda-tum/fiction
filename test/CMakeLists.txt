@@ -1,5 +1,3 @@
-include(${CMAKE_SOURCE_DIR}/libs/Catch2/extras/Catch.cmake)
-
 include_directories(.)
 
 file(GLOB_RECURSE FILENAMES */*.cpp)
