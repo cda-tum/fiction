@@ -11,34 +11,31 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
 {
     SECTION("a few states with degeneracy")
     {
-        std::map<double, std::pair<uint64_t, bool>> test_map{};
-        test_map[0] = std::make_pair(1, true);
-        test_map[0.2] = std::make_pair(3, true);
-        test_map[0.0004] = std::make_pair(6, false);
-        test_map[1.0] = std::make_pair(4, true);
-        test_map[0.8] = std::make_pair(5, false);
+        std::vector<std::pair<double, bool>> energy_distribution_transparent_erroneous{};
+        energy_distribution_transparent_erroneous.emplace_back(std::make_pair(0.1, true));
+        energy_distribution_transparent_erroneous.emplace_back(std::make_pair(0.1, false));
 
-        CHECK(occupation_propability_erroneous(test_map, 10) > 0.0);
-        CHECK(occupation_propability_erroneous(test_map, 0.01) > 0.0);
+        CHECK(occupation_propability_erroneous(energy_distribution_transparent_erroneous, 10) == 0.5);
+        CHECK(occupation_propability_erroneous(energy_distribution_transparent_erroneous, 0.01) == 0.5);
     }
 
     SECTION("one state / true")
     {
-        std::map<double, std::pair<uint64_t, bool>> test_map{};
-        test_map[0] = std::make_pair(1, true);
-
-        CHECK(occupation_propability_erroneous(test_map, 1000) == 0.0);
-        CHECK(occupation_propability_erroneous(test_map, 10) == 0.0);
-        CHECK(occupation_propability_erroneous(test_map, 0.01) == 0.0);
+        std::vector<std::pair<double, bool>> energy_distribution_transparent_erroneous{};
+        energy_distribution_transparent_erroneous.emplace_back(std::make_pair(1, true));
+        CHECK(occupation_propability_erroneous(energy_distribution_transparent_erroneous, 1000) == 0.0);
+        CHECK(occupation_propability_erroneous(energy_distribution_transparent_erroneous, 10) == 0.0);
+        CHECK(occupation_propability_erroneous(energy_distribution_transparent_erroneous, 0.01) == 0.0);
     }
 
     SECTION("one state / false")
     {
-        std::map<double, std::pair<uint64_t, bool>> test_map{};
-        test_map[0] = std::make_pair(1, false);
 
-        CHECK(occupation_propability_erroneous(test_map, 1000) == 1.0);
-        CHECK(occupation_propability_erroneous(test_map, 10) == 1.0);
-        CHECK(occupation_propability_erroneous(test_map, 0.01) == 1.0);
+        std::vector<std::pair<double, bool>> energy_distribution_transparent_erroneous{};
+        energy_distribution_transparent_erroneous.emplace_back(std::make_pair(1, false));
+
+        CHECK(occupation_propability_erroneous(energy_distribution_transparent_erroneous, 1000) == 1.0);
+        CHECK(occupation_propability_erroneous(energy_distribution_transparent_erroneous, 10) == 1.0);
+        CHECK(occupation_propability_erroneous(energy_distribution_transparent_erroneous, 0.01) == 1.0);
     }
 }
