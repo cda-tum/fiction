@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+
 #include <fiction/algorithms/simulation/sidb/occupation_function_erroneous.hpp>
 
 using namespace fiction;

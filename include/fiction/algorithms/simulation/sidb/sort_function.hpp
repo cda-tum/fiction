@@ -5,22 +5,26 @@
 #ifndef FICTION_SORT_FUNCTION_HPP
 #define FICTION_SORT_FUNCTION_HPP
 
-#include <utility>
 #include <algorithm>
+#include <utility>
 
-namespace fiction {
+namespace fiction
+{
 
-    template<typename Lyt>
-    bool local_sort_sidb_cells(const typename Lyt::cell &a, const typename Lyt::cell &b) {
-        if (a.y != b.y) {
-            return a.y < b.y;
-        }
-        if (a.z != b.z) {
-            return a.z < b.z;
-        }
-        return a.x < b.x;
+template <typename Lyt>
+bool local_sort_sidb_cells(const typename Lyt::cell& a, const typename Lyt::cell& b)
+{
+    if (a.y != b.y)
+    {
+        return a.y < b.y;
     }
+    if (a.z != b.z)
+    {
+        return a.z < b.z;
+    }
+    return a.x < b.x;
+}
 
-} // namespace fiction
+}  // namespace fiction
 
-#endif //FICTION_SORT_FUNCTION_HPP
+#endif  // FICTION_SORT_FUNCTION_HPP
