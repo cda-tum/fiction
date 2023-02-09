@@ -18,6 +18,7 @@
 #include "fiction/utils/hash.hpp"
 
 #include <cmath>
+#include <cassert>
 
 namespace fiction
 {
@@ -84,7 +85,6 @@ void critical_temperature(const Lyt& lyt, const std::string& gate, const std::st
 
     if (!lyt.is_empty())
     {
-
         // All physically valid charge configurations are determined for the given layout (exhaustive ground state
         // simulation is used to provide 100 % accuracy for the critical temperature).
         exgs_stats<Lyt> stats_exhaustive{};
@@ -94,9 +94,9 @@ void critical_temperature(const Lyt& lyt, const std::string& gate, const std::st
         cs.num_valid_lyt = stats_exhaustive.valid_lyts.size();
 
         // If the layout consists of only one SiDB, the maximum temperature is returned as the critical temperature.
-        if (lyt.num_cells() == 1)
+        if (lyt.num_cells() == 1u)
         {
-            cs.critical_temperature = max_temperature;
+            cs.critical_temperature = static_cast<double>(max_temperature);
         }
 
         if (lyt.num_cells() > 1)

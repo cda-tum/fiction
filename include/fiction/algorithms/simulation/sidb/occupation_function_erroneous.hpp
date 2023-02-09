@@ -11,6 +11,7 @@
 #include <map>
 #include <numeric>
 #include <vector>
+#include <cassert>
 
 namespace fiction
 {
@@ -27,13 +28,12 @@ namespace fiction
  * @return The criticaltemperature is returned. -10 as return says that either no charge distribution satisfies logic,
  * or at least not the ground state as it should be. Changing the physical parameter µ_ might help.
  */
-double
-occupation_propability_erroneous(const std::vector<std::pair<double, bool>>& energy_distribution_transparent_erroneous,
-                                 const double&                               temperature)
+double occupation_propability_erroneous(const std::vector<std::pair<double, bool>>& energy_distribution_transparent_erroneous,
+                                 const double& temperature)
 {
 
     assert(!energy_distribution_transparent_erroneous.empty() && "vector is empty");
-    assert((temperature > 0) && "temperature should be slightly above 0 K");
+    assert((temperature > static_cast<double>(0)) && "temperature should be slightly above 0 K");
 
     double min_energy = energy_distribution_transparent_erroneous.begin()->first;
 
