@@ -81,6 +81,8 @@ class obstruction_layout<Lyt, false> : public Lyt
     /**
      * Marks the connection from coordinate `src` to coordinate `tgt` as obstructed.
      *
+     * @note Coordinates marked this way will not be crossed with wires by path finding algorithms.
+     *
      * @param src Source coordinate.
      * @param tgt Target coordinate.
      */
@@ -96,7 +98,7 @@ class obstruction_layout<Lyt, false> : public Lyt
         strg->obstructed_coordinates.clear();
     }
     /**
-     * Clears all obstructed connections that were manually marked via `obstruct_connections`.
+     * Clears all obstructed connections that were manually marked via `obstruct_connection`.
      */
     void clear_obstructed_connections() noexcept
     {
@@ -143,7 +145,8 @@ class obstruction_layout<Lyt, false> : public Lyt
         }
         if constexpr (is_gate_level_layout_v<Lyt>)
         {
-            return Lyt::is_incoming_signal(tgt, static_cast<mockturtle::signal<Lyt>>(src));
+            return Lyt::is_incoming_signal(tgt, static_cast<mockturtle::signal<Lyt>>(src)) ||
+                   Lyt::is_outgoing_signal(src, static_cast<mockturtle::signal<Lyt>>(tgt));
         }
 
         // more implementations go here
