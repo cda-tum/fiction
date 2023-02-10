@@ -32,10 +32,11 @@ struct sidb_simulation_parameters
      * @param b lattice constant.
      * @param c lattice constant.
      */
-    explicit sidb_simulation_parameters(const uint8_t base_number = 3, const double mu_minus = -0.32,
-                                        const double relative_permittivity = 5.6,
-                                        const double screening_distance = 5.0 * 1E-9, const double a = 3.84 * 1E-10,
-                                        const double b = 7.68 * 1E-10, const double c = 2.25 * 1E-10) :
+    constexpr explicit sidb_simulation_parameters(const uint8_t base_number = 3, const double mu_minus = -0.32,
+                                                  const double relative_permittivity = 5.6,
+                                                  const double screening_distance    = 5.0 * 1E-9,
+                                                  const double a = 3.84 * 1E-10, const double b = 7.68 * 1E-10,
+                                                  const double c = 2.25 * 1E-10) :
             lat_a{a},
             lat_b{b},
             lat_c{c},
