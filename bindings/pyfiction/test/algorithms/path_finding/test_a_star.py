@@ -1,5 +1,6 @@
-from fiction.pyfiction import *
 import unittest
+
+from fiction.pyfiction import *
 
 
 class TestAStar(unittest.TestCase):
@@ -37,6 +38,69 @@ class TestAStar(unittest.TestCase):
             self.assertEqual(len(a_star(lyt, coordinate(0, 0), coordinate(4, 4))), 0)
             self.assertEqual(len(a_star(lyt, coordinate(1, 1), coordinate(0, 0))), 0)
             self.assertEqual(len(a_star(lyt, coordinate(2, 2), coordinate(1, 1))), 0)
+
+    def test_path_finding_with_obstructions_and_crossings(self):
+        for lyt in [cartesian_obstruction_layout(cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout")),
+                    hexagonal_obstruction_layout(hexagonal_gate_layout((2, 1, 1), "2DDWave", "Layout"))]:
+            x1 = lyt.create_pi("x1", (0, 0))
+            lyt.obstruct_coordinate((0, 0, 0))
+            lyt.obstruct_coordinate((0, 0, 1))
+
+            x2 = lyt.create_pi("x2", (0, 1))
+            lyt.obstruct_coordinate((0, 1, 0))
+            lyt.obstruct_coordinate((0, 1, 1))
+
+            b = lyt.create_buf(x1, (1, 0))
+            lyt.obstruct_coordinate((1, 0, 0))
+
+            a = lyt.create_and(x2, b, (1, 1))
+            lyt.obstruct_coordinate((1, 1, 0))
+            lyt.obstruct_coordinate((1, 1, 1))
+
+            params = a_star_params()
+            params.crossings = True
+
+            self.assertEqual(len(a_star(lyt, coordinate(0, 0), coordinate(0, 0), params)), 1)
+            self.assertEqual(len(a_star(lyt, coordinate(0, 0), coordinate(1, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(0, 0), coordinate(0, 1), params)), 2)
+            self.assertEqual(len(a_star(lyt, coordinate(0, 0), coordinate(1, 1), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(0, 0), coordinate(2, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(0, 0), coordinate(2, 1), params)), 0)
+
+            self.assertEqual(len(a_star(lyt, coordinate(1, 0), coordinate(0, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(1, 0), coordinate(1, 0), params)), 1)
+            self.assertEqual(len(a_star(lyt, coordinate(1, 0), coordinate(0, 1), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(1, 0), coordinate(1, 1), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(1, 0), coordinate(2, 0), params)), 2)
+            self.assertEqual(len(a_star(lyt, coordinate(1, 0), coordinate(2, 1), params)), 3)
+
+            self.assertEqual(len(a_star(lyt, coordinate(0, 1), coordinate(0, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(0, 1), coordinate(1, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(0, 1), coordinate(0, 1), params)), 1)
+            self.assertEqual(len(a_star(lyt, coordinate(0, 1), coordinate(1, 1), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(0, 1), coordinate(2, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(0, 1), coordinate(2, 1), params)), 0)
+
+            self.assertEqual(len(a_star(lyt, coordinate(1, 1), coordinate(0, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(1, 1), coordinate(1, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(1, 1), coordinate(0, 1), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(1, 1), coordinate(1, 1), params)), 1)
+            self.assertEqual(len(a_star(lyt, coordinate(1, 1), coordinate(2, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(1, 1), coordinate(2, 1), params)), 2)
+
+            self.assertEqual(len(a_star(lyt, coordinate(2, 0), coordinate(0, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(2, 0), coordinate(1, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(2, 0), coordinate(0, 1), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(2, 0), coordinate(1, 1), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(2, 0), coordinate(2, 0), params)), 1)
+            self.assertEqual(len(a_star(lyt, coordinate(2, 0), coordinate(2, 1), params)), 2)
+
+            self.assertEqual(len(a_star(lyt, coordinate(2, 1), coordinate(0, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(2, 1), coordinate(1, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(2, 1), coordinate(0, 1), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(2, 1), coordinate(1, 1), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(2, 1), coordinate(2, 0), params)), 0)
+            self.assertEqual(len(a_star(lyt, coordinate(2, 1), coordinate(2, 1), params)), 1)
 
     def test_distance(self):
         for lyt in [clocked_cartesian_layout((4, 4), "2DDWave"), cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
