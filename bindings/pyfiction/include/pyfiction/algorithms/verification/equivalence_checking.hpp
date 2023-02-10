@@ -5,11 +5,12 @@
 #ifndef PYFICTION_EQUIVALENCE_CHECKING_HPP
 #define PYFICTION_EQUIVALENCE_CHECKING_HPP
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/verification/equivalence_checking.hpp>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace pyfiction
 {

@@ -5,10 +5,11 @@
 #ifndef PYFICTION_WRITE_SVG_LAYOUT_HPP
 #define PYFICTION_WRITE_SVG_LAYOUT_HPP
 
-#include "pybind11/pybind11.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/write_svg_layout.hpp>
+
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {

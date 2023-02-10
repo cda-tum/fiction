@@ -5,14 +5,14 @@
 #ifndef PYFICTION_CELL_LEVEL_LAYOUT_HPP
 #define PYFICTION_CELL_LEVEL_LAYOUT_HPP
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <algorithm>
 #include <cctype>

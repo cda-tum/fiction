@@ -5,13 +5,14 @@
 #ifndef PYFICTION_K_SHORTEST_PATHS_HPP
 #define PYFICTION_K_SHORTEST_PATHS_HPP
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/path_finding/k_shortest_paths.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/utils/routing_utils.hpp>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace pyfiction
 {
@@ -57,10 +58,14 @@ inline void yen_k_shortest_paths(pybind11::module& m)
 
         ;
 
-    detail::yen_k_shortest_paths<py_cartesian_clocked_layout>(m);
+    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
+
+    detail::yen_k_shortest_paths<py_cartesian_obstruction_layout>(m);
     detail::yen_k_shortest_paths<py_cartesian_gate_layout>(m);
-    detail::yen_k_shortest_paths<py_hexagonal_clocked_layout>(m);
+    detail::yen_k_shortest_paths<py_cartesian_clocked_layout>(m);
+    detail::yen_k_shortest_paths<py_hexagonal_obstruction_layout>(m);
     detail::yen_k_shortest_paths<py_hexagonal_gate_layout>(m);
+    detail::yen_k_shortest_paths<py_hexagonal_clocked_layout>(m);
 }
 
 }  // namespace pyfiction

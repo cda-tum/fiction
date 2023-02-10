@@ -5,11 +5,12 @@
 #ifndef PYFICTION_ORTHOGONAL_HPP
 #define PYFICTION_ORTHOGONAL_HPP
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <sstream>
 

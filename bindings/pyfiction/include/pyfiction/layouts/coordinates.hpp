@@ -6,8 +6,9 @@
 #define PYFICTION_COORDINATES_HPP
 
 #include "pybind11/operators.h"
-#include "pybind11/pybind11.h"
 #include "pyfiction/types.hpp"
+
+#include <pybind11/pybind11.h>
 
 #include <cstdint>
 #include <exception>

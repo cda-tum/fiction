@@ -5,10 +5,11 @@
 #ifndef PYFICTION_DESIGN_RULE_VIOLATIONS_HPP
 #define PYFICTION_DESIGN_RULE_VIOLATIONS_HPP
 
-#include "pybind11/pybind11.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
+
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {

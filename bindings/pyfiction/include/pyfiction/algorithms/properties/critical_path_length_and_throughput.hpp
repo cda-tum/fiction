@@ -5,10 +5,11 @@
 #ifndef PYFICTION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP
 #define PYFICTION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP
 
-#include "pybind11/pybind11.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
+
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {

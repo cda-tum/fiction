@@ -5,14 +5,14 @@
 #ifndef PYFICTION_CLOCKED_LAYOUT_HPP
 #define PYFICTION_CLOCKED_LAYOUT_HPP
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <set>
 #include <string>

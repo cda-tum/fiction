@@ -7,11 +7,12 @@
 
 #if (FICTION_Z3_SOLVER)
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/exact.hpp>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <sstream>
 
@@ -66,7 +67,7 @@ inline void exact(pybind11::module& m)
 
 #else  // FICTION_Z3_SOLVER
 
-#include "pybind11/pybind11.h"
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {

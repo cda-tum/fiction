@@ -11,6 +11,7 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/layouts/obstruction_layout.hpp>
 #include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -60,6 +61,14 @@ using py_cartesian_gate_layout = fiction::gate_level_layout<py_cartesian_clocked
  * Hexagonal gate layout.
  */
 using py_hexagonal_gate_layout = fiction::gate_level_layout<py_hexagonal_clocked_layout>;
+/**
+ * Cartesian gate-level obstruction layout.
+ */
+using py_cartesian_obstruction_layout = fiction::obstruction_layout<py_cartesian_gate_layout>;
+/**
+ * Hexagonal gate-level obstruction layout.
+ */
+using py_hexagonal_obstruction_layout = fiction::obstruction_layout<py_hexagonal_gate_layout>;
 /**
  * Cartesian cell layout.
  */

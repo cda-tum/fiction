@@ -1,4 +1,5 @@
 import unittest
+
 from fiction.pyfiction import *
 
 
@@ -20,14 +21,15 @@ class TestColorRouting(unittest.TestCase):
     def test_crossings(self):
         lyt = cartesian_gate_layout((4, 2, 1), "2DDWave", "Layout")
 
-        x1 = lyt.create_pi("x1", coordinate(0, 1))
-        x2 = lyt.create_pi("x2", coordinate(3, 2))
+        x1 = lyt.create_pi("x1", (0, 1))
+        x2 = lyt.create_pi("x2", (3, 2))
         x3 = lyt.create_pi("x3", (2, 0))
 
         buf1 = lyt.create_buf(x3, (2, 1))
         lyt.create_buf(buf1, (2, 2))
 
-        lyt.create_and(x1, x2, coordinate(4, 2))
+        lyt.create_and(x1, x2, (4, 2))
+        lyt.move_node(lyt.get_node((4, 2)), (4, 2))
 
         params = color_routing_params()
         params.crossings = True

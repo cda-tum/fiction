@@ -5,8 +5,6 @@
 #ifndef PYFICTION_LOGIC_NETWORK_HPP
 #define PYFICTION_LOGIC_NETWORK_HPP
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/network_reader.hpp>
@@ -14,6 +12,8 @@
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 // #include <mockturtle/networks/aig.hpp>
 // #include <mockturtle/networks/mig.hpp>

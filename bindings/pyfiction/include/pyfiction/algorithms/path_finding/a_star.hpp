@@ -5,13 +5,14 @@
 #ifndef PYFICTION_A_STAR_HPP
 #define PYFICTION_A_STAR_HPP
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/path_finding/a_star.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/utils/routing_utils.hpp>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace pyfiction
 {
@@ -51,10 +52,14 @@ inline void a_star(pybind11::module& m)
 
         ;
 
-    detail::a_star<py_cartesian_clocked_layout>(m);
+    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
+
+    detail::a_star<py_cartesian_obstruction_layout>(m);
     detail::a_star<py_cartesian_gate_layout>(m);
-    detail::a_star<py_hexagonal_clocked_layout>(m);
+    detail::a_star<py_cartesian_clocked_layout>(m);
+    detail::a_star<py_hexagonal_obstruction_layout>(m);
     detail::a_star<py_hexagonal_gate_layout>(m);
+    detail::a_star<py_hexagonal_clocked_layout>(m);
 }
 
 }  // namespace pyfiction

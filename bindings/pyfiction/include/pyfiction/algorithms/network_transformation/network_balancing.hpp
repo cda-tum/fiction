@@ -5,10 +5,11 @@
 #ifndef PYFICTION_NETWORK_BALANCING_HPP
 #define PYFICTION_NETWORK_BALANCING_HPP
 
-#include "pybind11/pybind11.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
+
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {

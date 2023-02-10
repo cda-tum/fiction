@@ -2,7 +2,6 @@
 // Created by marcel on 02.06.22.
 //
 
-#include "pybind11/pybind11.h"
 #include "pyfiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "pyfiction/algorithms/network_transformation/network_balancing.hpp"
 #include "pyfiction/algorithms/path_finding/a_star.hpp"
@@ -31,8 +30,11 @@
 #include "pyfiction/layouts/coordinates.hpp"
 #include "pyfiction/layouts/gate_level_layout.hpp"
 #include "pyfiction/layouts/hexagonal_layout.hpp"
+#include "pyfiction/layouts/obstruction_layout.hpp"
 #include "pyfiction/networks/logic_network.hpp"
 #include "pyfiction/technology/area.hpp"
+
+#include <pybind11/pybind11.h>
 
 PYBIND11_MODULE(pyfiction, m)
 {
@@ -48,6 +50,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::clocked_layouts(m);
     pyfiction::gate_level_layouts(m);
     pyfiction::cell_level_layouts(m);
+    pyfiction::obstruction_layouts(m);
     /**
      * Networks
      */

@@ -7,11 +7,12 @@
 
 #if (MUGEN)
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/one_pass_synthesis.hpp>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <optional>
 #include <sstream>
@@ -68,7 +69,7 @@ inline void one_pass_synthesis(pybind11::module& m)
 
 #else  // MUGEN
 
-#include "pybind11/pybind11.h"
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {

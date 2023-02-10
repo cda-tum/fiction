@@ -5,13 +5,14 @@
 #ifndef PYFICTION_COLOR_ROUTING_HPP
 #define PYFICTION_COLOR_ROUTING_HPP
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/color_routing.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/utils/routing_utils.hpp>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace pyfiction
 {
@@ -70,7 +71,11 @@ inline void color_routing(pybind11::module& m)
 
         ;
 
+    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
+
+    detail::color_routing<py_cartesian_obstruction_layout>(m);
     detail::color_routing<py_cartesian_gate_layout>(m);
+    detail::color_routing<py_hexagonal_obstruction_layout>(m);
     detail::color_routing<py_hexagonal_gate_layout>(m);
 }
 

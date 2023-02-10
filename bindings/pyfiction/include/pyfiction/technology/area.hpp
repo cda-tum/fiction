@@ -5,11 +5,12 @@
 #ifndef PYFICTION_AREA_HPP
 #define PYFICTION_AREA_HPP
 
-#include "pybind11/pybind11.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/area.hpp>
 #include <fiction/traits.hpp>
+
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {

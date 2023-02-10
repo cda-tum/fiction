@@ -5,10 +5,11 @@
 #ifndef PYFICTION_DISTANCE_HPP
 #define PYFICTION_DISTANCE_HPP
 
-#include "pybind11/pybind11.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/path_finding/distance.hpp>
+
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {

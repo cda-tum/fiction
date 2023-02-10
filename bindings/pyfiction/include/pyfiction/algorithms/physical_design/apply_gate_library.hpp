@@ -5,8 +5,6 @@
 #ifndef PYFICTION_APPLY_GATE_LIBRARY_HPP
 #define PYFICTION_APPLY_GATE_LIBRARY_HPP
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
@@ -17,6 +15,8 @@
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <string>
 

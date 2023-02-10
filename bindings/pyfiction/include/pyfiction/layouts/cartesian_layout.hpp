@@ -5,11 +5,12 @@
 #ifndef PYFICTION_CARTESIAN_LAYOUT_HPP
 #define PYFICTION_CARTESIAN_LAYOUT_HPP
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/traits.hpp>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <cstdint>
 #include <vector>

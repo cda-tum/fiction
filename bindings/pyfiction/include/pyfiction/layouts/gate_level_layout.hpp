@@ -5,14 +5,14 @@
 #ifndef PYFICTION_GATE_LEVEL_LAYOUT_HPP
 #define PYFICTION_GATE_LEVEL_LAYOUT_HPP
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/print_layout.hpp>
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <set>
 #include <sstream>

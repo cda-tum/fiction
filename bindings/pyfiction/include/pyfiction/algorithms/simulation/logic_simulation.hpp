@@ -5,8 +5,6 @@
 #ifndef PYFICTION_LOGIC_SIMULATION_HPP
 #define PYFICTION_LOGIC_SIMULATION_HPP
 
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/utils/name_utils.hpp>
@@ -14,6 +12,8 @@
 #include <fmt/format.h>
 #include <kitty/print.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <string>
 #include <unordered_map>

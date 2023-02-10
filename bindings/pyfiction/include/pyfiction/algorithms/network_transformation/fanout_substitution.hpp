@@ -5,10 +5,11 @@
 #ifndef PYFICTION_FANOUT_SUBSTITUTION_HPP
 #define PYFICTION_FANOUT_SUBSTITUTION_HPP
 
-#include "pybind11/pybind11.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
+
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {

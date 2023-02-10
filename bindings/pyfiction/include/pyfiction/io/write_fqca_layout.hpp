@@ -5,10 +5,11 @@
 #ifndef PYFICTION_WRITE_FQCA_LAYOUT_HPP
 #define PYFICTION_WRITE_FQCA_LAYOUT_HPP
 
-#include "pybind11/pybind11.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/write_fqca_layout.hpp>
+
+#include <pybind11/pybind11.h>
 
 #include <string>
 
