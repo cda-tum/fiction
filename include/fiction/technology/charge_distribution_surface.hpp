@@ -758,12 +758,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         if (!candidates.empty())
         {
-            const auto random_index =
-                static_cast<uint64_t>(std::rand()) %  // NOLINT: we use rand() due to its performance advantage; we do
-                                                      // not need cryptographic security here
-                candidates.size();
-
-            const auto random_element         = index_vector[candidates[random_index]];
+            static std::mt19937_64 generator(std::random_device{}());
+            std::uniform_int_distribution<uint64_t> dist(0, candidates.size() - 1);
+            const auto random_element = index_vector[candidates[dist(generator)]];
             strg->cell_charge[random_element] = sidb_charge_state::NEGATIVE;
             negative_indices.push_back(random_element);
 
