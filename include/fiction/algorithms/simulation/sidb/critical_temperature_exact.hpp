@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 06.02.23.
 //
 
-#ifndef FICTION_CRITICAL_TEMPERATURE_HPP
-#define FICTION_CRITICAL_TEMPERATURE_HPP
+#ifndef FICTION_CRITICAL_TEMPERATURE_EXACT_HPP
+#define FICTION_CRITICAL_TEMPERATURE_EXACT_HPP
 
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
@@ -99,10 +99,11 @@ void critical_temperature(const Lyt& lyt, const std::string& gate, const std::st
             cs.critical_temperature = static_cast<double>(max_temperature);
         }
 
-        if (lyt.num_cells() > 1)
+        else if (lyt.num_cells() > 1)
         {
             // Vector with temperature values from 0.01 to 400 K in 0.01 K steps is generated.
             std::vector<double> temp_values{};
+            temp_values.reserve(max_temperature * 100);
             for (uint64_t i = 1; i <= max_temperature * 100; i++)
             {
                 temp_values.push_back(static_cast<double>(i) / 100.0);
@@ -114,8 +115,7 @@ void critical_temperature(const Lyt& lyt, const std::string& gate, const std::st
             lyt.foreach_cell([&all_cells](const auto& c) { all_cells.push_back(c); });
 
             // The cells are sorted according to local_sort_sidb_cells.
-            // The goal is to sort the cells from left to right and top to bottom. This means that the output SiDB is in
-            // the second last position.
+            // The goal is to sort the cells from left to right and top to bottom.
             std::sort(all_cells.begin(), all_cells.end(), local_sort_sidb_cells<Lyt>);
 
             // The indices of the output cells are collected as a vector. Depending on the specific gate, there is/are
@@ -131,7 +131,7 @@ void critical_temperature(const Lyt& lyt, const std::string& gate, const std::st
                 output_bits_index = {-2};  // and, or, xnor, nor, nand, etc.
             }
 
-            // Cell coordinates of the output cell(s) is/are collected.
+            // Output cell(s) is/are collected.
             std::vector<typename Lyt::cell> output_cells;
             output_cells.reserve(output_bits_index.size());
             std::transform(output_bits_index.begin(), output_bits_index.end(), std::back_inserter(output_cells),
@@ -162,7 +162,7 @@ void critical_temperature(const Lyt& lyt, const std::string& gate, const std::st
                             transparent =
                                 true;  // The output represents the correct output. Hence, state is called transparent.
                         }
-                        energy_transparent_erroneous.emplace_back(std::make_pair(energy, transparent));
+                        energy_transparent_erroneous.emplace_back(energy, transparent);
                     }
                 }
             }
@@ -220,4 +220,4 @@ void critical_temperature(const Lyt& lyt, const std::string& gate, const std::st
 
 }  // namespace fiction
 
-#endif  // FICTION_CRITICAL_TEMPERATURE_HPP
+#endif  // FICTION_CRITICAL_TEMPERATURE_EXACT_HPP
