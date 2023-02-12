@@ -1,0 +1,42 @@
+//
+// Created by Jan Drewniok on 12.02.23.
+//
+
+#include <catch2/catch_template_test_macros.hpp>
+
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/layouts/layout_fiction_coordinates_to_siqad.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+
+using namespace fiction;
+
+TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", sidb_cell_clk_lyt)
+{
+    SECTION("empty layout")
+    {
+        TestType lyt{{10, 10}};
+        auto     lyt_transformed = lyt_coordinates_to_siqad<TestType>(lyt);
+        CHECK(lyt_transformed.is_empty());
+    }
+
+    SECTION("layout with one cell")
+    {
+        TestType lyt{};
+        lyt.assign_cell_type({5, 3}, TestType::cell_type::NORMAL);
+        auto lyt_transformed = lyt_coordinates_to_siqad<TestType>(lyt);
+        CHECK(lyt_transformed.num_cells() == 1);
+        CHECK(lyt_transformed.get_cell_type({5, 1, 1}) == TestType::cell_type::NORMAL);
+    }
+
+    SECTION("layout with two cells")
+    {
+        TestType lyt{};
+        lyt.assign_cell_type({5, 3}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 1}, TestType::cell_type::NORMAL);
+        auto lyt_transformed = lyt_coordinates_to_siqad<TestType>(lyt);
+        CHECK(lyt_transformed.num_cells() == 2);
+        CHECK(lyt_transformed.get_cell_type({5, 1, 1}) == TestType::cell_type::NORMAL);
+        CHECK(lyt_transformed.get_cell_type({5, 0, 1}) == TestType::cell_type::NORMAL);
+    }
+}
