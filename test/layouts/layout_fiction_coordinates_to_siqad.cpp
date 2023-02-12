@@ -11,7 +11,7 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", sidb_cell_clk_lyt)
+TEMPLATE_TEST_CASE("Cell-level layout trait", "[layout_fiction_coordinates_to_siqad]", sidb_cell_clk_lyt)
 {
     SECTION("empty layout")
     {
@@ -29,13 +29,15 @@ TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", sidb_cell_
         CHECK(lyt_transformed.get_cell_type({5, 1, 1}) == TestType::cell_type::NORMAL);
     }
 
-    SECTION("layout with two cells")
+    SECTION("layout with three cells")
     {
         TestType lyt{};
+        lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 3}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 1}, TestType::cell_type::NORMAL);
         auto lyt_transformed = lyt_coordinates_to_siqad<TestType>(lyt);
-        CHECK(lyt_transformed.num_cells() == 2);
+        CHECK(lyt_transformed.num_cells() == 3);
+        CHECK(lyt_transformed.get_cell_type({0, 0, 0}) == TestType::cell_type::NORMAL);
         CHECK(lyt_transformed.get_cell_type({5, 1, 1}) == TestType::cell_type::NORMAL);
         CHECK(lyt_transformed.get_cell_type({5, 0, 1}) == TestType::cell_type::NORMAL);
     }
