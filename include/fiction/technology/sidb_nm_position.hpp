@@ -15,13 +15,15 @@ namespace fiction
 {
 
 /**
- * Computes the position of a cell in nanometers.
+ * Computes the position of a cell in nanometers from the layout origin.
  *
+ * @tparam Lyt The layout type.
+ * @param sp The simulation parameters (required for the lattice constants).
  * @param c The cell to compute the position for.
- * @return A pair of double values representing the `(x,y)` position of the cell in nanometers.
+ * @return A pair representing the `(x,y)` position of `c` in nanometers from the layout origin.
  */
 template <typename Lyt>
-std::pair<double, double> sidb_nm_position(const sidb_simulation_parameters& sp, const cell<Lyt>& c) noexcept
+constexpr std::pair<double, double> sidb_nm_position(const sidb_simulation_parameters& sp, const cell<Lyt>& c) noexcept
 {
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
