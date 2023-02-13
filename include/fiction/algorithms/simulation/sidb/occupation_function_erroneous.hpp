@@ -13,8 +13,7 @@
 #include <numeric>
 #include <vector>
 
-namespace fiction
-{
+namespace fiction {
 
 /**
  * This function computes the occupation probability of all erroneous charge distribution states at a given temperature.
@@ -39,20 +38,20 @@ namespace fiction
 
         // The partition function is obtained by summing up all the Boltzmann factors.
         double part_func = std::accumulate(
-        energy_distribution_transparent_erroneous.begin(), energy_distribution_transparent_erroneous.end(), 0.0,
-        [&](double sum, const auto& it) { return sum + std::exp(-(it.first - min_energy) * 12000 / temperature); });
+                energy_distribution_transparent_erroneous.begin(), energy_distribution_transparent_erroneous.end(), 0.0,
+                [&](double sum, const auto &it) {
+                    return sum + std::exp(-(it.first - min_energy) * 12000 / temperature);
+                });
 
-    // All Boltzmann factors of the erroneous states are summed.
-    double p = 0;
-    for (const auto& [energies, state_transparent_erroneous] : energy_distribution_transparent_erroneous)
-    {
-        if (!state_transparent_erroneous)
-        {
-            p += std::exp(-(energies - min_energy) * 12000 / temperature);
+        // All Boltzmann factors of the erroneous states are summed.
+        double p = 0;
+        for (const auto &[energies, state_transparent_erroneous]: energy_distribution_transparent_erroneous) {
+            if (!state_transparent_erroneous) {
+                p += std::exp(-(energies - min_energy) * 12000 / temperature);
+            }
         }
+        return p / part_func;  // occupation probability of the erroneous states.
     }
-    return p / part_func;  // occupation probability of the erroneous states.
-}
 
 }  // namespace fiction
 
