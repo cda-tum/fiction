@@ -228,6 +228,52 @@ template <typename Lyt>
 }
 
 /**
+ * The layout is shifted by x_min and y_min such that the cells' coordinates are positive.
+ *
+ * @tparam Lyt Cell-level layout.
+ * @param lyt The given layout which is shifted.
+ * @return shifted layout.
+ */
+template <typename Lyt>
+Lyt normalize_layout_coordinates(const Lyt& lyt)
+{
+    if (lyt.num_cells() == 0)
+    {
+        return lyt;
+    }
+    Lyt  lyt_new{};
+    auto x_min = INT32_MAX;
+    auto y_min = INT32_MAX;
+    lyt.foreach_cell(
+        [&lyt, &x_min, &y_min](const auto& c)
+        {
+            if (c.y <= y_min && c.x <= x_min)
+            {
+                y_min = c.y;
+                x_min = c.x;
+            }
+            else if (c.y <= y_min && c.x > x_min)
+            {
+                y_min = c.y;
+            }
+            else if (c.y > y_min && (c.x <= x_min))
+            {
+                x_min = c.x;
+            }
+        });
+
+    lyt.foreach_cell(
+        [&lyt_new, &lyt, &x_min, &y_min](const auto& c)
+        {
+            lyt_new.assign_cell_type({c.x - x_min, c.y - y_min}, lyt.get_cell_type(c)),
+                lyt_new.assign_cell_mode({c.x - x_min, c.y - y_min}, lyt.get_cell_mode(c)),
+                lyt_new.assign_cell_name({c.x - x_min, c.y - y_min}, lyt.get_cell_name(c));
+        });
+    lyt_new.set_layout_name(lyt.get_layout_name());
+    return lyt_new;
+}
+
+/**
  * The cell coordinates of a given layout are converted to SiQAD coordinates. A new layout with SiQAD coordinates is
  * returned.
  *
@@ -251,6 +297,7 @@ sidb_cell_clk_lyt_siqad lyt_coordinates_to_siqad(const Lyt& lyt)
                 lyt_new.assign_cell_name(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_name(c));
         });
     lyt_new.set_layout_name(lyt.get_layout_name());
+
     return lyt_new;
 }
 
@@ -258,27 +305,42 @@ sidb_cell_clk_lyt_siqad lyt_coordinates_to_siqad(const Lyt& lyt)
  * The cell coordinates of a given layout are converted to Fiction coordinates. A new layout with Fiction coordinates is
  * returned.
  *
- * @tparam Lyt Cell-level layout based on SiQAD coordinates.
+ * @tparam Lyt Cell-level layout based on Fiction coordinates.
  * @param lyt The given layout which is converted to a new layout based on Fiction coordinates.
  * @return New layout based on Fiction coordinates.
  */
 template <typename Lyt>
-sidb_cell_clk_lyt lyt_coordinates_to_fiction(const Lyt& lyt)
+Lyt lyt_coordinates_to_fiction(const sidb_cell_clk_lyt_siqad& lyt)
 {
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a cartesian layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    sidb_cell_clk_lyt lyt_new{};
-    lyt.foreach_cell(
-        [&lyt_new, &lyt](const auto& c)
-        {
-            lyt_new.assign_cell_type(siqad::to_fiction_coord<sidb_cell_clk_lyt::cell>(c), lyt.get_cell_type(c)),
-                lyt_new.assign_cell_mode(siqad::to_fiction_coord<sidb_cell_clk_lyt::cell>(c), lyt.get_cell_mode(c)),
-                lyt_new.assign_cell_name(siqad::to_fiction_coord<sidb_cell_clk_lyt::cell>(c), lyt.get_cell_name(c));
-        });
-    lyt_new.set_layout_name(lyt.get_layout_name());
+    Lyt lyt_new{};
+
+    if constexpr (has_offset_ucoord_v<Lyt>)
+    {
+        auto lyt_normalized = normalize_layout_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
+        lyt_normalized.foreach_cell(
+            [&lyt_new, &lyt_normalized](const auto& c)
+            {
+                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_type(c)),
+                    lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_mode(c)),
+                    lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_name(c));
+            });
+        lyt_new.set_layout_name(lyt_normalized.get_layout_name());
+    }
+    else
+    {
+        lyt.foreach_cell(
+            [&lyt_new, &lyt](const auto& c)
+            {
+                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_type(c)),
+                    lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_mode(c)),
+                    lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_name(c));
+            });
+        lyt_new.set_layout_name(lyt.get_layout_name());
+    }
     return lyt_new;
 }
 

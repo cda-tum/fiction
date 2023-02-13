@@ -5,6 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/utils/layout_utils.hpp>
@@ -39,7 +40,7 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesia
         });
 }
 
-TEMPLATE_TEST_CASE("Cell-level layout trait", "[layout_fiction_coordinates_to_siqad]", sidb_cell_clk_lyt)
+TEMPLATE_TEST_CASE("offset::ucoord_t to siqad layout", "[layout_fiction_coordinates_to_siqad]", sidb_cell_clk_lyt)
 {
     SECTION("empty layout")
     {
@@ -48,7 +49,7 @@ TEMPLATE_TEST_CASE("Cell-level layout trait", "[layout_fiction_coordinates_to_si
         CHECK(lyt_transformed.is_empty());
         CHECK(lyt_transformed.get_layout_name() == "test");
     }
-    //
+
     SECTION("layout with one normal and one input cell")
     {
         TestType lyt{};
@@ -80,11 +81,26 @@ TEMPLATE_TEST_CASE("Cell-level layout trait", "[layout_fiction_coordinates_to_si
     }
 }
 
-TEMPLATE_TEST_CASE("Cell-level layout traits", "[layout_siqad_coordinates_to_fiction]", sidb_cell_clk_lyt_siqad)
+TEMPLATE_TEST_CASE("siqad layout is normalized, shifted to positive coordinates", "[normalize_layout_coordinates]", sidb_cell_clk_lyt_siqad)
 {
     SECTION("empty layout")
     {
         TestType lyt{{}, "layout based on siqad coordinates"};
+        lyt.assign_cell_type({-5,-1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5,1}, TestType::cell_type::NORMAL);
+        auto     lyt_transformed = normalize_layout_coordinates<TestType>(lyt);
+        CHECK(lyt_transformed.get_layout_name() == "layout based on siqad coordinates");
+        CHECK(lyt_transformed.get_cell_type({0,0}) == TestType::cell_type::NORMAL);
+        CHECK(lyt_transformed.get_cell_type({10,2}) == TestType::cell_type::NORMAL);
+        CHECK(lyt_transformed.get_cell_type({-5,-1}) == TestType::cell_type::EMPTY);
+    }
+}
+
+TEMPLATE_TEST_CASE("siqad layout to offset::ucoord_t layout", "[layout_siqad_coordinates_to_fiction]", sidb_cell_clk_lyt)
+{
+    SECTION("empty layout")
+    {
+        sidb_cell_clk_lyt_siqad lyt{{}, "layout based on siqad coordinates"};
         auto     lyt_transformed = lyt_coordinates_to_fiction<TestType>(lyt);
         CHECK(lyt_transformed.is_empty());
         CHECK(lyt_transformed.get_layout_name() == "layout based on siqad coordinates");
@@ -92,18 +108,18 @@ TEMPLATE_TEST_CASE("Cell-level layout traits", "[layout_siqad_coordinates_to_fic
 
     SECTION("layout with one normal and one input cell")
     {
-        TestType lyt{};
+        sidb_cell_clk_lyt_siqad lyt{};
         lyt.assign_cell_type({5, 3}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 1}, TestType::cell_type::INPUT);
+        lyt.assign_cell_type({-5, -1}, TestType::cell_type::INPUT);
         auto lyt_transformed = lyt_coordinates_to_fiction<TestType>(lyt);
         CHECK(lyt_transformed.num_cells() == 2);
-        CHECK(lyt_transformed.get_cell_type({5, 6}) == TestType::cell_type::NORMAL);
-        CHECK(lyt_transformed.get_cell_type({5, 2}) == TestType::cell_type::INPUT);
+        CHECK(lyt_transformed.get_cell_type({10, 8}) == TestType::cell_type::NORMAL);
+        CHECK(lyt_transformed.get_cell_type({0, 0}) == TestType::cell_type::INPUT);
     }
 
     SECTION("layout with three cells")
     {
-        TestType lyt{};
+        sidb_cell_clk_lyt_siqad lyt{};
         lyt.assign_cell_type({5, 3}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({0, 0}, TestType::cell_type::INPUT);
         lyt.assign_cell_type({5, 1}, TestType::cell_type::OUTPUT);
@@ -118,5 +134,46 @@ TEMPLATE_TEST_CASE("Cell-level layout traits", "[layout_siqad_coordinates_to_fic
         CHECK(lyt_transformed.get_cell_name({5, 6}) == "normal cell");
         CHECK(lyt_transformed.get_cell_name({0, 0}) == "input cell");
         CHECK(lyt_transformed.get_cell_name({5, 2}) == "output cell");
+    }
+}
+
+TEMPLATE_TEST_CASE("siqad layout to cube::coord_t layout", "[layout_siqad_coordinates_to_fiction]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>))
+{
+    SECTION("empty layout")
+    {
+        sidb_cell_clk_lyt_siqad lyt{{}, "layout based on siqad coordinates"};
+        auto     lyt_transformed = lyt_coordinates_to_fiction<TestType>(lyt);
+        CHECK(lyt_transformed.is_empty());
+        CHECK(lyt_transformed.get_layout_name() == "layout based on siqad coordinates");
+    }
+
+    SECTION("layout with one normal and one input cell")
+    {
+        sidb_cell_clk_lyt_siqad lyt{};
+        lyt.assign_cell_type({5,-1,1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 1, 0}, TestType::cell_type::INPUT);
+        auto lyt_transformed = lyt_coordinates_to_fiction<TestType>(lyt);
+        CHECK(lyt_transformed.num_cells() == 2);
+        CHECK(lyt_transformed.get_cell_type({5, -1}) == TestType::cell_type::NORMAL);
+        CHECK(lyt_transformed.get_cell_type({5, 2,0}) == TestType::cell_type::INPUT);
+    }
+
+    SECTION("layout with three cells")
+    {
+        sidb_cell_clk_lyt_siqad lyt{};
+        lyt.assign_cell_type({5, -3}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0}, TestType::cell_type::INPUT);
+        lyt.assign_cell_type({5, 3}, TestType::cell_type::OUTPUT);
+        lyt.assign_cell_name({5, -3}, "normal cell");
+        lyt.assign_cell_name({0, 0}, "input cell");
+        lyt.assign_cell_name({5, 3}, "output cell");
+        auto lyt_transformed = lyt_coordinates_to_fiction<TestType>(lyt);
+        CHECK(lyt_transformed.num_cells() == 3);
+        CHECK(lyt_transformed.get_cell_type({5, -6}) == TestType::cell_type::NORMAL);
+        CHECK(lyt_transformed.get_cell_type({0, 0}) == TestType::cell_type::INPUT);
+        CHECK(lyt_transformed.get_cell_type({5, 6}) == TestType::cell_type::OUTPUT);
+        CHECK(lyt_transformed.get_cell_name({5, -6}) == "normal cell");
+        CHECK(lyt_transformed.get_cell_name({0, 0}) == "input cell");
+        CHECK(lyt_transformed.get_cell_name({5, 6}) == "output cell");
     }
 }
