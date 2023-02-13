@@ -21,23 +21,24 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesia
     TestType lyt{{4, 4}};
 
     lyt.foreach_coordinate(
-        [&lyt](const auto& c)
-        {
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH}) ==
-                  lyt.north(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH_EAST}) ==
-                  lyt.north_east(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::EAST}) == lyt.east(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::SOUTH_EAST}) ==
-                  lyt.south_east(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::SOUTH}) ==
-                  lyt.south(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::SOUTH_WEST}) ==
-                  lyt.south_west(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::WEST}) == lyt.west(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH_WEST}) ==
-                  lyt.north_west(c));
-        });
+            [&lyt](const auto &c) {
+                CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH}) ==
+                      lyt.north(c));
+                CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH_EAST}) ==
+                      lyt.north_east(c));
+                CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::EAST}) ==
+                      lyt.east(c));
+                CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::SOUTH_EAST}) ==
+                      lyt.south_east(c));
+                CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::SOUTH}) ==
+                      lyt.south(c));
+                CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::SOUTH_WEST}) ==
+                      lyt.south_west(c));
+                CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::WEST}) ==
+                      lyt.west(c));
+                CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH_WEST}) ==
+                      lyt.north_west(c));
+            });
 }
 
 TEMPLATE_TEST_CASE("offset::ucoord_t to siqad layout", "[layout_fiction_coordinates_to_siqad]", sidb_cell_clk_lyt)
@@ -45,7 +46,7 @@ TEMPLATE_TEST_CASE("offset::ucoord_t to siqad layout", "[layout_fiction_coordina
     SECTION("empty layout")
     {
         TestType lyt{{10, 10}, "test"};
-        auto     lyt_transformed = lyt_coordinates_to_siqad<TestType>(lyt);
+        auto lyt_transformed = lyt_coordinates_to_siqad<TestType>(lyt);
         CHECK(lyt_transformed.is_empty());
         CHECK(lyt_transformed.get_layout_name() == "test");
     }
@@ -103,7 +104,7 @@ TEMPLATE_TEST_CASE("siqad layout to offset::ucoord_t layout", "[layout_siqad_coo
     SECTION("empty layout")
     {
         sidb_cell_clk_lyt_siqad lyt{{}, "layout based on siqad coordinates"};
-        auto                    lyt_transformed = lyt_coordinates_to_fiction<TestType>(lyt);
+        auto lyt_transformed = lyt_coordinates_to_fiction<TestType>(lyt);
         CHECK(lyt_transformed.is_empty());
         CHECK(lyt_transformed.get_layout_name() == "layout based on siqad coordinates");
     }
@@ -145,7 +146,7 @@ TEMPLATE_TEST_CASE("siqad layout to cube::coord_t layout", "[layout_siqad_coordi
     SECTION("empty layout")
     {
         sidb_cell_clk_lyt_siqad lyt{{}, "layout based on siqad coordinates"};
-        auto                    lyt_transformed = lyt_coordinates_to_fiction<TestType>(lyt);
+        auto lyt_transformed = lyt_coordinates_to_fiction<TestType>(lyt);
         CHECK(lyt_transformed.is_empty());
         CHECK(lyt_transformed.get_layout_name() == "layout based on siqad coordinates");
     }
