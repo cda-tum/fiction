@@ -5,8 +5,11 @@
 #ifndef FICTION_LAYOUT_UTILS_HPP
 #define FICTION_LAYOUT_UTILS_HPP
 
+#include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -222,6 +225,61 @@ template <typename Lyt>
     }
 
     return {};
+}
+
+/**
+ * The cell coordinates of a given layout are converted to SiQAD coordinates. A new layout with SiQAD coordinates is
+ * returned.
+ *
+ * @tparam Lyt Cell-level layout based on Fiction coordinates (Cube, Offset).
+ * @param lyt The given layout which is converted to a new layout based on SiQAD coordinates.
+ * @return new layout based on SiQAD coordinates.
+ */
+template <typename Lyt>
+sidb_cell_clk_lyt_siqad lyt_coordinates_to_siqad(const Lyt& lyt)
+{
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a cartesian layout");
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    sidb_cell_clk_lyt_siqad lyt_new{};
+    lyt.foreach_cell(
+        [&lyt_new, &lyt](const auto& c)
+        {
+            lyt_new.assign_cell_type(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_type(c)),
+                lyt_new.assign_cell_mode(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_mode(c)),
+                lyt_new.assign_cell_name(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_name(c));
+        });
+    lyt_new.set_layout_name(lyt.get_layout_name());
+    return lyt_new;
+}
+
+/**
+ * The cell coordinates of a given layout are converted to Fiction coordinates. A new layout with Fiction coordinates is
+ * returned.
+ *
+ * @tparam Lyt Cell-level layout based on SiQAD coordinates.
+ * @param lyt The given layout which is converted to a new layout based on Fiction coordinates.
+ * @return New layout based on Fiction coordinates.
+ */
+template <typename Lyt>
+sidb_cell_clk_lyt lyt_coordinates_to_fiction(const Lyt& lyt)
+{
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a cartesian layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    sidb_cell_clk_lyt lyt_new{};
+    lyt.foreach_cell(
+        [&lyt_new, &lyt](const auto& c)
+        {
+            lyt_new.assign_cell_type(siqad::to_fiction_coord<sidb_cell_clk_lyt::cell>(c), lyt.get_cell_type(c)),
+                lyt_new.assign_cell_mode(siqad::to_fiction_coord<sidb_cell_clk_lyt::cell>(c), lyt.get_cell_mode(c)),
+                lyt_new.assign_cell_name(siqad::to_fiction_coord<sidb_cell_clk_lyt::cell>(c), lyt.get_cell_name(c));
+        });
+    lyt_new.set_layout_name(lyt.get_layout_name());
+    return lyt_new;
 }
 
 }  // namespace fiction
