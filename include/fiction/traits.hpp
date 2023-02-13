@@ -580,7 +580,6 @@ inline constexpr const bool has_cube_coord_v = std::is_same_v<coordinate<Lyt>, c
 template <typename Lyt>
 inline constexpr const bool has_siqad_coord_v = std::is_same_v<coordinate<Lyt>, siqad::coord_t>;
 
-
 #pragma region is_cell_level_layout
 template <class Lyt, class = void>
 struct is_cell_level_layout : std::false_type

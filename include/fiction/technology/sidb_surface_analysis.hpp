@@ -120,14 +120,12 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
     };
 
     // for each tile in the layout
-    gate_lyt.foreach_tile(
-        [&](const auto& t) constexpr
-        {
-            // for each gate in the library
-            std::for_each(gate_implementations.cbegin(), gate_implementations.cend(),
-                          // analyze the defect impact
-                          std::bind(analyze_gate, std::placeholders::_1, t));
-        });
+    gate_lyt.foreach_tile([&](const auto& t) constexpr {
+        // for each gate in the library
+        std::for_each(gate_implementations.cbegin(), gate_implementations.cend(),
+                      // analyze the defect impact
+                      std::bind(analyze_gate, std::placeholders::_1, t));
+    });
 
     return black_list;
 }
