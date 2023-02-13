@@ -33,6 +33,7 @@
 #include "pyfiction/layouts/obstruction_layout.hpp"
 #include "pyfiction/networks/logic_network.hpp"
 #include "pyfiction/technology/area.hpp"
+#include "pyfiction/utils/routing_utils.hpp"
 
 #include <pybind11/pybind11.h>
 
@@ -104,4 +105,8 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::write_qll_layout(m);
     pyfiction::write_fqca_layout(m);
     pyfiction::read_fqca_layout(m);
+    /**
+     * Utils
+     */
+     pyfiction::routing_utils(m);
 }
