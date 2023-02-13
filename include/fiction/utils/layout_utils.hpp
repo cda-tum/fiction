@@ -252,11 +252,11 @@ Lyt normalize_layout_coordinates(const Lyt& lyt)
                 y_min = c.y;
                 x_min = c.x;
             }
-            else if (c.y <= y_min && c.x > x_min)
+            else if (c.y <= y_min)
             {
                 y_min = c.y;
             }
-            else if (c.y > y_min && (c.x <= x_min))
+            else if (c.x <= x_min)
             {
                 x_min = c.x;
             }
