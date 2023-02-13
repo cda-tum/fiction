@@ -13,6 +13,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <limits>
 
 namespace fiction
 {
@@ -235,39 +236,33 @@ template <typename Lyt>
  * @return shifted layout.
  */
 template <typename Lyt>
-Lyt normalize_layout_coordinates(const Lyt& lyt)
+Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
 {
-    if (lyt.num_cells() == 0)
-    {
-        return lyt;
-    }
-    Lyt  lyt_new{};
-    auto x_min = INT32_MAX;
-    auto y_min = INT32_MAX;
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a cartesian layout");
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+
+    Lyt  lyt_new{{}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
+    auto x_offset = std::numeric_limits<int32_t>::max();
+    auto y_offset = std::numeric_limits<int32_t>::max();
     lyt.foreach_cell(
-        [&lyt, &x_min, &y_min](const auto& c)
+        [&x_offset, &y_offset](const auto& c)
         {
-            if (c.y <= y_min && c.x <= x_min)
+            if (c.y <= y_offset)
             {
-                y_min = c.y;
-                x_min = c.x;
+                y_offset = c.y;
             }
-            else if (c.y <= y_min)
+            if (c.x <= x_offset)
             {
-                y_min = c.y;
-            }
-            else if (c.x <= x_min)
-            {
-                x_min = c.x;
+                x_offset = c.x;
             }
         });
 
     lyt.foreach_cell(
-        [&lyt_new, &lyt, &x_min, &y_min](const auto& c)
+        [&lyt_new, &lyt, &x_offset, &y_offset](const auto& c)
         {
-            lyt_new.assign_cell_type({c.x - x_min, c.y - y_min}, lyt.get_cell_type(c)),
-                lyt_new.assign_cell_mode({c.x - x_min, c.y - y_min}, lyt.get_cell_mode(c)),
-                lyt_new.assign_cell_name({c.x - x_min, c.y - y_min}, lyt.get_cell_name(c));
+            lyt_new.assign_cell_type({c.x - x_offset, c.y - y_offset}, lyt.get_cell_type(c));
+            lyt_new.assign_cell_mode({c.x - x_offset, c.y - y_offset}, lyt.get_cell_mode(c));
+            lyt_new.assign_cell_name({c.x - x_offset, c.y - y_offset}, lyt.get_cell_name(c));
         });
     lyt_new.set_layout_name(lyt.get_layout_name());
     return lyt_new;
@@ -282,19 +277,19 @@ Lyt normalize_layout_coordinates(const Lyt& lyt)
  * @return new layout based on SiQAD coordinates.
  */
 template <typename Lyt>
-sidb_cell_clk_lyt_siqad lyt_coordinates_to_siqad(const Lyt& lyt)
+sidb_cell_clk_lyt_siqad lyt_coordinates_to_siqad(const Lyt& lyt) noexcept
 {
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    sidb_cell_clk_lyt_siqad lyt_new{};
+    sidb_cell_clk_lyt_siqad lyt_new{{}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
     lyt.foreach_cell(
         [&lyt_new, &lyt](const auto& c)
         {
-            lyt_new.assign_cell_type(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_type(c)),
-                lyt_new.assign_cell_mode(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_mode(c)),
-                lyt_new.assign_cell_name(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_name(c));
+            lyt_new.assign_cell_type(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_type(c));
+            lyt_new.assign_cell_mode(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_mode(c));
+            lyt_new.assign_cell_name(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_name(c));
         });
     lyt_new.set_layout_name(lyt.get_layout_name());
 
@@ -310,13 +305,13 @@ sidb_cell_clk_lyt_siqad lyt_coordinates_to_siqad(const Lyt& lyt)
  * @return New layout based on Fiction coordinates.
  */
 template <typename Lyt>
-Lyt lyt_coordinates_to_fiction(const sidb_cell_clk_lyt_siqad& lyt)
+Lyt lyt_coordinates_to_fiction(const sidb_cell_clk_lyt_siqad& lyt) noexcept
 {
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    Lyt lyt_new{};
+    Lyt lyt_new{{}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
 
     if constexpr (has_offset_ucoord_v<Lyt>)
     {
@@ -324,9 +319,9 @@ Lyt lyt_coordinates_to_fiction(const sidb_cell_clk_lyt_siqad& lyt)
         lyt_normalized.foreach_cell(
             [&lyt_new, &lyt_normalized](const auto& c)
             {
-                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_type(c)),
-                    lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_mode(c)),
-                    lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_name(c));
+                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_type(c));
+                lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_mode(c));
+                lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_name(c));
             });
         lyt_new.set_layout_name(lyt_normalized.get_layout_name());
     }
@@ -335,9 +330,9 @@ Lyt lyt_coordinates_to_fiction(const sidb_cell_clk_lyt_siqad& lyt)
         lyt.foreach_cell(
             [&lyt_new, &lyt](const auto& c)
             {
-                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_type(c)),
-                    lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_mode(c)),
-                    lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_name(c));
+                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_type(c));
+                lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_mode(c));
+                lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_name(c));
             });
         lyt_new.set_layout_name(lyt.get_layout_name());
     }
