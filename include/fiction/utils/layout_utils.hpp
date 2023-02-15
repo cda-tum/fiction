@@ -319,27 +319,26 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
 
     Lyt lyt_new{{}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
 
+    const auto assign_coordinates = [&lyt_new](const auto& base_lyt) noexcept
+    {
+        base_lyt.foreach_cell(
+            [&lyt_new, &base_lyt](const auto& c)
+            {
+                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<Lyt>>(c), base_lyt.get_cell_type(c));
+                lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<Lyt>>(c), base_lyt.get_cell_mode(c));
+                lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<Lyt>>(c), base_lyt.get_cell_name(c));
+            });
+    };
+
     if constexpr (has_offset_ucoord_v<Lyt>)
     {
         auto lyt_normalized = normalize_layout_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
 
-        lyt_normalized.foreach_cell(
-            [&lyt_new, &lyt_normalized](const auto& c)
-            {
-                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_type(c));
-                lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_mode(c));
-                lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_name(c));
-            });
+        assign_coordinates(lyt_normalized);
     }
     else
     {
-        lyt.foreach_cell(
-            [&lyt_new, &lyt](const auto& c)
-            {
-                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_type(c));
-                lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_mode(c));
-                lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_name(c));
-            });
+        assign_coordinates(lyt);
     }
 
     return lyt_new;
