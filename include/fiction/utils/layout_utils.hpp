@@ -231,11 +231,13 @@ template <typename Lyt>
 }
 
 /**
- * The layout is shifted by x_offset and y_offset so that the coordinates of the cells are positive and one cell is at the coordinate origin.
+ * A new layout is constructed and returned that is equivalent to the given cell-level layout. However, its coordinates
+ * are normalized, i.e., start at `(0, 0)` and are all positive. To this end, all existing coordinates are shifted by an
+ * x and y offset.
  *
- * @tparam Lyt Cell-level layout.
- * @param lyt The given layout which is shifted.
- * @return shifted layout.
+ * @tparam Lyt Cell-level layout type.
+ * @param lyt The layout which is to be normalized.
+ * @return New normalized equivalent layout.
  */
 template <typename Lyt>
 Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
@@ -243,9 +245,11 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
-    Lyt  lyt_new{{}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
+    Lyt lyt_new{{}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
+
     auto x_offset = std::numeric_limits<int32_t>::max();
     auto y_offset = std::numeric_limits<int32_t>::max();
+
     lyt.foreach_cell(
         [&x_offset, &y_offset](const auto& c)
         {
@@ -266,17 +270,17 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
             lyt_new.assign_cell_mode({c.x - x_offset, c.y - y_offset}, lyt.get_cell_mode(c));
             lyt_new.assign_cell_name({c.x - x_offset, c.y - y_offset}, lyt.get_cell_name(c));
         });
-    lyt_new.set_layout_name(lyt.get_layout_name());
+
     return lyt_new;
 }
 
 /**
- * The cell coordinates of a given layout are converted to SiQAD coordinates. A new layout with SiQAD coordinates is
- * returned.
+ * Converts the coordinates of a given cell-level layout to SiQAD coordinates. A new equivalent layout based on SiQAD
+ * coordinates is returned.
  *
- * @tparam Lyt Cell-level layout based on Fiction coordinates (Cube, Offset).
- * @param lyt The given layout which is converted to a new layout based on SiQAD coordinates.
- * @return new layout based on SiQAD coordinates.
+ * @tparam Lyt Cell-level layout type based on fiction coordinates, e.g., `offset::ucoord_t` or `cube::coord_t`.
+ * @param lyt The layout that is to be converted to a new layout based on SiQAD coordinates.
+ * @return A new equivalent layout based on SiQAD coordinates.
  */
 template <typename Lyt>
 sidb_cell_clk_lyt_siqad layout_coordinates_to_siqad(const Lyt& lyt) noexcept
@@ -286,6 +290,7 @@ sidb_cell_clk_lyt_siqad layout_coordinates_to_siqad(const Lyt& lyt) noexcept
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     sidb_cell_clk_lyt_siqad lyt_new{{}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
+
     lyt.foreach_cell(
         [&lyt_new, &lyt](const auto& c)
         {
@@ -293,18 +298,17 @@ sidb_cell_clk_lyt_siqad layout_coordinates_to_siqad(const Lyt& lyt) noexcept
             lyt_new.assign_cell_mode(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_mode(c));
             lyt_new.assign_cell_name(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_name(c));
         });
-    lyt_new.set_layout_name(lyt.get_layout_name());
 
     return lyt_new;
 }
 
 /**
- * The cell coordinates of a given layout are converted to Fiction coordinates. A new layout with Fiction coordinates is
- * returned.
+ * Converts the coordinates of a given cell-level layout to fiction coordinates, e.g., `offset::ucoord_t` or
+ * `cube::coord_t`. A new equivalent layout based on fiction coordinates is returned.
  *
- * @tparam Lyt Cell-level layout based on Fiction coordinates.
- * @param lyt The given layout which is converted to a new layout based on Fiction coordinates.
- * @return New layout based on Fiction coordinates.
+ * @tparam Lyt Cell-level layout type based on fiction coordinates.
+ * @param lyt The layout that is to be converted to a new layout based on fiction coordinates.
+ * @return A new equivalent layout based on fiction coordinates.
  */
 template <typename Lyt>
 Lyt layout_coordinates_to_fiction(const sidb_cell_clk_lyt_siqad& lyt) noexcept
@@ -318,6 +322,7 @@ Lyt layout_coordinates_to_fiction(const sidb_cell_clk_lyt_siqad& lyt) noexcept
     if constexpr (has_offset_ucoord_v<Lyt>)
     {
         auto lyt_normalized = normalize_layout_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
+
         lyt_normalized.foreach_cell(
             [&lyt_new, &lyt_normalized](const auto& c)
             {
@@ -325,7 +330,6 @@ Lyt layout_coordinates_to_fiction(const sidb_cell_clk_lyt_siqad& lyt) noexcept
                 lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_mode(c));
                 lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<Lyt>>(c), lyt_normalized.get_cell_name(c));
             });
-        lyt_new.set_layout_name(lyt_normalized.get_layout_name());
     }
     else
     {
@@ -336,8 +340,8 @@ Lyt layout_coordinates_to_fiction(const sidb_cell_clk_lyt_siqad& lyt) noexcept
                 lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_mode(c));
                 lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<Lyt>>(c), lyt.get_cell_name(c));
             });
-        lyt_new.set_layout_name(lyt.get_layout_name());
     }
+
     return lyt_new;
 }
 
