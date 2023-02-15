@@ -283,7 +283,7 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
  * @return A new equivalent layout based on SiQAD coordinates.
  */
 template <typename Lyt>
-sidb_cell_clk_lyt_siqad layout_coordinates_to_siqad(const Lyt& lyt) noexcept
+sidb_cell_clk_lyt_siqad convert_to_siqad_coordinates(const Lyt& lyt) noexcept
 {
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -311,7 +311,7 @@ sidb_cell_clk_lyt_siqad layout_coordinates_to_siqad(const Lyt& lyt) noexcept
  * @return A new equivalent layout based on fiction coordinates.
  */
 template <typename Lyt>
-Lyt layout_coordinates_to_fiction(const sidb_cell_clk_lyt_siqad& lyt) noexcept
+Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
 {
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
