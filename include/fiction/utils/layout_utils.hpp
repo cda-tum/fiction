@@ -231,7 +231,7 @@ template <typename Lyt>
 }
 
 /**
- * The layout is shifted by x_min and y_min such that the cells' coordinates are positive.
+ * The layout is shifted by x_offset and y_offset so that the coordinates of the cells are positive and one cell is at the coordinate origin.
  *
  * @tparam Lyt Cell-level layout.
  * @param lyt The given layout which is shifted.
@@ -240,7 +240,7 @@ template <typename Lyt>
 template <typename Lyt>
 Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
 {
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a cartesian layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
     Lyt  lyt_new{{}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
@@ -279,9 +279,9 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
  * @return new layout based on SiQAD coordinates.
  */
 template <typename Lyt>
-sidb_cell_clk_lyt_siqad lyt_coordinates_to_siqad(const Lyt& lyt) noexcept
+sidb_cell_clk_lyt_siqad layout_coordinates_to_siqad(const Lyt& lyt) noexcept
 {
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a cartesian layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
@@ -307,9 +307,9 @@ sidb_cell_clk_lyt_siqad lyt_coordinates_to_siqad(const Lyt& lyt) noexcept
  * @return New layout based on Fiction coordinates.
  */
 template <typename Lyt>
-Lyt lyt_coordinates_to_fiction(const sidb_cell_clk_lyt_siqad& lyt) noexcept
+Lyt layout_coordinates_to_fiction(const sidb_cell_clk_lyt_siqad& lyt) noexcept
 {
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a cartesian layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
