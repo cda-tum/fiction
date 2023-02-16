@@ -245,8 +245,6 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
-    Lyt lyt_new{{lyt.x(), lyt.y()}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
-
     auto x_offset = std::numeric_limits<int32_t>::max();
     auto y_offset = std::numeric_limits<int32_t>::max();
 
@@ -262,6 +260,11 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
                 x_offset = c.x;
             }
         });
+
+    Lyt lyt_new{{lyt.x() - x_offset, lyt.y() - y_offset, lyt.z()},
+                lyt.get_layout_name(),
+                lyt.get_tile_size_x(),
+                lyt.get_tile_size_y()};
 
     lyt.foreach_cell(
         [&lyt_new, &lyt, &x_offset, &y_offset](const auto& c)
@@ -289,7 +292,7 @@ sidb_cell_clk_lyt_siqad convert_to_siqad_coordinates(const Lyt& lyt) noexcept
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    sidb_cell_clk_lyt_siqad lyt_new{{lyt.x(), lyt.y()},
+    sidb_cell_clk_lyt_siqad lyt_new{{lyt.x(), lyt.y(), lyt.z()},
                                     lyt.get_layout_name(),
                                     lyt.get_tile_size_x(),
                                     lyt.get_tile_size_y()};
@@ -320,7 +323,7 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    Lyt lyt_new{{lyt.x(), lyt.y()}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
+    Lyt lyt_new{{lyt.x(), lyt.y(), lyt.z()}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
 
     const auto assign_coordinates = [&lyt_new](const auto& base_lyt) noexcept
     {
@@ -333,11 +336,11 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
             });
     };
 
-    if constexpr (has_offset_ucoord_v<Lyt>)
+    if (has_offset_ucoord_v<Lyt> && !lyt.is_empty())
     {
         auto lyt_normalized = normalize_layout_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
-
         assign_coordinates(lyt_normalized);
+        lyt_new.resize({lyt_normalized.x(), lyt_normalized.y(), lyt_normalized.z()});
     }
     else
     {

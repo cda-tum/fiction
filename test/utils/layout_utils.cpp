@@ -130,11 +130,14 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to offset::ucoord_t coordinate layout",
 
         lyt.assign_cell_type({5, 3}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({-5, -1}, TestType::cell_type::INPUT);
+        CHECK(lyt.x() == 5);
+        CHECK(lyt.y() == 3);
 
         auto lyt_transformed = convert_to_fiction_coordinates<TestType>(lyt);
 
+        CHECK(lyt_transformed.x() == 10);
+        CHECK(lyt_transformed.y() == 4);
         CHECK(lyt_transformed.num_cells() == 2);
-        CHECK(static_cast<int64_t>(lyt_transformed.area()) == static_cast<int64_t>(lyt.area()));
         CHECK(lyt_transformed.get_cell_type({10, 8}) == TestType::cell_type::NORMAL);
         CHECK(lyt_transformed.get_cell_type({0, 0}) == TestType::cell_type::INPUT);
     }
