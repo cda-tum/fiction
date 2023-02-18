@@ -1,14 +1,15 @@
 # *fiction* &ndash; Design Automation for Field-coupled Nanotechnologies
 
-[![Ubuntu CI](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
-[![macOS CI](https://github.com/marcelwa/fiction/actions/workflows/macos.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
-[![Windows CI](https://github.com/marcelwa/fiction/actions/workflows/windows.yml/badge.svg?branch=main)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
-[![CodeQL](https://github.com/marcelwa/fiction/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/marcelwa/fiction/actions/workflows/codeql-analysis.yml)
-[![Docker Image](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/docker-image.yml?label=Docker&logo=Docker)](https://github.com/marcelwa/fiction/actions/workflows/docker-image.yml)
-[![codecov](https://codecov.io/gh/marcelwa/fiction/branch/main/graph/badge.svg?token=SUPC5N6KFU)](https://codecov.io/gh/marcelwa/fiction)
-[![Documentation Status](https://img.shields.io/readthedocs/fiction?logo=readthedocs)](https://fiction.readthedocs.io/)
-[![Release](https://img.shields.io/github/v/tag/marcelwa/fiction?label=fiction&logo=github&logoColor=darkgray)](https://github.com/marcelwa/fiction/releases)
-[![License](https://img.shields.io/github/license/marcelwa/fiction)](https://github.com/marcelwa/fiction/blob/main/LICENSE.txt)
+[![Ubuntu CI](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/ubuntu.yml?label=Ubuntu&logo=ubuntu&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
+[![macOS CI](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/macos.yml?label=macOS&logo=apple&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
+[![Windows CI](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/windows.yml?label=Windows&logo=windows&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/codeql-analysis.yml?label=CodeQL&logo=github&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/codeql-analysis.yml)
+[![Docker Image](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/docker-image.yml?label=Docker&logo=docker&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/docker-image.yml)
+[![Documentation Status](https://img.shields.io/readthedocs/fiction?label=Docs&logo=readthedocs&style=flat-square)](https://fiction.readthedocs.io/)
+[![codecov](https://img.shields.io/codecov/c/github/marcelwa/fiction?label=Coverage&logo=codecov&style=flat-square)](https://codecov.io/gh/marcelwa/fiction)
+[![License](https://img.shields.io/github/license/marcelwa/fiction?label=License&style=flat-square)](https://github.com/marcelwa/fiction/blob/main/LICENSE.txt)
+[![Release](https://img.shields.io/github/v/release/marcelwa/fiction?label=fiction&style=flat-square)](https://github.com/marcelwa/fiction/releases)
+[![arXiv](https://img.shields.io/static/v1?label=arXiv&message=1905.02477&color=informational&style=flat-square)](https://arxiv.org/abs/1905.02477)
 
 This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
 in C++17 using the [EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). Thereby, *fiction*
