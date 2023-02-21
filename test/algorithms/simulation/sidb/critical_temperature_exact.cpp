@@ -30,7 +30,7 @@ TEMPLATE_TEST_CASE(
         const sidb_simulation_parameters params{2, -0.32};
 
         critical_temperature_stats<TestType> criticalstats{};
-        critical_temperature(lyt, "or", "10", params, &criticalstats);
+        critical_temperature(lyt, true, params, &criticalstats, 0.99, 350, "or", "10");
         CHECK(criticalstats.num_valid_lyt == 0);
         CHECK(criticalstats.critical_temperature == 0);
     }
@@ -43,37 +43,43 @@ TEMPLATE_TEST_CASE(
         const sidb_simulation_parameters params{2, -0.32};
 
         critical_temperature_stats<TestType> criticalstats{};
-        critical_temperature(lyt, "or", "10", params, &criticalstats, 0.99, 350);
+        critical_temperature(lyt, true, params, &criticalstats, 0.99, 350, "or", "10");
         CHECK(criticalstats.num_valid_lyt == 1);
         CHECK(criticalstats.critical_temperature == 350);
+
+        critical_temperature_stats<TestType> criticalstats_new{};
+        critical_temperature(lyt, false, params, &criticalstats_new, 0.99, 350);
+        CHECK(criticalstats_new.num_valid_lyt == 1);
+        CHECK(criticalstats_new.critical_temperature == 350);
     }
 
     SECTION("several SiDBs placed")
     {
         TestType lyt{{10, 10}};
-        lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({10, 2, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 0, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 0, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 1, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 1, 1}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({1, 2, 4}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({7, 4, 1}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({15, 1, 1}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({1, 10, 4}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({7, 8, 1}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({1, 9, 1}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({7, 6, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({20, 3, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{2, -0.32};
+        const sidb_simulation_parameters params{2, -0.23};
 
         critical_temperature_stats<TestType> criticalstats{};
-        critical_temperature(lyt, "or", "10", params, &criticalstats);
-        CHECK(criticalstats.critical_temperature == 0);
+        critical_temperature(lyt, true, params, &criticalstats, 0.99, 350, "or", "10");
+        CHECK(criticalstats.critical_temperature == 350);
 
         critical_temperature_stats<TestType> criticalstats_one{};
-        critical_temperature(lyt, "and", "10", params, &criticalstats_one);
-        CHECK(criticalstats_one.critical_temperature == 400);
+        critical_temperature(lyt, true, params, &criticalstats_one, 0.99, 350, "and", "11");
+        CHECK(criticalstats_one.critical_temperature == 350);
 
         critical_temperature_stats<TestType> criticalstats_second{};
-        critical_temperature(lyt, "and", "01", params, &criticalstats_second);
-        CHECK(criticalstats_second.critical_temperature == 400);
+        critical_temperature(lyt, true, params, &criticalstats_second, 0.99, 350, "and", "11");
+        CHECK(criticalstats_second.critical_temperature == 350);
+
+        critical_temperature_stats<TestType> criticalstats_no_logic{};
+        critical_temperature(lyt, false, params, &criticalstats_no_logic, 0.999, 450);
+        CHECK(criticalstats_no_logic.critical_temperature < 40);
     }
 }
