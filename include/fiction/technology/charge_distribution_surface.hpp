@@ -510,6 +510,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return std::nullopt;
     }
     /**
+     * Sets the electrostatic system energy to zero. Can be used if only one SiDB is charged.
+     */
+    void set_system_energy_to_zero() noexcept
+    {
+        strg->system_energy = 0.0;
+    }
+    /**
      * Calculates the system's total electrostatic potential energy and stores it in the storage.
      */
     void recompute_system_energy() noexcept
