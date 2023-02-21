@@ -224,6 +224,13 @@ void critical_temperature(const Lyt& lyt, const bool erroneous_excited = true,
             else
             {
                 std::vector<std::pair<double, bool>> energy_transparent_erroneous{};
+                auto                                 it_begin = distribution.begin();
+                auto                                 it       = distribution.begin();
+                std::advance(it, 1);
+                if (it != distribution.end())
+                {
+                    cs.emingrounderror = (it->first - it_begin->first) * 1000;
+                }
 
                 for (const auto& [energy, occurance] : distribution)
                 {
