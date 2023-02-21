@@ -31,14 +31,13 @@ namespace fiction
 template <typename Lyt>
 struct critical_temperature_stats
 {
-
     // critical temperature of the given layout.
     double critical_temperature{};
 
     // number of physically valid charge configurations.
     uint64_t num_valid_lyt{};
 
-    // energy difference between the ground state and the first erroneous excited state.
+    // energy difference between the ground state and the first (erroneous) excited state.
     double emingrounderror = std::numeric_limits<double>::max();
 
     void report(std::ostream& out = std::cout) const
@@ -46,7 +45,7 @@ struct critical_temperature_stats
         out << fmt::format("critical temperature  = {:.2f} K\n", critical_temperature);
         if (num_valid_lyt != 0)
         {
-            out << fmt::format("'#valid': {} | E_min_g,err: {}\n", num_valid_lyt, emingrounderror);
+            out << fmt::format("'#valid': {} | E_min_g,(err)exc.: {}\n", num_valid_lyt, emingrounderror);
         }
         else
         {
