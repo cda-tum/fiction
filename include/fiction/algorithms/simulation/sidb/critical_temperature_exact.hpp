@@ -59,7 +59,8 @@ struct critical_temperature_stats
  * The *critical temperature* function computes the critical temperature of a given layout. If a gate is simulated, the
  * temperature that results in a population of erroneous excited states with a probability greater than 1 − η, where η
  * is the confidence level for the presence of a working gate, is called the *Critical Temperature (CT)* of the gate. In
- * the case of an arbitrary layout, temperatures above CT lead to a population of ground states smaller than η.
+ * the case of an arbitrary layout (flag is set to false), temperatures above CT lead to a population of ground states
+ * smaller than η.
  *
  * @tparam Lyt Cell-level layout type.
  * @param lyt The layout to simulate.
@@ -68,11 +69,12 @@ struct critical_temperature_stats
  * @param ps Physical parameters. They are material-specific and may vary from experiment to experiment.
  * @param pst Statistics. They store the simulation results.
  * @param confidence_level Confidence level for the presence of a working gate.
- * @param max_temperature The maximal critical temperature is set at 400 K by default.
- * @param gate Gate (e.g. or, and, nor, ...)
- * @param input_bits Inputs configuration of the given gate (e.g. `and`: `00`, `01`, `10`, `11`).
- * @return The Critical Temperature is returned. 0 as return says that either no charge distribution satisfies logic, or
- * at least not the ground state as it should be. Changing the physical parameter µ_ might help.
+ * @param max_temperature The maximal critical temperature is set to 400 K by default.
+ * @param gate Gate (e.g. or, and, nor, ...), must be available in gate_logic_map.
+ * @param input_bits Input configuration of the given gate (e.g. `00` or `01` etc. for 2-input gate).
+ * @return The Critical Temperature is returned. 0 can only be returned if logic is considered (flag is set): It occurs
+ * when either no charge distribution satisfies logic, or at least not the ground state as it should be. Changing the
+ * physical parameter µ_ might help.
  */
 template <typename Lyt>
 void critical_temperature(const Lyt& lyt, const bool erroneous_excited = true,
@@ -128,6 +130,7 @@ void critical_temperature(const Lyt& lyt, const bool erroneous_excited = true,
             // The energy distribution of the physically valid charge configurations for the given layout is determined.
             std::map<double, uint64_t> distribution = energy_distribution(stats_exhaustive.valid_lyts);
 
+            // This scope is only executed if logic is considered, i.e. flag is set to true.
             if (erroneous_excited)
             {
                 std::vector<int64_t> output_bits_index{};
@@ -220,7 +223,8 @@ void critical_temperature(const Lyt& lyt, const bool erroneous_excited = true,
                 }
             }
 
-            else
+            else  // This scope is executed if an arbitrary SiDB layout is simulated with no underlying logic (flag has
+                  // to be set to `false`). The population of the first excited states is of interest.
             {
                 std::vector<std::pair<double, bool>> energy_transparent_erroneous{};
                 auto                                 it_begin = distribution.begin();
@@ -228,7 +232,9 @@ void critical_temperature(const Lyt& lyt, const bool erroneous_excited = true,
                 std::advance(it, 1);
                 if (it != distribution.end())
                 {
-                    cs.emingrounderror = (it->first - it_begin->first) * 1000;
+                    cs.emingrounderror =
+                        (it->first - it_begin->first) *
+                        1000;  // The energy difference between the first excited and the ground state in meV.
                 }
 
                 for (const auto& [energy, occurance] : distribution)
