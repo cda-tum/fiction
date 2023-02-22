@@ -187,11 +187,11 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
         {
             thread.join();
         }
+    }
 
-        if (pst)
-        {
-            *pst = st;
-        }
+    if (pst)
+    {
+        *pst = st;
     }
 }
 
