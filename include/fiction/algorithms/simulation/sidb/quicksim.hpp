@@ -26,7 +26,7 @@ namespace fiction
 {
 
 /**
- * This struct stores the parameters for the *quicksim* algorithm.
+ * This struct stores the parameters for the *QuickSim* algorithm.
  */
 struct quicksim_params
 {
@@ -39,48 +39,59 @@ struct quicksim_params
      */
     uint64_t interation_steps{80};
     /**
-     * Alpha parameter for the *quicksim* algorithm (should be reduced if no result is found).
+     * `alpha` parameter for the *QuickSim* algorithm (should be reduced if no result is found).
      */
     double alpha{0.7};
-
     /**
-     * Number of spawning threads.
+     * Number of threads to spawn. By default the number of threads is set to the number of available hardware threads.
      */
     uint64_t number_threads{std::thread::hardware_concurrency()};
 };
 
 /**
- * This struct stores the simulation runtime and all physically valid charge layouts gained by the quicksim algorithm.
+ * This struct stores the simulation runtime and all physically valid charge layouts gained by the *QuickSim* algorithm.
  *
  * @paramt Lyt Cell-level layout type.
  */
 template <typename Lyt>
 struct quicksim_stats
 {
-    mockturtle::stopwatch<>::duration             time_total{0};
+    /**
+     * Total simulation runtime.
+     */
+    mockturtle::stopwatch<>::duration time_total{0};
+    /**
+     * Vector of all physically valid charge layouts.
+     */
     std::vector<charge_distribution_surface<Lyt>> valid_lyts{};
-
+    /**
+     * Report the simulation statistics in a human-readable fashion.
+     *
+     * @param out Output stream to write to.
+     */
     void report(std::ostream& out = std::cout)
     {
-        out << fmt::format("total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] total runtime: {:.2f} secs\n", mockturtle::to_seconds(time_total));
+
         if (!energy_distribution<Lyt>(valid_lyts).empty())
         {
             for (auto [energy, count] : energy_distribution<Lyt>(valid_lyts))
             {
-                out << fmt::format("[i] the lowest state energy is  = {:.4f} \n", minimum_energy(valid_lyts));
-                out << fmt::format("energy: {} | occurance: {} \n", energy, count);
+                out << fmt::format("[i] lowest energy state: {:.4f} meV \n", minimum_energy(valid_lyts));
+                out << fmt::format("[i] energy: {} | occurrence: {} \n", energy, count);
             }
         }
         else
         {
             std::cout << "no state found" << std::endl;
         }
+
         std::cout << "_____________________________________________________ \n";
     }
 };
 
 /**
- * The *quicksim* algorithm is an electrostatic ground state simulation algorithm for SiDB layouts. It determines
+ * The *QuickSim* algorithm is an electrostatic ground state simulation algorithm for SiDB layouts. It determines
  * physically valid charge configurations (with minimal energy) of a given (already initialized) charge distribution
  * layout. Depending on the simulation parameters, the ground state is found with a certain probability after one run.
  *
@@ -108,8 +119,6 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
         // set the given physical parameters
         charge_lyt.set_physical_parameters(ps.phys_params);
 
-        std::vector<charge_distribution_surface<Lyt>> result{};
-
         charge_lyt.set_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 
@@ -127,24 +136,27 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
         }
 
         // split the iterations among threads
-        const auto iter_per_thread = std::max(
-            ps.interation_steps / ps.number_threads,
-            static_cast<uint64_t>(1u));  // If the number of set threads is greater than the number of iterations, the
-                                         // number of threads defines how many times QuickSim is repeated.
+        const auto iter_per_thread =
+            std::max(ps.interation_steps / ps.number_threads,
+                     uint64_t{1});  // If the number of set threads is greater than the number of iterations, the
+                                    // number of threads defines how many times QuickSim is repeated
+
         const auto bound = static_cast<uint64_t>(std::round(0.6 * static_cast<double>(charge_lyt.num_cells())));
 
-        std::vector<std::thread> threads;
-        std::mutex               mutex;  // used to control access to shared resources.
+        std::vector<std::thread> threads{};
+        threads.reserve(ps.number_threads);
+        std::mutex mutex{};  // used to control access to shared resources
 
-        for (uint64_t z = 0u; z < ps.number_threads; z++)
+        for (uint64_t z = 0ul; z < ps.number_threads; z++)
         {
             threads.emplace_back(
                 [&]
                 {
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-                    for (uint64_t l = 0u; l < iter_per_thread; l++)
+
+                    for (uint64_t l = 0ul; l < iter_per_thread; ++l)
                     {
-                        for (uint64_t i = 0u; i < bound; i++)
+                        for (uint64_t i = 0ul; i < bound; ++i)
                         {
                             std::vector<uint64_t> index_start{i};
                             charge_lyt_copy.set_all_charge_states(sidb_charge_state::NEUTRAL);
@@ -154,14 +166,15 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
 
                             const auto upper_limit =
                                 static_cast<uint64_t>(static_cast<double>(charge_lyt_copy.num_cells()) / 1.5);
-                            for (uint64_t num = 0; num < upper_limit; num++)
+
+                            for (uint64_t num = 0ul; num < upper_limit; num++)
                             {
                                 charge_lyt_copy.adjacent_search(ps.alpha, index_start);
                                 charge_lyt_copy.validity_check();
 
                                 if (charge_lyt_copy.is_physically_valid())
                                 {
-                                    std::lock_guard lock(mutex);
+                                    const std::lock_guard lock{mutex};
                                     st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
                                 }
                             }
