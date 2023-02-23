@@ -26,7 +26,7 @@ namespace fiction
 
 /**
  * This struct stores the time-to-solution, the simulation accuracy and the average single simulation runtime of
- * quicksim (see quicksim.hpp).
+ * *QuickSim* (see quicksim.hpp).
  *
  */
 struct time_to_solution_stats
@@ -61,15 +61,15 @@ struct time_to_solution_stats
     }
 };
 /**
- * This function determines the time-to-solution (TTS) and the accuracy (acc) of the *quicksim* algorithm.
+ * This function determines the time-to-solution (TTS) and the accuracy (acc) of the *QuickSim* algorithm.
  *
  * @tparam Lyt Cell-level layout type.
  * @param lyt Layout that is used for the simulation.
  * @param sidb_params Physical SiDB parameters which are used for the simulation.
  * @param ps Pointer to a struct where the results (time_to_solution, acc, single runtime) are stored.
- * @param repetitions Number of repetitions to determine the simulation accuracy (repetitions = 100 ==> accuracy is
- * precise to 1%).
- * @param confidence_level The time-to-solution also depends one the given confidence level which can be set here.
+ * @param repetitions Number of repetitions to determine the simulation accuracy (`repetitions = 100` means that
+ * accuracy is precise to 1%).
+ * @param confidence_level The time-to-solution also depends on the given confidence level which can be set here.
  */
 template <typename Lyt>
 void sim_acc_tts(const Lyt& lyt, const quicksim_params& quicksim_params, time_to_solution_stats* ps = nullptr,
