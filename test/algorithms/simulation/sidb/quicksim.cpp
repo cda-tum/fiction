@@ -75,7 +75,31 @@ TEMPLATE_TEST_CASE(
         }
     }
 
-    SECTION("varying thread counts")
+    SECTION("zero threads")
+    {
+        TestType lyt{{20, 10}};
+
+        lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 3, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({6, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 3, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
+
+        quicksim_stats<TestType>         quicksimstats{};
+        const sidb_simulation_parameters params{2, -0.30};
+        const struct quicksim_params     quicksim_params
+        {
+            params, 80, 0.7, 0
+        };
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        CHECK(quicksimstats.valid_lyts.empty());
+    }
+
+    SECTION("one thread")
     {
         TestType lyt{{20, 10}};
 
@@ -98,23 +122,55 @@ TEMPLATE_TEST_CASE(
         quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
         CHECK(!quicksimstats.valid_lyts.empty());
         CHECK(quicksimstats.time_total.count() > 0);
+    }
 
-        quicksim_stats<TestType>     quicksimstats_two_threads{};
-        const struct quicksim_params quicksim_params_two_threads
+    SECTION("two threads")
+    {
+        TestType lyt{{20, 10}};
+
+        lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 3, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({6, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 3, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
+
+        quicksim_stats<TestType>         quicksimstats{};
+        const sidb_simulation_parameters params{2, -0.30};
+        const struct quicksim_params     quicksim_params
         {
             params, 80, 0.7, 2
         };
-        quicksim<TestType>(lyt, quicksim_params_two_threads, &quicksimstats_two_threads);
-        CHECK(!quicksimstats_two_threads.valid_lyts.empty());
-        CHECK(quicksimstats_two_threads.time_total.count() > 0);
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        CHECK(!quicksimstats.valid_lyts.empty());
+        CHECK(quicksimstats.time_total.count() > 0);
+    }
 
-        quicksim_stats<TestType>     quicksimstats_100_threads{};
-        const struct quicksim_params quicksim_params_100_threads
+    SECTION("two threads")
+    {
+        TestType lyt{{20, 10}};
+
+        lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 3, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({6, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 3, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
+
+        quicksim_stats<TestType>         quicksimstats{};
+        const sidb_simulation_parameters params{2, -0.30};
+        const struct quicksim_params     quicksim_params
         {
             params, 80, 0.7, 100
         };
-        quicksim<TestType>(lyt, quicksim_params_100_threads, &quicksimstats_100_threads);
-        CHECK(!quicksimstats_100_threads.valid_lyts.empty());
-        CHECK(quicksimstats_100_threads.time_total.count() > 0);
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        CHECK(!quicksimstats.valid_lyts.empty());
+        CHECK(quicksimstats.time_total.count() > 0);
     }
 }
