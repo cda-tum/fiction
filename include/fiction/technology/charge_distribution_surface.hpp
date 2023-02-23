@@ -510,6 +510,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return std::nullopt;
     }
     /**
+     * Sets the electrostatic system energy to zero. Can be used if only one SiDB is charged.
+     */
+    void set_system_energy_to_zero() noexcept
+    {
+        strg->system_energy = 0.0;
+    }
+    /**
      * Calculates the system's total electrostatic potential energy and stores it in the storage.
      */
     void recompute_system_energy() noexcept
@@ -706,15 +713,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->index_to_charge_distribution();
     }
     /**
-     * This function is used for the *quicksim* algorithm (see quicksim.hpp). It gets a vector with indices representing
+     * This function is used for the *QuickSim* algorithm (see quicksim.hpp). It gets a vector with indices representing
      * negatively charged SiDBs as input. Afterward, a distant and a neutrally charged SiDB is localized using a min-max
-     * diversity algorithm. This selected SiDB is set to "negativ" and the index is added to the input vector such that
+     * diversity algorithm. This selected SiDB is set to "negative" and the index is added to the input vector such that
      * the next iteration works correctly.
      *
      * @param alpha A parameter for the algorithm (default: 0.7).
      * @param negative_indices Vector of SiDBs indices that are already negatively charged (double occupied).
      */
     void adjacent_search(const double alpha, std::vector<uint64_t>& negative_indices) noexcept
+
     {
         double     dist_max     = 0;
         const auto reserve_size = this->num_cells() - negative_indices.size();
