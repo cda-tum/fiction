@@ -93,7 +93,8 @@ TEMPLATE_TEST_CASE(
         const sidb_simulation_parameters params{2, -0.30};
         const quicksim_params            quicksim_params{params, 80, 0.7, 0};
         quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
-        CHECK(quicksimstats.valid_lyts.empty());
+        CHECK(!quicksimstats.valid_lyts.empty());
+        CHECK(quicksimstats.time_total.count() > 0);
     }
 
     SECTION("one thread")

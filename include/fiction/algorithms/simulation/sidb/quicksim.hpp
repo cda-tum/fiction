@@ -135,19 +135,22 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
             st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt});
         }
 
+        // If the number of threads is initially set to zero, the simulation is run with one thread.
+        uint64_t num_threads = std::max(ps.number_threads, uint64_t{1});
+
         // split the iterations among threads
         const auto iter_per_thread =
-            std::max(ps.interation_steps / ps.number_threads,
+            std::max(ps.interation_steps / num_threads,
                      uint64_t{1});  // If the number of set threads is greater than the number of iterations, the
                                     // number of threads defines how many times QuickSim is repeated
 
         const auto bound = static_cast<uint64_t>(std::round(0.6 * static_cast<double>(charge_lyt.num_cells())));
 
         std::vector<std::thread> threads{};
-        threads.reserve(ps.number_threads);
+        threads.reserve(num_threads);
         std::mutex mutex{};  // used to control access to shared resources
 
-        for (uint64_t z = 0ul; z < ps.number_threads; z++)
+        for (uint64_t z = 0ul; z < num_threads; z++)
         {
             threads.emplace_back(
                 [&]
