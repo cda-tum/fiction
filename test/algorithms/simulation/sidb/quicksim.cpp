@@ -91,10 +91,7 @@ TEMPLATE_TEST_CASE(
 
         quicksim_stats<TestType>         quicksimstats{};
         const sidb_simulation_parameters params{2, -0.30};
-        const struct quicksim_params     quicksim_params
-        {
-            params, 80, 0.7, 0
-        };
+        const quicksim_params            quicksim_params{params, 80, 0.7, 0};
         quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
         CHECK(quicksimstats.valid_lyts.empty());
     }
@@ -115,10 +112,7 @@ TEMPLATE_TEST_CASE(
 
         quicksim_stats<TestType>         quicksimstats{};
         const sidb_simulation_parameters params{2, -0.30};
-        const struct quicksim_params     quicksim_params
-        {
-            params, 80, 0.7, 1
-        };
+        const quicksim_params            quicksim_params{params, 80, 0.7, 1};
         quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
         CHECK(!quicksimstats.valid_lyts.empty());
         CHECK(quicksimstats.time_total.count() > 0);
@@ -140,10 +134,7 @@ TEMPLATE_TEST_CASE(
 
         quicksim_stats<TestType>         quicksimstats{};
         const sidb_simulation_parameters params{2, -0.30};
-        const struct quicksim_params     quicksim_params
-        {
-            params, 80, 0.7, 2
-        };
+        const quicksim_params            quicksim_params{params, 80, 0.7, 2};
         quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
         CHECK(!quicksimstats.valid_lyts.empty());
         CHECK(quicksimstats.time_total.count() > 0);
@@ -165,10 +156,7 @@ TEMPLATE_TEST_CASE(
 
         quicksim_stats<TestType>         quicksimstats{};
         const sidb_simulation_parameters params{2, -0.30};
-        const struct quicksim_params     quicksim_params
-        {
-            params, 80, 0.7, 100
-        };
+        const quicksim_params            quicksim_params{params, 80, 0.7, 100};
         quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
         CHECK(!quicksimstats.valid_lyts.empty());
         CHECK(quicksimstats.time_total.count() > 0);
