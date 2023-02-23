@@ -136,7 +136,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
         }
 
         // If the number of threads is initially set to zero, the simulation is run with one thread.
-        uint64_t num_threads = std::max(ps.number_threads, uint64_t{1});
+        const uint64_t num_threads = std::max(ps.number_threads, uint64_t{1});
 
         // split the iterations among threads
         const auto iter_per_thread =
@@ -144,7 +144,8 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
                      uint64_t{1});  // If the number of set threads is greater than the number of iterations, the
                                     // number of threads defines how many times QuickSim is repeated
 
-        const auto bound = static_cast<uint64_t>(std::round(0.6 * static_cast<double>(charge_lyt.num_cells())));
+        // Only 60 % of all cells are used as the negatively charged cell in the first iteration step.
+        const auto upper_bound = static_cast<uint64_t>(std::round(0.6 * static_cast<double>(charge_lyt.num_cells())));
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
@@ -159,7 +160,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
 
                     for (uint64_t l = 0ul; l < iter_per_thread; ++l)
                     {
-                        for (uint64_t i = 0ul; i < bound; ++i)
+                        for (uint64_t i = 0ul; i < upper_bound; ++i)
                         {
                             std::vector<uint64_t> index_start{i};
                             charge_lyt_copy.set_all_charge_states(sidb_charge_state::NEUTRAL);
