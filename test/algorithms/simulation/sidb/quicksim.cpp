@@ -149,7 +149,7 @@ TEMPLATE_TEST_CASE(
         CHECK(quicksimstats.time_total.count() > 0);
     }
 
-    SECTION("two threads")
+    SECTION("100 threads")
     {
         TestType lyt{{20, 10}};
 
