@@ -22,7 +22,7 @@ namespace fiction
  * @return Value of the minimum energy found in the input vector.
  */
 template <typename Lyt>
-double minimum_energy(const std::vector<charge_distribution_surface<Lyt>>& charge_lyts) noexcept
+[[nodiscard]] double minimum_energy(const std::vector<charge_distribution_surface<Lyt>>& charge_lyts) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

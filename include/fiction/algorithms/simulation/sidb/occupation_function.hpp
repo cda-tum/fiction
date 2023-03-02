@@ -5,12 +5,12 @@
 #ifndef FICTION_OCCUPATION_FUNCTION_HPP
 #define FICTION_OCCUPATION_FUNCTION_HPP
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <iostream>
-#include <iterator>
-#include <map>
+#include <limits>
 #include <numeric>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -27,10 +27,9 @@ namespace fiction
  * used (recommended) for gates. `False` is required for arbitrary layouts with no underlying logic.
  * @return The occupation probability of all erroneous or excited states is returned.
  */
-double occupation_propability(const std::vector<std::pair<double, bool>>& energy_distribution,
-                              const double& temperature, bool erroneous_excited = true)
+[[nodiscard]] inline double occupation_probability(const std::vector<std::pair<double, bool>>& energy_distribution,
+                                                   const double temperature, bool erroneous_excited = true) noexcept
 {
-
     assert(!energy_distribution.empty() && "vector is empty");
     assert((temperature > static_cast<double>(0)) && "temperature should be slightly above 0 K");
 
@@ -45,12 +44,13 @@ double occupation_propability(const std::vector<std::pair<double, bool>>& energy
     }
 
     // The partition function is obtained by summing up all the Boltzmann factors.
-    double partition_function = std::accumulate(
+    const double partition_function = std::accumulate(
         energy_distribution.begin(), energy_distribution.end(), 0.0,
         [&](double sum, const auto& it) { return sum + std::exp(-(it.first - min_energy) * 12000 / temperature); });
 
     // All Boltzmann factors of the (erroneous) excited states are summed.
     double p = 0;
+
     if (erroneous_excited)
     {
 
@@ -62,6 +62,7 @@ double occupation_propability(const std::vector<std::pair<double, bool>>& energy
                 p += std::exp(-(energies - min_energy) * 12000 / temperature);
             }
         }
+
         return p / partition_function;  // Occupation probability of the erroneous states.
     }
 
@@ -74,6 +75,7 @@ double occupation_propability(const std::vector<std::pair<double, bool>>& energy
             p += std::exp(-(energies - min_energy) * 12000 / temperature);
         }
     }
+
     return p / partition_function;  // Occupation probability of the excited states.
 }
 

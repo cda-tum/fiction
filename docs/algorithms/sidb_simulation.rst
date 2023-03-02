@@ -48,4 +48,4 @@ are a crucial step in the physical design flow of SiDB layouts, as they are used
 
 **Header:** ``fiction/algorithms/simulation/sidb/occupation_function_erroneous.hpp``
 
-.. doxygenfunction:: fiction::occupation_propability(const std::vector<std::pair<double, bool>> &energy_distribution_transparent_erroneous, const double &temperature) noexcept
+.. doxygenfunction:: fiction::occupation_probability(const std::vector<std::pair<double, bool>> &energy_distribution_transparent_erroneous, const double &temperature) noexcept

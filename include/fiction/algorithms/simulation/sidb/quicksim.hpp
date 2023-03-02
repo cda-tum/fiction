@@ -77,16 +77,16 @@ struct quicksim_stats
         {
             for (auto [energy, count] : energy_distribution<Lyt>(valid_lyts))
             {
-                out << fmt::format("[i] lowest energy state: {:.4f} meV \n", minimum_energy(valid_lyts));
-                out << fmt::format("[i] energy: {} | occurrence: {} \n", energy, count);
+                out << fmt::format("[i] lowest energy state: {:.4f} meV\n", minimum_energy(valid_lyts));
+                out << fmt::format("[i] energy: {} | occurrence: {}\n", energy, count);
             }
         }
         else
         {
-            std::cout << "no state found" << std::endl;
+            out << "[i] no state found\n";
         }
 
-        std::cout << "_____________________________________________________ \n";
+        out << "_____________________________________________________" << std::endl;
     }
 };
 

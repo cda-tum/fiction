@@ -17,8 +17,16 @@
 #include "fiction/utils/gate_logic_map.hpp"
 #include "fiction/utils/hash.hpp"
 
+#include <fmt/format.h>
+
+#include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstdint>
+#include <limits>
+#include <map>
+#include <ostream>
+#include <vector>
 
 namespace fiction
 {
@@ -31,36 +39,45 @@ namespace fiction
 template <typename Lyt>
 struct critical_temperature_stats
 {
-    // critical temperature of the given layout.
+    /**
+     * Critical temperature of the given layout.
+     */
     double critical_temperature{};
-
-    // number of physically valid charge configurations.
+    /**
+     * Number of physically valid charge configurations.
+     */
     uint64_t num_valid_lyt{};
-
-    // energy difference between the ground state and the first (erroneous) excited state.
-    double emingrounderror = std::numeric_limits<double>::max();
-
+    /**
+     * Energy difference between the ground state and the first (erroneous) excited state.
+     */
+    double e_min_ground_state_error = std::numeric_limits<double>::max();
+    /**
+     * Prints the simulation results to the given output stream.
+     *
+     * @param out Output stream.
+     */
     void report(std::ostream& out = std::cout) const
     {
         out << fmt::format("critical temperature  = {:.2f} K\n", critical_temperature);
+
         if (num_valid_lyt != 0)
         {
-            out << fmt::format("'#valid': {} | E_min_g,(err)exc.: {}\n", num_valid_lyt, emingrounderror);
+            out << fmt::format("'#valid': {} | E_min_g,(err)exc.: {}\n", num_valid_lyt, e_min_ground_state_error);
         }
         else
         {
-            std::cout << "no state found | if two state simulation is used, continue with three state" << std::endl;
+            out << "no state found | if two-state simulation is used, continue with three states\n";
         }
-        std::cout << "_____________________________________________________ \n";
+
+        out << "_____________________________________________________" << std::endl;
     }
 };
 
 /**
- * The *critical temperature* function computes the critical temperature of a given layout. If a gate is simulated, the
- * temperature that results in a population of erroneous excited states with a probability greater than 1 − η, where η
- * is the confidence level for the presence of a working gate, is called the *Critical Temperature (CT)* of the gate. In
- * the case of an arbitrary layout (flag is set to false), temperatures above CT lead to a population of ground states
- * smaller than η.
+ * Computes the critical temperature of a given SiDB layout. If a gate is simulated, the temperature that results in a
+ * population of erroneous excited states with a probability greater than 1 − η, where η is the confidence level for the
+ * presence of a working gate, is called the *Critical Temperature (CT)* of the gate. In the case of an arbitrary layout
+ * (flag is set to false), temperatures above CT lead to a population of ground states smaller than η.
  *
  * @tparam Lyt Cell-level layout type.
  * @param lyt The layout to simulate.
@@ -89,175 +106,131 @@ void critical_temperature(const Lyt& lyt, const bool erroneous_excited = true,
 
     critical_temperature_stats<Lyt> cs{};
 
-    if (!lyt.is_empty())
+    if (lyt.is_empty())
     {
-        // All physically valid charge configurations are determined for the given layout (exhaustive ground state
-        // simulation is used to provide 100 % accuracy for the critical temperature).
-        exgs_stats<Lyt> stats_exhaustive{};
-        exhaustive_ground_state_simulation(lyt, params, &stats_exhaustive);
+        return;
+    }
 
-        // The number of physically valid charge configurations is stored.
-        cs.num_valid_lyt = stats_exhaustive.valid_lyts.size();
+    // All physically valid charge configurations are determined for the given layout (exhaustive ground state
+    // simulation is used to provide 100 % accuracy for the critical temperature).
+    exgs_stats<Lyt> stats_exhaustive{};
+    exhaustive_ground_state_simulation(lyt, params, &stats_exhaustive);
 
-        // If the layout consists of only one SiDB, the maximum temperature is returned as the critical temperature.
-        if (lyt.num_cells() == 1u)
+    // The number of physically valid charge configurations is stored.
+    cs.num_valid_lyt = stats_exhaustive.valid_lyts.size();
+
+    // If the layout consists of only one SiDB, the maximum temperature is returned as the critical temperature.
+    if (lyt.num_cells() == 1u)
+    {
+        cs.critical_temperature = static_cast<double>(max_temperature);
+    }
+
+    else if (lyt.num_cells() > 1)
+    {
+        // Vector with temperature values from 0.01 to 400 K in 0.01 K steps is generated.
+        std::vector<double> temp_values{};
+        temp_values.reserve(max_temperature * 100);
+
+        for (uint64_t i = 1; i <= max_temperature * 100; i++)
         {
-            cs.critical_temperature = static_cast<double>(max_temperature);
+            temp_values.push_back(static_cast<double>(i) / 100.0);
         }
 
-        else if (lyt.num_cells() > 1)
+        // All cells of the given layout are collected.
+        std::vector<typename Lyt::cell> all_cells{};
+        all_cells.reserve(lyt.num_cells());
+
+        lyt.foreach_cell([&all_cells](const auto& c) { all_cells.push_back(c); });
+
+        // The cells are sorted according to local_sort_sidb_cells.
+        // The goal is to sort the cells from left to right and top to bottom.
+        std::sort(all_cells.begin(), all_cells.end(), local_sort_sidb_cells<Lyt>);
+
+        // The indices of the output cells are collected as a vector. Depending on the specific gate, there is/are
+        // one or two outputs.
+
+        // The energy distribution of the physically valid charge configurations for the given layout is determined.
+        const std::map<double, uint64_t> distribution = energy_distribution(stats_exhaustive.valid_lyts);
+
+        // This scope is only executed if logic is considered, i.e. flag is set to true.
+        if (erroneous_excited)
         {
-            // Vector with temperature values from 0.01 to 400 K in 0.01 K steps is generated.
-            std::vector<double> temp_values{};
-            temp_values.reserve(max_temperature * 100);
-            for (uint64_t i = 1; i <= max_temperature * 100; i++)
+            std::vector<int64_t> output_bits_index{};
+
+            if (gate_logic::GATES_IN_OUT_NUMBER.at(gate).at("out") == "2")
             {
-                temp_values.push_back(static_cast<double>(i) / 100.0);
+                output_bits_index = {-4, -3};  // double wire, cx, fo2, etc.
+            }
+            else
+            {
+                output_bits_index = {-2};  // and, or, xnor, nor, nand, etc.
             }
 
-            // All cells of the given layout are collected.
-            std::vector<typename Lyt::cell> all_cells{};
-            all_cells.reserve(lyt.num_cells());
-            lyt.foreach_cell([&all_cells](const auto& c) { all_cells.push_back(c); });
+            // Output cell(s) is/are collected.
+            std::vector<typename Lyt::cell> output_cells;
+            output_cells.reserve(output_bits_index.size());
+            std::transform(output_bits_index.begin(), output_bits_index.end(), std::back_inserter(output_cells),
+                           [&all_cells](const auto& index) { return *(all_cells.end() + index); });
 
-            // The cells are sorted according to local_sort_sidb_cells.
-            // The goal is to sort the cells from left to right and top to bottom.
-            std::sort(all_cells.begin(), all_cells.end(), local_sort_sidb_cells<Lyt>);
+            // A label that indicates whether the state still calculates the correct result is added.
+            std::vector<std::pair<double, bool>> energy_transparent_erroneous{};
 
-            // The indices of the output cells are collected as a vector. Depending on the specific gate, there is/are
-            // one or two outputs.
-
-            // The energy distribution of the physically valid charge configurations for the given layout is determined.
-            std::map<double, uint64_t> distribution = energy_distribution(stats_exhaustive.valid_lyts);
-
-            // This scope is only executed if logic is considered, i.e. flag is set to true.
-            if (erroneous_excited)
+            for (const auto& [energy, occurrence] : distribution)
             {
-                std::vector<int64_t> output_bits_index{};
-
-                if (gate_logic::GATES_IN_OUT_NUMBER.at(gate).at("out") == "2")
+                for (const auto& layout : stats_exhaustive.valid_lyts)
                 {
-                    output_bits_index = {-4, -3};  // double wire, cx, fo2, etc.
-                }
-                else
-                {
-                    output_bits_index = {-2};  // and, or, xnor, nor, nand, etc.
-                }
-
-                // Output cell(s) is/are collected.
-                std::vector<typename Lyt::cell> output_cells;
-                output_cells.reserve(output_bits_index.size());
-                std::transform(output_bits_index.begin(), output_bits_index.end(), std::back_inserter(output_cells),
-                               [&all_cells](const auto& index) { return *(all_cells.end() + index); });
-
-                // A label that indicates whether the state still calculates the correct result is added.
-                std::vector<std::pair<double, bool>> energy_transparent_erroneous{};
-
-                for (const auto& [energy, occurance] : distribution)
-                {
-                    for (const auto& layout : stats_exhaustive.valid_lyts)
+                    if ((std::round(layout.get_system_energy() * 1'000'000)) / 1'000'000 ==
+                        (std::round(energy * 1'000'000)) / 1'000'000)
                     {
-                        if ((std::round(layout.get_system_energy() * 1'000'000)) / 1'000'000 ==
-                            (std::round(energy * 1'000'000)) / 1'000'000)
+                        std::string charge;  // The output is collected as a string. For example: "10", "1", etc.
+                                             // (depending on the number of outputs).
+                        for (const auto& cell : output_cells)
                         {
-                            std::string charge;  // The output is collected as a string. For example: "10", "1", etc.
-                                                 // (depending on the number of outputs).
-                            for (const auto& cell : output_cells)
-                            {
-                                charge = charge + std::to_string(-charge_state_to_sign(layout.get_charge_state(cell)));
-                            }
-                            bool transparent = false;
-                            if (charge == gate_logic::GATE_TRUTH_TABLE.at(gate).at(input_bits))
-                            {
-                                transparent = true;  // The output represents the correct output. Hence, state is called
-                                                     // transparent.
-                            }
-                            energy_transparent_erroneous.emplace_back(energy, transparent);
+                            charge = charge + std::to_string(-charge_state_to_sign(layout.get_charge_state(cell)));
                         }
-                    }
-                }
-
-                double min_energy                 = energy_transparent_erroneous.begin()->first;
-                bool   groundstate_is_transparent = false;
-
-                // The energy difference between the ground state and the first erroneous state is determined.
-                for (const auto& [energy, trans_error] : energy_transparent_erroneous)
-                {
-                    if ((energy == min_energy) && trans_error)
-                    {
-                        groundstate_is_transparent =
-                            true;  // Check if at least one ground state exists which fulfills the logic (transparent).
-                    }
-
-                    if (!trans_error && (energy > min_energy) && groundstate_is_transparent)
-                    {
-                        cs.emingrounderror = (energy - min_energy) * 1000;  // The energy difference is stored in meV.
-                        break;
-                    }
-                }
-
-                if (groundstate_is_transparent)
-                {
-                    // This function determines the critical temperature (CT) for a given confidence level.
-                    for (const auto& temp : temp_values)
-                    {
-                        if (occupation_propability(energy_transparent_erroneous, temp, erroneous_excited) >
-                            (1 - confidence_level))
+                        bool transparent = false;
+                        if (charge == gate_logic::GATE_TRUTH_TABLE.at(gate).at(input_bits))
                         {
-                            cs.critical_temperature =
-                                temp;  // If the occupation probability of erroneous states exceeds the given threshold,
-                                       // the current temperature is stored as critical temperature.
-                            break;
+                            transparent = true;  // The output represents the correct output. Hence, state is called
+                                                 // transparent.
                         }
-                        if (std::abs(temp - static_cast<double>(max_temperature)) < 0.001)
-                        {
-                            cs.critical_temperature = static_cast<double>(
-                                max_temperature);  // Maximal temperature is stored as critical temperature.
-                        }
+                        energy_transparent_erroneous.emplace_back(energy, transparent);
                     }
-                }
-                else
-                {
-                    cs.critical_temperature = 0.0;  // If no ground state fulfills the logic, the critical temperature
-                                                    // is zero. May be worth it to change µ_.
                 }
             }
 
-            else  // This scope is executed if an arbitrary SiDB layout is simulated with no underlying logic (flag has
-                  // to be set to `false`). The population of the first excited states is of interest.
+            double const min_energy = energy_transparent_erroneous.begin()->first;
+
+            bool ground_state_is_transparent = false;
+
+            // The energy difference between the ground state and the first erroneous state is determined.
+            for (const auto& [energy, trans_error] : energy_transparent_erroneous)
             {
-                std::vector<std::pair<double, bool>> energy_transparent_erroneous{};
-                auto                                 it_begin = distribution.begin();
-                auto                                 it       = distribution.begin();
-                std::advance(it, 1);
-                if (it != distribution.end())
+                if ((energy == min_energy) && trans_error)
                 {
-                    cs.emingrounderror =
-                        (it->first - it_begin->first) *
-                        1000;  // The energy difference between the first excited and the ground state in meV.
+                    ground_state_is_transparent =
+                        true;  // Check if at least one ground state exists which fulfills the logic (transparent).
                 }
 
-                for (const auto& [energy, occurance] : distribution)
+                if (!trans_error && (energy > min_energy) && ground_state_is_transparent)
                 {
-                    for (const auto& layout : stats_exhaustive.valid_lyts)
-                    {
-                        if ((std::round(layout.get_system_energy() * 1'000'000)) / 1'000'000 ==
-                            (std::round(energy * 1'000'000)) / 1'000'000)
-                        {
-                            bool transparent = false;
-                            energy_transparent_erroneous.emplace_back(energy, transparent);
-                        }
-                    }
+                    cs.e_min_ground_state_error =
+                        (energy - min_energy) * 1000;  // The energy difference is stored in meV.
+                    break;
                 }
+            }
+
+            if (ground_state_is_transparent)
+            {
                 // This function determines the critical temperature (CT) for a given confidence level.
                 for (const auto& temp : temp_values)
                 {
-                    if (occupation_propability(energy_transparent_erroneous, temp, erroneous_excited) >
+                    if (occupation_probability(energy_transparent_erroneous, temp, erroneous_excited) >
                         (1 - confidence_level))
                     {
                         cs.critical_temperature =
-                            temp;  // If the occupation probability of excited states exceeds the given threshold, the
-                                   // current temperature is stored as critical temperature.
+                            temp;  // If the occupation probability of erroneous states exceeds the given threshold,
+                                   // the current temperature is stored as critical temperature.
                         break;
                     }
                     if (std::abs(temp - static_cast<double>(max_temperature)) < 0.001)
@@ -267,11 +240,64 @@ void critical_temperature(const Lyt& lyt, const bool erroneous_excited = true,
                     }
                 }
             }
+            else
+            {
+                cs.critical_temperature = 0.0;  // If no ground state fulfills the logic, the critical temperature
+                                                // is zero. May be worth it to change µ_.
+            }
         }
-        if (pst)
+
+        else  // This scope is executed if an arbitrary SiDB layout is simulated with no underlying logic (flag has
+              // to be set to `false`). The population of the first excited states is of interest.
         {
-            *pst = cs;
+            std::vector<std::pair<double, bool>> energy_transparent_erroneous{};
+
+            auto it_begin = distribution.begin();
+            auto it       = distribution.begin();
+
+            std::advance(it, 1);
+            if (it != distribution.end())
+            {
+                cs.e_min_ground_state_error =
+                    (it->first - it_begin->first) *
+                    1000;  // The energy difference between the first excited and the ground state in meV.
+            }
+
+            for (const auto& [energy, occurrence] : distribution)
+            {
+                for (const auto& layout : stats_exhaustive.valid_lyts)
+                {
+                    if ((std::round(layout.get_system_energy() * 1'000'000)) / 1'000'000 ==
+                        (std::round(energy * 1'000'000)) / 1'000'000)
+                    {
+                        bool transparent = false;
+                        energy_transparent_erroneous.emplace_back(energy, transparent);
+                    }
+                }
+            }
+            // This function determines the critical temperature (CT) for a given confidence level.
+            for (const auto& temp : temp_values)
+            {
+                if (occupation_probability(energy_transparent_erroneous, temp, erroneous_excited) >
+                    (1 - confidence_level))
+                {
+                    cs.critical_temperature =
+                        temp;  // If the occupation probability of excited states exceeds the given threshold, the
+                               // current temperature is stored as critical temperature.
+                    break;
+                }
+                if (std::abs(temp - static_cast<double>(max_temperature)) < 0.001)
+                {
+                    cs.critical_temperature =
+                        static_cast<double>(max_temperature);  // Maximal temperature is stored as critical temperature.
+                }
+            }
         }
+    }
+
+    if (pst)
+    {
+        *pst = cs;
     }
 }
 

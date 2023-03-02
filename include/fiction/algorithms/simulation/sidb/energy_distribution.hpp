@@ -25,7 +25,8 @@ namespace fiction
  * vector as the value.
  */
 template <typename Lyt>
-std::map<double, uint64_t> energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_vec) noexcept
+[[nodiscard]] std::map<double, uint64_t>
+energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_vec) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

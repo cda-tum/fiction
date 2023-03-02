@@ -22,27 +22,39 @@ namespace fiction
 template <typename Lyt>
 struct exgs_stats
 {
-    mockturtle::stopwatch<>::duration             time_total{0};
+    /**
+     * Total simulation runtime.
+     */
+    mockturtle::stopwatch<>::duration time_total{0};
+    /**
+     * All physically valid charge layouts.
+     */
     std::vector<charge_distribution_surface<Lyt>> valid_lyts{};
-
+    /**
+     * Prints the simulation statistics to the given output stream.
+     *
+     * @param out Output stream.
+     */
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+
         if (!valid_lyts.empty())
         {
             for (const auto& [energy, count] : energy_distribution<Lyt>(valid_lyts))
             {
-                out << fmt::format("energy: {} | occurance: {} \n", energy, count);
+                out << fmt::format("[i] energy: {} | occurrence: {}\n", energy, count);
             }
-            out << fmt::format("the ground state energy is  = {:.4f} \n", minimum_energy(valid_lyts));
+            out << fmt::format("[i] the ground state energy is  = {:.4f}\n", minimum_energy(valid_lyts));
         }
         else
         {
-            std::cout << "no state found | if two state simulation is used, continue with three state" << std::endl;
+            out << "[i] no state found | if two-state simulation is used, continue with three states\n";
         }
 
-        out << fmt::format("{} phyiscally valid charge states were found \n", valid_lyts.size());
-        std::cout << "_____________________________________________________ \n";
+        out << fmt::format("[i] {} physically valid charge states were found\n", valid_lyts.size());
+
+        out << "_____________________________________________________" << std::endl;
     }
 };
 
