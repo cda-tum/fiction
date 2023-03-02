@@ -5,11 +5,15 @@
 #ifndef FICTION_LAYOUT_UTILS_HPP
 #define FICTION_LAYOUT_UTILS_HPP
 
+#include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 
 #include <cassert>
 #include <cstdint>
+#include <limits>
 
 namespace fiction
 {
@@ -30,6 +34,7 @@ template <typename Lyt>
 
     return static_cast<uint8_t>(lyt.adjacent_coordinates(c).size());
 }
+
 /**
  * Converts a relative cell position within a tile to an absolute cell position within a layout. To compute the absolute
  * position, the layout topology is taken into account.
@@ -163,6 +168,7 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Cel
 
     return absolute_c;
 }
+
 /**
  * Port directions address coordinates relative to each other by specifying cardinal directions. This function converts
  * such a relative direction to an absolute coordinate when given a layout and a coordinate therein to consider. That
@@ -222,6 +228,126 @@ template <typename Lyt>
     }
 
     return {};
+}
+
+/**
+ * A new layout is constructed and returned that is equivalent to the given cell-level layout. However, its coordinates
+ * are normalized, i.e., start at `(0, 0)` and are all positive. To this end, all existing coordinates are shifted by an
+ * x and y offset.
+ *
+ * @tparam Lyt Cell-level layout type.
+ * @param lyt The layout which is to be normalized.
+ * @return New normalized equivalent layout.
+ */
+template <typename Lyt>
+Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
+{
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+
+    auto x_offset = std::numeric_limits<int32_t>::max();
+    auto y_offset = std::numeric_limits<int32_t>::max();
+
+    lyt.foreach_cell(
+        [&x_offset, &y_offset](const auto& c)
+        {
+            if (c.y <= y_offset)
+            {
+                y_offset = c.y;
+            }
+            if (c.x <= x_offset)
+            {
+                x_offset = c.x;
+            }
+        });
+
+    Lyt lyt_new{{lyt.x() - x_offset, lyt.y() - y_offset, lyt.z()},
+                lyt.get_layout_name(),
+                lyt.get_tile_size_x(),
+                lyt.get_tile_size_y()};
+
+    lyt.foreach_cell(
+        [&lyt_new, &lyt, &x_offset, &y_offset](const auto& c)
+        {
+            lyt_new.assign_cell_type({c.x - x_offset, c.y - y_offset}, lyt.get_cell_type(c));
+            lyt_new.assign_cell_mode({c.x - x_offset, c.y - y_offset}, lyt.get_cell_mode(c));
+            lyt_new.assign_cell_name({c.x - x_offset, c.y - y_offset}, lyt.get_cell_name(c));
+        });
+
+    return lyt_new;
+}
+
+/**
+ * Converts the coordinates of a given cell-level layout to SiQAD coordinates. A new equivalent layout based on SiQAD
+ * coordinates is returned.
+ *
+ * @tparam Lyt Cell-level layout type based on fiction coordinates, e.g., `offset::ucoord_t` or `cube::coord_t`.
+ * @param lyt The layout that is to be converted to a new layout based on SiQAD coordinates.
+ * @return A new equivalent layout based on SiQAD coordinates.
+ */
+template <typename Lyt>
+sidb_cell_clk_lyt_siqad convert_to_siqad_coordinates(const Lyt& lyt) noexcept
+{
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    sidb_cell_clk_lyt_siqad lyt_new{{lyt.x(), lyt.y(), lyt.z()},
+                                    lyt.get_layout_name(),
+                                    lyt.get_tile_size_x(),
+                                    lyt.get_tile_size_y()};
+
+    lyt.foreach_cell(
+        [&lyt_new, &lyt](const auto& c)
+        {
+            lyt_new.assign_cell_type(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_type(c));
+            lyt_new.assign_cell_mode(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_mode(c));
+            lyt_new.assign_cell_name(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_name(c));
+        });
+
+    return lyt_new;
+}
+
+/**
+ * Converts the coordinates of a given cell-level layout to fiction coordinates, e.g., `offset::ucoord_t` or
+ * `cube::coord_t`. A new equivalent layout based on fiction coordinates is returned.
+ *
+ * @tparam Lyt Cell-level layout type based on fiction coordinates.
+ * @param lyt The layout that is to be converted to a new layout based on fiction coordinates.
+ * @return A new equivalent layout based on fiction coordinates.
+ */
+template <typename Lyt>
+Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
+{
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt_new{{lyt.x(), lyt.y(), lyt.z()}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
+
+    const auto assign_coordinates = [&lyt_new](const auto& base_lyt) noexcept
+    {
+        base_lyt.foreach_cell(
+            [&lyt_new, &base_lyt](const auto& c)
+            {
+                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<Lyt>>(c), base_lyt.get_cell_type(c));
+                lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<Lyt>>(c), base_lyt.get_cell_mode(c));
+                lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<Lyt>>(c), base_lyt.get_cell_name(c));
+            });
+    };
+
+    if (has_offset_ucoord_v<Lyt> && !lyt.is_empty())
+    {
+        auto lyt_normalized = normalize_layout_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
+        assign_coordinates(lyt_normalized);
+        lyt_new.resize({lyt_normalized.x(), lyt_normalized.y(), lyt_normalized.z()});
+    }
+    else
+    {
+        assign_coordinates(lyt);
+    }
+
+    return lyt_new;
 }
 
 }  // namespace fiction
