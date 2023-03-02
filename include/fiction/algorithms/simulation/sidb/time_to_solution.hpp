@@ -56,8 +56,8 @@ struct time_to_solution_stats
      */
     void report(std::ostream& out = std::cout)
     {
-        out << fmt::format("[i] time_to_solution: {} | acc: {} | t_(s): {} | t_exhaustive(s): {}\n", time_to_solution, acc,
-                           mean_single_runtime, single_runtime_exhaustive);
+        out << fmt::format("[i] time_to_solution: {} | acc: {} | t_(s): {} | t_exhaustive(s): {}\n", time_to_solution,
+                           acc, mean_single_runtime, single_runtime_exhaustive);
     }
 };
 /**
