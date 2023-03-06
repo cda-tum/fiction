@@ -19,6 +19,7 @@ on:
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/ubuntu.yml'
+  merge_group:
 
 defaults:
   run:

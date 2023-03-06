@@ -19,6 +19,7 @@ on:
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/coverage.yml'
+  merge_group:
 
 defaults:
   run:
