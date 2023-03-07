@@ -20,7 +20,7 @@
 namespace fiction
 {
 
-struct exact_sidb_simulation_parameters
+struct exact_ground_state_simulation_params
 {
     /**
      * General parameters for the simulation of the physical SiDB system.
@@ -46,7 +46,7 @@ struct exact_sidb_simulation_parameters
 };
 
 template <typename Lyt>
-struct exact_sidb_simulation_stats
+struct exact_ground_state_simulation_stats
 {
     /**
      * Total simulation runtime.
@@ -65,12 +65,14 @@ template <typename Lyt>
 class exact_ground_state_simulation_impl
 {
   public:
-    exact_ground_state_simulation_impl(const Lyt& lyt, const exact_sidb_simulation_parameters& p,
-                                       exact_sidb_simulation_stats<Lyt>& st) noexcept :
+    exact_ground_state_simulation_impl(const Lyt& lyt, const exact_ground_state_simulation_params& p,
+                                       exact_ground_state_simulation_stats<Lyt>& st) noexcept :
             charge_lyt{lyt},
             params{p},
             stats{st}
     {}
+
+    void run() {}
 
   private:
     /**
@@ -80,11 +82,11 @@ class exact_ground_state_simulation_impl
     /**
      * The simulation parameters.
      */
-    const exact_sidb_simulation_parameters& params;
+    const exact_ground_state_simulation_params& params;
     /**
      * The simulation statistics.
      */
-    exact_sidb_simulation_stats<Lyt>& stats;
+    exact_ground_state_simulation_stats<Lyt>& stats;
 
     /**
      * The Z3 context.
@@ -95,15 +97,15 @@ class exact_ground_state_simulation_impl
 }  // namespace detail
 
 template <typename Lyt>
-void exact_ground_state_simulation(const Lyt& lyt, const exact_sidb_simulation_params& ps = {},
-                                   exact_sidb_simulation_stats<Lyt>* pst = nullptr) noexcept
+void exact_ground_state_simulation(const Lyt& lyt, const exact_ground_state_simulation_params& ps = {},
+                                   exact_ground_state_simulation_stats<Lyt>* pst = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_tech_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    exact_sidb_simulation_stats<Lyt> st{};
+    exact_ground_state_simulation_stats<Lyt> st{};
 
-    exact_ground_state_simulation_impl<Lyt> impl{lyt, ps, st}.run();
+    detail::exact_ground_state_simulation_impl<Lyt>{lyt, ps, st}.run();
 
     if (pst)
     {
