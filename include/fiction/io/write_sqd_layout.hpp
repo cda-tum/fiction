@@ -9,6 +9,7 @@
 #include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
 
+#include <fmt/chrono.h>
 #include <fmt/format.h>
 
 #include <chrono>
@@ -168,10 +169,7 @@ class write_sqd_layout_impl
 
         header << siqad::XML_HEADER << siqad::OPEN_SIQAD;
 
-        const auto now      = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-        auto       time_str = std::string{std::ctime(&now)};  // NOLINT(concurrency-mt-unsafe): concurrency not needed
-
-        time_str.pop_back();  // remove trailing new line
+        const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr)));
 
         header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
 
