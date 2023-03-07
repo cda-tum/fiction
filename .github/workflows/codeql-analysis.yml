@@ -12,7 +12,6 @@ on:
       - 'libs/**'
       - '.github/workflows/codeql-analysis.yml'
   pull_request:
-    # The branches below must be a subset of the branches above
     branches: [ 'main' ]
     paths:
       - '**/*.hpp'
@@ -80,4 +79,18 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
         with:
-          upload: true
+          upload: false
+          output: sarif-results
+
+      - name: Filter SARIF file to exclude library warnings
+        uses: advanced-security/filter-sarif@main
+        with:
+          patterns: |
+            -**/libs/**
+          input: sarif-results/${{ matrix.language }}.sarif
+          output: sarif-results/${{ matrix.language }}.sarif
+
+      - name: Upload SARIF to GitHub
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: sarif-results/${{ matrix.language }}.sarif
