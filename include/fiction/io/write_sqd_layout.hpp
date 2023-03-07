@@ -9,8 +9,8 @@
 #include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
 
-#include <fmt/format.h>
 #include <fmt/chrono.h>
+#include <fmt/format.h>
 
 #include <chrono>
 #include <ctime>
