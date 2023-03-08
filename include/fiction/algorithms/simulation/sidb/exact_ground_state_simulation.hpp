@@ -136,14 +136,50 @@ class exact_ground_state_simulation_impl
 
     [[nodiscard]] z3::expr get_sidb_var(const sidb& s)
     {
-        // two-state simulation
+        // two-state simulation: n == false -> n == -1 (negative charge), n == true -> n == 0 (neutral)
         if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
         {
             return ctx.bool_const(fmt::format("n_({},{},{})", s.x, s.y, s.z).c_str());
         }
 
-        // three-state simulation
+        // three-state simulation: n == -1 (negative charge), n == 0 (neutral), n == 1 (positive charge)
         return ctx.int_const(fmt::format("n_({},{},{})", s.x, s.y, s.z).c_str());
+    }
+
+    [[nodiscard]] z3::expr negative_sidb_var(const sidb& s)
+    {
+        const auto sidb_var = get_sidb_var(s);
+
+        // two-state simulation: n == false -> n == -1 (negative charge)
+        if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
+        {
+            return !sidb_var;
+        }
+
+        // three-state simulation: n == -1 (negative charge)
+        return sidb_var == -1;
+    }
+
+    [[nodiscard]] z3::expr neutral_sidb_var(const sidb& s)
+    {
+        const auto sidb_var = get_sidb_var(s);
+
+        // two-state simulation: n == true -> n == 0 (neutral)
+        if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
+        {
+            return sidb_var;
+        }
+
+        // three-state simulation: n == 0 (neutral)
+        return sidb_var == 0;
+    }
+
+    [[nodiscard]] z3::expr positive_sidb_var(const sidb& s)
+    {
+        const auto sidb_var = get_sidb_var(s);
+
+        // three-state simulation: n == 1 (positive charge)
+        return sidb_var == 1;
     }
 
     [[nodiscard]] z3::expr get_sidb_value(const sidb& s)
@@ -164,6 +200,11 @@ class exact_ground_state_simulation_impl
     [[nodiscard]] z3::expr get_potential_var(const sidb& s1, const sidb& s2)
     {
         return ctx.real_const(fmt::format("V_({},{},{}),({},{},{})", s1.x, s1.y, s1.z, s2.x, s2.y, s2.z).c_str());
+    }
+
+    [[nodiscard]] z3::expr get_local_potential_var(const sidb& s)
+    {
+        return ctx.real_const(fmt::format("V_local,({},{},{})", s.x, s.y, s.z).c_str());
     }
 
     void restrict_sidb_charge_state_values()
@@ -207,6 +248,47 @@ class exact_ground_state_simulation_impl
             });
     }
 
+    void define_population_stability()
+    {
+        charge_lyt.foreach_cell(
+            [this](const sidb& s1)
+            {
+                z3::expr_vector local_potential_terms{ctx};
+
+                // gather local potentials
+                charge_lyt.foreach_cell(
+                    [this, &local_potential_terms, &s1](const sidb& s2)
+                    {
+                        if (s1 != s2)
+                        {
+                            local_potential_terms.push_back(get_potential_var(s1, s2));
+                        }
+                    });
+
+                // the local potential is the sum of the potentials between the SiDB and all other SiDBs
+                if (!local_potential_terms.empty())
+                {
+                    optimizer.add(get_local_potential_var(s1) == z3::sum(local_potential_terms));
+                }
+
+                // the population stability conditions
+
+                // negative charge state
+                optimizer.add(z3::implies(get_local_potential_var(s1) < 0, negative_sidb_var(s1)));
+
+                // positive charge state (only for three-state simulation)
+                if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::THREE)
+                {
+                    optimizer.add(z3::implies(get_local_potential_var(s1) > 0, positive_sidb_var(s1)));
+                }
+
+                // neutral charge state
+                optimizer.add(z3::implies(get_local_potential_var(s1) == 0, neutral_sidb_var(s1)));
+                // TODO is it really right that neutral occurs on == 0?
+                // TODO do we need to work with pop-stability conditions?
+            });
+    }
+
     void minimize_system_energy()
     {
         const auto energy_var = ctx.real_const("E");
@@ -221,16 +303,8 @@ class exact_ground_state_simulation_impl
                     {
                         if (s1 < s2)
                         {
-                            // the electric charge of an electron
-                            const auto charge_val =
-                                ctx.real_val(std::to_string(physical_constants::ELECTRIC_CHARGE).c_str());
-                            // TODO this value is too small to be represented correctly by Z3
-
-                            std::cout << "charge_val: " << physical_constants::ELECTRIC_CHARGE
-                                      << ", Z3's value repr: " << charge_val << std::endl;
-
                             // add the electrostatic potential energy term
-                            energy_terms.push_back(get_potential_var(s1, s2) * get_sidb_value(s1) * charge_val);
+                            energy_terms.push_back(get_potential_var(s1, s2) * get_sidb_value(s1));
                         }
                     });
             });
@@ -251,6 +325,18 @@ class exact_ground_state_simulation_impl
         restrict_sidb_charge_state_values();
         // define the electrostatic potential V_{i,j} between SiDBs
         define_electrostatic_potential();
+
+        // population stability
+        if (!params.compute_population_stability_outside_the_solver)
+        {
+            define_population_stability();
+        }
+        // configuration stability
+        //        if (!params.compute_configuration_stability_outside_the_solver)
+        //        {
+        //            define_configuration_stability();
+        //        }
+
         // minimize the system energy
         minimize_system_energy();
     }
