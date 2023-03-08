@@ -4,6 +4,8 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
+#if (FICTION_Z3_SOLVER)
+
 #include <fiction/algorithms/simulation/sidb/exact_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -13,10 +15,10 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("Exhaustive ground state search", "[ExGS]",
+TEMPLATE_TEST_CASE("Exact SiDB ground state simulation", "[exact-sidb-sim]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
-    const sidb_simulation_parameters       sidb_params{2, -0.32};
+    const sidb_simulation_parameters           sidb_params{2, -0.32};
     const exact_ground_state_simulation_params exact_gs_params{sidb_params};
 
     SECTION("simulation with several SiDBs placed")
@@ -75,3 +77,12 @@ TEMPLATE_TEST_CASE("Exhaustive ground state search", "[ExGS]",
         CHECK(exgs_stats.valid_lyts.size() == 0);  // empty layout is saved.
     }
 }
+
+#else  // FICTION_Z3_SOLVER
+
+TEST_CASE("Exact SiDB ground state simulation", "[exact-sidb-sim]")
+{
+    CHECK(true);  // workaround for empty test case
+}
+
+#endif  // FICTION_Z3_SOLVER
