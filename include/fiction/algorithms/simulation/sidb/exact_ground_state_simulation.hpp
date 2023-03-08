@@ -50,8 +50,8 @@ struct exact_ground_state_simulation_params
      */
     simulation_states simulation_states{simulation_states::TWO};
     /**
-     * The number of valid layouts to enumerate. If set to `0`, no layouts are being returned. If set to `1`, only the
-     * layout with minimum system energy is determined.
+     * The number of valid layouts to enumerate. If set to `-1`, all valid layouts are enumerated. If set to `0`, no
+     * layouts are being returned. If set to `1`, only the layout with minimum system energy is determined, and so on.
      */
     uint16_t number_of_valid_layouts_to_enumerate{1u};
     /**
@@ -394,7 +394,7 @@ class exact_ground_state_simulation_impl
 
     void gather_valid_charge_configurations()
     {
-        for (auto i = 0u; i < params.number_of_valid_layouts_to_enumerate; ++i)
+        while (stats.valid_lyts.size() < params.number_of_valid_layouts_to_enumerate)
         {
             if (optimizer.check() == z3::sat)
             {
@@ -406,7 +406,7 @@ class exact_ground_state_simulation_impl
 
                 if (lyt.is_physically_valid())
                 {
-                    stats.valid_lyts.push_back(lyt);
+                    stats.valid_lyts.push_back(lyt);  // TODO move semantics
 
                     std::cout << "layout is valid!" << std::endl;
                 }
@@ -416,12 +416,10 @@ class exact_ground_state_simulation_impl
                 }
 
                 // if there is a next model to be considered, exclude the current one from the search space
-                if (i < params.number_of_valid_layouts_to_enumerate - 1)  // TODO or if current model is not valid
+                if (stats.valid_lyts.size() == params.number_of_valid_layouts_to_enumerate)
                 {
                     exclude_model_from_search_space(m);
                 }
-
-                // TODO if not valid, loop and go again until it is
             }
             else
             {
