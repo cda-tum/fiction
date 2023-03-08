@@ -54,18 +54,6 @@ struct exact_ground_state_simulation_params
      * layouts are being returned. If set to `1`, only the layout with minimum system energy is determined, and so on.
      */
     uint16_t number_of_valid_layouts_to_enumerate{1u};
-    /**
-     * Flag to indicate whether the population stability should be computed outside the solver. If set to `true`, the
-     * check is performed combinatorically on results yielded by the solver. Should a layout be found to be unstable,
-     * this configuration is excluded from the search space and the solver is called again.
-     */
-    bool compute_population_stability_outside_the_solver{false};
-    /**
-     * Flag to indicate whether the configuration stability should be computed outside the solver. If set to `true`, the
-     * check is performed combinatorically on results yielded by the solver. Should a layout be found to be unstable,
-     * this configuration is excluded from the search space and the solver is called again.
-     */
-    bool compute_configuration_stability_outside_the_solver{false};
 };
 
 template <typename Lyt>
@@ -343,16 +331,8 @@ class exact_ground_state_simulation_impl
         // define the electrostatic potential V_{i,j} between SiDBs
         define_electrostatic_potential();
 
-        // population stability
-        //        if (!params.compute_population_stability_outside_the_solver)
-        //        {
+        // population stability conditions
         define_population_stability();
-        //        }
-        // configuration stability
-        //        if (!params.compute_configuration_stability_outside_the_solver)
-        //        {
-        //            define_configuration_stability();
-        //        }
 
         // minimize the system energy
         minimize_system_energy();
