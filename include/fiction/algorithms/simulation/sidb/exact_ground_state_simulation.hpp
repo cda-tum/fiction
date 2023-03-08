@@ -229,11 +229,11 @@ class exact_ground_state_simulation_impl
                         }
 
                         // define the electrostatic potential between two SiDBs
-                        // we do not need a minus here, because we defined the electric charge with a positive sign
-                        const auto potential_val =
-                            ctx.real_val(std::to_string(-charge_lyt.potential_between_sidbs(s1, s2)).c_str());
 
-                        std::cout << "potential_val:   " << -charge_lyt.potential_between_sidbs(s1, s2) << "\n"
+                        const auto potential_val =
+                            ctx.real_val(std::to_string(-charge_lyt.get_electrostatic_potential(s1, s2)).c_str());
+
+                        std::cout << "potential_val:   " << -charge_lyt.get_electrostatic_potential(s1, s2) << "\n"
                                   << "Z3's value repr: " << potential_val.as_double() << std::endl;
 
                         std::cout << (get_electrostatic_potential(s1, s2) == potential_val * get_sidb_sign(s2))
