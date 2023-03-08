@@ -45,7 +45,7 @@ TEMPLATE_TEST_CASE("Exact SiDB ground state simulation", "[exact-sidb-sim]",
 
         CHECK(size_before == size_after);
 
-        CHECK(!exgs_stats.valid_lyts.empty());
+        REQUIRE(!exgs_stats.valid_lyts.empty());
 
         for (const auto& charge_lyt : exgs_stats.valid_lyts)
         {
@@ -62,7 +62,7 @@ TEMPLATE_TEST_CASE("Exact SiDB ground state simulation", "[exact-sidb-sim]",
 
         exact_ground_state_simulation<TestType>(lyt, exact_gs_params, &exgs_stats);
 
-        CHECK(exgs_stats.valid_lyts.size() == 1);
+        REQUIRE(exgs_stats.valid_lyts.size() == 1);
         CHECK(exgs_stats.valid_lyts[0].get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
     }
 
