@@ -160,7 +160,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param lyt charge_distribution_surface
      */
-    explicit charge_distribution_surface(const charge_distribution_surface<Lyt>& lyt) :
+    charge_distribution_surface(const charge_distribution_surface<Lyt>& lyt) :
             Lyt(lyt),
             strg{std::make_shared<charge_distribution_storage>(*lyt.strg)}
     {}

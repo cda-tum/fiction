@@ -93,7 +93,9 @@ class exact_ground_state_simulation_impl
             charge_lyt{lyt, p.phys_params},
             params{p},
             stats{st}
-    {}
+    {
+        st.valid_lyts.reserve(p.number_of_valid_layouts_to_enumerate);
+    }
 
     void run()
     {
@@ -107,6 +109,7 @@ class exact_ground_state_simulation_impl
         }
 
         generate_smt_instance();
+        gather_valid_charge_configurations();
     }
 
   private:
@@ -339,6 +342,92 @@ class exact_ground_state_simulation_impl
 
         // minimize the system energy
         minimize_system_energy();
+    }
+
+    charge_distribution_surface<Lyt> extract_charge_configuration_from_model(const z3::model& m)
+    {
+        // make a copy of the charge layout
+        charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+
+        charge_lyt_copy.foreach_cell(
+            [this, &m, &charge_lyt_copy](const sidb& s)
+            {
+                if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
+                {
+                    // extract charge state from model with model completion turned on
+                    const auto sidb_charge_state = m.eval(get_sidb_var(s), true).bool_value();
+
+                    charge_lyt_copy.assign_charge_state(
+                        s, sidb_charge_state == Z3_L_TRUE ? sidb_charge_state::NEUTRAL : sidb_charge_state::NEGATIVE);
+                }
+                else if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::THREE)
+                {
+                    // extract charge state from model with model completion turned on
+                    const auto sidb_charge_state = m.eval(get_sidb_var(s), true).get_numeral_int();
+
+                    charge_lyt_copy.assign_charge_state(s, sidb_charge_state == -1 ? sidb_charge_state::NEGATIVE :
+                                                           sidb_charge_state == 0  ? sidb_charge_state::NEUTRAL :
+                                                                                     sidb_charge_state::POSITIVE);
+                }
+            });
+
+        charge_lyt_copy.update_after_charge_change();
+
+        return charge_lyt_copy;
+    }
+
+    void exclude_model_from_search_space(const z3::model& m)
+    {
+        // make sure that the same model is not considered again
+        z3::expr_vector model_constraints{ctx};
+
+        charge_lyt.foreach_cell(
+            [this, &m, &model_constraints](const sidb& s)
+            {
+                model_constraints.push_back(get_sidb_var(s) == m.eval(get_sidb_var(s), true));
+
+                std::cout << (get_sidb_var(s) == m.eval(get_sidb_var(s), true)) << std::endl;
+            });
+
+        optimizer.add(!z3::mk_and(model_constraints));
+    }
+
+    void gather_valid_charge_configurations()
+    {
+        for (auto i = 0u; i < params.number_of_valid_layouts_to_enumerate; ++i)
+        {
+            if (optimizer.check() == z3::sat)
+            {
+                z3::model m = optimizer.get_model();
+
+                std::cout << "model: " << m << std::endl;
+
+                const auto lyt = extract_charge_configuration_from_model(m);
+
+                if (lyt.is_physically_valid())
+                {
+                    stats.valid_lyts.push_back(lyt);
+
+                    std::cout << "layout is valid!" << std::endl;
+                }
+                else
+                {
+                    std::cout << "layout is not valid!" << std::endl;
+                }
+
+                // if there is a next model to be considered, exclude the current one from the search space
+                if (i < params.number_of_valid_layouts_to_enumerate - 1)  // TODO or if current model is not valid
+                {
+                    exclude_model_from_search_space(m);
+                }
+
+                // TODO if not valid, loop and go again until it is
+            }
+            else
+            {
+                break;
+            }
+        }
     }
 };
 
