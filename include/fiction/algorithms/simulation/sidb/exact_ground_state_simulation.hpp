@@ -137,7 +137,7 @@ class exact_ground_state_simulation_impl
 
     using sidb = typename charge_distribution_surface<Lyt>::cell;
 
-    [[nodiscard]] z3::expr get_sidb_var(const sidb& s)
+    [[nodiscard]] z3::expr get_sidb_charge_state(const sidb& s)
     {
         // two-state simulation: n == false -> n == -1 (negative charge), n == true -> n == 0 (neutral)
         if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
@@ -149,43 +149,43 @@ class exact_ground_state_simulation_impl
         return ctx.int_const(fmt::format("n_({},{},{})", s.x, s.y, s.z).c_str());
     }
 
-    [[nodiscard]] z3::expr negative_sidb_var(const sidb& s)
+    [[nodiscard]] z3::expr negative_sidb_charge_state(const sidb& s)
     {
-        const auto sidb_var = get_sidb_var(s);
+        const auto sidb_charge_state = get_sidb_charge_state(s);
 
         // two-state simulation: n == false -> n == -1 (negative charge)
         if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
         {
-            return !sidb_var;
+            return !sidb_charge_state;
         }
 
         // three-state simulation: n == -1 (negative charge)
-        return sidb_var == -1;
+        return sidb_charge_state == -1;
     }
 
-    [[nodiscard]] z3::expr neutral_sidb_var(const sidb& s)
+    [[nodiscard]] z3::expr neutral_sidb_charge_state(const sidb& s)
     {
-        const auto sidb_var = get_sidb_var(s);
+        const auto sidb_charge_state = get_sidb_charge_state(s);
 
         // two-state simulation: n == true -> n == 0 (neutral)
         if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
         {
-            return sidb_var;
+            return sidb_charge_state;
         }
 
         // three-state simulation: n == 0 (neutral)
-        return sidb_var == 0;
+        return sidb_charge_state == 0;
     }
 
-    [[nodiscard]] z3::expr positive_sidb_var(const sidb& s)
+    [[nodiscard]] z3::expr positive_sidb_charge_state(const sidb& s)
     {
-        const auto sidb_var = get_sidb_var(s);
+        const auto sidb_charge_state = get_sidb_charge_state(s);
 
         // three-state simulation: n == 1 (positive charge)
-        return sidb_var == 1;
+        return sidb_charge_state == 1;
     }
 
-    [[nodiscard]] z3::expr get_sidb_value(const sidb& s)
+    [[nodiscard]] z3::expr get_sidb_sign(const sidb& s)
     {
         // two-state simulation
         if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
@@ -193,19 +193,19 @@ class exact_ground_state_simulation_impl
             const auto zero         = ctx.real_val(0);
             const auto negative_one = ctx.real_val(-1);
 
-            return ctx.real_val(z3::ite(get_sidb_var(s), zero, negative_one));
+            return z3::ite(get_sidb_charge_state(s), zero, negative_one);
         }
 
         // three-state simulation
-        return get_sidb_var(s);
+        return get_sidb_charge_state(s);
     }
 
-    [[nodiscard]] z3::expr get_potential_var(const sidb& s1, const sidb& s2)
+    [[nodiscard]] z3::expr get_electrostatic_potential(const sidb& s1, const sidb& s2)
     {
         return ctx.real_const(fmt::format("V_({},{},{}),({},{},{})", s1.x, s1.y, s1.z, s2.x, s2.y, s2.z).c_str());
     }
 
-    [[nodiscard]] z3::expr get_local_potential_var(const sidb& s)
+    [[nodiscard]] z3::expr get_local_potential(const sidb& s)
     {
         return ctx.real_const(fmt::format("V_local,({},{},{})", s.x, s.y, s.z).c_str());
     }
@@ -219,8 +219,8 @@ class exact_ground_state_simulation_impl
             charge_lyt.foreach_cell(
                 [this](const sidb& s)
                 {
-                    optimizer.add(get_sidb_var(s) >= -1);
-                    optimizer.add(get_sidb_var(s) <= 1);
+                    optimizer.add(get_sidb_charge_state(s) >= -1);
+                    optimizer.add(get_sidb_charge_state(s) <= 1);
                 });
         }
 
@@ -235,26 +235,37 @@ class exact_ground_state_simulation_impl
                 charge_lyt.foreach_cell(
                     [this, &s1](const sidb& s2)
                     {
-                        if (s1 != s2)
+                        if (s1 == s2)
                         {
-                            // define the electrostatic potential between two SiDBs
-                            // we do not need a minus here, because we defined the electric charge with a positive sign
-                            const auto potential_val =
-                                ctx.real_val(std::to_string(charge_lyt.potential_between_sidbs(s1, s2)).c_str());
-
-                            std::cout << "potential_val: " << charge_lyt.potential_between_sidbs(s1, s2)
-                                      << ", Z3's value repr: " << potential_val << std::endl;
-
-                            optimizer.add(get_potential_var(s1, s2) == potential_val * get_sidb_value(s2));
+                            return;
                         }
+
+                        // define the electrostatic potential between two SiDBs
+                        // we do not need a minus here, because we defined the electric charge with a positive sign
+                        const auto potential_val =
+                            ctx.real_val(std::to_string(-charge_lyt.potential_between_sidbs(s1, s2)).c_str());
+
+                        std::cout << "potential_val:   " << -charge_lyt.potential_between_sidbs(s1, s2) << "\n"
+                                  << "Z3's value repr: " << potential_val.as_double() << std::endl;
+
+                        std::cout << (get_electrostatic_potential(s1, s2) == potential_val * get_sidb_sign(s2))
+                                  << std::endl;
+
+                        optimizer.add(get_electrostatic_potential(s1, s2) == potential_val * get_sidb_sign(s2));
                     });
             });
     }
 
     void define_population_stability()
     {
+        const auto mu_minus = ctx.real_val(std::to_string(params.phys_params.mu).c_str());
+        const auto mu_plus  = ctx.real_val(std::to_string(params.phys_params.mu_p).c_str());
+
+        std::cout << "mu_minus: " << mu_minus.as_double() << std::endl;
+        std::cout << "mu_plus:  " << mu_plus.as_double() << std::endl;
+
         charge_lyt.foreach_cell(
-            [this](const sidb& s1)
+            [this, &mu_minus, &mu_plus](const sidb& s1)
             {
                 z3::expr_vector local_potential_terms{ctx};
 
@@ -264,50 +275,53 @@ class exact_ground_state_simulation_impl
                     {
                         if (s1 != s2)
                         {
-                            local_potential_terms.push_back(get_potential_var(s1, s2));
+                            local_potential_terms.push_back(get_electrostatic_potential(s1, s2));
                         }
                     });
 
                 // the local potential is the sum of the potentials between the SiDB and all other SiDBs
                 if (!local_potential_terms.empty())
                 {
-                    optimizer.add(get_local_potential_var(s1) == z3::sum(local_potential_terms));
+                    optimizer.add(get_local_potential(s1) == z3::sum(local_potential_terms));
                 }
 
                 // the population stability conditions
 
-                // negative charge state
-                optimizer.add(z3::implies(get_local_potential_var(s1) < 0, negative_sidb_var(s1)));
-
-                // positive charge state (only for three-state simulation)
-                if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::THREE)
+                // two-state simulation
+                if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
                 {
-                    optimizer.add(z3::implies(get_local_potential_var(s1) > 0, positive_sidb_var(s1)));
+                    optimizer.add(z3::ite(mu_minus + get_local_potential(s1) < 0,  // if mu_minus + V < 0
+                                          negative_sidb_charge_state(s1),          // then n == -1
+                                          neutral_sidb_charge_state(s1)));         // else n == 0
                 }
-
-                // neutral charge state
-                optimizer.add(z3::implies(get_local_potential_var(s1) == 0, neutral_sidb_var(s1)));
-                // TODO is it really right that neutral occurs on == 0?
-                // TODO do we need to work with pop-stability conditions?
+                // three-state simulation
+                else if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::THREE)
+                {
+                    optimizer.add(z3::ite(mu_minus + get_local_potential(s1) < 0,         // if mu_minus + V < 0
+                                          negative_sidb_charge_state(s1),                 // then n == -1
+                                          z3::ite(mu_plus + get_local_potential(s1) > 0,  // else if mu_plus + V > 0
+                                                  positive_sidb_charge_state(s1),         // then n == 1
+                                                  neutral_sidb_charge_state(s1))));       // else n == 0
+                }
             });
     }
 
     void minimize_system_energy()
     {
-        const auto energy_var = ctx.real_const("E");
+        const auto system_energy = ctx.real_const("E");
 
         z3::expr_vector energy_terms{ctx};
 
         charge_lyt.foreach_cell(
-            [this, &energy_var, &energy_terms](const sidb& s1)
+            [this, &energy_terms](const sidb& s1)
             {
                 charge_lyt.foreach_cell(
-                    [this, &energy_var, &energy_terms, &s1](const sidb& s2)
+                    [this, &energy_terms, &s1](const sidb& s2)
                     {
                         if (s1 < s2)
                         {
                             // add the electrostatic potential energy term
-                            energy_terms.push_back(get_potential_var(s1, s2) * get_sidb_value(s1));
+                            energy_terms.push_back(get_electrostatic_potential(s1, s2) * get_sidb_sign(s1));
                         }
                     });
             });
@@ -315,11 +329,11 @@ class exact_ground_state_simulation_impl
         if (!energy_terms.empty())
         {
             // the system energy is the negative sum of all energy terms
-            optimizer.add(energy_var == -z3::sum(energy_terms));
+            optimizer.add(system_energy == -z3::sum(energy_terms));
         }
 
         // minimize the system energy
-        optimizer.minimize(energy_var);
+        optimizer.minimize(system_energy);
     }
 
     void generate_smt_instance()
@@ -330,10 +344,10 @@ class exact_ground_state_simulation_impl
         define_electrostatic_potential();
 
         // population stability
-        if (!params.compute_population_stability_outside_the_solver)
-        {
-            define_population_stability();
-        }
+        //        if (!params.compute_population_stability_outside_the_solver)
+        //        {
+        define_population_stability();
+        //        }
         // configuration stability
         //        if (!params.compute_configuration_stability_outside_the_solver)
         //        {
@@ -355,7 +369,7 @@ class exact_ground_state_simulation_impl
                 if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
                 {
                     // extract charge state from model with model completion turned on
-                    const auto sidb_charge_state = m.eval(get_sidb_var(s), true).bool_value();
+                    const auto sidb_charge_state = m.eval(get_sidb_charge_state(s), true).bool_value();
 
                     charge_lyt_copy.assign_charge_state(
                         s, sidb_charge_state == Z3_L_TRUE ? sidb_charge_state::NEUTRAL : sidb_charge_state::NEGATIVE);
@@ -363,7 +377,7 @@ class exact_ground_state_simulation_impl
                 else if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::THREE)
                 {
                     // extract charge state from model with model completion turned on
-                    const auto sidb_charge_state = m.eval(get_sidb_var(s), true).get_numeral_int();
+                    const auto sidb_charge_state = m.eval(get_sidb_charge_state(s), true).get_numeral_int();
 
                     charge_lyt_copy.assign_charge_state(s, sidb_charge_state == -1 ? sidb_charge_state::NEGATIVE :
                                                            sidb_charge_state == 0  ? sidb_charge_state::NEUTRAL :
@@ -384,9 +398,9 @@ class exact_ground_state_simulation_impl
         charge_lyt.foreach_cell(
             [this, &m, &model_constraints](const sidb& s)
             {
-                model_constraints.push_back(get_sidb_var(s) == m.eval(get_sidb_var(s), true));
+                model_constraints.push_back(get_sidb_charge_state(s) == m.eval(get_sidb_charge_state(s), true));
 
-                std::cout << (get_sidb_var(s) == m.eval(get_sidb_var(s), true)) << std::endl;
+                std::cout << (get_sidb_charge_state(s) == m.eval(get_sidb_charge_state(s), true)) << std::endl;
             });
 
         optimizer.add(!z3::mk_and(model_constraints));
@@ -400,7 +414,7 @@ class exact_ground_state_simulation_impl
             {
                 z3::model m = optimizer.get_model();
 
-                std::cout << "model: " << m << std::endl;
+                std::cout << "MODEL:\n" << m << std::endl;
 
                 const auto lyt = extract_charge_configuration_from_model(m);
 
@@ -415,8 +429,39 @@ class exact_ground_state_simulation_impl
                     std::cout << "layout is not valid!" << std::endl;
                 }
 
+                // print the system energy
+                std::cout << "System Energy: " << lyt.get_system_energy() << std::endl;
+                std::cout << "Z3           : " << m.eval(ctx.real_const("E"), true).as_double() << std::endl;
+
+                // print the local potentials
+                lyt.foreach_cell(
+                    [this, &m, &lyt](const sidb& s1)
+                    {
+                        std::cout << fmt::format("V_local,{} = {}", s1, *lyt.get_local_potential(s1)) << std::endl;
+                        std::cout << fmt::format("Z3              = {}",
+                                                 m.eval(get_local_potential(s1), true).as_double())
+                                  << std::endl;
+
+                        // print the electrostatic potential
+                        lyt.foreach_cell(
+                            [this, &m, &lyt, &s1](const sidb& s2)
+                            {
+                                if (s1 == s2)
+                                {
+                                    return;
+                                }
+
+                                std::cout
+                                    << fmt::format("V_{},{} = {}", s1, s2, lyt.get_electrostatic_potential(s1, s2))
+                                    << std::endl;
+                                std::cout << fmt::format("Z3                = {}",
+                                                         m.eval(get_electrostatic_potential(s1, s2), true).as_double())
+                                          << std::endl;
+                            });
+                    });
+
                 // if there is a next model to be considered, exclude the current one from the search space
-                if (stats.valid_lyts.size() == params.number_of_valid_layouts_to_enumerate)
+                if (stats.valid_lyts.size() != params.number_of_valid_layouts_to_enumerate)
                 {
                     exclude_model_from_search_space(m);
                 }
