@@ -124,7 +124,15 @@ TEMPLATE_TEST_CASE(
         // all SiDBs' charge states are set to positive
         charge_layout.set_all_charge_states(sidb_charge_state::POSITIVE);
         //
-        //        // read SiDBs' charge states
+        //
+        // calculate potential between two sidbs (charge sign not included)
+        CHECK(charge_layout.potential_between_sidbs({5, 4}, {5, 5}) > 0);
+        CHECK(charge_layout.potential_between_sidbs({5, 4}, {5, 4}) == 0.0);
+        CHECK(charge_layout.potential_between_sidbs({5, 4}, {5, 6}) > 0);
+        CHECK(charge_layout.potential_between_sidbs({5, 5}, {5, 6}) > 0);
+        CHECK(charge_layout.potential_between_sidbs({5, 6}, {5, 5}) ==
+              charge_layout.potential_between_sidbs({5, 5}, {5, 6}));
+        // read SiDBs' charge states
         CHECK(charge_layout.get_charge_state({5, 4}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_state({5, 6}) == sidb_charge_state::POSITIVE);
