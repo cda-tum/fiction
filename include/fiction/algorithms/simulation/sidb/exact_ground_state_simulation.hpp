@@ -231,13 +231,7 @@ class exact_ground_state_simulation_impl
                         // define the electrostatic potential between two SiDBs
 
                         const auto potential_val =
-                            ctx.real_val(std::to_string(-charge_lyt.get_electrostatic_potential(s1, s2)).c_str());
-
-                        std::cout << "potential_val:   " << -charge_lyt.get_electrostatic_potential(s1, s2) << "\n"
-                                  << "Z3's value repr: " << potential_val.as_double() << std::endl;
-
-                        std::cout << (get_electrostatic_potential(s1, s2) == potential_val * get_sidb_sign(s2))
-                                  << std::endl;
+                            ctx.real_val(std::to_string(charge_lyt.get_electrostatic_potential(s1, s2)).c_str());
 
                         optimizer.add(get_electrostatic_potential(s1, s2) == potential_val * get_sidb_sign(s2));
                     });
@@ -248,9 +242,6 @@ class exact_ground_state_simulation_impl
     {
         const auto mu_minus = ctx.real_val(std::to_string(params.phys_params.mu).c_str());
         const auto mu_plus  = ctx.real_val(std::to_string(params.phys_params.mu_p).c_str());
-
-        std::cout << "mu_minus: " << mu_minus.as_double() << std::endl;
-        std::cout << "mu_plus:  " << mu_plus.as_double() << std::endl;
 
         charge_lyt.foreach_cell(
             [this, &mu_minus, &mu_plus](const sidb& s1)
@@ -394,7 +385,7 @@ class exact_ground_state_simulation_impl
             {
                 z3::model m = optimizer.get_model();
 
-                std::cout << "MODEL:\n" << m << std::endl;
+                //                std::cout << "MODEL:\n" << m << std::endl;
 
                 const auto lyt = extract_charge_configuration_from_model(m);
 
@@ -409,36 +400,39 @@ class exact_ground_state_simulation_impl
                     std::cout << "layout is not valid!" << std::endl;
                 }
 
-                // print the system energy
-                std::cout << "System Energy: " << lyt.get_system_energy() << std::endl;
-                std::cout << "Z3           : " << m.eval(ctx.real_const("E"), true).as_double() << std::endl;
-
-                // print the local potentials
-                lyt.foreach_cell(
-                    [this, &m, &lyt](const sidb& s1)
-                    {
-                        std::cout << fmt::format("V_local,{} = {}", s1, *lyt.get_local_potential(s1)) << std::endl;
-                        std::cout << fmt::format("Z3              = {}",
-                                                 m.eval(get_local_potential(s1), true).as_double())
-                                  << std::endl;
-
-                        // print the electrostatic potential
-                        lyt.foreach_cell(
-                            [this, &m, &lyt, &s1](const sidb& s2)
-                            {
-                                if (s1 == s2)
-                                {
-                                    return;
-                                }
-
-                                std::cout
-                                    << fmt::format("V_{},{} = {}", s1, s2, lyt.get_electrostatic_potential(s1, s2))
-                                    << std::endl;
-                                std::cout << fmt::format("Z3                = {}",
-                                                         m.eval(get_electrostatic_potential(s1, s2), true).as_double())
-                                          << std::endl;
-                            });
-                    });
+                //                // print the system energy
+                //                std::cout << "System Energy: " << lyt.get_system_energy() << std::endl;
+                //                std::cout << "Z3           : " << m.eval(ctx.real_const("E"), true).as_double() <<
+                //                std::endl;
+                //
+                //                // print the local potentials
+                //                lyt.foreach_cell(
+                //                    [this, &m, &lyt](const sidb& s1)
+                //                    {
+                //                        std::cout << fmt::format("V_local,{} = {}", s1, *lyt.get_local_potential(s1))
+                //                        << std::endl; std::cout << fmt::format("Z3              = {}",
+                //                                                 m.eval(get_local_potential(s1), true).as_double())
+                //                                  << std::endl;
+                //
+                //                        // print the electrostatic potential
+                //                        lyt.foreach_cell(
+                //                            [this, &m, &lyt, &s1](const sidb& s2)
+                //                            {
+                //                                if (s1 == s2)
+                //                                {
+                //                                    return;
+                //                                }
+                //
+                //                                std::cout << fmt::format("V_{},{} = {}", s1, s2,
+                //                                                         lyt.get_electrostatic_potential(s1, s2) *
+                //                                                             charge_state_to_sign(lyt.get_charge_state(s2)))
+                //                                          << std::endl;
+                //                                std::cout << fmt::format("Z3                = {}",
+                //                                                         m.eval(get_electrostatic_potential(s1, s2),
+                //                                                         true).as_double())
+                //                                          << std::endl;
+                //                            });
+                //                    });
 
                 // if there is a next model to be considered, exclude the current one from the search space
                 if (stats.valid_lyts.size() != params.number_of_valid_layouts_to_enumerate)
