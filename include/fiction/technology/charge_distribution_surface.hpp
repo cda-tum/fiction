@@ -395,9 +395,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param c1 The first cell
      * @param c2 The second cell
-     * @return The potential between `c1` and `c2`.
+     * @return The electrostatic potential between `c1` and `c2`.
      */
-    [[nodiscard]] double get_electrostatic_potential(const typename Lyt::cell& c1,
+    [[nodiscard]] double get_potential_between_sidbs(const typename Lyt::cell& c1,
                                                      const typename Lyt::cell& c2) const noexcept
     {
         if (const auto index1 = cell_to_index(c1), index2 = cell_to_index(c2); (index1 != -1) && (index2 != -1))
