@@ -199,14 +199,14 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({1, 10, 1}, TestType::cell_type::NORMAL);
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
-        CHECK(charge_layout.get_electrostatic_potential({0, 0, 0}, {0, 0, 0}) == 0.0);
-        CHECK(charge_layout.get_electrostatic_potential({1, 8, 0}, {1, 8, 0}) == 0.0);
-        CHECK(charge_layout.get_electrostatic_potential({1, 10, 1}, {1, 10, 1}) == 0.0);
-        CHECK((charge_layout.get_electrostatic_potential({1, 8, 0}, {0, 0, 0}) - 0.0121934043) < 0.00000001);
-        CHECK(charge_layout.get_electrostatic_potential({0, 0, 0}, {1, 10, 1}) ==
-              charge_layout.get_electrostatic_potential({1, 10, 1}, {0, 0, 0}));
-        CHECK(charge_layout.get_electrostatic_potential({0, 0, 0}, {1, 8, 0}) >
-              charge_layout.get_electrostatic_potential({1, 10, 1}, {0, 0, 0}));
+        CHECK(charge_layout.get_potential_between_sidbs({0, 0, 0}, {0, 0, 0}) == 0.0);
+        CHECK(charge_layout.get_potential_between_sidbs({1, 8, 0}, {1, 8, 0}) == 0.0);
+        CHECK(charge_layout.get_potential_between_sidbs({1, 10, 1}, {1, 10, 1}) == 0.0);
+        CHECK((charge_layout.get_potential_between_sidbs({1, 8, 0}, {0, 0, 0}) - 0.0121934043) < 0.00000001);
+        CHECK(charge_layout.get_potential_between_sidbs({0, 0, 0}, {1, 10, 1}) ==
+              charge_layout.get_potential_between_sidbs({1, 10, 1}, {0, 0, 0}));
+        CHECK(charge_layout.get_potential_between_sidbs({0, 0, 0}, {1, 8, 0}) >
+              charge_layout.get_potential_between_sidbs({1, 10, 1}, {0, 0, 0}));
     }
     //
     SECTION("Local Potential")
