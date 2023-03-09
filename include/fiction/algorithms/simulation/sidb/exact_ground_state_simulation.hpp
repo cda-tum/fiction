@@ -96,7 +96,9 @@ class exact_ground_state_simulation_impl
             return;
         }
 
+        // set up the solver (z3::optimize)
         generate_smt_instance();
+        // run the solver and extract the valid layouts
         gather_valid_charge_configurations();
     }
 
@@ -122,9 +124,22 @@ class exact_ground_state_simulation_impl
      * The Z3 optimizer.
      */
     z3::optimize optimizer{ctx};
-
+    /**
+     * Alias for an SiDB.
+     */
     using sidb = typename charge_distribution_surface<Lyt>::cell;
-
+    /**
+     * Returns a Z3 expression representing the charge state of the given SiDB.
+     *
+     * For two-state simulation, the charge state is represented by a Boolean variable `n` with the following meaning:
+     * `n == false` -> `n == -1` (negative charge), `n == true` -> `n == 0` (neutral)
+     *
+     * For three-state simulation, the charge state is represented by an integer variable `n` with the following
+     * meaning: `n == -1` (negative charge), `n == 0` (neutral), `n == 1` (positive charge)
+     *
+     * @param s The SiDB.
+     * @return A Z3 expression representing the charge state of the given SiDB.
+     */
     [[nodiscard]] z3::expr get_sidb_charge_state(const sidb& s)
     {
         // two-state simulation: n == false -> n == -1 (negative charge), n == true -> n == 0 (neutral)
@@ -136,7 +151,14 @@ class exact_ground_state_simulation_impl
         // three-state simulation: n == -1 (negative charge), n == 0 (neutral), n == 1 (positive charge)
         return ctx.int_const(fmt::format("n_({},{},{})", s.x, s.y, s.z).c_str());
     }
-
+    /**
+     * Returns a Z3 expression representing the negative charge state of the given SiDB.
+     *
+     * The expression takes into account the encoding of the charge state variable.
+     *
+     * @param s The SiDB.
+     * @return A Z3 expression representing the negative charge state of the given SiDB.
+     */
     [[nodiscard]] z3::expr negative_sidb_charge_state(const sidb& s)
     {
         const auto sidb_charge_state = get_sidb_charge_state(s);
@@ -150,7 +172,14 @@ class exact_ground_state_simulation_impl
         // three-state simulation: n == -1 (negative charge)
         return sidb_charge_state == -1;
     }
-
+    /**
+     * Returns a Z3 expression representing the neutral charge state of the given SiDB.
+     *
+     * The expression takes into account the encoding of the charge state variable.
+     *
+     * @param s The SiDB.
+     * @return A Z3 expression representing the neutral charge state of the given SiDB.
+     */
     [[nodiscard]] z3::expr neutral_sidb_charge_state(const sidb& s)
     {
         const auto sidb_charge_state = get_sidb_charge_state(s);
@@ -164,7 +193,14 @@ class exact_ground_state_simulation_impl
         // three-state simulation: n == 0 (neutral)
         return sidb_charge_state == 0;
     }
-
+    /**
+     * Returns a Z3 expression representing the positive charge state of the given SiDB.
+     *
+     * The expression takes into account the encoding of the charge state variable.
+     *
+     * @param s The SiDB.
+     * @return A Z3 expression representing the positive charge state of the given SiDB.
+     */
     [[nodiscard]] z3::expr positive_sidb_charge_state(const sidb& s)
     {
         const auto sidb_charge_state = get_sidb_charge_state(s);
@@ -172,7 +208,15 @@ class exact_ground_state_simulation_impl
         // three-state simulation: n == 1 (positive charge)
         return sidb_charge_state == 1;
     }
-
+    /**
+     * Returns a Z3 value representing the sign of the given SiDB, i.e., -1 for negative charge, 0 for neutral, and 1
+     * for positive charge.
+     *
+     * The expression takes into account the encoding of the charge state variable.
+     *
+     * @param s The SiDB.
+     * @return A Z3 value representing the sign of the given SiDB.
+     */
     [[nodiscard]] z3::expr get_sidb_sign(const sidb& s)
     {
         // two-state simulation
@@ -187,17 +231,34 @@ class exact_ground_state_simulation_impl
         // three-state simulation
         return get_sidb_charge_state(s);
     }
-
+    /**
+     * Returns a Z3 expression representing the electrostatic potential between the given SiDBs.
+     *
+     * The electrostatic potential is represented by a real variable `V_{s1, s2}`.
+     *
+     * @param s1 The first SiDB.
+     * @param s2 The second SiDB.
+     * @return A Z3 expression representing the electrostatic potential between the given SiDBs.
+     */
     [[nodiscard]] z3::expr get_electrostatic_potential(const sidb& s1, const sidb& s2)
     {
         return ctx.real_const(fmt::format("V_({},{},{}),({},{},{})", s1.x, s1.y, s1.z, s2.x, s2.y, s2.z).c_str());
     }
-
+    /**
+     * Returns a Z3 expression representing the local potential at the given SiDB.
+     *
+     * The local potential is represented by a real variable `V_local_{s}`.
+     *
+     * @param s The SiDB.
+     * @return A Z3 expression representing the local potential at the given SiDB.
+     */
     [[nodiscard]] z3::expr get_local_potential(const sidb& s)
     {
         return ctx.real_const(fmt::format("V_local,({},{},{})", s.x, s.y, s.z).c_str());
     }
-
+    /**
+     * Adds the constraints that restrict the values of the charge state variables to {-1, 0, 1}.
+     */
     void restrict_sidb_charge_state_values()
     {
         // only applicable to three-state simulation
@@ -214,7 +275,9 @@ class exact_ground_state_simulation_impl
 
         // for two-state simulation, the charge state variables are Boolean, thus, false == -1 and true == 0
     }
-
+    /**
+     * Adds the constraints that define the electrostatic potential between all mutually exclusive pairs of SiDBs.
+     */
     void define_electrostatic_potential()
     {
         charge_lyt.foreach_cell(
@@ -237,7 +300,10 @@ class exact_ground_state_simulation_impl
                     });
             });
     }
-
+    /**
+     * Adds the constraints that define the local potential at all SiDBs. Additionally, the constraints that define the
+     * population stability are added.
+     */
     void define_population_stability()
     {
         const auto mu_minus = ctx.real_val(std::to_string(params.phys_params.mu).c_str());
@@ -284,7 +350,9 @@ class exact_ground_state_simulation_impl
                 }
             });
     }
-
+    /**
+     * Adds the constraints that define and minimize the system energy.
+     */
     void minimize_system_energy()
     {
         const auto system_energy = ctx.real_const("E");
@@ -314,7 +382,9 @@ class exact_ground_state_simulation_impl
         // minimize the system energy
         optimizer.minimize(system_energy);
     }
-
+    /**
+     * Generates the SMT instance.
+     */
     void generate_smt_instance()
     {
         // restrict the values of the charge state variables if necessary (three-state simulation)
@@ -328,7 +398,13 @@ class exact_ground_state_simulation_impl
         // minimize the system energy
         minimize_system_energy();
     }
-
+    /**
+     * Extracts the charge configuration from the given Z3 model and returns a `charge_distribution_surface`
+     * representation.
+     *
+     * @param m The model.
+     * @return The charge configuration in a `charge_distribution_surface` object.
+     */
     charge_distribution_surface<Lyt> extract_charge_configuration_from_model(const z3::model& m)
     {
         // make a copy of the charge layout
@@ -360,7 +436,14 @@ class exact_ground_state_simulation_impl
 
         return charge_lyt_copy;
     }
-
+    /**
+     * Exclude the given model from the search space to prevent it from reoccurring in subsequent solver calls.
+     *
+     * This function is used to prevent the same charge configuration from being enumerated multiple times. Thus, it
+     * particularly only excludes the exact charge configuration present in the model.
+     *
+     * @param m The model to exclude.
+     */
     void exclude_model_from_search_space(const z3::model& m)
     {
         // make sure that the same model is not considered again
@@ -376,7 +459,9 @@ class exact_ground_state_simulation_impl
 
         optimizer.add(!z3::mk_and(model_constraints));
     }
-
+    /**
+     * Enumerates all valid charge configurations up to the bound specified in the parameters.
+     */
     void gather_valid_charge_configurations()
     {
         while (stats.valid_lyts.size() < params.number_of_valid_layouts_to_enumerate)
@@ -450,6 +535,17 @@ class exact_ground_state_simulation_impl
 
 }  // namespace detail
 
+/**
+ * This function performs an exact ground state simulation of the given SiDB layout. It is based on the Z3 SMT solver.
+ * The simulation is performed by translating the SiDB layout into a set of logical constraints that are then passed to
+ * the Z3 solver. The solver then enumerates all valid charge configurations up to the bound specified in the
+ * parameters. The valid charge configurations are then used to construct a set of valid layouts.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The SiDB layout to simulate.
+ * @param ps Parameters for the simulation.
+ * @param pst Statistics for the simulation.
+ */
 template <typename Lyt>
 void exact_ground_state_simulation(const Lyt& lyt, const exact_ground_state_simulation_params& ps = {},
                                    exact_ground_state_simulation_stats<Lyt>* pst = nullptr) noexcept
