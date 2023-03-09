@@ -54,6 +54,10 @@ struct exact_ground_state_simulation_params
      * layouts are being returned. If set to `1`, only the layout with minimum system energy is determined, and so on.
      */
     uint16_t number_of_valid_layouts_to_enumerate{1u};
+    /**
+     * Sets a timeout in ms for the solving process. Standard is 4294967 seconds as defined by Z3.
+     */
+    unsigned timeout{4294967u};
 };
 
 template <typename Lyt>
@@ -96,6 +100,9 @@ class exact_ground_state_simulation_impl
             return;
         }
 
+        // set the timeout
+        set_timeout(params.timeout);
+
         // set up the solver (z3::optimize)
         generate_smt_instance();
         // run the solver and extract the valid layouts
@@ -124,6 +131,17 @@ class exact_ground_state_simulation_impl
      * The Z3 optimizer.
      */
     z3::optimize optimizer{ctx};
+    /**
+     * Sets the given timeout for the current solver.
+     *
+     * @param t Timeout in ms.
+     */
+    void set_timeout(const unsigned t)
+    {
+        z3::params p{ctx};
+        p.set("timeout", t);
+        optimizer.set(p);
+    }
     /**
      * Alias for an SiDB.
      */
@@ -475,7 +493,18 @@ class exact_ground_state_simulation_impl
     {
         while (stats.valid_lyts.size() < params.number_of_valid_layouts_to_enumerate)
         {
-            if (optimizer.check() == z3::sat)
+            z3::check_result z3_result{z3::unknown};
+
+            try
+            {
+                z3_result = optimizer.check();
+            }
+            catch (z3::exception&)  // timeout
+            {
+                break;
+            }
+
+            if (z3_result == z3::sat)
             {
                 z3::model m = optimizer.get_model();
 
