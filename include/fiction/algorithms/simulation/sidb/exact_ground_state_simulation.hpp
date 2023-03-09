@@ -269,18 +269,18 @@ class exact_ground_state_simulation_impl
                 // two-state simulation
                 if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
                 {
-                    optimizer.add(z3::ite(mu_minus + get_local_potential(s1) < 0,  // if mu_minus + V < 0
-                                          negative_sidb_charge_state(s1),          // then n == -1
-                                          neutral_sidb_charge_state(s1)));         // else n == 0
+                    optimizer.add(z3::ite(mu_minus + -get_local_potential(s1) < 0,  // if mu_minus + V < 0
+                                          negative_sidb_charge_state(s1),           // then n == -1
+                                          neutral_sidb_charge_state(s1)));          // else n == 0
                 }
                 // three-state simulation
                 else if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::THREE)
                 {
-                    optimizer.add(z3::ite(mu_minus + get_local_potential(s1) < 0,         // if mu_minus + V < 0
-                                          negative_sidb_charge_state(s1),                 // then n == -1
-                                          z3::ite(mu_plus + get_local_potential(s1) > 0,  // else if mu_plus + V > 0
-                                                  positive_sidb_charge_state(s1),         // then n == 1
-                                                  neutral_sidb_charge_state(s1))));       // else n == 0
+                    optimizer.add(z3::ite(mu_minus + -get_local_potential(s1) < 0,         // if mu_minus + V < 0
+                                          negative_sidb_charge_state(s1),                  // then n == -1
+                                          z3::ite(mu_plus + -get_local_potential(s1) > 0,  // else if mu_plus + V > 0
+                                                  positive_sidb_charge_state(s1),          // then n == 1
+                                                  neutral_sidb_charge_state(s1))));        // else n == 0
                 }
             });
     }
@@ -307,8 +307,8 @@ class exact_ground_state_simulation_impl
 
         if (!energy_terms.empty())
         {
-            // the system energy is the negative sum of all energy terms
-            optimizer.add(system_energy == -z3::sum(energy_terms));
+            // the system energy is the sum of all energy terms
+            optimizer.add(system_energy == z3::sum(energy_terms));
         }
 
         // minimize the system energy
