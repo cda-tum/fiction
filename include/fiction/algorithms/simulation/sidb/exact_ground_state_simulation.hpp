@@ -257,6 +257,15 @@ class exact_ground_state_simulation_impl
         return ctx.real_const(fmt::format("V_local,({},{},{})", s.x, s.y, s.z).c_str());
     }
     /**
+     * Returns a Z3 expression representing the total system energy.
+     *
+     * @return A Z3 expression representing the total system energy.
+     */
+    [[nodiscard]] z3::expr get_system_energy()
+    {
+        return ctx.real_const("E");
+    }
+    /**
      * Adds the constraints that restrict the values of the charge state variables to {-1, 0, 1}.
      */
     void restrict_sidb_charge_state_values()
@@ -355,7 +364,7 @@ class exact_ground_state_simulation_impl
      */
     void minimize_system_energy()
     {
-        const auto system_energy = ctx.real_const("E");
+        const auto system_energy = get_system_energy();
 
         z3::expr_vector energy_terms{ctx};
 
@@ -487,7 +496,7 @@ class exact_ground_state_simulation_impl
 
                 //                // print the system energy
                 //                std::cout << "System Energy: " << lyt.get_system_energy() << std::endl;
-                //                std::cout << "Z3           : " << m.eval(ctx.real_const("E"), true).as_double() <<
+                //                std::cout << "Z3           : " << m.eval(get_system_energy(), true).as_double() <<
                 //                std::endl;
                 //
                 //                // print the local potentials
