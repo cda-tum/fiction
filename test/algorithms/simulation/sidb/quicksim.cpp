@@ -183,17 +183,6 @@ TEMPLATE_TEST_CASE(
         const quicksim_params            quicksim_params{params, 80, 0.7, 1};
         quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
 
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
-
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(1) == sidb_charge_state::NEGATIVE);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(2) == sidb_charge_state::NEGATIVE);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(3) == sidb_charge_state::NEGATIVE);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(4) == sidb_charge_state::NEUTRAL);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(5) == sidb_charge_state::NEUTRAL);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(6) == sidb_charge_state::NEUTRAL);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(7) == sidb_charge_state::NEGATIVE);
-
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({12, 3, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({10, 8, 1}) == sidb_charge_state::NEGATIVE);
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({10, 6, 1}) == sidb_charge_state::NEGATIVE);
@@ -202,6 +191,8 @@ TEMPLATE_TEST_CASE(
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(std::abs(quicksimstats.valid_lyts[0].get_system_energy() - 0.46621669) <
+              physical_constants::POP_STABILITY_ERR);
     }
 
     SECTION("simulation of SiQAD-OR gate with input 01 | zero threads")
@@ -224,17 +215,6 @@ TEMPLATE_TEST_CASE(
         const quicksim_params            quicksim_params{params, 80, 0.7, 0};
         quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
 
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
-
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(1) == sidb_charge_state::NEGATIVE);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(2) == sidb_charge_state::NEGATIVE);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(3) == sidb_charge_state::NEGATIVE);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(4) == sidb_charge_state::NEUTRAL);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(5) == sidb_charge_state::NEUTRAL);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(6) == sidb_charge_state::NEUTRAL);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(7) == sidb_charge_state::NEGATIVE);
-
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({12, 3, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({10, 8, 1}) == sidb_charge_state::NEGATIVE);
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({10, 6, 1}) == sidb_charge_state::NEGATIVE);
@@ -243,6 +223,8 @@ TEMPLATE_TEST_CASE(
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(std::abs(quicksimstats.valid_lyts[0].get_system_energy() - 0.46621669) <
+              physical_constants::POP_STABILITY_ERR);
     }
 
     SECTION("simulation of SiQAD-OR gate with input 01 | 100 threads")
@@ -265,17 +247,6 @@ TEMPLATE_TEST_CASE(
         const quicksim_params            quicksim_params{params, 80, 0.7, 100};
         quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
 
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
-
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(1) == sidb_charge_state::NEGATIVE);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(2) == sidb_charge_state::NEGATIVE);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(3) == sidb_charge_state::NEGATIVE);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(4) == sidb_charge_state::NEUTRAL);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(5) == sidb_charge_state::NEUTRAL);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(6) == sidb_charge_state::NEUTRAL);
-        CHECK(quicksimstats.valid_lyts[0].get_charge_state_by_index(7) == sidb_charge_state::NEGATIVE);
-
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({12, 3, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({10, 8, 1}) == sidb_charge_state::NEGATIVE);
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({10, 6, 1}) == sidb_charge_state::NEGATIVE);
@@ -284,5 +255,7 @@ TEMPLATE_TEST_CASE(
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(quicksimstats.valid_lyts[0].get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(std::abs(quicksimstats.valid_lyts[0].get_system_energy() - 0.46621669) <
+              physical_constants::POP_STABILITY_ERR);
     }
 }
