@@ -294,7 +294,7 @@ class exact_ground_state_simulation_impl
                         // define the electrostatic potential between two SiDBs
 
                         const auto potential_val =
-                            ctx.real_val(std::to_string(charge_lyt.get_electrostatic_potential(s1, s2)).c_str());
+                            ctx.real_val(std::to_string(charge_lyt.get_potential_between_sidbs(s1, s2)).c_str());
 
                         optimizer.add(get_electrostatic_potential(s1, s2) == potential_val * get_sidb_sign(s2));
                     });
@@ -509,7 +509,7 @@ class exact_ground_state_simulation_impl
                 //                                }
                 //
                 //                                std::cout << fmt::format("V_{},{} = {}", s1, s2,
-                //                                                         lyt.get_electrostatic_potential(s1, s2) *
+                //                                                         lyt.get_potential_between_sidbs(s1, s2) *
                 //                                                             charge_state_to_sign(lyt.get_charge_state(s2)))
                 //                                          << std::endl;
                 //                                std::cout << fmt::format("Z3                = {}",
