@@ -447,16 +447,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     [[nodiscard]] double potential_between_sidbs(const typename Lyt::cell& c1,
                                                  const typename Lyt::cell& c2) const noexcept
     {
-        const auto index1 = cell_to_index(c1);
-        const auto index2 = cell_to_index(c2);
+        const auto index1 = static_cast<std::size_t>(cell_to_index(c1));
+        const auto index2 = static_cast<std::size_t>(cell_to_index(c2));
 
         if (strg->dist_mat[index1][index2] == 0)
         {
             return 0.0;
         }
 
-        return (strg->sim_params.k / strg->dist_mat[index1][index2] *
-                std::exp(-strg->dist_mat[index1][index2] / strg->sim_params.lambda_tf) *
+        return (strg->phys_params.k / strg->dist_mat[index1][index2] *
+                std::exp(-strg->dist_mat[index1][index2] / strg->phys_params.lambda_tf) *
                 physical_constants::ELECTRIC_CHARGE);
     }
     /**
