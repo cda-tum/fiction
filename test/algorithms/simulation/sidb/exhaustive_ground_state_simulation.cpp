@@ -21,7 +21,7 @@ TEMPLATE_TEST_CASE(
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_column_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_column_hex>>>))
 {
-    SECTION("simulation with one SiDBs placed")
+    SECTION("simulation with one SiDB placed")
     {
         TestType lyt{{20, 10}};
         lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -34,7 +34,7 @@ TEMPLATE_TEST_CASE(
         CHECK(exgs_stats.valid_lyts[0].get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
     }
 
-    SECTION("simulation with no SiDBs placed")
+    SECTION("simulation with no SiDB placed")
     {
         TestType lyt{{20, 10}};
 
