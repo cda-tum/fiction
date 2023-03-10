@@ -4,6 +4,8 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
+#include "catch2/matchers/catch_matchers_floating_point.hpp"
+
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -68,15 +70,17 @@ TEMPLATE_TEST_CASE(
         CHECK(size_before == 1);
         CHECK(size_after == 1);
 
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({5, 0, 0}) == sidb_charge_state::NEUTRAL);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({7, 0, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({11, 0, 0}) == sidb_charge_state::NEUTRAL);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({13, 0, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({17, 0, 0}) == sidb_charge_state::NEUTRAL);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({19, 0, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(std::abs(exgs_stats.valid_lyts[0].get_system_energy() - 0.24602741408) <
-              physical_constants::POP_STABILITY_ERR);
+        REQUIRE(!exgs_stats.valid_lyts.empty());
+        const auto& charge_lyt_first = exgs_stats.valid_lyts.front();
+
+        CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({5, 0, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({7, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({11, 0, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({13, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({17, 0, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({19, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.24602741408, 0.00000001));
     }
 
     SECTION("simulation of SiQAD-OR gate with input 01")
@@ -98,16 +102,18 @@ TEMPLATE_TEST_CASE(
         const sidb_simulation_parameters params{2, -0.28};
         exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
 
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({12, 3, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({10, 8, 1}) == sidb_charge_state::NEGATIVE);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({10, 6, 1}) == sidb_charge_state::NEGATIVE);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({16, 1, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({10, 5, 0}) == sidb_charge_state::NEUTRAL);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
-        CHECK(exgs_stats.valid_lyts[0].get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(std::abs(exgs_stats.valid_lyts[0].get_system_energy() - 0.46621669) <
-              physical_constants::POP_STABILITY_ERR);
+        REQUIRE(!exgs_stats.valid_lyts.empty());
+        const auto& charge_lyt_first = exgs_stats.valid_lyts.front();
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.46621669, 0.00000001));
     }
 }
