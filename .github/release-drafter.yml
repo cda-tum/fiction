@@ -1,28 +1,28 @@
 name-template: "FICTION $RESOLVED_VERSION Release"
 tag-template: "v$RESOLVED_VERSION"
 categories:
-  - title: "🚀 Features and Enhancements"
+  - title: "✨ Features and Enhancements"
     labels:
-      - "feature"
-      - "usability"
+      - "enhancement"
+      - "cli"
+  - title: "⚡️ Performance"
+    labels:
+      - "performance"
   - title: "🐛 Bug Fixes"
     labels:
       - "bug"
-  - title: "📄 Documentation"
+      - "compiler issue"
+  - title: "📝 Documentation"
     labels:
       - "documentation"
-  - title: "🤖 CI"
+  - title: "👷 CI"
     labels:
-      - "continuous integration"
-  - title: "📦 Packaging"
-    labels:
-      - "packaging"
+      - "github_actions"
   - title: "⬆️ Dependencies"
     collapse-after: 5
     labels:
       - "dependencies"
       - "submodules"
-      - "github_actions"
 change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
 change-title-escapes: '\<*_&'
 version-resolver:
