@@ -9,8 +9,9 @@ on:
       - '.github/workflows/clang-tidy-review.yml'
 
 jobs:
-  build:
+  clangtidy:
     runs-on: ubuntu-latest
+    name: Clang-Tidy
 
     steps:
       - name: Clone Repository
