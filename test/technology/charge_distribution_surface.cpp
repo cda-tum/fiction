@@ -124,7 +124,15 @@ TEMPLATE_TEST_CASE(
         // all SiDBs' charge states are set to positive
         charge_layout.set_all_charge_states(sidb_charge_state::POSITIVE);
         //
-        //        // read SiDBs' charge states
+        //
+        // calculate potential between two sidbs (charge sign not included)
+        CHECK(charge_layout.potential_between_sidbs({5, 4}, {5, 5}) > 0);
+        CHECK(charge_layout.potential_between_sidbs({5, 4}, {5, 4}) == 0.0);
+        CHECK(charge_layout.potential_between_sidbs({5, 4}, {5, 6}) > 0);
+        CHECK(charge_layout.potential_between_sidbs({5, 5}, {5, 6}) > 0);
+        CHECK(std::abs(charge_layout.potential_between_sidbs({5, 6}, {5, 5}) -
+                       charge_layout.potential_between_sidbs({5, 5}, {5, 6})) < physical_constants::POP_STABILITY_ERR);
+        // read SiDBs' charge states
         CHECK(charge_layout.get_charge_state({5, 4}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_state({5, 6}) == sidb_charge_state::POSITIVE);
@@ -199,14 +207,15 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({1, 10, 1}, TestType::cell_type::NORMAL);
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
-        CHECK(charge_layout.get_electrostatic_potential({0, 0, 0}, {0, 0, 0}) == 0.0);
-        CHECK(charge_layout.get_electrostatic_potential({1, 8, 0}, {1, 8, 0}) == 0.0);
-        CHECK(charge_layout.get_electrostatic_potential({1, 10, 1}, {1, 10, 1}) == 0.0);
-        CHECK((charge_layout.get_electrostatic_potential({1, 8, 0}, {0, 0, 0}) - 0.0121934043) < 0.00000001);
-        CHECK(charge_layout.get_electrostatic_potential({0, 0, 0}, {1, 10, 1}) ==
-              charge_layout.get_electrostatic_potential({1, 10, 1}, {0, 0, 0}));
-        CHECK(charge_layout.get_electrostatic_potential({0, 0, 0}, {1, 8, 0}) >
-              charge_layout.get_electrostatic_potential({1, 10, 1}, {0, 0, 0}));
+        CHECK(charge_layout.get_potential_between_sidbs({0, 0, 0}, {0, 0, 0}) == 0.0);
+        CHECK(charge_layout.get_potential_between_sidbs({1, 8, 0}, {1, 8, 0}) == 0.0);
+        CHECK(charge_layout.get_potential_between_sidbs({1, 10, 1}, {1, 10, 1}) == 0.0);
+        CHECK((charge_layout.get_potential_between_sidbs({1, 8, 0}, {0, 0, 0}) - 0.0121934043) < 0.00000001);
+        CHECK(std::abs(charge_layout.get_potential_between_sidbs({0, 0, 0}, {1, 10, 1}) -
+                       charge_layout.get_potential_between_sidbs({1, 10, 1}, {0, 0, 0})) <
+              physical_constants::POP_STABILITY_ERR);
+        CHECK(charge_layout.get_potential_between_sidbs({0, 0, 0}, {1, 8, 0}) >
+              charge_layout.get_potential_between_sidbs({1, 10, 1}, {0, 0, 0}));
     }
     //
     SECTION("Local Potential")
