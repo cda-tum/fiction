@@ -165,6 +165,39 @@ TEMPLATE_TEST_CASE(
         CHECK(quicksimstats.time_total.count() > 0);
     }
 
+    SECTION("simulation of Y-shape arrangement | one thread")
+    {
+        TestType lyt{{20, 10}};
+
+        lyt.assign_cell_type({-11, -2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({-10, -1, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({-4, -1, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({-3, -2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({-7, 0, 1}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({-7, 1, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({-7, 3, 0}, TestType::cell_type::NORMAL);
+
+        quicksim_stats<TestType>         quicksimstats{};
+        const sidb_simulation_parameters params{2, -0.32};
+        const quicksim_params            quicksim_params{params, 80, 0.7, 1};
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+
+        REQUIRE(!quicksimstats.valid_lyts.empty());
+        const auto& charge_lyt_first = quicksimstats.valid_lyts.front();
+
+        CHECK(charge_lyt_first.get_charge_state({-11, -2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({-10, -1, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({-3, -2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({-4, -1, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({-7, 0, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({-7, 1, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({-7, 3, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0.31915040629512115, fiction::physical_constants::POP_STABILITY_ERR));
+    }
+
     SECTION("simulation of SiQAD-OR gate with input 01 | one thread")
     {
         TestType lyt{{20, 10}};
