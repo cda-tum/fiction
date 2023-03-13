@@ -16,12 +16,12 @@ namespace fiction
 /**
  * Charge states of SiDBs.
  */
-enum class sidb_charge_state
+enum class sidb_charge_state : int8_t
 {
-    NONE,  // assigned when layout cell is empty
-    POSITIVE,
-    NEUTRAL,
-    NEGATIVE
+    NONE     = 127,  // assigned when layout cell is empty
+    POSITIVE = 1,
+    NEUTRAL  = 0,
+    NEGATIVE = -1
 };
 /**
  * Converts the charge state into an integer (`-1`, `0`, `1`).
