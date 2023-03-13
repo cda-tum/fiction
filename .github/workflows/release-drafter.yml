@@ -17,7 +17,10 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+
     runs-on: ubuntu-latest
+    name: Draft Release
+
     steps:
       - uses: release-drafter/release-drafter@v5
         env:
