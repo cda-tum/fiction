@@ -1,0 +1,47 @@
+name-template: "FICTION $RESOLVED_VERSION Release"
+tag-template: "v$RESOLVED_VERSION"
+categories:
+  - title: "✨ Features and Enhancements"
+    labels:
+      - "enhancement"
+      - "cli"
+  - title: "⚡️ Performance"
+    labels:
+      - "performance"
+  - title: "🐛 Bug Fixes"
+    labels:
+      - "bug"
+      - "compiler issue"
+  - title: "📝 Documentation"
+    labels:
+      - "documentation"
+  - title: "👷 CI"
+    labels:
+      - "github_actions"
+  - title: "⬆️ Dependencies"
+    collapse-after: 5
+    labels:
+      - "dependencies"
+      - "submodules"
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
+change-title-escapes: '\<*_&'
+version-resolver:
+  major:
+    labels:
+      - "major"
+  minor:
+    labels:
+      - "minor"
+  patch:
+    labels:
+      - "patch"
+  default: patch
+autolabeler:
+  - label: "dependencies"
+    title:
+      - "/update pre-commit hooks/i"
+
+template: |
+  ## What Changed 👀
+  $CHANGES
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
