@@ -130,6 +130,112 @@ TEMPLATE_TEST_CASE("QuickSim simulation of several SiDBs with varying thread cou
     }
 }
 
+TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs with varying thread counts",
+                   "[quicksim]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+    TestType lyt{{20, 10}};
+
+    lyt.assign_cell_type({-13, -1, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({-9, -1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({-7, -1, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({-3, -1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({-1, -1, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({3, -1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({5, -1, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({9, -1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({11, -1, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({15, -1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({17, -1, 1}, TestType::cell_type::NORMAL);
+
+    quicksim_stats<TestType>         quicksimstats{};
+    const sidb_simulation_parameters params{2, -0.32};
+
+    quicksim_params quicksim_params{params};
+
+    REQUIRE(quicksim_params.phys_params.mu == -0.32);
+
+    const auto check_charge_configuration = [](const quicksim_stats<TestType>& stats) noexcept
+    {
+        REQUIRE(!stats.valid_lyts.empty());
+
+        const auto& charge_lyt_first = stats.valid_lyts.front();
+
+        CHECK(charge_lyt_first.get_charge_state({-13, -1, 1}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(charge_lyt_first.get_charge_state({-9, -1, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({-7, -1, 1}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(charge_lyt_first.get_charge_state({-3, -1, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({-1, -1, 1}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(charge_lyt_first.get_charge_state({3, -1, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({5, -1, 1}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(charge_lyt_first.get_charge_state({9, -1, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({11, -1, 1}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(charge_lyt_first.get_charge_state({15, -1, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({17, -1, 1}) == sidb_charge_state::NEGATIVE);
+
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0.47982940640071253, fiction::physical_constants::POP_STABILITY_ERR));
+    };
+
+    SECTION("Default settings")
+    {
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+
+        check_for_absence_of_positive_charges(quicksimstats);
+        check_for_runtime_measurement(quicksimstats);
+        check_charge_configuration(quicksimstats);
+    }
+    SECTION("0 threads")
+    {
+        quicksim_params.number_threads = 0;
+
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+
+        check_for_absence_of_positive_charges(quicksimstats);
+        check_for_runtime_measurement(quicksimstats);
+        check_charge_configuration(quicksimstats);
+    }
+    SECTION("1 thread")
+    {
+        quicksim_params.number_threads = 1;
+
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+
+        check_for_absence_of_positive_charges(quicksimstats);
+        check_for_runtime_measurement(quicksimstats);
+        check_charge_configuration(quicksimstats);
+    }
+    SECTION("2 threads")
+    {
+        quicksim_params.number_threads = 2;
+
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+
+        check_for_absence_of_positive_charges(quicksimstats);
+        check_for_runtime_measurement(quicksimstats);
+        check_charge_configuration(quicksimstats);
+    }
+    SECTION("100 threads")
+    {
+        quicksim_params.number_threads = 100;
+
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+
+        check_for_absence_of_positive_charges(quicksimstats);
+        check_for_runtime_measurement(quicksimstats);
+        check_charge_configuration(quicksimstats);
+    }
+}
+
 TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varying thread counts", "[quicksim]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
