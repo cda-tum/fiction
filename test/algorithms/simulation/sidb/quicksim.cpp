@@ -220,8 +220,8 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varyi
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01 and varying thread counts", "[quicksim]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01 and varying thread counts",
+                   "[quicksim]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
 
