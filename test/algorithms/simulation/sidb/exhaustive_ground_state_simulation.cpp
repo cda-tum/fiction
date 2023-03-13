@@ -3,8 +3,7 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
-
-#include "catch2/matchers/catch_matchers_floating_point.hpp"
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -12,6 +11,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/physical_constants.hpp>
 
 using namespace fiction;
 
@@ -44,7 +44,7 @@ TEMPLATE_TEST_CASE(
         const sidb_simulation_parameters params{2, -0.32};
         exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
 
-        CHECK(exgs_stats.valid_lyts.size() == 0);  // empty layout is saved.
+        CHECK(exgs_stats.valid_lyts.empty());
     }
 
     SECTION("simulation of wire with one perturber and two SiDB pairs")
@@ -80,7 +80,8 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({13, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_lyt_first.get_charge_state({17, 0, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_lyt_first.get_charge_state({19, 0, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.24602741408, 0.00000001));
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0.24602741408, fiction::physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("simulation of SiQAD-OR gate with input 01")
@@ -114,6 +115,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.46621669, 0.00000001));
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0.46621669, fiction::physical_constants::POP_STABILITY_ERR));
     }
 }

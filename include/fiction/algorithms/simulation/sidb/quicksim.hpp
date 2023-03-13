@@ -167,6 +167,13 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
                             charge_lyt_copy.assign_charge_state_by_cell_index(i, sidb_charge_state::NEGATIVE);
                             charge_lyt_copy.update_local_potential();
                             charge_lyt_copy.set_system_energy_to_zero();
+                            charge_lyt_copy.validity_check();
+
+                            if (charge_lyt_copy.is_physically_valid())
+                            {
+                                const std::lock_guard lock{mutex};
+                                st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
+                            }
 
                             const auto upper_limit =
                                 static_cast<uint64_t>(static_cast<double>(charge_lyt_copy.num_cells()) / 1.5);

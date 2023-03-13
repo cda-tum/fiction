@@ -3,8 +3,7 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
-
-#include "catch2/matchers/catch_matchers_floating_point.hpp"
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -12,6 +11,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/physical_constants.hpp>
 
 using namespace fiction;
 
@@ -46,7 +46,7 @@ TEMPLATE_TEST_CASE(
         CHECK(quicksim_params.phys_params.mu == -0.30);
         quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
 
-        CHECK(quicksimstats.valid_lyts.size() == 1);
+        CHECK(quicksimstats.valid_lyts.size() == quicksim_params.interation_steps + 1);
     }
 
     SECTION("layout with several SiDBs placed")
@@ -196,7 +196,8 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.46621669, 0.00000001));
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0.46621669, fiction::physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("simulation of SiQAD-OR gate with input 01 | zero threads")
@@ -230,7 +231,8 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.46621669, 0.00000001));
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0.46621669, fiction::physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("simulation of SiQAD-OR gate with input 01 | 100 threads")
@@ -264,6 +266,33 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.46621669, 0.00000001));
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0.46621669, fiction::physical_constants::POP_STABILITY_ERR));
+    }
+
+    SECTION("simulation of 2 SiDBs | 1 threads")
+    {
+        TestType lyt{{20, 10}};
+
+        lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 2, 0}, TestType::cell_type::NORMAL);
+
+        quicksim_stats<TestType>         quicksimstats{};
+        const sidb_simulation_parameters params{2, -0.25};
+        const quicksim_params            quicksim_params{params, 80, 0.7, 1};
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+
+        REQUIRE(!quicksimstats.valid_lyts.empty());
+        const auto& charge_lyt_first = quicksimstats.valid_lyts.front();
+
+        auto distribution = energy_distribution(quicksimstats.valid_lyts);
+        REQUIRE(!distribution.empty());
+        auto first_element = *distribution.begin();
+        CHECK(first_element.second == quicksim_params.interation_steps);
+
+        CHECK(((charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE) &&
+               (charge_lyt_first.get_charge_state({8, 2, 0}) == sidb_charge_state::NEUTRAL)) |
+              ((charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEUTRAL) &&
+               (charge_lyt_first.get_charge_state({8, 2, 0}) == sidb_charge_state::NEGATIVE)));
     }
 }
