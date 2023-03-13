@@ -287,7 +287,7 @@ class exact_ground_state_simulation_impl
     /**
      * Adds the constraints that define the electrostatic potential between all mutually exclusive pairs of SiDBs.
      */
-    void define_electrostatic_potential()
+    void define_electrostatic_potentials()
     {
         charge_lyt.foreach_cell(
             [this](const sidb& s1)
@@ -310,16 +310,12 @@ class exact_ground_state_simulation_impl
             });
     }
     /**
-     * Adds the constraints that define the local potential at all SiDBs. Additionally, the constraints that define the
-     * population stability are added.
+     * Adds the constraints that define the local potential at all SiDBs.
      */
-    void define_population_stability()
+    void define_local_potentials()
     {
-        const auto mu_minus = ctx.real_val(std::to_string(params.phys_params.mu).c_str());
-        const auto mu_plus  = ctx.real_val(std::to_string(params.phys_params.mu_p).c_str());
-
         charge_lyt.foreach_cell(
-            [this, &mu_minus, &mu_plus](const sidb& s1)
+            [this](const sidb& s1)
             {
                 z3::expr_vector local_potential_terms{ctx};
 
@@ -338,9 +334,20 @@ class exact_ground_state_simulation_impl
                 {
                     optimizer.add(get_local_potential(s1) == z3::sum(local_potential_terms));
                 }
+            });
+    }
+    /**
+     * Adds the constraints that define the local potential at all SiDBs. Additionally, the constraints that define the
+     * population stability are added.
+     */
+    void define_population_stability()
+    {
+        const auto mu_minus = ctx.real_val(std::to_string(params.phys_params.mu).c_str());
+        const auto mu_plus  = ctx.real_val(std::to_string(params.phys_params.mu_p).c_str());
 
-                // the population stability conditions
-
+        charge_lyt.foreach_cell(
+            [this, &mu_minus, &mu_plus](const sidb& s1)
+            {
                 // two-state simulation
                 if (params.phys_params.base == 2)
                 {
@@ -399,7 +406,9 @@ class exact_ground_state_simulation_impl
         // restrict the values of the charge state variables if necessary (three-state simulation)
         restrict_sidb_charge_state_values();
         // define the electrostatic potential V_{i,j} between SiDBs
-        define_electrostatic_potential();
+        define_electrostatic_potentials();
+        // define the local potential V_i at SiDBs
+        define_local_potentials();
 
         // population stability conditions
         define_population_stability();
