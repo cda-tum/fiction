@@ -145,7 +145,16 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
                                     // number of threads defines how many times QuickSim is repeated
 
         // Only 60 % of all cells are used as the negatively charged cell in the first iteration step.
-        const auto upper_bound = static_cast<uint64_t>(std::round(0.6 * static_cast<double>(charge_lyt.num_cells())));
+        uint64_t upper_bound = 0;
+        if (charge_lyt.num_cells() < 10)
+        {
+            upper_bound = charge_lyt.num_cells();
+        }
+
+        else
+        {
+            upper_bound = static_cast<uint64_t>(std::round(0.6 * static_cast<double>(charge_lyt.num_cells())));
+        }
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);

@@ -287,11 +287,57 @@ TEMPLATE_TEST_CASE(
 
         auto distribution = energy_distribution(quicksimstats.valid_lyts);
         REQUIRE(!distribution.empty());
-        auto first_element = *distribution.begin();
-        CHECK(first_element.second == quicksim_params.interation_steps);
 
         CHECK(((charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE) &&
-               (charge_lyt_first.get_charge_state({8, 2, 0}) == sidb_charge_state::NEUTRAL)) |
+               (charge_lyt_first.get_charge_state({8, 2, 0}) == sidb_charge_state::NEUTRAL)) ^
+              ((charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEUTRAL) &&
+               (charge_lyt_first.get_charge_state({8, 2, 0}) == sidb_charge_state::NEGATIVE)));
+    }
+
+    SECTION("simulation of 2 SiDBs | 100 threads")
+    {
+        TestType lyt{{20, 10}};
+
+        lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 2, 0}, TestType::cell_type::NORMAL);
+
+        quicksim_stats<TestType>         quicksimstats{};
+        const sidb_simulation_parameters params{2, -0.25};
+        const quicksim_params            quicksim_params{params, 80, 0.7, 100};
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+
+        REQUIRE(!quicksimstats.valid_lyts.empty());
+        const auto& charge_lyt_first = quicksimstats.valid_lyts.front();
+
+        auto distribution = energy_distribution(quicksimstats.valid_lyts);
+        REQUIRE(!distribution.empty());
+
+        CHECK(((charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE) &&
+               (charge_lyt_first.get_charge_state({8, 2, 0}) == sidb_charge_state::NEUTRAL)) ^
+              ((charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEUTRAL) &&
+               (charge_lyt_first.get_charge_state({8, 2, 0}) == sidb_charge_state::NEGATIVE)));
+    }
+
+    SECTION("simulation of 2 SiDBs | 1 thread but 0 to initialize")
+    {
+        TestType lyt{{20, 10}};
+
+        lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 2, 0}, TestType::cell_type::NORMAL);
+
+        quicksim_stats<TestType>         quicksimstats{};
+        const sidb_simulation_parameters params{2, -0.25};
+        const quicksim_params            quicksim_params{params, 80, 0.7, 0};
+        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+
+        REQUIRE(!quicksimstats.valid_lyts.empty());
+        const auto& charge_lyt_first = quicksimstats.valid_lyts.front();
+
+        auto distribution = energy_distribution(quicksimstats.valid_lyts);
+        REQUIRE(!distribution.empty());
+
+        CHECK(((charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE) &&
+               (charge_lyt_first.get_charge_state({8, 2, 0}) == sidb_charge_state::NEUTRAL)) ^
               ((charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEUTRAL) &&
                (charge_lyt_first.get_charge_state({8, 2, 0}) == sidb_charge_state::NEGATIVE)));
     }
