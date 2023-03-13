@@ -208,6 +208,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({1, 10, 1}, TestType::cell_type::NORMAL);
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
+        CHECK(charge_layout.get_chargeless_potential_between_sidbs({2, 8, 0}, {2, 10, 1}) == 0);
         CHECK(charge_layout.get_chargeless_potential_between_sidbs({0, 0, 0}, {0, 0, 0}) == 0.0);
         CHECK(charge_layout.get_chargeless_potential_between_sidbs({1, 8, 0}, {1, 8, 0}) == 0.0);
         CHECK(charge_layout.get_chargeless_potential_between_sidbs({1, 10, 1}, {1, 10, 1}) == 0.0);
