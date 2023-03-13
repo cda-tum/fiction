@@ -14,6 +14,7 @@
 #include <fmt/format.h>  // output formatting
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <filesystem>
@@ -26,9 +27,10 @@ int main()  // NOLINT
     experiments::experiment<std::string, double, double, double, bool, std::string> simulation_exp{
         "benchmark", "gates", "runtime ExGS (in sec.)", "runtime SMT (in sec.)", "TTS QuickSim", "correct", "#SiDB"};
 
-    double                sum_sr_exgs  = 0u;
-    double                sum_tts      = 0u;
-    double                sum_sr_quick = 0u;
+    double sum_sr_exgs  = 0u;
+    double sum_tts      = 0u;
+    double sum_sr_quick = 0u;
+
     std::vector<uint64_t> db_num{};
 
     const std::string folder = fmt::format("{}/siqad_gates/", EXPERIMENTS_PATH);
@@ -59,20 +61,26 @@ int main()  // NOLINT
             sim_acc_tts<sidb_cell_clk_lyt_siqad>(lyt, quicksim_params, &tts_stat);
 
             // SMT solver
-            exact_ground_state_simulation_params                         exgs_params{params};
+            const exact_ground_state_simulation_params                   exgs_params{params};
             exact_ground_state_simulation_stats<sidb_cell_clk_lyt_siqad> exgs_exact_stats{};
+
             exact_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, exgs_params, &exgs_exact_stats);
-            quicksim_stats<sidb_cell_clk_lyt_siqad> quicksim_stats{exgs_exact_stats.time_total,
-                                                                   exgs_exact_stats.valid_lyts};
+
+            const quicksim_stats<sidb_cell_clk_lyt_siqad> quicksim_stats{exgs_exact_stats.time_total,
+                                                                         exgs_exact_stats.valid_lyts};
+
             groundstate_found = is_ground_state(quicksim_stats, exgs_stats);  // checks if SMT found the ground state
 
             simulation_exp(benchmark.string(), mockturtle::to_seconds(exgs_stats.time_total),
                            mockturtle::to_seconds(quicksim_stats.time_total), tts_stat.time_to_solution,
                            groundstate_found, std::to_string(lyt.num_cells()));
+
             db_num.push_back(lyt.num_cells());
+
             sum_sr_exgs += mockturtle::to_seconds(exgs_stats.time_total);
             sum_sr_quick += mockturtle::to_seconds(exgs_exact_stats.time_total);
             sum_tts += tts_stat.time_to_solution;
+
             if (!groundstate_found)
             {
                 all_true = false;
@@ -80,12 +88,14 @@ int main()  // NOLINT
         }
     }
 
-    auto min_db_num = std::min_element(db_num.begin(), db_num.end());
-    auto max_db_num = std::max_element(db_num.begin(), db_num.end());
+    const auto min_db_num = std::min_element(db_num.begin(), db_num.end());
+    const auto max_db_num = std::max_element(db_num.begin(), db_num.end());
 
     simulation_exp("sum", sum_sr_exgs, sum_sr_quick, sum_tts, all_true,
                    std::to_string(*min_db_num) + " -- " + std::to_string(*max_db_num));
+
     simulation_exp.save();
     simulation_exp.table();
+
     return EXIT_SUCCESS;
 }
