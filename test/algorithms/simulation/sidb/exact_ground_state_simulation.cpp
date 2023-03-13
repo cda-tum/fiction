@@ -58,7 +58,7 @@ TEMPLATE_TEST_CASE("BDL pair plus perturber", "[exact-sidb-sim]",
 
     SECTION("2-state simulation")
     {
-        exgs_params.simulation_states = exact_ground_state_simulation_params::simulation_states::TWO;
+        exgs_params.phys_params.base = 2;
 
         exact_ground_state_simulation<TestType>(lyt, exgs_params, &exgs_stats);
 
@@ -67,7 +67,7 @@ TEMPLATE_TEST_CASE("BDL pair plus perturber", "[exact-sidb-sim]",
     }
     SECTION("3-state simulation")
     {
-        exgs_params.simulation_states = exact_ground_state_simulation_params::simulation_states::THREE;
+        exgs_params.phys_params.base = 3;
 
         exact_ground_state_simulation<TestType>(lyt, exgs_params, &exgs_stats);
 

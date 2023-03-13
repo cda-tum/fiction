@@ -32,24 +32,6 @@ struct exact_ground_state_simulation_params
      */
     sidb_simulation_parameters phys_params{};
     /**
-     * Representation of the number of simulation states.
-     */
-    enum class simulation_states : uint8_t
-    {
-        /**
-         * Two-state simulation.
-         */
-        TWO = 2,
-        /**
-         * Three-state simulation.
-         */
-        THREE = 3
-    };
-    /**
-     * Number of simulation states to use.
-     */
-    simulation_states simulation_states{simulation_states::TWO};
-    /**
      * The number of valid layouts to enumerate. If set to `-1`, all valid layouts are enumerated. If set to `0`, no
      * layouts are being returned. If set to `1`, only the layout with minimum system energy is determined, and so on.
      */
@@ -161,7 +143,7 @@ class exact_ground_state_simulation_impl
     [[nodiscard]] z3::expr get_sidb_charge_state(const sidb& s)
     {
         // two-state simulation: n == false -> n == -1 (negative charge), n == true -> n == 0 (neutral)
-        if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
+        if (params.phys_params.base == 2)
         {
             return ctx.bool_const(fmt::format("n_({},{},{})", s.x, s.y, s.z).c_str());
         }
@@ -182,7 +164,7 @@ class exact_ground_state_simulation_impl
         const auto sidb_charge_state = get_sidb_charge_state(s);
 
         // two-state simulation: n == false -> n == -1 (negative charge)
-        if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
+        if (params.phys_params.base == 2)
         {
             return !sidb_charge_state;
         }
@@ -203,7 +185,7 @@ class exact_ground_state_simulation_impl
         const auto sidb_charge_state = get_sidb_charge_state(s);
 
         // two-state simulation: n == true -> n == 0 (neutral)
-        if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
+        if (params.phys_params.base == 2)
         {
             return sidb_charge_state;
         }
@@ -238,7 +220,7 @@ class exact_ground_state_simulation_impl
     [[nodiscard]] z3::expr get_sidb_sign(const sidb& s)
     {
         // two-state simulation
-        if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
+        if (params.phys_params.base == 2)
         {
             const auto zero         = ctx.real_val(0);
             const auto negative_one = ctx.real_val(-1);
@@ -289,7 +271,7 @@ class exact_ground_state_simulation_impl
     void restrict_sidb_charge_state_values()
     {
         // only applicable to three-state simulation
-        if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::THREE)
+        if (params.phys_params.base == 3)
         {
             // restrict the values of the charge state variables to {-1, 0, 1}
             charge_lyt.foreach_cell(
@@ -360,14 +342,14 @@ class exact_ground_state_simulation_impl
                 // the population stability conditions
 
                 // two-state simulation
-                if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
+                if (params.phys_params.base == 2)
                 {
                     optimizer.add(z3::ite(mu_minus + -get_local_potential(s1) < 0,  // if mu_minus + V < 0
                                           negative_sidb_charge_state(s1),           // then n == -1
                                           neutral_sidb_charge_state(s1)));          // else n == 0
                 }
                 // three-state simulation
-                else if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::THREE)
+                else if (params.phys_params.base == 3)
                 {
                     optimizer.add(z3::ite(mu_minus + -get_local_potential(s1) < 0,         // if mu_minus + V < 0
                                           negative_sidb_charge_state(s1),                  // then n == -1
@@ -440,7 +422,7 @@ class exact_ground_state_simulation_impl
         charge_lyt_copy.foreach_cell(
             [this, &m, &charge_lyt_copy](const sidb& s)
             {
-                if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::TWO)
+                if (params.phys_params.base == 2)
                 {
                     // extract charge state from model with model completion turned on
                     const auto sidb_charge_state = m.eval(get_sidb_charge_state(s), true).bool_value();
@@ -448,7 +430,7 @@ class exact_ground_state_simulation_impl
                     charge_lyt_copy.assign_charge_state(
                         s, sidb_charge_state == Z3_L_TRUE ? sidb_charge_state::NEUTRAL : sidb_charge_state::NEGATIVE);
                 }
-                else if (params.simulation_states == exact_ground_state_simulation_params::simulation_states::THREE)
+                else if (params.phys_params.base == 3)
                 {
                     // extract charge state from model with model completion turned on
                     const auto sidb_charge_state = m.eval(get_sidb_charge_state(s), true).get_numeral_int();
