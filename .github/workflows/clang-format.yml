@@ -9,6 +9,7 @@ on:
 jobs:
   clangformat:
     runs-on: ubuntu-latest
+    name: ClangFormat
 
     steps:
       - name: Clone Repository (for push events)
