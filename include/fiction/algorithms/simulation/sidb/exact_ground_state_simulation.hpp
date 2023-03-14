@@ -50,6 +50,10 @@ struct exact_ground_state_simulation_stats
      */
     mockturtle::stopwatch<>::duration time_total{};
     /**
+     * Number of invalid layouts that were encountered.
+     */
+    std::size_t number_of_invalid_layouts{0u};
+    /**
      * All physically valid charge layouts.
      */
     std::vector<charge_distribution_surface<Lyt>> valid_lyts{};
@@ -511,6 +515,7 @@ class exact_ground_state_simulation_impl
                 else
                 {
                     std::cout << "layout is not valid!" << std::endl;
+                    ++stats.number_of_invalid_layouts;
                 }
 
                 //                // print the system energy
