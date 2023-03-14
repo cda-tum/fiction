@@ -381,13 +381,27 @@ class exact_ground_state_simulation_impl
         charge_lyt.foreach_cell(
             [this, &energy_terms](const sidb& s)
             {
-                // add the local potential energy term
-                energy_terms.push_back(get_local_potential(s) * get_sidb_sign(s));
+                // two-state simulation
+                if (params.phys_params.base == 2)
+                {
+                    // testing determined that this encoding is more performant than simply using
+                    // `get_local_potential(s) * get_sidb_sign(s)`
+                    energy_terms.push_back(z3::ite(neutral_sidb_charge_state(s), ctx.real_val(0),
+                                                   get_local_potential(s) * get_sidb_sign(s)));
+                }
+                // three-state simulation
+                else
+                {
+                    // however, for three-state simulation, the following encoding works best
+                    energy_terms.push_back(z3::ite(
+                        neutral_sidb_charge_state(s), ctx.real_val(0),
+                        z3::ite(negative_sidb_charge_state(s), -get_local_potential(s), get_local_potential(s))));
+                }
             });
 
         if (!energy_terms.empty())
         {
-            // the system energy is half of the sum of all local potential terms
+            // the system energy is half of the sum of all local potential terms (`/ 2` is more performant than `* 0.5`)
             optimizer.add(system_energy == z3::sum(energy_terms) / ctx.real_val(2));
         }
 
