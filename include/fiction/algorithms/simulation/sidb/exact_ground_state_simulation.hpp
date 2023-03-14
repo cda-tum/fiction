@@ -302,8 +302,8 @@ class exact_ground_state_simulation_impl
 
                         // define the electrostatic potential between two SiDBs
 
-                        const auto potential_val =
-                            ctx.real_val(std::to_string(charge_lyt.get_potential_between_sidbs(s1, s2)).c_str());
+                        const auto potential_val = ctx.real_val(
+                            std::to_string(charge_lyt.get_chargeless_potential_between_sidbs(s1, s2)).c_str());
 
                         optimizer.add(get_electrostatic_potential(s1, s2) == potential_val * get_sidb_sign(s2));
                     });
@@ -319,7 +319,7 @@ class exact_ground_state_simulation_impl
             {
                 z3::expr_vector local_potential_terms{ctx};
 
-                // gather local potentials
+                // gather electrostatic potentials
                 charge_lyt.foreach_cell(
                     [this, &local_potential_terms, &s1](const sidb& s2)
                     {
