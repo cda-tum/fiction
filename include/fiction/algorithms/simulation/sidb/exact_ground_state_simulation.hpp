@@ -370,6 +370,37 @@ class exact_ground_state_simulation_impl
             });
     }
     /**
+     * Adds the constraints that define the configuration stability.
+     */
+    void define_configuration_stability()
+    {
+        charge_lyt.foreach_cell(
+            [this](const sidb& s1)
+            {
+                const auto dni = z3::ite(get_sidb_sign(s1) == ctx.real_val(-1), ctx.real_val(1), ctx.real_val(-1));
+
+                charge_lyt.foreach_cell(
+                    [this, &s1, &dni](const sidb& s2)
+                    {
+                        if (s1 == s2)
+                        {
+                            return;
+                        }
+
+                        const auto dnj = -dni;
+
+                        const auto potential_val = ctx.real_val(
+                            std::to_string(charge_lyt.get_chargeless_potential_between_sidbs(s1, s2)).c_str());
+
+                        const auto delta_e =
+                            get_local_potential(s1) * dni + get_local_potential(s2) * dnj - potential_val;
+
+                        optimizer.add(
+                            !(get_sidb_sign(s2) > get_sidb_sign(s1) && delta_e < ctx.real_val(0)));
+                    });
+            });
+    }
+    /**
      * Adds the constraints that define and minimize the system energy.
      */
     void minimize_system_energy()
@@ -423,6 +454,8 @@ class exact_ground_state_simulation_impl
 
         // population stability conditions
         define_population_stability();
+        // configuration stability conditions
+        define_configuration_stability();
 
         // minimize the system energy
         minimize_system_energy();
@@ -514,17 +547,17 @@ class exact_ground_state_simulation_impl
 
                 const auto lyt = extract_charge_configuration_from_model(m);
 
-                if (lyt.is_physically_valid())
-                {
+//                if (lyt.is_physically_valid())
+//                {
                     stats.valid_lyts.push_back(lyt);  // TODO move semantics
 
-                    std::cout << "layout is valid!" << std::endl;
-                }
-                else
-                {
-                    std::cout << "layout is not valid!" << std::endl;
-                    ++stats.number_of_invalid_layouts;
-                }
+//                    std::cout << "layout is valid!" << std::endl;
+//                }
+//                else
+//                {
+//                    std::cout << "layout is not valid!" << std::endl;
+//                    ++stats.number_of_invalid_layouts;
+//                }
 
                 //                // print the system energy
                 //                std::cout << "System Energy: " << lyt.get_system_energy() << std::endl;
