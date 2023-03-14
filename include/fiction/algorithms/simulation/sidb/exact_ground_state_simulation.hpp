@@ -382,13 +382,13 @@ class exact_ground_state_simulation_impl
             [this, &energy_terms](const sidb& s)
             {
                 // add the local potential energy term
-                energy_terms.push_back(ctx.real_val("0.5") * get_local_potential(s) * get_sidb_sign(s));
+                energy_terms.push_back(get_local_potential(s) * get_sidb_sign(s));
             });
 
         if (!energy_terms.empty())
         {
-            // the system energy is the sum of all energy terms
-            optimizer.add(system_energy == z3::sum(energy_terms));
+            // the system energy is half of the sum of all local potential terms
+            optimizer.add(system_energy == z3::sum(energy_terms) / ctx.real_val(2));
         }
 
         // minimize the system energy
