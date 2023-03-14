@@ -337,8 +337,7 @@ class exact_ground_state_simulation_impl
             });
     }
     /**
-     * Adds the constraints that define the local potential at all SiDBs. Additionally, the constraints that define the
-     * population stability are added.
+     * Adds the constraints that define the population stability.
      */
     void define_population_stability()
     {
