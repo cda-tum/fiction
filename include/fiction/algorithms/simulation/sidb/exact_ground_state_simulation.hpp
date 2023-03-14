@@ -309,6 +309,7 @@ class exact_ground_state_simulation_impl
                         const auto potential_val = ctx.real_val(
                             std::to_string(charge_lyt.get_chargeless_potential_between_sidbs(s1, s2)).c_str());
 
+                        // this encoding is more performant than using `z3::ite` expressions with 0-valued sub-terms
                         optimizer.add(get_electrostatic_potential(s1, s2) == potential_val * get_sidb_sign(s2));
                     });
             });
