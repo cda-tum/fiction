@@ -378,21 +378,6 @@ class exact_ground_state_simulation_impl
 
         z3::expr_vector energy_terms{ctx};
 
-        //        charge_lyt.foreach_cell(
-        //            [this, &energy_terms](const sidb& s1)
-        //            {
-        //                charge_lyt.foreach_cell(
-        //                    [this, &energy_terms, &s1](const sidb& s2)
-        //                    {
-        //                        if (s1 < s2)
-        //                        {
-        //                            // add the electrostatic potential energy term
-        //                            energy_terms.push_back(get_electrostatic_potential(s1, s2) * get_sidb_sign(s1));
-        //                        }
-        //                    });
-        //            });
-        //
-
         charge_lyt.foreach_cell(
             [this, &energy_terms](const sidb& s)
             {
