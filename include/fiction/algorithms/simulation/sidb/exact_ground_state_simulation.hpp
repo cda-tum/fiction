@@ -68,14 +68,11 @@ class exact_ground_state_simulation_impl
   public:
     exact_ground_state_simulation_impl(const Lyt& lyt, const exact_ground_state_simulation_params& p,
                                        exact_ground_state_simulation_stats<Lyt>& st) noexcept :
-            charge_lyt{lyt, p.phys_params,
-                       sidb_charge_state::NEGATIVE},  // initialize the surface with all negative charges
+            charge_lyt{lyt, p.phys_params},
             params{p},
             stats{st}
     {
         st.valid_lyts.reserve(p.number_of_valid_layouts_to_enumerate);
-
-        std::cout << "All negative system energy: " << charge_lyt.get_system_energy() << std::endl;
     }
 
     void run()
@@ -446,43 +443,6 @@ class exact_ground_state_simulation_impl
         // minimize the system energy
         optimizer.minimize(system_energy);
     }
-
-    void minimize_system_energy_radical()
-    {
-        z3::expr_vector local_potential_terms{ctx};
-        z3::expr_vector potential_constants{ctx};
-
-        charge_lyt.foreach_cell(
-            [this, &local_potential_terms, &potential_constants](const sidb& s1)
-            {
-                local_potential_terms.push_back(z3::ite(
-                    neutral_sidb_charge_state(s1),
-                    ctx.real_val(std::to_string(*charge_lyt.get_local_potential(s1)).c_str()), ctx.real_val(0)));
-
-                charge_lyt.foreach_cell(
-                    [this, &potential_constants, &s1](const sidb& s2)
-                    {
-                        if (s2 > s1)
-                        {
-                            potential_constants.push_back(z3::ite(
-                                neutral_sidb_charge_state(s1) && neutral_sidb_charge_state(s2),
-                                ctx.real_val(std::to_string(charge_lyt.get_chargeless_potential_between_sidbs(s1, s2) /
-                                                            normalization)
-                                                 .c_str()),
-                                ctx.real_val(0)));
-                        }
-                    });
-            });
-
-        const auto system_energy = get_system_energy();
-
-        const auto max_system_energy_val = ctx.real_val(std::to_string(charge_lyt.get_system_energy()).c_str());
-
-        optimizer.add(system_energy ==
-                      max_system_energy_val + z3::sum(local_potential_terms) - z3::sum(potential_constants));
-
-        optimizer.minimize(system_energy);
-    }
     /**
      * Generates the SMT instance.
      */
@@ -500,8 +460,6 @@ class exact_ground_state_simulation_impl
 
         // minimize the system energy
         minimize_system_energy();
-
-        //        minimize_system_energy_radical();
     }
     /**
      * Extracts the charge configuration from the given Z3 model and returns a `charge_distribution_surface`
