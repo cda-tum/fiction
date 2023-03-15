@@ -330,6 +330,7 @@ class exact_ground_state_simulation_impl
                     {
                         if (s1 != s2)
                         {
+                            // this is way more performant than using `z3::ite` expressions with 0-valued sub-terms
                             local_potential_terms.push_back(get_electrostatic_potential(s1, s2));
                         }
                     });
