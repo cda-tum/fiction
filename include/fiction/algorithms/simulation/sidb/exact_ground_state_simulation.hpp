@@ -89,9 +89,6 @@ class exact_ground_state_simulation_impl
         // set the timeout
         set_timeout(params.timeout);
 
-        // determine the maximum electrostatic potential in the layout for normalization
-        determine_maximum_electrostatic_potential();
-
         // set up the solver (z3::optimize)
         generate_smt_instance();
         // run the solver and extract the valid layouts
@@ -122,11 +119,6 @@ class exact_ground_state_simulation_impl
     z3::optimize optimizer{ctx};
 
     /**
-     * The maximum electrostatic potential in the layout for normalization.
-     */
-    double normalization{0.0};
-
-    /**
      * Sets the given timeout for the current solver.
      *
      * @param t Timeout in ms.
@@ -141,28 +133,6 @@ class exact_ground_state_simulation_impl
      * Alias for an SiDB.
      */
     using sidb = typename charge_distribution_surface<Lyt>::cell;
-
-    /**
-     * Determines the maximum electrostatic potential in the layout for normalization of the real-valued constants.
-     */
-    void determine_maximum_electrostatic_potential()
-    {
-        charge_lyt.foreach_cell(
-            [this](const sidb& s1)
-            {
-                charge_lyt.foreach_cell(
-                    [this, &s1](const sidb& s2)
-                    {
-                        if (s1 == s2)
-                        {
-                            return;
-                        }
-
-                        normalization =
-                            std::max(normalization, charge_lyt.get_chargeless_potential_between_sidbs(s1, s2));
-                    });
-            });
-    }
     /**
      * Returns a Z3 expression representing the charge state of the given SiDB.
      *
@@ -338,8 +308,7 @@ class exact_ground_state_simulation_impl
                         // define the electrostatic potential between two SiDBs
 
                         const auto potential_val = ctx.real_val(
-                            std::to_string(charge_lyt.get_chargeless_potential_between_sidbs(s1, s2) / normalization)
-                                .c_str());
+                            std::to_string(charge_lyt.get_chargeless_potential_between_sidbs(s1, s2)).c_str());
 
                         // this encoding is more performant than using `z3::ite` expressions with 0-valued sub-terms
                         optimizer.add(get_electrostatic_potential(s1, s2) == potential_val * get_sidb_sign(s2));
@@ -379,8 +348,8 @@ class exact_ground_state_simulation_impl
      */
     void define_population_stability()
     {
-        const auto mu_minus = ctx.real_val(std::to_string(params.phys_params.mu / normalization).c_str());
-        const auto mu_plus  = ctx.real_val(std::to_string(params.phys_params.mu_p / normalization).c_str());
+        const auto mu_minus = ctx.real_val(std::to_string(params.phys_params.mu).c_str());
+        const auto mu_plus  = ctx.real_val(std::to_string(params.phys_params.mu_p).c_str());
 
         charge_lyt.foreach_cell(
             [this, &mu_minus, &mu_plus](const sidb& s1)
