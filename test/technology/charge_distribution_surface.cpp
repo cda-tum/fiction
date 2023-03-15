@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -124,7 +125,15 @@ TEMPLATE_TEST_CASE(
         // all SiDBs' charge states are set to positive
         charge_layout.set_all_charge_states(sidb_charge_state::POSITIVE);
         //
-        //        // read SiDBs' charge states
+        //
+        // calculate potential between two sidbs (charge sign not included)
+        CHECK(charge_layout.potential_between_sidbs({5, 4}, {5, 5}) > 0);
+        CHECK(charge_layout.potential_between_sidbs({5, 4}, {5, 4}) == 0.0);
+        CHECK(charge_layout.potential_between_sidbs({5, 4}, {5, 6}) > 0);
+        CHECK(charge_layout.potential_between_sidbs({5, 5}, {5, 6}) > 0);
+        CHECK(std::abs(charge_layout.potential_between_sidbs({5, 6}, {5, 5}) -
+                       charge_layout.potential_between_sidbs({5, 5}, {5, 6})) < physical_constants::POP_STABILITY_ERR);
+        // read SiDBs' charge states
         CHECK(charge_layout.get_charge_state({5, 4}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_state({5, 6}) == sidb_charge_state::POSITIVE);
@@ -135,7 +144,7 @@ TEMPLATE_TEST_CASE(
         // all SiDBs' charge states are set to neutral
         charge_layout.set_all_charge_states(sidb_charge_state::NEUTRAL);
         //
-        //        // read SiDBs' charge states
+        // read SiDBs' charge states
         CHECK(charge_layout.get_charge_state({5, 4}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_layout.get_charge_state({5, 6}) == sidb_charge_state::NEUTRAL);
@@ -143,10 +152,10 @@ TEMPLATE_TEST_CASE(
         //
         charge_layout.set_all_charge_states(sidb_charge_state::NEUTRAL);
         //
-        //        // all SiDBs' charge states are set to negative
+        // all SiDBs' charge states are set to negative
         charge_layout.set_all_charge_states(sidb_charge_state::NEGATIVE);
         //
-        //        // read SiDBs' charge states
+        // read SiDBs' charge states
         CHECK(charge_layout.get_charge_state({5, 4}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 6}) == sidb_charge_state::NEGATIVE);
@@ -199,14 +208,16 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({1, 10, 1}, TestType::cell_type::NORMAL);
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
-        CHECK(charge_layout.get_electrostatic_potential({0, 0, 0}, {0, 0, 0}) == 0.0);
-        CHECK(charge_layout.get_electrostatic_potential({1, 8, 0}, {1, 8, 0}) == 0.0);
-        CHECK(charge_layout.get_electrostatic_potential({1, 10, 1}, {1, 10, 1}) == 0.0);
-        CHECK((charge_layout.get_electrostatic_potential({1, 8, 0}, {0, 0, 0}) - 0.0121934043) < 0.00000001);
-        CHECK(charge_layout.get_electrostatic_potential({0, 0, 0}, {1, 10, 1}) ==
-              charge_layout.get_electrostatic_potential({1, 10, 1}, {0, 0, 0}));
-        CHECK(charge_layout.get_electrostatic_potential({0, 0, 0}, {1, 8, 0}) >
-              charge_layout.get_electrostatic_potential({1, 10, 1}, {0, 0, 0}));
+        CHECK(charge_layout.get_chargeless_potential_between_sidbs({2, 8, 0}, {2, 10, 1}) == 0);
+        CHECK(charge_layout.get_chargeless_potential_between_sidbs({0, 0, 0}, {0, 0, 0}) == 0.0);
+        CHECK(charge_layout.get_chargeless_potential_between_sidbs({1, 8, 0}, {1, 8, 0}) == 0.0);
+        CHECK(charge_layout.get_chargeless_potential_between_sidbs({1, 10, 1}, {1, 10, 1}) == 0.0);
+        CHECK((charge_layout.get_chargeless_potential_between_sidbs({1, 8, 0}, {0, 0, 0}) - 0.0121934043) < 0.00000001);
+        CHECK(std::abs(charge_layout.get_chargeless_potential_between_sidbs({0, 0, 0}, {1, 10, 1}) -
+                       charge_layout.get_chargeless_potential_between_sidbs({1, 10, 1}, {0, 0, 0})) <
+              physical_constants::POP_STABILITY_ERR);
+        CHECK(charge_layout.get_chargeless_potential_between_sidbs({0, 0, 0}, {1, 8, 0}) >
+              charge_layout.get_chargeless_potential_between_sidbs({1, 10, 1}, {0, 0, 0}));
     }
     //
     SECTION("Local Potential")
@@ -362,5 +373,42 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout_new.get_charge_index().first == 14);
         charge_layout_new.increase_charge_index_by_one();
         CHECK(charge_layout_new.get_charge_index().first == 15);
+    }
+
+    SECTION("using chargeless and normal potential function")
+    {
+        TestType                         lyt_new{{11, 11}};
+        const sidb_simulation_parameters params{3, -0.32, 5.0 * 1E-9, 3.84 * 1E-10, 7.68 * 1E-10, 2.25 * 1E-10};
+
+        lyt_new.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout_new{lyt_new, params};
+
+        charge_layout_new.assign_charge_state({0, 0, 1}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_charge_state({1, 3, 0}, sidb_charge_state::POSITIVE);
+        charge_layout_new.assign_charge_state({10, 5, 1}, sidb_charge_state::NEUTRAL);
+
+        CHECK(charge_layout_new.get_charge_state({0, 0, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout_new.get_charge_state({1, 3, 0}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_layout_new.get_charge_state({10, 5, 1}) == sidb_charge_state::NEUTRAL);
+
+        CHECK(charge_layout_new.get_chargeless_potential_between_sidbs({0, 0, 1}, {1, 3, 0}) > 0);
+        CHECK(charge_layout_new.get_potential_between_sidbs({0, 0, 1}, {1, 3, 0}) > 0);
+
+        CHECK(charge_layout_new.get_chargeless_potential_between_sidbs({0, 0, 1}, {10, 5, 1}) > 0);
+        CHECK(charge_layout_new.get_potential_between_sidbs({0, 0, 1}, {10, 5, 1}) == 0.0);
+
+        CHECK(charge_layout_new.get_chargeless_potential_between_sidbs({10, 5, 1}, {0, 0, 1}) > 0);
+        CHECK(charge_layout_new.get_potential_between_sidbs({10, 5, 1}, {0, 0, 1}) < 0);
+
+        CHECK_THAT(charge_layout_new.get_potential_between_sidbs({10, 5, 1}, {0, 0, 1}) +
+                       charge_layout_new.get_chargeless_potential_between_sidbs({10, 5, 1}, {0, 0, 1}),
+                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
+
+        CHECK_THAT(charge_layout_new.get_potential_between_sidbs({0, 0, 1}, {1, 3, 0}) -
+                       charge_layout_new.get_chargeless_potential_between_sidbs({0, 0, 1}, {1, 3, 0}),
+                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
     }
 }

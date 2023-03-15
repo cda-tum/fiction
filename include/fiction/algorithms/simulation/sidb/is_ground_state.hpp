@@ -16,15 +16,13 @@ namespace fiction
 {
 
 /**
- * This function checks if the ground state is found by the *quicksim* algorithm.
+ * This function checks if the ground state is found by the *QuickSim* algorithm.
  *
  * @tparam Lyt Cell-level layout type.
- * @param quicksim_results All found physically valid charge distribution surfaces obtained by the quicksim algorithm
- * (quicksim).
- * @param exhaustive_results All valid charge distribution surfaces determined by ExGS
- * (exhaustive_ground_state_simulation).
- * @return Returns `true` if the relative difference between the lowest energies of the two sets is less than 0.00001,
- * `false` otherwise.
+ * @param quicksim_results All found physically valid charge distribution surfaces obtained by the *QuickSim* algorithm.
+ * @param exhaustive_results All valid charge distribution surfaces determined by ExGS.
+ * @return Returns `true` if the relative difference between the lowest energies of the two sets is less than \f$
+ * 0.00001 \f$, `false` otherwise.
  */
 template <typename Lyt>
 [[nodiscard]] bool is_ground_state(const quicksim_stats<Lyt>& quicksim_results,
