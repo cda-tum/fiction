@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    name: Post Clang-Tidy Review
 
     steps:
       # Download the artifact uploaded by the lint action
