@@ -586,8 +586,6 @@ class exact_ground_state_simulation_impl
             {
                 z3::model m = optimizer.get_model();
 
-                //                std::cout << "MODEL:\n" << m << std::endl;
-
                 const auto lyt = extract_charge_configuration_from_model(m);
 
                 if (lyt.is_physically_valid())
@@ -601,40 +599,6 @@ class exact_ground_state_simulation_impl
                     std::cout << "layout is not valid!" << std::endl;
                     ++stats.number_of_invalid_layouts;
                 }
-
-                //                // print the system energy
-                //                std::cout << "System Energy: " << lyt.get_system_energy() << std::endl;
-                //                std::cout << "Z3           : " << m.eval(get_system_energy(), true).as_double() <<
-                //                std::endl;
-                //
-                //                // print the local potentials
-                //                lyt.foreach_cell(
-                //                    [this, &m, &lyt](const sidb& s1)
-                //                    {
-                //                        std::cout << fmt::format("V_local,{} = {}", s1, *lyt.get_local_potential(s1))
-                //                        << std::endl; std::cout << fmt::format("Z3              = {}",
-                //                                                 m.eval(get_local_potential(s1), true).as_double())
-                //                                  << std::endl;
-                //
-                //                        // print the electrostatic potential
-                //                        lyt.foreach_cell(
-                //                            [this, &m, &lyt, &s1](const sidb& s2)
-                //                            {
-                //                                if (s1 == s2)
-                //                                {
-                //                                    return;
-                //                                }
-                //
-                //                                std::cout << fmt::format("V_{},{} = {}", s1, s2,
-                //                                                         lyt.get_potential_between_sidbs(s1, s2) *
-                //                                                             charge_state_to_sign(lyt.get_charge_state(s2)))
-                //                                          << std::endl;
-                //                                std::cout << fmt::format("Z3                = {}",
-                //                                                         m.eval(get_electrostatic_potential(s1, s2),
-                //                                                         true).as_double())
-                //                                          << std::endl;
-                //                            });
-                //                    });
 
                 // if there is a next model to be considered, exclude the current one from the search space
                 if (stats.valid_lyts.size() != params.number_of_valid_layouts_to_enumerate)
