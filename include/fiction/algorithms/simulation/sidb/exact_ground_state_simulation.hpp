@@ -403,8 +403,9 @@ class exact_ground_state_simulation_impl
 
         if (!energy_terms.empty())
         {
-            // the system energy is half of the sum of all local potential terms (`/ 2` is more performant than `* 0.5`)
-            optimizer.add(system_energy == z3::sum(energy_terms) / ctx.real_val(2));
+            // the system energy is in fact half of the sum of all local potential terms
+            // we do not multiply by 0.5 here, because this is irrelevant for the optimization (equisatisfiable)
+            optimizer.add(system_energy == z3::sum(energy_terms));
         }
 
         // minimize the system energy
