@@ -280,7 +280,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
     {
         const gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
 
-        SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
+        SECTION("(0,0) to (3,3) with coordinate obstruction via PIs")  // path of length 7
         {
             obstruction_layout obstr_lyt{layout};
 
@@ -303,12 +303,41 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
             CHECK(path[4] == coordinate<gate_lyt>{1, 3});
             CHECK(path[5] == coordinate<gate_lyt>{2, 3});
         }
+        SECTION("(0,0) to (3,3) with coordinate obstruction via declaration")  // path of length 7
+        {
+            obstruction_layout obstr_lyt{layout};
+
+            // create some PIs as obstruction
+            obstr_lyt.obstruct_coordinate({3, 0});
+            obstr_lyt.obstruct_coordinate({3, 1});
+            obstr_lyt.obstruct_coordinate({1, 2});
+            obstr_lyt.obstruct_coordinate({2, 2});
+            // effectively blocking (3,2) as well
+
+            const auto collection =
+                yen_k_shortest_paths<coord_path>(obstr_lyt, {{0, 0}, {3, 3}}, 1);  // only one path possible
+
+            REQUIRE(collection.size() == 1);
+            const auto& path = collection[0];
+            REQUIRE(path.size() == 7);
+            CHECK(path[1] == coordinate<gate_lyt>{0, 1});
+            CHECK(path[2] == coordinate<gate_lyt>{0, 2});
+            CHECK(path[3] == coordinate<gate_lyt>{0, 3});
+            CHECK(path[4] == coordinate<gate_lyt>{1, 3});
+            CHECK(path[5] == coordinate<gate_lyt>{2, 3});
+
+            // coordinates should still be obstructed
+            CHECK(obstr_lyt.is_obstructed_coordinate({3, 0}));
+            CHECK(obstr_lyt.is_obstructed_coordinate({3, 1}));
+            CHECK(obstr_lyt.is_obstructed_coordinate({1, 2}));
+            CHECK(obstr_lyt.is_obstructed_coordinate({2, 2}));
+        }
     }
     SECTION("USE")
     {
         const gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
 
-        SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
+        SECTION("(0,0) to (3,3) with coordinate obstruction via PIs")  // path of length 7
         {
             obstruction_layout obstr_lyt{layout};
 
@@ -326,6 +355,28 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
             CHECK(path[3] == coordinate<gate_lyt>{1, 2});
             CHECK(path[4] == coordinate<gate_lyt>{2, 2});
             CHECK(path[5] == coordinate<gate_lyt>{3, 2});
+        }
+        SECTION("(0,0) to (3,3) with coordinate obstruction via declaration")  // path of length 7
+        {
+            obstruction_layout obstr_lyt{layout};
+
+            // create a PI as obstruction
+            obstr_lyt.obstruct_coordinate({3, 0});  // blocks 3 paths
+
+            const auto collection =
+                yen_k_shortest_paths<coord_path>(obstr_lyt, {{0, 0}, {3, 3}}, 1);  // only one path possible
+
+            REQUIRE(collection.size() == 1);
+            const auto& path = collection[0];
+            REQUIRE(path.size() == 7);
+            CHECK(path[1] == coordinate<gate_lyt>{1, 0});
+            CHECK(path[2] == coordinate<gate_lyt>{1, 1});
+            CHECK(path[3] == coordinate<gate_lyt>{1, 2});
+            CHECK(path[4] == coordinate<gate_lyt>{2, 2});
+            CHECK(path[5] == coordinate<gate_lyt>{3, 2});
+
+            // coordinates should still be obstructed
+            CHECK(obstr_lyt.is_obstructed_coordinate({3, 0}));
         }
     }
 }
@@ -481,6 +532,11 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
             CHECK(path[3] == coordinate<gate_lyt>{0, 3});
             CHECK(path[4] == coordinate<gate_lyt>{1, 3});
             CHECK(path[5] == coordinate<gate_lyt>{2, 3});
+
+            // connections should still be obstructed
+            CHECK(obstr_lyt.is_obstructed_connection({0, 0}, {1, 0}));
+            CHECK(obstr_lyt.is_obstructed_connection({0, 1}, {1, 1}));
+            CHECK(obstr_lyt.is_obstructed_connection({0, 2}, {1, 2}));
         }
     }
     SECTION("USE")
@@ -504,6 +560,9 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
             CHECK(path[3] == coordinate<gate_lyt>{1, 2});
             CHECK(path[4] == coordinate<gate_lyt>{2, 2});
             CHECK(path[5] == coordinate<gate_lyt>{3, 2});
+
+            // connections should still be obstructed
+            CHECK(obstr_lyt.is_obstructed_connection({2, 0}, {3, 0}));
         }
     }
 }
