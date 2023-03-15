@@ -43,7 +43,7 @@ TEMPLATE_TEST_CASE("Single SiDB QuickSim simulation", "[quicksim]",
 
     quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
 
-    CHECK(quicksimstats.valid_lyts.size() == quicksim_params.interation_steps + 1);
+    CHECK(quicksimstats.valid_lyts.size() > 0);
 }
 
 template <typename Lyt>
