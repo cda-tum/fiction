@@ -29,10 +29,12 @@ void obstruction_layout(pybind11::module& m, const std::string& topology)
 
         .def("obstruct_coordinate", &ObstrLyt::obstruct_coordinate)
         .def("obstruct_connection", &ObstrLyt::obstruct_connection)
-        .def("clear_obstructed_coordinates", &ObstrLyt::clear_obstructed_coordinates)
-        .def("clear_obstructed_connections", &ObstrLyt::clear_obstructed_connections)
         .def("is_obstructed_coordinate", &ObstrLyt::is_obstructed_coordinate)
         .def("is_obstructed_connection", &ObstrLyt::is_obstructed_connection)
+        .def("clear_obstructed_coordinate", &ObstrLyt::clear_obstructed_coordinate)
+        .def("clear_obstructed_connection", &ObstrLyt::clear_obstructed_connection)
+        .def("clear_obstructed_coordinates", &ObstrLyt::clear_obstructed_coordinates)
+        .def("clear_obstructed_connections", &ObstrLyt::clear_obstructed_connections)
 
         ;
 }
