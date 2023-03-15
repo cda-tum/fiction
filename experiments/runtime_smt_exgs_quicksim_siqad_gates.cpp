@@ -34,13 +34,13 @@ int main()  // NOLINT
 
     std::vector<uint64_t> db_num{};
 
-    const std::string folder = fmt::format("{}/siqad_gates/", EXPERIMENTS_PATH);
+    static const std::string folder = fmt::format("{}siqad_gates/", EXPERIMENTS_PATH);
 
-    static const std::array<std::string, 5> folders = {folder + "and", folder + "nand", folder + "xnor", folder + "xor",
-                                                       folder + "or"};
+    static const std::array folders = {folder + "and", folder + "nand", folder + "xnor", folder + "xor", folder + "or"};
 
     bool        all_true    = true;
     std::size_t num_invalid = 0u;
+
     for (const auto& folder_gate : folders)
     {
         for (const auto& file : std::filesystem::directory_iterator(folder_gate))
