@@ -15,7 +15,7 @@ are a crucial step in the physical design flow of SiDB layouts, as they are used
 .. doxygenstruct:: fiction::quicksim_params
    :members:
 
-.. doxgenfunction:: fiction::quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, quicksim_stats<Lyt>* pst = nullptr)
+.. doxygenfunction:: fiction::quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, quicksim_stats<Lyt>* pst = nullptr)
 
 
 **Header:** ``fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp``
