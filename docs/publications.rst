@@ -24,9 +24,9 @@ If you use *fiction* in your work, we would appreciate if you cited
       month = {May}
     }
 
-Furthermore, if you use any of the physical design algorithms :ref:`exact <exact>`, :ref:`ortho <ortho>`,
-:ref:`onepass <onepass>`, :ref:`equiv <equiv>`, or :ref:`color routing <color_routing>`, please consider citing their
-respective papers as well:
+Furthermore, if you use any of the design automation algorithms :ref:`exact <exact>`, :ref:`ortho <ortho>`,
+:ref:`onepass <onepass>`, :ref:`equiv <equiv>`, :ref:`color routing <color_routing>`, or :ref:`QuickSim <quicksim>`
+please consider citing their respective papers as well:
 
 .. code-block:: tex
 
@@ -76,6 +76,18 @@ respective papers as well:
       author={Walter, Marcel and Wille, Robert},
       booktitle={International Symposium on Nanoscale Architectures},
       year={2022}
+    }
+
+.. code-block:: tex
+
+    @misc{drewniok2023quicksim,
+      author = {Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert}
+      title = {{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
+      archivePrefix = {arXiv},
+      eprint = {2303.03422},
+      note = {arXiv:2303.03422},
+      year = {2023},
+      month = {March}
     }
 
 The same holds for the :ref:`Bestagon <bestagon>` gate library:
