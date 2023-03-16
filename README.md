@@ -106,7 +106,7 @@ Additionally, output formats for state-of-the-art physical simulator engines are
 
 ### Quantum-dot Cellular Automata (QCA)
 
-<img src="docs/_static/qca_cells.png" alt="Input pin and cell output" align="right" height="70"/>
+<img src="docs/_static/qca_cells.png" alt="QCA cells" align="right" height="70"/>
 
 Gate libraries:
 
@@ -124,7 +124,7 @@ QCA-STACK format, and to Sophia Kuhn for implementing the SVG writer!
 
 ### in-plane Nanomagnet Logic (iNML)
 
-<img src="docs/_static/nml_cells.png" alt="Input pin and cell output" align="right" height="70"/>
+<img src="docs/_static/nml_cells.png" alt="iNML cells" align="right" height="70"/>
 
 Gate libraries:
 
@@ -139,7 +139,7 @@ Many thanks to Umberto Garlando, Fabrizio Riente, and Giuliana Beretta for their
 
 ### Silicon Dangling Bonds (SiDBs)
 
-<img src="docs/_static/sidb_cells.png" alt="Input pin and cell output" align="right" height="70"/>
+<img src="docs/_static/sidb_cells.png" alt="SiDB cells" align="right" height="70"/>
 
 Gate libraries:
 
@@ -150,6 +150,57 @@ File formats:
 - `*.sqd` for [SiQAD](https://github.com/siqad/siqad)
 
 Many thanks to Samuel Sze Hang Ng for his support!
+
+## Implemented Design Automation Algorithms
+
+The *fiction* framework provides implementations of state-of-the-art design automation algorithms for FCN technologies.
+These algorithms can be used in evaluation scripts to perform logic synthesis, physical design, layout verification, and
+physical simulation.
+
+### Logic Synthesis
+
+For logic synthesis, *fiction* relies on the [mockturtle library](https://github.com/lsils/mockturtle) that offers a
+multitude of logic network types and optimization algorithms. Logic synthesis can be performed in external tools and
+resulting Verilog/AIGER/BLIF/... files can be parsed by *fiction*. Alternatively, since *mockturtle* is included in
+*fiction*, synthesis can be applied in the same evaluation script.
+
+### Physical Design
+
+For automatic FCN layout obtainment, *fiction* provides algorithms that
+take [mockturtle logic networks](https://mockturtle.readthedocs.io/en/latest/implementations.html) as input
+specification and output placed, routed, and clocked circuits.
+
+<img src="docs/_static/compare1.png" alt="QCA Layout" align="right" width="280"/>
+
+Among these algorithms are
+
+- SMT-based [exact placement and routing](https://ieeexplore.ieee.org/document/8342060)
+- OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
+- SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
+- SAT-based [multi-path routing](https://www.cda.cit.tum.de/files/eda/2022_nanoarch_efficient_multi-path_signal_routing_for_fcn.pdf)
+
+plus several path finding algorithms that work on generic layouts:
+
+- shortest path via the [A* algorithm](https://ieeexplore.ieee.org/document/4082128)
+- *k* shortest paths via [Yen's algorithm](https://www.ams.org/journals/qam/1970-27-04/S0033-569X-1970-0253822-7/)
+
+### Verification
+
+Layout correctness can be [validated](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#verification)
+using
+
+- [Design Rule Violation (DRV)](https://fiction.readthedocs.io/en/latest/algorithms/verification.html#design-rule-violations-drvs)
+  checking
+- SAT-based [formal verification](https://ieeexplore.ieee.org/document/9218641) (equivalence checking)
+
+### Physical Simulation
+
+When a layout is compiled to the cell-level via the application of a technology-dependent gate library, it can be
+simulated using a physical model. Currently, the following simulation algorithms are implemented in *fiction*:
+
+- Silicon Dangling Bonds (SiDBs)
+  - [Exhaustive Groundstate Simulation (ExGS)](https://fiction.readthedocs.io/en/latest/algorithms/sidb_simulation.html#_CPPv4I0EN7fiction34exhaustive_ground_state_simulationEvRK3LytRK26sidb_simulation_parametersP10exgs_statsI3LytE)
+  - [*QuickSim* Groundstate Simulation](https://arxiv.org/abs/2303.03422)
 
 ## Clocking Schemes
 
@@ -169,9 +220,9 @@ Built-in schemes are
 |:--------------------------------------------------------:|:------------------------------------------------------------------------:|:---------------------------------------------------------------------------:|
 | <img src="docs/_static/use.png" alt="USE" height="200"/> |         <img src="docs/_static/res.png" alt="RES" height="200"/>         |          <img src="docs/_static/esr.png" alt="ESR" height="200"/>           |
 
-|   [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096)   |    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
-|:------------------------------------------------------------------------------------:|:------------------------------------------------------------:|
-|               <img src="docs/_static/cfe.png" alt="CFE" height="200"/>               | <img src="docs/_static/bancs.png" alt="BANCS" height="300"/> |
+| [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096) |    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
+|:--------------------------------------------------------------------------------:|:------------------------------------------------------------:|
+|             <img src="docs/_static/cfe.png" alt="CFE" height="200"/>             | <img src="docs/_static/bancs.png" alt="BANCS" height="300"/> |
 
 plus the mentioned irregular open clocking that works via a clock map instead of a regular extrapolated cutout.
 
@@ -214,28 +265,6 @@ tiles, [synchronization elements](https://ieeexplore.ieee.org/document/8626294) 
 multiple clock cycles. These artificial latches are able to feed information to any other clock number, but their usage
 reduces the overall throughput of the layout. In return, long wire detours for signal synchronization can be prevented.
 
-## Implemented Physical Design Algorithms
-
-For automatic FCN layout obtainment, *fiction* provides implementations of state-of-the-art
-[physical design algorithms](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#physical-design) that
-take [mockturtle logic networks](https://mockturtle.readthedocs.io/en/latest/implementations.html) as input
-specification and output placed, routed, and clocked circuits.
-
-Among these algorithms are
-
-- SMT-based [exact placement and routing](https://ieeexplore.ieee.org/document/8342060)
-- OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
-- SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
-
-Furthermore, layout correctness can
-be [validated](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#verification) using
-
-- SAT-based [formal verification](https://ieeexplore.ieee.org/document/9218641)
-
-For logic synthesis, *fiction* relies on the [mockturtle library](https://github.com/lsils/mockturtle) that offers logic
-network types and optimization algorithms. Logic synthesis can be performed in external tools and resulting
-Verilog/AIGER/BLIF/... files can be parsed by *fiction*. Alternatively, since *mockturtle* is included in *fiction*,
-synthesis can be applied in the same evaluation script.
 
 ## Cost Metrics
 
