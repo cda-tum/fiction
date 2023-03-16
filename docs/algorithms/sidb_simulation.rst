@@ -10,6 +10,8 @@ are a crucial step in the physical design flow of SiDB layouts, as they are used
 .. doxygenstruct:: fiction::sidb_simulation_parameters
    :members:
 
+.. _quicksim:
+
 **Header:** ``fiction/algorithms/simulation/sidb/quicksim.hpp``
 
 .. doxygenstruct:: fiction::quicksim_params
