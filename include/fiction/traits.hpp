@@ -857,50 +857,6 @@ inline constexpr bool has_is_obstructed_connection_v = has_is_obstructed_connect
 #pragma endregion
 
 /**
- * Placement layout
- */
-
-#pragma region has_initialize_random_placement
-template <class Lyt, class = void>
-struct has_initialize_random_placement : std::false_type
-{};
-
-template <class Lyt>
-struct has_initialize_random_placement<Lyt, std::void_t<decltype(std::declval<Lyt>().initialize_random_placement())>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_initialize_random_placement_v = has_initialize_random_placement<Lyt>::value;
-#pragma endregion
-
-#pragma region has_random_tile
-template <class Lyt, class = void>
-struct has_random_tile : std::false_type
-{};
-
-template <class Lyt>
-struct has_random_tile<Lyt, std::void_t<decltype(std::declval<Lyt>().random_tile())>> : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_random_tile_v = has_random_tile<Lyt>::value;
-#pragma endregion
-
-#pragma region has_random_node
-template <class Lyt, class = void>
-struct has_random_node : std::false_type
-{};
-
-template <class Lyt>
-struct has_random_node<Lyt, std::void_t<decltype(std::declval<Lyt>().random_node())>> : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_random_node_v = has_random_node<Lyt>::value;
-#pragma endregion
-
-/**
  * Gate libraries
  */
 

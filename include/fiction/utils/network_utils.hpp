@@ -26,7 +26,7 @@ namespace mockturtle
 template <typename Ntk>
 struct edge
 {
-    node<Ntk> source, target;
+    const node<Ntk> source, target;
     /**
      * Equality operator.
      *
