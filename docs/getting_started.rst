@@ -69,8 +69,16 @@ to your ``CMakeLists.txt``::
     add_subdirectory(fiction/)
     target_link_libraries(fanfiction libfiction)
 
-Note that ``target_link_libraries`` must be called after the respective ``add_executable`` statement that defines
-``fanfiction``. Within your code files, you can then call
+.. note::
+
+    The command ``target_link_libraries`` must be called after the respective ``add_executable`` statement that defines
+    ``fanfiction``.
+
+    By default *fiction*'s CLI is enabled and will be built, which can be time-consuming. If you do not need it, you can
+    disable it by passing ``-DFICTION_CLI=OFF`` to your ``cmake`` call or adding
+    `set(FICTION_CLI OFF CACHE BOOL "" FORCE)` **before** `add_subdirectory(fiction/)`.
+
+Within your code files, you can then call
 
 .. code-block:: c++
 
