@@ -120,7 +120,7 @@ The :ref:`one-pass synthesis algorithm <onepass>` is embedded via the Python3 sc
 `Mugen <https://github.com/whaaswijk/mugen>`_ by Winston Haaswijk using `pybind11 <https://github.com/pybind/pybind11>`_.
 It has some further Python dependencies that can be installed via ``pip3``::
 
-    pip3 install python-sat==0.1.6.dev6 wrapt_timeout_decorator graphviz
+    pip3 install -r libs/mugen/requirements.txt
 
 The Python3 integration is experimental and may cause issues on some systems. It is currently not available on Windows
 and some macOS versions due to issues with ``python-sat``. Mugen requires at least Python 3.7!
