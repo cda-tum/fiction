@@ -103,7 +103,7 @@ Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/maste
 
 Finally, before building *fiction*, pass ``-DFICTION_Z3=ON`` to the ``cmake`` call. It should be able to find
 Z3's include path and link against the binary automatically if installed correctly. Otherwise, you can use
-``-DFICTION_Z3_SEARCH_PATHS=<path_to_z3>`` to set a list of locations that are to be searched for the installed solver.
+``-DZ3_ROOT=<path_to_z3_root>`` to set Z3's root directory that is to be searched for the installed solver.
 
 SAT-based ``onepass`` synthesis
 ###############################
