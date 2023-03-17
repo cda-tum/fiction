@@ -597,7 +597,7 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr bool is_crossing_layer(const OffsetCoordinateType& c) const noexcept
     {
-        return c.z > 0;
+        return c.z > 0ull;
     }
     /**
      * Returns whether the given coordinate is located within the layout bounds.

@@ -62,6 +62,14 @@ Verification
 
    verification.rst
 
+Simulation
+==========
+
+.. toctree::
+   :maxdepth: 1
+
+   sidb_simulation.rst
+
 
 Properties
 ==========

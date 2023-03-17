@@ -135,3 +135,8 @@ target_include_directories(libfiction SYSTEM INTERFACE combinations/)
 add_subdirectory(graph-coloring/)
 target_include_directories(libfiction SYSTEM INTERFACE graph-coloring/Header)
 target_link_libraries(libfiction INTERFACE graph-coloring)
+
+# Include tinyXML2
+set(tinyxml2_BUILD_TESTING OFF)
+add_subdirectory(tinyxml2/)
+target_link_libraries(libfiction INTERFACE tinyxml2::tinyxml2)

@@ -97,6 +97,10 @@ The :ref:`exact placement and routing algorithm <exact>` utilizes the `SMT solve
 Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/master/README-CMake.md>`_ and make sure to call
 ``sudo make install`` to install headers, scripts, and the binary.
 
+.. note::
+   Be sure to compile Z3 in **release mode** to avoid performance issues when running *fiction*'s dependent functions!
+   This can be achieved by passing ``-DCMAKE_BUILD_TYPE=Release`` to Z3's ``cmake`` call.
+
 Finally, before building *fiction*, pass ``-DFICTION_Z3=ON`` to the ``cmake`` call. It should be able to find
 Z3's include path and link against the binary automatically if installed correctly. Otherwise, you can use
 ``-DFICTION_Z3_SEARCH_PATHS=<path_to_z3>`` to set a list of locations that are to be searched for the installed solver.

@@ -5,6 +5,7 @@
 #ifndef FICTION_DISTANCE_HPP
 #define FICTION_DISTANCE_HPP
 
+#include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 
 #include <cmath>
@@ -58,6 +59,33 @@ template <typename Lyt, typename Dist = double>
 
     const auto x = static_cast<double>(source.x) - static_cast<double>(target.x);
     const auto y = static_cast<double>(source.y) - static_cast<double>(target.y);
+
+    return static_cast<Dist>(std::hypot(x, y));
+}
+/**
+ * Computes the distance between two SiDB cells in nanometers.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam Dist Floating-point type for the distance.
+ * @param c1 The first cell.
+ * @param c2 The second cell.
+ * @return The distance between the two cells in nanometers.
+ */
+template <typename Lyt, typename Dist = double>
+[[nodiscard]] constexpr Dist
+sidb_nanometer_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source, const coordinate<Lyt>& target,
+                        const sidb_simulation_parameters& sp = sidb_simulation_parameters{}) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not based on SiDB technology");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    static_assert(std::is_floating_point_v<Dist>, "Dist is not a floating-point type");
+
+    const auto pos_c1 = sidb_nm_position<Lyt>(sp, source);
+    const auto pos_c2 = sidb_nm_position<Lyt>(sp, target);
+
+    const auto x = static_cast<Dist>(pos_c1.first) - static_cast<double>(pos_c2.first);
+    const auto y = static_cast<Dist>(pos_c1.second) - static_cast<double>(pos_c2.second);
 
     return static_cast<Dist>(std::hypot(x, y));
 }

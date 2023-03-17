@@ -15,6 +15,7 @@
 #include <cassert>
 #include <cstdint>
 #include <iterator>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -51,7 +52,7 @@ class yen_k_shortest_paths_impl
                          unit_cost_functor<obstruction_layout<Lyt>, uint8_t>(), ps.astar_params));
     }
 
-    path_collection<Path> run()
+    path_collection<Path> run() noexcept
     {
         assert(!objective.source.is_dead() && !objective.target.is_dead() &&
                "Neither source nor target coordinate can be dead");
@@ -87,6 +88,8 @@ class yen_k_shortest_paths_impl
                     {
                         // block the connection that was already used in the previous shortest path
                         layout.obstruct_connection(p[i], p[i + 1]);
+                        // store connection for later clearing
+                        temporarily_obstructed_connections.push_back({p[i], p[i + 1]});
                     }
                 }
 
@@ -98,11 +101,13 @@ class yen_k_shortest_paths_impl
                     {
                         // block them from further exploration
                         layout.obstruct_coordinate(root);
+                        // store coordinate for later clearing
+                        temporarily_obstructed_coordinates.push_back(root);
                     }
                 }
 
                 // find an alternative path from the spur coordinate to the target and check that it is not empty
-                if (auto spur_path =
+                if (const auto spur_path =
                         a_star<Path>(layout, {spur, objective.target},
                                      manhattan_distance_functor<obstruction_layout<Lyt>, uint64_t>(),
                                      unit_cost_functor<obstruction_layout<Lyt>, uint8_t>(), ps.astar_params);
@@ -124,8 +129,7 @@ class yen_k_shortest_paths_impl
                 }
 
                 // clear obstructions again (prepare for the next potential path)
-                layout.clear_obstructed_coordinates();
-                layout.clear_obstructed_connections();
+                reset_temporary_obstructions();
             }
 
             // if there were no spur paths or if all spur paths have been added to k_shortest_paths already
@@ -174,6 +178,14 @@ class yen_k_shortest_paths_impl
      */
     path_set<Path> shortest_path_candidates{};
     /**
+     * A temporary storage for coordinates that are obstructed during the algorithm.
+     */
+    std::vector<coordinate<Lyt>> temporarily_obstructed_coordinates{};
+    /**
+     * A temporary storage for coordinates that are obstructed during the algorithm.
+     */
+    std::vector<std::pair<coordinate<Lyt>, coordinate<Lyt>>> temporarily_obstructed_connections{};
+    /**
      * Computes the cost of a path. This function can be adjusted to fetch paths of differing costs.
      *
      * Currently, the cost is equal to its length.
@@ -184,6 +196,23 @@ class yen_k_shortest_paths_impl
     static std::size_t path_cost(const Path& p) noexcept
     {
         return p.size();
+    }
+    /**
+     * Resets all temporary obstructions.
+     */
+    void reset_temporary_obstructions() noexcept
+    {
+        for (const auto& c : temporarily_obstructed_coordinates)
+        {
+            layout.clear_obstructed_coordinate(c);
+        }
+        for (const auto& c : temporarily_obstructed_connections)
+        {
+            layout.clear_obstructed_connection(c.first, c.second);
+        }
+
+        temporarily_obstructed_coordinates.clear();
+        temporarily_obstructed_connections.clear();
     }
 };
 

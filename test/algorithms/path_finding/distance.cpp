@@ -7,6 +7,7 @@
 #include <fiction/algorithms/path_finding/a_star.hpp>
 #include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 

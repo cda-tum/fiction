@@ -8,15 +8,16 @@
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
 
+#include <phmap.h>
+
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <functional>
 #include <optional>
 #include <string>
 #include <type_traits>
 #include <utility>
-
-#include <phmap.h>
 
 namespace fiction
 {

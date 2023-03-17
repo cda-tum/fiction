@@ -11,6 +11,8 @@
 #include "fiction/utils/routing_utils.hpp"
 #include "fiction/utils/stl_utils.hpp"
 
+#include <phmap.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -18,8 +20,6 @@
 #include <limits>
 #include <type_traits>
 #include <vector>
-
-#include <phmap.h>
 
 namespace fiction
 {
@@ -381,6 +381,7 @@ template <typename Lyt, typename Dist = uint64_t>
                                    const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
+    static_assert(std::is_arithmetic_v<Dist>, "Dist is not an arithmetic type");
 
     const auto path_length = a_star<layout_coordinate_path<Lyt>>(layout, {source, target}).size();
 

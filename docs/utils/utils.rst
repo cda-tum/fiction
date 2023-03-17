@@ -30,12 +30,34 @@ Network Utils
 .. doxygenfunction:: fiction::inverse_levels
 
 
+Truth Table Utils
+-----------------
+
+**Header:** ``fiction/utils/truth_table_utils.hpp``
+
+.. doxygenfunction:: fiction::create_id_tt
+.. doxygenfunction:: fiction::create_not_tt
+.. doxygenfunction:: fiction::create_and_tt
+.. doxygenfunction:: fiction::create_or_tt
+.. doxygenfunction:: fiction::create_nand_tt
+.. doxygenfunction:: fiction::create_nor_tt
+.. doxygenfunction:: fiction::create_xor_tt
+.. doxygenfunction:: fiction::create_xnor_tt
+.. doxygenfunction:: fiction::create_maj_tt
+
+
 Layout Utils
 ------------
 
 **Header:** ``fiction/utils/layout_utils.hpp``
 
 .. doxygenfunction:: fiction::num_adjacent_coordinates
+.. doxygenfunction:: fiction::relative_to_absolute_cell_position
+.. doxygenfunction:: fiction::port_direction_to_coordinate
+.. doxygenfunction:: fiction::normalize_layout_coordinates
+.. doxygenfunction:: fiction::convert_to_siqad_coordinates
+.. doxygenfunction:: fiction::convert_to_fiction_coordinates
+
 
 
 Placement Utils
@@ -84,6 +106,7 @@ Name Utils
 **Header:** ``fiction/utils/name_utils.hpp``
 
 .. doxygenfunction:: fiction::get_name
+.. doxygenfunction:: fiction::set_name
 .. doxygenfunction:: fiction::restore_network_name
 .. doxygenfunction:: fiction::restore_input_names
 .. doxygenfunction:: fiction::restore_output_names
@@ -158,3 +181,6 @@ Hashing
 This header defines implementations for ``std::hash`` for several data types.
 
 .. doxygenfunction:: fiction::hash_combine
+.. doxygenstruct:: std::hash<std::array<T, N>>
+.. doxygenstruct:: std::hash<std::set<T>>
+.. doxygenstruct:: std::hash<std::pair<T1, T2>>
