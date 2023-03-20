@@ -71,8 +71,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         using local_potential = std::vector<double>;
 
       public:
-        explicit charge_distribution_storage(const sidb_simulation_parameters& params = sidb_simulation_parameters{}) :
-                phys_params{params} {};
+        explicit charge_distribution_storage(const sidb_simulation_parameters& params = sidb_simulation_parameters{},
+                                             local_potential                   external_potential = {0.0}) :
+                phys_params{params},
+                external_pot{std::move(external_potential)} {};
         /**
          * Stores all physical parameters used for the simulation.
          */
@@ -96,7 +98,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         /**
          * Electrostatic potential at each SiDB position. Has to be updated when charge distribution is changed.
          */
-        local_potential loc_pot{};
+        local_potential external_pot{};
+        /**
+         * External electrostatic potential at each SiDB position.
+         */
+        local_potential local_pot{};
         /**
          * Stores the electrostatic energy of a given charge distribution.
          */
@@ -145,9 +151,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     explicit charge_distribution_surface(const Lyt&                        lyt,
                                          const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-                                         const sidb_charge_state&          cs     = sidb_charge_state::NEGATIVE) :
+                                         const sidb_charge_state&          cs     = sidb_charge_state::NEGATIVE,
+                                         std::vector<double>               external_potential = {}) :
             Lyt(lyt),
-            strg{std::make_shared<charge_distribution_storage>(params)}
+            strg{std::make_shared<charge_distribution_storage>(params, external_potential)}
     {
         static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -477,11 +484,20 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return potential_between_sidbs_by_index(index1, index2);
     }
     /**
+     * This function can be used to assign an external electrostatic potential to the layout. All important attributes
+     * of the charge layout are updated automatically.
+     */
+    void set_external_potential(const std::vector<double>& external_voltage) noexcept
+    {
+        strg->external_pot = external_voltage;
+        this->update_after_charge_change();
+    }
+    /**
      * The function calculates the electrostatic potential for each SiDB position (local).
      */
     void update_local_potential() noexcept
     {
-        strg->loc_pot.resize(this->num_cells(), 0);
+        strg->local_pot.resize(this->num_cells(), 0);
 
         for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
         {
@@ -491,7 +507,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 collect += strg->pot_mat[i][j] * static_cast<double>(charge_state_to_sign(strg->cell_charge[j]));
             }
 
-            strg->loc_pot[i] = collect;
+            strg->local_pot[i] = collect;
+        }
+
+        for (uint64_t ext = 0u; ext < strg->external_pot.size(); ++ext)
+        {
+            strg->local_pot[ext] = strg->local_pot[ext] - strg->external_pot[ext];
         }
     }
     /**
@@ -505,7 +526,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (const auto index = cell_to_index(c); index != -1)
         {
-            return strg->loc_pot[static_cast<uint64_t>(index)];
+            return strg->local_pot[static_cast<uint64_t>(index)];
         }
 
         return std::nullopt;
@@ -521,7 +542,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (index < strg->sidb_order.size())
         {
-            return strg->loc_pot[index];
+            return strg->local_pot[index];
         }
 
         return std::nullopt;
@@ -540,9 +561,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         double total_energy = 0;
 
-        for (uint64_t i = 0; i < strg->loc_pot.size(); ++i)
+        for (uint64_t i = 0; i < strg->local_pot.size(); ++i)
         {
-            total_energy += 0.5 * strg->loc_pot[i] * charge_state_to_sign(strg->cell_charge[i]);
+            total_energy += 0.5 * strg->local_pot[i] * charge_state_to_sign(strg->cell_charge[i]);
         }
 
         strg->system_energy = total_energy;
@@ -574,7 +595,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         uint64_t population_stability_not_fulfilled_counter = 0;
         uint64_t for_loop_counter                           = 0;
 
-        for (const auto& it : strg->loc_pot)  // this for-loop checks if the "population stability" is fulfilled.
+        for (const auto& it : strg->local_pot)  // this for-loop checks if the "population stability" is fulfilled.
         {
             bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
                            ((-it + strg->phys_params.mu) < physical_constants::POP_STABILITY_ERR)) ||
@@ -603,18 +624,18 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 const int dn_i = (strg->cell_charge[c1] == sidb_charge_state::NEGATIVE) ? 1 : -1;
                 const int dn_j = -dn_i;
 
-                return strg->loc_pot[c1] * dn_i + strg->loc_pot[c2] * dn_j - strg->pot_mat[c1][c2] * 1;
+                return strg->local_pot[c1] * dn_i + strg->local_pot[c2] * dn_j - strg->pot_mat[c1][c2] * 1;
             };
 
             uint64_t hop_counter = 0;
-            for (uint64_t i = 0u; i < strg->loc_pot.size(); ++i)
+            for (uint64_t i = 0u; i < strg->local_pot.size(); ++i)
             {
                 if (strg->cell_charge[i] == sidb_charge_state::POSITIVE)  // we do nothing with SiDB+
                 {
                     continue;
                 }
 
-                for (uint64_t j = 0u; j < strg->loc_pot.size(); j++)
+                for (uint64_t j = 0u; j < strg->local_pot.size(); j++)
                 {
                     if (hop_counter == 1)
                     {
@@ -793,7 +814,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
             for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
             {
-                strg->loc_pot[i] += -(this->get_electrostatic_potential_by_indices(i, random_element));
+                strg->local_pot[i] += -(this->get_electrostatic_potential_by_indices(i, random_element));
             }
         }
     }
@@ -866,6 +887,10 @@ charge_distribution_surface(const T&) -> charge_distribution_surface<T>;
 template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state& cs)
     -> charge_distribution_surface<T>;
+
+template <class T>
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state& cs,
+                            const std::vector<double>& external_pot) -> charge_distribution_surface<T>;
 
 template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
