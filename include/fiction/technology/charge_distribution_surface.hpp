@@ -329,9 +329,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->foreach_cell(
             [&negative_sidbs, this](const auto& c)
             {
-                if (get_local_potential(c).has_value())
+                if (const auto local_pot = this->get_local_potential(c); local_pot.has_value())
                 {
-                    if (-*this->get_local_potential(c) + strg->phys_params.mu < -physical_constants::POP_STABILITY_ERR)
+                    if (-*local_pot + strg->phys_params.mu < -physical_constants::POP_STABILITY_ERR)
                     {
                         negative_sidbs.push_back(cell_to_index(c));
                     }
