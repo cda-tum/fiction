@@ -150,7 +150,6 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
         {
             upper_bound = charge_lyt.num_cells();
         }
-
         else
         {
             upper_bound = static_cast<uint64_t>(std::round(0.6 * static_cast<double>(charge_lyt.num_cells())));
