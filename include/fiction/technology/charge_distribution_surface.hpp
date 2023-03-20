@@ -322,16 +322,19 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Vector of indices describing which SiDBs must be negatively charged.
      */
-    std::vector<uint64_t> negative_sidb_detection() noexcept
+    std::vector<int64_t> negative_sidb_detection() noexcept
     {
-        std::vector<uint64_t> negative_sidbs{};
+        std::vector<int64_t> negative_sidbs{};
         negative_sidbs.reserve(this->num_cells());
         this->foreach_cell(
             [&negative_sidbs, this](const auto& c)
             {
-                if (-*this->get_local_potential(c) + strg->phys_params.mu < -physical_constants::POP_STABILITY_ERR)
+                if (get_local_potential(c).has_value())
                 {
-                    negative_sidbs.push_back(cell_to_index(c));
+                    if (-*this->get_local_potential(c) + strg->phys_params.mu < -physical_constants::POP_STABILITY_ERR)
+                    {
+                        negative_sidbs.push_back(cell_to_index(c));
+                    }
                 }
             });
         return negative_sidbs;

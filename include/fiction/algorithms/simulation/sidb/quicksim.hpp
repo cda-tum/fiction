@@ -121,7 +121,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
 
         charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change();
-        auto negative_sidbs_index = charge_lyt.negative_sidb_detection();
+        const auto negative_sidbs_indices = charge_lyt.negative_sidb_detection();
 
         if (charge_lyt.is_physically_valid())
         {
@@ -131,7 +131,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
         charge_lyt.set_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 
-        if (!negative_sidbs_index.empty())
+        if (!negative_sidbs_indices.empty())
         {
             if (charge_lyt.is_physically_valid())
             {
@@ -165,8 +165,8 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
                         {
                             {
                                 const std::lock_guard lock{mutex};
-                                if (std::find(negative_sidbs_index.begin(), negative_sidbs_index.end(), i) !=
-                                    negative_sidbs_index.end())
+                                if (std::find(negative_sidbs_indices.begin(), negative_sidbs_indices.end(), i) !=
+                                    negative_sidbs_indices.end())
                                 {
                                     continue;
                                 }
@@ -176,7 +176,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
 
                             charge_lyt_copy.set_all_charge_states(sidb_charge_state::NEUTRAL);
 
-                            for (const auto& index : negative_sidbs_index)
+                            for (const auto& index : negative_sidbs_indices)
                             {
                                 charge_lyt_copy.assign_charge_state_by_cell_index(index, sidb_charge_state::NEGATIVE);
                                 index_start.push_back(index);
@@ -193,7 +193,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
 
                             const auto upper_limit =
                                 std::min(static_cast<uint64_t>(static_cast<double>(charge_lyt_copy.num_cells()) / 1.5),
-                                         charge_lyt.num_cells() - negative_sidbs_index.size());
+                                         charge_lyt.num_cells() - negative_sidbs_indices.size());
 
                             for (uint64_t num = 0ul; num < upper_limit; num++)
                             {

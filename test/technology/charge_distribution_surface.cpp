@@ -353,7 +353,7 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface charge_layout_new{lyt_new, params};
-        auto                        negative_sidbs = charge_layout_new.negative_sidb_detection();
+        const auto                  negative_sidbs = charge_layout_new.negative_sidb_detection();
         REQUIRE(negative_sidbs.size() == 3);
         CHECK(negative_sidbs[0] == 0);
         CHECK(negative_sidbs[1] == 1);
