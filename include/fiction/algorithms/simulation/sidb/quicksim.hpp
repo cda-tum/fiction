@@ -166,7 +166,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
                             {
                                 const std::lock_guard lock{mutex};
                                 if (std::find(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), i) !=
-                                    negative_sidb_indices.end())
+                                    negative_sidb_indices.cend())
                                 {
                                     continue;
                                 }
