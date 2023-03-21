@@ -72,7 +72,7 @@ struct time_to_solution_stats
  * @param confidence_level The time-to-solution also depends on the given confidence level which can be set here.
  */
 template <typename Lyt>
-void sim_acc_tts(const Lyt& lyt, const quicksim_params& quicksim_params, time_to_solution_stats* ps = nullptr,
+void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, time_to_solution_stats* ps = nullptr,
                  const uint64_t& repetitions = 100, const double confidence_level = 0.997) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
