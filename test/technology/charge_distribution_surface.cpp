@@ -352,11 +352,14 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {-0.5, -0.5, -0.5}};
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {{{0, 0, 1}, -0.5}}};
+        REQUIRE(!charge_layout_new.get_external_potentials().empty());
+        CHECK(charge_layout_new.get_external_potentials().size() == 1);
+        CHECK(charge_layout_new.get_external_potentials().size() == 1);
 
         CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) == 0.5);
-        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) == 0.5);
-        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) == 0.5);
+        CHECK_THAT(*charge_layout_new.get_local_potential({1, 3, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT(*charge_layout_new.get_local_potential({10, 5, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
         charge_layout_new.set_all_charge_states(sidb_charge_state::POSITIVE);
         charge_layout_new.update_after_charge_change();
         CHECK(charge_layout_new.get_charge_state({0, 0, 1}) == sidb_charge_state::POSITIVE);
@@ -364,11 +367,11 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout_new.get_charge_state({10, 5, 1}) == sidb_charge_state::POSITIVE);
 
         CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) > 0.5);
-        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) > 0.5);
-        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) > 0.5);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0.5);
+        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) < 0.5);
 
         charge_layout_new.set_all_charge_states(sidb_charge_state::NEUTRAL);
-        charge_layout_new.set_external_potential({-0.1});
+        charge_layout_new.set_external_potential({{{0, 0, 1}, -0.1}});
         CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) == 0.1);
         CHECK_THAT(*charge_layout_new.get_local_potential({1, 3, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
         CHECK_THAT(*charge_layout_new.get_local_potential({10, 5, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
@@ -388,6 +391,78 @@ TEMPLATE_TEST_CASE(
         CHECK_THAT(*charge_layout_new.get_local_potential({0, 0, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
         CHECK_THAT(*charge_layout_new.get_local_potential({1, 3, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
         CHECK_THAT(*charge_layout_new.get_local_potential({10, 5, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+    }
+
+    SECTION("assign defect | negative defect")
+    {
+        TestType                         lyt_new{{11, 11}};
+        const sidb_simulation_parameters params{3, -0.32};
+
+        lyt_new.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
+
+        charge_layout_new.assign_defect({5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1.0});
+
+        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) < 0);
+    }
+
+    SECTION("assign defect | positive defect")
+    {
+        TestType                         lyt_new{{11, 11}};
+        const sidb_simulation_parameters params{3, -0.32};
+
+        lyt_new.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
+
+        charge_layout_new.assign_defect({5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1.0});
+
+        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) > 0);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) > 0);
+        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) > 0);
+    }
+
+    SECTION("assign defect and perturber")
+    {
+        TestType                         lyt_new{{11, 11}};
+        const sidb_simulation_parameters params{3, -0.32};
+
+        lyt_new.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
+
+        charge_layout_new.assign_charge_state({10, 5, 1}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_defect({-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1.0});
+
+        CHECK_THAT(*charge_layout_new.get_local_potential({0, 0, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+    }
+
+    SECTION("layout with perturber |assigning and erasing defect")
+    {
+        TestType                         lyt{{11, 11}};
+        const sidb_simulation_parameters params{3, -0.32};
+
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL};
+
+        charge_layout.assign_charge_state({10, 5, 1}, sidb_charge_state::NEGATIVE);
+        charge_layout.update_after_charge_change();
+        charge_layout.assign_defect({-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1.0});
+
+        CHECK_THAT(*charge_layout.get_local_potential({0, 0, 0}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+
+        charge_layout.erase_defect({-10, 5, 1});
+        CHECK(charge_layout.get_local_potential({0, 0, 0}) < 0);
     }
 
     SECTION("increase charge index")

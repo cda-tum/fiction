@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
@@ -72,7 +73,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
       public:
         explicit charge_distribution_storage(const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-                                             local_potential                   external_potential = {0.0}) :
+                                             const std::unordered_map<typename Lyt::cell, double> &external_potential = {}) :
                 phys_params{params},
                 external_pot{std::move(external_potential)} {};
         /**
@@ -98,7 +99,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         /**
          * Electrostatic potential at each SiDB position. Has to be updated when charge distribution is changed.
          */
-        local_potential external_pot{};
+        std::unordered_map<typename Lyt::cell, double> external_pot{};
         /**
          * External electrostatic potential at each SiDB position.
          */
@@ -121,6 +122,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          * exists.
          */
         uint64_t max_charge_index{};
+
+        std::unordered_map<typename Lyt::cell, sidb_defect> defects{};
     };
 
     using storage = std::shared_ptr<charge_distribution_storage>;
@@ -152,7 +155,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     explicit charge_distribution_surface(const Lyt&                        lyt,
                                          const sidb_simulation_parameters& params = sidb_simulation_parameters{},
                                          const sidb_charge_state&          cs     = sidb_charge_state::NEGATIVE,
-                                         std::vector<double>               external_potential = {}) :
+                                        const std::unordered_map<typename Lyt::cell, double> &external_potential = {}) :
             Lyt(lyt),
             strg{std::make_shared<charge_distribution_storage>(params, external_potential)}
     {
@@ -241,15 +244,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             this->validity_check();
         }
     }
-    /**
-     * Delete the assign_cell_type function of the underlying layout.
-     */
-    void assign_cell_type(const typename Lyt::cell& c, const typename Lyt::cell_type& ct) = delete;
-    /**
-     * Check if any SiDB exhibits the given charge state.
-     *
-     * @param cs Charge state.
-     */
+    //    /**
+    //     * Delete the assign_cell_type function of the underlying layout.
+    //     */
+    //    void assign_cell_type(const typename Lyt::cell& c, const typename Lyt::cell_type& ct) = delete;
+    //    /**
+    //     * Check if any SiDB exhibits the given charge state.
+    //     *
+    //     * @param cs Charge state.
+    //     */
     [[nodiscard]] bool charge_exists(const sidb_charge_state& cs) const noexcept
     {
         return std::any_of(strg->cell_charge.begin(), strg->cell_charge.end(),
@@ -290,6 +293,37 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
 
         this->charge_distribution_to_index();
+    }
+
+    void assign_defect(const typename Lyt::cell& c, const sidb_defect& defect = sidb_defect{}) noexcept
+    {
+        strg->defects.insert({c, defect});
+        this->foreach_cell(
+            [this, &c, &defect](const auto& c1)
+            {
+                strg->local_pot[cell_to_index(c1)] +=
+                    potential_with_given_distance(sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params)) *
+                    defect.charge;
+                strg->external_pot[c1] +=
+                    potential_with_given_distance(sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params)) *
+                    defect.charge;
+            });
+    }
+
+    void erase_defect(const typename Lyt::cell& c) noexcept
+    {
+        if (strg->defects.find(c)!=strg->defects.end())
+        {
+            this->foreach_cell(
+                [this, &c](const auto& c1)
+                {
+                    strg->local_pot[cell_to_index(c1)] -=
+                        potential_with_given_distance(sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params)) * strg->defects[c].charge;
+                    strg->external_pot[c1] -=
+                        potential_with_given_distance(sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params)) * strg->defects[c].charge;
+                });
+            strg->defects.erase(c);
+        }
     }
     /**
      * This function assigns the given charge state to the cell (accessed by `index`) of the layout.
@@ -468,6 +502,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 std::exp(-strg->dist_mat[index1][index2] / strg->phys_params.lambda_tf) *
                 physical_constants::ELECTRIC_CHARGE);
     }
+
+    [[nodiscard]] double potential_with_given_distance(const double& distance) const noexcept
+    {
+        if (distance == 0.0)
+        {
+            return 0.0;
+        }
+        return (strg->phys_params.k / distance * std::exp(-distance / strg->phys_params.lambda_tf) *
+                physical_constants::ELECTRIC_CHARGE);
+    }
     /**
      * Calculates and returns the potential of a pair of cells based on their distance and simulation parameters.
      *
@@ -487,10 +531,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * This function can be used to assign an external electrostatic potential to the layout. All important attributes
      * of the charge layout are updated automatically.
      */
-    void set_external_potential(const std::vector<double>& external_voltage) noexcept
+    void set_external_potential(const std::unordered_map<typename Lyt::cell, double>& external_voltage) noexcept
     {
         strg->external_pot = external_voltage;
         this->update_after_charge_change();
+    }
+
+    std::unordered_map<typename Lyt::cell, double> get_external_potentials() noexcept
+    {
+        return strg->external_pot;
     }
     /**
      * The function calculates the electrostatic potential for each SiDB position (local).
@@ -510,9 +559,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             strg->local_pot[i] = collect;
         }
 
-        for (uint64_t ext = 0u; ext < strg->external_pot.size(); ++ext)
+        for (const auto& [cell, extern_pot] : strg->external_pot)
         {
-            strg->local_pot[ext] = strg->local_pot[ext] - strg->external_pot[ext];
+            strg->local_pot[cell_to_index(cell)] = strg->local_pot[static_cast<uint64_t>(cell_to_index(cell))] - extern_pot;
         }
     }
     /**
@@ -890,7 +939,7 @@ charge_distribution_surface(const T&, const sidb_simulation_parameters&, const s
 
 template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state& cs,
-                            const std::vector<double>& external_pot) -> charge_distribution_surface<T>;
+                            const std::unordered_map<typename T::cell, double>& external_pot) -> charge_distribution_surface<T>;
 
 template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
