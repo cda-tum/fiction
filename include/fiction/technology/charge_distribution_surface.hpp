@@ -72,8 +72,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         using local_potential = std::vector<double>;
 
       public:
-        explicit charge_distribution_storage(const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-                                             const std::unordered_map<typename Lyt::cell, double> &external_potential = {}) :
+        explicit charge_distribution_storage(
+            const sidb_simulation_parameters&                     params             = sidb_simulation_parameters{},
+            const std::unordered_map<typename Lyt::cell, double>& external_potential = {}) :
                 phys_params{params},
                 external_pot{std::move(external_potential)} {};
         /**
@@ -152,10 +153,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param params Physical parameters used for the simulation (µ_minus, base number, ...).
      * @param cs The charge state used for the initialization of all SiDBs, default is a negative charge.
      */
-    explicit charge_distribution_surface(const Lyt&                        lyt,
-                                         const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-                                         const sidb_charge_state&          cs     = sidb_charge_state::NEGATIVE,
-                                        const std::unordered_map<typename Lyt::cell, double> &external_potential = {}) :
+    explicit charge_distribution_surface(
+        const Lyt& lyt, const sidb_simulation_parameters& params = sidb_simulation_parameters{},
+        const sidb_charge_state&                              cs                 = sidb_charge_state::NEGATIVE,
+        const std::unordered_map<typename Lyt::cell, double>& external_potential = {}) :
             Lyt(lyt),
             strg{std::make_shared<charge_distribution_storage>(params, external_potential)}
     {
@@ -312,15 +313,17 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
     void erase_defect(const typename Lyt::cell& c) noexcept
     {
-        if (strg->defects.find(c)!=strg->defects.end())
+        if (strg->defects.find(c) != strg->defects.end())
         {
             this->foreach_cell(
                 [this, &c](const auto& c1)
                 {
                     strg->local_pot[cell_to_index(c1)] -=
-                        potential_with_given_distance(sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params)) * strg->defects[c].charge;
+                        potential_with_given_distance(sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params)) *
+                        strg->defects[c].charge;
                     strg->external_pot[c1] -=
-                        potential_with_given_distance(sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params)) * strg->defects[c].charge;
+                        potential_with_given_distance(sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params)) *
+                        strg->defects[c].charge;
                 });
             strg->defects.erase(c);
         }
@@ -561,7 +564,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& [cell, extern_pot] : strg->external_pot)
         {
-            strg->local_pot[cell_to_index(cell)] = strg->local_pot[static_cast<uint64_t>(cell_to_index(cell))] - extern_pot;
+            strg->local_pot[cell_to_index(cell)] =
+                strg->local_pot[static_cast<uint64_t>(cell_to_index(cell))] - extern_pot;
         }
     }
     /**
@@ -939,7 +943,8 @@ charge_distribution_surface(const T&, const sidb_simulation_parameters&, const s
 
 template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state& cs,
-                            const std::unordered_map<typename T::cell, double>& external_pot) -> charge_distribution_surface<T>;
+                            const std::unordered_map<typename T::cell, double>& external_pot)
+    -> charge_distribution_surface<T>;
 
 template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
