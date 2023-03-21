@@ -72,6 +72,47 @@ TEMPLATE_TEST_CASE(
 {
     TestType lyt{{11, 11}};
 
+    SECTION("cell to index and vs")
+    {
+        // assign SiDBs and charge states to three different cells and read the charge state
+        lyt.assign_cell_type({5, 4}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 6}, TestType::cell_type::NORMAL);
+        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
+        CHECK(charge_layout.cell_to_index({5, 4}) != charge_layout.cell_to_index({5, 5}));
+        CHECK(charge_layout.cell_to_index({5, 6}) != charge_layout.cell_to_index({5, 5}));
+        CHECK(charge_layout.index_to_cell(4) == (siqad::coord_t()));
+        uint64_t found = 0;
+        for (uint64_t i = 0u; i < 3; i++)
+        {
+            if (charge_layout.index_to_cell(i) == (siqad::coord_t(5, 4)))
+            {
+                found += 1;
+            }
+        }
+        CHECK(found == 1);
+
+        found = 0;
+        for (uint64_t i = 0u; i < 3; i++)
+        {
+            if (charge_layout.index_to_cell(i) == (siqad::coord_t(5, 5)))
+            {
+                found += 1;
+            }
+        }
+        CHECK(found == 1);
+
+        found = 0;
+        for (uint64_t i = 0u; i < 3; i++)
+        {
+            if (charge_layout.index_to_cell(i) == (siqad::coord_t(5, 6)))
+            {
+                found += 1;
+            }
+        }
+        CHECK(found == 1);
+    }
+
     SECTION("assign and read out charge states")
     {
         // assign SiDBs and charge states to three different cells and read the charge state

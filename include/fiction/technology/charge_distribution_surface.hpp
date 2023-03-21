@@ -430,6 +430,23 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return -1;
     }
     /**
+     * Finds the cell of a given index.
+     *
+     * @param c The index to find the cell of.
+     * @return The cell in the layout for the given index. Returns dead-coordinate if the index is not assigned to a not
+     * empty cell in the layout.
+     */
+    [[nodiscard]] typename Lyt::cell index_to_cell(const uint64_t index) const noexcept
+    {
+        if (index < strg->sidb_order.size())
+        {
+            return strg->sidb_order[index];
+        }
+
+        return {};
+    }
+
+    /**
      *  Returns the distance between two cells.
      *
      *  @param c1 the first cell to compare.
