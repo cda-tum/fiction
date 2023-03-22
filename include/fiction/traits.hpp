@@ -227,13 +227,12 @@ struct is_coordinate_layout : std::false_type
 template <class Lyt>
 struct is_coordinate_layout<
     Lyt,
-    std::enable_if_t<
-        std::conjunction_v<std::is_constructible<aspect_ratio<Lyt>, coordinate<Lyt>>, has_cardinal_operations<Lyt>,
-                           has_elevation_operations<Lyt>>,
-        std::void_t<typename Lyt::base_type, aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage,
-                    decltype(Lyt::max_fanin_size), decltype(Lyt::min_fanin_size), decltype(std::declval<Lyt>().x()),
-                    decltype(std::declval<Lyt>().y()), decltype(std::declval<Lyt>().z()),
-                    decltype(std::declval<Lyt>().area()), decltype(std::declval<Lyt>().resize(aspect_ratio<Lyt>()))>>>
+    std::enable_if_t<std::conjunction_v<std::is_constructible<aspect_ratio<Lyt>, coordinate<Lyt>>,
+                                        has_cardinal_operations<Lyt>, has_elevation_operations<Lyt>>,
+                     std::void_t<typename Lyt::base_type, aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage,
+                                 decltype(Lyt::max_fanin_size), decltype(Lyt::min_fanin_size),
+                                 decltype(std::declval<Lyt>().x()), decltype(std::declval<Lyt>().y()),
+                                 decltype(std::declval<Lyt>().z()), decltype(std::declval<Lyt>().area())>>>
         : std::true_type
 {};
 
