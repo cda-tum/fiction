@@ -370,10 +370,8 @@ class exact_impl
 
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
         /**
          * Stores the current solver state in the solver tree with aspect ratio ar as key.
@@ -3143,7 +3141,7 @@ class exact_impl
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = {},
+std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps = {},
                          exact_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
