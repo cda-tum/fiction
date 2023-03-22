@@ -373,7 +373,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return sidb_charge_state::NONE;
     }
     /**
-     * Finds the index of an SiDB.
+     * Returns the index of an SiDB cell.
      *
      * @param c The cell to find the index of.
      * @return The index of the cell in the layout. Returns -1 if the cell is not part of the layout.
@@ -387,6 +387,21 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
 
         return -1;
+    }
+    /**
+     * Returns an SiDB cell by index.
+     *
+     * @param index The index of the cell to return.
+     * @return The cell at the given index. Returns a default-constructed (dead) cell if the index is out of bounds.
+     */
+    [[nodiscard]] typename Lyt::cell index_to_cell(const uint64_t index) const noexcept
+    {
+        if (index < strg->sidb_order.size())
+        {
+            return strg->sidb_order[index];
+        }
+
+        return {};
     }
     /**
      *  Returns the distance between two cells.
