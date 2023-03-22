@@ -154,6 +154,6 @@ class bounding_box_2d
 
 }  // namespace fiction
 
-#endif  // FICTION_BOUNDING_BOX_HPP
-
 #pragma GCC diagnostic pop
+
+#endif  // FICTION_BOUNDING_BOX_HPP

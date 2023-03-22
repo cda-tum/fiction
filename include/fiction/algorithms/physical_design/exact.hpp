@@ -2,10 +2,10 @@
 // Created by marcel on 06.01.20.
 //
 
-#if (FICTION_Z3_SOLVER)
-
 #ifndef FICTION_EXACT_HPP
 #define FICTION_EXACT_HPP
+
+#if (FICTION_Z3_SOLVER)
 
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
@@ -3193,6 +3193,6 @@ std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = 
 
 }  // namespace fiction
 
-#endif  // FICTION_EXACT_HPP
-
 #endif  // FICTION_Z3_SOLVER
+
+#endif  // FICTION_EXACT_HPP
