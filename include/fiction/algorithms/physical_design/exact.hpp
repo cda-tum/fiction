@@ -355,27 +355,24 @@ class exact_impl
         {
             generate_smt_instance();
 
-            switch (solver->check(check_point->assumptions))
+            if (const auto z3_result = solver->check(check_point->assumptions); z3_result == z3::sat)
             {
-                case z3::sat:
+                // optimize the generated result
+                if (auto opt = optimize(); opt != nullptr)
                 {
-                    // optimize the generated result
-                    if (auto opt = optimize(); opt != nullptr)
-                    {
-                        opt->check();
-                        assign_layout(opt->get_model());
-                    }
-                    else
-                    {
-                        assign_layout(solver->get_model());
-                    }
+                    opt->check();
+                    assign_layout(opt->get_model());
+                }
+                else
+                {
+                    assign_layout(solver->get_model());
+                }
 
-                    return true;
-                }
-                default:
-                {
-                    return false;
-                }
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
         /**
