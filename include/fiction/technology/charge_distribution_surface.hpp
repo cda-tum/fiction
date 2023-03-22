@@ -317,8 +317,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->charge_distribution_to_index();
     }
     /**
-     * This function can be used to detect which SiDBs must be negatively charged due to their location. Important:
-     * This function must be applied to a charge layout where all SiDBs are negatively initialized.
+     * This function can be used to detect which SiDBs must be negatively charged due to their location.
+     *
+     * @note This function must be applied to a charge layout where all SiDBs are negatively initialized.
      *
      * @return Vector of indices describing which SiDBs must be negatively charged.
      */
@@ -326,6 +327,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         std::vector<int64_t> negative_sidbs{};
         negative_sidbs.reserve(this->num_cells());
+
         this->foreach_cell(
             [&negative_sidbs, this](const auto& c)
             {
@@ -337,6 +339,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     }
                 }
             });
+
         return negative_sidbs;
     }
     /**
