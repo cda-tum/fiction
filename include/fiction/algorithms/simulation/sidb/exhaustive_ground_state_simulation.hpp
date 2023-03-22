@@ -56,8 +56,9 @@ struct exgs_stats
  */
 template <typename Lyt>
 void exhaustive_ground_state_simulation(Lyt&                              lyt,
-                                        const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-                                        exgs_stats<Lyt>*                  ps     = nullptr) noexcept
+                                        const sidb_simulation_parameters& params        = sidb_simulation_parameters{},
+                                        exgs_stats<Lyt>*                  ps            = nullptr,
+                                        const typename Lyt::cell&         variable_cell = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -67,14 +68,15 @@ void exhaustive_ground_state_simulation(Lyt&                              lyt,
     {
         mockturtle::stopwatch stop{st.time_total};
 
-        charge_distribution_surface charge_lyt{lyt};
-
+        charge_distribution_surface charge_lyt{lyt, params, sidb_charge_state::NEGATIVE};
         charge_lyt.set_physical_parameters(params);
         charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change();
+        auto       sidbs                 = charge_lyt.get_sidb_order();
         const auto negative_sidb_indices = charge_lyt.negative_sidb_detection();
         std::cout << negative_sidb_indices.size() << std::endl;
         std::vector<typename Lyt::cell> negative_sidbs{};
+
         negative_sidbs.reserve(negative_sidb_indices.size());
         for (const auto& index : negative_sidb_indices)
         {
@@ -83,34 +85,52 @@ void exhaustive_ground_state_simulation(Lyt&                              lyt,
             lyt.assign_cell_type(cell, Lyt::cell_type::EMPTY);
         }
 
-        charge_distribution_surface charge_lyt_new{lyt, params};
+        sidbs.erase(std::remove_if(sidbs.begin(), sidbs.end(),
+                                   [&negative_sidbs](const typename Lyt::cell& n) {
+                                       return std::find(negative_sidbs.begin(), negative_sidbs.end(), n) !=
+                                              negative_sidbs.end();
+                                   }),
+                    sidbs.end());
 
-        for (const auto& cell : negative_sidbs)
+        typename Lyt::cell dependent_cell{};
+        if (!sidbs.empty())
         {
-            charge_lyt_new.assign_defect(cell, sidb_defect{sidb_defect_type::UNKNOWN, -1});
-        }
 
-        charge_lyt_new.update_after_charge_change();
+            charge_distribution_surface charge_lyt_new{lyt, params, sidb_charge_state::NEGATIVE, sidbs[0]};
 
-        while (charge_lyt_new.get_charge_index().first < charge_lyt_new.get_max_charge_index())
-        {
-
-            if (charge_lyt_new.is_physically_valid())
+            for (const auto& cell : negative_sidbs)
             {
-                //                for (const auto & cell : negative_sidbs)
-                //                {
-                //                    charge_lyt_new.assign_cell_type(cell, Lyt::cell_type::NORMAL);
-                //                    charge_lyt_new.assign_charge_state(cell, sidb_charge_state::NEGATIVE);
-                //                }
-                st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt_new});
+                charge_lyt_new.assign_defect(cell, sidb_defect{sidb_defect_type::UNKNOWN, -1});
             }
 
-            charge_lyt_new.increase_charge_index_by_one();
+            charge_lyt_new.update_after_charge_change(false);
+
+            while (charge_lyt_new.get_charge_index().first < charge_lyt_new.get_max_charge_index())
+            {
+
+                if (charge_lyt_new.is_physically_valid())
+                {
+                    st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt_new});
+                }
+                charge_lyt_new.increase_charge_index_by_one(false);
+            }
+
+            for (const auto& cell : negative_sidbs)
+            {
+                lyt.assign_cell_type(cell, Lyt::cell_type::NORMAL);
+            }
         }
 
-        for (const auto& cell : negative_sidbs)
+        else
         {
-            lyt.assign_cell_type(cell, Lyt::cell_type::NORMAL);
+            charge_distribution_surface charge_lyt_new{lyt, params, sidb_charge_state::NEGATIVE};
+            for (const auto& cell : negative_sidbs)
+            {
+                charge_lyt_new.assign_defect(cell, sidb_defect{sidb_defect_type::UNKNOWN, -1});
+            }
+            charge_lyt_new.update_after_charge_change(false);
+
+            st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt_new});
         }
     }
 

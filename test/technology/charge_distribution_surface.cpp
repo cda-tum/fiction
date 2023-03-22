@@ -406,7 +406,11 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {{{0, 0, 1}, -0.5}}};
+        charge_distribution_surface charge_layout_new{lyt_new,
+                                                      params,
+                                                      sidb_charge_state::NEUTRAL,
+                                                      {},
+                                                      {{{0, 0, 1}, -0.5}}};
         REQUIRE(!charge_layout_new.get_external_potentials().empty());
         CHECK(charge_layout_new.get_external_potentials().size() == 1);
         CHECK(charge_layout_new.get_external_potentials().size() == 1);
@@ -440,7 +444,7 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
 
         CHECK_THAT(*charge_layout_new.get_local_potential({0, 0, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
         CHECK_THAT(*charge_layout_new.get_local_potential({1, 3, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
@@ -456,7 +460,7 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
 
         charge_layout_new.assign_defect({5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1.0});
 
@@ -474,7 +478,7 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
 
         charge_layout_new.assign_defect({5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1.0});
 
@@ -491,7 +495,7 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
 
         charge_layout_new.assign_charge_state({10, 5, 1}, sidb_charge_state::NEGATIVE);
         charge_layout_new.assign_defect({-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1.0});
@@ -507,7 +511,7 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout{lyt_new, params, sidb_charge_state::NEUTRAL};
+        charge_distribution_surface charge_layout{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
 
         charge_layout.assign_charge_state({10, 5, 1}, sidb_charge_state::NEGATIVE);
         charge_layout.update_after_charge_change();
@@ -591,5 +595,191 @@ TEMPLATE_TEST_CASE(
         CHECK_THAT(charge_layout_new.get_potential_between_sidbs({0, 0, 1}, {1, 3, 0}) -
                        charge_layout_new.get_chargeless_potential_between_sidbs({0, 0, 1}, {1, 3, 0}),
                    Catch::Matchers::WithinAbs(0.000000, 0.000001));
+    }
+
+    SECTION("adding dependent cell")
+    {
+        TestType                         lyt_new{{11, 11}};
+        const sidb_simulation_parameters params{3, -0.32};
+
+        lyt_new.assign_cell_type({0, 3, 1}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({10, 4, 1}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEGATIVE, {10, 4, 1}};
+
+        charge_layout_new.assign_charge_state({0, 3, 1}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_charge_state({1, 3, 0}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
+
+        CHECK(charge_layout_new.get_charge_state({0, 3, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout_new.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout_new.get_charge_state({10, 4, 1}) == sidb_charge_state::NEUTRAL);
+        charge_layout_new.update_after_charge_change();
+        CHECK(*charge_layout_new.get_local_potential({0, 3, 1}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({10, 4, 1}) < 0);
+        charge_layout_new.update_charge_state_of_dependent_cell();
+        CHECK(charge_layout_new.get_charge_state({10, 4, 1}) == sidb_charge_state::NEGATIVE);
+    }
+
+    SECTION("adding dependent cell and increase index")
+    {
+        TestType                         lyt_new{{11, 11}};
+        const sidb_simulation_parameters params{2, -0.32};
+
+        lyt_new.assign_cell_type({0, 3, 1}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({10, 4, 1}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEGATIVE, {10, 4, 1}};
+
+        CHECK(*charge_layout_new.get_local_potential({0, 3, 1}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({10, 4, 1}) < 0);
+
+        for (uint64_t i = 0; i < 3; i++)
+        {
+            charge_layout_new.increase_charge_index_by_one();
+            CHECK(charge_layout_new.get_charge_state({10, 4, 1}) == sidb_charge_state::NEGATIVE);
+        }
+    }
+
+    SECTION("adding dependent cell and compare local potential and system energy")
+    {
+        TestType                         lyt_new{{11, 11}};
+        const sidb_simulation_parameters params{2, -0.32};
+
+        lyt_new.assign_cell_type({0, 3, 1}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({10, 4, 1}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEGATIVE, {10, 4, 1}};
+
+        charge_layout_new.assign_charge_state({0, 3, 1}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_charge_state({1, 3, 0}, sidb_charge_state::NEUTRAL);
+        charge_layout_new.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
+        charge_layout_new.update_after_charge_change();
+
+        CHECK(*charge_layout_new.get_local_potential({0, 3, 1}) == 0.0);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({10, 4, 1}) < 0);
+
+        charge_layout_new.update_charge_state_of_dependent_cell();
+        CHECK(charge_layout_new.get_charge_state({0, 3, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout_new.get_charge_state({1, 3, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_layout_new.get_charge_state({10, 4, 1}) == sidb_charge_state::NEGATIVE);
+        const auto loc_one   = *charge_layout_new.get_local_potential({0, 3, 1});
+        const auto loc_two   = *charge_layout_new.get_local_potential({1, 3, 0});
+        const auto loc_three = charge_layout_new.get_local_potential({10, 4, 1});
+        CHECK(loc_one < 0);
+        CHECK(loc_two < 0);
+        CHECK(loc_three < 0);
+        charge_layout_new.recompute_system_energy();
+        auto system_energy_first = charge_layout_new.get_system_energy();
+
+        charge_layout_new.assign_charge_state({0, 3, 1}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_charge_state({1, 3, 0}, sidb_charge_state::NEUTRAL);
+        charge_layout_new.assign_charge_state({10, 4, 1}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.update_after_charge_change();
+        CHECK(loc_one == *charge_layout_new.get_local_potential({0, 3, 1}));
+        CHECK(loc_two == *charge_layout_new.get_local_potential({1, 3, 0}));
+        CHECK(loc_three == *charge_layout_new.get_local_potential({10, 4, 1}));
+        auto system_energy_second = charge_layout_new.get_system_energy();
+        CHECK(system_energy_first == system_energy_second);
+    }
+
+    SECTION("Physical validity check after dependent cell is updated")
+    {
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout{lyt,
+                                                  sidb_simulation_parameters{},
+                                                  sidb_charge_state::NEGATIVE,
+                                                  {3, 0, 0}};
+        CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.is_physically_valid() == 0);
+
+        charge_layout.update_charge_state_of_dependent_cell();
+        charge_layout.update_after_charge_change(false);
+        charge_layout.validity_check();
+        CHECK(charge_layout.is_physically_valid() == 1);
+    }
+
+    SECTION("check charge index")
+    {
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
+
+        const sidb_simulation_parameters params{2, -0.32};
+
+        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE, {3, 0, 0}};
+        CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_index().first == 0);
+
+        charge_layout.increase_charge_index_by_one();
+        CHECK(charge_layout.get_charge_index().first == 1);
+        charge_layout.increase_charge_index_by_one();
+        CHECK(charge_layout.get_charge_index().first == 2);
+        charge_layout.increase_charge_index_by_one();
+        CHECK(charge_layout.get_charge_index().first == 3);
+
+        CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_layout.get_charge_index().first == 3);
+    }
+
+    SECTION("Physical validity check after dependent cell is updated")
+    {
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout{lyt,
+                                                  sidb_simulation_parameters{},
+                                                  sidb_charge_state::NEGATIVE,
+                                                  {3, 0, 0}};
+        CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.is_physically_valid() == 0);
+
+        charge_layout.update_charge_state_of_dependent_cell();
+        charge_layout.update_after_charge_change(false);
+        charge_layout.validity_check();
+        CHECK(charge_layout.is_physically_valid() == 1);
+    }
+
+    SECTION("check charge index")
+    {
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
+
+        const sidb_simulation_parameters params{2, -0.32};
+
+        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE, {0, 0, 0}};
+        CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_index().first == 0);
+
+        charge_layout.increase_charge_index_by_one();
+        CHECK(charge_layout.get_charge_index().first == 1);
+        charge_layout.increase_charge_index_by_one();
+        CHECK(charge_layout.get_charge_index().first == 2);
+        charge_layout.increase_charge_index_by_one();
+        CHECK(charge_layout.get_charge_index().first == 3);
+
+        CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_layout.get_charge_index().first == 3);
     }
 }

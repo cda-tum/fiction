@@ -27,9 +27,9 @@ TEMPLATE_TEST_CASE("Empty layout ExGS simulation", "[ExGS]",
     CHECK(exgs_stats.valid_lyts.empty());
 }
 
-// TEMPLATE_TEST_CASE("Single SiDB ExGS simulation", "[ExGS]",
+//  TEMPLATE_TEST_CASE("Single SiDB ExGS simulation", "[ExGS]",
 //                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
-//{
+// {
 //     TestType lyt{{20, 10}};
 //     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 //
@@ -177,7 +177,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB arrangement", "[ExGS]",
     exgs_stats<TestType>             exgs_stats{};
     const sidb_simulation_parameters params{2, -0.32};
 
-    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
+    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats, {-11, -2, 0});
 
     REQUIRE(!exgs_stats.valid_lyts.empty());
 
@@ -214,7 +214,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01", "[
     exgs_stats<TestType>             exgs_stats{};
     const sidb_simulation_parameters params{2, -0.28};
 
-    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
+    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats, {6, 2, 0});
 
     REQUIRE(!exgs_stats.valid_lyts.empty());
     const auto& charge_lyt_first = exgs_stats.valid_lyts.front();
