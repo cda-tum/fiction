@@ -68,7 +68,7 @@ class exact_ground_state_simulation_impl
   public:
     exact_ground_state_simulation_impl(const Lyt& lyt, const exact_ground_state_simulation_params& p,
                                        exact_ground_state_simulation_stats<Lyt>& st) noexcept :
-            charge_lyt{lyt, p.phys_params},
+            charge_lyt{lyt, p.phys_params, sidb_charge_state::NEGATIVE},
             params{p},
             stats{st}
     {
@@ -373,6 +373,18 @@ class exact_ground_state_simulation_impl
             });
     }
     /**
+     * Adds constraints that pre-assigns negative charges to SiDBs based on physical implications. This should not
+     * eliminate valid solutions, but reduce the search space for the SMT solver.
+     */
+    void define_known_negative_charges()
+    {
+        const auto negative_sidb_indices = charge_lyt.negative_sidb_detection();
+
+        std::for_each(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(),
+                      [this](const auto& sidb_index)
+                      { optimizer.add(negative_sidb_charge_state(charge_lyt.index_to_cell(sidb_index))); });
+    }
+    /**
      * Adds the constraints that define and minimize the system energy.
      */
     void minimize_system_energy()
@@ -426,6 +438,9 @@ class exact_ground_state_simulation_impl
 
         // population stability conditions
         define_population_stability();
+
+        // backdoor constraints
+        define_known_negative_charges();
 
         // minimize the system energy
         minimize_system_energy();
