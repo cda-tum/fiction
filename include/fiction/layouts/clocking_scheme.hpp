@@ -16,6 +16,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -54,7 +55,7 @@ class clocking_scheme
      * @param cn Number of clock phases that make up one clock cycle, i.e., the number of different clock numbers.
      * @param r Flag to identify the scheme as regular.
      */
-    explicit clocking_scheme(std::string n, clock_function f, const degree in_deg, const degree out_deg,
+    explicit clocking_scheme(std::string_view n, clock_function f, const degree in_deg, const degree out_deg,
                              const clock_number cn = 4, const bool r = true) noexcept :
             name{std::move(n)},
             max_in_degree{in_deg},
@@ -120,7 +121,7 @@ class clocking_scheme
     /**
      * Name of the clocking scheme.
      */
-    const std::string name;
+    const std::string_view name;
     /**
      * Maximum number of inputs the clocking scheme supports per clock zone.
      */
@@ -715,7 +716,7 @@ bool is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
  * `name` exists.
  */
 template <typename Lyt>
-std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::string& name) noexcept
+std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::string_view& name) noexcept
 {
     static const phmap::flat_hash_map<std::string, clocking_scheme<clock_zone<Lyt>>> scheme_lookup{
         {clock_name::OPEN, open_clocking<Lyt>(num_clks::FOUR)},
@@ -739,7 +740,7 @@ std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::s
         {clock_name::CFE, cfe_clocking<Lyt>()},
         {clock_name::BANCS, bancs_clocking<Lyt>()}};
 
-    auto upper_name = name;
+    std::string upper_name = name.data();
     std::transform(upper_name.begin(), upper_name.end(), upper_name.begin(), ::toupper);
 
     if (const auto it = scheme_lookup.find(upper_name); it != scheme_lookup.cend())

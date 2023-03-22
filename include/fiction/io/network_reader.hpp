@@ -21,6 +21,7 @@
 #include <filesystem>
 #include <ostream>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
@@ -41,7 +42,7 @@ class network_reader
      * @param filename Path to the file or folder of files to read.
      * @param out Output stream to write status updates into.
      */
-    network_reader(const std::string& filename, std::ostream& o) : out{o}
+    network_reader(const std::string_view& filename, std::ostream& o) : out{o}
     {
         constexpr const char* verilog_ext = ".v";
         constexpr const char* aig_ext     = ".aig";
@@ -56,7 +57,7 @@ class network_reader
                                [&p](const auto& valid) { return std::filesystem::path(p).extension() == valid; });
         };
 
-        std::vector<std::string> paths{};
+        std::vector<std::string_view> paths{};
 
         // check for given file's properties
         if (std::filesystem::exists(filename))
@@ -176,14 +177,15 @@ class network_reader
      * @param rfun The actual parsing function.
      */
     template <class Reader, class ReadFun>
-    void read(const std::string& file, ReadFun rfun) noexcept
+    void read(const std::string_view& file, ReadFun rfun) noexcept
     {
         Ntk ntk{};
 
         try
         {
             lorina::text_diagnostics client{};
-            if (lorina::diagnostic_engine diag{&client}; rfun(file, Reader{ntk}, &diag) == lorina::return_code::success)
+            if (lorina::diagnostic_engine diag{&client};
+                rfun(file.data(), Reader{ntk}, &diag) == lorina::return_code::success)
             {
                 const auto name = std::filesystem::path{file}.stem().string();
 
