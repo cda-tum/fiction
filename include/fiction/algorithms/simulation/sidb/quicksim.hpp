@@ -178,7 +178,8 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
 
                             for (const auto& index : negative_sidb_indices)
                             {
-                                charge_lyt_copy.assign_charge_state_by_cell_index(static_cast<uint64_t>(index), sidb_charge_state::NEGATIVE);
+                                charge_lyt_copy.assign_charge_state_by_cell_index(static_cast<uint64_t>(index),
+                                                                                  sidb_charge_state::NEGATIVE);
                                 index_start.push_back(static_cast<uint64_t>(index));
                             }
 
