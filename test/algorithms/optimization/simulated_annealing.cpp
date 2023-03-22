@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/optimization/simulated_annealing.hpp>
 
@@ -57,7 +58,8 @@ double random_next_schwefel(const double& x) noexcept
 TEST_CASE("1D Schwefel function", "[sim-anneal]")
 {
     const auto optimum = schwefel_function_1d(420.9687);
-    REQUIRE((optimum <= 0.00001 || optimum >= -0.00001));
+
+    REQUIRE_THAT(optimum, Catch::Matchers::WithinAbs(0.0, 0.0001));
 }
 
 /**
@@ -105,7 +107,8 @@ std::pair<double, double> random_next_drop_wave(const std::pair<double, double>&
 TEST_CASE("2D Drop-Wave function", "[sim-anneal]")
 {
     const auto optimum = drop_wave_function_2d({0.0, 0.0});
-    CHECK((optimum <= -0.99999 || optimum >= -1.00001));
+
+    REQUIRE_THAT(optimum, Catch::Matchers::WithinAbs(-1.0, 0.00001));
 }
 
 // Simulated Annealing tests
@@ -130,10 +133,11 @@ TEST_CASE("Simulated Annealing for optimizing the 1D Schwefel function", "[sim-a
             multi_simulated_annealing(init_temp, final_temp, cycles, instances, schwefel_1d_init_state_generator,
                                       schwefel_function_1d, linear_temperature_schedule, random_next_schwefel);
 
-        CHECK(single_cost == schwefel_function_1d(single_result));
         CHECK(single_cost < init_cost);
-        CHECK(multi_cost == schwefel_function_1d(multi_result));
         CHECK(multi_cost < init_cost);
+
+        CHECK_THAT(schwefel_function_1d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
+        CHECK_THAT(schwefel_function_1d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
 
         std::cout << fmt::format("Linear single_result: {}; Schwefel(x) = {}", single_result,
                                  schwefel_function_1d(single_result))
@@ -152,10 +156,11 @@ TEST_CASE("Simulated Annealing for optimizing the 1D Schwefel function", "[sim-a
             multi_simulated_annealing(init_temp, final_temp, cycles, instances, schwefel_1d_init_state_generator,
                                       schwefel_function_1d, geometric_temperature_schedule, random_next_schwefel);
 
-        CHECK(single_cost == schwefel_function_1d(single_result));
         CHECK(single_cost < init_cost);
-        CHECK(multi_cost == schwefel_function_1d(multi_result));
         CHECK(multi_cost < init_cost);
+
+        CHECK_THAT(schwefel_function_1d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
+        CHECK_THAT(schwefel_function_1d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
 
         std::cout << fmt::format("Geometric single_result: {}; Schwefel(x) = {}", single_result,
                                  schwefel_function_1d(single_result))
@@ -186,10 +191,11 @@ TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-
             multi_simulated_annealing(init_temp, final_temp, cycles, instances, drop_wave_2d_init_state_generator,
                                       drop_wave_function_2d, linear_temperature_schedule, random_next_drop_wave);
 
-        CHECK(single_cost == drop_wave_function_2d(single_result));
         CHECK(single_cost < init_cost);
-        CHECK(multi_cost == drop_wave_function_2d(multi_result));
         CHECK(multi_cost < init_cost);
+
+        CHECK_THAT(drop_wave_function_2d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
+        CHECK_THAT(drop_wave_function_2d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
 
         std::cout << fmt::format("Linear single_result: ({}, {}); Drop-Wave(x) = {}", single_result.first,
                                  single_result.second, drop_wave_function_2d(single_result))
@@ -209,10 +215,11 @@ TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-
             multi_simulated_annealing(init_temp, final_temp, cycles, instances, drop_wave_2d_init_state_generator,
                                       drop_wave_function_2d, geometric_temperature_schedule, random_next_drop_wave);
 
-        CHECK(single_cost == drop_wave_function_2d(single_result));
         CHECK(single_cost < init_cost);
-        CHECK(multi_cost == drop_wave_function_2d(multi_result));
         CHECK(multi_cost < init_cost);
+
+        CHECK_THAT(drop_wave_function_2d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
+        CHECK_THAT(drop_wave_function_2d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
 
         std::cout << fmt::format("Geometric single_result: ({}, {}); Drop-Wave(x) = {}", single_result.first,
                                  single_result.second, drop_wave_function_2d(single_result))
