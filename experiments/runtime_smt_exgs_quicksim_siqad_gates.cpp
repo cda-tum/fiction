@@ -91,8 +91,8 @@ int main()  // NOLINT
         }
     }
 
-    const auto min_db_num = std::min_element(db_num.begin(), db_num.end());
-    const auto max_db_num = std::max_element(db_num.begin(), db_num.end());
+    const auto min_db_num = std::min_element(db_num.cbegin(), db_num.cend());
+    const auto max_db_num = std::max_element(db_num.cbegin(), db_num.cend());
 
     simulation_exp("sum", sum_sr_exgs, sum_sr_quick, num_invalid, sum_tts, all_true,
                    std::to_string(*min_db_num) + " -- " + std::to_string(*max_db_num));
