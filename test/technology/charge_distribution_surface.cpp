@@ -346,13 +346,18 @@ TEMPLATE_TEST_CASE(
     SECTION("increase charge index")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{3, -0.32, 5.0 * 1E-9, 3.84 * 1E-10, 7.68 * 1E-10, 2.25 * 1E-10};
+        const sidb_simulation_parameters params{3, -0.32};
 
         lyt_new.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface charge_layout_new{lyt_new, params};
+        const auto                  negative_sidbs = charge_layout_new.negative_sidb_detection();
+        REQUIRE(negative_sidbs.size() == 3);
+        CHECK(negative_sidbs[0] == 0);
+        CHECK(negative_sidbs[1] == 1);
+        CHECK(negative_sidbs[2] == 2);
         CHECK(charge_layout_new.get_charge_index().first == 0);
 
         charge_layout_new.set_all_charge_states(sidb_charge_state::POSITIVE);
