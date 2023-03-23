@@ -89,6 +89,9 @@ int main()  // NOLINT
                 all_true = false;
             }
         }
+
+        simulation_exp.save();
+        simulation_exp.table();
     }
 
     const auto min_db_num = std::min_element(db_num.cbegin(), db_num.cend());
