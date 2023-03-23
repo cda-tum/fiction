@@ -113,29 +113,29 @@ TEST_CASE("Manhattan distance functor", "[distance]")
 
 TEST_CASE("Euclidean distance", "[distance]")
 {
+    using namespace Catch::Matchers;
+
     SECTION("Unsigned Cartesian layout")
     {
         using cart_lyt = cartesian_layout<offset::ucoord_t>;
 
         const cart_lyt layout{};
 
-        CHECK(euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0.0);
-        CHECK(euclidean_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0.0);
-        CHECK(euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1.0);
-        CHECK(euclidean_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == std::sqrt(2));
-        CHECK(euclidean_distance<cart_lyt>(layout, {9, 1}, {6, 2}) == std::sqrt(10));
-        CHECK(euclidean_distance<cart_lyt>(layout, {6, 2}, {0, 4}) == std::sqrt(40));
-        CHECK(euclidean_distance<cart_lyt>(layout, {0, 4}, {9, 1}) == std::sqrt(90));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {1, 1}, {1, 1}), WithinAbs(0.0, 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 1}), WithinAbs(1.0, 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 0}, {1, 1}), WithinAbs(std::sqrt(2), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {9, 1}, {6, 2}), WithinAbs(std::sqrt(10), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {6, 2}, {0, 4}), WithinAbs(std::sqrt(40), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 4}, {9, 1}), WithinAbs(std::sqrt(90), 0.00001));
 
         // ignore z-axis
-        CHECK(euclidean_distance<cart_lyt>(layout, {6, 2, 1}, {0, 4, 0}) == std::sqrt(40));
-        CHECK(euclidean_distance<cart_lyt>(layout, {6, 2, 0}, {0, 4, 1}) == std::sqrt(40));
-        CHECK(euclidean_distance<cart_lyt>(layout, {0, 4, 1}, {9, 1, 1}) == std::sqrt(90));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {6, 2, 1}, {0, 4, 0}), WithinAbs(std::sqrt(40), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {6, 2, 0}, {0, 4, 1}), WithinAbs(std::sqrt(40), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 4, 1}, {9, 1, 1}), WithinAbs(std::sqrt(90), 0.00001));
     }
     SECTION("Signed Cartesian layout")
     {
-        using namespace Catch::Matchers;
-
         using cart_lyt = cartesian_layout<cube::coord_t>;
 
         const cart_lyt layout{};
@@ -162,10 +162,10 @@ TEST_CASE("Euclidean distance", "[distance]")
 
 TEST_CASE("Euclidean distance functor", "[distance]")
 {
+    using namespace Catch::Matchers;
+
     SECTION("Unsigned Cartesian layout")
     {
-        using namespace Catch::Matchers;
-
         using cart_lyt = cartesian_layout<offset::ucoord_t>;
 
         const cart_lyt layout{};
@@ -193,23 +193,23 @@ TEST_CASE("Euclidean distance functor", "[distance]")
 
         const euclidean_distance_functor<cart_lyt> distance{};
 
-        CHECK(distance(layout, {0, 0}, {0, 0}) == 0.0);
-        CHECK(distance(layout, {1, 1}, {1, 1}) == 0.0);
-        CHECK(distance(layout, {0, 0}, {0, 1}) == 1.0);
-        CHECK(distance(layout, {0, 0}, {1, 1}) == std::sqrt(2));
-        CHECK(distance(layout, {9, 1}, {6, 2}) == std::sqrt(10));
-        CHECK(distance(layout, {6, 2}, {0, 4}) == std::sqrt(40));
-        CHECK(distance(layout, {0, 4}, {9, 1}) == std::sqrt(90));
+        CHECK_THAT(distance(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
+        CHECK_THAT(distance(layout, {1, 1}, {1, 1}), WithinAbs(0.0, 0.00001));
+        CHECK_THAT(distance(layout, {0, 0}, {0, 1}), WithinAbs(1.0, 0.00001));
+        CHECK_THAT(distance(layout, {0, 0}, {1, 1}), WithinAbs(std::sqrt(2), 0.00001));
+        CHECK_THAT(distance(layout, {9, 1}, {6, 2}), WithinAbs(std::sqrt(10), 0.00001));
+        CHECK_THAT(distance(layout, {6, 2}, {0, 4}), WithinAbs(std::sqrt(40), 0.00001));
+        CHECK_THAT(distance(layout, {0, 4}, {9, 1}), WithinAbs(std::sqrt(90), 0.00001));
 
         // ignore z-axis
-        CHECK(distance(layout, {6, 2, 1}, {0, 4, 0}) == std::sqrt(40));
-        CHECK(distance(layout, {6, 2, 0}, {0, 4, 1}) == std::sqrt(40));
-        CHECK(distance(layout, {0, 4, 1}, {9, 1, 1}) == std::sqrt(90));
+        CHECK_THAT(distance(layout, {6, 2, 1}, {0, 4, 0}), WithinAbs(std::sqrt(40), 0.00001));
+        CHECK_THAT(distance(layout, {6, 2, 0}, {0, 4, 1}), WithinAbs(std::sqrt(40), 0.00001));
+        CHECK_THAT(distance(layout, {0, 4, 1}, {9, 1, 1}), WithinAbs(std::sqrt(90), 0.00001));
 
         // negative coordinates
-        CHECK(distance(layout, {0, 0}, {-1, -1}) == std::sqrt(2));
-        CHECK(distance(layout, {-4, -3}, {1, -1}) == std::sqrt(29));
-        CHECK(distance(layout, {-2, -8}, {-6, -4}) == std::sqrt(32));
+        CHECK_THAT(distance(layout, {0, 0}, {-1, -1}), WithinAbs(std::sqrt(2), 0.00001));
+        CHECK_THAT(distance(layout, {-4, -3}, {1, -1}), WithinAbs(std::sqrt(29), 0.00001));
+        CHECK_THAT(distance(layout, {-2, -8}, {-6, -4}), WithinAbs(std::sqrt(32), 0.00001));
     }
 }
 
