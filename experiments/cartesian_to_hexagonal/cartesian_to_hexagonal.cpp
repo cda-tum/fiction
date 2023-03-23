@@ -278,6 +278,19 @@ int main()  // NOLINT
                                                        signal_b.x, signal_b.y, layout_height, signal_b.z))),
                                                    hex);
                         }
+                        else if (gate_level_layout.is_function(node))
+                        {
+                            const auto signal_a = gate_level_layout.incoming_data_flow(old_coord)[0];
+                            const auto signal_b = gate_level_layout.incoming_data_flow(old_coord)[1];
+
+                            const auto node_fun = gate_level_layout.node_function(node);
+
+                            hex_layout.create_node({hex_layout.make_signal(hex_layout.get_node(to_hex<gate_lyt>(
+                                                        signal_a.x, signal_a.y, layout_height, signal_a.z))),
+                                                    hex_layout.make_signal(hex_layout.get_node(to_hex<gate_lyt>(
+                                                        signal_b.x, signal_b.y, layout_height, signal_b.z)))},
+                                                   node_fun, hex);
+                        }
                     }
                 }
             }
