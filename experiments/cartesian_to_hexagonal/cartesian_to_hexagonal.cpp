@@ -4,6 +4,7 @@
 // #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
+#include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/write_sqd_layout.hpp>           // writer for SiQAD files (physical simulation)
 #include <fiction/networks/technology_network.hpp>   // technology-mapped network type
 #include <fiction/technology/area.hpp>               // area requirement calculations
@@ -297,9 +298,12 @@ int main()  // NOLINT
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
         // check equivalence
-        // const auto miter = mockturtle::miter<fiction::technology_network>(mapped_network, hex_layout);
-        // const auto eq    = mockturtle::equivalence_checking(*miter);
-        // assert(eq.has_value());
+        fiction::equivalence_checking_stats eq_stats{};
+        fiction::equivalence_checking(mapped_network, hex_layout, &eq_stats);
+
+        const auto eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
+                               eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
+                                                                         "NO";
 
         // apply gate library
         // const auto cell_level_layout = fiction::apply_gate_library<cell_lyt,
@@ -311,14 +315,14 @@ int main()  // NOLINT
         // fiction::area(cell_level_layout, area_ps, &area_stats);
 
         // log results
-        bestagon_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
-                     depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
-                     gate_level_layout.x() + 1, gate_level_layout.y() + 1,
-                     (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1), hex_layout.x() + 1, hex_layout.y() + 1,
-                     (hex_layout.x() + 1) * (hex_layout.y() + 1), gate_level_layout.num_gates(),
-                     gate_level_layout.num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
-                     mockturtle::to_seconds(orthogonal_stats.time_total),
-                     std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() / 1000000.0, 0, 0, 0);
+        bestagon_exp(
+            benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
+            depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(), gate_level_layout.x() + 1,
+            gate_level_layout.y() + 1, (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1), hex_layout.x() + 1,
+            hex_layout.y() + 1, (hex_layout.x() + 1) * (hex_layout.y() + 1), gate_level_layout.num_gates(),
+            gate_level_layout.num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
+            mockturtle::to_seconds(orthogonal_stats.time_total),
+            std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() / 1000000.0, eq_result, 0, 0);
 
         bestagon_exp.save();
         bestagon_exp.table();
