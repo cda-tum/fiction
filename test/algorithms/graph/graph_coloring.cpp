@@ -275,13 +275,16 @@ Graph create_complete_graph(std::vector<typename Graph::vertex_id_type>& vertice
 {
     Graph k{};
 
-    std::for_each(vertices.cbegin(), vertices.cend(), [&k](const auto& v) { k.insert_vertex(v, {}); });
-    combinations::for_each_combination(vertices.begin(), vertices.begin() + 2, vertices.end(),
-                                       [&k](const auto begin, [[maybe_unused]] const auto end)
-                                       {
-                                           k.insert_edge(*begin, *(begin + 1), {});
-                                           return false;  // keep looping
-                                       });
+    if (vertices.size() >= 2)
+    {
+        std::for_each(vertices.cbegin(), vertices.cend(), [&k](const auto& v) { k.insert_vertex(v, {}); });
+        combinations::for_each_combination(vertices.begin(), vertices.begin() + 2, vertices.end(),
+                                           [&k](const auto begin, [[maybe_unused]] const auto end)
+                                           {
+                                               k.insert_edge(*begin, *(begin + 1), {});
+                                               return false;  // keep looping
+                                           });
+    }
 
     return k;
 }

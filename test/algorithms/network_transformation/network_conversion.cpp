@@ -28,7 +28,7 @@
 using namespace fiction;
 
 template <typename Ntk>
-void to_x(Ntk ntk)
+void to_x(const Ntk& ntk)
 {
     SECTION("MIG")
     {
