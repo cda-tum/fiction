@@ -7,4 +7,4 @@ include_directories(${PROJECT_BINARY_DIR}/include/)
 add_executable(fiction ${SOURCES})
 
 # Link against the project settings, libfiction, alice, and mockturtle
-target_link_libraries(fiction PRIVATE project_options project_warnings libfiction alice)
+target_link_libraries(fiction PRIVATE fiction_project_options fiction_project_warnings libfiction alice)
