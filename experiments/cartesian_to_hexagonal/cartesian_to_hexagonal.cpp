@@ -39,15 +39,14 @@
 #include <string>
 #include <vector>
 
-fiction::tile<fiction::gate_level_layout<
-    fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>
-to_hex(int old_x, int old_y, int height, int z)
+template <typename Lyt>
+fiction::coordinate<Lyt> to_hex(int old_x, int old_y, int height, int z)
 {
-    int y = old_x + old_y;
-    int x = old_x + std::ceil(std::floor(height / 2) - y / 2);
-    fiction::tile<fiction::gate_level_layout<
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>
-        hex{x, y, z};
+    const auto y = old_x + old_y;
+    const auto x = old_x + std::ceil(std::floor(height / 2) - y / 2);
+
+    fiction::coordinate<Lyt> hex{x, y, z};
+
     return hex;
 }
 
@@ -62,7 +61,7 @@ int main()  // NOLINT
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
-                            uint64_t, double, double, bool, uint64_t, double>
+                            uint64_t, double, double, std::string, uint64_t, double>
         bestagon_exp{"cartesian_to_hexagonal",
                      "benchmark",
                      "inputs",
@@ -90,9 +89,9 @@ int main()  // NOLINT
                      "layout area in nm²"};
 
     // instantiate a complete XAG NPN database for node re-synthesis
-    mockturtle::xag_npn_resynthesis<mockturtle::xag_network,                    // the input network type
-                                    mockturtle::xag_network,                    // the database network type
-                                    mockturtle::xag_npn_db_kind::xag_complete>  // the kind of database to use
+    const mockturtle::xag_npn_resynthesis<mockturtle::xag_network,                    // the input network type
+                                          mockturtle::xag_network,                    // the database network type
+                                          mockturtle::xag_npn_db_kind::xag_complete>  // the kind of database to use
         resynthesis_function{};
 
     // parameters for cut rewriting
@@ -108,11 +107,11 @@ int main()  // NOLINT
     std::vector<mockturtle::gate> gates{};
 
     // parameters for technology mapping
-    mockturtle::map_params map_params{};
+    const mockturtle::map_params map_params{};
 
     const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
     assert(read_genlib_result == lorina::return_code::success);
-    mockturtle::tech_library<2> gate_lib{gates};
+    const mockturtle::tech_library<2> gate_lib{gates};
 
     // parameters for SMT-based physical design
     // fiction::orthogonal_physical_design_params<gate_lyt> orthogonal_params{};
@@ -131,17 +130,17 @@ int main()  // NOLINT
         assert(read_verilog_result == lorina::return_code::success);
 
         // compute depth
-        mockturtle::depth_view depth_xag{xag};
+        const mockturtle::depth_view depth_xag{xag};
 
         // rewrite network cuts using the given re-synthesis function
         const auto cut_xag = mockturtle::cut_rewriting(xag, resynthesis_function, cut_params);
         // compute depth
-        mockturtle::depth_view depth_cut_xag{cut_xag};
+        const mockturtle::depth_view depth_cut_xag{cut_xag};
 
         // perform technology mapping
         const auto mapped_network = mockturtle::map(cut_xag, gate_lib, map_params);
         // compute depth
-        mockturtle::depth_view depth_mapped_network{mapped_network};
+        const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
         const auto gate_level_layout = fiction::orthogonal<gate_lyt>(mapped_network, {}, &orthogonal_stats);
@@ -150,15 +149,15 @@ int main()  // NOLINT
         fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
         fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats);
 
-        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        const std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
         // get width & height of cartesian layout
-        int layout_width  = gate_level_layout.x() + 1;
-        int layout_height = gate_level_layout.y() + 1;
+        const auto layout_width  = gate_level_layout.x() + 1;
+        const auto layout_height = gate_level_layout.y() + 1;
 
         // calculate max width & height of hexagonal layout
-        int hex_height = to_hex(layout_width - 1, layout_height - 1, layout_height, 0).y;
-        int hex_width  = to_hex(layout_width - 1, 0, layout_height, 0).x;
+        const auto hex_height = to_hex<gate_lyt>(layout_width - 1, layout_height - 1, layout_height, 0).y;
+        const auto hex_width  = to_hex<gate_lyt>(layout_width - 1, 0, layout_height, 0).x;
 
         // instantiate hexagonal layout
         hex_lyt hex_layout{{hex_width, hex_height}, "ROW"};
@@ -168,13 +167,15 @@ int main()  // NOLINT
         {
             for (int x = 0; x < k + 1; x++)
             {
-                int y = k - x;
+                const auto y = k - x;
                 if (y < layout_height && x < layout_width)
                 {
                     for (int z = 0; z < 2; z++)
                     {
-                        fiction::tile<gate_lyt> node{x, y, z};                        // old coordinate
-                        fiction::tile<gate_lyt> hex{to_hex(x, y, layout_height, z)};  // new coordinate
+                        const fiction::coordinate<gate_lyt> node{x, y, z};  // old coordinate
+                        const fiction::coordinate<gate_lyt> hex{
+                            to_hex<gate_lyt>(x, y, layout_height, z)};  // new coordinate
+
                         if (gate_level_layout.is_empty_tile(node))
                         {
                             ;
@@ -190,62 +191,62 @@ int main()  // NOLINT
                             {
                                 hex_layout.create_po(
                                     hex_layout.make_signal(hex_layout.get_node(
-                                        to_hex(gate_level_layout.incoming_data_flow(node)[0].x,
-                                               gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
-                                               gate_level_layout.incoming_data_flow(node)[0].z))),
+                                        to_hex<gate_lyt>(gate_level_layout.incoming_data_flow(node)[0].x,
+                                                         gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
+                                                         gate_level_layout.incoming_data_flow(node)[0].z))),
                                     gate_level_layout.get_output_name(gate_level_layout.get_node(node)), hex);
                             }
                             else if (gate_level_layout.is_wire(gate_level_layout.get_node(node)))
                             {
                                 hex_layout.create_buf(
                                     hex_layout.make_signal(hex_layout.get_node(
-                                        to_hex(gate_level_layout.incoming_data_flow(node)[0].x,
-                                               gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
-                                               gate_level_layout.incoming_data_flow(node)[0].z))),
+                                        to_hex<gate_lyt>(gate_level_layout.incoming_data_flow(node)[0].x,
+                                                         gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
+                                                         gate_level_layout.incoming_data_flow(node)[0].z))),
                                     hex);
                             }
                             else if (gate_level_layout.is_inv(gate_level_layout.get_node(node)))
                             {
                                 hex_layout.create_not(
                                     hex_layout.make_signal(hex_layout.get_node(
-                                        to_hex(gate_level_layout.incoming_data_flow(node)[0].x,
-                                               gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
-                                               gate_level_layout.incoming_data_flow(node)[0].z))),
+                                        to_hex<gate_lyt>(gate_level_layout.incoming_data_flow(node)[0].x,
+                                                         gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
+                                                         gate_level_layout.incoming_data_flow(node)[0].z))),
                                     hex);
                             }
                             else if (gate_level_layout.is_and(gate_level_layout.get_node(node)))
                             {
                                 hex_layout.create_and(
                                     hex_layout.make_signal(hex_layout.get_node(
-                                        to_hex(gate_level_layout.incoming_data_flow(node)[0].x,
-                                               gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
-                                               gate_level_layout.incoming_data_flow(node)[0].z))),
+                                        to_hex<gate_lyt>(gate_level_layout.incoming_data_flow(node)[0].x,
+                                                         gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
+                                                         gate_level_layout.incoming_data_flow(node)[0].z))),
                                     hex_layout.make_signal(hex_layout.get_node(
-                                        to_hex(gate_level_layout.incoming_data_flow(node)[1].x,
-                                               gate_level_layout.incoming_data_flow(node)[1].y, layout_height,
-                                               gate_level_layout.incoming_data_flow(node)[1].z))),
+                                        to_hex<gate_lyt>(gate_level_layout.incoming_data_flow(node)[1].x,
+                                                         gate_level_layout.incoming_data_flow(node)[1].y, layout_height,
+                                                         gate_level_layout.incoming_data_flow(node)[1].z))),
                                     hex);
                             }
                             else if (gate_level_layout.is_nand(gate_level_layout.get_node(node)))
                             {
                                 hex_layout.create_nand(
                                     hex_layout.make_signal(hex_layout.get_node(
-                                        to_hex(gate_level_layout.incoming_data_flow(node)[0].x,
-                                               gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
-                                               gate_level_layout.incoming_data_flow(node)[0].z))),
+                                        to_hex<gate_lyt>(gate_level_layout.incoming_data_flow(node)[0].x,
+                                                         gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
+                                                         gate_level_layout.incoming_data_flow(node)[0].z))),
                                     hex_layout.make_signal(hex_layout.get_node(
-                                        to_hex(gate_level_layout.incoming_data_flow(node)[1].x,
-                                               gate_level_layout.incoming_data_flow(node)[1].y, layout_height,
-                                               gate_level_layout.incoming_data_flow(node)[1].z))),
+                                        to_hex<gate_lyt>(gate_level_layout.incoming_data_flow(node)[1].x,
+                                                         gate_level_layout.incoming_data_flow(node)[1].y, layout_height,
+                                                         gate_level_layout.incoming_data_flow(node)[1].z))),
                                     hex);
                             }
                             else if (gate_level_layout.is_or(gate_level_layout.get_node(node)))
                             {
-                                hex_layout.create_or(hex_layout.make_signal(hex_layout.get_node(to_hex(
+                                hex_layout.create_or(hex_layout.make_signal(hex_layout.get_node(to_hex<gate_lyt>(
                                                          gate_level_layout.incoming_data_flow(node)[0].x,
                                                          gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
                                                          gate_level_layout.incoming_data_flow(node)[0].z))),
-                                                     hex_layout.make_signal(hex_layout.get_node(to_hex(
+                                                     hex_layout.make_signal(hex_layout.get_node(to_hex<gate_lyt>(
                                                          gate_level_layout.incoming_data_flow(node)[1].x,
                                                          gate_level_layout.incoming_data_flow(node)[1].y, layout_height,
                                                          gate_level_layout.incoming_data_flow(node)[1].z))),
@@ -255,39 +256,39 @@ int main()  // NOLINT
                             {
                                 hex_layout.create_nor(
                                     hex_layout.make_signal(hex_layout.get_node(
-                                        to_hex(gate_level_layout.incoming_data_flow(node)[0].x,
-                                               gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
-                                               gate_level_layout.incoming_data_flow(node)[0].z))),
+                                        to_hex<gate_lyt>(gate_level_layout.incoming_data_flow(node)[0].x,
+                                                         gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
+                                                         gate_level_layout.incoming_data_flow(node)[0].z))),
                                     hex_layout.make_signal(hex_layout.get_node(
-                                        to_hex(gate_level_layout.incoming_data_flow(node)[1].x,
-                                               gate_level_layout.incoming_data_flow(node)[1].y, layout_height,
-                                               gate_level_layout.incoming_data_flow(node)[1].z))),
+                                        to_hex<gate_lyt>(gate_level_layout.incoming_data_flow(node)[1].x,
+                                                         gate_level_layout.incoming_data_flow(node)[1].y, layout_height,
+                                                         gate_level_layout.incoming_data_flow(node)[1].z))),
                                     hex);
                             }
                             else if (gate_level_layout.is_xor(gate_level_layout.get_node(node)))
                             {
                                 hex_layout.create_xor(
                                     hex_layout.make_signal(hex_layout.get_node(
-                                        to_hex(gate_level_layout.incoming_data_flow(node)[0].x,
-                                               gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
-                                               gate_level_layout.incoming_data_flow(node)[0].z))),
+                                        to_hex<gate_lyt>(gate_level_layout.incoming_data_flow(node)[0].x,
+                                                         gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
+                                                         gate_level_layout.incoming_data_flow(node)[0].z))),
                                     hex_layout.make_signal(hex_layout.get_node(
-                                        to_hex(gate_level_layout.incoming_data_flow(node)[1].x,
-                                               gate_level_layout.incoming_data_flow(node)[1].y, layout_height,
-                                               gate_level_layout.incoming_data_flow(node)[1].z))),
+                                        to_hex<gate_lyt>(gate_level_layout.incoming_data_flow(node)[1].x,
+                                                         gate_level_layout.incoming_data_flow(node)[1].y, layout_height,
+                                                         gate_level_layout.incoming_data_flow(node)[1].z))),
                                     hex);
                             }
                             else if (gate_level_layout.is_xnor(gate_level_layout.get_node(node)))
                             {
                                 hex_layout.create_xnor(
                                     hex_layout.make_signal(hex_layout.get_node(
-                                        to_hex(gate_level_layout.incoming_data_flow(node)[0].x,
-                                               gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
-                                               gate_level_layout.incoming_data_flow(node)[0].z))),
+                                        to_hex<gate_lyt>(gate_level_layout.incoming_data_flow(node)[0].x,
+                                                         gate_level_layout.incoming_data_flow(node)[0].y, layout_height,
+                                                         gate_level_layout.incoming_data_flow(node)[0].z))),
                                     hex_layout.make_signal(hex_layout.get_node(
-                                        to_hex(gate_level_layout.incoming_data_flow(node)[1].x,
-                                               gate_level_layout.incoming_data_flow(node)[1].y, layout_height,
-                                               gate_level_layout.incoming_data_flow(node)[1].z))),
+                                        to_hex<gate_lyt>(gate_level_layout.incoming_data_flow(node)[1].x,
+                                                         gate_level_layout.incoming_data_flow(node)[1].y, layout_height,
+                                                         gate_level_layout.incoming_data_flow(node)[1].z))),
                                     hex);
                             }
                         }
@@ -295,15 +296,15 @@ int main()  // NOLINT
                 }
             }
         }
-        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        const auto end = std::chrono::steady_clock::now();
 
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};
         fiction::equivalence_checking(mapped_network, hex_layout, &eq_stats);
 
-        const auto eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
-                               eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
-                                                                         "NO";
+        const std::string eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
+                                      eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
+                                                                                "NO";
 
         // apply gate library
         // const auto cell_level_layout = fiction::apply_gate_library<cell_lyt,
