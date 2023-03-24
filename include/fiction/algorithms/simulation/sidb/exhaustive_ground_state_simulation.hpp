@@ -55,10 +55,11 @@ struct exgs_stats
  * @param ps Simulation statistics.
  */
 template <typename Lyt>
-void exhaustive_ground_state_simulation(Lyt&                              lyt,
-                                        const sidb_simulation_parameters& params        = sidb_simulation_parameters{},
-                                        exgs_stats<Lyt>*                  ps            = nullptr,
-                                        const typename Lyt::cell&         variable_cell = {}) noexcept
+void exhaustive_ground_state_simulation(
+    Lyt& lyt, const sidb_simulation_parameters& params = sidb_simulation_parameters{}, exgs_stats<Lyt>* ps = nullptr,
+    const std::unordered_map<typename Lyt::cell, const sidb_defect>& defects                  = {},
+    const std::unordered_map<typename Lyt::cell, double>&            local_external_potential = {},
+    const double&                                                    global_potential         = 0) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -72,36 +73,64 @@ void exhaustive_ground_state_simulation(Lyt&                              lyt,
         charge_lyt.set_physical_parameters(params);
         charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change();
-        auto       sidbs                 = charge_lyt.get_sidb_order();
-        const auto negative_sidb_indices = charge_lyt.negative_sidb_detection();
-        std::cout << negative_sidb_indices.size() << std::endl;
-        std::vector<typename Lyt::cell> negative_sidbs{};
-
-        negative_sidbs.reserve(negative_sidb_indices.size());
-        for (const auto& index : negative_sidb_indices)
+        for (const auto& defect : defects)
         {
-            const auto cell = charge_lyt.index_to_cell(index);
-            negative_sidbs.push_back(cell);
-            lyt.assign_cell_type(cell, Lyt::cell_type::EMPTY);
+            charge_lyt.assign_defect(defect.first, defect.second);
+        }
+        charge_lyt.set_local_external_potential(local_external_potential);
+        charge_lyt.set_global_external_potential(global_potential);
+        const auto sidbs_charge_lyt = charge_lyt.get_sidb_order();
+
+        auto all_sidbs_in_lyt_without_detected_ones = sidbs_charge_lyt;
+        // determine all SiDBs that have to be negatively charged to fulfill the population stability. This is an
+        // efficient way to prune the search space by 2^k with k being the number of detected negatively charged SiDBs.
+        const auto                      detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
+        std::vector<typename Lyt::cell> detected_negative_sidbs{};
+
+        // if layout has at least two SiDBs, the code inside this if-scope is executed.
+        if (sidbs_charge_lyt.size() > 1)
+        {
+            detected_negative_sidbs.reserve(detected_negative_sidb_indices.size());
+            for (const auto& index : detected_negative_sidb_indices)
+            {
+                const auto cell = charge_lyt.index_to_cell(index);
+                detected_negative_sidbs.push_back(cell);
+                lyt.assign_cell_type(cell, Lyt::cell_type::EMPTY);
+            }
+
+            // all detected negatively charged SiDBs are erased from the all_sidbs_in_lyt_without_detected_ones vector.
+            all_sidbs_in_lyt_without_detected_ones.erase(
+                std::remove_if(all_sidbs_in_lyt_without_detected_ones.begin(),
+                               all_sidbs_in_lyt_without_detected_ones.end(),
+                               [&detected_negative_sidbs](const typename Lyt::cell& n)
+                               {
+                                   return std::find(detected_negative_sidbs.begin(), detected_negative_sidbs.end(),
+                                                    n) != detected_negative_sidbs.end();
+                               }),
+                all_sidbs_in_lyt_without_detected_ones.end());
         }
 
-        sidbs.erase(std::remove_if(sidbs.begin(), sidbs.end(),
-                                   [&negative_sidbs](const typename Lyt::cell& n) {
-                                       return std::find(negative_sidbs.begin(), negative_sidbs.end(), n) !=
-                                              negative_sidbs.end();
-                                   }),
-                    sidbs.end());
-
-        typename Lyt::cell dependent_cell{};
-        if (!sidbs.empty())
+        if (!all_sidbs_in_lyt_without_detected_ones.empty() && sidbs_charge_lyt.size() > 1)
         {
+            // the first cell from all_sidbs_in_lyt_without_detected_ones is chosen as the dependent cell to initialize
+            // the layout (detected negatively charged SiDBs were erased in the step before).
+            charge_distribution_surface charge_lyt_new{lyt, params, sidb_charge_state::NEGATIVE,
+                                                       all_sidbs_in_lyt_without_detected_ones[0]};
 
-            charge_distribution_surface charge_lyt_new{lyt, params, sidb_charge_state::NEGATIVE, sidbs[0]};
-
-            for (const auto& cell : negative_sidbs)
+            // IMPORTANT: The detected negatively charged SiDBs (they have to be negatively charged to fulfill the
+            // population stability) are considered as negatively charged defects in the layout. Hence, there are no
+            // "real" defects assigned but in order to set some SiDBs with a fixed negative charge, this way of
+            // implementation is chosen.
+            for (const auto& cell : detected_negative_sidbs)
             {
-                charge_lyt_new.assign_defect(cell, sidb_defect{sidb_defect_type::UNKNOWN, -1});
+                charge_lyt_new.assign_defect(cell, sidb_defect{sidb_defect_type::UNKNOWN, -1,
+                                                               charge_lyt_new.get_phys_params().epsilon_r,
+                                                               charge_lyt_new.get_phys_params().lambda_tf});
             }
+
+            // update all local potentials, system energy and physically validity. Flag is set to "false" to allow
+            // dependent cell to change its charge state based on the N-1 SiDBs to fulfill the local population
+            // stability at its position.
 
             charge_lyt_new.update_after_charge_change(false);
 
@@ -110,27 +139,57 @@ void exhaustive_ground_state_simulation(Lyt&                              lyt,
 
                 if (charge_lyt_new.is_physically_valid())
                 {
-                    st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt_new});
+                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
+                    charge_lyt_copy
+                        .adding_defects_as_normal_sidbs();  // detected negatively charged SiDBs were excluded from the
+                                                            // charge layout and are added here again.
+                    st.valid_lyts.push_back(charge_lyt_copy);
                 }
-                charge_lyt_new.increase_charge_index_by_one(false);
+                charge_lyt_new.increase_charge_index_by_one(
+                    false);  // "false" allows that the dependent cell is automatically changed based on the new charge
+                             // distribution.
+            }
+            if (charge_lyt_new.is_physically_valid())
+            {
+                charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
+                charge_lyt_copy.adding_defects_as_normal_sidbs();
+                st.valid_lyts.push_back(charge_lyt_copy);
             }
 
-            for (const auto& cell : negative_sidbs)
+            for (const auto& cell : detected_negative_sidbs)
             {
                 lyt.assign_cell_type(cell, Lyt::cell_type::NORMAL);
             }
         }
 
-        else
+        else if (sidbs_charge_lyt.size() == 1)
         {
             charge_distribution_surface charge_lyt_new{lyt, params, sidb_charge_state::NEGATIVE};
-            for (const auto& cell : negative_sidbs)
+            if (charge_lyt_new.is_physically_valid())
             {
-                charge_lyt_new.assign_defect(cell, sidb_defect{sidb_defect_type::UNKNOWN, -1});
+                st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt_new});
+            }
+
+            for (int8_t i = 1; i < 2; i++)
+            {
+                charge_lyt_new.set_all_charge_states(sign_to_charge_state(static_cast<int8_t>(i - 1)));
+                charge_lyt_new.update_after_charge_change(false);
+            }
+        }
+
+        else if (all_sidbs_in_lyt_without_detected_ones.empty() && sidbs_charge_lyt.size() > 1)
+        {
+            charge_distribution_surface charge_lyt_new{lyt, params, sidb_charge_state::NEGATIVE};
+            for (const auto& cell : detected_negative_sidbs)
+            {
+                charge_lyt_new.assign_defect(cell, sidb_defect{sidb_defect_type::UNKNOWN, -1,
+                                                               charge_lyt_new.get_phys_params().epsilon_r,
+                                                               charge_lyt_new.get_phys_params().lambda_tf});
             }
             charge_lyt_new.update_after_charge_change(false);
-
-            st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt_new});
+            charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
+            charge_lyt_copy.adding_defects_as_normal_sidbs();
+            st.valid_lyts.push_back(charge_lyt_copy);
         }
     }
 
