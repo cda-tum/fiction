@@ -941,7 +941,7 @@ class one_pass_synthesis_impl
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename TT>
-std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, const one_pass_synthesis_params<Lyt>& ps = {},
+std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, const one_pass_synthesis_params& ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
@@ -995,7 +995,7 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, const one_pass
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, const one_pass_synthesis_params<Lyt>& ps = {},
+std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, const one_pass_synthesis_params& ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(

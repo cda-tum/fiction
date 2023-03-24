@@ -3145,7 +3145,7 @@ class exact_impl
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps = {},
+std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps = {},
                          exact_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
