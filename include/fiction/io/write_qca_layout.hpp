@@ -14,6 +14,7 @@
 #include <fstream>
 #include <ostream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace fiction
@@ -551,9 +552,9 @@ void write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params 
  * @param ps Parameters.
  */
 template <typename Lyt>
-void write_qca_layout(const Lyt& lyt, const std::string& filename, write_qca_layout_params ps = {})
+void write_qca_layout(const Lyt& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
 {
-    std::ofstream os{filename.c_str(), std::ofstream::out};
+    std::ofstream os{filename.data(), std::ofstream::out};
 
     if (!os.is_open())
     {
