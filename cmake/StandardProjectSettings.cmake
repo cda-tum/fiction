@@ -25,7 +25,9 @@ if (ENABLE_IPO)
             RESULT
             ipo_supported
             OUTPUT
-            ipo_output)
+            ipo_output
+            LANGUAGES
+            CXX)
     # enable inter-procedural optimization if it is supported (Clang's ThinLTO does not work with Ubuntu 20.04's default linker at the moment)
     if ((ipo_supported AND NOT ((${CMAKE_SYSTEM_NAME} MATCHES "Linux") AND (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang"))))
         set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)

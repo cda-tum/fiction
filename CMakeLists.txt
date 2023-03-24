@@ -14,29 +14,29 @@ set(CMAKE_CXX_STANDARD ${FICTION_CXX_STANDARD})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Interface library to set project options
-add_library(project_options INTERFACE)
+add_library(fiction_project_options INTERFACE)
 
 # Option to enable time tracing with clang
 if (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
     option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
     if (ENABLE_BUILD_WITH_TIME_TRACE)
-        target_compile_options(project_options INTERFACE -ftime-trace)
+        target_compile_options(fiction_project_options INTERFACE -ftime-trace)
     endif ()
 endif ()
 
 # Use the warnings specified in CompilerWarnings.cmake
-add_library(project_warnings INTERFACE)
+add_library(fiction_project_warnings INTERFACE)
 
 # Enable cache system
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Cache.cmake)
 
 # Standard compiler warnings
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CompilerWarnings.cmake)
-set_project_warnings(project_warnings)
+set_project_warnings(fiction_project_warnings)
 
 # Sanitizer options if supported by compiler
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Sanitizers.cmake)
-enable_sanitizers(project_options)
+enable_sanitizers(fiction_project_options)
 
 # Allow for static analysis options
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/StaticAnalyzers.cmake)
@@ -45,7 +45,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/StaticAnalyzers.cmake)
 if (NOT WIN32)
     option(FICTION_PROGRESS_BARS "Enable animated progress bars in command line" ON)
     if (FICTION_PROGRESS_BARS)
-        target_compile_definitions(project_options INTERFACE PROGRESS_BARS)
+        target_compile_definitions(fiction_project_options INTERFACE PROGRESS_BARS)
     endif ()
 endif ()
 

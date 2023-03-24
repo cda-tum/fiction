@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
@@ -22,14 +23,14 @@ TEMPLATE_TEST_CASE(
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_column_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_column_hex>>>))
 {
+    TestType lyt{{10, 10}};
+
     SECTION("layout with no SiDB placed")
     {
-        TestType lyt{{10, 10}};
-
+        const charge_distribution_surface                  charge_layout{lyt};
         std::vector<charge_distribution_surface<TestType>> all_lyts{};
-        charge_distribution_surface                        charge_layout{lyt};
 
-        CHECK(minimum_energy(all_lyts) == std::numeric_limits<double>::max());
+        CHECK_THAT(minimum_energy(all_lyts), Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
 
         all_lyts.push_back(charge_layout);
 
@@ -38,12 +39,12 @@ TEMPLATE_TEST_CASE(
 
     SECTION("layout with one SiDB placed")
     {
-        TestType lyt{{10, 10}};
         lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
-        std::vector<charge_distribution_surface<TestType>> all_lyts{};
-        charge_distribution_surface                        charge_layout{lyt};
 
-        CHECK(minimum_energy(all_lyts) == std::numeric_limits<double>::max());
+        const charge_distribution_surface                  charge_layout{lyt};
+        std::vector<charge_distribution_surface<TestType>> all_lyts{};
+
+        CHECK_THAT(minimum_energy(all_lyts), Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
 
         all_lyts.push_back(charge_layout);
 
@@ -52,28 +53,30 @@ TEMPLATE_TEST_CASE(
 
     SECTION("layout with three SiDBs placed")
     {
-        TestType lyt{{10, 10}};
         lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({10, 10}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({9, 9}, TestType::cell_type::NORMAL);
 
-        std::vector<charge_distribution_surface<TestType>> all_lyts{};
         charge_distribution_surface                        charge_layout_first{lyt};
+        std::vector<charge_distribution_surface<TestType>> all_lyts{};
 
-        CHECK(minimum_energy(all_lyts) == std::numeric_limits<double>::max());
+        CHECK_THAT(minimum_energy(all_lyts), Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
 
         charge_layout_first.assign_charge_state({0, 0}, sidb_charge_state::NEUTRAL);
+
         charge_layout_first.update_local_potential();
         charge_layout_first.recompute_system_energy();
         all_lyts.push_back(charge_layout_first);
 
         charge_distribution_surface charge_layout_second{lyt};
+
         charge_layout_second.assign_charge_state({10, 10}, sidb_charge_state::NEUTRAL);
         charge_layout_second.assign_charge_state({9, 9}, sidb_charge_state::NEUTRAL);
+
         charge_layout_second.update_local_potential();
         charge_layout_second.recompute_system_energy();
         all_lyts.push_back(charge_layout_second);
 
-        CHECK(std::abs(minimum_energy(all_lyts) - 0) < 0.00000001);
+        CHECK_THAT(minimum_energy(all_lyts), Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
 }

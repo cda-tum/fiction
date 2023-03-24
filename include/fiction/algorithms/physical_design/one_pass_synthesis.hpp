@@ -2,10 +2,10 @@
 // Created by marcel on 09.04.20.
 //
 
-#if (MUGEN)
-
 #ifndef FICTION_ONE_PASS_SYNTHESIS_HPP
 #define FICTION_ONE_PASS_SYNTHESIS_HPP
+
+#if (MUGEN)
 
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
@@ -941,7 +941,7 @@ class one_pass_synthesis_impl
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename TT>
-std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params ps = {},
+std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, const one_pass_synthesis_params<Lyt>& ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
@@ -995,7 +995,7 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params ps = {},
+std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, const one_pass_synthesis_params<Lyt>& ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(
@@ -1021,6 +1021,6 @@ std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params 
 
 }  // namespace fiction
 
-#endif  // FICTION_ONE_PASS_SYNTHESIS_HPP
-
 #endif  // MUGEN
+
+#endif  // FICTION_ONE_PASS_SYNTHESIS_HPP

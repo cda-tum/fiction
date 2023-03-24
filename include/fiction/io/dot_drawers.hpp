@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <array>
 #include <string>
+#include <string_view>
+#include <vector>
 
 namespace fiction
 {
@@ -173,7 +175,7 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
         return label;
     }
 
-    [[nodiscard]] bool is_node_number(const std::string& s) const noexcept
+    [[nodiscard]] bool is_node_number(const std::string_view& s) const noexcept
     {
         return !s.empty() && std::all_of(s.begin(), s.end(), ::isdigit);
     }
@@ -372,14 +374,18 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
     [[nodiscard]] std::vector<std::vector<std::string>> rows(const Lyt& lyt) const noexcept
     {
         std::vector<std::vector<std::string>> rows{};
+        rows.reserve(lyt.y() + 1);
 
         for (auto y = 0ul; y <= lyt.y(); ++y)
         {
             std::vector<std::string> row{};
+            row.reserve(lyt.x() + 1);
+
             for (auto x = 0ul; x <= lyt.x(); ++x)
             {
                 row.emplace_back(tile_id({x, y}));
             }
+
             rows.push_back(row);
         }
 
@@ -389,14 +395,18 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
     [[nodiscard]] std::vector<std::vector<std::string>> columns(const Lyt& lyt) const noexcept
     {
         std::vector<std::vector<std::string>> columns{};
+        columns.reserve(lyt.x() + 1);
 
         for (auto x = 0ul; x <= lyt.x(); ++x)
         {
             std::vector<std::string> col{};
+            col.reserve(lyt.y() + 1);
+
             for (auto y = 0ul; y <= lyt.y(); ++y)
             {
                 col.emplace_back(tile_id({x, y}));
             }
+
             columns.push_back(col);
         }
 
@@ -408,7 +418,7 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
         return fmt::format("rank = same {{ {} }};\n", fmt::join(rank, " -> "));
     }
 
-    [[nodiscard]] std::string edge(const std::string& src, const std::string& tgt) const noexcept
+    [[nodiscard]] std::string edge(const std::string_view& src, const std::string_view& tgt) const noexcept
     {
         return fmt::format("{} -> {};\n", src, tgt);
     }
@@ -972,9 +982,9 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
  * \param filename Filename
  */
 template <class Lyt, class Drawer>
-void write_dot_layout(const Lyt& lyt, const std::string& filename, const Drawer& drawer = {})
+void write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {})
 {
-    std::ofstream os{filename.c_str(), std::ofstream::out};
+    std::ofstream os{filename.data(), std::ofstream::out};
     write_dot_layout(lyt, os, drawer);
     os.close();
 }

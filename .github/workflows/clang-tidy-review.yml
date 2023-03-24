@@ -45,7 +45,7 @@ jobs:
       # Workaround to fix an issue with non-existing review artifacts in the review posting workflow
       - name: Create empty review artifact
         if: steps.check-review-output.outputs.files_exists == 'false'
-        uses: finnp/create-file-action@1.0.0
+        uses: finnp/create-file-action@2.0.0
         env:
           FILE_NAME: 'clang-tidy-review-output.json'
           FILE_DATA: '{}'
