@@ -19,6 +19,7 @@
 #include <istream>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
 namespace fiction
@@ -30,7 +31,7 @@ namespace fiction
 class sqd_parsing_error : public std::runtime_error
 {
   public:
-    explicit sqd_parsing_error(const std::string& msg) noexcept : std::runtime_error(msg) {}
+    explicit sqd_parsing_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
 };
 
 namespace detail
@@ -40,7 +41,7 @@ template <typename Lyt>
 class read_sqd_layout_impl
 {
   public:
-    read_sqd_layout_impl(std::istream& s, const std::string& name) : lyt{}, is{s}
+    read_sqd_layout_impl(std::istream& s, const std::string_view& name) : lyt{}, is{s}
     {
         set_name(lyt, name);
     }
@@ -335,7 +336,7 @@ class read_sqd_layout_impl
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-Lyt read_sqd_layout(std::istream& is, const std::string& name = "")
+Lyt read_sqd_layout(std::istream& is, const std::string_view& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
@@ -383,9 +384,9 @@ void read_sqd_layout(Lyt& lyt, std::istream& is)
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-Lyt read_sqd_layout(const std::string& filename, const std::string& name = "")
+Lyt read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
 {
-    std::ifstream is{filename.c_str(), std::ifstream::in};
+    std::ifstream is{filename.data(), std::ifstream::in};
 
     if (!is.is_open())
     {
@@ -412,9 +413,9 @@ Lyt read_sqd_layout(const std::string& filename, const std::string& name = "")
  * @param filename The file name to open and read from.
  */
 template <typename Lyt>
-void read_sqd_layout(Lyt& lyt, const std::string& filename)
+void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
 {
-    std::ifstream is{filename.c_str(), std::ifstream::in};
+    std::ifstream is{filename.data(), std::ifstream::in};
 
     if (!is.is_open())
     {
