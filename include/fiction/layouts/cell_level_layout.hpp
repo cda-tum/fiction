@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace fiction
@@ -57,8 +58,8 @@ class cell_level_layout : public ClockedLayout
     template <typename Cell>
     struct cell_level_layout_storage
     {
-        explicit cell_level_layout_storage(std::string name, uint16_t tile_x = 1u, uint16_t tile_y = 1u) :
-                layout_name{std::move(name)},
+        explicit cell_level_layout_storage(const std::string_view& name, uint16_t tile_x = 1u, uint16_t tile_y = 1u) :
+                layout_name{name},
                 tile_size_x{tile_x},
                 tile_size_y{tile_y}
         {}
@@ -264,7 +265,7 @@ class cell_level_layout : public ClockedLayout
      */
     [[nodiscard]] std::string get_layout_name() const noexcept
     {
-        return strg->layout_name;
+        return strg->layout_name.data();
     }
     /**
      * Returns the number of non-empty cell types that were assigned to the layout.

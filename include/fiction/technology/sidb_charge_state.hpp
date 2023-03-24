@@ -29,7 +29,7 @@ enum class sidb_charge_state
  * @param cs SiDB charge state.
  * @return Integer representing the SiDB's charge state.
  */
-[[nodiscard]] constexpr int8_t charge_state_to_sign(const sidb_charge_state& cs) noexcept
+[[nodiscard]] inline constexpr int8_t charge_state_to_sign(const sidb_charge_state& cs) noexcept
 {
     switch (cs)
     {
@@ -53,7 +53,7 @@ enum class sidb_charge_state
  * @param sg Charge state as integer (-1,0,1).
  * @return sidb_charge_state representation of `sg`.
  */
-[[nodiscard]] constexpr sidb_charge_state sign_to_charge_state(const int8_t sg) noexcept
+[[nodiscard]] inline constexpr sidb_charge_state sign_to_charge_state(const int8_t sg) noexcept
 {
     assert(((sg == -1) || (sg == 0) || (sg == 1)) && "Invalid charge state.");
 
@@ -83,7 +83,7 @@ enum class sidb_charge_state
  * @param charge_distribution A vector of SiDBs charge states.
  * @return A string representation of the charge states.
  */
-[[nodiscard]] std::string
+[[nodiscard]] inline std::string
 charge_configuration_to_string(const std::vector<sidb_charge_state>& charge_distribution) noexcept
 {
     std::stringstream config_str{};
