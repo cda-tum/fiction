@@ -431,12 +431,12 @@ TEMPLATE_TEST_CASE(
         CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) > -0.5);
 
         charge_layout_new.set_all_charge_states(sidb_charge_state::NEUTRAL);
-        charge_layout_new.set_external_potential({{{0, 0, 1}, -0.1}});
+        charge_layout_new.set_local_external_potential({{{0, 0, 1}, -0.1}});
         CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) == -0.1);
         CHECK_THAT(*charge_layout_new.get_local_potential({1, 3, 0}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
         CHECK_THAT(*charge_layout_new.get_local_potential({10, 5, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
 
-        charge_layout_new.set_external_potential({{{0, 0, 1}, -0.5}, {{10, 5, 1}, -0.1}});
+        charge_layout_new.set_local_external_potential({{{0, 0, 1}, -0.5}, {{10, 5, 1}, -0.1}});
         charge_layout_new.set_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_layout_new.update_after_charge_change();
 
@@ -454,7 +454,7 @@ TEMPLATE_TEST_CASE(
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL};
         CHECK(charge_layout.get_external_potentials().empty());
-        charge_layout.set_homogenous_external_potential(-0.1);
+        charge_layout.set_global_external_potential(-0.1);
         CHECK(!charge_layout.get_external_potentials().empty());
 
         CHECK(*charge_layout.get_local_potential({0, 0, 1}) == -0.1);
@@ -473,8 +473,14 @@ TEMPLATE_TEST_CASE(
         charge_layout_new.update_after_charge_change();
         CHECK(charge_layout_new.is_physically_valid());
 
-        charge_layout_new.set_homogenous_external_potential(-0.5);
+        charge_layout_new.set_global_external_potential(0.2);
         CHECK(!charge_layout_new.is_physically_valid());
+
+        charge_layout_new.assign_charge_state({0, 0, 0}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_charge_state({3, 0, 0}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_charge_state({5, 0, 0}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.update_after_charge_change();
+        CHECK(charge_layout_new.is_physically_valid());
     }
 
     SECTION("no external voltage given")

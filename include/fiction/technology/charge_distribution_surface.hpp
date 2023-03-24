@@ -411,7 +411,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->charge_distribution_to_index();
     }
 
-    void set_homogenous_external_potential(const double& potential_value) noexcept
+    void set_global_external_potential(const double& potential_value) noexcept
     {
         this->foreach_cell(
             [this, &potential_value](const auto& cell) {
@@ -647,7 +647,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * This function can be used to assign an external electrostatic potential to the layout. All important attributes
      * of the charge layout are updated automatically.
      */
-    void set_external_potential(const std::unordered_map<typename Lyt::cell, double>& external_voltage) noexcept
+    void set_local_external_potential(const std::unordered_map<typename Lyt::cell, double>& external_voltage) noexcept
     {
         strg->external_pot = external_voltage;
         this->update_after_charge_change();

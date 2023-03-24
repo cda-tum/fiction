@@ -6,6 +6,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb_defects.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -27,22 +28,73 @@ TEMPLATE_TEST_CASE("Empty layout ExGS simulation", "[ExGS]",
     CHECK(exgs_stats.valid_lyts.empty());
 }
 
-//  TEMPLATE_TEST_CASE("Single SiDB ExGS simulation", "[ExGS]",
-//                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
-// {
-//     TestType lyt{{20, 10}};
-//     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
-//
-//     exgs_stats<TestType>             exgs_stats{};
-//     const sidb_simulation_parameters params{2, -0.32};
-//
-//     exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
-//
-//     //REQUIRE(exgs_stats.valid_lyts.size() == 1);
-//     CHECK(exgs_stats.valid_lyts.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
-// }
+  TEMPLATE_TEST_CASE("Single SiDB ExGS simulation", "[ExGS]",
+                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+ {
+     TestType lyt{{20, 10}};
+     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-TEMPLATE_TEST_CASE("ExGS  tesffg simulation of a two-pair BDL wire with one perturber", "[ExGS]",
+     exgs_stats<TestType>             exgs_stats{};
+     const sidb_simulation_parameters params{2, -0.32};
+
+     exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
+
+     REQUIRE(exgs_stats.valid_lyts.size() == 1);
+     CHECK(exgs_stats.valid_lyts.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
+ }
+
+ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defect in proximity", "[ExGS]",
+                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+ {
+     TestType lyt{{20, 10}};
+     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+
+     exgs_stats<TestType>             exgs_stats{};
+     const sidb_simulation_parameters params{2, -0.32};
+
+     //const sidb_defect{sidb_defect_type::UNKNOWN, -1.0};
+     //std::unordered_map<typename TestType::cell, const sidb_defect> defects = {{3,0,0}, sidb_defect{}};
+     exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
+
+     REQUIRE(exgs_stats.valid_lyts.size() == 1);
+     CHECK(exgs_stats.valid_lyts.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
+ }
+
+ TEMPLATE_TEST_CASE("ExGS simulation of a one BDL pair", "[ExGS]",
+                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+ {
+     TestType lyt{{20, 10}};
+     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+     lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
+
+     exgs_stats<TestType>             exgs_stats{};
+     const sidb_simulation_parameters params{2, -0.25};
+
+     exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
+
+     REQUIRE(exgs_stats.valid_lyts.size() == 2);
+     for (const auto&layouts : exgs_stats.valid_lyts)
+     {
+         uint64_t counter_negative = 0;
+         uint64_t counter_neutral  = 0;
+         for (uint64_t i = 0; i < 2; i++)
+         {
+             if (layouts.get_charge_state_by_index(i) == sidb_charge_state::NEGATIVE)
+             {
+                 counter_negative += 1;
+             }
+             else
+             {
+                 counter_neutral += 1;
+             }
+         }
+         CHECK(counter_neutral == 1);
+         CHECK(counter_negative == 1);
+     }
+
+ }
+
+TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -73,6 +125,7 @@ TEMPLATE_TEST_CASE("ExGS  tesffg simulation of a two-pair BDL wire with one pert
 
     const auto& charge_lyt_first = exgs_stats.valid_lyts.front();
 
+    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({5, 0, 0}) == sidb_charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({7, 0, 0}) == sidb_charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({11, 0, 0}) == sidb_charge_state::NEUTRAL);
@@ -84,7 +137,7 @@ TEMPLATE_TEST_CASE("ExGS  tesffg simulation of a two-pair BDL wire with one pert
                Catch::Matchers::WithinAbs(0.24602741408, fiction::physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with two perturbers", "[ExGS]",
+TEMPLATE_TEST_CASE("ExGS simulation of a one-pair BDL wire with two perturbers", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{50, 10}};
@@ -112,51 +165,13 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with two perturbers",
 
     const auto& charge_lyt_first = exgs_stats.valid_lyts.front();
 
+    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({5, 0, 0}) == sidb_charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({7, 0, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({15, 0, 0}) == sidb_charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_system_energy(),
                Catch::Matchers::WithinAbs(0.1152574819, fiction::physical_constants::POP_STABILITY_ERR));
-}
-
-TEMPLATE_TEST_CASE("ExGS test simulation of a two-pair BDL wire with one perturber", "[ExGS]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
-{
-    TestType lyt{{20, 10}};
-
-    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({7, 0, 0}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({11, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({13, 0, 0}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({17, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 0, 0}, TestType::cell_type::NORMAL);
-
-    charge_distribution_surface charge_lyt{lyt};
-
-    charge_lyt.assign_charge_state({0, 0, 0}, sidb_charge_state::NEGATIVE);
-    charge_lyt.assign_charge_state({5, 0, 0}, sidb_charge_state::NEUTRAL);
-    charge_lyt.assign_charge_state({7, 0, 0}, sidb_charge_state::NEGATIVE);
-    charge_lyt.assign_charge_state({11, 0, 0}, sidb_charge_state::NEUTRAL);
-    charge_lyt.assign_charge_state({13, 0, 0}, sidb_charge_state::NEGATIVE);
-    charge_lyt.assign_charge_state({17, 0, 0}, sidb_charge_state::NEUTRAL);
-    charge_lyt.assign_charge_state({19, 0, 0}, sidb_charge_state::NEGATIVE);
-    charge_lyt.update_after_charge_change();
-    CHECK(charge_lyt.num_cells() > 0);
-
-    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::EMPTY);
-    charge_distribution_surface charge_lyt_new{lyt};
-    charge_lyt_new.assign_charge_state({5, 0, 0}, sidb_charge_state::NEUTRAL);
-    charge_lyt_new.assign_charge_state({7, 0, 0}, sidb_charge_state::NEGATIVE);
-    charge_lyt_new.assign_charge_state({11, 0, 0}, sidb_charge_state::NEUTRAL);
-    charge_lyt_new.assign_charge_state({13, 0, 0}, sidb_charge_state::NEGATIVE);
-    charge_lyt_new.assign_charge_state({17, 0, 0}, sidb_charge_state::NEUTRAL);
-    charge_lyt_new.assign_charge_state({19, 0, 0}, sidb_charge_state::NEGATIVE);
-    charge_lyt_new.update_after_charge_change();
-    charge_lyt_new.assign_defect({0, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1});
-    charge_lyt_new.update_after_charge_change();
 }
 
 TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB arrangement", "[ExGS]",
@@ -177,7 +192,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB arrangement", "[ExGS]",
     exgs_stats<TestType>             exgs_stats{};
     const sidb_simulation_parameters params{2, -0.32};
 
-    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats, {-11, -2, 0});
+    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
 
     REQUIRE(!exgs_stats.valid_lyts.empty());
 
@@ -214,7 +229,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01", "[
     exgs_stats<TestType>             exgs_stats{};
     const sidb_simulation_parameters params{2, -0.28};
 
-    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats, {6, 2, 0});
+    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
 
     REQUIRE(!exgs_stats.valid_lyts.empty());
     const auto& charge_lyt_first = exgs_stats.valid_lyts.front();
