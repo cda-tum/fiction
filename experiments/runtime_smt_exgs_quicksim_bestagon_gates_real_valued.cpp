@@ -24,9 +24,18 @@ using namespace fiction;
 
 int main()  // NOLINT
 {
-    experiments::experiment<std::string, double, double, std::size_t, double, bool, std::string> simulation_exp{
-        "benchmark", "gates", "runtime ExGS (in sec.)", "runtime SMT (in sec.)", "#invalid", "TTS QuickSim",
-        "correct",   "#SiDB"};
+    experiments::experiment<std::string, double, double, std::size_t, std::size_t, std::size_t, double, bool,
+                            std::string>
+        simulation_exp{"benchmark",
+                       "gates",
+                       "runtime ExGS (in sec.)",
+                       "runtime SMT (in sec.)",
+                       "#invalid",
+                       "#pre-assigned",
+                       "#negative",
+                       "TTS QuickSim",
+                       "correct",
+                       "#SiDB"};
 
     double sum_sr_exgs  = 0u;
     double sum_tts      = 0u;
@@ -40,8 +49,10 @@ int main()  // NOLINT
                                        folder + "xor",  folder + "xnor",      folder + "inv", folder + "inv_diag",
                                        folder + "wire", folder + "wire_diag", folder + "cx",  folder + "hourglass"};
 
-    bool        all_true    = true;
-    std::size_t num_invalid = 0u;
+    bool        all_true         = true;
+    std::size_t num_invalid      = 0u;
+    std::size_t num_pre_assigned = 0u;
+    std::size_t num_negative     = 0u;
 
     for (const auto& folder_gate : folders)
     {
@@ -74,10 +85,13 @@ int main()  // NOLINT
                                                                          exact_stats.valid_lyts};
 
             groundstate_found = is_ground_state(quicksim_stats, exgs_stats);  // checks if SMT found the ground state
-            num_invalid += exact_stats.number_of_invalid_layouts;
+            num_invalid += exact_stats.number_of_invalid_configurations;
+            num_pre_assigned += exact_stats.number_of_pre_assigned_charges;
+            num_negative += exact_stats.number_of_negative_charges;
 
             simulation_exp(benchmark.string(), mockturtle::to_seconds(exgs_stats.time_total),
-                           mockturtle::to_seconds(exact_stats.time_total), exact_stats.number_of_invalid_layouts,
+                           mockturtle::to_seconds(exact_stats.time_total), exact_stats.number_of_invalid_configurations,
+                           exact_stats.number_of_pre_assigned_charges, exact_stats.number_of_negative_charges,
                            tts_stat.time_to_solution, groundstate_found, std::to_string(lyt.num_cells()));
 
             db_num.push_back(lyt.num_cells());
@@ -99,7 +113,7 @@ int main()  // NOLINT
     const auto min_db_num = std::min_element(db_num.cbegin(), db_num.cend());
     const auto max_db_num = std::max_element(db_num.cbegin(), db_num.cend());
 
-    simulation_exp("sum", sum_sr_exgs, sum_sr_quick, num_invalid, sum_tts, all_true,
+    simulation_exp("sum", sum_sr_exgs, sum_sr_quick, num_invalid, num_pre_assigned, num_negative, sum_tts, all_true,
                    std::to_string(*min_db_num) + " -- " + std::to_string(*max_db_num));
 
     simulation_exp.save();

@@ -50,9 +50,25 @@ struct exact_ground_state_simulation_stats
      */
     mockturtle::stopwatch<>::duration time_total{};
     /**
-     * Number of invalid layouts that were encountered.
+     * Number of invalid charge configurations that were enumerated before finding a metastable ground state.
      */
-    std::size_t number_of_invalid_layouts{0u};
+    std::size_t number_of_invalid_configurations{0u};
+    /**
+     * Number of charges that were pre-assigned before the solving process.
+     */
+    std::size_t number_of_pre_assigned_charges{0u};
+    /**
+     * Number of negative charges in the final configuration.
+     */
+    std::size_t number_of_negative_charges{0u};
+    /**
+     * Number of neutral charges in the final configuration.
+     */
+    std::size_t number_of_neutral_charges{0u};
+    /**
+     * Number of positive charges in the final configuration.
+     */
+    std::size_t number_of_positive_charges{0u};
     /**
      * All physically valid charge layouts.
      */
@@ -89,7 +105,7 @@ class exact_ground_state_simulation_impl
         // set the timeout
         set_timeout(params.timeout);
 
-        // set up the solver (z3::optimize)
+        // set up the SMT instance
         generate_smt_instance();
         // run the solver and extract the valid layouts
         gather_valid_charge_configurations();
@@ -376,13 +392,17 @@ class exact_ground_state_simulation_impl
      * Adds constraints that pre-assigns negative charges to SiDBs based on physical implications. This should not
      * eliminate valid solutions, but reduce the search space for the SMT solver.
      */
-    void define_known_negative_charges()
+    void pre_assign_known_negative_charges()
     {
         const auto negative_sidb_indices = charge_lyt.negative_sidb_detection();
 
         std::for_each(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(),
-                      [this](const auto& sidb_index)
-                      { optimizer.add(negative_sidb_charge_state(charge_lyt.index_to_cell(sidb_index))); });
+                      [this](const auto& sidb_index) {
+                          optimizer.add(
+                              negative_sidb_charge_state(charge_lyt.index_to_cell(static_cast<uint64_t>(sidb_index))));
+                      });
+
+        stats.number_of_pre_assigned_charges = negative_sidb_indices.size();
     }
     /**
      * Adds the constraints that define and minimize the system energy.
@@ -440,7 +460,7 @@ class exact_ground_state_simulation_impl
         define_population_stability();
 
         // backdoor constraints
-        define_known_negative_charges();
+        pre_assign_known_negative_charges();
 
         // minimize the system energy
         minimize_system_energy();
@@ -463,19 +483,39 @@ class exact_ground_state_simulation_impl
                 if (params.phys_params.base == 2)
                 {
                     // extract charge state from model with model completion turned on
-                    const auto sidb_charge_state = m.eval(get_sidb_charge_state(s), true).bool_value();
+                    const auto sidb_charge_state = m.eval(get_sidb_charge_state(s), true);
 
-                    charge_lyt_copy.assign_charge_state(
-                        s, sidb_charge_state == Z3_L_TRUE ? sidb_charge_state::NEUTRAL : sidb_charge_state::NEGATIVE);
+                    if (sidb_charge_state.is_true())
+                    {
+                        charge_lyt_copy.assign_charge_state(s, sidb_charge_state::NEUTRAL);
+                        ++stats.number_of_neutral_charges;
+                    }
+                    else if (sidb_charge_state.is_false())
+                    {
+                        charge_lyt_copy.assign_charge_state(s, sidb_charge_state::NEGATIVE);
+                        ++stats.number_of_negative_charges;
+                    }
                 }
                 else if (params.phys_params.base == 3)
                 {
                     // extract charge state from model with model completion turned on
                     const auto sidb_charge_state = m.eval(get_sidb_charge_state(s), true).get_numeral_int();
 
-                    charge_lyt_copy.assign_charge_state(s, sidb_charge_state == -1 ? sidb_charge_state::NEGATIVE :
-                                                           sidb_charge_state == 0  ? sidb_charge_state::NEUTRAL :
-                                                                                     sidb_charge_state::POSITIVE);
+                    if (sidb_charge_state == -1)
+                    {
+                        charge_lyt_copy.assign_charge_state(s, sidb_charge_state::NEGATIVE);
+                        ++stats.number_of_negative_charges;
+                    }
+                    else if (sidb_charge_state == 0)
+                    {
+                        charge_lyt_copy.assign_charge_state(s, sidb_charge_state::NEUTRAL);
+                        ++stats.number_of_neutral_charges;
+                    }
+                    else if (sidb_charge_state == 1)
+                    {
+                        charge_lyt_copy.assign_charge_state(s, sidb_charge_state::POSITIVE);
+                        ++stats.number_of_positive_charges;
+                    }
                 }
             });
 
@@ -498,13 +538,14 @@ class exact_ground_state_simulation_impl
 
         charge_lyt.foreach_cell(
             [this, &m, &model_constraints](const sidb& s)
-            {
-                model_constraints.push_back(get_sidb_charge_state(s) == m.eval(get_sidb_charge_state(s), true));
-
-                std::cout << (get_sidb_charge_state(s) == m.eval(get_sidb_charge_state(s), true)) << std::endl;
-            });
+            { model_constraints.push_back(get_sidb_charge_state(s) == m.eval(get_sidb_charge_state(s), true)); });
 
         optimizer.add(!z3::mk_and(model_constraints));
+
+        // reset charge statistics
+        stats.number_of_negative_charges = 0ul;
+        stats.number_of_neutral_charges  = 0ul;
+        stats.number_of_positive_charges = 0ul;
     }
     /**
      * Enumerates all valid charge configurations up to the bound specified in the parameters.
@@ -539,7 +580,7 @@ class exact_ground_state_simulation_impl
                 else
                 {
                     std::cout << "layout is not valid!" << std::endl;
-                    ++stats.number_of_invalid_layouts;
+                    ++stats.number_of_invalid_configurations;
                 }
 
                 // if there is a next model to be considered, exclude the current one from the search space
