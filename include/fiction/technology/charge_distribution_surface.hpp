@@ -411,13 +411,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->charge_distribution_to_index();
     }
 
-    void set_global_external_potential(const double& potential_value) noexcept
+    void set_global_external_potential(const double& potential_value, bool fixed_dependent_cell = true) noexcept
     {
         this->foreach_cell(
             [this, &potential_value](const auto& cell) {
                 strg->external_pot.insert({cell, potential_value});
             });
-        this->update_after_charge_change();
+        this->update_after_charge_change(fixed_dependent_cell);
     }
     /**
      * This function can be used to detect which SiDBs must be negatively charged due to their location. Important:
@@ -720,6 +720,23 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     }
                 }
             }
+            else if (loc_pot_cell + strg->phys_params.mu_p > -physical_constants::POP_STABILITY_ERR)
+            {
+                if (strg->cell_charge[cell_to_index(strg->dependent_cell)] != sidb_charge_state::POSITIVE)
+                {
+                    for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
+                    {
+                        if (i != cell_to_index(strg->dependent_cell))
+                        {
+                            strg->local_pot[i] +=
+                                (this->get_electrostatic_potential_by_indices(i, cell_to_index(strg->dependent_cell))) *
+                                -charge_state_to_sign(strg->cell_charge[cell_to_index(strg->dependent_cell)]);
+                        }
+                    }
+                    strg->cell_charge[cell_to_index(strg->dependent_cell)] = sidb_charge_state::POSITIVE;
+                }
+            }
+
             else
             {
                 if (strg->cell_charge[cell_to_index(strg->dependent_cell)] != sidb_charge_state::NEUTRAL)

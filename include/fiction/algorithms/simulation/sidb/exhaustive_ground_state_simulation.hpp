@@ -73,12 +73,31 @@ void exhaustive_ground_state_simulation(
         charge_lyt.set_physical_parameters(params);
         charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change();
-        for (const auto& defect : defects)
+        for (const auto& [cell, defect] : defects)
         {
-            charge_lyt.assign_defect(defect.first, defect.second);
+            if (defect.epsilon_r == 0 && defect.lambda_tf == 0)
+            {
+                charge_lyt.assign_defect(cell,
+                                         sidb_defect{defect.type, defect.charge, charge_lyt.get_phys_params().epsilon_r,
+                                                     charge_lyt.get_phys_params().lambda_tf});
+            }
+            else if (defect.epsilon_r == 0 && defect.lambda_tf != 0)
+            {
+                charge_lyt.assign_defect(
+                    cell, sidb_defect{defect.type, defect.charge, charge_lyt.get_phys_params().epsilon_r});
+            }
+            else if (defect.epsilon_r != 0 && defect.lambda_tf == 0)
+            {
+                charge_lyt.assign_defect(cell, sidb_defect{defect.type, defect.charge, defect.epsilon_r,
+                                                           charge_lyt.get_phys_params().lambda_tf});
+            }
+            else
+            {
+                charge_lyt.assign_defect(cell, defect);
+            }
         }
         charge_lyt.set_local_external_potential(local_external_potential);
-        charge_lyt.set_global_external_potential(global_potential);
+        charge_lyt.set_global_external_potential(global_potential, false);
         const auto sidbs_charge_lyt = charge_lyt.get_sidb_order();
 
         auto all_sidbs_in_lyt_without_detected_ones = sidbs_charge_lyt;
@@ -116,7 +135,8 @@ void exhaustive_ground_state_simulation(
             // the layout (detected negatively charged SiDBs were erased in the step before).
             charge_distribution_surface charge_lyt_new{lyt, params, sidb_charge_state::NEGATIVE,
                                                        all_sidbs_in_lyt_without_detected_ones[0]};
-
+            charge_lyt_new.set_local_external_potential(local_external_potential);
+            charge_lyt_new.set_global_external_potential(global_potential);
             // IMPORTANT: The detected negatively charged SiDBs (they have to be negatively charged to fulfill the
             // population stability) are considered as negatively charged defects in the layout. Hence, there are no
             // "real" defects assigned but in order to set some SiDBs with a fixed negative charge, this way of
@@ -164,22 +184,22 @@ void exhaustive_ground_state_simulation(
 
         else if (sidbs_charge_lyt.size() == 1)
         {
-            charge_distribution_surface charge_lyt_new{lyt, params, sidb_charge_state::NEGATIVE};
-            if (charge_lyt_new.is_physically_valid())
+            for (int8_t i = 0; i < 3; i++)
             {
-                st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt_new});
-            }
-
-            for (int8_t i = 1; i < 2; i++)
-            {
-                charge_lyt_new.set_all_charge_states(sign_to_charge_state(static_cast<int8_t>(i - 1)));
-                charge_lyt_new.update_after_charge_change(false);
+                charge_lyt.set_all_charge_states(sign_to_charge_state(static_cast<int8_t>(i - 1)));
+                charge_lyt.update_after_charge_change(false);
+                if (charge_lyt.is_physically_valid())
+                {
+                    st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+                }
             }
         }
 
         else if (all_sidbs_in_lyt_without_detected_ones.empty() && sidbs_charge_lyt.size() > 1)
         {
             charge_distribution_surface charge_lyt_new{lyt, params, sidb_charge_state::NEGATIVE};
+            charge_lyt_new.set_local_external_potential(local_external_potential);
+            charge_lyt_new.set_global_external_potential(global_potential);
             for (const auto& cell : detected_negative_sidbs)
             {
                 charge_lyt_new.assign_defect(cell, sidb_defect{sidb_defect_type::UNKNOWN, -1,

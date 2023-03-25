@@ -1090,4 +1090,34 @@ TEMPLATE_TEST_CASE(
         CHECK(*charge_layout.get_local_potential({3, 0, 0}) == 0);
         CHECK(*charge_layout.get_local_potential({5, 0, 0}) == 0);
     }
+
+    SECTION("Y-shape SiDB OR gate with input 01 and global external potential (high)")
+    {
+
+        lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 3, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({14, 2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 5, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({10, 6, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
+
+        const sidb_simulation_parameters params{3, -0.28};
+        charge_distribution_surface      charge_lyt_first{lyt, params, sidb_charge_state::POSITIVE};
+        charge_lyt_first.set_global_external_potential(-2.5);
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::POSITIVE);
+
+        CHECK(charge_lyt_first.is_physically_valid());
+    }
 }
