@@ -35,7 +35,12 @@ struct exact_ground_state_simulation_params
      * The number of valid layouts to enumerate. If set to `-1`, all valid layouts are enumerated. If set to `0`, no
      * layouts are being returned. If set to `1`, only the layout with minimum system energy is determined, and so on.
      */
-    uint16_t number_of_valid_layouts_to_enumerate{1u};
+    std::size_t number_of_valid_layouts_to_enumerate{1u};
+    /**
+     * Flag to indicate that parallel solving is desired. If enabled, it utilizes the maximum amount of hardware
+     * threads.
+     */
+    bool enable_parallel_solving{false};
     /**
      * Sets a timeout in ms for the solving process. Standard is 4294967 seconds as defined by Z3.
      */
@@ -102,8 +107,8 @@ class exact_ground_state_simulation_impl
             return;
         }
 
-        // set the timeout
-        set_timeout(params.timeout);
+        // set the timeout and other parameters
+        set_solver_parameters();
 
         // set up the SMT instance
         generate_smt_instance();
@@ -135,14 +140,29 @@ class exact_ground_state_simulation_impl
     z3::optimize optimizer{ctx};
 
     /**
-     * Sets the given timeout for the current solver.
-     *
-     * @param t Timeout in ms.
+     * Sets the given timeout specified in the parameters object in the current solver. Additionally, sets further
+     * settings that improve the runtime of the solver on this particular instance.
      */
-    void set_timeout(const unsigned t)
+    void set_solver_parameters()
     {
         z3::params p{ctx};
-        p.set("timeout", t);
+        // timeout
+        p.set("timeout", params.timeout);
+        // set the symba SMT optimization engine, which is performant than the basic optimizer
+        p.set("optsmt_engine", "symba");
+
+        // multi-threading
+        z3::set_param("parallel.enable", true);
+        z3::set_param("parallel.threads.max", 12);
+        //         z3::set_param("parallel.enable", params.enable_parallel_solving);
+
+        // maximum number of finite factorizations
+        z3::set_param("algebraic.factor_num_primes", 20);
+        // minimal size of an interval for caching purposes is 1/2^k
+        z3::set_param("algebraic.min_mag", 35);
+        // the result of a polynomial evaluation is considered to be 0 if it is inside the interval (-1/2^k, 1/2^k)
+        z3::set_param("algebraic.zero_accuracy", 1);
+
         optimizer.set(p);
     }
     /**
