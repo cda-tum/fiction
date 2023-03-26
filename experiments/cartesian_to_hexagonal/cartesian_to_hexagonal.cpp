@@ -1,8 +1,7 @@
 #include "experiment_setup.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
-// #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
+#include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/write_sqd_layout.hpp>           // writer for SiQAD files (physical simulation)
@@ -13,6 +12,7 @@
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/traits.hpp>                                 // traits for type-checking
 #include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
+#include <fiction/layouts/bounding_box.hpp>                   // computes a minimum-sized box around all non-empty coordinates in a given layout
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
@@ -22,10 +22,8 @@
 #include <mockturtle/algorithms/mapper.hpp>                    // Technology mapping on the logic level
 #include <mockturtle/algorithms/miter.hpp>                     // miter structure
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
-#include <mockturtle/io/aiger_reader.hpp>
 #include <mockturtle/io/genlib_reader.hpp>   // call-backs to read Genlib files into gate libraries
 #include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
-#include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/klut.hpp>       // k-LUT network
 #include <mockturtle/networks/xag.hpp>        // XOR-AND-inverter graphs
 #include <mockturtle/utils/tech_library.hpp>  // technology library utils
@@ -309,6 +307,11 @@ int main()  // NOLINT
         // const auto cell_level_layout = fiction::apply_gate_library<cell_lyt,
         // fiction::sidb_bestagon_library>(hex_layout);
 
+        // calculate bounding box
+        const auto bounding_box = fiction::bounding_box_2d(hex_layout);
+        const auto hex_layout_width = bounding_box.get_x_size() + 1;
+        const auto hex_layout_height = bounding_box.get_y_size() + 1;
+
         // compute area
         // fiction::area_stats                            area_stats{};
         // fiction::area_params<fiction::sidb_technology> area_ps{};
@@ -318,8 +321,8 @@ int main()  // NOLINT
         bestagon_exp(
             benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
             depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(), gate_level_layout.x() + 1,
-            gate_level_layout.y() + 1, (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1), hex_layout.x() + 1,
-            hex_layout.y() + 1, (hex_layout.x() + 1) * (hex_layout.y() + 1), gate_level_layout.num_gates(),
+            gate_level_layout.y() + 1, (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1), hex_layout_width,
+            hex_layout_height, hex_layout_width * hex_layout_height, gate_level_layout.num_gates(),
             gate_level_layout.num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
             mockturtle::to_seconds(orthogonal_stats.time_total),
             std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() / 1000000.0, eq_result, 0, 0);
