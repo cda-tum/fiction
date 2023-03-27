@@ -683,6 +683,32 @@ TEMPLATE_TEST_CASE(
         REQUIRE(negative_sidbs.size() == 1);
     }
 
+    SECTION("Seven randomly distributed DB | checking for physical validity")
+    {
+        TestType lyt_new{{11, 11}};
+        lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 3, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({6, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 3, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
+        const sidb_simulation_parameters params{2, -0.28};
+        charge_distribution_surface      charge_layout_new{lyt, params};
+        charge_layout_new.assign_charge_state({1, 3, 0}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_charge_state({3, 3, 0}, sidb_charge_state::NEUTRAL);
+        charge_layout_new.assign_charge_state({4, 3, 0}, sidb_charge_state::NEUTRAL);
+        charge_layout_new.assign_charge_state({6, 3, 0}, sidb_charge_state::NEUTRAL);
+        charge_layout_new.assign_charge_state({7, 3, 0}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_charge_state({6, 10, 0}, sidb_charge_state::NEUTRAL);
+        charge_layout_new.assign_charge_state({7, 10, 0}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.update_after_charge_change();
+
+        REQUIRE(charge_layout_new.is_physically_valid());
+    }
+
     SECTION("using chargeless and normal potential function")
     {
         TestType                         lyt_new{{11, 11}};

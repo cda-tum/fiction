@@ -421,14 +421,14 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01 and 
     REQUIRE(!exgs_stats.valid_lyts.empty());
     const auto& charge_lyt_first = exgs_stats.valid_lyts.front();
 
-    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::POSITIVE);
-    CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == sidb_charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == sidb_charge_state::POSITIVE);
-    CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == sidb_charge_state::POSITIVE);
-    CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == sidb_charge_state::POSITIVE);
-    CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == sidb_charge_state::POSITIVE);
-    CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::POSITIVE);
-    CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::POSITIVE);
+    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 }
 
 TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01 and global external potential (high)",
@@ -570,7 +570,7 @@ TEMPLATE_TEST_CASE(
     CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == sidb_charge_state::NEUTRAL);
 }
 
-TEMPLATE_TEST_CASE("test ExGS simulation of a Y-shape SiDB OR gate with input 01", "[ExGS]",
+TEMPLATE_TEST_CASE("Seven randomly distributed DBs, test if dependent cell calculation works correctly", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -592,4 +592,12 @@ TEMPLATE_TEST_CASE("test ExGS simulation of a Y-shape SiDB OR gate with input 01
 
     REQUIRE(!exgs_stats.valid_lyts.empty());
     const auto& charge_lyt_first = exgs_stats.valid_lyts.front();
+
+    charge_lyt_first.assign_charge_state({1, 3, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt_first.assign_charge_state({3, 3, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt_first.assign_charge_state({4, 3, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt_first.assign_charge_state({6, 3, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt_first.assign_charge_state({7, 3, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt_first.assign_charge_state({6, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt_first.assign_charge_state({7, 10, 0}, sidb_charge_state::NEGATIVE);
 }
