@@ -136,6 +136,34 @@ STL Extensions
 .. doxygenclass:: fiction::searchable_priority_queue
 
 
+Execution Policy Macros
+-----------------------
+
+**Header:** ``fiction/utils/execution_utils.hpp``
+
+Handling parallel STL algorithms is a bit cumbersome due to their platform dependence. The following macros are provided
+to simplify the usage of parallel STL algorithms while CMake and some pre-processor magic take care of all the
+boilerplate.
+
+One can use the following macros to specify the execution policy for parallel STL algorithms in a (mostly)
+platform-independent way::
+
+    std::for_each(FICTION_EXECUTION_POLICY_PAR v.begin(), v.end(), lambda);
+    //                                        ^ note the missing comma
+
+If parallelism or execution policies are not available, this will expand to::
+
+    std::for_each(v.begin(), v.end(), lambda);
+
+.. note::
+    Only include this header and do not include ``<execution>`` directly. This header will include ``<execution>`` if
+    available and will define the macros accordingly.
+
+.. doxygendefine:: FICTION_EXECUTION_POLICY_SEQ
+.. doxygendefine:: FICTION_EXECUTION_POLICY_PAR
+.. doxygendefine:: FICTION_EXECUTION_POLICY_PAR_UNSEQ
+
+
 Ranges
 ------
 
@@ -153,6 +181,3 @@ Hashing
 This header defines implementations for ``std::hash`` for several data types.
 
 .. doxygenfunction:: fiction::hash_combine
-.. doxygenstruct:: std::hash<std::array<T, N>>
-.. doxygenstruct:: std::hash<std::set<T>>
-.. doxygenstruct:: std::hash<std::pair<T1, T2>>

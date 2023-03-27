@@ -18,6 +18,7 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -323,9 +324,9 @@ void write_sqd_layout(const Lyt& lyt, std::ostream& os)
  * @param filename The file name to create and write into. Should preferably use the `.sqd` extension.
  */
 template <typename Lyt>
-void write_sqd_layout(const Lyt& lyt, const std::string& filename)
+void write_sqd_layout(const Lyt& lyt, const std::string_view& filename)
 {
-    std::ofstream os{filename.c_str(), std::ofstream::out};
+    std::ofstream os{filename.data(), std::ofstream::out};
 
     if (!os.is_open())
     {

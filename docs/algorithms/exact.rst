@@ -10,4 +10,4 @@ network specifications under constraints. This approach finds exact results but 
 
 .. doxygenstruct:: fiction::exact_physical_design_params
    :members:
-.. doxygenfunction:: fiction::exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = {}, exact_physical_design_stats* pst = nullptr)
+.. doxygenfunction:: fiction::exact(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps = {}, exact_physical_design_stats* pst = nullptr)

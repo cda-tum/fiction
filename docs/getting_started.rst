@@ -76,7 +76,7 @@ to your ``CMakeLists.txt``::
 
     By default *fiction*'s CLI is enabled and will be built, which can be time-consuming. If you do not need it, you can
     disable it by passing ``-DFICTION_CLI=OFF`` to your ``cmake`` call or adding
-    `set(FICTION_CLI OFF CACHE BOOL "" FORCE)` **before** `add_subdirectory(fiction/)`.
+    ``set(FICTION_CLI OFF CACHE BOOL "" FORCE)`` **before** ``add_subdirectory(fiction/)``.
 
 Within your code files, you can then call
 
