@@ -40,8 +40,7 @@ struct exgs_stats
         {
             std::cout << "no state found | if two state simulation is used, continue with three state" << std::endl;
         }
-
-        out << fmt::format("{} phyiscally valid charge states were found \n", valid_lyts.size());
+        out << fmt::format("{} physically valid charge states were found \n", valid_lyts.size());
         std::cout << "_____________________________________________________ \n";
     }
 };

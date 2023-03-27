@@ -205,7 +205,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Vector of SiDB charges.
      */
-    [[nodiscard]] std::vector<sidb_charge_state> get_all_sidb_charges() const noexcept
+    [[maybe_unused]] [[nodiscard]] std::vector<sidb_charge_state> get_all_sidb_charges() const noexcept
     {
         return strg->cell_charge;
     }
@@ -1235,6 +1235,13 @@ template <class T>
 charge_distribution_surface(const T&) -> charge_distribution_surface<T>;
 
 template <class T>
+charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
+
+template <class T>
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state& cs)
+    -> charge_distribution_surface<T>;
+
+template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state& cs,
                             const typename T::cell& variable_cells) -> charge_distribution_surface<T>;
 
@@ -1243,13 +1250,6 @@ charge_distribution_surface(const T&, const sidb_simulation_parameters&, const s
                             const typename T::cell&                             variable_cells,
                             const std::unordered_map<typename T::cell, double>& external_pot)
     -> charge_distribution_surface<T>;
-
-template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state& cs)
-    -> charge_distribution_surface<T>;
-
-template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
 
 }  // namespace fiction
 
