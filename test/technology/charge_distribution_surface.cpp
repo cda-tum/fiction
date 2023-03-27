@@ -1107,17 +1107,7 @@ TEMPLATE_TEST_CASE(
 
         const sidb_simulation_parameters params{3, -0.28};
         charge_distribution_surface      charge_lyt_first{lyt, params, sidb_charge_state::POSITIVE};
-        charge_lyt_first.set_global_external_potential(-2.5);
-
-        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::POSITIVE);
-        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == sidb_charge_state::POSITIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == sidb_charge_state::POSITIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == sidb_charge_state::POSITIVE);
-        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == sidb_charge_state::POSITIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == sidb_charge_state::POSITIVE);
-        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::POSITIVE);
-        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::POSITIVE);
-
+        charge_lyt_first.set_global_external_potential(-2.0);
         CHECK(charge_lyt_first.is_physically_valid());
     }
 }

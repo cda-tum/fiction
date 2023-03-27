@@ -50,6 +50,10 @@ struct time_to_solution_stats
     double single_runtime_exhaustive{};
 
     /**
+     * Number of physically valid charge configurations found by ExGS.
+     */
+    std::size_t number_valid_layouts_exgs{};
+    /**
      * Print the results to the given output stream.
      *
      * @param out Output stream.
@@ -83,6 +87,7 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, time_to_solut
     exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params, &stats_exhaustive);
 
     time_to_solution_stats st{};
+    st.number_valid_layouts_exgs = stats_exhaustive.valid_lyts.size();
     st.single_runtime_exhaustive = mockturtle::to_seconds(stats_exhaustive.time_total);
 
     std::size_t         gs_count = 0;

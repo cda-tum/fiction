@@ -33,7 +33,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("layout with no SiDB placed")
     {
-        const charge_distribution_surface charge_layout{lyt};
+        charge_distribution_surface charge_layout{lyt};
 
         sim_acc_tts<TestType>(charge_layout, quicksim_params, &tts_stat);
 
