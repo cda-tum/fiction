@@ -8,11 +8,14 @@
 #include <fiction/networks/technology_network.hpp>   // technology-mapped network type
 #include <fiction/technology/area.hpp>               // area requirement calculations
 #include <fiction/technology/cell_technologies.hpp>  // cell implementations
-// #include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
+#include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/traits.hpp>                                 // traits for type-checking
 #include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
 #include <fiction/layouts/bounding_box.hpp>                   // computes a minimum-sized box around all non-empty coordinates in a given layout
+#include <fiction/utils/placement_utils.hpp>                  // used for reserving inputs on the hexagonal layout
+#include <fiction/io/dot_drawers.hpp>                         // draw layouts
+#include <fiction/utils/name_utils.hpp>                       // restore names
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
@@ -158,7 +161,7 @@ int main()  // NOLINT
         const auto hex_width  = to_hex<gate_lyt>(layout_width - 1, 0, layout_height, 0).x;
 
         // instantiate hexagonal layout
-        hex_lyt hex_layout{{hex_width, hex_height}, "ROW"};
+        hex_lyt hex_layout{{hex_width, hex_height, 1}, fiction::row_clocking<hex_lyt>()};
 
         // iterate through cartesian layout diagonally
         for (int k = 0; k < layout_width + layout_height - 1; k++)
@@ -183,7 +186,7 @@ int main()  // NOLINT
                         if (const auto node = gate_level_layout.get_node(old_coord); gate_level_layout.is_pi(node))
                         {
                             hex_layout.create_pi(
-                                gate_level_layout.get_input_name(gate_level_layout.get_node({x, y, z})), hex);
+                                gate_level_layout.get_name(gate_level_layout.get_node({x, y, z})), hex);
                         }
                         else if (gate_level_layout.is_po(node))
                         {
@@ -192,7 +195,7 @@ int main()  // NOLINT
                             hex_layout.create_po(
                                 hex_layout.make_signal(
                                     hex_layout.get_node(to_hex<gate_lyt>(signal.x, signal.y, layout_height, signal.z))),
-                                gate_level_layout.get_output_name(gate_level_layout.get_node(old_coord)), hex);
+                                gate_level_layout.get_name(gate_level_layout.get_node(old_coord)), hex);
                         }
                         else if (gate_level_layout.is_wire(node))
                         {
@@ -295,6 +298,7 @@ int main()  // NOLINT
         }
         const auto end = std::chrono::steady_clock::now();
 
+        fiction::restore_names(gate_level_layout, hex_layout);
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};
         fiction::equivalence_checking(mapped_network, hex_layout, &eq_stats);
@@ -304,8 +308,7 @@ int main()  // NOLINT
                                                                                 "NO";
 
         // apply gate library
-        // const auto cell_level_layout = fiction::apply_gate_library<cell_lyt,
-        // fiction::sidb_bestagon_library>(hex_layout);
+        const auto cell_level_layout = fiction::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(hex_layout);
 
         // calculate bounding box
         const auto bounding_box = fiction::bounding_box_2d(hex_layout);
@@ -313,9 +316,9 @@ int main()  // NOLINT
         const auto hex_layout_height = bounding_box.get_y_size() + 1;
 
         // compute area
-        // fiction::area_stats                            area_stats{};
-        // fiction::area_params<fiction::sidb_technology> area_ps{};
-        // fiction::area(cell_level_layout, area_ps, &area_stats);
+        fiction::area_stats                            area_stats{};
+        fiction::area_params<fiction::sidb_technology> area_ps{};
+        fiction::area(cell_level_layout, area_ps, &area_stats);
 
         // log results
         bestagon_exp(
@@ -325,7 +328,8 @@ int main()  // NOLINT
             hex_layout_height, hex_layout_width * hex_layout_height, gate_level_layout.num_gates(),
             gate_level_layout.num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
             mockturtle::to_seconds(orthogonal_stats.time_total),
-            std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() / 1000000.0, eq_result, 0, 0);
+            std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() / 1000000.0, eq_result,
+            cell_level_layout.num_cells(), area_stats.area);
 
         bestagon_exp.save();
         bestagon_exp.table();
