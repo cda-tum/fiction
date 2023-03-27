@@ -25,7 +25,7 @@ using namespace fiction;
 int main()  // NOLINT
 {
     experiments::experiment<std::string, double, double, std::size_t, std::size_t, std::size_t, double, bool,
-                            std::string>
+                            std::string, std::string>
         simulation_exp{"benchmark",
                        "gates",
                        "runtime ExGS (in sec.)",
@@ -35,6 +35,7 @@ int main()  // NOLINT
                        "#negative",
                        "TTS QuickSim",
                        "correct",
+                       "number of enumerated layouts",
                        "#SiDB"};
 
     double sum_sr_exgs  = 0u;
@@ -76,7 +77,10 @@ int main()  // NOLINT
             sim_acc_tts<sidb_cell_clk_lyt_siqad>(lyt, quicksim_params, &tts_stat);
 
             // SMT solver
-            const exact_ground_state_simulation_params                   exact_params{phys_params};
+            const auto number_of_valid_layouts_to_enumerate =
+                std::min(tts_stat.number_valid_layouts_exgs,
+                         static_cast<std::size_t>(2));  // if an excited state exists, it is determined.
+            const exact_ground_state_simulation_params exact_params{phys_params, number_of_valid_layouts_to_enumerate};
             exact_ground_state_simulation_stats<sidb_cell_clk_lyt_siqad> exact_stats{};
 
             exact_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, exact_params, &exact_stats);
@@ -92,7 +96,8 @@ int main()  // NOLINT
             simulation_exp(benchmark.string(), mockturtle::to_seconds(exgs_stats.time_total),
                            mockturtle::to_seconds(exact_stats.time_total), exact_stats.number_of_invalid_configurations,
                            exact_stats.number_of_pre_assigned_charges, exact_stats.number_of_negative_charges,
-                           tts_stat.time_to_solution, groundstate_found, std::to_string(lyt.num_cells()));
+                           tts_stat.time_to_solution, groundstate_found,
+                           std::to_string(number_of_valid_layouts_to_enumerate), std::to_string(lyt.num_cells()));
 
             db_num.push_back(lyt.num_cells());
 
@@ -114,7 +119,7 @@ int main()  // NOLINT
     const auto max_db_num = std::max_element(db_num.cbegin(), db_num.cend());
 
     simulation_exp("sum", sum_sr_exgs, sum_sr_quick, num_invalid, num_pre_assigned, num_negative, sum_tts, all_true,
-                   std::to_string(*min_db_num) + " -- " + std::to_string(*max_db_num));
+                   "---", std::to_string(*min_db_num) + " -- " + std::to_string(*max_db_num));
 
     simulation_exp.save();
     simulation_exp.table();
