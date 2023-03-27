@@ -249,7 +249,7 @@ void restore_signal_names(
  * @param ntk_src Source logic network whose I/O names are to be transferred to `ntk_dest`.
  * @param ntk_dest Target logic network whose I/O names are to be assigned `ntk_src`'s names.
  */
-template <typename NtkSrc, typename NtkDest, typename T>
+template <typename NtkSrc, typename NtkDest>
 void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
 {
     restore_network_name(ntk_src, ntk_dest);
