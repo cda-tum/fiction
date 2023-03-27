@@ -224,6 +224,7 @@ class sat_coloring_handler
         // be two cliques of size 1. Color frequency says, they must both be assigned color 0 for frequency reasons. Now
         // let the respective paths be mutex, i.e., their nodes share an edge. Suddenly, the graph is not colorable
         // anymore. It would actually work fine if the cliques were total.
+        // If SAT is not able to determine a solution because of this issue, the algorithm falls back to MCS.
 
         if (ps.clique_size_color_frequency)
         {
@@ -233,21 +234,20 @@ class sat_coloring_handler
         return {check_sat(k_color_instance), k_color_instance};
     }
 
-    k_instance determine_min_coloring_with_linearly_ascending_search() const noexcept
+    std::optional<k_instance> determine_min_coloring_with_linearly_ascending_search() const noexcept
     {
         for (std::size_t k = q; k < graph.size_vertices() + 1; ++k)
         {
             if (const auto [sat, instance] = check_k_coloring(k); sat == bill::result::states::satisfiable)
             {
-                return {k, instance};
+                return k_instance{k, instance};
             }
         }
 
-        assert(false);
-        return {};  // unreachable
+        return std::nullopt;
     }
 
-    k_instance determine_min_coloring_with_linearly_descending_search() const noexcept
+    std::optional<k_instance> determine_min_coloring_with_linearly_descending_search() const noexcept
     {
         k_instance most_recent_sat_instance{};
 
@@ -263,13 +263,12 @@ class sat_coloring_handler
             most_recent_sat_instance = {k, instance};
         }
 
-        assert(false);
-        return {};  // unreachable
+        return std::nullopt;
     }
 
-    k_instance determine_min_coloring_with_binary_search() const noexcept
+    std::optional<k_instance> determine_min_coloring_with_binary_search() const noexcept
     {
-        k_instance most_recent_sat_instance{};
+        std::optional<k_instance> most_recent_sat_instance{};
 
         std::size_t h{q};
 
@@ -314,9 +313,9 @@ class sat_coloring_handler
         return most_recent_sat_instance;
     }
 
-    vertex_coloring<Graph, Color> color() noexcept
+    std::optional<vertex_coloring<Graph, Color>> color() noexcept
     {
-        k_instance min_coloring{};
+        std::optional<k_instance> min_coloring = std::nullopt;
 
         switch (ps.sat_search_tactic)
         {
@@ -337,10 +336,15 @@ class sat_coloring_handler
             }
         }
 
-        const auto [k, instance] = min_coloring;
+        if (min_coloring.has_value())
+        {
+            const auto [k, instance] = *min_coloring;
 
-        pst.chromatic_number = k;
-        return extract_vertex_coloring(instance, get_model(instance));
+            pst.chromatic_number = k;
+            return extract_vertex_coloring(instance, get_model(instance));
+        }
+
+        return std::nullopt;
     }
 
   private:
@@ -472,17 +476,20 @@ class sat_coloring_handler
     void color_frequency_equal_to_largest_clique_size(const solver_instance_ptr& instance) const
     {
         std::vector<bill::lit_type> same_color_in_each_clique{};
+        same_color_in_each_clique.reserve(ps.cliques.size() * q);
 
         // for each color
         for (std::size_t c = 0; c < instance->k; ++c)
         {
             std::vector<bill::lit_type> color_c_in_each_clique{};
+            color_c_in_each_clique.reserve(ps.cliques.size());
 
             // for each clique
             std::for_each(ps.cliques.cbegin(), ps.cliques.cend(),
                           [&instance, &c, &color_c_in_each_clique](const auto& clique)
                           {
                               std::vector<bill::lit_type> vc{};
+                              vc.reserve(clique.size());
 
                               // for each vertex in clique
                               std::for_each(clique.cbegin(), clique.cend(),
@@ -688,13 +695,9 @@ class graph_coloring_impl
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
 
-        vertex_coloring<Graph, Color> coloring{};
+        std::optional<vertex_coloring<Graph, Color>> coloring = std::nullopt;
 
-        if (is_brian_crites_engine(ps.engine))
-        {
-            coloring = run_brian_crites_engine();
-        }
-        else if (ps.engine == graph_coloring_engine::SAT)
+        if (ps.engine == graph_coloring_engine::SAT)
         {
             switch (ps.sat_params.sat_engine)
             {
@@ -740,14 +743,27 @@ class graph_coloring_impl
                     break;
                 }
             }
+
+            // if SAT was not able to determine a coloring, try MCS
+            if (!coloring.has_value())
+            {
+                ps.engine = graph_coloring_engine::MCS;
+            }
         }
+
+        if (is_brian_crites_engine(ps.engine))
+        {
+            coloring = run_brian_crites_engine();
+        }
+
+        assert(coloring.has_value() && "No coloring could be determined.");
 
         if (ps.verify_coloring_after_computation)
         {
-            pst.coloring_verified = is_valid_vertex_coloring(coloring);
+            pst.coloring_verified = is_valid_vertex_coloring(*coloring);
         }
 
-        return coloring;
+        return *coloring;
     }
 
   private:
@@ -758,7 +774,7 @@ class graph_coloring_impl
     /**
      * Parameters.
      */
-    const determine_vertex_coloring_params<Graph> ps;
+    determine_vertex_coloring_params<Graph> ps;
     /**
      * Statistics.
      */
@@ -927,10 +943,15 @@ class graph_coloring_impl
             }
         }
 
-        const auto brian_crites_clr = coloring_engine_ptr->color();
-        pst.chromatic_number        = static_cast<std::size_t>(coloring_engine_ptr->get_num_colors());
+        if (coloring_engine_ptr != nullptr)
+        {
+            const auto brian_crites_clr = coloring_engine_ptr->color();
+            pst.chromatic_number        = static_cast<std::size_t>(coloring_engine_ptr->get_num_colors());
 
-        return translate_to_vertex_coloring(brian_crites_clr);
+            return translate_to_vertex_coloring(brian_crites_clr);
+        }
+
+        return {};
     }
     /**
      * Checks whether the given coloring is valid, i.e., if no two adjacent vertices have the same color assigned.
@@ -972,6 +993,9 @@ class graph_coloring_impl
  * traversal of search spaces that SAT solvers provide.
  *
  * See graph_coloring_engine for a list of all supported engines.
+ *
+ * @note If the `clique_size_color_frequency` parameter is set together with the SAT engine, there is no guarantee that
+ * the SAT solver is able to find a valid coloring. In that case, this algorithm falls back to MCS.
  *
  * @tparam Graph Graph type to color.
  * @tparam Color Color type to use.

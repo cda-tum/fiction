@@ -8,11 +8,10 @@
 #include "fiction/traits.hpp"
 
 #include <mockturtle/traits.hpp>
+#include <phmap.h>
 
 #include <algorithm>
 #include <cstdint>
-
-#include <phmap.h>
 
 namespace fiction
 {

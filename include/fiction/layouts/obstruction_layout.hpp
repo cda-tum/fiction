@@ -8,11 +8,11 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/hash.hpp"
 
+#include <phmap.h>
+
 #include <memory>
 #include <type_traits>
 #include <utility>
-
-#include <phmap.h>
 
 namespace fiction
 {
@@ -81,12 +81,35 @@ class obstruction_layout<Lyt, false> : public Lyt
     /**
      * Marks the connection from coordinate `src` to coordinate `tgt` as obstructed.
      *
+     * @note Coordinates marked this way will not be crossed with wires by path finding algorithms.
+     *
      * @param src Source coordinate.
      * @param tgt Target coordinate.
      */
     void obstruct_connection(const typename Lyt::coordinate& src, const typename Lyt::coordinate& tgt) noexcept
     {
         strg->obstructed_connections.insert({src, tgt});
+    }
+    /**
+     * Clears the obstruction status of the given coordinate `c` if the obstruction was manually marked via
+     * `obstruct_coordinate`.
+     *
+     * @param c Coordinate to clear.
+     */
+    void clear_obstructed_coordinate(const typename Lyt::coordinate& c) noexcept
+    {
+        strg->obstructed_coordinates.erase(c);
+    }
+    /**
+     * Clears the obstruction status of the connection from coordinate `src` to coordinate `tgt` if the obstruction was
+     * manually marked via `obstruct_connection`.
+     *
+     * @param src Source coordinate.
+     * @param tgt Target coordinate.
+     */
+    void clear_obstructed_connection(const typename Lyt::coordinate& src, const typename Lyt::coordinate& tgt) noexcept
+    {
+        strg->obstructed_connections.erase({src, tgt});
     }
     /**
      * Clears all obstructed coordinates that were manually marked via `obstruct_coordinate`.
@@ -96,7 +119,7 @@ class obstruction_layout<Lyt, false> : public Lyt
         strg->obstructed_coordinates.clear();
     }
     /**
-     * Clears all obstructed connections that were manually marked via `obstruct_connections`.
+     * Clears all obstructed connections that were manually marked via `obstruct_connection`.
      */
     void clear_obstructed_connections() noexcept
     {
@@ -137,7 +160,19 @@ class obstruction_layout<Lyt, false> : public Lyt
     [[nodiscard]] bool is_obstructed_connection(const typename Lyt::coordinate& src,
                                                 const typename Lyt::coordinate& tgt) const noexcept
     {
-        return strg->obstructed_connections.count({src, tgt}) > 0;
+        if (strg->obstructed_connections.count({src, tgt}) > 0)
+        {
+            return true;
+        }
+        if constexpr (is_gate_level_layout_v<Lyt>)
+        {
+            return Lyt::is_incoming_signal(tgt, static_cast<mockturtle::signal<Lyt>>(src)) ||
+                   Lyt::is_outgoing_signal(src, static_cast<mockturtle::signal<Lyt>>(tgt));
+        }
+
+        // more implementations go here
+
+        return false;
     }
 
   private:

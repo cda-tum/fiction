@@ -10,6 +10,9 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 
+#include <string>
+#include <string_view>
+
 namespace fiction
 {
 
@@ -34,6 +37,26 @@ std::string get_name(const NtkOrLyt& ntk_or_lyt) noexcept
     }
 
     return {};
+}
+/**
+ * Helper function to conveniently assign a name to a layout or network as they use different function names for the
+ * same purpose.
+ *
+ * @tparam NtkOrLyt Network or layout type.
+ * @param ntk_or_lyt Network or layout object.
+ * @param name Name to assign to given network or layout.
+ */
+template <typename NtkOrLyt>
+void set_name(NtkOrLyt& ntk_or_lyt, const std::string_view& name) noexcept
+{
+    if constexpr (mockturtle::has_set_network_name_v<NtkOrLyt>)
+    {
+        return ntk_or_lyt.set_network_name(name.data());
+    }
+    else if constexpr (fiction::has_set_layout_name_v<NtkOrLyt>)
+    {
+        return ntk_or_lyt.set_layout_name(name.data());
+    }
 }
 /**
  * Helper function to conveniently assign the name of a source network or layout to a target network or layout as they
@@ -249,6 +272,7 @@ template <typename NtkSrc, typename NtkDest, typename T>
 void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, mockturtle::node_map<T, NtkSrc>& old2new) noexcept
 {
     restore_network_name(ntk_src, ntk_dest);
+    restore_input_names(ntk_src, ntk_dest);
     restore_signal_names(ntk_src, ntk_dest, old2new);
     restore_output_names(ntk_src, ntk_dest);
 }

@@ -30,12 +30,34 @@ Network Utils
 .. doxygenfunction:: fiction::inverse_levels
 
 
+Truth Table Utils
+-----------------
+
+**Header:** ``fiction/utils/truth_table_utils.hpp``
+
+.. doxygenfunction:: fiction::create_id_tt
+.. doxygenfunction:: fiction::create_not_tt
+.. doxygenfunction:: fiction::create_and_tt
+.. doxygenfunction:: fiction::create_or_tt
+.. doxygenfunction:: fiction::create_nand_tt
+.. doxygenfunction:: fiction::create_nor_tt
+.. doxygenfunction:: fiction::create_xor_tt
+.. doxygenfunction:: fiction::create_xnor_tt
+.. doxygenfunction:: fiction::create_maj_tt
+
+
 Layout Utils
 ------------
 
 **Header:** ``fiction/utils/layout_utils.hpp``
 
 .. doxygenfunction:: fiction::num_adjacent_coordinates
+.. doxygenfunction:: fiction::relative_to_absolute_cell_position
+.. doxygenfunction:: fiction::port_direction_to_coordinate
+.. doxygenfunction:: fiction::normalize_layout_coordinates
+.. doxygenfunction:: fiction::convert_to_siqad_coordinates
+.. doxygenfunction:: fiction::convert_to_fiction_coordinates
+
 
 
 Placement Utils
@@ -84,6 +106,7 @@ Name Utils
 **Header:** ``fiction/utils/name_utils.hpp``
 
 .. doxygenfunction:: fiction::get_name
+.. doxygenfunction:: fiction::set_name
 .. doxygenfunction:: fiction::restore_network_name
 .. doxygenfunction:: fiction::restore_input_names
 .. doxygenfunction:: fiction::restore_output_names
@@ -111,6 +134,34 @@ STL Extensions
 .. doxygenfunction:: fiction::find_first_two_of
 
 .. doxygenclass:: fiction::searchable_priority_queue
+
+
+Execution Policy Macros
+-----------------------
+
+**Header:** ``fiction/utils/execution_utils.hpp``
+
+Handling parallel STL algorithms is a bit cumbersome due to their platform dependence. The following macros are provided
+to simplify the usage of parallel STL algorithms while CMake and some pre-processor magic take care of all the
+boilerplate.
+
+One can use the following macros to specify the execution policy for parallel STL algorithms in a (mostly)
+platform-independent way::
+
+    std::for_each(FICTION_EXECUTION_POLICY_PAR v.begin(), v.end(), lambda);
+    //                                        ^ note the missing comma
+
+If parallelism or execution policies are not available, this will expand to::
+
+    std::for_each(v.begin(), v.end(), lambda);
+
+.. note::
+    Only include this header and do not include ``<execution>`` directly. This header will include ``<execution>`` if
+    available and will define the macros accordingly.
+
+.. doxygendefine:: FICTION_EXECUTION_POLICY_SEQ
+.. doxygendefine:: FICTION_EXECUTION_POLICY_PAR
+.. doxygendefine:: FICTION_EXECUTION_POLICY_PAR_UNSEQ
 
 
 Ranges

@@ -2,10 +2,10 @@
 // Created by marcel on 09.04.20.
 //
 
-#if (MUGEN)
-
 #ifndef FICTION_ONE_PASS_SYNTHESIS_HPP
 #define FICTION_ONE_PASS_SYNTHESIS_HPP
+
+#if (MUGEN)
 
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
@@ -64,13 +64,17 @@ struct one_pass_synthesis_params
     std::shared_ptr<clocking_scheme<coordinate<Lyt>>> scheme =
         std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
     /**
-     * Number of tiles to use.
+     * Number of tiles to use as an upper bound in x direction.
      */
-    uint16_t upper_bound = std::numeric_limits<uint16_t>::max();
+    uint16_t upper_bound_x = std::numeric_limits<uint16_t>::max();
     /**
-     * Use just one fixed tile size.
+     * Number of tiles to use as an upper bound in y direction.
      */
-    uint16_t fixed_size = 0ul;
+    uint16_t upper_bound_y = std::numeric_limits<uint16_t>::max();
+    /**
+     * Investigate only aspect ratios with the number of tiles given as upper bound.
+     */
+    bool fixed_size = false;
     /**
      * Enable the use of wire elements.
      */
@@ -176,6 +180,11 @@ class mugen_handler
      */
     [[nodiscard]] bool skippable(const aspect_ratio<Lyt>& ratio) const noexcept
     {
+        // skip aspect ratios that extend beyond the specified upper bounds
+        if (ratio.x >= ps.upper_bound_x || ratio.y >= ps.upper_bound_y)
+        {
+            return true;
+        }
         // OPEN clocking optimization: rotated aspect ratios don't need to be explored
         if (lyt.is_clocking_scheme(clock_name::OPEN))
         {
@@ -703,7 +712,8 @@ class one_pass_synthesis_impl
                             one_pass_synthesis_stats& st) :
             tts{spec},
             ps{p},
-            pst{st}
+            pst{st},
+            ari{ps.fixed_size ? static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y) : 0u}
     {}
 
     std::optional<Lyt> run()
@@ -720,7 +730,8 @@ class one_pass_synthesis_impl
         // handler for the Python interaction
         mugen_handler handler{tts, layout, ps};
 
-        for (; ari <= ps.upper_bound; ++ari)  // <= to prevent overflow
+        for (; ari <= static_cast<uint64_t>(ps.upper_bound_x) * static_cast<uint64_t>(ps.upper_bound_y);
+             ++ari)  // <= to prevent overflow
         {
 
 #if (PROGRESS_BARS)
@@ -934,7 +945,7 @@ class one_pass_synthesis_impl
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename TT>
-std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params<Lyt> ps = {},
+std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, const one_pass_synthesis_params<Lyt>& ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
@@ -972,7 +983,7 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<Lyt> ps = {},
+std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, const one_pass_synthesis_params<Lyt>& ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(
@@ -998,6 +1009,6 @@ std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<
 
 }  // namespace fiction
 
-#endif  // FICTION_ONE_PASS_SYNTHESIS_HPP
-
 #endif  // MUGEN
+
+#endif  // FICTION_ONE_PASS_SYNTHESIS_HPP

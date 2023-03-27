@@ -6,7 +6,7 @@
 #define FICTION_CSV_WRITER_HPP
 
 #include <fstream>
-#include <string>
+#include <string_view>
 
 namespace fiction
 {
@@ -19,7 +19,7 @@ class csv_writer
      *
      * @param filename CSV file to write into.
      */
-    explicit csv_writer(const std::string& filename) : file{filename, std::ios::out | std::ios::app} {}
+    explicit csv_writer(const std::string_view& filename) : file{filename.data(), std::ios::out | std::ios::app} {}
     /**
      * Writes a single line of comma-separated values to the stored file. Note that no escape checks are performed.
      *

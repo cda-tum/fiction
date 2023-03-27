@@ -23,6 +23,15 @@ Graph Algorithms
 
    graph.rst
 
+
+Optimization
+============
+
+.. toctree::
+   :maxdepth: 1
+
+   optimization.rst
+
 Network Transformation
 ======================
 
@@ -52,6 +61,14 @@ Verification
    :maxdepth: 1
 
    verification.rst
+
+Simulation
+==========
+
+.. toctree::
+   :maxdepth: 1
+
+   sidb_simulation.rst
 
 
 Properties

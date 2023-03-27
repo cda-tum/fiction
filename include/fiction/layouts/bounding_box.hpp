@@ -53,85 +53,32 @@ class bounding_box_2d
             return;
         }
 
-        // calculate min.x
-        for (decltype(min.x) x = 0; x <= layout.x(); ++x)
-        {
-            bool elem_found = false;
-            for (decltype(min.y) y = 0; y <= layout.y(); ++y)
+        // set min to max coordinate in the layout
+        min = {layout.x(), layout.y()};
+
+        layout.foreach_coordinate(
+            [this](const auto& c)
             {
-                if (!is_empty_coordinate({x, y}))
+                if (!is_empty_coordinate(c))
                 {
-                    elem_found = true;
-                    break;
+                    if (c.x < min.x)
+                    {
+                        min.x = c.x;
+                    }
+                    if (c.y < min.y)
+                    {
+                        min.y = c.y;
+                    }
+                    if (c.x > max.x)
+                    {
+                        max.x = c.x;
+                    }
+                    if (c.y > max.y)
+                    {
+                        max.y = c.y;
+                    }
                 }
-            }
-
-            min.x = x;
-            if (elem_found)
-            {
-                break;
-            }
-        }
-
-        // calculate min.y
-        for (decltype(min.y) y = 0; y <= layout.y(); ++y)
-        {
-            bool elem_found = false;
-            for (decltype(min.x) x = 0; x <= layout.x(); ++x)
-            {
-                if (!is_empty_coordinate({x, y}))
-                {
-                    elem_found = true;
-                    break;
-                }
-            }
-
-            min.y = y;
-            if (elem_found)
-            {
-                break;
-            }
-        }
-
-        // calculate max.x
-        for (auto x = layout.x(); x >= 0; --x)
-        {
-            bool elem_found = false;
-            for (decltype(max.y) y = 0; y <= layout.y(); ++y)
-            {
-                if (!is_empty_coordinate({x, y}))
-                {
-                    elem_found = true;
-                    break;
-                }
-            }
-
-            max.x = x;
-            if (elem_found)
-            {
-                break;
-            }
-        }
-
-        // calculate max.y
-        for (auto y = layout.y(); y >= 0; --y)
-        {
-            bool elem_found = false;
-            for (decltype(max.x) x = 0; x <= layout.x(); ++x)
-            {
-                if (!is_empty_coordinate({x, y}))
-                {
-                    elem_found = true;
-                    break;
-                }
-            }
-
-            max.y = y;
-            if (elem_found)
-            {
-                break;
-            }
-        }
+            });
 
         x_size = max.x - min.x;
         y_size = max.y - min.y;
@@ -207,6 +154,6 @@ class bounding_box_2d
 
 }  // namespace fiction
 
-#endif  // FICTION_BOUNDING_BOX_HPP
-
 #pragma GCC diagnostic pop
+
+#endif  // FICTION_BOUNDING_BOX_HPP

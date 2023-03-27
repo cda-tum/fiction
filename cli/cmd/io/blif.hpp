@@ -90,7 +90,7 @@ class blif_command : public command
     template <typename NtkOrLytVariant>
     void write_blif_callback(const NtkOrLytVariant& ntk_or_lyt_variant)
     {
-        const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return fiction::get_name(ntk_or_lyt_ptr); };
+        const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return fiction::get_name(*ntk_or_lyt_ptr); };
 
         const auto write_blif = [this](auto&& ntk_or_lyt_ptr) { mockturtle::write_blif(*ntk_or_lyt_ptr, filename); };
 
@@ -101,11 +101,11 @@ class blif_command : public command
             return;
         }
         // if filename was not given, use stored layout name
-        if (!is_set("filename"))
+        if (filename.empty())
         {
             filename = std::visit(get_name, ntk_or_lyt_variant);
         }
-        // add .v file extension if necessary
+        // add .blif file extension if necessary
         if (std::filesystem::path(filename).extension() != ".blif")
         {
             filename += ".blif";

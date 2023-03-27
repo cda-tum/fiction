@@ -22,6 +22,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -73,7 +74,7 @@ inline constexpr const char* OPEN_LAYOUT      = "\t<layout>\n";
 inline constexpr const char* CLOSE_LAYOUT     = "\t</layout>\n";
 
 inline constexpr const char* INML_COMPONENT_ITEM = "\t\t<item tech=\"{}\" name=\"{}\"/>\n";
-inline constexpr const char* MQCA_COMPONENT_ITEM = "\t\t<item tech=\"MolQCA\" name=\"Bisferrocene\"/>\n";
+inline constexpr const char* MQCA_COMPONENT_ITEM = "\t\t<item tech=\"MolFCN\" name=\"Bisferrocene\"/>\n";
 
 inline constexpr const char* OPEN_INML_LAYOUT_ITEM = "\t\t<item comp=\"{}\" id=\"{}\" x=\"{}\" y=\"{}\">\n";
 inline constexpr const char* OPEN_MQCA_LAYOUT_ITEM =
@@ -113,7 +114,7 @@ class write_qll_layout_impl
 
     void run()
     {
-        if (std::is_same_v<technology<Lyt>, inml_technology> && !has_border_io_pins())
+        if (has_inml_technology_v<Lyt> && !has_border_io_pins())
         {
             throw std::invalid_argument(
                 "the layout does not fulfill all requirements to be written as a QLL file because it does not have "
@@ -143,9 +144,7 @@ class write_qll_layout_impl
 
     uint64_t cell_id{1};
 
-    const char* tech_name{std::is_same_v<technology<Lyt>, inml_technology> ? "iNML" :
-                          std::is_same_v<technology<Lyt>, qca_technology>  ? "MolQCA" :
-                                                                             "?"};
+    const char* tech_name{has_inml_technology_v<Lyt> ? "iNML" : has_qca_technology_v<Lyt> ? "MolFCN" : "?"};
 
     [[nodiscard]] std::vector<cell<Lyt>> sorted_pis() const noexcept
     {
@@ -218,11 +217,11 @@ class write_qll_layout_impl
 
         os << fmt::format(qll::GENERAL_SETTINGS, lyt.x(), lyt.y(), (lyt.z() > 0 ? "true" : "false"), lyt.num_clocks());
 
-        if constexpr (std::is_same_v<technology<Lyt>, inml_technology>)
+        if constexpr (has_inml_technology_v<Lyt>)
         {
             os << qll::INML_SETTINGS;
         }
-        else if constexpr (std::is_same_v<technology<Lyt>, qca_technology>)
+        else if constexpr (has_qca_technology_v<Lyt>)
         {
             os << qll::MQCA_SETTINGS;
         }
@@ -235,14 +234,14 @@ class write_qll_layout_impl
     {
         os << qll::OPEN_COMPONENTS;
 
-        if constexpr (std::is_same_v<technology<Lyt>, inml_technology>)
+        if constexpr (has_inml_technology_v<Lyt>)
         {
             for (const auto& comp : qll::COMPONENTS)
             {
                 os << fmt::format(qll::INML_COMPONENT_ITEM, tech_name, comp);
             }
         }
-        else if constexpr (std::is_same_v<technology<Lyt>, qca_technology>)
+        else if constexpr (has_qca_technology_v<Lyt>)
         {
             os << qll::MQCA_COMPONENT_ITEM;
         }
@@ -284,7 +283,7 @@ class write_qll_layout_impl
                     }
 
                     // write iNML cell
-                    if constexpr (std::is_same_v<technology<Lyt>, inml_technology>)
+                    if constexpr (has_inml_technology_v<Lyt>)
                     {
                         // if an AND or an OR structure is encountered, the next two magnets in southern direction need
                         // to be skipped
@@ -339,7 +338,7 @@ class write_qll_layout_impl
                         os << qll::CLOSE_LAYOUT_ITEM;
                     }
                     // write mQCA cell
-                    else if constexpr (std::is_same_v<technology<Lyt>, qca_technology>)
+                    else if constexpr (has_qca_technology_v<Lyt>)
                     {
                         const auto mode = lyt.get_cell_mode(c);
 
@@ -413,9 +412,9 @@ void write_qll_layout(const Lyt& lyt, std::ostream& os)
  * @param ps Parameters.
  */
 template <typename Lyt>
-void write_qll_layout(const Lyt& lyt, const std::string& filename)
+void write_qll_layout(const Lyt& lyt, const std::string_view& filename)
 {
-    std::ofstream os{filename.c_str(), std::ofstream::out};
+    std::ofstream os{filename.data(), std::ofstream::out};
 
     if (!os.is_open())
     {

@@ -150,6 +150,36 @@ exact_physical_design_params<Lyt>&& topolinano(exact_physical_design_params<Lyt>
 }
 
 template <typename Lyt>
+exact_physical_design_params<Lyt>&& blacklist_wire(const tile<Lyt>&                              t,
+                                                   const std::vector<port_list<port_direction>>& ports,
+                                                   exact_physical_design_params<Lyt>&&           ps) noexcept
+{
+    ps.black_list[t].insert({create_id_tt(), ports});
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& blacklist_and(const tile<Lyt>&                              t,
+                                                  const std::vector<port_list<port_direction>>& ports,
+                                                  exact_physical_design_params<Lyt>&&           ps) noexcept
+{
+    ps.black_list[t].insert({create_and_tt(), ports});
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
+exact_physical_design_params<Lyt>&& blacklist_or(const tile<Lyt>&                              t,
+                                                 const std::vector<port_list<port_direction>>& ports,
+                                                 exact_physical_design_params<Lyt>&&           ps) noexcept
+{
+    ps.black_list[t].insert({create_or_tt(), ports});
+
+    return std::move(ps);
+}
+
+template <typename Lyt>
 exact_physical_design_params<Lyt>&& async(const std::size_t t, exact_physical_design_params<Lyt>&& ps) noexcept
 {
     ps.num_threads = t;
@@ -229,6 +259,26 @@ void check_apply_lib(const GateLyt& lyt)
     CHECK_NOTHROW(apply_gate_library<CellLyt, Lib>(lyt));
 }
 
+// check io names
+template <typename Ntk, typename Lyt>
+void check_io_names(const Ntk& ntk, const Lyt& lyt)
+{
+    if constexpr (mockturtle::has_get_name_v<Ntk>)
+    {
+        for (auto i = 0u; i < ntk.num_pis(); ++i)
+        {
+            CHECK(lyt.get_input_name(i) == ntk.get_name(ntk.make_signal(ntk.pi_at(i))));
+        }
+    }
+    if constexpr (mockturtle::has_get_output_name_v<Ntk>)
+    {
+        for (auto i = 0u; i < ntk.num_pos(); ++i)
+        {
+            CHECK(lyt.get_output_name(i) == ntk.get_output_name(i));
+        }
+    }
+}
+
 template <typename CellLyt, typename Lib, typename Ntk, typename GateLyt>
 void check_with_gate_library(const Ntk& ntk, const exact_physical_design_params<GateLyt>& ps)
 {
@@ -237,6 +287,7 @@ void check_with_gate_library(const Ntk& ntk, const exact_physical_design_params<
     check_eq(ntk, layout);
     check_tp(layout, 1);
     check_apply_lib<CellLyt, Lib>(layout);
+    check_io_names(ntk, layout);
 }
 
 template <typename Ntk, typename Lyt>
@@ -342,6 +393,58 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
                          blueprints::one_to_five_path_difference_network<technology_network>(),
                          use(desynchronize(configuration<cart_gate_clk_lyt>()))),
                      2);
+        }
+    }
+    SECTION("Blacklist gates & wires")
+    {
+        SECTION("Without port info")
+        {
+            const auto lyt = generate_layout<cart_gate_clk_lyt>(
+                blueprints::and_or_network<technology_network>(),
+                twoddwave(crossings(blacklist_and(
+                    {2, 2}, {},
+                    blacklist_wire(
+                        {2, 2}, {},
+                        blacklist_or({1, 2}, {}, blacklist_wire({2, 0}, {}, configuration<cart_gate_clk_lyt>())))))));
+
+            check_eq(blueprints::and_or_network<technology_network>(), lyt);
+
+            CHECK(!lyt.is_and(lyt.get_node({2, 2})));
+            CHECK(!lyt.is_wire(lyt.get_node({2, 2})));
+            CHECK(!lyt.is_or(lyt.get_node({1, 2})));
+            CHECK(!lyt.is_wire(lyt.get_node({2, 0})));
+        }
+        SECTION("With port info")
+        {
+            const auto lyt = generate_layout<cart_gate_clk_lyt>(
+                blueprints::and_or_network<technology_network>(),
+                twoddwave(crossings(blacklist_and(
+                    {2, 2},
+                    {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH),
+                                                port_direction(port_direction::cardinal::WEST)},
+                                               {port_direction(port_direction::cardinal::SOUTH)})},
+                    blacklist_or(
+                        {2, 2},
+                        {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH),
+                                                    port_direction(port_direction::cardinal::WEST)},
+                                                   {port_direction(port_direction::cardinal::SOUTH)})},
+                        blacklist_wire({2, 2},
+                                       {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH)},
+                                                                  {port_direction(port_direction::cardinal::SOUTH)})},
+                                       configuration<cart_gate_clk_lyt>()))))));
+
+            check_eq(blueprints::and_or_network<technology_network>(), lyt);
+
+            CHECK((!lyt.is_and(lyt.get_node({2, 2})) ||
+                   !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
+                     lyt.has_southern_outgoing_signal({2, 2}))));
+
+            CHECK((!lyt.is_or(lyt.get_node({2, 2})) ||
+                   !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
+                     lyt.has_southern_outgoing_signal({2, 2}))));
+
+            CHECK((!lyt.is_wire(lyt.get_node({2, 2})) ||
+                   !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_southern_outgoing_signal({2, 2}))));
         }
     }
     //    SECTION("Asynchronicity")

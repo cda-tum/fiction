@@ -12,7 +12,15 @@
 
 using namespace fiction;
 
-// TODO empty layout
+TEST_CASE("2D bounding box around an empty gate-level layout", "[bounding-box]")
+{
+    const auto lyt = cart_gate_clk_lyt{};
+    const auto bb  = bounding_box_2d<cart_gate_clk_lyt>{lyt};
+    CHECK(bb.get_min() == tile<cart_gate_clk_lyt>{0, 0});
+    CHECK(bb.get_max() == tile<cart_gate_clk_lyt>{0, 0});
+    CHECK(bb.get_x_size() == 0);
+    CHECK(bb.get_y_size() == 0);
+}
 
 TEST_CASE("Initialize 2D gate-level bounding box", "[bounding-box]")
 {
@@ -70,7 +78,15 @@ TEST_CASE("Update 2D gate-level bounding box", "[bounding-box]")
     CHECK(bb_crossing.get_y_size() == 3);
 }
 
-// TODO empty layout
+TEST_CASE("2D bounding box around an empty cell-level layout", "[bounding-box]")
+{
+    const auto lyt = qca_cell_clk_lyt{};
+    const auto bb  = bounding_box_2d<qca_cell_clk_lyt>{lyt};
+    CHECK(bb.get_min() == cell<qca_cell_clk_lyt>{0, 0});
+    CHECK(bb.get_max() == cell<qca_cell_clk_lyt>{0, 0});
+    CHECK(bb.get_x_size() == 0);
+    CHECK(bb.get_y_size() == 0);
+}
 
 TEST_CASE("Initialize 2D cell-level bounding box", "[bounding-box]")
 {

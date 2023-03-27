@@ -13,11 +13,11 @@
 #include "fiction/utils/stl_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
+#include <phmap.h>
 
 #include <algorithm>
 #include <cstdint>
 #include <optional>
-#include <unordered_set>
 #include <vector>
 
 #include <combinations.h>
@@ -109,8 +109,8 @@ class generate_edge_intersection_graph_impl
                           else
                           {
                               // enumerate k paths for the current objective
-                              obj_paths = yen_k_shortest_paths<clk_path>(obstruction_layout{layout},
-                                                                         {obj.source, obj.target}, *ps.path_limit);
+                              obj_paths = yen_k_shortest_paths<clk_path>(
+                                  obstruction_layout{layout}, {obj.source, obj.target}, *ps.path_limit, {ps.crossings});
                           }
 
                           // assign a unique label to each path and create a corresponding node in the graph
@@ -246,9 +246,9 @@ class generate_edge_intersection_graph_impl
 
       private:
         /**
-         * Uniquely identify path elements in a set and make them searchable fast.
+         * Uniquely identify path elements in a set to make them searchable in O(1).
          */
-        std::unordered_set<coordinate<Lyt>> path_elements{};
+        phmap::flat_hash_set<coordinate<Lyt>> path_elements{};
     };
     /**
      * Alias for the path type.

@@ -69,8 +69,16 @@ to your ``CMakeLists.txt``::
     add_subdirectory(fiction/)
     target_link_libraries(fanfiction libfiction)
 
-Note that ``target_link_libraries`` must be called after the respective ``add_executable`` statement that defines
-``fanfiction``. Within your code files, you can then call
+.. note::
+
+    The command ``target_link_libraries`` must be called after the respective ``add_executable`` statement that defines
+    ``fanfiction``.
+
+    By default *fiction*'s CLI is enabled and will be built, which can be time-consuming. If you do not need it, you can
+    disable it by passing ``-DFICTION_CLI=OFF`` to your ``cmake`` call or adding
+    ``set(FICTION_CLI OFF CACHE BOOL "" FORCE)`` **before** ``add_subdirectory(fiction/)``.
+
+Within your code files, you can then call
 
 .. code-block:: c++
 
@@ -97,9 +105,13 @@ The :ref:`exact placement and routing algorithm <exact>` utilizes the `SMT solve
 Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/master/README-CMake.md>`_ and make sure to call
 ``sudo make install`` to install headers, scripts, and the binary.
 
+.. note::
+   Be sure to compile Z3 in **release mode** to avoid performance issues when running *fiction*'s dependent functions!
+   This can be achieved by passing ``-DCMAKE_BUILD_TYPE=Release`` to Z3's ``cmake`` call.
+
 Finally, before building *fiction*, pass ``-DFICTION_Z3=ON`` to the ``cmake`` call. It should be able to find
 Z3's include path and link against the binary automatically if installed correctly. Otherwise, you can use
-``-DFICTION_Z3_SEARCH_PATHS=<path_to_z3>`` to set a list of locations that are to be searched for the installed solver.
+``-DZ3_ROOT=<path_to_z3_root>`` to set Z3's root directory that is to be searched for the installed solver.
 
 SAT-based ``onepass`` synthesis
 ###############################
@@ -108,7 +120,7 @@ The :ref:`one-pass synthesis algorithm <onepass>` is embedded via the Python3 sc
 `Mugen <https://github.com/whaaswijk/mugen>`_ by Winston Haaswijk using `pybind11 <https://github.com/pybind/pybind11>`_.
 It has some further Python dependencies that can be installed via ``pip3``::
 
-    pip3 install python-sat==0.1.6.dev6 wrapt_timeout_decorator graphviz
+    pip3 install -r libs/mugen/requirements.txt
 
 The Python3 integration is experimental and may cause issues on some systems. It is currently not available on Windows
 and some macOS versions due to issues with ``python-sat``. Mugen requires at least Python 3.7!

@@ -22,6 +22,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -42,7 +43,7 @@ struct write_qcc_layout_params
     /**
      * Filename of the QCC file.
      */
-    std::string filename{};
+    std::string_view filename{};
 };
 
 namespace detail
@@ -373,9 +374,9 @@ void write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params 
  * @param ps Parameters.
  */
 template <typename Lyt>
-void write_qcc_layout(const Lyt& lyt, const std::string& filename, write_qcc_layout_params ps = {})
+void write_qcc_layout(const Lyt& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})
 {
-    std::ofstream os{filename.c_str(), std::ofstream::out};
+    std::ofstream os{filename.data(), std::ofstream::out};
 
     if (!os.is_open())
     {

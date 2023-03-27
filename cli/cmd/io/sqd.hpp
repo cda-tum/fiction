@@ -9,6 +9,7 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 
@@ -54,7 +55,7 @@ class sqd_command : public command
             return;
         }
 
-        const auto get_name = [](auto&& lyt_ptr) -> std::string { return lyt_ptr->get_layout_name(); };
+        const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
 
         const auto write_sqd = [this, &get_name](auto&& lyt_ptr)
         {
@@ -81,7 +82,7 @@ class sqd_command : public command
             return;
         }
         // if filename was not given, use stored layout name
-        if (!is_set("filename"))
+        if (filename.empty())
         {
             filename = std::visit(get_name, lyt);
         }

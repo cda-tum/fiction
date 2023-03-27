@@ -7,13 +7,17 @@
 
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 
 #include <mockturtle/traits.hpp>
 
 #include <cstdint>
 #include <string>
 #include <type_traits>
+#include <utility>
 
 namespace fiction
 {
@@ -223,13 +227,12 @@ struct is_coordinate_layout : std::false_type
 template <class Lyt>
 struct is_coordinate_layout<
     Lyt,
-    std::enable_if_t<
-        std::conjunction_v<std::is_constructible<aspect_ratio<Lyt>, coordinate<Lyt>>, has_cardinal_operations<Lyt>,
-                           has_elevation_operations<Lyt>>,
-        std::void_t<typename Lyt::base_type, aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage,
-                    decltype(Lyt::max_fanin_size), decltype(Lyt::min_fanin_size), decltype(std::declval<Lyt>().x()),
-                    decltype(std::declval<Lyt>().y()), decltype(std::declval<Lyt>().z()),
-                    decltype(std::declval<Lyt>().area()), decltype(std::declval<Lyt>().resize(aspect_ratio<Lyt>()))>>>
+    std::enable_if_t<std::conjunction_v<std::is_constructible<aspect_ratio<Lyt>, coordinate<Lyt>>,
+                                        has_cardinal_operations<Lyt>, has_elevation_operations<Lyt>>,
+                     std::void_t<typename Lyt::base_type, aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage,
+                                 decltype(Lyt::max_fanin_size), decltype(Lyt::min_fanin_size),
+                                 decltype(std::declval<Lyt>().x()), decltype(std::declval<Lyt>().y()),
+                                 decltype(std::declval<Lyt>().z()), decltype(std::declval<Lyt>().area())>>>
         : std::true_type
 {};
 
@@ -569,6 +572,12 @@ template <typename Lyt>
 inline constexpr const bool has_inml_technology_v = std::is_same_v<technology<Lyt>, inml_technology>;
 template <typename Lyt>
 inline constexpr const bool has_sidb_technology_v = std::is_same_v<technology<Lyt>, sidb_technology>;
+template <typename Lyt>
+inline constexpr const bool has_offset_ucoord_v = std::is_same_v<coordinate<Lyt>, offset::ucoord_t>;
+template <typename Lyt>
+inline constexpr const bool has_cube_coord_v = std::is_same_v<coordinate<Lyt>, cube::coord_t>;
+template <typename Lyt>
+inline constexpr const bool has_siqad_coord_v = std::is_same_v<coordinate<Lyt>, siqad::coord_t>;
 
 #pragma region is_cell_level_layout
 template <class Lyt, class = void>
@@ -648,6 +657,95 @@ struct has_get_layout_name<Ntk, std::void_t<decltype(std::declval<Ntk>().get_lay
 
 template <class Ntk>
 inline constexpr bool has_get_layout_name_v = has_get_layout_name<Ntk>::value;
+#pragma endregion
+
+#pragma region has_assign_sidb_defect
+template <class Lyt, class = void>
+struct has_assign_sidb_defect : std::false_type
+{};
+
+template <class Lyt>
+struct has_assign_sidb_defect<
+    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_sidb_defect(coordinate<Lyt>(), sidb_defect()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_assign_sidb_defect_v = has_assign_sidb_defect<Lyt>::value;
+#pragma endregion
+
+#pragma region has_get_sidb_defect
+template <class Lyt, class = void>
+struct has_get_sidb_defect : std::false_type
+{};
+
+template <class Lyt>
+struct has_get_sidb_defect<Lyt, std::void_t<decltype(std::declval<Lyt>().get_sidb_defect(coordinate<Lyt>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_get_sidb_defect_v = has_get_sidb_defect<Lyt>::value;
+#pragma endregion
+
+#pragma region has_foreach_sidb_defect
+template <class Lyt, class = void>
+struct has_foreach_sidb_defect : std::false_type
+{};
+
+template <class Lyt>
+struct has_foreach_sidb_defect<Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_sidb_defect(
+                                        std::declval<void(std::pair<coordinate<Lyt>, sidb_defect>, uint32_t)>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_foreach_sidb_defect_v = has_foreach_sidb_defect<Lyt>::value;
+#pragma endregion
+
+#pragma region has_assign_charge_state
+template <class Lyt, class = void>
+struct has_assign_charge_state : std::false_type
+{};
+
+template <class Lyt>
+struct has_assign_charge_state<
+    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_charge_state(coordinate<Lyt>(), sidb_charge_state()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_assign_charge_state_v = has_assign_charge_state<Lyt>::value;
+#pragma endregion
+
+#pragma region has_get_charge_state
+template <class Lyt, class = void>
+struct has_get_charge_state : std::false_type
+{};
+
+template <class Lyt>
+struct has_get_charge_state<Lyt, std::void_t<decltype(std::declval<Lyt>().get_charge_state(coordinate<Lyt>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_get_charge_state_v = has_get_charge_state<Lyt>::value;
+#pragma endregion
+
+#pragma region has_foreach_charge_state
+template <class Lyt, class = void>
+struct has_foreach_charge_state : std::false_type
+{};
+
+template <class Lyt>
+struct has_foreach_charge_state<Lyt,
+                                std::void_t<decltype(std::declval<Lyt>().foreach_charge_state(
+                                    std::declval<void(std::pair<coordinate<Lyt>, sidb_charge_state>, uint32_t)>()))>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_foreach_charge_state_v = has_foreach_charge_state<Lyt>::value;
 #pragma endregion
 
 /**
@@ -762,6 +860,39 @@ inline constexpr bool has_is_obstructed_connection_v = has_is_obstructed_connect
  * Gate libraries
  */
 
+#pragma region has_get_functional_implementations
+template <class Lib, class = void>
+struct has_get_functional_implementations : std::false_type
+{};
+
+template <class Lib>
+struct has_get_functional_implementations<
+    Lib, std::enable_if_t<std::is_same_v<decltype(std::declval<Lib>().get_functional_implementations()),
+                                         typename Lib::gate_functions>>> : std::true_type
+{};
+
+template <class Lib>
+inline constexpr bool has_get_functional_implementations_v = has_get_functional_implementations<Lib>::value;
+#pragma endregion
+
+#pragma region has_get_gate_ports
+template <class Lib, class = void>
+struct has_get_gate_ports : std::false_type
+{};
+
+template <class Lib>
+struct has_get_gate_ports<Lib,
+                          std::enable_if_t<std::is_same_v<decltype(std::declval<Lib>().get_gate_ports()),
+                                                          typename Lib::template gate_ports<fiction::port_position>> ||
+                                           std::is_same_v<decltype(std::declval<Lib>().get_gate_ports()),
+                                                          typename Lib::template gate_ports<fiction::port_direction>>>>
+        : std::true_type
+{};
+
+template <class Lib>
+inline constexpr bool has_get_gate_ports_v = has_get_gate_ports<Lib>::value;
+#pragma endregion
+
 #pragma region has_post_layout_optimization
 template <class Lib, class Lyt, class = void>
 struct has_post_layout_optimization : std::false_type
@@ -770,7 +901,7 @@ struct has_post_layout_optimization : std::false_type
 template <class Lib, class Lyt>
 struct has_post_layout_optimization<
     Lib, Lyt,
-    std::enable_if_t<is_cell_level_layout_v<Lyt>,
+    std::enable_if_t<std::conjunction_v<is_cell_level_layout<Lyt>, std::is_same<technology<Lib>, technology<Lyt>>>,
                      std::void_t<decltype(std::declval<Lib>().post_layout_optimization(std::declval<Lyt>))>>>
         : std::true_type
 {};

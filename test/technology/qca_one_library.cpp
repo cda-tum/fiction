@@ -19,7 +19,11 @@ using namespace fiction;
 TEST_CASE("QCA ONE library traits", "[qca-one-library]")
 {
     CHECK(has_post_layout_optimization_v<qca_one_library, qca_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<qca_one_library, inml_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<qca_one_library, sidb_cell_clk_lyt>);
     CHECK(!has_post_layout_optimization_v<qca_one_library, cart_gate_clk_lyt>);
+    CHECK(!has_get_functional_implementations_v<qca_one_library>);
+    CHECK(!has_get_gate_ports_v<qca_one_library>);
 }
 
 TEST_CASE("Setting up input ports and gates", "[qca-one-library]")

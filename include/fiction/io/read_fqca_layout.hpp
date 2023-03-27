@@ -9,11 +9,13 @@
 #include "fiction/traits.hpp"
 
 #include <cctype>
+#include <exception>
 #include <fstream>
 #include <istream>
 #include <regex>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
 namespace fiction
@@ -92,7 +94,7 @@ template <typename Lyt>
 class read_fqca_layout_impl
 {
   public:
-    explicit read_fqca_layout_impl(std::istream& s, const std::string& name) : lyt{{}, name}, is{s} {}
+    explicit read_fqca_layout_impl(std::istream& s, const std::string_view& name) : lyt{{}, name.data()}, is{s} {}
 
     Lyt run()
     {
@@ -336,7 +338,7 @@ class read_fqca_layout_impl
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-Lyt read_fqca_layout(std::istream& is, const std::string& name = "")
+Lyt read_fqca_layout(std::istream& is, const std::string_view& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_qca_technology_v<Lyt>, "Lyt must be a QCA layout");
@@ -359,9 +361,9 @@ Lyt read_fqca_layout(std::istream& is, const std::string& name = "")
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-Lyt read_fqca_layout(const std::string& filename, const std::string& name = "")
+Lyt read_fqca_layout(const std::string_view& filename, const std::string_view& name = "")
 {
-    std::ifstream is{filename.c_str(), std::ifstream::in};
+    std::ifstream is{filename.data(), std::ifstream::in};
 
     if (!is.is_open())
     {

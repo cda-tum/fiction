@@ -2,6 +2,7 @@ name: Ubuntu CI
 
 on:
   push:
+    branches: [ 'main' ]
     paths:
       - '**/*.hpp'
       - '**/*.cpp'
@@ -9,6 +10,16 @@ on:
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/ubuntu.yml'
+  pull_request:
+    branches: [ 'main' ]
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/ubuntu.yml'
+  merge_group:
 
 defaults:
   run:
@@ -33,6 +44,8 @@ jobs:
             build_type: Release
             cppstandard: -DFICTION_CXX_STANDARD=20
             cppname: C++20
+          - os: ubuntu-22.04
+            compiler: g++-11
 
     name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode) ${{matrix.cppname}}
     runs-on: ${{matrix.os}}
@@ -94,10 +107,10 @@ jobs:
 
       - name: Build fiction
         working-directory: ${{github.workspace}}/build
-        run: cmake --build . --config ${{matrix.build_type}}
+        run: cmake --build .
 
       - name: Test
         working-directory: ${{github.workspace}}/build
         # Execute tests defined by the CMake configuration.
         # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-        run: ctest -C ${{matrix.build_type}} --verbose
+        run: ctest -C ${{matrix.build_type}} --verbose --output-on-failure --parallel 2
