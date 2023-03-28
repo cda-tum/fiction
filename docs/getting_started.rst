@@ -102,7 +102,7 @@ SMT-based ``exact`` P&R
 #######################
 
 The :ref:`exact placement and routing algorithm <exact>` utilizes the `SMT solver Z3 <https://github.com/Z3Prover/z3>`_.
-Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/master/README-CMake.md>`_ and make sure to call
+Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/master/README-CMake.md>`_ and call
 ``sudo make install`` to install headers, scripts, and the binary.
 
 .. note::
@@ -133,10 +133,9 @@ Building tests
 
 Unit tests can be built with CMake via a respective flag on the command line and executed via ``ctest``::
 
-  mkdir build
+  cmake . -B build -DFICTION_TEST=ON
   cd build
-  cmake -DFICTION_TEST=ON ..
-  make
+  cmake --build . -j4
   ctest
 
 
@@ -147,10 +146,9 @@ The ``experiments`` folder provides a playground for quickly scripting some idea
 A ``fictionlib_demo.cpp`` demonstrates the usage. Any ``*.cpp`` file that is placed in that folder is automatically
 linked against *fiction* and compiled as a stand-alone binary using the following commands::
 
-  mkdir build
+  cmake . -B build -DFICTION_EXPERIMENTS=ON
   cd build
-  cmake -DFICTION_EXPERIMENTS=ON ..
-  make
+  cmake --build . -j4
 
 
 Uninstall

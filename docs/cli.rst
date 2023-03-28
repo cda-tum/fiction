@@ -87,21 +87,21 @@ if-then-else, or ``!{!a!b}`` to describe the application of De Morgan’s law to
 fit the largest variable in the expression, e.g., if ``c`` is the largest variable, then the truth table has at least
 three variables.
 
-Alternatively, ``tt 0110`` or ``tt 0xaffe`` generate ``truth_table``\ s from bit/hex strings.
+Alternatively, ``tt 0110`` or ``tt 0xaffe`` generate ``truth_table``s from bit/hex strings.
 
 Logic synthesis
 ###############
 
 Having a ``truth_table`` in store, the command ``akers`` generates an equivalent Majority ``network`` using Akers' synthesis.
 
-Furthermore, it is possible to generate random ``network``\ s by using command ``random``. The desired number of primary
+Furthermore, it is possible to generate random ``network``s by using command ``random``. The desired number of primary
 inputs can be specified (``-n``) as well as the gate count excluding inverters and fan-outs (``-g``). A random seed (``-s``)
-allows for reproducibility as it will also be used as the network``\ s name.
+allows for reproducibility as it will also be used as the network``'s name.
 
 However, most importantly, a technology mapping command ``map`` is available that rewrites any ``network`` type as a
 technology network that exclusively uses gates from a given set but computes the same Boolean function.
 For instance, ``map -oxi`` produces a logic network that only uses OR gates, XOR gates, and inverters. This is extremely
-helpful for gate libraries that do not support certain gate types.
+helpful for FCN gate libraries that do not support certain gate types.
 
 Structural manipulation
 #######################
@@ -129,7 +129,7 @@ Statistical information about store elements can be printed using command ``ps -
 
 This displays (from left to right) the name of the layout, its clocking scheme, the aspect ratio in tiles, the number
 of primary inputs and outputs, the number of gate tiles, wire elements, the length of the critical path,
-the throughput of the design (where 1/1 is maximum throughput), and the number of
+the throughput of the design (where ``1/1`` is the maximum possible throughput), and the number of
 `synchronization elements <https://ieeexplore.ieee.org/document/8626294>`_.
 
 SMT-based (``exact``)
@@ -141,7 +141,7 @@ which is then translated back into a valid solution to the original physical des
 see `the paper <https://ieeexplore.ieee.org/document/8342060>`_.
 
 This exact approach generates minimal layouts in terms of circuit area. Since determining minimal FCN circuits for given
-specifications is an `NP-hard problem <https://dl.acm.org/citation.cfm?id=3312661>`_,
+specifications is an `NP-complete problem <https://dl.acm.org/doi/10.1145/3312661>`_,
 the process takes a while and is only suitable for rather small benchmarks with just a few gates.
 
 On the other hand, this approach is highly parameterizable and can produce results for a variety of settings.
@@ -172,7 +172,7 @@ Orthogonal Graph Drawing (OGD) is a well known problem in graph theory that rema
 problem for tile-based FCN circuits. Even though the problem of determining minimal drawings is hard in general, there
 exist linear time approximations for 3-graphs. Luckily, AOIGs can be substituted until they are 3-graphs. Using a
 topological ordering and a certain direction assignment, even large circuits can be designed in reasonable runtime.
-For more information, see `the paper <https://dl.acm.org/citation.cfm?id=3287705>`_.
+For more information, see `the paper <https://dl.acm.org/doi/10.1145/3287624.3287705>`_.
 
 This scalable approach only works on logic networks which are AOIGs (MAJ gates do not work). The clocking scheme is fixed to
 `2DDWave <https://ieeexplore.ieee.org/document/1717097>`_ and the algorithm can only be slightly parameterized
@@ -271,7 +271,7 @@ width and height of a single cell as well as horizontal and vertical spacing (ea
 is printed in nm².
 
 If no information about such values is given, *fiction* uses default technology-depended lengths taken from
-`QCADesigner <https://waluslab.ece.ubc.ca/qcadesigner/>`_, `NMLSim <https://dl.acm.org/citation.cfm?doid=3338852.3339856>`_,
+`QCADesigner <https://waluslab.ece.ubc.ca/qcadesigner/>`_, `NMLSim <https://dl.acm.org/doi/10.1145/3338852.3339856>`_,
 or `SiQAD <https://github.com/siqad/siqad>`_ respectively. These are
 
 QCA (default QCADesigner settings)
@@ -357,7 +357,7 @@ called ``c17_log.json``.  The following table presents possible results.
 These scripts can also be nested. One can use ``< script.fs`` within a *fiction script* to load ``script.fs`` in that very position.
 A script called ``shortcuts.fs`` has been placed in the top level folder. It can be loaded on start-up by calling
 ``./fiction -if ../shortcuts.fs`` in the build folder. This makes predefined commands and flows available as shortcuts.
-Try ``synth xibs use`` for instance to perform the whole flow of design (utilizing ``USE`` clocking) and physical
+Try ``synth -xibs use`` for instance to perform the whole flow of design (utilizing ``USE`` clocking) and physical
 synthesis down to cell-level including visual representation.
 
 Additionally, *fiction* itself can be part of a bash script. Consider the following snippet::
