@@ -178,8 +178,8 @@ void exhaustive_ground_state_simulation(
                     val, val_old, false, false, true);  // "false" allows that the charge state of the dependent cell is
                                                         // automatically changed based on the new charge distribution.
                 val_old = val;
-
-                if (charge_lyt_new.is_physically_valid())
+            }
+            if (charge_lyt_new.is_physically_valid())
                 {
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
                     for (const auto& cell : detected_negative_sidbs)
@@ -194,7 +194,7 @@ void exhaustive_ground_state_simulation(
                     lyt.assign_cell_type(cell, Lyt::cell_type::NORMAL);
                 }
             }
-        }
+
         // in the case with only one SiDB in the layout.
         else if (sidbs_charge_lyt.size() == 1)
         {
