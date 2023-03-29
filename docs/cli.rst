@@ -59,7 +59,7 @@ FCN constraints.
 
 When in *fiction*'s interactive mode, one can enter ``read <filename>`` to read a logic network into a store or
 ``read <directory>`` to parse all parsable files within that given directory powered by the
-`lorina <https://github.com/hriener/lorina>`_ parser by Heinz Riener respectively. The flag ``-s`` allows prior sorting.
+`lorina <https://github.com/hriener/lorina>`_ parser by Heinz Riener. The flag ``-s`` allows prior sorting.
 The content of the logic network store can be briefly viewed by entering ``store -n``. A more detailed breakdown can be
 printed by command ``gates``. Command ``show -n`` writes a `Graphviz <https://www.graphviz.org/>`_ ``.dot`` file of the
 current network and opens it with the user's standard viewer (e.g. `xdot <https://github.com/jrfonseca/xdot.py>`_).
@@ -87,16 +87,16 @@ if-then-else, or ``!{!a!b}`` to describe the application of De Morgan’s law to
 fit the largest variable in the expression, e.g., if ``c`` is the largest variable, then the truth table has at least
 three variables.
 
-Alternatively, ``tt 0110`` or ``tt 0xaffe`` generate ``truth_table``s from bit/hex strings.
+Alternatively, ``tt 0110`` or ``tt 0xaffe`` generate a ``truth_table`` from bit/hex strings.
 
 Logic synthesis
 ###############
 
 Having a ``truth_table`` in store, the command ``akers`` generates an equivalent Majority ``network`` using Akers' synthesis.
 
-Furthermore, it is possible to generate random ``network``s by using command ``random``. The desired number of primary
+Furthermore, it is possible to generate a random ``network`` by using command ``random``. The desired number of primary
 inputs can be specified (``-n``) as well as the gate count excluding inverters and fan-outs (``-g``). A random seed (``-s``)
-allows for reproducibility as it will also be used as the network``'s name.
+allows for reproducibility as it will also be used as the network's name.
 
 However, most importantly, a technology mapping command ``map`` is available that rewrites any ``network`` type as a
 technology network that exclusively uses gates from a given set but computes the same Boolean function.
@@ -119,11 +119,11 @@ Physical design
 
 Physical design is the task of generating a circuit layout from a specification (mostly a logic network). Currently, *fiction*
 offers placement and routing in the flavors exact (SMT-based) and scalable (OGD-based) as well as one-pass synthesis (SAT-based).
-The implementations can be called on the currently active ``network`` in store by ``exact`` and ``ortho`` respectively.
+The implementations can be called on the currently active ``network`` in store by ``exact`` and ``ortho``, respectively.
 Find some information and parameters about them below.
 
 Generated FCN gate layouts are also saved in stores. Entering ``store -g`` shows a list of all gate layouts available.
-Statistical information about store elements can be printed using command ``ps -g`` and could produce the following output::
+Statistical information about store elements can be printed using the command ``ps -g`` and could produce the following output::
 
     c17 (2DDWAVE) - 5 × 7, I/O: 5/2, gates: 8, wires: 28, CP: 11, TP: 1/1, sync. elems.: 0
 
@@ -272,7 +272,7 @@ is printed in nm².
 
 If no information about such values is given, *fiction* uses default technology-depended lengths taken from
 `QCADesigner <https://waluslab.ece.ubc.ca/qcadesigner/>`_, `NMLSim <https://dl.acm.org/doi/10.1145/3338852.3339856>`_,
-or `SiQAD <https://github.com/siqad/siqad>`_ respectively. These are
+or `SiQAD <https://github.com/siqad/siqad>`_, respectively. These are
 
 QCA (default QCADesigner settings)
 ##################################
@@ -367,7 +367,7 @@ Additionally, *fiction* itself can be part of a bash script. Consider the follow
         ./fiction -c "read $filepath; ortho; cell; qca ${f%.*}.qca"
     done
 
-where the for-loop iterates over all Verilog files in the ``../benchmarks/TOY/`` folder. Using the flag ``-c``, a
+where the for-loop iterates over all Verilog files in the ``../benchmarks/TOY/`` folder. By using the flag ``-c``, a
 semicolon-separated list of commands can be passed to *fiction*. In this case, the files are to be read in a store,
 designed using the ``ortho`` algorithm, synthesized to cell-level, and written as QCA using their original file
 name.
