@@ -9,4 +9,5 @@ defect. This interface can be added before construction of a new layout or to an
 it.
 
 .. doxygenclass:: fiction::obstruction_layout
+.. doxygenclass:: fiction::obstruction_layout<Lyt, false>
    :members:
