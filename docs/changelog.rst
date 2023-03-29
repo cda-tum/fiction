@@ -13,79 +13,79 @@ Added
 #####
 
 - Technology:
-    - Support for the SiDB *Bestagon* gate library, a standard-tile library for the SiDB technology based on hexagonal grids. Many thanks to Samuel Sze Hang Ng for the collaboration on `the paper <https://dl.acm.org/doi/abs/10.1145/3489517.3530525>`_! #32 #33
+    - Support for the SiDB *Bestagon* gate library, a standard-tile library for the SiDB technology based on hexagonal grids. Many thanks to Samuel Sze Hang Ng for the collaboration on `the paper <https://dl.acm.org/doi/abs/10.1145/3489517.3530525>`_!
 - Algorithms:
-    - Four established path-finding algorithms on arbitrary layouts with arbitrary clocking schemes #83
+    - Four established path-finding algorithms on arbitrary layouts with arbitrary clocking schemes
         - Recursive enumeration of all possible paths
         - A* for the shortest path
         - Jump Point Search (JPS) for the shortest path (proof-of-concept)
         - `k` shortest paths via Yen's algorithm
-    - Distance functions and functors for layouts #83 #85
+    - Distance functions and functors for layouts
         - Manhattan distance
         - Euclidean distance
         - A* distance
-    - Cost functions and functors for layouts #83
+    - Cost functions and functors for layouts
         - Unit cost
         - Random cost
-    - Graph coloring with a selection of SAT solvers or heuristic algorithms #83 #100 #101
-    - Efficient multi-path signal routing on gate-level layouts (based on `this paper <https://www.cda.cit.tum.de/files/eda/2022_nanoarch_efficient_multi-path_signal_routing_for_fcn.pdf>`_) #83 #113
-    - Specify a black list of tiles and gates to avoid in exact physical design #103
+    - Graph coloring with a selection of SAT solvers or heuristic algorithms
+    - Efficient multi-path signal routing on gate-level layouts (based on `this paper <https://www.cda.cit.tum.de/files/eda/2022_nanoarch_efficient_multi-path_signal_routing_for_fcn.pdf>`_)
+    - Specify a black list of tiles and gates to avoid in exact physical design
 - Data types:
-    - Obstruction layout to represent obstacles in a layout #83
-    - Edge intersection graphs from enumerated routing paths #83
+    - Obstruction layout to represent obstacles in a layout
+    - Edge intersection graphs from enumerated routing paths
 - I/O:
-    - Molecular FCN support in the QLL writer for MagCAD and SCERPA #49 #102
-    - SQD reader for the SiDB technology #103
+    - Molecular FCN support in the QLL writer for MagCAD and SCERPA
+    - SQD reader for the SiDB technology
 - Clocking Schemes:
-    - CFE #44
+    - CFE
 - Traits:
-    - ``has_*_technology`` traits to check for specific cell technologies of layouts and libraries #53
+    - ``has_*_technology`` traits to check for specific cell technologies of layouts and libraries
 - Utils:
-    - Routing utils #83
-    - STL extensions #83
-    - Truth table utils #103
+    - Routing utils
+    - STL extensions
+    - Truth table utils
 - Libraries:
-    - `phmap <https://github.com/greg7mdp/parallel-hashmap>`_ for faster hash maps #83
-    - `TinyXML2 <https://github.com/leethomason/tinyxml2>`_ for XML parsing #103
+    - `phmap <https://github.com/greg7mdp/parallel-hashmap>`_ for faster hash maps
+    - `TinyXML2 <https://github.com/leethomason/tinyxml2>`_ for XML parsing
 - Build and documentation:
-    - Automatic linking with TBB for parallel algorithms #57
-    - Docker image CI #55
+    - Automatic linking with TBB for parallel algorithms
+    - Docker image CI
     - `Dependabot <https://github.com/dependabot>`_ to automatically keep the dependencies up-to-date
-    - `CodeQL <https://codeql.github.com/>`_ to automatically scan the code for security vulnerabilities #37
+    - `CodeQL <https://codeql.github.com/>`_ to automatically scan the code for security vulnerabilities
 
 Changed
 #######
 - CLI:
-    - Split ``exact``'s and ``onepass``' parameter ``upper_bound`` into ``upper_x`` and ``upper_y`` #103
+    - Split ``exact``'s and ``onepass``' parameter ``upper_bound`` into ``upper_x`` and ``upper_y``
 - Clocking schemes:
-    - Renamed ESP to ESR #51
+    - Renamed ESP to ESR
 - Libraries:
     - Updated all libraries to the latest versions
-    - Moved to the upstream version of `Catch2 v3 <https://github.com/catchorg/Catch2>`_ #76
+    - Moved to the upstream version of `Catch2 v3 <https://github.com/catchorg/Catch2>`_
 - Continuous integration:
     - Updated CI runners to the latest versions
-    - Setup `Z3 <https://github.com/Z3Prover/z3>`_ via a designated action. Many thanks to Lukas Burgholzer for his support! #58
-    - Enabled `Ccache <https://ccache.dev/>`_ for faster compilation in CIs #60
-    - Activated experiments in CI builds to ensure that they are building correctly #63
-    - `clang-tidy <https://clang.llvm.org/extra/clang-tidy/>`_ workflow for static code analysis #64 #65 #69 #70
-    - `ClangFormat <https://clang.llvm.org/docs/ClangFormat.html>`_ workflow for automatic code formatting #75
-    - Run CI only when relevant files have changed #73 #78 #81
-    - Switched to single-threaded builds in CI to avoid out-of-memory issues #86
+    - Setup `Z3 <https://github.com/Z3Prover/z3>`_ via a designated action. Many thanks to Lukas Burgholzer for his support!
+    - Enabled `Ccache <https://ccache.dev/>`_ for faster compilation in CIs
+    - Activated experiments in CI builds to ensure that they are building correctly
+    - `clang-tidy <https://clang.llvm.org/extra/clang-tidy/>`_ workflow for static code analysis
+    - `ClangFormat <https://clang.llvm.org/docs/ClangFormat.html>`_ workflow for automatic code formatting
+    - Run CI only when relevant files have changed
+    - Switched to single-threaded builds in CI to avoid out-of-memory issues
 - Build and documentation:
-    - Refactored the CMake buildsystem #42
-    - Improved the README and the documentation #65 #77 #87
+    - Refactored the CMake buildsystem
+    - Improved the README and the documentation
 
 Fixed
 #####
-- Compilation issues when a certain header was included multiple times #34
-- Exclusion of experiment compilation if Z3 is not found #36 #103
-- Wrong DOT drawer in ``write_dot_layout`` #66
-- MSVC compilation issues #82
-- Performance issues with ``foreach_*`` functions on layout types #83
-- Regex in the FQCA reader #88
-- Issue with ``clear_tile`` that would lose track of PI and PO count #104
-- Duplicate crossing cells in the iNML ToPoliNano library #110
-- Several I/O issues in the CLI #111
+- Compilation issues when a certain header was included multiple times
+- Exclusion of experiment compilation if Z3 is not found
+- Wrong DOT drawer in ``write_dot_layout``
+- MSVC compilation issues
+- Performance issues with ``foreach_*`` functions on layout types
+- Regex in the FQCA reader
+- Issue with ``clear_tile`` that would lose track of PI and PO count
+- Duplicate crossing cells in the iNML ToPoliNano library
+- Several I/O issues in the CLI
 
 Removed
 #######
