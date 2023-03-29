@@ -157,13 +157,14 @@ See ``exact -h`` for a full list.
 
 Recommended settings include the use of I/O pins located at the layout borders for better integration (``-b``). Most
 networks are not realizable without crossings enabled (``-x``). Specifying a clocking scheme **significantly** speeds up
-the process. 2DDWave allows for the strictest constraints and thereby finds a solution the quickest (``-s 2ddwave``).
-However, for high input degree networks, no valid solution exists when border I/Os are to be used unless global
-synchronization is disabled (``-d``). Generally, solutions are found the fastest with the following settings: Crossings
-enabled, de-synchronization enabled, and 2DDWave clocking given (``-xds 2ddwave``). Multi-threading can sometimes speed up
-the process especially for large networks (``-a ...``). Note that the more threads are being used, the less information
-can be shared across the individual solver runs which destroys the benefits of incremental solving and thereby,
-comparatively, slows down each run. Parallelism is an unstable beta feature.
+the process. `2DDWave <https://ieeexplore.ieee.org/document/1717097>`_ allows for the strictest constraints and thereby
+finds a solution the quickest (``-s 2ddwave``). However, for high input degree networks, no valid solution exists when
+border I/Os are to be used unless global synchronization is disabled (``-d``). Generally, solutions are found the
+fastest with the following settings: Crossings enabled, de-synchronization enabled, and 2DDWave clocking given
+(``-xds 2ddwave``). Multi-threading can sometimes speed up the process especially for large networks (``-a ...``). Note
+that the more threads are being used, the less information can be shared across the individual solver runs which
+destroys the benefits of incremental solving and thereby, comparatively, slows down each run. Parallelism is an unstable
+beta feature.
 
 OGD-based (``ortho``)
 #####################
@@ -231,10 +232,10 @@ Energy dissipation (``energy``)
 -------------------------------
 
 A `physical model <https://ieeexplore.ieee.org/document/8246526>`_ for calculating the energy dissipation on the gate-level
-abstraction using the `QCA-ONE library <https://ieeexplore.ieee.org/document/7538997/>`_ has been proposed. Thereby, information
+abstraction using the `QCA ONE library <https://ieeexplore.ieee.org/document/7538997/>`_ has been proposed. Thereby, information
 about the cells' function within a gate can be utilized to obtain switching energy consumption. The respective value can be
 printed using command ``energy``. Note that this assumes that the gate-level layout can be physically synthesized using the
-QCA-ONE gate library.
+QCA ONE gate library.
 
 Physical synthesis (``cell``)
 -----------------------------
@@ -243,7 +244,7 @@ As mentioned above, gate-level layouts can be compiled down to cell-level ones i
 is required to do so. The command ``cell`` does exactly this, where the ``-l`` option indicates the gate
 library to use. The following ones are currently supported:
 
-- ``-l QCAONE`` represents `QCA-ONE <https://ieeexplore.ieee.org/document/7538997/>`_ which is the default setting
+- ``-l QCAONE`` represents `QCA ONE <https://ieeexplore.ieee.org/document/7538997/>`_ which is the default setting
 - ``-l ToPoliNano`` refers to `ToPoliNano <https://topolinano.polito.it/>`_'s gate library for iNML circuits. Note that only ``exact`` can be used in the moment to create layouts mappable to iNML. Suggested parameters are ``exact -xnbds columnar --topolinano``.
 - ``-l Bestagon`` chooses the `Bestagon <https://dl.acm.org/doi/10.1145/3489517.3530525>`_ gate library for SiDB circuits. Note that only ``exact`` can be used in the moment to create layouts that are properly mappable. Suggested parameters are ``exact -xdbs row --hex even_row``.
 
