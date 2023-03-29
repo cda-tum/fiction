@@ -22,3 +22,7 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
 
 .. doxygenclass:: fiction::charge_distribution_surface
    :members:
+.. doxygenclass:: fiction::charge_distribution_surface< Lyt, true >
+   :members:
+.. doxygenclass:: fiction::charge_distribution_surface< Lyt, false >
+   :members:

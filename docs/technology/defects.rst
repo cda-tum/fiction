@@ -28,6 +28,10 @@ SiDB Defects
 
 .. doxygenclass:: fiction::sidb_surface
    :members:
+.. doxygenclass:: fiction::sidb_surface< Lyt, true >
+   :members:
+.. doxygenclass:: fiction::sidb_surface< Lyt, false >
+   :members:
 
 
 **Header:** ``fiction/technology/sidb_surface_analysis.hpp``
