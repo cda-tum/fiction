@@ -212,7 +212,7 @@ class equivalence_checking_impl
  * \frac{1}{1} \f$.
  *
  * This approach was first proposed in \"Verification for Field-coupled Nanocomputing Circuits\" by M. Walter, R. Wille,
- * F. Sill Torres. D. Große, and R. Drechsler in DAC 2020.
+ * F. Sill Torres, D. Große, and R. Drechsler in DAC 2020.
  *
  * @tparam Spec Specification type.
  * @tparam Impl Implementation type.

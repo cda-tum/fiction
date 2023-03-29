@@ -3,7 +3,7 @@ Physical Simulation of SiDBs
 
 These headers provide auxiliary functionality for the physical simulation of SiDBs layouts.
 
-SiDB charge states
+SiDB Charge States
 ------------------
 
 **Header:** ``fiction/technology/sidb_charge_state.hpp``
@@ -15,10 +15,18 @@ Possible charge states of SiDBs.
 .. doxygenfunction:: fiction::sign_to_charge_state(const int8_t sg) noexcept
 .. doxygenfunction:: fiction::charge_configuration_to_string(const std::vector<sidb_charge_state>& charge_distribution) noexcept
 
+
+SiDB Charge Distribution Surface
+--------------------------------
+
 **Header:** ``fiction/technology/charge_distribution_surface.hpp``
 
 The charge distribution surface can be layered on top of any SiDB layout to add representation of possible charge
 distributions of the SiDBs. Charge distribution surfaces are returned by the SiDB physical simulation algorithms.
 
 .. doxygenclass:: fiction::charge_distribution_surface
+   :members:
+.. doxygenclass:: fiction::charge_distribution_surface< Lyt, true >
+   :members:
+.. doxygenclass:: fiction::charge_distribution_surface< Lyt, false >
    :members:
