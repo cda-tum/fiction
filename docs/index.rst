@@ -8,10 +8,10 @@ Let there be a *fiction*
 
    about.rst
    getting_started.rst
-   acknowledgments.rst
    cli.rst
    changelog.rst
    publications.rst
+   acknowledgments.rst
 
 .. toctree::
    :maxdepth: 2
