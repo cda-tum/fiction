@@ -8,7 +8,7 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/routing_utils.hpp"
 
-#include <unordered_set>
+#include <phmap.h>
 
 namespace fiction
 {
@@ -58,7 +58,7 @@ class enumerate_all_clocking_paths_impl
 
     enumerate_all_clocking_paths_params ps;
 
-    std::unordered_set<coordinate<Lyt>> visited{};
+    phmap::flat_hash_set<coordinate<Lyt>> visited{};
 
     path_collection<Path> collection{};
 

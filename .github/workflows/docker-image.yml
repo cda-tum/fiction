@@ -19,6 +19,7 @@ on:
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/docker-image.yml'
+  merge_group:
 
 jobs:
   build:

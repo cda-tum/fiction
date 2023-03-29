@@ -227,13 +227,12 @@ struct is_coordinate_layout : std::false_type
 template <class Lyt>
 struct is_coordinate_layout<
     Lyt,
-    std::enable_if_t<
-        std::conjunction_v<std::is_constructible<aspect_ratio<Lyt>, coordinate<Lyt>>, has_cardinal_operations<Lyt>,
-                           has_elevation_operations<Lyt>>,
-        std::void_t<typename Lyt::base_type, aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage,
-                    decltype(Lyt::max_fanin_size), decltype(Lyt::min_fanin_size), decltype(std::declval<Lyt>().x()),
-                    decltype(std::declval<Lyt>().y()), decltype(std::declval<Lyt>().z()),
-                    decltype(std::declval<Lyt>().area()), decltype(std::declval<Lyt>().resize(aspect_ratio<Lyt>()))>>>
+    std::enable_if_t<std::conjunction_v<std::is_constructible<aspect_ratio<Lyt>, coordinate<Lyt>>,
+                                        has_cardinal_operations<Lyt>, has_elevation_operations<Lyt>>,
+                     std::void_t<typename Lyt::base_type, aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage,
+                                 decltype(Lyt::max_fanin_size), decltype(Lyt::min_fanin_size),
+                                 decltype(std::declval<Lyt>().x()), decltype(std::declval<Lyt>().y()),
+                                 decltype(std::declval<Lyt>().z()), decltype(std::declval<Lyt>().area())>>>
         : std::true_type
 {};
 
@@ -573,6 +572,10 @@ template <typename Lyt>
 inline constexpr const bool has_inml_technology_v = std::is_same_v<technology<Lyt>, inml_technology>;
 template <typename Lyt>
 inline constexpr const bool has_sidb_technology_v = std::is_same_v<technology<Lyt>, sidb_technology>;
+template <typename Lyt>
+inline constexpr const bool has_offset_ucoord_v = std::is_same_v<coordinate<Lyt>, offset::ucoord_t>;
+template <typename Lyt>
+inline constexpr const bool has_cube_coord_v = std::is_same_v<coordinate<Lyt>, cube::coord_t>;
 template <typename Lyt>
 inline constexpr const bool has_siqad_coord_v = std::is_same_v<coordinate<Lyt>, siqad::coord_t>;
 
