@@ -134,7 +134,7 @@ void exhaustive_ground_state_simulation(
         {
             // the first cell from all_sidbs_in_lyt_without_detected_ones is chosen as the dependent cell to initialize
             // the layout (detected negatively charged SiDBs were erased in the step before).
-            charge_distribution_surface charge_lyt_new{lyt, params, sidb_charge_state::NEGATIVE,
+            charge_distribution_surface charge_lyt_new{lyt, params, sidb_charge_state::NEUTRAL,
                                                        all_sidbs_in_lyt_without_detected_ones[0]};
             charge_lyt_new.set_local_external_potential(local_external_potential);
             charge_lyt_new.set_global_external_potential(global_potential);
@@ -158,9 +158,10 @@ void exhaustive_ground_state_simulation(
 
             charge_lyt_new.update_after_charge_change(false);
 
-            while (charge_lyt_new.get_charge_index().first < charge_lyt_new.get_max_charge_index())
+            uint64_t val     = 0;
+            uint64_t val_old = 0;
+            for (uint64_t i = 0; i < charge_lyt_new.get_max_charge_index(); i++)
             {
-
                 if (charge_lyt_new.is_physically_valid())
                 {
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
@@ -171,23 +172,27 @@ void exhaustive_ground_state_simulation(
                     }
                     st.valid_lyts.push_back(charge_lyt_copy);
                 }
-                charge_lyt_new.increase_charge_index_by_one(
-                    false, false, true);  // "false" allows that the charge state of the dependent cell is automatically
-                                          // changed based on the new charge distribution.
-            }
-            if (charge_lyt_new.is_physically_valid())
-            {
-                charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
+
+                val = (i ^ (i >> 1));
+                charge_lyt_new.set_charge_index_by_gray(
+                    val, val_old, false, false, true);  // "false" allows that the charge state of the dependent cell is
+                                                        // automatically changed based on the new charge distribution.
+                val_old = val;
+
+                if (charge_lyt_new.is_physically_valid())
+                {
+                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
+                    for (const auto& cell : detected_negative_sidbs)
+                    {
+                        charge_lyt_copy.adding_sidb_to_layout(cell, -1);
+                    }
+                    st.valid_lyts.push_back(charge_lyt_copy);
+                }
+
                 for (const auto& cell : detected_negative_sidbs)
                 {
-                    charge_lyt_copy.adding_sidb_to_layout(cell, -1);
+                    lyt.assign_cell_type(cell, Lyt::cell_type::NORMAL);
                 }
-                st.valid_lyts.push_back(charge_lyt_copy);
-            }
-
-            for (const auto& cell : detected_negative_sidbs)
-            {
-                lyt.assign_cell_type(cell, Lyt::cell_type::NORMAL);
             }
         }
         // in the case with only one SiDB in the layout.
