@@ -14,8 +14,6 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
-#include <kitty/bit_operations.hpp>
-
 #include <algorithm>
 #include <bitset>
 #include <cassert>

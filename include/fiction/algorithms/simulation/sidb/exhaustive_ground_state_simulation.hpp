@@ -104,6 +104,7 @@ void exhaustive_ground_state_simulation(
         // determine all SiDBs that have to be negatively charged to fulfill the population stability. This is an
         // efficient way to prune the search space by 2^k with k being the number of detected negatively charged SiDBs.
         const auto                      detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
+        // std::cout << detected_negative_sidb_indices.size() << std::endl;
         std::vector<typename Lyt::cell> detected_negative_sidbs{};
         detected_negative_sidbs.reserve(detected_negative_sidb_indices.size());
 
@@ -129,7 +130,7 @@ void exhaustive_ground_state_simulation(
                                }),
                 all_sidbs_in_lyt_without_detected_ones.end());
         }
-
+        // std::cout << all_sidbs_in_lyt_without_detected_ones.size() << std::endl;
         if (!all_sidbs_in_lyt_without_detected_ones.empty() && sidbs_charge_lyt.size() > 1)
         {
             // the first cell from all_sidbs_in_lyt_without_detected_ones is chosen as the dependent cell to initialize
