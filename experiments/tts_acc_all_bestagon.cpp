@@ -43,14 +43,6 @@ int main()  // NOLINT
     static const std::array<std::string, 12> folders = {
         folder + "and/",  folder + "cx/",  folder + "fo2/", folder + "ha/",   folder + "hourglass/", folder + "inv/",
         folder + "nand/", folder + "nor/", folder + "or/",  folder + "wire/", folder + "xnor/",      folder + "xor/"};
-    //        static const std::array<std::string, 1> folders = {
-    //                  folder + "hourglass/"};
-    //    static const std::array<std::string, 10> folders = {
-    //        folder + "and/",  folder + "fo2/",  folder + "inv/", folder + "inv_diag/",
-    //        folder + "nand/", folder + "nor/", folder + "or/",  folder + "wire/", folder + "wire_diag/",  folder +
-    //        "xor/"};
-    //    static const std::array<std::string, 1> folders = {
-    //        folder + "and/"};
 
     for (const auto& folder_gate : folders)
     {
@@ -64,7 +56,7 @@ int main()  // NOLINT
             auto lyt = read_sqd_layout<sidb_cell_clk_lyt_siqad>(benchmark.string());
 
             const sidb_simulation_parameters params{2, -0.32};
-            const quicksim_params            quicksim_params{params, 80, 0.70};
+            const quicksim_params            quicksim_params{params, 100, 0.70};
 
             time_to_solution_stats tts_stat{};
             sim_acc_tts<sidb_cell_clk_lyt_siqad>(lyt, quicksim_params, &tts_stat);

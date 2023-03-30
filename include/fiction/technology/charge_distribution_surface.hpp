@@ -14,6 +14,8 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
+#include <kitty/bit_operations.hpp>
+
 #include <algorithm>
 #include <bitset>
 #include <cassert>
@@ -135,11 +137,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          */
         uint64_t max_charge_index{};
 
-        std::vector<std::pair<uint64_t, int8_t>> cell_history{};
+        std::pair<uint64_t, int8_t> cell_history{};
 
         std::unordered_map<typename Lyt::cell, const sidb_defect> defects{};
 
         typename Lyt::cell dependent_cell{};
+
+        uint64_t dependent_cell_index{};
 
         std::vector<uint64_t> gray_code{};
     };
@@ -711,15 +715,25 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
         else
         {
-            for (const auto& [changed_cell, charge] : strg->cell_history)
+            //            if (strg->cell_history[0].first!=-1)
+            //            {
+            if (strg->cell_history.first != -1)
             {
-                const auto cell_charge = static_cast<double>(charge_state_to_sign(strg->cell_charge[changed_cell]));
-                const auto charge_diff = (cell_charge - charge);
+                //                for (const auto& [changed_cell, charge] : strg->cell_history)
+                //                {
+                const auto cell_charge =
+                    static_cast<double>(charge_state_to_sign(strg->cell_charge[strg->cell_history.first]));
+                const auto charge_diff = (cell_charge - strg->cell_history.second);
                 for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
                 {
-                    strg->local_pot[j] += strg->pot_mat[changed_cell][j] * charge_diff;
+                    strg->local_pot[j] += strg->pot_mat[strg->cell_history.first][j] * charge_diff;
                 }
             }
+
+            //            else
+            //            {
+            //                std::cout << "cell history was minus 1" << std::endl;
+            //            }
         }
     }
 
@@ -727,55 +741,57 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (!strg->dependent_cell.is_dead())
         {
-            const auto index_dependent_cell = cell_to_index(strg->dependent_cell);
-            const auto loc_pot_cell         = -strg->local_pot[index_dependent_cell];
+            const auto loc_pot_cell = -strg->local_pot[strg->dependent_cell_index];
             if (loc_pot_cell + strg->phys_params.mu < physical_constants::POP_STABILITY_ERR)
             {
-                if (strg->cell_charge[index_dependent_cell] != sidb_charge_state::NEGATIVE)
+                if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::NEGATIVE)
                 {
+                    const auto charge_diff = (-charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]) - 1);
                     for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
                     {
-                        if (i != index_dependent_cell)
+                        if (i != strg->dependent_cell_index)
                         {
                             strg->local_pot[i] +=
-                                (this->get_electrostatic_potential_by_indices(i, index_dependent_cell)) *
-                                (-charge_state_to_sign(strg->cell_charge[index_dependent_cell]) - 1);
+                                (this->get_electrostatic_potential_by_indices(i, strg->dependent_cell_index)) *
+                                charge_diff;
                         }
                     }
-                    strg->cell_charge[index_dependent_cell] = sidb_charge_state::NEGATIVE;
+                    strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::NEGATIVE;
                 }
             }
             else if (loc_pot_cell + strg->phys_params.mu_p > -physical_constants::POP_STABILITY_ERR)
             {
-                if (strg->cell_charge[index_dependent_cell] != sidb_charge_state::POSITIVE)
+                if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::POSITIVE)
                 {
+                    const auto charge_diff = (-charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]) + 1);
                     for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
                     {
-                        if (i != index_dependent_cell)
+                        if (i != strg->dependent_cell_index)
                         {
                             strg->local_pot[i] +=
-                                (this->get_electrostatic_potential_by_indices(i, index_dependent_cell)) *
-                                (-charge_state_to_sign(strg->cell_charge[index_dependent_cell]) + 1);
+                                (this->get_electrostatic_potential_by_indices(i, strg->dependent_cell_index)) *
+                                charge_diff;
                         }
                     }
-                    strg->cell_charge[index_dependent_cell] = sidb_charge_state::POSITIVE;
+                    strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::POSITIVE;
                 }
             }
 
             else
             {
-                if (strg->cell_charge[index_dependent_cell] != sidb_charge_state::NEUTRAL)
+                if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::NEUTRAL)
                 {
+                    const auto charge_diff = (-charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]));
                     for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
                     {
-                        if (i != index_dependent_cell)
+                        if (i != strg->dependent_cell_index)
                         {
                             strg->local_pot[i] +=
-                                (this->get_electrostatic_potential_by_indices(i, index_dependent_cell)) *
-                                (-charge_state_to_sign(strg->cell_charge[index_dependent_cell]));
+                                (this->get_electrostatic_potential_by_indices(i, strg->dependent_cell_index)) *
+                                charge_diff;
                         }
                     }
-                    strg->cell_charge[index_dependent_cell] = sidb_charge_state::NEUTRAL;
+                    strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::NEUTRAL;
                 }
             }
         }
@@ -887,13 +903,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         uint64_t population_stability_not_fulfilled_counter = 0;
         uint64_t for_loop_counter                           = 0;
 
+        const auto cell_index = static_cast<uint64_t>(cell_to_index(strg->dependent_cell));
         for (const auto& it : strg->local_pot)  // this for-loop checks if the "population stability" is fulfilled.
         {
-            bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
+            const auto cell_charge = strg->cell_charge[for_loop_counter];
+            bool       valid       = (((cell_charge == sidb_charge_state::NEGATIVE) &&
                            ((-it + strg->phys_params.mu) < physical_constants::POP_STABILITY_ERR)) ||
-                          ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
+                          ((cell_charge == sidb_charge_state::POSITIVE) &&
                            ((-it + strg->phys_params.mu_p) > -physical_constants::POP_STABILITY_ERR)) ||
-                          ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
+                          ((cell_charge == sidb_charge_state::NEUTRAL) &&
                            ((-it + strg->phys_params.mu) > -physical_constants::POP_STABILITY_ERR) &&
                            (-it + strg->phys_params.mu_p) < physical_constants::POP_STABILITY_ERR));
             for_loop_counter += 1;
@@ -1011,7 +1029,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void index_to_charge_distribution() noexcept
     {
         strg->cell_history = {};
-        strg->cell_history.reserve(this->num_cells());
 
         auto       charge_quot          = strg->charge_index.first;
         const auto base                 = strg->charge_index.second;
@@ -1032,8 +1049,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
                 if (const auto new_chargesign = this->get_charge_state_by_index(counter); new_chargesign != sign)
                 {
-                    strg->cell_history.emplace_back(static_cast<uint64_t>(counter),
-                                                    charge_state_to_sign(new_chargesign));
+                    strg->cell_history.first  = static_cast<uint64_t>(counter);
+                    strg->cell_history.second = charge_state_to_sign(new_chargesign);
                     this->assign_charge_state_by_cell_index(counter, sign, false);
                 }
                 counter -= 1;
@@ -1044,8 +1061,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
                 if (const auto old_chargesign = this->get_charge_state_by_index(counter); old_chargesign != sign)
                 {
-                    strg->cell_history.emplace_back(static_cast<uint64_t>(counter),
-                                                    charge_state_to_sign(old_chargesign));
+                    strg->cell_history.first  = static_cast<uint64_t>(counter);
+                    strg->cell_history.second = charge_state_to_sign(old_chargesign);
                     this->assign_charge_state_by_cell_index(counter, sign, false);
                 }
                 counter -= 1;
@@ -1056,7 +1073,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void index_to_charge_distribution_new(uint64_t new_index, uint64_t old_index) noexcept
     {
         strg->cell_history = {};
-        strg->cell_history.reserve(1);
 
         const std::bitset<64> r_new(new_index);
         const std::bitset<64> r_old(old_index);
@@ -1064,7 +1080,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         uint64_t index_changed = 0;
 
-        if (diff != std::bitset<64>(0))
+        if (diff != 0)
         {
 
             while (index_changed < diff.size() && !diff.test(index_changed))
@@ -1075,18 +1091,23 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             const auto sign_old = -1 * static_cast<int8_t>(r_old[index_changed]);
             const auto sign_new = -1 * static_cast<int8_t>(r_new[index_changed]);
 
-            const auto dependent_cell_index = cell_to_index(strg->dependent_cell);
-
-            if (index_changed < dependent_cell_index)
+            if (index_changed < strg->dependent_cell_index)
             {
-                strg->cell_history.emplace_back(index_changed, sign_old);
+                strg->cell_history.first  = index_changed;
+                strg->cell_history.second = sign_old;
                 this->assign_charge_state_by_cell_index(index_changed, sign_to_charge_state(sign_new), false);
             }
             else
             {
-                strg->cell_history.emplace_back(index_changed + 1, sign_old);
+                strg->cell_history.first  = index_changed + 1;
+                strg->cell_history.second = sign_old;
                 this->assign_charge_state_by_cell_index(index_changed + 1, sign_to_charge_state(sign_new), false);
             }
+        }
+        else
+        {
+            strg->cell_history.first  = -1;
+            strg->cell_history.second = 0;
         }
     }
     /**
@@ -1247,25 +1268,26 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             strg->max_charge_index =
                 static_cast<uint64_t>(std::pow(static_cast<double>(strg->phys_params.base), this->num_cells()) - 1);
         }
+        strg->dependent_cell_index = cell_to_index(strg->dependent_cell);
         this->update_local_potential();
         this->recompute_system_energy();
         this->validity_check();
-        this->foreach_cell(
-            [this](const auto& c1)
-            {
-                if (c1 != strg->dependent_cell)
-                {
-                    strg->sidb_order_wo_dependent.push_back(c1);
-                }
-            });
-        this->foreach_cell(
-            [this, &cs](const auto& c1)
-            {
-                if (c1 != strg->dependent_cell)
-                {
-                    strg->cell_charge_wo_dependent.push_back(cs);
-                }
-            });
+        //        this->foreach_cell(
+        //            [this](const auto& c1)
+        //            {
+        //                if (c1 != strg->dependent_cell)
+        //                {
+        //                    strg->sidb_order_wo_dependent.push_back(c1);
+        //                }
+        //            });
+        //        this->foreach_cell(
+        //            [this, &cs](const auto& c1)
+        //            {
+        //                if (c1 != strg->dependent_cell)
+        //                {
+        //                    strg->cell_charge_wo_dependent.push_back(cs);
+        //                }
+        //            });
         // this->gray_code_sequence();
     };
 
