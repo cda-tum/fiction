@@ -103,7 +103,8 @@ void exhaustive_ground_state_simulation(
         auto all_sidbs_in_lyt_without_detected_ones = sidbs_charge_lyt;
         // determine all SiDBs that have to be negatively charged to fulfill the population stability. This is an
         // efficient way to prune the search space by 2^k with k being the number of detected negatively charged SiDBs.
-        const auto                      detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
+        const auto detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
+        const auto three_state_required           = charge_lyt.three_state_sim_required();
         // std::cout << detected_negative_sidb_indices.size() << std::endl;
         std::vector<typename Lyt::cell> detected_negative_sidbs{};
         detected_negative_sidbs.reserve(detected_negative_sidb_indices.size());
@@ -130,7 +131,6 @@ void exhaustive_ground_state_simulation(
                                }),
                 all_sidbs_in_lyt_without_detected_ones.end());
         }
-        // std::cout << all_sidbs_in_lyt_without_detected_ones.size() << std::endl;
         if (!all_sidbs_in_lyt_without_detected_ones.empty() && sidbs_charge_lyt.size() > 1)
         {
             // the first cell from all_sidbs_in_lyt_without_detected_ones is chosen as the dependent cell to initialize
@@ -159,8 +159,9 @@ void exhaustive_ground_state_simulation(
 
             charge_lyt_new.update_after_charge_change(false);
 
-            if (params.base == 2)
+            if (!three_state_required)
             {
+                charge_lyt_new.set_base_num(2);
                 uint64_t val     = 0;
                 uint64_t val_old = 0;
                 //            if (sidbs_charge_lyt.size() > 2)
@@ -200,6 +201,7 @@ void exhaustive_ground_state_simulation(
 
             else
             {
+                charge_lyt_new.set_base_num(3);
                 charge_lyt_new.set_all_charge_states(sidb_charge_state::NEGATIVE);
                 charge_lyt_new.update_after_charge_change(false);
                 while (charge_lyt_new.get_charge_index().first < charge_lyt_new.get_max_charge_index())

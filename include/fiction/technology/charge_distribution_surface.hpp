@@ -268,8 +268,23 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     //    /**
     //     * Delete the assign_cell_type function of the underlying layout.
     //     */
-    //    void assign_cell_type(const typename Lyt::cell& c, const typename Lyt::cell_type& ct) = delete;
-    //    /**
+
+    void set_base_num(const uint8_t base) noexcept
+    {
+        strg->phys_params.base    = base;
+        strg->charge_index.first  = 0;
+        strg->charge_index.second = base;
+        if (!strg->dependent_cell.is_dead())
+        {
+            strg->max_charge_index =
+                static_cast<uint64_t>(std::pow(static_cast<double>(base), this->num_cells() - 1) - 1);
+        }
+        else
+        {
+            strg->max_charge_index = static_cast<uint64_t>(std::pow(static_cast<double>(base), this->num_cells()) - 1);
+        }
+    }
+
     //     * Check if any SiDB exhibits the given charge state.
     //     *
     //     * @param cs Charge state.
@@ -447,6 +462,23 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 }
             });
         return negative_sidbs;
+    }
+
+    bool three_state_sim_required() noexcept
+    {
+        bool required = false;
+        this->foreach_cell(
+            [&required, this](const auto& c)
+            {
+                if (const auto local_pot = this->get_local_potential(c); local_pot.has_value())
+                {
+                    if (-*local_pot + strg->phys_params.mu_p > -physical_constants::POP_STABILITY_ERR)
+                    {
+                        required = true;
+                    }
+                }
+            });
+        return required;
     }
     /**
      * Returns the charge state of a cell of the layout at a given index.
@@ -734,12 +766,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 for (const auto& [changed_cell, charge] : strg->cell_history)
                 {
-                    const auto cell_charge = static_cast<double>(charge_state_to_sign(strg->cell_charge[changed_cell]));
-                    const auto cell_index  = cell_to_index(changed_cell);
-                    const auto charge_diff = (cell_charge - charge);
                     for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
                     {
-                        strg->local_pot[j] += strg->pot_mat[cell_index][j] * charge_diff;
+                        strg->local_pot[j] +=
+                            strg->pot_mat[changed_cell][j] *
+                            (static_cast<double>(charge_state_to_sign(strg->cell_charge[changed_cell])) - charge);
                     }
                 }
             }
