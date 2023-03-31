@@ -164,8 +164,6 @@ void exhaustive_ground_state_simulation(
                 charge_lyt_new.set_base_num(2);
                 uint64_t val     = 0;
                 uint64_t val_old = 0;
-                //            if (sidbs_charge_lyt.size() > 2)
-                //            {
                 for (uint64_t i = 0; i <= charge_lyt_new.get_max_charge_index(); i++)
                 {
 
@@ -240,16 +238,23 @@ void exhaustive_ground_state_simulation(
         // in the case with only one SiDB in the layout.
         else if (sidbs_charge_lyt.size() == 1)
         {
+            if (three_state_required)
+            {
+                charge_lyt.set_base_num(3);
+            }
+            else
+            {
+                charge_lyt.set_base_num(2);
+            }
+            charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
+            charge_lyt.update_after_charge_change(false);
+
             while (charge_lyt.get_charge_index().first < charge_lyt.get_max_charge_index())
             {
 
                 if (charge_lyt.is_physically_valid())
                 {
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-                    for (const auto& cell : detected_negative_sidbs)
-                    {
-                        charge_lyt_copy.adding_sidb_to_layout(cell, -1);
-                    }
                     st.valid_lyts.push_back(charge_lyt_copy);
                 }
                 charge_lyt.increase_charge_index_by_one(
@@ -259,10 +264,6 @@ void exhaustive_ground_state_simulation(
             if (charge_lyt.is_physically_valid())
             {
                 charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-                for (const auto& cell : detected_negative_sidbs)
-                {
-                    charge_lyt_copy.adding_sidb_to_layout(cell, -1);
-                }
                 st.valid_lyts.push_back(charge_lyt_copy);
             }
         }

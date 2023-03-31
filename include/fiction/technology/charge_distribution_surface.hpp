@@ -88,14 +88,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          * All cells that are occupied by an SiDB are stored in order.
          */
         std::vector<typename Lyt::cell> sidb_order{};
-
-        std::vector<typename Lyt::cell> sidb_order_wo_dependent{};
         /**
          * The SiDBs' charge states are stored. Corresponding cells are stored in `sidb_order`.
          */
         std::vector<sidb_charge_state> cell_charge{};
-
-        std::vector<sidb_charge_state> cell_charge_wo_dependent{};
         /**
          * Distance between SiDBs are stored as matrix.
          */
@@ -265,14 +261,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             this->validity_check();
         }
     }
-    //    /**
-    //     * Delete the assign_cell_type function of the underlying layout.
-    //     */
 
+    /**
+     * Set the base number for the simulation.
+     *
+     * @param base Base number to be set.
+     */
     void set_base_num(const uint8_t base) noexcept
     {
         strg->phys_params.base    = base;
-        strg->charge_index.first  = 0;
         strg->charge_index.second = base;
         if (!strg->dependent_cell.is_dead())
         {
@@ -464,6 +461,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return negative_sidbs;
     }
 
+    /**
+     * This function can be used to determine if given layout has to be simulated with three states.
+     *
+     * @return bool is true when three state simulation is required.
+     */
     bool three_state_sim_required() noexcept
     {
         bool required = false;

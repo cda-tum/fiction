@@ -43,7 +43,7 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation", "[ExGS]",
     CHECK(exgs_stats.valid_lyts.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defect in proximity", "[ExGS]",
+TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defect (default initialization) in proximity", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -58,6 +58,42 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defec
 
     REQUIRE(exgs_stats.valid_lyts.size() == 1);
     CHECK(exgs_stats.valid_lyts.front().get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
+}
+
+TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defect (changed lambda_tf) in proximity", "[ExGS]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+    TestType lyt{{20, 10}};
+    lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+
+    exgs_stats<TestType>             exgs_stats{};
+    const sidb_simulation_parameters params{2, -0.25};
+
+    std::unordered_map<typename TestType::cell, const sidb_defect> defects{};
+    auto defect = sidb_defect{sidb_defect_type::UNKNOWN, -1, 0.0,  2*10E-9};
+    defects.insert({{1, 2, 0}, defect});
+    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats, defects);
+
+    REQUIRE(exgs_stats.valid_lyts.size() == 1);
+    CHECK(exgs_stats.valid_lyts.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
+}
+
+TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defect (changed epsilon_r) in proximity", "[ExGS]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+    TestType lyt{{20, 10}};
+    lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+
+    exgs_stats<TestType>             exgs_stats{};
+    const sidb_simulation_parameters params{2, -0.25};
+
+    std::unordered_map<typename TestType::cell, const sidb_defect> defects{};
+    auto defect = sidb_defect{sidb_defect_type::UNKNOWN, -1, 0.3};
+    defects.insert({{1, 2, 0}, defect});
+    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats, defects);
+
+    REQUIRE(exgs_stats.valid_lyts.size() == 1);
+    CHECK(exgs_stats.valid_lyts.front().get_charge_state_by_index(0) == sidb_charge_state::POSITIVE);
 }
 
 TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one highly negatively charge defect in proximity", "[ExGS]",
@@ -593,11 +629,72 @@ TEMPLATE_TEST_CASE("Seven randomly distributed DBs, test if dependent cell calcu
     REQUIRE(!exgs_stats.valid_lyts.empty());
     const auto& charge_lyt_first = exgs_stats.valid_lyts.front();
 
-    charge_lyt_first.assign_charge_state({1, 3, 0}, sidb_charge_state::NEGATIVE);
-    charge_lyt_first.assign_charge_state({3, 3, 0}, sidb_charge_state::NEUTRAL);
-    charge_lyt_first.assign_charge_state({4, 3, 0}, sidb_charge_state::NEUTRAL);
-    charge_lyt_first.assign_charge_state({6, 3, 0}, sidb_charge_state::NEUTRAL);
-    charge_lyt_first.assign_charge_state({7, 3, 0}, sidb_charge_state::NEGATIVE);
-    charge_lyt_first.assign_charge_state({6, 10, 0}, sidb_charge_state::NEUTRAL);
-    charge_lyt_first.assign_charge_state({7, 10, 0}, sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({3, 3, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({4, 3, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({6, 3, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({7, 3, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({6, 10, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({7, 10, 0}) == sidb_charge_state::NEGATIVE);
+}
+
+TEMPLATE_TEST_CASE("three DBs next to each other", "[ExGS]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+    TestType lyt{{20, 10}};
+
+    lyt.assign_cell_type({-1, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
+
+    exgs_stats<TestType>             exgs_stats{};
+    const sidb_simulation_parameters params{2, -0.25};
+
+    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
+
+    REQUIRE(exgs_stats.valid_lyts.size() == 3);
+
+    auto energy_min = std::numeric_limits<double>::max();
+    for (const auto& layout : exgs_stats.valid_lyts)
+    {
+        if (layout.get_system_energy() < energy_min)
+        {
+            energy_min = layout.get_system_energy();
+        }
+    }
+
+    for (const auto& layout : exgs_stats.valid_lyts)
+    {
+        if (std::abs(layout.get_system_energy() - energy_min) < physical_constants::POP_STABILITY_ERR)
+        {
+            CHECK(layout.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
+            CHECK(layout.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
+            CHECK(layout.get_charge_state({2, 3, 0}) == sidb_charge_state::POSITIVE);
+            CHECK(layout.get_charge_state({3, 3, 0}) == sidb_charge_state::NEGATIVE);
+        }
+    }
+}
+
+TEMPLATE_TEST_CASE("three DBs next to each other, small mu-", "[ExGS]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+    TestType lyt{{20, 10}};
+
+    lyt.assign_cell_type({-1, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
+
+    exgs_stats<TestType>             exgs_stats{};
+    const sidb_simulation_parameters params{2, -0.8};
+
+    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
+
+    REQUIRE(exgs_stats.valid_lyts.size() == 1);
+    const auto& charge_lyt_first = exgs_stats.valid_lyts.front();
+    CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({2, 3, 0}) == sidb_charge_state::POSITIVE);
+    CHECK(charge_lyt_first.get_charge_state({3, 3, 0}) == sidb_charge_state::NEGATIVE);
 }
