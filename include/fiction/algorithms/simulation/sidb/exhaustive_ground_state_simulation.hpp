@@ -159,40 +159,79 @@ void exhaustive_ground_state_simulation(
 
             charge_lyt_new.update_after_charge_change(false);
 
-            uint64_t val     = 0;
-            uint64_t val_old = 0;
-            //            if (sidbs_charge_lyt.size() > 2)
-            //            {
-            for (uint64_t i = 0; i <= charge_lyt_new.get_max_charge_index(); i++)
+            if (params.base == 2)
             {
-
-                if (i == charge_lyt_new.get_max_charge_index() && charge_lyt_new.get_max_charge_index() > 1)
+                uint64_t val     = 0;
+                uint64_t val_old = 0;
+                //            if (sidbs_charge_lyt.size() > 2)
+                //            {
+                for (uint64_t i = 0; i <= charge_lyt_new.get_max_charge_index(); i++)
                 {
-                    continue;
+
+                    if (i == charge_lyt_new.get_max_charge_index() && charge_lyt_new.get_max_charge_index() > 1)
+                    {
+                        continue;
+                    }
+
+                    val = (i ^ (i >> 1));
+                    charge_lyt_new.set_charge_index_by_gray(
+                        val, val_old, false, false,
+                        true);  // "false" allows that the charge state of the dependent cell is
+                                // automatically changed based on the new charge distribution.
+                    val_old = val;
+
+                    if (charge_lyt_new.is_physically_valid())
+                    {
+                        charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
+                        charge_lyt_copy.recompute_system_energy();
+                        for (const auto& cell : detected_negative_sidbs)
+                        {
+                            charge_lyt_copy.adding_sidb_to_layout(cell, -1);
+                        }
+                        st.valid_lyts.push_back(charge_lyt_copy);
+                    }
                 }
 
-                val = (i ^ (i >> 1));
-                charge_lyt_new.set_charge_index_by_gray(
-                    val, val_old, false, false,
-                    true);  // "false" allows that the charge state of the dependent cell is
-                            // automatically changed based on the new charge distribution.
-                val_old = val;
+                for (const auto& cell : detected_negative_sidbs)
+                {
+                    lyt.assign_cell_type(cell, Lyt::cell_type::NORMAL);
+                }
+            }
 
+            else
+            {
+                charge_lyt_new.set_all_charge_states(sidb_charge_state::NEGATIVE);
+                charge_lyt_new.update_after_charge_change(false);
+                while (charge_lyt_new.get_charge_index().first < charge_lyt_new.get_max_charge_index())
+                {
+                    if (charge_lyt_new.is_physically_valid())
+                    {
+                        charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
+                        charge_lyt_copy.recompute_system_energy();
+                        for (const auto& cell : detected_negative_sidbs)
+                        {
+                            charge_lyt_copy.adding_sidb_to_layout(cell, -1);
+                        }
+                        st.valid_lyts.push_back(charge_lyt_copy);
+                    }
+                    charge_lyt_new.increase_charge_index_by_one(
+                        false, false, true);  // "false" allows that the charge state of the dependent cell is
+                                              // automatically changed based on the new charge distribution.
+                }
                 if (charge_lyt_new.is_physically_valid())
                 {
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
-                    charge_lyt_copy.recompute_system_energy();
                     for (const auto& cell : detected_negative_sidbs)
                     {
                         charge_lyt_copy.adding_sidb_to_layout(cell, -1);
                     }
                     st.valid_lyts.push_back(charge_lyt_copy);
                 }
-            }
 
-            for (const auto& cell : detected_negative_sidbs)
-            {
-                lyt.assign_cell_type(cell, Lyt::cell_type::NORMAL);
+                for (const auto& cell : detected_negative_sidbs)
+                {
+                    lyt.assign_cell_type(cell, Lyt::cell_type::NORMAL);
+                }
             }
         }
 

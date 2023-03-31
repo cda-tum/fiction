@@ -135,15 +135,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          */
         uint64_t max_charge_index{};
 
-        std::pair<uint64_t, int8_t> cell_history{};
+        std::pair<uint64_t, int8_t> cell_history_gray_code{};
+
+        std::vector<std::pair<uint64_t, int8_t>> cell_history{};
 
         std::unordered_map<typename Lyt::cell, const sidb_defect> defects{};
 
         typename Lyt::cell dependent_cell{};
 
         uint64_t dependent_cell_index{};
-
-        std::vector<uint64_t> gray_code{};
     };
 
     using storage = std::shared_ptr<charge_distribution_storage>;
@@ -713,25 +713,36 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
         else
         {
-            //            if (strg->cell_history[0].first!=-1)
+            //            if (strg->cell_history_gray_code[0].first!=-1)
             //            {
-            if (strg->cell_history.first != -1)
+            if (strg->phys_params.base == 2)
             {
-                //                for (const auto& [changed_cell, charge] : strg->cell_history)
-                //                {
-                const auto cell_charge =
-                    static_cast<double>(charge_state_to_sign(strg->cell_charge[strg->cell_history.first]));
-                const auto charge_diff = (cell_charge - strg->cell_history.second);
-                for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
+                if (strg->cell_history_gray_code.first != -1)
                 {
-                    strg->local_pot[j] += strg->pot_mat[strg->cell_history.first][j] * charge_diff;
+                    //                for (const auto& [changed_cell, charge] : strg->cell_history_gray_code)
+                    //                {
+                    const auto cell_charge = static_cast<double>(
+                        charge_state_to_sign(strg->cell_charge[strg->cell_history_gray_code.first]));
+                    const auto charge_diff = (cell_charge - strg->cell_history_gray_code.second);
+                    for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
+                    {
+                        strg->local_pot[j] += strg->pot_mat[strg->cell_history_gray_code.first][j] * charge_diff;
+                    }
                 }
             }
-
-            //            else
-            //            {
-            //                std::cout << "cell history was minus 1" << std::endl;
-            //            }
+            else
+            {
+                for (const auto& [changed_cell, charge] : strg->cell_history)
+                {
+                    const auto cell_charge = static_cast<double>(charge_state_to_sign(strg->cell_charge[changed_cell]));
+                    const auto cell_index  = cell_to_index(changed_cell);
+                    const auto charge_diff = (cell_charge - charge);
+                    for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
+                    {
+                        strg->local_pot[j] += strg->pot_mat[cell_index][j] * charge_diff;
+                    }
+                }
+            }
         }
     }
 
@@ -877,7 +888,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * The function updates the local potential and the system energy after a charge change.
      */
-    void update_after_charge_change(const bool dependent_cell_fixed = true, const bool energy_caluclation = true,
+    void update_after_charge_change(const bool dependent_cell_fixed = true, const bool energy_calculation = true,
                                     const bool& consider_history = false) noexcept
     {
         this->update_local_potential(consider_history);
@@ -885,7 +896,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             this->update_charge_state_of_dependent_cell();
         }
-        if (energy_caluclation)
+        if (energy_calculation)
         {
             this->recompute_system_energy();
         }
@@ -1027,6 +1038,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void index_to_charge_distribution() noexcept
     {
         strg->cell_history = {};
+        strg->cell_history.reserve(this->num_cells());
 
         auto       charge_quot          = strg->charge_index.first;
         const auto base                 = strg->charge_index.second;
@@ -1047,8 +1059,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
                 if (const auto new_chargesign = this->get_charge_state_by_index(counter); new_chargesign != sign)
                 {
-                    strg->cell_history.first  = static_cast<uint64_t>(counter);
-                    strg->cell_history.second = charge_state_to_sign(new_chargesign);
+                    strg->cell_history.emplace_back(static_cast<uint64_t>(counter),
+                                                    charge_state_to_sign(new_chargesign));
                     this->assign_charge_state_by_cell_index(counter, sign, false);
                 }
                 counter -= 1;
@@ -1059,8 +1071,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
                 if (const auto old_chargesign = this->get_charge_state_by_index(counter); old_chargesign != sign)
                 {
-                    strg->cell_history.first  = static_cast<uint64_t>(counter);
-                    strg->cell_history.second = charge_state_to_sign(old_chargesign);
+                    strg->cell_history.emplace_back(static_cast<uint64_t>(counter),
+                                                    charge_state_to_sign(old_chargesign));
                     this->assign_charge_state_by_cell_index(counter, sign, false);
                 }
                 counter -= 1;
@@ -1070,7 +1082,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
     void index_to_charge_distribution_new(uint64_t new_index, uint64_t old_index) noexcept
     {
-        strg->cell_history = {};
+        strg->cell_history_gray_code = {};
 
         const std::bitset<64> r_new(new_index);
         const std::bitset<64> r_old(old_index);
@@ -1091,21 +1103,21 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
             if (index_changed < strg->dependent_cell_index)
             {
-                strg->cell_history.first  = index_changed;
-                strg->cell_history.second = sign_old;
+                strg->cell_history_gray_code.first  = index_changed;
+                strg->cell_history_gray_code.second = sign_old;
                 this->assign_charge_state_by_cell_index(index_changed, sign_to_charge_state(sign_new), false);
             }
             else
             {
-                strg->cell_history.first  = index_changed + 1;
-                strg->cell_history.second = sign_old;
+                strg->cell_history_gray_code.first  = index_changed + 1;
+                strg->cell_history_gray_code.second = sign_old;
                 this->assign_charge_state_by_cell_index(index_changed + 1, sign_to_charge_state(sign_new), false);
             }
         }
         else
         {
-            strg->cell_history.first  = -1;
-            strg->cell_history.second = 0;
+            strg->cell_history_gray_code.first  = -1;
+            strg->cell_history_gray_code.second = 0;
         }
     }
     /**
