@@ -12,9 +12,13 @@ categories:
     labels:
       - "bug"
       - "compiler issue"
+      - "small fix"
   - title: "📝 Documentation"
     labels:
       - "documentation"
+  - title: "✅ Testing"
+    labels:
+      - "test"
   - title: "👷 CI"
     labels:
       - "github_actions"
@@ -24,7 +28,7 @@ categories:
       - "dependencies"
       - "submodules"
 change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
-change-title-escapes: '\<*_&'
+change-title-escapes: '\<*&'
 version-resolver:
   major:
     labels:
@@ -40,8 +44,12 @@ autolabeler:
   - label: "dependencies"
     title:
       - "/update pre-commit hooks/i"
+footer: |
+  Many thanks to all contributors!
 
 template: |
-  ## What's Changed 👀
+  ## 👀 What's Changed
+  
   $CHANGES
-  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+  
+  **Full [CHANGELOG](https://fiction.readthedocs.io/en/latest/changelog.html)**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
