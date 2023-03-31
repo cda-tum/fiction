@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(fiction
         LANGUAGES CXX
-        VERSION 0.4.0)
+        VERSION 0.5.0)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/StandardProjectSettings.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/PreventInSourceBuilds.cmake)
