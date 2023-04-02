@@ -718,6 +718,28 @@ TEMPLATE_TEST_CASE("four DBs next to each other, small mu-", "[ExGS]",
     const auto& charge_lyt_first = exgs_stats.valid_lyts.front();
 }
 
+TEMPLATE_TEST_CASE("seven DBs next to each other, small mu-", "[ExGS]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+    TestType lyt{{20, 10}};
+
+    lyt.assign_cell_type({0, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 0}, TestType::cell_type::NORMAL);
+
+    exgs_stats<TestType>             exgs_stats{};
+    const sidb_simulation_parameters params{3, -0.25};
+
+    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
+
+    REQUIRE(exgs_stats.valid_lyts.size() == 3);
+    const auto& charge_lyt_first = exgs_stats.valid_lyts.front();
+}
+
 TEMPLATE_TEST_CASE("larger random layout", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
