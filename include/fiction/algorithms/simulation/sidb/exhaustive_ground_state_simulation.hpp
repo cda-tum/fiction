@@ -105,7 +105,6 @@ void exhaustive_ground_state_simulation(
         // efficient way to prune the search space by 2^k with k being the number of detected negatively charged SiDBs.
         const auto detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
         const auto three_state_required           = charge_lyt.three_state_sim_required();
-        // std::cout << detected_negative_sidb_indices.size() << std::endl;
         std::vector<typename Lyt::cell> detected_negative_sidbs{};
         detected_negative_sidbs.reserve(detected_negative_sidb_indices.size());
 
