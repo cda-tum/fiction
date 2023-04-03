@@ -103,8 +103,8 @@ void exhaustive_ground_state_simulation(
         auto all_sidbs_in_lyt_without_detected_ones = sidbs_charge_lyt;
         // determine all SiDBs that have to be negatively charged to fulfill the population stability. This is an
         // efficient way to prune the search space by 2^k with k being the number of detected negatively charged SiDBs.
-        const auto detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
-        const auto three_state_required           = charge_lyt.three_state_sim_required();
+        const auto                      detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
+        const auto                      three_state_required           = charge_lyt.three_state_sim_required();
         std::vector<typename Lyt::cell> detected_negative_sidbs{};
         detected_negative_sidbs.reserve(detected_negative_sidb_indices.size());
 
@@ -158,6 +158,7 @@ void exhaustive_ground_state_simulation(
 
             charge_lyt_new.update_after_charge_change(false);
 
+            // if no positively charged DBs can occur in the layout, this scope is executed.
             if (!three_state_required)
             {
                 charge_lyt_new.set_base_num(2);
@@ -165,7 +166,6 @@ void exhaustive_ground_state_simulation(
                 uint64_t val_old = 0;
                 for (uint64_t i = 0; i <= charge_lyt_new.get_max_charge_index(); i++)
                 {
-
                     if (i == charge_lyt_new.get_max_charge_index() && charge_lyt_new.get_max_charge_index() > 1)
                     {
                         continue;
@@ -182,6 +182,7 @@ void exhaustive_ground_state_simulation(
                     {
                         charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
                         charge_lyt_copy.recompute_system_energy();
+                        // the previously detected negatively charged SiDBs are added to the final layout.
                         for (const auto& cell : detected_negative_sidbs)
                         {
                             charge_lyt_copy.adding_sidb_to_layout(cell, -1);
@@ -190,12 +191,14 @@ void exhaustive_ground_state_simulation(
                     }
                 }
 
+                // the cells of the previously detected negatively charged SiDBs are added to the cell level layout.
                 for (const auto& cell : detected_negative_sidbs)
                 {
                     lyt.assign_cell_type(cell, Lyt::cell_type::NORMAL);
                 }
             }
 
+            // if positively charged DBs can occur in the layout, 3-state simulation is conducted.
             else
             {
                 charge_lyt_new.set_base_num(3);
@@ -207,6 +210,7 @@ void exhaustive_ground_state_simulation(
                     {
                         charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
                         charge_lyt_copy.recompute_system_energy();
+                        // the previously detected negatively charged SiDBs are added to the final layout.
                         for (const auto& cell : detected_negative_sidbs)
                         {
                             charge_lyt_copy.adding_sidb_to_layout(cell, -1);

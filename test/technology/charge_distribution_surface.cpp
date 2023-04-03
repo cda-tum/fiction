@@ -251,7 +251,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 6}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 1}) == sidb_charge_state::NONE);
-        //
+
         charge_layout.set_all_charge_states(sidb_charge_state::NEGATIVE);
     }
 
@@ -404,7 +404,7 @@ TEMPLATE_TEST_CASE(
         charge_layout.recompute_system_energy();
         CHECK(charge_layout.get_system_energy() > 0);
     }
-    //
+
     SECTION("Physical validity check, far distance of SIDBs, all NEGATIVE")
     {
 
@@ -449,7 +449,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout_five.get_charge_state({0, 2, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout_five.get_charge_state({4, 1, 1}) == sidb_charge_state::NEUTRAL);
     }
-    //
+
     SECTION("Physical validity check, small distance, not all can be negatively charged anymore")
     {
         lyt.assign_cell_type({1, 0, 0}, TestType::cell_type::NORMAL);
