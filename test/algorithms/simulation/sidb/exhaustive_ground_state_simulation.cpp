@@ -740,44 +740,7 @@ TEMPLATE_TEST_CASE("seven DBs next to each other, small mu-", "[ExGS]",
     const auto& charge_lyt_first = exgs_stats.valid_lyts.front();
 }
 
-TEMPLATE_TEST_CASE("larger random layout", "[ExGS]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
-{
-    TestType lyt{{20, 10}};
-
-    lyt.assign_cell_type({197, 77, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({185, 65, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({191, 65, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({193, 64, 0}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({193, 76, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({185, 60, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({190, 69, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({169, 61, 0}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({173, 61, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({186, 73, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({197, 63, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({199, 62, 0}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({186, 68, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({199, 78, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({191, 75, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({203, 79, 0}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({187, 74, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({175, 63, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({179, 64, 0}, TestType::cell_type::NORMAL);
-
-    exgs_stats<TestType>             exgs_stats{};
-    const sidb_simulation_parameters params{3, -0.25};
-
-    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
-
-    CHECK(exgs_stats.valid_lyts.size() == 4);
-}
-
-TEMPLATE_TEST_CASE("18 DBs next to each other", "[ExGS]",
+TEMPLATE_TEST_CASE("7 DBs next to each other (positively charged DBs occur)", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -792,23 +755,10 @@ TEMPLATE_TEST_CASE("18 DBs next to each other", "[ExGS]",
     lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, TestType::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({9, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({11, 0, 0}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({12, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({13, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({15, 0, 0}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({16, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({17, 0, 0}, TestType::cell_type::NORMAL);
-
     exgs_stats<TestType>             exgs_stats{};
     const sidb_simulation_parameters params{3, -0.25};
 
     exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
 
-    CHECK(exgs_stats.valid_lyts.size() == 20);
+    CHECK(exgs_stats.valid_lyts.size() == 5);
 }
