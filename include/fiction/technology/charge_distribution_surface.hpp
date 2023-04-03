@@ -1079,36 +1079,43 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         auto       counter              = num_charges - 1;
         const auto dependent_cell_index = cell_to_index(strg->dependent_cell);
 
-        while (charge_quot > 0)
+        if (charge_quot == 0)
         {
-            const auto    charge_quot_int = static_cast<int64_t>(charge_quot);
-            const auto    base_int        = static_cast<int64_t>(base);
-            const int64_t quotient_int    = charge_quot_int / base_int;
-            const int64_t remainder_int   = charge_quot_int % base_int;
-            charge_quot                   = static_cast<uint64_t>(quotient_int);
+            this->set_all_charge_states(sidb_charge_state::NEGATIVE);
+        }
+        else
+        {
+            while (charge_quot > 0)
+            {
+                const auto    charge_quot_int = static_cast<int64_t>(charge_quot);
+                const auto    base_int        = static_cast<int64_t>(base);
+                const int64_t quotient_int    = charge_quot_int / base_int;
+                const int64_t remainder_int   = charge_quot_int % base_int;
+                charge_quot                   = static_cast<uint64_t>(quotient_int);
 
-            if (counter != dependent_cell_index)
-            {
-                const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                if (const auto new_chargesign = this->get_charge_state_by_index(counter); new_chargesign != sign)
+                if (counter != dependent_cell_index)
                 {
-                    strg->cell_history.emplace_back(static_cast<uint64_t>(counter),
-                                                    charge_state_to_sign(new_chargesign));
-                    this->assign_charge_state_by_cell_index(counter, sign, false);
+                    const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
+                    if (const auto new_chargesign = this->get_charge_state_by_index(counter); new_chargesign != sign)
+                    {
+                        strg->cell_history.emplace_back(static_cast<uint64_t>(counter),
+                                                        charge_state_to_sign(new_chargesign));
+                        this->assign_charge_state_by_cell_index(counter, sign, false);
+                    }
+                    counter -= 1;
                 }
-                counter -= 1;
-            }
-            else
-            {
-                counter -= 1;
-                const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                if (const auto old_chargesign = this->get_charge_state_by_index(counter); old_chargesign != sign)
+                else
                 {
-                    strg->cell_history.emplace_back(static_cast<uint64_t>(counter),
-                                                    charge_state_to_sign(old_chargesign));
-                    this->assign_charge_state_by_cell_index(counter, sign, false);
+                    counter -= 1;
+                    const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
+                    if (const auto old_chargesign = this->get_charge_state_by_index(counter); old_chargesign != sign)
+                    {
+                        strg->cell_history.emplace_back(static_cast<uint64_t>(counter),
+                                                        charge_state_to_sign(old_chargesign));
+                        this->assign_charge_state_by_cell_index(counter, sign, false);
+                    }
+                    counter -= 1;
                 }
-                counter -= 1;
             }
         }
     }
@@ -1221,8 +1228,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_charge_index(uint64_t charge_index) noexcept
     {
+        assert((charge_index <= strg->max_charge_index) && "number of SiDBs is too large");
         strg->charge_index.first = charge_index;
-        this->index_to_charge_distribution_gray_code();
+        this->index_to_charge_distribution();
     }
     /**
      * This function is used for the *QuickSim* algorithm (see quicksim.hpp). It gets a vector with indices representing
@@ -1297,7 +1305,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * This function returns all SiDBs of the layout.
      *
      * @return vector with all SiDBs.
-     *
      */
     std::vector<typename Lyt::cell> get_sidb_order() noexcept
     {
@@ -1311,7 +1318,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void adding_sidb_to_layout(const typename Lyt::cell& cell, const int8_t& charge) noexcept
     {
-
         strg->cell_charge.push_back(sign_to_charge_state(charge));
         strg->sidb_order.push_back(cell);
     }
