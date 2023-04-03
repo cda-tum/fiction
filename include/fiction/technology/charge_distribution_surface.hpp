@@ -130,16 +130,33 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          * exists.
          */
         uint64_t max_charge_index{};
-
+        /**
+         * This pair stores the cell and its previously charge state (important when all possible charge distributions
+         * are enumerated and checked for physical validity).
+         */
         std::pair<uint64_t, int8_t> cell_history_gray_code{};
-
+        /**
+         * This vector stores the cells and its previously charge states of the charge distribution before the charge
+         * index was changed.
+         */
         std::vector<std::pair<uint64_t, int8_t>> cell_history{};
-
+        /**
+         * This unordered map stores the cells and the placed defect.
+         */
         std::unordered_map<typename Lyt::cell, const sidb_defect> defects{};
-
+        /**
+         * Dependent cell is the cell which charge state is determined by all other SiDBs in the layout.
+         */
         typename Lyt::cell dependent_cell{};
-
+        /**
+         * Charge index of the dependent cell in the layout.
+         */
         uint64_t dependent_cell_index{};
+        /**
+         * This vector collects all cells that could potentially be positively charged based on the maximum possible
+         * local potential.
+         */
+        std::vector<typename Lyt::cell> positive_candidates{};
     };
 
     using storage = std::shared_ptr<charge_distribution_storage>;
@@ -468,7 +485,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     bool three_state_sim_required() noexcept
     {
-        bool required = false;
+        strg->positive_candidates = {};
+        bool required             = false;
         this->foreach_cell(
             [&required, this](const auto& c)
             {
@@ -476,11 +494,17 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
                     if (-*local_pot + strg->phys_params.mu_p > -physical_constants::POP_STABILITY_ERR)
                     {
+                        strg->positive_candidates.emplace_back(c);
                         required = true;
                     }
                 }
             });
         return required;
+    }
+
+    std::vector<typename Lyt::cell> get_positive_candidates() const noexcept
+    {
+        return strg->positive_candidates;
     }
     /**
      * Returns the charge state of a cell of the layout at a given index.
