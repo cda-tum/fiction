@@ -762,3 +762,27 @@ TEMPLATE_TEST_CASE("7 DBs next to each other (positively charged DBs occur)", "[
 
     CHECK(exgs_stats.valid_lyts.size() == 5);
 }
+
+TEMPLATE_TEST_CASE(
+    "7 DBs next to each other | only one physically valid charge distribution with only one neutrally charged DB",
+    "[ExGS]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+    TestType lyt{{20, 10}};
+
+    lyt.assign_cell_type({-6, 1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 4, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({4, 6, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({-8, -3, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({-1, -1, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 2, 0}, TestType::cell_type::NORMAL);
+
+    exgs_stats<TestType>             exgs_stats{};
+    const sidb_simulation_parameters params{3, -0.25};
+
+    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
+
+    CHECK(exgs_stats.valid_lyts.size() == 1);
+}
