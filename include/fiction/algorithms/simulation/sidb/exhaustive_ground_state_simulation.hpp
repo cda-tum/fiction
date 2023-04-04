@@ -166,11 +166,6 @@ void exhaustive_ground_state_simulation(
                 uint64_t val_old = 0;
                 for (uint64_t i = 0; i <= charge_lyt_new.get_max_charge_index(); i++)
                 {
-                    if (i == charge_lyt_new.get_max_charge_index() && charge_lyt_new.get_max_charge_index() > 1)
-                    {
-                        continue;
-                    }
-
                     val = (i ^ (i >> 1));
                     charge_lyt_new.set_charge_index_by_gray(
                         val, val_old, false, false,
