@@ -18,7 +18,7 @@ namespace fiction
  * Computes the minimum energy of a vector of charge_distribution_surface objects.
  *
  * @tparam Lyt Cell-level layout type.
- * @param result Vector of charge_distribution_surface objects.
+ * @param charge_lyts Vector of charge_distribution_surface objects.
  * @return Value of the minimum energy found in the input vector.
  */
 template <typename Lyt>
@@ -27,8 +27,8 @@ template <typename Lyt>
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    return std::accumulate(charge_lyts.begin(), charge_lyts.end(), std::numeric_limits<double>::max(),
-                           [](double a, const auto& lyt) { return std::min(a, lyt.get_system_energy()); });
+    return std::accumulate(charge_lyts.cbegin(), charge_lyts.cend(), std::numeric_limits<double>::max(),
+                           [](const double a, const auto& lyt) { return std::min(a, lyt.get_system_energy()); });
 }
 
 }  // namespace fiction

@@ -45,11 +45,12 @@ struct exgs_stats
             {
                 out << fmt::format("[i] energy: {} | occurrence: {}\n", energy, count);
             }
+
             out << fmt::format("[i] the ground state energy is  = {:.4f}\n", minimum_energy(valid_lyts));
         }
         else
         {
-            out << "[i] no state found | if two-state simulation is used, continue with three states\n";
+            out << "[i] no state found | if two-state simulation was used, try re-runing with three states\n";
         }
 
         out << fmt::format("[i] {} physically valid charge states were found\n", valid_lyts.size());
