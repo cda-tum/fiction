@@ -8,7 +8,6 @@ are a crucial step in the physical design flow of SiDB layouts, as they are used
 Physical Parameters
 ###################
 
-
 **Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp``
 
 .. doxygenstruct:: fiction::sidb_simulation_parameters
@@ -17,7 +16,6 @@ Physical Parameters
 
 Simulation Result
 #################
-
 
 **Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp``
 
@@ -40,7 +38,6 @@ Heuristic Ground State Simulation
 
 Exhaustive Ground State Simulation
 ##################################
-
 
 **Header:** ``fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp``
 
