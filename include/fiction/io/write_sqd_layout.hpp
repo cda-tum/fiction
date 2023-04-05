@@ -31,7 +31,7 @@ namespace detail
 namespace siqad
 {
 
-inline constexpr const char* XML_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+inline constexpr const char* SQD_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 inline constexpr const char* OPEN_SIQAD    = "<siqad>\n";
 inline constexpr const char* CLOSE_SIQAD   = "</siqad>\n";
 inline constexpr const char* PROGRAM_BLOCK = "    <program>\n"
@@ -168,7 +168,7 @@ class write_sqd_layout_impl
     {
         std::stringstream header{}, gui{}, design{};
 
-        header << siqad::XML_HEADER << siqad::OPEN_SIQAD;
+        header << siqad::SQD_HEADER << siqad::OPEN_SIQAD;
 
         const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr)));
 
