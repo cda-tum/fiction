@@ -103,12 +103,13 @@ void exhaustive_ground_state_simulation(
         auto all_sidbs_in_lyt_without_detected_ones = sidbs_charge_lyt;
         // determine all SiDBs that have to be negatively charged to fulfill the population stability. This is an
         // efficient way to prune the search space by 2^k with k being the number of detected negatively charged SiDBs.
-        const auto                      detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
-        const auto                      three_state_required           = charge_lyt.three_state_sim_required();
+        const auto detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
+        // determine if three state simulation (i.e. positively charged SiDBs can occur) is required.
+        const auto                      three_state_simulation_required = charge_lyt.three_state_sim_required();
         std::vector<typename Lyt::cell> detected_negative_sidbs{};
         detected_negative_sidbs.reserve(detected_negative_sidb_indices.size());
 
-        // if layout has at least two SiDBs, the code inside this if-scope is executed.
+        // if layout has at least two SiDBs, the code inside this if-statement is executed.
         if (sidbs_charge_lyt.size() > 1)
         {
             detected_negative_sidbs.reserve(detected_negative_sidb_indices.size());
@@ -156,22 +157,23 @@ void exhaustive_ground_state_simulation(
             // dependent cell to change its charge state based on the N-1 SiDBs to fulfill the local population
             // stability at its position.
 
+            // false declares that the dependent cell is updated based on the local potential at the position.
             charge_lyt_new.update_after_charge_change(false);
 
-            // if no positively charged DBs can occur in the layout, this scope is executed.
-            if (!three_state_required)
+            // if no positively charged DB can occur in the layout, this scope is executed.
+            if (!three_state_simulation_required)
             {
                 charge_lyt_new.set_base_num(2);
-                uint64_t val     = 0;
-                uint64_t val_old = 0;
+                auto current_charge_index = 0u;
+                auto old_charge_index     = 0u;
                 for (uint64_t i = 0; i <= charge_lyt_new.get_max_charge_index(); i++)
                 {
-                    val = (i ^ (i >> 1));
+                    current_charge_index = (i ^ (i >> 1));
                     charge_lyt_new.set_charge_index_by_gray(
-                        val, val_old, false, false,
+                        current_charge_index, old_charge_index, false, false,
                         true);  // "false" allows that the charge state of the dependent cell is
                                 // automatically changed based on the new charge distribution.
-                    val_old = val;
+                    old_charge_index = current_charge_index;
 
                     if (charge_lyt_new.is_physically_valid())
                     {
@@ -233,10 +235,11 @@ void exhaustive_ground_state_simulation(
             }
         }
 
-        // in the case with only one SiDB in the layout.
+        // in the case with only one SiDB in the layout (due to external potentials or defects, this single SiDB can
+        // neutrally or even positively charged.)
         else if (sidbs_charge_lyt.size() == 1)
         {
-            if (three_state_required)
+            if (three_state_simulation_required)
             {
                 charge_lyt.set_base_num(3);
             }
@@ -265,7 +268,7 @@ void exhaustive_ground_state_simulation(
                 st.valid_lyts.push_back(charge_lyt_copy);
             }
         }
-        // if the layout consists of SiDBs that are all among the detected negatively charged SiDBs, this scope is
+        // if the layout consists of only detected negatively charged SiDBs, this scope is
         // executed.
         else if (all_sidbs_in_lyt_without_detected_ones.empty() && sidbs_charge_lyt.size() > 1)
         {
