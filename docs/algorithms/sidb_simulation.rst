@@ -15,6 +15,16 @@ Physical Parameters
    :members:
 
 
+Simulation Result
+#################
+
+
+**Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp``
+
+.. doxygenstruct:: fiction::sidb_simulation_result
+   :members:
+
+
 Heuristic Ground State Simulation
 #################################
 
