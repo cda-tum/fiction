@@ -91,10 +91,21 @@ class write_sqd_sim_result_impl
     }
 
   private:
+    /**
+     * The simulation result to write.
+     */
     const sidb_simulation_result<Lyt>& sim_result;
-
+    /**
+     * The output stream to write to.
+     */
     std::ostream& os;
 
+    /**
+     * Converts an `std::any` to a string if it contains an alpha-numerical standard data type.
+     *
+     * @param value The value to convert.
+     * @return The string representation of the value.
+     */
     [[nodiscard]] std::string any_to_string(const std::any& value) const
     {
         if (auto x = std::any_cast<int>(&value))
@@ -148,7 +159,19 @@ class write_sqd_sim_result_impl
 
         return "";
     }
-
+    /**
+     * Converts a charge distribution to a string.
+     *
+     * The string is a concatenation of the charge states of the cells in the distribution in order.
+     *
+     * The charge states are represented as follows:
+     * - NEUTRAL: '-'
+     * - NEGATIVE: '0'
+     * - POSITIVE: '1'
+     *
+     * @param surface The charge distribution to represent as a string.
+     * @return The string representation of the charge distribution.
+     */
     std::string charge_distribution_to_string(const charge_distribution_surface<Lyt>& surface) const
     {
         std::stringstream stream{};
@@ -169,7 +192,9 @@ class write_sqd_sim_result_impl
 
         return stream.str();
     }
-
+    /**
+     * Writes the engine information to the output stream in XML format.
+     */
     void write_engine_info()
     {
         os << fmt::format(siqad::ENG_INFO_BLOCK, sim_result.algorithm_name, FICTION_VERSION, FICTION_REPO, 0,
@@ -204,7 +229,9 @@ class write_sqd_sim_result_impl
 
         os << siqad::CLOSE_SIM_PARAMS;
     }
-
+    /**
+     * Writes the physical locations of all SiDBs to the output stream in XML format.
+     */
     void write_physical_locations()
     {
         os << siqad::OPEN_PHYSLOC;
@@ -226,7 +253,9 @@ class write_sqd_sim_result_impl
 
         os << siqad::CLOSE_PHYSLOC;
     }
-
+    /**
+     * Writes all charge distributions to the output stream in XML format.
+     */
     void write_electron_distributions()
     {
         os << siqad::OPEN_ELEC_DIST;
@@ -250,15 +279,13 @@ class write_sqd_sim_result_impl
 }  // namespace detail
 
 /**
- * Writes a cell-level SiDB or QCA layout to an sqd file that is used by SiQAD (https://github.com/siqad/siqad),
- * a physical simulator for the SiDB technology platform.
- *
- * If The provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
+ * Writes an SiDB simulation result to an XML file that is used by SiQAD (https://github.com/siqad/siqad), a physical
+ * simulator for the SiDB technology platform.
  *
  * This overload uses an output stream to write into.
  *
  * @tparam Lyt Cell-level SiDB layout type.
- * @param lyt The layout to be written.
+ * @param sim_result The simulation result to write.
  * @param os The output stream to write into.
  */
 template <typename Lyt>
@@ -272,16 +299,14 @@ void write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, std::os
     p.run();
 }
 /**
- * Writes a cell-level SiDB or QCA layout to an sqd file that is used by SiQAD (https://github.com/siqad/siqad),
- * a physical simulator for the SiDB technology platform.
+ * Writes an SiDB simulation result to an XML file that is used by SiQAD (https://github.com/siqad/siqad), a physical
+ * simulator for the SiDB technology platform.
  *
- * If The provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
+ * This overload uses a file name to create and write into.
  *
- * This overload uses file name to create and write into.
- *
- * @tparam Lyt Cell-level SiDB or QCA layout type.
- * @param lyt The layout to be written.
- * @param filename The file name to create and write into. Should preferably use the `.sqd` extension.
+ * @tparam Lyt Cell-level SiDB layout type.
+ * @param sim_result The simulation result to write.
+ * @param filename The file name to create and write into. Should preferably use the `.xml` extension.
  */
 template <typename Lyt>
 void write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
