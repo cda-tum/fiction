@@ -187,6 +187,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         return strg->cell_charge;
     }
+
+    [[nodiscard]] std::vector<typename Lyt::cell> get_all_sidbs() const noexcept
+    {
+        return strg->sidb_order;
+    }
     /**
      * Returns the positions of all SiDBs in nm of the form `(x,y)`.
      *
