@@ -22,26 +22,22 @@
 #include <string>
 
 using namespace fiction;
+namespace fs = std::filesystem;
 
 int main()  // NOLINT
 {
 
-    const std::string folder = fmt::format("{}/bestagon_gates/", EXPERIMENTS_PATH);
+    fs::path dir_path = "/Users/jandrewniok/Documents/PhD/random_layouts";
 
-    static const std::array<std::string, 7> folders = {folder + "and/", folder + "inv/",  folder + "nor/",
-                                                       folder + "or/",  folder + "wire/", folder + "xnor/",
-                                                       folder + "xor/"};
-
-    for (const auto& folder_gate : folders)
+    for (const auto& folder : fs::directory_iterator(dir_path))
     {
-
-        for (const auto& file : std::filesystem::directory_iterator(folder_gate))
+        for (const auto& file : std::filesystem::directory_iterator(folder.path().string() + "/sqd"))
         {
             const auto& benchmark = file.path();
 
             std::string path  = benchmark.string();
-            uint64_t    start = path.rfind("_") - 10;
-            uint64_t    end   = path.rfind("_");
+            uint64_t    start = path.rfind("layout") + 7;
+            uint64_t    end   = path.rfind(".sqd") - 1;
             std::string name  = path.substr(start, end - start + 1);
 
             std::cout << benchmark << std::endl;
@@ -68,7 +64,7 @@ int main()  // NOLINT
                 const auto    sidb_location_nm   = ground_state_layouts.front().get_all_sidb_location_in_nm();
                 const auto    sidbs              = ground_state_layouts.front().get_all_sidbs();
                 const auto    physical_parameter = ground_state_layouts.front().get_phys_params();
-                std::ofstream outFile("/Users/jandrewniok/Desktop/new_layouts/" + name + "_location.txt");
+                std::ofstream outFile(folder.path().string() + "/loc/" + name + "_sim.txt");
                 outFile << std::fixed << std::setprecision(3);
                 outFile << "x;"
                         << "y;";
