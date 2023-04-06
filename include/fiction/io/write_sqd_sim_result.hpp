@@ -108,53 +108,53 @@ class write_sqd_sim_result_impl
      */
     [[nodiscard]] std::string any_to_string(const std::any& value) const
     {
-        if (auto x = std::any_cast<int>(&value))
+        if (const auto* x = std::any_cast<int>(&value))
         {
             return std::to_string(*x);
         }
-        if (auto x = std::any_cast<unsigned>(&value))
+        if (const auto* x = std::any_cast<unsigned>(&value))
         {
             return std::to_string(*x);
         }
-        if (auto x = std::any_cast<long>(&value))
+        if (const auto* x = std::any_cast<long>(&value))
         {
             return std::to_string(*x);
         }
-        if (auto x = std::any_cast<unsigned long>(&value))
+        if (const auto* x = std::any_cast<unsigned long>(&value))
         {
             return std::to_string(*x);
         }
-        if (auto x = std::any_cast<long long>(&value))
+        if (const auto* x = std::any_cast<long long>(&value))
         {
             return std::to_string(*x);
         }
-        if (auto x = std::any_cast<unsigned long long>(&value))
+        if (const auto* x = std::any_cast<unsigned long long>(&value))
         {
             return std::to_string(*x);
         }
-        if (auto x = std::any_cast<float>(&value))
+        if (const auto* x = std::any_cast<float>(&value))
         {
             return std::to_string(*x);
         }
-        if (auto x = std::any_cast<double>(&value))
+        if (const auto* x = std::any_cast<double>(&value))
         {
             return std::to_string(*x);
         }
-        if (auto x = std::any_cast<long double>(&value))
+        if (const auto* x = std::any_cast<long double>(&value))
         {
             return std::to_string(*x);
         }
-        if (auto x = std::any_cast<std::string>(&value))
+        if (const auto* x = std::any_cast<std::string>(&value))
         {
             return *x;
         }
-        if (auto x = std::any_cast<const char*>(&value))
+        if (const auto* x = std::any_cast<const char*>(&value))
         {
             return *x;
         }
-        if (auto x = std::any_cast<char>(&value))
+        if (const auto* x = std::any_cast<char>(&value))
         {
-            return std::string(1, *x);
+            return {*x};
         }
 
         return "";
