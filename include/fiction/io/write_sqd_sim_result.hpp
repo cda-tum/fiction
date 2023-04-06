@@ -18,10 +18,13 @@
 #include <chrono>
 #include <ctime>
 #include <fstream>
+#include <functional>
 #include <ostream>
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <typeindex>
+#include <typeinfo>
 #include <unordered_map>
 #include <vector>
 
@@ -106,58 +109,29 @@ class write_sqd_sim_result_impl
      * @param value The value to convert.
      * @return The string representation of the value.
      */
-    [[nodiscard]] std::string any_to_string(const std::any& value) const
+    [[nodiscard]] std::string any_to_string(const std::any& value) const noexcept
     {
-        if (const auto* x = std::any_cast<int>(&value))
-        {
-            return std::to_string(*x);
-        }
-        if (const auto* x = std::any_cast<unsigned>(&value))
-        {
-            return std::to_string(*x);
-        }
-        if (const auto* x = std::any_cast<long>(&value))
-        {
-            return std::to_string(*x);
-        }
-        if (const auto* x = std::any_cast<unsigned long>(&value))
-        {
-            return std::to_string(*x);
-        }
-        if (const auto* x = std::any_cast<long long>(&value))
-        {
-            return std::to_string(*x);
-        }
-        if (const auto* x = std::any_cast<unsigned long long>(&value))
-        {
-            return std::to_string(*x);
-        }
-        if (const auto* x = std::any_cast<float>(&value))
-        {
-            return std::to_string(*x);
-        }
-        if (const auto* x = std::any_cast<double>(&value))
-        {
-            return std::to_string(*x);
-        }
-        if (const auto* x = std::any_cast<long double>(&value))
-        {
-            return std::to_string(*x);
-        }
-        if (const auto* x = std::any_cast<std::string>(&value))
-        {
-            return *x;
-        }
-        if (const auto* x = std::any_cast<const char*>(&value))
-        {
-            return *x;
-        }
-        if (const auto* x = std::any_cast<char>(&value))
-        {
-            return {*x};
-        }
+        static const std::unordered_map<std::type_index, std::function<std::string(const std::any&)>> converters{
+            {typeid(int8_t), [](const std::any& v) { return std::to_string(std::any_cast<int8_t>(v)); }},
+            {typeid(uint8_t), [](const std::any& v) { return std::to_string(std::any_cast<uint8_t>(v)); }},
+            {typeid(int16_t), [](const std::any& v) { return std::to_string(std::any_cast<int16_t>(v)); }},
+            {typeid(uint16_t), [](const std::any& v) { return std::to_string(std::any_cast<uint16_t>(v)); }},
+            {typeid(int32_t), [](const std::any& v) { return std::to_string(std::any_cast<int32_t>(v)); }},
+            {typeid(uint32_t), [](const std::any& v) { return std::to_string(std::any_cast<uint32_t>(v)); }},
+            {typeid(int64_t), [](const std::any& v) { return std::to_string(std::any_cast<int64_t>(v)); }},
+            {typeid(uint64_t), [](const std::any& v) { return std::to_string(std::any_cast<uint64_t>(v)); }},
+            {typeid(float), [](const std::any& v) { return std::to_string(std::any_cast<float>(v)); }},
+            {typeid(double), [](const std::any& v) { return std::to_string(std::any_cast<double>(v)); }},
+            {typeid(long double), [](const std::any& v) { return std::to_string(std::any_cast<long double>(v)); }},
+            {typeid(std::string), [](const std::any& v) { return std::any_cast<std::string>(v); }},
+            {typeid(const char*), [](const std::any& v) { return std::string(std::any_cast<const char*>(v)); }},
+            {typeid(char), [](const std::any& v) { return std::string(1, std::any_cast<char>(v)); }},
+        };
 
-        return "";
+        const auto& type = value.type();
+        const auto& it   = converters.find(type);
+
+        return it == converters.end() ? std::string() : it->second(value);
     }
     /**
      * Converts a charge distribution to a string.
