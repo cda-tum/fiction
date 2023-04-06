@@ -58,13 +58,17 @@ int main()  // NOLINT
                     ground_state_layouts.push_back(charge_distribution_surface<sidb_cell_clk_lyt_siqad>{lyt});
                 }
             }
-
+            if (ground_state_layouts.size() > 1)
+            {
+                std::cout << "degeneracy detected!" << std::endl;
+            }
             if (!ground_state_layouts.empty())
             {
-                const auto    sidb_location_nm   = ground_state_layouts.front().get_all_sidb_location_in_nm();
-                const auto    sidbs              = ground_state_layouts.front().get_all_sidbs();
-                const auto    physical_parameter = ground_state_layouts.front().get_phys_params();
-                std::ofstream outFile(folder.path().string() + "/loc/" + name + "_sim.txt");
+                const auto         sidbs              = ground_state_layouts.front().get_all_sidbs();
+                const auto         physical_parameter = ground_state_layouts.front().get_phys_params();
+                std::ostringstream ss;
+                ss << std::fixed << std::setprecision(3) << -params.mu;
+                std::ofstream outFile(folder.path().string() + "/loc/" + name + "_sim_µ_minus_" + ss.str() + ".txt");
                 outFile << std::fixed << std::setprecision(3);
                 outFile << "x;"
                         << "y;";
@@ -77,7 +81,7 @@ int main()  // NOLINT
                 for (const auto& sidb : sidbs)
                 {
                     auto pos = sidb_nm_position<sidb_cell_clk_lyt_siqad>(physical_parameter, sidb);
-                    outFile << pos.first * 10E9 << ";" << pos.second * 10E9 << ";";
+                    outFile << pos.first * 10E8 << ";" << pos.second * 10E8 << ";";
                     for (const auto& lyt : ground_state_layouts)
                     {
                         outFile << std::to_string(charge_state_to_sign(lyt.get_charge_state(sidb))) << ";";
