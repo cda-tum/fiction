@@ -165,8 +165,8 @@ void exhaustive_ground_state_simulation(
             if (!three_state_simulation_required)
             {
                 charge_lyt_new.set_base_num(2);
-                auto current_charge_index = 0u;
-                auto old_charge_index     = 0u;
+                uint64_t current_charge_index = 0;
+                uint64_t old_charge_index     = 0;
                 for (uint64_t i = 0; i <= charge_lyt_new.get_max_charge_index(); i++)
                 {
                     current_charge_index = (i ^ (i >> 1));

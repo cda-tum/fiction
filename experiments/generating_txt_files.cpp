@@ -89,6 +89,10 @@ int main()  // NOLINT
                     outFile << std::endl;
                 }
             }
+            else
+            {
+                std::cout << "no groundstate found" << std::endl;
+            }
         }
     }
 
