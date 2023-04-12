@@ -149,9 +149,9 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
 
     node ro_at(uint32_t index) const
     {
-        std::vector<node> ROs;
-        foreach_ro( [&](const auto& n){ROs.emplace_back(n);});
-        return ROs[index];
+        std::vector<node> r_os;
+        foreach_ro( [&](const auto& n){r_os.emplace_back(n);});
+        return r_os[index];
     }
 
     /**
@@ -176,6 +176,20 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     [[nodiscard]] int isFo_inv_flag_num() const
     {
         return fo_inv_flag_num;
+    }
+
+    /*Getters for the PIs respected in the Ordering Network*/
+    [[nodiscard]] const std::vector<node>& get_fo_two() const
+    {
+        return wait;
+    }
+    [[nodiscard]] const std::vector<node>& get_fo_one() const
+    {
+        return second_wait;
+    }
+    [[nodiscard]] const std::vector<node>& get_pi_to_pi() const
+    {
+        return third_wait;
     }
 
     void update_topo()
@@ -208,13 +222,20 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
 
         // Here the sorted nodes get pushed_back
         // They are stored in three different hierarchies
+        // Maybe another sorting here could be beneficial
         for(unsigned int iter = 0; iter < wait.size(); ++iter){
             topo_order.push_back(wait[iter]);
             this->set_visited(wait[iter], this->trav_id());
         }
+
         for(unsigned int iter = 0; iter < second_wait.size(); ++iter){
             topo_order.push_back(second_wait[iter]);
             this->set_visited(second_wait[iter], this->trav_id());
+        }
+
+        for(unsigned int iter = 0; iter < third_wait.size(); ++iter){
+            topo_order.push_back(third_wait[iter]);
+            this->set_visited(third_wait[iter], this->trav_id());
         }
 
         this->foreach_ci(
@@ -359,11 +380,14 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                                                           {
                                                               /**FO has two incoming PIs**/
                                                               /**Push PI and PI stored in first_PI**/
-                                                              auto check_n = wait[wait.size()-2];
-                                                              wait.erase(wait.end()-2);
+                                                              auto check_n = second_wait[second_wait.size()-2];
+                                                              second_wait.erase(second_wait.end()-2);
+                                                              second_wait.erase(second_wait.end()-1);
                                                               if(check_n == n)
                                                               {
-                                                                  topo_order.push_back(n);
+                                                                  wait.push_back(n);
+                                                                  this->set_visited(n, this->trav_id());
+                                                                  wait.push_back(first_pi);
                                                                   this->set_visited(n, this->trav_id());
                                                               }
                                                               else
@@ -373,7 +397,7 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
 
                                                               if (this->visited(fin_inp) != this->trav_id())
                                                               {
-                                                                  topo_order.push_back(fin_inp);
+                                                                  wait.push_back(fin_inp);
                                                                   this->set_visited(fin_inp, this->trav_id());
                                                               }
                                                               already_one_pi = false;
@@ -386,13 +410,13 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                                                               /*Store the currently visited node*/
                                                               if (this->visited(n) != this->trav_id())
                                                               {
-                                                                  wait.push_back(n);
+                                                                  second_wait.push_back(n);
                                                                   this->set_visited(n, this->trav_id());
                                                               }
                                                               /*Store the connected node*/
                                                               if (this->visited(fin_inp) != this->trav_id())
                                                               {
-                                                                  wait.push_back(fin_inp);
+                                                                  second_wait.push_back(fin_inp);
                                                                   this->set_visited(fin_inp, this->trav_id());
                                                               }
                                                               /*Mark FOs that already one PI is now connected to its fan-outs*/
@@ -405,12 +429,12 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                                                           /**When a PI is connected to a PI it is ranked third**/
                                                           if (this->visited(n) != this->trav_id())
                                                           {
-                                                              second_wait.push_back(n);
+                                                              third_wait.push_back(n);
                                                               this->set_visited(n, this->trav_id());
                                                           }
                                                           if (this->visited(fin_inp) != this->trav_id())
                                                           {
-                                                              second_wait.push_back(fin_inp);
+                                                              third_wait.push_back(fin_inp);
                                                               this->set_visited(fin_inp, this->trav_id());
                                                           }
                                                       }
@@ -425,8 +449,9 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     Ntk my_ntk;
     std::vector<node> topo_order;
 
-    std::vector<node> wait;
-    std::vector<node> second_wait;
+    std::vector<node> wait;         //FOs with 2 PIs
+    std::vector<node> second_wait;  //FOs with 1PI
+    std::vector<node> third_wait;   //PI to PI
 
     bool fo_inv_flag = false;
     int fo_inv_flag_num = 0;
