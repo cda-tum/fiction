@@ -105,8 +105,8 @@ void exhaustive_ground_state_simulation(
         // efficient way to prune the search space by 2^k with k being the number of detected negatively charged SiDBs.
         const auto detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
         // determine if three state simulation (i.e. positively charged SiDBs can occur) is required.
-        // const auto                      three_state_simulation_required = charge_lyt.three_state_sim_required();
-        const auto                      three_state_simulation_required = false;
+        const auto three_state_simulation_required = charge_lyt.three_state_sim_required();
+        // const auto                      three_state_simulation_required = false;
         std::vector<typename Lyt::cell> detected_negative_sidbs{};
         detected_negative_sidbs.reserve(detected_negative_sidb_indices.size());
 
@@ -199,9 +199,12 @@ void exhaustive_ground_state_simulation(
             // if positively charged DBs can occur in the layout, 3-state simulation is conducted.
             else
             {
-                charge_lyt_new.set_base_num(3);
                 charge_lyt_new.set_all_charge_states(sidb_charge_state::NEGATIVE);
+                charge_lyt_new.update_after_charge_change();
+                const auto three_state_simulation_required_true = charge_lyt_new.three_state_sim_required();
+                charge_lyt_new.base_to_three();
                 charge_lyt_new.update_after_charge_change(false);
+                // std::cout << charge_lyt_new.get_charge_index_sub_layout().first << std::endl;
                 while (charge_lyt_new.get_charge_index().first < charge_lyt_new.get_max_charge_index())
                 {
                     if (charge_lyt_new.is_physically_valid())
@@ -215,10 +218,64 @@ void exhaustive_ground_state_simulation(
                         }
                         st.valid_lyts.push_back(charge_lyt_copy);
                     }
+
+                    while (charge_lyt_new.get_charge_index_sub_layout().first <
+                           charge_lyt_new.get_max_charge_index_sub_layout())
+                    {
+                        if (charge_lyt_new.is_physically_valid())
+                        {
+                            charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
+                            charge_lyt_copy.recompute_system_energy();
+                            // the previously detected negatively charged SiDBs are added to the final layout.
+                            for (const auto& cell : detected_negative_sidbs)
+                            {
+                                charge_lyt_copy.adding_sidb_to_layout(cell, -1);
+                            }
+                            st.valid_lyts.push_back(charge_lyt_copy);
+                        }
+                        charge_lyt_new.increase_charge_index_by_sub_layout(
+                            false, false, true,
+                            true);  // "false" allows that the charge state of the dependent cell is
+                                    // automatically changed based on the new charge distribution.
+                    }
+
+                    if (charge_lyt_new.is_physically_valid())
+                    {
+                        charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
+                        for (const auto& cell : detected_negative_sidbs)
+                        {
+                            charge_lyt_copy.adding_sidb_to_layout(cell, -1);
+                        }
+                        st.valid_lyts.push_back(charge_lyt_copy);
+                    }
+
+                    charge_lyt_new.reset_charge_index_sub_layout(false, false, true, true);
+
                     charge_lyt_new.increase_charge_index_by_one(
-                        false, false, true);  // "false" allows that the charge state of the dependent cell is
-                                              // automatically changed based on the new charge distribution.
+                        false, false, true, true);  // "false" allows that the charge state of the dependent cell is
+                                                    // automatically changed based on the new charge distribution.
                 }
+
+                while (charge_lyt_new.get_charge_index_sub_layout().first <
+                       charge_lyt_new.get_max_charge_index_sub_layout())
+                {
+                    if (charge_lyt_new.is_physically_valid())
+                    {
+                        charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
+                        charge_lyt_copy.recompute_system_energy();
+                        // the previously detected negatively charged SiDBs are added to the final layout.
+                        for (const auto& cell : detected_negative_sidbs)
+                        {
+                            charge_lyt_copy.adding_sidb_to_layout(cell, -1);
+                        }
+                        st.valid_lyts.push_back(charge_lyt_copy);
+                    }
+                    charge_lyt_new.increase_charge_index_by_sub_layout(
+                        false, false, true,
+                        true);  // "false" allows that the charge state of the dependent cell is
+                                // automatically changed based on the new charge distribution.
+                }
+
                 if (charge_lyt_new.is_physically_valid())
                 {
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
@@ -248,8 +305,6 @@ void exhaustive_ground_state_simulation(
             {
                 charge_lyt.set_base_num(2);
             }
-            charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
-            charge_lyt.update_after_charge_change(false);
 
             while (charge_lyt.get_charge_index().first < charge_lyt.get_max_charge_index())
             {

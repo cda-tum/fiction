@@ -56,7 +56,7 @@ int main()  // NOLINT
             auto lyt = read_sqd_layout<sidb_cell_clk_lyt_siqad>(benchmark.string());
 
             const sidb_simulation_parameters params{3, -0.32};
-            const quicksim_params            quicksim_params{params, 0, 0.70, 1};
+            const quicksim_params            quicksim_params{params, 80, 0.70, 1};
 
             time_to_solution_stats tts_stat{};
             sim_acc_tts<sidb_cell_clk_lyt_siqad>(lyt, quicksim_params, &tts_stat);

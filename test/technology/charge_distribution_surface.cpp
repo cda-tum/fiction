@@ -445,9 +445,9 @@ TEMPLATE_TEST_CASE(
         charge_layout_five.increase_charge_index_by_one();
         CHECK(charge_layout_five.get_charge_index().first == 10);
 
-        CHECK(charge_layout_five.get_charge_state({0, 0, 0}) == sidb_charge_state::NEUTRAL);
-        CHECK(charge_layout_five.get_charge_state({0, 2, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(charge_layout_five.get_charge_state({4, 1, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_layout_five.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout_five.get_charge_state({0, 2, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_layout_five.get_charge_state({4, 1, 1}) == sidb_charge_state::NEGATIVE);
     }
 
     SECTION("Physical validity check, small distance, not all can be negatively charged anymore")
@@ -1193,5 +1193,51 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface      charge_lyt_first{lyt, params, sidb_charge_state::POSITIVE};
         charge_lyt_first.set_global_external_potential(-2.0);
         CHECK(charge_lyt_first.is_physically_valid());
+    }
+
+    SECTION("detecting DBs which could be positively charged due to maximal band bending")
+    {
+
+        lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 2, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({10, 2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({20, 2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({23, 2, 0}, TestType::cell_type::NORMAL);
+
+        const sidb_simulation_parameters params{3, -0.28};
+        charge_distribution_surface      charge_lyt_first{lyt, params, sidb_charge_state::NEGATIVE};
+        const auto                       positive_candidates = charge_lyt_first.get_positive_candidates();
+        REQUIRE(positive_candidates.size() == 3);
+        uint64_t loop_counter = 0;
+        for (const auto& cell : positive_candidates)
+        {
+            if (cell == siqad::coord_t(6, 2, 0))
+            {
+                loop_counter += 1;
+            }
+        }
+        CHECK(loop_counter == 1);
+
+        uint64_t loop_counter_second = 0;
+        for (const auto& cell : positive_candidates)
+        {
+            if (cell == siqad::coord_t(7, 2, 0))
+            {
+                loop_counter_second += 1;
+            }
+        }
+        CHECK(loop_counter_second == 1);
+
+        uint64_t loop_counter_third = 0;
+        for (const auto& cell : positive_candidates)
+        {
+            if (cell == siqad::coord_t(7, 2, 0))
+            {
+                loop_counter_third += 1;
+            }
+        }
+        CHECK(loop_counter == 1);
     }
 }

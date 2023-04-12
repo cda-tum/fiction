@@ -1,6 +1,5 @@
 //
 // Created by Jan Drewniok on 18.12.22.
-//
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -14,7 +13,7 @@
 #include <fiction/technology/sidb_defects.hpp>
 
 using namespace fiction;
-//
+
 TEMPLATE_TEST_CASE("Empty layout ExGS simulation", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
@@ -27,7 +26,7 @@ TEMPLATE_TEST_CASE("Empty layout ExGS simulation", "[ExGS]",
 
     CHECK(exgs_stats.valid_lyts.empty());
 }
-//
+
 TEMPLATE_TEST_CASE("Single SiDB ExGS simulation", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
@@ -212,6 +211,21 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with global external potential (
     CHECK(exgs_stats.valid_lyts.front().get_charge_state_by_index(0) == sidb_charge_state::POSITIVE);
 }
 
+TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with global external potential (high, positive)", "[ExGS]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+    TestType lyt{{20, 10}};
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+
+    exgs_stats<TestType>             exgs_stats{};
+    const sidb_simulation_parameters params{3, -0.25};
+
+    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats, {}, {}, 1.0);
+
+    REQUIRE(exgs_stats.valid_lyts.size() == 1);
+    CHECK(exgs_stats.valid_lyts.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
+}
+
 TEMPLATE_TEST_CASE("ExGS simulation of a BDL pair", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
@@ -287,7 +301,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber", 
     CHECK_THAT(charge_lyt_first.get_system_energy(),
                Catch::Matchers::WithinAbs(0.24602741408, fiction::physical_constants::POP_STABILITY_ERR));
 }
-//
+
 TEMPLATE_TEST_CASE("ExGS simulation of a one-pair BDL wire with two perturbers", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
@@ -785,4 +799,22 @@ TEMPLATE_TEST_CASE(
     exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
 
     CHECK(exgs_stats.valid_lyts.size() == 1);
+}
+
+TEMPLATE_TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[ExGS]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+    TestType lyt{{20, 10}};
+
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 0, 0}, TestType::cell_type::NORMAL);
+
+    exgs_stats<TestType>             exgs_stats{};
+    const sidb_simulation_parameters params{3, -0.1};
+
+    exhaustive_ground_state_simulation<TestType>(lyt, params, &exgs_stats);
+
+    CHECK(exgs_stats.valid_lyts.size() == 2);
 }

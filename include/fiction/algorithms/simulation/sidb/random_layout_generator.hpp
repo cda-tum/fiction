@@ -54,6 +54,17 @@ void generate_random_layouts(const typename Lyt::aspect_ratio& max_coordinate = 
             lyt.assign_cell_type(random_coordinate, Lyt::cell_type::NORMAL);
         }
         loop_counter += 1;
+
+        if (lyt.num_cells() == number_placed_sidbs - 3)
+        {
+            const auto random_x_coordinate_close = dist_x(generator);
+            const auto random_y_coordinate_close = dist_y(generator);
+            const auto random_coordinate_close =
+                typename Lyt::coordinate({random_x_coordinate_close, random_y_coordinate_close});
+            lyt.assign_cell_type({random_coordinate_close.x, random_coordinate_close.y}, Lyt::cell_type::NORMAL);
+            lyt.assign_cell_type({random_coordinate_close.x, random_coordinate_close.y + 1}, Lyt::cell_type::NORMAL);
+            lyt.assign_cell_type({random_coordinate_close.x, random_coordinate_close.y + 2}, Lyt::cell_type::NORMAL);
+        }
     }
 
     if (lyt.num_cells() == number_placed_sidbs)
