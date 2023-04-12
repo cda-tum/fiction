@@ -18,7 +18,7 @@ TEST_CASE("TEST", "[ordering]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    auto mux21 = blueprints::test_inv_flag<mockturtle::names_view<technology_network>>();
+    auto mux21 = blueprints::mux21_network<mockturtle::names_view<technology_network>>();
 
     orthogonal_physical_design_stats stats{};
 
