@@ -297,7 +297,7 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                                   if(const auto fc = fanins(my_ntk, current_node); fc.fanin_nodes.size()==2)
                                   {
                                       /*current_node is a 2 fan-in node [connecting_node has only one entry]*/
-                                      connecting_node.push_back(fon);
+                                      connecting_node.push_back(current_node);
                                   }
                                   else if (my_ntk.is_fanout(current_node))
                                   {

@@ -199,6 +199,27 @@ mockturtle::names_view<Ntk> mux21_network()
 }
 
 template <typename Ntk>
+mockturtle::names_view<Ntk> test_inv_flag()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+    const auto x1 = ntk.create_pi();
+    const auto x2 = ntk.create_pi();
+    const auto x3 = ntk.create_pi();
+    const auto x4 = ntk.create_pi();
+
+    const auto n1  = ntk.create_not(x1);
+    const auto n3  = ntk.create_not(x3);
+    const auto a1  = ntk.create_and(n1, x2);
+    const auto a2  = ntk.create_and(n3, x4);
+    const auto a3  = ntk.create_and(a1, a2);
+
+    ntk.create_po(a3);
+
+    return ntk;
+}
+
+template <typename Ntk>
 mockturtle::names_view<Ntk> se_coloring_corner_case_network()
 {
     mockturtle::names_view<Ntk> ntk{};
