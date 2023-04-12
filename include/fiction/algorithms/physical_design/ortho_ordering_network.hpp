@@ -41,143 +41,136 @@ void paint_if( const coloring_container<Ntk>& ctn, mockturtle::node<Ntk> const& 
     ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, color);
 }
 
-/*Conditional coloring*/
+template <typename Ntk>
+void paint_node_and_edges(const coloring_container<Ntk>& ctn, mockturtle::node<Ntk> const& n, uint32_t color)
+{
+    const auto finc = fanin_edges(ctn.color_ntk, n);
+    std::for_each(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
+                  [&ctn, &color](const auto& fe) { paint_edge_if(ctn, fe, color); });
+    paint_if(ctn, n, color);
+}
+
+/*
+ * Conditional coloring:
+ * 1. All 1-fanin nodes (inverters and Fanouts) after PIs have to be colored east
+ * 2. Pi connected to Fanout node: one east coloring and one south coloring
+     * - Case: 2-inverters -> get balanced to the beginning of the fanout node (isFo_inv_flag has to be respected here for instance)
+     * - Case: one inverter (color inverter east and other outgoing edges south)
+         * - PI connected to both inverted and non-inverted node (color inverter east and both other edges south)
+         * - PI connected to non-inverted node (color outgoing edge south)
+         * - PI connected to inverted node (color inverter east and both outgoing edges south)
+     * - Case: no inverter
+         * - 2 PIs connected -> color one east and one south
+         * - 1 PI connected -> color PI south and other node east
+ * 3. Case PI connected to node connected to PI: color east
+ * */
 template <typename Ntk>
 coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
 {
     coloring_container<Ntk> ctn{ntk};
     reverse_view            rtv{ntk};  // reverse order of nodes
 
-    /*Coloring for Input Network*/
-    bool fo_node = false;
-    bool node_pi = false;
-    bool node_fo = false;
-    bool inv_flag = false;
+    /*node(s), from which we look if the fan-ins are PIs*/
+    std::vector<typename Ntk::node> connecting_node;
 
-    bool po_flag = false;
+    /*currently viewed node*/
+    mockturtle::node<Ntk> current_node;
 
-    std::vector<typename Ntk::node> new_output_node;
-    mockturtle::node<Ntk> safe_node;
-
-    ntk.foreach_ci(
-        [&](const auto& nd){
+    ntk.foreach_pi(
+        [&](const auto& nd)
+        {
             ntk.foreach_fanout(
-                nd,
-                [&](const auto& fon)
+                nd, [&](const auto& fon)
                 {
-                    fo_node = false;
-                    node_pi = false;
-                    node_fo = false;
-                    inv_flag = false;
-                    po_flag = false;
+                    /*Flags*/
+                    bool fo_node = false;
+                    bool inv_flag = false;
+                    bool po_flag = false;
 
-                    /*
-                     * 1. All 1-fanin nodes (inverters and Fanouts) after PIs have to be colored east
-                     * 2. Pi connected to Fanout node: one east coloring and one south coloring
-                     * - Case: 2-inverters -> get balanced to the beginning of the fanout node (isFo_inv_flag has to be respected here for instance)
-                     * - Case: one inverter (color inverter east and both outgoing edges south)
-                     * - PI connected to both inverted and non-inverted node (color inverter east and both outgoing edges south)
-                     * - PI connected to non-inverted node
-                     * - PI connected to inverted node
-                     * - Case: no inverter
-                     * - 2 PIs connected -> color one east and one south
-                     * - 1 PI connected -> color PI south and other node east
-                     * 3. Case PI connected to node connected to PI: color east
-                     * */
+                    /*Always track the current_node*/
+                    current_node = fon;
 
-                    /*Ignore Inverters*/
-                    new_output_node.clear();
-                    new_output_node.push_back(fon);
-                    if (ntk.is_inv(fon))
+                    /*Skip Inverters and color them east*/
+                    if (ntk.is_inv(current_node))
                     {
                         ntk.foreach_fanout(fon,
-                                           [&](const auto& fon_inv) {
-                                               new_output_node[0] = fon_inv;
+                                           [&](const auto& fon_inv)
+                                           {
+                                               /*Skip Inverter*/
+                                               current_node = fon_inv;
 
-                                               /*COLOR INVERTER EAST*/
-                                               auto color = ctn.color_east;
-                                               const auto finc = fanin_edges(ctn.color_ntk, fon);
-                                               std::for_each(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
-                                                             [&ctn, &color](const auto& fe) { paint_edge_if(ctn, fe, color); });
+                                               /*Color Inverter east*/
+                                               paint_node_and_edges(ctn, fon, ctn.color_east);
                                            });
                     }
-                    if (ntk.is_fanout(new_output_node[0]) && ntk.fanout_size(new_output_node[0]) >= 2){
-                        safe_node = new_output_node[0];
+
+                    if(const auto fc = fanins(ntk, current_node); fc.fanin_nodes.size()==2)
+                    {
+                        /*current_node is a 2 fan-in node [connecting_node has only one entry]*/
+                        connecting_node.push_back(current_node);
+                    }
+                    else if (ntk.is_fanout(current_node) && ntk.fanout_size(current_node) >= 2)
+                    {
+                        /*current_node is a fan-out node [connecting_node has two entries]*/
                         fo_node = true;
 
-                        /*COLOR FAN-OUT EAST*/
-                        auto color = ctn.color_east;
-                        const auto finc = fanin_edges(ctn.color_ntk, new_output_node[0]);
-                        std::for_each(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
-                                      [&ctn, &color](const auto& fe) { paint_edge_if(ctn, fe, color); });
+                        /*Color fan-out east*/
+                        paint_node_and_edges(ctn, current_node, ctn.color_east);
 
-                        new_output_node.clear();
-                        ntk.foreach_fanout(safe_node,
-                                           [&](const auto& fon) {
-                                               if (ntk.is_inv(fon))
+                        ntk.foreach_fanout(current_node,
+                                           [&](const auto& fon_fo)
+                                           {
+                                               if (ntk.is_inv(fon_fo))
                                                {
                                                    inv_flag = true;
-
-                                                   if(ntk.is_po(fon))
+                                                   if(ntk.is_po(fon_fo))
                                                    {
                                                        po_flag = true;
                                                    }
-
-                                                   /*Inverter Flag*/
-                                                   ntk.foreach_fanout(fon,
-                                                                      [&](const auto& fon_inv) {new_output_node.insert(new_output_node.begin(), fon_inv);});
+                                                   /*Skip Inverter*/
+                                                   ntk.foreach_fanout(fon_fo,
+                                                                      [&](const auto& fon_inv) {connecting_node.insert(connecting_node.begin(), fon_inv);});
                                                }
-                                               else{
-                                                   if(ntk.is_po(fon))
+                                               else
+                                               {
+                                                   if(ntk.is_po(fon_fo))
                                                    {
                                                        po_flag = true;
                                                    }
-                                                   /*COLOR NODE SOUTH AND COLOR THE INCOMING EDGES OF THIS NODE ALSO SOUTH*/
-                                                   new_output_node.push_back(fon);
+                                                   connecting_node.push_back(fon_fo);
                                                }
-
-                                               /*COLOR THE OTHER OUTGOING EDGE OF THE FAN-OUT EAST*/
-                                               /*IF the node is an inverter color next edge also east*/
                                            });
                     }
 
                     /*The Fan-out has to be connected to 1.Fan-out nodes of Inputs or 2.Inputs*/
 
-                    /*Instead again use trav_id()*/
+                    /*CHANGE Instead again use trav_id()*/
                     bool already_painted = false;
-                    bool all_inputs = false;
 
-                    for(int i = 0; i <new_output_node.size(); ++i)
+                    for(int i = 0; i <connecting_node.size(); ++i)
                     {
                         ntk.foreach_fanin(
-                            new_output_node[i],
-                            [&](const auto& fi)
+                            connecting_node[i], [&](const auto& fin)
                             {
-                                auto fin_inp = ntk.get_node(fi);
+                                auto fin_inp = ntk.get_node(fin);
                                 /*Ignore Inverters*/
                                 if (ntk.is_inv(fin_inp))
                                 {
-                                    auto color = ctn.color_east;
-                                    const auto fin_inv = fanin_edges(ctn.color_ntk, fin_inp);
-                                    std::for_each(fin_inv.fanin_edges.cbegin(), fin_inv.fanin_edges.cend(),
-                                                  [&ctn, &color](const auto& fe) { paint_edge_if(ctn, fe, color); });
-                                    paint_if(ctn, fin_inp, color);
+                                    /*Color Inverter east*/
+                                    paint_node_and_edges(ctn, fin_inp, ctn.color_east);
+
+                                    /*Ignore Inverters*/
                                     const auto fis_inv = fanins(ntk, fin_inp);
                                     fin_inp            = fis_inv.fanin_nodes[0];
                                 }
                                 /*1*/
                                 if (ntk.fanout_size(fin_inp) >= 2 && ntk.is_fanout(fin_inp) && !po_flag)
                                 {
-                                    //For coloring fanouts south
-                                    /*auto color = ctn.color_south;
-                                    const auto finc = fanin_edges(ctn.color_ntk, safe_node);
-                                    std::for_each(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
-                                                  [&ctn, &color](const auto& fe) { paint_edge(ctn, fe, color); });*/
                                     ntk.foreach_fanin(
                                         fin_inp,
-                                        [&](const auto& fin)
+                                        [&](const auto& fi)
                                         {
-                                            auto fin_inp_sec = ntk.get_node(fin);
+                                            auto fin_inp_sec = ntk.get_node(fi);
                                             /*Ignore Inverters*/
                                             if (ntk.is_inv(fin_inp_sec))
                                             {
@@ -190,60 +183,33 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                                                 if(fo_node && !already_painted){
                                                     if (inv_flag)
                                                     {
-                                                        auto color = ctn.color_south;
-                                                        const auto finc_fo = fanin_edges(ctn.color_ntk, new_output_node[i]);
-                                                        std::for_each(finc_fo.fanin_edges.cbegin(), finc_fo.fanin_edges.cend(),
-                                                                      [&ctn, &color](const auto& fe) { paint_edge_if(ctn, fe, color); });
-                                                        paint_if(ctn, new_output_node[i], color);
+                                                        paint_node_and_edges(ctn, connecting_node[i], ctn.color_south);
 
                                                         i = 1 - i;
 
                                                         /*Color other fan-out south*/
-                                                        color = ctn.color_south;
-                                                        const auto finc_other = fanin_edges(ctn.color_ntk, new_output_node[i]);
-                                                        std::for_each(finc_other.fanin_edges.cbegin(), finc_other.fanin_edges.cend(),
-                                                                      [&ctn, &color](const auto& fe) { paint_edge_if(ctn, fe, color); });
-                                                        paint_if(ctn, new_output_node[i], color);
+                                                        paint_node_and_edges(ctn, connecting_node[i], ctn.color_south);
 
                                                         already_painted = true;
                                                     }
                                                     else
                                                     {
                                                         /*Color first fan-out node east*/
-                                                        auto color = ctn.color_east;
-                                                        const auto finc_fo = fanin_edges(ctn.color_ntk, new_output_node[i]);
-                                                        std::for_each(finc_fo.fanin_edges.cbegin(), finc_fo.fanin_edges.cend(),
-                                                                      [&ctn, &color](const auto& fe) { paint_edge_if(ctn, fe, color); });
-                                                        paint_if(ctn, new_output_node[i], color);
+                                                        paint_node_and_edges(ctn, connecting_node[i], ctn.color_east);
 
                                                         i = 1 - i;
 
                                                         /*Color other fan-out south*/
-                                                        color = ctn.color_south;
-                                                        const auto finc_other = fanin_edges(ctn.color_ntk, new_output_node[i]);
-                                                        std::for_each(finc_other.fanin_edges.cbegin(), finc_other.fanin_edges.cend(),
-                                                                      [&ctn, &color](const auto& fe) { paint_edge_if(ctn, fe, color); });
-                                                        paint_if(ctn, new_output_node[i], color);
+                                                        paint_node_and_edges(ctn, connecting_node[i], ctn.color_south);
 
                                                         already_painted = true;
                                                     }
 
                                                 }
-                                                node_fo = true;
-                                                all_inputs = true;
                                             }
                                         });
                                 }
-                                /*else if (po_flag)
-                                {
-                                    auto color = ctn.color_south;
-                                    const auto finc_other = fanin_edges(ctn.color_ntk, new_output_node[0]);
-                                    std::for_each(finc_other.fanin_edges.cbegin(), finc_other.fanin_edges.cend(),
-                                                  [&ctn, &color](const auto& fe) { paint_edge_if(ctn, fe, color); });
-                                    paint_if(ctn, new_output_node[0], color);
 
-                                    already_painted = true;
-                                }*/
                                 /*2*/
                                 else if (ntk.is_ci(fin_inp) == true && fin_inp != nd)
                                 {
@@ -254,67 +220,34 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                                             if (inv_flag)
                                             {
                                                 /*Color first fan-out node south*/
-                                                auto       color    = ctn.color_south;
-                                                const auto finc_inv = fanin_edges(ctn.color_ntk, new_output_node[i]);
-                                                std::for_each(finc_inv.fanin_edges.cbegin(),
-                                                              finc_inv.fanin_edges.cend(),
-                                                              [&ctn, &color](const auto& fe)
-                                                              { paint_edge_if(ctn, fe, color); });
-                                                paint_if(ctn, new_output_node[i], color);
+                                                paint_node_and_edges(ctn, connecting_node[i], ctn.color_south);
+
+                                                i = 1 - i;
 
                                                 /*Color other fan-out south*/
-                                                color                  = ctn.color_south;
-                                                const auto finc_no_inv = fanin_edges(ctn.color_ntk, new_output_node[i + 1]);
-                                                std::for_each(finc_no_inv.fanin_edges.cbegin(),
-                                                              finc_no_inv.fanin_edges.cend(),
-                                                              [&ctn, &color](const auto& fe)
-                                                              { paint_edge_if(ctn, fe, color); });
-                                                paint_if(ctn, new_output_node[i+1], color);
+                                                paint_node_and_edges(ctn, connecting_node[i], ctn.color_south);
                                             }
                                             else
                                             {
                                                 /*Color first fan-out node south*/
-                                                auto       color           = ctn.color_south;
-                                                const auto finc_no_inv_one = fanin_edges(ctn.color_ntk, new_output_node[i]);
-                                                std::for_each(finc_no_inv_one.fanin_edges.cbegin(),
-                                                              finc_no_inv_one.fanin_edges.cend(),
-                                                              [&ctn, &color](const auto& fe)
-                                                              { paint_edge_if(ctn, fe, color); });
-                                                paint_if(ctn, new_output_node[i], color);
+                                                paint_node_and_edges(ctn, connecting_node[i], ctn.color_south);
 
                                                 i = 1 - i;
 
                                                 /*Color other fan-out east*/
-                                                color = ctn.color_east;
-                                                const auto finc_no_inv_two =
-                                                    fanin_edges(ctn.color_ntk, new_output_node[i]);
-                                                std::for_each(finc_no_inv_two.fanin_edges.cbegin(),
-                                                              finc_no_inv_two.fanin_edges.cend(),
-                                                              [&ctn, &color](const auto& fe)
-                                                              { paint_edge_if(ctn, fe, color); });
-                                                paint_if(ctn, new_output_node[i], color);
+                                                paint_node_and_edges(ctn, connecting_node[i], ctn.color_east);
                                             }
                                             already_painted = true;
                                         }
                                     }
                                     else
                                     {
-                                        auto color = ctn.color_east;
-                                        const auto finc_only_pis = fanin_edges(ctn.color_ntk, new_output_node[i]);
-                                        std::for_each(finc_only_pis.fanin_edges.cbegin(), finc_only_pis.fanin_edges.cend(),
-                                                      [&ctn, &color](const auto& fe) { paint_edge_if(ctn, fe, color); });
-                                        paint_if(ctn, new_output_node[i], color);
+                                        paint_node_and_edges(ctn, connecting_node[i], ctn.color_east);
                                     }
-                                    node_pi = true;
-                                    all_inputs = true;
                                 }
                                 else if (ntk.is_maj(fin_inp))
                                 {
-                                    auto color = ctn.color_east;
-                                    const auto finc_only_pis = fanin_edges(ctn.color_ntk, new_output_node[i]);
-                                    std::for_each(finc_only_pis.fanin_edges.cbegin(), finc_only_pis.fanin_edges.cend(),
-                                                  [&ctn, &color](const auto& fe) { paint_edge_if(ctn, fe, color); });
-                                    paint_if(ctn, new_output_node[i], color);
+                                    paint_node_and_edges(ctn, connecting_node[i], ctn.color_east);
                                 }
 
 
@@ -323,27 +256,14 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                 });
         });
 
+    /*For nodes not respected in the Ordering Network, still a workaround has to be found*/
     ntk.foreach_ci(
-        [&](const auto& nd) {
+        [&](const auto& nd)
+        {
             ntk.foreach_fanout(nd,
-                               [&](const auto& fon) {
-                                   //This was to color gates east even after inverters have been placed:
-                                   // resolved by placing inverters in the ordering network in seperate columns
-                                   /*if (ntk.is_inv(fon))
-                                   {
-                                       auto fos = fanouts(ctn.color_ntk, fon);
-                                       auto fo = fos[0];
-                                       auto color = ctn.color_east;
-                                       const auto fo_edges = fanin_edges(ctn.color_ntk, fo);
-                                       std::for_each(fo_edges.fanin_edges.cbegin(), fo_edges.fanin_edges.cend(),
-                                                     [&ctn, &color](const auto& fe) { paint_edge_if(ctn, fe, color); });
-                                       paint_if(ctn, fo, color);
-                                   }*/
-                                   auto color = ctn.color_east;
-                                   const auto fo_edges = fanin_edges(ctn.color_ntk, fon);
-                                   std::for_each(fo_edges.fanin_edges.cbegin(), fo_edges.fanin_edges.cend(),
-                                                 [&ctn, &color](const auto& fe) { paint_edge_if(ctn, fe, color); });
-                                   paint_if(ctn, fon, color);
+                               [&](const auto& fon)
+                               {
+                                   paint_node_and_edges(ctn, fon, ctn.color_east);
                                });
         });
 
@@ -353,7 +273,7 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                                  "[i] determining relative positions: |{0}|"};
 #endif
 
-
+    /*Color the rest of the network*/
     rtv.foreach_gate(
         [&](const auto& n, [[maybe_unused]] const auto i)
         {
@@ -391,67 +311,13 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
     return ctn;
 }
 
-/*
- * Check edges, which have to be buffered according to the delays resulting from majority gates
- * */
-
-template <typename Ntk>
-std::vector<int> majority_buffer(const Ntk& ntk, mockturtle::node<Ntk> n) noexcept
-{
-    std::vector<mockturtle::node<Ntk>> delay_nodes;
-
-    int size{0};
-    int iterator{0};
-    const auto fc = fanins(ntk, n);
-    size = fc.fanin_nodes.size();
-
-    std::vector<int>                         delays(size);
-    //std::vector<mockturtle::node<Ntk>> incoming_path_node(size);
-    if(size != 0){
-
-        foreach_incoming_edge(ntk, n,
-                              [&](const auto& e)
-                              {
-                                  if(!ntk.is_constant(e.source))
-                                  {
-                                      auto node_paths = all_incoming_edge_paths(ntk, e.source);
-                                      // incoming_path_node[iterator] = e.source;
-
-                                      for (int i = 0; i < node_paths.size(); ++i)
-                                      {
-                                          int path_delay = 0;
-                                          for (int j = 0; j < node_paths[i].size(); ++j)
-                                          {
-                                              if (const auto ft = fanins(ntk, node_paths[i][j].target); ntk.is_maj(node_paths[i][j].target) && ft.fanin_nodes.size()>2)
-                                              {
-                                                  ++path_delay;
-                                              }
-                                          }
-                                          if (delays[iterator] < path_delay)
-                                          {
-                                              delays[iterator] = path_delay;
-                                          }
-                                      }
-                                      ++iterator;
-                                  }
-                              });
-
-        int max = *std::max_element(delays.begin(), delays.end());
-        for(int k=0; k<delays.size(); ++k)
-        {
-            delays[k] = max - delays[k];
-        }
-    }
-
-    return delays;
-}
 
 template <typename Lyt, typename Ntk>
 class orthogonal_ordering_network_impl
 {
   public:
     orthogonal_ordering_network_impl(const Ntk& src, const orthogonal_physical_design_params& p, orthogonal_physical_design_stats& st) :
-            ntk{input_ordering_view{mockturtle::fanout_view{inverter_balancing(fanout_substitution<mockturtle::names_view<technology_network>>(src))}}},
+            ntk{input_ordering_view{mockturtle::fanout_view{fanout_substitution<mockturtle::names_view<technology_network>>(src)}}},
             ps{p},
             pst{st}
     {}
@@ -475,7 +341,10 @@ class orthogonal_ordering_network_impl
 
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         tile<Lyt> latest_pos{1, 0};
-        if(ctn.color_ntk.isFo_inv_flag()){
+
+        /*CHANGE so all inverters are placed into the first column*/
+        if(ctn.color_ntk.isFo_inv_flag())
+        {
             latest_pos.x = latest_pos.x + ctn.color_ntk.isFo_inv_flag_num();
         }
         tile<Lyt> latest_pos_inputs{0, 0};
@@ -519,9 +388,9 @@ class orthogonal_ordering_network_impl
             });
 
 
-        //This is only for additional coloring, if the conditional coloring isnt correct
+        //This is only for additional coloring, if the conditional coloring isn't correct
         ntk.foreach_node(
-            [&, this](const auto& n, [[maybe_unused]] const auto i)
+            [this, &recolored_fanouts, &ctn, &node2pos](const auto& n, [[maybe_unused]] const auto i)
             {
                 if(auto fc = fanins(ctn.color_ntk, n); fc.fanin_nodes.size() ==2)
                 {
@@ -636,7 +505,7 @@ class orthogonal_ordering_network_impl
 
         //This is only for additional coloring, if the conditional coloring isn't correct
         ntk.foreach_node(
-            [&, this](const auto& n, [[maybe_unused]] const auto i)
+            [this, &ctn](const auto& n, [[maybe_unused]] const auto i)
             {
                 if(const auto fc = fanins(ctn.color_ntk, n); fc.fanin_nodes.size() == 1)
                 {
