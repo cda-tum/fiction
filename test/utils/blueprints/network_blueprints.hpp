@@ -220,6 +220,95 @@ mockturtle::names_view<Ntk> test_inv_flag()
 }
 
 template <typename Ntk>
+mockturtle::names_view<Ntk> test_sort_inputs()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+    const auto z = ntk.create_pi();
+    const auto a = ntk.create_pi();
+    const auto b = ntk.create_pi();
+    const auto c = ntk.create_pi();
+    const auto d = ntk.create_pi();
+
+    const auto f1 = ntk.create_and(a, b);
+    const auto f2 = ntk.create_and(a, c);
+    const auto f3 = ntk.create_and(f1, d);
+    const auto f4 = ntk.create_and(f2, f3);
+    const auto f5 = ntk.create_and(f4, z);
+
+    ntk.create_po(f5);
+
+    return ntk;
+}
+
+template <typename Ntk>
+mockturtle::names_view<Ntk> test_fanout_swap()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+
+    const auto a = ntk.create_pi();//2
+    const auto b = ntk.create_pi();//3
+    const auto c = ntk.create_pi();//4
+
+
+    const auto f1 = ntk.create_and(a, b);
+    const auto n1 = ntk.create_not(a);
+    const auto f2 = ntk.create_and(n1, c);
+    const auto f3 = ntk.create_and(f1, f2);
+
+    ntk.create_po(f3);
+
+    return ntk;
+}
+
+template <typename Ntk>
+mockturtle::names_view<Ntk> test_sort_fanouts()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+    //Not part of ordering, should be placed at the end
+    const auto x = ntk.create_pi();//2
+
+    //PI to PI should get ordered after FOs with 2PIs
+    const auto y = ntk.create_pi();//3
+    const auto z = ntk.create_pi();//4
+
+    // FOs with 1PI should get ordered at the beginning
+    const auto r = ntk.create_pi();//5
+    const auto s = ntk.create_pi();//6
+
+    //FOs with 2PIs should get ordered at the beginning
+    const auto a = ntk.create_pi();//7
+    const auto b = ntk.create_pi();//8
+    const auto c = ntk.create_pi();//9
+    const auto d = ntk.create_pi();//10
+    const auto e = ntk.create_pi();//11
+    const auto f = ntk.create_pi();//12
+
+
+    const auto na = ntk.create_not(a);
+    const auto f1 = ntk.create_and(na, b);
+    const auto f3 = ntk.create_and(c, e);
+    const auto f2 = ntk.create_and(a, d);
+    const auto f4 = ntk.create_and(c, f);
+    const auto f5 = ntk.create_and(f1, f3);
+    const auto f6 = ntk.create_and(f2, f4);
+    const auto f7 = ntk.create_and(f5, f6);
+    const auto f8 = ntk.create_and(f7, x);
+    const auto f9 = ntk.create_and(y, z);
+    const auto f10 = ntk.create_and(f9, f8);
+    //const auto nr = ntk.create_not(r);
+    const auto f11 = ntk.create_and(r, s);
+    const auto f12 = ntk.create_and(f10, r);
+    const auto f13 = ntk.create_and(f11, f12);
+
+    ntk.create_po(f13);
+
+    return ntk;
+}
+
+template <typename Ntk>
 mockturtle::names_view<Ntk> se_coloring_corner_case_network()
 {
     mockturtle::names_view<Ntk> ntk{};
