@@ -90,7 +90,7 @@ with open(README_PATH, encoding="utf8") as readme_file:
 
 setup(
     name='fiction',
-    version='0.4.0',
+    version='0.5.0',
     author='Marcel Walter',
     author_email='marcel.walter@tum.de',
     description='Design Automation for Field-coupled Nanotechnologies',
