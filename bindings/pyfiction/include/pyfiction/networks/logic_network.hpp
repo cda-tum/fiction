@@ -89,50 +89,64 @@ void network(pybind11::module& m, const std::string& network_name)
                  return pos;
              })
 
-        .def("fanins",
-             [](const Ntk& ntk, const mockturtle::node<Ntk>& n)
-             {
-                 std::vector<mockturtle::node<Ntk>> fanins{};
-                 fanins.reserve(ntk.fanin_size(n));
-                 ntk.foreach_fanin(n, [&fanins](const auto& f) { fanins.push_back(f); });
-                 return fanins;
-             })
+        .def(
+            "fanins",
+            [](const Ntk& ntk, const mockturtle::node<Ntk>& n)
+            {
+                std::vector<mockturtle::node<Ntk>> fanins{};
+                fanins.reserve(ntk.fanin_size(n));
+                ntk.foreach_fanin(n, [&fanins](const auto& f) { fanins.push_back(f); });
+                return fanins;
+            },
+            "n"_a)
 
-        .def("is_constant", &Ntk::is_constant)
-        .def("is_pi", &Ntk::is_pi)
-        .def("is_po", &Ntk::is_po)
+        .def("is_constant", &Ntk::is_constant, "n"_a)
+        .def("is_pi", &Ntk::is_pi, "n"_a)
+        .def("is_po", &Ntk::is_po, "n"_a)
 
         // for some reason, the is_* functions need redefinition to match with Ntk
-        .def("is_buf", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_buf(n); })
-        .def("is_fanout", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_fanout(n); })
-        .def("is_inv", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_inv(n); })
-        .def("is_and", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_and(n); })
-        .def("is_or", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_or(n); })
-        .def("is_xor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xor(n); })
-        .def("is_maj", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_maj(n); })
-        .def("is_nand", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nand(n); })
-        .def("is_nor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nor(n); })
-        .def("is_xnor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xnor(n); })
+        .def(
+            "is_buf", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_buf(n); }, "n"_a)
+        .def(
+            "is_fanout", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_fanout(n); }, "n"_a)
+        .def(
+            "is_inv", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_inv(n); }, "n"_a)
+        .def(
+            "is_and", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_and(n); }, "n"_a)
+        .def(
+            "is_or", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_or(n); }, "n"_a)
+        .def(
+            "is_xor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xor(n); }, "n"_a)
+        .def(
+            "is_maj", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_maj(n); }, "n"_a)
+        .def(
+            "is_nand", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nand(n); }, "n"_a)
+        .def(
+            "is_nor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nor(n); }, "n"_a)
+        .def(
+            "is_xnor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xnor(n); }, "n"_a)
 
         ;
 
     /**
      * Network parsing function.
      */
-    m.def(fmt::format("read_{}", network_name).c_str(),
-          [](const std::string& filename) -> Ntk
-          {
-              auto reader = fiction::network_reader<std::shared_ptr<Ntk>>(filename, std::cout);
+    m.def(
+        fmt::format("read_{}", network_name).c_str(),
+        [](const std::string& filename) -> Ntk
+        {
+            auto reader = fiction::network_reader<std::shared_ptr<Ntk>>(filename, std::cout);
 
-              if (const auto ntks = reader.get_networks(); !ntks.empty())
-              {
-                  auto ntk = *ntks.front();
-                  ntk.substitute_po_signals();
-                  return ntk;
-              }
+            if (const auto ntks = reader.get_networks(); !ntks.empty())
+            {
+                auto ntk = *ntks.front();
+                ntk.substitute_po_signals();
+                return ntk;
+            }
 
-              throw std::runtime_error("Could not parse specification file");
-          });
+            throw std::runtime_error("Could not parse specification file");
+        },
+        "filename"_a);
 }
 
 }  // namespace detail

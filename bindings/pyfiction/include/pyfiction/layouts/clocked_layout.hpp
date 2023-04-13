@@ -47,20 +47,22 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
                  }),
              "dimension"_a, "clocking_scheme"_a = "2DDWave")
 
-        .def("assign_clock_number", &ClockedLyt::assign_clock_number)
-        .def("get_clock_number", &ClockedLyt::get_clock_number)
+        .def("assign_clock_number", &ClockedLyt::assign_clock_number, "cz"_a, "cn"_a)
+        .def("get_clock_number", &ClockedLyt::get_clock_number, "cz"_a)
         .def("num_clocks", &ClockedLyt::num_clocks)
         .def("is_regularly_clocked", &ClockedLyt::is_regularly_clocked)
 
-        .def("is_incoming_clocked", &ClockedLyt::is_incoming_clocked)
-        .def("is_outgoing_clocked", &ClockedLyt::is_outgoing_clocked)
+        .def("is_clocking_scheme", &ClockedLyt::is_clocking_scheme, "name"_a)
 
-        .def("incoming_clocked_zones", &ClockedLyt::incoming_clocked_zones)
-        .def("outgoing_clocked_zones", &ClockedLyt::outgoing_clocked_zones)
+        .def("is_incoming_clocked", &ClockedLyt::is_incoming_clocked, "cz1"_a, "cz2"_a)
+        .def("is_outgoing_clocked", &ClockedLyt::is_outgoing_clocked, "cz1"_a, "cz2"_a)
 
-        .def("in_degree", &ClockedLyt::in_degree)
-        .def("out_degree", &ClockedLyt::out_degree)
-        .def("degree", &ClockedLyt::degree)
+        .def("incoming_clocked_zones", &ClockedLyt::incoming_clocked_zones, "cz"_a)
+        .def("outgoing_clocked_zones", &ClockedLyt::outgoing_clocked_zones, "cz"_a)
+
+        .def("in_degree", &ClockedLyt::in_degree, "cz"_a)
+        .def("out_degree", &ClockedLyt::out_degree, "cz"_a)
+        .def("degree", &ClockedLyt::degree, "cz"_a)
 
         ;
 }

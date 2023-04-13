@@ -91,41 +91,6 @@ class obstruction_layout<Lyt, false> : public Lyt
         strg->obstructed_connections.insert({src, tgt});
     }
     /**
-     * Clears the obstruction status of the given coordinate `c` if the obstruction was manually marked via
-     * `obstruct_coordinate`.
-     *
-     * @param c Coordinate to clear.
-     */
-    void clear_obstructed_coordinate(const typename Lyt::coordinate& c) noexcept
-    {
-        strg->obstructed_coordinates.erase(c);
-    }
-    /**
-     * Clears the obstruction status of the connection from coordinate `src` to coordinate `tgt` if the obstruction was
-     * manually marked via `obstruct_connection`.
-     *
-     * @param src Source coordinate.
-     * @param tgt Target coordinate.
-     */
-    void clear_obstructed_connection(const typename Lyt::coordinate& src, const typename Lyt::coordinate& tgt) noexcept
-    {
-        strg->obstructed_connections.erase({src, tgt});
-    }
-    /**
-     * Clears all obstructed coordinates that were manually marked via `obstruct_coordinate`.
-     */
-    void clear_obstructed_coordinates() noexcept
-    {
-        strg->obstructed_coordinates.clear();
-    }
-    /**
-     * Clears all obstructed connections that were manually marked via `obstruct_connection`.
-     */
-    void clear_obstructed_connections() noexcept
-    {
-        strg->obstructed_connections.clear();
-    }
-    /**
      * Checks if the given coordinate is obstructed of some sort.
      *
      * @param c Coordinate to check.
@@ -173,6 +138,41 @@ class obstruction_layout<Lyt, false> : public Lyt
         // more implementations go here
 
         return false;
+    }
+    /**
+     * Clears the obstruction status of the given coordinate `c` if the obstruction was manually marked via
+     * `obstruct_coordinate`.
+     *
+     * @param c Coordinate to clear.
+     */
+    void clear_obstructed_coordinate(const typename Lyt::coordinate& c) noexcept
+    {
+        strg->obstructed_coordinates.erase(c);
+    }
+    /**
+     * Clears the obstruction status of the connection from coordinate `src` to coordinate `tgt` if the obstruction was
+     * manually marked via `obstruct_connection`.
+     *
+     * @param src Source coordinate.
+     * @param tgt Target coordinate.
+     */
+    void clear_obstructed_connection(const typename Lyt::coordinate& src, const typename Lyt::coordinate& tgt) noexcept
+    {
+        strg->obstructed_connections.erase({src, tgt});
+    }
+    /**
+     * Clears all obstructed coordinates that were manually marked via `obstruct_coordinate`.
+     */
+    void clear_obstructed_coordinates() noexcept
+    {
+        strg->obstructed_coordinates.clear();
+    }
+    /**
+     * Clears all obstructed connections that were manually marked via `obstruct_connection`.
+     */
+    void clear_obstructed_connections() noexcept
+    {
+        strg->obstructed_connections.clear();
     }
 
   private:

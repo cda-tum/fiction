@@ -44,7 +44,7 @@ inline void coordinates(pybind11::module& m)
                 }
 
                 throw std::runtime_error("Wrong number of dimensions provided for coordinate");
-            }))
+            }), "tuple_repr"_a)
 
         .def_property(
             "x", [](py_coordinate& self) -> decltype(self.x) { return self.x; },
@@ -56,12 +56,12 @@ inline void coordinates(pybind11::module& m)
             "z", [](py_coordinate& self) -> decltype(self.z) { return self.z; },
             [](py_coordinate& self, const decltype(self.z) value) { self.z = value; })
 
-        .def(py::self == py::self)
-        .def(py::self != py::self)
-        .def(py::self < py::self)
-        .def(py::self > py::self)
-        .def(py::self <= py::self)
-        .def(py::self >= py::self)
+        .def(py::self == py::self, "other"_a)
+        .def(py::self != py::self, "other"_a)
+        .def(py::self < py::self, "other"_a)
+        .def(py::self > py::self, "other"_a)
+        .def(py::self <= py::self, "other"_a)
+        .def(py::self >= py::self, "other"_a)
 
         .def("__repr__", &py_coordinate::str)
         .def("__hash__", [](const py_coordinate& self) { return std::hash<py_coordinate>{}(self); })
