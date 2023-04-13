@@ -3,8 +3,8 @@ Fabrication Defects
 
 A collection of tools to model defects that can occur during the fabrication process of FCN technologies.
 
-SiDB Defects
-------------
+SiDB Defect Types
+-----------------
 
 **Header:** ``fiction/technology/sidb_defects.hpp``
 
@@ -24,11 +24,21 @@ SiDB Defects
 .. doxygenfunction:: fiction::defect_extent
 
 
+SiDB Defect Surface
+-------------------
+
 **Header:** ``fiction/technology/sidb_surface.hpp``
 
 .. doxygenclass:: fiction::sidb_surface
    :members:
+.. doxygenclass:: fiction::sidb_surface< Lyt, true >
+   :members:
+.. doxygenclass:: fiction::sidb_surface< Lyt, false >
+   :members:
 
+
+SiDB Defect Analysis
+--------------------
 
 **Header:** ``fiction/technology/sidb_surface_analysis.hpp``
 
