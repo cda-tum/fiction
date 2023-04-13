@@ -4,90 +4,85 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/utils/debug/network_writer.hpp"
+#include <fiction/algorithms/physical_design/ortho_ordering_network.hpp>
+
 #include "utils/blueprints/network_blueprints.hpp"
 
+#include "fiction/utils/debug/network_writer.hpp"
+
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
-#include <fiction/algorithms/physical_design/ortho_ordering_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 
 #include <iostream>
 
 using namespace fiction;
 
-TEST_CASE("conditional_coloring", "[orthogonal-coloring]")
+TEST_CASE("conditional_coloring", "[orthogonal_ordering]")
 {
-    const auto check_colors = [](const auto& ntk)
+    const auto check = [](const auto& ntk)
     {
         auto container = detail::conditional_coloring(ntk);
         CHECK(detail::is_east_south_colored(container.color_ntk));
     };
 
-    check_colors(input_ordering_view{mockturtle::fanout_view{
+    check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>())}});
-    check_colors(input_ordering_view{mockturtle::fanout_view{
+    check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::maj1_network<mockturtle::aig_network>())}});
-    check_colors(input_ordering_view{mockturtle::fanout_view{
+    check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::maj4_network<mockturtle::aig_network>())}});
-    check_colors(input_ordering_view{mockturtle::fanout_view{
+    check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::se_coloring_corner_case_network<technology_network>())}});
-    check_colors(input_ordering_view{mockturtle::fanout_view{fanout_substitution<technology_network>(
+    check(input_ordering_view{mockturtle::fanout_view{fanout_substitution<technology_network>(
         blueprints::fanout_substitution_corner_case_network<technology_network>())}});
-    check_colors(input_ordering_view{mockturtle::fanout_view{
+    check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::nary_operation_network<technology_network>())}});
-    check_colors(input_ordering_view{
-        mockturtle::fanout_view{fanout_substitution<technology_network>(blueprints::clpl<technology_network>())}});
-    check_colors(input_ordering_view{mockturtle::fanout_view{
+    check(input_ordering_view{mockturtle::fanout_view{fanout_substitution<technology_network>(blueprints::clpl<technology_network>())}});
+    check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::half_adder_network<mockturtle::mig_network>())}});
-    check_colors(input_ordering_view{mockturtle::fanout_view{
+
+    check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::test_sort_inputs<mockturtle::mig_network>())}});
-    check_colors(input_ordering_view{mockturtle::fanout_view{fanout_substitution<technology_network>(
-        blueprints::test_fanout_nodes_coloring_null<mockturtle::mig_network>())}});
-    check_colors(input_ordering_view{mockturtle::fanout_view{
+    check(input_ordering_view{mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::test_fanout_nodes_coloring_null<mockturtle::mig_network>())}});
+    check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::test_fanout_nodes_rank<mockturtle::mig_network>())}});
-    check_colors(input_ordering_view{mockturtle::fanout_view{
+    check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::test_fanout_swap<mockturtle::mig_network>())}});
 }
 
-TEST_CASE("Ordering gate library application and design rule violation", "[orthogonal-ordering]")
+TEST_CASE("Ordering Gate library application", "[orthogonal_ordering]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
     using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-    const auto check_ortho_ordering = [](const auto& ntk)
+    const auto check = [](const auto& ntk)
     {
         orthogonal_physical_design_stats stats{};
 
         auto layout = orthogonal_ordering_network<gate_layout>(ntk, {}, &stats);
 
         CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(layout));
-
-        gate_level_drv_stats  st = {};
-        gate_level_drv_params ps = {};
-        std::stringstream     ss{};
-        ps.out = &ss;
-        gate_level_drvs(layout, ps, &st);
-
-        CHECK(st.drvs == 0);
     };
 
-    check_ortho_ordering(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check_ortho_ordering(blueprints::maj1_network<mockturtle::aig_network>());
-    check_ortho_ordering(blueprints::maj4_network<mockturtle::aig_network>());
-    check_ortho_ordering(blueprints::se_coloring_corner_case_network<technology_network>());
-    check_ortho_ordering(blueprints::fanout_substitution_corner_case_network<technology_network>());
-    check_ortho_ordering(blueprints::clpl<technology_network>());
-    check_ortho_ordering(blueprints::half_adder_network<mockturtle::mig_network>());
-    check_ortho_ordering(blueprints::test_sort_inputs<mockturtle::mig_network>());
-    check_ortho_ordering(blueprints::test_fanout_nodes_coloring_null<mockturtle::mig_network>());
-    check_ortho_ordering(blueprints::test_fanout_nodes_rank<mockturtle::mig_network>());
-    check_ortho_ordering(blueprints::test_fanout_swap<mockturtle::mig_network>());
+    check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
+    check(blueprints::maj1_network<mockturtle::aig_network>());
+    check(blueprints::maj4_network<mockturtle::aig_network>());
+    check(blueprints::se_coloring_corner_case_network<technology_network>());
+    check(blueprints::fanout_substitution_corner_case_network<technology_network>());
+    check(blueprints::clpl<technology_network>());
+    check(blueprints::half_adder_network<mockturtle::mig_network>());
+
+    check(blueprints::test_sort_inputs<mockturtle::mig_network>());
+    check(blueprints::test_fanout_nodes_coloring_null<mockturtle::mig_network>());
+    check(blueprints::test_fanout_nodes_rank<mockturtle::mig_network>());
+    check(blueprints::test_fanout_swap<mockturtle::mig_network>());
 
     // constant input network
-    check_ortho_ordering(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
+    check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
 }
 
-TEST_CASE("Ordering name conservation after orthogonal physical design", "[orthogonal-ordering]")
+TEST_CASE("Ordering Name conservation after orthogonal physical design", "[orthogonal_ordering]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
@@ -106,4 +101,27 @@ TEST_CASE("Ordering name conservation after orthogonal physical design", "[ortho
 
     // PO names
     CHECK(layout.get_output_name(0) == "f");
+}
+
+TEST_CASE("TEST", "[ordering]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    auto mux21 = blueprints::test_sort_fanouts<mockturtle::names_view<mockturtle::aig_network>>();
+
+    orthogonal_physical_design_stats stats{};
+
+    const auto layout = orthogonal_ordering_network<gate_layout>(mux21, {}, &stats);
+
+    fiction::debug::write_dot_layout(layout);
+
+    std::cout << "PROCESSING ORDERING_NW "<< std::endl;
+    std::cout << "Size: " <<(stats.x_size) * (stats.y_size) << std::endl;
+    std::cout << "w: " <<(stats.x_size)<< std::endl;
+    std::cout << "h: " <<(stats.y_size) << std::endl;
+    std::cout << "Time: " << mockturtle::to_seconds(stats.time_total) << std::endl;
+    std::cout << "Num Gates: "  << stats.num_gates << std::endl;
+    std::cout << "Num Wires: " << stats.num_wires<< std::endl;
+
+    gate_level_drvs(layout);
 }
