@@ -11,7 +11,7 @@
 
 #include <pybind11/pybind11.h>
 
-#include <string>
+#include <string_view>
 
 namespace pyfiction
 {
@@ -22,7 +22,7 @@ inline void write_qcc_layout(pybind11::module& m)
 
     m.def(
         "write_qca_layout",
-        [](const py_inml_layout& lyt, const std::string& filename) { fiction::write_qcc_layout(lyt, filename); },
+        [](const py_inml_layout& lyt, const std::string_view& filename) { fiction::write_qcc_layout(lyt, filename); },
         "layout"_a, "filename"_a);
 }
 

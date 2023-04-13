@@ -11,7 +11,7 @@
 
 #include <pybind11/pybind11.h>
 
-#include <string>
+#include <string_view>
 
 namespace pyfiction
 {
@@ -20,7 +20,7 @@ inline void write_sqd_layout(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    void (*write_sqd_layout_function_pointer)(const py_sidb_layout&, const std::string&) =
+    void (*write_sqd_layout_function_pointer)(const py_sidb_layout&, const std::string_view&) =
         &fiction::write_sqd_layout<py_sidb_layout>;
 
     m.def("write_sqd_layout", write_sqd_layout_function_pointer, "layout"_a, "filename"_a);
