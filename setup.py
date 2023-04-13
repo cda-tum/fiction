@@ -31,12 +31,12 @@ class CMakeBuild(build_ext):
                       '-DFICTION_TEST=OFF',
                       '-DFICTION_EXPERIMENTS=OFF',
                       '-DFICTION_PYTHON_BINDINGS=ON',
-                      '-DFICTION_Z3=ON',
+                      # '-DFICTION_Z3=ON',
                       # '-DFICTION_ENABLE_MUGEN=ON'
                       ]
 
-        if "FICTION_Z3_SEARCH_PATHS" in os.environ:
-            cmake_args += ['-DFICTION_Z3_SEARCH_PATHS={}'.format(os.environ.get("FICTION_Z3_SEARCH_PATHS"))]
+        if "Z3_ROOT" in os.environ:
+            cmake_args += ['-DZ3_ROOT={}'.format(os.environ.get("Z3_ROOT"))]
 
         if self.compiler.compiler_type != "msvc":
             # Using Ninja-build since it a) is available as a wheel and b)
