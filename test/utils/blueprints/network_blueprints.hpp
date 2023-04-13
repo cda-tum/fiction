@@ -199,18 +199,66 @@ mockturtle::names_view<Ntk> mux21_network()
 }
 
 template <typename Ntk>
-mockturtle::names_view<Ntk> test_inv_flag()
+mockturtle::names_view<Ntk> test_inv_flag_a()
 {
     mockturtle::names_view<Ntk> ntk{};
 
-    const auto x1 = ntk.create_pi();
     const auto x2 = ntk.create_pi();
+    const auto x1 = ntk.create_pi();
+
+    const auto n1  = ntk.create_not(x1);
+    const auto a1  = ntk.create_and(n1, x2);
+
+    ntk.create_po(a1);
+
+    return ntk;
+}
+
+template <typename Ntk>
+mockturtle::names_view<Ntk> test_inv_flag_b()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+    const auto x2 = ntk.create_pi();
+    const auto x1 = ntk.create_pi();
+
     const auto x3 = ntk.create_pi();
     const auto x4 = ntk.create_pi();
+
+    const auto x5 = ntk.create_pi();
+    const auto x6 = ntk.create_pi();
+
 
     const auto n1  = ntk.create_not(x1);
     const auto n3  = ntk.create_not(x3);
     const auto a1  = ntk.create_and(n1, x2);
+    const auto a2  = ntk.create_and(n3, x4);
+    const auto a3  = ntk.create_and(a1, a2);
+    const auto a4  = ntk.create_and(x5, x6);
+    const auto a5  = ntk.create_and(a4, a3);
+
+    ntk.create_po(a5);
+
+    return ntk;
+}
+
+template <typename Ntk>
+mockturtle::names_view<Ntk> test_inv_flag_c()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+
+    const auto x1 = ntk.create_pi();
+    const auto x2 = ntk.create_pi();
+
+    const auto x3 = ntk.create_pi();
+    const auto x4 = ntk.create_pi();
+
+
+    const auto n1  = ntk.create_not(x1);
+    const auto n2  = ntk.create_not(x2);
+    const auto n3  = ntk.create_not(x3);
+    const auto a1  = ntk.create_and(n1, n2);
     const auto a2  = ntk.create_and(n3, x4);
     const auto a3  = ntk.create_and(a1, a2);
 
@@ -298,12 +346,58 @@ mockturtle::names_view<Ntk> test_sort_fanouts()
     const auto f8 = ntk.create_and(f7, x);
     const auto f9 = ntk.create_and(y, z);
     const auto f10 = ntk.create_and(f9, f8);
-    //const auto nr = ntk.create_not(r);
-    const auto f11 = ntk.create_and(r, s);
+    const auto nr = ntk.create_not(r);
+    const auto f11 = ntk.create_and(nr, s);
     const auto f12 = ntk.create_and(f10, r);
     const auto f13 = ntk.create_and(f11, f12);
 
     ntk.create_po(f13);
+
+    return ntk;
+}
+
+template <typename Ntk>
+mockturtle::names_view<Ntk> test_fanout_nodes_rank()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+    const auto c = ntk.create_pi();//2
+    const auto d = ntk.create_pi();//3
+    const auto a = ntk.create_pi();//4
+    const auto b = ntk.create_pi();//5
+
+
+
+    const auto f1 = ntk.create_and(a, b);
+
+    const auto f2 = ntk.create_and(c, d);
+    const auto f3 = ntk.create_or(c, d);
+
+    const auto f4 = ntk.create_and(f1, f2);
+    const auto f5 = ntk.create_and(f3, f4);
+
+    ntk.create_po(f5);
+
+    return ntk;
+}
+
+template <typename Ntk>
+mockturtle::names_view<Ntk> test_fanout_nodes_coloring_null()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+    const auto a = ntk.create_pi();//2
+    const auto b = ntk.create_pi();//3
+    const auto c = ntk.create_pi();//4
+
+    const auto f1 = ntk.create_and(a, b);
+    const auto f2 = ntk.create_and(a, c);
+    const auto f3 = ntk.create_and(b, c);
+
+    const auto f4 = ntk.create_and(f1, f2);
+    const auto f5 = ntk.create_and(f3, f4);
+
+    ntk.create_po(f5);
 
     return ntk;
 }

@@ -293,11 +293,12 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
 
         /*node(s), from which we look if the fan-ins are PIs*/
         std::vector<node> connecting_node;
+        bool inv_flag = false;
 
         /*currently viewed node*/
         node current_node;
 
-        my_ntk.foreach_fanout(n, [this, &n, &connecting_node, &current_node](const auto& fon)
+        my_ntk.foreach_fanout(n, [this, &n, &connecting_node, &current_node, &inv_flag](const auto& fon)
                               {
                                   bool is_fan_out = false;
 
@@ -309,10 +310,9 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                                       /*Skip Inverters*/
                                       my_ntk.foreach_fanout(fon,
                                                             [this, &current_node](const auto& fon_inv) { current_node =  fon_inv;});
-
-                                      /*!!!!!!!!!!!!!!!!!!Take out flags!!!!!!!!!!!!!!!!!!!!!!!!!*/
                                       fo_inv_flag=true;
                                       ++fo_inv_flag_num;
+                                      inv_flag = true;
                                   }
 
                                   if(const auto fc = fanins(my_ntk, current_node); fc.fanin_nodes.size()==2)
@@ -360,7 +360,7 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                                   {
                                       my_ntk.foreach_fanin(
                                           connecting_node[i],
-                                          [this, &fon, &is_fan_out, &already_one_pi, &first_pi, &n](const auto& fi)
+                                          [this, &fon, &is_fan_out, &already_one_pi, &first_pi, &n, &inv_flag](const auto& fi)
                                           {
                                               auto fin_inp = my_ntk.get_node(fi);
                                               /*Ignore Inverters*/
@@ -426,17 +426,35 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                                                       }
                                                       else
                                                       {
-                                                          /**When a PI is connected to a PI it is ranked third**/
-                                                          if (this->visited(n) != this->trav_id())
+                                                          if(inv_flag)
                                                           {
-                                                              third_wait.push_back(n);
-                                                              this->set_visited(n, this->trav_id());
+                                                              /**When a PI is connected to a PI it is ranked third**/
+                                                              if (this->visited(n) != this->trav_id())
+                                                              {
+                                                                  third_wait.push_back(n);
+                                                                  this->set_visited(n, this->trav_id());
+                                                              }
+                                                              if (this->visited(fin_inp) != this->trav_id())
+                                                              {
+                                                                  third_wait.push_back(fin_inp);
+                                                                  this->set_visited(fin_inp, this->trav_id());
+                                                              }
                                                           }
-                                                          if (this->visited(fin_inp) != this->trav_id())
+                                                          else
                                                           {
-                                                              third_wait.push_back(fin_inp);
-                                                              this->set_visited(fin_inp, this->trav_id());
+                                                              /**When a PI is connected to a PI it is ranked third**/
+                                                              if (this->visited(fin_inp) != this->trav_id())
+                                                              {
+                                                                  third_wait.push_back(fin_inp);
+                                                                  this->set_visited(fin_inp, this->trav_id());
+                                                              }
+                                                              if (this->visited(n) != this->trav_id())
+                                                              {
+                                                                  third_wait.push_back(n);
+                                                                  this->set_visited(n, this->trav_id());
+                                                              }
                                                           }
+
                                                       }
                                                   }
                                               }
