@@ -31,7 +31,7 @@ class CMakeBuild(build_ext):
                       '-DFICTION_TEST=OFF',
                       '-DFICTION_EXPERIMENTS=OFF',
                       '-DFICTION_PYTHON_BINDINGS=ON',
-                      # '-DFICTION_Z3=ON',
+                      '-DFICTION_Z3=ON',
                       # '-DFICTION_ENABLE_MUGEN=ON'
                       ]
 
