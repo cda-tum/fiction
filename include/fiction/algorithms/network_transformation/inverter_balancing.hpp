@@ -1,0 +1,8 @@
+//
+// Created by benjamin on 13.04.23.
+//
+
+#ifndef FICTION_INVERTER_BALANCING_HPP
+#define FICTION_INVERTER_BALANCING_HPP
+
+#endif  // FICTION_INVERTER_BALANCING_HPP
