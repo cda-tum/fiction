@@ -985,6 +985,12 @@ template <class Lyt, class Drawer>
 void write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
+
+    if (!os.is_open())
+    {
+        throw std::ofstream::failure("could not open file");
+    }
+
     write_dot_layout(lyt, os, drawer);
     os.close();
 }
