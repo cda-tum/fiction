@@ -51,9 +51,8 @@ class inverter_balancing_impl
                 auto fanout_inv = fanouts(fo_ntk, n);
                 auto balance = std::all_of(fanout_inv.begin(), fanout_inv.end(),[this](const auto& fo_node)
                                               {return fo_ntk.is_inv(fo_node);});
-                if(balance && fanout_inv.size()>1){
-                    /*del_inv = fanout_inv[1];
-                    blc_fos=n;*/
+                if(balance && fanout_inv.size()>1)
+                {
                     del_inv.emplace_back(fanout_inv[1]);
                     blc_fos.emplace_back(n);
                     new_inv.emplace_back(fanout_inv[0]);
@@ -65,27 +64,6 @@ class inverter_balancing_impl
                               {
                                   auto fn         = ntk.get_node(f);
 
-                                  /*New children for balanced fan-out nodes*/
-                                  /*if(blc_fos==n){
-                                      const auto fos = fanouts(fo_ntk, n);
-                                      //fn = fos[0];
-                                      new_inv=fos[0];
-                                  }*/
-
-                                  /*New children for new inverter node*/
-                                  /*bool inv_ch = false;
-                                  for(auto i = new_inv.begin(); i < new_inv.end(); ++i){
-                                      if(*i == n){
-                                          inv_ch=true;
-                                      }
-                                  }
-                                  if(inv_ch){
-                                      const auto fis_inv = fanins(fo_ntk, fn);
-                                      fn = fis_inv.fanin_nodes[0]; //fan-in of the inverter is the fan-out node
-                                      const auto fis_fo = fanins(fo_ntk, fn);
-                                      fn = fis_fo.fanin_nodes[0]; //fan-in of the fan-out node is the PI node
-                                  }*/
-
                                   /*New children for nodes with deleted Inverters as fan-in*/
                                   for(int i = 0; i<blc_fos.size(); ++i)
                                   {
@@ -96,16 +74,7 @@ class inverter_balancing_impl
                                       }
                                   }
 
-                                  /*if(del_inv == fn){
-                                      const auto fis = fanins(fo_ntk, fn);
-                                      fn = new_inv;
-                                  }*/
-
                                   const auto tgt_signal = old2new[fn];
-
-                                  /*children.emplace_back(ntk.is_complemented(f) ? ntk_dest.create_not(tgt_signal) :
-                                                                                 tgt_signal);*/
-
                                   children.emplace_back(tgt_signal);
                               });
 
@@ -150,7 +119,6 @@ class inverter_balancing_impl
                             int index = po_it - del_inv.begin();
                             preserved_po.push_back(new_inv[index]);
                         }
-                        //old2new[g] = ntk_dest.create_buf(children[0]);
                         return true;
                     }
                 }
@@ -275,7 +243,6 @@ template<typename NtkSrc>
 bool inverter_balancing_recursive(const NtkSrc& ntk){
     bool return_val = false;
     const auto fo_ntk= mockturtle::fanout_view<NtkSrc>(ntk);
-    //detail::inverter_balancing_impl<NtkSrc> k(ntk);
     ntk.foreach_gate(
         [&](const auto& g)
         {
@@ -298,11 +265,9 @@ bool inverter_balancing_recursive(const NtkSrc& ntk){
  * Converts a logic network into an equivalent one of another type. Thereby, this function is very similar to
  * mockturtle::cleanup_dangling. However, it supports real buffer nodes used for fanouts and path balancing in fiction.
  *
- * If all fanouts of a node are inverted, the inverters are replaced by one inverter as fanin of this node
+ * When both fanouts of a fanout-node are inverted, the inverters are replaced by one inverter as fanin of this node
  * This is part of the Distribution Newtork I: Inputs
  *
- * NOTE: In contrast to mockturtle::cleanup_dangling, this function returns ntk if NtkDest and NtkSrc are of the same
- * type.
  *
  * @tparam NtkDest Type of the returned logic network.
  * @tparam NtkSrc Type of the input logic network.
@@ -333,9 +298,8 @@ NtkSrc inverter_balancing(const NtkSrc& ntk)
     static_assert(mockturtle::has_create_maj_v<NtkSrc>, "NtkDest does not implement the create_maj function");
 
     static_assert(has_is_fanout_v<NtkSrc>, "NtkDest does not implement the has_is_fanout function");
-    // TODO handle ci/ro/etc...
 
-    //assert(ntk.is_combinational() && "Network has to be combinational");
+    assert(ntk.is_combinational() && "Network has to be combinational");
 
     detail::inverter_balancing_impl<NtkSrc> p{ntk};
 
