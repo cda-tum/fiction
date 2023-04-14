@@ -2,7 +2,8 @@ Getting started
 ===============
 
 The *fiction* framework provides stand-alone CLI tool as well as a header-only library that can be used in external projects.
-Both are written in C++17 and are continuously tested on ubuntu, macOS, and Windows with multiple compilers. See the build badges in the README file for more information.
+Both are written in C++17 and are continuously tested on Ubuntu, macOS, and Windows with multiple compilers.
+See the build badges in the README file for more information.
 
 
 Compilation requirements
@@ -19,7 +20,7 @@ them automatically. Should the repository have been cloned before, the commands:
 
 will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++17 compiler are required.
 
-At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (``libtbb-dev`` on ubuntu) is
+At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (``libtbb-dev`` on Ubuntu) is
 needed. It is an optional dependency that can be installed for a performance boost in certain scenarios. For your
 preferred compiler, see the current implementation state of `P0024R2 <https://en.cppreference.com/w/cpp/compiler_support/17>`_.
 
@@ -43,7 +44,8 @@ The CLI tool can then be run using::
   cli/fiction
 
 
-Here is an example of running *fiction* to perform a full physical design flow on a QCA circuit layout that can afterward be simulated in QCADesigner:
+Here is an example of running *fiction* to perform a full physical design flow on a QCA circuit layout that can
+afterward be simulated in QCADesigner:
 
 .. figure:: /_static/fiction_cli_example.gif
    :alt: CLI example
@@ -102,7 +104,7 @@ SMT-based ``exact`` P&R
 #######################
 
 The :ref:`exact placement and routing algorithm <exact>` utilizes the `SMT solver Z3 <https://github.com/Z3Prover/z3>`_.
-Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/master/README-CMake.md>`_ and make sure to call
+Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/master/README-CMake.md>`_ and call
 ``sudo make install`` to install headers, scripts, and the binary.
 
 .. note::
@@ -133,10 +135,9 @@ Building tests
 
 Unit tests can be built with CMake via a respective flag on the command line and executed via ``ctest``::
 
-  mkdir build
+  cmake . -B build -DFICTION_TEST=ON
   cd build
-  cmake -DFICTION_TEST=ON ..
-  make
+  cmake --build . -j4
   ctest
 
 
@@ -147,10 +148,9 @@ The ``experiments`` folder provides a playground for quickly scripting some idea
 A ``fictionlib_demo.cpp`` demonstrates the usage. Any ``*.cpp`` file that is placed in that folder is automatically
 linked against *fiction* and compiled as a stand-alone binary using the following commands::
 
-  mkdir build
+  cmake . -B build -DFICTION_EXPERIMENTS=ON
   cd build
-  cmake -DFICTION_EXPERIMENTS=ON ..
-  make
+  cmake --build . -j4
 
 
 Uninstall
