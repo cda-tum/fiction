@@ -321,7 +321,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             if (!strg->three_state_cells.empty())
             {
-                if (std::find(strg->three_state_cells.begin(), strg->three_state_cells.end(), strg->dependent_cell) !=
+                if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), strg->dependent_cell) !=
                     strg->three_state_cells.end())
                 {
                     strg->max_charge_index =
@@ -354,7 +354,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     //     */
     [[nodiscard]] bool charge_exists(const sidb_charge_state& cs) const noexcept
     {
-        return std::any_of(strg->cell_charge.begin(), strg->cell_charge.end(),
+        return std::any_of(strg->cell_charge.cbegin(), strg->cell_charge.cend(),
                            [&cs](const sidb_charge_state& c) { return c == cs; });
     }
     /**
@@ -405,7 +405,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_defect(const typename Lyt::cell& c, const sidb_defect& defect) noexcept
     {
-        if (std::find(strg->sidb_order.begin(), strg->sidb_order.end(), c) == strg->sidb_order.end())
+        if (std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c) == strg->sidb_order.end())
         {
             if (strg->defects.find(c) == strg->defects.end())
             {
@@ -568,7 +568,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             });
         for (const auto& cell : strg->sidb_order)
         {
-            if (std::find(strg->three_state_cells.begin(), strg->three_state_cells.end(), cell) ==
+            if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), cell) ==
                 strg->three_state_cells.end())
             {
                 strg->sidb_order_without_three_state_cells.push_back(cell);
@@ -1182,7 +1182,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         uint64_t   chargeindex          = 0;
         uint64_t   counter              = 0;
-        const auto dependent_cell_index = cell_to_index(strg->dependent_cell);
 
         uint64_t chargeindex_sub_layout = 0;
         uint64_t counter_sub_layout     = 0;
