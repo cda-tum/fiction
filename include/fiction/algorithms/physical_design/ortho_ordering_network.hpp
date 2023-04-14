@@ -6,7 +6,6 @@
 #define FICTION_ORTHO_ORDERING_NETWORK_HPP
 
 #include "fiction/networks/views/input_ordering_view.hpp"
-#include "fiction/networks/views/reverse_view.hpp"
 #include "fiction/algorithms/network_transformation/inverter_balancing.hpp"
 #include "orthogonal.hpp"
 
@@ -59,7 +58,6 @@ int getIndex(std::vector<Ntk> v, Ntk n)
 // If element was found
 if (it != v.end())
 {
-
     // calculating the index
     // of K
     int index = it - v.begin();
@@ -90,7 +88,6 @@ template <typename Ntk>
 coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
 {
     coloring_container<Ntk> ctn{ntk};
-    reverse_view            rtv{ntk};  // reverse order of nodes
 
     /*currently viewed node*/
     mockturtle::node<Ntk> current_node;
@@ -100,8 +97,6 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
     auto fo_one = ctn.color_ntk.get_fo_one();
     auto pi_pi = ctn.color_ntk.get_pi_to_pi();
 
-
-
 #if (PROGRESS_BARS)
     // initialize a progress bar
     mockturtle::progress_bar bar{static_cast<uint32_t>(ctn.color_ntk.num_gates()),
@@ -109,7 +104,7 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
 #endif
 
     /*Find a coloring*/
-    rtv.foreach_gate(
+    ntk.foreach_gate_reverse(
         [&](const auto& n, [[maybe_unused]] const auto i)
         {
             const auto finc = fanin_edges(ctn.color_ntk, n);
@@ -156,7 +151,6 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                     /*Skip Inverters and color them east*/
                     if (ntk.is_inv(current_node))
                     {
-                        //auto fos_pre1 = fanouts(ctn.color_ntk, pre1);
                         /*Color Inverter east*/
                         paint_node_and_edges(ctn, current_node, ctn.color_east);
                         auto fon_f = fanouts(ctn.color_ntk, current_node);
@@ -334,13 +328,7 @@ class orthogonal_ordering_network_impl
                     // if node is a PI, move it to its correct position
                     if (ctn.color_ntk.is_pi(n))
                     {
-                        /**NEW CODE
-                         * !!new latest_pos for inputs
-                         * **/
                         node2pos[n] = layout.move_node(pi2node[n], {latest_pos_inputs});
-
-                        /*Placing Inputs in first Column*/
-                        std::cout<<n<<"Pi plaziert auf "<<"X:"<<latest_pos_inputs.x<<"Y:"<<latest_pos_inputs.y<<std::endl;
 
                         //++latest_pos.y;
                         ++latest_pos_inputs.y;
@@ -360,23 +348,14 @@ class orthogonal_ordering_network_impl
                                 insert_position = insert_position_inv;
                                 ++insert_position_inv;
                                 --latest_pos.x;
-                                //std::cout<<"INV"<<ntk.isFo_inv_flag_num()<<std::endl;
                             }
-                            /*oder ist inverter und nächster knoten ist pi*/
+                            /*Is Inverter and next node is PI*/
                             if(ctn.color_ntk.is_fanout(n) && ctn.color_ntk.is_pi(pre))
                             {
                                 ++latest_pos.y;
                             }
                             const tile<Lyt> t{insert_position, pre_t.y};
 
-                            if(ctn.color_ntk.is_fanout(n)){
-                                std::cout<<n<<"FO plaziert auf"<<"X:"<<t.x<<"Y:"<<t.y<<std::endl;
-                            }else{
-                                std::cout<<n<<"Inv plaziert auf"<<"X:"<<t.x<<"Y:"<<t.y<<std::endl;
-                            }
-
-                            std::cout<<n<<"Pre: "<<pre<<std::endl;
-                            std::cout<<n<<"color: "<<"east"<<std::endl;
                             node2pos[n] = connect_and_place(layout, t, ctn.color_ntk, n, pre_t);
                             ++latest_pos.x;
                         }
@@ -385,26 +364,14 @@ class orthogonal_ordering_network_impl
                         {
                             if((ctn.color_ntk.is_inv(n) ||ctn.color_ntk.is_fanout(n)) && latest_pos.y<latest_pos_inputs.y){
                                 const tile<Lyt> t{pre_t.x, latest_pos_inputs.y};
-                                if(ctn.color_ntk.is_fanout(n)){
-                                    std::cout<<n<<"FO plaziert auf"<<"X:"<<t.x<<"Y:"<<t.y<<std::endl;
-                                }else{
-                                    std::cout<<n<<"Inv plaziert auf"<<"X:"<<t.x<<"Y:"<<t.y<<std::endl;
-                                }
-                                std::cout<<n<<"Pre: "<<pre<<std::endl;
-                                std::cout<<n<<"color: "<<"south"<<std::endl;
+
                                 node2pos[n] = connect_and_place(layout, t, ctn.color_ntk, n, pre_t);
                                 latest_pos.y = t.y+1;
                             }
                             else
                             {
                                 const tile<Lyt> t{pre_t.x, latest_pos.y};
-                                if(ctn.color_ntk.is_fanout(n)){
-                                    std::cout<<n<<"FO plaziert auf"<<"X:"<<t.x<<"Y:"<<t.y<<std::endl;
-                                }else{
-                                    std::cout<<n<<"Inv plaziert auf"<<"X:"<<t.x<<"Y:"<<t.y<<std::endl;
-                                }
-                                std::cout<<n<<"Pre: "<<pre<<std::endl;
-                                std::cout<<n<<"color: "<<"south"<<std::endl;
+
                                 node2pos[n] = connect_and_place(layout, t, ctn.color_ntk, n, pre_t);
                                 ++latest_pos.y;
                             }
@@ -424,7 +391,6 @@ class orthogonal_ordering_network_impl
 
                         tile<Lyt> t{};
 
-
                         // n is colored east
                         if (const auto clr = ctn.color_ntk.color(n); clr == ctn.color_east)
                         {
@@ -432,7 +398,6 @@ class orthogonal_ordering_network_impl
                             if (pre2_t.y < pre1_t.y){
                                 std::swap(pre1_t, pre2_t);
                             }
-
 
                             // use larger y position of predecessors
                             t = {latest_pos.x, pre2_t.y};
@@ -444,12 +409,6 @@ class orthogonal_ordering_network_impl
                             if(latest_pos.y < latest_pos_inputs.y){
                                 latest_pos.y = t.y+1;
                             }
-
-                            std::cout<<n<<"And plaziert auf"<<"X:"<<t.x<<"Y:"<<t.y<<std::endl;
-                            std::cout<<n<<"Pre1: "<<pre1<<std::endl;
-                            std::cout<<n<<"Pre2: "<<pre2<<std::endl;
-                            std::cout<<n<<"color: "<<"east"<<std::endl;
-
                         }
                         // n is colored south
                         else if (clr == ctn.color_south)
@@ -478,36 +437,21 @@ class orthogonal_ordering_network_impl
                                 std::swap(pre1_t, pre2_t);
                                 pre_fo = pre1;
                             }
-                            /**NEW CODE
-                             * !!new south wire option
-                             * **/
+                            /*Area saving south rule*/
                             // check if pre1_t is now also the northwards tile
                             if (pre1_t.y < pre2_t.y && !ctn.color_ntk.is_fanout(pre_fo))
                             {
                                 if(pre2_t.x == pre1_t.x)
                                 {
-                                    // node can be placed on y position of pre2_t
-                                    //std::cout<<"Neue south wires für: "<<n<<std::endl;
 
                                     // use larger x position of predecessors
                                     t = {latest_pos.x, pre2_t.y};
-                                    std::cout<<n<<"And plaziert auf"<<"X:"<<t.x<<"Y:"<<t.y<<std::endl;
-                                    std::cout<<n<<"Pre1: "<<pre1<<std::endl;
-                                    std::cout<<n<<"Pre2: "<<pre2<<std::endl;
-                                    std::cout<<n<<"color: "<<"south"<<std::endl;
                                     ++latest_pos.x;
                                 }
                                 else
                                 {
-                                    // node can be placed on y position of pre2_t
-                                    //std::cout<<"Neue south wires für: "<<n<<std::endl;
-
                                     // use larger x position of predecessors
                                     t = {pre1_t.x, pre2_t.y};
-                                    std::cout<<n<<"And plaziert auf"<<"X:"<<t.x<<"Y:"<<t.y<<std::endl;
-                                    std::cout<<n<<"Pre1: "<<pre1<<std::endl;
-                                    std::cout<<n<<"Pre2: "<<pre2<<std::endl;
-                                    std::cout<<n<<"color: "<<"south"<<std::endl;
                                 }
                                 if(pre2_t.y+1>latest_pos.y)
                                 {
@@ -525,11 +469,6 @@ class orthogonal_ordering_network_impl
                                     pre2_t = static_cast<tile<Lyt>>(wire_south(layout, pre2_t, {pre2_t.x, t.y + 1}));
 
                                     latest_pos.y = t.y+1;
-
-                                    std::cout<<n<<"And plaziert auf"<<"X:"<<t.x<<"Y:"<<t.y<<std::endl;
-                                    std::cout<<n<<"Pre1: "<<pre1<<std::endl;
-                                    std::cout<<n<<"Pre2: "<<pre2<<std::endl;
-                                    std::cout<<n<<"color: "<<"south"<<std::endl;
                                 }
                                 else
                                 {
@@ -540,11 +479,6 @@ class orthogonal_ordering_network_impl
                                     pre2_t = static_cast<tile<Lyt>>(wire_south(layout, pre2_t, {pre2_t.x, t.y + 1}));
 
                                     ++latest_pos.y;
-
-                                    std::cout<<n<<"And plaziert auf"<<"X:"<<t.x<<"Y:"<<t.y<<std::endl;
-                                    std::cout<<n<<"Pre1: "<<pre1<<std::endl;
-                                    std::cout<<n<<"Pre2: "<<pre2<<std::endl;
-                                    std::cout<<n<<"color: "<<"south"<<std::endl;
                                 }
                             }
                         }
@@ -567,11 +501,6 @@ class orthogonal_ordering_network_impl
                                     ctn.color_east;
 
                             t = latest_pos;
-
-                            std::cout<<n<<"And plaziert auf"<<"X:"<<t.x<<"Y:"<<t.y<<std::endl;
-                            std::cout<<n<<"Pre1: "<<pre1<<std::endl;
-                            std::cout<<n<<"Pre2: "<<pre2<<std::endl;
-                            std::cout<<n<<"color: "<<"southeast"<<std::endl;
 
                             if(color_pre1 == ctn.color_east && color_pre2 == ctn.color_south)
                             {
@@ -628,16 +557,12 @@ class orthogonal_ordering_network_impl
                 if (is_eastern_po_orientation_available(ctn, po) && !multi_out_node)
                 {
                     po_tile = static_cast<tile<Lyt>>(n_s);
-                    //++po_tile.x;
-                    //++latest_pos.x;
                     layout.resize({latest_pos.x, latest_pos.y-1, 1});
                 }
                 else
                 {
                     po_tile = static_cast<tile<Lyt>>(n_s);
-                    //++latest_pos.y;
                     po_tile = static_cast<tile<Lyt>>(wire_south(layout, po_tile, {po_tile.x, po_tile.y + 2}));
-                    //++po_tile.y;
                     layout.resize({latest_pos.x, latest_pos.y-1, 1});
                 }
                 // check if PO position is located at the border
@@ -666,7 +591,6 @@ class orthogonal_ordering_network_impl
                 }
 
                 out_nodes.push_back(po);
-                std::cout<<po<<"PO plaziert auf"<<"X:"<<po_tile.x<<"Y:"<<po_tile.y<<std::endl;
             });
         /**********************************************************End: Place Pos***************************************************************/
 
@@ -686,7 +610,6 @@ class orthogonal_ordering_network_impl
                     }
                 }
             });
-        std::cout<<"Crossing_Num: "<<crossing_count<<std::endl;
 
         // statistical information
         pst.x_size    = layout.x() + 1;
@@ -694,10 +617,6 @@ class orthogonal_ordering_network_impl
         pst.num_gates = layout.num_gates();
         pst.num_wires = layout.num_wires();
 
-        std::cout<<"ntk.num_gates()"<<ntk.num_gates()<<std::endl;
-
-        //std::cout<<"latest X: "<<latest_pos.x<<std::endl;
-        //std::cout<<"latest Y: "<<latest_pos.y<<std::endl;
 
         return layout;
     }
@@ -713,6 +632,20 @@ class orthogonal_ordering_network_impl
 
 }  // namespace detail
 
+
+/**
+ * A modification of the orthogonal algorithm, which saves area and wire crossings by ordering PIs
+ * and coloring the affected nodes based on the relevant conditions.
+ *
+ * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in larger than 2.
+ *
+ * @tparam Lyt Desired gate-level layout type.
+ * @tparam Ntk Network type that acts as specification.
+ * @param ntk The network that is to place and route.
+ * @param ps Parameters.
+ * @param pst Statistics.
+ * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit.
+ */
 
 template <typename Lyt, typename Ntk>
 Lyt orthogonal_ordering_network(const Ntk& ntk, orthogonal_physical_design_params ps = {},

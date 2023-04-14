@@ -107,21 +107,11 @@ TEST_CASE("TEST", "[ordering]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    auto mux21 = blueprints::test_sort_fanouts<mockturtle::names_view<mockturtle::aig_network>>();
+    auto test_nw = blueprints::test_sort_fanouts<mockturtle::names_view<mockturtle::aig_network>>();
 
     orthogonal_physical_design_stats stats{};
 
-    const auto layout = orthogonal_ordering_network<gate_layout>(mux21, {}, &stats);
-
-    fiction::debug::write_dot_layout(layout);
-
-    std::cout << "PROCESSING ORDERING_NW "<< std::endl;
-    std::cout << "Size: " <<(stats.x_size) * (stats.y_size) << std::endl;
-    std::cout << "w: " <<(stats.x_size)<< std::endl;
-    std::cout << "h: " <<(stats.y_size) << std::endl;
-    std::cout << "Time: " << mockturtle::to_seconds(stats.time_total) << std::endl;
-    std::cout << "Num Gates: "  << stats.num_gates << std::endl;
-    std::cout << "Num Wires: " << stats.num_wires<< std::endl;
+    const auto layout = orthogonal_ordering_network<gate_layout>(test_nw, {}, &stats);
 
     gate_level_drvs(layout);
 }
