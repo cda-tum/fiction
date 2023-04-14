@@ -51,7 +51,7 @@ struct critical_temperature_stats
     /**
      * Energy difference between the ground state and the first (erroneous) excited state.
      */
-    double e_min_ground_state_error = std::numeric_limits<double>::max();
+    double energy_between_ground_state_and_first_erroneous = std::numeric_limits<double>::infinity();
     /**
      * Prints the simulation results to the given output stream.
      *
@@ -63,7 +63,9 @@ struct critical_temperature_stats
 
         if (num_valid_lyt != 0)
         {
-            out << fmt::format("'#valid': {} | E_min_g,(err)exc.: {}\n", num_valid_lyt, e_min_ground_state_error);
+            out << fmt::format("'# of physically valid charge configurations': {} | Energy between ground state and "
+                               "first erroneous: {}\n",
+                               num_valid_lyt, energy_between_ground_state_and_first_erroneous);
         }
         else
         {
@@ -221,7 +223,7 @@ void critical_temperature(const Lyt& lyt, const bool erroneous_excited = true,
                 if (!trans_error && (energy > min_energy) && ground_state_is_transparent)
                 {
                     // The energy difference is stored in meV.
-                    ct_stats.e_min_ground_state_error = (energy - min_energy) * 1000;
+                    ct_stats.energy_between_ground_state_and_first_erroneous = (energy - min_energy) * 1000;
 
                     break;
                 }
@@ -267,7 +269,8 @@ void critical_temperature(const Lyt& lyt, const bool erroneous_excited = true,
                 const auto first_excited_state_energy = std::next(distribution.cbegin())->first;
 
                 // The energy difference between the first excited and the ground state in meV.
-                ct_stats.e_min_ground_state_error = (first_excited_state_energy - ground_state_energy) * 1000;
+                ct_stats.energy_between_ground_state_and_first_erroneous =
+                    (first_excited_state_energy - ground_state_energy) * 1000;
             }
 
             for (const auto& [energy, occurrence] : distribution)
