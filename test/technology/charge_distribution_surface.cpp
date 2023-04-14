@@ -445,9 +445,9 @@ TEMPLATE_TEST_CASE(
         charge_layout_five.increase_charge_index_by_one();
         CHECK(charge_layout_five.get_charge_index().first == 10);
 
-        CHECK(charge_layout_five.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(charge_layout_five.get_charge_state({0, 2, 0}) == sidb_charge_state::NEUTRAL);
-        CHECK(charge_layout_five.get_charge_state({4, 1, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout_five.get_charge_state({0, 0, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_layout_five.get_charge_state({0, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout_five.get_charge_state({4, 1, 1}) == sidb_charge_state::NEUTRAL);
     }
 
     SECTION("Physical validity check, small distance, not all can be negatively charged anymore")
@@ -1208,6 +1208,7 @@ TEMPLATE_TEST_CASE(
 
         const sidb_simulation_parameters params{3, -0.28};
         charge_distribution_surface      charge_lyt_first{lyt, params, sidb_charge_state::NEGATIVE};
+        charge_lyt_first.three_state_sim_required();
         const auto                       positive_candidates = charge_lyt_first.get_positive_candidates();
         REQUIRE(positive_candidates.size() == 3);
         uint64_t loop_counter = 0;

@@ -89,7 +89,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          */
         std::vector<typename Lyt::cell> sidb_order{};
 
-        std::vector<typename Lyt::cell> sidb_order_without_positive_candidates{};
+        std::vector<typename Lyt::cell> sidb_order_without_three_state_cells{};
         /**
          * The SiDBs' charge states are stored. Corresponding cells are stored in `sidb_order`.
          */
@@ -162,7 +162,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          * This vector collects all cells that could potentially be positively charged based on the maximum possible
          * local potential.
          */
-        std::vector<typename Lyt::cell> positive_candidates{};
+        std::vector<typename Lyt::cell> three_state_cells{};
 
         bool dependent_cell_in_sub_layout{};
     };
@@ -319,22 +319,22 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         strg->charge_index_sub_layout.second = 3;
         if (!strg->dependent_cell.is_dead())
         {
-            if (!strg->positive_candidates.empty())
+            if (!strg->three_state_cells.empty())
             {
-                if (std::find(strg->positive_candidates.begin(), strg->positive_candidates.end(),
-                              strg->dependent_cell) != strg->positive_candidates.end())
+                if (std::find(strg->three_state_cells.begin(), strg->three_state_cells.end(), strg->dependent_cell) !=
+                    strg->three_state_cells.end())
                 {
                     strg->max_charge_index =
-                        static_cast<uint64_t>(std::pow(2, this->num_cells() - strg->positive_candidates.size()) - 1);
+                        static_cast<uint64_t>(std::pow(2, this->num_cells() - strg->three_state_cells.size()) - 1);
                     strg->max_charge_index_sub_layout =
-                        static_cast<uint64_t>(std::pow(3, strg->positive_candidates.size() - 1) - 1);
+                        static_cast<uint64_t>(std::pow(3, strg->three_state_cells.size() - 1) - 1);
                 }
                 else
                 {
-                    strg->max_charge_index = static_cast<uint64_t>(
-                        std::pow(2, this->num_cells() - 1 - strg->positive_candidates.size()) - 1);
+                    strg->max_charge_index =
+                        static_cast<uint64_t>(std::pow(2, this->num_cells() - 1 - strg->three_state_cells.size()) - 1);
                     strg->max_charge_index_sub_layout =
-                        static_cast<uint64_t>(std::pow(3, strg->positive_candidates.size()) - 1);
+                        static_cast<uint64_t>(std::pow(3, strg->three_state_cells.size()) - 1);
                 }
             }
             else
@@ -551,9 +551,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     bool three_state_sim_required() noexcept
     {
         this->update_after_charge_change();
-        strg->positive_candidates                    = {};
-        strg->sidb_order_without_positive_candidates = {};
-        bool required                                = false;
+        strg->three_state_cells                    = {};
+        strg->sidb_order_without_three_state_cells = {};
+        bool required                              = false;
         this->foreach_cell(
             [&required, this](const auto& c)
             {
@@ -561,17 +561,17 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
                     if (-*local_pot + strg->phys_params.mu_p > -physical_constants::POP_STABILITY_ERR)
                     {
-                        strg->positive_candidates.emplace_back(c);
+                        strg->three_state_cells.emplace_back(c);
                         required = true;
                     }
                 }
             });
         for (const auto& cell : strg->sidb_order)
         {
-            if (std::find(strg->positive_candidates.begin(), strg->positive_candidates.end(), cell) ==
-                strg->positive_candidates.end())
+            if (std::find(strg->three_state_cells.begin(), strg->three_state_cells.end(), cell) ==
+                strg->three_state_cells.end())
             {
-                strg->sidb_order_without_positive_candidates.push_back(cell);
+                strg->sidb_order_without_three_state_cells.push_back(cell);
             }
         }
         return required;
@@ -579,7 +579,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
     std::vector<typename Lyt::cell> get_positive_candidates() const noexcept
     {
-        return strg->positive_candidates;
+        return strg->three_state_cells;
     }
     /**
      * Returns the charge state of a cell of the layout at a given index.
@@ -630,21 +630,21 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
     [[nodiscard]] int64_t positive_cell_to_index(const typename Lyt::cell& c) const noexcept
     {
-        if (const auto it = std::find(strg->positive_candidates.cbegin(), strg->positive_candidates.cend(), c);
-            it != strg->positive_candidates.cend())
+        if (const auto it = std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), c);
+            it != strg->three_state_cells.cend())
         {
-            return static_cast<int64_t>(std::distance(strg->positive_candidates.cbegin(), it));
+            return static_cast<int64_t>(std::distance(strg->three_state_cells.cbegin(), it));
         }
         return -1;
     }
 
     [[nodiscard]] int64_t negative_cell_to_index(const typename Lyt::cell& c) const noexcept
     {
-        if (const auto it = std::find(strg->sidb_order_without_positive_candidates.cbegin(),
-                                      strg->sidb_order_without_positive_candidates.cend(), c);
-            it != strg->sidb_order_without_positive_candidates.cend())
+        if (const auto it = std::find(strg->sidb_order_without_three_state_cells.cbegin(),
+                                      strg->sidb_order_without_three_state_cells.cend(), c);
+            it != strg->sidb_order_without_three_state_cells.cend())
         {
-            return static_cast<int64_t>(std::distance(strg->sidb_order_without_positive_candidates.cbegin(), it));
+            return static_cast<int64_t>(std::distance(strg->sidb_order_without_three_state_cells.cbegin(), it));
         }
         return -1;
     }
@@ -665,21 +665,35 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return {};
     }
 
-    [[nodiscard]] typename Lyt::cell index_to_positive_cell(const uint64_t index) const noexcept
+    /**
+     * Finds the cell which is a candidate to be positively charged of a given index.
+     *
+     * @param c The index to find the cell of.
+     * @return The cell in the layout for the given index. Returns dead-coordinate if the index is not assigned to a not
+     * empty cell in the layout.
+     */
+    [[nodiscard]] typename Lyt::cell index_to_three_state_cell(const uint64_t index) const noexcept
     {
-        if (index < strg->positive_candidates.size())
+        if (index < strg->three_state_cells.size())
         {
-            return strg->positive_candidates[index];
+            return strg->three_state_cells[index];
         }
 
         return {};
     }
 
-    [[nodiscard]] typename Lyt::cell index_to_negative_cell(const uint64_t index) const noexcept
+    /**
+     * Finds the cell which can only be neutrally or negatively charged of a given index.
+     *
+     * @param c The index to find the cell of.
+     * @return The cell in the layout for the given index. Returns dead-coordinate if the index is not assigned to a not
+     * empty cell in the layout.
+     */
+    [[nodiscard]] typename Lyt::cell index_to_two_state_cell(const uint64_t index) const noexcept
     {
-        if (index < strg->sidb_order_without_positive_candidates.size())
+        if (index < strg->sidb_order_without_three_state_cells.size())
         {
-            return strg->sidb_order_without_positive_candidates[index];
+            return strg->sidb_order_without_three_state_cells[index];
         }
 
         return {};
@@ -1080,6 +1094,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void validity_check() noexcept
     {
+        strg->validity                                      = true;
         uint64_t population_stability_not_fulfilled_counter = 0;
         uint64_t for_loop_counter                           = 0;
 
@@ -1175,11 +1190,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         if (!strg->dependent_cell.is_dead())
         {
-            if (!strg->positive_candidates.empty())
+            if (!strg->three_state_cells.empty())
             {
                 if (strg->dependent_cell_in_sub_layout)
                 {
-                    for (const auto& cell : strg->positive_candidates)
+                    for (const auto& cell : strg->three_state_cells)
                     {
                         if (cell != strg->dependent_cell)
                         {
@@ -1189,7 +1204,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                             counter_sub_layout += 1;
                         }
                     }
-                    for (const auto& cell : strg->sidb_order_without_positive_candidates)
+                    for (const auto& cell : strg->sidb_order_without_three_state_cells)
                     {
                         chargeindex +=
                             static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
@@ -1199,7 +1214,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 }
                 else
                 {
-                    for (const auto& cell : strg->positive_candidates)
+                    for (const auto& cell : strg->three_state_cells)
                     {
 
                         chargeindex_sub_layout +=
@@ -1207,7 +1222,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                                                   std::pow(3, this->num_cells() - 1 - counter - 1));
                         counter_sub_layout += 1;
                     }
-                    for (const auto& cell : strg->sidb_order_without_positive_candidates)
+                    for (const auto& cell : strg->sidb_order_without_three_state_cells)
                     {
                         if (cell != strg->dependent_cell)
                         {
@@ -1235,9 +1250,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         else
         {
-            if (!strg->positive_candidates.empty())
+            if (!strg->three_state_cells.empty())
             {
-                for (const auto& cell : strg->positive_candidates)
+                for (const auto& cell : strg->three_state_cells)
                 {
 
                     chargeindex_sub_layout +=
@@ -1245,7 +1260,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                                               std::pow(3, this->num_cells() - 1 - counter));
                     counter_sub_layout += 1;
                 }
-                for (const auto& cell : strg->sidb_order_without_positive_candidates)
+                for (const auto& cell : strg->sidb_order_without_three_state_cells)
                 {
 
                     chargeindex +=
@@ -1260,13 +1275,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
                     chargeindex +=
                         static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
-                                              std::pow(2, this->num_cells() - 1 - counter));
+                                              std::pow(base, this->num_cells() - 1 - counter));
                     counter += 1;
                 }
             }
         }
 
-        strg->charge_index            = {chargeindex, 2};
+        strg->charge_index            = {chargeindex, base};
         strg->charge_index_sub_layout = {chargeindex_sub_layout, 3};
     }
     /**
@@ -1286,9 +1301,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      *  The stored unique index is converted to the charge distribution of the charge distribution surface.
      */
-    void index_to_charge_distribution(const bool flag = false) noexcept
+    void index_to_charge_distribution(const bool fast_three_state_simulation = false) noexcept
     {
-        if (!flag)
+        if (!fast_three_state_simulation)
         {
             strg->cell_history = {};
             strg->cell_history.reserve(this->num_cells());
@@ -1348,13 +1363,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
             if (strg->charge_index.first == 0)
             {
-                for (const auto& cell : strg->sidb_order_without_positive_candidates)
+                for (const auto& cell : strg->sidb_order_without_three_state_cells)
                 {
                     if (this->get_charge_state(cell) != sidb_charge_state::NEGATIVE && cell != strg->dependent_cell)
                     {
                         strg->cell_history.emplace_back(cell_to_index(cell),
                                                         charge_state_to_sign(get_charge_state(cell)));
-                        this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, !flag);
+                        this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, !fast_three_state_simulation);
                     }
                 }
             }
@@ -1362,13 +1377,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 if (strg->charge_index_sub_layout.first == 0)
                 {
-                    for (const auto& cell : strg->positive_candidates)
+                    for (const auto& cell : strg->three_state_cells)
                     {
                         if (this->get_charge_state(cell) != sidb_charge_state::NEGATIVE && cell != strg->dependent_cell)
                         {
                             strg->cell_history.emplace_back(cell_to_index(cell),
                                                             charge_state_to_sign(get_charge_state(cell)));
-                            this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, !flag);
+                            this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, !fast_three_state_simulation);
                         }
                     }
                 }
@@ -1378,7 +1393,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
             auto       charge_quot_positive = strg->charge_index_sub_layout.first;
             const auto base_positive        = strg->charge_index_sub_layout.second;
-            auto       counter              = strg->positive_candidates.size() - 1;
+            auto       counter              = strg->three_state_cells.size() - 1;
 
             while (charge_quot_positive > 0)
             {
@@ -1392,13 +1407,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
                     const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
                     if (const auto new_chargesign =
-                            this->get_charge_state_by_index(cell_to_index(index_to_positive_cell(counter)));
+                            this->get_charge_state_by_index(cell_to_index(index_to_three_state_cell(counter)));
                         new_chargesign != sign)
                     {
                         strg->cell_history.emplace_back(
-                            static_cast<uint64_t>(cell_to_index(index_to_positive_cell(counter))),
+                            static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))),
                             charge_state_to_sign(new_chargesign));
-                        this->assign_charge_state_by_cell_index(cell_to_index(index_to_positive_cell(counter)), sign,
+                        this->assign_charge_state_by_cell_index(cell_to_index(index_to_three_state_cell(counter)), sign,
                                                                 false);
                     }
                     counter -= 1;
@@ -1408,13 +1423,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     counter -= 1;
                     const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
                     if (const auto old_chargesign =
-                            this->get_charge_state_by_index(cell_to_index(index_to_positive_cell(counter)));
+                            this->get_charge_state_by_index(cell_to_index(index_to_three_state_cell(counter)));
                         old_chargesign != sign)
                     {
                         strg->cell_history.emplace_back(
-                            static_cast<uint64_t>(cell_to_index(index_to_positive_cell(counter))),
+                            static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))),
                             charge_state_to_sign(old_chargesign));
-                        this->assign_charge_state_by_cell_index(cell_to_index(index_to_positive_cell(counter)), sign,
+                        this->assign_charge_state_by_cell_index(cell_to_index(index_to_three_state_cell(counter)), sign,
                                                                 false);
                     }
                     counter -= 1;
@@ -1424,7 +1439,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             const auto dependent_cell_index_negative = negative_cell_to_index(strg->dependent_cell);
             auto       charge_quot                   = strg->charge_index.first;
             const auto base                          = strg->charge_index.second;
-            auto       counter_negative              = strg->sidb_order_without_positive_candidates.size() - 1;
+            auto       counter_negative              = strg->sidb_order_without_three_state_cells.size() - 1;
 
             while (charge_quot > 0)
             {
@@ -1438,14 +1453,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
                     const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
                     if (const auto new_chargesign =
-                            this->get_charge_state_by_index(cell_to_index(index_to_negative_cell(counter_negative)));
+                            this->get_charge_state_by_index(cell_to_index(index_to_two_state_cell(counter_negative)));
                         new_chargesign != sign)
                     {
                         strg->cell_history.emplace_back(
-                            static_cast<uint64_t>(cell_to_index(index_to_negative_cell(counter_negative))),
+                            static_cast<uint64_t>(cell_to_index(index_to_two_state_cell(counter_negative))),
                             charge_state_to_sign(new_chargesign));
-                        this->assign_charge_state_by_cell_index(cell_to_index(index_to_negative_cell(counter_negative)),
-                                                                sign, false);
+                        this->assign_charge_state_by_cell_index(
+                            cell_to_index(index_to_two_state_cell(counter_negative)), sign, false);
                     }
                     counter_negative -= 1;
                 }
@@ -1454,14 +1469,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     counter_negative -= 1;
                     const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
                     if (const auto old_chargesign =
-                            this->get_charge_state_by_index(cell_to_index(index_to_negative_cell(counter_negative)));
+                            this->get_charge_state_by_index(cell_to_index(index_to_two_state_cell(counter_negative)));
                         old_chargesign != sign)
                     {
                         strg->cell_history.emplace_back(
-                            static_cast<uint64_t>(cell_to_index(index_to_negative_cell(counter_negative))),
+                            static_cast<uint64_t>(cell_to_index(index_to_two_state_cell(counter_negative))),
                             charge_state_to_sign(old_chargesign));
-                        this->assign_charge_state_by_cell_index(cell_to_index(index_to_negative_cell(counter_negative)),
-                                                                sign, false);
+                        this->assign_charge_state_by_cell_index(
+                            cell_to_index(index_to_two_state_cell(counter_negative)), sign, false);
                     }
                     counter_negative -= 1;
                 }
@@ -1529,7 +1544,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             strg->charge_index.first += 1;
             this->index_to_charge_distribution(fast_three_state);
-            // std::cout << strg->cell_history.size() << std::endl;
             this->update_after_charge_change(dependent_cell_fixed, recompute_system_energy, consider_history);
         }
     }
@@ -1715,7 +1729,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param cs The charge state assigned to all SiDBs.
      */
-    void initialize(const sidb_charge_state& cs = sidb_charge_state::NEGATIVE) noexcept
+    void initialize(const sidb_charge_state& cs                               = sidb_charge_state::NEGATIVE,
+                    bool                     three_state_simulation_detection = false) noexcept
     {
         strg->sidb_order.reserve(this->num_cells());
         strg->cell_charge.reserve(this->num_cells());
@@ -1743,15 +1758,20 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->update_local_potential();
         this->recompute_system_energy();
         this->validity_check();
-        this->three_state_sim_required();
-        if (std::find(strg->positive_candidates.cbegin(), strg->positive_candidates.cend(), strg->dependent_cell) !=
-            strg->positive_candidates.cend())
+        if (three_state_simulation_detection)
         {
-            strg->dependent_cell_in_sub_layout = true;
-        }
-        else
-        {
-            strg->dependent_cell_in_sub_layout = false;
+            this->set_all_charge_states(sidb_charge_state::NEGATIVE);
+            this->update_after_charge_change();
+            this->three_state_sim_required();
+            if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), strg->dependent_cell) !=
+                strg->three_state_cells.cend())
+            {
+                strg->dependent_cell_in_sub_layout = true;
+            }
+            else
+            {
+                strg->dependent_cell_in_sub_layout = false;
+            }
         }
     };
 
