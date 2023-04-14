@@ -1094,7 +1094,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void validity_check() noexcept
     {
-        strg->validity                                      = true;
         uint64_t population_stability_not_fulfilled_counter = 0;
         uint64_t for_loop_counter                           = 0;
 
