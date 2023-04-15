@@ -24,7 +24,7 @@ class CMakeBuild(build_ext):
             extdir += os.path.sep
 
         # check if Z3 should be used. If no argument is given, fiction depends on Z3 by default.
-        z3 = os.environ.get("z3", "ON")
+        z3 = os.environ.get("z3", "OFF")
 
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
