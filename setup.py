@@ -23,7 +23,7 @@ class CMakeBuild(build_ext):
         if not extdir.endswith(os.path.sep):
             extdir += os.path.sep
 
-        # check if Z3 should be used. If no argument is given, fiction depends on Z3 by default.
+        # check if Z3 should be used. If no argument is given, fiction does not depend on Z3 by default.
         z3 = os.environ.get("z3", "OFF")
 
         # store environment variable
