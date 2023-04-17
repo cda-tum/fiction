@@ -235,8 +235,7 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
         "        <dbdot x=\"2.6880000000000002e-09\" y=\"0.0\"/>\n"
         "    </physloc>\n"
         "    <elec_dist>\n"
-        "        <dist energy=\"0.24602741408534134\" count=\"1\" physically_valid=\"1\" "
-        "state_count=\"2\">0---000</dist>\n"
+        "        <dist energy=\"0.24602741408534134\" count=\"1\" physically_valid=\"1\" state_count=\"2\">-000---</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
