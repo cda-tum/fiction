@@ -79,7 +79,7 @@ inline constexpr const char* DIST_ENERGY =
  * @param value The value to convert.
  * @return The string representation of the value.
  */
-[[nodiscard]] std::string any_to_string(const std::any& value) noexcept
+[[nodiscard]] inline std::string any_to_string(const std::any& value) noexcept
 {
     static const std::unordered_map<std::type_index, std::function<std::string(const std::any&)>> converters{
         {typeid(int8_t), [](const std::any& v) { return std::to_string(std::any_cast<int8_t>(v)); }},
