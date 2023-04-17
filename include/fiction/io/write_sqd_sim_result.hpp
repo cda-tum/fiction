@@ -211,7 +211,7 @@ class write_sqd_sim_result_impl
                                             surface.is_physically_valid() ? 1 : 0,  // physical validity
                                             sim_result.physical_parameters.base,    // simulation state count
                                             charge_configuration_to_string(
-                                                surface.get_all_sidb_charges())     // charge distribution as a string
+                                                surface.get_all_sidb_charges())  // charge distribution as a string
                           );
                       });
 
