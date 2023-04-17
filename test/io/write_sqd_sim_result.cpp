@@ -17,6 +17,80 @@
 
 using namespace fiction;
 
+TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
+{
+    SECTION("Empty std::any")
+    {
+        const std::any value{};
+        const auto     result = detail::any_to_string(value);
+
+        REQUIRE(result.empty());
+    }
+    SECTION("int8_t")
+    {
+        const int8_t value  = -42;
+        const auto   result = detail::any_to_string(value);
+
+        REQUIRE(result == "-42");
+    }
+    SECTION("uint16_t")
+    {
+        const uint16_t value  = 65535;
+        const auto     result = detail::any_to_string(value);
+
+        CHECK(result == "65535");
+    }
+    SECTION("double")
+    {
+        const double value  = 3.141593;
+        const auto   result = detail::any_to_string(value);
+
+        CHECK(result == "3.141593");
+    }
+    SECTION("std::string")
+    {
+        const std::string value  = "hello, world!";
+        const auto        result = detail::any_to_string(value);
+
+        CHECK(result == "hello, world!");
+    }
+    SECTION("const char*")
+    {
+        const char* value  = "hello, world!";
+        const auto  result = detail::any_to_string(value);
+
+        CHECK(result == "hello, world!");
+    }
+    SECTION("char")
+    {
+        const char value  = 'X';
+        const auto result = detail::any_to_string(value);
+
+        CHECK(result == "X");
+    }
+    SECTION("unsupported type")
+    {
+        const std::vector<int> value{1, 2, 3};
+        const auto             result = detail::any_to_string(value);
+
+        CHECK(result.empty());
+    }
+    SECTION("std::string in std::any")
+    {
+        const std::any value  = std::string{"hello, world!"};
+        const auto     result = detail::any_to_string(value);
+
+        CHECK(result == "hello, world!");
+    }
+    SECTION("const char* in std::any")
+    {
+        const std::any value  = "hello, world!";
+        const auto     result = detail::any_to_string(value);
+
+        CHECK(result == "hello, world!");
+    }
+}
+
 TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 {
     using namespace std::chrono_literals;

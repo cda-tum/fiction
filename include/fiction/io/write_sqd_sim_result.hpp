@@ -73,6 +73,37 @@ inline constexpr const char* DIST_ENERGY =
 
 }  // namespace siqad
 
+/**
+ * Converts an `std::any` to a string if it contains an alpha-numerical standard data type.
+ *
+ * @param value The value to convert.
+ * @return The string representation of the value.
+ */
+[[nodiscard]] std::string any_to_string(const std::any& value) noexcept
+{
+    static const std::unordered_map<std::type_index, std::function<std::string(const std::any&)>> converters{
+        {typeid(int8_t), [](const std::any& v) { return std::to_string(std::any_cast<int8_t>(v)); }},
+        {typeid(uint8_t), [](const std::any& v) { return std::to_string(std::any_cast<uint8_t>(v)); }},
+        {typeid(int16_t), [](const std::any& v) { return std::to_string(std::any_cast<int16_t>(v)); }},
+        {typeid(uint16_t), [](const std::any& v) { return std::to_string(std::any_cast<uint16_t>(v)); }},
+        {typeid(int32_t), [](const std::any& v) { return std::to_string(std::any_cast<int32_t>(v)); }},
+        {typeid(uint32_t), [](const std::any& v) { return std::to_string(std::any_cast<uint32_t>(v)); }},
+        {typeid(int64_t), [](const std::any& v) { return std::to_string(std::any_cast<int64_t>(v)); }},
+        {typeid(uint64_t), [](const std::any& v) { return std::to_string(std::any_cast<uint64_t>(v)); }},
+        {typeid(float), [](const std::any& v) { return std::to_string(std::any_cast<float>(v)); }},
+        {typeid(double), [](const std::any& v) { return std::to_string(std::any_cast<double>(v)); }},
+        {typeid(long double), [](const std::any& v) { return std::to_string(std::any_cast<long double>(v)); }},
+        {typeid(std::string), [](const std::any& v) { return std::any_cast<std::string>(v); }},
+        {typeid(const char*), [](const std::any& v) { return std::string(std::any_cast<const char*>(v)); }},
+        {typeid(char), [](const std::any& v) { return std::string(1, std::any_cast<char>(v)); }},
+    };
+
+    const auto& type = value.type();
+    const auto& it   = converters.find(type);
+
+    return it == converters.end() ? std::string() : it->second(value);
+}
+
 template <typename Lyt>
 class write_sqd_sim_result_impl
 {
@@ -103,37 +134,6 @@ class write_sqd_sim_result_impl
      * The output stream to write to.
      */
     std::ostream& os;
-
-    /**
-     * Converts an `std::any` to a string if it contains an alpha-numerical standard data type.
-     *
-     * @param value The value to convert.
-     * @return The string representation of the value.
-     */
-    [[nodiscard]] std::string any_to_string(const std::any& value) const noexcept
-    {
-        static const std::unordered_map<std::type_index, std::function<std::string(const std::any&)>> converters{
-            {typeid(int8_t), [](const std::any& v) { return std::to_string(std::any_cast<int8_t>(v)); }},
-            {typeid(uint8_t), [](const std::any& v) { return std::to_string(std::any_cast<uint8_t>(v)); }},
-            {typeid(int16_t), [](const std::any& v) { return std::to_string(std::any_cast<int16_t>(v)); }},
-            {typeid(uint16_t), [](const std::any& v) { return std::to_string(std::any_cast<uint16_t>(v)); }},
-            {typeid(int32_t), [](const std::any& v) { return std::to_string(std::any_cast<int32_t>(v)); }},
-            {typeid(uint32_t), [](const std::any& v) { return std::to_string(std::any_cast<uint32_t>(v)); }},
-            {typeid(int64_t), [](const std::any& v) { return std::to_string(std::any_cast<int64_t>(v)); }},
-            {typeid(uint64_t), [](const std::any& v) { return std::to_string(std::any_cast<uint64_t>(v)); }},
-            {typeid(float), [](const std::any& v) { return std::to_string(std::any_cast<float>(v)); }},
-            {typeid(double), [](const std::any& v) { return std::to_string(std::any_cast<double>(v)); }},
-            {typeid(long double), [](const std::any& v) { return std::to_string(std::any_cast<long double>(v)); }},
-            {typeid(std::string), [](const std::any& v) { return std::any_cast<std::string>(v); }},
-            {typeid(const char*), [](const std::any& v) { return std::string(std::any_cast<const char*>(v)); }},
-            {typeid(char), [](const std::any& v) { return std::string(1, std::any_cast<char>(v)); }},
-        };
-
-        const auto& type = value.type();
-        const auto& it   = converters.find(type);
-
-        return it == converters.end() ? std::string() : it->second(value);
-    }
     /**
      * Writes the engine information to the output stream in XML format.
      */
