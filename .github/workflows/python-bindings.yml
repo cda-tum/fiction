@@ -73,3 +73,8 @@ jobs:
       - name: Test
         working-directory: ${{github.workspace}}/bindings/pyfiction/test
         run: python3 -m unittest discover --verbose
+      
+      - name: mkdocs
+        if: ${{(matrix.os == ubuntu-latest) && (matrix.python_version == '3.11.x')}}
+        run: echo This is a test
+        
