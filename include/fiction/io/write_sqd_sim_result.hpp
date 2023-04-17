@@ -8,6 +8,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
@@ -134,39 +135,6 @@ class write_sqd_sim_result_impl
         return it == converters.end() ? std::string() : it->second(value);
     }
     /**
-     * Converts a charge distribution to a string.
-     *
-     * The string is a concatenation of the charge states of the cells in the distribution in order.
-     *
-     * The charge states are represented as follows:
-     * - NEUTRAL: '-'
-     * - NEGATIVE: '0'
-     * - POSITIVE: '1'
-     *
-     * @param surface The charge distribution to represent as a string.
-     * @return The string representation of the charge distribution.
-     */
-    std::string charge_distribution_to_string(const charge_distribution_surface<Lyt>& surface) const
-    {
-        std::stringstream stream{};
-
-        static const auto charge_to_string = [](const sidb_charge_state& state) -> char
-        {
-            switch (state)
-            {
-                case sidb_charge_state::NEUTRAL: return '-';
-                case sidb_charge_state::NEGATIVE: return '0';
-                case sidb_charge_state::POSITIVE: return '1';
-                default: return '-';
-            }
-        };
-
-        surface.foreach_cell([&stream, &surface](const auto& c)
-                             { stream << charge_to_string(surface.get_charge_state(c)); });
-
-        return stream.str();
-    }
-    /**
      * Writes the engine information to the output stream in XML format.
      */
     void write_engine_info()
@@ -242,7 +210,8 @@ class write_sqd_sim_result_impl
                                             1,                                      // occurrence count
                                             surface.is_physically_valid() ? 1 : 0,  // physical validity
                                             sim_result.physical_parameters.base,    // simulation state count
-                                            charge_distribution_to_string(surface)  // charge distribution as string
+                                            charge_configuration_to_string(
+                                                surface.get_all_sidb_charges())     // charge distribution as a string
                           );
                       });
 
