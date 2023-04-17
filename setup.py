@@ -27,7 +27,7 @@ class CMakeBuild(build_ext):
         z3 = os.environ.get("z3", "OFF")
 
         # store environment variable
-        with open(".env", 'w') as f:
+        with open(".env", "w") as f:
             f.write(f"z3={z3}")
 
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
