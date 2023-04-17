@@ -26,6 +26,10 @@ class CMakeBuild(build_ext):
         # check if Z3 should be used. If no argument is given, fiction depends on Z3 by default.
         z3 = os.environ.get("z3", "OFF")
 
+        # store environment variable
+        with open(".env", 'w') as f:
+            f.write(f"z3={z3}")
+
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
                       '-DMOCKTURTLE_EXAMPLES=OFF',

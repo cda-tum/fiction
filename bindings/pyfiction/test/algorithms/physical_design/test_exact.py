@@ -3,15 +3,18 @@ import unittest
 import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
+z3 = os.environ.get("z3", "OFF")
 
 
 class TestExactCartesianPhysicalDesign(unittest.TestCase):
 
+    @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_exact_default(self):
         network = read_logic_network(dir_path + "/../../resources/mux21.v")
         layout = exact_cartesian(network)
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
 
+    @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_exact_with_parameters(self):
         network = read_logic_network(dir_path + "/../../resources/mux21.v")
 
@@ -24,6 +27,7 @@ class TestExactCartesianPhysicalDesign(unittest.TestCase):
 
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
 
+    @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_exact_with_stats(self):
         network = read_logic_network(dir_path + "/../../resources/mux21.v")
 
@@ -36,11 +40,13 @@ class TestExactCartesianPhysicalDesign(unittest.TestCase):
 
 class TestExactHexagonalPhysicalDesign(unittest.TestCase):
 
+    @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_exact_default(self):
         network = read_logic_network(dir_path + "/../../resources/mux21.v")
         layout = exact_hexagonal(network)
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
 
+    @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_exact_with_parameters(self):
         network = read_logic_network(dir_path + "/../../resources/mux21.v")
 
@@ -53,6 +59,7 @@ class TestExactHexagonalPhysicalDesign(unittest.TestCase):
 
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
 
+    @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_exact_with_stats(self):
         network = read_logic_network(dir_path + "/../../resources/mux21.v")
 
