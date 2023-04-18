@@ -5,8 +5,8 @@
 #ifndef PYFICTION_ROUTING_UTILS_HPP
 #define PYFICTION_ROUTING_UTILS_HPP
 
-#include "pyfiction/types.hpp"
 #include "pyfiction/docs.h"
+#include "pyfiction/types.hpp"
 
 #include <fiction/utils/routing_utils.hpp>
 
