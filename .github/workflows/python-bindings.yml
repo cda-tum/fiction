@@ -18,6 +18,7 @@ defaults:
 
 env:
   Z3_VERSION: 4.10.0
+  ENABLE_Z3: 'ON'
 
 jobs:
   build_and_test:
@@ -68,7 +69,7 @@ jobs:
 
       - name: Build pyfiction
         working-directory: ${{github.workspace}}
-        run: pip install .
+        run: z3=${{env.ENABLE_Z3}} pip install .
 
       - name: Test
         working-directory: ${{github.workspace}}/bindings/pyfiction/test

@@ -23,6 +23,13 @@ class CMakeBuild(build_ext):
         if not extdir.endswith(os.path.sep):
             extdir += os.path.sep
 
+        # check if Z3 should be used. If no argument is given, fiction does not depend on Z3 by default.
+        z3 = os.environ.get("z3", "OFF")
+
+        # store environment variable
+        with open(".env", "w") as env_file:
+            env_file.write(f"z3={z3}")
+
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable,
                       '-DMOCKTURTLE_EXAMPLES=OFF',
@@ -31,7 +38,7 @@ class CMakeBuild(build_ext):
                       '-DFICTION_TEST=OFF',
                       '-DFICTION_EXPERIMENTS=OFF',
                       '-DFICTION_PYTHON_BINDINGS=ON',
-                      '-DFICTION_Z3=ON',
+                      f'-DFICTION_Z3={z3}',
                       # '-DFICTION_ENABLE_MUGEN=ON'
                       ]
 
