@@ -63,13 +63,13 @@ inline constexpr const char* ADD_SIM_PARAM = "        <{}>{}</{}>\n";
 inline constexpr const char* OPEN_PHYSLOC  = "    <physloc>\n";
 inline constexpr const char* CLOSE_PHYSLOC = "    </physloc>\n";
 
-inline constexpr const char* DBDOT = "        <dbdot x=\"{}\" y=\"{}\"/>\n";
+inline constexpr const char* DBDOT = "        <dbdot x=\"{:.6f}\" y=\"{:.6f}\"/>\n";
 
 inline constexpr const char* OPEN_ELEC_DIST  = "    <elec_dist>\n";
 inline constexpr const char* CLOSE_ELEC_DIST = "    </elec_dist>\n";
 
 inline constexpr const char* DIST_ENERGY =
-    "        <dist energy=\"{}\" count=\"{}\" physically_valid=\"{}\" state_count=\"{}\">{}</dist>\n";
+    "        <dist energy=\"{:.6f}\" count=\"{}\" physically_valid=\"{}\" state_count=\"{}\">{}</dist>\n";
 
 }  // namespace siqad
 
