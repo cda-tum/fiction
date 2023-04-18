@@ -5,6 +5,7 @@
 #ifndef PYFICTION_A_STAR_HPP
 #define PYFICTION_A_STAR_HPP
 
+#include "pyfiction/docs.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/path_finding/a_star.hpp>
@@ -35,9 +36,10 @@ void a_star(pybind11::module& m)
                                                                            fiction::manhattan_distance_functor<Lyt>(),
                                                                            fiction::unit_cost_functor<Lyt>(), params));
         },
-        "layout"_a, "source"_a, "target"_a, "params"_a = fiction::a_star_params{});
+        "layout"_a, "source"_a, "target"_a, "params"_a = fiction::a_star_params{}, DOC(fiction_a_star));
 
-    m.def("a_star_distance", &fiction::a_star_distance<Lyt, double>, "layout"_a, "source"_a, "target"_a);
+    m.def("a_star_distance", &fiction::a_star_distance<Lyt, double>, "layout"_a, "source"_a, "target"_a,
+          DOC(fiction_a_star_distance));
 }
 
 }  // namespace detail
@@ -48,7 +50,7 @@ inline void a_star(pybind11::module& m)
 
     py::class_<fiction::a_star_params>(m, "a_star_params")
         .def(py::init<>())
-        .def_readwrite("crossings", &fiction::a_star_params::crossings)
+        .def_readwrite("crossings", &fiction::a_star_params::crossings, DOC(fiction_a_star_params_crossings))
 
         ;
 

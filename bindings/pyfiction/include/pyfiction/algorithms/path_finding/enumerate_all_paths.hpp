@@ -5,6 +5,7 @@
 #ifndef PYFICTION_ENUMERATE_ALL_PATHS_HPP
 #define PYFICTION_ENUMERATE_ALL_PATHS_HPP
 
+#include "pyfiction/docs.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/path_finding/enumerate_all_paths.hpp>
@@ -43,7 +44,8 @@ void enumerate_all_clocking_paths(pybind11::module& m)
 
             return paths;
         },
-        "layout"_a, "source"_a, "target"_a, "params"_a = fiction::enumerate_all_clocking_paths_params{});
+        "layout"_a, "source"_a, "target"_a, "params"_a = fiction::enumerate_all_clocking_paths_params{},
+        DOC(fiction_enumerate_all_clocking_paths));
 }
 
 }  // namespace detail
@@ -53,8 +55,9 @@ inline void enumerate_all_clocking_paths(pybind11::module& m)
     namespace py = pybind11;
 
     py::class_<fiction::enumerate_all_clocking_paths_params>(m, "enumerate_all_clocking_paths_params")
-        .def(py::init<>())
-        .def_readwrite("crossings", &fiction::enumerate_all_clocking_paths_params::crossings)
+        .def(py::init<>(), DOC(fiction_enumerate_all_clocking_paths_params))
+        .def_readwrite("crossings", &fiction::enumerate_all_clocking_paths_params::crossings,
+                       DOC(fiction_enumerate_all_clocking_paths_params_crossings))
 
         ;
 
