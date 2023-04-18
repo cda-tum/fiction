@@ -11,6 +11,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include "pyfiction/docstrings.h"
 
 #include <vector>
 
@@ -35,7 +36,7 @@ void route_path(pybind11::module& m)
 
             fiction::route_path(lyt, converted_path);
         },
-        "layout"_a, "path"_a);
+        "layout"_a, "path"_a, DOC(fiction_route_path));
 }
 
 }  // namespace detail
