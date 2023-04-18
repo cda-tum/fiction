@@ -63,7 +63,7 @@ struct sidb_simulation_parameters
      */
     double lat_c;
     /**
-     * epsilon_r is the electric permittivity. It is a material specific number.
+     * epsilon_r is the electric permittivity. It is a material specific number (unit-less).
      */
     double epsilon_r;
     /**
