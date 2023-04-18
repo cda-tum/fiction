@@ -5,7 +5,7 @@
 #ifndef PYFICTION_OBSTRUCTION_LAYOUT_HPP
 #define PYFICTION_OBSTRUCTION_LAYOUT_HPP
 
-#include "pyfiction/docs.h"
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/obstruction_layout.hpp>

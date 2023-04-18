@@ -5,7 +5,7 @@
 #ifndef PYFICTION_NETWORK_BALANCING_HPP
 #define PYFICTION_NETWORK_BALANCING_HPP
 
-#include "pyfiction/docs.h"
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>

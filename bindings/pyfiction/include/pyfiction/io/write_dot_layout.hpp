@@ -5,7 +5,7 @@
 #ifndef PYFICTION_WRITE_DOT_LAYOUT_HPP
 #define PYFICTION_WRITE_DOT_LAYOUT_HPP
 
-#include "pyfiction/docs.h"
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/dot_drawers.hpp>

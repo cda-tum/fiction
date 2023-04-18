@@ -5,7 +5,7 @@
 #ifndef PYFICTION_A_STAR_HPP
 #define PYFICTION_A_STAR_HPP
 
-#include "pyfiction/docs.h"
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/path_finding/a_star.hpp>

@@ -5,7 +5,7 @@
 #ifndef PYFICTION_APPLY_GATE_LIBRARY_HPP
 #define PYFICTION_APPLY_GATE_LIBRARY_HPP
 
-#include "pyfiction/docs.h"
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>

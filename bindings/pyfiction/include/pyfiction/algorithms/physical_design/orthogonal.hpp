@@ -5,7 +5,7 @@
 #ifndef PYFICTION_ORTHOGONAL_HPP
 #define PYFICTION_ORTHOGONAL_HPP
 
-#include "pyfiction/docs.h"
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>

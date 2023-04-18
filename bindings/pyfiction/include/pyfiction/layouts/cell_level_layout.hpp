@@ -5,7 +5,7 @@
 #ifndef PYFICTION_CELL_LEVEL_LAYOUT_HPP
 #define PYFICTION_CELL_LEVEL_LAYOUT_HPP
 
-#include "pyfiction/docs.h"
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/cell_technologies.hpp>

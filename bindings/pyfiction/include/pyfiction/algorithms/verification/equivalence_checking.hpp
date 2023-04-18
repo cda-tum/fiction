@@ -5,7 +5,7 @@
 #ifndef PYFICTION_EQUIVALENCE_CHECKING_HPP
 #define PYFICTION_EQUIVALENCE_CHECKING_HPP
 
-#include "pyfiction/docs.h"
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/verification/equivalence_checking.hpp>

@@ -5,7 +5,7 @@
 #ifndef PYFICTION_COLOR_ROUTING_HPP
 #define PYFICTION_COLOR_ROUTING_HPP
 
-#include "pyfiction/docs.h"
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/color_routing.hpp>

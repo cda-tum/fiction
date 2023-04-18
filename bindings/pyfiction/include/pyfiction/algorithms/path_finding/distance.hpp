@@ -5,7 +5,7 @@
 #ifndef PYFICTION_DISTANCE_HPP
 #define PYFICTION_DISTANCE_HPP
 
-#include "pyfiction/docs.h"
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/path_finding/distance.hpp>

@@ -5,7 +5,7 @@
 #ifndef PYFICTION_CLOCKED_LAYOUT_HPP
 #define PYFICTION_CLOCKED_LAYOUT_HPP
 
-#include "pyfiction/docs.h"
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
