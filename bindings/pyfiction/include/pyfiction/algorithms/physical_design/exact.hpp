@@ -7,6 +7,7 @@
 
 #if (FICTION_Z3_SOLVER)
 
+#include "pyfiction/docs.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/exact.hpp>
