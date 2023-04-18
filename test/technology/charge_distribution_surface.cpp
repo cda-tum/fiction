@@ -194,20 +194,20 @@ TEMPLATE_TEST_CASE(
 
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
-        CHECK_THAT(charge_layout.get_distance_between_cells({0, 0, 0}, {0, 0, 0}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {0, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK_THAT(charge_layout.get_distance_between_cells({0, 0, 0}, {1, 0, 0}),
-                   Catch::Matchers::WithinAbs(sidb_simulation_parameters{}.lat_a, 0.00001));
-        CHECK_THAT(charge_layout.get_distance_between_cells({1, 0, 0}, {0, 0, 0}),
-                   Catch::Matchers::WithinAbs(sidb_simulation_parameters{}.lat_a, 0.00001));
-        CHECK_THAT(charge_layout.get_distance_between_cells({1, 0, 0}, {1, 0, 0}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {1, 0, 0}),
+                   Catch::Matchers::WithinAbs(sidb_simulation_parameters{}.lat_a * 0.1, 0.00001));
+        CHECK_THAT(charge_layout.get_nm_distance_between_cells({1, 0, 0}, {0, 0, 0}),
+                   Catch::Matchers::WithinAbs(sidb_simulation_parameters{}.lat_a * 0.1, 0.00001));
+        CHECK_THAT(charge_layout.get_nm_distance_between_cells({1, 0, 0}, {1, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK_THAT(charge_layout.get_distance_between_cells({0, 0, 0}, {1, 1, 1}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {1, 1, 1}),
                    Catch::Matchers::WithinAbs(
-                       std::hypot(sidb_simulation_parameters{}.lat_a,
-                                  sidb_simulation_parameters{}.lat_b + sidb_simulation_parameters{}.lat_c),
+                       std::hypot(sidb_simulation_parameters{}.lat_a * 0.1,
+                                  sidb_simulation_parameters{}.lat_b * 0.1 + sidb_simulation_parameters{}.lat_c * 0.1),
                        0.00001));
-        CHECK_THAT(charge_layout.get_distance_between_cells({1, 1, 1}, {1, 1, 1}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_cells({1, 1, 1}, {1, 1, 1}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
 
