@@ -5,6 +5,7 @@
 #ifndef PYFICTION_CELL_LEVEL_LAYOUT_HPP
 #define PYFICTION_CELL_LEVEL_LAYOUT_HPP
 
+#include "pyfiction/docs.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/cell_technologies.hpp>
@@ -92,21 +93,28 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
 
                      throw std::runtime_error("Given name does not refer to a supported clocking scheme");
                  }),
-             "dimension"_a, "clocking_scheme"_a = "2DDWave", "layout_name"_a = "")
+             "dimension"_a, "clocking_scheme"_a = "2DDWave", "layout_name"_a = "", DOC(fiction_cell_level_layout))
 
-        .def("assign_cell_type", &py_cartesian_technology_cell_layout::assign_cell_type, "c"_a, "ct"_a)
-        .def("get_cell_type", &py_cartesian_technology_cell_layout::get_cell_type, "c"_a)
-        .def("is_empty_cell", &py_cartesian_technology_cell_layout::is_empty_cell, "c"_a)
-        .def("assign_cell_name", &py_cartesian_technology_cell_layout::assign_cell_name, "c"_a, "n"_a)
-        .def("get_cell_name", &py_cartesian_technology_cell_layout::get_cell_name, "c"_a)
-        .def("set_layout_name", &py_cartesian_technology_cell_layout::set_layout_name, "name"_a)
-        .def("get_layout_name", &py_cartesian_technology_cell_layout::get_layout_name)
-        .def("num_cells", &py_cartesian_technology_cell_layout::num_cells)
-        .def("is_empty", &py_cartesian_technology_cell_layout::is_empty)
-        .def("num_pis", &py_cartesian_technology_cell_layout::num_pis)
-        .def("num_pos", &py_cartesian_technology_cell_layout::num_pos)
-        .def("is_pi", &py_cartesian_technology_cell_layout::is_pi, "c"_a)
-        .def("is_po", &py_cartesian_technology_cell_layout::is_po, "c"_a)
+        .def("assign_cell_type", &py_cartesian_technology_cell_layout::assign_cell_type, "c"_a, "ct"_a,
+             DOC(fiction_cell_level_layout_assign_cell_type))
+        .def("get_cell_type", &py_cartesian_technology_cell_layout::get_cell_type, "c"_a,
+             DOC(fiction_cell_level_layout_get_cell_type))
+        .def("is_empty_cell", &py_cartesian_technology_cell_layout::is_empty_cell, "c"_a,
+             DOC(fiction_cell_level_layout_is_empty_cell))
+        .def("assign_cell_name", &py_cartesian_technology_cell_layout::assign_cell_name, "c"_a, "n"_a,
+             DOC(fiction_cell_level_layout_assign_cell_name))
+        .def("get_cell_name", &py_cartesian_technology_cell_layout::get_cell_name, "c"_a,
+             DOC(fiction_cell_level_layout_get_cell_name))
+        .def("set_layout_name", &py_cartesian_technology_cell_layout::set_layout_name, "name"_a,
+             DOC(fiction_cell_level_layout_set_layout_name))
+        .def("get_layout_name", &py_cartesian_technology_cell_layout::get_layout_name,
+             DOC(fiction_cell_level_layout_get_layout_name))
+        .def("num_cells", &py_cartesian_technology_cell_layout::num_cells, DOC(fiction_cell_level_layout_num_cells))
+        .def("is_empty", &py_cartesian_technology_cell_layout::is_empty, DOC(fiction_cell_level_layout_is_empty))
+        .def("num_pis", &py_cartesian_technology_cell_layout::num_pis, DOC(fiction_cell_level_layout_num_pis))
+        .def("num_pos", &py_cartesian_technology_cell_layout::num_pos, DOC(fiction_cell_level_layout_num_pos))
+        .def("is_pi", &py_cartesian_technology_cell_layout::is_pi, "c"_a, DOC(fiction_cell_level_layout_is_pi))
+        .def("is_po", &py_cartesian_technology_cell_layout::is_po, "c"_a, DOC(fiction_cell_level_layout_is_po))
 
         .def("cells",
              [](const py_cartesian_technology_cell_layout& lyt)
