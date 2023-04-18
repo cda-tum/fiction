@@ -2580,6 +2580,723 @@ static const char *__doc_fiction_detail_equivalence_checking_impl_run = R"doc()d
 
 static const char *__doc_fiction_detail_equivalence_checking_impl_spec = R"doc(Specification.)doc";
 
+static const char *__doc_fiction_detail_exact_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_exact_impl_ari = R"doc(Iterator for the factorization of possible aspect ratios.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_ari_mutex =
+R"doc(Restricts access to the aspect_ratio_iterator and the
+result_aspect_ratio.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_black_list =
+R"doc(Maps tiles to blacklisted gate types via their truth tables and port
+information.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_exact_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_exact_impl_explore_asynchronously =
+R"doc(Thread function for the asynchronous solving strategy. It registers
+its own context in the given list of thread_info objects and starts
+exploring the search space. It fetches the next aspect ratio to work
+on from the global aspect ratio iterator which is protected by a
+mutex. When a result is found, other threads that are currently
+working on larger layout aspect ratios are interrupted while smaller
+ones may finish running.
+
+Parameter ``t_num``:
+    Thread's identifier.
+
+Parameter ``ti_list``:
+    Pointer to a list of shared thread info that the threads use for
+    communication.
+
+Returns:
+    A found layout or nullptr if being interrupted.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_lower_bound = R"doc(Lower bound for the number of layout tiles.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_ntk = R"doc(Specification network.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_ps = R"doc(Parameters.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_pst = R"doc(Statistics.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_rar_mutex = R"doc()doc";
+
+static const char *__doc_fiction_detail_exact_impl_result_aspect_ratio = R"doc(Aspect ratio of found result. Only needed for the asynchronous case.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_exact_impl_run_asynchronously =
+R"doc(Launches params.num_threads threads and evaluates their return
+statements.
+
+Returns:
+    A placed and routed gate-level layout or std::nullopt in case a
+    timeout or an upper bound was reached.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_run_synchronously =
+R"doc(Does the same as explore_asynchronously but without thread
+synchronization overhead.
+
+Returns:
+    A placed and routed gate-level layout or std::nullopt in case a
+    timeout or an upper bound was reached.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_scheme = R"doc(The utilized clocking scheme.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler =
+R"doc(Sub-class to exact to handle construction of SMT instances as well as
+house-keeping like storing solver states across incremental calls etc.
+Multiple handlers can be created in order to explore possible aspect
+ratios in parallel.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_apply_to_added_and_updated_tiles =
+R"doc(Applies a given function to all added and updated tiles in the current
+solver check point.
+
+Template parameter ``Fn``:
+    Functor type.
+
+Parameter ``fn``:
+    Unary function to apply to all added and updated tiles. Must
+    receive a tile as parameter.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_apply_to_added_tiles =
+R"doc(Applies a given function to all added tiles in the current solver
+check point.
+
+Template parameter ``Fn``:
+    Functor type.
+
+Parameter ``fn``:
+    Unary function to apply to all added tiles. Must receive a tile as
+    parameter.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_apply_to_updated_tiles =
+R"doc(Applies a given function to all updated tiles in the current solver
+check point.
+
+Template parameter ``Fn``:
+    Functor type.
+
+Parameter ``fn``:
+    Unary function to apply to all updated tiles. Must receive a tile
+    as parameter.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_assign_layout =
+R"doc(Assigns vertices, edges and directions to the stored layout sketch
+with respect to the given model.
+
+Parameter ``model``:
+    A satisfying assignment to the created variables under all created
+    constraints that can be used to extract a layout description.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_assign_layout_clocking =
+R"doc(If an open clocking scheme was provided, this function extracts the
+clocking information from the given model and assigns the respective
+clock zones to the stored layout.
+
+Parameter ``model``:
+    Satisfying model to the generated instance.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_assign_pi_clockings =
+R"doc(Adds constraints to the solver to ensure that the cl variable of
+primary input pi is set to the clock zone value of the tile pi is
+assigned to. Necessary to be taken into account for path lengths.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_assumption_literals =
+R"doc(During incremental SMT calls, several created assertions need to be
+reformulated. To still be able to reuse information like learned
+clauses and lemmas, the push/pop strategy is not employed. Instead,
+assumption literals are used that track, i.e., imply, certain
+assertions and can be negated in order to deactivate them. Over
+incremental calls, the layout size grows either in eastern or southern
+direction. Assertions to deactivate affect tiles sitting at the
+growing borders as they certainly get new neighbors. To not deactivate
+both at once if not needed, there is one assertion literal tracking
+eastern growth and one tracking southern growth. The corner tile is
+implied by their conjunction.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_assumption_literals_e =
+R"doc(Watched literals for eastern and southern constraints which are used
+to reformulate them.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_assumption_literals_s =
+R"doc(Watched literals for eastern and southern constraints which are used
+to reformulate them.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_black_list =
+R"doc(Maps tiles to blacklisted gate types via their truth tables and port
+information.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_black_list_gates =
+R"doc(Adds constraints to the solver to enforce blacklisting of certain
+gates.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_check_point = R"doc(Current solver checkpoint extracted from the solver tree.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_ctx = R"doc(The context used for all solvers.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_define_gate_fanin_tiles =
+R"doc(Adds constraints to the solver to enforce that a tile which was
+assigned with some node n has a predecessor that is assigned to the
+inversely adjacent node of n or an incoming edge of n.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_define_gate_fanout_tiles =
+R"doc(Adds constraints to the solver to enforce that a tile which was
+assigned with some node n has a successor that is assigned to the
+adjacent node of n or an outgoing edge of n.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_define_number_of_connections =
+R"doc(Adds constraints to the solver to define the number of connection
+variables to be set for each tile, i.e. empty tiles are not allowed to
+have connections at all, edges need to have one ingoing and one
+outgoing connection and so on. Symmetry breaking constraints.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_define_wire_fanin_tiles =
+R"doc(Adds constraints to the solver to enforce that a tile that was
+assigned with some edge has a predecessor which is assigned to the
+inversely adjacent node or another edge.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_define_wire_fanout_tiles =
+R"doc(Adds constraints to the solver to enforce that a tile that was
+assigned with some edge has a successor which is assigned to the
+adjacent node or another edge.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_depth_ntk = R"doc(Mapping of levels to nodes used for symmetry breaking.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_eliminate_cycles =
+R"doc(Adds constraints to the solver to prohibit cycles that loop back
+information. To this end, the formerly established paths are used.
+Without this constraint, useless wire loops appear.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_enforce_border_io =
+R"doc(Adds constraints to the solver to position the primary inputs and
+primary outputs at the layout's borders.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_enforce_straight_inverters =
+R"doc(Adds constraints to the solver to enforce that no bent inverters are
+used.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_establish_sub_paths =
+R"doc(Adds constraints to the solver to map established connections between
+single tiles to sub-paths. They are spanned transitively by the next
+set of constraints.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_establish_transitive_paths =
+R"doc(Adds constraints to the solver to expand the formerly created sub-
+paths transitively.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_fetch_solver =
+R"doc(Accesses the solver tree and looks for a solver state that is
+associated with an aspect ratio smaller by 1 row or column than given
+aspect ratio. The found one is returned together with the tiles that
+are new to this solver.
+
+If no such solver could be found, a new solver is created from the
+context given.
+
+Parameter ``ar``:
+    aspect ratio of size x * y.
+
+Returns:
+    Solver state associated with an aspect ratio of size x - 1 * y or
+    x * y - 1 and, additionally, the tiles new to the solver. If no
+    such solver is available, a new one is created.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_generate_smt_instance =
+R"doc(Generates the SMT instance by calling the constraint generating
+functions.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_get_lit_e =
+R"doc(Returns the lc-th eastern assumption literal from the stored context.
+
+Returns:
+    Eastern literal.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_get_lit_s =
+R"doc(Returns the lc-th southern assumption literal from the stored context.
+
+Returns:
+    Southern literal.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_get_ncl =
+R"doc(Returns an ncl variable from the stored context representing node n's
+(pi) clock number.
+
+Parameter ``n``:
+    Node to be considered.
+
+Returns:
+    ncl variable from ctx.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_get_solver_statistics =
+R"doc(Returns a statistics object from the current solver state.
+
+Returns:
+    Statistics.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_get_tc =
+R"doc(Returns a tc variable from the stored context representing that
+information flows from tile t1 to tile t2.
+
+Parameter ``t1``:
+    Tile 1 to be considered.
+
+Parameter ``t2``:
+    Tile 2 to be considered that is adjacent to t1.
+
+Returns:
+    tc variable from ctx.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_get_tcl =
+R"doc(Returns a tcl variable from the stored context representing tile t's
+clock number.
+
+Parameter ``t``:
+    Tile to be considered.
+
+Returns:
+    tcl variable from ctx.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_get_te =
+R"doc(Returns a te variable from the stored context representing that tile t
+has edge e assigned.
+
+Parameter ``t``:
+    Tile to be considered.
+
+Parameter ``e``:
+    Edge to be considered.
+
+Returns:
+    te variable from ctx.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_get_tn =
+R"doc(Returns a tn variable from the stored context representing that tile t
+has node n assigned.
+
+Parameter ``t``:
+    Tile to be considered.
+
+Parameter ``n``:
+    Node to be considered.
+
+Returns:
+    tn variable from ctx.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_get_tp =
+R"doc(Returns a tp variable from the stored context representing that a path
+from tile t1 to tile t2 exists.
+
+Parameter ``t1``:
+    Tile 1 to be considered.
+
+Parameter ``t2``:
+    Tile 2 to be considered.
+
+Returns:
+    tp variable from ctx.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_get_tse =
+R"doc(Returns a tse variable from the stored context representing tile t's
+synchronization element delay in cycles.
+
+Parameter ``t``:
+    Tile to be considered.
+
+Returns:
+    tse variable from ctx.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_global_synchronization =
+R"doc(Adds constraints to the solver to ensure that fan-in paths to the same
+tile need to have the same length in the layout modulo timing, i.e.,
+plus the clock zone assigned to their PIs.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_inv_levels = R"doc(Mapping of inverse levels to nodes used for symmetry breaking.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_is_added_tile =
+R"doc(Checks whether a given tile belongs to the added tiles of the current
+solver check point.
+
+Parameter ``t``:
+    Tile to check.
+
+Returns:
+    `true` iff t is contained in check_point->added_tiles.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_is_satisfiable =
+R"doc(Generates the SMT instance for the current solver check point and runs
+the solver check. In case the instance was satisfiable, all
+constraints are moved to an z3::optimize if optimization criteria were
+specified. This way, no unnecessary optimization constraints need to
+be generated over and over for UNSAT instances.
+
+If the instance was found SAT on both levels, a layout is extract from
+the model and stored. The function returns then true.
+
+Returns:
+    `true` iff the instance generated for the current configuration is
+    SAT.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_is_updated_tile =
+R"doc(Checks whether a given tile belongs to the updated tiles of the
+current solver check point.
+
+Parameter ``t``:
+    Tile to check.
+
+Returns:
+    `true` iff t is contained in check_point->updated_tiles.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_layout = R"doc(The sketch that later contains the layout generated from a model.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_lc = R"doc(Assumption literal counter.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_lit =
+R"doc(Shortcut to the assumption literals.
+
+Returns:
+    Reference to check_point->state->lit.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_minimize_crossings =
+R"doc(Adds constraints to the given optimize to minimize the number of
+crossing tiles to use.
+
+Parameter ``optimize``:
+    Pointer to an z3::optimize to add constraints to.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_minimize_synchronization_elements =
+R"doc(Adds constraints to the given optimize to enforce that the overall sum
+of synchronization element values should be minimized.
+
+Parameter ``optimize``:
+    Pointer to an z3::optimize to add constraints to.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_minimize_wires =
+R"doc(Adds constraints to the given optimize to minimize the number of
+crossing tiles to use.
+
+Parameter ``optimize``:
+    Pointer to an z3::optimize to add constraints to.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_mk_as =
+R"doc(Helper function for generating an implication lit -> constraint where
+lit is the given assumption literal.
+
+Parameter ``constraint``:
+    Constraint to be implied.
+
+Parameter ``lit``:
+    Assumption literal.
+
+Returns:
+    lit -> constraint.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_mk_as_if_se =
+R"doc(Helper function for generating an implication lit -> constraint where
+lit is the assumption literal responsible for t, i.e., e if t is at
+eastern border, s if t is at southern border, and (e and s) if t is
+the corner tile.
+
+Parameter ``constraint``:
+    Constraint to be implied.
+
+Parameter ``t``:
+    Tile to consider for literal picking.
+
+Returns:
+    lit -> constraint.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_mk_clk_mod =
+R"doc(Helper function to create an expression that assigns a matching
+clocking to a tile given its outgoing tile. This function is only
+needed for irregular clocking schemes.
+
+Parameter ``t1``:
+    Tile.
+
+Parameter ``t2``:
+    Tile outgoing to t1 given its dataflow.
+
+Returns:
+    An expression of the form tcl(t1, 0) --> tcl(t2, 1) and tcl(t1, 1)
+    --> tcl(t2, 2) and ... up to the number of clock phases in the
+    layout.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_mk_eq =
+R"doc(Helper function for generating an equality of an arbitrary number of
+expressions.
+
+Parameter ``v``:
+    Vector of expressions to equalize.
+
+Returns:
+    Expression that represents the equality of all elements in v.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_ncl_to_real =
+R"doc(Helper function to create an expression that maps from an ncl variable
+to a real value during a solver call.
+
+Parameter ``n``:
+    Network node.
+
+Returns:
+    An expression of the form ite(ncl == 0, 0, ite(ncl == 1, 1, ...))
+    up to the number of clock phases in the layout.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_network = R"doc(Logical specification for the layout.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_network_in_degree =
+R"doc(Determines the number of child nodes to some given node n in the
+stored logic network, not counting constants and not counting primary
+inputs if params.io_pins is not set.
+
+Parameter ``n``:
+    Node in the stored network.
+
+Returns:
+    Number of incoming nodes to n.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_network_out_degree =
+R"doc(Determines the number of parent nodes to some given node n in the
+stored logic network, not counting constants and not counting primary
+outputs if params.io_pins is not set.
+
+Parameter ``n``:
+    Node in the stored network.
+
+Returns:
+    Number of outgoing nodes of n.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_node2pos =
+R"doc(Maps nodes to tile positions when creating the layout from the SMT
+model.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_optimize =
+R"doc(Creates and returns a z3::optimize if optimization criteria were set
+by the configuration. The optimize gets passed all constraints from
+the current solver and the respective optimization constraints are
+added to it, too.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_params =
+R"doc(Configurations specifying layout restrictions. Used in instance
+generation among other places.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_place_output =
+R"doc(Places a primary output pin represented by node n of the stored
+network onto tile t in the stored layout.
+
+Parameter ``t``:
+    Tile to place the PO pin.
+
+Parameter ``n``:
+    Node in the stored network representing a PO.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_prevent_insufficiencies =
+R"doc(Adds constraints to the solver to prevent edges or vertices to be
+assigned to tiles with an insufficient number of
+predecessors/successors. Symmetry breaking constraints.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_restrict_clocks =
+R"doc(Adds constraints to the solver to enforce that each clock zone
+variable has valid bounds of 0 <= cl <= C, where C is the maximum
+clock number. Uses a one-hot encoding.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_restrict_synchronization_elements =
+R"doc(Adds constraints to the solver to prevent negative valued
+synchronization elements and that gate tiles cannot be assigned
+synchronization elements.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_restrict_tile_elements =
+R"doc(Adds constraints to the solver to limit the number of elements that
+are going to be assigned to a tile to one (node or edge) if no
+crossings are allowed. Otherwise, one node per tile or two edges per
+tile can be placed.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_restrict_vertices =
+R"doc(Adds constraints to the solver to enforce that each node is placed
+exactly once on exactly one tile.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_route =
+R"doc(Starting from t, all outgoing clocked tiles are recursively considered
+and checked against the given model. Consequently, e is routed through
+all tiles with a match in model.
+
+Parameter ``t``:
+    Initial tile to start recursion from (not included in model
+    evaluations).
+
+Parameter ``e``:
+    Edge to check for.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_set_timeout =
+R"doc(Sets the given timeout for the current solver.
+
+Parameter ``t``:
+    Timeout in ms.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_skip_const_or_io_edge =
+R"doc(Returns true, iff skip_const_or_io_node returns true for either source
+or target of the given edge..
+
+Parameter ``e``:
+    Edge in network.
+
+Returns:
+    `true` iff e is to be skipped in a loop due to it having constant
+    or I/O nodes while params.io_ports == false.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_skip_const_or_io_node =
+R"doc(Returns true, iff params.io_ports is set to false and n is either a
+constant or PI or PO node in network.
+
+Parameter ``n``:
+    Node in network.
+
+Returns:
+    `true` iff n is to be skipped in a loop due to it being a constant
+    or an I/O and params.io_ports == false.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_skippable =
+R"doc(Evaluates a given aspect ratio regarding the stored configurations
+whether it can be skipped, i.e., does not need to be explored by the
+SMT solver. The better this function is at predicting unsatisfying
+inputs, the more UNSAT instances can be skipped without losing the
+optimality guarantee. This function should never be overly
+restrictive!
+
+Parameter ``ar``:
+    Aspect ratio to evaluate.
+
+Returns:
+    `true` if ar can safely be skipped because it is UNSAT anyway.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_smt_handler =
+R"doc(Standard constructor.
+
+Parameter ``ctxp``:
+    The context that is used in all solvers.
+
+Parameter ``lyt``:
+    The empty gate-level layout that is going to contain the created
+    layout.
+
+Parameter ``ps``:
+    The parameters to respect in the SMT instance generation process.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_solver = R"doc(Shortcut to the solver stored in check_point.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_solver_check_point =
+R"doc(To reuse solver states, more information is necessary in the SMT
+instance generation process. Namely, which tiles have been added in
+contrast to the last generation and which tiles got new neighbors,
+i.e., have been updated. Additionally, a container for assumptions,
+i.e., assertions that are only valid in this and only this run, is
+needed. All of that is packaged in a solver check point.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_solver_check_point_added_tiles =
+R"doc(added_tiles contains only the newly added tiles in eastern or southern
+direction. updated_tiles instead contains the column (eastern) or row
+(southern) of tiles that used to be at the border but is not anymore
+now. In these tiles, certain assertions change so that their previous
+assertions need to be reformulated.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_solver_check_point_assumptions =
+R"doc(Assumptions that are true for only one solver run. Always includes the
+assumption literal that did not change.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_solver_check_point_state = R"doc(Solver and watched literals.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_solver_check_point_updated_tiles =
+R"doc(added_tiles contains only the newly added tiles in eastern or southern
+direction. updated_tiles instead contains the column (eastern) or row
+(southern) of tiles that used to be at the border but is not anymore
+now. In these tiles, certain assertions change so that their previous
+assertions need to be reformulated.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_solver_state =
+R"doc(Incremental solver calls require some kind of continuous solver state
+that can be extended. This state involves a pointer to the solver
+alongside its assumption literals.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_solver_state_lit =
+R"doc(Watched literals for eastern and southern constraints which are used
+to reformulate them.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_solver_state_solver = R"doc(The actual stored solver.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_solver_tree =
+R"doc(Tree-like structure mapping already examined aspect ratios to
+respective solver states for later reuse. Due to the rather suboptimal
+exploration strategy of factorizing tile counts, multiple solver
+states need to be kept. It would always be easiest to simply add an
+entire row or column to the layout but that way, several tile counts
+are skipped. E.g. by exploring 4 x 5 after 4 x 4, one would go
+directly from 16 tiles to 20 tiles. If the optimal layout can be found
+at 18 tiles, it would be missed. Therefore, the exploration strategy
+using factorizations is kept and several solvers are employed that can
+be reused at a later point. In the example, the 4 x 4 solver would be
+stored and revisited when 4 x 5 is to be explored.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_store_solver_state =
+R"doc(Stores the current solver state in the solver tree with aspect ratio
+ar as key.
+
+Parameter ``ar``:
+    Key to storing the current solver state.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_technology_specific_constraints =
+R"doc(Adds constraints to the solver to enforce technology-specific
+restrictions.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_tile_ite_counters =
+R"doc(Constructs a series of expressions to evaluate how many tiles were
+occupied by a given edge. Therefore, all te variables are translated
+to expressions of the form ite(te, 1, 0) which allows for applying
+z3::sum to them. This is a work around because no such api function
+for pseudo boolean exists.
+
+Parameter ``e``:
+    Edge to consider.
+
+Parameter ``ve``:
+    Vector of expressions to extend.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_update =
+R"doc(Resizes the layout and creates a new solver checkpoint from where on
+the next incremental instance can be generated.
+
+Parameter ``ar``:
+    Current aspect ratio to work on.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_smt_handler_utilize_hierarchical_information =
+R"doc(Adds constraints to the solver to prohibit certain node placements
+based on the network hierarchy if the clocking scheme is feed-back-
+free. Symmetry breaking constraints.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_thread_info =
+R"doc(Contains a context pointer and a currently worked on aspect ratio and
+can be shared between multiple worker threads so that they can notify
+each other via context interrupts based on their individual results,
+i.e., a thread that found a result at aspect ratio x * y can interrupt
+all other threads that are working on larger layout sizes.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_thread_info_ctx = R"doc(Pointer to a context.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_thread_info_worker_aspect_ratio = R"doc(Currently examined layout aspect ratio.)doc";
+
+static const char *__doc_fiction_detail_exact_impl_update_timeout =
+R"doc(Calculates the time left for solving by subtracting the time passed
+from the configured timeout and updates Z3's timeout accordingly.
+
+Parameter ``handler``:
+    Handler whose timeout is to be updated.
+
+Parameter ``time``:
+    Time passed since beginning of the solving process.)doc";
+
 static const char *__doc_fiction_detail_fanout_substitution_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_available_fanouts = R"doc()doc";
@@ -3948,6 +4665,185 @@ R"doc(\verbatim / \ / \ / \ / \ / \ / \ | (0,0) | (1,0) | (2,0) | | | | | /
 \ / \ / \ / / \ / \ / \ / | (0,1) | (1,1) | (2,1) | | | | | \ / \ / \
 / \ \ / \ / \ / \ | (0,2) | (1,2) | (2,2) | | | | | \ / \ / \ / \ / \
 / \ / \endverbatim)doc";
+
+static const char *__doc_fiction_exact =
+R"doc(An exact placement & routing approach using SMT solving as originally
+proposed in \"An Exact Method for Design Exploration of Quantum-dot
+Cellular Automata\" by M. Walter, R. Wille, D. Große, F. Sill Torres,
+and R. Drechsler in DATE 2018. A more extensive description can be
+found in \"Design Automation for Field-coupled Nanotechnologies\" by
+M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
+Springer Nature in 2022.
+
+Via incremental SMT calls, an optimal gate-level layout for a given
+logic network will be found under constraints. Starting with :math:` n
+` tiles, where :math:` n ` is the number of logic network nodes, each
+possible layout aspect ratio will be examined by factorization and
+tested for routability with the SMT solver Z3. When no upper bound is
+given, this approach will run until it finds a solution to the
+placement & routing problem instance.
+
+Note that there a combinations of constraints for which no valid
+solution under the given parameters exist for the given logic network.
+Such combinations cannot be detected automatically. It is, thus,
+recommended to always set a timeout. Recommended settings include the
+use of I/O pins located at the layout borders for better integration.
+Most networks are not realizable without crossings enabled. Specifying
+a regular clocking scheme SIGNIFICANTLY speeds up the process. 2DDWave
+allows for the strictest constraints and, thereby, finds a solution
+the quickest. However, for high input degree networks, no valid
+solution exists when border I/Os are to be used unless global
+synchronization is disabled. Generally, solutions are found the
+fastest with the following settings: Crossings enabled, de-
+synchronization enabled, and 2DDWave clocking given. Multi-threading
+can sometimes speed up the process, especially for large networks.
+Note that the more threads are being used, the less information can be
+shared across the individual solver runs which destroys the benefits
+of incremental solving and thereby, comparatively, slows down each
+run.
+
+The SMT instance works with a single layer of variables even though it
+is possible to allow crossings in the solution. The reduced number of
+variables saves a considerable amount of runtime. That's why
+`layout.foreach_ground_tile()` is used even though the model will be
+mapped to a 3-dimensional layout afterwards. Generally, the algorithm
+incorporates quite a few encoding optimizations to be as performant as
+possible on various layout topologies and clocking schemes.
+
+The approach applies to any data structures that implement the
+necessary functions to comply with `is_network_type` and
+`is_gate_level_layout`, respectively. It is, thereby, mostly
+technology-independent but can make certain assumptions if needed, for
+instance for ToPoliNano-compliant circuits.
+
+This approach requires the Z3 SMT solver to be installed on the
+system. Due to this circumstance, it is excluded from (CLI)
+compilation by default. To enable it, pass `-DFICTION_Z3=ON` to the
+cmake call.
+
+May throw a high_degree_fanin_exception if `ntk` contains any node
+with a fan-in too large to be handled by the specified clocking
+scheme.
+
+Template parameter ``Lyt``:
+    Desired gate-level layout type.
+
+Template parameter ``Ntk``:
+    Network type that acts as specification.
+
+Parameter ``ntk``:
+    The network that is to place and route.
+
+Parameter ``ps``:
+    Parameters.
+
+Parameter ``pst``:
+    Statistics.
+
+Returns:
+    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
+    circuit if one is found under the given parameters;
+    `std::nullopt`, otherwise.)doc";
+
+static const char *__doc_fiction_exact_physical_design_params = R"doc(Parameters for the exact physical design algorithm.)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_border_io = R"doc(Flag to indicate that I/Os should be placed at the layout's border.)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_crossings = R"doc(Flag to indicate that crossings may be used.)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_desynchronize =
+R"doc(Flag to indicate that a discrepancy in fan-in path lengths is allowed
+(reduces runtime!).)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_fixed_size =
+R"doc(Investigate only aspect ratios with the number of tiles given as upper
+bound.)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_io_pins =
+R"doc(Flag to indicate that I/Os should be realized by designated wire
+segments (preferred).)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_minimize_crossings =
+R"doc(Flag to indicate that the number of used crossing tiles should be
+minimized.)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_minimize_wires =
+R"doc(Flag to indicate that the number of used crossing tiles should be
+minimized.)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_num_threads =
+R"doc(Number of threads to use for exploring the possible aspect ratios.
+
+@note This is an unstable beta feature.)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_scheme = R"doc(Clocking scheme to be used.)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_straight_inverters =
+R"doc(Flag to indicate that straight inverters should be used over bend
+ones.)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_synchronization_elements =
+R"doc(Flag to indicate that artificial clock latch delays should be used to
+balance paths (runtime expensive!).)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_technology_specifics =
+R"doc(Technology-specific constraints that are only to be added for a
+certain target technology.)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_timeout =
+R"doc(Sets a timeout in ms for the solving process. Standard is 4294967
+seconds as defined by Z3.)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_upper_bound_x = R"doc(Number of tiles to use as an upper bound in x direction.)doc";
+
+static const char *__doc_fiction_exact_physical_design_params_upper_bound_y = R"doc(Number of tiles to use as an upper bound in y direction.)doc";
+
+static const char *__doc_fiction_exact_physical_design_stats = R"doc(Statistics.)doc";
+
+static const char *__doc_fiction_exact_physical_design_stats_duration = R"doc()doc";
+
+static const char *__doc_fiction_exact_physical_design_stats_num_aspect_ratios = R"doc()doc";
+
+static const char *__doc_fiction_exact_physical_design_stats_num_gates = R"doc()doc";
+
+static const char *__doc_fiction_exact_physical_design_stats_num_wires = R"doc()doc";
+
+static const char *__doc_fiction_exact_physical_design_stats_report = R"doc()doc";
+
+static const char *__doc_fiction_exact_physical_design_stats_x_size = R"doc()doc";
+
+static const char *__doc_fiction_exact_physical_design_stats_y_size = R"doc()doc";
+
+static const char *__doc_fiction_exact_with_blacklist =
+R"doc(The same as `exact` but with a black list of tiles that are not
+allowed to be used to a specified set of Boolean functions and their
+orientations. For example, a black list could be used to exclude the
+use of a tile only for an AND gate of a certain rotation, but not for
+other gates. This is useful if a tile is known to be faulty or if it
+is known to be used for a different purpose.
+
+Template parameter ``Lyt``:
+    Desired gate-level layout type.
+
+Template parameter ``Ntk``:
+    Network type that acts as specification.
+
+Parameter ``ntk``:
+    The network that is to place and route.
+
+Parameter ``black_list``:
+    The black list of tiles and their gate orientations.
+
+Parameter ``ps``:
+    Parameters.
+
+Parameter ``pst``:
+    Statistics.
+
+Returns:
+    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
+    circuit if one is found under the given parameters;
+    `std::nullopt`, otherwise.)doc";
 
 static const char *__doc_fiction_exgs_stats = R"doc()doc";
 
@@ -9069,6 +9965,12 @@ static const char *__doc_fiction_synchronization_element_layout_synchronization_
 static const char *__doc_fiction_synchronization_element_layout_synchronization_element_layout_storage_se_map = R"doc()doc";
 
 static const char *__doc_fiction_synchronization_element_layout_synchronization_element_layout_storage_synchronization_element_layout_storage = R"doc()doc";
+
+static const char *__doc_fiction_technology_constraints = R"doc(Target technologies.)doc";
+
+static const char *__doc_fiction_technology_constraints_NONE = R"doc()doc";
+
+static const char *__doc_fiction_technology_constraints_TOPOLINANO = R"doc()doc";
 
 static const char *__doc_fiction_technology_dot_drawer =
 R"doc(A DOT drawer that extends mockturtle's one by several additional gate

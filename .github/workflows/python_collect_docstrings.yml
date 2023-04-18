@@ -31,7 +31,7 @@ jobs:
 
       - name: mkdoc        
         working-directory: ${{github.workspace}}        
-        run: python3 -m pybind11_mkdoc -o ${{github.workspace}}/docstrings.h `find ${{github.workspace}}/include/fiction -name "*.hpp" -print`      
+        run: python3 -m pybind11_mkdoc -o ${{github.workspace}}/docstrings.h -D FICTION_Z3_SOLVER `find ${{github.workspace}}/include/fiction -name "*.hpp" -print`
 
       - uses: actions/upload-artifact@v3        
         with:          
