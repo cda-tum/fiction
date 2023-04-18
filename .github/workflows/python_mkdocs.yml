@@ -35,7 +35,7 @@ jobs:
 
       - name: mkdoc        
         working-directory: ${{github.workspace}}        
-        run: python3 -m pybind11_mkdoc -o ${{github.workspace}}/docstrings.h ${{github.workspace}}/include/fiction/utils/routing_utils.hpp      
+        run: python3 -m pybind11_mkdoc -o ${{github.workspace}}/docstrings.h `find ${{github.workspace}}/include/fiction -name "*.hpp" -print`      
 
       - uses: actions/upload-artifact@v3        
         with:          
