@@ -97,7 +97,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         /**
          * Distance between SiDBs are stored as matrix.
          */
-        distance_matrix dist_mat{};
+        distance_matrix nm_dist_mat{};
         /**
          * Electrostatic potential between SiDBs are stored as matrix (here, still charge-independent).
          */
@@ -282,7 +282,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         else
         {
             strg->phys_params = params;
-            this->initialize_distance_matrix();
+            this->initialize_nm_distance_matrix();
             this->initialize_potential_matrix();
             strg->charge_index.second = params.base;
             strg->max_charge_index    = static_cast<uint64_t>(std::pow(strg->phys_params.base, this->num_cells())) - 1;
@@ -704,14 +704,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      *  @param c1 the first cell to compare.
      *  @param c2 the second cell to compare.
-     *  @return a constexpr double representing the distance between the two cells.
+     *  @return a constexpr double representing the distance in nm between the two cells.
      */
-    [[nodiscard]] double get_distance_between_cells(const typename Lyt::cell& c1,
-                                                    const typename Lyt::cell& c2) const noexcept
+    [[nodiscard]] double get_nm_distance_between_cells(const typename Lyt::cell& c1,
+                                                       const typename Lyt::cell& c2) const noexcept
     {
         if (const auto index1 = cell_to_index(c1), index2 = cell_to_index(c2); (index1 != -1) && (index2 != -1))
         {
-            return strg->dist_mat[static_cast<uint64_t>(index1)][static_cast<uint64_t>(index2)];
+            return strg->nm_dist_mat[static_cast<uint64_t>(index1)][static_cast<uint64_t>(index2)];
         }
 
         return 0;
@@ -723,9 +723,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param index2 The second index.
      * @return The distance index between `index1` and `index2` (indices correspond to unique SiDBs).
      */
-    [[nodiscard]] double get_distance_by_indices(const uint64_t index1, const uint64_t index2) const noexcept
+    [[nodiscard]] double get_nm_distance_by_indices(const uint64_t index1, const uint64_t index2) const noexcept
     {
-        return strg->dist_mat[index1][index2];
+        return strg->nm_dist_mat[index1][index2];
     }
     /**
      * Returns the chargeless electrostatic potential between two cells.
@@ -789,13 +789,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     [[nodiscard]] double potential_between_sidbs_by_index(const uint64_t index1, const uint64_t index2) const noexcept
     {
-        if (strg->dist_mat[index1][index2] == 0)
+        if (strg->nm_dist_mat[index1][index2] == 0)
         {
             return 0.0;
         }
 
-        return (strg->phys_params.k / strg->dist_mat[index1][index2] *
-                std::exp(-strg->dist_mat[index1][index2] / strg->phys_params.lambda_tf) *
+        return (strg->phys_params.k / (strg->nm_dist_mat[index1][index2] * 1E-9) *
+                std::exp(-strg->nm_dist_mat[index1][index2] * 1E-9 / strg->phys_params.lambda_tf) *
                 physical_constants::ELECTRIC_CHARGE);
     }
 
@@ -1659,7 +1659,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             const auto dist_min =
                 std::accumulate(negative_indices.begin(), negative_indices.end(), std::numeric_limits<double>::max(),
                                 [&](const double acc, const uint64_t occ)
-                                { return std::min(acc, this->get_distance_by_indices(unocc, occ)); });
+                                { return std::min(acc, this->get_nm_distance_by_indices(unocc, occ)); });
 
             index_vector.push_back(unocc);
             distance.push_back(dist_min);
@@ -1740,7 +1740,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                "number of SiDBs is too large");
 
         this->charge_distribution_to_index();
-        this->initialize_distance_matrix();
+        this->initialize_nm_distance_matrix();
         this->initialize_potential_matrix();
         if (!strg->dependent_cell.is_dead())
         {
@@ -1776,15 +1776,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Initializes the distance matrix between all the cells of the layout.
      */
-    void initialize_distance_matrix() const noexcept
+    void initialize_nm_distance_matrix() const noexcept
     {
-        strg->dist_mat = std::vector<std::vector<double>>(this->num_cells(), std::vector<double>(this->num_cells(), 0));
+        strg->nm_dist_mat =
+            std::vector<std::vector<double>>(this->num_cells(), std::vector<double>(this->num_cells(), 0));
 
         for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
         {
             for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
             {
-                strg->dist_mat[i][j] =
+                strg->nm_dist_mat[i][j] =
                     sidb_nanometer_distance<Lyt>(*this, strg->sidb_order[i], strg->sidb_order[j], strg->phys_params);
             }
         }
