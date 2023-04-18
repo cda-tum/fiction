@@ -6,6 +6,7 @@
 #define PYFICTION_LOGIC_NETWORK_HPP
 
 #include "pyfiction/types.hpp"
+#include "pyfiction/docs.h"
 
 #include <fiction/io/network_reader.hpp>
 #include <fiction/traits.hpp>
@@ -48,7 +49,7 @@ void network(pybind11::module& m, const std::string& network_name)
      * Network.
      */
     py::class_<Ntk>(m, network_name.c_str())
-        .def(py::init<>())
+        .def(py::init<>(), DOC(fiction_technology_network))
 
         .def("size", &Ntk::size)
         .def("num_gates", &Ntk::num_gates)
@@ -106,25 +107,35 @@ void network(pybind11::module& m, const std::string& network_name)
 
         // for some reason, the is_* functions need redefinition to match with Ntk
         .def(
-            "is_buf", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_buf(n); }, "n"_a)
+            "is_buf", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_buf(n); }, "n"_a,
+            DOC(fiction_technology_network_is_buf))
         .def(
-            "is_fanout", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_fanout(n); }, "n"_a)
+            "is_fanout", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_fanout(n); }, "n"_a,
+            DOC(fiction_technology_network_is_fanout))
         .def(
-            "is_inv", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_inv(n); }, "n"_a)
+            "is_inv", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_inv(n); }, "n"_a,
+            DOC(fiction_technology_network_is_inv))
         .def(
-            "is_and", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_and(n); }, "n"_a)
+            "is_and", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_and(n); }, "n"_a,
+            DOC(fiction_technology_network_is_and))
         .def(
-            "is_or", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_or(n); }, "n"_a)
+            "is_or", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_or(n); }, "n"_a,
+            DOC(fiction_technology_network_is_or))
         .def(
-            "is_xor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xor(n); }, "n"_a)
+            "is_xor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xor(n); }, "n"_a,
+            DOC(fiction_technology_network_is_xor))
         .def(
-            "is_maj", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_maj(n); }, "n"_a)
+            "is_maj", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_maj(n); }, "n"_a,
+            DOC(fiction_technology_network_is_maj))
         .def(
-            "is_nand", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nand(n); }, "n"_a)
+            "is_nand", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nand(n); }, "n"_a,
+            DOC(fiction_technology_network_is_nand))
         .def(
-            "is_nor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nor(n); }, "n"_a)
+            "is_nor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_nor(n); }, "n"_a,
+            DOC(fiction_technology_network_is_nor))
         .def(
-            "is_xnor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xnor(n); }, "n"_a)
+            "is_xnor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xnor(n); }, "n"_a,
+            DOC(fiction_technology_network_is_xnor))
 
         ;
 
