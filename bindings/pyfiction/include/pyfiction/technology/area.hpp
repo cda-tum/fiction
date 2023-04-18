@@ -6,13 +6,12 @@
 #define PYFICTION_AREA_HPP
 
 #include "pyfiction/types.hpp"
+#include "pyfiction/docs.h"
 
 #include <fiction/technology/area.hpp>
 #include <fiction/traits.hpp>
 
 #include <pybind11/pybind11.h>
-
-#include "pyfiction/docs.h"
 
 namespace pyfiction
 {

@@ -6,6 +6,7 @@
 #define PYFICTION_ROUTING_UTILS_HPP
 
 #include "pyfiction/types.hpp"
+#include "pyfiction/docs.h"
 
 #include <fiction/utils/routing_utils.hpp>
 
@@ -13,8 +14,6 @@
 #include <pybind11/stl.h>
 
 #include <vector>
-
-#include "pyfiction/docs.h"
 
 namespace pyfiction
 {
