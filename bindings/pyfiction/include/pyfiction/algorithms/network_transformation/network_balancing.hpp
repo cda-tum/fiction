@@ -5,6 +5,7 @@
 #ifndef PYFICTION_NETWORK_BALANCING_HPP
 #define PYFICTION_NETWORK_BALANCING_HPP
 
+#include "pyfiction/docs.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
@@ -23,9 +24,10 @@ void network_balancing(pybind11::module& m)
     using namespace pybind11::literals;
 
     m.def("network_balancing", &fiction::network_balancing<py_logic_network, Ntk>, "network"_a,
-          "params"_a = fiction::network_balancing_params{});
+          "params"_a = fiction::network_balancing_params{}, DOC(fiction_network_balancing));
 
-    m.def("is_balanced", &fiction::is_balanced<Ntk>, "network"_a, "params"_a = fiction::network_balancing_params{});
+    m.def("is_balanced", &fiction::is_balanced<Ntk>, "network"_a, "params"_a = fiction::network_balancing_params{},
+          DOC(fiction_is_balanced));
 }
 
 }  // namespace detail
@@ -35,8 +37,9 @@ inline void network_balancing(pybind11::module& m)
     namespace py = pybind11;
 
     py::class_<fiction::network_balancing_params>(m, "network_balancing_params")
-        .def(py::init<>())
-        .def_readwrite("unify_outputs", &fiction::network_balancing_params::unify_outputs)
+        .def(py::init<>(), DOC(fiction_network_balancing_params))
+        .def_readwrite("unify_outputs", &fiction::network_balancing_params::unify_outputs,
+                       DOC(fiction_network_balancing_params_unify_outputs))
 
         ;
 
