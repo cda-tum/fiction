@@ -5,6 +5,7 @@
 #ifndef PYFICTION_WRITE_SQD_LAYOUT_HPP
 #define PYFICTION_WRITE_SQD_LAYOUT_HPP
 
+#include "pyfiction/docs.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/write_sqd_layout.hpp>
@@ -23,7 +24,8 @@ inline void write_sqd_layout(pybind11::module& m)
     void (*write_sqd_layout_function_pointer)(const py_sidb_layout&, const std::string_view&) =
         &fiction::write_sqd_layout<py_sidb_layout>;
 
-    m.def("write_sqd_layout", write_sqd_layout_function_pointer, "layout"_a, "filename"_a);
+    m.def("write_sqd_layout", write_sqd_layout_function_pointer, "layout"_a, "filename"_a,
+          DOC(fiction_write_sqd_layout));
 }
 
 }  // namespace pyfiction

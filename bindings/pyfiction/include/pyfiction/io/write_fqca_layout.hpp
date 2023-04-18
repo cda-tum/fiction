@@ -5,6 +5,7 @@
 #ifndef PYFICTION_WRITE_FQCA_LAYOUT_HPP
 #define PYFICTION_WRITE_FQCA_LAYOUT_HPP
 
+#include "pyfiction/docs.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/write_fqca_layout.hpp>
@@ -29,7 +30,7 @@ void write_fqca_layout(pybind11::module& m)
         &fiction::write_fqca_layout<Lyt>;
 
     m.def("write_fqca_layout", write_fqca_layout_function_pointer, "layout"_a, "filename"_a,
-          "params"_a = fiction::write_fqca_layout_params{});
+          "params"_a = fiction::write_fqca_layout_params{}, DOC(fiction_write_fqca_layout));
 }
 
 }  // namespace detail
@@ -39,8 +40,9 @@ inline void write_fqca_layout(pybind11::module& m)
     namespace py = pybind11;
 
     py::class_<fiction::write_fqca_layout_params>(m, "write_fqca_layout_params")
-        .def(py::init<>())
-        .def_readwrite("create_inter_layer_via_cells", &fiction::write_fqca_layout_params::create_inter_layer_via_cells)
+        .def(py::init<>(), DOC(fiction_write_fqca_layout_params))
+        .def_readwrite("create_inter_layer_via_cells", &fiction::write_fqca_layout_params::create_inter_layer_via_cells,
+                       DOC(fiction_write_fqca_layout_params_create_inter_layer_via_cells))
 
         ;
 
