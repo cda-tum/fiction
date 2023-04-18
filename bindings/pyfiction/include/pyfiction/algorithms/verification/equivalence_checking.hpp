@@ -5,6 +5,7 @@
 #ifndef PYFICTION_EQUIVALENCE_CHECKING_HPP
 #define PYFICTION_EQUIVALENCE_CHECKING_HPP
 
+#include "pyfiction/docs.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/verification/equivalence_checking.hpp>
@@ -37,7 +38,7 @@ void equivalence_checking(pybind11::module& m)
 
             return stats.eq;
         },
-        "specification"_a, "implementation"_a, "statistics"_a = nullptr);
+        "specification"_a, "implementation"_a, "statistics"_a = nullptr, DOC(fiction_equivalence_checking));
 }
 
 }  // namespace detail
@@ -55,8 +56,9 @@ inline void equivalence_checking(pybind11::module& m)
         ;
 
     pybind11::class_<fiction::equivalence_checking_stats>(m, "equivalence_checking_stats")
-        .def(pybind11::init<>())
-        .def_readwrite("counter_example", &fiction::equivalence_checking_stats::counter_example)
+        .def(pybind11::init<>(), DOC(fiction_equivalence_checking_stats))
+        .def_readwrite("counter_example", &fiction::equivalence_checking_stats::counter_example,
+                       DOC(fiction_equivalence_checking_stats_counter_example))
 
         ;
 
