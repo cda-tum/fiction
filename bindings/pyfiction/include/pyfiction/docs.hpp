@@ -4,4 +4,3 @@
 #include "pyfiction/docstrings.hpp"
 
 #endif  // FICTION_DOCSTRINGS_HPP
-
