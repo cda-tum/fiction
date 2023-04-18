@@ -12,6 +12,8 @@
 
 #include <pybind11/pybind11.h>
 
+#include "pyfiction/docs.h"
+
 namespace pyfiction
 {
 
@@ -37,7 +39,8 @@ void area(pybind11::module& m)
             return stats.area;
         },
         "layout"_a, "width"_a = tech::CELL_WIDTH, "height"_a = tech::CELL_HEIGHT, "hspace"_a = tech::CELL_HSPACE,
-        "vspace"_a = tech::CELL_VSPACE);
+        "vspace"_a = tech::CELL_VSPACE,
+        DOC(fiction_area));
 }
 
 }  // namespace detail
