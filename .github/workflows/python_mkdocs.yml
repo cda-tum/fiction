@@ -2,36 +2,42 @@ name: use pybind11_mkdoc on all .h files and save it in a docstrings.h file
 
 on: workflow_dispatch
 
-jobs:  get_docstrings:    
-  name: use pybind11_mkdoc on all .h files and save it in a docstrings.h file    
-  runs-on: ubuntumacos-latest  
-  steps:      
-    - name: Setup Python        
-    uses: actions/setup-python@v4        
-    with:          python-version: "3.11.x"      
-    
-    - name: Clone Repository        
-    uses: actions/checkout@v3        
-    with:          
-      submodules: recursive            
-    
-    # - name: Build pyfiction        
-    # working-directory: ${{github.workspace}}        
-    # run: pip install .            
-    
-    - name: Install pybind11_mkdoc  
-    working-directory: ${{github.workspace}}        
-    run: pip install pybind11_mkdoc        
-    
-    - name: Install clang        
-    working-directory: ${{github.workspace}}        
-    run: pip install clang==14            
-    
-    - name: mkdoc        
-    working-directory: ${{github.workspace}}        
-    run: python3 -m pybind11_mkdoc -o ${{github.workspace}}/docstrings.h ${{github.workspace}}/include/fiction/utilsrouting_utils.hpp      
-    
-    - uses: actions/upload-artifact@v3        
-    with:          
-      name: docstrings          
-      path: ${{ github.workspace }}/docstrings.h
+jobs:  
+  get_docstrings:    
+    name: use pybind11_mkdoc on all .h files and save it in a docstrings.h file    
+    runs-on: macos-latest  
+    steps:      
+      - name: Setup Python        
+        uses: actions/setup-python@v4        
+        with:          
+          python-version: "3.11.x"      
+
+      - name: Clone Repository        
+        uses: actions/checkout@v3        
+        with:          
+          submodules: recursive            
+
+      # - name: Build pyfiction        
+      # working-directory: ${{github.workspace}}        
+      # run: pip install .            
+
+      - name: Install pybind11_mkdoc  
+        working-directory: ${{github.workspace}}        
+        run: pip install pybind11_mkdoc        
+
+      - name: Install clang        
+        working-directory: ${{github.workspace}}        
+        run: pip install clang==14            
+
+      - name: create docstring file
+        working-directory: ${{github.workspace}}  
+        run: touch ${{github.workspace}}/docstrings.h
+
+      - name: mkdoc        
+        working-directory: ${{github.workspace}}        
+        run: python3 -m pybind11_mkdoc -o ${{github.workspace}}/docstrings.h ${{github.workspace}}/include/fiction/utilsrouting_utils.hpp      
+
+      - uses: actions/upload-artifact@v3        
+        with:          
+          name: docstrings          
+          path: ${{ github.workspace }}/docstrings.h
