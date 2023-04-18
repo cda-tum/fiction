@@ -1,4 +1,4 @@
-name: use pybind11_mkdoc on all .h files and save it in a docstrings.h file
+name: pyfiction Collect Docstrings
 
 on: workflow_dispatch
 
