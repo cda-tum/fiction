@@ -5,6 +5,7 @@
 #ifndef PYFICTION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP
 #define PYFICTION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP
 
+#include "pyfiction/docs.h"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
@@ -31,7 +32,7 @@ void critical_path_length_and_throughput(pybind11::module& m)
 
             return {stats.critical_path_length, stats.throughput};
         },
-        "layout"_a);
+        "layout"_a, DOC(fiction_critical_path_length_and_throughput));
 }
 
 }  // namespace detail
