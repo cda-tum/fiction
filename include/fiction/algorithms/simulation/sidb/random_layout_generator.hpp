@@ -42,12 +42,9 @@ void generate_random_layouts(const typename Lyt::aspect_ratio& max_coordinate = 
             lyt.foreach_cell(
                 [&lyt, &random_coordinate, &constraint_violation](const auto& c1)
                 {
-                    if (euclidean_distance<Lyt>(lyt, c1, random_coordinate) <= 2)
+                    if (euclidean_distance<Lyt>(lyt, c1, random_coordinate) < 2)
                     {
-                        if (random_coordinate.x == c1.x)
-                        {
-                            constraint_violation = true;
-                        }
+                        constraint_violation = true;
                     }
                 });
         }

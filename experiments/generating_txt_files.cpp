@@ -27,7 +27,8 @@ namespace fs = std::filesystem;
 int main()  // NOLINT
 {
 
-    fs::path dir_path = "/Users/jandrewniok/Documents/PhD/random_layouts";
+    // fs::path dir_path = "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/random_layouts_paper_larger/";
+    fs::path dir_path = "/Users/jandrewniok/Documents/PhD/quickexact/";
 
     for (const auto& folder : fs::directory_iterator(dir_path))
     {
@@ -72,11 +73,11 @@ int main()  // NOLINT
                 outFile << std::fixed << std::setprecision(3);
                 outFile << "x;"
                         << "y;";
-                for (uint64_t i = 0; i < ground_state_layouts.size() - 1; i++)
+                for (uint64_t i = 0; i < ground_state_layouts.size(); i++)
                 {
                     outFile << std::to_string(i) << ";";
                 }
-                outFile << std::to_string(ground_state_layouts.size()) << std::endl;
+                outFile << std::endl;
 
                 for (const auto& sidb : sidbs)
                 {

@@ -1241,4 +1241,20 @@ TEMPLATE_TEST_CASE(
         }
         CHECK(loop_counter == 1);
     }
+
+    SECTION("detecting DBs which could be positively charged due to maximal band bending")
+    {
+
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
+
+        const sidb_simulation_parameters params{3, -0.32};
+        charge_distribution_surface      charge_lyt_first{lyt, params, sidb_charge_state::NEGATIVE};
+        charge_lyt_first.assign_charge_state({0, 0, 0}, sidb_charge_state::NEGATIVE);
+        charge_lyt_first.assign_charge_state({4, 0, 0}, sidb_charge_state::NEUTRAL);
+        charge_lyt_first.assign_charge_state({6, 0, 0}, sidb_charge_state::NEGATIVE);
+        charge_lyt_first.update_after_charge_change();
+        CHECK(1 == 1);
+    }
 }

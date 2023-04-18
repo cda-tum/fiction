@@ -38,14 +38,19 @@ int main()  // NOLINT
     std::vector<uint64_t> db_num{};
     uint64_t              benchmark_counter = 0u;
 
-    const std::string folder = fmt::format("{}/bestagon_gates/", EXPERIMENTS_PATH);
+    const std::string folder = fmt::format("{}/random_layouts_paper_larger/number_sidbs_", EXPERIMENTS_PATH);
 
-    static const std::array<std::string, 12> folders = {
-        folder + "and/",  folder + "cx/",  folder + "fo2/", folder + "ha/",   folder + "hourglass/", folder + "inv/",
-        folder + "nand/", folder + "nor/", folder + "or/",  folder + "wire/", folder + "xnor/",      folder + "xor/"};
+    //    static const std::array<std::string, 11> folders = {
+    //        folder + "20/sqd/",  folder + "21/sqd/",  folder + "22/sqd/", folder + "23/sqd/",   folder + "24/sqd/",
+    //        folder + "25/sqd/", folder + "26/sqd/", folder + "27/sqd/", folder + "28/sqd/",  folder + "29/sqd/",
+    //        folder + "30/sqd/"};
+
+    static const std::array<std::string, 4> folders = {folder + "30/sqd/", folder + "31/sqd/", folder + "32/sqd/",
+                                                       folder + "33/sqd/"};
 
     for (const auto& folder_gate : folders)
     {
+        double time_layout_type = 0;
         for (const auto& file : std::filesystem::directory_iterator(folder_gate))
         {
             benchmark_counter += 1;
@@ -56,7 +61,7 @@ int main()  // NOLINT
             auto lyt = read_sqd_layout<sidb_cell_clk_lyt_siqad>(benchmark.string());
 
             const sidb_simulation_parameters params{3, -0.32};
-            const quicksim_params            quicksim_params{params, 80, 0.70, 1};
+            const quicksim_params            quicksim_params{params, 0, 0.60, 10};
 
             time_to_solution_stats tts_stat{};
             sim_acc_tts<sidb_cell_clk_lyt_siqad>(lyt, quicksim_params, &tts_stat);
@@ -67,9 +72,11 @@ int main()  // NOLINT
             db_num.push_back(lyt.num_cells());
             sum_sr += tts_stat.single_runtime_exhaustive;
             sum_sr_quick += tts_stat.mean_single_runtime;
+            time_layout_type += tts_stat.single_runtime_exhaustive;
             sum_acc += tts_stat.acc;
             sum_tts += tts_stat.time_to_solution;
         }
+        std::cout << time_layout_type << std::endl;
     }
 
     auto min_db_num    = std::min_element(db_num.begin(), db_num.end());
