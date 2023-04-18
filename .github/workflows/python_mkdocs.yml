@@ -4,7 +4,7 @@ on: workflow_dispatch
 
 jobs:  get_docstrings:    
   name: use pybind11_mkdoc on all .h files and save it in a docstrings.h file    
-  runs-on: ubuntumacos-latestlatest    
+  runs-on: ubuntumacos-latest  
   steps:      
     - name: Setup Python        
     uses: actions/setup-python@v4        
@@ -15,13 +15,13 @@ jobs:  get_docstrings:
     with:          
       submodules: recursive            
     
-    - name: Build pyfiction        
-    working-directory: ${{github.workspace}}        
-    run: pip install .            
+    # - name: Build pyfiction        
+    # working-directory: ${{github.workspace}}        
+    # run: pip install .            
     
-    - name: Install pybind11_mkdocs        
+    - name: Install pybind11_mkdoc  
     working-directory: ${{github.workspace}}        
-    run: pip install pybind11_mkdocs              
+    run: pip install pybind11_mkdoc        
     
     - name: Install clang        
     working-directory: ${{github.workspace}}        
