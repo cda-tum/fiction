@@ -30,21 +30,22 @@ inline void coordinates(pybind11::module& m)
         .def(py::init<const uint64_t, const uint64_t, const uint64_t>(), "x"_a, "y"_a, "z"_a = 0)
         .def(py::init<const py_coordinate>(), "c"_a)
         .def(py::init(
-            [](const py::tuple& t)
-            {
-                const auto size = t.size();
+                 [](const py::tuple& t)
+                 {
+                     const auto size = t.size();
 
-                if (size == 2)
-                {
-                    return py_coordinate{py::int_(t[0]), py::int_(t[1])};
-                }
-                if (size == 3)
-                {
-                    return py_coordinate{py::int_(t[0]), py::int_(t[1]), py::int_(t[2])};
-                }
+                     if (size == 2)
+                     {
+                         return py_coordinate{py::int_(t[0]), py::int_(t[1])};
+                     }
+                     if (size == 3)
+                     {
+                         return py_coordinate{py::int_(t[0]), py::int_(t[1]), py::int_(t[2])};
+                     }
 
-                throw std::runtime_error("Wrong number of dimensions provided for coordinate");
-            }), "tuple_repr"_a)
+                     throw std::runtime_error("Wrong number of dimensions provided for coordinate");
+                 }),
+             "tuple_repr"_a)
 
         .def_property(
             "x", [](py_coordinate& self) -> decltype(self.x) { return self.x; },

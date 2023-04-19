@@ -27,10 +27,10 @@ inline void hexagonal_layout(pybind11::module& m)
     /**
      * Hexagonal layout.
      */
-    py::class_<py_hexagonal_layout>(m, "hexagonal_layout")
+    py::class_<py_hexagonal_layout>(m, "hexagonal_layout", DOC(fiction_hexagonal_layout))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<py_hexagonal_layout>&>(), "dimension"_a,
-             DOC(fiction_hexagonal_layout))
+             DOC(fiction_hexagonal_layout_hexagonal_layout))
         .def("x", &py_hexagonal_layout::x, DOC(fiction_hexagonal_layout_x))
         .def("y", &py_hexagonal_layout::y, DOC(fiction_hexagonal_layout_y))
         .def("z", &py_hexagonal_layout::z, DOC(fiction_hexagonal_layout_z))

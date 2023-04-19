@@ -32,9 +32,10 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout", topology).c_str())
+    py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout", topology).c_str(), DOC(fiction_gate_level_layout))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<GateLyt>&>(), "dimension"_a)
+        .def(py::init<const fiction::aspect_ratio<GateLyt>&>(), "dimension"_a,
+             DOC(fiction_gate_level_layout_gate_level_layout))
         .def(py::init(
                  [](const fiction::aspect_ratio<GateLyt>& dimension, const std::string& scheme_name,
                     const std::string& layout_name) -> GateLyt
@@ -46,7 +47,8 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
 
                      throw std::runtime_error("Given name does not refer to a supported clocking scheme");
                  }),
-             "dimension"_a, "clocking_scheme"_a = "2DDWave", "layout_name"_a = "", DOC(fiction_gate_level_layout))
+             "dimension"_a, "clocking_scheme"_a = "2DDWave", "layout_name"_a = "",
+             DOC(fiction_gate_level_layout_gate_level_layout_2))
 
         .def("create_pi", &GateLyt::create_pi, "name"_a = std::string{}, "t"_a = fiction::tile<GateLyt>{},
              DOC(fiction_gate_level_layout_create_pi))

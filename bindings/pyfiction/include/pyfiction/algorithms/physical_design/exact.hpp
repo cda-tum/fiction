@@ -28,8 +28,8 @@ inline void exact(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::exact_physical_design_params>(m, "exact_params")
-        .def(py::init<>(), DOC(fiction_exact_physical_design_params))
+    py::class_<fiction::exact_physical_design_params>(m, "exact_params", DOC(fiction_exact_physical_design_params))
+        .def(py::init<>())
         .def_readwrite("scheme", &fiction::exact_physical_design_params::scheme,
                        DOC(fiction_exact_physical_design_params_scheme))
         .def_readwrite("upper_bound_x", &fiction::exact_physical_design_params::upper_bound_x,
@@ -57,8 +57,8 @@ inline void exact(pybind11::module& m)
 
         ;
 
-    py::class_<fiction::exact_physical_design_stats>(m, "exact_stats")
-        .def(py::init<>(), DOC(fiction_exact_physical_design_stats))
+    py::class_<fiction::exact_physical_design_stats>(m, "exact_stats", DOC(fiction_exact_physical_design_stats))
+        .def(py::init<>())
         .def("__repr__",
              [](const fiction::exact_physical_design_stats& stats)
              {

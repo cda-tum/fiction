@@ -48,8 +48,8 @@ void network(pybind11::module& m, const std::string& network_name)
     /**
      * Network.
      */
-    py::class_<Ntk>(m, network_name.c_str())
-        .def(py::init<>(), DOC(fiction_technology_network))
+    py::class_<Ntk>(m, network_name.c_str(), DOC(fiction_technology_network))
+        .def(py::init<>())
 
         .def("size", &Ntk::size)
         .def("num_gates", &Ntk::num_gates)

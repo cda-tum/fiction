@@ -26,13 +26,15 @@ inline void orthogonal(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::orthogonal_physical_design_params>(m, "orthogonal_params")
-        .def(py::init<>(), DOC(fiction_orthogonal_physical_design_params))
+    py::class_<fiction::orthogonal_physical_design_params>(m, "orthogonal_params",
+                                                           DOC(fiction_orthogonal_physical_design_params))
+        .def(py::init<>())
 
         ;
 
-    py::class_<fiction::orthogonal_physical_design_stats>(m, "orthogonal_stats")
-        .def(py::init<>(), DOC(fiction_orthogonal_physical_design_stats))
+    py::class_<fiction::orthogonal_physical_design_stats>(m, "orthogonal_stats",
+                                                          DOC(fiction_orthogonal_physical_design_stats))
+        .def(py::init<>())
         .def("__repr__",
              [](const fiction::orthogonal_physical_design_stats& stats)
              {

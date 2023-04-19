@@ -48,7 +48,7 @@ inline void a_star(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::class_<fiction::a_star_params>(m, "a_star_params")
+    py::class_<fiction::a_star_params>(m, "a_star_params", DOC(fiction_a_star_params))
         .def(py::init<>())
         .def_readwrite("crossings", &fiction::a_star_params::crossings, DOC(fiction_a_star_params_crossings))
 

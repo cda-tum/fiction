@@ -29,8 +29,9 @@ inline void one_pass_synthesis(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::one_pass_synthesis_params>(m, "one_pass_synthesis_params")
-        .def(py::init<>(), DOC(fiction_one_pass_synthesis_params))
+    py::class_<fiction::one_pass_synthesis_params>(m, "one_pass_synthesis_params",
+                                                   DOC(fiction_one_pass_synthesis_params))
+        .def(py::init<>())
         .def_readwrite("scheme", &fiction::one_pass_synthesis_params::scheme,
                        DOC(fiction_one_pass_synthesis_params_scheme))
         .def_readwrite("upper_bound", &fiction::one_pass_synthesis_params::upper_bound,
@@ -56,8 +57,8 @@ inline void one_pass_synthesis(pybind11::module& m)
 
         ;
 
-    py::class_<fiction::one_pass_synthesis_stats>(m, "one_pass_synthesis_stats")
-        .def(py::init<>(), DOC(fiction_one_pass_synthesis_stats))
+    py::class_<fiction::one_pass_synthesis_stats>(m, "one_pass_synthesis_stats", DOC(fiction_one_pass_synthesis_stats))
+        .def(py::init<>())
         .def("__repr__",
              [](const fiction::one_pass_synthesis_stats& stats)
              {

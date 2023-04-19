@@ -36,7 +36,8 @@ inline void fanout_substitution(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::enum_<fiction::fanout_substitution_params::substitution_strategy>(m, "substitution_strategy")
+    py::enum_<fiction::fanout_substitution_params::substitution_strategy>(
+        m, "substitution_strategy", DOC(fiction_fanout_substitution_params_substitution_strategy))
         .value("BREADTH", fiction::fanout_substitution_params::substitution_strategy::BREADTH,
                DOC(fiction_fanout_substitution_params_substitution_strategy_BREADTH))
         .value("DEPTH", fiction::fanout_substitution_params::substitution_strategy::DEPTH,
@@ -44,8 +45,9 @@ inline void fanout_substitution(pybind11::module& m)
 
         ;
 
-    py::class_<fiction::fanout_substitution_params>(m, "fanout_substitution_params")
-        .def(py::init<>(), DOC(fiction_fanout_substitution_params))
+    py::class_<fiction::fanout_substitution_params>(m, "fanout_substitution_params",
+                                                    DOC(fiction_fanout_substitution_params))
+        .def(py::init<>())
         .def_readwrite("strategy", &fiction::fanout_substitution_params::strategy,
                        DOC(fiction_fanout_substitution_params_strategy))
         .def_readwrite("degree", &fiction::fanout_substitution_params::degree,

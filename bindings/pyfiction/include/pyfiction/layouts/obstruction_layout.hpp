@@ -24,9 +24,10 @@ void obstruction_layout(pybind11::module& m, const std::string& topology)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<ObstrLyt, LytBase>(m, fmt::format("{}_obstruction_layout", topology).c_str())
+    py::class_<ObstrLyt, LytBase>(m, fmt::format("{}_obstruction_layout", topology).c_str(),
+                                  DOC(fiction_obstruction_layout))
         .def(py::init<>())
-        .def(py::init<const LytBase&>(), "layout"_a, DOC(fiction_obstruction_layout))
+        .def(py::init<const LytBase&>(), "layout"_a, DOC(fiction_obstruction_layout_obstruction_layout))
 
         .def("obstruct_coordinate", &ObstrLyt::obstruct_coordinate, "c"_a)
         .def("obstruct_connection", &ObstrLyt::obstruct_connection, "src"_a, "tgt"_a)

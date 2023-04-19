@@ -62,8 +62,8 @@ inline void color_routing(pybind11::module& m)
 
         ;
 
-    py::class_<fiction::color_routing_params>(m, "color_routing_params")
-        .def(py::init<>(), DOC(fiction_color_routing_params))
+    py::class_<fiction::color_routing_params>(m, "color_routing_params", DOC(fiction_color_routing_params))
+        .def(py::init<>())
         .def_readwrite("conduct_partial_routing", &fiction::color_routing_params::conduct_partial_routing,
                        DOC(fiction_color_routing_params_conduct_partial_routing))
         .def_readwrite("crossings", &fiction::color_routing_params::crossings,

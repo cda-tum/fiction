@@ -51,16 +51,21 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
 
     if constexpr (std::is_same_v<Technology, fiction::qca_technology>)
     {
-        cell_type.value("CONST_0", Technology::cell_type::CONST_0);
-        cell_type.value("CONST_1", Technology::cell_type::CONST_1);
+        cell_type.value("CONST_0", Technology::cell_type::CONST_0, DOC(fiction_qca_technology_cell_type_CONST_0));
+        cell_type.value("CONST_1", Technology::cell_type::CONST_1, DOC(fiction_qca_technology_cell_type_CONST_1));
     }
     else if constexpr (std::is_same_v<Technology, fiction::inml_technology>)
     {
-        cell_type.value("SLANTED_EDGE_UP_MAGNET", Technology::cell_type::SLANTED_EDGE_UP_MAGNET);
-        cell_type.value("SLANTED_EDGE_DOWN_MAGNET", Technology::cell_type::SLANTED_EDGE_DOWN_MAGNET);
-        cell_type.value("INVERTER_MAGNET", Technology::cell_type::INVERTER_MAGNET);
-        cell_type.value("CROSSWIRE_MAGNET", Technology::cell_type::CROSSWIRE_MAGNET);
-        cell_type.value("FANOUT_COUPLER_MAGNET", Technology::cell_type::FANOUT_COUPLER_MAGNET);
+        cell_type.value("SLANTED_EDGE_UP_MAGNET", Technology::cell_type::SLANTED_EDGE_UP_MAGNET,
+                        DOC(fiction_inml_technology_cell_type_SLANTED_EDGE_UP_MAGNET));
+        cell_type.value("SLANTED_EDGE_DOWN_MAGNET", Technology::cell_type::SLANTED_EDGE_DOWN_MAGNET,
+                        DOC(fiction_inml_technology_cell_type_SLANTED_EDGE_DOWN_MAGNET));
+        cell_type.value("INVERTER_MAGNET", Technology::cell_type::INVERTER_MAGNET,
+                        DOC(fiction_inml_technology_cell_type_INVERTER_MAGNET));
+        cell_type.value("CROSSWIRE_MAGNET", Technology::cell_type::CROSSWIRE_MAGNET,
+                        DOC(fiction_inml_technology_cell_type_CROSSWIRE_MAGNET));
+        cell_type.value("FANOUT_COUPLER_MAGNET", Technology::cell_type::FANOUT_COUPLER_MAGNET,
+                        DOC(fiction_inml_technology_cell_type_FANOUT_COUPLER_MAGNET));
     }
     else if constexpr (std::is_same_v<Technology, fiction::sidb_technology>)
     {
@@ -76,9 +81,10 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
     py::class_<py_cartesian_technology_cell_layout,
                fiction::synchronization_element_layout<fiction::clocked_layout<
                    fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>(
-        m, fmt::format("{}_layout", tech_name).c_str())
+        m, fmt::format("{}_layout", tech_name).c_str(), DOC(fiction_cell_level_layout))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), "dimension"_a)
+        .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), "dimension"_a,
+             DOC(fiction_cell_level_layout_cell_level_layout))
         .def(py::init(
                  [](const fiction::aspect_ratio<py_cartesian_technology_cell_layout>& dimension,
                     const std::string&                                                scheme_name,
@@ -93,7 +99,8 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
 
                      throw std::runtime_error("Given name does not refer to a supported clocking scheme");
                  }),
-             "dimension"_a, "clocking_scheme"_a = "2DDWave", "layout_name"_a = "", DOC(fiction_cell_level_layout))
+             "dimension"_a, "clocking_scheme"_a = "2DDWave", "layout_name"_a = "",
+             DOC(fiction_cell_level_layout_cell_level_layout_2))
 
         .def("assign_cell_type", &py_cartesian_technology_cell_layout::assign_cell_type, "c"_a, "ct"_a,
              DOC(fiction_cell_level_layout_assign_cell_type))

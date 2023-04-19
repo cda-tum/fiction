@@ -29,7 +29,8 @@ inline void cartesian_layout(pybind11::module& m)
      */
     py::class_<py_cartesian_layout>(m, "cartesian_layout", DOC(fiction_cartesian_layout))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<py_cartesian_layout>&>(), "dimension"_a)
+        .def(py::init<const fiction::aspect_ratio<py_cartesian_layout>&>(), "dimension"_a,
+             DOC(fiction_cartesian_layout_cartesian_layout))
         .def("x", &py_cartesian_layout::x, DOC(fiction_cartesian_layout_x))
         .def("y", &py_cartesian_layout::y, DOC(fiction_cartesian_layout_y))
         .def("z", &py_cartesian_layout::z, DOC(fiction_cartesian_layout_z))

@@ -54,8 +54,9 @@ inline void enumerate_all_clocking_paths(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::class_<fiction::enumerate_all_clocking_paths_params>(m, "enumerate_all_clocking_paths_params")
-        .def(py::init<>(), DOC(fiction_enumerate_all_clocking_paths_params))
+    py::class_<fiction::enumerate_all_clocking_paths_params>(m, "enumerate_all_clocking_paths_params",
+                                                             DOC(fiction_enumerate_all_clocking_paths_params))
+        .def(py::init<>())
         .def_readwrite("crossings", &fiction::enumerate_all_clocking_paths_params::crossings,
                        DOC(fiction_enumerate_all_clocking_paths_params_crossings))
 

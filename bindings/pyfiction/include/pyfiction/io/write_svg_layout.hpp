@@ -22,8 +22,9 @@ inline void write_svg_layout(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::write_qca_layout_svg_params>(m, "write_qca_layout_svg_params")
-        .def(py::init<>(), DOC(fiction_write_qca_layout_svg_params))
+    py::class_<fiction::write_qca_layout_svg_params>(m, "write_qca_layout_svg_params",
+                                                     DOC(fiction_write_qca_layout_svg_params))
+        .def(py::init<>())
         .def_readwrite("simple", &fiction::write_qca_layout_svg_params::simple,
                        DOC(fiction_write_qca_layout_svg_params_simple))
 

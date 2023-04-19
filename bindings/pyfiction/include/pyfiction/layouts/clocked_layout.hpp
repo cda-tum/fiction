@@ -33,9 +33,10 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
     /**
      * Clocked Cartesian layout.
      */
-    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout", topology).c_str())
+    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout", topology).c_str(), DOC(fiction_clocked_layout))
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<ClockedLyt>&>(), "dimension"_a)
+        .def(py::init<const fiction::aspect_ratio<ClockedLyt>&>(), "dimension"_a,
+             DOC(fiction_clocked_layout_clocked_layout))
         .def(py::init(
                  [](const fiction::aspect_ratio<ClockedLyt>& dimension, const std::string& scheme_name)
                  {
@@ -46,7 +47,7 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
 
                      throw std::runtime_error("Given name does not refer to a supported clocking scheme");
                  }),
-             "dimension"_a, "clocking_scheme"_a = "2DDWave", DOC(fiction_clocked_layout))
+             "dimension"_a, "clocking_scheme"_a = "2DDWave", DOC(fiction_clocked_layout_clocked_layout_2))
 
         .def("assign_clock_number", &ClockedLyt::assign_clock_number, "cz"_a, "cn"_a,
              DOC(fiction_clocked_layout_assign_clock_number))

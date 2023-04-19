@@ -36,8 +36,8 @@ inline void network_balancing(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::class_<fiction::network_balancing_params>(m, "network_balancing_params")
-        .def(py::init<>(), DOC(fiction_network_balancing_params))
+    py::class_<fiction::network_balancing_params>(m, "network_balancing_params", DOC(fiction_network_balancing_params))
+        .def(py::init<>())
         .def_readwrite("unify_outputs", &fiction::network_balancing_params::unify_outputs,
                        DOC(fiction_network_balancing_params_unify_outputs))
 
