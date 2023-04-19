@@ -31,7 +31,7 @@ namespace detail
 namespace siqad
 {
 
-inline constexpr const char* XML_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+inline constexpr const char* SQD_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 inline constexpr const char* OPEN_SIQAD    = "<siqad>\n";
 inline constexpr const char* CLOSE_SIQAD   = "</siqad>\n";
 inline constexpr const char* PROGRAM_BLOCK = "    <program>\n"
@@ -168,7 +168,7 @@ class write_sqd_layout_impl
     {
         std::stringstream header{}, gui{}, design{};
 
-        header << siqad::XML_HEADER << siqad::OPEN_SIQAD;
+        header << siqad::SQD_HEADER << siqad::OPEN_SIQAD;
 
         const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr)));
 
@@ -293,7 +293,7 @@ class write_sqd_layout_impl
  * Writes a cell-level SiDB or QCA layout to an sqd file that is used by SiQAD (https://github.com/siqad/siqad),
  * a physical simulator for the SiDB technology platform.
  *
- * If The provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
+ * If the provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
  *
  * This overload uses an output stream to write into.
  *
@@ -315,9 +315,9 @@ void write_sqd_layout(const Lyt& lyt, std::ostream& os)
  * Writes a cell-level SiDB or QCA layout to an sqd file that is used by SiQAD (https://github.com/siqad/siqad),
  * a physical simulator for the SiDB technology platform.
  *
- * If The provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
+ * If the provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
  *
- * This overload uses file name to create and write into.
+ * This overload uses a file name to create and write into.
  *
  * @tparam Lyt Cell-level SiDB or QCA layout type.
  * @param lyt The layout to be written.
