@@ -99,7 +99,7 @@ TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
     SECTION("long double")
     {
         const long double value  = 2.7182818284590452353602874l;
-        const auto   result = detail::any_to_string(value);
+        const auto        result = detail::any_to_string(value);
 
         CHECK(result == "2.718282");  // will be rounded by std::to_string
     }
