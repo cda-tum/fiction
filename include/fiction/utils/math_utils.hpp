@@ -2,10 +2,11 @@
 // Created by Jan Drewniok on 19.04.23.
 //
 
-#ifndef FICTION_ROUND_N_DECIMAL_PLACES_HPP
-#define FICTION_ROUND_N_DECIMAL_PLACES_HPP
+#ifndef FICTION_MATH_UTILS_HPP
+#define FICTION_MATH_UTILS_HPP
 
 #include <cmath>
+#include <cstdint>
 
 namespace fiction
 {
@@ -18,14 +19,14 @@ namespace fiction
  * @param n the number of decimal places to round to.
  * @return the number rounded to n decimal places.
  */
-
 template <typename T>
-T round_n_decimal_places(T number, const uint64_t n)
+T round_to_n_decimal_places(const T number, const uint64_t n)
 {
-    T factor = std::pow(10, n);
+    static_assert(std::is_arithmetic_v<T>, "T is not a number type");
+    const T factor = std::pow(10, n);
     return std::round(number * factor) / factor;
 }
 
 }  // namespace fiction
 
-#endif  // FICTION_ROUND_N_DECIMAL_PLACES_HPP
+#endif  // FICTION_MATH_UTILS_HPP
