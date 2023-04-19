@@ -33,6 +33,20 @@ TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
 
         REQUIRE(result == "-42");
     }
+    SECTION("uint8_t")
+    {
+        const uint8_t value  = 42;
+        const auto    result = detail::any_to_string(value);
+
+        REQUIRE(result == "42");
+    }
+    SECTION("int16_t")
+    {
+        const int16_t value  = -32768;
+        const auto    result = detail::any_to_string(value);
+
+        CHECK(result == "-32768");
+    }
     SECTION("uint16_t")
     {
         const uint16_t value  = 65535;
@@ -40,12 +54,54 @@ TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
 
         CHECK(result == "65535");
     }
+    SECTION("int32_t")
+    {
+        const int32_t value  = -2'147'483'648;
+        const auto    result = detail::any_to_string(value);
+
+        CHECK(result == "-2147483648");
+    }
+    SECTION("uint32_t")
+    {
+        const uint32_t value  = 4'294'967'295ul;
+        const auto     result = detail::any_to_string(value);
+
+        CHECK(result == "4294967295");
+    }
+    SECTION("int64_t")
+    {
+        const int64_t value  = -9'223'372'036'854'775'807;
+        const auto    result = detail::any_to_string(value);
+
+        CHECK(result == "-9223372036854775807");
+    }
+    SECTION("uint64_t")
+    {
+        const uint64_t value  = 18'446'744'073'709'551'615ull;
+        const auto     result = detail::any_to_string(value);
+
+        CHECK(result == "18446744073709551615");
+    }
+    SECTION("float")
+    {
+        const float value  = -3.141593f;
+        const auto  result = detail::any_to_string(value);
+
+        CHECK(result == "-3.141593");
+    }
     SECTION("double")
     {
-        const double value  = 3.141593;
+        const double value  = 3.14159265359;
         const auto   result = detail::any_to_string(value);
 
-        CHECK(result == "3.141593");
+        CHECK(result == "3.141593");  // will be rounded by std::to_string
+    }
+    SECTION("long double")
+    {
+        const long double value  = 2.7182818284590452353602874l;
+        const auto   result = detail::any_to_string(value);
+
+        CHECK(result == "2.718282");  // will be rounded by std::to_string
     }
     SECTION("std::string")
     {
