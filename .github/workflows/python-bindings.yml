@@ -44,6 +44,7 @@ jobs:
         with:
           python-version: ${{matrix.python_version}}
           cache: 'pip'
+          cache-dependency-path: '**/setup.py'
 
       - name: Clone Repository
         uses: actions/checkout@v3
