@@ -5,7 +5,7 @@
 #ifndef PYFICTION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP
 #define PYFICTION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP
 
-#include "pyfiction/docs.hpp"
+#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>

@@ -5,7 +5,7 @@
 #ifndef PYFICTION_K_SHORTEST_PATHS_HPP
 #define PYFICTION_K_SHORTEST_PATHS_HPP
 
-#include "pyfiction/docs.hpp"
+#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/path_finding/k_shortest_paths.hpp>

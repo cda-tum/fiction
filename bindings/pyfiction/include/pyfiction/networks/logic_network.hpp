@@ -5,7 +5,7 @@
 #ifndef PYFICTION_LOGIC_NETWORK_HPP
 #define PYFICTION_LOGIC_NETWORK_HPP
 
-#include "pyfiction/docs.hpp"
+#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/network_reader.hpp>

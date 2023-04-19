@@ -5,7 +5,7 @@
 #ifndef PYFICTION_HEXAGONAL_LAYOUT_HPP
 #define PYFICTION_HEXAGONAL_LAYOUT_HPP
 
-#include "pyfiction/docs.hpp"
+#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/traits.hpp>

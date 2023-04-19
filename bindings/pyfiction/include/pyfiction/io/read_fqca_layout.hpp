@@ -5,7 +5,7 @@
 #ifndef PYFICTION_READ_FQCA_LAYOUT_HPP
 #define PYFICTION_READ_FQCA_LAYOUT_HPP
 
-#include "pyfiction/docs.hpp"
+#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/read_fqca_layout.hpp>

@@ -7,7 +7,7 @@
 
 #if (MUGEN)
 
-#include "pyfiction/docs.hpp"
+#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/one_pass_synthesis.hpp>

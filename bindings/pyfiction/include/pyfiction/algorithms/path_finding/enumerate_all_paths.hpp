@@ -5,7 +5,7 @@
 #ifndef PYFICTION_ENUMERATE_ALL_PATHS_HPP
 #define PYFICTION_ENUMERATE_ALL_PATHS_HPP
 
-#include "pyfiction/docs.hpp"
+#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/path_finding/enumerate_all_paths.hpp>

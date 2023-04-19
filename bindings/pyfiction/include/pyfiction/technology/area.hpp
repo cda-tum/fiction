@@ -5,7 +5,7 @@
 #ifndef PYFICTION_AREA_HPP
 #define PYFICTION_AREA_HPP
 
-#include "pyfiction/docs.hpp"
+#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/area.hpp>

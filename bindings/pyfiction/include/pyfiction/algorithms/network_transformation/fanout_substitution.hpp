@@ -5,7 +5,7 @@
 #ifndef PYFICTION_FANOUT_SUBSTITUTION_HPP
 #define PYFICTION_FANOUT_SUBSTITUTION_HPP
 
-#include "pyfiction/docs.hpp"
+#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>

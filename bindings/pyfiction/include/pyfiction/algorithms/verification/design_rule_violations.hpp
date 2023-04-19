@@ -5,7 +5,7 @@
 #ifndef PYFICTION_DESIGN_RULE_VIOLATIONS_HPP
 #define PYFICTION_DESIGN_RULE_VIOLATIONS_HPP
 
-#include "pyfiction/docs.hpp"
+#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
