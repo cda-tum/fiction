@@ -18,6 +18,7 @@ concurrency:
 
 env:
   Z3_VERSION: 4.10.0
+  ENABLE_Z3: 'ON'
 
 jobs:
   build_wheels:
