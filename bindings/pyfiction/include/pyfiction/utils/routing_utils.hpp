@@ -5,6 +5,7 @@
 #ifndef PYFICTION_ROUTING_UTILS_HPP
 #define PYFICTION_ROUTING_UTILS_HPP
 
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/utils/routing_utils.hpp>
@@ -35,7 +36,7 @@ void route_path(pybind11::module& m)
 
             fiction::route_path(lyt, converted_path);
         },
-        "layout"_a, "path"_a);
+        "layout"_a, "path"_a, DOC(fiction_route_path));
 }
 
 }  // namespace detail

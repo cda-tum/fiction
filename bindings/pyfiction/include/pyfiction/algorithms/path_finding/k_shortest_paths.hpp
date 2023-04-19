@@ -5,6 +5,7 @@
 #ifndef PYFICTION_K_SHORTEST_PATHS_HPP
 #define PYFICTION_K_SHORTEST_PATHS_HPP
 
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/path_finding/k_shortest_paths.hpp>
@@ -43,7 +44,8 @@ void yen_k_shortest_paths(pybind11::module& m)
 
             return paths;
         },
-        "layout"_a, "source"_a, "target"_a, "k"_a, "params"_a = fiction::yen_k_shortest_paths_params{});
+        "layout"_a, "source"_a, "target"_a, "k"_a, "params"_a = fiction::yen_k_shortest_paths_params{},
+        DOC(fiction_yen_k_shortest_paths));
 }
 
 }  // namespace detail
@@ -52,9 +54,11 @@ inline void yen_k_shortest_paths(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::class_<fiction::yen_k_shortest_paths_params>(m, "yen_k_shortest_paths_params")
+    py::class_<fiction::yen_k_shortest_paths_params>(m, "yen_k_shortest_paths_params",
+                                                     DOC(fiction_yen_k_shortest_paths_params))
         .def(py::init<>())
-        .def_readwrite("a_star_params", &fiction::yen_k_shortest_paths_params::astar_params)
+        .def_readwrite("a_star_params", &fiction::yen_k_shortest_paths_params::astar_params,
+                       DOC(fiction_yen_k_shortest_paths_params_astar_params))
 
         ;
 

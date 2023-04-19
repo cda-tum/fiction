@@ -5,6 +5,7 @@
 #ifndef PYFICTION_LOGIC_SIMULATION_HPP
 #define PYFICTION_LOGIC_SIMULATION_HPP
 
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/utils/name_utils.hpp>

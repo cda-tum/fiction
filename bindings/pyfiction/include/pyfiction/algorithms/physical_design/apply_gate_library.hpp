@@ -5,6 +5,7 @@
 #ifndef PYFICTION_APPLY_GATE_LIBRARY_HPP
 #define PYFICTION_APPLY_GATE_LIBRARY_HPP
 
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
@@ -34,7 +35,8 @@ void apply_fcn_gate_library(pybind11::module& m, const std::string& lib_name)
     using py_cartesian_technology_cell_layout = py_cartesian_cell_layout<fiction::technology<GateLibrary>>;
 
     m.def(fmt::format("apply_{}_library", lib_name).c_str(),
-          &fiction::apply_gate_library<py_cartesian_technology_cell_layout, GateLibrary, GateLyt>, "layout"_a);
+          &fiction::apply_gate_library<py_cartesian_technology_cell_layout, GateLibrary, GateLyt>, "layout"_a,
+          DOC(fiction_apply_gate_library));
 }
 
 }  // namespace detail

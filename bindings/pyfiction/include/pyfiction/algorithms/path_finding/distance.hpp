@@ -5,6 +5,7 @@
 #ifndef PYFICTION_DISTANCE_HPP
 #define PYFICTION_DISTANCE_HPP
 
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/path_finding/distance.hpp>
@@ -22,8 +23,10 @@ void distance(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def("manhattan_distance", &fiction::manhattan_distance<Lyt>, "layout"_a, "source"_a, "target"_a);
-    m.def("euclidean_distance", &fiction::euclidean_distance<Lyt>, "layout"_a, "source"_a, "target"_a);
+    m.def("manhattan_distance", &fiction::manhattan_distance<Lyt>, "layout"_a, "source"_a, "target"_a,
+          DOC(fiction_manhattan_distance));
+    m.def("euclidean_distance", &fiction::euclidean_distance<Lyt>, "layout"_a, "source"_a, "target"_a,
+          DOC(fiction_euclidean_distance));
 }
 
 }  // namespace detail

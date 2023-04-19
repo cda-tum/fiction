@@ -5,6 +5,7 @@
 #ifndef PYFICTION_WRITE_QLL_LAYOUT_HPP
 #define PYFICTION_WRITE_QLL_LAYOUT_HPP
 
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/write_qll_layout.hpp>
@@ -26,7 +27,8 @@ void write_qll_layout(pybind11::module& m)
 
     void (*write_qll_layout_function_pointer)(const Lyt&, const std::string_view&) = &fiction::write_qll_layout<Lyt>;
 
-    m.def("write_qll_layout", write_qll_layout_function_pointer, "layout"_a, "filename"_a);
+    m.def("write_qll_layout", write_qll_layout_function_pointer, "layout"_a, "filename"_a,
+          DOC(fiction_write_qll_layout));
 }
 
 }  // namespace detail

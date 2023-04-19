@@ -5,6 +5,7 @@
 #ifndef PYFICTION_WRITE_DOT_LAYOUT_HPP
 #define PYFICTION_WRITE_DOT_LAYOUT_HPP
 
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/dot_drawers.hpp>
@@ -36,7 +37,7 @@ void write_dot_layout(pybind11::module& m)
                 fiction::write_dot_layout<Lyt, fiction::gate_layout_hexagonal_drawer<Lyt>>(lyt, filename);
             }
         },
-        "layout"_a, "filename"_a);
+        "layout"_a, "filename"_a, DOC(fiction_write_dot_layout));
 }
 
 }  // namespace detail

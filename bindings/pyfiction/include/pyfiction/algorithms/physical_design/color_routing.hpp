@@ -5,6 +5,7 @@
 #ifndef PYFICTION_COLOR_ROUTING_HPP
 #define PYFICTION_COLOR_ROUTING_HPP
 
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/color_routing.hpp>
@@ -40,7 +41,7 @@ void color_routing(pybind11::module& m)
 
             return fiction::color_routing(lyt, objs, params);
         },
-        "layout"_a, "objectives"_a, "params"_a = fiction::color_routing_params{});
+        "layout"_a, "objectives"_a, "params"_a = fiction::color_routing_params{}, DOC(fiction_color_routing));
 }
 
 }  // namespace detail
@@ -52,22 +53,26 @@ inline void color_routing(pybind11::module& m)
     /**
      * SAT engine selector type.
      */
-    pybind11::enum_<fiction::graph_coloring_engine>(m, "graph_coloring_engine")
-        .value("MCS", fiction::graph_coloring_engine::MCS)
-        .value("DSATUR", fiction::graph_coloring_engine::DSATUR)
-        .value("LMXRLF", fiction::graph_coloring_engine::LMXRLF)
-        .value("TABUCOL", fiction::graph_coloring_engine::TABUCOL)
-        .value("SAT", fiction::graph_coloring_engine::SAT)
+    pybind11::enum_<fiction::graph_coloring_engine>(m, "graph_coloring_engine", DOC(fiction_graph_coloring_engine))
+        .value("MCS", fiction::graph_coloring_engine::MCS, DOC(fiction_graph_coloring_engine_MCS))
+        .value("DSATUR", fiction::graph_coloring_engine::DSATUR, DOC(fiction_graph_coloring_engine_DSATUR))
+        .value("LMXRLF", fiction::graph_coloring_engine::LMXRLF, DOC(fiction_graph_coloring_engine_LMXRLF))
+        .value("TABUCOL", fiction::graph_coloring_engine::TABUCOL, DOC(fiction_graph_coloring_engine_TABUCOL))
+        .value("SAT", fiction::graph_coloring_engine::SAT, DOC(fiction_graph_coloring_engine_SAT))
 
         ;
 
-    py::class_<fiction::color_routing_params>(m, "color_routing_params")
+    py::class_<fiction::color_routing_params>(m, "color_routing_params", DOC(fiction_color_routing_params))
         .def(py::init<>())
-        .def_readwrite("conduct_partial_routing", &fiction::color_routing_params::conduct_partial_routing)
-        .def_readwrite("crossings", &fiction::color_routing_params::crossings)
-        .def_readwrite("path_limit", &fiction::color_routing_params::path_limit)
-        .def_readwrite("engine", &fiction::color_routing_params::engine)
-        .def_readwrite("partial_sat", &fiction::color_routing_params::partial_sat)
+        .def_readwrite("conduct_partial_routing", &fiction::color_routing_params::conduct_partial_routing,
+                       DOC(fiction_color_routing_params_conduct_partial_routing))
+        .def_readwrite("crossings", &fiction::color_routing_params::crossings,
+                       DOC(fiction_color_routing_params_crossings))
+        .def_readwrite("path_limit", &fiction::color_routing_params::path_limit,
+                       DOC(fiction_color_routing_params_path_limit))
+        .def_readwrite("engine", &fiction::color_routing_params::engine, DOC(fiction_color_routing_params_engine))
+        .def_readwrite("partial_sat", &fiction::color_routing_params::partial_sat,
+                       DOC(fiction_color_routing_params_partial_sat))
 
         ;
 

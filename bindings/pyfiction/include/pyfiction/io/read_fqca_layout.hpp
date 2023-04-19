@@ -5,6 +5,7 @@
 #ifndef PYFICTION_READ_FQCA_LAYOUT_HPP
 #define PYFICTION_READ_FQCA_LAYOUT_HPP
 
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/read_fqca_layout.hpp>
@@ -27,7 +28,8 @@ void read_fqca_layout(pybind11::module& m)
     Lyt (*read_fqca_layout_function_pointer)(const std::string_view&, const std::string_view&) =
         &fiction::read_fqca_layout<Lyt>;
 
-    m.def("read_fqca_layout", read_fqca_layout_function_pointer, "filename"_a, "layout_name"_a = "");
+    m.def("read_fqca_layout", read_fqca_layout_function_pointer, "filename"_a, "layout_name"_a = "",
+          DOC(fiction_read_fqca_layout));
 }
 
 }  // namespace detail

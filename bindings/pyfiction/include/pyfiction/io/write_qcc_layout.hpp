@@ -5,6 +5,7 @@
 #ifndef PYFICTION_WRITE_QCC_LAYOUT_HPP
 #define PYFICTION_WRITE_QCC_LAYOUT_HPP
 
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/write_qcc_layout.hpp>
@@ -21,9 +22,9 @@ inline void write_qcc_layout(pybind11::module& m)
     using namespace pybind11::literals;
 
     m.def(
-        "write_qca_layout",
+        "write_qcc_layout",
         [](const py_inml_layout& lyt, const std::string_view& filename) { fiction::write_qcc_layout(lyt, filename); },
-        "layout"_a, "filename"_a);
+        "layout"_a, "filename"_a, DOC(fiction_write_qcc_layout));
 }
 
 }  // namespace pyfiction

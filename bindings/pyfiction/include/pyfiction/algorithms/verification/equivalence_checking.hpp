@@ -5,6 +5,7 @@
 #ifndef PYFICTION_EQUIVALENCE_CHECKING_HPP
 #define PYFICTION_EQUIVALENCE_CHECKING_HPP
 
+#include "pyfiction/docs.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/verification/equivalence_checking.hpp>
@@ -37,7 +38,7 @@ void equivalence_checking(pybind11::module& m)
 
             return stats.eq;
         },
-        "specification"_a, "implementation"_a, "statistics"_a = nullptr);
+        "specification"_a, "implementation"_a, "statistics"_a = nullptr, DOC(fiction_equivalence_checking));
 }
 
 }  // namespace detail
@@ -47,16 +48,18 @@ inline void equivalence_checking(pybind11::module& m)
     /**
      * Result type for equivalence checking.
      */
-    pybind11::enum_<fiction::eq_type>(m, "eq_type")
-        .value("NO", fiction::eq_type::NO)
-        .value("WEAK", fiction::eq_type::WEAK)
-        .value("STRONG", fiction::eq_type::STRONG)
+    pybind11::enum_<fiction::eq_type>(m, "eq_type", DOC(fiction_eq_type))
+        .value("NO", fiction::eq_type::NO, DOC(fiction_eq_type_NO))
+        .value("WEAK", fiction::eq_type::WEAK, DOC(fiction_eq_type_WEAK))
+        .value("STRONG", fiction::eq_type::STRONG, DOC(fiction_eq_type_STRONG))
 
         ;
 
-    pybind11::class_<fiction::equivalence_checking_stats>(m, "equivalence_checking_stats")
+    pybind11::class_<fiction::equivalence_checking_stats>(m, "equivalence_checking_stats",
+                                                          DOC(fiction_equivalence_checking_stats))
         .def(pybind11::init<>())
-        .def_readwrite("counter_example", &fiction::equivalence_checking_stats::counter_example)
+        .def_readwrite("counter_example", &fiction::equivalence_checking_stats::counter_example,
+                       DOC(fiction_equivalence_checking_stats_counter_example))
 
         ;
 
