@@ -14,9 +14,10 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # import os
-# import sys
+import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+sys.path.append("/Users/simonhofmann/Documents/fcn_fork_2/venv/lib/python3.9/site-packages")
 
 # -- General configuration ------------------------------------------------
 
@@ -27,7 +28,7 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.mathjax', 'sphinx.ext.viewcode', 'breathe']
+extensions = ['sphinx.ext.mathjax', 'sphinx.ext.viewcode', 'sphinx_tabs.tabs', 'sphinx.ext.autodoc', 'breathe']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

@@ -20,5 +20,11 @@ a total of four different orientations.
 
 The hexagonal layout supports all of them via template parameters.
 
-.. doxygenclass:: fiction::hexagonal_layout
-   :members:
+.. tabs::
+    .. tab:: C+
+        .. doxygenclass:: fiction::hexagonal_layout
+           :members:
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.hexagonal_layout
+            :members:

@@ -10,17 +10,35 @@ Supported technological implementations of the FCN concept. Each has its own set
 Quantum-dot Cellular Automata (QCA)
 -----------------------------------
 
-.. doxygenstruct:: fiction::qca_technology
-   :members:
+.. tabs::
+    .. tab:: C++
+        .. doxygenstruct:: fiction::qca_technology
+           :members:
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.qca_technology
+            :members:
 
 in-plane Nanomagnet Logic (iNML)
 --------------------------------
 
-.. doxygenstruct:: fiction::inml_technology
-   :members:
+.. tabs::
+    .. tab:: C++
+        .. doxygenstruct:: fiction::inml_technology
+           :members:
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.inml_technology
+            :members:
 
 Silicon Dangling Bonds (SiDB)
 -----------------------------
 
-.. doxygenstruct:: fiction::sidb_technology
-   :members:
+.. tabs::
+    .. tab:: C++
+        .. doxygenstruct:: fiction::sidb_technology
+           :members:
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.sidb_technology
+            :members:

@@ -95,7 +95,14 @@ Routing Utils
    :members:
 
 .. doxygenfunction:: fiction::is_crossable_wire
-.. doxygenfunction:: fiction::route_path
+
+.. tabs::
+    .. tab:: C++
+        .. doxygenfunction:: fiction::route_path
+
+    .. tab:: Python
+        .. autofunction:: fiction.pyfiction.route_path
+
 .. doxygenfunction:: fiction::extract_routing_objectives
 .. doxygenfunction:: fiction::clear_routing
 

@@ -4,9 +4,14 @@ Physical Properties
 Area Requirements
 #################
 
-**Header:** ``fiction/technology/area.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/technology/area.hpp``
 
-.. doxygenfunction:: fiction::area(const Lyt& lyt, area_params<technology<Lyt>, AreaType>& ps = {}, area_stats<AreaType>* pst = nullptr)
+        .. doxygenfunction:: fiction::area(const Lyt& lyt, area_params<technology<Lyt>, AreaType>& ps = {}, area_stats<AreaType>* pst = nullptr)
+
+    .. tab:: Python
+        .. autofunction:: fiction.pyfiction.area
 
 MagCAD Magnet Count
 ###################

@@ -13,5 +13,13 @@ The clocked layout can be layered on top of any coordinate (in this context call
 time to extend its functionality by a notion of FCN clocking. Various :ref:`pre-defined clocking schemes<clocking schemes>`
 can be utilized or the clock numbers can be assigned manually.
 
-.. doxygenclass:: fiction::clocked_layout
-   :members:
+.. tabs::
+    .. tab:: C++
+        .. doxygenclass:: fiction::clocked_layout
+           :members:
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.clocked_cartesian_layout
+            :members:
+        .. autoclass:: fiction.pyfiction.clocked_hexagonal_layout
+            :members:

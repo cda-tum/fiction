@@ -15,5 +15,16 @@ knowledge of their implemented functionality.
 A cell-level layout can be obtained from a ``gate_level_layout`` by the :ref:`application <apply-gate-library>` of a
 :ref:`gate library <fcn-gate-libraries>`.
 
-.. doxygenclass:: fiction::cell_level_layout
-   :members:
+.. tabs::
+    .. tab:: C++
+        .. doxygenclass:: fiction::cell_level_layout
+           :members:
+
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.qca_layout
+            :members:
+        .. autoclass:: fiction.pyfiction.inml_layout
+            :members:
+        .. autoclass:: fiction.pyfiction.sidb_layout
+            :members:

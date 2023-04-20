@@ -14,6 +14,13 @@ The gate-level layout is implemented in accordance with ``mockturtle``\ 's
 network that can be passed to various of mockturtle's algorithms. However, since each logic node (gate) in the layout
 has to have a concrete position assigned, mockturtle cannot be used to generate valid layouts.
 
-.. doxygenclass:: fiction::gate_level_layout
-   :members:
+.. tabs::
+    .. tab:: C++
+        .. doxygenclass:: fiction::gate_level_layout
+           :members:
 
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.cartesian_gate_layout
+            :members:
+        .. autoclass:: fiction.pyfiction.hexagonal_gate_layout
+            :members:

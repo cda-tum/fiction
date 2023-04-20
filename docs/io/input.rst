@@ -31,14 +31,20 @@ Cell-level Layouts
 
 .. doxygenclass:: fiction::sqd_parsing_error
 
-**Header:** ``fiction/io/read_fqca_layout.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/io/read_fqca_layout.hpp``
 
-.. doxygenfunction:: fiction::read_fqca_layout(std::istream& is, const std::string_view& name = "")
-.. doxygenfunction:: fiction::read_fqca_layout(const std::string_view& filename, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::read_fqca_layout(std::istream& is, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::read_fqca_layout(const std::string_view& filename, const std::string_view& name = "")
 
-.. doxygenclass:: fiction::unsupported_character_exception
-.. doxygenclass:: fiction::undefined_cell_label_exception
-.. doxygenclass:: fiction::unrecognized_cell_definition_exception
+        .. doxygenclass:: fiction::unsupported_character_exception
+        .. doxygenclass:: fiction::undefined_cell_label_exception
+        .. doxygenclass:: fiction::unrecognized_cell_definition_exception
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.read_fqca_layout
+            :members:
 
 SiDB Surface Defects
 ####################

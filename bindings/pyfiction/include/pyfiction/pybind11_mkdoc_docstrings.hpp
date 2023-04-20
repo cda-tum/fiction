@@ -4986,9 +4986,9 @@ breadth-first).)doc";
 
 static const char *__doc_fiction_fanout_substitution_params_substitution_strategy = R"doc(Breadth-first vs. depth-first fanout-tree substitution strategies.)doc";
 
-static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_BREADTH = R"doc()doc";
+static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_BREADTH = R"doc(Breadth-first substitution. Creates balanced fanout trees.)doc";
 
-static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_DEPTH = R"doc()doc";
+static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_DEPTH = R"doc(Depth-first substitution. Creates fanout trees with one deep branch.)doc";
 
 static const char *__doc_fiction_fanout_substitution_params_threshold =
 R"doc(Maximum number of outputs any gate is allowed to have before

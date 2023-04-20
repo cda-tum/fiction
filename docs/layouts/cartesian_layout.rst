@@ -5,5 +5,11 @@ Cartesian Layout
 
 Coordinate system that represents a Cartesian grid of compile-time coordinate types.
 
-.. doxygenclass:: fiction::cartesian_layout
-   :members:
+.. tabs::
+    .. tab:: C++
+        .. doxygenclass:: fiction::cartesian_layout
+           :members:
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.cartesian_layout
+            :members:
