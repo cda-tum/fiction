@@ -128,8 +128,5 @@ setup(
         'Tracker': 'https://github.com/marcelwa/fiction/issues',
         'Documentation': 'https://fiction.readthedocs.io/en/latest/',
         'Research': 'https://www.cda.cit.tum.de/research/fcn/',
-    },
-    # extras_require={
-    #     "tnflow": ["sparse", "opt-einsum", "quimb", "pandas", "numpy"]
-    # }
+    }
 )
