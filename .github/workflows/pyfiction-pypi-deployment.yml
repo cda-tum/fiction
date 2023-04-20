@@ -97,9 +97,12 @@ jobs:
 
       - name: Build sdist
         run: pipx run build --sdist
+
       - name: Test sdist
-        run: pip install --verbose dist/*.tar.gz
-      - uses: actions/upload-artifact@v3
+        run: z3=${{env.ENABLE_Z3}} pip install --verbose dist/*.tar.gz
+
+      - name: Upload sdist as an artifact
+        uses: actions/upload-artifact@v3
         with:
           path: dist/*.tar.gz
 
