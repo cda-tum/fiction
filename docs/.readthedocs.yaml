@@ -3,5 +3,5 @@ version: 2
 build:
   os: ubuntu-20.04
   jobs:
-    post_install:
-      - pip install .
+    pre_install:
+      - z3="ON"
