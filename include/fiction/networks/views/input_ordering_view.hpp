@@ -5,26 +5,26 @@
 #ifndef FICTION_INPUT_ORDERING_VIEW_HPP
 #define FICTION_INPUT_ORDERING_VIEW_HPP
 
-#include <mockturtle/networks/detail/foreach.hpp>
-#include <mockturtle/traits.hpp>
-#include <mockturtle/views/immutable_view.hpp>
-#include <mockturtle/views/fanout_view.hpp>
 #include "fiction/utils/network_utils.hpp"
 
+#include <mockturtle/networks/detail/foreach.hpp>
+#include <mockturtle/traits.hpp>
+#include <mockturtle/views/fanout_view.hpp>
+#include <mockturtle/views/immutable_view.hpp>
 
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <iostream>
 #include <optional>
 #include <vector>
-#include <iostream>
 
 namespace fiction
 {
 
 /**
- * A variation of mockturtle::topo_view that computes the topological order after sorting the inputs according to the connections of their fanouts.
- * This is part of the Distribution Newtork I: Ordering_Network
+ * A variation of mockturtle::topo_view that computes the topological order after sorting the inputs according to the
+ * connections of their fanouts. This is part of the Distribution Newtork I: Ordering_Network
  *
  * @tparam Ntk mockturtle network type.
  * @tparam sorted Flag that determines whether Ntk is already wrapped in a topo_view.
@@ -43,9 +43,9 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
 
     /*! \brief Default constructor.
      *
-     * Constructs ordering view on another network.
+     * Constructs input ordering view on another network.
      */
-    explicit input_ordering_view(Ntk const& ntk) : mockturtle::immutable_view<Ntk>(ntk), num_p{ntk.num_pis()}, my_ntk{ntk}
+    explicit input_ordering_view(Ntk const& ntk) : mockturtle::immutable_view<Ntk>(ntk), num_p{ntk.num_pis()}, ntk{ntk}
     {
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
         static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size function");
@@ -106,10 +106,10 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     }
 
     /*! \brief Implementation of `foreach_node` in reverse topological order. */
-    template<typename Fn>
-    void foreach_node_reverse( Fn&& fn ) const
+    template <typename Fn>
+    void foreach_node_reverse(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element( topo_order.rbegin(),topo_order.rend(), fn);
+        mockturtle::detail::foreach_element(topo_order.rbegin(), topo_order.rend(), fn);
     }
 
     /**
@@ -124,33 +124,36 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     }
 
     /*! \brief Implementation of `foreach_gate` in reverse topological order. */
-    template<typename Fn>
-    void foreach_gate_reverse( Fn&& fn ) const
+    template <typename Fn>
+    void foreach_gate_reverse(Fn&& fn) const
     {
-        uint32_t const offset = 1u + this->num_pis() + ( this->get_node( this->get_constant( true ) ) != this->get_node( this->get_constant( false ) ) );
-        mockturtle::detail::foreach_element( topo_order.rbegin(),
-                                topo_order.rend() - offset,
-                                fn );
+        uint32_t const offset = 1u + this->num_pis() +
+                                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
+        mockturtle::detail::foreach_element(topo_order.rbegin(), topo_order.rend() - offset, fn);
     }
 
     /*! \brief Reimplementation of `foreach_pi`. */
-    template<typename Fn>
-    void foreach_pi( Fn&& fn ) const
+    template <typename Fn>
+    void foreach_pi(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element_if( topo_order.begin()+num_c, topo_order.begin()+num_c+num_p+num_r, [this]( auto n ) { return my_ntk.is_pi( n );}, fn );
+        mockturtle::detail::foreach_element_if(
+            topo_order.begin() + num_c, topo_order.begin() + num_c + num_p + num_r,
+            [this](auto n) { return ntk.is_pi(n); }, fn);
     }
 
     /*! \brief Reimplementation of `foreach_ro`. */
-    template<typename Fn>
-    void foreach_ro( Fn&& fn ) const
+    template <typename Fn>
+    void foreach_ro(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element_if( topo_order.begin()+num_c, topo_order.begin()+num_c+num_p+num_r, [this]( auto n ) { return my_ntk.is_ro( n );}, fn );
+        mockturtle::detail::foreach_element_if(
+            topo_order.begin() + num_c, topo_order.begin() + num_c + num_p + num_r,
+            [this](auto n) { return ntk.is_ro(n); }, fn);
     }
 
     node ro_at(uint32_t index) const
     {
         std::vector<node> r_os;
-        foreach_ro( [&](const auto& n){r_os.emplace_back(n);});
+        foreach_ro([&](const auto& n) { r_os.emplace_back(n); });
         return r_os[index];
     }
 
@@ -167,18 +170,18 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     {
         return Ntk::num_pos();
     }
-
-    [[nodiscard]] bool isFo_inv_flag() const
+    /*! \brief flag indicating inverters with special treatment in the ordering network */
+    [[nodiscard]] bool nc_inv_flag() const
     {
         return fo_inv_flag;
     }
 
-    [[nodiscard]] int isFo_inv_flag_num() const
+    [[nodiscard]] int nc_inv_num() const
     {
         return fo_inv_flag_num;
     }
 
-    /*Getters for the PIs respected in the Ordering Network*/
+    /* ! \brief getters for the PIs hierarchies respected in the ordering network */
     [[nodiscard]] const std::vector<node>& get_fo_two() const
     {
         return wait;
@@ -198,7 +201,11 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
 
         this->incr_trav_id();
         this->incr_trav_id();
+        // reserve vector capacity
         topo_order.reserve(this->size());
+        wait.reserve(static_cast<std::uint64_t>(num_p));
+        second_wait.reserve(static_cast<std::uint64_t>(num_p));
+        third_wait.reserve(static_cast<std::uint64_t>(num_p));
 
         /* constants and PIs */
         const auto c0 = this->get_node(this->get_constant(false));
@@ -217,23 +224,26 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
             [this](auto n)
             {
                 if (this->visited(n) != this->trav_id())
-                {input_sort(n);}
+                {
+                    input_sort(n);
+                }
             });
 
-        // Here the sorted nodes get pushed_back
-        // They are stored in three different hierarchies
-        // Maybe another sorting here could be beneficial
-        for(unsigned int iter = 0; iter < wait.size(); ++iter){
+        /* The hierarchies of ordered PIs get pushed into topo_view */
+        for (unsigned int iter = 0; iter < wait.size(); ++iter)
+        {
             topo_order.push_back(wait[iter]);
             this->set_visited(wait[iter], this->trav_id());
         }
 
-        for(unsigned int iter = 0; iter < second_wait.size(); ++iter){
+        for (unsigned int iter = 0; iter < second_wait.size(); ++iter)
+        {
             topo_order.push_back(second_wait[iter]);
             this->set_visited(second_wait[iter], this->trav_id());
         }
 
-        for(unsigned int iter = 0; iter < third_wait.size(); ++iter){
+        for (unsigned int iter = 0; iter < third_wait.size(); ++iter)
+        {
             topo_order.push_back(third_wait[iter]);
             this->set_visited(third_wait[iter], this->trav_id());
         }
@@ -248,24 +258,27 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                 }
             });
 
+        Ntk::foreach_co(
+            [this](auto f)
+            {
+                /* node was already visited */
+                if (this->visited(this->get_node(f)) == this->trav_id())
+                {
+                    return;
+                }
 
-        Ntk::foreach_co( [this]( auto f ) {
-                            /* node was already visited */
-                            if ( this->visited( this->get_node( f ) ) == this->trav_id() )
-                                return;
-
-                            create_topo_rec( this->get_node( f ) );
-                        });
+                create_topo_rec(this->get_node(f));
+            });
     }
-
-
 
   private:
     void create_topo_rec(node const& n)
     {
         /* is permanently marked? */
         if (this->visited(n) == this->trav_id())
+        {
             return;
+        }
 
         /* ensure that the node is not temporarily marked */
         assert(this->visited(n) != this->trav_id() - 1);
@@ -283,205 +296,200 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
         topo_order.push_back(n);
     }
 
-    void input_sort(node const& n){
+    void input_sort(node const& n)
+    {
 
         /**
          * Here only the PIs get sorted, everything else is sorted topologically thereafter
-         * First: find the relevant connecting_nodes
-         * Second: order the connected PIs
+         * first: find the relevant connecting_nodes
+         * second: order the related PIs
          **/
 
-        /*node(s), from which we look if the fan-ins are PIs*/
+        /* node(s), from which we look if the fan-ins are PIs */
         std::vector<node> connecting_node;
-        bool inv_flag = false;
+        bool              inv_flag = false;
 
-        /*currently viewed node*/
+        /* currently viewed node */
         node current_node;
 
-        my_ntk.foreach_fanout(n, [this, &n, &connecting_node, &current_node, &inv_flag](const auto& fon)
-                              {
-                                  bool is_fan_out = false;
+        ntk.foreach_fanout(
+            n,
+            [this, &n, &connecting_node, &current_node, &inv_flag](const auto& fon)
+            {
+                bool is_fan_out = false;
 
-                                  /*Take fan-out as first candidate for connecting_node*/
-                                  current_node =  fon;
+                /* take fan-out as first candidate for connecting_node */
+                current_node = fon;
 
-                                  if (my_ntk.is_inv(current_node))
-                                  {
-                                      /*Skip Inverters*/
-                                      my_ntk.foreach_fanout(fon,
-                                                            [this, &current_node](const auto& fon_inv) { current_node =  fon_inv;});
-                                      fo_inv_flag=true;
-                                      ++fo_inv_flag_num;
-                                      inv_flag = true;
-                                  }
+                if (ntk.is_inv(current_node))
+                {
+                    /* skip inverters */
+                    ntk.foreach_fanout(fon, [this, &current_node](const auto& fon_inv) { current_node = fon_inv; });
+                    fo_inv_flag = true;
+                    ++fo_inv_flag_num;
+                    inv_flag = true;
+                }
 
-                                  if(const auto fc = fanins(my_ntk, current_node); fc.fanin_nodes.size()==2)
-                                  {
-                                      /*current_node is a 2 fan-in node [connecting_node has only one entry]*/
-                                      connecting_node.push_back(current_node);
-                                  }
-                                  else if (my_ntk.is_fanout(current_node))
-                                  {
-                                      /*current_node is a fan-out node [connecting_node has two entries]*/
-                                      is_fan_out = true;
+                if (const auto fc = fanins(ntk, current_node); fc.fanin_nodes.size() == 2)
+                {
+                    /* current_node is a 2 fan-in node [connecting_node has only one entry] */
+                    connecting_node.push_back(current_node);
+                }
+                else if (ntk.is_fanout(current_node))
+                {
+                    /* current_node is a fan-out node (FO) [connecting_node has two entries] */
+                    is_fan_out = true;
 
-                                      /*Take fan-outs of the fan-out-node as candidates for connecting_node*/
-                                      connecting_node.clear();
-                                      my_ntk.foreach_fanout(current_node,
-                                                            [this, &connecting_node](const auto& fon_two) {
-                                                                if (my_ntk.is_fanout(fon_two))
-                                                                {
-                                                                    return;
-                                                                }
-                                                                if (my_ntk.is_inv(fon_two))
-                                                                {
-                                                                    /*Skip Inverter*/
-                                                                    my_ntk.foreach_fanout(fon_two,
-                                                                                          [this, &connecting_node](const auto& fon_inv) {
-                                                                                              connecting_node.insert(connecting_node.begin(), fon_inv);});
-                                                                }
-                                                                else
-                                                                {
-                                                                    connecting_node.push_back(fon_two);
-                                                                }
-                                                            });
-                                  }
+                    /* take fan-outs of the FO as candidates for connecting_node */
+                    connecting_node.clear();
+                    ntk.foreach_fanout(current_node,
+                                       [this, &connecting_node](const auto& fon_two)
+                                       {
+                                           if (ntk.is_fanout(fon_two))
+                                           {
+                                               return;
+                                           }
+                                           if (ntk.is_inv(fon_two))
+                                           {
+                                               /*Skip Inverter*/
+                                               ntk.foreach_fanout(
+                                                   fon_two, [this, &connecting_node](const auto& fon_inv)
+                                                   { connecting_node.insert(connecting_node.begin(), fon_inv); });
+                                           }
+                                           else
+                                           {
+                                               connecting_node.push_back(fon_two);
+                                           }
+                                       });
+                }
 
-                                  /*
-                                   * Connecting_node contains only 2 fan-in gates (and/or gates)
-                                   *
-                                   * Check the way back from the connecting_node, if a PI is connected to its other fan-in
-                                   * Ranking: FOs with 2PIs, FOs with 1PI, PI with PI, Rest(visited in the main function)
-                                   * */
+                /*
+                 * connecting_node contains only 2 fan-in gates (and/or gates)
+                 *
+                 * Check the way back from the connecting_node, if a PI is connected to its other fan-in
+                 * Ranking: FOs with 2PIs, FOs with 1PI, PI with PI, Rest(visited in the main function)
+                 * */
 
-                                  bool already_one_pi = false;
-                                  node first_pi;
-                                  for(int i = 0; i < connecting_node.size(); ++i)
-                                  {
-                                      my_ntk.foreach_fanin(
-                                          connecting_node[i],
-                                          [this, &fon, &is_fan_out, &already_one_pi, &first_pi, &n, &inv_flag](const auto& fi)
-                                          {
-                                              auto fin_inp = my_ntk.get_node(fi);
-                                              /*Ignore Inverters*/
-                                              if (my_ntk.is_inv(fin_inp))
-                                              {
-                                                  const auto fis_inv = fanins(my_ntk, fin_inp);
-                                                  fin_inp            = fis_inv.fanin_nodes[0];
-                                              }
-                                              if (fin_inp != n)
-                                              {
-                                                  if (my_ntk.is_pi(fin_inp))
-                                                  {
-                                                      if (is_fan_out)
-                                                      {
-                                                          /**When a Fanout is connected to a PI, it can be one or two PIs**/
-                                                          if(already_one_pi)
-                                                          {
-                                                              /**FO has two incoming PIs**/
-                                                              /**Push PI and PI stored in first_PI**/
-                                                              auto check_n = second_wait[second_wait.size()-2];
-                                                              second_wait.erase(second_wait.end()-2);
-                                                              second_wait.erase(second_wait.end()-1);
-                                                              if(check_n == n)
-                                                              {
-                                                                  wait.push_back(n);
-                                                                  this->set_visited(n, this->trav_id());
-                                                                  wait.push_back(first_pi);
-                                                                  this->set_visited(n, this->trav_id());
-                                                              }
-                                                              else
-                                                              {
-                                                                  assert(false);
-                                                              }
+                bool already_one_pi = false;
+                node first_pi;
+                for (int i = 0; i < connecting_node.size(); ++i)
+                {
+                    ntk.foreach_fanin(
+                        connecting_node[i],
+                        [this, &fon, &is_fan_out, &already_one_pi, &first_pi, &n, &inv_flag](const auto& fi)
+                        {
+                            auto fin_inp = ntk.get_node(fi);
+                            /* ignore inverters */
+                            if (ntk.is_inv(fin_inp))
+                            {
+                                const auto fis_inv = fanins(ntk, fin_inp);
+                                fin_inp            = fis_inv.fanin_nodes[0];
+                            }
+                            if (fin_inp != n)
+                            {
+                                if (ntk.is_pi(fin_inp))
+                                {
+                                    if (is_fan_out)
+                                    {
+                                        /* when a FO is related to a PI, it can be one or two PIs */
+                                        if (already_one_pi)
+                                        {
+                                            /* FO related to two incoming PIs */
+                                            /* push PI and PI stored in first_PI */
+                                            auto check_n = second_wait[second_wait.size() - 2];
+                                            second_wait.erase(second_wait.end() - 2);
+                                            second_wait.erase(second_wait.end() - 1);
+                                            if (check_n == n)
+                                            {
+                                                wait.push_back(n);
+                                                this->set_visited(n, this->trav_id());
+                                                wait.push_back(first_pi);
+                                                this->set_visited(n, this->trav_id());
+                                            }
+                                            else
+                                            {
+                                                assert(false);
+                                            }
 
-                                                              if (this->visited(fin_inp) != this->trav_id())
-                                                              {
-                                                                  wait.push_back(fin_inp);
-                                                                  this->set_visited(fin_inp, this->trav_id());
-                                                              }
-                                                              already_one_pi = false;
-
-                                                          }
-                                                          else
-                                                          {
-                                                              /**Store PI in first_PI, for the case if FO has two incoming PIs**/
-
-                                                              /*Store the currently visited node*/
-                                                              if (this->visited(n) != this->trav_id())
-                                                              {
-                                                                  second_wait.push_back(n);
-                                                                  this->set_visited(n, this->trav_id());
-                                                              }
-                                                              /*Store the connected node*/
-                                                              if (this->visited(fin_inp) != this->trav_id())
-                                                              {
-                                                                  second_wait.push_back(fin_inp);
-                                                                  this->set_visited(fin_inp, this->trav_id());
-                                                              }
-                                                              /*Mark FOs that already one PI is now connected to its fan-outs*/
-                                                              already_one_pi = true;
-                                                              first_pi       = fin_inp;
-                                                          }
-                                                      }
-                                                      else
-                                                      {
-                                                          if(inv_flag)
-                                                          {
-                                                              /**When a PI is connected to a PI it is ranked third**/
-                                                              if (this->visited(n) != this->trav_id())
-                                                              {
-                                                                  third_wait.push_back(n);
-                                                                  this->set_visited(n, this->trav_id());
-                                                              }
-                                                              if (this->visited(fin_inp) != this->trav_id())
-                                                              {
-                                                                  third_wait.push_back(fin_inp);
-                                                                  this->set_visited(fin_inp, this->trav_id());
-                                                              }
-                                                          }
-                                                          else
-                                                          {
-                                                              /**When a PI is connected to a PI it is ranked third**/
-                                                              if (this->visited(fin_inp) != this->trav_id())
-                                                              {
-                                                                  third_wait.push_back(fin_inp);
-                                                                  this->set_visited(fin_inp, this->trav_id());
-                                                              }
-                                                              if (this->visited(n) != this->trav_id())
-                                                              {
-                                                                  third_wait.push_back(n);
-                                                                  this->set_visited(n, this->trav_id());
-                                                              }
-                                                          }
-
-                                                      }
-                                                  }
-                                              }
-                                          });
-                                  }
-                              });
+                                            if (this->visited(fin_inp) != this->trav_id())
+                                            {
+                                                wait.push_back(fin_inp);
+                                                this->set_visited(fin_inp, this->trav_id());
+                                            }
+                                            already_one_pi = false;
+                                        }
+                                        else
+                                        {
+                                            /* store PI in first_PI, for the case two related PIs */
+                                            /* Store the currently visited node */
+                                            if (this->visited(n) != this->trav_id())
+                                            {
+                                                second_wait.push_back(n);
+                                                this->set_visited(n, this->trav_id());
+                                            }
+                                            /* Store the connected node */
+                                            if (this->visited(fin_inp) != this->trav_id())
+                                            {
+                                                second_wait.push_back(fin_inp);
+                                                this->set_visited(fin_inp, this->trav_id());
+                                            }
+                                            /* Mark FOs with already one related PI */
+                                            already_one_pi = true;
+                                            first_pi       = fin_inp;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (inv_flag)
+                                        {
+                                            /* when a PI is related to a PI it is ranked third */
+                                            if (this->visited(n) != this->trav_id())
+                                            {
+                                                third_wait.push_back(n);
+                                                this->set_visited(n, this->trav_id());
+                                            }
+                                            if (this->visited(fin_inp) != this->trav_id())
+                                            {
+                                                third_wait.push_back(fin_inp);
+                                                this->set_visited(fin_inp, this->trav_id());
+                                            }
+                                        }
+                                        else
+                                        {
+                                            /* when a PI is related to a PI it is ranked third */
+                                            if (this->visited(fin_inp) != this->trav_id())
+                                            {
+                                                third_wait.push_back(fin_inp);
+                                                this->set_visited(fin_inp, this->trav_id());
+                                            }
+                                            if (this->visited(n) != this->trav_id())
+                                            {
+                                                third_wait.push_back(n);
+                                                this->set_visited(n, this->trav_id());
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                }
+            });
     }
 
-    // extension of private
-    Ntk my_ntk;
-    std::vector<node> topo_order;
+    // private
+    Ntk               ntk;
+    std::vector<node> topo_order{};
 
-    std::vector<node> wait;         //FOs with 2 PIs
-    std::vector<node> second_wait;  //FOs with 1PI
-    std::vector<node> third_wait;   //PI to PI
+    std::vector<node> wait{};         // FOs related to 2 PIs
+    std::vector<node> second_wait{};  // FOs related to 1PI
+    std::vector<node> third_wait{};   // PI related to PI
 
-    bool fo_inv_flag = false;
-    int fo_inv_flag_num = 0;
+    bool fo_inv_flag     = false;
+    int  fo_inv_flag_num = 0;
 
     uint32_t num_p;
     uint32_t num_c = 0u;
     uint32_t num_r = 0u;
-
-    uint32_t overflow_protector{0};
-
-    unsigned int push_iter;
-    node next_node;
 };
 
 template <typename Ntk>
