@@ -14,7 +14,6 @@
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/gate_logic_map.hpp"
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/math_utils.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
@@ -22,7 +21,6 @@
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
 #include <kitty/dynamic_truth_table.hpp>
-#include <kitty/print.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -56,7 +54,7 @@ struct critical_temperature_params
      */
     double confidence_level{0.99};
     /**
-     * Simulation stops at max_temperature.
+     * Simulation stops at max_temperature (room temperature ~300 K).
      */
     uint64_t max_temperature{400};
     /**
@@ -231,7 +229,7 @@ class critical_temperature_impl
             for (const auto& [energy, trans_error] : energy_state_type)
             {
                 // Check if at least one ground state exists which fulfills the logic (transparent).
-                if ((energy == min_energy) && trans_error)
+                if ((round_to_n_decimal_places(energy, 6) == round_to_n_decimal_places(min_energy, 6)) && trans_error)
                 {
                     ground_state_is_transparent = true;
                 }

@@ -18,8 +18,8 @@ using energy_and_state_type = std::vector<std::pair<double, bool>>;
 
 /**
  * This function takes in a map of energy (of a physically valid charge distribution) and the corresponding degeneracy.
- * For each charge distribution, it is determined if the wanted logic is still fulfilled, which is then returned. Thus,
- * information about which charge distributions affect the accuracy of a gate when it is populated.
+ * For each charge distribution, it is determined if the gate still computes correctly. This provides information on
+ * which charge distributions affect the accuracy of a gate when it is populated.
  *
  * @tparam Lyt Cell-level layout type.
  * @param energy_distribution The energy distribution of all physically valid charge layouts (can be calculated with
@@ -64,7 +64,6 @@ calculating_energy_and_state_type(const std::map<double, uint64_t>&             
             }
         }
     }
-
     return energy_transparent_erroneous;
 }
 

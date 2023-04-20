@@ -127,6 +127,11 @@ inline kitty::dynamic_truth_table create_xnor_tt() noexcept
 
     return table;
 }
+/**
+ * Creates and returns a truth table that implements an identity function in two variables.
+ *
+ * @return identity function in two variables.
+ */
 inline kitty::dynamic_truth_table create_double_wire_tt() noexcept
 {
     const char* hex_string = "11100100";
@@ -136,7 +141,11 @@ inline kitty::dynamic_truth_table create_double_wire_tt() noexcept
 
     return tt;
 }
-
+/**
+ * Creates and returns a truth table that implements a crossing in two variables.
+ *
+ * @return crossing in two variables.
+ */
 inline kitty::dynamic_truth_table create_crossing_wire_tt() noexcept
 {
     const char* hex_string = "11011000";
@@ -146,7 +155,11 @@ inline kitty::dynamic_truth_table create_crossing_wire_tt() noexcept
 
     return tt;
 }
-
+/**
+ * Creates and returns a truth table that implements a fan-out in one variable.
+ *
+ * @return fan-out in one variable.
+ */
 inline kitty::dynamic_truth_table create_fan_out_tt() noexcept
 {
     const char* truth_table_string = "1100";
@@ -156,7 +169,11 @@ inline kitty::dynamic_truth_table create_fan_out_tt() noexcept
 
     return tt;
 }
-
+/**
+ * Creates and returns a truth table that implements a half-adder in two variables.
+ *
+ * @return half-adder in two variables.
+ */
 inline kitty::dynamic_truth_table create_half_adder_tt() noexcept
 {
     const char* truth_table_string = "01101000";

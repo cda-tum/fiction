@@ -5,6 +5,7 @@
 #ifndef FICTION_OCCUPATION_PROBABILITY_EXCITED_STATES_HPP
 #define FICTION_OCCUPATION_PROBABILITY_EXCITED_STATES_HPP
 
+#include "fiction/algorithms/simulation/sidb/calculating_energy_and_state_type.hpp"
 #include "fiction/utils/math_utils.hpp"
 
 #include <algorithm>
@@ -20,20 +21,16 @@ namespace fiction
 {
 
 /**
- * This function computes the occupation probability of all erroneous charge distribution states at a given temperature
- * if `gate_based_simulation` is set to `true` (default). If not, the occupation probability of all excited states is
- * computed.
+ * This function computes the occupation probability of erroneous charge distributions (output charge does not match the
+ * expected output according the truth table) at a given temperature.
  *
- * @param energy_distribution This vector contains the energies of all possible charge distributions with the
- * information if state is transparent or erroneous.
+ * @param energy_distribution This contains the energies of all possible charge distributions with the
+ * information if corresponding state is transparent or erroneous.
  * @param temperature System temperature to assume.
- * @param erroneous_excited Flag to indicate that the critical temperature is determined for a logic gate. `true` is
- * used (recommended) for gates. `false` is required for arbitrary layouts with no underlying logic.
- * @return The occupation probability of all erroneous or excited states is returned.
+ * @return The occupation probability of all erroneous states is returned.
  */
-[[nodiscard]] inline double
-occupation_probability_gate_based(const std::vector<std::pair<double, bool>>& energy_distribution,
-                                  const double                                temperature) noexcept
+[[nodiscard]] inline double occupation_probability_gate_based(const energy_and_state_type& energy_distribution,
+                                                              const double                 temperature) noexcept
 {
     assert(!energy_distribution.empty() && "vector is empty");
     assert((temperature > static_cast<double>(0)) && "temperature should be slightly above 0 K");
@@ -55,26 +52,34 @@ occupation_probability_gate_based(const std::vector<std::pair<double, bool>>& en
                         [&](const double sum, const auto& it)
                         { return sum + std::exp(-(it.first - min_energy) * 12'000 / temperature); });
 
-    // All Boltzmann factors of the (erroneous) excited states are summed.
+    // All Boltzmann factors of the erroneous states are summed.
     double p = 0;
 
-        // The Boltzmann factors of all erroneous excited states are accumulated.
-        for (const auto& [energies, state_transparent_erroneous] : energy_distribution)
+    // The Boltzmann factors of all erroneous excited states are accumulated.
+    for (const auto& [energies, state_transparent_erroneous] : energy_distribution)
+    {
+        if (!state_transparent_erroneous)
         {
-            if (!state_transparent_erroneous)
-            {
-                p += std::exp(-(energies - min_energy) * 12'000 / temperature);
-            }
+            p += std::exp(-(energies - min_energy) * 12'000 / temperature);
         }
+    }
 
-        return p / partition_function;  // Occupation probability of the erroneous states.
+    return p / partition_function;  // Occupation probability of the erroneous states.
 }
 
+/**
+ * This function computes the occupation probability of excited states (charge distributions with energy higher than the
+ * ground state) at a given temperature.
+ *
+ * @param energy_distribution This contains the energies of all possible charge distributions with the degeneracy.
+ * @param temperature System temperature to assume.
+ * @return The total occupation probability of all excited states is returned.
+ */
 [[nodiscard]] inline double occupation_probability_non_gate_based(const std::map<double, uint64_t>& energy_distribution,
                                                                   const double temperature) noexcept
 {
-    assert(!energy_distribution.empty() && "vector is empty");
-    assert((temperature > static_cast<double>(0)) && "temperature should be slightly above 0 K");
+    assert(!energy_distribution.empty() && "Vector is empty");
+    assert((temperature > static_cast<double>(0)) && "Temperature should be slightly above 0 K");
 
     auto min_energy = std::numeric_limits<double>::infinity();
 
@@ -92,7 +97,7 @@ occupation_probability_gate_based(const std::vector<std::pair<double, bool>>& en
                         [&](const double sum, const auto& it)
                         { return sum + std::exp(-(it.first - min_energy) * 12'000 / temperature); });
 
-    // All Boltzmann factors of the (erroneous) excited states are summed.
+    // All Boltzmann factors of the excited states are summed.
     double p = 0;
 
     for (auto it = energy_distribution.begin(); it != energy_distribution.end(); it++)
