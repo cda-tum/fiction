@@ -1,14 +1,15 @@
 [build-system]
 requires = [
     "setuptools>=45",
-    "wheel>=0.37",
+    "setuptools_scm[toml]>=7",
     "ninja>=1.10; sys_platform != 'win32'",
-    "cmake>=3.14",
+    "cmake>=3.15",
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "fiction"
+version = "0.5.0"
 description = "Design Automation for Field-coupled Nanotechnologies"
 readme = "README.md"
 authors = [
@@ -16,7 +17,7 @@ authors = [
     { name = "Jan Drewniok", email = "jan.drewniok@tum.de" },
     { name = "Simon Hofmann", email = "simon.t.hofmann@tum.de" }
 ]
-keywords = ["MNT", "nanotechnology", "FCN", "QCA", "NML", "SiDB", "design automation", "placement", "routing", "clocking", "simulation"]
+keywords = ["MNT", "fiction", "nanotechnology", "FCN", "QCA", "NML", "SiDB", "design automation", "placement", "routing", "clocking", "simulation"]
 license = { file = "LICENSE.txt" }
 
 classifiers = [
@@ -33,8 +34,7 @@ classifiers = [
     'Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)',
 ]
 
-dynamic = ["version"]
-
+requires-python = ">=3.7"
 
 [project.urls]
 Source = 'https://github.com/marcelwa/fiction'
@@ -42,18 +42,29 @@ Tracker = 'https://github.com/marcelwa/fiction/issues'
 Documentation = 'https://fiction.readthedocs.io/en/latest/'
 Research = 'https://www.cda.cit.tum.de/research/fcn/'
 
+[tool.setuptools.packages.find]
+include = ["bindings/pyfiction.*"]
+
+[tool.setuptools_scm]
+
 [tool.cibuildwheel]
 build = "cp3*"
 archs = "auto64"
-test-skip = "*_arm64 *-musllinux_x86_64 *_universal2:arm64"
+skip = "*-musllinux*"
+test-skip = "*-macosx_arm64"
 test-command = "python3 -m unittest discover --start-directory bindings/pyfiction/test --verbose"
 environment = { DEPLOY = "ON" }
-build-verbosity = 1
+build-frontend = "build"
+build-verbosity = 3
+manylinux-x86_64-image = "manylinux_2_28"
 
 [tool.cibuildwheel.linux]
+environment = { Z3_ROOT = "/opt/python/cp39-cp39/lib/python3.9/site-packages/z3", DEPLOY = "ON" }
 
 [tool.cibuildwheel.macos]
 archs = "x86_64"
 environment = { MACOSX_DEPLOYMENT_TARGET = "10.15", DEPLOY = "ON" }
 
 [tool.cibuildwheel.windows]
+before-build = "pip install delvewheel"
+repair-wheel-command = "delvewheel repair -v -w {dest_dir} {wheel}"

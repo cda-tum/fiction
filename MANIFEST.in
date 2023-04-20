@@ -1,0 +1,33 @@
+prune bib
+prune cli
+
+graft libs/
+prune libs/Catch2/**
+prune libs/alice/**
+prune libs/mockturtle/lib/nauty/**
+
+prune **/.git
+prune **/.github
+prune **/app
+prune **/apps
+prune **/doc
+prune **/docs
+prune **/meta
+prune **/plots
+prune **/css
+prune **/html
+prune **/test
+prune **/tests
+prune **/benchmark
+prune **/benchmarks
+prune **/experiment
+prune **/experiments
+prune **/examples
+
+prune **cmake-build-**
+
+exclude **.pdf
+exclude **.ans
+exclude **.out
+exclude **.log
+exclude **.xml

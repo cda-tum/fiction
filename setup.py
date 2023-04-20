@@ -122,7 +122,7 @@ setup(
         'Natural Language :: English',
         'Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)',
     ],
-    keywords='fiction fcn qca nml sidb',
+    keywords='MNT fiction nanotechnology fcn qca nml sidb design automation placement routing clocking simulation',
     project_urls={
         'Source': 'https://github.com/marcelwa/fiction',
         'Tracker': 'https://github.com/marcelwa/fiction/issues',
