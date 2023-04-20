@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <array>
+#include <iterator>
 #include <string>
 #include <string_view>
 #include <vector>
