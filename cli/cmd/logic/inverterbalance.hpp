@@ -2,8 +2,8 @@
 // Created by benjamin on 20.04.23.
 //
 
-#ifndef FICTION_OPTIMIZE_HPP
-#define FICTION_OPTIMIZE_HPP
+#ifndef FICTION_INVERTERBALANCE_HPP
+#define FICTION_INVERTERBALANCE_HPP
 
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/algorithms/network_transformation/inverter_balancing.hpp"
@@ -29,7 +29,7 @@ namespace alice
  *
  * For more information see: https://github.com/hriener/lorina
  */
-class optimize_command : public command
+class inverterbalance_command : public command
 {
   public:
     /**
@@ -37,11 +37,7 @@ class optimize_command : public command
      *
      * @param e alice::environment that specifies stores etc.
      */
-    explicit optimize_command(const environment::ptr& e) : command(e, "Optimizes logic_networks with selected method.")
-    {
-        add_flag("--inv,-i",
-                 "Optimize Inverters at fan-out nodes. Note that a fan-out substitution is automatically performed");
-    }
+    explicit inverterbalance_command(const environment::ptr& e) : command(e, "Balances inverters at fan-out nodes.") {}
 
   protected:
     void execute() override
@@ -53,31 +49,37 @@ class optimize_command : public command
 
             return;
         }
-        if (!is_set("inv"))
+        const auto perform_optimization = [this](auto&& ntk_ptr)
         {
-            env->out() << "[e] at least one optimization type must be specified" << std::endl;
-        }
-        else if (is_set("inv"))
-        {
-            const auto perform_optimization = [this](auto&& ntk_ptr)
+            auto src_ntk{*ntk_ptr};
+            if (!is_fanout_substituted(src_ntk, ps))
             {
-                auto src_ntk{fiction::fanout_substitution<fiction::tec_nt>(*ntk_ptr)};
-                auto optimized_ntk{fiction::inverter_balancing(src_ntk)};
+                env->out() << "[e] network is not fan-out substituted. You may want to try command 'fanouts' before "
+                              "running this command."
+                           << std::endl;
+            }
+            else
+            {
+                auto src_ntk_f{fiction::fanout_substitution<fiction::tec_nt>(*ntk_ptr)};
+                auto optimized_ntk{fiction::inverter_balancing(src_ntk_f)};
                 auto gate_dif = src_ntk.num_gates() - optimized_ntk.num_gates();
                 env->out() << "Number of balanced inverters: " << gate_dif << std::endl;
 
                 auto result = std::make_shared<fiction::tec_nt>(optimized_ntk);
 
                 return result;
-            };
+            }
+        };
 
-            s.extend() = std::visit(perform_optimization, s.current());
-        }
+        s.extend() = std::visit(perform_optimization, s.current());
     }
+
+  private:
+    fiction::fanout_substitution_params ps{};
 };
 
-ALICE_ADD_COMMAND(optimize, "Logic")
+ALICE_ADD_COMMAND(inverterbalance, "Logic")
 
 }  // namespace alice
 
-#endif  // FICTION_OPTIMIZE_HPP
+#endif  // FICTION_INVERTERBALANCE_HPP
