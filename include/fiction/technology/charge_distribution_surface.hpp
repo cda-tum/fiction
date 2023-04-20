@@ -795,7 +795,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
 
         return (strg->phys_params.k / (strg->nm_dist_mat[index1][index2] * 1E-9) *
-                std::exp(-strg->nm_dist_mat[index1][index2] * 1E-9 / strg->phys_params.lambda_tf) *
+                std::exp(-strg->nm_dist_mat[index1][index2] / strg->phys_params.lambda_tf) *
                 physical_constants::ELECTRIC_CHARGE);
     }
 
