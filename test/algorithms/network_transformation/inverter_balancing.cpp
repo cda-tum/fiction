@@ -11,17 +11,28 @@
 
 using namespace fiction;
 
+TEST_CASE("One Balancing", "[inverter-balancing]")
+{
+    auto test_nw = blueprints::test_inverter_balancing<mockturtle::names_view<mockturtle::aig_network>>();
+    auto aig_ntk{fanout_substitution<mockturtle::names_view<technology_network>>(test_nw)};
+
+    CHECK(aig_ntk.num_gates() == 9);
+
+    auto balanced_aig_ntk{inverter_balancing(aig_ntk)};
+
+    CHECK(balanced_aig_ntk.num_gates() == 8);
+}
+
 TEST_CASE("Double Balancing", "[inverter-balancing]")
 {
     auto test_nw =
         blueprints::fanout_substitution_corner_case_network<mockturtle::names_view<mockturtle::aig_network>>();
 
-    auto aig_ntk{mockturtle::fanout_view{fanout_substitution<mockturtle::names_view<technology_network>>(test_nw)}};
+    auto aig_ntk{fanout_substitution<mockturtle::names_view<technology_network>>(test_nw)};
 
     CHECK(aig_ntk.num_gates() == 7);
 
-    auto balanced_aig_ntk{mockturtle::fanout_view{
-        inverter_balancing(fanout_substitution<mockturtle::names_view<technology_network>>(test_nw))}};
+    auto balanced_aig_ntk{inverter_balancing(aig_ntk)};
 
     CHECK(balanced_aig_ntk.num_gates() == 4);
 }
