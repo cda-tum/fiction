@@ -13,7 +13,7 @@
 
 #include <pybind11/pybind11.h>
 
-#include <string>
+#include <string_view>
 
 namespace pyfiction
 {
@@ -28,7 +28,7 @@ void write_dot_layout(pybind11::module& m)
 
     m.def(
         "write_dot_layout",
-        [](const Lyt& lyt, const std::string& filename)
+        [](const Lyt& lyt, const std::string_view& filename)
         {
             if constexpr (fiction::is_cartesian_layout_v<Lyt>)
             {
