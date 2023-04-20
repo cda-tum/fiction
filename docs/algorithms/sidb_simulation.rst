@@ -64,7 +64,7 @@ Temperature Behavior
 
 **Header:** ``fiction/algorithms/simulation/sidb/occupation_function_erroneous.hpp``
 
-.. doxygenfunction:: fiction::occupation_probability
+.. doxygenfunction:: fiction::occupation_probability_gate_based
 
 
 Time-to-Solution (TTS) Statistics

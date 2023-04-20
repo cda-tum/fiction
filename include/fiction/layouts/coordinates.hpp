@@ -723,25 +723,17 @@ struct coord_t
      */
     constexpr bool operator<(const coord_t& other) const noexcept
     {
-        if (z < other.z)
+
+        if (y != other.y)
         {
-            return true;
+            return y < other.y;
+        }
+        if (z != other.z)
+        {
+            return z < other.z;
         }
 
-        if (z == other.z)
-        {
-            if (y < other.y)
-            {
-                return true;
-            }
-
-            if (y == other.y)
-            {
-                return x < other.x;
-            }
-        }
-
-        return false;
+        return x < other.x;
     }
     /**
      * Determine whether this coordinate is "greater than" another one. This is the case if the other one is "less
