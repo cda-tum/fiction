@@ -8,8 +8,8 @@ on:
   pull_request:
   merge_group:
   push:
-#    branches:
-#      - main
+  #    branches:
+  #      - main
   workflow_dispatch:
 
 concurrency:
@@ -37,6 +37,7 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
       # Under Linux the action does not work because it can't install to the manylinux container.
       - if: runner.os != 'Linux'
         name: Install Z3
@@ -46,14 +47,19 @@ jobs:
           architecture: ${{ matrix.config.arch }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - if: ${{ matrix.config.arch == 'arm64' }}
         name: Set Architecture to arm64 if necessary
         run: echo "CIBW_ARCHS_MACOS=arm64" >> $GITHUB_ENV
-      - name: Build wheels
+
+      - name: Build wheel
         uses: pypa/cibuildwheel@v2.12.1
         env:
+          z3: ${{env.ENABLE_Z3}}
           CIBW_BEFORE_ALL_LINUX: /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
-      - uses: actions/upload-artifact@v3
+
+      - name: Upload wheel as an artifact
+        uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
 
