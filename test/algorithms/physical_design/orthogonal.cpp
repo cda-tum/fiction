@@ -28,28 +28,28 @@ using namespace fiction;
 
 TEST_CASE("East-south coloring", "[orthogonal]")
 {
-    const auto check = [](const auto& ntk)
+    const auto check_colors = [](const auto& ntk)
     {
         auto container = detail::east_south_edge_coloring(ntk);
         CHECK(detail::is_east_south_colored(container.color_ntk));
     };
 
-    check(mockturtle::fanout_view{
+    check_colors(mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{
+    check_colors(mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::maj1_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{
+    check_colors(mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::maj4_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{
+    check_colors(mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::se_coloring_corner_case_network<technology_network>())});
-    check(mockturtle::fanout_view{fanout_substitution<technology_network>(
+    check_colors(mockturtle::fanout_view{fanout_substitution<technology_network>(
         blueprints::fanout_substitution_corner_case_network<technology_network>())});
-    check(mockturtle::fanout_view{
+    check_colors(mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::nary_operation_network<technology_network>())});
-    check(mockturtle::fanout_view{fanout_substitution<technology_network>(blueprints::clpl<technology_network>())});
-    check(mockturtle::fanout_view{
+    check_colors(mockturtle::fanout_view{fanout_substitution<technology_network>(blueprints::clpl<technology_network>())});
+    check_colors(mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::half_adder_network<mockturtle::mig_network>())});
-    check(mockturtle::fanout_view{
+    check_colors(mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::full_adder_network<mockturtle::mig_network>())});
 }
 
@@ -133,7 +133,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
     using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-    const auto check = [](const auto& ntk)
+    const auto check_orthogonal = [](const auto& ntk)
     {
         orthogonal_physical_design_stats stats{};
 
@@ -142,16 +142,16 @@ TEST_CASE("Gate library application", "[orthogonal]")
         CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(layout));
     };
 
-    check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check(blueprints::maj1_network<mockturtle::aig_network>());
-    check(blueprints::maj4_network<mockturtle::aig_network>());
-    check(blueprints::se_coloring_corner_case_network<technology_network>());
-    check(blueprints::fanout_substitution_corner_case_network<technology_network>());
-    check(blueprints::clpl<technology_network>());
-    check(blueprints::half_adder_network<mockturtle::mig_network>());
+    check_orthogonal(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
+    check_orthogonal(blueprints::maj1_network<mockturtle::aig_network>());
+    check_orthogonal(blueprints::maj4_network<mockturtle::aig_network>());
+    check_orthogonal(blueprints::se_coloring_corner_case_network<technology_network>());
+    check_orthogonal(blueprints::fanout_substitution_corner_case_network<technology_network>());
+    check_orthogonal(blueprints::clpl<technology_network>());
+    check_orthogonal(blueprints::half_adder_network<mockturtle::mig_network>());
 
     // constant input network
-    check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
+    check_orthogonal(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
 }
 
 TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
