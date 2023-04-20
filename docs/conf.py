@@ -222,5 +222,9 @@ class DocOverviewTableDirective(Directive):
         table += tgroup
         return [table]
 
+
 def setup(app):
     app.add_directive('doc_overview_table', DocOverviewTableDirective)
+
+
+autodoc_member_order = 'bysource'
