@@ -4,13 +4,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/physical_design/ortho_ordering_network.hpp>
-
+#include "fiction/utils/debug/network_writer.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 
 #include "fiction/utils/debug/network_writer.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
+#include <fiction/algorithms/physical_design/ortho_ordering_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 
 #include <iostream>
@@ -37,14 +37,15 @@ TEST_CASE("conditional_coloring", "[orthogonal_ordering]")
         blueprints::fanout_substitution_corner_case_network<technology_network>())}});
     check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::nary_operation_network<technology_network>())}});
-    check(input_ordering_view{mockturtle::fanout_view{fanout_substitution<technology_network>(blueprints::clpl<technology_network>())}});
+    check(input_ordering_view{
+        mockturtle::fanout_view{fanout_substitution<technology_network>(blueprints::clpl<technology_network>())}});
     check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::half_adder_network<mockturtle::mig_network>())}});
 
     check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::test_sort_inputs<mockturtle::mig_network>())}});
-    check(input_ordering_view{mockturtle::fanout_view{
-        fanout_substitution<technology_network>(blueprints::test_fanout_nodes_coloring_null<mockturtle::mig_network>())}});
+    check(input_ordering_view{mockturtle::fanout_view{fanout_substitution<technology_network>(
+        blueprints::test_fanout_nodes_coloring_null<mockturtle::mig_network>())}});
     check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::test_fanout_nodes_rank<mockturtle::mig_network>())}});
     check(input_ordering_view{mockturtle::fanout_view{
@@ -114,4 +115,6 @@ TEST_CASE("TEST", "[ordering]")
     const auto layout = orthogonal_ordering_network<gate_layout>(test_nw, {}, &stats);
 
     gate_level_drvs(layout);
+
+    fiction::debug::write_dot_layout(layout);
 }

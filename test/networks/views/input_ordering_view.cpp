@@ -19,10 +19,10 @@ using namespace fiction;
 
 TEST_CASE("Input_ordering consider all PIs", "[input-ordering]")
 {
-    auto mux21 = blueprints::test_fanout_nodes_rank<mockturtle::names_view<mockturtle::aig_network>>();
+    auto test_nw = blueprints::test_fanout_nodes_rank<mockturtle::names_view<mockturtle::aig_network>>();
 
     auto ordered_aig_ntk{input_ordering_view{
-        mockturtle::fanout_view{fanout_substitution<mockturtle::names_view<technology_network>>(mux21)}}};
+        mockturtle::fanout_view{fanout_substitution<mockturtle::names_view<technology_network>>(test_nw)}}};
 
     std::vector<mockturtle::node<technology_network>> nodes_order;
     std::vector<mockturtle::node<technology_network>> expected_nodes_order{0, 1, 5,  4,  2,  3,  6,  8,
