@@ -914,7 +914,7 @@ class one_pass_synthesis_impl
  * Walter, W. Haaswijk, R. Wille, F. Sill Torres, and Rolf Drechsler in ASP-DAC 2021.
  *
  * Using iterative SAT calls, an optimal synthesis & placement & routing for a given specification will be found.
- * Starting with \f$ n \f$, each possible layout aspect ratio in \f$ n \f$ tiles will be examined by factorization and
+ * Starting with \f$n\f$, each possible layout aspect ratio in \f$n\f$ tiles will be examined by factorization and
  * tested for realizability using the SAT solver glucose. When no upper bound is given, this approach will run until it
  * finds a solution to the synthesis & placement & routing problem instance under all given constraints. Note that there
  * are combinations of constraints for which no valid solution under the given parameters might exist. It is, thus,

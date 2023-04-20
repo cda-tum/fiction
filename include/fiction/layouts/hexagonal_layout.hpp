@@ -232,7 +232,7 @@ class hexagonal_layout
         return strg->dimension.z;
     }
     /**
-     * Returns the layout's number of faces which are equal to \f$ (x + 1) \cdot (y + 1) \f$.
+     * Returns the layout's number of faces which are equal to \f$(x + 1) \cdot (y + 1)\f$.
      *
      * @return Area of layout.
      */
