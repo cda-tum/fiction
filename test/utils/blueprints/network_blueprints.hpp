@@ -199,6 +199,25 @@ mockturtle::names_view<Ntk> mux21_network()
 }
 
 template <typename Ntk>
+mockturtle::names_view<Ntk> test_inverter_balancing()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+    const auto x1 = ntk.create_pi();
+    const auto x2 = ntk.create_pi();
+    const auto x3 = ntk.create_pi();
+
+    const auto n1  = ntk.create_not(x3);
+    const auto a1  = ntk.create_and(x1, n1);
+    const auto a2  = ntk.create_and(x2, n1);
+    const auto mux = ntk.create_or(a1, a2);
+
+    ntk.create_po(mux);
+
+    return ntk;
+}
+
+template <typename Ntk>
 mockturtle::names_view<Ntk> test_inv_flag_a()
 {
     mockturtle::names_view<Ntk> ntk{};
