@@ -14,10 +14,8 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # import os
-import sys
+# import sys
 # sys.path.insert(0, os.path.abspath('.'))
-
-sys.path.append("/Users/simonhofmann/Documents/fcn_fork_2/venv/lib/python3.9/site-packages")
 
 # -- General configuration ------------------------------------------------
 
