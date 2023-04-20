@@ -57,7 +57,7 @@ jobs:
         env:
           z3: ${{env.ENABLE_Z3}}
           CIBW_BEFORE_ALL_LINUX: /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
-          CIBW_TEST_COMMAND: 'python3 -m unittest discover --start-directory {project}/pyfiction/bindings/test --verbose'
+          CIBW_TEST_COMMAND: 'python3 -m unittest discover --start-directory {project}/pyfiction/ --verbose'
 
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@v3
