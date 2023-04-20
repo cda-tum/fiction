@@ -7,8 +7,6 @@
 #include "fiction/utils/debug/network_writer.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 
-#include "fiction/utils/debug/network_writer.hpp"
-
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/algorithms/physical_design/ortho_ordering_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
@@ -17,7 +15,7 @@
 
 using namespace fiction;
 
-TEST_CASE("conditional_coloring", "[orthogonal_ordering]")
+TEST_CASE("conditional_coloring", "[orthogonal-coloring]")
 {
     const auto check = [](const auto& ntk)
     {
@@ -41,7 +39,6 @@ TEST_CASE("conditional_coloring", "[orthogonal_ordering]")
         mockturtle::fanout_view{fanout_substitution<technology_network>(blueprints::clpl<technology_network>())}});
     check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::half_adder_network<mockturtle::mig_network>())}});
-
     check(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::test_sort_inputs<mockturtle::mig_network>())}});
     check(input_ordering_view{mockturtle::fanout_view{fanout_substitution<technology_network>(
@@ -52,7 +49,7 @@ TEST_CASE("conditional_coloring", "[orthogonal_ordering]")
         fanout_substitution<technology_network>(blueprints::test_fanout_swap<mockturtle::mig_network>())}});
 }
 
-TEST_CASE("Ordering Gate library application", "[orthogonal_ordering]")
+TEST_CASE("Ordering Gate library application", "[orthogonal-ordering]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
     using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
@@ -73,7 +70,6 @@ TEST_CASE("Ordering Gate library application", "[orthogonal_ordering]")
     check(blueprints::fanout_substitution_corner_case_network<technology_network>());
     check(blueprints::clpl<technology_network>());
     check(blueprints::half_adder_network<mockturtle::mig_network>());
-
     check(blueprints::test_sort_inputs<mockturtle::mig_network>());
     check(blueprints::test_fanout_nodes_coloring_null<mockturtle::mig_network>());
     check(blueprints::test_fanout_nodes_rank<mockturtle::mig_network>());
@@ -83,7 +79,7 @@ TEST_CASE("Ordering Gate library application", "[orthogonal_ordering]")
     check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
 }
 
-TEST_CASE("Ordering Name conservation after orthogonal physical design", "[orthogonal_ordering]")
+TEST_CASE("Ordering Name conservation after orthogonal physical design", "[orthogonal-ordering]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
@@ -104,7 +100,7 @@ TEST_CASE("Ordering Name conservation after orthogonal physical design", "[ortho
     CHECK(layout.get_output_name(0) == "f");
 }
 
-TEST_CASE("TEST", "[ordering]")
+TEST_CASE("TEST", "[orthogonal-ordering]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
