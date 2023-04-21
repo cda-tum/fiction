@@ -52,7 +52,7 @@ build = "cp3*"
 archs = "auto64"
 skip = "*-musllinux*"
 test-skip = "*-macosx_arm64"
-test-command = "python3 -m unittest discover --start-directory bindings/pyfiction/test --verbose"
+test-command = "python3 -m unittest discover --start-directory bindings/pyfiction/ --verbose"
 environment = { DEPLOY = "ON" }
 build-frontend = "build"
 build-verbosity = 3
