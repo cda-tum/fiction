@@ -16,6 +16,7 @@
 #include <fmt/chrono.h>
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <chrono>
 #include <ctime>
 #include <fstream>
@@ -108,7 +109,11 @@ template <typename Lyt>
 class write_sqd_sim_result_impl
 {
   public:
-    write_sqd_sim_result_impl(const sidb_simulation_result<Lyt>& result, std::ostream& s) : sim_result{result}, os{s} {}
+    write_sqd_sim_result_impl(const sidb_simulation_result<Lyt>& result, std::ostream& s) :
+            sim_result{result},
+            os{s},
+            ordered_cells{obtain_ordered_cells()}
+    {}
 
     void run()
     {
@@ -134,6 +139,38 @@ class write_sqd_sim_result_impl
      * The output stream to write to.
      */
     std::ostream& os;
+    /**
+     * A reproducible ordering of cells in the surfaces.
+     */
+    const std::vector<cell<Lyt>> ordered_cells;
+
+    /**
+     * Obtains all cells in the surfaces and orders them by their position to achieve a reproducible output.
+     *
+     * @return An ordering of cells.
+     */
+    std::vector<cell<Lyt>> obtain_ordered_cells() const noexcept
+    {
+        std::vector<cell<Lyt>> cells{};
+
+        if (sim_result.charge_distributions.empty())
+        {
+            return cells;
+        }
+
+        // take the first distribution as the reference layout
+        const auto& lyt = sim_result.charge_distributions.front();
+
+        cells.reserve(lyt.num_cells());
+
+        // obtain all cells in the surfaces and order them by their position to achieve a reproducible output
+        lyt.foreach_cell([&cells](const cell<Lyt>& c) { cells.push_back(c); });
+
+        // sort the cells by their position using their respective operator<
+        std::sort(cells.begin(), cells.end());
+
+        return cells;
+    }
     /**
      * Writes the engine information to the output stream in XML format.
      */
@@ -178,20 +215,13 @@ class write_sqd_sim_result_impl
     {
         os << siqad::OPEN_PHYSLOC;
 
-        // only write locations if any charge distributions are present
-        if (!sim_result.charge_distributions.empty())
-        {
-            // take the first distribution as the reference layout
-            const auto& lyt = sim_result.charge_distributions.front();
+        std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
+                      [this](const auto& c)
+                      {
+                          const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(sim_result.physical_parameters, c);
 
-            lyt.foreach_cell(  // this should ensure the same order for all subsequent distributions
-                [this](const auto& c)
-                {
-                    const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(sim_result.physical_parameters, c);
-
-                    os << fmt::format(siqad::DBDOT, nm_x * 10, nm_y * 10);  // convert nm to Angstrom
-                });
-        }
+                          os << fmt::format(siqad::DBDOT, nm_x * 10, nm_y * 10);  // convert nm to Angstrom
+                      });
 
         os << siqad::CLOSE_PHYSLOC;
     }
@@ -205,13 +235,21 @@ class write_sqd_sim_result_impl
         std::for_each(sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend(),
                       [this](const auto& surface)
                       {
-                          os << fmt::format(siqad::DIST_ENERGY,
-                                            surface.get_system_energy(),            // system energy
-                                            1,                                      // occurrence count
-                                            surface.is_physically_valid() ? 1 : 0,  // physical validity
-                                            sim_result.physical_parameters.base,    // simulation state count
-                                            charge_configuration_to_string(
-                                                surface.get_all_sidb_charges())  // charge distribution as a string
+                          // obtain the charges in the same order as the cells
+                          std::vector<sidb_charge_state> ordered_charges{};
+                          ordered_charges.reserve(ordered_cells.size());
+
+                          std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
+                                        [&ordered_charges, &surface](const auto& c)
+                                        { ordered_charges.push_back(surface.get_charge_state(c)); });
+
+                          os << fmt::format(
+                              siqad::DIST_ENERGY,
+                              surface.get_system_energy(),                     // system energy
+                              1,                                               // occurrence count
+                              surface.is_physically_valid() ? 1 : 0,           // physical validity
+                              sim_result.physical_parameters.base,             // simulation state count
+                              charge_configuration_to_string(ordered_charges)  // charge distribution as a string
                           );
                       });
 

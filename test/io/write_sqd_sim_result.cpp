@@ -24,21 +24,21 @@ TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
         const std::any value{};
         const auto     result = detail::any_to_string(value);
 
-        REQUIRE(result.empty());
+        CHECK(result.empty());
     }
     SECTION("int8_t")
     {
         const int8_t value  = -42;
         const auto   result = detail::any_to_string(value);
 
-        REQUIRE(result == "-42");
+        CHECK(result == "-42");
     }
     SECTION("uint8_t")
     {
         const uint8_t value  = 42;
         const auto    result = detail::any_to_string(value);
 
-        REQUIRE(result == "42");
+        CHECK(result == "42");
     }
     SECTION("int16_t")
     {
@@ -283,16 +283,16 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
         "    </sim_params>\n"
         "    <physloc>\n"
         "        <dbdot x=\"0.000000\" y=\"0.000000\"/>\n"
-        "        <dbdot x=\"42.240000\" y=\"0.000000\"/>\n"
-        "        <dbdot x=\"65.280000\" y=\"0.000000\"/>\n"
         "        <dbdot x=\"19.200000\" y=\"0.000000\"/>\n"
-        "        <dbdot x=\"72.960000\" y=\"0.000000\"/>\n"
-        "        <dbdot x=\"49.920000\" y=\"0.000000\"/>\n"
         "        <dbdot x=\"26.880000\" y=\"0.000000\"/>\n"
+        "        <dbdot x=\"42.240000\" y=\"0.000000\"/>\n"
+        "        <dbdot x=\"49.920000\" y=\"0.000000\"/>\n"
+        "        <dbdot x=\"65.280000\" y=\"0.000000\"/>\n"
+        "        <dbdot x=\"72.960000\" y=\"0.000000\"/>\n"
         "    </physloc>\n"
         "    <elec_dist>\n"
         "        <dist energy=\"0.246027\" count=\"1\" physically_valid=\"1\" "
-        "state_count=\"2\">-000---</dist>\n"
+        "state_count=\"2\">-0-0-0-</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
@@ -347,13 +347,13 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         "        <muzm>{}</muzm>\n"
         "    </sim_params>\n"
         "    <physloc>\n"
-        "        <dbdot x=\"23.040000\" y=\"0.000000\"/>\n"
         "        <dbdot x=\"19.200000\" y=\"0.000000\"/>\n"
+        "        <dbdot x=\"23.040000\" y=\"0.000000\"/>\n"
         "        <dbdot x=\"26.880000\" y=\"0.000000\"/>\n"
         "    </physloc>\n"
         "    <elec_dist>\n"
-        "        <dist energy=\"0.000000\" count=\"1\" physically_valid=\"1\" state_count=\"3\">-00</dist>\n"
-        "        <dist energy=\"-0.953023\" count=\"1\" physically_valid=\"1\" state_count=\"3\">+--</dist>\n"
+        "        <dist energy=\"0.000000\" count=\"1\" physically_valid=\"1\" state_count=\"3\">0-0</dist>\n"
+        "        <dist energy=\"-0.953023\" count=\"1\" physically_valid=\"1\" state_count=\"3\">-+-</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),

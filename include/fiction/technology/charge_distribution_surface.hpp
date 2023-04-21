@@ -192,7 +192,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Vector of SiDB nanometer positions.
      */
-    [[nodiscard]] std::vector<std::pair<double, double>> get_all_sidb_location_in_nm() const noexcept
+    [[nodiscard]] std::vector<std::pair<double, double>> get_all_sidb_locations_in_nm() const noexcept
     {
         std::vector<std::pair<double, double>> positions{};
         positions.reserve(strg->sidb_order.size());
