@@ -21,7 +21,6 @@
 #include <ctime>
 #include <fstream>
 #include <functional>
-#include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>
