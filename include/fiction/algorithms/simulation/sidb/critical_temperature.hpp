@@ -36,7 +36,7 @@ namespace fiction
 {
 
 /**
- * This struct stores the parameters for the *critical_temperature* algorithm.
+ * This struct stores the parameters for the `critical_temperature` algorithm.
  */
 struct critical_temperature_params
 {
@@ -49,7 +49,7 @@ struct critical_temperature_params
      */
     const sidb_simulation_parameters& sidb_sim_params{};
     /**
-     * Probability that ground state is less populated due to temperature. For gate-based simulation, this is the
+     * Probability that the ground state is less populated due to temperature. For gate-based simulation, this is the
      * probability of erroneous calculations of the gate.
      */
     double confidence_level{0.99};
@@ -58,7 +58,7 @@ struct critical_temperature_params
      */
     uint64_t max_temperature{400};
     /**
-     * Truth table of the given gate (if layout is simulated in *gate-based mode*).
+     * Truth table of the given gate (if layout is simulated in `gate-based` mode).
      */
     tt truth_table{};
     /**
@@ -311,7 +311,7 @@ class critical_temperature_impl
             // if the occupation probability of excited states exceeds the given threshold...
             if (occupation_probability_non_gate_based(distribution, temp) > (1 - parameter.confidence_level))
             {
-                // ... the current temperature is stored as the critical temperature
+                // ...the current temperature is stored as the critical temperature
                 temperature_stats.critical_temperature = temp;
 
                 break;

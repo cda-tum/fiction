@@ -715,8 +715,8 @@ struct coord_t
         return !(*this == other);
     }
     /**
-     * Determine whether this coordinate is "less than" another one. This is the case if z is smaller, or if z is equal
-     * but y is smaller, or if z and y are equal but x is smaller.
+     * Determine whether this coordinate is "less than" another one. This is the case if y is smaller, or if y is equal
+     * but z is smaller, or if z and y are equal but x is smaller.
      *
      * @param other Right-hand side coordinate.
      * @return True iff this coordinate is "less than" the other coordinate.
