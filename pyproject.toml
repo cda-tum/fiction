@@ -52,7 +52,7 @@ build = "cp3*"
 archs = "auto64"
 skip = "*-musllinux*"
 test-skip = "*-macosx_arm64"
-test-command = "python3 -m unittest discover --start-directory bindings/pyfiction/ --verbose"
+test-command = "python -m unittest discover --start-directory bindings/pyfiction/ --verbose"
 environment = { DEPLOY = "ON" }
 build-frontend = "build"
 manylinux-x86_64-image = "manylinux_2_28"
