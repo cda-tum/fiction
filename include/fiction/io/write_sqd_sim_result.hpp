@@ -21,6 +21,7 @@
 #include <ctime>
 #include <fstream>
 #include <functional>
+#include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -232,7 +233,21 @@ class write_sqd_sim_result_impl
     {
         os << siqad::OPEN_ELEC_DIST;
 
+        // a vector of pointers to avoid copying the surfaces (use raw pointers at your own risk, kids!)
+        std::vector<const charge_distribution_surface<Lyt>*> ordered_surface_pointers{};
+        ordered_surface_pointers.reserve(sim_result.charge_distributions.size());
+
+        // obtain pointers to all the surfaces
         std::for_each(sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend(),
+                      [&ordered_surface_pointers](const auto& surface)
+                      { ordered_surface_pointers.push_back(&surface); });
+
+        // sort the surface references by their system energy
+        std::sort(ordered_surface_pointers.begin(), ordered_surface_pointers.end(),
+                  [](const auto& a, const auto& b) { return a->get_system_energy() < b->get_system_energy(); });
+
+        // write the distributions to the output stream
+        std::for_each(ordered_surface_pointers.cbegin(), ordered_surface_pointers.cend(),
                       [this](const auto& surface)
                       {
                           // obtain the charges in the same order as the cells
@@ -241,13 +256,13 @@ class write_sqd_sim_result_impl
 
                           std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
                                         [&ordered_charges, &surface](const auto& c)
-                                        { ordered_charges.push_back(surface.get_charge_state(c)); });
+                                        { ordered_charges.push_back(surface->get_charge_state(c)); });
 
                           os << fmt::format(
                               siqad::DIST_ENERGY,
-                              surface.get_system_energy(),                     // system energy
+                              surface->get_system_energy(),                    // system energy
                               1,                                               // occurrence count
-                              surface.is_physically_valid() ? 1 : 0,           // physical validity
+                              surface->is_physically_valid() ? 1 : 0,          // physical validity
                               sim_result.physical_parameters.base,             // simulation state count
                               charge_configuration_to_string(ordered_charges)  // charge distribution as a string
                           );
