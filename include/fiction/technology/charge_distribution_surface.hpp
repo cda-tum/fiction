@@ -805,7 +805,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             return 0.0;
         }
-        return (strg->phys_params.k / distance * std::exp(-distance / strg->phys_params.lambda_tf) *
+        return (strg->phys_params.k / distance * 1E9 * std::exp(-distance / strg->phys_params.lambda_tf) *
                 physical_constants::ELECTRIC_CHARGE);
     }
 
@@ -819,7 +819,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
 
         return 1.0 / (4.0 * fiction::physical_constants::PI * fiction::physical_constants::EPSILON * defect.epsilon_r) /
-               distance * std::exp(-distance / defect.lambda_tf) * physical_constants::ELECTRIC_CHARGE;
+               distance * 1E9 * std::exp(-distance / defect.lambda_tf) * physical_constants::ELECTRIC_CHARGE;
     }
 
     /**
