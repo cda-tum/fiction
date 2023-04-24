@@ -2,6 +2,7 @@
 .idea/
 cmake-build-*
 build/
+dist/
 *.aux
 *.log
 *.pdf
