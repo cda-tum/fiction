@@ -93,7 +93,7 @@ TEMPLATE_TEST_CASE(
 
         params.simulation_mode  = critical_temperature_simulation_mode::NON_GATE_BASED_SIM;
         params.max_temperature  = 450;
-        params.confidence_level      = 0.999;
+        params.confidence_level = 0.999;
         critical_temperature_stats<TestType> criticalstats_no_logic{};
         critical_temperature(lyt, params, &criticalstats_no_logic);
         CHECK(criticalstats_no_logic.critical_temperature < 40);
