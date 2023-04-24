@@ -35,7 +35,7 @@ Alternatively, install the following dependency before the `CMake` call:
 pip install python-dotenv==0.21.1
 ```
 
-To execute all tests, use the following command inside in the package directory:
+To execute all tests, use the following command inside the package directory:
 
 ```bash
  python -m unittest discover --verbose
