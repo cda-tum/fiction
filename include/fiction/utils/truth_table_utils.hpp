@@ -134,10 +134,10 @@ inline kitty::dynamic_truth_table create_xnor_tt() noexcept
  */
 inline kitty::dynamic_truth_table create_double_wire_tt() noexcept
 {
-    const char* hex_string = "11100100";
+    static constexpr const char* truth_table_string = "11100100";
 
     kitty::dynamic_truth_table tt(3);
-    kitty::create_from_binary_string(tt, hex_string);
+    kitty::create_from_binary_string(tt, truth_table_string);
 
     return tt;
 }
@@ -148,10 +148,10 @@ inline kitty::dynamic_truth_table create_double_wire_tt() noexcept
  */
 inline kitty::dynamic_truth_table create_crossing_wire_tt() noexcept
 {
-    const char* hex_string = "11011000";
+    static constexpr const char* truth_table_string = "11011000";
 
     kitty::dynamic_truth_table tt(3);
-    kitty::create_from_binary_string(tt, hex_string);
+    kitty::create_from_binary_string(tt, truth_table_string);
 
     return tt;
 }
@@ -162,7 +162,7 @@ inline kitty::dynamic_truth_table create_crossing_wire_tt() noexcept
  */
 inline kitty::dynamic_truth_table create_fan_out_tt() noexcept
 {
-    const char* truth_table_string = "1100";
+    static constexpr const char* truth_table_string = "1100";
 
     kitty::dynamic_truth_table tt(2);
     kitty::create_from_binary_string(tt, truth_table_string);
@@ -176,7 +176,7 @@ inline kitty::dynamic_truth_table create_fan_out_tt() noexcept
  */
 inline kitty::dynamic_truth_table create_half_adder_tt() noexcept
 {
-    const char* truth_table_string = "01101000";
+    static constexpr const char* truth_table_string = "01101000";
 
     kitty::dynamic_truth_table tt(3);
     kitty::create_from_binary_string(tt, truth_table_string);

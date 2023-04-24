@@ -50,6 +50,8 @@ Energy Calculation
 **Header:** ``fiction/algorithms/simulation/sidb/energy_distribution.hpp``
 
 .. doxygenfunction:: fiction::energy_distribution
+.. doxygentypedef:: fiction::sidb_energy_distribution
+    :project: fiction
 
 
 **Header:** ``fiction/algorithms/simulation/sidb/minimum_energy.hpp``
@@ -69,9 +71,16 @@ Temperature Behavior
 
 .. doxygenfunction:: fiction::critical_temperature
 
-**Header:** ``fiction/algorithms/simulation/sidb/occupation_function_erroneous.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_excited_states.hpp``
 
 .. doxygenfunction:: fiction::occupation_probability_gate_based
+.. doxygenfunction:: fiction::occupation_probability_non_gate_based
+
+**Header:** ``fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp``
+
+.. doxygenfunction:: fiction::calculate_energy_and_state_type
+.. doxygentypedef:: fiction::sidb_energy_and_state_type
+    :project: fiction
 
 
 Time-to-Solution (TTS) Statistics
