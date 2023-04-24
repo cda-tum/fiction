@@ -40,7 +40,7 @@
 PYBIND11_MODULE(pyfiction, m)
 {
     // docstring
-    m.doc() = "Python bindings fiction, a framework for Design Automation for Field-coupled Nanotechnologies";
+    m.doc() = "Python bindings for fiction, a framework for Design Automation for Field-coupled Nanotechnologies";
 
     /**
      * Layouts

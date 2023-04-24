@@ -18,6 +18,8 @@
 
 #include <algorithm>
 #include <array>
+#include <iterator>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <vector>

@@ -1,23 +1,23 @@
 # Include pybind11
-add_subdirectory(pybind11/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/pybind11/)
 
 # Include alice
 if (FICTION_CLI)
     set(ALICE_EXAMPLES OFF CACHE BOOL "" FORCE)
     set(ALICE_TEST OFF CACHE BOOL "" FORCE)
-    add_subdirectory(alice/)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/alice/)
 endif ()
 
 # Include mockturtle
 set(MOCKTURTLE_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(MOCKTURTLE_EXPERIMENTS OFF CACHE BOOL "" FORCE)
 set(MOCKTURTLE_TEST OFF CACHE BOOL "" FORCE)
-add_subdirectory(mockturtle/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/mockturtle/)
 target_link_libraries(libfiction INTERFACE mockturtle)
 
 # Include Catch2
 if (FICTION_TEST)
-    add_subdirectory(Catch2/)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Catch2/)
 endif ()
 
 # Mugen is not available under Windows
@@ -128,20 +128,20 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif ()
 
 # Include parallel_hashmap by Gregory Popovitch
-target_include_directories(libfiction SYSTEM INTERFACE parallel-hashmap/parallel_hashmap/)
+target_include_directories(libfiction SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/parallel-hashmap/parallel_hashmap/)
 
 # Include undirected_graph by Fabian Löschner
-target_include_directories(libfiction SYSTEM INTERFACE undirected_graph/source/)
+target_include_directories(libfiction SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/undirected_graph/source/)
 
 # Include combinations by Howard Hinnant
-target_include_directories(libfiction SYSTEM INTERFACE combinations/)
+target_include_directories(libfiction SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/combinations/)
 
 # Include graph-coloring by Brian Crites
-add_subdirectory(graph-coloring/)
-target_include_directories(libfiction SYSTEM INTERFACE graph-coloring/Header)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/graph-coloring/)
+target_include_directories(libfiction SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/graph-coloring/Header)
 target_link_libraries(libfiction INTERFACE graph-coloring)
 
 # Include tinyXML2
 set(tinyxml2_BUILD_TESTING OFF)
-add_subdirectory(tinyxml2/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tinyxml2/)
 target_link_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
