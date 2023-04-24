@@ -81,8 +81,8 @@ TEMPLATE_TEST_CASE(
         CHECK(criticalstats_second.critical_temperature == 350);
 
         params.gate_based_simulation = false;
-        params.max_temperature   = 450;
-        params.confidence_level  = 0.999;
+        params.max_temperature       = 450;
+        params.confidence_level      = 0.999;
         critical_temperature_stats<TestType> criticalstats_no_logic{};
         critical_temperature(lyt, params, &criticalstats_no_logic);
         CHECK(criticalstats_no_logic.critical_temperature < 40);
@@ -161,7 +161,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({37, 3, 0}, TestType::cell_type::NORMAL);
 
         critical_temperature_stats<TestType> criticalstats{};
-        critical_temperature_params params{false, sidb_simulation_parameters{2, -0.15}, 0.99, 350};
+        critical_temperature_params          params{false, sidb_simulation_parameters{2, -0.15}, 0.99, 350};
         critical_temperature(lyt, params, &criticalstats);
         CHECK(criticalstats.critical_temperature < 200);
         CHECK(criticalstats.critical_temperature > 0);
