@@ -7,16 +7,16 @@ jobs:
     name: Auto-generate docstrings for pyfiction from C++ code
     runs-on: ubuntu-latest
     steps:
+      - name: Clone Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11.x"
           cache: 'pip'
-
-      - name: Clone Repository
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
 
       - name: Install pybind11_mkdoc and clang
         working-directory: ${{ github.workspace }}
