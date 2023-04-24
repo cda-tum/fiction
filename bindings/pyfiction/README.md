@@ -21,6 +21,26 @@ cd build
 cmake --build . -j4
 ```
 
+### Enabling and running tests
+
+To run tests locally, build the binding with its dependencies using `pip`:
+
+```bash
+pip install '.[test]'
+```
+
+Alternatively, install the following dependency before the `CMake` call:
+
+```bash
+pip install python-dotenv==0.21.1
+```
+
+To execute all tests, use the following command inside in the package directory:
+
+```bash
+ python -m unittest discover --verbose
+```
+
 ## Usage
 
 The bindings are available as a Python module named `pyfiction` in the namespace `mnt`. To use the bindings, simply

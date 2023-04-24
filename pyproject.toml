@@ -34,7 +34,6 @@ classifiers = [
     'Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)',
 ]
 
-dependencies = ["python-dotenv==0.21.1"]
 requires-python = ">=3.7"
 
 [project.urls]
@@ -42,6 +41,11 @@ Source = 'https://github.com/marcelwa/fiction'
 Tracker = 'https://github.com/marcelwa/fiction/issues'
 Documentation = 'https://fiction.readthedocs.io/en/latest/'
 Research = 'https://www.cda.cit.tum.de/research/fcn/'
+
+[project.optional-dependencies]
+test = [
+    "python-dotenv==0.21.1"
+]
 
 [tool.setuptools.packages.find]
 include = ["bindings/pyfiction.*"]

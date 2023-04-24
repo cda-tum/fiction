@@ -70,7 +70,7 @@ jobs:
 
       - name: Build pyfiction
         working-directory: ${{github.workspace}}
-        run: z3=${{env.ENABLE_Z3}} pip install .
+        run: z3=${{env.ENABLE_Z3}} pip install '.[test]'
 
       - name: Test
         working-directory: ${{github.workspace}}/bindings/pyfiction/test
