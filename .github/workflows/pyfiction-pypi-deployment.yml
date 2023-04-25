@@ -55,7 +55,6 @@ jobs:
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.12.3
         env:
-          CIBW_BEFORE_ALL: z3=${{env.ENABLE_Z3}}
           CIBW_BEFORE_ALL_LINUX: /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
           CIBW_TEST_EXTRAS: test
           CIBW_TEST_COMMAND: 'python -m unittest discover --start-directory {project} --verbose'
