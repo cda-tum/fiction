@@ -20,5 +20,7 @@ it.
     .. tab:: Python
         .. autoclass:: fiction.pyfiction.cartesian_obstruction_layout
             :members:
+        .. autoclass:: fiction.pyfiction.shifted_cartesian_obstruction_layout
+            :members:
         .. autoclass:: fiction.pyfiction.hexagonal_obstruction_layout
             :members:
