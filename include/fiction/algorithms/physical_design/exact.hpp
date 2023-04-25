@@ -3104,7 +3104,7 @@ class exact_impl
  * M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
  *
  * Via incremental SMT calls, an optimal gate-level layout for a given logic network will be found under constraints.
- * Starting with \f$ n \f$ tiles, where \f$ n \f$ is the number of logic network nodes, each possible layout aspect
+ * Starting with \f$n\f$ tiles, where \f$n\f$ is the number of logic network nodes, each possible layout aspect
  * ratio will be examined by factorization and tested for routability with the SMT solver Z3. When no upper bound is
  * given, this approach will run until it finds a solution to the placement & routing problem instance.
  *

@@ -70,10 +70,10 @@ inline void exact(pybind11::module& m)
         ;
 
     m.def("exact_cartesian", &fiction::exact<py_cartesian_gate_layout, py_logic_network>, "network"_a,
-          "parameters"_a = fiction::exact_physical_design_params{}, "statistics"_a = nullptr);
+          "parameters"_a = fiction::exact_physical_design_params{}, "statistics"_a = nullptr, DOC(fiction_exact));
 
     m.def("exact_hexagonal", &fiction::exact<py_hexagonal_gate_layout, py_logic_network>, "network"_a,
-          "parameters"_a = fiction::exact_physical_design_params{}, "statistics"_a = nullptr);
+          "parameters"_a = fiction::exact_physical_design_params{}, "statistics"_a = nullptr, DOC(fiction_exact));
 }
 
 }  // namespace pyfiction

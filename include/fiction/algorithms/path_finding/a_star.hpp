@@ -363,7 +363,7 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
 }
 /**
  * A distance function that does not approximate but compute the actual minimum path length on the given layout via A*
- * traversal. Naturally, this function cannot be evaluated in \f$ O(1) \f$, but has the polynomial complexity of A*.
+ * traversal. Naturally, this function cannot be evaluated in \f$O(1)\f$, but has the polynomial complexity of A*.
  *
  * If no path between source and target exists in `lyt`, the returned distance is
  * `std::numeric_limits<Dist>::infinity()` if that value is supported by `Dist`, or `std::numeric_limits<Dist>::max()`,
