@@ -199,7 +199,7 @@ mockturtle::names_view<Ntk> mux21_network()
 }
 
 template <typename Ntk>
-mockturtle::names_view<Ntk> test_inverter_balancing()
+mockturtle::names_view<Ntk> test_inverter_substitution()
 {
     mockturtle::names_view<Ntk> ntk{};
 

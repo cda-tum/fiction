@@ -5,7 +5,7 @@
 #ifndef FICTION_ORTHO_ORDERING_NETWORK_HPP
 #define FICTION_ORTHO_ORDERING_NETWORK_HPP
 
-#include "fiction/algorithms/network_transformation/inverter_balancing.hpp"
+#include "fiction/algorithms/network_transformation/inverter_substitution.hpp"
 #include "fiction/networks/views/input_ordering_view.hpp"
 #include "orthogonal.hpp"
 
@@ -119,12 +119,12 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                         /*Jump to next node*/
                         current_node = cur_fon[0];
                     }
+                    // 1. fan-out node related to two PIs
                     if (ntk.is_fanout(current_node) && ntk.fanout_size(current_node) >= 2)
                     {
                         paint_node_and_edges(ctn, current_node, ctn.color_east);
 
                         bool inv_flag = false;
-                        // 1. fan-out node related to two PIs
                         if (auto fo_two = ctn.color_ntk.get_fo_two(); get_index(fo_two, pi) % 3 == 0)
                         {
                             auto cur_fon = fanouts(ctn.color_ntk, current_node);
@@ -132,6 +132,7 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                             current_node = cur_fon[0];
                             if (ntk.is_inv(current_node))
                             {
+                                /*Color Inverter east*/
                                 paint_node_and_edges(ctn, current_node, ctn.color_east);
                                 inv_flag = true;
                             }
@@ -146,6 +147,7 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
 
                                     if (ntk.is_inv(current_node))
                                     {
+                                        /*Color Inverter east*/
                                         paint_node_and_edges(ctn, current_node, ctn.color_east);
                                         ntk.foreach_fanout(fon,
                                                            [&](const auto& fon_inv)
@@ -229,7 +231,7 @@ class orthogonal_ordering_network_impl
     orthogonal_ordering_network_impl(const Ntk& src, const orthogonal_physical_design_params& p,
                                      orthogonal_physical_design_stats& st) :
             ntk{input_ordering_view{mockturtle::fanout_view{
-                inverter_balancing(fanout_substitution<mockturtle::names_view<technology_network>>(src))}}},
+                inverter_substitution(fanout_substitution<mockturtle::names_view<technology_network>>(src))}}},
             ps{p},
             pst{st}
     {}
@@ -499,6 +501,7 @@ class orthogonal_ordering_network_impl
                             std::find(multi_out_nodes.begin(), multi_out_nodes.end(), n) != multi_out_nodes.end())
                         {
                             ++latest_pos.y;
+                            ++latest_pos_inputs.y;
                         }
                     }
                 }
@@ -601,7 +604,6 @@ class orthogonal_ordering_network_impl
  * @param pst Statistics.
  * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit.
  */
-
 template <typename Lyt, typename Ntk>
 Lyt orthogonal_ordering_network(const Ntk& ntk, orthogonal_physical_design_params ps = {},
                                 orthogonal_physical_design_stats* pst = nullptr)

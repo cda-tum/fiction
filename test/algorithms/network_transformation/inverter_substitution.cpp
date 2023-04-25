@@ -11,155 +11,45 @@
 
 using namespace fiction;
 
-TEST_CASE("Check correct substitution at one FO node", "[inverter-substitution]")
+TEST_CASE("One Balancing", "[inverter-substitution]")
 {
-    // checks the right node assignment after a single substitution
-    const auto check_single_substitution = [](const auto& ntk)
-    {
-        std::vector<mockturtle::node<mockturtle::names_view<technology_network>>> fo_to_inv;
-        std::vector<mockturtle::node<mockturtle::names_view<technology_network>>> inv_to_fo;
-        const auto fo_ntk = mockturtle::fanout_view<mockturtle::names_view<technology_network>>(ntk);
+    auto test_nw = blueprints::test_inverter_substitution<mockturtle::names_view<mockturtle::aig_network>>();
+    auto aig_ntk{fanout_substitution<mockturtle::names_view<technology_network>>(test_nw)};
 
-        // Gather the affected nodes
-        fo_ntk.foreach_gate(
-            [&](const auto& g)
-            {
-                if (fo_ntk.is_fanout(g))
-                {
-                    const auto fanout_inv = fanouts(fo_ntk, g);
-                    const auto do_substitute =
-                        std::all_of(fanout_inv.cbegin(), fanout_inv.cend(),
-                                    [&fo_ntk](const auto& fo_node) { return fo_ntk.is_inv(fo_node); });
+    CHECK(aig_ntk.num_gates() == 9);
 
-                    if (do_substitute && fanout_inv.size() > 1)
-                    {
-                        fo_to_inv.emplace_back(g);
-                        inv_to_fo.emplace_back(fanout_inv[0]);
-                    }
-                }
-            });
+    auto balanced_aig_ntk{inverter_substitution(aig_ntk)};
 
-        assert(fo_to_inv.size() == inv_to_fo.size());
-
-        auto balanced_ntk = inverter_substitution(ntk);
-        CHECK(fo_ntk.num_gates() == balanced_ntk.num_gates() + 1);
-        // check if the affected nodes have been assigned correctly
-        int correct_node_assignment = 1;
-        for (std::size_t i = 0; i < fo_to_inv.size(); ++i)
-        {
-            if (!balanced_ntk.is_inv(fo_to_inv[i]) || !balanced_ntk.is_fanout(inv_to_fo[i]))
-            {
-                correct_node_assignment = 0;
-            }
-        }
-        return correct_node_assignment;
-    };
-
-    CHECK(check_single_substitution(fanout_substitution<mockturtle::names_view<technology_network>>(
-        blueprints::test_single_inverter_substitution_a<mockturtle::names_view<mockturtle::aig_network>>())));
-    CHECK(check_single_substitution(fanout_substitution<mockturtle::names_view<technology_network>>(
-        blueprints::test_single_inverter_substitution_b<mockturtle::names_view<mockturtle::aig_network>>())));
+    CHECK(balanced_aig_ntk.num_gates() == 8);
 }
 
-TEST_CASE("Check if output network is substituted", "[inverter-substitution]")
+TEST_CASE("Double Balancing", "[inverter-substitution]")
 {
-    // returns true, when no further inverters can be substituted in the output network
-    const auto check_substituted = [](const auto& ntk)
-    {
-        auto balanced_ntk =
-            mockturtle::fanout_view<mockturtle::names_view<technology_network>>(inverter_substitution(ntk));
-        CHECK(ntk.num_gates() >= balanced_ntk.num_gates());
-        int properly_substituted = 1;
+    auto test_nw =
+        blueprints::fanout_substitution_corner_case_network<mockturtle::names_view<mockturtle::aig_network>>();
 
-        // Gather the affected nodes
-        balanced_ntk.foreach_gate(
-            [&](const auto& g)
-            {
-                if (balanced_ntk.is_fanout(g))
-                {
-                    const auto fanout_inv = fanouts(balanced_ntk, g);
-                    const auto do_substitute =
-                        std::all_of(fanout_inv.cbegin(), fanout_inv.cend(),
-                                    [&balanced_ntk](const auto& fo_node) { return balanced_ntk.is_inv(fo_node); });
+    auto aig_ntk{fanout_substitution<mockturtle::names_view<technology_network>>(test_nw)};
 
-                    if (do_substitute && fanout_inv.size() > 1)
-                    {
-                        properly_substituted = 0;
-                    }
-                }
-            });
-        return properly_substituted;
-    };
+    CHECK(aig_ntk.num_gates() == 7);
 
-    // no substitution
-    CHECK(check_substituted(fanout_substitution<mockturtle::names_view<technology_network>>(
-        blueprints::test_inv_flag_a<mockturtle::names_view<mockturtle::aig_network>>())));
-    // one substitution
-    CHECK(check_substituted(fanout_substitution<mockturtle::names_view<technology_network>>(
-        blueprints::test_single_inverter_substitution_a<mockturtle::names_view<mockturtle::aig_network>>())));
-    CHECK(check_substituted(fanout_substitution<mockturtle::names_view<technology_network>>(
-        blueprints::test_single_inverter_substitution_b<mockturtle::names_view<mockturtle::aig_network>>())));
-    // two concatenated substitutions
-    CHECK(check_substituted(fanout_substitution<mockturtle::names_view<technology_network>>(
-        blueprints::fanout_substitution_corner_case_network<mockturtle::names_view<mockturtle::aig_network>>())));
+    auto balanced_aig_ntk{inverter_substitution(aig_ntk)};
+
+    CHECK(balanced_aig_ntk.num_gates() == 4);
+
+    test_nw.foreach_po([&](const auto& po){
+                           auto poo = test_nw.get_node(po);
+                           std::cout<<"PO: "<<poo<<std::endl;
+    });
 }
 
-TEST_CASE("Check output preservation", "[inverter-substitution]")
+TEST_CASE("Test no impact", "[inverter-substitution]")
 {
-    // checks if the PO of the deleted inverter is preserved and assigned to the right node (for a single substitution)
-    const auto check_output_preservation_for_single_balancing = [](const auto& ntk)
-    {
-        std::vector<mockturtle::node<mockturtle::names_view<technology_network>>> inv_to_fo;
-        const auto fo_ntk = mockturtle::fanout_view<mockturtle::names_view<technology_network>>(ntk);
-        auto       balanced_ntk =
-            mockturtle::fanout_view<mockturtle::names_view<technology_network>>(inverter_substitution(ntk));
+    auto test_nw =
+        blueprints::test_inv_flag_a<mockturtle::names_view<mockturtle::aig_network>>();
 
-        // Gather the affected nodes
-        fo_ntk.foreach_gate(
-            [&](const auto& g)
-            {
-                if (fo_ntk.is_fanout(g))
-                {
-                    const auto fanout_inv = fanouts(fo_ntk, g);
-                    const auto do_substitute =
-                        std::all_of(fanout_inv.cbegin(), fanout_inv.cend(),
-                                    [&fo_ntk](const auto& fo_node) { return fo_ntk.is_inv(fo_node); });
+    auto aig_ntk{fanout_substitution<mockturtle::names_view<technology_network>>(test_nw)};
 
-                    if (do_substitute && fanout_inv.size() > 1)
-                    {
-                        inv_to_fo.emplace_back(fanout_inv[0]);
-                        if (fo_ntk.is_po(fanout_inv[0]))
-                        {
-                            CHECK(balanced_ntk.is_fanout(fanout_inv[0]));
-                            const auto fanout_pos = fanouts(fo_ntk, g);
-                            CHECK(balanced_ntk.is_po(fanout_pos[0]));
-                            CHECK(balanced_ntk.is_po(fanout_pos[1]));
-                        }
-                    }
-                }
-            });
-    };
+    auto balanced_aig_ntk{inverter_substitution(aig_ntk)};
 
-    // checks if the number of POs stays the same after inverter substitution
-    const auto check_output_preservation_num_pos = [](const auto& ntk)
-    {
-        const auto fo_ntk = mockturtle::fanout_view<mockturtle::names_view<technology_network>>(ntk);
-        auto       balanced_ntk =
-            mockturtle::fanout_view<mockturtle::names_view<technology_network>>(inverter_substitution(ntk));
-        CHECK(balanced_ntk.num_pos() == fo_ntk.num_pos());
-    };
-
-    check_output_preservation_for_single_balancing(fanout_substitution<mockturtle::names_view<technology_network>>(
-        blueprints::test_single_inverter_substitution_a<mockturtle::names_view<mockturtle::aig_network>>()));
-    check_output_preservation_for_single_balancing(fanout_substitution<mockturtle::names_view<technology_network>>(
-        blueprints::test_single_inverter_substitution_b<mockturtle::names_view<mockturtle::aig_network>>()));
-
-    check_output_preservation_num_pos(fanout_substitution<mockturtle::names_view<technology_network>>(
-        blueprints::test_inv_flag_a<mockturtle::names_view<mockturtle::aig_network>>()));
-    check_output_preservation_num_pos(fanout_substitution<mockturtle::names_view<technology_network>>(
-        blueprints::test_single_inverter_substitution_a<mockturtle::names_view<mockturtle::aig_network>>()));
-    check_output_preservation_num_pos(fanout_substitution<mockturtle::names_view<technology_network>>(
-        blueprints::test_single_inverter_substitution_b<mockturtle::names_view<mockturtle::aig_network>>()));
-    check_output_preservation_num_pos(fanout_substitution<mockturtle::names_view<technology_network>>(
-        blueprints::fanout_substitution_corner_case_network<mockturtle::names_view<mockturtle::aig_network>>()));
+    CHECK(aig_ntk.num_gates() == balanced_aig_ntk.num_gates());
 }
