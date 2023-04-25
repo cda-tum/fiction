@@ -13,6 +13,12 @@ The bindings can either be build and installed automatically with `pip` or build
 pip install .
 ```
 
+If you want to include the functions dependent on the Z3 solver, set `z3=ON` before running `pip`:
+
+```bash
+z3=ON pip install .
+```
+
 ### Building the bindings with CMake
 
 ```bash
@@ -43,14 +49,14 @@ To execute all tests, use the following command inside the package directory:
 
 ## Usage
 
-The bindings are available as a Python module named `pyfiction` in the namespace `mnt`. To use the bindings, simply
+The bindings are available as a Python module named `fiction` in the namespace `mnt`. To use the bindings, simply
 import the module in your Python script:
 
 ```python
-from mnt import pyfiction
+from mnt import fiction
 ```
 
-The bindings are documented using [pybind11's mkdoc utility tool](https://github.com/pybind/pybind11_mkdoc). To get
+The bindings are documented using [pybind11's mkdoc utility tool](https://github.com/pybind/pybind11_mkdoc). To see
 the documentation for a function, simply call `help` on it:
 
 ```python
@@ -81,8 +87,10 @@ locally.
 
 #### Use the GitHub Action (preferred)
 
-Go to the [pyfiction-docstring-generator](TODO) workflow on GitHub and run it. Upon completion, it will make the
-`pybind11_mkdoc_docstrings.hpp` file available as an artifact. Download the file and replace the existing one.
+Go to
+the [pyfiction-docstring-generator](https://github.com/marcelwa/fiction/actions/workflows/pyfiction-docstring-generator.yml)
+workflow on GitHub and run it. Upon completion, it will make the `pybind11_mkdoc_docstrings.hpp` file available as an
+artifact. Download the file and replace the existing one.
 
 #### Run locally
 
