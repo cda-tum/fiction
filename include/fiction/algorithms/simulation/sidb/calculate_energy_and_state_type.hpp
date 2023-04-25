@@ -70,15 +70,18 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
                 std::transform(charge_states.begin(), charge_states.end(), charge.begin(),
                                [](const auto& state) { return static_cast<bool>(-charge_state_to_sign(state)); });
 
-                sidb_charge_distribution_type state_type = sidb_charge_distribution_type::ERRONEOUS;
-
                 if (charge == output_bits)
                 {
-                    state_type =
+                    sidb_charge_distribution_type state_type =
                         sidb_charge_distribution_type::TRANSPARENT;  // The output represents the correct output. Hence,
                                                                      // state is called sidb_charge_distribution_type.
+                    energy_transparent_erroneous.emplace_back(energy, state_type);
                 }
-                energy_transparent_erroneous.emplace_back(energy, state_type);
+                else
+                {
+                    sidb_charge_distribution_type state_type = sidb_charge_distribution_type::ERRONEOUS;
+                    energy_transparent_erroneous.emplace_back(energy, state_type);
+                }
             }
         }
     }
