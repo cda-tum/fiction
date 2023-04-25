@@ -27,7 +27,7 @@ inline void cartesian_layout(pybind11::module& m)
     /**
      * Cartesian layout.
      */
-    py::class_<py_cartesian_layout>(m, "cartesian_layout", DOC(fiction_cartesian_layout))
+    py::class_<py_cartesian_layout>(m, "cartesian_layout", DOC(fiction_cartesian_layout_overridden))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<py_cartesian_layout>&>(), "dimension"_a,
              DOC(fiction_cartesian_layout_cartesian_layout))

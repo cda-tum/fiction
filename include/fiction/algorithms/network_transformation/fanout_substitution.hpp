@@ -38,7 +38,13 @@ struct fanout_substitution_params
      */
     enum substitution_strategy
     {
+        /**
+         * Breadth-first substitution. Creates balanced fanout trees.
+         */
         BREADTH,
+        /**
+         * Depth-first substitution. Creates fanout trees with one deep branch.
+         */
         DEPTH
     };
 
