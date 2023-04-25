@@ -3,8 +3,6 @@
 Multi-Path Routing (Color Routing)
 ----------------------------------
 
-**Header:** ``fiction/algorithms/physical_design/color_routing.hpp``
-
 Utilizes graph coloring to determine non-conflicting paths between multiple given routing objectives in an FCN
 gate-level layout. This approach can be parameterized to tradeoff completeness (full path enumeration and SAT-based
 coloring) and runtime (limited path exploration and/or heuristic coloring). This algorithm is suitable for all clocking
@@ -14,6 +12,8 @@ to the layout.
 
 .. tabs::
     .. tab:: C++
+        **Header:** ``fiction/algorithms/physical_design/color_routing.hpp``
+
         .. doxygenstruct:: fiction::color_routing_params
            :members:
         .. doxygenfunction:: fiction::color_routing(Lyt& lyt, const std::vector<routing_objective<Lyt>>& objectives, color_routing_params ps = {}, color_routing_stats* pst = nullptr)

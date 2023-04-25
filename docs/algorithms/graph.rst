@@ -11,8 +11,6 @@ Generate Edge Intersection Graph
 Graph Coloring
 --------------
 
-**Header:** ``fiction/algorithms/graph/graph_coloring.hpp``
-
 .. tabs::
     .. tab:: C++
         **Header:** ``fiction/algorithms/graph/graph_coloring.hpp``

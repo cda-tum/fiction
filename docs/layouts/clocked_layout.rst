@@ -3,8 +3,6 @@
 Clocked Layout
 ==============
 
-**Header:** ``fiction/layouts/clocked_layout.hpp``
-
 Clocking is one of the most important differences between conventional CMOS technologies and the FCN domain. Clocking
 directs information flow and provides a notion of timing for both combinational and sequential circuits alike. Usually,
 clocking information is assigned to the coordinates of a layout by the means of a clocking scheme.
@@ -15,6 +13,8 @@ can be utilized or the clock numbers can be assigned manually.
 
 .. tabs::
     .. tab:: C++
+        **Header:** ``fiction/layouts/clocked_layout.hpp``
+
         .. doxygenclass:: fiction::clocked_layout
            :members:
 

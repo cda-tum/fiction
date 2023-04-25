@@ -1,8 +1,6 @@
 Gate-level Layout
 =================
 
-**Header:** ``fiction/layouts/gate_level_layout.hpp``
-
 The gate-level layout can be layered on top of any clocked layout type at compile time to extend its functionality by
 a notion of gates that can be assigned to its clock zones. Each gate is identified as a Boolean function. Thereby, this
 layout type is technology-independent and does not have any concrete implementation, structures, or shapes assigned to
@@ -16,6 +14,8 @@ has to have a concrete position assigned, mockturtle cannot be used to generate 
 
 .. tabs::
     .. tab:: C++
+        **Header:** ``fiction/layouts/gate_level_layout.hpp``
+
         .. doxygenclass:: fiction::gate_level_layout
            :members:
 

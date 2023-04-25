@@ -1,8 +1,6 @@
 Cell-level Layout
 =================
 
-**Header:** ``fiction/layouts/cell_level_layout.hpp``
-
 The cell-level layout can be layered on top of any clocked layout type at compile time to extend its functionality by
 a notion of FCN cells that can be assigned to its clock zones. In contrast to ``gate_level_layout``, this layout type
 does not abstract from a technology implementation but embraces it. The cell-level layout requires a
@@ -17,6 +15,8 @@ A cell-level layout can be obtained from a ``gate_level_layout`` by the :ref:`ap
 
 .. tabs::
     .. tab:: C++
+        **Header:** ``fiction/layouts/cell_level_layout.hpp``
+
         .. doxygenclass:: fiction::cell_level_layout
            :members:
 
