@@ -66,6 +66,8 @@ Energy Calculation
 Temperature Behavior
 ####################
 
+.. _critical_temperature:
+
 **Header:** ``fiction/algorithms/simulation/sidb/critical_temperature.hpp``
 
 .. doxygenenum:: fiction::critical_temperature_simulation_mode
