@@ -20,7 +20,7 @@
 #include "cmd/logic/balance.hpp"
 #include "cmd/logic/fanouts.hpp"
 #include "cmd/logic/gates.hpp"
-#include "cmd/logic/inverterbalance.hpp"
+#include "cmd/logic/inv.hpp"
 #include "cmd/logic/map.hpp"
 #include "cmd/logic/random.hpp"
 #include "cmd/logic/simulate.hpp"
