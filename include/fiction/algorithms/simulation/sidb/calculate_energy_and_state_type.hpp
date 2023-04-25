@@ -18,9 +18,9 @@
 namespace fiction
 {
 /**
- *  Types of charge distributions.
+ *  Types of excited charge configuration states.
  */
-enum class sidb_charge_distribution_type
+enum class type_of_excited_sidb_state
 {
     ERRONEOUS,   // The output SiDB (SiDBs) of the charge distribution does NOT match the truth table entry.
     TRANSPARENT  // The output SiDB (SiDBs) of the charge distribution matches the truth table entry.
@@ -29,7 +29,7 @@ enum class sidb_charge_distribution_type
  *  Data type to collect electrostatic potential energies of charge distributions with corresponding state types (i.e.,
  * transparent, erroneous).
  */
-using sidb_energy_and_state_type = std::vector<std::pair<double, sidb_charge_distribution_type>>;
+using sidb_energy_and_state_type = std::vector<std::pair<double, type_of_excited_sidb_state>>;
 
 /**
  * This function takes in an SiDB energy distribution. For each charge distribution, the state type is determined (i.e.
@@ -49,10 +49,14 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
                                 const std::vector<bool>&                             output_bits) noexcept
 
 {
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
     assert(!output_cells.empty() && "No output cell provided.");
     assert(!output_bits.empty() && "No output bits provided.");
 
-    sidb_energy_and_state_type energy_transparent_erroneous{};
+    sidb_energy_and_state_type energy_and_state_type{};
 
     for (const auto& [energy, occurrence] : energy_distribution)
     {
@@ -72,20 +76,20 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
 
                 if (charge == output_bits)
                 {
-                    sidb_charge_distribution_type state_type =
-                        sidb_charge_distribution_type::TRANSPARENT;  // The output represents the correct output. Hence,
-                                                                     // state is called sidb_charge_distribution_type.
-                    energy_transparent_erroneous.emplace_back(energy, state_type);
+                    type_of_excited_sidb_state state_type =
+                        type_of_excited_sidb_state::TRANSPARENT;  // The output SiDB matches the truth table entry.
+                                                                  // Hence, state is called transparent.
+                    energy_and_state_type.emplace_back(energy, state_type);
                 }
                 else
                 {
-                    sidb_charge_distribution_type state_type = sidb_charge_distribution_type::ERRONEOUS;
-                    energy_transparent_erroneous.emplace_back(energy, state_type);
+                    type_of_excited_sidb_state state_type = type_of_excited_sidb_state::ERRONEOUS;
+                    energy_and_state_type.emplace_back(energy, state_type);
                 }
             }
         }
     }
-    return energy_transparent_erroneous;
+    return energy_and_state_type;
 }
 
 }  // namespace fiction

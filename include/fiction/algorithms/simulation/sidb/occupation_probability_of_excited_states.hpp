@@ -58,7 +58,7 @@ namespace fiction
     // The Boltzmann factors of all erroneous excited states are accumulated.
     for (const auto& [energies, state_transparent_erroneous] : energy_and_state_type)
     {
-        if (state_transparent_erroneous == sidb_charge_distribution_type::ERRONEOUS)
+        if (state_transparent_erroneous == type_of_excited_sidb_state::ERRONEOUS)
         {
             p += std::exp(-(energies - min_energy) * 12'000 / temperature);
         }

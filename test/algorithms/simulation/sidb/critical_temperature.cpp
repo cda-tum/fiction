@@ -31,7 +31,7 @@ TEMPLATE_TEST_CASE(
         TestType lyt{{10, 10}};
 
         critical_temperature_stats<TestType> criticalstats{};
-        critical_temperature_params const    params{critical_temperature_simulation_mode::GATE_BASED_SIM,
+        critical_temperature_params const    params{critical_temperature_simulation_mode::GATE_BASED_SIMULATION,
                                                  sidb_simulation_parameters{2, -0.32}, 0.99, 350};
         critical_temperature<TestType>(lyt, params, &criticalstats);
         CHECK(criticalstats.num_valid_lyt == 0);
@@ -44,7 +44,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
 
         critical_temperature_stats<TestType> criticalstats{};
-        critical_temperature_params const    params{critical_temperature_simulation_mode::GATE_BASED_SIM,
+        critical_temperature_params const    params{critical_temperature_simulation_mode::GATE_BASED_SIMULATION,
                                                  sidb_simulation_parameters{2, -0.32},
                                                  0.99,
                                                  350,
@@ -72,7 +72,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({20, 3, 0}, TestType::cell_type::NORMAL);
 
         critical_temperature_stats<TestType> criticalstats{};
-        critical_temperature_params const    params{critical_temperature_simulation_mode::GATE_BASED_SIM,
+        critical_temperature_params const    params{critical_temperature_simulation_mode::GATE_BASED_SIMULATION,
                                                  sidb_simulation_parameters{2, -0.23},
                                                  0.99,
                                                  350,
@@ -82,7 +82,7 @@ TEMPLATE_TEST_CASE(
         CHECK(criticalstats.critical_temperature == 350);
 
         critical_temperature_stats<TestType> criticalstats_one{};
-        critical_temperature_params const    params_one{critical_temperature_simulation_mode::GATE_BASED_SIM,
+        critical_temperature_params const    params_one{critical_temperature_simulation_mode::GATE_BASED_SIMULATION,
                                                      sidb_simulation_parameters{2, -0.23},
                                                      0.99,
                                                      350,
@@ -96,7 +96,7 @@ TEMPLATE_TEST_CASE(
         critical_temperature(lyt, params_one, &criticalstats_second);
         CHECK(criticalstats_second.critical_temperature == 350);
 
-        critical_temperature_params const    params_two{critical_temperature_simulation_mode::NON_GATE_BASED_SIM,
+        critical_temperature_params const    params_two{critical_temperature_simulation_mode::NON_GATE_BASED_SIMULATION,
                                                      sidb_simulation_parameters{2, -0.23},
                                                      0.999,
                                                      450,
@@ -128,7 +128,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({37, 3, 0}, TestType::cell_type::NORMAL);
 
         critical_temperature_stats<TestType> criticalstats{};
-        critical_temperature_params const    params{critical_temperature_simulation_mode::GATE_BASED_SIM,
+        critical_temperature_params const    params{critical_temperature_simulation_mode::GATE_BASED_SIMULATION,
                                                  sidb_simulation_parameters{2, -0.28},
                                                  0.99,
                                                  350,
@@ -159,7 +159,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({37, 3, 0}, TestType::cell_type::NORMAL);
 
         critical_temperature_stats<TestType> criticalstats{};
-        critical_temperature_params const    params{critical_temperature_simulation_mode::GATE_BASED_SIM,
+        critical_temperature_params const    params{critical_temperature_simulation_mode::GATE_BASED_SIMULATION,
                                                  sidb_simulation_parameters{2, -0.15},
                                                  0.99,
                                                  350,
@@ -190,7 +190,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({37, 3, 0}, TestType::cell_type::NORMAL);
 
         critical_temperature_stats<TestType> criticalstats{};
-        critical_temperature_params const    params{critical_temperature_simulation_mode::NON_GATE_BASED_SIM,
+        critical_temperature_params const    params{critical_temperature_simulation_mode::NON_GATE_BASED_SIMULATION,
                                                  sidb_simulation_parameters{2, -0.15}, 0.99, 350};
         critical_temperature(lyt, params, &criticalstats);
         CHECK(criticalstats.critical_temperature < 200);

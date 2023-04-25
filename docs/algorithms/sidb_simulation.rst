@@ -69,7 +69,11 @@ Temperature Behavior
 
 **Header:** ``fiction/algorithms/simulation/sidb/critical_temperature.hpp``
 
-.. doxygenfunction:: fiction::critical_temperature
+.. doxygenenum:: fiction::critical_temperature_simulation_mode
+.. doxygenstruct:: fiction::critical_temperature_params
+   :members:
+.. doxygenfunction:: fiction::critical_temperature(const Lyt& lyt, const critical_temperature_params& params = {},
+                          critical_temperature_stats<Lyt>* pst = nullptr)
 
 **Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_excited_states.hpp``
 
@@ -78,9 +82,10 @@ Temperature Behavior
 
 **Header:** ``fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp``
 
-.. doxygenenum:: fiction::sidb_charge_distribution_type
-.. doxygenfunction:: fiction::calculate_energy_and_state_type
 .. doxygentypedef:: fiction::sidb_energy_and_state_type
+.. doxygenenum:: fiction::type_of_excited_sidb_state
+.. doxygenfunction:: fiction::calculate_energy_and_state_type
+
 
 
 Time-to-Solution (TTS) Statistics

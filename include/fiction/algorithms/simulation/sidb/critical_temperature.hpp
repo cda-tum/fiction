@@ -35,11 +35,23 @@
 
 namespace fiction
 {
-
+/**
+ * An enumeration of modes to use for the Critical Temperature Simulation.
+ */
 enum class critical_temperature_simulation_mode
 {
-    GATE_BASED_SIM,
-    NON_GATE_BASED_SIM
+    /**
+     * The Critical Temperature is determined by considering the gate logic of the given layout. In this mode, it is
+     * distinguished between excited charge distributions that produce the correct output (with respect to a truth
+     * table) and those that do not.
+     */
+    GATE_BASED_SIMULATION,
+    /**
+     * The Critical Temperature is determined by ignoring the gate logic of the given layout. This mode does not
+     * distinguish between excited charge distributions that produce the correct output (with respect to a truth table)
+     * and those that do not.
+     */
+    NON_GATE_BASED_SIMULATION
 };
 
 /**
@@ -50,7 +62,7 @@ struct critical_temperature_params
     /**
      * Simulation mode to determine the Critical Temperature.
      */
-    critical_temperature_simulation_mode simulation_mode = critical_temperature_simulation_mode::GATE_BASED_SIM;
+    critical_temperature_simulation_mode simulation_mode = critical_temperature_simulation_mode::GATE_BASED_SIMULATION;
     /**
      * All physical parameters for physical SiDB simulations.
      */
@@ -305,12 +317,12 @@ class critical_temperature_impl
         {
             // Check if at least one ground state exists which fulfills the logic (transparent).
             if ((round_to_n_decimal_places(energy, 6) == round_to_n_decimal_places(min_energy, 6)) &&
-                state_type == sidb_charge_distribution_type::TRANSPARENT)
+                state_type == type_of_excited_sidb_state::TRANSPARENT)
             {
                 ground_state_is_transparent = true;
             }
 
-            if ((state_type == sidb_charge_distribution_type::ERRONEOUS) && (energy > min_energy) &&
+            if ((state_type == type_of_excited_sidb_state::ERRONEOUS) && (energy > min_energy) &&
                 ground_state_is_transparent)
             {
                 // The energy difference is stored in meV.
@@ -400,7 +412,7 @@ bool critical_temperature(const Lyt& lyt, const critical_temperature_params& par
 
     bool result = false;
 
-    if (params.simulation_mode == critical_temperature_simulation_mode::GATE_BASED_SIM)
+    if (params.simulation_mode == critical_temperature_simulation_mode::GATE_BASED_SIMULATION)
     {
         result = p.gate_based_simulation();
     }
