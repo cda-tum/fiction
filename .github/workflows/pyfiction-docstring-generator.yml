@@ -28,9 +28,14 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: touch ${{ github.workspace }}/pybind11_mkdoc_docstrings.hpp
 
-      - name: run pybind11_mkdoc
+      - name: Run pybind11_mkdoc
         working-directory: ${{ github.workspace }}
-        run: python3 -m pybind11_mkdoc -o ${{ github.workspace }}/pybind11_mkdoc_docstrings.hpp -D FICTION_Z3_SOLVER -D MUGEN `find ${{ github.workspace }}/include/fiction -name "*.hpp" -print`
+        run: >
+          python3
+          -m pybind11_mkdoc
+          -o ${{ github.workspace }}/pybind11_mkdoc_docstrings.hpp
+          -D FICTION_Z3_SOLVER
+          `find ${{ github.workspace }}/include/fiction -name "*.hpp" -print`
 
       - name: Upload docstrings as an artifact
         uses: actions/upload-artifact@v3
