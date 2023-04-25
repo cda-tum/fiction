@@ -30,7 +30,8 @@ inline void shifted_cartesian_layout(pybind11::module& m)
      * @note All functions had to be redefined, because in the regular C++ version, this layout extends a specific
      * hexagonal layout, which we do not expose in pyfiction.
      */
-    py::class_<py_shifted_cartesian_layout>(m, "shifted_cartesian_layout", DOC(fiction_shifted_cartesian_layout))
+    py::class_<py_shifted_cartesian_layout>(m, "shifted_cartesian_layout",
+                                            DOC(fiction_shifted_cartesian_layout_overridden))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<py_shifted_cartesian_layout>&>(), "dimension"_a,
              DOC(fiction_shifted_cartesian_layout_shifted_cartesian_layout))

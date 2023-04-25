@@ -3,8 +3,8 @@
 
 #include "pyfiction/pybind11_mkdoc_docstrings.hpp"
 
-static const char *__doc_fiction_cartesian_layout_overridden =
-R"doc(A layout type that utilizes offset coordinates to represent a
+static const char* __doc_fiction_cartesian_layout_overridden =
+    R"doc(A layout type that utilizes offset coordinates to represent a
 Cartesian grid. Its faces are organized in the following way:
 
 .. code-block:: text
@@ -23,15 +23,37 @@ Cartesian grid. Its faces are organized in the following way:
     |       |       |       |       |
     +-------+-------+-------+-------+
 
-Template parameter ``OffsetCoordinateType``:
-    The coordinate implementation to be used. Offset coordinates are
-    required.)doc";
+)doc";
 
-static const char *__doc_fiction_hexagonal_layout_overridden =
-R"doc(A layout type that utilizes offset coordinates to represent a
-hexagonal grid. Its faces are organized in an offset coordinate system
-as provided. Hexagons are in the pointy_top_hex orientation. Based on that,
-the even_row_hex coordinate system emerges, which is sketched in ASCII below.
+static const char* __doc_fiction_shifted_cartesian_layout_overridden =
+    R"doc(A layout type that utilizes offset coordinates to represent a
+Cartesian layout with shifted coordinates. In this implementation, odd
+columns are vertically shifted. Its faces are organized in the following
+way:
+
+.. code-block:: text
+
+          +-------+       +-------+
+          |       |       |       |
+  +-------+ (1,0) +-------+ (3,0) |
+  |       |       |       |       |
+  | (0,0) +-------+ (2,0) +-------+
+  |       |       |       |       |
+  +-------+ (1,1) +-------+ (3,1) |
+  |       |       |       |       |
+  | (0,1) +-------+ (2,1) +-------+
+  |       |       |       |       |
+  +-------+ (1,2) +-------+ (3,2) |
+          |       |       |       |
+          +-------+       +-------+
+
+)doc";
+
+static const char* __doc_fiction_hexagonal_layout_overridden =
+    R"doc(A layout type that utilizes offset coordinates to represent a
+hexagonal grid. In this implementation, the hexagons are in the pointy-top
+orientation with even rows horizontally shifted. Its faces are organized
+in the following way:
 
 .. code-block:: text
 
