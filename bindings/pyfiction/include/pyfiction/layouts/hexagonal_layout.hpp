@@ -27,7 +27,7 @@ inline void hexagonal_layout(pybind11::module& m)
     /**
      * Hexagonal layout.
      */
-    py::class_<py_hexagonal_layout>(m, "hexagonal_layout", DOC(fiction_hexagonal_layout))
+    py::class_<py_hexagonal_layout>(m, "hexagonal_layout", DOC(fiction_hexagonal_layout_overridden))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<py_hexagonal_layout>&>(), "dimension"_a,
              DOC(fiction_hexagonal_layout_hexagonal_layout))
