@@ -49,9 +49,8 @@ Energy Calculation
 
 **Header:** ``fiction/algorithms/simulation/sidb/energy_distribution.hpp``
 
-.. doxygenfunction:: fiction::energy_distribution
 .. doxygentypedef:: fiction::sidb_energy_distribution
-    :project: fiction
+.. doxygenfunction:: fiction::energy_distribution
 
 
 **Header:** ``fiction/algorithms/simulation/sidb/minimum_energy.hpp``
@@ -72,8 +71,7 @@ Temperature Behavior
 .. doxygenenum:: fiction::critical_temperature_simulation_mode
 .. doxygenstruct:: fiction::critical_temperature_params
    :members:
-.. doxygenfunction:: fiction::critical_temperature(const Lyt& lyt, const critical_temperature_params& params = {},
-                          critical_temperature_stats<Lyt>* pst = nullptr)
+.. doxygenfunction:: fiction::critical_temperature(const Lyt& lyt, const critical_temperature_params& params = {}, critical_temperature_stats<Lyt>* pst = nullptr)
 
 **Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_excited_states.hpp``
 
