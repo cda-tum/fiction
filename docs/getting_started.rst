@@ -1,9 +1,12 @@
 Getting started
 ===============
 
-The *fiction* framework provides stand-alone CLI tool as well as a header-only library that can be used in external projects.
-Both are written in C++17 and are continuously tested on Ubuntu, macOS, and Windows with multiple compilers.
-See the build badges in the README file for more information.
+The *fiction* framework provides a stand-alone CLI tool as well as a C++17 header-only library and a Python module which
+can be used in external projects. Additionally, we provide an experimentation playground that can be used to quickly
+prototype new ideas or script evaluations.
+
+We are continuously testing on Ubuntu, macOS, and Windows with multiple compilers and various Python versions.
+See the badges in the README file for more information.
 
 
 Compilation requirements
@@ -24,6 +27,8 @@ At the time of writing, for parallel STL algorithms to work when using GCC, the 
 needed. It is an optional dependency that can be installed for a performance boost in certain scenarios. For your
 preferred compiler, see the current implementation state of `P0024R2 <https://en.cppreference.com/w/cpp/compiler_support/17>`_.
 
+
+.. _cli:
 
 Using *fiction* as a stand-alone CLI tool
 -----------------------------------------
@@ -130,6 +135,51 @@ and some macOS versions due to issues with ``python-sat``. Mugen requires at lea
 Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``cmake`` call.
 
 
+The Python module
+-----------------
+
+The Python module can be installed via ``pip`` from PyPI where we publish wheels for every new release::
+
+  pip install mnt.fiction
+
+This is the recommended way to use *fiction* in your Python projects.
+
+.. note::
+
+    *fiction* is primarily developed for C++ as a header-only library. The Python module is a thin wrapper around the
+    C++ code. It is therefore possible that some features are not yet available in the Python module. If you encounter
+    such a case, please open an issue on GitHub.
+
+
+Building experiments
+--------------------
+
+The ``experiments`` folder provides a playground for quickly scripting some ideas by plugging algorithms together.
+A ``fictionlib_demo.cpp`` demonstrates the usage. Any ``*.cpp`` file that is placed in on of its sub-folders is
+automatically linked against ``libfiction`` and compiled as a stand-alone binary. Simply add a ``main`` function and
+include the desired header files to get started:
+
+.. code-block:: c++
+
+   #include <fiction/layouts/cell_level_layout.hpp>
+   #include <fiction/layouts/clocking_scheme.hpp>
+   #include <fiction/technology/qca_one_library.hpp>
+   #include <fiction/io/write_qca_layout.hpp>
+   #include <fiction/...>
+
+   int main(int argc, char* argv[])
+   {
+     // your code goes here
+   }
+
+
+Each file can be built individually via CMake::
+
+  cmake . -B build -DFICTION_EXPERIMENTS=ON
+  cd build
+  cmake --build . -j4
+
+
 Building tests
 --------------
 
@@ -139,19 +189,6 @@ Unit tests can be built with CMake via a respective flag on the command line and
   cd build
   cmake --build . -j4
   ctest
-
-
-Building experiments
---------------------
-
-The ``experiments`` folder provides a playground for quickly scripting some ideas by plugging algorithms together.
-A ``fictionlib_demo.cpp`` demonstrates the usage. Any ``*.cpp`` file that is placed in that folder is automatically
-linked against *fiction* and compiled as a stand-alone binary using the following commands::
-
-  cmake . -B build -DFICTION_EXPERIMENTS=ON
-  cd build
-  cmake --build . -j4
-
 
 Uninstall
 ---------

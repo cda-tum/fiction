@@ -28,13 +28,16 @@ types, these can easily be compiled down to any desired FCN technology for physi
 The *fiction* framework is academic software and aims at researchers and developers in the FCN domain who want to obtain
 cell-accurate circuit layouts from logical specifications or who want to implement their own physical design algorithms.
 
-For these use cases, *fiction* provides
-a [header-only library](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-header-only-library)
-that provides data types and algorithms for recurring tasks, e.g., logic network and layout types on different
-abstraction levels, clocking schemes, gate libraries, placement, routing, clocking, and verification algorithms, etc.
-Additionally, *fiction* comes with an
+For these use cases, *fiction* offers
+a [C++ header-only library](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-header-only-library)
+and
+a [Python module](https://fiction.readthedocs.io/en/latest/getting_started.html#the-python-module)
+that provide data types and algorithms for recurring tasks, e.g., logic network and layout types on different
+abstraction levels, clocking schemes, gate libraries, placement, routing, clocking, verification, and simulation
+algorithms, etc. Additionally, *fiction* comes with an
 ABC-like [CLI tool](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-stand-alone-cli-tool)
-that allows quick access to its core functionality.
+that allows quick access to its core functionality. To quickly script ideas, *fiction* also provides an
+[experiment playground](https://fiction.readthedocs.io/en/latest/getting_started.html#building-experiments)
 
 
 <p align="center">
@@ -76,7 +79,7 @@ cli/fiction
 
 ### The Header-only Library
 
-> Add `fiction` as a sub-directory to your CMake project and link against `libfiction` (assuming your project is
+> Add `fiction` as a subdirectory to your CMake project and link against `libfiction` (assuming your project is
 > called `fanfiction`):
 
 ```CMake
@@ -86,12 +89,39 @@ target_link_libraries(fanfiction libfiction)
 
 > Include the headers you need:
 
-```C++
+```c++
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/io/write_qca_layout.hpp>
 #include <fiction/...>
+```
+
+### The Experiments Playground
+
+Inside the `fiction/experiments/` folder, create a new folder for your experiment and create a new `*.cpp` file inside:
+
+```c++
+int main(int argc, char* argv[])
+{
+  // your code goes here
+}
+```
+
+You have full access to *fiction*'s header-only library and your files can be built using CMake:
+
+```bash
+cmake . -B build -DFICTION_EXPERIMENTS=ON
+cd build
+cmake --build . -j4
+```
+
+### The Python Module
+
+> Install *fiction* from PyPI:
+
+```bash
+pip install mnt.fiction
 ```
 
 For a full getting started guide, please refer to
@@ -177,7 +207,9 @@ Among these algorithms are
 - SMT-based [exact placement and routing](https://ieeexplore.ieee.org/document/8342060)
 - OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
 - SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
-- SAT-based [multi-path routing](https://www.cda.cit.tum.de/files/eda/2022_nanoarch_efficient_multi-path_signal_routing_for_fcn.pdf)
+-
+
+SAT-based [multi-path routing](https://www.cda.cit.tum.de/files/eda/2022_nanoarch_efficient_multi-path_signal_routing_for_fcn.pdf)
 
 plus several path finding algorithms that work on generic layouts:
 
@@ -199,8 +231,8 @@ When a layout is compiled to the cell-level via the application of a technology-
 simulated using a physical model. Currently, the following simulation algorithms are implemented in *fiction*:
 
 - Silicon Dangling Bonds (SiDBs)
-  - [Exhaustive Groundstate Simulation (ExGS)](https://fiction.readthedocs.io/en/latest/algorithms/sidb_simulation.html#_CPPv4I0EN7fiction34exhaustive_ground_state_simulationEvRK3LytRK26sidb_simulation_parametersP10exgs_statsI3LytE)
-  - [*QuickSim* Groundstate Simulation](https://arxiv.org/abs/2303.03422)
+    - [Exhaustive Groundstate Simulation (ExGS)](https://fiction.readthedocs.io/en/latest/algorithms/sidb_simulation.html#_CPPv4I0EN7fiction34exhaustive_ground_state_simulationEvRK3LytRK26sidb_simulation_parametersP10exgs_statsI3LytE)
+    - [*QuickSim* Groundstate Simulation](https://arxiv.org/abs/2303.03422)
 
 ## Clocking Schemes
 
@@ -264,7 +296,6 @@ further asymmetric clock signals with extended *Hold* phases that are assigned t
 tiles, [synchronization elements](https://ieeexplore.ieee.org/document/8626294) can be created that stall signals over
 multiple clock cycles. These artificial latches are able to feed information to any other clock number, but their usage
 reduces the overall throughput of the layout. In return, long wire detours for signal synchronization can be prevented.
-
 
 ## Cost Metrics
 
