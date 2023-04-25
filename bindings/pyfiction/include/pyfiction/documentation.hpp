@@ -31,24 +31,30 @@ static const char *__doc_fiction_hexagonal_layout_overridden =
 R"doc(A layout type that utilizes offset coordinates to represent a
 hexagonal grid. Its faces are organized in an offset coordinate system
 as provided. Hexagons are in the pointy_top_hex orientation. Based on that,
-the even_row_hex coordinate system emerges, which is sketched in ASCII above.
+the even_row_hex coordinate system emerges, which is sketched in ASCII below.
+
+.. code-block:: text
+
+           / \     / \     / \
+         /     \ /     \ /     \
+        | (0,0) | (1,0) | (2,0) |
+        |       |       |       |
+       / \     / \     / \     /
+     /     \ /     \ /     \ /
+    | (0,1) | (1,1) | (2,1) |
+    |       |       |       |
+     \     / \     / \     / \
+       \ /     \ /     \ /     \
+        | (0,2) | (1,2) | (2,2) |
+        |       |       |       |
+         \     / \     / \     /
+           \ /     \ /     \ /
 
 Other representations would be using cube or axial coordinates for
 instance, but since we want the layouts to be rectangular-ish, offset
 coordinates make the most sense here.
 
 https://www.redblobgames.com/grids/hexagons/ is a wonderful resource
-on the topic.
-
-Template parameter ``OffsetCoordinateType``:
-    The coordinate implementation to be used. Offset coordinates are
-    required.
-
-Template parameter ``HexagonalCoordinateSystem``:
-    In pyfiction, even_row_hex is choosen for the coodrinate system.
-
-Template parameter ``CubeCoordinateType``:
-    Internally, cube coordinates are needed for certain algorithms or
-    calculations.)doc";
+on the topic.)doc";
 
 #endif  // FICTION_DOCSTRINGS_HPP
