@@ -31,7 +31,7 @@ jobs:
           submodules: recursive
 
       - name: Run ClangFormat
-        uses: DoozyX/clang-format-lint-action@v0.15
+        uses: DoozyX/clang-format-lint-action@v0.16
         with:
           source: 'include test experiments'
           exclude: '*/catch2/*.hpp'
@@ -46,5 +46,3 @@ jobs:
           message: ':art: ClangFormat changes'
           author_name: ClangFormat
           author_email: ClangFormat@users.noreply.github.com
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
