@@ -38,7 +38,7 @@
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wrange-loop-analysis"
-#pragma warning(push, 0)  // MSVC
+#pragma warning(push, 0)    // MSVC
 #include <pybind11/embed.h>
 #pragma GCC diagnostic pop  // GCC
 #pragma warning(pop)        // MSVC
@@ -166,7 +166,7 @@ class mugen_handler
             tts{spec},
             num_pis{spec[0].num_vars()},  // since all tts have to have the same number of variables
             lyt{sketch},
-            ps{std::move(p)},  // need a copy because timeout will be altered
+            ps{std::move(p)},             // need a copy because timeout will be altered
             pi_list(num_pis),
             mugen{pybind11::module::import("mugen")}
     {}
