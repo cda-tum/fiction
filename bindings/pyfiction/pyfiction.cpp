@@ -17,6 +17,7 @@
 #include "pyfiction/algorithms/verification/design_rule_violations.hpp"
 #include "pyfiction/algorithms/verification/equivalence_checking.hpp"
 #include "pyfiction/io/read_fqca_layout.hpp"
+#include "pyfiction/io/read_sqd_layout.hpp"
 #include "pyfiction/io/write_dot_layout.hpp"
 #include "pyfiction/io/write_fqca_layout.hpp"
 #include "pyfiction/io/write_qca_layout.hpp"
@@ -105,6 +106,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::write_qll_layout(m);
     pyfiction::write_fqca_layout(m);
     pyfiction::read_fqca_layout(m);
+    pyfiction::read_sqd_layout(m);
     /**
      * Utils
      */

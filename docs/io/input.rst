@@ -22,14 +22,21 @@ Truth Tables
 Cell-level Layouts
 ##################
 
-**Header:** ``fiction/io/read_sqd_layout.hpp``
+.. tabs::
+    .. tab:: C++
 
-.. doxygenfunction:: fiction::read_sqd_layout(std::istream& is, const std::string_view& name = "")
-.. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, std::istream& is)
-.. doxygenfunction:: fiction::read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
-.. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, const std::string_view& filename)
+        **Header:** ``fiction/io/read_sqd_layout.hpp``
 
-.. doxygenclass:: fiction::sqd_parsing_error
+        .. doxygenfunction:: fiction::read_sqd_layout(std::istream& is, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, std::istream& is)
+        .. doxygenfunction:: fiction::read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, const std::string_view& filename)
+
+        .. doxygenclass:: fiction::sqd_parsing_error
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.read_sqd_layout
+            :members:
 
 .. tabs::
     .. tab:: C++
