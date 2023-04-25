@@ -49,13 +49,13 @@ int get_index(std::vector<Ntk> v, Ntk n)
  * - Case: no inverter (color one outgoing edge east and one south)
  * 2. fan-out node related to one PI (coloring is dependent on the coloring of the whole network)
  * 3. PI connected to node connected to PI: color connecting node east
- * */
+ */
 template <typename Ntk>
 coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
 {
     coloring_container<Ntk> ctn{ntk};
 
-    /*currently viewed node*/
+    // currently viewed node
     mockturtle::node<Ntk> current_node;
 
 #if (PROGRESS_BARS)
@@ -64,7 +64,7 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                                  "[i] determining relative positions: |{0}|"};
 #endif
 
-    /*Find a coloring*/
+    // Find a coloring
     ntk.foreach_gate_reverse(
         [&](const auto& n, [[maybe_unused]] const auto i)
         {
@@ -99,7 +99,7 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
 #endif
         });
 
-    /*Adjust only the nodes viewed in the ordering network*/
+    // Adjust only the nodes viewed in the ordering network
     ntk.foreach_pi(
         [&](const auto& pi)
         {
@@ -107,16 +107,16 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                 pi,
                 [&](const auto& fon)
                 {
-                    /*Always track the current_node*/
+                    // Always track the current_node
                     current_node = fon;
 
-                    /*Skip Inverters and color them east*/
+                    // Skip Inverters and color them east
                     if (ntk.is_inv(current_node))
                     {
-                        /*Color Inverter east*/
+                        // Color Inverter east
                         paint_node_and_edges(ctn, current_node, ctn.color_east);
                         auto cur_fon = fanouts(ctn.color_ntk, current_node);
-                        /*Jump to next node*/
+                        // Jump to next node
                         current_node = cur_fon[0];
                     }
                     // 1. fan-out node related to two PIs
@@ -128,11 +128,11 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                         if (auto fo_two = ctn.color_ntk.get_fo_two(); get_index(fo_two, pi) % 3 == 0)
                         {
                             auto cur_fon = fanouts(ctn.color_ntk, current_node);
-                            /*Jump to next node*/
+                            // Jump to next node
                             current_node = cur_fon[0];
                             if (ntk.is_inv(current_node))
                             {
-                                /*Color Inverter east*/
+                                // Color Inverter east
                                 paint_node_and_edges(ctn, current_node, ctn.color_east);
                                 inv_flag = true;
                             }
@@ -142,17 +142,17 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                                 current_node,
                                 [&ctn, &inv_flag, &current_node, &ntk, &fon, &swap_color](const auto& cur_fon)
                                 {
-                                    /*Jump to next node*/
+                                    // Jump to next node
                                     current_node = cur_fon;
 
                                     if (ntk.is_inv(current_node))
                                     {
-                                        /*Color Inverter east*/
+                                        // Color Inverter east
                                         paint_node_and_edges(ctn, current_node, ctn.color_east);
                                         ntk.foreach_fanout(fon,
                                                            [&](const auto& fon_inv)
                                                            {
-                                                               /*Jump to next node*/
+                                                               // Jump to next node
                                                                current_node = fon_inv;
                                                            });
                                         paint_node_and_edges(ctn, current_node, ctn.color_south);
@@ -513,7 +513,6 @@ class orthogonal_ordering_network_impl
             });
 
         // Since the layout size is only known after placing all gates, the POs are placed after the main algorithm
-
         bool                               multi_out_node = false;
         std::vector<mockturtle::node<Ntk>> out_nodes;
         ctn.color_ntk.foreach_po(
