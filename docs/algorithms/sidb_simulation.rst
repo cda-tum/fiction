@@ -78,9 +78,9 @@ Temperature Behavior
 
 **Header:** ``fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp``
 
+.. doxygenenum:: fiction::sidb_charge_distribution_type
 .. doxygenfunction:: fiction::calculate_energy_and_state_type
 .. doxygentypedef:: fiction::sidb_energy_and_state_type
-    :project: fiction
 
 
 Time-to-Solution (TTS) Statistics

@@ -28,8 +28,8 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
     SECTION("one state with degeneracy")
     {
         sidb_energy_and_state_type energy_distribution_transparent_erroneous{};
-        energy_distribution_transparent_erroneous.emplace_back(0.1, state_type::TRANSPARENT);
-        energy_distribution_transparent_erroneous.emplace_back(0.1, state_type::ERRONEOUS);
+        energy_distribution_transparent_erroneous.emplace_back(0.1, sidb_charge_distribution_type::TRANSPARENT);
+        energy_distribution_transparent_erroneous.emplace_back(0.1, sidb_charge_distribution_type::ERRONEOUS);
 
         CHECK(occupation_probability_gate_based(energy_distribution_transparent_erroneous, 10) == 0.5);
         CHECK(occupation_probability_gate_based(energy_distribution_transparent_erroneous, 0.01) == 0.5);
@@ -43,11 +43,11 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
     SECTION("a few states with degeneracy")
     {
         sidb_energy_and_state_type energy_distribution_transparent_erroneous{};
-        energy_distribution_transparent_erroneous.emplace_back(0.1, state_type::TRANSPARENT);
-        energy_distribution_transparent_erroneous.emplace_back(0.1, state_type::ERRONEOUS);
+        energy_distribution_transparent_erroneous.emplace_back(0.1, sidb_charge_distribution_type::TRANSPARENT);
+        energy_distribution_transparent_erroneous.emplace_back(0.1, sidb_charge_distribution_type::ERRONEOUS);
 
-        energy_distribution_transparent_erroneous.emplace_back(0.2, state_type::TRANSPARENT);
-        energy_distribution_transparent_erroneous.emplace_back(0.2, state_type::TRANSPARENT);
+        energy_distribution_transparent_erroneous.emplace_back(0.2, sidb_charge_distribution_type::TRANSPARENT);
+        energy_distribution_transparent_erroneous.emplace_back(0.2, sidb_charge_distribution_type::TRANSPARENT);
 
         CHECK(occupation_probability_gate_based(energy_distribution_transparent_erroneous, 0.001) == 0.5);
 
@@ -63,11 +63,11 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
     {
         sidb_energy_and_state_type energy_distribution_transparent_erroneous{};
 
-        energy_distribution_transparent_erroneous.emplace_back(0.2, state_type::TRANSPARENT);
-        energy_distribution_transparent_erroneous.emplace_back(0.2, state_type::TRANSPARENT);
+        energy_distribution_transparent_erroneous.emplace_back(0.2, sidb_charge_distribution_type::TRANSPARENT);
+        energy_distribution_transparent_erroneous.emplace_back(0.2, sidb_charge_distribution_type::TRANSPARENT);
 
-        energy_distribution_transparent_erroneous.emplace_back(0.1, state_type::TRANSPARENT);
-        energy_distribution_transparent_erroneous.emplace_back(0.1, state_type::ERRONEOUS);
+        energy_distribution_transparent_erroneous.emplace_back(0.1, sidb_charge_distribution_type::TRANSPARENT);
+        energy_distribution_transparent_erroneous.emplace_back(0.1, sidb_charge_distribution_type::ERRONEOUS);
 
         CHECK(occupation_probability_gate_based(energy_distribution_transparent_erroneous, 0.001) == 0.5);
         const std::map<double, uint64_t> distribution{{0.2, 2}, {0.1, 2}};
@@ -81,7 +81,7 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
     SECTION("one state / true")
     {
         sidb_energy_and_state_type energy_distribution_transparent_erroneous{};
-        energy_distribution_transparent_erroneous.emplace_back(1, state_type::TRANSPARENT);
+        energy_distribution_transparent_erroneous.emplace_back(1, sidb_charge_distribution_type::TRANSPARENT);
         CHECK(occupation_probability_gate_based(energy_distribution_transparent_erroneous, 1000) == 0.0);
         CHECK(occupation_probability_gate_based(energy_distribution_transparent_erroneous, 10) == 0.0);
         CHECK(occupation_probability_gate_based(energy_distribution_transparent_erroneous, 0.01) == 0.0);
@@ -96,7 +96,7 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
     SECTION("one state / false")
     {
         sidb_energy_and_state_type energy_distribution_transparent_erroneous{};
-        energy_distribution_transparent_erroneous.emplace_back(1, state_type::ERRONEOUS);
+        energy_distribution_transparent_erroneous.emplace_back(1, sidb_charge_distribution_type::ERRONEOUS);
 
         CHECK(occupation_probability_gate_based(energy_distribution_transparent_erroneous, 1000) == 1.0);
         CHECK(occupation_probability_gate_based(energy_distribution_transparent_erroneous, 10) == 1.0);

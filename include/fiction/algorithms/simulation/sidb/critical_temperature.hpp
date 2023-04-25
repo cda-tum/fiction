@@ -214,7 +214,8 @@ class critical_temperature_impl
             // Collect the SiDB cells where the output bit is read out.
             for (const auto& output_bit : output_bits_index)
             {
-                output_cells.push_back(all_cells[layout.num_cells() + output_bit]);
+                output_cells.push_back(
+                    all_cells[static_cast<uint64_t>(static_cast<int64_t>(layout.num_cells()) + output_bit)]);
             }
 
             // A label that indicates whether the state still fulfills the logic.
@@ -304,12 +305,13 @@ class critical_temperature_impl
         {
             // Check if at least one ground state exists which fulfills the logic (transparent).
             if ((round_to_n_decimal_places(energy, 6) == round_to_n_decimal_places(min_energy, 6)) &&
-                state_type == state_type::TRANSPARENT)
+                state_type == sidb_charge_distribution_type::TRANSPARENT)
             {
                 ground_state_is_transparent = true;
             }
 
-            if ((state_type == state_type::ERRONEOUS) && (energy > min_energy) && ground_state_is_transparent)
+            if ((state_type == sidb_charge_distribution_type::ERRONEOUS) && (energy > min_energy) &&
+                ground_state_is_transparent)
             {
                 // The energy difference is stored in meV.
                 temperature_stats.energy_between_ground_state_and_first_erroneous = (energy - min_energy) * 1000;

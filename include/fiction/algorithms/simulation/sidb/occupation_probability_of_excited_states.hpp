@@ -24,17 +24,17 @@ namespace fiction
  * This function computes the occupation probability of erroneous charge distributions (output charge does not match the
  * expected output according the truth table) at a given temperature.
  *
- * @param energy_distribution This contains the energies of all possible charge distributions with the
- * information if corresponding state is transparent or erroneous.
+ * @param energy_and_state_type This contains the energies of all possible charge distributions together with the
+ * information if the charge distribution (state) is transparent or erroneous.
  * @param temperature System temperature to assume.
  * @return The occupation probability of all erroneous states is returned.
  */
-[[nodiscard]] inline double occupation_probability_gate_based(const sidb_energy_and_state_type& energy_distribution,
+[[nodiscard]] inline double occupation_probability_gate_based(const sidb_energy_and_state_type& energy_and_state_type,
                                                               const double                      temperature) noexcept
 {
     assert((temperature > static_cast<double>(0)) && "temperature should be slightly above 0 K");
 
-    if (energy_distribution.empty())
+    if (energy_and_state_type.empty())
     {
         return 0.0;
     }
@@ -42,17 +42,13 @@ namespace fiction
     auto min_energy = std::numeric_limits<double>::infinity();
 
     // Determine the minimal energy.
-    if (!energy_distribution.empty())
-    {
-        const auto [energy, state_type] =
-            *std::min_element(energy_distribution.begin(), energy_distribution.end(),
-                              [](const auto& a, const auto& b) { return a.first < b.first; });
-        min_energy = energy;
-    }
+    const auto [energy, state_type] = *std::min_element(energy_and_state_type.begin(), energy_and_state_type.end(),
+                                                        [](const auto& a, const auto& b) { return a.first < b.first; });
+    min_energy                      = energy;
 
     // The partition function is obtained by summing up all the Boltzmann factors.
     const double partition_function =
-        std::accumulate(energy_distribution.begin(), energy_distribution.end(), 0.0,
+        std::accumulate(energy_and_state_type.begin(), energy_and_state_type.end(), 0.0,
                         [&](const double sum, const auto& it)
                         { return sum + std::exp(-(it.first - min_energy) * 12'000 / temperature); });
 
@@ -60,9 +56,9 @@ namespace fiction
     double p = 0;
 
     // The Boltzmann factors of all erroneous excited states are accumulated.
-    for (const auto& [energies, state_transparent_erroneous] : energy_distribution)
+    for (const auto& [energies, state_transparent_erroneous] : energy_and_state_type)
     {
-        if (state_transparent_erroneous == state_type::ERRONEOUS)
+        if (state_transparent_erroneous == sidb_charge_distribution_type::ERRONEOUS)
         {
             p += std::exp(-(energies - min_energy) * 12'000 / temperature);
         }
@@ -91,11 +87,8 @@ namespace fiction
 
     auto min_energy = std::numeric_limits<double>::infinity();
 
-    if (!energy_distribution.empty())
-    {
-        const auto& [energy, degeneracy] = *(energy_distribution.begin());
-        min_energy                       = energy;
-    }
+    const auto& [energy, degeneracy] = *(energy_distribution.begin());
+    min_energy                       = energy;
 
     // The partition function is obtained by summing up all the Boltzmann factors.
     const double partition_function =

@@ -18,18 +18,18 @@
 namespace fiction
 {
 /**
- *  Types of excited charge distributions.
+ *  Types of charge distributions.
  */
-enum class state_type
+enum class sidb_charge_distribution_type
 {
     ERRONEOUS,   // The output SiDB (SiDBs) of the charge distribution does NOT match the truth table entry.
-    TRANSPARENT  // The output SiDBs (SiDBs) of the charge distribution matches the truth table entry.
+    TRANSPARENT  // The output SiDB (SiDBs) of the charge distribution matches the truth table entry.
 };
 /**
  *  Data type to collect electrostatic potential energies of charge distributions with corresponding state types (i.e.,
  * transparent, erroneous).
  */
-using sidb_energy_and_state_type = std::vector<std::pair<double, state_type>>;
+using sidb_energy_and_state_type = std::vector<std::pair<double, sidb_charge_distribution_type>>;
 
 /**
  * This function takes in an SiDB energy distribution. For each charge distribution, the state type is determined (i.e.
@@ -70,12 +70,13 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
                 std::transform(charge_states.begin(), charge_states.end(), charge.begin(),
                                [](const auto& state) { return static_cast<bool>(-charge_state_to_sign(state)); });
 
-                state_type state_type = state_type::ERRONEOUS;
+                sidb_charge_distribution_type state_type = sidb_charge_distribution_type::ERRONEOUS;
 
                 if (charge == output_bits)
                 {
-                    state_type = state_type::TRANSPARENT;  // The output represents the correct output. Hence, state is
-                                                           // called state_type.
+                    state_type =
+                        sidb_charge_distribution_type::TRANSPARENT;  // The output represents the correct output. Hence,
+                                                                     // state is called sidb_charge_distribution_type.
                 }
                 energy_transparent_erroneous.emplace_back(energy, state_type);
             }
