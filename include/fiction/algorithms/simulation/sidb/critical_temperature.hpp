@@ -390,8 +390,8 @@ class critical_temperature_impl
  * charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$ \eta \in [0,1] \f$.
  *
  * For non-gate-based simulation, the Critical Temperature is defined as follows: The temperature at which the
- * erroneous charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$ \eta \in [0,1] \f$ is the confidence level
- *  for the presence of a working gate.
+ * erroneous charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$ \eta \in [0,1] \f$ is the
+ * confidence level for the presence of a working gate.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to simulate.
