@@ -29,7 +29,7 @@ void read_sqd_layout(pybind11::module& m)
         &fiction::read_sqd_layout<Lyt>;
 
     m.def("read_sqd_layout", read_sqd_layout_function_pointer, "filename"_a, "layout_name"_a = "",
-          DOC(fiction_read_sqd_layout));
+          DOC(fiction_read_sqd_layout_3));
 }
 
 }  // namespace detail
