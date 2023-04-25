@@ -81,6 +81,7 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
 void clocked_layouts(pybind11::module& m)
 {
     detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "cartesian");
+    detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(m, "shifted_cartesian");
     detail::clocked_layout<py_hexagonal_layout, py_hexagonal_clocked_layout>(m, "hexagonal");
 }
 

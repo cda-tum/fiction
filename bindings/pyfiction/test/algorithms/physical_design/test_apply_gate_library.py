@@ -28,3 +28,17 @@ class TestApplyGateLibrary(unittest.TestCase):
         layout = exact_hexagonal(network, params)
 
         cell_layout = apply_bestagon_library(layout)
+
+    @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
+    def test_apply_topolinano_library(self):
+        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+
+        params = exact_params()
+        params.scheme = "COLUMNAR3"
+        params.crossings = True
+        params.border_io = True
+        params.technology_specifics = technology_constraints.TOPOLINANO
+
+        layout = exact_shifted_cartesian(network, params)
+
+        cell_layout = apply_topolinano_library(layout)

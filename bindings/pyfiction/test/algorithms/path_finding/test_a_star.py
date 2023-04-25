@@ -6,6 +6,8 @@ from fiction.pyfiction import *
 class TestAStar(unittest.TestCase):
     def test_path_finding(self):
         for lyt in [clocked_cartesian_layout((4, 4), "2DDWave"), cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
+                    clocked_shifted_cartesian_layout((4, 4), "2DDWave"),
+                    shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
                     clocked_hexagonal_layout((4, 4), "2DDWave"), hexagonal_gate_layout((4, 4), "2DDWave", "Layout")]:
             self.assertListEqual(a_star(lyt, coordinate(0, 0), coordinate(0, 0)), [(0, 0)])
             self.assertEqual(len(a_star(lyt, coordinate(0, 0), coordinate(1, 1))), 3)
@@ -17,6 +19,7 @@ class TestAStar(unittest.TestCase):
 
     def test_path_finding_with_obstructions(self):
         for lyt in [cartesian_obstruction_layout(cartesian_gate_layout((4, 4), "2DDWave", "Layout")),
+                    shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout")),
                     hexagonal_obstruction_layout(hexagonal_gate_layout((4, 4), "2DDWave", "Layout"))]:
             # block a vertical line of coordinates
             lyt.obstruct_coordinate(coordinate(1, 0))
@@ -41,6 +44,7 @@ class TestAStar(unittest.TestCase):
 
     def test_path_finding_with_obstructions_and_crossings(self):
         for lyt in [cartesian_obstruction_layout(cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout")),
+                    shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout")),
                     hexagonal_obstruction_layout(hexagonal_gate_layout((2, 1, 1), "2DDWave", "Layout"))]:
             x1 = lyt.create_pi("x1", (0, 0))
             lyt.obstruct_coordinate((0, 0, 0))
@@ -104,6 +108,8 @@ class TestAStar(unittest.TestCase):
 
     def test_distance(self):
         for lyt in [clocked_cartesian_layout((4, 4), "2DDWave"), cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
+                    clocked_shifted_cartesian_layout((4, 4), "2DDWave"),
+                    shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
                     clocked_hexagonal_layout((4, 4), "2DDWave"), hexagonal_gate_layout((4, 4), "2DDWave", "Layout")]:
             self.assertEqual(a_star_distance(lyt, coordinate(0, 0), coordinate(0, 0)), 0)
             self.assertEqual(a_star_distance(lyt, coordinate(0, 0), coordinate(1, 0)), 1)

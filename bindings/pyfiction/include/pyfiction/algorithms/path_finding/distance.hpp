@@ -34,6 +34,7 @@ void distance(pybind11::module& m)
 inline void distance(pybind11::module& m)
 {
     detail::distance<py_cartesian_layout>(m);
+    detail::distance<py_shifted_cartesian_layout>(m);
     detail::distance<py_hexagonal_layout>(m);
 }
 

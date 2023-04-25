@@ -2,20 +2,84 @@ import unittest
 
 from fiction.pyfiction import *
 
+class TestObstructionLayout(unittest.TestCase):
+
+    def test_obstruction_layout_clocking_inheritance(self):
+
+        for layout in [cartesian_obstruction_layout(cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+                       shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 2, 0), "2DDWave",
+                                                                                          "Layout")),
+                       hexagonal_obstruction_layout(hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"))]:
+
+            self.assertEqual(layout.incoming_clocked_zones((0, 0)), [])
+            self.assertEqual(layout.outgoing_clocked_zones((2, 2)), [])
+
+            for icz in layout.incoming_clocked_zones((1, 1)):
+                self.assertIn(icz, [coordinate(1, 0), coordinate(0, 1)])
+
+            for icz in layout.outgoing_clocked_zones((1, 1)):
+                self.assertIn(icz, [coordinate(1, 2), coordinate(2, 1)])
+
+    def test_obstructed_coordinates(self):
+        for layout in [cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+                       shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave",
+                                                                                          "Layout")),
+                       hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"))]:
+
+            for c in layout.coordinates():
+                self.assertFalse(layout.is_obstructed_coordinate(c))
+
+            layout.obstruct_coordinate((0, 0))
+            layout.obstruct_coordinate((1, 1))
+            layout.obstruct_coordinate((2, 2))
+
+            self.assertTrue(layout.is_obstructed_coordinate((0, 0)))
+            self.assertTrue(layout.is_obstructed_coordinate((1, 1)))
+            self.assertTrue(layout.is_obstructed_coordinate((2, 2)))
+
+    def test_obstructed_connections(self):
+        for layout in [cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+                       shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave",
+                                                                                          "Layout")),
+                       hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"))]:
+
+            for c1 in layout.coordinates():
+                for c2 in layout.coordinates():
+                    self.assertFalse(layout.is_obstructed_connection(c1, c2))
+
+            layout.obstruct_connection((0, 0), (1, 1))
+            layout.obstruct_connection((1, 1), (2, 2))
+
+            self.assertTrue(layout.is_obstructed_connection((0, 0), (1, 1)))
+            self.assertTrue(layout.is_obstructed_connection((1, 1), (2, 2)))
+
+    def test_obstruction_via_gates(self):
+
+        for layout in [cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+                       shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave",
+                                                                                          "Layout")),
+                       hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"))]:
+            x1 = layout.create_pi("x1", (0, 1))
+            x2 = layout.create_pi("x2", (3, 2))
+            x3 = layout.create_pi("x3", (2, 0))
+
+            buf1 = layout.create_buf(x3, (2, 1))
+            layout.create_buf(buf1, (2, 2))
+
+            layout.create_and(x1, x2, (4, 2))
+
+            self.assertTrue(layout.is_obstructed_coordinate((0, 1)))
+            self.assertTrue(layout.is_obstructed_coordinate((3, 2)))
+            self.assertTrue(layout.is_obstructed_coordinate((2, 0)))
+            self.assertTrue(layout.is_obstructed_coordinate((2, 1)))
+            self.assertTrue(layout.is_obstructed_coordinate((2, 2)))
+            self.assertTrue(layout.is_obstructed_coordinate((4, 2)))
+
+            self.assertTrue(layout.is_obstructed_connection((2, 0), (2, 1)))
+            self.assertTrue(layout.is_obstructed_connection((2, 1), (2, 2)))
+            self.assertTrue(layout.is_obstructed_connection((3, 2), (4, 2)))
 
 class TestCartesianObstructionLayout(unittest.TestCase):
-
-    def test_cartesian_obstruction_layout_clocking_inheritance(self):
-        layout = cartesian_obstruction_layout(cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"))
-
-        self.assertEqual(layout.incoming_clocked_zones((0, 0)), [])
-        self.assertEqual(layout.outgoing_clocked_zones((2, 2)), [])
-
-        for icz in layout.incoming_clocked_zones((1, 1)):
-            self.assertIn(icz, [coordinate(1, 0), coordinate(0, 1)])
-
-        for icz in layout.outgoing_clocked_zones((1, 1)):
-            self.assertIn(icz, [coordinate(1, 2), coordinate(2, 1)])
 
     def test_cartesian_obstruction_layout_gate_level_inheritance(self):
         layout = cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"))
@@ -145,70 +209,8 @@ class TestCartesianObstructionLayout(unittest.TestCase):
         drv_params = gate_level_drv_params()
         self.assertEqual(gate_level_drvs(layout, drv_params, False), (0, 0))
 
-    def test_obstructed_coordinates(self):
-        layout = cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"))
-
-        for c in layout.coordinates():
-            self.assertFalse(layout.is_obstructed_coordinate(c))
-
-        layout.obstruct_coordinate((0, 0))
-        layout.obstruct_coordinate((1, 1))
-        layout.obstruct_coordinate((2, 2))
-
-        self.assertTrue(layout.is_obstructed_coordinate((0, 0)))
-        self.assertTrue(layout.is_obstructed_coordinate((1, 1)))
-        self.assertTrue(layout.is_obstructed_coordinate((2, 2)))
-
-    def test_obstructed_connections(self):
-        layout = cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"))
-
-        for c1 in layout.coordinates():
-            for c2 in layout.coordinates():
-                self.assertFalse(layout.is_obstructed_connection(c1, c2))
-
-        layout.obstruct_connection((0, 0), (1, 1))
-        layout.obstruct_connection((1, 1), (2, 2))
-
-        self.assertTrue(layout.is_obstructed_connection((0, 0), (1, 1)))
-        self.assertTrue(layout.is_obstructed_connection((1, 1), (2, 2)))
-
-    def test_obstruction_via_gates(self):
-        layout = cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"))
-
-        x1 = layout.create_pi("x1", (0, 1))
-        x2 = layout.create_pi("x2", (3, 2))
-        x3 = layout.create_pi("x3", (2, 0))
-
-        buf1 = layout.create_buf(x3, (2, 1))
-        layout.create_buf(buf1, (2, 2))
-
-        layout.create_and(x1, x2, (4, 2))
-
-        self.assertTrue(layout.is_obstructed_coordinate((0, 1)))
-        self.assertTrue(layout.is_obstructed_coordinate((3, 2)))
-        self.assertTrue(layout.is_obstructed_coordinate((2, 0)))
-        self.assertTrue(layout.is_obstructed_coordinate((2, 1)))
-        self.assertTrue(layout.is_obstructed_coordinate((2, 2)))
-        self.assertTrue(layout.is_obstructed_coordinate((4, 2)))
-
-        self.assertTrue(layout.is_obstructed_connection((2, 0), (2, 1)))
-        self.assertTrue(layout.is_obstructed_connection((2, 1), (2, 2)))
-        self.assertTrue(layout.is_obstructed_connection((3, 2), (4, 2)))
-
 
 class TestHexagonalObstructionLayout(unittest.TestCase):
-
-    def test_hexagonal_obstruction_layout_clocking_inheritance(self):
-        layout = hexagonal_obstruction_layout(hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"))
-
-        self.assertEqual(layout.incoming_clocked_zones((0, 0)), [])
-        self.assertEqual(layout.outgoing_clocked_zones((2, 2)), [])
-
-        for icz in layout.incoming_clocked_zones((1, 1)):
-            self.assertIn(icz, [coordinate(1, 0), coordinate(0, 1)])
-
-        for icz in layout.outgoing_clocked_zones((1, 1)):
-            self.assertIn(icz, [coordinate(1, 2), coordinate(2, 1)])
 
     def test_hexagonal_obstruction_layout_gate_level_inheritance(self):
         layout = hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"))
@@ -338,55 +340,6 @@ class TestHexagonalObstructionLayout(unittest.TestCase):
         drv_params = gate_level_drv_params()
         self.assertEqual(gate_level_drvs(layout, drv_params, False), (0, 0))
 
-    def test_obstructed_coordinates(self):
-        layout = hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"))
-
-        for c in layout.coordinates():
-            self.assertFalse(layout.is_obstructed_coordinate(c))
-
-        layout.obstruct_coordinate((0, 0))
-        layout.obstruct_coordinate((1, 1))
-        layout.obstruct_coordinate((2, 2))
-
-        self.assertTrue(layout.is_obstructed_coordinate((0, 0)))
-        self.assertTrue(layout.is_obstructed_coordinate((1, 1)))
-        self.assertTrue(layout.is_obstructed_coordinate((2, 2)))
-
-    def test_obstructed_connections(self):
-        layout = hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"))
-
-        for c1 in layout.coordinates():
-            for c2 in layout.coordinates():
-                self.assertFalse(layout.is_obstructed_connection(c1, c2))
-
-        layout.obstruct_connection((0, 0), (1, 1))
-        layout.obstruct_connection((1, 1), (2, 2))
-
-        self.assertTrue(layout.is_obstructed_connection((0, 0), (1, 1)))
-        self.assertTrue(layout.is_obstructed_connection((1, 1), (2, 2)))
-
-    def test_obstruction_via_gates(self):
-        layout = hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout"))
-
-        x1 = layout.create_pi("x1", (0, 1))
-        x2 = layout.create_pi("x2", (3, 2))
-        x3 = layout.create_pi("x3", (2, 0))
-
-        buf1 = layout.create_buf(x3, (2, 1))
-        layout.create_buf(buf1, (2, 2))
-
-        layout.create_and(x1, x2, (4, 2))
-
-        self.assertTrue(layout.is_obstructed_coordinate((0, 1)))
-        self.assertTrue(layout.is_obstructed_coordinate((3, 2)))
-        self.assertTrue(layout.is_obstructed_coordinate((2, 0)))
-        self.assertTrue(layout.is_obstructed_coordinate((2, 1)))
-        self.assertTrue(layout.is_obstructed_coordinate((2, 2)))
-        self.assertTrue(layout.is_obstructed_coordinate((4, 2)))
-
-        self.assertTrue(layout.is_obstructed_connection((2, 0), (2, 1)))
-        self.assertTrue(layout.is_obstructed_connection((2, 1), (2, 2)))
-        self.assertTrue(layout.is_obstructed_connection((3, 2), (4, 2)))
 
 
 if __name__ == '__main__':

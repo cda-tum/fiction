@@ -65,11 +65,23 @@ inline void equivalence_checking(pybind11::module& m)
 
     detail::equivalence_checking<py_logic_network, py_logic_network>(m);
     detail::equivalence_checking<py_logic_network, py_cartesian_gate_layout>(m);
+    detail::equivalence_checking<py_logic_network, py_shifted_cartesian_gate_layout>(m);
     detail::equivalence_checking<py_logic_network, py_hexagonal_gate_layout>(m);
+
+    detail::equivalence_checking<py_cartesian_gate_layout, py_logic_network>(m);
     detail::equivalence_checking<py_cartesian_gate_layout, py_cartesian_gate_layout>(m);
+    detail::equivalence_checking<py_cartesian_gate_layout, py_shifted_cartesian_gate_layout>(m);
     detail::equivalence_checking<py_cartesian_gate_layout, py_hexagonal_gate_layout>(m);
-    detail::equivalence_checking<py_hexagonal_gate_layout, py_hexagonal_gate_layout>(m);
+
+    detail::equivalence_checking<py_shifted_cartesian_gate_layout, py_logic_network>(m);
+    detail::equivalence_checking<py_shifted_cartesian_gate_layout, py_cartesian_gate_layout>(m);
+    detail::equivalence_checking<py_shifted_cartesian_gate_layout, py_shifted_cartesian_gate_layout>(m);
+    detail::equivalence_checking<py_shifted_cartesian_gate_layout, py_hexagonal_gate_layout>(m);
+
+    detail::equivalence_checking<py_hexagonal_gate_layout, py_logic_network>(m);
     detail::equivalence_checking<py_hexagonal_gate_layout, py_cartesian_gate_layout>(m);
+    detail::equivalence_checking<py_hexagonal_gate_layout, py_shifted_cartesian_gate_layout>(m);
+    detail::equivalence_checking<py_hexagonal_gate_layout, py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

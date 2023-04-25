@@ -5,8 +5,11 @@ import unittest
 class TestDistance(unittest.TestCase):
     def test_manhattan(self):
         for lyt in [cartesian_layout((4, 4)), clocked_cartesian_layout((4, 4), "2DDWave"),
-                    cartesian_gate_layout((4, 4), "2DDWave", "Layout"), hexagonal_layout((4, 4)),
-                    clocked_hexagonal_layout((4, 4), "2DDWave"), hexagonal_gate_layout((4, 4), "2DDWave", "Layout")]:
+                    cartesian_gate_layout((4, 4), "2DDWave", "Layout"), shifted_cartesian_layout((4, 4)),
+                    clocked_shifted_cartesian_layout((4, 4), "2DDWave"),
+                    shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
+                    hexagonal_layout((4, 4)), clocked_hexagonal_layout((4, 4), "2DDWave"),
+                    hexagonal_gate_layout((4, 4), "2DDWave", "Layout")]:
             self.assertEqual(manhattan_distance(lyt, coordinate(0, 0), coordinate(0, 0)), 0)
             self.assertEqual(manhattan_distance(lyt, coordinate(0, 0), coordinate(1, 0)), 1)
             self.assertEqual(manhattan_distance(lyt, coordinate(0, 0), coordinate(0, 1)), 1)
@@ -17,7 +20,9 @@ class TestDistance(unittest.TestCase):
 
     def test_euclidean(self):
         for lyt in [cartesian_layout((4, 4)), clocked_cartesian_layout((4, 4), "2DDWave"),
-                    cartesian_gate_layout((4, 4), "2DDWave", "Layout"), hexagonal_layout((4, 4)),
+                    cartesian_gate_layout((4, 4), "2DDWave", "Layout"), shifted_cartesian_layout((4, 4)),
+                    clocked_shifted_cartesian_layout((4, 4), "2DDWave"),
+                    shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"), hexagonal_layout((4, 4)),
                     clocked_hexagonal_layout((4, 4), "2DDWave"), hexagonal_gate_layout((4, 4), "2DDWave", "Layout")]:
             self.assertEqual(euclidean_distance(lyt, coordinate(0, 0), coordinate(0, 0)), 0)
             self.assertEqual(euclidean_distance(lyt, coordinate(0, 0), coordinate(1, 0)), 1)

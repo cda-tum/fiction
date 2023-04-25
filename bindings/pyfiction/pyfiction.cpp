@@ -31,6 +31,7 @@
 #include "pyfiction/layouts/gate_level_layout.hpp"
 #include "pyfiction/layouts/hexagonal_layout.hpp"
 #include "pyfiction/layouts/obstruction_layout.hpp"
+#include "pyfiction/layouts/shifted_cartesian_layout.hpp"
 #include "pyfiction/networks/logic_network.hpp"
 #include "pyfiction/technology/area.hpp"
 #include "pyfiction/utils/routing_utils.hpp"
@@ -47,6 +48,7 @@ PYBIND11_MODULE(pyfiction, m)
      */
     pyfiction::coordinates(m);
     pyfiction::cartesian_layout(m);
+    pyfiction::shifted_cartesian_layout(m);
     pyfiction::hexagonal_layout(m);
     pyfiction::clocked_layouts(m);
     pyfiction::gate_level_layouts(m);
@@ -108,5 +110,5 @@ PYBIND11_MODULE(pyfiction, m)
     /**
      * Utils
      */
-     pyfiction::routing_utils(m);
+    pyfiction::routing_utils(m);
 }

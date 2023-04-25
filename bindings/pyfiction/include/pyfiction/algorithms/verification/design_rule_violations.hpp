@@ -74,6 +74,7 @@ inline void design_rule_violations(pybind11::module& m)
         ;
 
     detail::gate_level_drvs<py_cartesian_gate_layout>(m);
+    detail::gate_level_drvs<py_shifted_cartesian_gate_layout>(m);
     detail::gate_level_drvs<py_hexagonal_gate_layout>(m);
 }
 

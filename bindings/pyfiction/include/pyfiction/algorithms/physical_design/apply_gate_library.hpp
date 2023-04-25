@@ -44,6 +44,7 @@ void apply_fcn_gate_library(pybind11::module& m, const std::string& lib_name)
 inline void apply_gate_library(pybind11::module& m)
 {
     detail::apply_fcn_gate_library<fiction::qca_one_library, py_cartesian_gate_layout>(m, "qca_one");
+    detail::apply_fcn_gate_library<fiction::inml_topolinano_library, py_shifted_cartesian_gate_layout>(m, "topolinano");
     detail::apply_fcn_gate_library<fiction::sidb_bestagon_library, py_hexagonal_gate_layout>(m, "bestagon");
 }
 

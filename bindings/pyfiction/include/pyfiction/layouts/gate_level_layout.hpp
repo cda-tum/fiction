@@ -210,6 +210,11 @@ inline void gate_level_layouts(pybind11::module& m)
      */
     detail::gate_level_layout<py_cartesian_clocked_layout, py_cartesian_gate_layout>(m, "cartesian");
     /**
+     * Gate-level clocked shifted Cartesian layout.
+     */
+    detail::gate_level_layout<py_shifted_cartesian_clocked_layout, py_shifted_cartesian_gate_layout>(
+        m, "shifted_cartesian");
+    /**
      * Gate-level clocked hexagonal layout.
      */
     detail::gate_level_layout<py_hexagonal_clocked_layout, py_hexagonal_gate_layout>(m, "hexagonal");

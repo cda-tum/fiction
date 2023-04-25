@@ -47,6 +47,8 @@ inline void routing_utils(pybind11::module& m)
 
     detail::route_path<py_cartesian_obstruction_layout>(m);
     detail::route_path<py_cartesian_gate_layout>(m);
+    detail::route_path<py_shifted_cartesian_obstruction_layout>(m);
+    detail::route_path<py_shifted_cartesian_gate_layout>(m);
     detail::route_path<py_hexagonal_obstruction_layout>(m);
     detail::route_path<py_hexagonal_gate_layout>(m);
 }

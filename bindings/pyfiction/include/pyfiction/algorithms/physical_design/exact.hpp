@@ -28,6 +28,13 @@ inline void exact(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
+    py::enum_<fiction::technology_constraints>(m, "technology_constraints", DOC(fiction_technology_constraints))
+        .value("NONE", fiction::technology_constraints::NONE, DOC(fiction_technology_constraints_NONE))
+        .value("TOPOLINANO", fiction::technology_constraints::TOPOLINANO,
+               DOC(fiction_technology_constraints_TOPOLINANO))
+
+        ;
+
     py::class_<fiction::exact_physical_design_params>(m, "exact_params", DOC(fiction_exact_physical_design_params))
         .def(py::init<>())
         .def_readwrite("scheme", &fiction::exact_physical_design_params::scheme,
@@ -54,6 +61,8 @@ inline void exact(pybind11::module& m)
                        DOC(fiction_exact_physical_design_params_minimize_crossings))
         .def_readwrite("timeout", &fiction::exact_physical_design_params::timeout,
                        DOC(fiction_exact_physical_design_params_timeout))
+        .def_readwrite("technology_specifics", &fiction::exact_physical_design_params::technology_specifics,
+                       DOC(fiction_exact_physical_design_params_technology_specifics))
 
         ;
 
@@ -70,6 +79,9 @@ inline void exact(pybind11::module& m)
         ;
 
     m.def("exact_cartesian", &fiction::exact<py_cartesian_gate_layout, py_logic_network>, "network"_a,
+          "parameters"_a = fiction::exact_physical_design_params{}, "statistics"_a = nullptr);
+
+    m.def("exact_shifted_cartesian", &fiction::exact<py_shifted_cartesian_gate_layout, py_logic_network>, "network"_a,
           "parameters"_a = fiction::exact_physical_design_params{}, "statistics"_a = nullptr);
 
     m.def("exact_hexagonal", &fiction::exact<py_hexagonal_gate_layout, py_logic_network>, "network"_a,
