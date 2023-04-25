@@ -4,7 +4,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/utils/debug/network_writer.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
@@ -104,13 +103,11 @@ TEST_CASE("TEST", "[orthogonal-ordering]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    auto test_nw = blueprints::test_sort_fanouts<mockturtle::names_view<mockturtle::aig_network>>();
+    auto test_nw = blueprints::fanout_substitution_corner_case_network<mockturtle::names_view<mockturtle::aig_network>>();
 
     orthogonal_physical_design_stats stats{};
 
     const auto layout = orthogonal_ordering_network<gate_layout>(test_nw, {}, &stats);
 
     gate_level_drvs(layout);
-
-    fiction::debug::write_dot_layout(layout);
 }
