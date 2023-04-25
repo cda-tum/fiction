@@ -103,7 +103,7 @@ pip install pybind11_mkdoc clang==14
 To generate the docstrings call
 
 ```bash
-python3 -m pybind11_mkdoc -o pybind11_mkdoc_docstrings.hpp -D FICTION_Z3_SOLVER -D MUGEN `find ./include/fiction -name "*.hpp" -print`
+python3 -m pybind11_mkdoc -o pybind11_mkdoc_docstrings.hpp -D FICTION_Z3_SOLVER `find ./include/fiction -name "*.hpp" -print`
 ```
 
 in *fiction*'s base directory.

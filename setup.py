@@ -39,7 +39,6 @@ class CMakeBuild(build_ext):
                       '-DFICTION_EXPERIMENTS=OFF',
                       '-DFICTION_PYTHON_BINDINGS=ON',
                       f'-DFICTION_Z3={z3}',
-                      # '-DFICTION_ENABLE_MUGEN=ON'
                       ]
 
         if "Z3_ROOT" in os.environ:

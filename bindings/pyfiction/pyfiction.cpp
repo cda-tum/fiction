@@ -63,8 +63,6 @@ PYBIND11_MODULE(pyfiction, m)
      */
     pyfiction::exact(m);
     pyfiction::orthogonal(m);
-    // NOTE: currently not functioning because the Python interpreter can only run as a single instance
-    // pyfiction::one_pass_synthesis(m);
     pyfiction::apply_gate_library(m);
     pyfiction::color_routing(m);
     /**
