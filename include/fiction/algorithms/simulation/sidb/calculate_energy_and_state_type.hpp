@@ -20,7 +20,7 @@ namespace fiction
 /**
  *  Types of excited charge configuration states.
  */
-enum class type_of_excited_sidb_state
+enum class type_of_excited_sidb_state : int 
 {
     ERRONEOUS,   // The output SiDB (SiDBs) of the charge distribution does NOT match the truth table entry.
     TRANSPARENT  // The output SiDB (SiDBs) of the charge distribution matches the truth table entry.
