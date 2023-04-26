@@ -316,14 +316,12 @@ class critical_temperature_impl
         for (const auto& [energy, state_type] : energy_and_state_type)
         {
             // Check if at least one ground state exists which fulfills the logic (transparent).
-            type_of_excited_sidb_state state_typ_copy = state_type;
-            if ((round_to_n_decimal_places(energy, 6) == round_to_n_decimal_places(min_energy, 6)) &&
-                state_typ_copy == type_of_excited_sidb_state::TRANSPARENT)
+            if ((round_to_n_decimal_places(energy, 6) == round_to_n_decimal_places(min_energy, 6)) && state_type)
             {
                 ground_state_is_transparent = true;
             }
 
-            if ((state_type == type_of_excited_sidb_state::ERRONEOUS) && (energy > min_energy) &&
+            if (!state_type && (energy > min_energy) &&
                 ground_state_is_transparent)
             {
                 // The energy difference is stored in meV.

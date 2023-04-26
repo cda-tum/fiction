@@ -83,7 +83,6 @@ Temperature Behavior
 **Header:** ``fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp``
 
 .. doxygentypedef:: fiction::sidb_energy_and_state_type
-.. doxygenenum:: fiction::type_of_excited_sidb_state
 .. doxygenfunction:: fiction::calculate_energy_and_state_type
 
 

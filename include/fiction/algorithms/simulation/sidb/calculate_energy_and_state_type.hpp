@@ -17,19 +17,12 @@
 
 namespace fiction
 {
-/**
- *  Types of excited charge configuration states.
- */
-enum struct type_of_excited_sidb_state : int
-{
-    ERRONEOUS,   // The output SiDB (SiDBs) of the charge distribution does NOT match the truth table entry.
-    TRANSPARENT  // The output SiDB (SiDBs) of the charge distribution matches the truth table entry.
-};
+
 /**
  *  Data type to collect electrostatic potential energies of charge distributions with corresponding state types (i.e.,
  * transparent, erroneous).
  */
-using sidb_energy_and_state_type = std::vector<std::pair<double, type_of_excited_sidb_state>>;
+using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
 
 /**
  * This function takes in an SiDB energy distribution. For each charge distribution, the state type is determined (i.e.
@@ -76,14 +69,13 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
 
                 if (charge == output_bits)
                 {
-                    type_of_excited_sidb_state state_type =
-                        type_of_excited_sidb_state::TRANSPARENT;  // The output SiDB matches the truth table entry.
+                    bool state_type = true;  // The output SiDB matches the truth table entry.
                                                                   // Hence, state is called transparent.
                     energy_and_state_type.emplace_back(energy, state_type);
                 }
                 else
                 {
-                    type_of_excited_sidb_state state_type = type_of_excited_sidb_state::ERRONEOUS;
+                    bool state_type = false;
                     energy_and_state_type.emplace_back(energy, state_type);
                 }
             }
