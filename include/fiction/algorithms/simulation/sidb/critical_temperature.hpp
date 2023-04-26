@@ -66,7 +66,7 @@ struct critical_temperature_params
     /**
      * All physical parameters for physical SiDB simulations.
      */
-    const sidb_simulation_parameters& sidb_sim_params{};
+    const sidb_simulation_parameters sidb_sim_params{};
     /**
      * Probability that the ground state is less populated due to temperature. For gate-based simulation, this is the
      * probability of erroneous calculations of the gate.
