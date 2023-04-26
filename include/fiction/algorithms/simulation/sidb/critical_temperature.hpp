@@ -321,8 +321,7 @@ class critical_temperature_impl
                 ground_state_is_transparent = true;
             }
 
-            if (!state_type && (energy > min_energy) &&
-                ground_state_is_transparent)
+            if (!state_type && (energy > min_energy) && ground_state_is_transparent)
             {
                 // The energy difference is stored in meV.
                 temperature_stats.energy_between_ground_state_and_first_erroneous = (energy - min_energy) * 1000;
