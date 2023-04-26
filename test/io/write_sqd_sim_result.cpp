@@ -266,7 +266,7 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
     std::stringstream simulation_stream{};
 
     const std::string sim_result_str = fmt::format(
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<sim_out>\n"
         "    <eng_info>\n"
         "        <engine>ExGS</engine>\n"
@@ -292,8 +292,8 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
         "    </physloc>\n"
         "    <elec_dist>\n"
         "        <dist energy=\"0.246027\" count=\"1\" physically_valid=\"1\" "
-        "state_count=\"2\">-0-0-0-</dist>\n"
-        "    </elec_dist>\n"
+            "state_count=\"3\">-0-0-0-</dist>\n"
+            "    </elec_dist>\n"
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
         sim_result.simulation_runtime.count(), sim_result.physical_parameters.lambda_tf,
