@@ -696,7 +696,7 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
     CHECK(layout->get_output_name(0) == "f");
 }
 
-#else  // FICTION_Z3_SOLVER
+#else   // FICTION_Z3_SOLVER
 
 TEST_CASE("Exact physical design", "[exact]")
 {

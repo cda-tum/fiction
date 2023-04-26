@@ -150,7 +150,7 @@ TEST_CASE("JPS on 4x4 gate-level layouts with coordinate obstruction", "[JPS]")
             obstruction_layout obstr_lyt{layout};
 
             // create a PI as obstruction
-            obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
+            obstr_lyt.create_pi("obstruction", {3, 0});                                    // blocks 3 paths
 
             const auto path = jump_point_search<coord_path>(obstr_lyt, {{0, 0}, {3, 3}});  // only one path possible
 
@@ -206,7 +206,7 @@ TEST_CASE("JPS on 4x4 gate-level layouts with connection obstruction", "[JPS]")
             obstruction_layout obstr_lyt{layout};
 
             // create a PI as obstruction
-            obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
+            obstr_lyt.obstruct_connection({2, 0}, {3, 0});                                 // blocks 3 paths
 
             const auto path = jump_point_search<coord_path>(obstr_lyt, {{0, 0}, {3, 3}});  // only one path possible
 
