@@ -11,6 +11,7 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_defects.hpp>
+#include <fiction/utils/math_utils.hpp>
 
 using namespace fiction;
 
@@ -856,5 +857,9 @@ TEMPLATE_TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[
     const sidb_simulation_parameters params{3, -0.32};
 
     exhaustive_ground_state_simulation<sidb_layout>(lyt, params, &exgs_stats);
-    CHECK(1==1);
+
+    for (const auto & lyt : exgs_stats.valid_lyts)
+        {
+        CHECK(round_to_n_decimal_places(lyt.get_system_energy(),1)<=0);
+        }
 }

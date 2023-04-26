@@ -242,6 +242,7 @@ void exhaustive_ground_state_simulation(
                     if (charge_lyt_new.is_physically_valid())
                     {
                         charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt_new};
+                        charge_lyt_copy.recompute_system_energy();
                         for (const auto& cell : detected_negative_sidbs)
                         {
                             charge_lyt_copy.adding_sidb_to_layout(cell, -1);
