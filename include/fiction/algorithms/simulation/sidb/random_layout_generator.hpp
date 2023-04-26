@@ -19,7 +19,8 @@ namespace fiction
 template <typename Lyt>
 void generate_random_layouts(const typename Lyt::aspect_ratio& max_coordinate = {}, uint64_t number_placed_sidbs = 0,
                              const std::string& layout_name = "", const std::string& path = "",
-                             uint64_t maximal_attempts = 10E6, const bool prevent_positive_charges = true)
+                             uint64_t maximal_attempts = 10E6, const bool prevent_positive_charges = true,
+                             std::vector<Lyt>& all_layouts = {})
 {
     Lyt                    lyt{max_coordinate, layout_name};
     const auto             x_dimension = max_coordinate.x;
@@ -70,7 +71,25 @@ void generate_random_layouts(const typename Lyt::aspect_ratio& max_coordinate = 
         //        }
     }
 
-    if (lyt.num_cells() == number_placed_sidbs)
+    uint64_t counter = 0;
+    for (const auto& old_lyt : all_layouts)
+    {
+
+        old_lyt.foreach_cell(
+            [&all_layouts, &counter, lyt](const auto& cell_old) mutable
+            {
+                lyt.foreach_cell(
+                    [&all_layouts, &counter, &cell_old](const auto& cell_new) mutable
+                    {
+                        if (cell_new == cell_old)
+                        {
+                            counter += 1;
+                        }
+                    });
+            });
+    }
+
+    if (lyt.num_cells() == number_placed_sidbs && counter == 0)
     {
         write_sqd_layout(lyt, path + lyt.get_layout_name());
     }

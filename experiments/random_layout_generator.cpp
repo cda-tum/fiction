@@ -16,7 +16,7 @@ using namespace fiction;
 int main()
 {
     using cell_level_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
-    std::string           folder_name = "random_layouts_paper_larger/";
+    std::string           folder_name = "random_layouts_paper_KI/";
     std::filesystem::path folder_path(EXPERIMENTS_PATH);
     folder_path /= folder_name;
 
@@ -30,7 +30,7 @@ int main()
         std::cout << "Failed to create folder" << std::endl;
     }
 
-    for (uint64_t num_sidbs = 30; num_sidbs < 34; num_sidbs++)
+    for (uint64_t num_sidbs = 32; num_sidbs < 33; num_sidbs++)
     {
         std::filesystem::path dir_path = folder_path.string() + "number_sidbs_" + std::to_string(num_sidbs);
         std::filesystem::path dir_path_sqd =
@@ -49,10 +49,11 @@ int main()
             std::cout << "Folder already exists." << std::endl;
         }
 
-        for (uint64_t i = 0; i < 20; i++)
+        std::vector<cell_level_layout> all_layouts{};
+        for (uint64_t i = 0; i < 10000; i++)
         {
-            generate_random_layouts<cell_level_layout>({43, 43}, num_sidbs, "layout_" + std::to_string(i) + ".sqd",
-                                                       dir_path_sqd.string() + "/", 10E6, true);
+            generate_random_layouts<cell_level_layout>({40, 40}, num_sidbs, "layout_" + std::to_string(i) + ".sqd",
+                                                       dir_path_sqd.string() + "/", 10E8, true, all_layouts);
         }
     }
 }

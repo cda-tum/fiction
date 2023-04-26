@@ -27,8 +27,8 @@ namespace fs = std::filesystem;
 int main()  // NOLINT
 {
 
-    // fs::path dir_path = "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/random_layouts_paper_larger/";
-    fs::path dir_path = "/Users/jandrewniok/Documents/PhD/quickexact/";
+    fs::path dir_path = "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/random_layouts_paper_KI/";
+    //fs::path dir_path = "/Users/jandrewniok/Documents/PhD/quickexact/";
 
     for (const auto& folder : fs::directory_iterator(dir_path))
     {
@@ -82,7 +82,7 @@ int main()  // NOLINT
                 for (const auto& sidb : sidbs)
                 {
                     auto pos = sidb_nm_position<sidb_cell_clk_lyt_siqad>(physical_parameter, sidb);
-                    outFile << pos.first * 10E8 << ";" << pos.second * 10E8 << ";";
+                    outFile << pos.first  << ";" << pos.second << ";";
                     for (const auto& lyt : ground_state_layouts)
                     {
                         outFile << std::to_string(charge_state_to_sign(lyt.get_charge_state(sidb))) << ";";
