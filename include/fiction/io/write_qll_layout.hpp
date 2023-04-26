@@ -187,7 +187,7 @@ class write_qll_layout_impl
                     all_border_pins = false;
                     return false;  // break iteration
                 }
-                return true;  // keep iterating
+                return true;       // keep iterating
             });
         // check PO border cells
         lyt.foreach_po(
@@ -198,7 +198,7 @@ class write_qll_layout_impl
                     all_border_pins = false;
                     return false;  // break iteration
                 }
-                return true;  // keep iterating
+                return true;       // keep iterating
             });
 
         return all_border_pins;
