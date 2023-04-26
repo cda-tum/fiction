@@ -70,7 +70,7 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
                 if (charge == output_bits)
                 {
                     bool state_type = true;  // The output SiDB matches the truth table entry.
-                                                                  // Hence, state is called transparent.
+                                             // Hence, state is called transparent.
                     energy_and_state_type.emplace_back(energy, state_type);
                 }
                 else

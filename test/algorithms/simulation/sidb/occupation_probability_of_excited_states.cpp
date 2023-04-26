@@ -44,7 +44,7 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
     SECTION("a few states with degeneracy")
     {
         sidb_energy_and_state_type energy_and_state_type{};
-        energy_and_state_type.emplace_back(0.1,true);
+        energy_and_state_type.emplace_back(0.1, true);
         energy_and_state_type.emplace_back(0.1, false);
 
         energy_and_state_type.emplace_back(0.2, true);
