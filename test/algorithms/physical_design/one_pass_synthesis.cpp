@@ -204,7 +204,7 @@ TEST_CASE("Name conservation after one-pass synthesis", "[one-pass]")
     CHECK(layout->get_output_name(0) == "f");
 }
 
-#else  // MUGEN
+#else   // MUGEN
 
 TEST_CASE("One-pass synthesis", "[one-pass]")
 {

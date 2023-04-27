@@ -170,7 +170,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
             obstruction_layout obstr_lyt{layout};
 
             // create a PI as obstruction
-            obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
+            obstr_lyt.create_pi("obstruction", {3, 0});                         // blocks 3 paths
 
             const auto path = a_star<coord_path>(obstr_lyt, {{0, 0}, {3, 3}});  // only one path possible
             const auto dist = a_star_distance(obstr_lyt, {0, 0}, {3, 3});
@@ -208,7 +208,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
             {
                 const gate_lyt layout{{2, 2, 1}, twoddwave_clocking<gate_lyt>()};  // create a crossing layer
 
-                SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
+                SECTION("(0,0) to (2,2) with obstruction and crossings")           // 1 valid path
                 {
                     obstruction_layout obstr_lyt{layout};
 
@@ -226,7 +226,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
             {
                 const gate_lyt layout{{2, 2, 1}, use_clocking<gate_lyt>()};  // create a crossing layer
 
-                SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
+                SECTION("(0,0) to (2,2) with obstruction and crossings")     // 1 valid path
                 {
                     obstruction_layout obstr_lyt{layout};
 
@@ -250,7 +250,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
             {
                 const gate_lyt layout{{3, 3, 1}, twoddwave_clocking<gate_lyt>()};  // create a crossing layer
 
-                SECTION("(0,0) to (3,3) with obstruction and crossings")  // 2 valid paths
+                SECTION("(0,0) to (3,3) with obstruction and crossings")           // 2 valid paths
                 {
                     obstruction_layout obstr_lyt{layout};
 
@@ -281,7 +281,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
             {
                 const gate_lyt layout{{3, 2, 1}, twoddwave_clocking<gate_lyt>()};  // create a crossing layer
 
-                SECTION("(0,0) to (3,2) with obstruction and crossings")  // 1 valid paths
+                SECTION("(0,0) to (3,2) with obstruction and crossings")           // 1 valid paths
                 {
                     obstruction_layout obstr_lyt{layout};
 
@@ -343,7 +343,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
             obstruction_layout obstr_lyt{layout};
 
             // create a PI as obstruction
-            obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
+            obstr_lyt.obstruct_connection({2, 0}, {3, 0});                      // blocks 3 paths
 
             const auto path = a_star<coord_path>(obstr_lyt, {{0, 0}, {3, 3}});  // only one path possible
 

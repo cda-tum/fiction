@@ -84,5 +84,6 @@ SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: c++17
 UseTab: Never
+LineEnding: LF
 
 ...

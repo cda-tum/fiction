@@ -31,12 +31,11 @@ jobs:
           submodules: recursive
 
       - name: Run ClangFormat
-        uses: DoozyX/clang-format-lint-action@v0.15
+        uses: DoozyX/clang-format-lint-action@v0.16.1
         with:
           source: 'include test experiments'
-          exclude: '*/catch2/*.hpp'
           extensions: 'hpp,cpp'
-          clangFormatVersion: 15
+          clangFormatVersion: 16
           inplace: True
 
       - uses: EndBug/add-and-commit@v9
