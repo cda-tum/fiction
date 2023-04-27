@@ -317,7 +317,7 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
 
     exhaustive_ground_state_simulation<sidb_layout>(lyt, params, &sim_result);
 
-    sim_result.algorithm_name       = "ExGS";
+    sim_result.algorithm_name = "ExGS";
     std::stringstream simulation_stream{};
 
     const std::string sim_result_str = fmt::format(
