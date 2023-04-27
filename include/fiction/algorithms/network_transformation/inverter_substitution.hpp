@@ -16,6 +16,7 @@
 #include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
+#include <csignal>
 #include <cstdint>
 #include <type_traits>
 #include <vector>
@@ -29,6 +30,68 @@ namespace fiction
 
 namespace detail
 {
+
+template <typename Ntk, typename NtkDest, typename Gate>
+bool connect_children_to_gates(Ntk& ntk, NtkDest& ntk_dest, mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new,
+                           std::vector<typename Ntk::signal> children, Gate& g)
+{
+    if constexpr (mockturtle::has_is_and_v<Ntk> && mockturtle::has_create_and_v<Ntk>)
+    {
+        if (ntk.is_and(g))
+        {
+            old2new[g] = ntk_dest.create_and(children[0], children[1]);
+            return true;
+        }
+    }
+    if constexpr (mockturtle::has_is_or_v<Ntk> && mockturtle::has_create_or_v<Ntk>)
+    {
+        if (ntk.is_or(g))
+        {
+            old2new[g] = ntk_dest.create_or(children[0], children[1]);
+            return true;
+        }
+    }
+    if constexpr (mockturtle::has_is_xor_v<Ntk> && mockturtle::has_create_xor_v<Ntk>)
+    {
+        if (ntk.is_xor(g))
+        {
+            old2new[g] = ntk_dest.create_xor(children[0], children[1]);
+            return true;
+        }
+    }
+    if constexpr (mockturtle::has_is_maj_v<Ntk> && mockturtle::has_create_maj_v<Ntk>)
+    {
+        if (ntk.is_maj(g))
+        {
+            old2new[g] = ntk_dest.create_maj(children[0], children[1], children[2]);
+            return true;
+        }
+    }
+    if constexpr (mockturtle::has_is_nary_and_v<Ntk> && mockturtle::has_create_nary_and_v<Ntk>)
+    {
+        if (ntk.is_nary_and(g))
+        {
+            old2new[g] = ntk_dest.create_nary_and(children);
+            return true;
+        }
+    }
+    if constexpr (mockturtle::has_is_nary_or_v<Ntk> && mockturtle::has_create_nary_or_v<Ntk>)
+    {
+        if (ntk.is_nary_or(g))
+        {
+            old2new[g] = ntk_dest.create_nary_or(children);
+            return true;
+        }
+    }
+    if constexpr (mockturtle::has_is_nary_xor_v<Ntk> && mockturtle::has_create_nary_xor_v<Ntk>)
+    {
+        if (ntk.is_nary_xor(g))
+        {
+            old2new[g] = ntk_dest.create_nary_xor(children);
+            return true;
+        }
+    }
+}
 
 template <typename Ntk>
 class inverter_substitution_impl
@@ -108,7 +171,7 @@ class inverter_substitution_impl
                 // update progress
                 bar(i);
 #endif
-
+                // map all affected nodes
                 if constexpr (has_is_inv_v<TopoNtkSrc>)
                 {
                     if (ntk.is_inv(g) && std::find(m_inv.cbegin(), m_inv.cend(), g) != m_inv.cend())
@@ -136,62 +199,8 @@ class inverter_substitution_impl
                         return true;
                     }
                 }
-                if constexpr (mockturtle::has_is_and_v<TopoNtkSrc> && mockturtle::has_create_and_v<Ntk>)
-                {
-                    if (ntk.is_and(g))
-                    {
-                        old2new[g] = ntk_dest.create_and(children[0], children[1]);
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_or_v<TopoNtkSrc> && mockturtle::has_create_or_v<Ntk>)
-                {
-                    if (ntk.is_or(g))
-                    {
-                        old2new[g] = ntk_dest.create_or(children[0], children[1]);
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_xor_v<TopoNtkSrc> && mockturtle::has_create_xor_v<Ntk>)
-                {
-                    if (ntk.is_xor(g))
-                    {
-                        old2new[g] = ntk_dest.create_xor(children[0], children[1]);
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_maj_v<TopoNtkSrc> && mockturtle::has_create_maj_v<Ntk>)
-                {
-                    if (ntk.is_maj(g))
-                    {
-                        old2new[g] = ntk_dest.create_maj(children[0], children[1], children[2]);
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_nary_and_v<TopoNtkSrc> && mockturtle::has_create_nary_and_v<Ntk>)
-                {
-                    if (ntk.is_nary_and(g))
-                    {
-                        old2new[g] = ntk_dest.create_nary_and(children);
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_nary_or_v<TopoNtkSrc> && mockturtle::has_create_nary_or_v<Ntk>)
-                {
-                    if (ntk.is_nary_or(g))
-                    {
-                        old2new[g] = ntk_dest.create_nary_or(children);
-                        return true;
-                    }
-                }
-                if constexpr (mockturtle::has_is_nary_xor_v<TopoNtkSrc> && mockturtle::has_create_nary_xor_v<Ntk>)
-                {
-                    if (ntk.is_nary_xor(g))
-                    {
-                        old2new[g] = ntk_dest.create_nary_xor(children);
-                        return true;
-                    }
-                }
+                // map all unaffected nodes
+                connect_children_to_gates(ntk, ntk_dest, old2new, children, g);
                 if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<Ntk>)
                 {
                     old2new[g] = ntk_dest.create_node(children, ntk.node_function(g));
