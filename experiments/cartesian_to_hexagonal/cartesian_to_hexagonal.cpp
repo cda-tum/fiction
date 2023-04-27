@@ -4,47 +4,43 @@
 #include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/io/write_sqd_layout.hpp>           // writer for SiQAD files (physical simulation)
-#include <fiction/networks/technology_network.hpp>   // technology-mapped network type
-#include <fiction/technology/area.hpp>               // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>  // cell implementations
+#include <fiction/io/dot_drawers.hpp>
+#include <fiction/io/write_sqd_layout.hpp>  // writer for SiQAD files (physical simulation)
+#include <fiction/layouts/bounding_box.hpp>  // computes a minimum-sized box around all non-empty coordinates in a given layout
+#include <fiction/technology/area.hpp>                        // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>           // cell implementations
 #include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/traits.hpp>                                 // traits for type-checking
 #include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
-#include <fiction/layouts/bounding_box.hpp>                   // computes a minimum-sized box around all non-empty coordinates in a given layout
-#include <fiction/utils/placement_utils.hpp>                  // used for reserving inputs on the hexagonal layout
-#include <fiction/io/dot_drawers.hpp>                         // draw layouts
 #include <fiction/utils/name_utils.hpp>                       // restore names
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
 #include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
 #include <mockturtle/algorithms/cut_rewriting.hpp>             // logic optimization with cut rewriting
-#include <mockturtle/algorithms/equivalence_checking.hpp>      // equivalence checking
 #include <mockturtle/algorithms/mapper.hpp>                    // Technology mapping on the logic level
-#include <mockturtle/algorithms/miter.hpp>                     // miter structure
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
-#include <mockturtle/io/genlib_reader.hpp>   // call-backs to read Genlib files into gate libraries
-#include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
-#include <mockturtle/networks/klut.hpp>       // k-LUT network
-#include <mockturtle/networks/xag.hpp>        // XOR-AND-inverter graphs
-#include <mockturtle/utils/tech_library.hpp>  // technology library utils
-#include <mockturtle/views/depth_view.hpp>    // to determine network levels
+#include <mockturtle/io/genlib_reader.hpp>                     // call-backs to read Genlib files into gate libraries
+#include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
+#include <mockturtle/networks/xag.hpp>                         // XOR-AND-inverter graphs
+#include <mockturtle/utils/tech_library.hpp>                   // technology library utils
 
 #include <cassert>
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <sstream>
-#include <string>
 #include <vector>
 
 template <typename Lyt>
-fiction::coordinate<Lyt> to_hex(int old_x, int old_y, int height, int z)
+fiction::coordinate<Lyt> to_hex(int cartesian_x, int cartesian_y, int64_t cartesian_layout_height, int cartesian_z)
 {
-    const auto y = old_x + old_y;
-    const auto x = old_x + std::ceil(std::floor(height / 2) - y / 2);
+    const auto y = cartesian_x + cartesian_y;
+    const auto x =
+        static_cast<int>(cartesian_x + std::ceil(std::floor(static_cast<double>(cartesian_layout_height) / 2) -
+                                                 static_cast<double>(y) / 2));
+    const auto z = cartesian_z;
 
     fiction::coordinate<Lyt> hex{x, y, z};
 
@@ -114,12 +110,12 @@ int main()  // NOLINT
     assert(read_genlib_result == lorina::return_code::success);
     const mockturtle::tech_library<2> gate_lib{gates};
 
-    // parameters for SMT-based physical design
-    // fiction::orthogonal_physical_design_params<gate_lyt> orthogonal_params{};
+    // stats for SMT-based physical design
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
 
-    static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::log2 &
-                                                   ~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
+    static constexpr const uint64_t bench_select =
+        fiction_experiments::b1_r2;  //& ~fiction_experiments::log2 &
+                                     //~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
@@ -153,12 +149,15 @@ int main()  // NOLINT
         const std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
         // get width & height of cartesian layout
-        const auto layout_width  = gate_level_layout.x() + 1;
-        const auto layout_height = gate_level_layout.y() + 1;
+        const int64_t layout_width  = static_cast<int64_t>(gate_level_layout.x()) + 1;
+        const int64_t layout_height = static_cast<int64_t>(gate_level_layout.y()) + 1;
 
         // calculate max width & height of hexagonal layout
-        const auto hex_height = to_hex<gate_lyt>(layout_width - 1, layout_height - 1, layout_height, 0).y;
-        const auto hex_width  = to_hex<gate_lyt>(layout_width - 1, 0, layout_height, 0).x;
+        const auto hex_height =
+            to_hex<gate_lyt>(static_cast<int>(layout_width) - 1, static_cast<int>(layout_height) - 1,
+                             static_cast<int>(layout_height), 0)
+                .y;
+        const auto hex_width = to_hex<gate_lyt>(static_cast<int>(layout_width) - 1, 0, layout_height, 0).x;
 
         // instantiate hexagonal layout
         hex_lyt hex_layout{{hex_width, hex_height, 1}, fiction::row_clocking<hex_lyt>()};
@@ -185,17 +184,17 @@ int main()  // NOLINT
 
                         if (const auto node = gate_level_layout.get_node(old_coord); gate_level_layout.is_pi(node))
                         {
-                            hex_layout.create_pi(
-                                gate_level_layout.get_name(gate_level_layout.get_node({x, y, z})), hex);
+                            hex_layout.create_pi(gate_level_layout.get_name(gate_level_layout.get_node({x, y, z})),
+                                                 hex);
                         }
                         else if (gate_level_layout.is_po(node))
                         {
                             const auto signal = gate_level_layout.incoming_data_flow(old_coord)[0];
 
-                            hex_layout.create_po(
-                                hex_layout.make_signal(
-                                    hex_layout.get_node(to_hex<gate_lyt>(signal.x, signal.y, layout_height, signal.z))),
-                                gate_level_layout.get_name(gate_level_layout.get_node(old_coord)), hex);
+                            hex_layout.create_po(hex_layout.make_signal(hex_layout.get_node(
+                                                     to_hex<gate_lyt>(signal.x, signal.y, layout_height, signal.z))),
+                                                 gate_level_layout.get_name(gate_level_layout.get_node(old_coord)),
+                                                 hex);
                         }
                         else if (gate_level_layout.is_wire(node))
                         {
@@ -301,18 +300,19 @@ int main()  // NOLINT
         fiction::restore_names(gate_level_layout, hex_layout);
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};
-        fiction::equivalence_checking(mapped_network, hex_layout, &eq_stats);
+        fiction::equivalence_checking(gate_level_layout, hex_layout, &eq_stats);
 
         const std::string eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
                                       eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
                                                                                 "NO";
 
         // apply gate library
-        const auto cell_level_layout = fiction::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(hex_layout);
+        const auto cell_level_layout =
+            fiction::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(hex_layout);
 
         // calculate bounding box
-        const auto bounding_box = fiction::bounding_box_2d(hex_layout);
-        const auto hex_layout_width = bounding_box.get_x_size() + 1;
+        const auto bounding_box      = fiction::bounding_box_2d(hex_layout);
+        const auto hex_layout_width  = bounding_box.get_x_size() + 1;
         const auto hex_layout_height = bounding_box.get_y_size() + 1;
 
         // compute area
@@ -328,8 +328,8 @@ int main()  // NOLINT
             hex_layout_height, hex_layout_width * hex_layout_height, gate_level_layout.num_gates(),
             gate_level_layout.num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
             mockturtle::to_seconds(orthogonal_stats.time_total),
-            std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() / 1000000.0, eq_result,
-            cell_level_layout.num_cells(), area_stats.area);
+            static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) / 1000000.0,
+            eq_result, cell_level_layout.num_cells(), area_stats.area);
 
         bestagon_exp.save();
         bestagon_exp.table();
