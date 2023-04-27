@@ -25,7 +25,7 @@ void paint_node_and_edges(const coloring_container<Ntk>& ctn, mockturtle::node<N
 }
 
 template <typename Ntk>
-int get_index(std::vector<Ntk> v, Ntk n)
+int64_t get_index(std::vector<Ntk> v, Ntk n)
 {
     auto it = find(v.begin(), v.end(), n);
 
@@ -33,7 +33,7 @@ int get_index(std::vector<Ntk> v, Ntk n)
     if (it != v.end())
     {
         // calculating the index
-        int index = it - v.begin();
+        int64_t index = it - v.begin();
         return index;
     }
     return -1;
@@ -262,7 +262,7 @@ class orthogonal_ordering_network_impl
             latest_pos.x = latest_pos.x + ctn.color_ntk.nc_inv_num() + 1;
         }
         // new column inverter tracker
-        int insert_position_inv = 1;
+        std::uint64_t insert_position_inv{1};
 
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -285,8 +285,7 @@ class orthogonal_ordering_network_impl
 
         // Start of the algorithm
         ntk.foreach_node(
-            [&ctn, this, &insert_position_inv, &multi_out_nodes, &node2pos, &layout, &pi2node, &latest_pos_inputs,
-             &latest_pos](const auto& n, [[maybe_unused]] const auto i)
+            [&, this](const auto& n, [[maybe_unused]] const auto i)
             {
                 // do not place constants
                 if (!ctn.color_ntk.is_constant(n))
