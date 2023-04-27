@@ -80,7 +80,7 @@ struct critical_temperature_params
     /**
      * Simulation mode to determine the Critical Temperature.
      */
-    simulation_engine simulation_engine = simulation_engine::EXACT;
+    simulation_engine engine = simulation_engine::EXACT;
     /**
      * Mode to determine the Critical Temperature.
      */
@@ -178,7 +178,7 @@ class critical_temperature_impl
         }
 
         sidb_simulation_result<Lyt> stats{};
-        if (parameter.simulation_engine == simulation_engine::EXACT)
+        if (parameter.engine == simulation_engine::EXACT)
         {
             temperature_stats.algorithm_name = "exgs";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
@@ -295,7 +295,7 @@ class critical_temperature_impl
     bool non_gate_based_simulation()
     {
         sidb_simulation_result<Lyt> stats{};
-        if (parameter.simulation_engine == simulation_engine::EXACT)
+        if (parameter.engine == simulation_engine::EXACT)
         {
             temperature_stats.algorithm_name = "exgs";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
