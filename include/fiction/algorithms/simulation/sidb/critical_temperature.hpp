@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
+#include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
@@ -38,7 +39,7 @@ namespace fiction
 /**
  * An enumeration of modes to use for the Critical Temperature Simulation.
  */
-enum class critical_temperature_simulation_mode
+enum class critical_temperature_mode
 {
     /**
      * The Critical Temperature is determined by considering the gate logic of the given layout. In this mode, it is
@@ -55,6 +56,23 @@ enum class critical_temperature_simulation_mode
 };
 
 /**
+ * An enumeration of simulation modes (exact vs. approximate) to use for the Critical Temperature Simulation.
+ */
+enum class simulation_engine
+{
+    /**
+     * This simulation engine computes Critical Temperature values with 100 % accuracy.
+     */
+    EXACT,
+    /**
+     *
+     * This simulation engine quickly calculates the Critical Temperature. However, there may be deviations from the
+     * exact Critical Temperature. This mode is recommended for larger layouts (> 40 SiDBs).
+     */
+    APPROXIMATE
+};
+
+/**
  * This struct stores the parameters for the `critical_temperature` algorithm.
  */
 struct critical_temperature_params
@@ -62,11 +80,15 @@ struct critical_temperature_params
     /**
      * Simulation mode to determine the Critical Temperature.
      */
-    critical_temperature_simulation_mode simulation_mode = critical_temperature_simulation_mode::GATE_BASED_SIMULATION;
+    simulation_engine simulation_engine = simulation_engine::EXACT;
     /**
-     * All physical parameters for physical SiDB simulations.
+     * Mode to determine the Critical Temperature.
      */
-    const sidb_simulation_parameters sidb_sim_params{};
+    critical_temperature_mode temperature_mode = critical_temperature_mode::GATE_BASED_SIMULATION;
+    /**
+     * All Parameters for physical SiDB simulations.
+     */
+    quicksim_params simulation_params{};
     /**
      * Probability that the ground state is less populated due to temperature. For gate-based simulation, this is the
      * probability of erroneous calculations of the gate.
@@ -94,6 +116,10 @@ struct critical_temperature_params
 template <typename Lyt>
 struct critical_temperature_stats
 {
+    /**
+     * Name of the algorithm used to compute the physically valid charge distributions.
+     */
+    std::string algorithm_name{};
     /**
      * Critical Temperature of the given layout.
      */
@@ -151,13 +177,24 @@ class critical_temperature_impl
             return true;
         }
 
-        // All physically valid charge configurations are determined for the given layout (exhaustive ground state
-        // simulation is used to provide 100 % accuracy for the Critical Temperature).
-        exgs_stats<Lyt> stats_exhaustive{};
-        exhaustive_ground_state_simulation(layout, parameter.sidb_sim_params, &stats_exhaustive);
+        sidb_simulation_result<Lyt> stats{};
+        if (parameter.simulation_engine == simulation_engine::EXACT)
+        {
+            temperature_stats.algorithm_name = "exgs";
+            // All physically valid charge configurations are determined for the given layout (exhaustive ground state
+            // simulation is used to provide 100 % accuracy for the Critical Temperature).
+            exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params, &stats);
+        }
+        else
+        {
+            temperature_stats.algorithm_name = "quicksim";
+            // All physically valid charge configurations are determined for the given layout (exhaustive ground state
+            // simulation is used to provide 100 % accuracy for the Critical Temperature).
+            quicksim(layout, parameter.simulation_params, &stats);
+        }
 
         // The number of physically valid charge configurations is stored.
-        temperature_stats.num_valid_lyt = stats_exhaustive.valid_lyts.size();
+        temperature_stats.num_valid_lyt = stats.charge_distributions.size();
 
         // If the layout consists of only one SiDB, the maximum temperature is returned as the Critical Temperature.
         if (layout.num_cells() == 1u)
@@ -177,7 +214,7 @@ class critical_temperature_impl
             std::sort(all_cells.begin(), all_cells.end());
 
             // The energy distribution of the physically valid charge configurations for the given layout is determined.
-            const auto distribution = energy_distribution(stats_exhaustive.valid_lyts);
+            const auto distribution = energy_distribution(stats.charge_distributions);
 
             std::vector<int64_t> output_bits_index{};
             std::vector<bool>    output_bits{};
@@ -233,7 +270,7 @@ class critical_temperature_impl
             // A label that indicates whether the state still fulfills the logic.
             sidb_energy_and_state_type energy_state_type{};
             energy_state_type =
-                calculate_energy_and_state_type(distribution, stats_exhaustive.valid_lyts, output_cells, output_bits);
+                calculate_energy_and_state_type(distribution, stats.charge_distributions, output_cells, output_bits);
 
             const auto min_energy = energy_state_type.cbegin()->first;
 
@@ -257,13 +294,26 @@ class critical_temperature_impl
 
     bool non_gate_based_simulation()
     {
-        exgs_stats<Lyt> stats_exhaustive{};
-        exhaustive_ground_state_simulation(layout, parameter.sidb_sim_params, &stats_exhaustive);
+        sidb_simulation_result<Lyt> stats{};
+        if (parameter.simulation_engine == simulation_engine::EXACT)
+        {
+            temperature_stats.algorithm_name = "exgs";
+            // All physically valid charge configurations are determined for the given layout (exhaustive ground state
+            // simulation is used to provide 100 % accuracy for the Critical Temperature).
+            exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params, &stats);
+        }
+        else
+        {
+            temperature_stats.algorithm_name = "quicksim";
+            // All physically valid charge configurations are determined for the given layout (exhaustive ground state
+            // simulation is used to provide 100 % accuracy for the Critical Temperature).
+            quicksim(layout, parameter.simulation_params, &stats);
+        }
 
         // The number of physically valid charge configurations is stored.
-        temperature_stats.num_valid_lyt = stats_exhaustive.valid_lyts.size();
+        temperature_stats.num_valid_lyt = stats.charge_distributions.size();
 
-        const auto distribution = energy_distribution(stats_exhaustive.valid_lyts);
+        const auto distribution = energy_distribution(stats.charge_distributions);
 
         // if there is more than one metastable state
         if (temperature_stats.num_valid_lyt > 1)
@@ -381,7 +431,7 @@ class critical_temperature_impl
 /**
  *
  * This algorithm performs temperature-aware SiDB simulation. It comes in two flavors:
- * gate-based and non-gate based, which can be specified using the `critical_temperature_simulation_mode` parameter.
+ * gate-based and non-gate based, which can be specified using the `critical_temperature_mode` parameter.
  *
  * For gate-based simulation, the Critical Temperature is defined as follows: The temperature at which the excited
  * charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$ \eta \in [0,1] \f$.
@@ -410,7 +460,7 @@ bool critical_temperature(const Lyt& lyt, const critical_temperature_params& par
 
     bool result = false;
 
-    if (params.simulation_mode == critical_temperature_simulation_mode::GATE_BASED_SIMULATION)
+    if (params.temperature_mode == critical_temperature_mode::GATE_BASED_SIMULATION)
     {
         result = p.gate_based_simulation();
     }

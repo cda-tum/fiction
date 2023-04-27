@@ -7,6 +7,7 @@
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/is_ground_state.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -27,11 +28,11 @@ TEMPLATE_TEST_CASE(
     {
         TestType                         lyt{{20, 10}};
         charge_distribution_surface      charge_layout{lyt};
-        exgs_stats<TestType>             exgs_stats{};
+        sidb_simulation_result<TestType> exgs_stats{};
         const sidb_simulation_parameters params{2, -0.32};
         exhaustive_ground_state_simulation<TestType>(charge_layout, params, &exgs_stats);
-        quicksim_stats<TestType> quicksimstats{};
-        const quicksim_params    quicksim_params{params};
+        sidb_simulation_result<TestType> quicksimstats{};
+        const quicksim_params            quicksim_params{params};
         quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
 
         CHECK(!is_ground_state(quicksimstats, exgs_stats));
@@ -52,11 +53,11 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface      charge_layout{lyt};
-        exgs_stats<TestType>             exgs_stats{};
+        sidb_simulation_result<TestType> exgs_stats{};
         const sidb_simulation_parameters params{2, -0.32};
         exhaustive_ground_state_simulation<TestType>(charge_layout, params, &exgs_stats);
-        quicksim_stats<TestType> quicksimstats{};
-        const quicksim_params    quicksim_params{params};
+        sidb_simulation_result<TestType> quicksimstats{};
+        const quicksim_params            quicksim_params{params};
         quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
 
         CHECK(is_ground_state(quicksimstats, exgs_stats));

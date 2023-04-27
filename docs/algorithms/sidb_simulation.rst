@@ -70,7 +70,8 @@ Temperature Behavior
 
 **Header:** ``fiction/algorithms/simulation/sidb/critical_temperature.hpp``
 
-.. doxygenenum:: fiction::critical_temperature_simulation_mode
+.. doxygenenum:: fiction::critical_temperature_mode
+.. doxygenenum:: fiction::simulation_engine
 .. doxygenstruct:: fiction::critical_temperature_params
    :members:
 .. doxygenfunction:: fiction::critical_temperature(const Lyt& lyt, const critical_temperature_params& params = {}, critical_temperature_stats<Lyt>* pst = nullptr)

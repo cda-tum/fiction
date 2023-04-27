@@ -8,6 +8,7 @@
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 
 #include <fmt/format.h>
@@ -18,46 +19,6 @@
 
 namespace fiction
 {
-
-template <typename Lyt>
-struct exgs_stats
-{
-    /**
-     * Total simulation runtime.
-     */
-    mockturtle::stopwatch<>::duration time_total{0};
-    /**
-     * All physically valid charge layouts.
-     */
-    std::vector<charge_distribution_surface<Lyt>> valid_lyts{};
-    /**
-     * Prints the simulation statistics to the given output stream.
-     *
-     * @param out Output stream.
-     */
-    void report(std::ostream& out = std::cout) const
-    {
-        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
-
-        if (!valid_lyts.empty())
-        {
-            for (const auto& [energy, count] : energy_distribution<Lyt>(valid_lyts))
-            {
-                out << fmt::format("[i] energy: {} | occurrence: {}\n", energy, count);
-            }
-
-            out << fmt::format("[i] the ground state energy is  = {:.4f}\n", minimum_energy(valid_lyts));
-        }
-        else
-        {
-            out << "[i] no state found | if two-state simulation was used, try re-runing with three states\n";
-        }
-
-        out << fmt::format("[i] {} physically valid charge states were found\n", valid_lyts.size());
-
-        out << "_____________________________________________________" << std::endl;
-    }
-};
 
 /**
  *  All metastable and physically valid charge distribution layouts are computed, stored in a vector and returned.
@@ -70,15 +31,18 @@ struct exgs_stats
 template <typename Lyt>
 void exhaustive_ground_state_simulation(const Lyt&                        lyt,
                                         const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-                                        exgs_stats<Lyt>*                  ps     = nullptr) noexcept
+                                        sidb_simulation_result<Lyt>*      ps     = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    exgs_stats<Lyt> st{};
-
+    sidb_simulation_result<Lyt> st{};
+    st.algorithm_name      = "exgs";
+    st.physical_parameters = params;
+    mockturtle::stopwatch<>::duration time_counter{};
     {
-        mockturtle::stopwatch stop{st.time_total};
+
+        mockturtle::stopwatch const stop{time_counter};
 
         charge_distribution_surface charge_lyt{lyt};
 
@@ -91,7 +55,7 @@ void exhaustive_ground_state_simulation(const Lyt&                        lyt,
 
             if (charge_lyt.is_physically_valid())
             {
-                st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+                st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
             }
 
             charge_lyt.increase_charge_index_by_one();
@@ -99,9 +63,10 @@ void exhaustive_ground_state_simulation(const Lyt&                        lyt,
 
         if (charge_lyt.is_physically_valid())
         {
-            st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+            st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
         }
     }
+    st.simulation_runtime = time_counter;
 
     if (ps)
     {
