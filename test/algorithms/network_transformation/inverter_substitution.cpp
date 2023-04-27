@@ -20,6 +20,13 @@ TEST_CASE("One Balancing", "[inverter-substitution]")
 
     auto balanced_aig_ntk{inverter_substitution(aig_ntk)};
 
+    balanced_aig_ntk.foreach_node([&balanced_aig_ntk](const auto &n){
+                                      if(balanced_aig_ntk.is_and(n))
+                                              {
+                                                  std::cout<<"AND nodes: "<<n<<std::endl;
+                                              }
+    });
+
     CHECK(balanced_aig_ntk.num_gates() == 8);
 }
 
