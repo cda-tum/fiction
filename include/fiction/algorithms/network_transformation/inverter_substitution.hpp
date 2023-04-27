@@ -33,7 +33,7 @@ namespace detail
 
 template <typename Ntk, typename NtkDest, typename Gate>
 bool connect_children_to_gates(Ntk& ntk, NtkDest& ntk_dest, mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new,
-                           std::vector<typename Ntk::signal> children, Gate& g)
+                               std::vector<typename Ntk::signal> children, Gate& g)
 {
     if constexpr (mockturtle::has_is_and_v<Ntk> && mockturtle::has_create_and_v<Ntk>)
     {
@@ -91,6 +91,7 @@ bool connect_children_to_gates(Ntk& ntk, NtkDest& ntk_dest, mockturtle::node_map
             return true;
         }
     }
+    return false;
 }
 
 template <typename Ntk>
@@ -137,7 +138,7 @@ class inverter_substitution_impl
             }
             // compute children of affected nodes
             ntk.foreach_fanin(n,
-                              [this, &old2new, &children, &n](const auto& f)
+                              [this, &old2new, &children](const auto& f)
                               {
                                   auto fn = ntk.get_node(f);
 
@@ -163,7 +164,7 @@ class inverter_substitution_impl
 #endif
 
         ntk.foreach_gate(
-            [this, &gather_fanin_signals, &old2new, &ntk_dest](const auto& g, [[maybe_unused]] auto i)
+            [&, this](const auto& g, [[maybe_unused]] auto i)
             {
                 const auto children = gather_fanin_signals(g);
 
@@ -200,7 +201,10 @@ class inverter_substitution_impl
                     }
                 }
                 // map all unaffected nodes
-                connect_children_to_gates(ntk, ntk_dest, old2new, children, g);
+                if (connect_children_to_gates(ntk, ntk_dest, old2new, children, g))
+                {
+                    return true;
+                }
                 if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<Ntk>)
                 {
                     old2new[g] = ntk_dest.create_node(children, ntk.node_function(g));

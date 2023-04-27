@@ -45,7 +45,7 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
      *
      * Constructs input ordering view on another network.
      */
-    explicit input_ordering_view(Ntk const& ntk) : mockturtle::immutable_view<Ntk>(ntk), num_p{ntk.num_pis()}, ntk{ntk}
+    explicit input_ordering_view(Ntk const& ntk) : mockturtle::immutable_view<Ntk>(ntk), ntk{ntk}, num_p{ntk.num_pis()}
     {
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
         static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size function");
@@ -176,7 +176,7 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
         return fo_inv_flag;
     }
 
-    [[nodiscard]] int nc_inv_num() const
+    [[nodiscard]] uint64_t nc_inv_num() const
     {
         return fo_inv_flag_num;
     }
@@ -230,19 +230,19 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
             });
 
         /* The hierarchies of ordered PIs get pushed into topo_view */
-        for (unsigned int iter = 0; iter < wait.size(); ++iter)
+        for (std::size_t iter = 0; iter < wait.size(); ++iter)
         {
             topo_order.push_back(wait[iter]);
             this->set_visited(wait[iter], this->trav_id());
         }
 
-        for (unsigned int iter = 0; iter < second_wait.size(); ++iter)
+        for (std::size_t iter = 0; iter < second_wait.size(); ++iter)
         {
             topo_order.push_back(second_wait[iter]);
             this->set_visited(second_wait[iter], this->trav_id());
         }
 
-        for (unsigned int iter = 0; iter < third_wait.size(); ++iter)
+        for (std::size_t iter = 0; iter < third_wait.size(); ++iter)
         {
             topo_order.push_back(third_wait[iter]);
             this->set_visited(third_wait[iter], this->trav_id());
@@ -324,7 +324,7 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                 if (ntk.is_inv(current_node))
                 {
                     /* skip inverters */
-                    ntk.foreach_fanout(fon, [this, &current_node](const auto& fon_inv) { current_node = fon_inv; });
+                    ntk.foreach_fanout(fon, [&current_node](const auto& fon_inv) { current_node = fon_inv; });
                     fo_inv_flag = true;
                     ++fo_inv_flag_num;
                     inv_flag = true;
@@ -353,7 +353,7 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                                            {
                                                /*Skip Inverter*/
                                                ntk.foreach_fanout(
-                                                   fon_two, [this, &connecting_node](const auto& fon_inv)
+                                                   fon_two, [&connecting_node](const auto& fon_inv)
                                                    { connecting_node.insert(connecting_node.begin(), fon_inv); });
                                            }
                                            else
@@ -372,7 +372,7 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
 
                 bool already_one_pi = false;
                 node first_pi;
-                for (int i = 0; i < connecting_node.size(); ++i)
+                for (std::size_t i = 0; i < connecting_node.size(); ++i)
                 {
                     ntk.foreach_fanin(
                         connecting_node[i],
@@ -485,11 +485,11 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     std::vector<node> third_wait{};   // PI related to PI
 
     bool fo_inv_flag     = false;
-    int  fo_inv_flag_num = 0;
+    uint64_t  fo_inv_flag_num{0u};
 
     uint32_t num_p;
-    uint32_t num_c = 0u;
-    uint32_t num_r = 0u;
+    uint32_t num_c{0u};
+    uint32_t num_r{0u};
 };
 
 template <typename Ntk>
