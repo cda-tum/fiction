@@ -194,20 +194,20 @@ TEMPLATE_TEST_CASE(
 
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
-        CHECK_THAT(charge_layout.get_distance_between_cells({0, 0, 0}, {0, 0, 0}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {0, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK_THAT(charge_layout.get_distance_between_cells({0, 0, 0}, {1, 0, 0}),
-                   Catch::Matchers::WithinAbs(sidb_simulation_parameters{}.lat_a, 0.00001));
-        CHECK_THAT(charge_layout.get_distance_between_cells({1, 0, 0}, {0, 0, 0}),
-                   Catch::Matchers::WithinAbs(sidb_simulation_parameters{}.lat_a, 0.00001));
-        CHECK_THAT(charge_layout.get_distance_between_cells({1, 0, 0}, {1, 0, 0}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {1, 0, 0}),
+                   Catch::Matchers::WithinAbs(sidb_simulation_parameters{}.lat_a * 0.1, 0.00001));
+        CHECK_THAT(charge_layout.get_nm_distance_between_cells({1, 0, 0}, {0, 0, 0}),
+                   Catch::Matchers::WithinAbs(sidb_simulation_parameters{}.lat_a * 0.1, 0.00001));
+        CHECK_THAT(charge_layout.get_nm_distance_between_cells({1, 0, 0}, {1, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK_THAT(charge_layout.get_distance_between_cells({0, 0, 0}, {1, 1, 1}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {1, 1, 1}),
                    Catch::Matchers::WithinAbs(
-                       std::hypot(sidb_simulation_parameters{}.lat_a,
-                                  sidb_simulation_parameters{}.lat_b + sidb_simulation_parameters{}.lat_c),
+                       std::hypot(sidb_simulation_parameters{}.lat_a * 0.1,
+                                  sidb_simulation_parameters{}.lat_b * 0.1 + sidb_simulation_parameters{}.lat_c * 0.1),
                        0.00001));
-        CHECK_THAT(charge_layout.get_distance_between_cells({1, 1, 1}, {1, 1, 1}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_cells({1, 1, 1}, {1, 1, 1}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
 
@@ -417,7 +417,7 @@ TEMPLATE_TEST_CASE(
     SECTION("using chargeless and normal potential function")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{3, -0.32, 5.0 * 1E-9, 3.84 * 1E-10, 7.68 * 1E-10, 2.25 * 1E-10};
+        const sidb_simulation_parameters params{3, -0.32, 5.0, 3.84, 7.68, 2.25};
 
         lyt_new.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);

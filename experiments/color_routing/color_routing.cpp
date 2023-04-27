@@ -13,10 +13,10 @@
 #include <fiction/types.hpp>                                         // pre-defined types suitable for the FCN domain
 #include <fiction/utils/routing_utils.hpp>                           // routing utility functions
 
-#include <fmt/format.h>                      // output formatting
-#include <lorina/lorina.hpp>                 // Verilog/BLIF/AIGER/... file parsing
-#include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
-#include <mockturtle/networks/aig.hpp>       // AND-inverter graphs
+#include <fmt/format.h>                                              // output formatting
+#include <lorina/lorina.hpp>                                         // Verilog/BLIF/AIGER/... file parsing
+#include <mockturtle/io/verilog_reader.hpp>                          // call-backs to read Verilog files into networks
+#include <mockturtle/networks/aig.hpp>                               // AND-inverter graphs
 
 #include <cstdint>
 #include <cstdlib>

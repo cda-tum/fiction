@@ -9,14 +9,14 @@
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
 #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
-#include <fiction/io/write_sqd_layout.hpp>                    // writer for SiQAD files (physical simulation)
-#include <fiction/networks/technology_network.hpp>            // technology-mapped network type
-#include <fiction/technology/area.hpp>                        // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>           // cell implementations
-#include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
-#include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
-#include <fiction/traits.hpp>                                 // traits for type-checking
-#include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
+#include <fiction/io/write_sqd_layout.hpp>                     // writer for SiQAD files (physical simulation)
+#include <fiction/networks/technology_network.hpp>             // technology-mapped network type
+#include <fiction/technology/area.hpp>                         // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>            // cell implementations
+#include <fiction/technology/sidb_bestagon_library.hpp>        // a pre-defined SiDB gate library
+#include <fiction/technology/technology_mapping_library.hpp>   // pre-defined gate types for technology mapping
+#include <fiction/traits.hpp>                                  // traits for type-checking
+#include <fiction/types.hpp>                                   // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
