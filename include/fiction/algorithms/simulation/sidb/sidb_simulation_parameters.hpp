@@ -27,16 +27,15 @@ struct sidb_simulation_parameters
      * @param mu_minus it is the energy transition level (0/-).
      * @param relative_permittivity it describes the electric field reduction due to polarization.
      * @param screening_distance also known as "Thomas-Fermi screening" and it describes the electric field screening
-     * due to free charges.
-     * @param a lattice constant.
-     * @param b lattice constant.
-     * @param c lattice constant.
+     * due to free charges in nm.
+     * @param a lattice constant in Å (Ångström).
+     * @param b lattice constant in Å.
+     * @param c lattice constant in Å.
      */
     constexpr explicit sidb_simulation_parameters(const uint8_t base_number = 3, const double mu_minus = -0.32,
                                                   const double relative_permittivity = 5.6,
-                                                  const double screening_distance    = 5.0 * 1E-9,
-                                                  const double a = 3.84 * 1E-10, const double b = 7.68 * 1E-10,
-                                                  const double c = 2.25 * 1E-10) :
+                                                  const double screening_distance = 5.0, const double a = 3.84,
+                                                  const double b = 7.68, const double c = 2.25) :
             lat_a{a},
             lat_b{b},
             lat_c{c},
@@ -52,35 +51,35 @@ struct sidb_simulation_parameters
     }
 
     /**
-     * lat_a is the lattice vector in x-direction.
+     * lat_a is the lattice vector in x-direction (unit: Å).
      */
     double lat_a;
     /**
-     * lat_b is the lattice vector in y-direction.
+     * lat_b is the lattice vector in y-direction (unit: Å).
      */
     double lat_b;
     /**
-     * lat_c is the dimer pair separation.
+     * lat_c is the dimer pair separation (unit: Å).
      */
     double lat_c;
     /**
-     * epsilon_r is the electric permittivity. It is a material specific number.
+     * epsilon_r is the electric permittivity. It is a material specific number (unit-less).
      */
     double epsilon_r;
     /**
-     * k is the Coulomb constant and is inversely proportional to the electric permittivity.
+     * k is the Coulomb constant and is inversely proportional to the electric permittivity (unit: SI).
      */
     double k;
     /**
-     * lambda_tf is the Thomas-Fermi screening distance.
+     * lambda_tf is the Thomas-Fermi screening distance (unit: nm).
      */
     double lambda_tf;
     /**
-     * µ- is the energy transition level (0/-)
+     * µ- is the energy transition level (0/-) (unit: eV).
      */
     double mu;
     /**
-     * µ+ is the energy transition level (+/0)
+     * µ+ is the energy transition level (+/0) (unit: eV).
      */
     double mu_p;
     /**

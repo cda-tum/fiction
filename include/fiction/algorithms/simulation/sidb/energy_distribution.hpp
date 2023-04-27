@@ -6,6 +6,7 @@
 #define FICTION_ENERGY_DISTRIBUTION_HPP
 
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/utils/math_utils.hpp"
 
 #include <cmath>
 #include <cstdint>
@@ -34,8 +35,7 @@ std::map<double, uint64_t> energy_distribution(const std::vector<charge_distribu
 
     for (const auto& lyt : input_vec)
     {
-        const auto energy =
-            std::round(lyt.get_system_energy() * 1'000'000) / 1'000'000;  // rounding to 6 decimal places.
+        const auto energy = round_to_n_decimal_places(lyt.get_system_energy(), 6);  // rounding to 6 decimal places.
 
         distribution[energy]++;
     }

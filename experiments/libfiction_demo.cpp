@@ -9,19 +9,19 @@
 #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/physical_design/orthogonal.hpp>          // scalable physical design of FCN layouts
 #include <fiction/io/dot_drawers.hpp>                                 // DOT drawers for logic networks and layouts
-#include <fiction/io/write_qca_layout.hpp>           // writer for QCADesigner files (physical simulation)
-#include <fiction/io/write_sqd_layout.hpp>           // writer for SiQAD files (physical simulation)
-#include <fiction/io/write_svg_layout.hpp>           // SVG writer for cell-level layout representation
-#include <fiction/layouts/cartesian_layout.hpp>      // Cartesian grid layouts
-#include <fiction/layouts/cell_level_layout.hpp>     // cell-level abstraction of layouts
-#include <fiction/layouts/coordinates.hpp>           // coordinate systems
-#include <fiction/layouts/gate_level_layout.hpp>     // gate-level abstraction of layouts
-#include <fiction/layouts/tile_based_layout.hpp>     // tile-based abstraction of layouts
-#include <fiction/technology/area.hpp>               // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>  // pre-defined cell implementations
-#include <fiction/technology/qca_one_library.hpp>    // a pre-defined QCA gate library
-#include <fiction/types.hpp>                         // pre-defined types suitable for the FCN domain
-#include <fiction/utils/debug/network_writer.hpp>    // DOT writer for logic networks and layouts
+#include <fiction/io/write_qca_layout.hpp>                     // writer for QCADesigner files (physical simulation)
+#include <fiction/io/write_sqd_layout.hpp>                     // writer for SiQAD files (physical simulation)
+#include <fiction/io/write_svg_layout.hpp>                     // SVG writer for cell-level layout representation
+#include <fiction/layouts/cartesian_layout.hpp>                // Cartesian grid layouts
+#include <fiction/layouts/cell_level_layout.hpp>               // cell-level abstraction of layouts
+#include <fiction/layouts/coordinates.hpp>                     // coordinate systems
+#include <fiction/layouts/gate_level_layout.hpp>               // gate-level abstraction of layouts
+#include <fiction/layouts/tile_based_layout.hpp>               // tile-based abstraction of layouts
+#include <fiction/technology/area.hpp>                         // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>            // pre-defined cell implementations
+#include <fiction/technology/qca_one_library.hpp>              // a pre-defined QCA gate library
+#include <fiction/types.hpp>                                   // pre-defined types suitable for the FCN domain
+#include <fiction/utils/debug/network_writer.hpp>              // DOT writer for logic networks and layouts
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
@@ -33,10 +33,10 @@
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 #include <mockturtle/views/names_view.hpp>                     // to assign names to network signals
 
-#include <cstdlib>     // exit codes
-#include <filesystem>  // filesystem access
-#include <iostream>    // output
-#include <string>      // strings
+#include <cstdlib>                                             // exit codes
+#include <filesystem>                                          // filesystem access
+#include <iostream>                                            // output
+#include <string>                                              // strings
 
 template <typename Ntk>
 void print_network_properties(const Ntk& ntk)
