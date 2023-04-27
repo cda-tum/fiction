@@ -2,8 +2,8 @@
 // Created by simon on 14.04.23.
 //
 
-#ifndef FICTION_MAPPING_HPP
-#define FICTION_MAPPING_HPP
+#ifndef FICTION_HEXAGONALIZATION_HPP
+#define FICTION_HEXAGONALIZATION_HPP
 
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
@@ -43,7 +43,7 @@ coordinate<Lyt> to_hex(int cartesian_x, int cartesian_y, int cartesian_layout_he
  * @return Hexagonal representation of the Cartesian layout.
  */
 template <typename Lyt>
-hex_even_row_gate_clk_lyt mapping(const Lyt& lyt)
+hex_even_row_gate_clk_lyt hexagonalization(const Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate level layout");
     // static_assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE), "Lyt is not 2DDWave clocked");
@@ -196,4 +196,4 @@ hex_even_row_gate_clk_lyt mapping(const Lyt& lyt)
 }
 }  // namespace fiction
 
-#endif  // FICTION_MAPPING_HPP
+#endif  // FICTION_HEXAGONALIZATION_HPP

@@ -7,11 +7,10 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
-#include <fiction/algorithms/physical_design/mapping.hpp>
+#include <fiction/algorithms/physical_design/hexagonalization.hpp>
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -25,7 +24,7 @@ template <typename Lyt, typename Ntk>
 void check_mapping_equiv(const Ntk& ntk)
 {
     auto layout     = orthogonal<Lyt>(ntk, {});
-    auto hex_layout = mapping<Lyt>(layout);
+    auto hex_layout = cartesian_to_hexagonal<Lyt>(layout);
 
     check_eq(ntk, layout);
     check_eq(ntk, hex_layout);

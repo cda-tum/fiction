@@ -59,7 +59,7 @@ int main()  // NOLINT
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
                             uint64_t, double, double, std::string, uint64_t, double>
-        bestagon_exp{"cartesian_to_hexagonal",
+        bestagon_exp{"hexagonalization",
                      "benchmark",
                      "inputs",
                      "outputs",
