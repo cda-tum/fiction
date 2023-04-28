@@ -42,13 +42,13 @@ class hex_command : public command
             env->out() << "[w] no gate layout in store" << std::endl;
             return;
         }
-        const auto& lyt_ptr = store<fiction::gate_layout_t>().current();
+        const auto& lyt_ptr = gls.current();
 
-        const auto apply_hexagonalization = [this](auto&& lyt_ptr){ return fiction::hexagonalization(*lyt_ptr); };
+        const auto apply_hexagonalization = [](auto&& lyt_ptr){ return fiction::hexagonalization(*lyt_ptr); };
 
         auto lyt = std::visit(apply_hexagonalization, lyt_ptr);
 
-        // store<fiction::gate_layout_t>().extend() = std::make_shared<Lyt>(lyt);
+        gls.extend() = std::make_shared<fiction::hex_even_row_gate_clk_lyt>(lyt);
     }
 };
 
