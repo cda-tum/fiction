@@ -6,8 +6,8 @@
 #define FICTION_CMD_HEX_HPP
 
 #include <fiction/algorithms/physical_design/hexagonalization.hpp>
-#include <fiction/types.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
 
@@ -44,7 +44,7 @@ class hex_command : public command
         }
         const auto& lyt_ptr = gls.current();
 
-        const auto apply_hexagonalization = [](auto&& lyt_ptr){ return fiction::hexagonalization(*lyt_ptr); };
+        const auto apply_hexagonalization = [](auto&& lyt_ptr) { return fiction::hexagonalization(*lyt_ptr); };
 
         auto lyt = std::visit(apply_hexagonalization, lyt_ptr);
 

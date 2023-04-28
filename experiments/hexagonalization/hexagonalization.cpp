@@ -57,30 +57,30 @@ int main()  // NOLINT
                             uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
                             uint64_t, double, double, std::string, uint64_t, double>
         hexagonalization_exp{"hexagonalization",
-                     "benchmark",
-                     "inputs",
-                     "outputs",
-                     "initial nodes",
-                     "initial depth",
-                     "nodes after optimization",
-                     "depth after optimization",
-                     "nodes after mapping",
-                     "depth after mapping",
-                     "ortho layout width (in tiles)",
-                     "ortho layout height (in tiles)",
-                     "ortho layout area (in tiles)",
-                     "mapped layout width (in tiles)",
-                     "mapped layout height (in tiles)",
-                     "mapped layout area (in tiles)",
-                     "gates",
-                     "wires",
-                     "critical path",
-                     "throughput",
-                     "runtime ortho (in sec)",
-                     "runtime mapping (in sec)",
-                     "equivalent",
-                     "SiDB dots",
-                     "layout area in nm²"};
+                             "benchmark",
+                             "inputs",
+                             "outputs",
+                             "initial nodes",
+                             "initial depth",
+                             "nodes after optimization",
+                             "depth after optimization",
+                             "nodes after mapping",
+                             "depth after mapping",
+                             "ortho layout width (in tiles)",
+                             "ortho layout height (in tiles)",
+                             "ortho layout area (in tiles)",
+                             "mapped layout width (in tiles)",
+                             "mapped layout height (in tiles)",
+                             "mapped layout area (in tiles)",
+                             "gates",
+                             "wires",
+                             "critical path",
+                             "throughput",
+                             "runtime ortho (in sec)",
+                             "runtime mapping (in sec)",
+                             "equivalent",
+                             "SiDB dots",
+                             "layout area in nm²"};
 
     // instantiate a complete XAG NPN database for node re-synthesis
     const mockturtle::xag_npn_resynthesis<mockturtle::xag_network,                    // the input network type
@@ -111,8 +111,7 @@ int main()  // NOLINT
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
 
     static constexpr const uint64_t bench_select =
-        experiment_setup::all & ~experiment_setup::log2 &
-                                     ~experiment_setup::sqrt & ~experiment_setup::multiplier;
+        experiment_setup::all & ~experiment_setup::log2 & ~experiment_setup::sqrt & ~experiment_setup::multiplier;
 
     for (const auto& benchmark : experiment_setup::all_benchmarks(bench_select))
     {
