@@ -103,7 +103,7 @@ int main()  // NOLINT
     // parameters for technology mapping
     const mockturtle::map_params map_params{};
 
-    const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
+    const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});  // NOLINT
     assert(read_genlib_result == lorina::return_code::success);
     const mockturtle::tech_library<2> gate_lib{gates};
 
@@ -118,8 +118,9 @@ int main()  // NOLINT
         fmt::print("[i] processing {}\n", benchmark);
         mockturtle::xag_network xag{};
 
-        const auto read_verilog_result =
-            lorina::read_verilog(experiment_setup::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
+        const auto read_verilog_result =                                       // NOLINT
+            lorina::read_verilog(experiment_setup::benchmark_path(benchmark),  // NOLINT
+                                 mockturtle::verilog_reader(xag));             // NOLINT
         assert(read_verilog_result == lorina::return_code::success);
 
         // compute depth
