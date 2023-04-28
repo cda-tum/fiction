@@ -4,6 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
@@ -33,6 +34,14 @@ void check_mapping_equiv(const Ntk& ntk)
 }
 
 template <typename Lyt>
+void check_mapping_equiv_layout(const Lyt& lyt)
+{
+    auto hex_layout = hexagonalization<Lyt>(lyt);
+
+    check_eq(lyt, hex_layout);
+}
+
+template <typename Lyt>
 void check_mapping_equiv_all()
 {
     check_mapping_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>());
@@ -50,6 +59,11 @@ void check_mapping_equiv_all()
     check_mapping_equiv<Lyt>(blueprints::clpl<technology_network>());
     check_mapping_equiv<Lyt>(blueprints::one_to_five_path_difference_network<technology_network>());
     check_mapping_equiv<Lyt>(blueprints::nand_xnor_network<technology_network>());
+
+    check_mapping_equiv_layout(blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>());
+    check_mapping_equiv_layout(blueprints::or_not_gate_layout<cart_gate_clk_lyt>());
+    check_mapping_equiv_layout(blueprints::crossing_layout<cart_gate_clk_lyt>());
+    check_mapping_equiv_layout(blueprints::xor_gate_layout<cart_gate_clk_lyt>());
 }
 
 template <typename Lyt>
