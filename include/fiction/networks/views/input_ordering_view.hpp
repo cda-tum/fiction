@@ -376,7 +376,7 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                 {
                     ntk.foreach_fanin(
                         connecting_node[i],
-                        [this, &fon, &is_fan_out, &already_one_pi, &first_pi, &n, &inv_flag](const auto& fi)
+                        [this, &is_fan_out, &already_one_pi, &first_pi, &n, &inv_flag](const auto& fi)
                         {
                             auto fin_inp = ntk.get_node(fi);
                             /* ignore inverters */
