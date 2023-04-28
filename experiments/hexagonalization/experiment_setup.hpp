@@ -177,8 +177,8 @@ std::vector<std::string> all_benchmarks(uint64_t selection = all)  // NOLINT
     return result;
 }
 
-std::string benchmark_path(const std::string& benchmark_name,
-                           const std::string& benchmark_folder = "../benchmarks")  // NOLINT
+std::string benchmark_path(const std::string& benchmark_name,  // NOLINT
+                           const std::string& benchmark_folder = "../benchmarks")
 {
     return fmt::format("{}{}/{}.v", EXPERIMENTS_PATH, benchmark_folder, benchmark_name);
 }
