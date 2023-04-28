@@ -2,15 +2,14 @@
 // Created by Simon Hofmann on 27.04.23.
 //
 
-#ifndef FICTION_HEX_HPP
-#define FICTION_HEX_HPP
+#ifndef FICTION_CMD_HEX_HPP
+#define FICTION_CMD_HEX_HPP
 
 #include <fiction/algorithms/physical_design/hexagonalization.hpp>
 #include <fiction/types.hpp>
+#include <fiction/traits.hpp>
 
 #include <alice/alice.hpp>
-
-#include <variant>
 
 namespace alice
 {
@@ -35,33 +34,21 @@ class hex_command : public command
      */
     void execute() override
     {
+        auto& gls = store<fiction::gate_layout_t>();
 
-        if (is_set("gate_layout"))
+        // error case: empty gate-level layout store
+        if (gls.empty())
         {
-            auto& gls = store<fiction::gate_layout_t>();
-
-            if (gls.empty())
-            {
-                env->out() << "[w] no gate layout in store" << std::endl;
-                return;
-            }
-            apply_hexagonalization<fiction::cart_gate_clk_lyt>();
+            env->out() << "[w] no gate layout in store" << std::endl;
+            return;
         }
-        else
-        {
-            env->out() << "[w] store must be specified" << std::endl;
-        }
-    }
-  private:
-    template <typename Lyt>
-    void apply_hexagonalization()
-    {
-        const auto perform_hexagonalization = [this](auto&& gls_ptr)
-        { return fiction::hexagonalization<Lyt>(*gls_ptr); };
+        const auto& lyt_ptr = store<fiction::gate_layout_t>().current();
 
-        const auto& gls_ptr = store<fiction::gate_layout_t>().current();
-        auto hex_lyt = std::visit(perform_hexagonalization, gls_ptr);
-        store<fiction::gate_layout_t>().extend() = std::make_shared<Lyt>(hex_lyt);
+        const auto apply_hexagonalization = [this](auto&& lyt_ptr){ return fiction::hexagonalization(*lyt_ptr); };
+
+        auto lyt = std::visit(apply_hexagonalization, lyt_ptr);
+
+        // store<fiction::gate_layout_t>().extend() = std::make_shared<Lyt>(lyt);
     }
 };
 
@@ -69,4 +56,4 @@ ALICE_ADD_COMMAND(hex, "Physical Design")
 
 }  // namespace alice
 
-#endif  // FICTION_HEX_HPP
+#endif  // FICTION_CMD_HEX_HPP

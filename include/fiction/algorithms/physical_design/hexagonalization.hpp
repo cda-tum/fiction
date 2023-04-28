@@ -51,8 +51,8 @@ hex_even_row_gate_clk_lyt hexagonalization(const Lyt& lyt)
     using hex_lyt = hex_even_row_gate_clk_lyt;
 
     // get width & height of cartesian layout
-    const auto layout_width  = lyt.x() + 1;
-    const auto layout_height = lyt.y() + 1;
+    const int layout_width  = static_cast<int>(lyt.x()) + 1;
+    const int layout_height = static_cast<int>(lyt.y()) + 1;
 
     // calculate max width & height of hexagonal layout
     const auto hex_height = to_hex<Lyt>(layout_width - 1, layout_height - 1, layout_height, 0).y;
