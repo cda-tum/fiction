@@ -186,7 +186,7 @@ class inverter_substitution_impl
                         if (ntk.is_po(g))
                         {
                             // Preserve Outputs
-                            int index = po_it - x_inv.cbegin();
+                            const auto index = po_it - x_inv.cbegin();
                             preserved_po.push_back(m_inv[index]);
                         }
                         return true;
