@@ -45,7 +45,7 @@ class hex_command : public command
                 env->out() << "[w] no gate layout in store" << std::endl;
                 return;
             }
-            apply_hexagonalization<>(gls);
+            apply_hexagonalization<fiction::cart_gate_clk_lyt>();
         }
         else
         {
@@ -54,12 +54,14 @@ class hex_command : public command
     }
   private:
     template <typename Lyt>
-    void apply_hexagonalization(Lyt)
+    void apply_hexagonalization()
     {
-        const auto apply_mapping = [this](auto&& gls)
-        { return fiction::hexagonalization<Lyt>(*gls); };
+        const auto perform_hexagonalization = [this](auto&& gls_ptr)
+        { return fiction::hexagonalization<Lyt>(*gls_ptr); };
 
-        const auto& gls = store<fiction::gate_layout_t>().current();
+        const auto& gls_ptr = store<fiction::gate_layout_t>().current();
+        auto hex_lyt = std::visit(perform_hexagonalization, gls_ptr);
+        store<fiction::gate_layout_t>().extend() = std::make_shared<Lyt>(hex_lyt);
     }
 };
 

@@ -24,7 +24,7 @@ template <typename Lyt, typename Ntk>
 void check_mapping_equiv(const Ntk& ntk)
 {
     auto layout     = orthogonal<Lyt>(ntk, {});
-    auto hex_layout = cartesian_to_hexagonal<Lyt>(layout);
+    auto hex_layout = hexagonalization<Lyt>(layout);
 
     check_eq(ntk, layout);
     check_eq(ntk, hex_layout);

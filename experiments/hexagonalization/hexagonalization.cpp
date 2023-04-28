@@ -4,7 +4,6 @@
 #include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/io/dot_drawers.hpp>
 #include <fiction/io/write_sqd_layout.hpp>  // writer for SiQAD files (physical simulation)
 #include <fiction/layouts/bounding_box.hpp>  // computes a minimum-sized box around all non-empty coordinates in a given layout
 #include <fiction/technology/area.hpp>                        // area requirement calculations
@@ -54,12 +53,10 @@ int main()  // NOLINT
     using hex_lyt  = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt;
 
-    const std::string layouts_folder = fmt::format("{}/bestagon/layouts", EXPERIMENTS_PATH);
-
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
                             uint64_t, double, double, std::string, uint64_t, double>
-        bestagon_exp{"hexagonalization",
+        hexagonalization_exp{"hexagonalization",
                      "benchmark",
                      "inputs",
                      "outputs",
@@ -114,16 +111,16 @@ int main()  // NOLINT
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
 
     static constexpr const uint64_t bench_select =
-        fiction_experiments::b1_r2;  //& ~fiction_experiments::log2 &
-                                     //~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
+        experiment_setup::all & ~experiment_setup::log2 &
+                                     ~experiment_setup::sqrt & ~experiment_setup::multiplier;
 
-    for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
+    for (const auto& benchmark : experiment_setup::all_benchmarks(bench_select))
     {
         fmt::print("[i] processing {}\n", benchmark);
         mockturtle::xag_network xag{};
 
         const auto read_verilog_result =
-            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
+            lorina::read_verilog(experiment_setup::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
         assert(read_verilog_result == lorina::return_code::success);
 
         // compute depth
@@ -321,7 +318,7 @@ int main()  // NOLINT
         fiction::area(cell_level_layout, area_ps, &area_stats);
 
         // log results
-        bestagon_exp(
+        hexagonalization_exp(
             benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
             depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(), gate_level_layout.x() + 1,
             gate_level_layout.y() + 1, (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1), hex_layout_width,
@@ -331,8 +328,8 @@ int main()  // NOLINT
             static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) / 1000000.0,
             eq_result, cell_level_layout.num_cells(), area_stats.area);
 
-        bestagon_exp.save();
-        bestagon_exp.table();
+        hexagonalization_exp.save();
+        hexagonalization_exp.table();
     }
 
     return EXIT_SUCCESS;

@@ -14,7 +14,7 @@
 
 #include <experiments.hpp>  // mockturtle's experiments setup
 
-namespace fiction_experiments
+namespace experiment_setup
 {
 
 // NOLINTBEGIN(readability-identifier-naming)
@@ -107,7 +107,7 @@ static constexpr const std::array benchmarks {
 // clang-format on
 // NOLINTEND(readability-identifier-naming)
 
-std::vector<std::string> trindade16_benchmarks(uint64_t selection = trindade16)
+std::vector<std::string> trindade16_benchmarks(uint64_t selection = trindade16) //NOLINT
 {
     std::vector<std::string> result{};
     for (uint64_t i = 0u; i < 7u; ++i)
@@ -121,7 +121,7 @@ std::vector<std::string> trindade16_benchmarks(uint64_t selection = trindade16)
     return result;
 }
 
-std::vector<std::string> fontes18_benchmarks(uint64_t selection = fontes18)
+std::vector<std::string> fontes18_benchmarks(uint64_t selection = fontes18) //NOLINT
 {
     std::vector<std::string> result{};
     for (uint64_t i = 7u; i < 23u; ++i)
@@ -135,7 +135,7 @@ std::vector<std::string> fontes18_benchmarks(uint64_t selection = fontes18)
     return result;
 }
 
-std::vector<std::string> iscas85_benchmarks(uint64_t selection = iscas85)
+std::vector<std::string> iscas85_benchmarks(uint64_t selection = iscas85) //NOLINT
 {
     std::vector<std::string> result{};
     for (uint64_t i = 23u; i < 34u; ++i)
@@ -149,7 +149,7 @@ std::vector<std::string> iscas85_benchmarks(uint64_t selection = iscas85)
     return result;
 }
 
-std::vector<std::string> epfl_benchmarks(uint64_t selection = epfl)
+std::vector<std::string> epfl_benchmarks(uint64_t selection = epfl) //NOLINT
 {
     std::vector<std::string> result{};
     for (uint64_t i = 34u; i < 51u; ++i)
@@ -165,7 +165,7 @@ std::vector<std::string> epfl_benchmarks(uint64_t selection = epfl)
 
 
 
-std::vector<std::string> all_benchmarks(uint64_t selection = all)
+std::vector<std::string> all_benchmarks(uint64_t selection = all) //NOLINT
 {
     std::vector<std::string> result{};
     for (uint64_t i = 0u; i < 51u; ++i)
@@ -179,11 +179,11 @@ std::vector<std::string> all_benchmarks(uint64_t selection = all)
     return result;
 }
 
-std::string benchmark_path(const std::string& benchmark_name, const std::string& benchmark_folder = "../benchmarks")
+std::string benchmark_path(const std::string& benchmark_name, const std::string& benchmark_folder = "../benchmarks") //NOLINT
 {
     return fmt::format("{}{}/{}.v", EXPERIMENTS_PATH, benchmark_folder, benchmark_name);
 }
 
-}  // namespace fiction_experiments
+}  // namespace experiment_setup
 
 #endif  // FICTION_EXPERIMENT_SETUP_HPP
