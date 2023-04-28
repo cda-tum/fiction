@@ -274,8 +274,6 @@ class orthogonal_ordering_network_impl
         ctn.color_ntk.foreach_po(
             [&](const auto& po)
             {
-                tile<Lyt> po_tile{};
-
                 if (std::find(my_out_nodes.begin(), my_out_nodes.end(), po) != my_out_nodes.end())
                 {
                     multi_out_nodes.push_back(po);
