@@ -27,22 +27,22 @@ namespace fiction
  * @param lyt The layout to simulate.
  * @param params Simulation parameters.
  * @param ps Simulation statistics.
+ * @return sidb_simulation_result is returned with all results.
  */
 template <typename Lyt>
-void exhaustive_ground_state_simulation(const Lyt&                        lyt,
-                                        const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-                                        sidb_simulation_result<Lyt>*      ps     = nullptr) noexcept
+sidb_simulation_result<Lyt>
+exhaustive_ground_state_simulation(const Lyt&                        lyt,
+                                   const sidb_simulation_parameters& params = sidb_simulation_parameters{}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-
-    sidb_simulation_result<Lyt> st{};
-    st.algorithm_name      = "exgs";
-    st.physical_parameters = params;
+    sidb_simulation_result<Lyt> simulation_result{};
+    simulation_result.algorithm_name      = "exgs";
+    simulation_result.physical_parameters = params;
     mockturtle::stopwatch<>::duration time_counter{};
     {
 
-        mockturtle::stopwatch const stop{time_counter};
+        const mockturtle::stopwatch stop{time_counter};
 
         charge_distribution_surface charge_lyt{lyt};
 
@@ -55,7 +55,7 @@ void exhaustive_ground_state_simulation(const Lyt&                        lyt,
 
             if (charge_lyt.is_physically_valid())
             {
-                st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+                simulation_result.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
             }
 
             charge_lyt.increase_charge_index_by_one();
@@ -63,15 +63,12 @@ void exhaustive_ground_state_simulation(const Lyt&                        lyt,
 
         if (charge_lyt.is_physically_valid())
         {
-            st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+            simulation_result.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
         }
     }
-    st.simulation_runtime = time_counter;
+    simulation_result.simulation_runtime = time_counter;
 
-    if (ps)
-    {
-        *ps = st;
-    }
+    return simulation_result;
 }
 
 }  // namespace fiction

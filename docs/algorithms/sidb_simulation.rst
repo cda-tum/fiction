@@ -74,7 +74,7 @@ Temperature Behavior
 .. doxygenenum:: fiction::simulation_engine
 .. doxygenstruct:: fiction::critical_temperature_params
    :members:
-.. doxygenfunction:: fiction::critical_temperature(const Lyt& lyt, const critical_temperature_params& params = {}, critical_temperature_stats<Lyt>* pst = nullptr)
+.. doxygenfunction:: fiction::critical_temperature
 
 **Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_excited_states.hpp``
 

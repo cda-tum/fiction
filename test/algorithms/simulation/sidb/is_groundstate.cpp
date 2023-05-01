@@ -28,14 +28,12 @@ TEMPLATE_TEST_CASE(
     {
         TestType                         lyt{{20, 10}};
         charge_distribution_surface      charge_layout{lyt};
-        sidb_simulation_result<TestType> exgs_stats{};
         const sidb_simulation_parameters params{2, -0.32};
-        exhaustive_ground_state_simulation<TestType>(charge_layout, params, &exgs_stats);
-        sidb_simulation_result<TestType> quicksimstats{};
-        const quicksim_params            quicksim_params{params};
-        quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
+        const auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(charge_layout, params);
+        const quicksim_params quicksim_params{params};
+        const auto            simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
 
-        CHECK(!is_ground_state(quicksimstats, exgs_stats));
+        CHECK(!is_ground_state(simulation_results_exgs, simulation_results_quicksim));
     }
 
     SECTION("layout with seven SiDBs placed")
@@ -53,13 +51,13 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface      charge_layout{lyt};
-        sidb_simulation_result<TestType> exgs_stats{};
         const sidb_simulation_parameters params{2, -0.32};
-        exhaustive_ground_state_simulation<TestType>(charge_layout, params, &exgs_stats);
-        sidb_simulation_result<TestType> quicksimstats{};
-        const quicksim_params            quicksim_params{params};
-        quicksim<TestType>(charge_layout, quicksim_params, &quicksimstats);
 
-        CHECK(is_ground_state(quicksimstats, exgs_stats));
+        const auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(charge_layout, params);
+
+        const quicksim_params quicksim_params{params};
+        const auto            simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
+
+        CHECK(is_ground_state(simulation_results_exgs, simulation_results_quicksim));
     }
 }

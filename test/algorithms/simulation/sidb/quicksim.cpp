@@ -19,21 +19,20 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
 {
     TestType lyt{{20, 10}};
 
-    sidb_simulation_result<TestType> quicksimstats{};
-    const quicksim_params            quicksim_params{sidb_simulation_parameters{2, -0.30}};
+    const quicksim_params quicksim_params{sidb_simulation_parameters{2, -0.30}};
 
     REQUIRE(quicksim_params.phys_params.mu == -0.30);
 
-    quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+    const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-    CHECK(quicksimstats.charge_distributions.empty());
-    REQUIRE(!quicksimstats.additional_simulation_parameters.empty());
-    CHECK(quicksimstats.algorithm_name == "quicksim");
-    CHECK(quicksimstats.additional_simulation_parameters[0].first == "iteration_steps");
-    CHECK(std::any_cast<uint64_t>(quicksimstats.additional_simulation_parameters[0].second) == 80);
-    CHECK(quicksimstats.additional_simulation_parameters[1].first == "alpha");
-    CHECK(std::any_cast<double>(quicksimstats.additional_simulation_parameters[1].second) == 0.7);
-    CHECK(quicksimstats.charge_distributions.empty());
+    CHECK(simulation_results.charge_distributions.empty());
+    REQUIRE(!simulation_results.additional_simulation_parameters.empty());
+    CHECK(simulation_results.algorithm_name == "quicksim");
+    CHECK(simulation_results.additional_simulation_parameters[0].first == "iteration_steps");
+    CHECK(std::any_cast<uint64_t>(simulation_results.additional_simulation_parameters[0].second) == 80);
+    CHECK(simulation_results.additional_simulation_parameters[1].first == "alpha");
+    CHECK(std::any_cast<double>(simulation_results.additional_simulation_parameters[1].second) == 0.7);
+    CHECK(simulation_results.charge_distributions.empty());
 }
 
 TEMPLATE_TEST_CASE("Single SiDB QuickSim simulation", "[quicksim]",
@@ -43,14 +42,13 @@ TEMPLATE_TEST_CASE("Single SiDB QuickSim simulation", "[quicksim]",
 
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    sidb_simulation_result<TestType> quicksimstats{};
-    const quicksim_params            quicksim_params{sidb_simulation_parameters{2, -0.30}};
+    const quicksim_params quicksim_params{sidb_simulation_parameters{2, -0.30}};
 
     REQUIRE(quicksim_params.phys_params.mu == -0.30);
 
-    quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+    const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-    CHECK(quicksimstats.charge_distributions.size() > 0);
+    CHECK(simulation_results.charge_distributions.size() > 0);
 }
 
 template <typename Lyt>
@@ -85,7 +83,6 @@ TEMPLATE_TEST_CASE("QuickSim simulation of several SiDBs with varying thread cou
     lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
 
-    sidb_simulation_result<TestType> quicksimstats{};
     const sidb_simulation_parameters params{2, -0.30};
 
     quicksim_params quicksim_params{params};
@@ -94,46 +91,46 @@ TEMPLATE_TEST_CASE("QuickSim simulation of several SiDBs with varying thread cou
 
     SECTION("Default settings")
     {
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
     }
     SECTION("0 threads")
     {
         quicksim_params.number_threads = 0;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
     }
     SECTION("1 thread")
     {
         quicksim_params.number_threads = 1;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
     }
     SECTION("2 threads")
     {
         quicksim_params.number_threads = 2;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
     }
     SECTION("100 threads")
     {
         quicksim_params.number_threads = 100;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
     }
 }
 
@@ -158,8 +155,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
 
     lyt.assign_cell_type({15, -1, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({17, -1, 1}, TestType::cell_type::NORMAL);
-
-    sidb_simulation_result<TestType> quicksimstats{};
+    ;
     const sidb_simulation_parameters params{2, -0.32};
 
     quicksim_params quicksim_params{params};
@@ -195,51 +191,51 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
 
     SECTION("Default settings")
     {
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("0 threads")
     {
         quicksim_params.number_threads = 0;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("1 thread")
     {
         quicksim_params.number_threads = 1;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("2 threads")
     {
         quicksim_params.number_threads = 2;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("100 threads")
     {
         quicksim_params.number_threads = 100;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
 }
 
@@ -258,7 +254,6 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varyi
     lyt.assign_cell_type({-7, 1, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({-7, 3, 0}, TestType::cell_type::NORMAL);
 
-    sidb_simulation_result<TestType> quicksimstats{};
     const sidb_simulation_parameters params{2, -0.32};
 
     quicksim_params quicksim_params{params};
@@ -285,51 +280,51 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varyi
 
     SECTION("Default settings")
     {
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("0 threads")
     {
         quicksim_params.number_threads = 0;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("1 thread")
     {
         quicksim_params.number_threads = 1;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("2 threads")
     {
         quicksim_params.number_threads = 2;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("100 threads")
     {
         quicksim_params.number_threads = 100;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
 }
 
@@ -377,51 +372,51 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01 
 
     SECTION("Default settings")
     {
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("0 threads")
     {
         quicksim_params.number_threads = 0;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("1 thread")
     {
         quicksim_params.number_threads = 1;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("2 threads")
     {
         quicksim_params.number_threads = 2;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("100 threads")
     {
         quicksim_params.number_threads = 100;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
 }
 
@@ -456,50 +451,50 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread 
 
     SECTION("Default settings")
     {
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("0 threads")
     {
         quicksim_params.number_threads = 0;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("1 thread")
     {
         quicksim_params.number_threads = 1;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("2 threads")
     {
         quicksim_params.number_threads = 2;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
     SECTION("100 threads")
     {
         quicksim_params.number_threads = 100;
 
-        quicksim<TestType>(lyt, quicksim_params, &quicksimstats);
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-        check_for_absence_of_positive_charges(quicksimstats);
-        check_for_runtime_measurement(quicksimstats);
-        check_charge_configuration(quicksimstats);
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
     }
 }

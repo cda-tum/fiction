@@ -15,7 +15,7 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
 {
     SECTION("empty energy distribution")
     {
-        sidb_energy_and_state_type const energy_and_state_type{};
+        const sidb_energy_and_state_type energy_and_state_type{};
 
         CHECK(occupation_probability_gate_based(energy_and_state_type, 10) == 0.0);
         CHECK(occupation_probability_gate_based(energy_and_state_type, 0.01) == 0.0);

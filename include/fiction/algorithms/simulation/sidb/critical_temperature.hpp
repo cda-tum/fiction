@@ -10,6 +10,7 @@
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
@@ -65,7 +66,6 @@ enum class simulation_engine
      */
     EXACT,
     /**
-     *
      * This simulation engine quickly calculates the Critical Temperature. However, there may be deviations from the
      * exact Critical Temperature. This mode is recommended for larger layouts (> 40 SiDBs).
      */
@@ -177,24 +177,24 @@ class critical_temperature_impl
             return true;
         }
 
-        sidb_simulation_result<Lyt> stats{};
+        sidb_simulation_result<Lyt> simulation_results{};
         if (parameter.engine == simulation_engine::EXACT)
         {
             temperature_stats.algorithm_name = "exgs";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params, &stats);
+            simulation_results = exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params);
         }
         else
         {
             temperature_stats.algorithm_name = "quicksim";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            quicksim(layout, parameter.simulation_params, &stats);
+            simulation_results = quicksim(layout, parameter.simulation_params);
         }
 
         // The number of physically valid charge configurations is stored.
-        temperature_stats.num_valid_lyt = stats.charge_distributions.size();
+        temperature_stats.num_valid_lyt = simulation_results.charge_distributions.size();
 
         // If the layout consists of only one SiDB, the maximum temperature is returned as the Critical Temperature.
         if (layout.num_cells() == 1u)
@@ -214,7 +214,7 @@ class critical_temperature_impl
             std::sort(all_cells.begin(), all_cells.end());
 
             // The energy distribution of the physically valid charge configurations for the given layout is determined.
-            const auto distribution = energy_distribution(stats.charge_distributions);
+            const auto distribution = energy_distribution(simulation_results.charge_distributions);
 
             std::vector<int64_t> output_bits_index{};
             std::vector<bool>    output_bits{};
@@ -269,8 +269,8 @@ class critical_temperature_impl
 
             // A label that indicates whether the state still fulfills the logic.
             sidb_energy_and_state_type energy_state_type{};
-            energy_state_type =
-                calculate_energy_and_state_type(distribution, stats.charge_distributions, output_cells, output_bits);
+            energy_state_type = calculate_energy_and_state_type(distribution, simulation_results.charge_distributions,
+                                                                output_cells, output_bits);
 
             const auto min_energy = energy_state_type.cbegin()->first;
 
@@ -294,26 +294,26 @@ class critical_temperature_impl
 
     bool non_gate_based_simulation()
     {
-        sidb_simulation_result<Lyt> stats{};
+        sidb_simulation_result<Lyt> simulation_results{};
         if (parameter.engine == simulation_engine::EXACT)
         {
             temperature_stats.algorithm_name = "exgs";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params, &stats);
+            simulation_results = exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params);
         }
         else
         {
             temperature_stats.algorithm_name = "quicksim";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            quicksim(layout, parameter.simulation_params, &stats);
+            simulation_results = quicksim(layout, parameter.simulation_params);
         }
 
         // The number of physically valid charge configurations is stored.
-        temperature_stats.num_valid_lyt = stats.charge_distributions.size();
+        temperature_stats.num_valid_lyt = simulation_results.charge_distributions.size();
 
-        const auto distribution = energy_distribution(stats.charge_distributions);
+        const auto distribution = energy_distribution(simulation_results.charge_distributions);
 
         // if there is more than one metastable state
         if (temperature_stats.num_valid_lyt > 1)
@@ -357,15 +357,24 @@ class critical_temperature_impl
     }
 
   private:
-    // The energy difference between the ground state and the first erroneous state is determined. Additionally, the
-    // state type of the ground state is determined and returned.
+    /**
+     * The energy difference between the ground state and the first erroneous state is determined. Additionally, the
+     * state type of the ground state is determined and returned.
+     *
+     * @param energy_and_state_type All energies of all physically valid charge distributions with the corresponding
+     * state type (i.e. transparent, erroneous).
+     * @param min_energy Minimal energy of all physically valid charge distributions of a given layout.
+     * @return State type (i.e. transparent, erroneous) of the ground state is returned.
+     */
     bool energy_between_ground_state_and_first_erroneous(const sidb_energy_and_state_type& energy_and_state_type,
                                                          const double                      min_energy)
     {
         bool ground_state_is_transparent = false;
         for (const auto& [energy, state_type] : energy_and_state_type)
         {
-            // Check if at least one ground state exists which fulfills the logic (transparent).
+            // Check if there is at least one ground state that satisfies the logic (transparent). Round the energy
+            // value of the given valid_layout to six decimal places to overcome possible rounding errors and for
+            // comparability with the min_energy.
             if ((round_to_n_decimal_places(energy, 6) == round_to_n_decimal_places(min_energy, 6)) && state_type)
             {
                 ground_state_is_transparent = true;
@@ -380,8 +389,12 @@ class critical_temperature_impl
         }
         return ground_state_is_transparent;
     };
-
-    // The Critical Temperature is determined for given `sidb_energy_and_state_type`.
+    /**
+     * The Critical Temperature is determined.
+     *
+     * @param energy_state_type All energies of all physically valid charge distributions with the corresponding state
+     * type (i.e. transparent, erroneous).
+     */
     void determine_critical_temperature(const sidb_energy_and_state_type& energy_state_type)
     {
         // Vector with temperature values from 0.01 to max_temperature * 100 K in 0.01 K steps is generated.

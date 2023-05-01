@@ -57,11 +57,10 @@ struct quicksim_params
  * @tparam Lyt Cell-level layout type.
  * @param lyt The layout to simulate.
  * @param ps Physical parameters. They are material-specific and may vary from experiment to experiment.
- * @param pst Statistics. They store the simulation results (simulation runtime as well as all physically valid charge
- * distribution layouts).
+ * @return sidb_simulation_result is returned with all results.
  */
 template <typename Lyt>
-void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, sidb_simulation_result<Lyt>* pst = nullptr)
+sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
@@ -77,7 +76,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, sid
 
     // measure run time (artificial scope)
     {
-        mockturtle::stopwatch const stop{time_counter};
+        const mockturtle::stopwatch stop{time_counter};
 
         charge_distribution_surface charge_lyt{lyt};
 
@@ -186,10 +185,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, sid
 
     st.simulation_runtime = time_counter;
 
-    if (pst)
-    {
-        *pst = st;
-    }
+    return st;
 }
 
 }  // namespace fiction
