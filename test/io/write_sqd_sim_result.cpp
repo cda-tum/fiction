@@ -310,7 +310,7 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
     lyt.assign_cell_type({6, 0, 0}, sidb_layout::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, sidb_layout::cell_type::NORMAL);
 
-    const sidb_simulation_parameters    params{3, -0.32};
+    const sidb_simulation_parameters params{3, -0.32};
 
     auto sim_result = exhaustive_ground_state_simulation<sidb_layout>(lyt, params);
 
