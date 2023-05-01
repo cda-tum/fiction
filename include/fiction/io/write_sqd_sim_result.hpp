@@ -171,6 +171,7 @@ class write_sqd_sim_result_impl
 
         return cells;
     }
+
     /**
      * Writes the engine information to the output stream in XML format.
      */
@@ -208,6 +209,7 @@ class write_sqd_sim_result_impl
 
         os << siqad::CLOSE_SIM_PARAMS;
     }
+
     /**
      * Writes the physical locations of all SiDBs to the output stream in XML format.
      */
@@ -225,6 +227,7 @@ class write_sqd_sim_result_impl
 
         os << siqad::CLOSE_PHYSLOC;
     }
+
     /**
      * Writes all charge distributions to the output stream in XML format.
      */
@@ -246,26 +249,27 @@ class write_sqd_sim_result_impl
                   [](const auto& a, const auto& b) { return a->get_system_energy() < b->get_system_energy(); });
 
         // write the distributions to the output stream
-        std::for_each(ordered_surface_pointers.cbegin(), ordered_surface_pointers.cend(),
-                      [this](const auto& surface)
-                      {
-                          // obtain the charges in the same order as the cells
-                          std::vector<sidb_charge_state> ordered_charges{};
-                          ordered_charges.reserve(ordered_cells.size());
+        std::for_each(
+            ordered_surface_pointers.cbegin(), ordered_surface_pointers.cend(),
+            [this](const auto& surface)
+            {
+                // obtain the charges in the same order as the cells
+                std::vector<sidb_charge_state> ordered_charges{};
+                ordered_charges.reserve(ordered_cells.size());
 
-                          std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
-                                        [&ordered_charges, &surface](const auto& c)
-                                        { ordered_charges.push_back(surface->get_charge_state(c)); });
+                std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
+                              [&ordered_charges, &surface](const auto& c)
+                              { ordered_charges.push_back(surface->get_charge_state(c)); });
 
-                          os << fmt::format(
-                              siqad::DIST_ENERGY,
-                              surface->get_system_energy(),                    // system energy
-                              1,                                               // occurrence count
-                              surface->is_physically_valid() ? 1 : 0,          // physical validity
-                              sim_result.physical_parameters.base,             // simulation state count
-                              charge_configuration_to_string(ordered_charges)  // charge distribution as a string
-                          );
-                      });
+                os << fmt::format(
+                    siqad::DIST_ENERGY,
+                    surface->get_system_energy(),            // system energy
+                    1,                                       // occurrence count
+                    surface->is_physically_valid() ? 1 : 0,  // physical validity
+                    3,  // simulation state count (fixed to 3 since state count = 2 is not supported by SiQAD yet).
+                    charge_configuration_to_string(ordered_charges)  // charge distribution as a string
+                );
+            });
 
         os << siqad::CLOSE_ELEC_DIST;
     }
@@ -293,6 +297,7 @@ void write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, std::os
 
     p.run();
 }
+
 /**
  * Writes an SiDB simulation result to an XML file that is used by SiQAD (https://github.com/siqad/siqad), a physical
  * simulator for the SiDB technology platform.
