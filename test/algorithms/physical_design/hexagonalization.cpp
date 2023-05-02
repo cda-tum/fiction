@@ -63,7 +63,7 @@ void check_mapping_equiv_all()
     check_mapping_equiv_layout(blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>());
     check_mapping_equiv_layout(blueprints::or_not_gate_layout<cart_gate_clk_lyt>());
     check_mapping_equiv_layout(blueprints::crossing_layout<cart_gate_clk_lyt>());
-    check_mapping_equiv_layout(blueprints::xor_gate_layout<cart_gate_clk_lyt>());
+    check_mapping_equiv_layout(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
 }
 
 template <typename Lyt>

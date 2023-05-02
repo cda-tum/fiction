@@ -85,7 +85,7 @@ GateLyt xor_maj_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt xor_gate_layout() noexcept
+GateLyt tautology_gate_layout() noexcept
 {
     REQUIRE(mockturtle::has_create_node_v<GateLyt>);
 
@@ -94,10 +94,10 @@ GateLyt xor_gate_layout() noexcept
     const auto x1 = layout.create_pi("x1", {1, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
 
-    kitty::dynamic_truth_table tt_xor(2u);
-    kitty::create_from_hex_string(tt_xor, "6");
+    kitty::dynamic_truth_table tt_t(2u);
+    kitty::create_from_hex_string(tt_t, "F");
 
-    const auto n_xor = layout.create_node({x1, x2}, tt_xor, {1, 1});
+    const auto n_xor = layout.create_node({x1, x2}, tt_t, {1, 1});
 
     layout.create_po(n_xor, "f1", {2, 1});
 
