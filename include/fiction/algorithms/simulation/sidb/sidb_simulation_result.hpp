@@ -64,4 +64,4 @@ struct sidb_simulation_result
 
 }  // namespace fiction
 
-#endif  // FICTION_SIMULATION_RESULT_HPP
+#endif  // FICTION_SIDB_SIMULATION_RESULT_HPP

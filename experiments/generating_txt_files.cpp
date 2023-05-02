@@ -6,13 +6,13 @@
 // Created by Jan Drewniok 01.01.23
 //
 
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
+#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/io/read_sqd_layout.hpp"  // reader for SiDB layouts including surface scan data
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/types.hpp"  // pre-defined types suitable for the FCN domain
+#include "fiction/types.hpp"               // pre-defined types suitable for the FCN domain
 
-#include <fmt/format.h>  // output formatting
+#include <fmt/format.h>                    // output formatting
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <array>
