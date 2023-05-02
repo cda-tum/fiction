@@ -163,7 +163,7 @@ template <typename Lyt>
 class critical_temperature_impl
 {
   public:
-    critical_temperature_impl(const Lyt& lyt, const critical_temperature_params& params,
+    critical_temperature_impl(Lyt& lyt, const critical_temperature_params& params,
                               critical_temperature_stats<Lyt>& st) :
             layout{lyt},
             parameter{params},
@@ -428,7 +428,7 @@ class critical_temperature_impl
     /**
      * SiDB cell-level layout.
      */
-    const Lyt& layout{};
+    Lyt& layout{};
     /**
      * Parameters for the `critical_temperature` algorithm.
      */
@@ -460,7 +460,7 @@ class critical_temperature_impl
  */
 
 template <typename Lyt>
-bool critical_temperature(const Lyt& lyt, const critical_temperature_params& params = {},
+bool critical_temperature(Lyt& lyt, const critical_temperature_params& params = {},
                           critical_temperature_stats<Lyt>* pst = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
