@@ -6,13 +6,13 @@
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/write_sqd_layout.hpp>  // writer for SiQAD files (physical simulation)
 #include <fiction/layouts/bounding_box.hpp>  // computes a minimum-sized box around all non-empty coordinates in a given layout
-#include <fiction/technology/area.hpp>                        // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>           // cell implementations
-#include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
-#include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
-#include <fiction/traits.hpp>                                 // traits for type-checking
-#include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
-#include <fiction/utils/name_utils.hpp>                       // restore names
+#include <fiction/technology/area.hpp>                         // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>            // cell implementations
+#include <fiction/technology/sidb_bestagon_library.hpp>        // a pre-defined SiDB gate library
+#include <fiction/technology/technology_mapping_library.hpp>   // pre-defined gate types for technology mapping
+#include <fiction/traits.hpp>                                  // traits for type-checking
+#include <fiction/types.hpp>                                   // pre-defined types suitable for the FCN domain
+#include <fiction/utils/name_utils.hpp>                        // restore names
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
