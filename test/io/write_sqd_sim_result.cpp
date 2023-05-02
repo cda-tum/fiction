@@ -292,7 +292,7 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
         "    </physloc>\n"
         "    <elec_dist>\n"
         "        <dist energy=\"0.246027\" count=\"1\" physically_valid=\"1\" "
-        "state_count=\"2\">-0-0-0-</dist>\n"
+        "state_count=\"3\">-0-0-0-</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
