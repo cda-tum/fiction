@@ -46,7 +46,7 @@ template <typename Lyt>
 hex_even_row_gate_clk_lyt hexagonalization(const Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate level layout");
-    // static_assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE), "Lyt is not 2DDWave clocked");
+    assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE));
 
     using hex_lyt = hex_even_row_gate_clk_lyt;
 
