@@ -194,6 +194,7 @@ hex_even_row_gate_clk_lyt hexagonalization(const Lyt& lyt)
     }
     return hex_layout;
 }
+
 }  // namespace fiction
 
 #endif  // FICTION_HEXAGONALIZATION_HPP
