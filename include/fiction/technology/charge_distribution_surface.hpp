@@ -306,7 +306,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param base Base number to be set.
      */
-    void set_base_num(const uint8_t base) noexcept
+    void set_base_number(const uint8_t base) noexcept
     {
         strg->phys_params.base    = base;
         strg->charge_index.second = base;
@@ -321,41 +321,44 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
 
-    void base_to_three() noexcept
-    {
-        strg->phys_params.base               = 3;
-        strg->charge_index.second            = 2;
-        strg->charge_index_sub_layout.second = 3;
-        if (!strg->dependent_cell.is_dead())
-        {
-            if (!strg->three_state_cells.empty())
-            {
-                if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), strg->dependent_cell) !=
-                    strg->three_state_cells.end())
-                {
-                    strg->max_charge_index =
-                        static_cast<uint64_t>(std::pow(2, this->num_cells() - strg->three_state_cells.size()) - 1);
-                    strg->max_charge_index_sub_layout =
-                        static_cast<uint64_t>(std::pow(3, strg->three_state_cells.size() - 1) - 1);
-                }
-                else
-                {
-                    strg->max_charge_index =
-                        static_cast<uint64_t>(std::pow(2, this->num_cells() - 1 - strg->three_state_cells.size()) - 1);
-                    strg->max_charge_index_sub_layout =
-                        static_cast<uint64_t>(std::pow(3, strg->three_state_cells.size()) - 1);
-                }
-            }
-            else
-            {
-                strg->max_charge_index = static_cast<uint64_t>(std::pow(3, this->num_cells() - 1) - 1);
-            }
-        }
-        else
-        {
-            strg->max_charge_index = static_cast<uint64_t>(std::pow(3, this->num_cells()) - 1);
-        }
-    }
+    //    void set_base_to_three() noexcept
+    //    {
+    //        strg->phys_params.base               = 3;
+    //        strg->charge_index.second            = 2;
+    //        strg->charge_index_sub_layout.second = 3;
+    //        if (!strg->dependent_cell.is_dead())
+    //        {
+    //            if (!strg->three_state_cells.empty())
+    //            {
+    //                if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(),
+    //                strg->dependent_cell) !=
+    //                    strg->three_state_cells.end())
+    //                {
+    //                    strg->max_charge_index =
+    //                        static_cast<uint64_t>(std::pow(2, this->num_cells() - strg->three_state_cells.size()) -
+    //                        1);
+    //                    strg->max_charge_index_sub_layout =
+    //                        static_cast<uint64_t>(std::pow(3, strg->three_state_cells.size() - 1) - 1);
+    //                }
+    //                else
+    //                {
+    //                    strg->max_charge_index =
+    //                        static_cast<uint64_t>(std::pow(2, this->num_cells() - 1 - strg->three_state_cells.size())
+    //                        - 1);
+    //                    strg->max_charge_index_sub_layout =
+    //                        static_cast<uint64_t>(std::pow(3, strg->three_state_cells.size()) - 1);
+    //                }
+    //            }
+    //            else
+    //            {
+    //                strg->max_charge_index = static_cast<uint64_t>(std::pow(3, this->num_cells() - 1) - 1);
+    //            }
+    //        }
+    //        else
+    //        {
+    //            strg->max_charge_index = static_cast<uint64_t>(std::pow(3, this->num_cells()) - 1);
+    //        }
+    //    }
 
     //     * Check if any SiDB exhibits the given charge state.
     //     *
@@ -582,6 +585,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 strg->sidb_order_without_three_state_cells.push_back(cell);
             }
+        }
+        if (required)
+        {
+            this->set_base_to_three();
         }
         return required;
     }
@@ -1308,9 +1315,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      *  The stored unique index is converted to the charge distribution of the charge distribution surface.
      */
-    void index_to_charge_distribution(const bool fast_three_state_simulation = false) noexcept
+    void index_to_charge_distribution(const bool quickexact = false) noexcept
     {
-        if (!fast_three_state_simulation)
+        if (!quickexact)
         {
             strg->cell_history = {};
             strg->cell_history.reserve(this->num_cells());
@@ -1376,7 +1383,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     {
                         strg->cell_history.emplace_back(cell_to_index(cell),
                                                         charge_state_to_sign(get_charge_state(cell)));
-                        this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, !fast_three_state_simulation);
+                        this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, !quickexact);
                     }
                 }
             }
@@ -1390,7 +1397,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         {
                             strg->cell_history.emplace_back(cell_to_index(cell),
                                                             charge_state_to_sign(get_charge_state(cell)));
-                            this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, !fast_three_state_simulation);
+                            this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, !quickexact);
                         }
                     }
                 }
@@ -1498,7 +1505,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param new_gray_code gray code as uint64_t of the new charge distribution.
      * @param old_gray_code gray code as uint64_t of the previous charge distribution layout.
      */
-    void index_to_charge_distribution_gray_code(uint64_t new_gray_code, uint64_t old_gray_code) noexcept
+    void charge_index_gray_code_to_charge_distribution(uint64_t new_gray_code, uint64_t old_gray_code) noexcept
     {
         strg->cell_history_gray_code = {};
 
@@ -1545,12 +1552,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void increase_charge_index_by_one(const bool  dependent_cell_fixed    = true,
                                       const bool& recompute_system_energy = true, const bool& consider_history = false,
-                                      const bool& fast_three_state = false) noexcept
+                                      const bool& quickexact = false) noexcept
     {
         if (strg->charge_index.first < strg->max_charge_index)
         {
             strg->charge_index.first += 1;
-            this->index_to_charge_distribution(fast_three_state);
+            this->index_to_charge_distribution(quickexact);
             this->update_after_charge_change(dependent_cell_fixed, recompute_system_energy, consider_history);
         }
     }
@@ -1558,45 +1565,45 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void increase_charge_index_by_sub_layout(const bool  dependent_cell_fixed    = true,
                                              const bool& recompute_system_energy = true,
                                              const bool& consider_history        = false,
-                                             const bool& fast_three_state        = false) noexcept
+                                             const bool& quickexact              = false) noexcept
     {
         if (strg->charge_index_sub_layout.first < strg->max_charge_index_sub_layout)
         {
             strg->charge_index_sub_layout.first += 1;
-            this->index_to_charge_distribution(fast_three_state);
-            // std::cout << strg->cell_history.size() << std::endl;
+            this->index_to_charge_distribution(quickexact);
             this->update_after_charge_change(dependent_cell_fixed, recompute_system_energy, consider_history);
         }
     }
     /**
      * The charge index is set by a gray code number in decimal.
      *
-     * @param gray_code gray code in decimal representing the new charge distribution.
-     * @param gray_code_old gray code in decimal representing the old charge distribution.
+     * @param current_gray_code gray code in decimal representing the new charge distribution.
+     * @param previous_gray_code gray code in decimal representing the old charge distribution.
      * @param dependent_cell_fixed if set to true, the dependent cell's charge state is changed based on the local
      * potential at its position.
      * @param recompute_system_energy if set to true, the system energy is calculated for the new charge distribution.
      * @param consider_histroy if set to true, the cells which changed due to the change of the charge index, are used
      * to speed up the calculation of the calculation of the local potential, etc.
      */
-    void set_charge_index_by_gray(const uint64_t gray_code, const uint64_t gray_code_old,
-                                  const bool dependent_cell_fixed = true, const bool& recompute_system_energy = true,
-                                  const bool& consider_history = false) noexcept
+    void set_charge_index_by_gray_code(const uint64_t current_gray_code, const uint64_t previous_gray_code,
+                                       const bool  dependent_cell_fixed    = true,
+                                       const bool& recompute_system_energy = true,
+                                       const bool& consider_history        = false) noexcept
     {
-        if (gray_code <= strg->max_charge_index)
+        if (current_gray_code <= strg->max_charge_index)
         {
-            this->assign_charge_index_by_gray_code(gray_code, gray_code_old);
+            this->assign_charge_index_by_two_gray_codes(current_gray_code, previous_gray_code);
             this->update_after_charge_change(dependent_cell_fixed, recompute_system_energy, consider_history);
         }
     }
 
     void reset_charge_index_sub_layout(const bool  dependent_cell_fixed    = true,
                                        const bool& recompute_system_energy = true, const bool& consider_history = false,
-                                       const bool& fast_three_state = false) noexcept
+                                       const bool& quickexact = false) noexcept
     {
 
         strg->charge_index_sub_layout.first = 0;
-        this->index_to_charge_distribution(fast_three_state);
+        this->index_to_charge_distribution(quickexact);
         this->update_after_charge_change(dependent_cell_fixed, recompute_system_energy, consider_history);
     }
     /**
@@ -1620,10 +1627,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param gray_code charge index (as gray code in decimal) of the new charge distribution.
      * @param gray_code_old charge index (as gray code in decimal) of the old charge distribution.
      */
-    void assign_charge_index_by_gray_code(uint64_t gray_code, uint64_t gray_code_old) noexcept
+    void assign_charge_index_by_two_gray_codes(uint64_t gray_code, uint64_t gray_code_old) noexcept
     {
         strg->charge_index.first = gray_code;
-        this->index_to_charge_distribution_gray_code(gray_code, gray_code_old);
+        this->charge_index_gray_code_to_charge_distribution(gray_code, gray_code_old);
     }
 
     /**
@@ -1781,6 +1788,42 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
         }
     };
+
+    void set_base_to_three() noexcept
+    {
+        strg->phys_params.base               = 3;
+        strg->charge_index.second            = 2;
+        strg->charge_index_sub_layout.second = 3;
+        if (!strg->dependent_cell.is_dead())
+        {
+            if (!strg->three_state_cells.empty())
+            {
+                if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), strg->dependent_cell) !=
+                    strg->three_state_cells.end())
+                {
+                    strg->max_charge_index =
+                        static_cast<uint64_t>(std::pow(2, this->num_cells() - strg->three_state_cells.size()) - 1);
+                    strg->max_charge_index_sub_layout =
+                        static_cast<uint64_t>(std::pow(3, strg->three_state_cells.size() - 1) - 1);
+                }
+                else
+                {
+                    strg->max_charge_index =
+                        static_cast<uint64_t>(std::pow(2, this->num_cells() - 1 - strg->three_state_cells.size()) - 1);
+                    strg->max_charge_index_sub_layout =
+                        static_cast<uint64_t>(std::pow(3, strg->three_state_cells.size()) - 1);
+                }
+            }
+            else
+            {
+                strg->max_charge_index = static_cast<uint64_t>(std::pow(3, this->num_cells() - 1) - 1);
+            }
+        }
+        else
+        {
+            strg->max_charge_index = static_cast<uint64_t>(std::pow(3, this->num_cells()) - 1);
+        }
+    }
 
     /**
      * Initializes the distance matrix between all the cells of the layout.

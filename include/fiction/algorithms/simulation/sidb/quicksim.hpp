@@ -82,7 +82,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
         // set the given physical parameters
         charge_lyt.set_physical_parameters(ps.phys_params);
-        charge_lyt.set_base_num(2);
+        charge_lyt.set_base_number(2);
         charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change(false);
         const auto negative_sidb_indices = charge_lyt.negative_sidb_detection();

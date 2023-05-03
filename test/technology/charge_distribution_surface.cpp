@@ -1255,6 +1255,5 @@ TEMPLATE_TEST_CASE(
         charge_lyt_first.assign_charge_state({4, 0, 0}, sidb_charge_state::NEUTRAL);
         charge_lyt_first.assign_charge_state({6, 0, 0}, sidb_charge_state::NEGATIVE);
         charge_lyt_first.update_after_charge_change();
-        CHECK(1 == 1);
     }
 }

@@ -68,7 +68,6 @@ class quickexact_impl
             const mockturtle::stopwatch stop{time_counter};
             this->initialize_charge_layout();
 
-            // auto all_sidbs_in_lyt_without_detected_ones = sidbs_charge_lyt;
             //  determine all SiDBs that have to be negatively charged to fulfill the population stability. This is an
             //  efficient way to prune the search space by 2^k with k being the number of detected negatively charged
             //  SiDBs.
@@ -80,7 +79,7 @@ class quickexact_impl
             // if layout has at least two SiDBs, the code inside this if-statement is executed.
             if (num_cells > 1)
             {
-                this->layout_without_negative_detected_sidbs();
+                this->generate_layout_without_negative_sidbs();
             }
             if (!all_sidbs_in_lyt_without_detected_ones.empty() && num_cells > 1)
             {
@@ -126,16 +125,16 @@ class quickexact_impl
             }
 
             // in the case with only one SiDB in the layout (due to external potentials or defects, this single SiDB can
-            // neutrally or even positively charged.)
+            // be neutrally or even positively charged.)
             else if (num_cells == 1)
             {
                 if (three_state_simulation_required)
                 {
-                    charge_lyt.set_base_num(3);
+                    charge_lyt.set_base_number(3);
                 }
                 else
                 {
-                    charge_lyt.set_base_num(2);
+                    charge_lyt.set_base_number(2);
                 }
 
                 while (charge_lyt.get_charge_index().first < charge_lyt.get_max_charge_index())
@@ -180,17 +179,17 @@ class quickexact_impl
   private:
     void two_state_sim(charge_distribution_surface<Lyt>& charge_lyt_new, sidb_simulation_result<Lyt>& sim_result)
     {
-        charge_lyt_new.set_base_num(2);
-        uint64_t current_charge_index = 0;
-        uint64_t old_charge_index     = 0;
+        charge_lyt_new.set_base_number(2);
+        uint64_t current_charge_index  = 0;
+        uint64_t previous_charge_index = 0;
         for (uint64_t i = 0; i <= charge_lyt_new.get_max_charge_index(); i++)
         {
             current_charge_index = (i ^ (i >> 1));
-            charge_lyt_new.set_charge_index_by_gray(
-                current_charge_index, old_charge_index, false, false,
+            charge_lyt_new.set_charge_index_by_gray_code(
+                current_charge_index, previous_charge_index, false, false,
                 true);  // "false" allows that the charge state of the dependent cell is
                         // automatically changed based on the new charge distribution.
-            old_charge_index = current_charge_index;
+            previous_charge_index = current_charge_index;
 
             if (charge_lyt_new.is_physically_valid())
             {
@@ -216,8 +215,7 @@ class quickexact_impl
     {
         charge_lyt_new.set_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt_new.update_after_charge_change();
-        const auto three_state_simulation_required_true = charge_lyt_new.three_state_sim_required();
-        charge_lyt_new.base_to_three();
+        const auto three_state_simulation_required = charge_lyt_new.three_state_sim_required();
         charge_lyt_new.update_after_charge_change(false);
         while (charge_lyt_new.get_charge_index().first < charge_lyt_new.get_max_charge_index())
         {
@@ -341,7 +339,7 @@ class quickexact_impl
         num_cells                              = charge_lyt.get_sidb_order().size();
     }
 
-    void layout_without_negative_detected_sidbs()
+    void generate_layout_without_negative_sidbs()
     {
         for (const auto& index : detected_negative_sidb_indices)
         {
