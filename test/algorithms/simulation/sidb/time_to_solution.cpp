@@ -27,16 +27,27 @@ TEMPLATE_TEST_CASE(
 
     TestType lyt{{20, 10}};
 
-    const sidb_simulation_parameters params{2, -0.30};
-    const quicksim_params            quicksim_params{params};
-    time_to_solution_stats           tts_stat{};
-
-    SECTION("layout with no SiDB placed")
+    SECTION("layout with no SiDB placed, exgs")
     {
-        charge_distribution_surface charge_layout{lyt};
+        const sidb_simulation_parameters params{2, -0.30};
+        const quicksim_params            quicksim_params{params};
+        time_to_solution_stats           tts_stat{};
+        sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat);
 
-        sim_acc_tts<TestType>(charge_layout, quicksim_params, &tts_stat);
+        CHECK(tts_stat.algorithm == "exgs");
+        CHECK_THAT(tts_stat.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK_THAT(tts_stat.time_to_solution, Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
+        CHECK(tts_stat.mean_single_runtime > 0.0);
+    }
 
+    SECTION("layout with no SiDB placed, quickexact")
+    {
+        const sidb_simulation_parameters params{2, -0.30};
+        const quicksim_params            quicksim_params{params};
+        time_to_solution_stats           tts_stat{};
+        const time_to_solution_params    tts_params{exact_algorithm_type::QUICKEXACT};
+        sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat, tts_params);
+        CHECK(tts_stat.algorithm == "quickexact");
         CHECK_THAT(tts_stat.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat.time_to_solution, Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
         CHECK(tts_stat.mean_single_runtime > 0.0);
@@ -47,17 +58,29 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({4, 3, 0}, TestType::cell_type::NORMAL);
-
+        lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({6, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({7, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 3, 0}, TestType::cell_type::NORMAL);
 
-        lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
+        const sidb_simulation_parameters params{3, -0.30};
+        const quicksim_params            quicksim_params{params};
 
-        sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat);
+        time_to_solution_stats tts_stat_exgs{};
+        sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat_exgs);
 
-        CHECK(tts_stat.acc == 100);
-        CHECK(tts_stat.time_to_solution > 0.0);
-        CHECK(tts_stat.mean_single_runtime > 0.0);
+        CHECK(tts_stat_exgs.acc == 100);
+        CHECK(tts_stat_exgs.time_to_solution > 0.0);
+        CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
+
+        time_to_solution_stats        tts_stat_quickexact{};
+        const time_to_solution_params tts_params{exact_algorithm_type::QUICKEXACT};
+        sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat_quickexact, tts_params);
+
+        CHECK(tts_stat_quickexact.acc == 100);
+        CHECK(tts_stat_quickexact.time_to_solution > 0.0);
+        CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
+        CHECK(tts_stat_exgs.single_runtime_exhaustive > tts_stat_quickexact.single_runtime_exhaustive);
     }
 }

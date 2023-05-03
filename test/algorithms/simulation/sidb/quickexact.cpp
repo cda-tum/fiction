@@ -20,13 +20,13 @@ TEMPLATE_TEST_CASE("Empty layout ExGS simulation", "[ExGS]",
 {
     TestType lyt{{20, 10}};
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32}};
+    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32}};
 
-    const auto simulation_results = quickexact<TestType>(lyt, params);
+    const auto simulation_results = quickexact(lyt, params);
 
     CHECK(simulation_results.charge_distributions.empty());
     CHECK(simulation_results.additional_simulation_parameters.empty());
-    CHECK(simulation_results.algorithm_name == "exgs");
+    CHECK(simulation_results.algorithm_name == "quickexact");
     CHECK(simulation_results.additional_simulation_parameters.empty());
 }
 
