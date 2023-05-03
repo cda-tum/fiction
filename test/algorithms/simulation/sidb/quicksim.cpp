@@ -428,8 +428,8 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread 
     lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({8, 2, 0}, TestType::cell_type::NORMAL);
 
-    sidb_simulation_result<TestType> quicksimstats{};
-    const sidb_simulation_parameters params{2, -0.25};
+    const sidb_simulation_result<TestType> quicksimstats{};
+    const sidb_simulation_parameters       params{2, -0.25};
 
     quicksim_params quicksim_params{params};
 
