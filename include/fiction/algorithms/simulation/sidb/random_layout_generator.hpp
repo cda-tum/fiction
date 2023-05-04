@@ -150,6 +150,7 @@ class generate_random_layout_impl
  * This algorithm generates a layout with randomly distributed SiDBs.
  *
  * @tparam Lyt Cell-level with fiction coordinates.
+ * @param params All parameters needed for the generation of random layouts.
  * @param os The output stream to write into.
  * @param all_layouts Previous generated layouts to avoid duplication.
  */
@@ -167,6 +168,7 @@ void generate_random_layout(const random_layout_params<Lyt>& params, std::ostrea
  * This algorithm generates a layout with randomly distributed SiDBs.
  *
  * @tparam Lyt Cell-level with fiction coordinates.
+ * @param params All parameters needed for the generation of random layouts.
  * @param filename The file name to create and write into. Should preferably use the `.sqd` extension.
  * @param all_layouts Previous generated layouts to avoid duplication.
  */
