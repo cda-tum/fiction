@@ -55,7 +55,7 @@ class generate_random_layout_impl
 {
   public:
     generate_random_layout_impl(const random_layout_params<Lyt>& params, std::ostream& s,
-                                const std::vector<Lyt>& all_layouts) :
+                                std::vector<Lyt>& all_layouts) :
 
             parameter{params},
             os{s},
@@ -133,15 +133,22 @@ class generate_random_layout_impl
             // std::ostream.
             if (lyt.num_cells() == parameter.number_placed_sidbs && identical_layout_counter == 0)
             {
+                layout = lyt;
                 write_sqd_layout(lyt, os);
                 successful_generation = true;
             }
         }
     }
 
+    const Lyt get_layout() const
+    {
+        return layout;
+    }
+
   private:
+    Lyt                       layout;
     random_layout_params<Lyt> parameter;
-    const std::vector<Lyt>&   previous_layouts;
+    std::vector<Lyt>          previous_layouts;
     std::ostream&             os;
 };
 }  // namespace detail
@@ -155,14 +162,14 @@ class generate_random_layout_impl
  * @param all_layouts Previous generated layouts to avoid duplication.
  */
 template <typename Lyt>
-void generate_random_layout(const random_layout_params<Lyt>& params, std::ostream& os,
-                            const std::vector<Lyt>& all_layouts = {})
+const Lyt generate_random_layout(const random_layout_params<Lyt>& params, std::ostream& os, std::vector<Lyt> layouts)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(!has_siqad_coord_v<Lyt>, "Lyt is based on SiQAD coordinates");
 
-    detail::generate_random_layout_impl<Lyt> p{params, os, all_layouts};
+    detail::generate_random_layout_impl<Lyt> p{params, os, layouts};
     p.run();
+    return p.get_layout();
 }
 /**
  * This algorithm generates a layout with randomly distributed SiDBs.
@@ -173,8 +180,8 @@ void generate_random_layout(const random_layout_params<Lyt>& params, std::ostrea
  * @param all_layouts Previous generated layouts to avoid duplication.
  */
 template <typename Lyt>
-void generate_random_layout(const random_layout_params<Lyt>& params, const std::string_view& filename,
-                            const std::vector<Lyt>& all_layouts = {})
+const Lyt generate_random_layout(const random_layout_params<Lyt>& params, const std::string_view& filename,
+                                 std::vector<Lyt>& all_layouts = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 
@@ -183,8 +190,9 @@ void generate_random_layout(const random_layout_params<Lyt>& params, const std::
         throw std::ofstream::failure("could not open file");
     }
 
-    generate_random_layout(params, os, all_layouts);
+    const auto lyt = generate_random_layout(params, os, all_layouts);
     os.close();
+    return lyt;
 }
 
 }  // namespace fiction
