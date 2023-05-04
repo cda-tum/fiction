@@ -31,10 +31,10 @@ int main()  // NOLINT
         {
             const auto& benchmark = file.path();
 
-            std::string path  = benchmark.string();
-            uint64_t    start = path.rfind("layout") + 7;
-            uint64_t    end   = path.rfind(".sqd") - 1;
-            std::string name  = path.substr(start, end - start + 1);
+            const std::string path  = benchmark.string();
+            const uint64_t    start = path.rfind("layout") + 7;
+            const uint64_t    end   = path.rfind(".sqd") - 1;
+            const std::string name  = path.substr(start, end - start + 1);
 
             std::cout << benchmark << std::endl;
 
@@ -51,7 +51,8 @@ int main()  // NOLINT
             {
                 if (std::abs(valid_layout.get_system_energy() - min_energy) < physical_constants::POP_STABILITY_ERR)
                 {
-                    ground_state_layouts.push_back(charge_distribution_surface<sidb_cell_clk_lyt_siqad>{valid_layout});
+                    ground_state_layouts.emplace_back(
+                        charge_distribution_surface<sidb_cell_clk_lyt_siqad>{valid_layout});
                 }
             }
             if (ground_state_layouts.size() > 1)

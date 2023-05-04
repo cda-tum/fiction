@@ -79,9 +79,9 @@ class generate_random_layout_impl
             while (lyt.num_cells() < parameter.number_placed_sidbs && attempt_counter < parameter.maximal_attempts)
             {
                 // uniform distribution of [0,x_coordinate].
-                std::uniform_int_distribution<uint64_t> dist_x(0, x_dimension);
+                std::uniform_int_distribution<uint64_t> dist_x(0, static_cast<uint64_t>(x_dimension));
                 // uniform distribution of [0,y_coordinate].
-                std::uniform_int_distribution<uint64_t> dist_y(0, y_dimension);
+                std::uniform_int_distribution<uint64_t> dist_y(0, static_cast<uint64_t>(y_dimension));
                 // random integer from [0,x_coordinate] is selected.
                 const auto random_x_coordinate = dist_x(generator);
                 // random integer from [0,y_coordinate] is selected.
@@ -119,7 +119,7 @@ class generate_random_layout_impl
                     [this, &identical_layout_counter, lyt](const auto& cell_old) mutable
                     {
                         lyt.foreach_cell(
-                            [this, &identical_layout_counter, &cell_old](const auto& cell_new) mutable
+                            [&identical_layout_counter, &cell_old](const auto& cell_new) mutable
                             {
                                 if (cell_new == cell_old)
                                 {
@@ -148,8 +148,8 @@ class generate_random_layout_impl
   private:
     Lyt                       layout;
     random_layout_params<Lyt> parameter;
-    std::vector<Lyt>          previous_layouts;
     std::ostream&             os;
+    std::vector<Lyt>          previous_layouts;
 };
 }  // namespace detail
 
