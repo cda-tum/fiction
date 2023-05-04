@@ -17,7 +17,7 @@
 namespace fiction
 {
 /**
- * This struct stores the parameters for the *QuickSim* algorithm.
+ * This struct stores the parameters for the *generate_random_layouts* algorithm.
  */
 template <typename Lyt>
 struct random_layout_params
