@@ -20,9 +20,9 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
     std::stringstream layout_stream{};
     SECTION("empty parameters")
     {
-        random_layout_params<TestType> params{};
+        const random_layout_params<TestType> params{};
 
-        generate_random_layout<TestType>(params, layout_stream);
+        generate_random_layout<TestType>(params, layout_stream, {});
         const auto read_layout = read_sqd_layout<TestType>(layout_stream);
 
         CHECK(read_layout.num_cells() == 0);
@@ -32,9 +32,9 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
 
     SECTION("given aspect ratio")
     {
-        random_layout_params<TestType> params{{10, 10}};
+        const random_layout_params<TestType> params{{10, 10}};
 
-        generate_random_layout<TestType>(params, layout_stream);
+        const auto result_lyts = generate_random_layout<TestType>(params, layout_stream, {});
         const auto read_layout = read_sqd_layout<TestType>(layout_stream);
 
         CHECK(read_layout.num_cells() == 0);
@@ -44,9 +44,9 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
 
     SECTION("given aspect ratio and number of SiDBs")
     {
-        random_layout_params<TestType> params{{10, 10}, 10};
+        const random_layout_params<TestType> params{{10, 10}, 10};
 
-        generate_random_layout<TestType>(params, layout_stream);
+        generate_random_layout<TestType>(params, layout_stream, {});
         const auto read_layout = read_sqd_layout<TestType>(layout_stream);
 
         CHECK(read_layout.num_cells() == 10);
@@ -56,9 +56,9 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
 
     SECTION("given aspect ratio, number of SiDBs, and allow positive charges")
     {
-        random_layout_params<TestType> params{{9, 9}, 100, false};
+        const random_layout_params<TestType> params{{9, 9}, 100, false};
 
-        generate_random_layout<TestType>(params, layout_stream);
+        generate_random_layout<TestType>(params, layout_stream, {});
         const auto read_layout = read_sqd_layout<TestType>(layout_stream);
 
         CHECK(read_layout.num_cells() == 100);
@@ -68,9 +68,9 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
 
     SECTION("given aspect ratio, number of SiDBs, and allow positive charges")
     {
-        random_layout_params<TestType> params{{9, 9}, 10};
+        const random_layout_params<TestType> params{{9, 9}, 10};
 
-        generate_random_layout<TestType>(params, layout_stream);
+        generate_random_layout<TestType>(params, layout_stream, {});
         const auto read_layout = read_sqd_layout<TestType>(layout_stream);
 
         CHECK(read_layout.num_cells() == 10);
@@ -106,10 +106,9 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
         lyt_two.assign_cell_type({1, 0}, TestType::cell_type::NORMAL);
         all_layouts.push_back(lyt_three);
 
-        random_layout_params<TestType> params{{1, 1}, 1, false};
+        const random_layout_params<TestType> params{{1, 1}, 1, false};
 
-
-            generate_random_layout<TestType>(params, layout_stream, all_layouts);
+        generate_random_layout<TestType>(params, layout_stream, all_layouts);
 
                 const auto read_layout = read_sqd_layout<TestType>(layout_stream);
 

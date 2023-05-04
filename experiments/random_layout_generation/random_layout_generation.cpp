@@ -13,15 +13,15 @@
 
 using namespace fiction;
 
-int main()
+int main()  // NOLINT
 {
     // This script generates random layouts as .sqd file.
     using cell_level_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
-    std::string           folder_name = "random_layouts_test/";
+    const std::string     folder_name = "random_layouts_test/";
     std::filesystem::path folder_path(EXPERIMENTS_PATH);
     folder_path /= folder_name;
 
-    bool result = std::filesystem::create_directory(folder_path);
+    const bool result = std::filesystem::create_directory(folder_path);
     if (result)
     {
         std::cout << "Folder *random_layouts* created successfully" << std::endl;
@@ -31,12 +31,12 @@ int main()
         std::cout << "Failed to create folder" << std::endl;
     }
 
-    for (uint64_t num_sidbs = 5; num_sidbs < 10; num_sidbs++)
+    for (uint64_t num_sidbs = 25; num_sidbs < 26; num_sidbs++)
     {
-        std::filesystem::path dir_path = folder_path.string() + "number_sidbs_" + std::to_string(num_sidbs);
-        std::filesystem::path dir_path_sqd =
+        const std::filesystem::path dir_path = folder_path.string() + "number_sidbs_" + std::to_string(num_sidbs);
+        const std::filesystem::path dir_path_sqd =
             folder_path.string() + "number_sidbs_" + std::to_string(num_sidbs) + "/sqd";
-        std::filesystem::path dir_path_loc =
+        const std::filesystem::path dir_path_loc =
             folder_path.string() + "number_sidbs_" + std::to_string(num_sidbs) + "/loc";
         if (!std::filesystem::exists(dir_path))
         {
@@ -51,11 +51,12 @@ int main()
         }
 
         std::vector<cell_level_layout>          all_layouts{};
-        random_layout_params<cell_level_layout> params{{40, 40}, num_sidbs, true};
+        random_layout_params<cell_level_layout> params{{4, 4}, num_sidbs, false};
         for (uint64_t number_of_layouts = 0; number_of_layouts < 10; number_of_layouts++)
         {
-            generate_random_layout<cell_level_layout>(
+            const auto lyts = generate_random_layout<cell_level_layout>(
                 params, dir_path_sqd.string() + "/layout_" + std::to_string(number_of_layouts) + ".sqd", all_layouts);
+            all_layouts.push_back(lyts);
         }
     }
 }
