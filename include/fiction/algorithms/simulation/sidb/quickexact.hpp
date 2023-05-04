@@ -14,14 +14,31 @@
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <cstdint>
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 
 namespace fiction
 {
-
 /**
- * This struct stores the parameters for the `critical_temperature` algorithm.
+ * An enumeration of modes to use for the QuickExact algorithm.
+ */
+enum class automatic_base_number_detection
+{
+    /**
+     * It automatically detects if 3-state simulation is required. It checks if a positive charge could occur due to
+     * maximum band bending. If this mode is active, 3-state simulation could be run even if base_num = 2 was set in the
+     * physical parameters.
+     */
+    ON,
+    /**
+     * The base number from the physical parameter are used for the simulation.
+     */
+    OFF
+};
+/**
+ * This struct stores the parameters for the `quickexact` algorithm.
  */
 template <typename Lyt>
 struct quickexact_params
@@ -30,24 +47,27 @@ struct quickexact_params
      * All Parameters for physical SiDB simulations.
      */
     sidb_simulation_parameters physical_parameters{};
-
+    /**
+     * If ON, quickexact checks before the simulation starts if 3-state simulation is required or not.
+     */
+    automatic_base_number_detection base_number_detection = automatic_base_number_detection::ON;
+    /**
+     * All placed defects (cell + defect).
+     */
     std::unordered_map<typename Lyt::cell, const sidb_defect> defects{};
-
+    /**
+     * Local external electrostatic potentials (e.g locally applied electrodes).
+     */
     std::unordered_map<typename Lyt::cell, double> local_external_potential = {};
-    double                                         global_potential         = 0;
+    /**
+     * Global external electrostatic potential. Value is applied on each cell in the layout.
+     */
+    double global_potential = 0;
 };
 
 namespace detail
 {
-/**
- *  All metastable and physically valid charge distribution layouts are computed, stored in a vector and returned.
- *
- * @tparam Lyt Cell-level layout type.
- * @param lyt The layout to simulate.
- * @param params Simulation parameters.
- * @param ps Simulation statistics.
- * @return sidb_simulation_result is returned with all results.
- */
+
 template <typename Lyt>
 class quickexact_impl
 {
@@ -72,9 +92,11 @@ class quickexact_impl
             //  efficient way to prune the search space by 2^k with k being the number of detected negatively charged
             //  SiDBs.
             //  determine if three state simulation (i.e. positively charged SiDBs can occur) is required.
-            const auto three_state_simulation_required = charge_lyt.three_state_sim_required();
-            // std::vector<typename Lyt::cell> detected_negative_sidbs{};
-            // detected_negative_sidbs.reserve(detected_negative_sidb_indices.size());
+            bool three_state_simulation_required = false;
+            if (parameter.base_number_detection == automatic_base_number_detection::ON)
+            {
+                three_state_simulation_required = charge_lyt.three_state_sim_required();
+            }
 
             // if layout has at least two SiDBs, the code inside this if-statement is executed.
             if (number_of_SiDBs > 1)
@@ -114,17 +136,21 @@ class quickexact_impl
                 // if no positively charged DB can occur in the layout, this scope is executed.
                 if (!three_state_simulation_required)
                 {
+                    simulation_result.additional_simulation_parameters.emplace_back("base_number",
+                                                                                    static_cast<uint64_t>(2));
                     this->two_state_sim(charge_lyt_new, simulation_result);
                 }
 
                 // if positively charged DBs can occur in the layout, 3-state simulation is conducted.
                 else
                 {
+                    simulation_result.additional_simulation_parameters.emplace_back("base_number",
+                                                                                    static_cast<uint64_t>(3));
                     this->three_state_sim(charge_lyt_new, simulation_result);
                 }
             }
 
-            // in the case with only one SiDB in the layout (due to external potentials or defects, this single SiDB can
+            // In the case with only one SiDB in the layout (due to external potentials or defects, this single SiDB can
             // be neutrally or even positively charged.)
             else if (number_of_SiDBs == 1)
             {
@@ -373,15 +399,28 @@ class quickexact_impl
     std::vector<typename Lyt::cell> all_sidbs_in_lyt_without_negative_detected_ones;
     // Collection of defects that are placed in addition to the SiDBs.
     std::unordered_map<typename Lyt::cell, const sidb_defect> real_placed_defects;
-    uint64_t                                                  number_of_SiDBs{};
-
+    // number of SiDBs of the input layout.
+    uint64_t number_of_SiDBs{};
+    // Parameter used for the simulation.
     quickexact_params<Lyt> parameter;
-
+    // Simulation results.
     sidb_simulation_result<Lyt> result{};
 };
 
 }  // namespace detail
 
+/**
+ * *Quickexact* is a *quick* and *exact* physical simulation algorithm for SiDB layouts. It determines all physically
+ * valid charge configurations of a given layout. It shows a performance advantage of more than three orders of
+ * magnitude over the state of the art. It also computes efficiently when positively charged SiDB can occur
+ * in the layout due to small spacing. Finally, it also allows the simulation of an SiDB layout while taking into
+ * account global and local electrostatic potentials and existing defects.
+ *
+ * @tparam Lyt Cell-level layout type.
+ * @param params Parameters used for the simulation. This includes physical parameters, external potentials, and
+ * defects.
+ * @return sidb_simulation_result is returned with all results.
+ */
 template <typename Lyt>
 sidb_simulation_result<Lyt> quickexact(Lyt& lyt, const quickexact_params<Lyt>& params = {})
 {

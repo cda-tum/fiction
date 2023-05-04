@@ -833,3 +833,35 @@ TEMPLATE_TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[
         CHECK(round_to_n_decimal_places(layout.get_system_energy(), 1) <= 0);
     }
 }
+
+TEMPLATE_TEST_CASE("3 DBs next to each other with automatic base number detection", "[ExGS]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+
+    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
+
+    sidb_layout lyt{{20, 10}};
+
+    lyt.assign_cell_type({5, 0, 0}, sidb_layout::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb_layout::cell_type::NORMAL);
+    lyt.assign_cell_type({7, 0, 0}, sidb_layout::cell_type::NORMAL);
+
+    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+
+    const auto simulation_results = quickexact<TestType>(lyt, params);
+
+    REQUIRE(!simulation_results.additional_simulation_parameters.empty());
+    CHECK(simulation_results.additional_simulation_parameters[0].first == "base_number");
+    CHECK(std::any_cast<uint64_t>(simulation_results.additional_simulation_parameters[0].second) == 3);
+
+    const quickexact_params<TestType> params_new{sidb_simulation_parameters{3, -0.32},
+                                                 automatic_base_number_detection::OFF};
+
+    const auto simulation_results_new = quickexact<TestType>(lyt, params_new);
+
+    REQUIRE(!simulation_results_new.additional_simulation_parameters.empty());
+    CHECK(simulation_results_new.additional_simulation_parameters[0].first == "base_number");
+    CHECK(std::any_cast<uint64_t>(simulation_results_new.additional_simulation_parameters[0].second) == 2);
+
+    CHECK(simulation_results_new.simulation_runtime < simulation_results.simulation_runtime);
+}
