@@ -134,7 +134,6 @@ class generate_random_layout_impl
             if (lyt.num_cells() == parameter.number_placed_sidbs && identical_layout_counter == 0)
             {
                 write_sqd_layout(lyt, os);
-                ;
                 successful_generation = true;
             }
         }
