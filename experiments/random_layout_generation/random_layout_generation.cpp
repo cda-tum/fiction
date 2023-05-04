@@ -6,18 +6,16 @@
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/types.hpp>
 
-#include <fmt/format.h>
-#include <mockturtle/utils/stopwatch.hpp>
-
 #include <filesystem>
 #include <iomanip>
+#include <iostream>
 #include <string>
 
 using namespace fiction;
 
 int main()
 {
-
+    // This script generates random layouts as .sqd file.
     using cell_level_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
     std::string           folder_name = "random_layouts_test/";
     std::filesystem::path folder_path(EXPERIMENTS_PATH);
