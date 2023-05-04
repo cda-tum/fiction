@@ -39,6 +39,13 @@ Heuristic Ground State Simulation
 Exhaustive Ground State Simulation
 ##################################
 
+**Header:** ``fiction/algorithms/simulation/sidb/quickexact.hpp``
+
+.. doxygenenum:: fiction::automatic_base_number_detection
+.. doxygenstruct:: fiction::quickexact_params
+   :members:
+.. doxygenfunction:: fiction::quickexact
+
 **Header:** ``fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp``
 
 .. doxygenfunction:: fiction::exhaustive_ground_state_simulation
