@@ -75,7 +75,5 @@ Random Layout Generator
 
 **Header:** ``fiction/algorithms/simulation/sidb/random_layout_generator.hpp``
 
-.. doxygenfunction:: fiction::generate_random_layout(const random_layout_params<Lyt>& params, std::ostream& os,
-                            const std::vector<Lyt>& all_layouts = {}))
-.. doxygenfunction:: fiction::generate_random_layout(const random_layout_params<Lyt>& params, const std::string_view& filename,
-                            const std::vector<Lyt>& all_layouts = {})
+.. doxygenfunction:: fiction::generate_random_layout(const random_layout_params<Lyt>& params, std::ostream& os, const std::vector<Lyt>& all_layouts = {}))
+.. doxygenfunction:: fiction::generate_random_layout(const random_layout_params<Lyt>& params, const std::string_view& filename, const std::vector<Lyt>& all_layouts = {})
