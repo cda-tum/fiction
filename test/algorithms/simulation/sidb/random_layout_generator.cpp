@@ -15,7 +15,7 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>))
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>))
 {
     std::stringstream layout_stream{};
     SECTION("empty parameters")
@@ -89,5 +89,34 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
                         }
                     });
             });
+    }
+
+    SECTION("given previous layouts")
+    {
+        std::vector<TestType> all_layouts{};
+        TestType              lyt_one{{1, 1}};
+        lyt_one.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
+        all_layouts.push_back(lyt_one);
+
+        TestType lyt_two{{1, 1}};
+        lyt_two.assign_cell_type({0, 1}, TestType::cell_type::NORMAL);
+        all_layouts.push_back(lyt_two);
+
+        TestType lyt_three{{1, 1}};
+        lyt_two.assign_cell_type({1, 0}, TestType::cell_type::NORMAL);
+        all_layouts.push_back(lyt_three);
+
+        random_layout_params<TestType> params{{1, 1}, 1, false};
+
+
+            generate_random_layout<TestType>(params, layout_stream, all_layouts);
+
+                const auto read_layout = read_sqd_layout<TestType>(layout_stream);
+
+                CHECK(read_layout.num_cells() == 1);
+                CHECK(read_layout.get_cell_type({1, 1}) == TestType::cell_type::NORMAL);
+                CHECK(read_layout.x() == 1);
+                CHECK(read_layout.y() == 1);
+
     }
 }
