@@ -31,11 +31,13 @@ struct random_layout_params
      */
     uint64_t number_placed_sidbs = 0;
     /**
-     * If positively charged SiDBs should be prevented, SiDBs are not placed closed than a specified distance (2 cells
-     * by default).
+     * If positively charged SiDBs should be prevented, SiDBs are not placed closed than minimal_spacing.
      */
     bool prevent_positive_charges = true;
-
+    /**
+     * If positively charged SiDBs should be prevented, SiDBs are not placed closed than this value (2 cells as
+     * Euclidean distance by default).
+     */
     double minimal_spacing = 2;
     /**
      * Maximal Attempts to generate layout.
