@@ -50,8 +50,8 @@ int main()  // NOLINT
             std::cout << "Folder already exists." << std::endl;
         }
 
-        std::vector<cell_level_layout>          all_layouts{};
-        random_layout_params<cell_level_layout> params{{4, 4}, num_sidbs, false};
+        std::vector<cell_level_layout>                all_layouts{};
+        const random_layout_params<cell_level_layout> params{{4, 4}, num_sidbs, false};
         for (uint64_t number_of_layouts = 0; number_of_layouts < 10; number_of_layouts++)
         {
             const auto lyts = generate_random_layout<cell_level_layout>(

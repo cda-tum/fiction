@@ -79,9 +79,9 @@ class generate_random_layout_impl
             while (lyt.num_cells() < parameter.number_placed_sidbs && attempt_counter < parameter.maximal_attempts)
             {
                 // uniform distribution of [0,x_coordinate].
-                std::uniform_int_distribution<uint64_t> dist_x(0, static_cast<uint64_t>(x_dimension));
+                std::uniform_int_distribution<uint64_t> dist_x(0u, static_cast<uint64_t>(x_dimension));
                 // uniform distribution of [0,y_coordinate].
-                std::uniform_int_distribution<uint64_t> dist_y(0, static_cast<uint64_t>(y_dimension));
+                std::uniform_int_distribution<uint64_t> dist_y(0u, static_cast<uint64_t>(y_dimension));
                 // random integer from [0,x_coordinate] is selected.
                 const auto random_x_coordinate = dist_x(generator);
                 // random integer from [0,y_coordinate] is selected.
@@ -116,7 +116,7 @@ class generate_random_layout_impl
             for (const auto& old_lyt : previous_layouts)
             {
                 old_lyt.foreach_cell(
-                    [this, &identical_layout_counter, lyt](const auto& cell_old) mutable
+                    [&identical_layout_counter, lyt](const auto& cell_old) mutable
                     {
                         lyt.foreach_cell(
                             [&identical_layout_counter, &cell_old](const auto& cell_new) mutable
@@ -140,7 +140,7 @@ class generate_random_layout_impl
         }
     }
 
-    const Lyt get_layout() const
+    Lyt get_layout() const
     {
         return layout;
     }
@@ -162,7 +162,7 @@ class generate_random_layout_impl
  * @param all_layouts Previous generated layouts to avoid duplication.
  */
 template <typename Lyt>
-const Lyt generate_random_layout(const random_layout_params<Lyt>& params, std::ostream& os, std::vector<Lyt> layouts)
+Lyt generate_random_layout(const random_layout_params<Lyt>& params, std::ostream& os, std::vector<Lyt> layouts)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(!has_siqad_coord_v<Lyt>, "Lyt is based on SiQAD coordinates");
@@ -180,8 +180,8 @@ const Lyt generate_random_layout(const random_layout_params<Lyt>& params, std::o
  * @param all_layouts Previous generated layouts to avoid duplication.
  */
 template <typename Lyt>
-const Lyt generate_random_layout(const random_layout_params<Lyt>& params, const std::string_view& filename,
-                                 std::vector<Lyt>& all_layouts = {})
+Lyt generate_random_layout(const random_layout_params<Lyt>& params, const std::string_view& filename,
+                           std::vector<Lyt>& all_layouts = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 

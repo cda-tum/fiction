@@ -110,12 +110,11 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
 
         generate_random_layout<TestType>(params, layout_stream, all_layouts);
 
-                const auto read_layout = read_sqd_layout<TestType>(layout_stream);
+        const auto read_layout = read_sqd_layout<TestType>(layout_stream);
 
-                CHECK(read_layout.num_cells() == 1);
-                CHECK(read_layout.get_cell_type({1, 1}) == TestType::cell_type::NORMAL);
-                CHECK(read_layout.x() == 1);
-                CHECK(read_layout.y() == 1);
-
+        CHECK(read_layout.num_cells() == 1);
+        CHECK(read_layout.get_cell_type({1, 1}) == TestType::cell_type::NORMAL);
+        CHECK(read_layout.x() == 1);
+        CHECK(read_layout.y() == 1);
     }
 }
