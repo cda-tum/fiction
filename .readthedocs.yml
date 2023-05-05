@@ -1,5 +1,8 @@
 version: 2
 
+build:
+  os: ubuntu-22.04
+
 submodules:
   exclude: all
   recursive: false
@@ -7,7 +10,7 @@ submodules:
 sphinx:
   configuration: docs/conf.py
 
-formats: []
+formats: [ ]
 
 python:
   version: "3.7"
