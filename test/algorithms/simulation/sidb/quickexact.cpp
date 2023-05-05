@@ -511,7 +511,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away)", "[ExGS]",
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -640,7 +640,7 @@ TEMPLATE_TEST_CASE("three DBs next to each other", "[ExGS]",
     lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -677,7 +677,7 @@ TEMPLATE_TEST_CASE("three DBs next to each other, small mu-", "[ExGS]",
     lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.8}};
+    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.8}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
