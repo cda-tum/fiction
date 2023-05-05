@@ -1033,9 +1033,12 @@ TEMPLATE_TEST_CASE(
         CHECK(loc_two_w_positive_defect > loc_two_w_neutral_defect);
         CHECK(loc_three_w_positive_defect > loc_three_w_neutral_defect);
 
-        CHECK(defect_potentials_negative[{0, 0, 0}] == -defect_potentials_positive[{0, 0, 0}]);
-        CHECK(defect_potentials_negative[{3, 0, 0}] == -defect_potentials_positive[{3, 0, 0}]);
-        CHECK(defect_potentials_negative[{5, 0, 0}] == -defect_potentials_positive[{5, 0, 0}]);
+        CHECK_THAT((defect_potentials_negative[{0, 0, 0}] + defect_potentials_positive[{0, 0, 0}]),
+                   Catch::Matchers::WithinAbs(0.0, 0.000001));
+        CHECK_THAT((defect_potentials_negative[{3, 0, 0}] + defect_potentials_positive[{3, 0, 0}]),
+                   Catch::Matchers::WithinAbs(0.0, 0.000001));
+        CHECK_THAT((defect_potentials_negative[{5, 0, 0}] + defect_potentials_positive[{5, 0, 0}]),
+                   Catch::Matchers::WithinAbs(0.0, 0.000001));
     }
 
     SECTION("experiments with defects | assigning and reassigning defects")
@@ -1094,9 +1097,12 @@ TEMPLATE_TEST_CASE(
         CHECK(loc_two_w_positive_defect > loc_two_w_neutral_defect);
         CHECK(loc_three_w_positive_defect > loc_three_w_neutral_defect);
 
-        CHECK(defect_potentials_negative[{0, 0, 0}] == -defect_potentials_positive[{0, 0, 0}]);
-        CHECK(defect_potentials_negative[{3, 0, 0}] == -defect_potentials_positive[{3, 0, 0}]);
-        CHECK(defect_potentials_negative[{5, 0, 0}] == -defect_potentials_positive[{5, 0, 0}]);
+        CHECK_THAT((defect_potentials_negative[{0, 0, 0}] + defect_potentials_positive[{0, 0, 0}]),
+                   Catch::Matchers::WithinAbs(0.0, 0.000001));
+        CHECK_THAT((defect_potentials_negative[{3, 0, 0}] + defect_potentials_positive[{3, 0, 0}]),
+                   Catch::Matchers::WithinAbs(0.0, 0.000001));
+        CHECK_THAT((defect_potentials_negative[{5, 0, 0}] + defect_potentials_positive[{5, 0, 0}]),
+                   Catch::Matchers::WithinAbs(0.0, 0.000001));
     }
 
     SECTION("assign defect on DB position which is not allowed")
@@ -1209,7 +1215,7 @@ TEMPLATE_TEST_CASE(
         const sidb_simulation_parameters params{3, -0.28};
         charge_distribution_surface      charge_lyt_first{lyt, params, sidb_charge_state::NEGATIVE};
         charge_lyt_first.three_state_sim_required();
-        const auto                       positive_candidates = charge_lyt_first.get_positive_candidates();
+        const auto positive_candidates = charge_lyt_first.get_positive_candidates();
         REQUIRE(positive_candidates.size() == 3);
         uint64_t loop_counter = 0;
         for (const auto& cell : positive_candidates)

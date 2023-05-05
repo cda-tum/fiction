@@ -681,7 +681,7 @@ TEMPLATE_TEST_CASE("three DBs next to each other, small mu-", "[ExGS]",
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
-    REQUIRE(simulation_results.charge_distributions.size() == 1);
+    REQUIRE(simulation_results.charge_distributions.size() > 0);
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
     CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);

@@ -409,7 +409,7 @@ class quickexact_impl
     /**
      * Cell-level layout
      */
-    Lyt layout{};
+    Lyt layout;
     /**
      * Charge distribution surface
      */
@@ -417,7 +417,7 @@ class quickexact_impl
     /**
      * Indices of all SiDBs that are detected to be negatively charged in a physically valid layout.
      */
-    std::vector<int64_t> detected_negative_sidb_indices;
+    std::vector<int64_t> detected_negative_sidb_indices{};
     /**
      * All SiDBs that are detected to be negatively charged in a physically valid layout.
      */
@@ -425,11 +425,11 @@ class quickexact_impl
     /**
      * All SiDBs of the layout but without the negatively charged SiDBs.
      */
-    std::vector<typename Lyt::cell> all_sidbs_in_lyt_without_negative_detected_ones;
+    std::vector<typename Lyt::cell> all_sidbs_in_lyt_without_negative_detected_ones{};
     /**
      * Collection of defects that are placed in addition to the SiDBs.
      */
-    std::unordered_map<typename Lyt::cell, const sidb_defect> real_placed_defects;
+    std::unordered_map<typename Lyt::cell, const sidb_defect> real_placed_defects{};
     /**
      * Number of SiDBs of the input layout.
      */
@@ -437,7 +437,7 @@ class quickexact_impl
     /**
      * Parameter used for the simulation.
      */
-    quickexact_params<Lyt> parameter;
+    quickexact_params<Lyt> parameter{};
     /**
      * Simulation results.
      */
