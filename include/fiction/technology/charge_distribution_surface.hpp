@@ -1676,7 +1676,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param negative_indices Vector of SiDBs indices that are already negatively charged (double occupied).
      */
     void adjacent_search(const double alpha, std::vector<uint64_t>& negative_indices) noexcept
-
     {
         double     dist_max     = 0;
         const auto reserve_size = this->num_cells() - negative_indices.size();
