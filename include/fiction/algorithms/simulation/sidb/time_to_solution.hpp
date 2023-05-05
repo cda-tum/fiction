@@ -25,19 +25,36 @@
 
 namespace fiction
 {
-
+/**
+ * An enumeration of exact algorithms for the tts-simulation.
+ */
 enum class exact_algorithm_type
 {
+    /**
+     * ExGS
+     */
     EXGS,
-
+    /**
+     * QuickExact
+     */
     QUICKEXACT
 };
 
 struct time_to_solution_params
 {
-    exact_algorithm_type engine           = exact_algorithm_type::EXGS;
-    uint64_t             repetitions      = 100;
-    double               confidence_level = 0.997;
+    /**
+     * Exact simulation algorithm used to simulate the ground state as reference.
+     */
+    exact_algorithm_type engine = exact_algorithm_type::EXGS;
+    /**
+     * Number of repetitions to determine the simulation accuracy (`repetitions = 100` means that accuracy is precise to
+     * 1%).
+     */
+    uint64_t repetitions = 100;
+    /**
+     * The time-to-solution also depends on the given confidence level which can be set here.
+     */
+    double confidence_level = 0.997;
 };
 
 /**
@@ -59,17 +76,17 @@ struct time_to_solution_stats
      * Average single simulation runtime in seconds.
      */
     double mean_single_runtime{};
-
     /**
      * Single simulation runtime of the exhaustive ground state searcher.
      */
     double single_runtime_exhaustive{};
-
     /**
      * Number of physically valid charge configurations found by ExGS.
      */
     std::size_t number_valid_layouts_exgs{};
-
+    /**
+     * Name of the exact simulation algorithm used.
+     */
     std::string algorithm{};
     /**
      * Print the results to the given output stream.
@@ -88,11 +105,9 @@ struct time_to_solution_stats
  *
  * @tparam Lyt Cell-level layout type.
  * @param lyt Layout that is used for the simulation.
- * @param sidb_params Physical SiDB parameters which are used for the simulation.
+ * @param quicksim_params Parameters required for the quicksim.hpp algorithm.
  * @param ps Pointer to a struct where the results (time_to_solution, acc, single runtime) are stored.
- * @param repetitions Number of repetitions to determine the simulation accuracy (`repetitions = 100` means that
- * accuracy is precise to 1%).
- * @param confidence_level The time-to-solution also depends on the given confidence level which can be set here.
+ * @param tts_params Parameters used for the time-to-solution calculation.
  */
 template <typename Lyt>
 void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, time_to_solution_stats* ps = nullptr,

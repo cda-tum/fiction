@@ -100,4 +100,7 @@ Time-to-Solution (TTS) Statistics
 
 **Header:** ``fiction/algorithms/simulation/sidb/time_to_solution.hpp``
 
+.. doxygenenum:: fiction::exact_algorithm_type
+.. doxygenstruct:: fiction::time_to_solution_params
+   :members:
 .. doxygenfunction:: fiction::sim_acc_tts
