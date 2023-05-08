@@ -65,25 +65,39 @@ int main()  // NOLINT
                 const auto        physical_parameter = ground_state_layouts.front().get_phys_params();
                 std::stringstream ss;
                 ss << std::fixed << std::setprecision(3) << -params.mu;
-                std::ofstream outFile(folder.path().string() + "/loc/" + name + "_sim_µ_minus_" + ss.str() + ".txt");
-                outFile << std::fixed << std::setprecision(3);
-                outFile << "x;"
-                        << "y;";
+                std::string const file_path =
+                    folder.path().string() + "/loc/" + name + "_sim_µ_minus_" + ss.str() + ".txt";
+
+                // Open the output file
+                std::ofstream out_file(file_path);
+                if (!out_file)
+                {
+                    std::cerr << "Error opening file: " << file_path << std::endl;
+                    return 0;
+                }
+
+                // Set the floating-point precision for the output file
+                out_file << std::fixed << std::setprecision(3);
+
+                // Write the column headers
+                out_file << "x;"
+                         << "y;" << std::endl;
+
                 for (uint64_t i = 0; i < ground_state_layouts.size(); i++)
                 {
-                    outFile << std::to_string(i) << ";";
+                    out_file << std::to_string(i) << ";";
                 }
-                outFile << std::endl;
+                out_file << std::endl;
 
                 for (const auto& sidb : sidbs)
                 {
                     auto pos = sidb_nm_position<sidb_cell_clk_lyt_siqad>(physical_parameter, sidb);
-                    outFile << pos.first << ";" << pos.second << ";";
+                    out_file << pos.first << ";" << pos.second << ";";
                     for (const auto& valid_layout : ground_state_layouts)
                     {
-                        outFile << std::to_string(charge_state_to_sign(valid_layout.get_charge_state(sidb))) << ";";
+                        out_file << std::to_string(charge_state_to_sign(valid_layout.get_charge_state(sidb))) << ";";
                     }
-                    outFile << std::endl;
+                    out_file << std::endl;
                 }
             }
             else
