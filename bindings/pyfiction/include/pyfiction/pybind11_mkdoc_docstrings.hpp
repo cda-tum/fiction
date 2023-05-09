@@ -89,9 +89,9 @@ Returns:
     The shortest loopless path in `layout` from `source` to `target`.)doc";
 
 static const char *__doc_fiction_a_star_distance =
-R"doc(A distance function that does not approximate but compute the actual
+    R"doc(A distance function that does not approximate but compute the actual
 minimum path length on the given layout via A* traversal. Naturally,
-this function cannot be evaluated in :math:` O(1) `, but has the
+this function cannot be evaluated in :math:`O(1)`, but has the
 polynomial complexity of A*.
 
 If no path between source and target exists in `lyt`, the returned
@@ -176,8 +176,8 @@ Returns:
     building blocks defined in `GateLibrary`.)doc";
 
 static const char *__doc_fiction_area =
-R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
-0). Calculates :math:` (x + 1) \cdot (y + 1) `.
+    R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
+0). Calculates :math:`(x + 1) \cdot (y + 1)`.
 
 Template parameter ``CoordinateType``:
     Coordinate type.
@@ -220,42 +220,42 @@ static const char *__doc_fiction_area_stats_area = R"doc(Area requirements in nm
 static const char *__doc_fiction_area_stats_report = R"doc()doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator =
-R"doc(An iterator type that iterates over increasingly larger 2D aspect
-ratios via factorization, starting from a number of faces :math:` n `.
+    R"doc(An iterator type that iterates over increasingly larger 2D aspect
+ratios via factorization, starting from a number of faces :math:`n`.
 After iterating over all possible factorizations of n, the next step
-increases :math:` n ` and continues with the factorization. Thereby, a
-sequence of aspect ratios starting from :math:` n = 4 ` faces looks
-like this: :math:` 1 \times 4, 4 \times 1, 2 \times 2, 1 \times 5, 5
-\times 1, 1 \times 6, 6 \times 1, 2 \times 3, 3 \times 2, \dots `
+increases :math:`n` and continues with the factorization. Thereby, a
+sequence of aspect ratios starting from :math:`n = 4` faces looks like
+this: :math:`1 \times 4, 4 \times 1, 2 \times 2, 1 \times 5, 5 \times
+1, 1 \times 6, 6 \times 1, 2 \times 3, 3 \times 2, \dots`
 
 Template parameter ``AspectRatio``:
     Aspect ratio type.)doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator_aspect_ratio_iterator =
-R"doc(Standard constructor. Takes a starting value and computes an initial
+    R"doc(Standard constructor. Takes a starting value and computes an initial
 factorization. The value `n` represents the amount of faces in the
-desired aspect ratios. For example, :math:` n = 1 ` will yield aspect
-ratios with exactly :math:` 1 ` face, i.e. :math:` 1 \times 1 ` which
-is equal to `ucoord_t{0, 0}`. If :math:` n = 2 `, the aspect ratios
-:math:` 1 \times 2 ` and :math:` 2 \times 1 ` will result, which are
-equal to `ucoord_t{0, 1}` and `ucoord_t{1, 0}`. Both examples with
+desired aspect ratios. For example, :math:`n = 1` will yield aspect
+ratios with exactly :math:`1` face, i.e. :math:`1 \times 1` which is
+equal to `ucoord_t{0, 0}`. If :math:`n = 2`, the aspect ratios
+:math:`1 \times 2` and :math:`2 \times 1` will result, which are equal
+to `ucoord_t{0, 1}` and `ucoord_t{1, 0}`. Both examples with
 `AspectRatio == offset::ucoord_t`.
 
 Parameter ``n``:
     Starting value of the aspect ratio iteration.)doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator_factorize =
-R"doc(Factorizes the current `num` into all possible factors :math:` (x, y)
-` with :math:` x \cdot y = num `. The result is stored as a vector of
+    R"doc(Factorizes the current `num` into all possible factors :math:`(x, y)`
+with :math:`x \cdot y = num`. The result is stored as a vector of
 `AspectRatio` objects in the attribute factors.)doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator_factors = R"doc(Factors of num.)doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator_it = R"doc(Iterator pointing to current factor.)doc";
 
-static const char *__doc_fiction_aspect_ratio_iterator_next =
-R"doc(Computes the next possible `num` where a factorization :math:` (x, y)
-` with :math:` x \cdot y = num ` exists.)doc";
+static const char* __doc_fiction_aspect_ratio_iterator_next =
+    R"doc(Computes the next possible `num` where a factorization :math:`(x, y)`
+with :math:`x \cdot y = num` exists.)doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator_num = R"doc(Number to factorize into dimensions.)doc";
 
@@ -437,8 +437,8 @@ Returns:
     A container that contains pairs of `c`'s opposing coordinates.)doc";
 
 static const char *__doc_fiction_cartesian_layout_area =
-R"doc(Returns the layout's number of faces which are equal to :math:` (x +
-1) \cdot (y + 1) `.
+    R"doc(Returns the layout's number of faces which are equal to :math:`(x + 1)
+\cdot (y + 1)`.
 
 Returns:
     Area of layout.)doc";
@@ -986,7 +986,7 @@ Returns:
     z-dimension.)doc";
 
 static const char *__doc_fiction_cell_level_layout =
-R"doc(A layout type to layer on top of a clocked layout that allows the
+    R"doc(A layout type to layer on top of a clocked layout that allows the
 assignment of individual cells to clock zones in accordance with an
 FCN technology, e.g., QCA, iNML, or SiDB. This type, thereby,
 represents layouts on a cell-accurate abstraction without a notion of
@@ -997,14 +997,14 @@ ToPoliNano & MagCAD, SiQAD, etc.
 
 In this layout, each coordinate, i.e., clock zone has the dimensions
 of a single cell. Clock numbers can, however, be assigned in a way,
-that they form larger zones, e.g., of :math:` 5 \times 5 ` cells.
-These dimensions can be specified in the constructor. They affect the
-way, clock numbers are fetched from the underlying clocked layout.
+that they form larger zones, e.g., of :math:`5 \times 5` cells. These
+dimensions can be specified in the constructor. They affect the way,
+clock numbers are fetched from the underlying clocked layout.
 
 The de-facto standard of cell-level FCN design is to group multiple
 cells into tiles large enough to be addressable by individual clocking
 electrodes buried in the layout substrate. Cell-based clocking, i.e.,
-clock zones of size :math:` 1 \times 1 ` cells are not recommended as
+clock zones of size :math:`1 \times 1` cells are not recommended as
 they are most likely not fabricable in reality.
 
 On the implementation side, this layout distinguishes between `cell`,
@@ -1645,7 +1645,7 @@ Parameter ``cn``:
 static const char *__doc_fiction_clocking_scheme_regular = R"doc(Defines the clocking as regular and well-defined by the scheme.)doc";
 
 static const char *__doc_fiction_color_routing =
-R"doc(A multi-path signal routing approach based on coloring of edge
+    R"doc(A multi-path signal routing approach based on coloring of edge
 intersection graphs as originally proposed in \"Efficient Multi-Path
 Signal Routing for Field-coupled Nanotechnologies\" by M. Walter and
 R. Wille in NANOARCH 2022.
@@ -1669,7 +1669,7 @@ could be fulfilled. Furthermore, the path enumeration and the coloring
 can be parameterized in the first place. By default, all paths are
 enumerated for each objective. While this guarantees completeness on
 small layouts, it quickly becomes intractable. Therefore, a path limit
-can be set that restricts the number of paths to the :math:` k `
+can be set that restricts the number of paths to the :math:`k`
 shortest. Additionally, for the coloring process, SAT solving is used
 by default, which, again, guarantees completeness, but becomes
 infeasible rather quickly. However, powerful symmetry breaking is
@@ -2029,24 +2029,24 @@ Returns:
     Exclusive disjunction in two variables.)doc";
 
 static const char *__doc_fiction_critical_path_length_and_throughput =
-R"doc(Computes the critical path length (CP) length and the throughput (TP)
+    R"doc(Computes the critical path length (CP) length and the throughput (TP)
 of a gate-level layout.
 
 The critical path length is defined as the longest path from any PI to
 any PO in tiles.
 
-The throughput is defined as :math:` \frac{1}{x} ` where :math:` x `
-is the highest path length difference between any sets of paths that
-lead to the same gate. This function provides only the denominator
-:math:` x `, as the numerator is always :math:` 1 `. Furthermore,
-:math:` x ` is given in clock cycles rather than clock phases because
-it is assumed that a path length difference smaller than
+The throughput is defined as :math:`\frac{1}{x}` where :math:`x` is
+the highest path length difference between any sets of paths that lead
+to the same gate. This function provides only the denominator
+:math:`x`, as the numerator is always :math:`1`. Furthermore,
+:math:`x` is given in clock cycles rather than clock phases because it
+is assumed that a path length difference smaller than
 `lyt.num_clocks()` does not lead to any delay. Contrary, for any
-throughput value :math:` \frac{1}{x} ` with :math:` x > 1 `, the
-layout computes its represented Boolean function only every :math:` x
-` full clock cycles after the first inputs have been propagated
-through the design. Thereby, all PIs need to be held constant for
-:math:` x ` clock phases to ensure proper computation.
+throughput value :math:`\frac{1}{x}` with :math:`x > 1`, the layout
+computes its represented Boolean function only every :math:`x` full
+clock cycles after the first inputs have been propagated through the
+design. Thereby, all PIs need to be held constant for :math:`x` clock
+phases to ensure proper computation.
 
 For more information on the concept of throughput and delay see
 \"Synchronization of Clocked Field-Coupled Circuits\" by F. Sill
@@ -2055,8 +2055,8 @@ Torres, M. Walter, R. Wille, D. Große, and R. Drechsler in IEEE NANO
 M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
 Springer Nature in 2022.
 
-The complexity of this function is :math:` O(|T|) ` where :math:` T `
-is the set of all occupied tiles in `lyt`.
+The complexity of this function is :math:`O(|T|)` where :math:`T` is
+the set of all occupied tiles in `lyt`.
 
 Template parameter ``Lyt``:
     Gate-level layout type.
@@ -4283,19 +4283,19 @@ algorithm.)doc";
 static const char *__doc_fiction_detail_yen_k_shortest_paths_impl_yen_k_shortest_paths_impl = R"doc()doc";
 
 static const char *__doc_fiction_determine_vertex_coloring =
-R"doc(This function provides an interface to call various vertex coloring
+    R"doc(This function provides an interface to call various vertex coloring
 algorithms on the given graph. A vertex coloring is the assignment of
 colors to graph vertices such that no two vertices that share an edge
-receive the same color. If a graph is colorable with :math:` k `
-colors, the graph is said to be :math:` k `-colorable. The minimum
-value of :math:` k ` for a graph is called its chromatic number. To
-determine the chromatic number of a graph is :math:` NP `-complete in
-general. The provided algorithms attempt to get as close to the
-optimum coloring as possible. However, no heuristic can give an
-optimality guarantee. If the exact chromatic number is required, the
-SAT-based engine must be used. This may require exponential runtime in
-the worst case but is, on average, a lot faster due to the smart
-traversal of search spaces that SAT solvers provide.
+receive the same color. If a graph is colorable with :math:`k` colors,
+the graph is said to be :math:`k`-colorable. The minimum value of
+:math:`k` for a graph is called its chromatic number. To determine the
+chromatic number of a graph is :math:`NP`-complete in general. The
+provided algorithms attempt to get as close to the optimum coloring as
+possible. However, no heuristic can give an optimality guarantee. If
+the exact chromatic number is required, the SAT-based engine must be
+used. This may require exponential runtime in the worst case but is,
+on average, a lot faster due to the smart traversal of search spaces
+that SAT solvers provide.
 
 See graph_coloring_engine for a list of all supported engines.
 
@@ -4326,7 +4326,7 @@ Returns:
 static const char *__doc_fiction_determine_vertex_coloring_heuristic_params = R"doc(Parameters for heuristic graph coloring.)doc";
 
 static const char *__doc_fiction_determine_vertex_coloring_heuristic_params_k_color_value =
-R"doc(:math:` k `-color value for :math:` k `-coloring algorithms, e.g.,
+    R"doc(:math:`k`-color value for :math:`k`-coloring algorithms, e.g.,
 TABUCOL.)doc";
 
 static const char *__doc_fiction_determine_vertex_coloring_params =
@@ -4512,16 +4512,16 @@ static const char *__doc_fiction_eq_type = R"doc(The different equivalence types
 
 static const char *__doc_fiction_eq_type_NO = R"doc(`Spec` and `Impl` are logically not equivalent OR `Impl` has DRVs.)doc";
 
-static const char *__doc_fiction_eq_type_STRONG =
-R"doc(`Spec` and `Impl` are logically equivalent AND `Impl` has a throughput
-of :math:` \frac{1}{1} `.)doc";
+static const char* __doc_fiction_eq_type_STRONG =
+    R"doc(`Spec` and `Impl` are logically equivalent AND `Impl` has a throughput
+of :math:`\frac{1}{1}`.)doc";
 
-static const char *__doc_fiction_eq_type_WEAK =
-R"doc(`Spec` and `Impl` are logically equivalent BUT `Impl` has a throughput
-of :math:` \frac{1}{x} ` with :math:` x > 1 `.)doc";
+static const char* __doc_fiction_eq_type_WEAK =
+    R"doc(`Spec` and `Impl` are logically equivalent BUT `Impl` has a throughput
+of :math:`\frac{1}{x}` with :math:`x > 1`.)doc";
 
 static const char *__doc_fiction_equivalence_checking =
-R"doc(Performs SAT-based equivalence checking between a specification of
+    R"doc(Performs SAT-based equivalence checking between a specification of
 type `Spec` and an implementation of type `Impl`. Both `Spec` and
 `Impl` need to be network types (that is, gate-level layouts can be
 utilized as well).
@@ -4538,11 +4538,11 @@ Thereby, three different types of equivalences arise:
 of them is a gate-level layout that contains DRVs and, thus, cannot be
 checked for equivalence. - `WEAK` equivalence: Spec and Impl are
 logically equivalent but either one of them is a gate-level layout
-with TP of :math:` \frac{1}{x} ` with :math:` x > 1 ` or both of them
-are gate-level layouts with TP of :math:` \frac{1}{x} ` and :math:`
-\frac{1}{y} `, respectively, where :math:` x \neq y `. - `STRONG`
+with TP of :math:`\frac{1}{x}` with :math:`x > 1` or both of them are
+gate-level layouts with TP of :math:`\frac{1}{x}` and
+:math:`\frac{1}{y}`, respectively, where :math:`x \neq y`. - `STRONG`
 equivalence: Spec and Impl are logically equivalent and all involved
-gate-level layouts have TP of :math:` \frac{1}{1} `.
+gate-level layouts have TP of :math:`\frac{1}{1}`.
 
 This approach was first proposed in \"Verification for Field-coupled
 Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D.
@@ -4595,10 +4595,10 @@ Returns:
     ESR clocking scheme.)doc";
 
 static const char *__doc_fiction_euclidean_distance =
-R"doc(The Euclidean distance :math:` D ` between two layout coordinates
-:math:` (x_1, y_1) ` and :math:` (x_2, y_2) ` given by
+    R"doc(The Euclidean distance :math:`D` between two layout coordinates
+:math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
 
-:math:` D = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2} `
+:math:`D = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}`
 
 Template parameter ``Lyt``:
     Coordinate layout type.
@@ -4655,7 +4655,7 @@ R"doc(\verbatim / \ / \ / \ / \ / \ / \ | (0,0) | (1,0) | (2,0) | | | | | /
 / \ / \endverbatim)doc";
 
 static const char *__doc_fiction_exact =
-R"doc(An exact placement & routing approach using SMT solving as originally
+    R"doc(An exact placement & routing approach using SMT solving as originally
 proposed in \"An Exact Method for Design Exploration of Quantum-dot
 Cellular Automata\" by M. Walter, R. Wille, D. Große, F. Sill Torres,
 and R. Drechsler in DATE 2018. A more extensive description can be
@@ -4664,8 +4664,8 @@ M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
 Springer Nature in 2022.
 
 Via incremental SMT calls, an optimal gate-level layout for a given
-logic network will be found under constraints. Starting with :math:` n
-` tiles, where :math:` n ` is the number of logic network nodes, each
+logic network will be found under constraints. Starting with :math:`n`
+tiles, where :math:`n` is the number of logic network nodes, each
 possible layout aspect ratio will be examined by factorization and
 tested for routability with the SMT solver Z3. When no upper bound is
 given, this approach will run until it finds a solution to the
@@ -4974,9 +4974,11 @@ breadth-first).)doc";
 
 static const char *__doc_fiction_fanout_substitution_params_substitution_strategy = R"doc(Breadth-first vs. depth-first fanout-tree substitution strategies.)doc";
 
-static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_BREADTH = R"doc()doc";
+static const char* __doc_fiction_fanout_substitution_params_substitution_strategy_BREADTH =
+    R"doc(Breadth-first substitution. Creates balanced fanout trees.)doc";
 
-static const char *__doc_fiction_fanout_substitution_params_substitution_strategy_DEPTH = R"doc()doc";
+static const char* __doc_fiction_fanout_substitution_params_substitution_strategy_DEPTH =
+    R"doc(Depth-first substitution. Creates fanout trees with one deep branch.)doc";
 
 static const char *__doc_fiction_fanout_substitution_params_threshold =
 R"doc(Maximum number of outputs any gate is allowed to have before
@@ -6317,15 +6319,15 @@ static const char *__doc_fiction_generate_edge_intersection_graph_stats_number_o
 R"doc(For each routing objective that cannot be fulfilled in the given
 layout, this counter is incremented.)doc";
 
-static const char *__doc_fiction_geometric_temperature_schedule =
-R"doc(A logarithmically decreasing temperature schedule. The temperature is
+static const char* __doc_fiction_geometric_temperature_schedule =
+    R"doc(A logarithmically decreasing temperature schedule. The temperature is
 altered by multiplying it with `0.99`.
 
 Parameter ``t``:
     The current temperature.
 
 Returns:
-    The next temperature, i.e. :math:` \texttt{t} \cdot 0.99 `.)doc";
+    The next temperature, i.e. :math:`\texttt{t} \cdot 0.99`.)doc";
 
 static const char *__doc_fiction_get_clocking_scheme =
 R"doc(Returns a clocking scheme by name.
@@ -6377,11 +6379,11 @@ via Coloring of Chordal Graphs\" by Jens Palsberg in CATS 2007.)doc";
 static const char *__doc_fiction_graph_coloring_engine_SAT = R"doc(Custom iterative SAT-based encoding that finds optimal colorings.)doc";
 
 static const char *__doc_fiction_graph_coloring_engine_TABUCOL =
-R"doc(A :math:` k `-coloring algorithm using tabu search proposed in \"Using
+    R"doc(A :math:`k`-coloring algorithm using tabu search proposed in \"Using
 Tabu Search Techniques for Graph Coloring\" by A. Hertz and D. de
 Werra in Computing 1987. The authors claim that it significantly
-outperforms simulated annealing. However, since it is a :math:` k
-`-coloring algorithm, it is required to set `k_color_value` in
+outperforms simulated annealing. However, since it is a
+:math:`k`-coloring algorithm, it is required to set `k_color_value` in
 `determine_vertex_coloring_params` to the chromatic number that is to
 be checked for.)doc";
 
@@ -6389,23 +6391,23 @@ static const char *__doc_fiction_graph_coloring_sat_search_tactic =
 R"doc(An enumeration of search tactics to use for the SAT-based graph
 coloring to determine a min-coloring.)doc";
 
-static const char *__doc_fiction_graph_coloring_sat_search_tactic_BINARY_SEARCH =
-R"doc(First ascend exponentially by checking for :math:` k = 2^0, 2^1, 2^2,
-\dots ` until SAT, then perform binary search in the window :math:`
-[2^{h-1}, 2^h] `, where :math:` 2^h ` was the first SAT. If at least
-one clique is passed, :math:` k ` starts at the largest clique size
-:math:` |C| ` instead with :math:` k = 2^0 \cdot |C|, 2^1 \cdot |C|,
-2^2 \cdot |C|, \dots `)doc";
+static const char* __doc_fiction_graph_coloring_sat_search_tactic_BINARY_SEARCH =
+    R"doc(First ascend exponentially by checking for :math:`k = 2^0, 2^1, 2^2,
+\dots` until SAT, then perform binary search in the window
+:math:`[2^{h-1}, 2^h]`, where :math:`2^h` was the first SAT. If at
+least one clique is passed, :math:`k` starts at the largest clique
+size :math:`|C|` instead with :math:`k = 2^0 \cdot |C|, 2^1 \cdot |C|,
+2^2 \cdot |C|, \dots`)doc";
 
-static const char *__doc_fiction_graph_coloring_sat_search_tactic_LINEARLY_ASCENDING =
-R"doc(Ascend linearly by checking for :math:` k = 1, 2, 3, \dots ` until
-SAT. If at least one clique is passed, :math:` k ` starts at the
-largest clique size :math:` |C| ` instead with :math:` k = |C|, |C| +
-1, |C| + 2, \dots `)doc";
+static const char* __doc_fiction_graph_coloring_sat_search_tactic_LINEARLY_ASCENDING =
+    R"doc(Ascend linearly by checking for :math:`k = 1, 2, 3, \dots` until SAT.
+If at least one clique is passed, :math:`k` starts at the largest
+clique size :math:`|C|` instead with :math:`k = |C|, |C| + 1, |C| + 2,
+\dots`)doc";
 
-static const char *__doc_fiction_graph_coloring_sat_search_tactic_LINEARLY_DESCENDING =
-R"doc(Descend linearly by checking for :math:` k = |G|, |G| - 1, |G| - 2,
-\dots ` until UNSAT.)doc";
+static const char* __doc_fiction_graph_coloring_sat_search_tactic_LINEARLY_DESCENDING =
+    R"doc(Descend linearly by checking for :math:`k = |G|, |G| - 1, |G| - 2,
+\dots` until UNSAT.)doc";
 
 static const char *__doc_fiction_has_above = R"doc()doc";
 
@@ -6657,8 +6659,8 @@ Returns:
     A container that contains pairs of `c`'s opposing coordinates.)doc";
 
 static const char *__doc_fiction_hexagonal_layout_area =
-R"doc(Returns the layout's number of faces which are equal to :math:` (x +
-1) \cdot (y + 1) `.
+    R"doc(Returns the layout's number of faces which are equal to :math:`(x + 1)
+\cdot (y + 1)`.
 
 Returns:
     Area of layout.)doc";
@@ -7338,10 +7340,10 @@ static const char *__doc_fiction_inml_technology_is_slanted_edge_magnet = R"doc(
 static const char *__doc_fiction_inml_technology_is_slanted_edge_up_magnet = R"doc()doc";
 
 static const char *__doc_fiction_inml_topolinano_library =
-R"doc(A concrete FCN gate library as used in \"ToPoliNano\"
+    R"doc(A concrete FCN gate library as used in \"ToPoliNano\"
 (https://topolinano.polito.it/) for the iNML technology. In fiction,
 this is emulated by using vertically shifted layouts and implementing
-the ToPoliNano library with :math:` 4 \times 4 ` magnet positions with
+the ToPoliNano library with :math:`4 \times 4` magnet positions with
 one empty row in most tiles (except for MAJ which needs to be handled
 differently as this library is not uniform otherwise). Theoretically,
 it allows for multiple wires in the same tile.)doc";
@@ -7518,7 +7520,7 @@ Returns:
 static const char *__doc_fiction_is_gate_level_layout = R"doc()doc";
 
 static const char *__doc_fiction_is_ground_state =
-R"doc(This function checks if the ground state is found by the *QuickSim*
+    R"doc(This function checks if the ground state is found by the *QuickSim*
 algorithm.
 
 Template parameter ``Lyt``:
@@ -7533,7 +7535,7 @@ Parameter ``exhaustive_results``:
 
 Returns:
     Returns `true` if the relative difference between the lowest
-    energies of the two sets is less than :math:` 0.00001 `, `false`
+    energies of the two sets is less than :math:`0.00001`, `false`
     otherwise.)doc";
 
 static const char *__doc_fiction_is_hexagonal_layout = R"doc()doc";
@@ -7643,15 +7645,15 @@ static const char *__doc_fiction_layout_coordinate_path_source = R"doc()doc";
 
 static const char *__doc_fiction_layout_coordinate_path_target = R"doc()doc";
 
-static const char *__doc_fiction_linear_temperature_schedule =
-R"doc(A linearly decreasing temperature schedule. The temperature is altered
+static const char* __doc_fiction_linear_temperature_schedule =
+    R"doc(A linearly decreasing temperature schedule. The temperature is altered
 in decrements of `10`.
 
 Parameter ``t``:
     The current temperature.
 
 Returns:
-    The next temperature, i.e. :math:` \texttt{t} - 10 `.)doc";
+    The next temperature, i.e. :math:`\texttt{t} - 10`.)doc";
 
 static const char *__doc_fiction_magcad_magnet_count =
 R"doc(Calculates the number of magnets for an iNML layout the way MagCAD
@@ -7668,10 +7670,10 @@ Returns:
     Number of magnets as counted by MagCAD.)doc";
 
 static const char *__doc_fiction_manhattan_distance =
-R"doc(The Manhattan distance :math:` D ` between two layout coordinates
-:math:` (x_1, y_1) ` and :math:` (x_2, y_2) ` given by
+    R"doc(The Manhattan distance :math:`D` between two layout coordinates
+:math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
 
-:math:` D = |x_1 - x_2| + |y_1 - y_2| `
+:math:`D = |x_1 - x_2| + |y_1 - y_2|`
 
 Template parameter ``Lyt``:
     Coordinate layout type.
@@ -7942,13 +7944,13 @@ static const char *__doc_fiction_offset_coord_iterator_operator_ne = R"doc()doc"
 
 static const char *__doc_fiction_offset_operator_lshift = R"doc()doc";
 
-static const char *__doc_fiction_offset_ucoord_t =
-R"doc(Unsigned offset coordinates.
+static const char* __doc_fiction_offset_ucoord_t =
+    R"doc(Unsigned offset coordinates.
 
 The implementation is optimized for memory-efficiency and fits within
-64 bits. Coordinates span from :math:` (0, 0, 0) ` to :math:` (2^{31}
-- 1, 2^{31} - 1, 1) `. Each coordinate has a dead indicator `d` that
-can be used to represent that it is not in use.)doc";
+64 bits. Coordinates span from :math:`(0, 0, 0)` to :math:`(2^{31} -
+1, 2^{31} - 1, 1)`. Each coordinate has a dead indicator `d` that can
+be used to represent that it is not in use.)doc";
 
 static const char *__doc_fiction_offset_ucoord_t_d = R"doc(MSB acts as dead indicator.)doc";
 
@@ -8119,7 +8121,7 @@ Returns:
     Irregular clocking scheme.)doc";
 
 static const char *__doc_fiction_orthogonal =
-R"doc(A scalable placement & routing approach based on orthogonal graph
+    R"doc(A scalable placement & routing approach based on orthogonal graph
 drawing as originally proposed in \"Scalable Design for Field-coupled
 Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D.
 Große, and R. Drechsler in ASP-DAC 2019. A more extensive description
@@ -8148,10 +8150,10 @@ according to its DFS tree, ordering the vertices using topological
 sorting instead of DFS, and adding an extra placement rule for nodes
 without predecessors.
 
-The algorithm works in polynomial time :math:` O(3|N| + |L|) ` where
-:math:` |N| ` is the number of nodes in the given network and :math:`
-|L| ` is the resulting layout size given by :math:` x \cdot y `, which
-approaches :math:` (\frac{|N|}{2})^2 ` asymptotically.
+The algorithm works in polynomial time :math:`O(3|N| + |L|)` where
+:math:`|N|` is the number of nodes in the given network and
+:math:`|L|` is the resulting layout size given by :math:`x \cdot y`,
+which approaches :math:`(\frac{|N|}{2})^2` asymptotically.
 
 May throw a high_degree_fanin_exception if `ntk` contains any node
 with a fan-in larger than 2.
@@ -8545,8 +8547,8 @@ Parameter ``lyt``:
 Parameter ``pst``:
     Statistics.)doc";
 
-static const char *__doc_fiction_qca_one_library =
-R"doc(A concrete FCN gate library based on QCA ONE proposed in \"A
+static const char* __doc_fiction_qca_one_library =
+    R"doc(A concrete FCN gate library based on QCA ONE proposed in \"A
 Methodology for Standard Cell Design for QCA\" by Dayane Alfenas Reis,
 Caio Araújo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba
 V. Neto, and Frank Sill Torres in IEEE International Symposium on
@@ -8554,7 +8556,7 @@ Circuits and Systems, 2016. QCA ONE was originally proposed for the
 USE clocking scheme. The version used here is an extension to the
 original QCA ONE by also theoretically allowing multiple wires in the
 same tile. Furthermore, it can be used for a range of clocking
-schemes. Tiles in QCA ONE are :math:` 5 \times 5 ` QCA cells.)doc";
+schemes. Tiles in QCA ONE are :math:`5 \times 5` QCA cells.)doc";
 
 static const char *__doc_fiction_qca_one_library_determine_port_routing = R"doc()doc";
 
@@ -9272,8 +9274,8 @@ Parameter ``name``:
     Name to assign to given network or layout.)doc";
 
 static const char *__doc_fiction_shifted_cartesian_layout =
-R"doc(A layout type that utilizes offset coordinates to represent a
-cartesian layout with shifted coordinates. Its faces are organizes in
+    R"doc(A layout type that utilizes offset coordinates to represent a
+Cartesian layout with shifted coordinates. Its faces are organizes in
 an offset coordinate system as provided. These can either be the
 horizontal_shift_cartesian or vertical_shift_cartesian orientation.
 Based on that, two respectively possible coordinate systems emerge
@@ -9667,11 +9669,11 @@ static const char *__doc_fiction_simple_gate_layout_tile_drawer_tile_id = R"doc(
 static const char *__doc_fiction_simple_gate_layout_tile_drawer_tile_label = R"doc()doc";
 
 static const char *__doc_fiction_siqad_coord_t =
-R"doc(SiQAD coordinates.
+    R"doc(SiQAD coordinates.
 
-Coordinates span from :math:` (-2^{31}, -2^{31}, 0) ` to :math:`
-(2^{31} - 1 , 2^{31} - 1, 1) `. `x` is the SiDB's x-coordinate, `y` is
-the dimer pair's row number, and `z` represents the two possible SiDB
+Coordinates span from :math:`(-2^{31}, -2^{31}, 0)` to :math:`(2^{31}
+- 1 , 2^{31} - 1, 1)`. `x` is the SiDB's x-coordinate, `y` is the
+dimer pair's row number, and `z` represents the two possible SiDB
 positions in one SiDB dimer pair. Each coordinate has a dead indicator
 `d` that can be used to represent that it is not in use.)doc";
 
@@ -10513,8 +10515,8 @@ R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 \endverbatim)doc";
 
 static const char *__doc_fiction_volume =
-R"doc(Computes the volume of a given coordinate assuming its origin is (0,
-0, 0). Calculates :math:` (x + 1) \cdot (y + 1) \cdot (z + 1) `.
+    R"doc(Computes the volume of a given coordinate assuming its origin is (0,
+0, 0). Calculates :math:`(x + 1) \cdot (y + 1) \cdot (z + 1)`.
 
 Template parameter ``CoordinateType``:
     Coordinate type.
@@ -10642,9 +10644,9 @@ static const char *__doc_fiction_write_qca_layout_params = R"doc(Parameters for 
 static const char *__doc_fiction_write_qca_layout_params_create_inter_layer_via_cells = R"doc(Create via cells in between each layer.)doc";
 
 static const char *__doc_fiction_write_qca_layout_svg =
-R"doc(Writes an SVG representation of a cell-level QCA layout into an output
+    R"doc(Writes an SVG representation of a cell-level QCA layout into an output
 stream. Both tile- and cell-based layouts are supported. For tile-
-based layouts, QCA layouts of tile size :math:` 5 \times 5 ` are
+based layouts, QCA layouts of tile size :math:`5 \times 5` are
 supported exclusively so far.
 
 The utilized color scheme is based on the standard scheme used in
@@ -10665,9 +10667,9 @@ Parameter ``ps``:
     Parameters.)doc";
 
 static const char *__doc_fiction_write_qca_layout_svg_2 =
-R"doc(Writes an SVG representation of a cell-level QCA layout into a file.
+    R"doc(Writes an SVG representation of a cell-level QCA layout into a file.
 Both tile- and cell-based layouts are supported. For tile-based
-layouts, QCA layouts of tile size :math:` 5 \times 5 ` are supported
+layouts, QCA layouts of tile size :math:`5 \times 5` are supported
 exclusively so far.
 
 The utilized color scheme is based on the standard scheme used in
@@ -10820,7 +10822,7 @@ Parameter ``filename``:
     `.sqd` extension.)doc";
 
 static const char *__doc_fiction_yen_k_shortest_paths =
-R"doc(Yen's algorithm for finding up to :math:` k ` shortest paths without
+    R"doc(Yen's algorithm for finding up to :math:`k` shortest paths without
 loops from source to target. This implementation works on clocked
 layouts and uses the A* algorithm with the Manhattan distance function
 internally. The algorithm was originally described in \"An algorithm
@@ -10828,9 +10830,9 @@ for finding shortest routes from all source nodes to a given
 destination in general networks\" by Jin Y. Yen in Quarterly of
 Applied Mathematics, 1970.
 
-If :math:` k ` is larger than the number of possible paths from source
+If :math:`k` is larger than the number of possible paths from source
 to target, the size of the returned path collection will be smaller
-than :math:` k `.
+than :math:`k`.
 
 If the given layout is a gate-level layout and implements the
 obstruction interface (see obstruction_layout), paths may contain wire
@@ -10847,7 +10849,7 @@ Template parameter ``Lyt``:
     Clocked layout type.
 
 Parameter ``layout``:
-    The clocked layout in which the :math:` k ` shortest paths between
+    The clocked layout in which the :math:`k` shortest paths between
     `source` and `target` are to be found.
 
 Parameter ``objective``:
@@ -10860,10 +10862,11 @@ Parameter ``ps``:
     Parameters.
 
 Returns:
-    A collection of up to :math:` k ` shortest loopless paths in
+    A collection of up to :math:`k` shortest loopless paths in
     `layout` from `source` to `target`.)doc";
 
-static const char *__doc_fiction_yen_k_shortest_paths_params = R"doc(Parameters for Yen's :math:` k `-shortest paths algorithm.)doc";
+static const char* __doc_fiction_yen_k_shortest_paths_params =
+    R"doc(Parameters for Yen's :math:`k`-shortest paths algorithm.)doc";
 
 static const char *__doc_fiction_yen_k_shortest_paths_params_astar_params = R"doc(Parameters for the internal A* algorithm.)doc";
 

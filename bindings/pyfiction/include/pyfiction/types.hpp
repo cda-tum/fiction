@@ -33,13 +33,17 @@ using py_tt = kitty::dynamic_truth_table;
  */
 using py_logic_network = mockturtle::names_view<fiction::technology_network>;
 /**
- * Offset coordinates.
+ * Offset ucoord coordinates.
  */
-using py_coordinate = fiction::offset::ucoord_t;
+using py_coordinate_offset_ucoord = fiction::offset::ucoord_t;
+/**
+ * Cube coord coordinates.
+ */
+using py_coordinate_cube_coord = fiction::cube::coord_t;
 /**
  * Cartesian layout.
  */
-using py_cartesian_layout = fiction::cartesian_layout<py_coordinate>;
+using py_cartesian_layout = fiction::cartesian_layout<py_coordinate_offset_ucoord>;
 /**
  * SiQAD coordinates.
  */
@@ -47,11 +51,12 @@ using py_coordinate_siqad = fiction::siqad::coord_t;
 /**
  * Shifted Cartesian layout.
  */
-using py_shifted_cartesian_layout = fiction::shifted_cartesian_layout<py_coordinate, fiction::odd_column_cartesian>;
+using py_shifted_cartesian_layout =
+    fiction::shifted_cartesian_layout<py_coordinate_offset_ucoord, fiction::odd_column_cartesian>;
 /**
  * Hexagonal layout.
  */
-using py_hexagonal_layout = fiction::hexagonal_layout<py_coordinate, fiction::even_row_hex>;
+using py_hexagonal_layout = fiction::hexagonal_layout<py_coordinate_offset_ucoord, fiction::even_row_hex>;
 /**
  * Cartesian clocked layout.
  */
