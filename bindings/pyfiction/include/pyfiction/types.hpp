@@ -33,13 +33,17 @@ using py_tt = kitty::dynamic_truth_table;
  */
 using py_logic_network = mockturtle::names_view<fiction::technology_network>;
 /**
- * Coordinates.
+ * Offset coordinates.
  */
 using py_coordinate = fiction::offset::ucoord_t;
 /**
  * Cartesian layout.
  */
 using py_cartesian_layout = fiction::cartesian_layout<py_coordinate>;
+/**
+ * SiQAD coordinates.
+ */
+using py_coordinate_siqad = fiction::siqad::coord_t;
 /**
  * Shifted Cartesian layout.
  */
