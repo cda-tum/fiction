@@ -54,6 +54,8 @@ Utility functions
     .. tab:: C++
         .. doxygenfunction:: fiction::area(const CoordinateType& coord) noexcept
         .. doxygenfunction:: fiction::volume(const CoordinateType& coord) noexcept
+        .. doxygenfunction:: fiction::to_siqad_coord(const CoordinateType& coord) noexcept
+        .. doxygenfunction:: fiction::to_fiction_coord(const coord_t& coord) noexcept
     .. tab:: Python
         .. autofunction:: fiction.pyfiction.to_fiction_coord
         .. autofunction:: fiction.pyfiction.to_siqad_coord
