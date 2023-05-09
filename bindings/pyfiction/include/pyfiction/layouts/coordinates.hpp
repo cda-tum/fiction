@@ -16,37 +16,6 @@
 namespace pyfiction
 {
 
-/**
- * Converts SiQAD coordinates to other coordinates (offset, cube).
- *
- * @tparam CoordinateType Coordinate type to convert to.
- * @param coord SiQAD coordinate to convert.
- * @return Coordinate of type `CoordinateType`.
- */
-template <typename CoordinateType>
-constexpr CoordinateType to_fiction_coord(const fiction::siqad::coord_t& coord) noexcept
-{
-    if (!coord.is_dead())
-    {
-        return {coord.x, coord.y * 2 + coord.z};
-    }
-
-    return CoordinateType{};
-}
-
-/**
- * Converts any coordinate type to SiQAD coordinates.
- *
- * @tparam CoordinateType Coordinate type to convert.
- * @param coord Coordinate to convert.
- * @return SiQAD coordinate representation of `coord`.
- */
-template <typename CoordinateType>
-constexpr fiction::siqad::coord_t to_siqad_coord(const CoordinateType& coord) noexcept
-{
-    return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};
-}
-
 inline void coordinates(pybind11::module& m)
 {
     namespace py = pybind11;
@@ -99,15 +68,14 @@ inline void coordinates(pybind11::module& m)
              [](const py_coordinate_offset_ucoord& self) { return std::hash<py_coordinate_offset_ucoord>{}(self); });
 
     py::implicitly_convertible<py::tuple, py_coordinate_offset_ucoord>();
-
     /**
-     * Offset coordinates.
+     * Cube coordinates.
      */
-    py::class_<py_coordinate_cube_coord>(m, "cube_coordinate", DOC(fiction_offset_ucoord_t))
-        .def(py::init<>(), DOC(fiction_offset_ucoord_t_ucoord_t))
+    py::class_<py_coordinate_cube_coord>(m, "cube_coordinate", DOC(fiction_cube_coord_t))
+        .def(py::init<>(), DOC(fiction_cube_coord_t))
         .def(py::init<const int32_t, const int32_t, const int32_t>(), "x"_a, "y"_a, "z"_a = 0,
-             DOC(fiction_offset_ucoord_t_ucoord_t_2))
-        .def(py::init<const py_coordinate_cube_coord>(), "c"_a, DOC(fiction_offset_ucoord_t_get_dead))
+             DOC(fiction_cube_coord_t_coord_t_2))
+        .def(py::init<const py_coordinate_cube_coord>(), "c"_a, DOC(fiction_cube_coord_t_get_dead))
         .def(py::init(
                  [](const py::tuple& t)
                  {
@@ -136,13 +104,13 @@ inline void coordinates(pybind11::module& m)
             "z", [](py_coordinate_cube_coord& self) -> decltype(self.z) { return self.z; },
             [](py_coordinate_cube_coord& self, const decltype(self.z) value) { self.z = value; })
 
-        .def(py::self == py::self, "other"_a, DOC(fiction_offset_ucoord_t_operator_eq))
-        .def(py::self != py::self, "other"_a, DOC(fiction_offset_ucoord_t_operator_ne))
-        .def(py::self < py::self, "other"_a, DOC(fiction_offset_ucoord_t_operator_lt))
-        .def(py::self > py::self, "other"_a, DOC(fiction_offset_ucoord_t_operator_gt))
-        .def(py::self <= py::self, "other"_a, DOC(fiction_offset_ucoord_t_operator_le))
-        .def(py::self >= py::self, "other"_a, DOC(fiction_offset_ucoord_t_operator_ge))
-        .def("__repr__", &py_coordinate_cube_coord::str, DOC(fiction_offset_ucoord_t_str))
+        .def(py::self == py::self, "other"_a, DOC(fiction_cube_coord_t_operator_eq))
+        .def(py::self != py::self, "other"_a, DOC(fiction_cube_coord_t_operator_ne))
+        .def(py::self < py::self, "other"_a, DOC(fiction_cube_coord_t_operator_lt))
+        .def(py::self > py::self, "other"_a, DOC(fiction_cube_coord_t_operator_gt))
+        .def(py::self <= py::self, "other"_a, DOC(fiction_cube_coord_t_operator_le))
+        .def(py::self >= py::self, "other"_a, DOC(fiction_cube_coord_t_operator_ge))
+        .def("__repr__", &py_coordinate_cube_coord::str, DOC(fiction_cube_coord_t_str))
         .def("__hash__",
              [](const py_coordinate_cube_coord& self) { return std::hash<py_coordinate_cube_coord>{}(self); });
 
@@ -196,8 +164,9 @@ inline void coordinates(pybind11::module& m)
 
     py::implicitly_convertible<py::tuple, py_coordinate_siqad>();
 
-    m.def("to_siqad_coord", &to_siqad_coord<py_coordinate_offset_ucoord>, "coord"_a, DOC(fiction_siqad_to_siqad_coord));
-    m.def("to_fiction_coord", &to_fiction_coord<py_coordinate_offset_ucoord>, "coord"_a,
+    m.def("to_siqad_coord", &fiction::siqad::to_siqad_coord<py_coordinate_offset_ucoord>, "coord"_a,
+          DOC(fiction_siqad_to_siqad_coord));
+    m.def("to_fiction_coord", &fiction::siqad::to_fiction_coord<py_coordinate_offset_ucoord>, "coord"_a,
           DOC(fiction_convert_to_fiction_coordinates));
 }
 
