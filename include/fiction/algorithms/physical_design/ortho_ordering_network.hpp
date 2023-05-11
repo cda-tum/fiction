@@ -124,23 +124,23 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                     {
                         paint_node_and_edges(ctn, current_node, ctn.color_east);
 
-                        bool inv_flag = false;
+                        /*bool inv_flag = false;*/
                         if (auto fo_two = ctn.color_ntk.get_fo_two(); get_index(fo_two, pi) % 3 == 0)
                         {
                             auto cur_fon = fanouts(ctn.color_ntk, current_node);
-                            // Jump to next node
+                            /*// Jump to next node
                             current_node = cur_fon[0];
                             if (ntk.is_inv(current_node))
                             {
                                 // Color Inverter east
                                 paint_node_and_edges(ctn, current_node, ctn.color_east);
                                 inv_flag = true;
-                            }
+                            }*/
 
                             auto swap_color = ctn.color_south;
                             ntk.foreach_fanout(
                                 current_node,
-                                [&ctn, &inv_flag, &current_node, &ntk, &fon, &swap_color](const auto& cur_fon)
+                                [&ctn, &current_node, &ntk, &fon, &swap_color](const auto& cur_fon)
                                 {
                                     // Jump to next node
                                     current_node = cur_fon;
@@ -157,10 +157,10 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                                                            });
                                         paint_node_and_edges(ctn, current_node, ctn.color_south);
                                     }
-                                    else if (inv_flag)
+                                    /*else if (inv_flag)
                                     {
                                         paint_node_and_edges(ctn, current_node, ctn.color_south);
-                                    }
+                                    }*/
                                     else
                                     {
                                         paint_node_and_edges(ctn, current_node, swap_color);
