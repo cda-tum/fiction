@@ -178,6 +178,11 @@ class inverter_substitution_impl
                     if (ntk.is_inv(g) && std::find(m_inv.cbegin(), m_inv.cend(), g) != m_inv.cend())
                     {
                         old2new[g] = ntk_dest.create_buf(children[0]);
+                        if (ntk.is_po(g))
+                        {
+                            // Preserve Outputs
+                            preserved_po.push_back(g);
+                        }
                         return true;
                     }
                     const auto po_it = std::find(x_inv.cbegin(), x_inv.cend(), g);
