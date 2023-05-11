@@ -88,7 +88,7 @@ void sim_acc_tts(const Lyt& lyt, const quicksim_params& quicksim_params, time_to
     std::vector<double> time{};
     time.reserve(repetitions);
 
-    for (uint64_t i = 0; i < repetitions; i++)
+    for (auto i = 0u; i < repetitions; ++i)
     {
         sidb_simulation_result<Lyt> stats_quick{};
 

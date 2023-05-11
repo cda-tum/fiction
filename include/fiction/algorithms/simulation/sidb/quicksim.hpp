@@ -66,7 +66,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
     sidb_simulation_result<Lyt> st{};
-    st.algorithm_name = "quicksim";
+    st.algorithm_name = "QuickSim";
     st.additional_simulation_parameters.emplace_back("iteration_steps", ps.interation_steps);
     st.additional_simulation_parameters.emplace_back("alpha", ps.alpha);
     st.physical_parameters = ps.phys_params;

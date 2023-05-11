@@ -27,7 +27,7 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
 
     CHECK(simulation_results.charge_distributions.empty());
     REQUIRE(!simulation_results.additional_simulation_parameters.empty());
-    CHECK(simulation_results.algorithm_name == "quicksim");
+    CHECK(simulation_results.algorithm_name == "QuickSim");
     CHECK(simulation_results.additional_simulation_parameters[0].first == "iteration_steps");
     CHECK(std::any_cast<uint64_t>(simulation_results.additional_simulation_parameters[0].second) == 80);
     CHECK(simulation_results.additional_simulation_parameters[1].first == "alpha");
