@@ -4,7 +4,7 @@ FROM ubuntu:latest
 ARG NUMBER_OF_JOBS=2
 
 # Configure apt and install packages
-RUN apt -y update && apt -y upgrade && apt -y install \
+RUN apt-get -y update && apt-get -y upgrade && apt-get -y install \
     make cmake gcc g++ git python3 python3-dev python3-pip libreadline-dev xdg-utils
 
 # Setup Z3
