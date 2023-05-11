@@ -8,7 +8,7 @@ RUN apt-get -y update && apt-get -y upgrade && apt-get -y install \
     make cmake gcc g++ git python3 python3-dev python3-pip libreadline-dev xdg-utils
 
 # Setup Z3
-RUN pip3 install z3-solver
+RUN pip3 install z3-solver==4.10.0
 
 # Clone fiction's repository including submodules
 RUN git clone --recursive https://github.com/marcelwa/fiction.git
