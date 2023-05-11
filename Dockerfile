@@ -1,14 +1,11 @@
-FROM alpine:latest
+FROM ubuntu:latest
 
 # Optional argument to run the "make" command in parallel with the specified NUMBER_OF_JOBS
-ARG NUMBER_OF_JOBS=1
+ARG NUMBER_OF_JOBS=2
 
 # Configure apt and install packages
-RUN apk add --no-cache \
-    # Install cmake with its dependencies
-    build-base gcc abuild binutils cmake \
-    # Install packages needed to build fiction
-    git g++ python3 python3-dev py3-pip readline-dev xdg-utils
+RUN apt -y update && apt -y upgrade && apt -y install \
+    build-essential cmake gcc g++ git python3 python3-dev python3-pip libreadline-dev xdg-utils
 
 # Setup Z3
 RUN pip3 install z3-solver
