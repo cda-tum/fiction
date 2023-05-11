@@ -59,6 +59,17 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
         .def("is_pi_tile", &GateLyt::is_pi_tile, "t"_a, DOC(fiction_gate_level_layout_is_pi_tile))
         .def("is_po_tile", &GateLyt::is_po_tile, "t"_a, DOC(fiction_gate_level_layout_is_po_tile))
 
+        .def("is_inv", &GateLyt::is_inv, DOC(fiction_gate_level_layout_is_inv))
+        .def("is_and", &GateLyt::is_and, DOC(fiction_gate_level_layout_is_and))
+        .def("is_nand", &GateLyt::is_nand, DOC(fiction_gate_level_layout_is_nand))
+        .def("is_or", &GateLyt::is_or, DOC(fiction_gate_level_layout_is_or))
+        .def("is_nor", &GateLyt::is_nor, DOC(fiction_gate_level_layout_is_nor))
+        .def("is_xor", &GateLyt::is_xor, DOC(fiction_gate_level_layout_is_xor))
+        .def("is_xnor", &GateLyt::is_xnor, DOC(fiction_gate_level_layout_is_xnor))
+        .def("is_maj", &GateLyt::is_maj, DOC(fiction_gate_level_layout_is_maj))
+        .def("is_fanout", &GateLyt::is_fanout, DOC(fiction_gate_level_layout_is_fanout))
+        .def("is_wire", &GateLyt::is_wire, DOC(fiction_gate_level_layout_is_wire))
+
         .def("set_layout_name", &GateLyt::set_layout_name, "name"_a, DOC(fiction_gate_level_layout_set_layout_name))
         .def("get_layout_name", &GateLyt::get_layout_name, DOC(fiction_gate_level_layout_get_layout_name))
         .def("set_input_name", &GateLyt::set_input_name, "index"_a, "name"_a,

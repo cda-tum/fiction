@@ -149,6 +149,91 @@ class TestCartesianGateLevelLayout(unittest.TestCase):
             drv_params = gate_level_drv_params()
             self.assertEqual(gate_level_drvs(layout, drv_params, False), (0, 0))
 
+    def test_gate_level_layout_gate_types(self):
+
+        for layout in [cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout"),
+                       shifted_cartesian_gate_layout((2, 8, 0), "2DDWave", "Layout"),
+                       hexagonal_gate_layout((2, 8, 0), "2DDWave", "Layout")]:
+            self.assertTrue(layout.is_empty())
+
+            # layout creation
+            # pis
+            x1 = layout.create_pi("x1", (0, 0))
+            x2 = layout.create_pi("x2", (0, 1))
+            x3 = layout.create_pi("x3", (0, 2))
+            x4 = layout.create_pi("x4", (0, 3))
+            x5 = layout.create_pi("x5", (0, 4))
+            x6 = layout.create_pi("x6", (0, 5))
+            x7 = layout.create_pi("x7", (0, 6))
+
+            # gates
+            inv = layout.create_not(x1, (1, 0))
+            and_gate = layout.create_and(x2, inv, (1, 1))
+            nand_gate = layout.create_nand(x3, and_gate, (1, 2))
+            or_gate = layout.create_or(x4, nand_gate, (1, 3))
+            nor_gate = layout.create_nor(x5, or_gate, (1, 4))
+            xor_gate = layout.create_xor(x6, nor_gate, (1, 5))
+            xnor_gate = layout.create_xnor(x7, xor_gate, (1, 6))
+            fanout = layout.create_buf(xnor_gate, (1, 7))
+            buf = layout.create_buf(fanout, (2, 7))
+
+            # pos
+            f1 = layout.create_po(fanout, "f1", (1, 8))
+            f2 = layout.create_po(buf, "f2", (2, 8))
+
+            # check gate type
+            # pis
+            self.assertTrue(layout.is_pi(layout.get_node((0, 0))))
+            self.assertTrue(layout.is_pi(layout.get_node((0, 1))))
+            self.assertTrue(layout.is_pi(layout.get_node((0, 2))))
+            self.assertTrue(layout.is_pi(layout.get_node((0, 3))))
+            self.assertTrue(layout.is_pi(layout.get_node((0, 4))))
+            self.assertTrue(layout.is_pi(layout.get_node((0, 5))))
+            self.assertTrue(layout.is_pi(layout.get_node((0, 6))))
+
+            # gates
+            self.assertTrue(layout.is_inv(layout.get_node((1, 0))))
+            self.assertTrue(layout.is_and(layout.get_node((1, 1))))
+            self.assertTrue(layout.is_nand(layout.get_node((1, 2))))
+            self.assertTrue(layout.is_or(layout.get_node((1, 3))))
+            self.assertTrue(layout.is_nor(layout.get_node((1, 4))))
+            self.assertTrue(layout.is_xor(layout.get_node((1, 5))))
+            self.assertTrue(layout.is_xnor(layout.get_node((1, 6))))
+            self.assertTrue(layout.is_fanout(layout.get_node((1, 7))))
+            self.assertTrue(layout.is_wire(layout.get_node((2, 7))))
+
+            # pos
+            self.assertTrue(layout.is_po(layout.get_node((1, 8))))
+            self.assertTrue(layout.is_po(layout.get_node((2, 8))))
+
+        for layout in [cartesian_gate_layout((2, 2, 0), "RES", "Layout"),
+                       shifted_cartesian_gate_layout((2, 2, 0), "RES", "Layout"),
+                       hexagonal_gate_layout((2, 2, 0), "RES", "Layout")]:
+            self.assertTrue(layout.is_empty())
+
+            # pis
+            x1 = layout.create_pi("x1", (0, 1))
+            x2 = layout.create_pi("x2", (1, 0))
+            x3 = layout.create_pi("x3", (2, 1))
+
+            # maj
+            maj = layout.create_maj(x1, x2, x3, (1, 1))
+
+            # po
+            f1 = layout.create_po(maj, "f1", (1, 2))
+
+            # check gate type
+            # pis
+            self.assertTrue(layout.is_pi(layout.get_node((0, 1))))
+            self.assertTrue(layout.is_pi(layout.get_node((1, 0))))
+            self.assertTrue(layout.is_pi(layout.get_node((2, 1))))
+
+            # maj
+            self.assertTrue(layout.is_maj(layout.get_node((1, 1))))
+
+            # po
+            self.assertTrue(layout.is_po(layout.get_node((1, 2))))
+
 
 if __name__ == '__main__':
     unittest.main()
