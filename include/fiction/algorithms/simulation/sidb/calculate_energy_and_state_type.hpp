@@ -71,17 +71,14 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
                 std::transform(charge_states.cbegin(), charge_states.cend(), charge.begin(),
                                [](const auto& state) { return static_cast<bool>(-charge_state_to_sign(state)); });
 
-                bool state_type = false;
                 if (charge == output_bits)
                 {
-                    state_type = true;  // The output SiDB matches the truth table entry.
-                                        // Hence, state is called transparent.
-                    energy_and_state_type.emplace_back(energy, state_type);
+                    // The output SiDB matches the truth table entry. Hence, state is called transparent.
+                    energy_and_state_type.emplace_back(energy, true);
                 }
                 else
                 {
-                    state_type = false;
-                    energy_and_state_type.emplace_back(energy, state_type);
+                    energy_and_state_type.emplace_back(energy, false);
                 }
             }
         }
