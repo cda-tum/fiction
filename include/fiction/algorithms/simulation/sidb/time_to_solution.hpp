@@ -96,7 +96,7 @@ struct time_to_solution_stats
     void report(std::ostream& out = std::cout)
     {
         out << fmt::format(
-            "[i] time_to_solution: {} | acc: {} | t_(s): {} | t_exhaustive(s): {} | algortihm used: {}\n",
+            "[i] time_to_solution: {} | acc: {} | t_(s): {} | t_exhaustive(s): {} | algorithm used: {}\n",
             time_to_solution, acc, mean_single_runtime, single_runtime_exhaustive, algorithm);
     }
 };
@@ -124,13 +124,13 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, time_to_solut
     sidb_simulation_result<Lyt> simulation_result{};
     if (tts_params.engine == exact_algorithm_type::EXGS)
     {
-        st.algorithm      = "exgs";
+        st.algorithm      = "ExGS";
         simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
     }
     else
     {
         const quickexact_params<Lyt> params{quicksim_params.phys_params};
-        st.algorithm      = "quickexact";
+        st.algorithm      = "QuickExact";
         simulation_result = quickexact(lyt, params);
     }
 

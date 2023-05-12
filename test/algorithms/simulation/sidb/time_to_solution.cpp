@@ -34,7 +34,7 @@ TEMPLATE_TEST_CASE(
         time_to_solution_stats           tts_stat{};
         sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat);
 
-        CHECK(tts_stat.algorithm == "exgs");
+        CHECK(tts_stat.algorithm == "ExGS");
         CHECK_THAT(tts_stat.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat.time_to_solution, Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
         CHECK(tts_stat.mean_single_runtime > 0.0);
@@ -47,7 +47,7 @@ TEMPLATE_TEST_CASE(
         time_to_solution_stats           tts_stat{};
         const time_to_solution_params    tts_params{exact_algorithm_type::QUICKEXACT};
         sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat, tts_params);
-        CHECK(tts_stat.algorithm == "quickexact");
+        CHECK(tts_stat.algorithm == "QuickExact");
         CHECK_THAT(tts_stat.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat.time_to_solution, Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
         CHECK(tts_stat.mean_single_runtime > 0.0);
