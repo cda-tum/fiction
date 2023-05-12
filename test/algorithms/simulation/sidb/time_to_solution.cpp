@@ -45,7 +45,7 @@ TEMPLATE_TEST_CASE(
         const sidb_simulation_parameters params{2, -0.30};
         const quicksim_params            quicksim_params{params};
         time_to_solution_stats           tts_stat{};
-        const time_to_solution_params    tts_params{exact_algorithm_type::QUICKEXACT};
+        const time_to_solution_params    tts_params{exact_algorithm::QUICKEXACT};
         sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat, tts_params);
         CHECK(tts_stat.algorithm == "QuickExact");
         CHECK_THAT(tts_stat.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -75,7 +75,7 @@ TEMPLATE_TEST_CASE(
         CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
 
         time_to_solution_stats        tts_stat_quickexact{};
-        const time_to_solution_params tts_params{exact_algorithm_type::QUICKEXACT};
+        const time_to_solution_params tts_params{exact_algorithm::QUICKEXACT};
         sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat_quickexact, tts_params);
 
         CHECK(tts_stat_quickexact.acc == 100);

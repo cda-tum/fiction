@@ -28,7 +28,7 @@ namespace fiction
 /**
  * An enumeration of exact algorithms for the tts-simulation.
  */
-enum class exact_algorithm_type
+enum class exact_algorithm
 {
     /**
      * ExGS
@@ -45,7 +45,7 @@ struct time_to_solution_params
     /**
      * Exact simulation algorithm used to simulate the ground state as reference.
      */
-    exact_algorithm_type engine = exact_algorithm_type::EXGS;
+    exact_algorithm engine = exact_algorithm::EXGS;
     /**
      * Number of repetitions to determine the simulation accuracy (`repetitions = 100` means that accuracy is precise to
      * 1%).
@@ -59,7 +59,8 @@ struct time_to_solution_params
 
 /**
  * This struct stores the time-to-solution, the simulation accuracy and the average single simulation runtime of
- * *QuickSim* (see quicksim.hpp).
+ * *QuickSim* (see quicksim.hpp), the single runtime of the exact simulator used, and the number of valid charge
+ * configurations found by the exact algorithm.
  *
  */
 struct time_to_solution_stats
@@ -83,7 +84,7 @@ struct time_to_solution_stats
     /**
      * Number of physically valid charge configurations found by ExGS.
      */
-    std::size_t number_valid_layouts_exgs{};
+    std::size_t number_valid_layouts_exact{};
     /**
      * Name of the exact simulation algorithm used.
      */
@@ -105,7 +106,7 @@ struct time_to_solution_stats
  *
  * @tparam Lyt Cell-level layout type.
  * @param lyt Layout that is used for the simulation.
- * @param quicksim_params Parameters required for the quicksim.hpp algorithm.
+ * @param quicksim_params Parameters required for the QuickSim algorithm.
  * @param ps Pointer to a struct where the results (time_to_solution, acc, single runtime) are stored.
  * @param tts_params Parameters used for the time-to-solution calculation.
  */
@@ -122,7 +123,7 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, time_to_solut
     time_to_solution_stats st{};
     st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_results_exgs.simulation_runtime);
     sidb_simulation_result<Lyt> simulation_result{};
-    if (tts_params.engine == exact_algorithm_type::EXGS)
+    if (tts_params.engine == exact_algorithm::EXGS)
     {
         st.algorithm      = "ExGS";
         simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
