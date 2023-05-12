@@ -17,6 +17,12 @@ namespace fiction
 {
 
 /**
+ *  Data type to collect electrostatic potential energies of charge distributions with corresponding degeneracy (i.e.
+ * how often a certain energy value occurs).
+ */
+using sidb_energy_distribution = std::map<double, uint64_t>;
+
+/**
  * This function takes in a vector of charge_distribution_surface objects and returns a map containing the system energy
  * and the number of occurrences of that energy in the input vector.
  *
@@ -26,7 +32,8 @@ namespace fiction
  * vector as the value.
  */
 template <typename Lyt>
-std::map<double, uint64_t> energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_vec) noexcept
+[[nodiscard]] sidb_energy_distribution
+energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_vec) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
