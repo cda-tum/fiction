@@ -128,6 +128,63 @@ inline kitty::dynamic_truth_table create_xnor_tt() noexcept
     return table;
 }
 /**
+ * Creates and returns a truth table that implements an identity function in two variables.
+ *
+ * @return identity function in two variables.
+ */
+inline kitty::dynamic_truth_table create_double_wire_tt() noexcept
+{
+    static constexpr const char* truth_table_string = "11100100";
+
+    kitty::dynamic_truth_table tt(3);
+    kitty::create_from_binary_string(tt, truth_table_string);
+
+    return tt;
+}
+/**
+ * Creates and returns a truth table that implements a crossing in two variables.
+ *
+ * @return crossing in two variables.
+ */
+inline kitty::dynamic_truth_table create_crossing_wire_tt() noexcept
+{
+    static constexpr const char* truth_table_string = "11011000";
+
+    kitty::dynamic_truth_table tt(3);
+    kitty::create_from_binary_string(tt, truth_table_string);
+
+    return tt;
+}
+/**
+ * Creates and returns a truth table that implements a fan-out in one variable.
+ *
+ * @return fan-out in one variable.
+ */
+inline kitty::dynamic_truth_table create_fan_out_tt() noexcept
+{
+    static constexpr const char* truth_table_string = "1100";
+
+    kitty::dynamic_truth_table tt(2);
+    kitty::create_from_binary_string(tt, truth_table_string);
+
+    return tt;
+}
+/**
+ * Creates and returns a truth table that implements a half-adder in two variables.
+ *
+ * @return half-adder in two variables.
+ */
+inline kitty::dynamic_truth_table create_half_adder_tt() noexcept
+{
+    static constexpr const char* truth_table_string = "01101000";
+
+    kitty::dynamic_truth_table tt(3);
+    kitty::create_from_binary_string(tt, truth_table_string);
+
+    return tt;
+}
+
+/**
  * Creates and returns a truth table that implements the majority function in three variables.
  *
  * @return Majority function in three variables.
