@@ -10,6 +10,7 @@ on:
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/docker-image.yml'
+      - 'Dockerfile'
   pull_request:
     branches: [ 'main' ]
     paths:
@@ -19,6 +20,7 @@ on:
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/docker-image.yml'
+      - 'Dockerfile'
   merge_group:
 
 jobs:

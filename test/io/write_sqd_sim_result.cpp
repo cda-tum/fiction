@@ -251,17 +251,11 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
     lyt.assign_cell_type({17, 0, 0}, sidb_layout::cell_type::NORMAL);
     lyt.assign_cell_type({19, 0, 0}, sidb_layout::cell_type::NORMAL);
 
-    exgs_stats<sidb_layout>          exgs_stats{};
     const sidb_simulation_parameters params{2, -0.32};
 
-    exhaustive_ground_state_simulation<sidb_layout>(lyt, params, &exgs_stats);
+    auto sim_result = exhaustive_ground_state_simulation<sidb_layout>(lyt, params);
 
-    sidb_simulation_result<sidb_layout> sim_result{};
-
-    sim_result.algorithm_name       = "ExGS";
-    sim_result.simulation_runtime   = exgs_stats.time_total;
-    sim_result.charge_distributions = exgs_stats.valid_lyts;
-    sim_result.physical_parameters  = params;
+    sim_result.algorithm_name = "ExGS";
 
     std::stringstream simulation_stream{};
 
@@ -316,18 +310,11 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
     lyt.assign_cell_type({6, 0, 0}, sidb_layout::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, sidb_layout::cell_type::NORMAL);
 
-    exgs_stats<sidb_layout>          exgs_stats{};
     const sidb_simulation_parameters params{3, -0.32};
 
-    exhaustive_ground_state_simulation<sidb_layout>(lyt, params, &exgs_stats);
+    auto sim_result = exhaustive_ground_state_simulation<sidb_layout>(lyt, params);
 
-    sidb_simulation_result<sidb_layout> sim_result{};
-
-    sim_result.algorithm_name       = "ExGS";
-    sim_result.simulation_runtime   = exgs_stats.time_total;
-    sim_result.charge_distributions = exgs_stats.valid_lyts;
-    sim_result.physical_parameters  = params;
-
+    sim_result.algorithm_name = "ExGS";
     std::stringstream simulation_stream{};
 
     const std::string sim_result_str = fmt::format(

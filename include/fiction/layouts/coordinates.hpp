@@ -715,33 +715,25 @@ struct coord_t
         return !(*this == other);
     }
     /**
-     * Determine whether this coordinate is "less than" another one. This is the case if z is smaller, or if z is equal
-     * but y is smaller, or if z and y are equal but x is smaller.
+     * Determine whether this coordinate is "less than" another one. This is the case if y is smaller, or if y is equal
+     * but z is smaller, or if z and y are equal but x is smaller.
      *
      * @param other Right-hand side coordinate.
      * @return True iff this coordinate is "less than" the other coordinate.
      */
     constexpr bool operator<(const coord_t& other) const noexcept
     {
-        if (z < other.z)
+
+        if (y != other.y)
         {
-            return true;
+            return y < other.y;
+        }
+        if (z != other.z)
+        {
+            return z < other.z;
         }
 
-        if (z == other.z)
-        {
-            if (y < other.y)
-            {
-                return true;
-            }
-
-            if (y == other.y)
-            {
-                return x < other.x;
-            }
-        }
-
-        return false;
+        return x < other.x;
     }
     /**
      * Determine whether this coordinate is "greater than" another one. This is the case if the other one is "less
