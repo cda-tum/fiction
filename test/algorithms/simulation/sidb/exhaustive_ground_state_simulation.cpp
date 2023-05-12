@@ -25,7 +25,7 @@ TEMPLATE_TEST_CASE("Empty layout ExGS simulation", "[ExGS]",
 
     CHECK(simulation_results.charge_distributions.empty());
     CHECK(simulation_results.additional_simulation_parameters.empty());
-    CHECK(simulation_results.algorithm_name == "exgs");
+    CHECK(simulation_results.algorithm_name == "ExGS");
     CHECK(simulation_results.additional_simulation_parameters.empty());
 }
 

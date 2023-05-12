@@ -117,7 +117,10 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, time_to_solut
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
-    time_to_solution_stats      st{};
+    const auto simulation_results_exgs = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
+
+    time_to_solution_stats st{};
+    st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_results_exgs.simulation_runtime);
     sidb_simulation_result<Lyt> simulation_result{};
     if (tts_params.engine == exact_algorithm_type::EXGS)
     {
@@ -137,7 +140,7 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, time_to_solut
     std::vector<double> time{};
     time.reserve(tts_params.repetitions);
 
-    for (uint64_t i = 0; i < tts_params.repetitions; i++)
+    for (auto i = 0u; i < tts_params.repetitions; ++i)
     {
         sidb_simulation_result<Lyt> stats_quick{};
 
@@ -151,7 +154,7 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, time_to_solut
 
         time.push_back(diff_first);
 
-        if (is_ground_state(simulation_results_quicksim, simulation_result))
+        if (is_ground_state(simulation_results_quicksim, simulation_results_exgs))
         {
             gs_count += 1;
         }

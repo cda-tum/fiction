@@ -32,7 +32,7 @@ namespace fiction
 [[nodiscard]] inline double occupation_probability_gate_based(const sidb_energy_and_state_type& energy_and_state_type,
                                                               const double                      temperature) noexcept
 {
-    assert((temperature > static_cast<double>(0)) && "temperature should be slightly above 0 K");
+    assert((temperature > 0.0) && "temperature should be slightly above 0 K");
 
     if (energy_and_state_type.empty())
     {
@@ -42,13 +42,13 @@ namespace fiction
     auto min_energy = std::numeric_limits<double>::infinity();
 
     // Determine the minimal energy.
-    const auto [energy, state_type] = *std::min_element(energy_and_state_type.begin(), energy_and_state_type.end(),
+    const auto [energy, state_type] = *std::min_element(energy_and_state_type.cbegin(), energy_and_state_type.cend(),
                                                         [](const auto& a, const auto& b) { return a.first < b.first; });
     min_energy                      = energy;
 
     // The partition function is obtained by summing up all the Boltzmann factors.
     const double partition_function =
-        std::accumulate(energy_and_state_type.begin(), energy_and_state_type.end(), 0.0,
+        std::accumulate(energy_and_state_type.cbegin(), energy_and_state_type.cend(), 0.0,
                         [&](const double sum, const auto& it)
                         { return sum + std::exp(-(it.first - min_energy) * 12'000 / temperature); });
 
@@ -78,7 +78,7 @@ namespace fiction
 [[nodiscard]] inline double occupation_probability_non_gate_based(const sidb_energy_distribution& energy_distribution,
                                                                   const double                    temperature) noexcept
 {
-    assert((temperature > static_cast<double>(0)) && "Temperature should be slightly above 0 K");
+    assert((temperature > 0.0) && "Temperature should be slightly above 0 K");
 
     if (energy_distribution.empty())
     {

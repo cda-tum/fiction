@@ -9,6 +9,8 @@
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
+#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
+#include "fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
@@ -163,7 +165,7 @@ template <typename Lyt>
 class critical_temperature_impl
 {
   public:
-    critical_temperature_impl(Lyt& lyt, const critical_temperature_params& params,
+    critical_temperature_impl(const Lyt& lyt, const critical_temperature_params& params,
                               critical_temperature_stats<Lyt>& st) :
             layout{lyt},
             parameter{params},
@@ -180,15 +182,14 @@ class critical_temperature_impl
         sidb_simulation_result<Lyt> simulation_results{};
         if (parameter.engine == simulation_engine::EXACT)
         {
-            temperature_stats.algorithm_name = "exgs";
+            temperature_stats.algorithm_name = "ExGS";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            const quickexact_params<Lyt> params{parameter.simulation_params.phys_params};
-            simulation_results = quickexact<Lyt>(layout, params);
+            simulation_results = exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params);
         }
         else
         {
-            temperature_stats.algorithm_name = "quicksim";
+            temperature_stats.algorithm_name = "QuickSim";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = quicksim(layout, parameter.simulation_params);
@@ -301,8 +302,7 @@ class critical_temperature_impl
             temperature_stats.algorithm_name = "exgs";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            const quickexact_params<Lyt> params{parameter.simulation_params.phys_params};
-            simulation_results = quickexact<Lyt>(layout, params);
+            simulation_results = exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params);
         }
         else
         {
@@ -430,7 +430,7 @@ class critical_temperature_impl
     /**
      * SiDB cell-level layout.
      */
-    Lyt& layout{};
+    const Lyt& layout{};
     /**
      * Parameters for the `critical_temperature` algorithm.
      */
@@ -460,9 +460,8 @@ class critical_temperature_impl
  * @param params Simulation and physical parameters.
  * @param pst Statistics.
  */
-
 template <typename Lyt>
-bool critical_temperature(Lyt& lyt, const critical_temperature_params& params = {},
+bool critical_temperature(const Lyt& lyt, const critical_temperature_params& params = {},
                           critical_temperature_stats<Lyt>* pst = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");

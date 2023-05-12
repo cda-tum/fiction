@@ -63,28 +63,27 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
             {
                 // collect the charge state of the output SiDBs.
                 std::vector<sidb_charge_state> charge_states(output_cells.size());
-                std::transform(output_cells.begin(), output_cells.end(), charge_states.begin(),
+                std::transform(output_cells.cbegin(), output_cells.cend(), charge_states.begin(),
                                [&](const auto& cell) { return valid_layout.get_charge_state(cell); });
 
                 // Convert the charge states of the output SiDBs to bits (-1 -> 1, 0 -> 0).
                 std::vector<bool> charge(charge_states.size());
-                std::transform(charge_states.begin(), charge_states.end(), charge.begin(),
+                std::transform(charge_states.cbegin(), charge_states.cend(), charge.begin(),
                                [](const auto& state) { return static_cast<bool>(-charge_state_to_sign(state)); });
 
                 if (charge == output_bits)
                 {
-                    bool state_type = true;  // The output SiDB matches the truth table entry.
-                                             // Hence, state is called transparent.
-                    energy_and_state_type.emplace_back(energy, state_type);
+                    // The output SiDB matches the truth table entry. Hence, state is called transparent.
+                    energy_and_state_type.emplace_back(energy, true);
                 }
                 else
                 {
-                    bool state_type = false;
-                    energy_and_state_type.emplace_back(energy, state_type);
+                    energy_and_state_type.emplace_back(energy, false);
                 }
             }
         }
     }
+
     return energy_and_state_type;
 }
 
