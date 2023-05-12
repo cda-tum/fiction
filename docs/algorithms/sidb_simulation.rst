@@ -49,6 +49,7 @@ Energy Calculation
 
 **Header:** ``fiction/algorithms/simulation/sidb/energy_distribution.hpp``
 
+.. doxygentypedef:: fiction::sidb_energy_distribution
 .. doxygenfunction:: fiction::energy_distribution
 
 
@@ -60,6 +61,31 @@ Energy Calculation
 **Header:** ``fiction/algorithms/simulation/sidb/is_ground_state.hpp``
 
 .. doxygenfunction:: fiction::is_ground_state
+
+
+Temperature Behavior
+####################
+
+.. _critical-temperature:
+
+**Header:** ``fiction/algorithms/simulation/sidb/critical_temperature.hpp``
+
+.. doxygenenum:: fiction::critical_temperature_mode
+.. doxygenenum:: fiction::simulation_engine
+.. doxygenstruct:: fiction::critical_temperature_params
+   :members:
+.. doxygenfunction:: fiction::critical_temperature
+
+**Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_excited_states.hpp``
+
+.. doxygenfunction:: fiction::occupation_probability_gate_based
+.. doxygenfunction:: fiction::occupation_probability_non_gate_based
+
+**Header:** ``fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp``
+
+.. doxygentypedef:: fiction::sidb_energy_and_state_type
+.. doxygenfunction:: fiction::calculate_energy_and_state_type
+
 
 
 Time-to-Solution (TTS) Statistics
