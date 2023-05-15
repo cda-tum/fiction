@@ -1840,9 +1840,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     // that cannot.
     void set_base_number_to_three() noexcept
     {
-        strg->phys_params.base               = 3;
-        strg->charge_index.second            = 2;
-        strg->charge_index_sublayout.second  = 3;
+        strg->phys_params.base 3;
+        strg->charge_index.second 2;
+        strg->charge_index_sublayout.second 3;
         if (!strg->dependent_cell.is_dead())
         {
             if (!strg->three_state_cells.empty())
