@@ -78,7 +78,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({5, 4}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 5}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 6}, TestType::cell_type::NORMAL);
-        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
+        const charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
         CHECK(charge_layout.cell_to_index({5, 4}) != charge_layout.cell_to_index({5, 5}));
         CHECK(charge_layout.cell_to_index({5, 6}) != charge_layout.cell_to_index({5, 5}));
         CHECK(charge_layout.index_to_cell(4) == (siqad::coord_t()));
@@ -152,12 +152,13 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({5, 4}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 5}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 6}, TestType::cell_type::NORMAL);
-        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
+        const charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
         lyt.assign_cell_type({5, 6}, TestType::cell_type::EMPTY);
         charge_distribution_surface charge_layout_new{lyt, sidb_simulation_parameters{}};
         charge_layout_new.assign_defect({5, 6}, sidb_defect{sidb_defect_type::UNKNOWN, -1,
                                                             charge_layout_new.get_phys_params().epsilon_r,
                                                             charge_layout_new.get_phys_params().lambda_tf});
+        CHECK(charge_layout_new.chargeless_potential_generated_by_defect_at_given_distance(0.0) == 0.0);
         charge_layout_new.update_after_charge_change();
         CHECK_THAT(charge_layout.get_system_energy() - charge_layout_new.get_system_energy(),
                    Catch::Matchers::WithinAbs(0, fiction::physical_constants::POP_STABILITY_ERR));

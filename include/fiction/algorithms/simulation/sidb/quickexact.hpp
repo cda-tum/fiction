@@ -74,8 +74,8 @@ class quickexact_impl
   public:
     quickexact_impl(Lyt& lyt, const quickexact_params<Lyt>& params) :
             layout{lyt},
-            parameter{params},
-            charge_lyt{lyt, params.physical_parameters, sidb_charge_state::NEGATIVE}
+            charge_lyt{lyt, params.physical_parameters, sidb_charge_state::NEGATIVE},
+            parameter{params}
     {}
 
     void run()
@@ -255,7 +255,7 @@ class quickexact_impl
         charge_lyt_new.update_after_charge_change();
         // Not executed to detect if 3-state simulation is required, but to detect the SiDBs that could be positively
         // charged (important to speed up the simulation).
-        const auto three_state_simulation_required = charge_lyt_new.three_state_sim_required();
+        charge_lyt_new.three_state_sim_required();
         charge_lyt_new.update_after_charge_change(false);
         while (charge_lyt_new.get_charge_index().first < charge_lyt_new.get_max_charge_index())
         {
@@ -389,7 +389,7 @@ class quickexact_impl
     {
         for (const auto& index : detected_negative_sidb_indices)
         {
-            const auto cell = charge_lyt.index_to_cell(index);
+            const auto cell = charge_lyt.index_to_cell(static_cast<uint64_t>(index));
             detected_negative_sidbs.push_back(cell);
             layout.assign_cell_type(cell, Lyt::cell_type::EMPTY);
         }
@@ -415,6 +415,10 @@ class quickexact_impl
      */
     charge_distribution_surface<Lyt> charge_lyt{};
     /**
+     * Parameter used for the simulation.
+     */
+    quickexact_params<Lyt> parameter{};
+    /**
      * Indices of all SiDBs that are detected to be negatively charged in a physically valid layout.
      */
     std::vector<int64_t> detected_negative_sidb_indices{};
@@ -434,10 +438,6 @@ class quickexact_impl
      * Number of SiDBs of the input layout.
      */
     uint64_t number_of_SiDBs{};
-    /**
-     * Parameter used for the simulation.
-     */
-    quickexact_params<Lyt> parameter{};
     /**
      * Simulation results.
      */
