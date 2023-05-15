@@ -412,15 +412,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return 0;
     }
     /**
-     * Returns all SiDB cells.
-     *
-     * @return Vector of SiDB cells.
-     */
-    [[nodiscard]] std::vector<typename Lyt::cell> get_all_sidb_cells() const noexcept
-    {
-        return strg->sidb_order;
-    }
-    /**
      * Calculates and returns the distance between two cells (accessed by indices).
      *
      * @param index1 The first index.
