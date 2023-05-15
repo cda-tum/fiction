@@ -40,14 +40,13 @@ int main()  // NOLINT
 
             auto lyt = read_sqd_layout<sidb_cell_clk_lyt_siqad>(benchmark.string());
 
-            const sidb_simulation_parameters    params{2, -0.32};
-            exgs_stats<sidb_cell_clk_lyt_siqad> exgs_stats{};
-            exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params, &exgs_stats);
+            const sidb_simulation_parameters params{2, -0.32};
+            const auto simulation_results = exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
 
-            auto min_energy = minimum_energy<sidb_cell_clk_lyt_siqad>(exgs_stats.valid_lyts);
+            auto min_energy = minimum_energy<sidb_cell_clk_lyt_siqad>(simulation_results.charge_distributions);
 
             std::vector<charge_distribution_surface<sidb_cell_clk_lyt_siqad>> ground_state_layouts{};
-            for (const auto& valid_layout : exgs_stats.valid_lyts)
+            for (const auto& valid_layout : simulation_results.charge_distributions)
             {
                 if (std::abs(valid_layout.get_system_energy() - min_energy) < physical_constants::POP_STABILITY_ERR)
                 {
