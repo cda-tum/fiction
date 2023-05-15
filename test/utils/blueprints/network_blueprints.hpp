@@ -581,6 +581,73 @@ mockturtle::names_view<Ntk> topolinano_network()
     return ntk;
 }
 
+template <typename Ntk>
+mockturtle::names_view<Ntk> par_check()
+{
+    mockturtle::names_view<Ntk> ntk{};
+    const auto a = ntk.create_pi("a");
+    const auto b = ntk.create_pi("b");
+    const auto c = ntk.create_pi("c");
+    const auto p = ntk.create_pi("p");
+    const auto w1 = ntk.create_not(b);
+    const auto w2 = ntk.create_and(a, w1);
+    const auto w3 = ntk.create_not(a);
+    const auto w4 = ntk.create_and(w3, b);
+    const auto n1 = ntk.create_or(w2, w4);
+    const auto w5 = ntk.create_not(p);
+    const auto w6 = ntk.create_and(w5, c);
+    const auto w7 = ntk.create_not(a);
+    const auto w8 = ntk.create_and(w7, p);
+    const auto n2 = ntk.create_or(w6, w8);
+    const auto w9 = ntk.create_not(n2);
+    const auto w10 = ntk.create_and(n1, w9);
+    const auto w11 = ntk.create_not(n1);
+    const auto w12 = ntk.create_and(w11, n2);
+    const auto parity_check = ntk.create_or(w10, w12);
+
+    ntk.create_po(parity_check, "parity_check");
+
+    return ntk;
+}
+
+template <typename Ntk>
+    mockturtle::names_view<Ntk> fontes_1bitAdderMaj()
+{
+    mockturtle::names_view<Ntk> ntk{};
+    const auto a = ntk.create_pi("a");
+    const auto b = ntk.create_pi("b");
+    const auto cin = ntk.create_pi("cin");
+    const auto new_n5 = ntk.create_and(a, b);
+    const auto new_n6 = ntk.create_and(a, cin);
+    const auto nnew_n5 = ntk.create_not(new_n5);
+    const auto nnew_n6 = ntk.create_not(new_n6);
+    const auto new_n7 = ntk.create_and(nnew_n5, nnew_n6);
+    const auto new_n8 = ntk.create_and(b, cin);
+    const auto nnew_n8 = ntk.create_not(new_n8);
+    const auto new_n9 = ntk.create_and(new_n7, nnew_n8);
+    const auto new_n10 = ntk.create_and(a, new_n9);
+    const auto new_n11 = ntk.create_and(b, new_n9);
+    const auto nnew_n10 = ntk.create_not(new_n10);
+    const auto nnew_n11 = ntk.create_not(new_n11);
+    const auto new_n12 = ntk.create_and(nnew_n10, nnew_n11);
+    const auto new_n13 = ntk.create_and(nnew_n5, new_n12);
+    const auto nnew_n9 = ntk.create_not(new_n9);
+    const auto nnew_n13 = ntk.create_not(new_n13);
+    const auto new_n14 = ntk.create_and(nnew_n9, nnew_n13);
+    const auto ncin = ntk.create_not(cin);
+    const auto new_n15 = ntk.create_and(ncin, nnew_n13);
+    const auto new_n16 = ntk.create_and(ncin, nnew_n9);
+    const auto nnew_n15 = ntk.create_not(new_n15);
+    const auto nnew_n16 = ntk.create_not(new_n16);
+    const auto new_n17 = ntk.create_and(nnew_n15, nnew_n16);
+    const auto nnew_n17 = ntk.create_not(new_n17);
+    const auto m3 = ntk.create_or(new_n14, nnew_n17);
+
+    ntk.create_po(m3, "m3");
+
+    return ntk;
+}
+
 }  // namespace blueprints
 
 #endif  // FICTION_NETWORK_BLUEPRINTS_HPP
