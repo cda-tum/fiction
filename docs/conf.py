@@ -112,7 +112,7 @@ html_sidebars = {
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'fictiondoc'
-html_logo = "_static/mnt_light.svg"
+html_logo = "_static/mnt_sidebar.svg"
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -164,7 +164,8 @@ texinfo_documents = [
 
 # -- Options for breathe --------------------------------------------------
 
-import subprocess, os
+import os
+import subprocess
 
 read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
 
@@ -178,7 +179,6 @@ breathe_default_project = "fiction"
 
 from docutils import nodes
 from docutils.parsers.rst import Directive
-from sphinx import addnodes
 import xml.etree.ElementTree as ET
 
 
