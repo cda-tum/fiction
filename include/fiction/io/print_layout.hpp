@@ -39,7 +39,7 @@ static const auto SIDB_NEG_COLOR = fmt::fg(fmt::color::blue);
 // Escape color sequence for positively charged SiDB colors (red).
 static const auto SIDB_POS_COLOR = fmt::fg(fmt::color::red);
 // Escape color sequence for charge-neutral SiDB colors (white).
-static const auto SIDB_NEUT_COLOR = fmt::fg(fmt::color::red);
+static const auto SIDB_NEUT_COLOR = fmt::fg(fmt::color::white);
 
 }  // namespace detail
 
@@ -352,7 +352,8 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
 
                 if (it != cds.get_all_sidb_locations_in_nm().cend())
                 {
-                    switch (cds.get_all_sidb_charges()[std::distance(cds.get_all_sidb_locations_in_nm().cbegin(), it)])
+                    switch (cds.get_all_sidb_charges()[static_cast<std::vector<std::pair<double, double>>::size_type>(
+                        std::distance(cds.get_all_sidb_locations_in_nm().cbegin(), it))])
                     {
                         case sidb_charge_state::NEGATIVE:
                         {

@@ -4,14 +4,19 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb_bestagon_library.hpp>
 
+#include <fstream>
 #include <sstream>
 
 using namespace fiction;
@@ -193,4 +198,85 @@ TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
     print_cell_level_layout(print_stream, layout, false, false);
 
     CHECK(print_stream.str() == layout_print);
+}
+
+TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
+{
+    using hex_gate_lyt = hex_even_row_gate_clk_lyt;
+
+    hex_gate_lyt layout{{1, 0}};
+
+    layout.create_or({}, {}, {0, 0});
+
+    charge_distribution_surface<sidb_cell_clk_lyt_siqad> cl{
+        convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout)),
+        sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
+
+    for (uint64_t i = 0; i < cl.num_cells() / 2; ++i)
+    {
+        cl.assign_charge_state_by_cell_index(2 * i, sidb_charge_state::NEUTRAL, false);
+    }
+    for (uint64_t i = 0; i < cl.num_cells() / 4; ++i)
+    {
+        cl.assign_charge_state_by_cell_index(4 * i, sidb_charge_state::POSITIVE, false);
+    }
+    for (uint64_t i = 0; i < cl.num_cells() / 6; ++i)
+    {
+        cl.assign_charge_state_by_cell_index(6 * i, sidb_charge_state::NONE, false);
+    }
+
+    std::stringstream print_stream{};
+
+    print_charge_layout(print_stream, cl, true);
+
+    constexpr const char* layout_print =
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                              \x1B[38;2;255;255;255mo\x1B[0m                         \x1B[38;2;000;000;255m-\x1B[0m                                               \n"
+        "                                                ▢                     \x1B[38;2;000;000;255m-\x1B[0m                                                 \n"
+        "                                                    \x1B[38;2;000;000;255m-\x1B[0m             \x1B[38;2;255;255;255mo\x1B[0m                                                     \n"
+        "                                                      \x1B[38;2;000;000;255m-\x1B[0m         \x1B[38;2;255;255;255mo\x1B[0m                                                       \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                         \x1B[38;2;000;000;255m-\x1B[0m                                                              \n"
+        "                                                              \x1B[38;2;255;000;000m+\x1B[0m                                                         \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                           \x1B[38;2;000;000;255m-\x1B[0m                                                            \n"
+        "                                                            ▢                                                           \n"
+        "                                                                \x1B[38;2;255;000;000m+\x1B[0m                                                       \n"
+        "                                                                  \x1B[38;2;255;255;255mo\x1B[0m                                                     \n"
+        "                                                                      \x1B[38;2;000;000;255m-\x1B[0m                                                 \n"
+        "                                                                        \x1B[38;2;000;000;255m-\x1B[0m                                               \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "                                                                                                                        \n"
+        "\n";
+
+    CHECK(layout_print == print_stream.str());
 }
