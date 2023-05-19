@@ -6,6 +6,7 @@
 #define FICTION_PRINT_LAYOUT_HPP
 
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
