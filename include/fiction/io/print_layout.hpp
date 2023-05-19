@@ -325,7 +325,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
  */
 template <typename Lyt>
 void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt>& cds,
-                                       const bool cs_color = false) noexcept
+                         const bool cs_color = false) noexcept
 {
     // empty layout
     if (cds.num_cells() == 0ul)
@@ -346,9 +346,9 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
 
             if (Lyt::technology::is_normal_cell(ct))
             {
-                const auto& it = std::find(cds.get_all_sidb_locations_in_nm().cbegin(),
-                                           cds.get_all_sidb_locations_in_nm().cend(),
-                                           sidb_nm_position<Lyt>(cds.get_phys_params(), c));
+                const auto& it =
+                    std::find(cds.get_all_sidb_locations_in_nm().cbegin(), cds.get_all_sidb_locations_in_nm().cend(),
+                              sidb_nm_position<Lyt>(cds.get_phys_params(), c));
 
                 if (it != cds.get_all_sidb_locations_in_nm().cend())
                 {
