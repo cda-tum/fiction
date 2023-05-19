@@ -315,15 +315,15 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     os << std::endl;
 }
 /**
- * Writes a simplified 2D representation of a charge distribution surface to an output stream.
+ * Writes a simplified 2D representation of a SiDB charge layout to an output stream.
  *
  * @tparam Lyt Cell-level layout based in SiQAD-coordinates.
  * @param os Output stream to write into.
- * @param cds The charge distribution surface to print.
+ * @param cds The charge distribution surface of which the charge layout is to be printed.
  * @param cs_color Flag to utilize color escapes for charge states.
  */
 template <typename Lyt>
-void print_charge_distribution_surface(std::ostream& os, const charge_distribution_surface<Lyt>& cds,
+void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt>& cds,
                                        const bool cs_color = false) noexcept
 {
     // empty layout
