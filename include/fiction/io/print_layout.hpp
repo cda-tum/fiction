@@ -32,6 +32,12 @@ static const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::bla
                                                          fmt::fg(fmt::color::black) | fmt::bg(fmt::color::light_gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::dark_gray)}};
+// Escape color sequence for negatively charged SiDB colors (blue).
+static const auto SIDB_NEG_COLOR = fmt::fg(fmt::color::blue);
+// Escape color sequence for positively charged SiDB colors (red).
+static const auto SIDB_POS_COLOR = fmt::fg(fmt::color::red);
+// Escape color sequence for charge-neutral SiDB colors (white).
+static const auto SIDB_NEUT_COLOR = fmt::fg(fmt::color::red);
 
 }  // namespace detail
 
@@ -300,6 +306,82 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 
                 os << fmt::format(color,
                                   (Lyt::technology::is_normal_cell(ct) ? "▢" : std::string(1u, static_cast<char>(ct))));
+            }
+        }
+        os << '\n';
+    }
+    // flush stream
+    os << std::endl;
+}
+/**
+ * Writes a simplified 2D representation of an  cell-level layout to an output stream.
+ *
+ * @tparam Lyt Cell-level layout based in SiQAD-coordinates.
+ * @param os Output stream to write into.
+ * @param cds The charge distribution surface to print.
+ * @param cs_color Flag to utilize color escapes for charge states.
+ */
+template <typename Lyt>
+void print_charge_distribution_surface(std::ostream& os, const charge_distribution_surface<Lyt>& cds,
+                                       const bool cs_color = false) noexcept
+{
+    // empty layout
+    if (cds.num_cells() == 0ul)
+    {
+        os << "[i] empty layout" << std::endl;
+        return;
+    }
+
+    for (decltype(cds.y()) y_pos = 0; y_pos <= cds.y(); ++y_pos)
+    {
+        for (decltype(cds.x()) x_pos = 0; x_pos <= cds.x(); ++x_pos)
+        {
+            cell<Lyt> c{x_pos, y_pos};
+
+            const fmt::text_style no_color{};
+
+            const auto ct = cds.get_cell_type(c);
+
+            if (Lyt::technology::is_normal_cell(ct))
+            {
+                const auto& db_locs = cds.get_all_sidb_locations_in_nm();
+
+                const auto& it = std::find(db_locs.cbegin(), db_locs.cend(),
+                                           sidb_nm_position<Lyt>(cds.get_phys_params(), c));
+
+                if (it != db_locs.cend())
+                {
+                    switch (cds.get_all_sidb_charges()[std::distance(db_locs.cbegin(), it)])
+                    {
+                        case sidb_charge_state::NEGATIVE:
+                        {
+                            os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : no_color, "-");
+                            continue;
+                        }
+                        case sidb_charge_state::POSITIVE:
+                        {
+                            os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : no_color, "+");
+                            continue;
+                        }
+                        case sidb_charge_state::NEUTRAL:
+                        {
+                            os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : no_color, "o");
+                            continue;
+                        }
+                        default:
+                        {
+                            os << "▢";
+                        }
+                    }
+                }
+                else
+                {
+                    os << "▢";
+                }
+            }
+            else
+            {
+                os << std::string(1u, static_cast<char>(ct));
             }
         }
         os << '\n';
