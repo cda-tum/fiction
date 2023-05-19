@@ -9,6 +9,7 @@
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/math_utils.hpp"
 
 #include <fmt/color.h>
 #include <fmt/format.h>
@@ -346,9 +347,13 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
 
             if (Lyt::technology::is_normal_cell(ct))
             {
-                const auto& it =
-                    std::find(cds.get_all_sidb_locations_in_nm().cbegin(), cds.get_all_sidb_locations_in_nm().cend(),
-                              sidb_nm_position<Lyt>(cds.get_phys_params(), c));
+                const auto& it = std::find_if(
+                    cds.get_all_sidb_locations_in_nm().cbegin(), cds.get_all_sidb_locations_in_nm().cend(),
+                    [cur_loc = sidb_nm_position<Lyt>(cds.get_phys_params(), c)](const std::pair<double, double>& loc)
+                    {
+                        return round_to_n_decimal_places(cur_loc.first, 3) == round_to_n_decimal_places(loc.first, 3) &&
+                               round_to_n_decimal_places(cur_loc.second, 3) == round_to_n_decimal_places(loc.second, 3);
+                    });
 
                 if (it != cds.get_all_sidb_locations_in_nm().cend())
                 {
