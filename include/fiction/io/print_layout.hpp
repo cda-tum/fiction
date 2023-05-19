@@ -314,7 +314,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     os << std::endl;
 }
 /**
- * Writes a simplified 2D representation of an  cell-level layout to an output stream.
+ * Writes a simplified 2D representation of a charge distribution surface to an output stream.
  *
  * @tparam Lyt Cell-level layout based in SiQAD-coordinates.
  * @param os Output stream to write into.
@@ -344,14 +344,13 @@ void print_charge_distribution_surface(std::ostream& os, const charge_distributi
 
             if (Lyt::technology::is_normal_cell(ct))
             {
-                const auto& db_locs = cds.get_all_sidb_locations_in_nm();
-
-                const auto& it = std::find(db_locs.cbegin(), db_locs.cend(),
+                const auto& it = std::find(cds.get_all_sidb_locations_in_nm().cbegin(),
+                                           cds.get_all_sidb_locations_in_nm().cend(),
                                            sidb_nm_position<Lyt>(cds.get_phys_params(), c));
 
-                if (it != db_locs.cend())
+                if (it != cds.get_all_sidb_locations_in_nm().cend())
                 {
-                    switch (cds.get_all_sidb_charges()[std::distance(db_locs.cbegin(), it)])
+                    switch (cds.get_all_sidb_charges()[std::distance(cds.get_all_sidb_locations_in_nm().cbegin(), it)])
                     {
                         case sidb_charge_state::NEGATIVE:
                         {
