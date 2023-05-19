@@ -5,6 +5,7 @@
 #ifndef FICTION_PRINT_LAYOUT_HPP
 #define FICTION_PRINT_LAYOUT_HPP
 
+#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
