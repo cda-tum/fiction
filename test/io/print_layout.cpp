@@ -210,22 +210,22 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
         convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout)),
         sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
 
-    for (uint64_t i = 0; i < cl.num_cells() / 2; ++i)
+    for (uint64_t i = 0; 2 * i < cl.num_cells(); ++i)
     {
         cl.assign_charge_state_by_cell_index(2 * i, sidb_charge_state::NEUTRAL, false);
     }
-    for (uint64_t i = 0; i < cl.num_cells() / 4; ++i)
+    for (uint64_t i = 0; 4 * i < cl.num_cells(); ++i)
     {
         cl.assign_charge_state_by_cell_index(4 * i, sidb_charge_state::POSITIVE, false);
     }
-    for (uint64_t i = 0; i < cl.num_cells() / 6; ++i)
+    for (uint64_t i = 0; 6 * i < cl.num_cells(); ++i)
     {
         cl.assign_charge_state_by_cell_index(6 * i, sidb_charge_state::NONE, false);
     }
 
     std::stringstream print_stream{};
 
-    print_charge_layout(print_stream, cl);
+    print_charge_layout(print_stream, cl, false);
 
     constexpr const char* layout_print =
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
