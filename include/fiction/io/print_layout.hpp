@@ -35,7 +35,7 @@ static const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::bla
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::dark_gray)}};
 // Escape color sequence for negatively charged SiDB colors (blue).
-static const auto SIDB_NEG_COLOR = fmt::fg(fmt::color::blue);
+static const auto SIDB_NEG_COLOR = fmt::fg(fmt::color::cyan);
 // Escape color sequence for positively charged SiDB colors (red).
 static const auto SIDB_POS_COLOR = fmt::fg(fmt::color::red);
 // Escape color sequence for charge-neutral SiDB colors (white).
