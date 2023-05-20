@@ -6,15 +6,14 @@
 #define FICTION_PRINT_LAYOUT_HPP
 
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/math_utils.hpp"
 
 #include <fmt/color.h>
 #include <fmt/format.h>
 
 #include <array>
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -41,6 +40,8 @@ static const auto SIDB_NEG_COLOR = fmt::fg(fmt::color::blue);
 static const auto SIDB_POS_COLOR = fmt::fg(fmt::color::red);
 // Escape color sequence for charge-neutral SiDB colors (white).
 static const auto SIDB_NEUT_COLOR = fmt::fg(fmt::color::white);
+// Escape color sequence for lattice background colors (grey).
+static const auto SIDB_LAT_COLOR = fmt::fg(fmt::color::gray);
 
 }  // namespace detail
 
@@ -335,61 +336,80 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
         return;
     }
 
-    for (decltype(cds.y()) y_pos = 0; y_pos <= cds.y(); ++y_pos)
+    std::vector<std::pair<uint64_t, std::pair<double, double>>> sorted_locs;
+
+    auto min_x_d = std::numeric_limits<double>::max();
+    auto max_x_d = std::numeric_limits<double>::min();
+
+    for (uint64_t i = 0; i < cds.num_cells(); ++i)
     {
-        for (decltype(cds.x()) x_pos = 0; x_pos <= cds.x(); ++x_pos)
+        min_x_d = std::min(min_x_d, cds.get_all_sidb_locations_in_nm()[i].first);
+        max_x_d = std::max(max_x_d, cds.get_all_sidb_locations_in_nm()[i].first);
+
+        sorted_locs.push_back(std::make_pair(i, cds.get_all_sidb_locations_in_nm()[i]));
+    };
+
+    std::sort(sorted_locs.begin(), sorted_locs.end(),
+              [](const auto& p1, const auto& p2)
+              {
+                  if (p1.second.second != p2.second.second)
+                  {
+                      return p1.second.second < p2.second.second;
+                  }
+                  return p1.second.first < p2.second.first;
+              });
+
+    auto min_x = static_cast<int>(std::floor(min_x_d / cds.get_phys_params().lat_a * 10));
+    auto max_x = static_cast<int>(std::floor(max_x_d / cds.get_phys_params().lat_a * 10));
+
+    auto min_y = static_cast<int>(std::floor(sorted_locs.front().second.second / cds.get_phys_params().lat_b * 10));
+    auto max_y = static_cast<int>(std::floor(sorted_locs.back().second.second / cds.get_phys_params().lat_b * 10));
+
+    uint64_t count = 0;
+
+    const fmt::text_style no_color{};
+
+    for (decltype(cds.y()) y_pos = std::max(min_y - 1, 0); y_pos <= std::min(max_y + 1, cds.y()); ++y_pos)
+    {
+        for (uint8_t l = 0; l <= 1; ++l)
         {
-            cell<Lyt> c{x_pos, y_pos};
-
-            const fmt::text_style no_color{};
-
-            const auto ct = cds.get_cell_type(c);
-
-            if (Lyt::technology::is_normal_cell(ct))
+            for (decltype(cds.x()) x_pos = std::max(min_x - 2, 0); x_pos <= std::min(max_x + 2, cds.x()); ++x_pos)
             {
-                const auto& it = std::find_if(
-                    cds.get_all_sidb_locations_in_nm().cbegin(), cds.get_all_sidb_locations_in_nm().cend(),
-                    [cur_loc = sidb_nm_position<Lyt>(cds.get_phys_params(), c)](const std::pair<double, double>& loc)
-                    {
-                        return round_to_n_decimal_places(cur_loc.first, 3) == round_to_n_decimal_places(loc.first, 3) &&
-                               round_to_n_decimal_places(cur_loc.second, 3) == round_to_n_decimal_places(loc.second, 3);
-                    });
+                cell<Lyt> c{x_pos, y_pos, l};
 
-                if (it != cds.get_all_sidb_locations_in_nm().cend())
+                const auto ct = cds.get_cell_type(c);
+
+                if (Lyt::technology::is_normal_cell(ct))
                 {
-                    switch (cds.get_all_sidb_charges()[static_cast<std::vector<std::pair<double, double>>::size_type>(
-                        std::distance(cds.get_all_sidb_locations_in_nm().cbegin(), it))])
+                    switch (cds.get_charge_state_by_index(sorted_locs[count++].first))
                     {
                         case sidb_charge_state::NEGATIVE:
                         {
-                            os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : no_color, "-");
+                            os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : no_color, " ● ");
                             continue;
                         }
                         case sidb_charge_state::POSITIVE:
                         {
-                            os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : no_color, "+");
+                            os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : no_color, " ⨁ ");
                             continue;
                         }
                         case sidb_charge_state::NEUTRAL:
                         {
-                            os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : no_color, "o");
+                            os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : no_color, " ◯ ");
                             continue;
                         }
                         default:
                         {
-                            os << "▢";
+                            os << fmt::format(cs_color ? detail::SIDB_LAT_COLOR : no_color, " ◌ ");
                         }
                     }
                 }
                 else
                 {
-                    os << "▢";
+                    os << fmt::format(cs_color ? detail::SIDB_LAT_COLOR : no_color, " · ");
                 }
             }
-            else
-            {
-                os << std::string(1u, static_cast<char>(ct));
-            }
+            os << '\n';
         }
         os << '\n';
     }
