@@ -318,16 +318,16 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     os << std::endl;
 }
 /**
- * Writes a simplified 2D representation of a SiDB charge layout to an output stream.
+ * Writes a simplified 2D representation of an SiDB charge layout to an output stream.
  *
- * @tparam Lyt Cell-level layout based in SiQAD-coordinates.
+ * @tparam Lyt Cell-level layout based on SiQAD coordinates.
  * @param os Output stream to write into.
  * @param cds The charge distribution surface of which the charge layout is to be printed.
  * @param cs_color Flag to utilize color escapes for charge states.
  */
 template <typename Lyt>
 void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt>& cds,
-                         const bool cs_color = false) noexcept
+                         const bool cs_color = true) noexcept
 {
     // empty layout
     if (cds.num_cells() == 0ul)
@@ -349,6 +349,7 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
         sorted_locs.push_back(std::make_pair(i, cds.get_all_sidb_locations_in_nm()[i]));
     };
 
+    // sort a vector containing indices on the order of how they are printed
     std::sort(sorted_locs.begin(), sorted_locs.end(),
               [](const auto& p1, const auto& p2)
               {
@@ -359,28 +360,32 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
                   return p1.second.first < p2.second.first;
               });
 
+    // obtain fiction coordinates of the minimum and maximum normal cell
     auto min_x = static_cast<int>(std::floor(min_x_d / cds.get_phys_params().lat_a * 10));
     auto max_x = static_cast<int>(std::floor(max_x_d / cds.get_phys_params().lat_a * 10));
 
     auto min_y = static_cast<int>(std::floor(sorted_locs.front().second.second / cds.get_phys_params().lat_b * 10));
     auto max_y = static_cast<int>(std::floor(sorted_locs.back().second.second / cds.get_phys_params().lat_b * 10));
 
+    // initialize the count which indexes the sorted vector containing the indices associated with the cells
     uint64_t count = 0;
 
-    const fmt::text_style no_color{};
+    static const fmt::text_style no_color{};
 
     for (decltype(cds.y()) y_pos = std::max(min_y - 1, 0); y_pos <= std::min(max_y + 1, cds.y()); ++y_pos)
     {
-        for (uint8_t l = 0; l <= 1; ++l)
+        // loop over the different rows of a dimer pair
+        for (uint8_t r = 0; r <= 1; ++r)
         {
             for (decltype(cds.x()) x_pos = std::max(min_x - 2, 0); x_pos <= std::min(max_x + 2, cds.x()); ++x_pos)
             {
-                cell<Lyt> c{x_pos, y_pos, l};
+                cell<Lyt> c{x_pos, y_pos, r};
 
                 const auto ct = cds.get_cell_type(c);
 
                 if (Lyt::technology::is_normal_cell(ct))
                 {
+                    // switch over the charge state of the SiDB index associated with the current cell, and update count
                     switch (cds.get_charge_state_by_index(sorted_locs[count++].first))
                     {
                         case sidb_charge_state::NEGATIVE:
@@ -398,7 +403,7 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
                             os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : no_color, " ◯ ");
                             continue;
                         }
-                        default:
+                        default:  // NONE charge state case
                         {
                             os << fmt::format(cs_color ? detail::SIDB_LAT_COLOR : no_color, " ◌ ");
                         }
