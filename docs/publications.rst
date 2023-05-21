@@ -25,7 +25,7 @@ If you use *fiction* in your work, we would appreciate if you cited
     }
 
 Furthermore, if you use any of the design automation algorithms :ref:`exact <exact>`, :ref:`ortho <ortho>`,
-:ref:`onepass <onepass>`, :ref:`equiv <equiv>`, :ref:`color routing <color_routing>`, :ref:`QuickSim <quicksim>`, or :ref:`critical temperature simulation<critical_temperature>`
+:ref:`onepass <onepass>`, :ref:`equiv <equiv>`, :ref:`color routing <color_routing>`, :ref:`QuickSim <quicksim>`, or :ref:`critical temperature simulation <critical_temperature>`
 please consider citing their respective papers as well:
 
 .. code-block:: tex
