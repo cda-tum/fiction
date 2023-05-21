@@ -328,10 +328,11 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
  * @param os Output stream to write into.
  * @param cds The charge distribution surface of which the charge layout is to be printed.
  * @param cs_color Flag to utilize color escapes for charge states.
+ * @param draw_lattice Flag to enable lattice background drawing.
  */
 template <typename Lyt>
-void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt>& cds,
-                         const bool cs_color = true) noexcept
+void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt>& cds, const bool cs_color = true,
+                         const bool draw_lattice = true) noexcept
 {
     // empty layout
     if (cds.num_cells() == 0ul)
@@ -383,7 +384,8 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
             {
                 if (Lyt::technology::is_empty_cell(cds.get_cell_type({x_pos, y_pos, r})))
                 {
-                    os << fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ");
+                    os << (draw_lattice ? fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") :
+                                          "  ");
                     continue;
                 }
 
