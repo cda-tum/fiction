@@ -43,8 +43,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'fiction'
-copyright = '2018-2023, Marcel Walter, Technical University of Munich (TUM)'
-author = 'Marcel Walter'
+copyright = '2018-2023, Marcel Walter. 2023-present Chair for Design Automation, Technical University of Munich'
+author = 'Marcel Walter, Jan Drewniok, Simon Hofmann, Benjamin Hien'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -73,7 +73,6 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -86,7 +85,7 @@ html_theme = 'sphinx_rtd_theme'
 # documentation.
 #
 html_theme_options = {
-    "collapse_navigation" : False
+    "collapse_navigation": False
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -109,12 +108,11 @@ html_sidebars = {
     ]
 }
 
-
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'fictiondoc'
-
+html_logo = "_static/mnt_sidebar.svg"
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -141,9 +139,8 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'fiction.tex', 'fiction Documentation',
-     'Marcel Walter, TUM', 'manual'),
+     'Chair for Design Automation, Technical University of Munich', 'manual'),
 ]
-
 
 # -- Options for manual page output ---------------------------------------
 
@@ -153,7 +150,6 @@ man_pages = [
     (master_doc, 'fiction', 'fiction Documentation',
      [author], 1)
 ]
-
 
 # -- Options for Texinfo output -------------------------------------------
 
@@ -168,12 +164,13 @@ texinfo_documents = [
 
 # -- Options for breathe --------------------------------------------------
 
-import subprocess, os
+import os
+import subprocess
 
 read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
 
 if read_the_docs_build:
-    subprocess.call('doxygen Doxyfile', shell = True)
+    subprocess.call('doxygen Doxyfile', shell=True)
 
 breathe_projects = {"fiction": "doxyxml/xml"}
 breathe_default_project = "fiction"
@@ -182,8 +179,8 @@ breathe_default_project = "fiction"
 
 from docutils import nodes
 from docutils.parsers.rst import Directive
-from sphinx import addnodes
 import xml.etree.ElementTree as ET
+
 
 class DocOverviewTableDirective(Directive):
     has_content = True
@@ -194,33 +191,35 @@ class DocOverviewTableDirective(Directive):
         doc = ET.parse("doxyxml/xml/{}.xml".format(self.arguments[0]))
 
         table = nodes.table()
-        tgroup = nodes.tgroup(cols = 2)
+        tgroup = nodes.tgroup(cols=2)
 
-        tgroup += nodes.colspec(colwidth = 50)
-        tgroup += nodes.colspec(colwidth = 50)
+        tgroup += nodes.colspec(colwidth=50)
+        tgroup += nodes.colspec(colwidth=50)
 
         # header
         colname = self.options.get('column', "Function")
-        tgroup += nodes.thead('', nodes.row('', *[nodes.entry('', nodes.line(text = c)) for c in [colname, "Description"]]))
+        tgroup += nodes.thead('',
+                              nodes.row('', *[nodes.entry('', nodes.line(text=c)) for c in [colname, "Description"]]))
 
         # rows
         tbody = nodes.tbody()
         for target in self.content:
             for elem in doc.findall("./compounddef/sectiondef/memberdef/[name='%s']" % target):
-                ref = nodes.reference('', target, internal = True)
-                ref['refuri'] = '#{}'.format( elem.attrib["id"] )
+                ref = nodes.reference('', target, internal=True)
+                ref['refuri'] = '#{}'.format(elem.attrib["id"])
 
                 reft = nodes.paragraph()
                 reft.extend([ref])
 
                 func = nodes.entry('', reft)
-                desc = nodes.entry('', nodes.line(text = elem.findtext("./briefdescription/para")))
+                desc = nodes.entry('', nodes.line(text=elem.findtext("./briefdescription/para")))
 
                 tbody += nodes.row('', func, desc)
 
         tgroup += tbody
         table += tgroup
         return [table]
+
 
 def setup(app):
     app.add_directive('doc_overview_table', DocOverviewTableDirective)
