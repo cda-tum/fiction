@@ -42,6 +42,8 @@ static const auto SIDB_POS_COLOR = fmt::fg(fmt::color::red);
 static const auto SIDB_NEUT_COLOR = fmt::fg(fmt::color::white);
 // Escape color sequence for lattice background colors (grey).
 static const auto SIDB_LAT_COLOR = fmt::fg(fmt::color::gray);
+// Empty escape color sequence
+static constexpr auto NO_COLOR = fmt::text_style{};
 
 }  // namespace detail
 
@@ -232,6 +234,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 
         ++r_ctr;
     }
+
     // flush stream
     os << std::endl;
 }
@@ -314,6 +317,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         }
         os << '\n';
     }
+
     // flush stream
     os << std::endl;
 }
@@ -336,88 +340,82 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
         return;
     }
 
-    std::vector<std::pair<uint64_t, std::pair<double, double>>> sorted_locs;
+    std::vector<std::pair<uint64_t, typename Lyt::coordinate>> sorted_locs;
 
-    auto min_x_d = std::numeric_limits<double>::max();
-    auto max_x_d = std::numeric_limits<double>::min();
+    auto min_x = std::numeric_limits<int32_t>::max();
+    auto max_x = std::numeric_limits<int32_t>::min();
 
-    for (uint64_t i = 0; i < cds.num_cells(); ++i)
-    {
-        min_x_d = std::min(min_x_d, cds.get_all_sidb_locations_in_nm()[i].first);
-        max_x_d = std::max(max_x_d, cds.get_all_sidb_locations_in_nm()[i].first);
+    auto ix = 0;
 
-        sorted_locs.push_back(std::make_pair(i, cds.get_all_sidb_locations_in_nm()[i]));
-    };
+    cds.foreach_cell(
+        [&cds, &min_x, &max_x, &sorted_locs, &ix](const cell<Lyt>& c)
+        {
+            if (Lyt::technology::is_empty_cell(cds.get_cell_type(c)))
+            {
+                return;
+            }
+
+            min_x = std::min(min_x, c.x);
+            max_x = std::max(max_x, c.x);
+
+            sorted_locs.emplace_back(ix, c);
+
+            ix++;
+        });
 
     // sort a vector containing indices on the order of how they are printed
     std::sort(sorted_locs.begin(), sorted_locs.end(),
-              [](const auto& p1, const auto& p2)
-              {
-                  if (p1.second.second != p2.second.second)
-                  {
-                      return p1.second.second < p2.second.second;
-                  }
-                  return p1.second.first < p2.second.first;
-              });
+              [](const auto& p1, const auto& p2) { return p1.second < p2.second; });
 
-    // obtain fiction coordinates of the minimum and maximum normal cell
-    auto min_x = static_cast<int>(std::floor(min_x_d / cds.get_phys_params().lat_a * 10));
-    auto max_x = static_cast<int>(std::floor(max_x_d / cds.get_phys_params().lat_a * 10));
+    // obtain the crop dimensions
+    siqad::coord_t min{std::max(min_x - 2, 0), std::max(sorted_locs.front().second.y - 1, 0)};
+    siqad::coord_t max{std::min(max_x + 2, cds.x()), std::min(sorted_locs.back().second.y + 1, cds.y())};
 
-    auto min_y = static_cast<int>(std::floor(sorted_locs.front().second.second / cds.get_phys_params().lat_b * 10));
-    auto max_y = static_cast<int>(std::floor(sorted_locs.back().second.second / cds.get_phys_params().lat_b * 10));
-
-    // initialize the count which indexes the sorted vector containing the indices associated with the cells
+    // initialize the count that indexes the sorted vector containing the indices associated with the cells
     uint64_t count = 0;
 
-    static const fmt::text_style no_color{};
-
-    for (decltype(cds.y()) y_pos = std::max(min_y - 1, 0); y_pos <= std::min(max_y + 1, cds.y()); ++y_pos)
+    for (decltype(cds.y()) y_pos = min.y; y_pos <= max.y; ++y_pos)
     {
         // loop over the different rows of a dimer pair
         for (uint8_t r = 0; r <= 1; ++r)
         {
-            for (decltype(cds.x()) x_pos = std::max(min_x - 2, 0); x_pos <= std::min(max_x + 2, cds.x()); ++x_pos)
+            for (decltype(cds.x()) x_pos = min.x; x_pos <= max.x; ++x_pos)
             {
-                cell<Lyt> c{x_pos, y_pos, r};
-
-                const auto ct = cds.get_cell_type(c);
-
-                if (Lyt::technology::is_normal_cell(ct))
+                if (Lyt::technology::is_empty_cell(cds.get_cell_type({x_pos, y_pos, r})))
                 {
-                    // switch over the charge state of the SiDB index associated with the current cell, and update count
-                    switch (cds.get_charge_state_by_index(sorted_locs[count++].first))
-                    {
-                        case sidb_charge_state::NEGATIVE:
-                        {
-                            os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : no_color, " ● ");
-                            continue;
-                        }
-                        case sidb_charge_state::POSITIVE:
-                        {
-                            os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : no_color, " ⨁ ");
-                            continue;
-                        }
-                        case sidb_charge_state::NEUTRAL:
-                        {
-                            os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : no_color, " ◯ ");
-                            continue;
-                        }
-                        default:  // NONE charge state case
-                        {
-                            os << fmt::format(cs_color ? detail::SIDB_LAT_COLOR : no_color, " ◌ ");
-                        }
-                    }
+                    os << fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ");
+                    continue;
                 }
-                else
+
+                // switch over the charge state of the SiDB index associated with the current cell, and update count
+                switch (cds.get_charge_state_by_index(sorted_locs[count++].first))
                 {
-                    os << fmt::format(cs_color ? detail::SIDB_LAT_COLOR : no_color, " · ");
+                    case sidb_charge_state::NEGATIVE:
+                    {
+                        os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ● ");
+                        continue;
+                    }
+                    case sidb_charge_state::POSITIVE:
+                    {
+                        os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ⨁ ");
+                        continue;
+                    }
+                    case sidb_charge_state::NEUTRAL:
+                    {
+                        os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : detail::NO_COLOR, " ◯ ");
+                        continue;
+                    }
+                    default:  // NONE charge state case
+                    {
+                        os << fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " ◌ ");
+                    }
                 }
             }
             os << '\n';
         }
         os << '\n';
     }
+
     // flush stream
     os << std::endl;
 }
