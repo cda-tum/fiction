@@ -341,10 +341,10 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
         return;
     }
 
-    std::vector<std::pair<uint64_t, typename Lyt::coordinate>> sorted_locs;
+    auto min_x = std::numeric_limits<decltype(cds.x())>::max();
+    auto max_x = std::numeric_limits<decltype(cds.x())>::min();
 
-    auto min_x = std::numeric_limits<int32_t>::max();
-    auto max_x = std::numeric_limits<int32_t>::min();
+    std::vector<std::pair<uint64_t, coordinate<Lyt>>> sorted_locs;
 
     auto ix = 0;
 
@@ -369,8 +369,8 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
               [](const auto& p1, const auto& p2) { return p1.second < p2.second; });
 
     // obtain the crop dimensions
-    siqad::coord_t min{std::max(min_x - 2, 0), std::max(sorted_locs.front().second.y - 1, 0)};
-    siqad::coord_t max{std::min(max_x + 2, cds.x()), std::min(sorted_locs.back().second.y + 1, cds.y())};
+    coordinate<Lyt> min{std::max(min_x - 2, 0), std::max(sorted_locs.front().second.y - 1, 0)};
+    coordinate<Lyt> max{std::min(max_x + 2, cds.x()), std::min(sorted_locs.back().second.y + 1, cds.y())};
 
     // initialize the count that indexes the sorted vector containing the indices associated with the cells
     uint64_t count = 0;
