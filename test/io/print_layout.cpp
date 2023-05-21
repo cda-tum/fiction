@@ -219,28 +219,28 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
 
     layout.create_or({}, {}, {0, 0});
 
-    charge_distribution_surface<sidb_cell_clk_lyt_siqad> cl{
+    const charge_distribution_surface<sidb_cell_clk_lyt_siqad> cl{
         convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout)),
         sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
 
-    cl.assign_charge_state_by_cell_index(0, sidb_charge_state::NONE, false);
-    cl.assign_charge_state_by_cell_index(1, sidb_charge_state::NEGATIVE, false);
-    cl.assign_charge_state_by_cell_index(2, sidb_charge_state::NEUTRAL, false);
-    cl.assign_charge_state_by_cell_index(3, sidb_charge_state::NEGATIVE, false);
-    cl.assign_charge_state_by_cell_index(4, sidb_charge_state::POSITIVE, false);
-    cl.assign_charge_state_by_cell_index(5, sidb_charge_state::NEGATIVE, false);
-    cl.assign_charge_state_by_cell_index(6, sidb_charge_state::NEGATIVE, false);
-    cl.assign_charge_state_by_cell_index(7, sidb_charge_state::NEGATIVE, false);
-    cl.assign_charge_state_by_cell_index(8, sidb_charge_state::POSITIVE, false);
-    cl.assign_charge_state_by_cell_index(9, sidb_charge_state::NEGATIVE, false);
-    cl.assign_charge_state_by_cell_index(10, sidb_charge_state::NEUTRAL, false);
-    cl.assign_charge_state_by_cell_index(11, sidb_charge_state::NEGATIVE, false);
-    cl.assign_charge_state_by_cell_index(12, sidb_charge_state::NONE, false);
-    cl.assign_charge_state_by_cell_index(13, sidb_charge_state::NEGATIVE, false);
-    cl.assign_charge_state_by_cell_index(14, sidb_charge_state::NEUTRAL, false);
-    cl.assign_charge_state_by_cell_index(15, sidb_charge_state::NEGATIVE, false);
-    cl.assign_charge_state_by_cell_index(16, sidb_charge_state::POSITIVE, false);
-    cl.assign_charge_state_by_cell_index(17, sidb_charge_state::NEGATIVE, false);
+    cl.assign_charge_state({46, 3, 0}, sidb_charge_state::NEUTRAL);
+    cl.assign_charge_state({72, 3, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({48, 4, 0}, sidb_charge_state::NONE);
+    cl.assign_charge_state({70, 4, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({52, 5, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({66, 5, 0}, sidb_charge_state::NEUTRAL);
+    cl.assign_charge_state({54, 6, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({64, 6, 0}, sidb_charge_state::POSITIVE);
+    cl.assign_charge_state({57, 9, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({57, 10, 1}, sidb_charge_state::NONE);
+    cl.assign_charge_state({62, 10, 0}, sidb_charge_state::POSITIVE);
+    cl.assign_charge_state({59, 11, 1}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({59, 14, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({60, 15, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({64, 16, 0}, sidb_charge_state::POSITIVE);
+    cl.assign_charge_state({66, 17, 0}, sidb_charge_state::NEUTRAL);
+    cl.assign_charge_state({70, 18, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({72, 19, 0}, sidb_charge_state::NEGATIVE);
 
     std::stringstream print_stream{};
 

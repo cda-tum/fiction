@@ -12,9 +12,14 @@
 #include <fmt/color.h>
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdint>
+#include <iostream>
+#include <limits>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -335,54 +340,46 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
                          const bool draw_lattice = true) noexcept
 {
     // empty layout
-    if (cds.num_cells() == 0ul)
+    if (cds.is_empty())
     {
         os << "[i] empty layout" << std::endl;
         return;
     }
 
+    // obtain the crop dimensions
     auto min_x = std::numeric_limits<decltype(cds.x())>::max();
     auto max_x = std::numeric_limits<decltype(cds.x())>::min();
 
-    std::vector<std::pair<uint64_t, coordinate<Lyt>>> sorted_locs;
-
-    auto ix = 0;
+    auto min_y = std::numeric_limits<decltype(cds.y())>::max();
+    auto max_y = std::numeric_limits<decltype(cds.y())>::min();
 
     cds.foreach_cell(
-        [&cds, &min_x, &max_x, &sorted_locs, &ix](const cell<Lyt>& c)
+        [&cds, &min_x, &max_x, &min_y, &max_y](const cell<Lyt>& c)
         {
-            if (Lyt::technology::is_empty_cell(cds.get_cell_type(c)))
+            if (!cds.is_empty_cell(c))
             {
-                return;
+                min_x = std::min(min_x, c.x);
+                max_x = std::max(max_x, c.x);
+
+                min_y = std::min(min_y, c.y);
+                max_y = std::max(max_y, c.y);
             }
-
-            min_x = std::min(min_x, c.x);
-            max_x = std::max(max_x, c.x);
-
-            sorted_locs.emplace_back(ix, c);
-
-            ix++;
         });
 
-    // sort a vector containing indices on the order of how they are printed
-    std::sort(sorted_locs.begin(), sorted_locs.end(),
-              [](const auto& p1, const auto& p2) { return p1.second < p2.second; });
+    const coordinate<Lyt> min{std::max(min_x - 2, 0), std::max(min_y - 1, 0)};
+    const coordinate<Lyt> max{std::min(max_x + 2, cds.x()), std::min(max_y + 1, cds.y())};
 
-    // obtain the crop dimensions
-    const coordinate<Lyt> min{std::max(min_x - 2, 0), std::max(sorted_locs.front().second.y - 1, 0)};
-    const coordinate<Lyt> max{std::min(max_x + 2, cds.x()), std::min(sorted_locs.back().second.y + 1, cds.y())};
-
-    // initialize the count that indexes the sorted vector containing the indices associated with the cells
-    uint64_t count = 0;
-
+    // loop over dimer pairs
     for (decltype(cds.y()) y_pos = min.y; y_pos <= max.y; ++y_pos)
     {
-        // loop over the different rows of a dimer pair
+        // loop over rows of a dimer pair
         for (uint8_t r = 0; r <= 1; ++r)
         {
             for (decltype(cds.x()) x_pos = min.x; x_pos <= max.x; ++x_pos)
             {
-                if (Lyt::technology::is_empty_cell(cds.get_cell_type({x_pos, y_pos, r})))
+                const cell<Lyt> c{x_pos, y_pos, r};
+
+                if (cds.is_empty_cell(c))
                 {
                     os << (draw_lattice ? fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") :
                                           "  ");
@@ -390,7 +387,7 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
                 }
 
                 // switch over the charge state of the SiDB index associated with the current cell, and update count
-                switch (cds.get_charge_state_by_index(sorted_locs[count++].first))
+                switch (cds.get_charge_state(c))
                 {
                     case sidb_charge_state::NEGATIVE:
                     {
