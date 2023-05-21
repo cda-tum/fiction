@@ -216,7 +216,7 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
     cl.assign_charge_state_by_cell_index(3, sidb_charge_state::NEGATIVE, false);
     cl.assign_charge_state_by_cell_index(4, sidb_charge_state::POSITIVE, false);
     cl.assign_charge_state_by_cell_index(5, sidb_charge_state::NEGATIVE, false);
-    cl.assign_charge_state_by_cell_index(6, sidb_charge_state::NONE, false);
+    cl.assign_charge_state_by_cell_index(6, sidb_charge_state::NEGATIVE, false);
     cl.assign_charge_state_by_cell_index(7, sidb_charge_state::NEGATIVE, false);
     cl.assign_charge_state_by_cell_index(8, sidb_charge_state::POSITIVE, false);
     cl.assign_charge_state_by_cell_index(9, sidb_charge_state::NEGATIVE, false);
@@ -273,7 +273,7 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◌  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ⨁  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
