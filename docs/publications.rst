@@ -25,7 +25,7 @@ If you use *fiction* in your work, we would appreciate if you cited
     }
 
 Furthermore, if you use any of the design automation algorithms :ref:`exact <exact>`, :ref:`ortho <ortho>`,
-:ref:`onepass <onepass>`, :ref:`equiv <equiv>`, :ref:`color routing <color_routing>`, or :ref:`QuickSim <quicksim>`
+:ref:`onepass <onepass>`, :ref:`equiv <equiv>`, :ref:`color routing <color_routing>`, :ref:`QuickSim <quicksim>`, or :ref:`Critical Temperature <critical_temperature>`
 please consider citing their respective papers as well:
 
 .. code-block:: tex
@@ -88,6 +88,26 @@ please consider citing their respective papers as well:
       note = {arXiv:2303.03422},
       year = {2023},
       month = {March}
+    }
+
+.. code-block:: tex
+
+    @inproceedings{drewniok2023quicksim_nano,
+	author    = {J. Drewniok and M. Walter and S. S. H. Ng and K. Walus and R. Wille},
+	title     = {{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
+	booktitle = nano,
+	year      = {2023},
+	domain    = {fcn}
+    }
+
+.. code-block:: tex
+
+    @inproceedings{drewniok2023temperature_nano,
+	author    = {J. Drewniok and M. Walter and R. Wille},
+	title     = {{Temperature Behavior of Silicon Dangling Bond Logic}},
+	booktitle = nano,
+	year      = {2023},
+	domain    = {fcn}
     }
 
 The same holds for the :ref:`Bestagon <bestagon>` gate library:
