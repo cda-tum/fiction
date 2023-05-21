@@ -93,21 +93,21 @@ please consider citing their respective papers as well:
 .. code-block:: tex
 
     @inproceedings{drewniok2023quicksim_nano,
-	author    = {J. Drewniok and M. Walter and S. S. H. Ng and K. Walus and R. Wille},
-	title     = {{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
-	booktitle = nano,
-	year      = {2023},
-	domain    = {Field-Coupled Nanocomputing}
+	  author    = {J. Drewniok and M. Walter and S. S. H. Ng and K. Walus and R. Wille},
+	  title     = {{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
+	  booktitle = IEEE-NANO 2023,
+	  year      = {2023},
+	  domain    = {Field-Coupled Nanocomputing}
     }
 
 .. code-block:: tex
 
     @inproceedings{drewniok2023temperature_nano,
-	author    = {J. Drewniok and M. Walter and R. Wille},
-	title     = {{Temperature Behavior of Silicon Dangling Bond Logic}},
-	booktitle = nano,
-	year      = {2023},
-	domain    = {Field-Coupled Nanocomputing}
+      author    = {J. Drewniok and M. Walter and R. Wille},
+	  title     = {{Temperature Behavior of Silicon Dangling Bond Logic}},
+	  booktitle = IEEE-NANO 2023,
+	  year      = {2023},
+	  domain    = {Field-Coupled Nanocomputing}
     }
 
 The same holds for the :ref:`Bestagon <bestagon>` gate library:
