@@ -106,7 +106,7 @@ TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
     CHECK(print_stream.str() == layout_print);
 }
 
-TEST_CASE("Print empty cell-level layout", "[print-gate-level-layout]")
+TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = fiction::cell_level_layout<fiction::qca_technology,
                                                    fiction::clocked_layout<cartesian_layout<offset::ucoord_t>>>;
@@ -194,6 +194,21 @@ TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
     std::stringstream print_stream{};
 
     print_cell_level_layout(print_stream, layout, false, false);
+
+    CHECK(print_stream.str() == layout_print);
+}
+
+TEST_CASE("Print empty charge layout", "[print-charge-layout]")
+{
+    sidb_cell_clk_lyt_siqad layout{sidb_cell_clk_lyt_siqad::aspect_ratio{2, 2}, "Empty"};
+
+    charge_distribution_surface<sidb_cell_clk_lyt_siqad> cl{layout};
+
+    constexpr const char* layout_print = "[i] empty layout\n";
+
+    std::stringstream print_stream{};
+
+    print_charge_layout(print_stream, cl, false);
 
     CHECK(print_stream.str() == layout_print);
 }
