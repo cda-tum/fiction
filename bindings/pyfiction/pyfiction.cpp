@@ -50,6 +50,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::offset_coordinate(m);
     pyfiction::cube_coordinate(m);
     pyfiction::siqad_coordinate(m);
+    pyfiction::coordinate_utility(m);
     /**
      * Layouts
      */

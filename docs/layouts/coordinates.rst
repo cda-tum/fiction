@@ -10,9 +10,12 @@ Offset coordinates
 
 An offset coordinate is a coordinate that defines a location via an offset from a fixed point (origin). Cartesian coordinates are offset coordinates.
 
-.. doxygenstruct:: fiction::offset::ucoord_t
-
-.. doxygenclass:: fiction::offset::coord_iterator
+.. tabs::
+    .. tab:: C++
+        .. doxygenstruct:: fiction::offset::ucoord_t
+        .. doxygenclass:: fiction::offset::coord_iterator
+    .. tab:: Python
+        .. autoclass:: fiction.offset.offset_coordinate
 
 Cube coordinates
 ----------------
@@ -20,7 +23,11 @@ Cube coordinates
 Cube coordinates are used as a way to identify faces in a hexagonal grid. A wonderful resource on the topic is: https://www.redblobgames.com/grids/hexagons/#coordinates-cube
 At the same time, they can be used to address 3-dimensional grids.
 
-.. doxygenstruct:: fiction::cube::coord_t
+.. tabs::
+    .. tab:: C++
+        .. doxygenstruct:: fiction::cube::coord_t
+    .. tab:: Python
+        .. autoclass:: fiction.offset.cube_coordinate
 
 SiQAD coordinates
 -----------------
@@ -28,13 +35,33 @@ SiQAD coordinates
 SiQAD coordinates are used to describe locations of Silicon Dangling Bonds on the H-Si(100) 2x1 surface were dimer columns and rows are identified by x and y values, respecitvely,
 while the z value (0,1) points to the top or bottom Si atom in the dimer. The coordinates are originally used in the SiQAD simulator (https://github.com/siqad).
 
-.. doxygenstruct:: fiction::siqad::coord_t
+.. tabs::
+    .. tab:: C++
+        .. doxygenstruct:: fiction::siqad::coord_t
+    .. tab:: Python
+        .. autoclass:: fiction.offset.siqad_coordinate
 
 Utility functions
 -----------------
 
-.. doxygenfunction:: fiction::area(const CoordinateType& coord) noexcept
-.. doxygenfunction:: fiction::volume(const CoordinateType& coord) noexcept
+.. tabs::
+    .. tab:: C++
+        .. doxygenfunction:: fiction::area(const CoordinateType& coord) noexcept
+        .. doxygenfunction:: fiction::volume(const CoordinateType& coord) noexcept
 
-.. doxygenfunction:: fiction::siqad::to_fiction_coord(const coord_t& coord) noexcept
-.. doxygenfunction:: fiction::siqad::to_siqad_coord(const CoordinateType& coord) noexcept
+        .. doxygenfunction:: fiction::siqad::to_fiction_coord(const coord_t& coord) noexcept
+        .. doxygenfunction:: fiction::siqad::to_siqad_coord(const CoordinateType& coord) noexcept
+
+    .. tab:: Python
+        .. autofunction:: fiction.offset_area
+        .. autofunction:: fiction.cube_area
+        .. autofunction:: fiction.siqad_area
+
+        .. autofunction:: fiction.offset_volume
+        .. autofunction:: fiction.cube_volume
+        .. autofunction:: fiction.siqad_volume
+
+        .. autofunction:: fiction.to_offset_coord
+        .. autofunction:: fiction.to_cube_coord
+
+        .. autofunction:: fiction.to_siqad_coord

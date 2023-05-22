@@ -8,6 +8,8 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/coordinates.hpp>
+
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 
@@ -193,6 +195,29 @@ inline void siqad_coordinate(pybind11::module& m)
         ;
 
     py::implicitly_convertible<py::tuple, py_siqad_coordinate>();
+}
+
+inline void coordinate_utility(pybind11::module& m)
+{
+    using namespace pybind11::literals;
+
+    m.def("offset_area", &fiction::area<py_offset_coordinate>, "coord"_a, DOC(fiction_area));
+    m.def("cube_area", &fiction::area<py_cube_coordinate>, "coord"_a, DOC(fiction_area));
+    m.def("siqad_area", &fiction::area<py_siqad_coordinate>, "coord"_a, DOC(fiction_area));
+
+    m.def("offset_volume", &fiction::volume<py_offset_coordinate>, "coord"_a, DOC(fiction_volume));
+    m.def("cube_volume", &fiction::volume<py_cube_coordinate>, "coord"_a, DOC(fiction_volume));
+    m.def("siqad_volume", &fiction::volume<py_siqad_coordinate>, "coord"_a, DOC(fiction_volume));
+
+    m.def("to_offset_coord", &fiction::siqad::to_fiction_coord<py_offset_coordinate>, "coord"_a,
+          DOC(fiction_siqad_to_fiction_coord));
+    m.def("to_cube_coord", &fiction::siqad::to_fiction_coord<py_cube_coordinate>, "coord"_a,
+          DOC(fiction_siqad_to_fiction_coord));
+
+    m.def("to_siqad_coord", &fiction::siqad::to_siqad_coord<py_offset_coordinate>, "coord"_a,
+          DOC(fiction_siqad_to_siqad_coord));
+    m.def("to_siqad_coord", &fiction::siqad::to_siqad_coord<py_cube_coordinate>, "coord"_a,
+          DOC(fiction_siqad_to_siqad_coord));
 }
 
 }  // namespace pyfiction
