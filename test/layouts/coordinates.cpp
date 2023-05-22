@@ -4,6 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 
 #include <map>
@@ -84,9 +85,8 @@ TEST_CASE("Unsigned offset coordinates", "[coordinates]")
     CHECK(os.str() == "(3,2,1)");
 }
 
-TEST_CASE("siqad coordinate conversion", "[coordinates]")
+TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
 {
-
     using coordinate         = siqad::coord_t;
     using coordinate_fiction = cube::coord_t;
 
@@ -122,6 +122,32 @@ TEST_CASE("siqad coordinate conversion", "[coordinates]")
     auto t5_fiction = siqad::to_fiction_coord<coordinate_fiction>(t5_siqad);
     CHECK(t5_fiction.x == -1);
     CHECK(t5_fiction.y == -3);
+}
+
+TEST_CASE("Offset coordinate iteration", "[coordinates]")
+{
+    using lyt = cartesian_layout<offset::ucoord_t>;
+
+    std::stringstream print_stream;
+
+    lyt {{1,1,1}}.foreach_coordinate([&ps = print_stream](const auto& c) { ps << c.str(); });
+
+    constexpr const char* coordinates_string = "(0,0,0)(1,0,0)(0,1,0)(1,1,0)(0,0,1)(1,0,1)(0,1,1)(1,1,1)";
+
+    CHECK(coordinates_string == print_stream.str());
+}
+
+TEST_CASE("SiQAD coordinate iteration", "[coordinates]")
+{
+    using lyt = cartesian_layout<siqad::coord_t>;
+
+    std::stringstream print_stream;
+
+    lyt {{1,1,1}}.foreach_coordinate([&ps = print_stream](const auto& c) { ps << c.str(); });
+
+    constexpr const char* coordinates_string = "(0,0,0)(1,0,0)(0,0,1)(1,0,1)(0,1,0)(1,1,0)(0,1,1)(1,1,1)";
+
+    CHECK(coordinates_string == print_stream.str());
 }
 
 #if defined(__GNUC__)
