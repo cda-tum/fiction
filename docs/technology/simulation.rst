@@ -31,7 +31,7 @@ SiDB Charge Distribution Surface
 The charge distribution surface can be layered on top of any SiDB layout to add representation of possible charge
 distributions of the SiDBs. Charge distribution surfaces are returned by the SiDB physical simulation algorithms.
 
-..tabs::
+.. tabs::
     .. tab:: C++
         **Header:** ``fiction/technology/charge_distribution_surface.hpp``
 
