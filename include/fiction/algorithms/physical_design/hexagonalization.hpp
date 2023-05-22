@@ -8,6 +8,9 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
+#include <cmath>
+#include <cstdint>
+
 namespace fiction
 {
 /**
@@ -21,55 +24,56 @@ namespace fiction
  * @return coordinate on the hexagonal grid.
  */
 template <typename Lyt>
-coordinate<Lyt> to_hex(int cartesian_x, int cartesian_y, int cartesian_layout_height, int cartesian_z)
+[[nodiscard]] coordinate<Lyt> to_hex(int64_t cartesian_x, int64_t cartesian_y, int64_t cartesian_layout_height, int64_t cartesian_z) noexcept
 {
     const auto y = cartesian_x + cartesian_y;
     const auto x =
-        static_cast<int>(cartesian_x + std::ceil(std::floor(static_cast<double>(cartesian_layout_height) / 2) -
-                                                 static_cast<double>(y) / 2));
+        static_cast<int64_t>(cartesian_x + static_cast<int64_t>(std::ceil(std::floor(static_cast<double>(cartesian_layout_height) / 2) -
+                                                 static_cast<double>(y) / 2)));
     const auto z = cartesian_z;
 
-    fiction::coordinate<Lyt> hex{x, y, z};
-
-    return hex;
+    return {x, y, z};
 }
 
 /**
  * Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even row clocked layout suitable for SiDBs by
- * remapping all gates and wires.
+ * remapping all gates and wires as originally proposed in \"Scalable Physical Design for Silicon Dangling Bond Logic:
+ * How a 45° Turn Prevents the Reinvention of the Wheel\" by S. Hofmann, M. Walter, and R. Wille in IEEE Nano 2023.
  *
  * @param Lyt Gate-level layout that is 2DDWave-clocked.
  *
  * @return Hexagonal representation of the Cartesian layout.
  */
 template <typename Lyt>
-hex_even_row_gate_clk_lyt hexagonalization(const Lyt& lyt)
+[[nodiscard]] hex_even_row_gate_clk_lyt hexagonalization(const Lyt& lyt) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate level layout");
     assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE));
 
     using hex_lyt = hex_even_row_gate_clk_lyt;
 
-    // get width & height of cartesian layout
-    const int layout_width  = static_cast<int>(lyt.x()) + 1;
-    const int layout_height = static_cast<int>(lyt.y()) + 1;
+    // get width, height and depth of Cartesian layout
+    const auto layout_width  = static_cast<int64_t>(lyt.x()) + 1;
+    const auto layout_height = static_cast<int64_t>(lyt.y()) + 1;
+    const auto layout_depth = static_cast<int64_t>(lyt.z()) + 1;
 
-    // calculate max width & height of hexagonal layout
+    // calculate max width, height and depth of hexagonal layout
     const auto hex_height = to_hex<Lyt>(layout_width - 1, layout_height - 1, layout_height, 0).y;
     const auto hex_width  = to_hex<Lyt>(layout_width - 1, 0, layout_height, 0).x;
+    const auto hex_depth = layout_depth;
 
     // instantiate hexagonal layout
-    hex_lyt hex_layout{{hex_width, hex_height, 1}, fiction::row_clocking<hex_lyt>()};
+    hex_lyt hex_layout{{hex_width, hex_height, hex_depth}, fiction::row_clocking<hex_lyt>()};
 
     // iterate through cartesian layout diagonally
-    for (int k = 0; k < layout_width + layout_height - 1; k++)
+    for (int64_t k = 0; k < layout_width + layout_height - 1; ++k)
     {
-        for (int x = 0; x < k + 1; x++)
+        for (int64_t x = 0; x < k + 1; ++x)
         {
             const auto y = k - x;
             if (y < layout_height && x < layout_width)
             {
-                for (int z = 0; z < 2; z++)
+                for (int64_t z = 0; z <= layout_depth; ++z)
                 {
                     // old coordinate
                     const coordinate<Lyt> old_coord{x, y, z};

@@ -25,8 +25,8 @@ using namespace fiction;
 template <typename Lyt, typename Ntk>
 void check_mapping_equiv(const Ntk& ntk)
 {
-    auto layout     = orthogonal<Lyt>(ntk, {});
-    auto hex_layout = hexagonalization<Lyt>(layout);
+    const auto layout     = orthogonal<Lyt>(ntk, {});
+    const auto hex_layout = hexagonalization<Lyt>(layout);
 
     check_eq(ntk, layout);
     check_eq(ntk, hex_layout);
@@ -36,9 +36,10 @@ void check_mapping_equiv(const Ntk& ntk)
 template <typename Lyt>
 void check_mapping_equiv_layout(const Lyt& lyt)
 {
-    auto hex_layout = hexagonalization<Lyt>(lyt);
+    const auto hex_layout = hexagonalization<Lyt>(lyt);
 
     check_eq(lyt, hex_layout);
+    CHECK(lyt.get_layout_name() == hex_layout.get_layout_name());
 }
 
 template <typename Lyt>
@@ -66,33 +67,7 @@ void check_mapping_equiv_all()
     check_mapping_equiv_layout(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
 }
 
-template <typename Lyt>
-void check_coordinate_equiv_all()
-{
-    auto layout_height = 3;
-    CHECK(to_hex<Lyt>(0, 0, layout_height, 0) == offset::ucoord_t(1, 0, 0));
-    CHECK(to_hex<Lyt>(0, 0, layout_height, 1) == offset::ucoord_t(1, 0, 1));
-    CHECK(to_hex<Lyt>(1, 0, layout_height, 0) == offset::ucoord_t(2, 1, 0));
-    CHECK(to_hex<Lyt>(1, 0, layout_height, 1) == offset::ucoord_t(2, 1, 1));
-    CHECK(to_hex<Lyt>(2, 0, layout_height, 0) == offset::ucoord_t(2, 2, 0));
-    CHECK(to_hex<Lyt>(2, 0, layout_height, 1) == offset::ucoord_t(2, 2, 1));
-
-    CHECK(to_hex<Lyt>(0, 1, layout_height, 0) == offset::ucoord_t(1, 1, 0));
-    CHECK(to_hex<Lyt>(0, 1, layout_height, 1) == offset::ucoord_t(1, 1, 1));
-    CHECK(to_hex<Lyt>(1, 1, layout_height, 0) == offset::ucoord_t(1, 2, 0));
-    CHECK(to_hex<Lyt>(1, 1, layout_height, 1) == offset::ucoord_t(1, 2, 1));
-    CHECK(to_hex<Lyt>(2, 1, layout_height, 0) == offset::ucoord_t(2, 3, 0));
-    CHECK(to_hex<Lyt>(2, 1, layout_height, 1) == offset::ucoord_t(2, 3, 1));
-
-    CHECK(to_hex<Lyt>(0, 2, layout_height, 0) == offset::ucoord_t(0, 2, 0));
-    CHECK(to_hex<Lyt>(0, 2, layout_height, 1) == offset::ucoord_t(0, 2, 1));
-    CHECK(to_hex<Lyt>(1, 2, layout_height, 0) == offset::ucoord_t(1, 3, 0));
-    CHECK(to_hex<Lyt>(1, 2, layout_height, 1) == offset::ucoord_t(1, 3, 1));
-    CHECK(to_hex<Lyt>(2, 2, layout_height, 0) == offset::ucoord_t(1, 4, 0));
-    CHECK(to_hex<Lyt>(2, 2, layout_height, 1) == offset::ucoord_t(1, 4, 1));
-}
-
-TEST_CASE("Layout equivalence", "[algorithms]")
+TEST_CASE("Layout equivalence", "[hexagonalization]")
 {
     SECTION("Cartesian layouts")
     {
@@ -106,5 +81,25 @@ TEST_CASE("Cartesian to hexagonal")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    check_coordinate_equiv_all<gate_layout>();
+    constexpr const auto layout_height = 3;
+    CHECK(to_hex<gate_layout>(0, 0, layout_height, 0) == offset::ucoord_t(1, 0, 0));
+    CHECK(to_hex<gate_layout>(0, 0, layout_height, 1) == offset::ucoord_t(1, 0, 1));
+    CHECK(to_hex<gate_layout>(1, 0, layout_height, 0) == offset::ucoord_t(2, 1, 0));
+    CHECK(to_hex<gate_layout>(1, 0, layout_height, 1) == offset::ucoord_t(2, 1, 1));
+    CHECK(to_hex<gate_layout>(2, 0, layout_height, 0) == offset::ucoord_t(2, 2, 0));
+    CHECK(to_hex<gate_layout>(2, 0, layout_height, 1) == offset::ucoord_t(2, 2, 1));
+
+    CHECK(to_hex<gate_layout>(0, 1, layout_height, 0) == offset::ucoord_t(1, 1, 0));
+    CHECK(to_hex<gate_layout>(0, 1, layout_height, 1) == offset::ucoord_t(1, 1, 1));
+    CHECK(to_hex<gate_layout>(1, 1, layout_height, 0) == offset::ucoord_t(1, 2, 0));
+    CHECK(to_hex<gate_layout>(1, 1, layout_height, 1) == offset::ucoord_t(1, 2, 1));
+    CHECK(to_hex<gate_layout>(2, 1, layout_height, 0) == offset::ucoord_t(2, 3, 0));
+    CHECK(to_hex<gate_layout>(2, 1, layout_height, 1) == offset::ucoord_t(2, 3, 1));
+
+    CHECK(to_hex<gate_layout>(0, 2, layout_height, 0) == offset::ucoord_t(0, 2, 0));
+    CHECK(to_hex<gate_layout>(0, 2, layout_height, 1) == offset::ucoord_t(0, 2, 1));
+    CHECK(to_hex<gate_layout>(1, 2, layout_height, 0) == offset::ucoord_t(1, 3, 0));
+    CHECK(to_hex<gate_layout>(1, 2, layout_height, 1) == offset::ucoord_t(1, 3, 1));
+    CHECK(to_hex<gate_layout>(2, 2, layout_height, 0) == offset::ucoord_t(1, 4, 0));
+    CHECK(to_hex<gate_layout>(2, 2, layout_height, 1) == offset::ucoord_t(1, 4, 1));
 }

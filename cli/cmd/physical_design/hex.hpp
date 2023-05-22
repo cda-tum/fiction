@@ -6,6 +6,7 @@
 #define FICTION_CMD_HEX_HPP
 
 #include <fiction/algorithms/physical_design/hexagonalization.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -34,6 +35,12 @@ class hex_command : public command
      */
     void execute() override
     {
+        hexagonalization<fiction::cart_gate_clk_lyt>();
+    }
+  private:
+    template <typename Lyt>
+    void hexagonalization()
+    {
         auto& gls = store<fiction::gate_layout_t>();
 
         // error case: empty gate-level layout store
@@ -42,13 +49,20 @@ class hex_command : public command
             env->out() << "[w] no gate layout in store" << std::endl;
             return;
         }
+
         const auto& lyt_ptr = gls.current();
+
+        //if (lyt_ptr.is_clocking_scheme(fiction::clock_name::TWODDWAVE))
+        //{
+        //    env->out() << "[e] Layout has to be 2DDWave-clocked" << std::endl;
+        //    return;
+        //}
 
         const auto apply_hexagonalization = [](auto&& lyt_ptr) { return fiction::hexagonalization(*lyt_ptr); };
 
-        auto lyt = std::visit(apply_hexagonalization, lyt_ptr);
+        const auto lyt = std::visit(apply_hexagonalization, lyt_ptr);
+        gls.extend()   = std::make_shared<fiction::hex_even_row_gate_clk_lyt>(lyt);
 
-        gls.extend() = std::make_shared<fiction::hex_even_row_gate_clk_lyt>(lyt);
     }
 };
 
