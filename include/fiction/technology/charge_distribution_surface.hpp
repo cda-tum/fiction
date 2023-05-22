@@ -198,15 +198,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return *this;
     }
     /**
-     * Returns all SiDB charges of the placed SiDBs as a vector.
-     *
-     * @return Vector of SiDB charges.
-     */
-    [[nodiscard]] std::vector<sidb_charge_state> get_all_sidb_charges() const noexcept
-    {
-        return strg->cell_charge;
-    }
-    /**
      * Returns the locations of all SiDBs in nm of the form `(x,y)`.
      *
      * @return Vector of SiDB nanometer positions.
