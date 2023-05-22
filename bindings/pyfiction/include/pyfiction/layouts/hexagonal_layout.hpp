@@ -35,7 +35,7 @@ inline void hexagonal_layout(pybind11::module& m)
             "coord",
             [](const py_hexagonal_layout& layout, const int64_t x, const int64_t y, const int64_t z)
             { return layout.coord(x, y, z); },
-            "x"_a, "y"_a, "z"_a = 0l)
+            "x"_a, "y"_a, "z"_a = 0l, DOC(fiction_hexagonal_layout_coord))
         .def("x", &py_hexagonal_layout::x, DOC(fiction_hexagonal_layout_x))
         .def("y", &py_hexagonal_layout::y, DOC(fiction_hexagonal_layout_y))
         .def("z", &py_hexagonal_layout::z, DOC(fiction_hexagonal_layout_z))

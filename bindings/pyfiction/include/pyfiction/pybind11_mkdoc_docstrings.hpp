@@ -9531,25 +9531,25 @@ experiments create new insights. However, the default values are
 commonly used.)doc";
 
 static const char *__doc_fiction_sidb_simulation_parameters_base =
-R"doc(base can be either 2 or 3 and describes the assumed number of charge
+R"doc(`base` can be either 2 or 3 and describes the assumed number of charge
 states of one SiDB. It often makes sense to assume only negatively and
 neutrally charged SiDBs.)doc";
 
 static const char *__doc_fiction_sidb_simulation_parameters_epsilon_r =
-R"doc(epsilon_r is the electric permittivity. It is a material specific
+R"doc(`epsilon_r` is the electric permittivity. It is a material specific
 number (unit-less).)doc";
 
 static const char *__doc_fiction_sidb_simulation_parameters_k =
-R"doc(k is the Coulomb constant and is inversely proportional to the
+R"doc(`k` is the Coulomb constant and is inversely proportional to the
 electric permittivity (unit: SI).)doc";
 
-static const char *__doc_fiction_sidb_simulation_parameters_lambda_tf = R"doc(lambda_tf is the Thomas-Fermi screening distance (unit: nm).)doc";
+static const char *__doc_fiction_sidb_simulation_parameters_lambda_tf = R"doc(`lambda_tf` is the Thomas-Fermi screening distance (unit: nm).)doc";
 
-static const char *__doc_fiction_sidb_simulation_parameters_lat_a = R"doc(lat_a is the lattice vector in x-direction (unit: Å).)doc";
+static const char *__doc_fiction_sidb_simulation_parameters_lat_a = R"doc(`lat_a` is the lattice vector in x-direction (unit: Å).)doc";
 
-static const char *__doc_fiction_sidb_simulation_parameters_lat_b = R"doc(lat_b is the lattice vector in y-direction (unit: Å).)doc";
+static const char *__doc_fiction_sidb_simulation_parameters_lat_b = R"doc(`lat_b` is the lattice vector in y-direction (unit: Å).)doc";
 
-static const char *__doc_fiction_sidb_simulation_parameters_lat_c = R"doc(lat_c is the dimer pair separation (unit: Å).)doc";
+static const char *__doc_fiction_sidb_simulation_parameters_lat_c = R"doc(`lat_c` is the dimer pair separation (unit: Å).)doc";
 
 static const char *__doc_fiction_sidb_simulation_parameters_mu = R"doc(µ- is the energy transition level (0/-) (unit: eV).)doc";
 

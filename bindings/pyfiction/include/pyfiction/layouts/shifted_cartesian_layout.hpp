@@ -39,7 +39,7 @@ inline void shifted_cartesian_layout(pybind11::module& m)
             "coord",
             [](const py_shifted_cartesian_layout& layout, const int64_t x, const int64_t y, const int64_t z)
             { return layout.coord(x, y, z); },
-            "x"_a, "y"_a, "z"_a = 0l)
+            "x"_a, "y"_a, "z"_a = 0l, DOC(fiction_cartesian_layout_coord))
         .def(
             "x", [](const py_shifted_cartesian_layout& lyt) { return lyt.x(); }, DOC(fiction_cartesian_layout_x))
         .def(
