@@ -158,7 +158,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
             {
                 const gate_lyt layout{{2, 2, 1}, twoddwave_clocking<gate_lyt>()};  // create a crossing layer
 
-                SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
+                SECTION("(0,0) to (2,2) with obstruction and crossings")           // 1 valid path
                 {
                     obstruction_layout obstr_lyt{layout};
 
@@ -177,7 +177,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
             {
                 const gate_lyt layout{{2, 2, 1}, use_clocking<gate_lyt>()};  // create a crossing layer
 
-                SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
+                SECTION("(0,0) to (2,2) with obstruction and crossings")     // 1 valid path
                 {
                     obstruction_layout obstr_lyt{layout};
 
@@ -202,7 +202,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
             {
                 const gate_lyt layout{{3, 3, 1}, twoddwave_clocking<gate_lyt>()};  // create a crossing layer
 
-                SECTION("(0,0) to (3,3) with obstruction and crossings")  // 2 valid paths
+                SECTION("(0,0) to (3,3) with obstruction and crossings")           // 2 valid paths
                 {
                     obstruction_layout obstr_lyt{layout};
 
@@ -234,7 +234,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
             {
                 const gate_lyt layout{{3, 2, 1}, twoddwave_clocking<gate_lyt>()};  // create a crossing layer
 
-                SECTION("(0,0) to (3,2) with obstruction and crossings")  // 1 valid paths
+                SECTION("(0,0) to (3,2) with obstruction and crossings")           // 1 valid paths
                 {
                     obstruction_layout obstr_lyt{layout};
 

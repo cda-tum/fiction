@@ -56,8 +56,8 @@ struct time_to_solution_stats
      */
     void report(std::ostream& out = std::cout)
     {
-        out << fmt::format("time_to_solution: {} | acc: {} | t_(s): {} | t_exhaustive(s): {}\n", time_to_solution, acc,
-                           mean_single_runtime, single_runtime_exhaustive);
+        out << fmt::format("[i] time_to_solution: {} | acc: {} | t_(s): {} | t_exhaustive(s): {}\n", time_to_solution,
+                           acc, mean_single_runtime, single_runtime_exhaustive);
     }
 };
 /**
@@ -79,23 +79,22 @@ void sim_acc_tts(const Lyt& lyt, const quicksim_params& quicksim_params, time_to
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
-    exgs_stats<Lyt> stats_exhaustive{};
-    exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params, &stats_exhaustive);
+    const auto simulation_results_exgs = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
 
     time_to_solution_stats st{};
-    st.single_runtime_exhaustive = mockturtle::to_seconds(stats_exhaustive.time_total);
+    st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_results_exgs.simulation_runtime);
 
     std::size_t         gs_count = 0;
     std::vector<double> time{};
     time.reserve(repetitions);
 
-    for (uint64_t i = 0; i < repetitions; i++)
+    for (auto i = 0u; i < repetitions; ++i)
     {
-        quicksim_stats<Lyt> stats_quick{};
+        sidb_simulation_result<Lyt> stats_quick{};
 
         const auto t_start = std::chrono::high_resolution_clock::now();
 
-        quicksim<Lyt>(lyt, quicksim_params, &stats_quick);
+        const auto simulation_results_quicksim = quicksim<Lyt>(lyt, quicksim_params);
 
         const auto t_end      = std::chrono::high_resolution_clock::now();
         const auto elapsed    = t_end - t_start;
@@ -103,7 +102,7 @@ void sim_acc_tts(const Lyt& lyt, const quicksim_params& quicksim_params, time_to
 
         time.push_back(diff_first);
 
-        if (is_ground_state(stats_quick, stats_exhaustive))
+        if (is_ground_state(simulation_results_quicksim, simulation_results_exgs))
         {
             gs_count += 1;
         }

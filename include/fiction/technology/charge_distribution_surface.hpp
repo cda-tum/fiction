@@ -198,6 +198,42 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return *this;
     }
     /**
+     * Returns all SiDB charges of the placed SiDBs as a vector.
+     *
+     * @return Vector of SiDB charges.
+     */
+    [[nodiscard]] std::vector<sidb_charge_state> get_all_sidb_charges() const noexcept
+    {
+        return strg->cell_charge;
+    }
+    /**
+     * Returns the locations of all SiDBs in nm of the form `(x,y)`.
+     *
+     * @return Vector of SiDB nanometer positions.
+     */
+    [[nodiscard]] std::vector<std::pair<double, double>> get_all_sidb_locations_in_nm() const noexcept
+    {
+        std::vector<std::pair<double, double>> positions{};
+        positions.reserve(strg->sidb_order.size());
+
+        for (const auto& cell : strg->sidb_order)
+        {
+            auto pos = sidb_nm_position<Lyt>(strg->phys_params, cell);
+            positions.push_back(std::make_pair(pos.first, pos.second));
+        }
+
+        return positions;
+    }
+    /**
+     * Returns all SiDB cells.
+     *
+     * @return Vector of SiDB cells.
+     */
+    [[nodiscard]] std::vector<typename Lyt::cell> get_all_sidb_cells() const noexcept
+    {
+        return strg->sidb_order;
+    }
+    /**
      * Set the physical parameters for the simulation.
      *
      * @param params Physical parameters to be set.

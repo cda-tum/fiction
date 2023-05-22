@@ -6,6 +6,7 @@
 #define FICTION_ENERGY_DISTRIBUTION_HPP
 
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/utils/math_utils.hpp"
 
 #include <cmath>
 #include <cstdint>
@@ -14,6 +15,12 @@
 
 namespace fiction
 {
+
+/**
+ *  Data type to collect electrostatic potential energies of charge distributions with corresponding degeneracy (i.e.
+ * how often a certain energy value occurs).
+ */
+using sidb_energy_distribution = std::map<double, uint64_t>;
 
 /**
  * This function takes in a vector of charge_distribution_surface objects and returns a map containing the system energy
@@ -25,7 +32,8 @@ namespace fiction
  * vector as the value.
  */
 template <typename Lyt>
-std::map<double, uint64_t> energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_vec) noexcept
+[[nodiscard]] sidb_energy_distribution
+energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_vec) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -34,8 +42,7 @@ std::map<double, uint64_t> energy_distribution(const std::vector<charge_distribu
 
     for (const auto& lyt : input_vec)
     {
-        const auto energy =
-            std::round(lyt.get_system_energy() * 1'000'000) / 1'000'000;  // rounding to 6 decimal places.
+        const auto energy = round_to_n_decimal_places(lyt.get_system_energy(), 6);  // rounding to 6 decimal places.
 
         distribution[energy]++;
     }

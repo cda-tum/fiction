@@ -11,6 +11,13 @@
 [![Release](https://img.shields.io/github/v/release/marcelwa/fiction?label=fiction&style=flat-square)](https://github.com/marcelwa/fiction/releases)
 [![arXiv](https://img.shields.io/static/v1?label=arXiv&message=1905.02477&color=informational&style=flat-square)](https://arxiv.org/abs/1905.02477)
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/_static/mnt_light.svg" width="60%">
+    <img src="docs/_static/mnt_dark.svg" width="60%">
+  </picture>
+</p>
+
 This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
 in C++17 using the [EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). Thereby, *fiction*
 focuses on the logic synthesis, placement, routing, clocking, and verification of emerging nanotechnologies. As a
@@ -207,9 +214,7 @@ Among these algorithms are
 - SMT-based [exact placement and routing](https://ieeexplore.ieee.org/document/8342060)
 - OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
 - SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
--
-
-SAT-based [multi-path routing](https://www.cda.cit.tum.de/files/eda/2022_nanoarch_efficient_multi-path_signal_routing_for_fcn.pdf)
+- SAT-based [multi-path routing](https://www.cda.cit.tum.de/files/eda/2022_nanoarch_efficient_multi-path_signal_routing_for_fcn.pdf)
 
 plus several path finding algorithms that work on generic layouts:
 

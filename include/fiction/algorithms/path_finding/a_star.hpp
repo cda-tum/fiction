@@ -78,7 +78,7 @@ class a_star_impl
 
         } while (!open_list.empty());  // until the open list is empty
 
-        return {};  // open list is empty, no path has been found
+        return {};                     // open list is empty, no path has been found
     }
 
   private:
