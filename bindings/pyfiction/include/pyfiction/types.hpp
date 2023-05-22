@@ -17,6 +17,7 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/charge_distribution_surface.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/views/names_view.hpp>
@@ -108,11 +109,11 @@ using py_inml_layout = py_cartesian_cell_layout<fiction::inml_technology>;
  */
 using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb_technology>;
 /**
- * SiQAD layout. This is a special SiDB layout that is used for the SiDB simulation algorithms.
+ * Charge distribution surface. This is a special SiDB cell-level layout that is used for the SiDB simulation
+ * algorithms. It is based on SiQAD coordinates.
  */
-using py_siqad_layout =
-    fiction::cell_level_layout<fiction::sidb_technology,
-                               fiction::clocked_layout<fiction::cartesian_layout<fiction::siqad::coord_t>>>;
+using py_charge_distribution_surface = fiction::charge_distribution_surface<fiction::cell_level_layout<
+    fiction::sidb_technology, fiction::clocked_layout<fiction::cartesian_layout<fiction::siqad::coord_t>>>>;
 
 }  // namespace pyfiction
 

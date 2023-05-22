@@ -14,6 +14,7 @@
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
 #include "pyfiction/algorithms/properties/critical_path_length_and_throughput.hpp"
 #include "pyfiction/algorithms/simulation/logic_simulation.hpp"
+#include "pyfiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "pyfiction/algorithms/verification/design_rule_violations.hpp"
 #include "pyfiction/algorithms/verification/equivalence_checking.hpp"
 #include "pyfiction/io/read_fqca_layout.hpp"
@@ -35,6 +36,7 @@
 #include "pyfiction/layouts/shifted_cartesian_layout.hpp"
 #include "pyfiction/networks/logic_network.hpp"
 #include "pyfiction/technology/area.hpp"
+#include "pyfiction/technology/charge_distribution_surface.hpp"
 #include "pyfiction/utils/routing_utils.hpp"
 
 #include <pybind11/pybind11.h>
@@ -92,6 +94,7 @@ PYBIND11_MODULE(pyfiction, m)
      * Algorithms: Simulation
      */
     pyfiction::logic_simulation(m);
+    pyfiction::sidb_simulation_parameters(m);
     /*
      * Algorithms: Verification
      */
@@ -101,6 +104,7 @@ PYBIND11_MODULE(pyfiction, m)
      * Technology
      */
     pyfiction::area(m);
+    pyfiction::charge_distribution_surface(m);
     /**
      * Input/Output
      */
