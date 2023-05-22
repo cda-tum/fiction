@@ -70,7 +70,7 @@ inline void charge_distribution_surface(pybind11::module& m)
 
         .def("set_physical_parameters", &py_charge_distribution_surface::set_physical_parameters, "params"_a)
         .def("get_phys_params", &py_charge_distribution_surface::get_phys_params)
-        .def("get_all_sidb_location_in_nm", &py_charge_distribution_surface::get_all_sidb_location_in_nm)
+        .def("get_all_sidb_locations_in_nm", &py_charge_distribution_surface::get_all_sidb_locations_in_nm)
 
         .def("charge_exists", &py_charge_distribution_surface::charge_exists, "cs"_a)
 
