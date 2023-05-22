@@ -176,8 +176,8 @@ Returns:
     building blocks defined in `GateLibrary`.)doc";
 
 static const char *__doc_fiction_area =
-R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
-0). Calculates :math:`(x + 1) \cdot (y + 1)`.
+R"doc(Computes the area of a given coordinate assuming its origin is
+:math:`(0, 0, 0)`. Calculates :math:`(x + 1) \cdot (y + 1)`.
 
 Template parameter ``CoordinateType``:
     Coordinate type.
@@ -378,6 +378,28 @@ This function recomputes the bounding box.)doc";
 static const char *__doc_fiction_bounding_box_2d_x_size = R"doc()doc";
 
 static const char *__doc_fiction_bounding_box_2d_y_size = R"doc()doc";
+
+static const char *__doc_fiction_calculate_energy_and_state_type =
+R"doc(This function takes in an SiDB energy distribution. For each charge
+distribution, the state type is determined (i.e. erroneous,
+transparent).
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type (representing a gate).
+
+Parameter ``energy_distribution``:
+    Energy distribution.
+
+Parameter ``output_cells``:
+    SiDBs in the layout from which the output is read.
+
+Parameter ``output_bits``:
+    Truth table entry for a given input (e.g. 0 for AND (00 as input)
+    or 1 for a wire (input 1)).
+
+Returns:
+    sidb_energy_and_state_type Electrostatic potential energy of all
+    charge distributions with state type.)doc";
 
 static const char *__doc_fiction_cartesian_layout =
 R"doc(A layout type that utilizes offset coordinates to represent a
@@ -2000,6 +2022,34 @@ Returns:
     An object of type `std::array<T, N>` that is initialized with `N`
     copies of value.)doc";
 
+static const char *__doc_fiction_create_crossing_wire_tt =
+R"doc(Creates and returns a truth table that implements a crossing in two
+variables.
+
+Returns:
+    crossing in two variables.)doc";
+
+static const char *__doc_fiction_create_double_wire_tt =
+R"doc(Creates and returns a truth table that implements an identity function
+in two variables.
+
+Returns:
+    identity function in two variables.)doc";
+
+static const char *__doc_fiction_create_fan_out_tt =
+R"doc(Creates and returns a truth table that implements a fan-out in one
+variable.
+
+Returns:
+    fan-out in one variable.)doc";
+
+static const char *__doc_fiction_create_half_adder_tt =
+R"doc(Creates and returns a truth table that implements a half-adder in two
+variables.
+
+Returns:
+    half-adder in two variables.)doc";
+
 static const char *__doc_fiction_create_id_tt =
 R"doc(Creates and returns a truth table that implements the identity
 function in one variable.
@@ -2100,6 +2150,96 @@ static const char *__doc_fiction_critical_path_length_and_throughput_stats = R"d
 static const char *__doc_fiction_critical_path_length_and_throughput_stats_critical_path_length = R"doc()doc";
 
 static const char *__doc_fiction_critical_path_length_and_throughput_stats_throughput = R"doc()doc";
+
+static const char *__doc_fiction_critical_temperature =
+R"doc(This algorithm performs temperature-aware SiDB simulation. It comes in
+two flavors: gate-based and non-gate based, which can be specified
+using the `critical_temperature_mode` parameter.
+
+For gate-based simulation, the Critical Temperature is defined as
+follows: The temperature at which the excited charge distributions are
+populated by more than :math:` 1 - \eta `, where :math:` \eta \in
+[0,1] `.
+
+For non-gate-based simulation, the Critical Temperature is defined as
+follows: The temperature at which the erroneous charge distributions
+are populated by more than :math:` 1 - \eta `, where :math:` \eta \in
+[0,1] ` is the confidence level for the presence of a working gate.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    The layout to simulate.
+
+Parameter ``params``:
+    Simulation and physical parameters.
+
+Parameter ``pst``:
+    Statistics.)doc";
+
+static const char *__doc_fiction_critical_temperature_mode =
+R"doc(An enumeration of modes to use for the Critical Temperature
+Simulation.)doc";
+
+static const char *__doc_fiction_critical_temperature_mode_GATE_BASED_SIMULATION =
+R"doc(The Critical Temperature is determined by considering the gate logic
+of the given layout. In this mode, it is distinguished between excited
+charge distributions that produce the correct output (with respect to
+a truth table) and those that do not.)doc";
+
+static const char *__doc_fiction_critical_temperature_mode_NON_GATE_BASED_SIMULATION =
+R"doc(The Critical Temperature is determined by ignoring the gate logic of
+the given layout. This mode does not distinguish between excited
+charge distributions that produce the correct output (with respect to
+a truth table) and those that do not.)doc";
+
+static const char *__doc_fiction_critical_temperature_params =
+R"doc(This struct stores the parameters for the `critical_temperature`
+algorithm.)doc";
+
+static const char *__doc_fiction_critical_temperature_params_confidence_level =
+R"doc(Probability that the ground state is less populated due to
+temperature. For gate-based simulation, this is the probability of
+erroneous calculations of the gate.)doc";
+
+static const char *__doc_fiction_critical_temperature_params_engine = R"doc(Simulation mode to determine the Critical Temperature.)doc";
+
+static const char *__doc_fiction_critical_temperature_params_input_bit = R"doc(Input bit (e.g. 0 -> 00, 1 -> 01, ...).)doc";
+
+static const char *__doc_fiction_critical_temperature_params_max_temperature = R"doc(Simulation stops at max_temperature (room temperature ~300 K).)doc";
+
+static const char *__doc_fiction_critical_temperature_params_simulation_params = R"doc(All Parameters for physical SiDB simulations.)doc";
+
+static const char *__doc_fiction_critical_temperature_params_temperature_mode = R"doc(Mode to determine the Critical Temperature.)doc";
+
+static const char *__doc_fiction_critical_temperature_params_truth_table =
+R"doc(Truth table of the given gate (if layout is simulated in `gate-based`
+mode).)doc";
+
+static const char *__doc_fiction_critical_temperature_stats =
+R"doc(This struct stores the result of the temperature simulation.
+
+Parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
+
+static const char *__doc_fiction_critical_temperature_stats_algorithm_name =
+R"doc(Name of the algorithm used to compute the physically valid charge
+distributions.)doc";
+
+static const char *__doc_fiction_critical_temperature_stats_critical_temperature = R"doc(Critical Temperature of the given layout.)doc";
+
+static const char *__doc_fiction_critical_temperature_stats_energy_between_ground_state_and_first_erroneous =
+R"doc(Energy difference between the ground state and the first (erroneous)
+excited state.)doc";
+
+static const char *__doc_fiction_critical_temperature_stats_num_valid_lyt = R"doc(Number of physically valid charge configurations.)doc";
+
+static const char *__doc_fiction_critical_temperature_stats_report =
+R"doc(Prints the simulation results to the given output stream.
+
+Parameter ``out``:
+    Output stream.)doc";
 
 static const char *__doc_fiction_csv_writer = R"doc()doc";
 
@@ -2425,6 +2565,16 @@ static const char *__doc_fiction_detail_a_star_impl_source = R"doc()doc";
 
 static const char *__doc_fiction_detail_a_star_impl_target = R"doc()doc";
 
+static const char *__doc_fiction_detail_any_to_string =
+R"doc(Converts an `std::any` to a string if it contains an alpha-numerical
+standard data type.
+
+Parameter ``value``:
+    The value to convert.
+
+Returns:
+    The string representation of the value.)doc";
+
 static const char *__doc_fiction_detail_apply_gate_library_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_apply_gate_library_impl_apply_gate_library_impl = R"doc()doc";
@@ -2533,6 +2683,44 @@ static const char *__doc_fiction_detail_critical_path_length_and_throughput_impl
 static const char *__doc_fiction_detail_critical_path_length_and_throughput_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_critical_path_length_and_throughput_impl_signal_delay = R"doc()doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_critical_temperature_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_determine_critical_temperature =
+R"doc(The Critical Temperature is determined.
+
+Parameter ``energy_state_type``:
+    All energies of all physically valid charge distributions with the
+    corresponding state type (i.e. transparent, erroneous).)doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_energy_between_ground_state_and_first_erroneous =
+R"doc(The energy difference between the ground state and the first erroneous
+state is determined. Additionally, the state type of the ground state
+is determined and returned.
+
+Parameter ``energy_and_state_type``:
+    All energies of all physically valid charge distributions with the
+    corresponding state type (i.e. transparent, erroneous).
+
+Parameter ``min_energy``:
+    Minimal energy of all physically valid charge distributions of a
+    given layout.
+
+Returns:
+    State type (i.e. transparent, erroneous) of the ground state is
+    returned.)doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_gate_based_simulation = R"doc()doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_layout = R"doc(SiDB cell-level layout.)doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_non_gate_based_simulation = R"doc()doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_parameter = R"doc(Parameters for the `critical_temperature` algorithm.)doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_temperature_stats = R"doc(Statistics.)doc";
 
 static const char *__doc_fiction_detail_determine_layout_size = R"doc()doc";
 
@@ -4272,6 +4460,37 @@ static const char *__doc_fiction_detail_write_sqd_layout_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_write_sqd_layout_impl_write_sqd_layout_impl = R"doc()doc";
 
+static const char *__doc_fiction_detail_write_sqd_sim_result_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_write_sqd_sim_result_impl_obtain_ordered_cells =
+R"doc(Obtains all cells in the surfaces and orders them by their position to
+achieve a reproducible output.
+
+Returns:
+    An ordering of cells.)doc";
+
+static const char *__doc_fiction_detail_write_sqd_sim_result_impl_ordered_cells = R"doc(A reproducible ordering of cells in the surfaces.)doc";
+
+static const char *__doc_fiction_detail_write_sqd_sim_result_impl_os = R"doc(The output stream to write to.)doc";
+
+static const char *__doc_fiction_detail_write_sqd_sim_result_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_write_sqd_sim_result_impl_sim_result = R"doc(The simulation result to write.)doc";
+
+static const char *__doc_fiction_detail_write_sqd_sim_result_impl_write_electron_distributions = R"doc(Writes all charge distributions to the output stream in XML format.)doc";
+
+static const char *__doc_fiction_detail_write_sqd_sim_result_impl_write_engine_info = R"doc(Writes the engine information to the output stream in XML format.)doc";
+
+static const char *__doc_fiction_detail_write_sqd_sim_result_impl_write_physical_locations =
+R"doc(Writes the physical locations of all SiDBs to the output stream in XML
+format.)doc";
+
+static const char *__doc_fiction_detail_write_sqd_sim_result_impl_write_simulation_parameters =
+R"doc(Writes both the `physical_parameters` as well as the
+`additional_simulation_parameters` to the output stream in XML format.)doc";
+
+static const char *__doc_fiction_detail_write_sqd_sim_result_impl_write_sqd_sim_result_impl = R"doc()doc";
+
 static const char *__doc_fiction_detail_yen_k_shortest_paths_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_yen_k_shortest_paths_impl_k_shortest_paths = R"doc(The list of k shortest paths that is created during the algorithm.)doc";
@@ -4861,14 +5080,6 @@ Returns:
     circuit if one is found under the given parameters;
     `std::nullopt`, otherwise.)doc";
 
-static const char *__doc_fiction_exgs_stats = R"doc()doc";
-
-static const char *__doc_fiction_exgs_stats_duration = R"doc()doc";
-
-static const char *__doc_fiction_exgs_stats_report = R"doc()doc";
-
-static const char *__doc_fiction_exgs_stats_valid_lyts = R"doc()doc";
-
 static const char *__doc_fiction_exhaustive_ground_state_simulation =
 R"doc(All metastable and physically valid charge distribution layouts are
 computed, stored in a vector and returned.
@@ -4883,7 +5094,10 @@ Parameter ``params``:
     Simulation parameters.
 
 Parameter ``ps``:
-    Simulation statistics.)doc";
+    Simulation statistics.
+
+Returns:
+    sidb_simulation_result is returned with all results.)doc";
 
 static const char *__doc_fiction_extract_routing_objectives =
 R"doc(Extracts all routing objectives from the given layout. To this end,
@@ -7765,7 +7979,7 @@ objects.
 Template parameter ``Lyt``:
     Cell-level layout type.
 
-Parameter ``result``:
+Parameter ``charge_lyts``:
     Vector of charge_distribution_surface objects.
 
 Returns:
@@ -7922,6 +8136,22 @@ static const char *__doc_fiction_obstruction_layout = R"doc()doc";
 static const char *__doc_fiction_obstruction_layout_2 = R"doc()doc";
 
 static const char *__doc_fiction_obstruction_layout_obstruction_layout = R"doc()doc";
+
+static const char *__doc_fiction_occupation_probability_gate_based =
+R"doc(This function computes the occupation probability of erroneous charge
+distributions (output charge does not match the expected output
+according the truth table) at a given temperature.
+
+Parameter ``energy_and_state_type``:
+    This contains the energies of all possible charge distributions
+    together with the information if the charge distribution (state)
+    is transparent or erroneous.
+
+Parameter ``temperature``:
+    System temperature to assume.
+
+Returns:
+    The occupation probability of all erroneous states is returned.)doc";
 
 static const char *__doc_fiction_odd_column_cartesian =
 R"doc(\verbatim +-------+ +-------+ | | | | | (0,0) +-------+ (2,0)
@@ -8550,6 +8780,26 @@ Parameter ``io_color``:
 Parameter ``clk_color``:
     Flag to utilize color escapes for clock zones.)doc";
 
+static const char *__doc_fiction_print_charge_layout =
+R"doc(Writes a simplified 2D representation of an SiDB charge layout to an
+output stream.
+
+Template parameter ``Lyt``:
+    Cell-level layout based on SiQAD coordinates.
+
+Parameter ``os``:
+    Output stream to write into.
+
+Parameter ``cds``:
+    The charge distribution surface of which the charge layout is to
+    be printed.
+
+Parameter ``cs_color``:
+    Flag to utilize color escapes for charge states.
+
+Parameter ``draw_lattice``:
+    Flag to enable lattice background drawing.)doc";
+
 static const char *__doc_fiction_print_gate_level_layout =
 R"doc(Writes a simplified 2D representation of a gate-level layout to an
 output stream.
@@ -8721,9 +8971,8 @@ Parameter ``ps``:
     Physical parameters. They are material-specific and may vary from
     experiment to experiment.
 
-Parameter ``pst``:
-    Statistics. They store the simulation results (simulation runtime
-    as well as all physically valid charge distribution layouts).)doc";
+Returns:
+    sidb_simulation_result is returned with all results.)doc";
 
 static const char *__doc_fiction_quicksim_params = R"doc(This struct stores the parameters for the *QuickSim* algorithm.)doc";
 
@@ -8731,30 +8980,13 @@ static const char *__doc_fiction_quicksim_params_alpha =
 R"doc(`alpha` parameter for the *QuickSim* algorithm (should be reduced if
 no result is found).)doc";
 
-static const char *__doc_fiction_quicksim_params_interation_steps = R"doc(Number of iterations to run the simulation for.)doc";
+static const char *__doc_fiction_quicksim_params_iteration_steps = R"doc(Number of iterations to run the simulation for.)doc";
 
 static const char *__doc_fiction_quicksim_params_number_threads =
 R"doc(Number of threads to spawn. By default the number of threads is set to
 the number of available hardware threads.)doc";
 
 static const char *__doc_fiction_quicksim_params_phys_params = R"doc(General parameters for the simulation of the physical SiDB system.)doc";
-
-static const char *__doc_fiction_quicksim_stats =
-R"doc(This struct stores the simulation runtime and all physically valid
-charge layouts gained by the *QuickSim* algorithm.
-
-Parameter ``Lyt``:
-    Cell-level layout type.)doc";
-
-static const char *__doc_fiction_quicksim_stats_duration = R"doc(Total simulation runtime.)doc";
-
-static const char *__doc_fiction_quicksim_stats_report =
-R"doc(Report the simulation statistics in a human-readable fashion.
-
-Parameter ``out``:
-    Output stream to write to.)doc";
-
-static const char *__doc_fiction_quicksim_stats_valid_lyts = R"doc(Vector of all physically valid charge layouts.)doc";
 
 static const char *__doc_fiction_random_cost =
 R"doc(Random cost between two layout coordinates that returns a random value
@@ -9194,6 +9426,21 @@ Parameter ``old2new``:
     Mapping of signals from `ntk_src` to `ntk_dest` using a
     branching_signal_container.)doc";
 
+static const char *__doc_fiction_round_to_n_decimal_places =
+R"doc(Rounds a number to a specified number of decimal places.
+
+Template parameter ``T``:
+    the type of the number to round.
+
+Parameter ``number``:
+    the number to round.
+
+Parameter ``n``:
+    the number of decimal places to round to.
+
+Returns:
+    the number rounded to n decimal places.)doc";
+
 static const char *__doc_fiction_route_path =
 R"doc(Establishes a wire routing along the given path in the given layout.
 To this end, the given path's source and target coordinates are
@@ -9581,6 +9828,36 @@ Parameter ``b``:
 Parameter ``c``:
     lattice constant in Å.)doc";
 
+static const char *__doc_fiction_sidb_simulation_result =
+R"doc(This struct defines a unified return type for all SiDB simulation
+algorithms. It contains the name of the algorithm, the total
+simulation runtime, the charge distributions determined by the
+algorithm, the physical parameters used in the simulation, and
+(optional) algorithm-specific named simulation parameters.
+
+Template parameter ``Lyt``:
+    Cell-level layout type.)doc";
+
+static const char *__doc_fiction_sidb_simulation_result_additional_simulation_parameters =
+R"doc(Additional named simulation parameters. This is used to store
+algorithm-dependent parameters that are not part of the
+`physical_parameters` struct.
+
+The first element of the pair is the name of the parameter, the second
+element is the value of the parameter.)doc";
+
+static const char *__doc_fiction_sidb_simulation_result_algorithm_name = R"doc(Name of the algorithm used to determine the charge distributions.)doc";
+
+static const char *__doc_fiction_sidb_simulation_result_charge_distributions = R"doc(Charge distributions determined by the algorithm.)doc";
+
+static const char *__doc_fiction_sidb_simulation_result_physical_parameters = R"doc(Physical parameters used in the simulation.)doc";
+
+static const char *__doc_fiction_sidb_simulation_result_sidb_simulation_result =
+R"doc(Default constructor. It only exists to allow for the use of
+`static_assert` statements that restrict the type of `Lyt`.)doc";
+
+static const char *__doc_fiction_sidb_simulation_result_simulation_runtime = R"doc(Total simulation runtime.)doc";
+
 static const char *__doc_fiction_sidb_surface = R"doc()doc";
 
 static const char *__doc_fiction_sidb_surface_2 = R"doc()doc";
@@ -9722,6 +9999,19 @@ static const char *__doc_fiction_simple_gate_layout_tile_drawer_tile_id = R"doc(
 
 static const char *__doc_fiction_simple_gate_layout_tile_drawer_tile_label = R"doc()doc";
 
+static const char *__doc_fiction_simulation_engine =
+R"doc(An enumeration of simulation modes (exact vs. approximate) to use for
+the Critical Temperature Simulation.)doc";
+
+static const char *__doc_fiction_simulation_engine_APPROXIMATE =
+R"doc(This simulation engine quickly calculates the Critical Temperature.
+However, there may be deviations from the exact Critical Temperature.
+This mode is recommended for larger layouts (> 40 SiDBs).)doc";
+
+static const char *__doc_fiction_simulation_engine_EXACT =
+R"doc(This simulation engine computes Critical Temperature values with 100 %
+accuracy.)doc";
+
 static const char *__doc_fiction_siqad_coord_t =
 R"doc(SiQAD coordinates.
 
@@ -9838,7 +10128,7 @@ Returns:
 
 static const char *__doc_fiction_siqad_coord_t_operator_lt =
 R"doc(Determine whether this coordinate is "less than" another one. This is
-the case if z is smaller, or if z is equal but y is smaller, or if z
+the case if y is smaller, or if y is equal but z is smaller, or if z
 and y are equal but x is smaller.
 
 Parameter ``other``:
@@ -10569,8 +10859,9 @@ R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 \endverbatim)doc";
 
 static const char *__doc_fiction_volume =
-R"doc(Computes the volume of a given coordinate assuming its origin is (0,
-0, 0). Calculates :math:`(x + 1) \cdot (y + 1) \cdot (z + 1)`.
+R"doc(Computes the volume of a given coordinate assuming its origin is
+:math:`(0, 0, 0)`. Calculates :math:`(x + 1) \cdot (y + 1) \cdot (z +
+1)`.
 
 Template parameter ``CoordinateType``:
     Coordinate type.
@@ -10841,7 +11132,7 @@ R"doc(Writes a cell-level SiDB or QCA layout to an sqd file that is used by
 SiQAD (https://github.com/siqad/siqad), a physical simulator for the
 SiDB technology platform.
 
-If The provided cell-level layout type can represent SiDB defects,
+If the provided cell-level layout type can represent SiDB defects,
 they will be written to the file as well.
 
 This overload uses an output stream to write into.
@@ -10860,10 +11151,10 @@ R"doc(Writes a cell-level SiDB or QCA layout to an sqd file that is used by
 SiQAD (https://github.com/siqad/siqad), a physical simulator for the
 SiDB technology platform.
 
-If The provided cell-level layout type can represent SiDB defects,
+If the provided cell-level layout type can represent SiDB defects,
 they will be written to the file as well.
 
-This overload uses file name to create and write into.
+This overload uses a file name to create and write into.
 
 Template parameter ``Lyt``:
     Cell-level SiDB or QCA layout type.
@@ -10874,6 +11165,39 @@ Parameter ``lyt``:
 Parameter ``filename``:
     The file name to create and write into. Should preferably use the
     `.sqd` extension.)doc";
+
+static const char *__doc_fiction_write_sqd_sim_result =
+R"doc(Writes an SiDB simulation result to an XML file that is used by SiQAD
+(https://github.com/siqad/siqad), a physical simulator for the SiDB
+technology platform.
+
+This overload uses an output stream to write into.
+
+Template parameter ``Lyt``:
+    Cell-level SiDB layout type.
+
+Parameter ``sim_result``:
+    The simulation result to write.
+
+Parameter ``os``:
+    The output stream to write into.)doc";
+
+static const char *__doc_fiction_write_sqd_sim_result_2 =
+R"doc(Writes an SiDB simulation result to an XML file that is used by SiQAD
+(https://github.com/siqad/siqad), a physical simulator for the SiDB
+technology platform.
+
+This overload uses a file name to create and write into.
+
+Template parameter ``Lyt``:
+    Cell-level SiDB layout type.
+
+Parameter ``sim_result``:
+    The simulation result to write.
+
+Parameter ``filename``:
+    The file name to create and write into. Should preferably use the
+    `.xml` extension.)doc";
 
 static const char *__doc_fiction_yen_k_shortest_paths =
 R"doc(Yen's algorithm for finding up to :math:`k` shortest paths without
