@@ -130,7 +130,7 @@ TEST_CASE("Offset coordinate iteration", "[coordinates]")
 
     std::stringstream print_stream;
 
-    lyt {{1,1,1}}.foreach_coordinate([&ps = print_stream](const auto& c) { ps << c.str(); });
+    lyt{{1, 1, 1}}.foreach_coordinate([&ps = print_stream](const auto& c) { ps << c.str(); });
 
     constexpr const char* coordinates_string = "(0,0,0)(1,0,0)(0,1,0)(1,1,0)(0,0,1)(1,0,1)(0,1,1)(1,1,1)";
 
@@ -143,7 +143,7 @@ TEST_CASE("SiQAD coordinate iteration", "[coordinates]")
 
     std::stringstream print_stream;
 
-    lyt {{1,1,1}}.foreach_coordinate([&ps = print_stream](const auto& c) { ps << c.str(); });
+    lyt{{1, 1, 1}}.foreach_coordinate([&ps = print_stream](const auto& c) { ps << c.str(); });
 
     constexpr const char* coordinates_string = "(0,0,0)(1,0,0)(0,0,1)(1,0,1)(0,1,0)(1,1,0)(0,1,1)(1,1,1)";
 
