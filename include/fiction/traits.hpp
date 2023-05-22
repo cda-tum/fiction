@@ -586,14 +586,13 @@ struct is_cell_level_layout : std::false_type
 
 template <class Lyt>
 struct is_cell_level_layout<
-    Lyt,
-    std::enable_if_t<is_clocked_layout_v<Lyt>,
-                     std::void_t<typename Lyt::base_type, cell<Lyt>, typename Lyt::cell_type, typename Lyt::cell_mode,
-                                 technology<Lyt>, typename Lyt::storage,
-                                 decltype(std::declval<Lyt>().get_cell_type(cell<Lyt>())),
-                                 decltype(std::declval<Lyt>().is_empty_cell(cell<Lyt>())),
-                                 decltype(std::declval<Lyt>().get_cell_mode(cell<Lyt>())),
-                                 decltype(std::declval<Lyt>().get_cell_name(cell<Lyt>()))>>> : std::true_type
+    Lyt, std::enable_if_t<is_clocked_layout_v<Lyt>,
+                          std::void_t<typename Lyt::base_type, cell<Lyt>, typename Lyt::cell_type,
+                                      typename Lyt::cell_mode, technology<Lyt>, typename Lyt::storage,
+                                      decltype(std::declval<Lyt>().get_cell_type(cell<Lyt>())),
+                                      decltype(std::declval<Lyt>().is_empty_cell(cell<Lyt>())),
+                                      decltype(std::declval<Lyt>().get_cell_mode(cell<Lyt>())),
+                                      decltype(std::declval<Lyt>().get_cell_name(cell<Lyt>()))>>> : std::true_type
 {};
 
 template <class Lyt>
