@@ -38,7 +38,7 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      # Under Linux the action does not work because it can't install to the manylinux container.
+      # on Linux, the action does not work because it can't install to the manylinux container
       - if: runner.os != 'Linux'
         name: Install Z3
         uses: cda-tum/setup-z3@v1
@@ -47,6 +47,10 @@ jobs:
           architecture: ${{ matrix.config.arch }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: runner.os == 'Linux'
+        name: Setup mold
+        uses: rui314/setup-mold@v1
 
       - if: ${{ matrix.config.arch == 'arm64' }}
         name: Set Architecture to arm64 if necessary
