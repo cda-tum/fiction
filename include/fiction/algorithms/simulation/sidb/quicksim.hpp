@@ -37,7 +37,7 @@ struct quicksim_params
     /**
      * Number of iterations to run the simulation for.
      */
-    uint64_t interation_steps{80};
+    uint64_t iteration_steps{80};
     /**
      * `alpha` parameter for the *QuickSim* algorithm (should be reduced if no result is found).
      */
@@ -108,7 +108,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
     quicksim_stats<Lyt> st{};
-    st.valid_lyts.reserve(ps.interation_steps);
+    st.valid_lyts.reserve(ps.iteration_steps);
 
     // measure run time (artificial scope)
     {
@@ -144,7 +144,7 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
 
         // split the iterations among threads
         const auto iter_per_thread =
-            std::max(ps.interation_steps / num_threads,
+            std::max(ps.iteration_steps / num_threads,
                      uint64_t{1});  // If the number of set threads is greater than the number of iterations, the
                                     // number of threads defines how many times QuickSim is repeated
 
