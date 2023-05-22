@@ -15,6 +15,7 @@
 #include "pyfiction/algorithms/properties/critical_path_length_and_throughput.hpp"
 #include "pyfiction/algorithms/simulation/logic_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
+#include "pyfiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "pyfiction/algorithms/verification/design_rule_violations.hpp"
 #include "pyfiction/algorithms/verification/equivalence_checking.hpp"
 #include "pyfiction/io/read_fqca_layout.hpp"
@@ -95,6 +96,7 @@ PYBIND11_MODULE(pyfiction, m)
      */
     pyfiction::logic_simulation(m);
     pyfiction::sidb_simulation_parameters(m);
+    pyfiction::sidb_simulation_result(m);
     /*
      * Algorithms: Verification
      */
