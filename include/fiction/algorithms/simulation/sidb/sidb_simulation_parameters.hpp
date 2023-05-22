@@ -51,27 +51,27 @@ struct sidb_simulation_parameters
     }
 
     /**
-     * lat_a is the lattice vector in x-direction (unit: Å).
+     * `lat_a` is the lattice vector in x-direction (unit: Å).
      */
     double lat_a;
     /**
-     * lat_b is the lattice vector in y-direction (unit: Å).
+     * `lat_b` is the lattice vector in y-direction (unit: Å).
      */
     double lat_b;
     /**
-     * lat_c is the dimer pair separation (unit: Å).
+     * `lat_c` is the dimer pair separation (unit: Å).
      */
     double lat_c;
     /**
-     * epsilon_r is the electric permittivity. It is a material specific number (unit-less).
+     * `epsilon_r` is the electric permittivity. It is a material specific number (unit-less).
      */
     double epsilon_r;
     /**
-     * k is the Coulomb constant and is inversely proportional to the electric permittivity (unit: SI).
+     * `k` is the Coulomb constant and is inversely proportional to the electric permittivity (unit: SI).
      */
     double k;
     /**
-     * lambda_tf is the Thomas-Fermi screening distance (unit: nm).
+     * `lambda_tf` is the Thomas-Fermi screening distance (unit: nm).
      */
     double lambda_tf;
     /**
@@ -83,7 +83,7 @@ struct sidb_simulation_parameters
      */
     double mu_p;
     /**
-     * base can be either 2 or 3 and describes the assumed number of charge states of one SiDB.
+     * `base` can be either 2 or 3 and describes the assumed number of charge states of one SiDB.
      * It often makes sense to assume only negatively and neutrally charged SiDBs.
      */
     uint8_t base;

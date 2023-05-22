@@ -137,6 +137,25 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         initialize(cs);
     }
     /**
+     * Standard constructor for empty layouts.
+     *
+     * @param ar Aspect ratio of the layout.
+     * @param params Physical parameters used for the simulation (µ_minus, base number, ...).
+     * @param cs The charge state used for the initialization of all SiDBs, default is a negative charge.
+     */
+    explicit charge_distribution_surface(const typename Lyt::aspect_ratio& ar,
+                                         const sidb_simulation_parameters& params = sidb_simulation_parameters{},
+                                         const sidb_charge_state&          cs     = sidb_charge_state::NEGATIVE) :
+            Lyt(ar),
+            strg{std::make_shared<charge_distribution_storage>(params)}
+    {
+        static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+        initialize(cs);
+    }
+    /**
      * Standard constructor for existing layouts.
      *
      * @param lyt The layout to be used as base.
@@ -179,33 +198,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return *this;
     }
     /**
-     * Returns all SiDB charges of the placed SiDBs as a vector.
-     *
-     * @return Vector of SiDB charges.
-     */
-    [[nodiscard]] std::vector<sidb_charge_state> get_all_sidb_charges() const noexcept
-    {
-        return strg->cell_charge;
-    }
-    /**
-     * Returns the positions of all SiDBs in nm of the form `(x,y)`.
-     *
-     * @return Vector of SiDB nanometer positions.
-     */
-    [[nodiscard]] std::vector<std::pair<double, double>> get_all_sidb_location_in_nm() const noexcept
-    {
-        std::vector<std::pair<double, double>> positions{};
-        positions.reserve(strg->sidb_order.size());
-
-        for (const auto& cell : strg->sidb_order)
-        {
-            auto pos = sidb_nm_position<Lyt>(strg->phys_params, cell);
-            positions.push_back(std::make_pair(pos.first, pos.second));
-        }
-
-        return positions;
-    }
-    /**
      * Set the physical parameters for the simulation.
      *
      * @param params Physical parameters to be set.
@@ -235,9 +227,60 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
     /**
-     * Delete the assign_cell_type function of the underlying layout.
+     * Retrieves the physical parameters of the simulation.
+     *
+     * @return sidb_simulation_parameters struct containing the physical parameters of the simulation.
      */
-    void assign_cell_type(const typename Lyt::cell& c, const typename Lyt::cell_type& ct) = delete;
+    [[nodiscard]] sidb_simulation_parameters get_phys_params() const noexcept
+    {
+        return strg->phys_params;
+    }
+    /**
+     * Returns the positions of all SiDBs in nm of the form `(x,y)`.
+     *
+     * @return Vector of SiDB nanometer positions.
+     */
+    [[nodiscard]] std::vector<std::pair<double, double>> get_all_sidb_location_in_nm() const noexcept
+    {
+        std::vector<std::pair<double, double>> positions{};
+        positions.reserve(strg->sidb_order.size());
+
+        for (const auto& cell : strg->sidb_order)
+        {
+            auto pos = sidb_nm_position<Lyt>(strg->phys_params, cell);
+            positions.push_back(std::make_pair(pos.first, pos.second));
+        }
+
+        return positions;
+    }
+    /**
+     *  Returns the distance between two cells.
+     *
+     *  @param c1 the first cell to compare.
+     *  @param c2 the second cell to compare.
+     *  @return a constexpr double representing the distance in nm between the two cells.
+     */
+    [[nodiscard]] double get_nm_distance_between_cells(const typename Lyt::cell& c1,
+                                                       const typename Lyt::cell& c2) const noexcept
+    {
+        if (const auto index1 = cell_to_index(c1), index2 = cell_to_index(c2); (index1 != -1) && (index2 != -1))
+        {
+            return strg->nm_dist_mat[static_cast<uint64_t>(index1)][static_cast<uint64_t>(index2)];
+        }
+
+        return 0;
+    }
+    /**
+     * Calculates and returns the distance between two cells (accessed by indices).
+     *
+     * @param index1 The first index.
+     * @param index2 The second index.
+     * @return The distance index between `index1` and `index2` (indices correspond to unique SiDBs).
+     */
+    [[nodiscard]] double get_nm_distance_by_indices(const uint64_t index1, const uint64_t index2) const noexcept
+    {
+        return strg->nm_dist_mat[index1][index2];
+    }
     /**
      * Check if any SiDB exhibits the given charge state.
      *
@@ -249,25 +292,24 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                            [&cs](const sidb_charge_state& c) { return c == cs; });
     }
     /**
-     * Retrieves the physical parameters of the simulation.
-     *
-     * @return sidb_simulation_parameters struct containing the physical parameters of the simulation.
+     * Delete the `assign_cell_type` function of the underlying layout.
      */
-    [[nodiscard]] sidb_simulation_parameters get_phys_params() const noexcept
-    {
-        return strg->phys_params;
-    }
+    void assign_cell_type(const typename Lyt::cell& c, const typename Lyt::cell_type& ct) = delete;
     /**
-     * This function assigns the given charge state to the cell of the layout at the specified index. It updates the
-     * `cell_charge` member of `strg` object with the new charge state of the specified cell.
+     * Returns the index of an SiDB.
      *
-     * @param i The index of the cell.
-     * @param cs The charge state to be assigned to the cell.
+     * @param c The cell to find the index of.
+     * @return The index of the cell in the layout. Returns -1 if the cell is not part of the layout.
      */
-    void assign_charge_by_cell_index(const uint64_t i, const sidb_charge_state& cs) const noexcept
+    [[nodiscard]] int64_t cell_to_index(const typename Lyt::cell& c) const noexcept
     {
-        strg->cell_charge[i] = cs;
-        this->charge_distribution_to_index();
+        if (const auto it = std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c);
+            it != strg->sidb_order.cend())
+        {
+            return static_cast<int64_t>(std::distance(strg->sidb_order.cbegin(), it));
+        }
+
+        return -1;
     }
     /**
      * This function assigns the given charge state to the given cell of the layout.
@@ -282,6 +324,18 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             strg->cell_charge[static_cast<uint64_t>(index)] = cs;
         }
 
+        this->charge_distribution_to_index();
+    }
+    /**
+     * This function assigns the given charge state to the cell of the layout at the specified index. It updates the
+     * `cell_charge` member of `strg` object with the new charge state of the specified cell.
+     *
+     * @param index The index of the cell.
+     * @param cs The charge state to be assigned to the cell.
+     */
+    void assign_charge_by_cell_index(const uint64_t index, const sidb_charge_state& cs) const noexcept
+    {
+        strg->cell_charge[index] = cs;
         this->charge_distribution_to_index();
     }
     /**
@@ -317,6 +371,45 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->charge_distribution_to_index();
     }
     /**
+     * Returns the charge state of a given cell.
+     *
+     * @param c The cell.
+     * @return The charge state of the given cell.
+     */
+    [[nodiscard]] sidb_charge_state get_charge_state(const typename Lyt::cell& c) const noexcept
+    {
+        if (const auto index = cell_to_index(c); index != -1)
+        {
+            return strg->cell_charge[static_cast<uint64_t>(index)];
+        }
+
+        return sidb_charge_state::NONE;
+    }
+    /**
+     * Returns the charge state of a cell of the layout at a given index.
+     *
+     * @param index The index of the cell.
+     * @return The charge state of the cell at the given index.
+     */
+    [[nodiscard]] sidb_charge_state get_charge_state_by_index(const uint64_t index) const noexcept
+    {
+        if (index < (strg->cell_charge.size()))
+        {
+            return strg->cell_charge[index];
+        }
+
+        return sidb_charge_state::NONE;
+    }
+    /**
+     * Returns all SiDB charges of the placed SiDBs as a vector.
+     *
+     * @return Vector of SiDB charges.
+     */
+    [[nodiscard]] std::vector<sidb_charge_state> get_all_sidb_charges() const noexcept
+    {
+        return strg->cell_charge;
+    }
+    /**
      * This function can be used to detect which SiDBs must be negatively charged due to their location. Important:
      * This function must be applied to a charge layout where all SiDBs are negatively initialized.
      *
@@ -338,80 +431,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 }
             });
         return negative_sidbs;
-    }
-    /**
-     * Returns the charge state of a cell of the layout at a given index.
-     *
-     * @param index The index of the cell.
-     * @return The charge state of the cell at the given index.
-     */
-    [[nodiscard]] sidb_charge_state get_charge_state_by_index(const uint64_t index) const noexcept
-    {
-        if (index < (strg->cell_charge.size()))
-        {
-            return strg->cell_charge[index];
-        }
-
-        return sidb_charge_state::NONE;
-    }
-    /**
-     * Returns the charge state of a given cell.
-     *
-     * @param c The cell.
-     * @return The charge state of the given cell.
-     */
-    [[nodiscard]] sidb_charge_state get_charge_state(const typename Lyt::cell& c) const noexcept
-    {
-        if (const auto index = cell_to_index(c); index != -1)
-        {
-            return strg->cell_charge[static_cast<uint64_t>(index)];
-        }
-
-        return sidb_charge_state::NONE;
-    }
-    /**
-     * Finds the index of an SiDB.
-     *
-     * @param c The cell to find the index of.
-     * @return The index of the cell in the layout. Returns -1 if the cell is not part of the layout.
-     */
-    [[nodiscard]] int64_t cell_to_index(const typename Lyt::cell& c) const noexcept
-    {
-        if (const auto it = std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c);
-            it != strg->sidb_order.cend())
-        {
-            return static_cast<int64_t>(std::distance(strg->sidb_order.cbegin(), it));
-        }
-
-        return -1;
-    }
-    /**
-     *  Returns the distance between two cells.
-     *
-     *  @param c1 the first cell to compare.
-     *  @param c2 the second cell to compare.
-     *  @return a constexpr double representing the distance in nm between the two cells.
-     */
-    [[nodiscard]] double get_nm_distance_between_cells(const typename Lyt::cell& c1,
-                                                       const typename Lyt::cell& c2) const noexcept
-    {
-        if (const auto index1 = cell_to_index(c1), index2 = cell_to_index(c2); (index1 != -1) && (index2 != -1))
-        {
-            return strg->nm_dist_mat[static_cast<uint64_t>(index1)][static_cast<uint64_t>(index2)];
-        }
-
-        return 0;
-    }
-    /**
-     * Calculates and returns the distance between two cells (accessed by indices).
-     *
-     * @param index1 The first index.
-     * @param index2 The second index.
-     * @return The distance index between `index1` and `index2` (indices correspond to unique SiDBs).
-     */
-    [[nodiscard]] double get_nm_distance_by_indices(const uint64_t index1, const uint64_t index2) const noexcept
-    {
-        return strg->nm_dist_mat[index1][index2];
     }
     /**
      * Returns the chargeless electrostatic potential between two cells.
@@ -455,6 +474,21 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return 0;
     }
     /**
+     * Calculates and returns the potential of a pair of cells based on their distance and simulation parameters.
+     *
+     * @param c1 The first cell.
+     * @param c2 The second cell.
+     * @return The potential between c1 and c2.
+     */
+    [[nodiscard]] double potential_between_sidbs(const typename Lyt::cell& c1,
+                                                 const typename Lyt::cell& c2) const noexcept
+    {
+        const auto index1 = static_cast<std::size_t>(cell_to_index(c1));
+        const auto index2 = static_cast<std::size_t>(cell_to_index(c2));
+
+        return potential_between_sidbs_by_index(index1, index2);
+    }
+    /**
      * Calculates and returns the potential of two indices.
      *
      * @param index1 The first index.
@@ -483,21 +517,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return (strg->phys_params.k / (strg->nm_dist_mat[index1][index2] * 1E-9) *
                 std::exp(-strg->nm_dist_mat[index1][index2] / strg->phys_params.lambda_tf) *
                 physical_constants::ELECTRIC_CHARGE);
-    }
-    /**
-     * Calculates and returns the potential of a pair of cells based on their distance and simulation parameters.
-     *
-     * @param c1 The first cell.
-     * @param c2 The second cell.
-     * @return The potential between c1 and c2.
-     */
-    [[nodiscard]] double potential_between_sidbs(const typename Lyt::cell& c1,
-                                                 const typename Lyt::cell& c2) const noexcept
-    {
-        const auto index1 = static_cast<std::size_t>(cell_to_index(c1));
-        const auto index2 = static_cast<std::size_t>(cell_to_index(c2));
-
-        return potential_between_sidbs_by_index(index1, index2);
     }
     /**
      * The function calculates the electrostatic potential for each SiDB position (local).
@@ -691,15 +710,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         strg->charge_index = {chargeindex, base};
     }
     /**
-     * The charge index of the current charge distribution is returned.
-     *
-     * @return A pair with the charge index and the used base is returned.
-     */
-    [[nodiscard]] charge_index_base get_charge_index() const noexcept
-    {
-        return strg->charge_index;
-    }
-    /**
      *  The stored unique index is converted to the charge distribution of the charge distribution surface.
      */
     void index_to_charge_distribution() noexcept
@@ -719,6 +729,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
             counter -= 1;
         }
+    }
+    /**
+     * The charge index of the current charge distribution is returned.
+     *
+     * @return A pair with the charge index and the used base is returned.
+     */
+    [[nodiscard]] charge_index_base get_charge_index() const noexcept
+    {
+        return strg->charge_index;
     }
     /**
      * The charge index is increased by one, but only if it is less than the maximum charge index for the given layout.
