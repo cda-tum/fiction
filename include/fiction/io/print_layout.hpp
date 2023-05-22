@@ -12,7 +12,6 @@
 #include <fmt/color.h>
 #include <fmt/format.h>
 
-#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -368,51 +367,46 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
     const coordinate<Lyt> min{std::max(min_x - 2, 0), std::max(min_y - 1, 0)};
     const coordinate<Lyt> max{std::min(max_x + 2, cds.x()), std::min(max_y + 1, cds.y())};
 
-    // loop over dimer pairs
-    for (decltype(cds.y()) y_pos = min.y; y_pos <= max.y; ++y_pos)
-    {
-        // loop over rows of a dimer pair
-        for (uint8_t r = 0; r <= 1; ++r)
+    // iterate over all coordinates in the rows determined by the vertical crop
+    cds.foreach_coordinate(
+        [&](const coordinate<Lyt>& c)
         {
-            for (decltype(cds.x()) x_pos = min.x; x_pos <= max.x; ++x_pos)
+            if (c.x < min.x || c.x > max.x)  // apply horizontal crop
             {
-                const cell<Lyt> c{x_pos, y_pos, r};
+                return;
+            }
 
-                if (cds.is_empty_cell(c))
+            switch (cds.get_charge_state(c))  // switch over the charge state of the SiDB at the current coordinate
+            {
+                case sidb_charge_state::NEGATIVE:
                 {
-                    os << (draw_lattice ? fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") :
-                                          "  ");
-                    continue;
+                    os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ● ");
+                    break;
                 }
-
-                // switch over the charge state of the SiDB index associated with the current cell, and update count
-                switch (cds.get_charge_state(c))
+                case sidb_charge_state::POSITIVE:
                 {
-                    case sidb_charge_state::NEGATIVE:
-                    {
-                        os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ● ");
-                        continue;
-                    }
-                    case sidb_charge_state::POSITIVE:
-                    {
-                        os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ⨁ ");
-                        continue;
-                    }
-                    case sidb_charge_state::NEUTRAL:
-                    {
-                        os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : detail::NO_COLOR, " ◯ ");
-                        continue;
-                    }
-                    default:  // NONE charge state case
-                    {
-                        os << fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " ◌ ");
-                    }
+                    os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ⨁ ");
+                    break;
+                }
+                case sidb_charge_state::NEUTRAL:
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : detail::NO_COLOR, " ◯ ");
+                    break;
+                }
+                default:  // NONE charge state case -> empty cell
+                {
+                    os << (draw_lattice || !cds.is_empty_cell(c) ?
+                               fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") :
+                               "  ");
                 }
             }
-            os << '\n';
-        }
-        os << '\n';
-    }
+
+            if (c.x == max.x)
+            {
+                os << (c.z == 1 ? "\n\n" : "\n");
+            }
+        },
+        min, {0, max.y + 1, 0});
 
     // flush stream
     os << std::endl;
