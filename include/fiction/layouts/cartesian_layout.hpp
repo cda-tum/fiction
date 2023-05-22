@@ -621,7 +621,7 @@ class cartesian_layout
      * will be iterated first, then y, then z.
      *
      * @param start First coordinate to include in the range of all coordinates.
-     * @param stop Last coordinate to include in the range of all coordinates.
+     * @param stop Last coordinate (exclusive) to include in the range of all coordinates.
      * @return An iterator range from `start` to `stop`. If they are not provided, the first/last coordinate is used as
      * a default.
      */
@@ -638,7 +638,7 @@ class cartesian_layout
      * @tparam Fn Functor type that has to comply with the restrictions imposed by `mockturtle::foreach_element`.
      * @param fn Functor to apply to each coordinate in the range.
      * @param start First coordinate to include in the range of all coordinates.
-     * @param stop Last coordinate to include in the range of all coordinates.
+     * @param stop Last coordinate (exclusive) to include in the range of all coordinates.
      */
     template <typename Fn>
     void foreach_coordinate(Fn&& fn, const OffsetCoordinateType& start = {},
@@ -653,7 +653,7 @@ class cartesian_layout
      * iteration order is the same as for the coordinates function but without the z dimension.
      *
      * @param start First coordinate to include in the range of all ground coordinates.
-     * @param stop Last coordinate to include in the range of all ground coordinates.
+     * @param stop Last coordinate (exclusive) to include in the range of all ground coordinates.
      * @return An iterator range from `start` to `stop`. If they are not provided, the first/last coordinate in the
      * ground layer is used as a default.
      */
@@ -675,7 +675,7 @@ class cartesian_layout
      * @tparam Fn Functor type that has to comply with the restrictions imposed by `mockturtle::foreach_element`.
      * @param fn Functor to apply to each coordinate in the range.
      * @param start First coordinate to include in the range of all ground coordinates.
-     * @param stop Last coordinate to include in the range of all ground coordinates.
+     * @param stop Last coordinate (exclusive) to include in the range of all ground coordinates.
      */
     template <typename Fn>
     void foreach_ground_coordinate(Fn&& fn, const OffsetCoordinateType& start = {},
