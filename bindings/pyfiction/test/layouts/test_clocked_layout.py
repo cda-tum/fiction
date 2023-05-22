@@ -32,10 +32,10 @@ class TestClockedLayout(unittest.TestCase):
             self.assertEqual(layout.outgoing_clocked_zones((2, 2)), [])
 
             for icz in layout.incoming_clocked_zones((1, 1)):
-                self.assertIn(icz, [coordinate(1, 0), coordinate(0, 1)])
+                self.assertIn(icz, [layout.coord(1, 0), layout.coord(0, 1)])
 
             for icz in layout.outgoing_clocked_zones((1, 1)):
-                self.assertIn(icz, [coordinate(1, 2), coordinate(2, 1)])
+                self.assertIn(icz, [layout.coord(1, 2), layout.coord(2, 1)])
 
     def test_fetch_clocking_scheme(self):
 

@@ -45,9 +45,14 @@ PYBIND11_MODULE(pyfiction, m)
     m.doc() = "Python bindings for fiction, a framework for Design Automation for Field-coupled Nanotechnologies";
 
     /**
+     * Coordinates
+     */
+    pyfiction::offset_coordinate(m);
+    pyfiction::cube_coordinate(m);
+    pyfiction::siqad_coordinate(m);
+    /**
      * Layouts
      */
-    pyfiction::coordinates(m);
     pyfiction::cartesian_layout(m);
     pyfiction::shifted_cartesian_layout(m);
     pyfiction::hexagonal_layout(m);

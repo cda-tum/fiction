@@ -109,12 +109,12 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
 
         .def(
             "get_node",
-            [](const GateLyt& layout, const py_coordinate& coordinate) { return layout.get_node(coordinate); }, "t"_a,
+            [](const GateLyt& layout, const py_offset_coordinate& coordinate) { return layout.get_node(coordinate); }, "t"_a,
             DOC(fiction_gate_level_layout_get_node))
         .def("get_tile", &GateLyt::get_tile, "n"_a, DOC(fiction_gate_level_layout_get_tile))
         .def("make_signal", &GateLyt::make_signal, "n"_a, DOC(fiction_gate_level_layout_make_signal))
 
-        .def("move_node", &GateLyt::move_node, "n"_a, "t"_a, "new_children"_a = std::vector<py_coordinate>{},
+        .def("move_node", &GateLyt::move_node, "n"_a, "t"_a, "new_children"_a = std::vector<py_offset_coordinate>{},
              DOC(fiction_gate_level_layout_move_node))
 
         .def("clear_tile", &GateLyt::clear_tile, "t"_a, DOC(fiction_gate_level_layout_clear_tile))

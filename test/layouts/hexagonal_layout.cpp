@@ -104,6 +104,66 @@ void check_identity_conversion()
                               { CHECK(layout.to_offset_coordinate(layout.to_cube_coordinate(coord)) == coord); });
 }
 
+TEST_CASE("Coordinate creation", "[hexagonal-layout]")
+{
+    SECTION("odd row")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, odd_row_hex>;
+
+        const layout lyt{{3, 3}};
+
+        CHECK(lyt.coord(0, 0, 0) == offset::ucoord_t{0, 0, 0});
+        CHECK(lyt.coord(0, 0, 1) == offset::ucoord_t{0, 0, 1});
+        CHECK(lyt.coord(1, 0) == offset::ucoord_t{1, 0});
+        CHECK(lyt.coord(2, 0) == offset::ucoord_t{2, 0});
+        CHECK(lyt.coord(0, 1) == offset::ucoord_t{0, 1});
+        CHECK(lyt.coord(1, 1) == offset::ucoord_t{1, 1});
+        CHECK(lyt.coord(2, 1) == offset::ucoord_t{2, 1});
+    }
+    SECTION("even row")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, even_row_hex>;
+
+        const layout lyt{{3, 3}};
+
+        CHECK(lyt.coord(0, 0, 0) == offset::ucoord_t{0, 0, 0});
+        CHECK(lyt.coord(0, 0, 1) == offset::ucoord_t{0, 0, 1});
+        CHECK(lyt.coord(1, 0) == offset::ucoord_t{1, 0});
+        CHECK(lyt.coord(2, 0) == offset::ucoord_t{2, 0});
+        CHECK(lyt.coord(0, 1) == offset::ucoord_t{0, 1});
+        CHECK(lyt.coord(1, 1) == offset::ucoord_t{1, 1});
+        CHECK(lyt.coord(2, 1) == offset::ucoord_t{2, 1});
+    }
+    SECTION("odd column")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, odd_column_hex>;
+
+        const layout lyt{{3, 3}};
+
+        CHECK(lyt.coord(0, 0, 0) == offset::ucoord_t{0, 0, 0});
+        CHECK(lyt.coord(0, 0, 1) == offset::ucoord_t{0, 0, 1});
+        CHECK(lyt.coord(1, 0) == offset::ucoord_t{1, 0});
+        CHECK(lyt.coord(2, 0) == offset::ucoord_t{2, 0});
+        CHECK(lyt.coord(0, 1) == offset::ucoord_t{0, 1});
+        CHECK(lyt.coord(1, 1) == offset::ucoord_t{1, 1});
+        CHECK(lyt.coord(2, 1) == offset::ucoord_t{2, 1});
+    }
+    SECTION("even column")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, even_column_hex>;
+
+        const layout lyt{{3, 3}};
+
+        CHECK(lyt.coord(0, 0, 0) == offset::ucoord_t{0, 0, 0});
+        CHECK(lyt.coord(0, 0, 1) == offset::ucoord_t{0, 0, 1});
+        CHECK(lyt.coord(1, 0) == offset::ucoord_t{1, 0});
+        CHECK(lyt.coord(2, 0) == offset::ucoord_t{2, 0});
+        CHECK(lyt.coord(0, 1) == offset::ucoord_t{0, 1});
+        CHECK(lyt.coord(1, 1) == offset::ucoord_t{1, 1});
+        CHECK(lyt.coord(2, 1) == offset::ucoord_t{2, 1});
+    }
+}
+
 TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
 {
     SECTION("odd row")
@@ -111,7 +171,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
         using layout = hexagonal_layout<offset::ucoord_t, odd_row_hex>;
         check_identity_conversion<layout>();
 
-        layout lyt{{3, 3}};
+        const layout lyt{{3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
         CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
@@ -125,7 +185,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
         using layout = hexagonal_layout<offset::ucoord_t, even_row_hex>;
         check_identity_conversion<layout>();
 
-        layout lyt{{3, 3}};
+        const layout lyt{{3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
         CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
@@ -139,7 +199,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
         using layout = hexagonal_layout<offset::ucoord_t, odd_column_hex>;
         check_identity_conversion<layout>();
 
-        layout lyt{{3, 3}};
+        const layout lyt{{3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
         CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
@@ -153,7 +213,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
         using layout = hexagonal_layout<offset::ucoord_t, even_column_hex>;
         check_identity_conversion<layout>();
 
-        layout lyt{{3, 3}};
+        const layout lyt{{3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
         CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, 0, -1});

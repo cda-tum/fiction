@@ -10,13 +10,13 @@ class TestDistance(unittest.TestCase):
                     shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
                     hexagonal_layout((4, 4)), clocked_hexagonal_layout((4, 4), "2DDWave"),
                     hexagonal_gate_layout((4, 4), "2DDWave", "Layout")]:
-            self.assertEqual(manhattan_distance(lyt, coordinate(0, 0), coordinate(0, 0)), 0)
-            self.assertEqual(manhattan_distance(lyt, coordinate(0, 0), coordinate(1, 0)), 1)
-            self.assertEqual(manhattan_distance(lyt, coordinate(0, 0), coordinate(0, 1)), 1)
-            self.assertEqual(manhattan_distance(lyt, coordinate(0, 0), coordinate(1, 1)), 2)
-            self.assertEqual(manhattan_distance(lyt, coordinate(0, 0), coordinate(2, 2)), 4)
-            self.assertEqual(manhattan_distance(lyt, coordinate(0, 0), coordinate(3, 3)), 6)
-            self.assertEqual(manhattan_distance(lyt, coordinate(0, 0), coordinate(4, 4)), 8)
+            self.assertEqual(manhattan_distance(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)), 0)
+            self.assertEqual(manhattan_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)), 1)
+            self.assertEqual(manhattan_distance(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)), 1)
+            self.assertEqual(manhattan_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1)), 2)
+            self.assertEqual(manhattan_distance(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2)), 4)
+            self.assertEqual(manhattan_distance(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3)), 6)
+            self.assertEqual(manhattan_distance(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4)), 8)
 
     def test_euclidean(self):
         for lyt in [cartesian_layout((4, 4)), clocked_cartesian_layout((4, 4), "2DDWave"),
@@ -24,13 +24,13 @@ class TestDistance(unittest.TestCase):
                     clocked_shifted_cartesian_layout((4, 4), "2DDWave"),
                     shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"), hexagonal_layout((4, 4)),
                     clocked_hexagonal_layout((4, 4), "2DDWave"), hexagonal_gate_layout((4, 4), "2DDWave", "Layout")]:
-            self.assertEqual(euclidean_distance(lyt, coordinate(0, 0), coordinate(0, 0)), 0)
-            self.assertEqual(euclidean_distance(lyt, coordinate(0, 0), coordinate(1, 0)), 1)
-            self.assertEqual(euclidean_distance(lyt, coordinate(0, 0), coordinate(0, 1)), 1)
-            self.assertAlmostEqual(euclidean_distance(lyt, coordinate(0, 0), coordinate(1, 1)), 2 ** 0.5)
-            self.assertAlmostEqual(euclidean_distance(lyt, coordinate(0, 0), coordinate(2, 2)), 2 * 2 ** 0.5)
-            self.assertAlmostEqual(euclidean_distance(lyt, coordinate(0, 0), coordinate(3, 3)), 3 * 2 ** 0.5)
-            self.assertAlmostEqual(euclidean_distance(lyt, coordinate(0, 0), coordinate(4, 4)), 4 * 2 ** 0.5)
+            self.assertEqual(euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)), 0)
+            self.assertEqual(euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)), 1)
+            self.assertEqual(euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)), 1)
+            self.assertAlmostEqual(euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1)), 2 ** 0.5)
+            self.assertAlmostEqual(euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2)), 2 * 2 ** 0.5)
+            self.assertAlmostEqual(euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3)), 3 * 2 ** 0.5)
+            self.assertAlmostEqual(euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4)), 4 * 2 ** 0.5)
 
 
 if __name__ == '__main__':

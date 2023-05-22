@@ -35,19 +35,22 @@ using py_logic_network = mockturtle::names_view<fiction::technology_network>;
 /**
  * Coordinates.
  */
-using py_coordinate = fiction::offset::ucoord_t;
+using py_offset_coordinate = fiction::offset::ucoord_t;
+using py_cube_coordinate   = fiction::cube::coord_t;
+using py_siqad_coordinate  = fiction::siqad::coord_t;
 /**
  * Cartesian layout.
  */
-using py_cartesian_layout = fiction::cartesian_layout<py_coordinate>;
+using py_cartesian_layout = fiction::cartesian_layout<py_offset_coordinate>;
 /**
  * Shifted Cartesian layout.
  */
-using py_shifted_cartesian_layout = fiction::shifted_cartesian_layout<py_coordinate, fiction::odd_column_cartesian>;
+using py_shifted_cartesian_layout =
+    fiction::shifted_cartesian_layout<py_offset_coordinate, fiction::odd_column_cartesian>;
 /**
  * Hexagonal layout.
  */
-using py_hexagonal_layout = fiction::hexagonal_layout<py_coordinate, fiction::even_row_hex>;
+using py_hexagonal_layout = fiction::hexagonal_layout<py_offset_coordinate, fiction::even_row_hex>;
 /**
  * Cartesian clocked layout.
  */
@@ -104,6 +107,12 @@ using py_inml_layout = py_cartesian_cell_layout<fiction::inml_technology>;
  * SiDB cell layout.
  */
 using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb_technology>;
+/**
+ * SiQAD layout. This is a special SiDB layout that is used for the SiDB simulation algorithms.
+ */
+using py_siqad_layout =
+    fiction::cell_level_layout<fiction::sidb_technology,
+                               fiction::clocked_layout<fiction::cartesian_layout<fiction::siqad::coord_t>>>;
 
 }  // namespace pyfiction
 
