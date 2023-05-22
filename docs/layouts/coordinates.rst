@@ -15,7 +15,7 @@ An offset coordinate is a coordinate that defines a location via an offset from 
         .. doxygenstruct:: fiction::offset::ucoord_t
         .. doxygenclass:: fiction::offset::coord_iterator
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.offset.offset_coordinate
+        .. autoclass:: fiction.pyfiction.offset_coordinate
 
 Cube coordinates
 ----------------
@@ -27,7 +27,7 @@ At the same time, they can be used to address 3-dimensional grids.
     .. tab:: C++
         .. doxygenstruct:: fiction::cube::coord_t
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.offset.cube_coordinate
+        .. autoclass:: fiction.pyfiction.cube_coordinate
 
 SiQAD coordinates
 -----------------
@@ -39,7 +39,7 @@ while the z value (0,1) points to the top or bottom Si atom in the dimer. The co
     .. tab:: C++
         .. doxygenstruct:: fiction::siqad::coord_t
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.offset.siqad_coordinate
+        .. autoclass:: fiction.pyfiction.siqad_coordinate
 
 Utility functions
 -----------------
