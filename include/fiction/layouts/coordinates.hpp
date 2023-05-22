@@ -574,7 +574,8 @@ struct coord_t
 }  // namespace cube
 
 /**
- * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(x + 1) \cdot (y + 1)\f$.
+ * Computes the area of a given coordinate assuming its origin is \f$(0, 0, 0)\f$.
+ * Calculates \f$(x + 1) \cdot (y + 1)\f$.
  *
  * @tparam CoordinateType Coordinate type.
  * @param coord Coordinate.
@@ -586,8 +587,8 @@ uint64_t area(const CoordinateType& coord) noexcept
     return (coord.x + static_cast<decltype(coord.x)>(1)) * (coord.y + static_cast<decltype(coord.y)>(1));
 }
 /**
- * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(x + 1) \cdot (y + 1)
- * \cdot (z + 1)\f$.
+ * Computes the volume of a given coordinate assuming its origin is \f$(0, 0, 0)\f$.
+ * Calculates \f$(x + 1) \cdot (y + 1) \cdot (z + 1)\f$.
  *
  * @tparam CoordinateType Coordinate type.
  * @param coord Coordinate.
