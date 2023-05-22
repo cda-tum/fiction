@@ -19,7 +19,6 @@
 #include <iostream>
 #include <limits>
 #include <string>
-#include <utility>
 #include <vector>
 
 namespace fiction
@@ -39,7 +38,7 @@ static const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::bla
                                                          fmt::fg(fmt::color::black) | fmt::bg(fmt::color::light_gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::dark_gray)}};
-// Escape color sequence for negatively charged SiDB colors (blue).
+// Escape color sequence for negatively charged SiDB colors (cyan).
 static const auto SIDB_NEG_COLOR = fmt::fg(fmt::color::cyan);
 // Escape color sequence for positively charged SiDB colors (red).
 static const auto SIDB_POS_COLOR = fmt::fg(fmt::color::red);
@@ -48,7 +47,7 @@ static const auto SIDB_NEUT_COLOR = fmt::fg(fmt::color::white);
 // Escape color sequence for lattice background colors (grey).
 static const auto SIDB_LAT_COLOR = fmt::fg(fmt::color::gray);
 // Empty escape color sequence
-static constexpr auto NO_COLOR = fmt::text_style{};
+inline constexpr auto NO_COLOR = fmt::text_style{};
 
 }  // namespace detail
 
