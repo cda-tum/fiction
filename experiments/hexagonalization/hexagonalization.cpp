@@ -94,17 +94,17 @@ int main()  // NOLINT
     // stats for SMT-based physical design
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
 
-    static constexpr const uint64_t bench_select =
-        fiction_experiments::all & ~fiction_experiments::log2 & ~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
+    static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::log2 &
+                                                   ~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
         fmt::print("[i] processing {}\n", benchmark);
         mockturtle::xag_network xag{};
 
-        const auto read_verilog_result =                                       // NOLINT
+        const auto read_verilog_result =                                          // NOLINT
             lorina::read_verilog(fiction_experiments::benchmark_path(benchmark),  // NOLINT
-                                 mockturtle::verilog_reader(xag));             // NOLINT
+                                 mockturtle::verilog_reader(xag));                // NOLINT
         assert(read_verilog_result == lorina::return_code::success);
 
         // compute depth
