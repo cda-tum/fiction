@@ -7,9 +7,11 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 
+#include <fmt/format.h>
+
 #include <map>
-#include <set>
 #include <sstream>
+#include <vector>
 
 using namespace fiction;
 
@@ -66,7 +68,7 @@ TEST_CASE("Unsigned offset coordinates", "[coordinates]")
     CHECK(t1 < t3);
     CHECK(t2 < t3);
 
-    std::map<uint64_t, coordinate> coordinate_repr{
+    const std::map<uint64_t, coordinate> coordinate_repr{
         {0x8000000000000000, coordinate{}},        {0x0000000000000000, coordinate{0, 0, 0}},
         {0x4000000000000000, coordinate{0, 0, 1}}, {0x4000000080000001, coordinate{1, 1, 1}},
         {0x0000000000000002, coordinate{2, 0, 0}}, {0x3fffffffffffffff, coordinate{2147483647, 2147483647, 0}}};
@@ -130,30 +132,52 @@ void check_coordinate_iteration() noexcept
     std::vector<CoordinateType> coord_vector{};
     coord_vector.reserve(7);
 
-    cartesian_layout<CoordinateType>{{1, 1, 1}}.foreach_coordinate(
-        [&cv = coord_vector](const auto& c) { cv.emplace_back(c); }, {0, 0, 0}, {1, 1, 1});
+    const cartesian_layout<CoordinateType> lyt{{1, 1, 1}};
 
-    CHECK(coord_vector.size() == 7);
+    const auto fill_coord_vector = [&cv = coord_vector](const auto& c) { cv.emplace_back(c); };
 
-    CHECK(coord_vector[0] == CoordinateType{0, 0, 0});
-    CHECK(coord_vector[1] == CoordinateType{1, 0, 0});
-
-    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    SECTION("With bounds")
     {
-        CHECK(coord_vector[2] == CoordinateType{0, 0, 1});
-        CHECK(coord_vector[3] == CoordinateType{1, 0, 1});
-        CHECK(coord_vector[4] == CoordinateType{0, 1, 0});
-        CHECK(coord_vector[5] == CoordinateType{1, 1, 0});
-    }
-    else
-    {
-        CHECK(coord_vector[2] == CoordinateType{0, 1, 0});
-        CHECK(coord_vector[3] == CoordinateType{1, 1, 0});
-        CHECK(coord_vector[4] == CoordinateType{0, 0, 1});
-        CHECK(coord_vector[5] == CoordinateType{1, 0, 1});
-    }
+        lyt.foreach_coordinate(fill_coord_vector, {1, 0, 0}, {1, 1, 1});
 
-    CHECK(coord_vector[6] == CoordinateType{0, 1, 1});
+        CHECK(coord_vector.size() == 6);
+
+        CHECK(coord_vector[0] == CoordinateType{1, 0, 0});
+
+        if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+        {
+            CHECK(coord_vector[1] == CoordinateType{0, 0, 1});
+            CHECK(coord_vector[2] == CoordinateType{1, 0, 1});
+            CHECK(coord_vector[3] == CoordinateType{0, 1, 0});
+            CHECK(coord_vector[4] == CoordinateType{1, 1, 0});
+        }
+        else
+        {
+            CHECK(coord_vector[1] == CoordinateType{0, 1, 0});
+            CHECK(coord_vector[2] == CoordinateType{1, 1, 0});
+            CHECK(coord_vector[3] == CoordinateType{0, 0, 1});
+            CHECK(coord_vector[4] == CoordinateType{1, 0, 1});
+        }
+
+        CHECK(coord_vector[5] == CoordinateType{0, 1, 1});
+    }
+    SECTION("Without bounds")
+    {
+        coord_vector.clear();
+        coord_vector.reserve(8);
+
+        lyt.foreach_coordinate(fill_coord_vector);
+
+        CHECK(coord_vector.size() == 8);
+
+        CHECK(coord_vector.front().str() == fmt::format("{}", CoordinateType{0, 0, 0}));
+        CHECK(coord_vector.back().str() == fmt::format("{}", CoordinateType{1, 1, 1}));
+    }
+    SECTION("Compute area and volume")
+    {
+        CHECK(area(CoordinateType{lyt.x(), lyt.y(), lyt.z()}) == 4);
+        CHECK(volume(CoordinateType{lyt.x(), lyt.y(), lyt.z()}) == 8);
+    }
 }
 
 TEST_CASE("Coordinate iteration", "[coordinates]")
