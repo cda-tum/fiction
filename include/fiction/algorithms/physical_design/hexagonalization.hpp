@@ -79,94 +79,96 @@ template <typename Lyt>
     // instantiate hexagonal layout
     hex_lyt hex_layout{{hex_width, hex_height, hex_depth}, fiction::row_clocking<hex_lyt>()};
 
-    // create a topological view on the network
-    mockturtle::topo_view cartesian_topo{lyt};
-
-    // create a node map
-    mockturtle::node_map<mockturtle::signal<Lyt>, decltype(cartesian_topo)> node2pos{cartesian_topo};
-
-    // reserve PI nodes without positions
-    auto pi2node = reserve_input_nodes(hex_layout, cartesian_topo);
-
-    cartesian_topo.foreach_pi(
-        [&](const auto& node)
+    // iterate through cartesian layout diagonally
+    for (int64_t k = 0; k < layout_width + layout_height - 1; ++k)
+    {
+        for (int64_t x = 0; x < k + 1; ++x)
         {
-            // old coordinate
-            const coordinate<Lyt> old_coord = lyt.get_tile(node);
-            // new coordinate
-            const coordinate<Lyt> hex{detail::to_hex<Lyt, hex_lyt>(old_coord, layout_height)};
-
-            if (lyt.is_pi(node))
+            const auto y = k - x;
+            if (y < layout_height && x < layout_width)
             {
-                node2pos[node] = hex_layout.move_node(pi2node[node], hex);
+                for (int64_t z = 0; z <= hex_depth; ++z)
+                {
+                    // old coordinate
+                    const coordinate<Lyt> old_coord{x, y, z};
+                    // new coordinate
+                    const coordinate<Lyt> hex{detail::to_hex<Lyt, hex_lyt>(old_coord, layout_height)};
+
+                    if (lyt.is_empty_tile(old_coord))
+                    {
+                        continue;
+                    }
+                    const auto node = lyt.get_node(old_coord);
+
+                    if (lyt.is_pi(node))
+                    {
+                        hex_layout.create_pi(lyt.get_name(lyt.get_node(old_coord)), hex);
+                    }
+
+                    if (const auto signals = lyt.incoming_data_flow(old_coord); signals.size() == 1)
+                    {
+                        const auto signal     = signals[0];
+                        const auto hex_signal = hex_layout.make_signal(
+                            hex_layout.get_node(detail::to_hex<Lyt, hex_lyt>(signal, layout_height)));
+
+                        if (lyt.is_po(node))
+                        {
+                            hex_layout.create_po(hex_signal, lyt.get_name(lyt.get_node(old_coord)), hex);
+                        }
+                        else if (lyt.is_wire(node))
+                        {
+                            hex_layout.create_buf(hex_signal, hex);
+                        }
+                        else if (lyt.is_inv(node))
+                        {
+                            hex_layout.create_not(hex_signal, hex);
+                        }
+                    }
+
+                    else if (signals.size() == 2)
+                    {
+                        const auto signal_a     = signals[0];
+                        const auto signal_b     = signals[1];
+                        const auto hex_signal_a = hex_layout.make_signal(
+                            hex_layout.get_node(detail::to_hex<Lyt, hex_lyt>(signal_a, layout_height)));
+                        const auto hex_signal_b = hex_layout.make_signal(
+                            hex_layout.get_node(detail::to_hex<Lyt, hex_lyt>(signal_b, layout_height)));
+
+                        if (lyt.is_and(node))
+                        {
+                            hex_layout.create_and(hex_signal_a, hex_signal_b, hex);
+                        }
+                        else if (lyt.is_nand(node))
+                        {
+                            hex_layout.create_nand(hex_signal_a, hex_signal_b, hex);
+                        }
+                        else if (lyt.is_or(node))
+                        {
+                            hex_layout.create_or(hex_signal_a, hex_signal_b, hex);
+                        }
+                        else if (lyt.is_nor(node))
+                        {
+                            hex_layout.create_nor(hex_signal_a, hex_signal_b, hex);
+                        }
+                        else if (lyt.is_xor(node))
+                        {
+                            hex_layout.create_xor(hex_signal_a, hex_signal_b, hex);
+                        }
+                        else if (lyt.is_xnor(node))
+                        {
+                            hex_layout.create_xnor(hex_signal_a, hex_signal_b, hex);
+                        }
+                        else if (lyt.is_function(node))
+                        {
+                            const auto node_fun = lyt.node_function(node);
+
+                            hex_layout.create_node({hex_signal_a, hex_signal_b}, node_fun, hex);
+                        }
+                    }
+                }
             }
-        });
-
-    cartesian_topo.foreach_gate(
-        [&](const auto& node)
-        {
-            // old coordinate
-            const coordinate<Lyt> old_coord = lyt.get_tile(node);
-            // new coordinate
-            const coordinate<Lyt> hex{detail::to_hex<Lyt, hex_lyt>(old_coord, layout_height)};
-
-            if (const auto fc = fanins(cartesian_topo, node); fc.fanin_nodes.size() == 1)
-            {
-                const auto fanin_signal = node2pos[cartesian_topo.make_signal(fc.fanin_nodes[0])];
-
-                if (lyt.is_po(node))
-                {
-                    node2pos[node] = hex_layout.create_po(fanin_signal, lyt.get_name(node), hex);
-                }
-                else if (lyt.is_wire(node))
-                {
-                    node2pos[node] = hex_layout.create_buf(fanin_signal, hex);
-                }
-                else if (lyt.is_inv(node))
-                {
-                    node2pos[node] = hex_layout.create_not(fanin_signal, hex);
-                }
-            }
-            else
-            {
-                const auto fanin_signal_a = node2pos[cartesian_topo.make_signal(fc.fanin_nodes[0])];
-                const auto fanin_signal_b = node2pos[cartesian_topo.make_signal(fc.fanin_nodes[1])];
-
-                if (lyt.is_and(node))
-                {
-                    node2pos[node] = hex_layout.create_and(fanin_signal_a, fanin_signal_b, hex);
-                }
-                else if (lyt.is_nand(node))
-                {
-                    node2pos[node] = hex_layout.create_nand(fanin_signal_a, fanin_signal_b, hex);
-                }
-                else if (lyt.is_or(node))
-                {
-                    node2pos[node] = hex_layout.create_or(fanin_signal_a, fanin_signal_b, hex);
-                }
-                else if (lyt.is_nor(node))
-                {
-                    node2pos[node] = hex_layout.create_nor(fanin_signal_a, fanin_signal_b, hex);
-                }
-                else if (lyt.is_xor(node))
-                {
-                    node2pos[node] = hex_layout.create_xor(fanin_signal_a, fanin_signal_b, hex);
-                }
-                else if (lyt.is_xnor(node))
-                {
-                    node2pos[node] = hex_layout.create_xnor(fanin_signal_a, fanin_signal_b, hex);
-                }
-                else if (lyt.is_function(node))
-                {
-                    const auto node_fun = lyt.node_function(node);
-
-                    node2pos[node] = hex_layout.create_node({fanin_signal_a, fanin_signal_b}, node_fun, hex);
-                }
-            }
-        });
-
-    // restore possibly set signal names
-    restore_names(cartesian_topo, hex_layout, node2pos);
+        }
+    }
     return hex_layout;
 }
 
