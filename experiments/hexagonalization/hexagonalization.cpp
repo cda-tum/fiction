@@ -1,4 +1,4 @@
-#include "experiment_setup.hpp"
+#include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
 #include <fiction/algorithms/physical_design/hexagonalization.hpp>    // layout conversion to hexagonal gird
@@ -95,15 +95,15 @@ int main()  // NOLINT
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
 
     static constexpr const uint64_t bench_select =
-        experiment_setup::all & ~experiment_setup::log2 & ~experiment_setup::sqrt & ~experiment_setup::multiplier;
+        fiction_experiments::all & ~fiction_experiments::log2 & ~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
 
-    for (const auto& benchmark : experiment_setup::all_benchmarks(bench_select))
+    for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
         fmt::print("[i] processing {}\n", benchmark);
         mockturtle::xag_network xag{};
 
         const auto read_verilog_result =                                       // NOLINT
-            lorina::read_verilog(experiment_setup::benchmark_path(benchmark),  // NOLINT
+            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark),  // NOLINT
                                  mockturtle::verilog_reader(xag));             // NOLINT
         assert(read_verilog_result == lorina::return_code::success);
 
