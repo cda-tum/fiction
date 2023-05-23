@@ -2,6 +2,7 @@
 // Created by marcel on 15.09.21.
 //
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -126,13 +127,12 @@ TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
     CHECK(t5_fiction.y == -3);
 }
 
-template <typename CoordinateType>
-void check_coordinate_iteration() noexcept
+TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cube::coord_t, siqad::coord_t)
 {
-    std::vector<CoordinateType> coord_vector{};
+    std::vector<TestType> coord_vector{};
     coord_vector.reserve(7);
 
-    const cartesian_layout<CoordinateType> lyt{{1, 1, 1}};
+    const cartesian_layout<TestType> lyt{{1, 1, 1}};
 
     const auto fill_coord_vector = [&cv = coord_vector](const auto& c) { cv.emplace_back(c); };
 
@@ -142,24 +142,24 @@ void check_coordinate_iteration() noexcept
 
         CHECK(coord_vector.size() == 6);
 
-        CHECK(coord_vector[0] == CoordinateType{1, 0, 0});
+        CHECK(coord_vector[0] == TestType{1, 0, 0});
 
-        if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+        if constexpr (std::is_same_v<TestType, siqad::coord_t>)
         {
-            CHECK(coord_vector[1] == CoordinateType{0, 0, 1});
-            CHECK(coord_vector[2] == CoordinateType{1, 0, 1});
-            CHECK(coord_vector[3] == CoordinateType{0, 1, 0});
-            CHECK(coord_vector[4] == CoordinateType{1, 1, 0});
+            CHECK(coord_vector[1] == TestType{0, 0, 1});
+            CHECK(coord_vector[2] == TestType{1, 0, 1});
+            CHECK(coord_vector[3] == TestType{0, 1, 0});
+            CHECK(coord_vector[4] == TestType{1, 1, 0});
         }
         else
         {
-            CHECK(coord_vector[1] == CoordinateType{0, 1, 0});
-            CHECK(coord_vector[2] == CoordinateType{1, 1, 0});
-            CHECK(coord_vector[3] == CoordinateType{0, 0, 1});
-            CHECK(coord_vector[4] == CoordinateType{1, 0, 1});
+            CHECK(coord_vector[1] == TestType{0, 1, 0});
+            CHECK(coord_vector[2] == TestType{1, 1, 0});
+            CHECK(coord_vector[3] == TestType{0, 0, 1});
+            CHECK(coord_vector[4] == TestType{1, 0, 1});
         }
 
-        CHECK(coord_vector[5] == CoordinateType{0, 1, 1});
+        CHECK(coord_vector[5] == TestType{0, 1, 1});
     }
     SECTION("Without bounds")
     {
@@ -170,30 +170,16 @@ void check_coordinate_iteration() noexcept
 
         CHECK(coord_vector.size() == 8);
 
-        CHECK(coord_vector.front().str() == fmt::format("{}", CoordinateType{0, 0, 0}));
-        CHECK(coord_vector.back().str() == fmt::format("{}", CoordinateType{1, 1, 1}));
-    }
-    SECTION("Compute area and volume")
-    {
-        CHECK(area(CoordinateType{lyt.x(), lyt.y(), lyt.z()}) == 4);
-        CHECK(volume(CoordinateType{lyt.x(), lyt.y(), lyt.z()}) == 8);
+        CHECK(coord_vector.front().str() == fmt::format("{}", TestType{0, 0, 0}));
+        CHECK(coord_vector.back().str() == fmt::format("{}", TestType{1, 1, 1}));
     }
 }
 
-TEST_CASE("Coordinate iteration", "[coordinates]")
+TEMPLATE_TEST_CASE("Computing area and volume of offset and cubic coordinates", "[coordinates]", offset::ucoord_t,
+                   cube::coord_t)
 {
-    SECTION("Offset coordinates")
-    {
-        check_coordinate_iteration<offset::ucoord_t>();
-    }
-    SECTION("Cube coordinates")
-    {
-        check_coordinate_iteration<cube::coord_t>();
-    }
-    SECTION("SiQAD coordinates")
-    {
-        check_coordinate_iteration<siqad::coord_t>();
-    }
+    CHECK(area(TestType{1, 1, 1}) == 4);
+    CHECK(volume(TestType{1, 1, 1}) == 8);
 }
 
 #if defined(__GNUC__)
