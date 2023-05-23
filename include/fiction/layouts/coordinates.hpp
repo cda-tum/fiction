@@ -764,7 +764,12 @@ class coord_iterator
     constexpr explicit coord_iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept :
             aspect_ratio{dimension},
             coord{start}
-    {}
+    {
+        static_assert(std::is_same_v<CoordinateType, offset::ucoord_t> ||
+                          std::is_same_v<CoordinateType, cube::coord_t> ||
+                          std::is_same_v<CoordinateType, siqad::coord_t>,
+                      "CoordinateType must be a supported coordinate");
+    }
     /**
      * Increments the iterator.
      *
@@ -780,7 +785,8 @@ class coord_iterator
             {
                 coord.x = 0;
 
-                if constexpr (std::is_same_v<CoordinateType, offset::ucoord_t>)
+                if constexpr (std::is_same_v<CoordinateType, offset::ucoord_t> ||
+                              std::is_same_v<CoordinateType, cube::coord_t>)
                 {
                     ++coord.y;
                     if (coord.y > aspect_ratio.y)

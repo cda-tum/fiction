@@ -124,30 +124,52 @@ TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
     CHECK(t5_fiction.y == -3);
 }
 
-TEST_CASE("Offset coordinate iteration", "[coordinates]")
+template <typename CoordinateType>
+void check_coordinate_iteration() noexcept
 {
-    using lyt = cartesian_layout<offset::ucoord_t>;
+    std::vector<CoordinateType> coord_vector{};
+    coord_vector.reserve(7);
 
-    std::stringstream print_stream;
+    cartesian_layout<CoordinateType>{{1, 1, 1}}.foreach_coordinate(
+        [&cv = coord_vector](const auto& c) { cv.emplace_back(c); }, {0, 0, 0}, {1, 1, 1});
 
-    lyt{{1, 1, 1}}.foreach_coordinate([&ps = print_stream](const auto& c) { ps << c.str(); });
+    CHECK(coord_vector.size() == 7);
 
-    constexpr const char* coordinates_string = "(0,0,0)(1,0,0)(0,1,0)(1,1,0)(0,0,1)(1,0,1)(0,1,1)(1,1,1)";
+    CHECK(coord_vector[0] == CoordinateType{0, 0, 0});
+    CHECK(coord_vector[1] == CoordinateType{1, 0, 0});
 
-    CHECK(coordinates_string == print_stream.str());
+    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    {
+        CHECK(coord_vector[2] == CoordinateType{0, 0, 1});
+        CHECK(coord_vector[3] == CoordinateType{1, 0, 1});
+        CHECK(coord_vector[4] == CoordinateType{0, 1, 0});
+        CHECK(coord_vector[5] == CoordinateType{1, 1, 0});
+    }
+    else
+    {
+        CHECK(coord_vector[2] == CoordinateType{0, 1, 0});
+        CHECK(coord_vector[3] == CoordinateType{1, 1, 0});
+        CHECK(coord_vector[4] == CoordinateType{0, 0, 1});
+        CHECK(coord_vector[5] == CoordinateType{1, 0, 1});
+    }
+
+    CHECK(coord_vector[6] == CoordinateType{0, 1, 1});
 }
 
-TEST_CASE("SiQAD coordinate iteration", "[coordinates]")
+TEST_CASE("Coordinate iteration", "[coordinates]")
 {
-    using lyt = cartesian_layout<siqad::coord_t>;
-
-    std::stringstream print_stream;
-
-    lyt{{1, 1, 1}}.foreach_coordinate([&ps = print_stream](const auto& c) { ps << c.str(); });
-
-    constexpr const char* coordinates_string = "(0,0,0)(1,0,0)(0,0,1)(1,0,1)(0,1,0)(1,1,0)(0,1,1)(1,1,1)";
-
-    CHECK(coordinates_string == print_stream.str());
+    SECTION("Offset coordinates")
+    {
+        check_coordinate_iteration<offset::ucoord_t>();
+    }
+    SECTION("Cube coordinates")
+    {
+        check_coordinate_iteration<cube::coord_t>();
+    }
+    SECTION("SiQAD coordinates")
+    {
+        check_coordinate_iteration<siqad::coord_t>();
+    }
 }
 
 #if defined(__GNUC__)
