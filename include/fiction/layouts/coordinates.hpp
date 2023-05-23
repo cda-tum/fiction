@@ -939,6 +939,22 @@ struct formatter<fiction::cube::coord_t>
         return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
     }
 };
+// make siqad::coord_t compatible with fmt::format
+template <>
+struct formatter<fiction::siqad::coord_t>
+{
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const fiction::siqad::coord_t& c, FormatContext& ctx)
+    {
+        return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
+    }
+};
 
 }  // namespace fmt
 
