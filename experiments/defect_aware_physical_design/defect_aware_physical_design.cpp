@@ -142,7 +142,8 @@ int main()  // NOLINT
 
     constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::parity &
                                             ~fiction_experiments::two_bit_add_maj & ~fiction_experiments::b1_r2 &
-                                            ~fiction_experiments::clpl;
+                                            ~fiction_experiments::clpl & ~fiction_experiments::iscas85 &
+                                            ~fiction_experiments::epfl;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
