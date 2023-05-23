@@ -857,6 +857,8 @@ class coord_iterator
 
 }  // namespace fiction
 
+// NOLINTBEGIN(cert-dcl58-cpp)
+
 namespace std
 {
 
@@ -899,6 +901,8 @@ struct iterator_traits<fiction::coord_iterator<Coordinate>>
 };
 
 }  // namespace std
+
+// NOLINTEND(cert-dcl58-cpp)
 
 namespace fmt
 {
