@@ -1,7 +1,7 @@
 #include "experiment_setup.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
-#include <fiction/algorithms/physical_design/hexagonalization.hpp>  // layout conversion to hexagonal gird
+#include <fiction/algorithms/physical_design/hexagonalization.hpp>    // layout conversion to hexagonal gird
 #include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
@@ -30,7 +30,6 @@
 #include <cstdlib>
 #include <sstream>
 #include <vector>
-
 
 int main()  // NOLINT
 {
@@ -128,9 +127,9 @@ int main()  // NOLINT
         fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
         fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats);
 
-        const std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        const auto hex_layout = fiction::hexagonalization<gate_lyt>(gate_level_layout);
-        const auto end = std::chrono::steady_clock::now();
+        const std::chrono::steady_clock::time_point begin      = std::chrono::steady_clock::now();
+        const auto                                  hex_layout = fiction::hexagonalization<gate_lyt>(gate_level_layout);
+        const auto                                  end        = std::chrono::steady_clock::now();
 
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};

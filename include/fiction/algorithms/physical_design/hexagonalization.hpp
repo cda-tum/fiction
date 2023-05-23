@@ -9,9 +9,10 @@
 #include "fiction/types.hpp"
 #include "fiction/utils/placement_utils.hpp"
 
-#include <mockturtle/views/topo_view.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
+#include <mockturtle/views/topo_view.hpp>
+
 #include <cmath>
 #include <cstdint>
 
@@ -30,14 +31,16 @@ namespace detail
  * @return coordinate on the hexagonal grid.
  */
 template <typename CartLyt, typename HexLyt>
-[[nodiscard]] fiction::coordinate<HexLyt> to_hex(fiction::coordinate<CartLyt> cartesian_coordinate, int64_t cartesian_layout_height) noexcept
+[[nodiscard]] fiction::coordinate<HexLyt> to_hex(fiction::coordinate<CartLyt> cartesian_coordinate,
+                                                 int64_t                      cartesian_layout_height) noexcept
 {
     static_assert(is_cartesian_layout_v<CartLyt>, "Old coordinate is not Cartesian");
     static_assert(is_hexagonal_layout_v<HexLyt>, "New coordinate is not hexagonal");
     const auto y = cartesian_coordinate.x + cartesian_coordinate.y;
     const auto x = static_cast<int64_t>(
-        cartesian_coordinate.x + static_cast<int64_t>(std::ceil(std::floor(static_cast<double>(cartesian_layout_height) / 2) -
-                                                     static_cast<double>(y) / 2)));
+        cartesian_coordinate.x +
+        static_cast<int64_t>(
+            std::ceil(std::floor(static_cast<double>(cartesian_layout_height) / 2) - static_cast<double>(y) / 2)));
     const auto z = cartesian_coordinate.z;
 
     return fiction::coordinate<HexLyt>{x, y, z};
@@ -65,11 +68,12 @@ template <typename Lyt>
     // get width, height and depth of Cartesian layout
     const auto layout_width  = static_cast<int64_t>(lyt.x()) + 1;
     const auto layout_height = static_cast<int64_t>(lyt.y()) + 1;
-    const auto layout_depth = static_cast<int64_t>(lyt.z());
+    const auto layout_depth  = static_cast<int64_t>(lyt.z());
 
     // calculate max width, height and depth of hexagonal layout
-    const auto hex_height = detail::to_hex<Lyt, hex_lyt>(coordinate<Lyt>(layout_width - 1, layout_height - 1, 0), layout_height).y;
-    const auto hex_width  = detail::to_hex<Lyt, hex_lyt>(coordinate<Lyt>(layout_width - 1, 0, 0), layout_height).x;
+    const auto hex_height =
+        detail::to_hex<Lyt, hex_lyt>(coordinate<Lyt>(layout_width - 1, layout_height - 1, 0), layout_height).y;
+    const auto hex_width = detail::to_hex<Lyt, hex_lyt>(coordinate<Lyt>(layout_width - 1, 0, 0), layout_height).x;
     const auto hex_depth = layout_depth;
 
     // instantiate hexagonal layout
@@ -87,80 +91,79 @@ template <typename Lyt>
     cartesian_topo.foreach_pi(
         [&](const auto& node)
         {
-        // old coordinate
-        const coordinate<Lyt> old_coord = lyt.get_tile(node);
-        // new coordinate
-        const coordinate<Lyt> hex{detail::to_hex<Lyt, hex_lyt>(old_coord, layout_height)};
+            // old coordinate
+            const coordinate<Lyt> old_coord = lyt.get_tile(node);
+            // new coordinate
+            const coordinate<Lyt> hex{detail::to_hex<Lyt, hex_lyt>(old_coord, layout_height)};
 
-        if (lyt.is_pi(node))
-        {
-            node2pos[node] = hex_layout.move_node(pi2node[node], hex);
-        }
+            if (lyt.is_pi(node))
+            {
+                node2pos[node] = hex_layout.move_node(pi2node[node], hex);
+            }
         });
 
     cartesian_topo.foreach_gate(
         [&](const auto& node)
         {
-        // old coordinate
-        const coordinate<Lyt> old_coord = lyt.get_tile(node);
-        // new coordinate
-        const coordinate<Lyt> hex{detail::to_hex<Lyt, hex_lyt>(old_coord, layout_height)};
+            // old coordinate
+            const coordinate<Lyt> old_coord = lyt.get_tile(node);
+            // new coordinate
+            const coordinate<Lyt> hex{detail::to_hex<Lyt, hex_lyt>(old_coord, layout_height)};
 
-        if (const auto fc = fanins(cartesian_topo, node); fc.fanin_nodes.size() == 1)
-        {
-            const auto fanin_signal = node2pos[cartesian_topo.make_signal(fc.fanin_nodes[0])];
+            if (const auto fc = fanins(cartesian_topo, node); fc.fanin_nodes.size() == 1)
+            {
+                const auto fanin_signal = node2pos[cartesian_topo.make_signal(fc.fanin_nodes[0])];
 
-            if (lyt.is_po(node))
-            {
-                node2pos[node] = hex_layout.create_po(fanin_signal,lyt.get_name(node), hex);
+                if (lyt.is_po(node))
+                {
+                    node2pos[node] = hex_layout.create_po(fanin_signal, lyt.get_name(node), hex);
+                }
+                else if (lyt.is_wire(node))
+                {
+                    node2pos[node] = hex_layout.create_buf(fanin_signal, hex);
+                }
+                else if (lyt.is_inv(node))
+                {
+                    node2pos[node] = hex_layout.create_not(fanin_signal, hex);
+                }
             }
-            else if (lyt.is_wire(node))
+            else
             {
-                node2pos[node] = hex_layout.create_buf(fanin_signal,hex);
-            }
-            else if (lyt.is_inv(node))
-            {
-                node2pos[node] = hex_layout.create_not(fanin_signal,hex);
-            }
-        }
-        else
-        {
-            const auto fanin_signal_a = node2pos[cartesian_topo.make_signal(fc.fanin_nodes[0])];
-            const auto fanin_signal_b = node2pos[cartesian_topo.make_signal(fc.fanin_nodes[1])];
+                const auto fanin_signal_a = node2pos[cartesian_topo.make_signal(fc.fanin_nodes[0])];
+                const auto fanin_signal_b = node2pos[cartesian_topo.make_signal(fc.fanin_nodes[1])];
 
-            if (lyt.is_and(node))
-            {
-                node2pos[node] = hex_layout.create_and(fanin_signal_a, fanin_signal_b,hex);
-            }
-            else if (lyt.is_nand(node))
-            {
-                node2pos[node] = hex_layout.create_nand(fanin_signal_a, fanin_signal_b, hex);
-            }
-            else if (lyt.is_or(node))
-            {
-                node2pos[node] = hex_layout.create_or(fanin_signal_a, fanin_signal_b, hex);
-            }
-            else if (lyt.is_nor(node))
-            {
-                node2pos[node] = hex_layout.create_nor(fanin_signal_a, fanin_signal_b, hex);
-            }
-            else if (lyt.is_xor(node))
-            {
-                node2pos[node] = hex_layout.create_xor(fanin_signal_a, fanin_signal_b,hex);
-            }
-            else if (lyt.is_xnor(node))
-            {
-                node2pos[node] = hex_layout.create_xnor(fanin_signal_a, fanin_signal_b, hex);
-            }
-            else if (lyt.is_function(node))
-            {
-                const auto node_fun = lyt.node_function(node);
+                if (lyt.is_and(node))
+                {
+                    node2pos[node] = hex_layout.create_and(fanin_signal_a, fanin_signal_b, hex);
+                }
+                else if (lyt.is_nand(node))
+                {
+                    node2pos[node] = hex_layout.create_nand(fanin_signal_a, fanin_signal_b, hex);
+                }
+                else if (lyt.is_or(node))
+                {
+                    node2pos[node] = hex_layout.create_or(fanin_signal_a, fanin_signal_b, hex);
+                }
+                else if (lyt.is_nor(node))
+                {
+                    node2pos[node] = hex_layout.create_nor(fanin_signal_a, fanin_signal_b, hex);
+                }
+                else if (lyt.is_xor(node))
+                {
+                    node2pos[node] = hex_layout.create_xor(fanin_signal_a, fanin_signal_b, hex);
+                }
+                else if (lyt.is_xnor(node))
+                {
+                    node2pos[node] = hex_layout.create_xnor(fanin_signal_a, fanin_signal_b, hex);
+                }
+                else if (lyt.is_function(node))
+                {
+                    const auto node_fun = lyt.node_function(node);
 
-                node2pos[node] = hex_layout.create_node({fanin_signal_a, fanin_signal_b},
-                                       node_fun, hex);
+                    node2pos[node] = hex_layout.create_node({fanin_signal_a, fanin_signal_b}, node_fun, hex);
+                }
             }
-        }
-    });
+        });
 
     // restore possibly set signal names
     restore_names(cartesian_topo, hex_layout, node2pos);

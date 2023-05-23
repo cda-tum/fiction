@@ -46,7 +46,8 @@ class hex_command : public command
 
         const auto& lyt_ptr = gls.current();
 
-        const auto check_clocking_scheme = [](auto&& lyt_ptr) { return lyt_ptr->is_clocking_scheme(fiction::clock_name::TWODDWAVE); };
+        const auto check_clocking_scheme = [](auto&& lyt_ptr)
+        { return lyt_ptr->is_clocking_scheme(fiction::clock_name::TWODDWAVE); };
         const auto is_twoddwave_clocked = std::visit(check_clocking_scheme, lyt_ptr);
 
         // error case: layout is not 2DDWave-clocked
@@ -56,7 +57,8 @@ class hex_command : public command
             return;
         }
 
-        const auto apply_hexagonalization = [](auto&& lyt_ptr)-> std::optional<fiction::hex_even_row_gate_clk_lyt> {
+        const auto apply_hexagonalization = [](auto&& lyt_ptr) -> std::optional<fiction::hex_even_row_gate_clk_lyt>
+        {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
             if constexpr (fiction::is_cartesian_layout_v<Lyt>)
@@ -82,8 +84,7 @@ class hex_command : public command
         }
         catch (...)
         {
-            env->out() << fmt::format("[e] an error occurred while mapping")
-                       << std::endl;
+            env->out() << fmt::format("[e] an error occurred while mapping") << std::endl;
         }
     }
 };
