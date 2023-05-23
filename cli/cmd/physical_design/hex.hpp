@@ -35,12 +35,6 @@ class hex_command : public command
      */
     void execute() override
     {
-        hexagonalization<fiction::cart_gate_clk_lyt>();
-    }
-  private:
-    template <typename Lyt>
-    void hexagonalization()
-    {
         auto& gls = store<fiction::gate_layout_t>();
 
         // error case: empty gate-level layout store
@@ -52,17 +46,45 @@ class hex_command : public command
 
         const auto& lyt_ptr = gls.current();
 
-        //if (lyt_ptr.is_clocking_scheme(fiction::clock_name::TWODDWAVE))
-        //{
-        //    env->out() << "[e] Layout has to be 2DDWave-clocked" << std::endl;
-        //    return;
-        //}
+        const auto check_clocking_scheme = [](auto&& lyt_ptr) { return lyt_ptr->is_clocking_scheme(fiction::clock_name::TWODDWAVE); };
+        const auto is_twoddwave_clocked = std::visit(check_clocking_scheme, lyt_ptr);
 
-        const auto apply_hexagonalization = [](auto&& lyt_ptr) { return fiction::hexagonalization(*lyt_ptr); };
+        // error case: layout is not 2DDWave-clocked
+        if (!is_twoddwave_clocked)
+        {
+            env->out() << "[e] layout has to be 2DDWave-clocked" << std::endl;
+            return;
+        }
 
-        const auto lyt = std::visit(apply_hexagonalization, lyt_ptr);
-        gls.extend()   = std::make_shared<fiction::hex_even_row_gate_clk_lyt>(lyt);
+        const auto apply_hexagonalization = [](auto&& lyt_ptr)-> std::optional<fiction::hex_even_row_gate_clk_lyt> {
+            using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
+            if constexpr (fiction::is_cartesian_layout_v<Lyt>)
+            {
+                return fiction::hexagonalization(*lyt_ptr);
+            }
+            else
+            {
+                std::cout << "[e] layout has to be Cartesian" << std::endl;
+            }
+
+            return std::nullopt;
+        };
+
+        try
+        {
+            const auto lyt = std::visit(apply_hexagonalization, lyt_ptr);
+
+            if (lyt.has_value())
+            {
+                gls.extend() = std::make_shared<fiction::hex_even_row_gate_clk_lyt>(*lyt);
+            }
+        }
+        catch (...)
+        {
+            env->out() << fmt::format("[e] an error occurred while mapping")
+                       << std::endl;
+        }
     }
 };
 
