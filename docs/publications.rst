@@ -80,34 +80,22 @@ please consider citing their respective papers as well:
 
 .. code-block:: tex
 
-    @misc{drewniok2023quicksim,
-      author = {Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert}
-      title = {{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
-      archivePrefix = {arXiv},
-      eprint = {2303.03422},
-      note = {arXiv:2303.03422},
-      year = {2023},
-      month = {March}
-    }
-
-.. code-block:: tex
-
     @inproceedings{drewniok2023quicksim_nano,
-	  author    = {J. Drewniok and M. Walter and S. S. H. Ng and K. Walus and R. Wille},
-	  title     = {{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
-	  booktitle = IEEE-NANO 2023,
-	  year      = {2023},
-	  domain    = {Field-Coupled Nanocomputing}
+	  title={{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
+      author={J. Drewniok and M. Walter and S. S. H. Ng and K. Walus and R. Wille},
+	  booktitle={IEEE International Conference on Nanotechnology (IEEE-NANO)},
+	  year={2023},
+	  domain={Field-Coupled Nanocomputing}
     }
 
 .. code-block:: tex
 
     @inproceedings{drewniok2023temperature_nano,
-      author    = {J. Drewniok and M. Walter and R. Wille},
-	  title     = {{Temperature Behavior of Silicon Dangling Bond Logic}},
-	  booktitle = IEEE-NANO 2023,
-	  year      = {2023},
-	  domain    = {Field-Coupled Nanocomputing}
+	  title={{Temperature Behavior of Silicon Dangling Bond Logic}},
+      author={J. Drewniok and M. Walter and R. Wille},
+	  booktitle={IEEE International Conference on Nanotechnology (IEEE-NANO)},
+	  year={2023},
+	  domain={Field-Coupled Nanocomputing}
     }
 
 The same holds for the :ref:`Bestagon <bestagon>` gate library:
