@@ -82,7 +82,7 @@ please consider citing their respective papers as well:
 
     @inproceedings{drewniok2023quicksimIEEE,
 	  title={{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
-      author={J. Drewniok and M. Walter and S. S. H. Ng and K. Walus and R. Wille},
+      author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
 	  booktitle={IEEE International Conference on Nanotechnology (IEEE-NANO)},
 	  year={2023},
 	  domain={Field-Coupled Nanocomputing}
@@ -92,7 +92,7 @@ please consider citing their respective papers as well:
 
     @inproceedings{drewniok2023temperatureIEEE,
 	  title={{Temperature Behavior of Silicon Dangling Bond Logic}},
-      author={J. Drewniok and M. Walter and R. Wille},
+      author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
 	  booktitle={IEEE International Conference on Nanotechnology (IEEE-NANO)},
 	  year={2023},
 	  domain={Field-Coupled Nanocomputing}
