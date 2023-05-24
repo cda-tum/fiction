@@ -741,7 +741,8 @@ class coord_iterator
     /**
      * Standard constructor. Initializes the iterator with a starting position and the boundary within to enumerate.
      *
-     * With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following order would be enumerated:
+     * With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following order would be enumerated for offset or cubic
+     * coordinates:
      *
      * - (0, 0, 0)
      * - (1, 0, 0)
@@ -753,6 +754,21 @@ class coord_iterator
      * - (1, 0, 1)
      * - (0, 1, 1)
      * - (1, 1, 1)
+     * - (0, 2, 1)
+     * - (1, 2, 1)
+     *
+     * For SiQAD coordinates with the same parameters, we have the following order of enumeration:
+     *
+     * - (0, 0, 0)
+     * - (1, 0, 0)
+     * - (0, 0, 1)
+     * - (1, 0, 1)
+     * - (0, 1, 0)
+     * - (1, 2, 0)
+     * - (0, 1, 1)
+     * - (1, 1, 1)
+     * - (1, 1, 0)
+     * - (0, 2, 0)
      * - (0, 2, 1)
      * - (1, 2, 1)
      *
