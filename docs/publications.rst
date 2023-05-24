@@ -84,8 +84,7 @@ please consider citing their respective papers as well:
 	  title={{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
       author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
 	  booktitle={IEEE International Conference on Nanotechnology (IEEE-NANO)},
-	  year={2023},
-	  domain={Field-Coupled Nanocomputing}
+	  year={2023}
     }
 
 .. code-block:: tex
@@ -94,8 +93,7 @@ please consider citing their respective papers as well:
 	  title={{Temperature Behavior of Silicon Dangling Bond Logic}},
       author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
 	  booktitle={IEEE International Conference on Nanotechnology (IEEE-NANO)},
-	  year={2023},
-	  domain={Field-Coupled Nanocomputing}
+	  year={2023}
     }
 
 The same holds for the :ref:`Bestagon <bestagon>` gate library:
