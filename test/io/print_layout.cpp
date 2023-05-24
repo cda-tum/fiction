@@ -6,11 +6,14 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb_bestagon_library.hpp>
 
 #include <sstream>
 
@@ -20,7 +23,7 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    gate_layout layout{gate_layout::aspect_ratio{2, 2}, open_clocking<gate_layout>(num_clks::FOUR)};
+    const gate_layout layout{gate_layout::aspect_ratio{2, 2}, open_clocking<gate_layout>(num_clks::FOUR)};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
@@ -103,12 +106,12 @@ TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
     CHECK(print_stream.str() == layout_print);
 }
 
-TEST_CASE("Print empty cell-level layout", "[print-gate-level-layout]")
+TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = fiction::cell_level_layout<fiction::qca_technology,
                                                    fiction::clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
-    cell_layout layout{cell_layout::aspect_ratio{2, 2}, "Empty"};
+    const cell_layout layout{cell_layout::aspect_ratio{2, 2}, "Empty"};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
@@ -193,4 +196,115 @@ TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
     print_cell_level_layout(print_stream, layout, false, false);
 
     CHECK(print_stream.str() == layout_print);
+}
+
+TEST_CASE("Print empty charge layout", "[print-charge-layout]")
+{
+    using sqd_lyt = sidb_cell_clk_lyt_siqad;
+
+    constexpr const char* layout_print = "[i] empty layout\n";
+
+    std::stringstream print_stream{};
+
+    print_charge_layout(print_stream, charge_distribution_surface<sqd_lyt>{sqd_lyt{{2, 2}, "Empty"}}, false);
+
+    CHECK(print_stream.str() == layout_print);
+}
+
+TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
+{
+    using hex_gate_lyt = hex_even_row_gate_clk_lyt;
+
+    hex_gate_lyt layout{aspect_ratio<hex_gate_lyt>{1, 0, 1}};
+
+    layout.create_or({}, {}, {0, 0});
+
+    const charge_distribution_surface<sidb_cell_clk_lyt_siqad> cl{
+        convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout)),
+        sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
+
+    cl.assign_charge_state({46, 3, 0}, sidb_charge_state::NEUTRAL);
+    cl.assign_charge_state({72, 3, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({48, 4, 0}, sidb_charge_state::NONE);
+    cl.assign_charge_state({70, 4, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({52, 5, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({66, 5, 0}, sidb_charge_state::NEUTRAL);
+    cl.assign_charge_state({54, 6, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({64, 6, 0}, sidb_charge_state::POSITIVE);
+    cl.assign_charge_state({57, 9, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({57, 10, 1}, sidb_charge_state::NONE);
+    cl.assign_charge_state({62, 10, 0}, sidb_charge_state::POSITIVE);
+    cl.assign_charge_state({59, 11, 1}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({59, 14, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({60, 15, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({64, 16, 0}, sidb_charge_state::POSITIVE);
+    cl.assign_charge_state({66, 17, 0}, sidb_charge_state::NEUTRAL);
+    cl.assign_charge_state({70, 18, 0}, sidb_charge_state::NEGATIVE);
+    cl.assign_charge_state({72, 19, 0}, sidb_charge_state::NEGATIVE);
+
+    std::stringstream print_stream{};
+
+    print_charge_layout(print_stream, cl, false);
+
+    constexpr const char* layout_print =
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ⨁  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ⨁  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ⨁  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        "\n";
+
+    CHECK(layout_print == print_stream.str());
 }
