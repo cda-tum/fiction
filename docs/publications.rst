@@ -80,7 +80,7 @@ please consider citing their respective papers as well:
 
 .. code-block:: tex
 
-    @inproceedings{drewniok2023quicksim_nano,
+    @inproceedings{drewniok2023quicksimIEEE,
 	  title={{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
       author={J. Drewniok and M. Walter and S. S. H. Ng and K. Walus and R. Wille},
 	  booktitle={IEEE International Conference on Nanotechnology (IEEE-NANO)},
@@ -90,7 +90,7 @@ please consider citing their respective papers as well:
 
 .. code-block:: tex
 
-    @inproceedings{drewniok2023temperature_nano,
+    @inproceedings{drewniok2023temperatureIEEE,
 	  title={{Temperature Behavior of Silicon Dangling Bond Logic}},
       author={J. Drewniok and M. Walter and R. Wille},
 	  booktitle={IEEE International Conference on Nanotechnology (IEEE-NANO)},
