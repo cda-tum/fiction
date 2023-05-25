@@ -9,6 +9,7 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <functional>
@@ -878,7 +879,7 @@ class coord_iterator
      * - (0, 2, 1)
      * - (1, 2, 1)
      *
-     * coord_iterator is compatible with the STL forward_iterator category.
+     * coord_iterator is compatible with the STL forward_iterator category. Does not iterate over negative coordinates.
      *
      * @param dimension Boundary within to enumerate. Iteration wraps at its limits.
      * @param start Starting coordinate to enumerate first.
@@ -891,9 +892,17 @@ class coord_iterator
                           std::is_same_v<CoordinateType, cube::coord_t> ||
                           std::is_same_v<CoordinateType, siqad::coord_t>,
                       "CoordinateType must be a supported coordinate");
+
+        // Make sure the start iterator is within the given boundary; first handle negative coordinates ...
+        coord.x = std::max(coord.x, static_cast<decltype(coord.x)>(0));
+        coord.y = std::max(coord.y, static_cast<decltype(coord.y)>(0));
+        coord.z = std::max(coord.z, static_cast<decltype(coord.z)>(0));
+
+        // ... then handle coordinates that are beyond the given boundary.
+        coord.clamp(aspect_ratio);
     }
     /**
-     * Increments the iterator.
+     * Increments the iterator, while keeping it within the boundary. Also defined on iterators that are out of bounds.
      *
      * @return Reference to the incremented iterator.
      */
@@ -903,31 +912,7 @@ class coord_iterator
         {
             ++coord.x;
 
-            if (coord.x > aspect_ratio.x)
-            {
-                coord.x = 0;
-
-                if constexpr (std::is_same_v<CoordinateType, offset::ucoord_t> ||
-                              std::is_same_v<CoordinateType, cube::coord_t>)
-                {
-                    ++coord.y;
-                    if (coord.y > aspect_ratio.y)
-                    {
-                        coord.y = 0;
-
-                        ++coord.z;
-                    }
-                }
-                else if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
-                {
-                    coord.y += coord.z;
-                    coord.z = !coord.z;
-                }
-                else
-                {
-                    assert(false && "Unsupported coordinate type");
-                }
-            }
+            coord.clamp(aspect_ratio);
         }
         else
         {
