@@ -16,7 +16,6 @@
 #include <array>
 #include <cstdint>
 #include <iostream>
-#include <limits>
 #include <string>
 #include <vector>
 
@@ -331,11 +330,13 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
  * @param os Output stream to write into.
  * @param cds The charge distribution surface of which the charge layout is to be printed.
  * @param cs_color Flag to utilize color escapes for charge states.
+ * @param crop_layout Flag to remove rows and columns with only empty cells, while leaving a maximum padding of one
+ * dimer row and two columns.
  * @param draw_lattice Flag to enable lattice background drawing.
  */
 template <typename Lyt>
 void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt>& cds, const bool cs_color = true,
-                         const bool draw_lattice = true) noexcept
+                         const bool crop_layout = false, const bool draw_lattice = true) noexcept
 {
     // empty layout
     if (cds.is_empty())
@@ -344,34 +345,37 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
         return;
     }
 
-    // obtain the crop dimensions
-    auto min_x = std::numeric_limits<decltype(cds.x())>::max();
-    auto max_x = std::numeric_limits<decltype(cds.x())>::min();
+    coordinate<Lyt> min{crop_layout ? cds.x() : 0, crop_layout ? cds.y() : 0};
+    coordinate<Lyt> max{};
 
-    auto min_y = std::numeric_limits<decltype(cds.y())>::max();
-    auto max_y = std::numeric_limits<decltype(cds.y())>::min();
-
-    cds.foreach_cell(
-        [&cds, &min_x, &max_x, &min_y, &max_y](const cell<Lyt>& c)
-        {
-            if (!cds.is_empty_cell(c))
+    if (crop_layout)
+    {
+        // obtain the crop dimensions
+        cds.foreach_cell(
+            [&cds, &min, &max](const cell<Lyt>& c)
             {
-                min_x = std::min(min_x, c.x);
-                max_x = std::max(max_x, c.x);
+                if (!cds.is_empty_cell(c))
+                {
+                    min = {std::min(min.x, c.x), std::min(min.y, c.y)};
+                    max = {std::max(max.x, c.x), std::max(max.y, c.y)};
+                }
+            });
 
-                min_y = std::min(min_y, c.y);
-                max_y = std::max(max_y, c.y);
-            }
-        });
-
-    const coordinate<Lyt> min{std::max(min_x - 2, 0), std::max(min_y - 1, 0)};
-    const coordinate<Lyt> max{std::min(max_x + 2, cds.x()), std::min(max_y + 1, cds.y())};
+        // apply padding of maximally one dimer row and two columns
+        min = {min.x - 2, min.y - 1, 0};
+        max = {max.x + 2, max.y + 1, 1};
+    }
+    else
+    {
+        // obtain exclusive iteration end coordinate
+        max = coordinate<Lyt>{cds.x(), cds.y(), 1}.get_dead();
+    }
 
     // iterate over all coordinates in the rows determined by the vertical crop
     cds.foreach_coordinate(
         [&](const coordinate<Lyt>& c)
         {
-            if (c.x < min.x || c.x > max.x)  // apply horizontal crop
+            if (crop_layout && (c.x < min.x || c.x > max.x))  // apply horizontal crop
             {
                 return;
             }
@@ -406,7 +410,7 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
                 os << (c.z == 1 ? "\n\n" : "\n");
             }
         },
-        min, {0, max.y + 1, 0});
+        min, max + coordinate<Lyt>{1, 0});
 
     // flush stream
     os << std::endl;
