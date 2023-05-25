@@ -10,7 +10,6 @@
 #include <fmt/format.h>
 
 #include <algorithm>
-#include <cassert>
 #include <cstdint>
 #include <functional>
 #include <iostream>
