@@ -5,6 +5,8 @@
 #ifndef FICTION_COORDINATES_HPP
 #define FICTION_COORDINATES_HPP
 
+#include "fiction/utils/math_utils.hpp"
+
 #include <fmt/format.h>
 
 #include <cassert>
@@ -470,32 +472,11 @@ struct coord_t
 }  // namespace cube
 
 /**
- * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (x + 1) \cdot (y + 1) \f$.
- *
- * @tparam CoordinateType Coordinate type.
- * @param coord Coordinate.
- * @return Area of coord.
+ * Provides SiQAD coordinates. SiQAD coordinates are used to describe locations of Silicon Dangling Bonds on the
+ * H-Si(100) 2x1 surface were dimer columns and rows are identified by x and y values, respectively, while the z value
+ * (0,1) points to the top or bottom Si atom in the dimer. The coordinates are originally used in the SiQAD simulator
+ * (https://github.com/siqad).
  */
-template <typename CoordinateType>
-uint64_t area(const CoordinateType& coord) noexcept
-{
-    return (coord.x + static_cast<decltype(coord.x)>(1)) * (coord.y + static_cast<decltype(coord.y)>(1));
-}
-/**
- * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (x + 1) \cdot (y + 1)
- * \cdot (z + 1) \f$.
- *
- * @tparam CoordinateType Coordinate type.
- * @param coord Coordinate.
- * @return Volume of coord.
- */
-template <typename CoordinateType>
-uint64_t volume(const CoordinateType& coord) noexcept
-{
-    return (coord.x + static_cast<decltype(coord.x)>(1)) * (coord.y + static_cast<decltype(coord.y)>(1)) *
-           (coord.z + static_cast<decltype(coord.z)>(1));
-}
-
 namespace siqad
 {
 
@@ -672,7 +653,7 @@ struct coord_t
      */
     constexpr coord_t operator+(const coord_t& other) const noexcept
     {
-        return coord_t{x + other.x, y + other.y, z + other.z};
+        return coord_t{x + other.x, y + other.y + static_cast<decltype(y)>(z && other.z), z ^ other.z};
     }
     /**
      * Subtracts another coordinate from this one and returns the result. Does not modify this coordinate.
@@ -682,7 +663,7 @@ struct coord_t
      */
     constexpr coord_t operator-(const coord_t& other) const noexcept
     {
-        return coord_t{x - other.x, y - other.y, z - other.z};
+        return coord_t{x - other.x, y - other.y - static_cast<decltype(y)>(!z && other.z), z - other.z};
     }
     /**
      * Returns a string representation of the coordinate of the form "(x, y, z)" that does not respect the dead
