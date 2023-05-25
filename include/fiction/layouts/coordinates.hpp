@@ -154,8 +154,8 @@ struct ucoord_t
      *
      * @param dimension Dimension or aspect ratio to clamp the coordinate to.
      */
-     void clamp(const ucoord_t& dimension) noexcept
-     {
+    void clamp(const ucoord_t& dimension) noexcept
+    {
         if (x > dimension.x)
         {
             x = 0;
@@ -166,20 +166,20 @@ struct ucoord_t
         {
             if (z == 1)
             {
-               *this = dimension.get_dead();
+                *this = dimension.get_dead();
             }
             else
             {
-               y = 0;
-               z = 1;
+                y = 0;
+                z = 1;
             }
         }
 
         if (z > dimension.z)
         {
-           *this = dimension.get_dead();
+            *this = dimension.get_dead();
         }
-     }
+    }
     /**
      * Compares against another coordinate for equality. Respects the dead indicator.
      *
@@ -395,8 +395,8 @@ struct coord_t
      *
      * @param dimension Dimension or aspect ratio to clamp the coordinate to.
      */
-     void clamp(const coord_t& dimension) noexcept
-     {
+    void clamp(const coord_t& dimension) noexcept
+    {
         if (x > dimension.x)
         {
             x = 0;
@@ -413,7 +413,7 @@ struct coord_t
         {
             *this = dimension.get_dead();
         }
-     }
+    }
     /**
      * Compares against another coordinate for equality. Respects the dead indicator.
      *
@@ -637,8 +637,8 @@ struct coord_t
      *
      * @param dimension Dimension or aspect ratio to clamp the coordinate to.
      */
-     void clamp(const coord_t& dimension) noexcept
-     {
+    void clamp(const coord_t& dimension) noexcept
+    {
         if (x > dimension.x)
         {
             x = 0;
@@ -655,7 +655,7 @@ struct coord_t
         {
             *this = dimension.get_dead();
         }
-     }
+    }
     /**
      * Compares against another coordinate for equality. Respects the dead indicator.
      *

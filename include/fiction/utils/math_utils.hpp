@@ -36,9 +36,9 @@ T round_to_n_decimal_places(const T number, const uint64_t n)
  * @param n The number to take the absolute value of.
  * @return |n|.
  */
- template <typename T>
- T abs(const T n)
- {
+template <typename T>
+T abs(const T n)
+{
     if constexpr (std::is_unsigned_v<T>)
     {
         return n;
@@ -50,7 +50,7 @@ T round_to_n_decimal_places(const T number, const uint64_t n)
     }
 
     return std::fabs(n);
- }
+}
 
 }  // namespace fiction
 
