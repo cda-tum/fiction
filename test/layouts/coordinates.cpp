@@ -2,13 +2,17 @@
 // Created by marcel on 15.09.21.
 //
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 
+#include <fmt/format.h>
+
 #include <map>
-#include <set>
 #include <sstream>
+#include <vector>
 
 using namespace fiction;
 
@@ -65,7 +69,7 @@ TEST_CASE("Unsigned offset coordinates", "[coordinates]")
     CHECK(t1 < t3);
     CHECK(t2 < t3);
 
-    std::map<uint64_t, coordinate> coordinate_repr{
+    const std::map<uint64_t, coordinate> coordinate_repr{
         {0x8000000000000000, coordinate{}},        {0x0000000000000000, coordinate{0, 0, 0}},
         {0x4000000000000000, coordinate{0, 0, 1}}, {0x4000000080000001, coordinate{1, 1, 1}},
         {0x0000000000000002, coordinate{2, 0, 0}}, {0x3fffffffffffffff, coordinate{2147483647, 2147483647, 0}}};
@@ -84,9 +88,8 @@ TEST_CASE("Unsigned offset coordinates", "[coordinates]")
     CHECK(os.str() == "(3,2,1)");
 }
 
-TEST_CASE("siqad coordinate conversion", "[coordinates]")
+TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
 {
-
     using coordinate         = siqad::coord_t;
     using coordinate_fiction = cube::coord_t;
 
@@ -122,6 +125,61 @@ TEST_CASE("siqad coordinate conversion", "[coordinates]")
     auto t5_fiction = siqad::to_fiction_coord<coordinate_fiction>(t5_siqad);
     CHECK(t5_fiction.x == -1);
     CHECK(t5_fiction.y == -3);
+}
+
+TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cube::coord_t, siqad::coord_t)
+{
+    std::vector<TestType> coord_vector{};
+    coord_vector.reserve(7);
+
+    const cartesian_layout<TestType> lyt{{1, 1, 1}};
+
+    const auto fill_coord_vector = [&cv = coord_vector](const auto& c) { cv.emplace_back(c); };
+
+    SECTION("With bounds")
+    {
+        lyt.foreach_coordinate(fill_coord_vector, {1, 0, 0}, {1, 1, 1});
+
+        CHECK(coord_vector.size() == 6);
+
+        CHECK(coord_vector[0] == TestType{1, 0, 0});
+
+        if constexpr (std::is_same_v<TestType, siqad::coord_t>)
+        {
+            CHECK(coord_vector[1] == TestType{0, 0, 1});
+            CHECK(coord_vector[2] == TestType{1, 0, 1});
+            CHECK(coord_vector[3] == TestType{0, 1, 0});
+            CHECK(coord_vector[4] == TestType{1, 1, 0});
+        }
+        else
+        {
+            CHECK(coord_vector[1] == TestType{0, 1, 0});
+            CHECK(coord_vector[2] == TestType{1, 1, 0});
+            CHECK(coord_vector[3] == TestType{0, 0, 1});
+            CHECK(coord_vector[4] == TestType{1, 0, 1});
+        }
+
+        CHECK(coord_vector[5] == TestType{0, 1, 1});
+    }
+    SECTION("Without bounds")
+    {
+        coord_vector.clear();
+        coord_vector.reserve(8);
+
+        lyt.foreach_coordinate(fill_coord_vector);
+
+        CHECK(coord_vector.size() == 8);
+
+        CHECK(coord_vector.front().str() == fmt::format("{}", TestType{0, 0, 0}));
+        CHECK(coord_vector.back().str() == fmt::format("{}", TestType{1, 1, 1}));
+    }
+}
+
+TEMPLATE_TEST_CASE("Computing area and volume of offset and cubic coordinates", "[coordinates]", offset::ucoord_t,
+                   cube::coord_t)
+{
+    CHECK(area(TestType{1, 1, 1}) == 4);
+    CHECK(volume(TestType{1, 1, 1}) == 8);
 }
 
 #if defined(__GNUC__)
