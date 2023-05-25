@@ -25,7 +25,7 @@ If you use *fiction* in your work, we would appreciate if you cited
     }
 
 Furthermore, if you use any of the design automation algorithms :ref:`exact <exact>`, :ref:`ortho <ortho>`,
-:ref:`onepass <onepass>`, :ref:`equiv <equiv>`, :ref:`color routing <color_routing>`, or :ref:`QuickSim <quicksim>`
+:ref:`onepass <onepass>`, :ref:`equiv <equiv>`, :ref:`color routing <color_routing>`, :ref:`QuickSim <quicksim>`, or :ref:`critical temperature simulation <critical_temperature>`
 please consider citing their respective papers as well:
 
 .. code-block:: tex
@@ -80,14 +80,20 @@ please consider citing their respective papers as well:
 
 .. code-block:: tex
 
-    @misc{drewniok2023quicksim,
-      author = {Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert}
-      title = {{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
-      archivePrefix = {arXiv},
-      eprint = {2303.03422},
-      note = {arXiv:2303.03422},
-      year = {2023},
-      month = {March}
+    @inproceedings{drewniok2023quicksimIEEE,
+      title={{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
+      author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
+      booktitle={IEEE International Conference on Nanotechnology (IEEE-NANO)},
+      year={2023}
+    }
+
+.. code-block:: tex
+
+    @inproceedings{drewniok2023temperatureIEEE,
+      title={{Temperature Behavior of Silicon Dangling Bond Logic}},
+      author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
+      booktitle={IEEE International Conference on Nanotechnology (IEEE-NANO)},
+      year={2023}
     }
 
 The same holds for the :ref:`Bestagon <bestagon>` gate library:
