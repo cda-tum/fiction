@@ -103,8 +103,7 @@ please consider citing their respective papers as well:
       title={{Scalable Physical Design for Silicon Dangling Bond Logic: How a 45\textdegree~Turn Prevents the Reinvention of the Wheel}},
       author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
       booktitle={IEEE International Conference on Nanotechnology (IEEE-NANO)},
-      year={2023},
-      domain={Field-Coupled Nanocomputing}
+      year={2023}
     }
 
 The same holds for the :ref:`Bestagon <bestagon>` gate library:
