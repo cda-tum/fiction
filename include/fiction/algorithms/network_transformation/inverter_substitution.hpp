@@ -16,7 +16,6 @@
 #include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
-#include <csignal>
 #include <cstdint>
 #include <type_traits>
 #include <vector>
@@ -31,9 +30,13 @@ namespace fiction
 namespace detail
 {
 
+/**
+ * Connects all gates, that are not affected by the inverter substitution.
+ */
 template <typename Ntk, typename NtkDest, typename Gate>
-bool connect_children_to_gates(Ntk& ntk, NtkDest& ntk_dest, mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new,
-                               std::vector<typename Ntk::signal> children, Gate& g)
+bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
+                               mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new,
+                               const std::vector<typename Ntk::signal>& children, const Gate& g)
 {
     if constexpr (mockturtle::has_is_and_v<Ntk> && mockturtle::has_create_and_v<Ntk>)
     {
@@ -103,19 +106,13 @@ class inverter_substitution_impl
         // compute maximum sizes for vectors
         count_gate_types_stats st{};
         count_gate_types(fo_ntk, &st);
-        num_fos = st.num_fanout;
-        x_inv.reserve(num_fos);
-        m_inv.reserve(num_fos);
-        blc_fos.reserve(num_fos);
+        x_inv.reserve(st.num_fanout);
+        m_inv.reserve(st.num_fanout);
+        blc_fos.reserve(st.num_fanout);
     }
 
     Ntk run()
     {
-        if (num_fos == 0)
-        {
-            return ntk;
-        }
-
         auto  init     = mockturtle::initialize_copy_network<Ntk>(ntk);
         auto& ntk_dest = init.first;
         auto& old2new  = init.second;
@@ -173,36 +170,32 @@ class inverter_substitution_impl
                 bar(i);
 #endif
                 // map all affected nodes
-                if constexpr (has_is_inv_v<TopoNtkSrc>)
+                if constexpr (mockturtle::has_create_buf_v<Ntk>)
                 {
                     if (ntk.is_inv(g) && std::find(m_inv.cbegin(), m_inv.cend(), g) != m_inv.cend())
                     {
                         old2new[g] = ntk_dest.create_buf(children[0]);
-                        if (ntk.is_po(g))
-                        {
-                            // Preserve Outputs
-                            preserved_po.push_back(g);
-                        }
-                        return true;
+                        return true;  // keep looping
                     }
-                    const auto po_it = std::find(x_inv.cbegin(), x_inv.cend(), g);
-                    if (ntk.is_inv(g) && po_it != x_inv.cend())
+                    if (const auto po_it = std::find(x_inv.cbegin(), x_inv.cend(), g);
+                        ntk.is_inv(g) && po_it != x_inv.cend())
                     {
                         if (ntk.is_po(g))
                         {
                             // Preserve Outputs
                             const auto index = po_it - x_inv.cbegin();
-                            preserved_po.push_back(m_inv[index]);
+                            preserved_po.push_back(
+                                m_inv[static_cast<std::vector<long unsigned int>::size_type>(index)]);
                         }
-                        return true;
+                        return true;  // keep looping
                     }
                 }
-                if constexpr (fiction::has_is_buf_v<TopoNtkSrc> && mockturtle::has_create_buf_v<Ntk>)
+                if constexpr (mockturtle::has_create_not_v<Ntk>)
                 {
                     if (ntk.is_buf(g) && std::find(blc_fos.cbegin(), blc_fos.cend(), g) != blc_fos.cend())
                     {
                         old2new[g] = ntk_dest.create_not(children[0]);
-                        return true;
+                        return true;  // keep looping
                     }
                 }
                 // map all unaffected nodes
@@ -213,18 +206,19 @@ class inverter_substitution_impl
                 if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<Ntk>)
                 {
                     old2new[g] = ntk_dest.create_node(children, ntk.node_function(g));
-                    return true;
+                    return true;  // keep looping
                 }
 
-                return true;
+                return true;  // keep looping
             });
 
+        // create the POs of the network, POs of deleted inverters need to be preserved
         ntk.foreach_po(
             [this, &ntk_dest, &old2new](const auto& po)
             {
                 auto tgt_signal = old2new[ntk.get_node(po)];
                 auto tgt_po     = ntk.is_complemented(po) ? ntk_dest.create_not(tgt_signal) : tgt_signal;
-                if (tgt_po == mockturtle::signal<Ntk>{})
+                if (tgt_po == mockturtle::signal<Ntk>{} && !ntk.is_constant(po))
                 {
                     tgt_signal = old2new[ntk.get_node(preserved_po[0])];
                     preserved_po.erase(preserved_po.cbegin());
@@ -240,62 +234,60 @@ class inverter_substitution_impl
     }
 
   private:
-    /**
-     * Two inverters at the fan-outs of a fan-out node are substituted with one inverter at the fan-in of this node.
-     * Therefore one inverter gets deleted and one inverter gets moved to the fan-in of the fan-out node.
-     * All nodes, with fan-ins affected by deletion or moving of nodes are taken into account by the algorithm
-     * @tparam Ntk Type of the input logic network.
-     * @param ntk Topologically ordered input logic network.
-     * @param fo_ntk Fan-out view of ntk.
-     * @param x_inv Deleted inverter nodes
-     * @param m_inv Moved inverter nodes.
-     * @param blc_fos Affected fan-out nodes.
-     * @param preserved_po Preserve POs, when deleted or moved inverter nodes are POs.
-     * @param num_fos number of fan-outs in the input network
-     */
     using TopoNtkSrc = mockturtle::topo_view<Ntk>;
-    TopoNtkSrc                          ntk;
-    mockturtle::fanout_view<TopoNtkSrc> fo_ntk{ntk};
+    TopoNtkSrc                          ntk;             // topologically ordered input logic network
+    mockturtle::fanout_view<TopoNtkSrc> fo_ntk{ntk};     // fan-out view of ntk
     std::vector<mockturtle::node<Ntk>>  x_inv{};         // inverter nodes, which get deleted
-    std::vector<mockturtle::node<Ntk>>  m_inv{};         // inverter nodes, which get moved to fanin position
+    std::vector<mockturtle::node<Ntk>>  m_inv{};         // inverter nodes, which get moved to fan-in position
     std::vector<mockturtle::node<Ntk>>  blc_fos{};       // fo nodes, where balancing is applied
     std::vector<mockturtle::node<Ntk>>  preserved_po{};  // nodes where pos need to be preserved
-    std::uint64_t                       num_fos{};
 };
 
 /**
- * The substitution of inverters on a fan-out node can lead to the need of substitution on another fan-out node
- * This function provides the necessary check, if another substitution has to be performed
+ * Checks, if the input network contains inverter and FO nodes and
+ * also checks if there are FO nodes suited for inverter substitution
  */
 template <typename NtkSrc>
-bool inverter_substitution_check(const NtkSrc& ntk)
+bool run_inverter_substitution_check(const NtkSrc& ntk)
 {
-    bool       rerun_check = false;
-    const auto fo_ntk      = mockturtle::fanout_view<NtkSrc>(ntk);
-    ntk.foreach_gate(
-        [&](const auto& g)
+    bool       run_check = false;
+    const auto fo_ntk    = mockturtle::fanout_view<NtkSrc>(ntk);
+    if (fiction::has_is_buf_v<NtkSrc> && fiction::has_is_inv_v<NtkSrc>)
+    {
+        count_gate_types_stats st{};
+        count_gate_types(fo_ntk, &st);
+        // check if the input network has inverter and FO nodes
+        if (st.num_fanout >= 1 && st.num_inv >= 2)
         {
-            if (ntk.fanout_size(g) >= 2)
-            {
-                auto fanout_inv      = fanouts(fo_ntk, g);
-                auto need_substitute = std::all_of(fanout_inv.cbegin(), fanout_inv.cend(),
-                                                   [&](const auto& fo_node) { return fo_ntk.is_inv(fo_node); });
-                if (need_substitute && fanout_inv.size() > 1)
+            ntk.foreach_gate(
+                [&](const auto& g)
                 {
-                    rerun_check = true;
-                }
-            }
-        });
-    return rerun_check;
+                    if (ntk.fanout_size(g) >= 2)
+                    {
+                        // check if there exists a FO node with an inverter on each fan-out
+                        auto fanout_inv      = fanouts(fo_ntk, g);
+                        auto need_substitute = std::all_of(fanout_inv.cbegin(), fanout_inv.cend(),
+                                                           [&](const auto& fo_node) { return fo_ntk.is_inv(fo_node); });
+                        if (need_substitute && fanout_inv.size() > 1)
+                        {
+                            run_check = true;
+                        }
+                    }
+                });
+            return run_check;
+        }
+        return false;
+    }
+    return false;
 }
 
 }  // namespace detail
 
 /**
- * Substitutes inverters at fan-out nodes.
- *
- * When both fan-outs of a fan-out node are inverted, the inverters are replaced by one inverter as fan-in of this node
- * This is part of the Distribution Newtork I: Input_Ordering
+ * Substitutes two inverters at the fan-outs of a fan-out node with one inverter at the fan-in of this node.
+ * Therefore one inverter gets deleted and one inverter gets moved to the fan-in of the fan-out node.
+ * All nodes, with fan-ins affected by deletion or moving of nodes are taken into account by the algorithm.
+ * This is part of the Distribution Network I: Input_Ordering
  *
  * @tparam Ntk Type of the input logic network.
  * @param ntk The input logic network.
@@ -324,18 +316,15 @@ Ntk inverter_substitution(const Ntk& ntk)
 
     assert(ntk.is_combinational() && "Network has to be combinational");
 
-    detail::inverter_substitution_impl<Ntk> p{ntk};
-
-    auto result = p.run();
-    // check if the new ntk is balanced
-    bool rerun = detail::inverter_substitution_check(result);
-    while (rerun)
+    auto result = ntk;
+    bool run    = detail::run_inverter_substitution_check(result);
+    while (run)
     {
-        detail::inverter_substitution_impl<Ntk> k{result};
+        detail::inverter_substitution_impl<Ntk> p{result};
 
-        result = k.run();
+        result = p.run();
 
-        rerun = detail::inverter_substitution_check(result);
+        run = detail::run_inverter_substitution_check(result);
     }
 
     return result;

@@ -14,7 +14,7 @@ namespace fiction
 
 namespace detail
 {
-
+// paints a node and all incoming edges
 template <typename Ntk>
 void paint_node_and_edges(const coloring_container<Ntk>& ctn, mockturtle::node<Ntk> const& n, uint32_t color)
 {
@@ -23,9 +23,9 @@ void paint_node_and_edges(const coloring_container<Ntk>& ctn, mockturtle::node<N
                   [&ctn, &color](const auto& fe) { ctn.color_ntk.paint_edge(fe, color); });
     ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, color);
 }
-
-template <typename Ntk>
-int64_t get_index(std::vector<Ntk> v, Ntk n)
+// get the index of a vector entry
+template <typename nd>
+int64_t get_index(std::vector<nd> v, nd n)
 {
     auto it = find(v.begin(), v.end(), n);
 
@@ -40,15 +40,20 @@ int64_t get_index(std::vector<Ntk> v, Ntk n)
 }
 
 /*
+ * Conditional coloring computes a valid coloring for all the nodes, which are affected by the input ordering network.
+ *
+ * Two PIs are related to each other, when they are connected to the same two fan-in gate and between the PI and this
+ * gate are only fan-out nodes or inverters.
+ *
  * Conditional coloring rules:
- * 0. All 1-fan-in nodes (inverters and fan-outs) after PIs have to be colored east
- * 1. fan-out node related to two PIs:
- * - Case: 2-inverters -> get balanced to the beginning of the fan-out node (nl_inv has to be respected here for
+ * 0. All 1-fan-in nodes (inverters and fan-outs) after PIs get colored east
+ * 1. PI connected to a fan-out and related to two PIs:
+ * - Case: 2-inverters -> get balanced to the beginning of the fan-out node (nc_inv has to be respected here for
  * instance)
  * - Case: one inverter (color inverter east and other outgoing edges south)
  * - Case: no inverter (color one outgoing edge east and one south)
- * 2. fan-out node related to one PI (coloring is dependent on the coloring of the whole network)
- * 3. PI connected to node connected to PI: color connecting node east
+ * 2. PI node connected to fan-out node and related to one PI (coloring is dependent on the coloring of the network)
+ * 3. PI related to PI: color connecting node east
  */
 template <typename Ntk>
 coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
@@ -124,49 +129,33 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                     {
                         paint_node_and_edges(ctn, current_node, ctn.color_east);
 
-                        /*bool inv_flag = false;*/
                         if (auto fo_two = ctn.color_ntk.get_fo_two(); get_index(fo_two, pi) % 3 == 0)
                         {
-                            auto cur_fon = fanouts(ctn.color_ntk, current_node);
-                            /*// Jump to next node
-                            current_node = cur_fon[0];
-                            if (ntk.is_inv(current_node))
-                            {
-                                // Color Inverter east
-                                paint_node_and_edges(ctn, current_node, ctn.color_east);
-                                inv_flag = true;
-                            }*/
-
                             auto swap_color = ctn.color_south;
-                            ntk.foreach_fanout(
-                                current_node,
-                                [&ctn, &current_node, &ntk, &fon, &swap_color](const auto& cur_fon)
-                                {
-                                    // Jump to next node
-                                    current_node = cur_fon;
+                            ntk.foreach_fanout(current_node,
+                                               [&ctn, &current_node, &ntk, &fon, &swap_color](const auto& cur_fon)
+                                               {
+                                                   // Jump to next node
+                                                   current_node = cur_fon;
 
-                                    if (ntk.is_inv(current_node))
-                                    {
-                                        // Color Inverter east
-                                        paint_node_and_edges(ctn, current_node, ctn.color_east);
-                                        ntk.foreach_fanout(fon,
-                                                           [&](const auto& fon_inv)
-                                                           {
-                                                               // Jump to next node
-                                                               current_node = fon_inv;
-                                                           });
-                                        paint_node_and_edges(ctn, current_node, ctn.color_south);
-                                    }
-                                    /*else if (inv_flag)
-                                    {
-                                        paint_node_and_edges(ctn, current_node, ctn.color_south);
-                                    }*/
-                                    else
-                                    {
-                                        paint_node_and_edges(ctn, current_node, swap_color);
-                                        swap_color = ctn.color_east;
-                                    }
-                                });
+                                                   if (ntk.is_inv(current_node))
+                                                   {
+                                                       // Color Inverter east
+                                                       paint_node_and_edges(ctn, current_node, ctn.color_east);
+                                                       ntk.foreach_fanout(current_node,
+                                                                          [&](const auto& fon_inv)
+                                                                          {
+                                                                              // Jump to next node
+                                                                              current_node = fon_inv;
+                                                                          });
+                                                       paint_node_and_edges(ctn, current_node, ctn.color_south);
+                                                   }
+                                                   else
+                                                   {
+                                                       paint_node_and_edges(ctn, current_node, swap_color);
+                                                       swap_color = ctn.color_east;
+                                                   }
+                                               });
                         }
                     }
                     // 2. fan-out node related to one PI
@@ -512,56 +501,66 @@ class orthogonal_ordering_network_impl
         // Since the layout size is only known after placing all gates, the POs are placed after the main algorithm
         bool                               multi_out_node = false;
         std::vector<mockturtle::node<Ntk>> out_nodes;
+        uint32_t                           inputs_border = ctn.color_ntk.num_pis();
+        tile<Lyt>                          po_tile{};
         ctn.color_ntk.foreach_po(
-            [this, &out_nodes, &multi_out_node, &node2pos, &ctn, &layout, &latest_pos](const auto& po)
+            [this, &out_nodes, &multi_out_node, &node2pos, &ctn, &layout, &latest_pos, &latest_pos_inputs,
+             &inputs_border, &po_tile](const auto& po)
             {
-                const auto n_s = node2pos[po];
-
-                tile<Lyt> po_tile{};
-
-                if (std::find(out_nodes.begin(), out_nodes.end(), po) != out_nodes.end())
+                if (!ctn.color_ntk.is_constant(po))
                 {
-                    multi_out_node = true;
-                }
+                    const auto n_s = node2pos[po];
 
-                // determine PO orientation
-                if (is_eastern_po_orientation_available(ctn, po) && !multi_out_node)
-                {
-                    po_tile = static_cast<tile<Lyt>>(n_s);
-                    layout.resize({latest_pos.x, latest_pos.y - 1, 1});
-                }
-                else
-                {
-                    po_tile = static_cast<tile<Lyt>>(n_s);
-                    po_tile = static_cast<tile<Lyt>>(wire_south(layout, po_tile, {po_tile.x, po_tile.y + 2}));
-                    layout.resize({latest_pos.x, latest_pos.y - 1, 1});
-                }
-                // check if PO position is located at the border
-                if (layout.is_at_eastern_border({po_tile.x + 1, po_tile.y}) && !multi_out_node)
-                {
-                    ++po_tile.x;
-                    layout.create_po(n_s,
-                                     ctn.color_ntk.has_output_name(po_counter) ?
-                                         ctn.color_ntk.get_output_name(po_counter++) :
-                                         fmt::format("po{}", po_counter++),
-                                     po_tile);
-                }
-                // place PO at the border and connect it by wire segments
-                else
-                {
-                    const tile<Lyt> anker{po_tile};
+                    if (std::find(out_nodes.begin(), out_nodes.end(), po) != out_nodes.end())
+                    {
+                        multi_out_node = true;
+                    }
 
-                    po_tile = layout.eastern_border_of(po_tile);
+                    // determine PO orientation
+                    if (is_eastern_po_orientation_available(ctn, po) && !multi_out_node)
+                    {
+                        po_tile = static_cast<tile<Lyt>>(n_s);
+                        layout.resize({latest_pos.x, latest_pos.y - 1, 1});
+                    }
+                    else
+                    {
+                        po_tile = static_cast<tile<Lyt>>(n_s);
+                        po_tile = static_cast<tile<Lyt>>(wire_south(layout, po_tile, {po_tile.x, po_tile.y + 2}));
+                        if (po_tile.y < inputs_border)
+                        {
+                            po_tile =
+                                static_cast<tile<Lyt>>(wire_south(layout, po_tile, {po_tile.x, latest_pos.y + 1}));
+                            ++latest_pos.y;
+                        }
+                        layout.resize({latest_pos.x, latest_pos.y - 1, 1});
+                    }
+                    // check if PO position is located at the border
+                    if (layout.is_at_eastern_border({po_tile.x + 1, po_tile.y}) && !multi_out_node)
+                    {
+                        ++po_tile.x;
+                        layout.create_po(n_s,
+                                         ctn.color_ntk.has_output_name(po_counter) ?
+                                             ctn.color_ntk.get_output_name(po_counter++) :
+                                             fmt::format("po{}", po_counter++),
+                                         po_tile);
+                    }
+                    // place PO at the border and connect it by wire segments
+                    else
+                    {
+                        const tile<Lyt> anker{po_tile};
 
-                    layout.create_po(wire_east(layout, anker, po_tile),
-                                     ctn.color_ntk.has_output_name(po_counter) ?
-                                         ctn.color_ntk.get_output_name(po_counter++) :
-                                         fmt::format("po{}", po_counter++),
-                                     po_tile);
-                    multi_out_node = false;
+                        po_tile = layout.eastern_border_of(po_tile);
+
+                        layout.create_po(wire_east(layout, anker, po_tile),
+                                         ctn.color_ntk.has_output_name(po_counter) ?
+                                             ctn.color_ntk.get_output_name(po_counter++) :
+                                             fmt::format("po{}", po_counter++),
+                                         po_tile);
+                        multi_out_node = false;
+                    }
+
+                    out_nodes.push_back(po);
                 }
-
-                out_nodes.push_back(po);
             });
 
         // restore possibly set signal names
