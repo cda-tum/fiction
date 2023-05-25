@@ -12,8 +12,6 @@ An offset coordinate is a coordinate that defines a location via an offset from 
 
 .. doxygenstruct:: fiction::offset::ucoord_t
 
-.. doxygenclass:: fiction::offset::coord_iterator
-
 Cube coordinates
 ----------------
 
@@ -23,12 +21,19 @@ At the same time, they can be used to address 3-dimensional grids.
 .. doxygenstruct:: fiction::cube::coord_t
 
 SiQAD coordinates
-----------------
+-----------------
 
-SiQAD coordinates are used to describe locations of Silicon Dangling Bonds on the H-Si(100) 2x1 surface were dimer columns and rows are identified by x and y values, respecitvely,
+SiQAD coordinates are used to describe locations of Silicon Dangling Bonds on the H-Si(100) 2x1 surface were dimer columns and rows are identified by x and y values, respectively,
 while the z value (0,1) points to the top or bottom Si atom in the dimer. The coordinates are originally used in the SiQAD simulator (https://github.com/siqad).
 
 .. doxygenstruct:: fiction::siqad::coord_t
+
+Coordinate iterator
+-------------------
+
+An iterator type that allows to enumerate coordinates in order within a boundary.
+
+.. doxygenclass:: fiction::coord_iterator
 
 Utility functions
 -----------------
