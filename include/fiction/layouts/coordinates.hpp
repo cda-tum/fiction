@@ -148,6 +148,39 @@ struct ucoord_t
         return ucoord_t{static_cast<uint64_t>(*this) | static_cast<uint64_t>(ucoord_t{})};
     }
     /**
+     * Clamps the coordinate to the given dimension. Lower bounds are neglected and should be handled separately if need
+     * be. When the coordinate is outside the given dimension, it is transformed to the next coordinate that is in it.
+     * If no such coordinate exists, the coordinate becomes a dead copy of the dimension.
+     *
+     * @param dimension Dimension or aspect ratio to clamp the coordinate to.
+     */
+     void clamp(const ucoord_t& dimension) noexcept
+     {
+        if (x > dimension.x)
+        {
+            x = 0;
+            ++y;
+        }
+
+        if (y > dimension.y)
+        {
+            if (z == 1)
+            {
+               *this = dimension.get_dead();
+            }
+            else
+            {
+               y = 0;
+               z = 1;
+            }
+        }
+
+        if (z > dimension.z)
+        {
+           *this = dimension.get_dead();
+        }
+     }
+    /**
      * Compares against another coordinate for equality. Respects the dead indicator.
      *
      * @param other Right-hand side coordinate.
@@ -355,6 +388,32 @@ struct coord_t
         dead_coord.d = true;
         return dead_coord;
     }
+    /**
+     * Clamps the coordinate to the given dimension. Lower bounds are neglected and should be handled separately if need
+     * be. When the coordinate is outside the given dimension, it is transformed to the next coordinate that is in it.
+     * If no such coordinate exists, the coordinate becomes a dead copy of the dimension.
+     *
+     * @param dimension Dimension or aspect ratio to clamp the coordinate to.
+     */
+     void clamp(const coord_t& dimension) noexcept
+     {
+        if (x > dimension.x)
+        {
+            x = 0;
+            ++y;
+        }
+
+        if (y > dimension.y)
+        {
+            y = 0;
+            ++z;
+        }
+
+        if (z > dimension.z)
+        {
+            *this = dimension.get_dead();
+        }
+     }
     /**
      * Compares against another coordinate for equality. Respects the dead indicator.
      *
@@ -571,6 +630,32 @@ struct coord_t
         dead_coord.d = true;
         return dead_coord;
     }
+    /**
+     * Clamps the coordinate to the given dimension. Lower bounds are neglected and should be handled separately if need
+     * be. When the coordinate is outside the given dimension, it is transformed to the next coordinate that is in it.
+     * If no such coordinate exists, the coordinate becomes a dead copy of the dimension.
+     *
+     * @param dimension Dimension or aspect ratio to clamp the coordinate to.
+     */
+     void clamp(const coord_t& dimension) noexcept
+     {
+        if (x > dimension.x)
+        {
+            x = 0;
+            y += z;
+            z = !z;
+        }
+
+        if (z > dimension.z)
+        {
+            *this = dimension.get_dead();
+        }
+
+        if (y > dimension.y)
+        {
+            *this = dimension.get_dead();
+        }
+     }
     /**
      * Compares against another coordinate for equality. Respects the dead indicator.
      *
