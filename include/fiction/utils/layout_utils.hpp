@@ -53,6 +53,7 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Cel
                                                                const cell<CellLyt>& relative_c) noexcept
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+    static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt cannot have SiQAD coordinates");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
 
     assert(relative_c.x < GateSizeX && relative_c.y < GateSizeY &&
