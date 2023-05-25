@@ -26,6 +26,7 @@
 #include "pyfiction/io/write_qll_layout.hpp"
 #include "pyfiction/io/write_sqd_layout.hpp"
 #include "pyfiction/io/write_svg_layout.hpp"
+#include "pyfiction/layouts/bounding_box.hpp"
 #include "pyfiction/layouts/cartesian_layout.hpp"
 #include "pyfiction/layouts/cell_level_layout.hpp"
 #include "pyfiction/layouts/clocked_layout.hpp"
@@ -56,6 +57,7 @@ PYBIND11_MODULE(pyfiction, m)
     /**
      * Layouts
      */
+    pyfiction::bounding_boxes_2d(m);
     pyfiction::cartesian_layout(m);
     pyfiction::shifted_cartesian_layout(m);
     pyfiction::hexagonal_layout(m);
