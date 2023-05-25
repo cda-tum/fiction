@@ -25,7 +25,8 @@ If you use *fiction* in your work, we would appreciate if you cited
     }
 
 Furthermore, if you use any of the design automation algorithms :ref:`exact <exact>`, :ref:`ortho <ortho>`,
-:ref:`onepass <onepass>`, :ref:`equiv <equiv>`, :ref:`color routing <color_routing>`, :ref:`QuickSim <quicksim>`, or :ref:`critical temperature simulation <critical_temperature>`
+:ref:`onepass <onepass>`, :ref:`equiv <equiv>`, :ref:`color routing <color_routing>`, :ref:`QuickSim <quicksim>`,
+:ref:`critical temperature simulation <critical_temperature>`, or :ref:`hexagonalization <hexagonalization>`
 please consider citing their respective papers as well:
 
 .. code-block:: tex
@@ -94,6 +95,16 @@ please consider citing their respective papers as well:
       author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
       booktitle={IEEE International Conference on Nanotechnology (IEEE-NANO)},
       year={2023}
+    }
+
+.. code-block:: tex
+
+    @inproceedings{hofmann2023hexagonalization,
+      title={{Scalable Physical Design for Silicon Dangling Bond Logic: How a 45\textdegree~Turn Prevents the Reinvention of the Wheel}},
+      author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
+      booktitle={IEEE International Conference on Nanotechnology (IEEE-NANO)},
+      year={2023},
+      domain={Field-Coupled Nanocomputing}
     }
 
 The same holds for the :ref:`Bestagon <bestagon>` gate library:
