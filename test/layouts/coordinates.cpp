@@ -175,11 +175,41 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cu
     }
 }
 
-TEMPLATE_TEST_CASE("Computing area and volume of offset and cubic coordinates", "[coordinates]", offset::ucoord_t,
-                   cube::coord_t)
+TEST_CASE("Computing area and volume of cube coordinates", "[coordinates]")
 {
-    CHECK(area(TestType{1, 1, 1}) == 4);
-    CHECK(volume(TestType{1, 1, 1}) == 8);
+    CHECK(area(cube::coord_t{1, 1, 1}) == 4);
+    CHECK(area(cube::coord_t{-1, -1, -1}) == 4);
+
+    CHECK(volume(cube::coord_t{-1, -1, -1}) == 8);
+    CHECK(volume(cube::coord_t{1, 1, 1}) == 8);
+}
+
+TEST_CASE("Computing area and volume of SiQAD coordinates", "[coordinates]")
+{
+    CHECK(area(siqad::coord_t{1, 1, 1}) == 8);
+    CHECK(area(siqad::coord_t{-1, -1, 1}) == 8);
+
+    CHECK(volume(siqad::coord_t{1, 1, 1}) == 8);
+    CHECK(volume(siqad::coord_t{-1, -1, 1}) == 8);
+}
+
+TEST_CASE("Addition / subtraction of SiQAD coordinates", "[coordinates]")
+{
+    using coord = siqad::coord_t;
+
+    CHECK(coord{-4, 4, 1} + coord{1, -7, 1} == coord{-3, -2, 0});
+    CHECK(coord{-4, 4, 1} + coord{1, -7, 0} == coord{-3, -3, 1});
+
+    CHECK(coord{-4, 4, 0} - coord{1, -7, 1} == coord{-5, 10, 1});
+    CHECK(coord{-4, 4, 1} - coord{1, -7, 1} == coord{-5, 11, 0});
+}
+
+TEST_CASE("Addition / subtraction of cube coordinates", "[coordinates]")
+{
+    using coord = siqad::coord_t;
+
+    CHECK(coord{-4, 4, -42} + coord{1, -7, 24} == coord{-3, -3, -18});
+    CHECK(coord{-4, 4, 42} - coord{1, -7, 24} == coord{-5, 11, 18});
 }
 
 #if defined(__GNUC__)

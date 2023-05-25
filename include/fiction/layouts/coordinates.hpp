@@ -710,6 +710,46 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 }  // namespace siqad
 
 /**
+ * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (|x| + 1) \cdot (|y| + 1)
+ * \f$ by default. The exception is SiQAD coordinates, for which it computes \f$ (|x| + 1) \cdot (2 \cdot |y| + |z| + 1)
+ * \f$.
+ *
+ * @tparam CoordinateType Coordinate type.
+ * @param coord Coordinate.
+ * @return Area of coord.
+ */
+template <typename CoordinateType>
+uint64_t area(const CoordinateType& coord) noexcept
+{
+    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    {
+        return (abs(coord.x) + static_cast<decltype(coord.x)>(1)) *
+               (static_cast<decltype(coord.y)>(2) * abs(coord.y) + abs(coord.z) + static_cast<decltype(coord.y)>(1));
+    }
+
+    return (abs(coord.x) + static_cast<decltype(coord.x)>(1)) * (abs(coord.y) + static_cast<decltype(coord.y)>(1));
+}
+/**
+ * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (|x| + 1) \cdot (|y| + 1)
+ * \cdot (|z| + 1) \f$ by default. For SiQAD coordinates, which are planar by definition, the area is returned.
+ *
+ * @tparam CoordinateType Coordinate type.
+ * @param coord Coordinate.
+ * @return Volume of coord.
+ */
+template <typename CoordinateType>
+uint64_t volume(const CoordinateType& coord) noexcept
+{
+    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    {
+        return area(coord);
+    }
+
+    return (abs(coord.x) + static_cast<decltype(coord.x)>(1)) * (abs(coord.y) + static_cast<decltype(coord.y)>(1)) *
+           (abs(coord.z) + static_cast<decltype(coord.z)>(1));
+}
+
+/**
  * An iterator type that allows to enumerate coordinates in order within a boundary.
  *
  * @tparam CoordinateType Type of coordinate to enumerate.
