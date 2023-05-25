@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -71,7 +72,9 @@ class cartesian_layout
      *
      * @param ar Highest possible position in the layout.
      */
-    explicit cartesian_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<cartesian_layout_storage>(ar)} {}
+    explicit cartesian_layout(const aspect_ratio& ar = {}) :
+            strg{std::make_shared<cartesian_layout_storage>(initialize_dimension(ar))}
+    {}
     /**
      * Copy constructor from another layout's storage.
      *
@@ -125,7 +128,7 @@ class cartesian_layout
      */
     void resize(const aspect_ratio& ar) noexcept
     {
-        strg->dimension = ar;
+        strg->dimension = initialize_dimension(ar);
     }
 
 #pragma endregion
@@ -783,6 +786,19 @@ class cartesian_layout
 
   private:
     storage strg;
+    /*
+     * Initializer for a cartesian layout dimension. When using SiQAD coordinates, it will default the z value to 1 if
+     * the y value is greater than 0.
+     */
+    constexpr OffsetCoordinateType initialize_dimension(const OffsetCoordinateType& coord)
+    {
+        if constexpr (std::is_same_v<OffsetCoordinateType, siqad::coord_t>)
+        {
+            return OffsetCoordinateType{coord.x, coord.y, 1};
+        }
+
+        return coord;
+    }
 };
 
 }  // namespace fiction
