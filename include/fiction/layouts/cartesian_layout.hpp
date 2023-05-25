@@ -19,6 +19,7 @@
 
 namespace fiction
 {
+
 /**
  * A layout type that utilizes offset coordinates to represent a Cartesian grid. Its faces are organized in the
  * following way:
@@ -39,7 +40,7 @@ namespace fiction
    +-------+-------+-------+-------+
    \endverbatim
  *
- * @tparam OffsetCoordinateType The coordinate implementation to be used. Offset coordinates are required.
+ * @tparam OffsetCoordinateType The coordinate implementation to be used.
  */
 template <typename OffsetCoordinateType = offset::ucoord_t>
 class cartesian_layout
