@@ -5,6 +5,7 @@
 #ifndef FICTION_PRINT_LAYOUT_HPP
 #define FICTION_PRINT_LAYOUT_HPP
 
+#include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
@@ -330,8 +331,8 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
  * @param os Output stream to write into.
  * @param cds The charge distribution surface of which the charge layout is to be printed.
  * @param cs_color Flag to utilize color escapes for charge states.
- * @param crop_layout Flag to remove rows and columns with only empty cells, while leaving a maximum padding of one
- * dimer row and two columns.
+ * @param crop_layout Flag to print the 2D bounding box of the layout, while leaving a maximum padding of one dimer row
+ * and two columns.
  * @param draw_lattice Flag to enable lattice background drawing.
  */
 template <typename Lyt>
@@ -345,30 +346,20 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
         return;
     }
 
-    coordinate<Lyt> min{crop_layout ? cds.x() : 0, crop_layout ? cds.y() : 0};
-    coordinate<Lyt> max{};
+    coordinate<Lyt> min{};
+    coordinate<Lyt> max{cds.x(), cds.y(), 1};
 
     if (crop_layout)
     {
-        // obtain the crop dimensions
-        cds.foreach_cell(
-            [&cds, &min, &max](const cell<Lyt>& c)
-            {
-                if (!cds.is_empty_cell(c))
-                {
-                    min = {std::min(min.x, c.x), std::min(min.y, c.y)};
-                    max = {std::max(max.x, c.x), std::max(max.y, c.y)};
-                }
-            });
+        const auto bb = bounding_box_2d{cds};
 
         // apply padding of maximally one dimer row and two columns
-        min = {min.x - 2, min.y - 1, 0};
-        max = {max.x + 2, max.y + 1, 1};
-    }
-    else
-    {
-        // obtain exclusive iteration end coordinate
-        max = coordinate<Lyt>{cds.x(), cds.y(), 1}.get_dead();
+        min = bb.get_min() - coordinate<Lyt>{2, 1};
+        max = bb.get_max() + coordinate<Lyt>{2, 1};
+
+        // ensure only full dimer rows are printed
+        min.z = 0;
+        max.z = 1;
     }
 
     // iterate over all coordinates in the rows determined by the vertical crop
