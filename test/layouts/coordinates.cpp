@@ -193,11 +193,6 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cu
             c_lyt.foreach_coordinate(fill_coord_vector, {}, bad_bound);
             c_lyt.foreach_coordinate(fill_good_bound_coord_vector, {}, good_bound);
 
-            if (coord_vector.size() != good_bound_coord_vector.size())
-            {
-                std::cout << bad_bound.str() << good_bound.str() << std::endl;
-            }
-
             CHECK(coord_vector.size() == good_bound_coord_vector.size());
             CHECK(coord_vector.back() == good_bound_coord_vector.back());
         };
