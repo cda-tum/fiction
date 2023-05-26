@@ -790,7 +790,7 @@ class cartesian_layout
      * Initializer for a cartesian layout dimension. When using SiQAD coordinates, it will default the z value to 1 if
      * the y value is greater than 0.
      */
-    constexpr OffsetCoordinateType initialize_dimension(const OffsetCoordinateType& coord)
+    constexpr OffsetCoordinateType initialize_dimension(const OffsetCoordinateType& coord) const
     {
         if constexpr (std::is_same_v<OffsetCoordinateType, siqad::coord_t>)
         {
