@@ -10,6 +10,8 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
+#include <cstdint>
+
 using namespace fiction;
 
 TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesian_layout<offset::ucoord_t>),
@@ -60,9 +62,9 @@ TEMPLATE_TEST_CASE("siqad layout is normalized, shifted to positive coordinates"
 }
 
 template <typename T1, typename T2>
-inline uint64_t area_with_padding(const uint64_t& area, const T1& x, const T2& y) noexcept
+inline auto area_with_padding(const uint64_t& area, const T1& x, const T2& y) noexcept
 {
-    return static_cast<uint64_t>(static_cast<int64_t>(area) + (x + 1) * ((y + 1) % 2));
+    return area + (static_cast<uint64_t>(x) + 1) * ((static_cast<uint64_t>(y) + 1) % 2ul);
 }
 
 TEMPLATE_TEST_CASE("Convert offset::ucoord_t layout to SiQAD coordinate layout", "[layout-utils]", sidb_cell_clk_lyt)
