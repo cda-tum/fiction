@@ -30,26 +30,23 @@ T round_to_n_decimal_places(const T number, const uint64_t n)
 }
 
 /**
- * Takes the absolute value of a number if it is signed, and otherwise computes the identity. This avoids compiler
- * warnings.
- * @tparam T The type of the number to take the absolute value of.
+ * Takes the absolute value of an integral number if it is signed, and otherwise computes the identity. This avoids a
+ * compiler warning when taking the absolute value of an unsigned number.
+ * @tparam T The type of the number to take the absolute value of. Must be integral.
  * @param n The number to take the absolute value of.
  * @return |n|.
  */
 template <typename T>
-T abs(const T n)
+T integral_abs(const T n)
 {
+    static_assert(std::is_integral_v<T>, "T is not an integral number type");
+
     if constexpr (std::is_unsigned_v<T>)
     {
         return n;
     }
 
-    if constexpr (std::is_integral_v<T>)
-    {
-        return static_cast<T>(std::abs(static_cast<int64_t>(n)));  // needed to solve ambiguity of std::abs
-    }
-
-    return std::fabs(n);
+    return static_cast<T>(std::abs(static_cast<int64_t>(n)));  // needed to solve ambiguity of std::abs
 }
 
 }  // namespace fiction

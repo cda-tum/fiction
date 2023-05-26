@@ -817,11 +817,11 @@ uint64_t area(const CoordinateType& coord) noexcept
 {
     if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
-        return (static_cast<uint64_t>(abs(coord.x)) + 1) *
-               (2 * static_cast<uint64_t>(abs(coord.y)) + static_cast<uint64_t>(abs(coord.z)) + 1);
+        return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) *
+               (2 * static_cast<uint64_t>(integral_abs(coord.y)) + static_cast<uint64_t>(integral_abs(coord.z)) + 1);
     }
 
-    return (static_cast<uint64_t>(abs(coord.x)) + 1) * (static_cast<uint64_t>(abs(coord.y)) + 1);
+    return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1);
 }
 /**
  * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (|x| + 1) \cdot (|y| + 1)
@@ -839,8 +839,8 @@ uint64_t volume(const CoordinateType& coord) noexcept
         return area(coord);
     }
 
-    return (static_cast<uint64_t>(abs(coord.x)) + 1) * (static_cast<uint64_t>(abs(coord.y)) + 1) *
-           (static_cast<uint64_t>(abs(coord.z)) + 1);
+    return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1) *
+           (static_cast<uint64_t>(integral_abs(coord.z)) + 1);
 }
 
 /**
