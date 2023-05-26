@@ -8,6 +8,7 @@
 #include <fiction/utils/math_utils.hpp>
 
 #include <cstdint>
+#include <limits>
 
 using namespace fiction;
 
@@ -52,10 +53,18 @@ TEST_CASE("round_to_n_decimal_places should round an input number to n decimal p
     }
 }
 
-TEMPLATE_TEST_CASE("abs should compute the absolute value of a number of different types", "[abs]", int8_t, int16_t,
-                   int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t, float, double, long double)
+TEMPLATE_TEST_CASE("abs should compute the absolute value of a number of different integral types", "[abs]", int8_t,
+                   int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t)
 {
-    auto x = static_cast<TestType>(-42);
+    const auto x = static_cast<TestType>(-42);
 
-    CHECK(abs(x) == (x < 0 ? -x : x));
+    CHECK(abs(abs(x) - (x < 0 ? -x : x)) == 0);
+}
+
+TEMPLATE_TEST_CASE("abs should compute the absolute value of a number of different floating point types", "[abs]",
+                   float, double, long double)
+{
+    const auto x = static_cast<TestType>(-42);
+
+    CHECK(abs(abs(x) - (x < 0 ? -x : x)) < std::numeric_limits<TestType>::epsilon());
 }
