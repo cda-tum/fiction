@@ -268,9 +268,9 @@ TEST_CASE("Addition / subtraction of SiQAD coordinates", "[coordinates]")
 
 TEST_CASE("Addition / subtraction of cube coordinates", "[coordinates]")
 {
-    using coord = siqad::coord_t;
+    using coord = cube::coord_t;
 
-    CHECK(coord{-4, 4, -42} + coord{1, -7, 24} == coord{-3, -3, -18});
+    CHECK(coord{-4, 4, -43} + coord{1, -7, 27} == coord{-3, -3, -16});
     CHECK(coord{-4, 4, 42} - coord{1, -7, 24} == coord{-5, 11, 18});
 }
 
