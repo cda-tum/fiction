@@ -7,6 +7,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
@@ -182,7 +183,7 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cu
 
         const auto fill_good_bound_coord_vector = [&v = good_bound_coord_vector](const auto& c) { v.emplace_back(c); };
 
-        const auto test_bounds_equal = [&](const lyt_t& c_lyt, const TestType& bad_bound, const TestType& good_bound)
+        const auto test_bounds_equal = [&](const auto& c_lyt, const TestType& bad_bound, const TestType& good_bound)
         {
             coord_vector.clear();
             coord_vector.reserve(8);
@@ -211,6 +212,10 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cu
             test_bounds_equal(lyt, {2, 0, 1}, {0, 1, 0});
             test_bounds_equal(lyt, {2, 1, 0}, {0, 1, 1});
             test_bounds_equal(lyt, {0, 2, 0}, {});
+
+            using h_lyt = hexagonal_layout<TestType, even_row_hex>;
+
+            test_bounds_equal(h_lyt{aspect_ratio<h_lyt>{0, 1, 0}}, {0, 1, 1}, {});
         }
         else
         {
@@ -218,6 +223,8 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cu
             test_bounds_equal(lyt, {2, 0, 1}, {0, 1, 1});
             test_bounds_equal(lyt, {2, 1, 0}, {0, 0, 1});
             test_bounds_equal(lyt, {0, 2, 0}, {0, 0, 1});
+
+            test_bounds_equal(lyt_t{aspect_ratio<lyt_t>{0, 1, 0}}, {0, 1, 1}, {});
         }
 
         test_bounds_equal(lyt_t{aspect_ratio<lyt_t>{0, 0, 0}}, {9, 9, 9}, {});
