@@ -148,25 +148,28 @@ struct ucoord_t
         return ucoord_t{static_cast<uint64_t>(*this) | static_cast<uint64_t>(ucoord_t{})};
     }
     /**
-     * Clamps the coordinate to the given dimension. Lower bounds are neglected and should be handled separately if need
-     * be. When the coordinate is outside the given dimension, it is transformed to the next coordinate that is in it.
-     * If no such coordinate exists, the coordinate becomes a dead copy of the dimension.
+     * Wraps the coordinate with respect to the given aspect ratio by iterating over the dimensions in the order defined
+     * by the coordinate type. For any dimension of the coordinate that is strictly larger than the associated dimension
+     * of the aspect ratio, this dimension will be wrapped to zero, and the next dimension is increased. The resulting
+     * coordinate becomes a dead copy of the aspect ratio if it is not contained in the aspect ratio after iterating.
+     * An example use case of this function is the coordinate iterator, which implements iterator advancing by first
+     * incrementing the x dimension, then wrapping the coordinate to the boundary within to enumerate.
      *
-     * @param dimension Dimension or aspect ratio to clamp the coordinate to.
+     * @param aspect_ratio Aspect ratio to wrap the coordinate to.
      */
-    void clamp(const ucoord_t& dimension) noexcept
+    void wrap(const ucoord_t& aspect_ratio) noexcept
     {
-        if (x > dimension.x)
+        if (x > aspect_ratio.x)
         {
             x = 0;
             ++y;
         }
 
-        if (y > dimension.y)
+        if (y > aspect_ratio.y)
         {
             if (z == 1)
             {
-                *this = dimension.get_dead();
+                *this = aspect_ratio.get_dead();
             }
             else
             {
@@ -175,9 +178,9 @@ struct ucoord_t
             }
         }
 
-        if (z > dimension.z)
+        if (z > aspect_ratio.z)
         {
-            *this = dimension.get_dead();
+            *this = aspect_ratio.get_dead();
         }
     }
     /**
@@ -389,29 +392,32 @@ struct coord_t
         return dead_coord;
     }
     /**
-     * Clamps the coordinate to the given dimension. Lower bounds are neglected and should be handled separately if need
-     * be. When the coordinate is outside the given dimension, it is transformed to the next coordinate that is in it.
-     * If no such coordinate exists, the coordinate becomes a dead copy of the dimension.
+     * Wraps the coordinate with respect to the given aspect ratio by iterating over the dimensions in the order defined
+     * by the coordinate type. For any dimension of the coordinate that is strictly larger than the associated dimension
+     * of the aspect ratio, this dimension will be wrapped to zero, and the next dimension is increased. The resulting
+     * coordinate becomes a dead copy of the aspect ratio if it is not contained in the aspect ratio after iterating.
+     * An example use case of this function is the coordinate iterator, which implements iterator advancing by first
+     * incrementing the x dimension, then wrapping the coordinate to the boundary within to enumerate.
      *
-     * @param dimension Dimension or aspect ratio to clamp the coordinate to.
+     * @param aspect_ratio Aspect ratio to wrap the coordinate to.
      */
-    void clamp(const coord_t& dimension) noexcept
+    void wrap(const coord_t& aspect_ratio) noexcept
     {
-        if (x > dimension.x)
+        if (x > aspect_ratio.x)
         {
             x = 0;
             ++y;
         }
 
-        if (y > dimension.y)
+        if (y > aspect_ratio.y)
         {
             y = 0;
             ++z;
         }
 
-        if (z > dimension.z)
+        if (z > aspect_ratio.z)
         {
-            *this = dimension.get_dead();
+            *this = aspect_ratio.get_dead();
         }
     }
     /**
@@ -631,29 +637,32 @@ struct coord_t
         return dead_coord;
     }
     /**
-     * Clamps the coordinate to the given dimension. Lower bounds are neglected and should be handled separately if need
-     * be. When the coordinate is outside the given dimension, it is transformed to the next coordinate that is in it.
-     * If no such coordinate exists, the coordinate becomes a dead copy of the dimension.
+     * Wraps the coordinate with respect to the given aspect ratio by iterating over the dimensions in the order defined
+     * by the coordinate type. For any dimension of the coordinate that is strictly larger than the associated dimension
+     * of the aspect ratio, this dimension will be wrapped to zero, and the next dimension is increased. The resulting
+     * coordinate becomes a dead copy of the aspect ratio if it is not contained in the aspect ratio after iterating.
+     * An example use case of this function is the coordinate iterator, which implements iterator advancing by first
+     * incrementing the x dimension, then wrapping the coordinate to the boundary within to enumerate.
      *
-     * @param dimension Dimension or aspect ratio to clamp the coordinate to.
+     * @param aspect_ratio Aspect ratio to wrap the coordinate to.
      */
-    void clamp(const coord_t& dimension) noexcept
+    void wrap(const coord_t& aspect_ratio) noexcept
     {
-        if (x > dimension.x)
+        if (x > aspect_ratio.x)
         {
             x = 0;
             y += z;
             z = !z;
         }
 
-        if (z > dimension.z)
+        if (z > aspect_ratio.z)
         {
-            *this = dimension.get_dead();
+            *this = aspect_ratio.get_dead();
         }
 
-        if (y > dimension.y)
+        if (y > aspect_ratio.y)
         {
-            *this = dimension.get_dead();
+            *this = aspect_ratio.get_dead();
         }
     }
     /**
@@ -898,7 +907,7 @@ class coord_iterator
         coord.z = std::max(coord.z, static_cast<decltype(coord.z)>(0));
 
         // ... then handle coordinates that are beyond the given boundary.
-        coord.clamp(aspect_ratio);
+        coord.wrap(aspect_ratio);
     }
     /**
      * Increments the iterator, while keeping it within the boundary. Also defined on iterators that are out of bounds.
@@ -911,7 +920,7 @@ class coord_iterator
         {
             ++coord.x;
 
-            coord.clamp(aspect_ratio);
+            coord.wrap(aspect_ratio);
         }
         else
         {
