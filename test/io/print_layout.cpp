@@ -243,10 +243,10 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
     cl.assign_charge_state({40, 18, 0}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({42, 19, 0}, sidb_charge_state::NEGATIVE);
 
+    std::stringstream print_stream{};
+
     SECTION("Cropped")
     {
-        std::stringstream print_stream{};
-
         print_charge_layout(print_stream, cl, false, true, true);
 
         constexpr const char* layout_print =
@@ -313,7 +313,7 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
     }
     SECTION("No crop")
     {
-        std::stringstream print_stream{};
+        print_stream.clear();
 
         print_charge_layout(print_stream, cl, false);
 
