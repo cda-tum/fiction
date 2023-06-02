@@ -22,7 +22,7 @@ namespace fiction
  * @return The number rounded to n decimal places.
  */
 template <typename T>
-T round_to_n_decimal_places(const T number, const uint64_t n)
+T round_to_n_decimal_places(const T number, const uint64_t n) noexcept
 {
     static_assert(std::is_arithmetic_v<T>, "T is not a number type");
     const T factor = std::pow(10, n);
@@ -37,7 +37,7 @@ T round_to_n_decimal_places(const T number, const uint64_t n)
  * @return |n|.
  */
 template <typename T>
-T integral_abs(const T n)
+T integral_abs(const T n) noexcept
 {
     static_assert(std::is_integral_v<T>, "T is not an integral number type");
 
