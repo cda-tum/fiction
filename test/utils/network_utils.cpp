@@ -45,7 +45,7 @@ TEST_CASE("High-degree fanin nodes", "[network-utils]")
           std::string{"network contains nodes that exceed the supported non-constant fanin size"});
 }
 
-TEST_CASE("Incoming primary input", "[network-utils")
+TEST_CASE("Incoming primary input", "[network-utils]")
 {
     const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
 
