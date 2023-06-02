@@ -53,6 +53,7 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Cel
                                                                const cell<CellLyt>& relative_c) noexcept
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+    static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt cannot have SiQAD coordinates");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
 
     assert(relative_c.x < GateSizeX && relative_c.y < GateSizeY &&
@@ -251,11 +252,11 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
     lyt.foreach_cell(
         [&x_offset, &y_offset](const auto& c)
         {
-            if (c.y <= y_offset)
+            if (c.y < y_offset)
             {
                 y_offset = c.y;
             }
-            if (c.x <= x_offset)
+            if (c.x < x_offset)
             {
                 x_offset = c.x;
             }
@@ -292,7 +293,7 @@ sidb_cell_clk_lyt_siqad convert_to_siqad_coordinates(const Lyt& lyt) noexcept
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    sidb_cell_clk_lyt_siqad lyt_new{{lyt.x(), lyt.y(), lyt.z()},
+    sidb_cell_clk_lyt_siqad lyt_new{{lyt.x(), (lyt.y() - lyt.y() % 2) / 2},
                                     lyt.get_layout_name(),
                                     lyt.get_tile_size_x(),
                                     lyt.get_tile_size_y()};
@@ -323,7 +324,7 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    Lyt lyt_new{{lyt.x(), lyt.y(), lyt.z()}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
+    Lyt lyt_new{{lyt.x(), 2 * lyt.y() + 1}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
 
     const auto assign_coordinates = [&lyt_new](const auto& base_lyt) noexcept
     {
@@ -340,7 +341,7 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
     {
         auto lyt_normalized = normalize_layout_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
         assign_coordinates(lyt_normalized);
-        lyt_new.resize({lyt_normalized.x(), lyt_normalized.y(), lyt_normalized.z()});
+        lyt_new.resize({lyt_normalized.x(), 2 * lyt_normalized.y() + 1});
     }
     else
     {
