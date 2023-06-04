@@ -155,15 +155,15 @@ int main()  // NOLINT
         fiction::area(cell_level_layout, area_ps, &area_stats);
 
         // log results
-        hexagonalization_exp(
-            benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
-            depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(), gate_level_layout.x() + 1,
-            gate_level_layout.y() + 1, (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1), hex_layout_width,
-            hex_layout_height, hex_layout_width * hex_layout_height, gate_level_layout.num_gates(),
-            gate_level_layout.num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
-            mockturtle::to_seconds(orthogonal_stats.time_total),
-            static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(end - begin).count()),
-            eq_result, cell_level_layout.num_cells(), area_stats.area);
+        hexagonalization_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
+                             cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
+                             depth_mapped_network.depth(), gate_level_layout.x() + 1, gate_level_layout.y() + 1,
+                             (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1), hex_layout_width,
+                             hex_layout_height, hex_layout_width * hex_layout_height, gate_level_layout.num_gates(),
+                             gate_level_layout.num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
+                             mockturtle::to_seconds(orthogonal_stats.time_total),
+                             static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(end - begin).count()),
+                             eq_result, cell_level_layout.num_cells(), area_stats.area);
 
         hexagonalization_exp.save();
         hexagonalization_exp.table();

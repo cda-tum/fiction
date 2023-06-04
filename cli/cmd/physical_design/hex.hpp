@@ -48,7 +48,7 @@ class hex_command : public command
 
         const auto check_clocking_scheme = [](auto&& lyt_ptr)
         { return lyt_ptr->is_clocking_scheme(fiction::clock_name::TWODDWAVE); };
-        
+
         // error case: layout is not 2DDWave-clocked
         if (const auto is_twoddwave_clocked = std::visit(check_clocking_scheme, lyt_ptr); !is_twoddwave_clocked)
         {
