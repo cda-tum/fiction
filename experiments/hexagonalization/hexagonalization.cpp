@@ -29,6 +29,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <sstream>
+#include <string>
 #include <vector>
 
 int main()  // NOLINT
@@ -161,7 +162,7 @@ int main()  // NOLINT
             hex_layout_height, hex_layout_width * hex_layout_height, gate_level_layout.num_gates(),
             gate_level_layout.num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
             mockturtle::to_seconds(orthogonal_stats.time_total),
-            static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) / 1000000.0,
+            static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(end - begin).count()),
             eq_result, cell_level_layout.num_cells(), area_stats.area);
 
         hexagonalization_exp.save();
