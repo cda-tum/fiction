@@ -7,6 +7,7 @@
 
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/placement_utils.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -169,6 +170,7 @@ template <typename Lyt>
             }
         }
     }
+    restore_names<Lyt, hex_lyt>(lyt, hex_layout);
     return hex_layout;
 }
 
