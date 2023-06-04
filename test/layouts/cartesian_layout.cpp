@@ -131,7 +131,7 @@ TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 
 TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
 {
-    cartesian_layout<offset::ucoord_t>::aspect_ratio ar{10, 10, 1};
+    const cartesian_layout<offset::ucoord_t>::aspect_ratio ar{10, 10, 1};
 
     cartesian_layout layout{ar};
 
@@ -219,7 +219,7 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
     CHECK(!layout.is_at_any_border(at));
 
     // cover corner case
-    cartesian_layout<offset::ucoord_t> planar_layout{{1, 1, 0}};
+    const cartesian_layout<offset::ucoord_t> planar_layout{{1, 1, 0}};
 
     auto dat = planar_layout.above({1, 1, 1});
     CHECK(dat.is_dead());
@@ -246,4 +246,13 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
             CHECK(
                 std::set<cartesian_layout<offset::ucoord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}}.count(adj));
         });
+}
+
+TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1")
+{
+    using lyt = cartesian_layout<siqad::coord_t>;
+
+    CHECK(lyt{aspect_ratio<lyt>{0, 0}}.z() == 1);
+    CHECK(lyt{aspect_ratio<lyt>{9, 9}}.z() == 1);
+    CHECK(lyt{aspect_ratio<lyt>{42, 42, 1}}.z() == 1);
 }
