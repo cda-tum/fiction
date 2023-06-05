@@ -5,13 +5,18 @@
 #ifndef FICTION_PRINT_LAYOUT_HPP
 #define FICTION_PRINT_LAYOUT_HPP
 
+#include "fiction/layouts/bounding_box.hpp"
+#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
 #include <fmt/color.h>
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <array>
+#include <cstdint>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -32,6 +37,16 @@ static const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::bla
                                                          fmt::fg(fmt::color::black) | fmt::bg(fmt::color::light_gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::dark_gray)}};
+// Escape color sequence for negatively charged SiDB colors (cyan).
+static const auto SIDB_NEG_COLOR = fmt::fg(fmt::color::cyan);
+// Escape color sequence for positively charged SiDB colors (red).
+static const auto SIDB_POS_COLOR = fmt::fg(fmt::color::red);
+// Escape color sequence for charge-neutral SiDB colors (white).
+static const auto SIDB_NEUT_COLOR = fmt::fg(fmt::color::white);
+// Escape color sequence for lattice background colors (grey).
+static const auto SIDB_LAT_COLOR = fmt::fg(fmt::color::gray);
+// Empty escape color sequence
+inline constexpr auto NO_COLOR = fmt::text_style{};
 
 }  // namespace detail
 
@@ -222,6 +237,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 
         ++r_ctr;
     }
+
     // flush stream
     os << std::endl;
 }
@@ -304,6 +320,89 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         }
         os << '\n';
     }
+
+    // flush stream
+    os << std::endl;
+}
+/**
+ * Writes a simplified 2D representation of an SiDB charge layout to an output stream.
+ *
+ * @tparam Lyt Cell-level layout based on SiQAD coordinates.
+ * @param os Output stream to write into.
+ * @param cds The charge distribution surface of which the charge layout is to be printed.
+ * @param cs_color Flag to utilize color escapes for charge states.
+ * @param crop_layout Flag to print the 2D bounding box of the layout, while leaving a maximum padding of one dimer row
+ * and two columns.
+ * @param draw_lattice Flag to enable lattice background drawing.
+ */
+template <typename Lyt>
+void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt>& cds, const bool cs_color = true,
+                         const bool crop_layout = false, const bool draw_lattice = true) noexcept
+{
+    // empty layout
+    if (cds.is_empty())
+    {
+        os << "[i] empty layout" << std::endl;
+        return;
+    }
+
+    coordinate<Lyt> min{};
+    coordinate<Lyt> max{cds.x(), cds.y(), 1};
+
+    if (crop_layout)
+    {
+        const auto bb = bounding_box_2d{cds};
+
+        // apply padding of maximally one dimer row and two columns
+        min = bb.get_min() - coordinate<Lyt>{2, 1};
+        max = bb.get_max() + coordinate<Lyt>{2, 1};
+
+        // ensure only full dimer rows are printed
+        min.z = 0;
+        max.z = 1;
+    }
+
+    // iterate over all coordinates in the rows determined by the vertical crop
+    cds.foreach_coordinate(
+        [&](const coordinate<Lyt>& c)
+        {
+            if (crop_layout && (c.x < min.x || c.x > max.x))  // apply horizontal crop
+            {
+                return;
+            }
+
+            switch (cds.get_charge_state(c))  // switch over the charge state of the SiDB at the current coordinate
+            {
+                case sidb_charge_state::NEGATIVE:
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ● ");
+                    break;
+                }
+                case sidb_charge_state::POSITIVE:
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ⨁ ");
+                    break;
+                }
+                case sidb_charge_state::NEUTRAL:
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : detail::NO_COLOR, " ◯ ");
+                    break;
+                }
+                default:  // NONE charge state case -> empty cell
+                {
+                    os << (draw_lattice || !cds.is_empty_cell(c) ?
+                               fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") :
+                               "  ");
+                }
+            }
+
+            if (c.x == max.x)
+            {
+                os << (c.z == 1 ? "\n\n" : "\n");
+            }
+        },
+        min, max + coordinate<Lyt>{1, 0});
+
     // flush stream
     os << std::endl;
 }

@@ -16,7 +16,13 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(
-    "charge distribution surface traits and construction (layer on cell_level_layout)", "[charge-distribution-surface]",
+    "Charge distribution surface traits and construction", "[charge-distribution-surface]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_column_hex>>>),
+
     (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>>),
     (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>>),
@@ -28,33 +34,25 @@ TEMPLATE_TEST_CASE(
     REQUIRE(is_cell_level_layout_v<TestType>);
     CHECK(!has_assign_charge_state_v<TestType>);
     CHECK(!has_get_charge_state_v<TestType>);
-    CHECK(!has_foreach_charge_state_v<TestType>);
-}
-
-TEMPLATE_TEST_CASE(
-    "charge distribution surface traits (layer on cell_level_layout)", "[charge-distribution-surface]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_column_hex>>>))
-{
-    REQUIRE(is_cell_level_layout_v<TestType>);
-    CHECK(!has_assign_charge_state_v<TestType>);
-    CHECK(!has_get_charge_state_v<TestType>);
-    CHECK(!has_foreach_charge_state_v<TestType>);
-    CHECK(!has_assign_sidb_defect_v<TestType>);
-    CHECK(!has_get_sidb_defect_v<TestType>);
-    CHECK(!has_foreach_sidb_defect_v<TestType>);
 
     TestType lyt{};
-    CHECK(!has_assign_sidb_defect_v<TestType>);
-    CHECK(!has_get_sidb_defect_v<TestType>);
-    CHECK(!has_foreach_sidb_defect_v<TestType>);
+
+    using charge_layout = charge_distribution_surface<TestType>;
+    CHECK(is_cell_level_layout_v<charge_layout>);
+    CHECK(has_assign_charge_state_v<charge_layout>);
+    CHECK(has_get_charge_state_v<charge_layout>);
+
+    const charge_layout defect_lyt{};
+    const charge_layout defect_lyt_from_lyt{lyt};
+
+    using charge_charge_layout = charge_distribution_surface<charge_layout>;
+    CHECK(is_cell_level_layout_v<charge_charge_layout>);
+    CHECK(has_assign_charge_state_v<charge_charge_layout>);
+    CHECK(has_get_charge_state_v<charge_charge_layout>);
 }
 
 TEMPLATE_TEST_CASE(
-    "assign and delete charge states", "[charge-distribution-surface]",
+    "Assign and delete charge states", "[charge-distribution-surface]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),

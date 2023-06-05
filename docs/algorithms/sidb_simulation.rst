@@ -73,7 +73,7 @@ Energy Calculation
 Temperature Behavior
 ####################
 
-.. _critical-temperature:
+.. _critical_temperature:
 
 **Header:** ``fiction/algorithms/simulation/sidb/critical_temperature.hpp``
 

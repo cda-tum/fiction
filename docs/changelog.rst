@@ -41,7 +41,7 @@ Added
     - Charge distribution surface for SiDB layouts
     - Coordinate type ``siqad::coord_t`` representing signed SiDB coordinates as represented in `SiQAD <https://github.com/siqad/siqad>`_
 - I/O:
-    - Molecular FCN support in the QLL writer for MagCAD and SCERPA
+    - Molecular FCN support in the QLL writer for MagCAD and SCERPA (many thanks to Giuliana Beretta!)
     - SQD reader for the SiDB technology
 - Clocking Schemes:
     - CFE

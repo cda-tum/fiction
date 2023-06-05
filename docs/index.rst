@@ -12,6 +12,8 @@ Let there be a *fiction*
    changelog.rst
    publications.rst
    acknowledgments.rst
+   contributing.rst
+   support.rst
 
 .. toctree::
    :maxdepth: 2

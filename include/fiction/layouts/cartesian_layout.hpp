@@ -14,11 +14,13 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 namespace fiction
 {
+
 /**
  * A layout type that utilizes offset coordinates to represent a Cartesian grid. Its faces are organized in the
  * following way:
@@ -39,7 +41,7 @@ namespace fiction
    +-------+-------+-------+-------+
    \endverbatim
  *
- * @tparam OffsetCoordinateType The coordinate implementation to be used. Offset coordinates are required.
+ * @tparam OffsetCoordinateType The coordinate implementation to be used.
  */
 template <typename OffsetCoordinateType = offset::ucoord_t>
 class cartesian_layout
@@ -70,7 +72,9 @@ class cartesian_layout
      *
      * @param ar Highest possible position in the layout.
      */
-    explicit cartesian_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<cartesian_layout_storage>(ar)} {}
+    explicit cartesian_layout(const aspect_ratio& ar = {}) :
+            strg{std::make_shared<cartesian_layout_storage>(initialize_dimension(ar))}
+    {}
     /**
      * Copy constructor from another layout's storage.
      *
@@ -109,13 +113,13 @@ class cartesian_layout
         return strg->dimension.z;
     }
     /**
-     * Returns the layout's number of faces which are equal to \f$ (x + 1) \cdot (y + 1) \f$.
+     * Returns the layout's number of faces depending on the coordinate type.
      *
      * @return Area of layout.
      */
     [[nodiscard]] auto area() const noexcept
     {
-        return (x() + 1) * (y() + 1);
+        return fiction::area(strg->dimension);
     }
     /**
      * Updates the layout's dimensions, effectively resizing it.
@@ -124,7 +128,7 @@ class cartesian_layout
      */
     void resize(const aspect_ratio& ar) noexcept
     {
-        strg->dimension = ar;
+        strg->dimension = initialize_dimension(ar);
     }
 
 #pragma endregion
@@ -621,15 +625,15 @@ class cartesian_layout
      * will be iterated first, then y, then z.
      *
      * @param start First coordinate to include in the range of all coordinates.
-     * @param stop Last coordinate to include in the range of all coordinates.
+     * @param stop Last coordinate (exclusive) to include in the range of all coordinates.
      * @return An iterator range from `start` to `stop`. If they are not provided, the first/last coordinate is used as
      * a default.
      */
     [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
     {
-        return range_t{std::make_pair(
-            offset::coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            offset::coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop})};
+        return range_t{
+            std::make_pair(coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+                           coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop})};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -638,22 +642,22 @@ class cartesian_layout
      * @tparam Fn Functor type that has to comply with the restrictions imposed by `mockturtle::foreach_element`.
      * @param fn Functor to apply to each coordinate in the range.
      * @param start First coordinate to include in the range of all coordinates.
-     * @param stop Last coordinate to include in the range of all coordinates.
+     * @param stop Last coordinate (exclusive) to include in the range of all coordinates.
      */
     template <typename Fn>
     void foreach_coordinate(Fn&& fn, const OffsetCoordinateType& start = {},
                             const OffsetCoordinateType& stop = {}) const
     {
         mockturtle::detail::foreach_element(
-            offset::coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            offset::coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, fn);
+            coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, fn);
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
      * iteration order is the same as for the coordinates function but without the z dimension.
      *
      * @param start First coordinate to include in the range of all ground coordinates.
-     * @param stop Last coordinate to include in the range of all ground coordinates.
+     * @param stop Last coordinate (exclusive) to include in the range of all ground coordinates.
      * @return An iterator range from `start` to `stop`. If they are not provided, the first/last coordinate in the
      * ground layer is used as a default.
      */
@@ -665,8 +669,8 @@ class cartesian_layout
         const auto ground_layer = aspect_ratio{x(), y(), 0};
 
         return range_t{
-            std::make_pair(offset::coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-                           offset::coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop})};
+            std::make_pair(coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+                           coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop})};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -675,7 +679,7 @@ class cartesian_layout
      * @tparam Fn Functor type that has to comply with the restrictions imposed by `mockturtle::foreach_element`.
      * @param fn Functor to apply to each coordinate in the range.
      * @param start First coordinate to include in the range of all ground coordinates.
-     * @param stop Last coordinate to include in the range of all ground coordinates.
+     * @param stop Last coordinate (exclusive) to include in the range of all ground coordinates.
      */
     template <typename Fn>
     void foreach_ground_coordinate(Fn&& fn, const OffsetCoordinateType& start = {},
@@ -686,8 +690,8 @@ class cartesian_layout
         const auto ground_layer = aspect_ratio{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
-            offset::coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            offset::coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
+            coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, only cardinal
@@ -782,6 +786,19 @@ class cartesian_layout
 
   private:
     storage strg;
+    /*
+     * Initializer for a cartesian layout dimension. When using SiQAD coordinates, it will default the z value to 1 if
+     * the y value is greater than 0.
+     */
+    constexpr OffsetCoordinateType initialize_dimension(const OffsetCoordinateType& coord) const
+    {
+        if constexpr (std::is_same_v<OffsetCoordinateType, siqad::coord_t>)
+        {
+            return OffsetCoordinateType{coord.x, coord.y, 1};
+        }
+
+        return coord;
+    }
 };
 
 }  // namespace fiction
