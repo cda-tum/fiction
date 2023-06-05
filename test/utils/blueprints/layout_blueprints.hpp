@@ -85,6 +85,26 @@ GateLyt xor_maj_gate_layout() noexcept
 }
 
 template <typename GateLyt>
+GateLyt tautology_gate_layout() noexcept
+{
+    REQUIRE(mockturtle::has_create_node_v<GateLyt>);
+
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 1}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {1, 0});
+    const auto x2 = layout.create_pi("x2", {0, 1});
+
+    kitty::dynamic_truth_table tt_t(2u);
+    kitty::create_from_hex_string(tt_t, "F");
+
+    const auto n_xor = layout.create_node({x1, x2}, tt_t, {1, 1});
+
+    layout.create_po(n_xor, "f1", {2, 1});
+
+    return layout;
+}
+
+template <typename GateLyt>
 GateLyt and_or_gate_layout() noexcept
 {
     GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::open_clocking<GateLyt>()};

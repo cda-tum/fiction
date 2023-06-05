@@ -7,6 +7,8 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/traits.hpp>
 
 #include <fmt/format.h>
 
@@ -129,12 +131,14 @@ TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
 
 TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cube::coord_t, siqad::coord_t)
 {
+    using lyt_t = cartesian_layout<TestType>;
+
     std::vector<TestType> coord_vector{};
     coord_vector.reserve(7);
 
-    const cartesian_layout<TestType> lyt{{1, 1, 1}};
+    const lyt_t lyt{{1, 1, 1}};
 
-    const auto fill_coord_vector = [&cv = coord_vector](const auto& c) { cv.emplace_back(c); };
+    const auto fill_coord_vector = [&v = coord_vector](const auto& c) { v.emplace_back(c); };
 
     SECTION("With bounds")
     {
@@ -173,13 +177,101 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cu
         CHECK(coord_vector.front().str() == fmt::format("{}", TestType{0, 0, 0}));
         CHECK(coord_vector.back().str() == fmt::format("{}", TestType{1, 1, 1}));
     }
+    SECTION("With non-dead out of bounds end bound")
+    {
+        std::vector<TestType> good_bound_coord_vector{};
+
+        const auto fill_good_bound_coord_vector = [&v = good_bound_coord_vector](const auto& c) { v.emplace_back(c); };
+
+        const auto test_bounds_equal = [&](const auto& c_lyt, const TestType& bad_bound, const TestType& good_bound)
+        {
+            coord_vector.clear();
+            coord_vector.reserve(8);
+
+            good_bound_coord_vector.clear();
+            good_bound_coord_vector.reserve(8);
+
+            c_lyt.foreach_coordinate(fill_coord_vector, {}, bad_bound);
+            c_lyt.foreach_coordinate(fill_good_bound_coord_vector, {}, good_bound);
+
+            CHECK(coord_vector.size() == good_bound_coord_vector.size());
+            CHECK(coord_vector.back() == good_bound_coord_vector.back());
+        };
+
+        test_bounds_equal(lyt, {9, 9, 9}, {});
+        test_bounds_equal(lyt, {0, 2, 1}, {});
+
+        if constexpr (std::is_same_v<TestType, cube::coord_t>)
+        {
+            test_bounds_equal(lyt, {0, 0, 9}, {});
+        }
+
+        if constexpr (std::is_same_v<TestType, siqad::coord_t>)
+        {
+            test_bounds_equal(lyt, {2, 0, 0}, {0, 0, 1});
+            test_bounds_equal(lyt, {2, 0, 1}, {0, 1, 0});
+            test_bounds_equal(lyt, {2, 1, 0}, {0, 1, 1});
+            test_bounds_equal(lyt, {0, 2, 0}, {});
+
+            using h_lyt = hexagonal_layout<TestType, even_row_hex>;
+
+            test_bounds_equal(h_lyt{aspect_ratio<h_lyt>{0, 1, 0}}, {0, 1, 1}, {});
+        }
+        else
+        {
+            test_bounds_equal(lyt, {2, 0, 0}, {0, 1, 0});
+            test_bounds_equal(lyt, {2, 0, 1}, {0, 1, 1});
+            test_bounds_equal(lyt, {2, 1, 0}, {0, 0, 1});
+            test_bounds_equal(lyt, {0, 2, 0}, {0, 0, 1});
+
+            test_bounds_equal(lyt_t{aspect_ratio<lyt_t>{0, 1, 0}}, {0, 1, 1}, {});
+        }
+
+        test_bounds_equal(lyt_t{aspect_ratio<lyt_t>{0, 0, 0}}, {9, 9, 9}, {});
+    }
 }
 
-TEMPLATE_TEST_CASE("Computing area and volume of offset and cubic coordinates", "[coordinates]", offset::ucoord_t,
-                   cube::coord_t)
+TEST_CASE("Computing area and volume of offset coordinates", "[coordinates]")
 {
-    CHECK(area(TestType{1, 1, 1}) == 4);
-    CHECK(volume(TestType{1, 1, 1}) == 8);
+    CHECK(area(offset::ucoord_t{1, 1, 1}) == 4);
+    CHECK(volume(offset::ucoord_t{1, 1, 1}) == 8);
+}
+
+TEST_CASE("Computing area and volume of cube coordinates", "[coordinates]")
+{
+    CHECK(area(cube::coord_t{1, 1, 1}) == 4);
+    CHECK(area(cube::coord_t{-1, -1, -1}) == 4);
+
+    CHECK(volume(cube::coord_t{-1, -1, -1}) == 8);
+    CHECK(volume(cube::coord_t{1, 1, 1}) == 8);
+}
+
+TEST_CASE("Computing area and volume of SiQAD coordinates", "[coordinates]")
+{
+    CHECK(area(siqad::coord_t{1, 1, 1}) == 8);
+    CHECK(area(siqad::coord_t{-1, -1, 1}) == 8);
+
+    CHECK(volume(siqad::coord_t{1, 1, 1}) == 8);
+    CHECK(volume(siqad::coord_t{-1, -1, 1}) == 8);
+}
+
+TEST_CASE("Addition / subtraction of SiQAD coordinates", "[coordinates]")
+{
+    using coord = siqad::coord_t;
+
+    CHECK(coord{-4, 4, 1} + coord{1, -7, 1} == coord{-3, -2, 0});
+    CHECK(coord{-4, 4, 1} + coord{1, -7, 0} == coord{-3, -3, 1});
+
+    CHECK(coord{-4, 4, 0} - coord{1, -7, 1} == coord{-5, 10, 1});
+    CHECK(coord{-4, 4, 1} - coord{1, -7, 1} == coord{-5, 11, 0});
+}
+
+TEST_CASE("Addition / subtraction of cube coordinates", "[coordinates]")
+{
+    using coord = cube::coord_t;
+
+    CHECK(coord{-4, 4, -43} + coord{1, -7, 27} == coord{-3, -3, -16});
+    CHECK(coord{-4, 4, 42} - coord{1, -7, 24} == coord{-5, 11, 18});
 }
 
 #if defined(__GNUC__)

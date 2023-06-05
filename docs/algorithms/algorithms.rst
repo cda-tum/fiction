@@ -52,6 +52,7 @@ Physical Design
    one_pass_synthesis.rst
    color_routing.rst
    apply_gate_library.rst
+   hexagonalization.rst
 
 
 Verification
