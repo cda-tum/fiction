@@ -14,6 +14,7 @@
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <iostream>
 #include <unordered_map>
@@ -27,13 +28,13 @@ namespace fiction
 enum class automatic_base_number_detection
 {
     /**
-     * It automatically detects if 3-state simulation is required. It checks if a positive charge could occur due to
-     * maximum band bending. If this mode is active, 3-state simulation could be run even if base_num = 2 was set in the
-     * physical parameters.
+     * It automatically detects if a 2-state simulation is sufficient or if a 3-state simulation is required. It checks
+     * if a positive charge could occur due to maximum band bending. If this mode is active, 3-state simulation could be
+     * run even if base_num = 2 was set in the physical parameters.
      */
     ON,
     /**
-     * The base number from the physical parameter are used for the simulation.
+     * The base number from the physical parameter is used for the simulation.
      */
     OFF
 };
@@ -44,7 +45,7 @@ template <typename Lyt>
 struct quickexact_params
 {
     /**
-     * All Parameters for physical SiDB simulations.
+     * All parameters for physical SiDB simulations.
      */
     sidb_simulation_parameters physical_parameters{};
     /**
