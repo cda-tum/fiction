@@ -28,7 +28,7 @@ namespace fiction
 /**
  * An enumeration of exact algorithms for the tts-simulation.
  */
-enum class exact_algorithm
+enum class exhaustive_algorithm
 {
     /**
      * ExGS
@@ -43,16 +43,16 @@ enum class exact_algorithm
 struct time_to_solution_params
 {
     /**
-     * Exact simulation algorithm used to simulate the ground state as reference.
+     * Exhaustive simulation algorithm used to simulate the ground state as reference.
      */
-    exact_algorithm engine = exact_algorithm::EXGS;
+    exhaustive_algorithm engine = exhaustive_algorithm::QUICKEXACT;
     /**
-     * Number of repetitions to determine the simulation accuracy (`repetitions = 100` means that accuracy is precise to
-     * 1%).
+     * Number of iterations of the heuristic algorithm used to determine the simulation accuracy (`repetitions = 100`
+     * means that accuracy is precise to 1%).
      */
     uint64_t repetitions = 100;
     /**
-     * The time-to-solution also depends on the given confidence level which can be set here.
+     * Confidence level.
      */
     double confidence_level = 0.997;
 };
@@ -82,7 +82,8 @@ struct time_to_solution_stats
      */
     double single_runtime_exhaustive{};
     /**
-     * Number of physically valid charge configurations found by ExGS.
+     * Number of physically valid charge configurations found by the exhaustive ground state searcher (ExGS or
+     * QuickExact).
      */
     std::size_t number_valid_layouts_exact{};
     /**
@@ -111,8 +112,8 @@ struct time_to_solution_stats
  * @param tts_params Parameters used for the time-to-solution calculation.
  */
 template <typename Lyt>
-void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, time_to_solution_stats* ps = nullptr,
-                 const time_to_solution_params& tts_params = {}) noexcept
+void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to_solution_params& tts_params = {},
+                 time_to_solution_stats* ps = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -123,7 +124,7 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, time_to_solut
     time_to_solution_stats st{};
     st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_results_exgs.simulation_runtime);
     sidb_simulation_result<Lyt> simulation_result{};
-    if (tts_params.engine == exact_algorithm::EXGS)
+    if (tts_params.engine == exhaustive_algorithm::EXGS)
     {
         st.algorithm      = "ExGS";
         simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
@@ -162,7 +163,7 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, time_to_solut
     }
 
     const auto single_runtime =
-        std::accumulate(time.begin(), time.end(), 0.0) / static_cast<double>(tts_params.repetitions);
+        std::accumulate(time.cbegin(), time.cend(), 0.0) / static_cast<double>(tts_params.repetitions);
     const auto acc = static_cast<double>(gs_count) / static_cast<double>(tts_params.repetitions);
 
     double tts = single_runtime;

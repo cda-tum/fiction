@@ -32,9 +32,10 @@ TEMPLATE_TEST_CASE(
         const sidb_simulation_parameters params{2, -0.30};
         const quicksim_params            quicksim_params{params};
         time_to_solution_stats           tts_stat{};
-        sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat);
+        const time_to_solution_params    tts_params{exhaustive_algorithm::QUICKEXACT};
+        sim_acc_tts<TestType>(lyt, quicksim_params, tts_params, &tts_stat);
 
-        CHECK(tts_stat.algorithm == "ExGS");
+        CHECK(tts_stat.algorithm == "QuickExact");
         CHECK_THAT(tts_stat.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat.time_to_solution, Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
         CHECK(tts_stat.mean_single_runtime > 0.0);
@@ -45,8 +46,8 @@ TEMPLATE_TEST_CASE(
         const sidb_simulation_parameters params{2, -0.30};
         const quicksim_params            quicksim_params{params};
         time_to_solution_stats           tts_stat{};
-        const time_to_solution_params    tts_params{exact_algorithm::QUICKEXACT};
-        sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat, tts_params);
+        const time_to_solution_params    tts_params{exhaustive_algorithm::QUICKEXACT};
+        sim_acc_tts<TestType>(lyt, quicksim_params, tts_params, &tts_stat);
         CHECK(tts_stat.algorithm == "QuickExact");
         CHECK_THAT(tts_stat.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat.time_to_solution, Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
@@ -67,16 +68,17 @@ TEMPLATE_TEST_CASE(
         const sidb_simulation_parameters params{3, -0.30};
         const quicksim_params            quicksim_params{params};
 
-        time_to_solution_stats tts_stat_exgs{};
-        sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat_exgs);
+        const time_to_solution_params tts_params_exgs{exhaustive_algorithm::EXGS};
+        time_to_solution_stats        tts_stat_exgs{};
+        sim_acc_tts<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
         CHECK(tts_stat_exgs.acc == 100);
         CHECK(tts_stat_exgs.time_to_solution > 0.0);
         CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
 
         time_to_solution_stats        tts_stat_quickexact{};
-        const time_to_solution_params tts_params{exact_algorithm::QUICKEXACT};
-        sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat_quickexact, tts_params);
+        const time_to_solution_params tts_params{exhaustive_algorithm::QUICKEXACT};
+        sim_acc_tts<TestType>(lyt, quicksim_params, tts_params, &tts_stat_quickexact);
 
         CHECK(tts_stat_quickexact.acc == 100);
         CHECK(tts_stat_quickexact.time_to_solution > 0.0);
