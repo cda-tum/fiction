@@ -6,7 +6,7 @@
 #define FICTION_CHARGE_DISTRIBUTION_SURFACE_HPP
 
 #include "fiction/algorithms/path_finding/distance.hpp"
-#include "fiction/algorithms/simulation/sidb/enum_classes_for_sidb_simulation.hpp"
+#include "fiction/algorithms/simulation/sidb/enum_class_exhaustive_algorithm.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
@@ -30,6 +30,53 @@
 
 namespace fiction
 {
+
+/**
+ * An enumeration of modes for the dependent cell.
+ */
+enum class dependent_cell_mode
+{
+    /**
+     * The charge state of the dependent cell is not changed based on the local electrostatic potential at its position.
+     */
+    FIXED,
+    /**
+     * The charge state of the dependent cell is changed based on the local electrostatic potential at its position.
+     */
+    VARIABLE
+};
+
+/**
+ * An enumeration of modes for calculation of the electrostatic potential energy of a given charge distribution.
+ */
+enum class energy_calculation
+{
+    /**
+     * The electrostatic potential energy of a given charge distribution is not updated after it is changed.
+     */
+    KEEP_OLD_ENERGY_VALUE,
+    /**
+     * The electrostatic potential energy of a given charge distribution is updated after it is changed.
+     */
+    UPDATE_ENERGY
+};
+
+/**
+ * An enumeration of modes to decide if the previous charge distirbution is used to simply the computation of the
+ * properties of a new charge distribution.
+ */
+enum class charge_distribution_history
+{
+    /**
+     * The previous charge distribution is used.
+     */
+    CONSIDER,
+    /**
+     * The previous charge distribution is not used. Hence, the local electrostatic potential of the given charge
+     * distribution is calculated from scratch.
+     */
+    NEGLECT
+};
 
 /**
  * A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
@@ -900,9 +947,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param consider_history If set to true, the changed cells due to
      */
-    void update_local_potential(const history& history_mode = history::NEGLECT) noexcept
+    void update_local_potential(
+        const charge_distribution_history& history_mode = charge_distribution_history::NEGLECT) noexcept
     {
-        if (history_mode == history::NEGLECT)
+        if (history_mode == charge_distribution_history::NEGLECT)
         {
             strg->local_pot.resize(this->num_cells(), 0);
 
@@ -1102,9 +1150,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * The function updates the local potential and the system energy after a charge change.
      */
-    void update_after_charge_change(const dependent_cell_mode& dependent_cell   = dependent_cell_mode::FIXED,
-                                    const energy_calculation&  energy_calc_mode = energy_calculation::UPDATE_ENERGY,
-                                    const history&             history_mode     = history::NEGLECT) noexcept
+    void update_after_charge_change(
+        const dependent_cell_mode&         dependent_cell   = dependent_cell_mode::FIXED,
+        const energy_calculation&          energy_calc_mode = energy_calculation::UPDATE_ENERGY,
+        const charge_distribution_history& history_mode     = charge_distribution_history::NEGLECT) noexcept
     {
         this->update_local_potential(history_mode);
         if (dependent_cell == dependent_cell_mode::VARIABLE)
@@ -1368,7 +1417,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
                         // The charge state is only changed (i.e. the function assign_charge_state_by_cell_index is c
                         // lled), if the nw charge state differs to the previous one. Only then will the cell be added
-                        // to the history.
+                        // to the charge_distribution_history.
                         if (const auto new_chargesign = this->get_charge_state_by_index(counter);
                             new_chargesign != sign)
                         {
@@ -1386,7 +1435,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
                         // The charge state is only changed (i.e. the function assign_charge_state_by_cell_index is c
                         // lled), if the nw charge state differs to the previous one. Only then will the cell be added
-                        // to the history.
+                        // to the charge_distribution_history.
                         if (const auto old_chargesign = this->get_charge_state_by_index(counter);
                             old_chargesign != sign)
                         {
@@ -1603,11 +1652,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * `index_to_charge_distribution()` function.
      */
 
-    void
-    increase_charge_index_by_one(const dependent_cell_mode& dependent_cell_fixed    = dependent_cell_mode::FIXED,
-                                 const energy_calculation&  recompute_system_energy = energy_calculation::UPDATE_ENERGY,
-                                 const history&             consider_history        = history::NEGLECT,
-                                 const exhaustive_algorithm& engine = exhaustive_algorithm::EXGS) noexcept
+    void increase_charge_index_by_one(
+        const dependent_cell_mode&         dependent_cell_fixed    = dependent_cell_mode::FIXED,
+        const energy_calculation&          recompute_system_energy = energy_calculation::UPDATE_ENERGY,
+        const charge_distribution_history& consider_history        = charge_distribution_history::NEGLECT,
+        const exhaustive_algorithm&        engine                  = exhaustive_algorithm::EXGS) noexcept
     {
         if (strg->charge_index.first < strg->max_charge_index)
         {
@@ -1627,10 +1676,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param quickexact False by default, since this function is only used for `quickexact` anyway.
      */
     void increase_charge_index_of_sub_layout_by_one(
-        const dependent_cell_mode&  dependent_cell_fixed    = dependent_cell_mode::FIXED,
-        const energy_calculation&   recompute_system_energy = energy_calculation::UPDATE_ENERGY,
-        const history&              consider_history        = history::NEGLECT,
-        const exhaustive_algorithm& engine                  = exhaustive_algorithm::QUICKEXACT) noexcept
+        const dependent_cell_mode&         dependent_cell_fixed    = dependent_cell_mode::FIXED,
+        const energy_calculation&          recompute_system_energy = energy_calculation::UPDATE_ENERGY,
+        const charge_distribution_history& consider_history        = charge_distribution_history::NEGLECT,
+        const exhaustive_algorithm&        engine                  = exhaustive_algorithm::QUICKEXACT) noexcept
     {
         if (strg->charge_index_sublayout.first < strg->max_charge_index_sulayout)
         {
@@ -1650,10 +1699,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param consider_histroy if set to true, the cells which changed due to the change of the charge index, are used
      * to speed up the calculation of the calculation of the local potential, etc.
      */
-    void set_charge_index_by_gray_code(const uint64_t current_gray_code, const uint64_t previous_gray_code,
-                                       const dependent_cell_mode& dependent_cell   = dependent_cell_mode::FIXED,
-                                       const energy_calculation&  energy_calc_mode = energy_calculation::UPDATE_ENERGY,
-                                       const history&             history_mode     = history::NEGLECT) noexcept
+    void set_charge_index_by_gray_code(
+        const uint64_t current_gray_code, const uint64_t previous_gray_code,
+        const dependent_cell_mode&         dependent_cell   = dependent_cell_mode::FIXED,
+        const energy_calculation&          energy_calc_mode = energy_calculation::UPDATE_ENERGY,
+        const charge_distribution_history& history_mode     = charge_distribution_history::NEGLECT) noexcept
     {
         if (current_gray_code <= strg->max_charge_index)
         {
@@ -1669,7 +1719,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         strg->charge_index_sublayout.first = 0;
         this->index_to_charge_distribution(exhaustive_algorithm::QUICKEXACT);
         this->update_after_charge_change(dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
-                                         history::CONSIDER);
+                                         charge_distribution_history::CONSIDER);
     }
     /**
      * Returns the maximum index of the cell-level layout.

@@ -5,7 +5,7 @@
 #ifndef FICTION_TIME_TO_SOLUTION_HPP
 #define FICTION_TIME_TO_SOLUTION_HPP
 
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
+#include "fiction/algorithms/simulation/sidb/enum_class_exhaustive_algorithm.hpp"
 #include "fiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
