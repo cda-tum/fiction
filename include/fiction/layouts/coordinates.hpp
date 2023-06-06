@@ -7,9 +7,11 @@
 
 #include <fmt/format.h>
 
+#include <cassert>
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <type_traits>
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
@@ -25,6 +27,7 @@ namespace fiction
  */
 namespace offset
 {
+
 /**
  * Unsigned offset coordinates.
  *
@@ -252,114 +255,6 @@ inline std::ostream& operator<<(std::ostream& os, const ucoord_t& t)
     return os;
 }
 
-/**
- * An iterator type that allows to enumerate coordinates in order within a boundary.
- *
- * @tparam CoordinateType Type of coordinate to enumerate.
- */
-template <typename CoordinateType>
-class coord_iterator
-{
-  public:
-    using value_type = CoordinateType;
-    /**
-     * Standard constructor. Initializes the iterator with a starting position and the boundary within to enumerate.
-     *
-     * With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following order would be enumerated:
-     *
-     * - (0, 0, 0)
-     * - (1, 0, 0)
-     * - (0, 1, 0)
-     * - (1, 1, 0)
-     * - (0, 2, 0)
-     * - (1, 2, 0)
-     * - (0, 0, 1)
-     * - (1, 0, 1)
-     * - (0, 1, 1)
-     * - (1, 1, 1)
-     * - (0, 2, 1)
-     * - (1, 2, 1)
-     *
-     * coord_iterator is compatible with the STL forward_iterator category.
-     *
-     * @param dimension Boundary within to enumerate. Iteration wraps at its limits.
-     * @param start Starting coordinate to enumerate first.
-     */
-    constexpr explicit coord_iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept :
-            aspect_ratio{dimension},
-            coord{start}
-    {}
-    /**
-     * Increments the iterator.
-     *
-     * @return Reference to the incremented iterator.
-     */
-    constexpr coord_iterator& operator++() noexcept
-    {
-        if (coord != aspect_ratio)
-        {
-            ++coord.x;
-
-            if (coord.x > aspect_ratio.x)
-            {
-                coord.x = 0;
-
-                ++coord.y;
-                if (coord.y > aspect_ratio.y)
-                {
-                    coord.y = 0;
-
-                    ++coord.z;
-                }
-            }
-        }
-        else
-        {
-            coord = coord.get_dead();
-        }
-
-        return *this;
-    }
-
-    constexpr coord_iterator operator++(int) noexcept
-    {
-        const auto result{*this};
-
-        ++(*this);
-
-        return result;
-    }
-
-    constexpr CoordinateType operator*() const noexcept
-    {
-        return coord;
-    }
-
-    constexpr bool operator==(const coord_iterator& other) const noexcept
-    {
-        return (coord == other.coord);
-    }
-
-    constexpr bool operator!=(const coord_iterator& other) const noexcept
-    {
-        return !(*this == other);
-    }
-
-    constexpr bool operator<(const coord_iterator& other) const noexcept
-    {
-        return (coord < other.coord);
-    }
-
-    constexpr bool operator<=(const coord_iterator& other) const noexcept
-    {
-        return (coord <= other.coord);
-    }
-
-  private:
-    const CoordinateType aspect_ratio;
-
-    CoordinateType coord;
-};
 }  // namespace offset
 
 /**
@@ -368,6 +263,7 @@ class coord_iterator
  */
 namespace cube
 {
+
 /**
  * Signed cube coordinates.
  *
@@ -833,10 +729,156 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 
 }  // namespace siqad
 
+/**
+ * An iterator type that allows to enumerate coordinates in order within a boundary.
+ *
+ * @tparam CoordinateType Type of coordinate to enumerate.
+ */
+template <typename CoordinateType>
+class coord_iterator
+{
+  public:
+    using value_type = CoordinateType;
+    /**
+     * Standard constructor. Initializes the iterator with a starting position and the boundary within to enumerate.
+     *
+     * With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following order would be enumerated for offset or cubic
+     * coordinates:
+     *
+     * - (0, 0, 0)
+     * - (1, 0, 0)
+     * - (0, 1, 0)
+     * - (1, 1, 0)
+     * - (0, 2, 0)
+     * - (1, 2, 0)
+     * - (0, 0, 1)
+     * - (1, 0, 1)
+     * - (0, 1, 1)
+     * - (1, 1, 1)
+     * - (0, 2, 1)
+     * - (1, 2, 1)
+     *
+     * For SiQAD coordinates with the same parameters, we have the following order of enumeration:
+     *
+     * - (0, 0, 0)
+     * - (1, 0, 0)
+     * - (0, 0, 1)
+     * - (1, 0, 1)
+     * - (0, 1, 0)
+     * - (1, 2, 0)
+     * - (0, 1, 1)
+     * - (1, 1, 1)
+     * - (1, 1, 0)
+     * - (0, 2, 0)
+     * - (0, 2, 1)
+     * - (1, 2, 1)
+     *
+     * coord_iterator is compatible with the STL forward_iterator category.
+     *
+     * @param dimension Boundary within to enumerate. Iteration wraps at its limits.
+     * @param start Starting coordinate to enumerate first.
+     */
+    constexpr explicit coord_iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept :
+            aspect_ratio{dimension},
+            coord{start}
+    {
+        static_assert(std::is_same_v<CoordinateType, offset::ucoord_t> ||
+                          std::is_same_v<CoordinateType, cube::coord_t> ||
+                          std::is_same_v<CoordinateType, siqad::coord_t>,
+                      "CoordinateType must be a supported coordinate");
+    }
+    /**
+     * Increments the iterator.
+     *
+     * @return Reference to the incremented iterator.
+     */
+    constexpr coord_iterator& operator++() noexcept
+    {
+        if (coord != aspect_ratio)
+        {
+            ++coord.x;
+
+            if (coord.x > aspect_ratio.x)
+            {
+                coord.x = 0;
+
+                if constexpr (std::is_same_v<CoordinateType, offset::ucoord_t> ||
+                              std::is_same_v<CoordinateType, cube::coord_t>)
+                {
+                    ++coord.y;
+                    if (coord.y > aspect_ratio.y)
+                    {
+                        coord.y = 0;
+
+                        ++coord.z;
+                    }
+                }
+                else if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+                {
+                    coord.y += coord.z;
+                    coord.z = !coord.z;
+                }
+                else
+                {
+                    assert(false && "Unsupported coordinate type");
+                }
+            }
+        }
+        else
+        {
+            coord = coord.get_dead();
+        }
+
+        return *this;
+    }
+
+    constexpr coord_iterator operator++(int) noexcept
+    {
+        const auto result{*this};
+
+        ++(*this);
+
+        return result;
+    }
+
+    constexpr CoordinateType operator*() const noexcept
+    {
+        return coord;
+    }
+
+    constexpr bool operator==(const coord_iterator& other) const noexcept
+    {
+        return (coord == other.coord);
+    }
+
+    constexpr bool operator!=(const coord_iterator& other) const noexcept
+    {
+        return !(*this == other);
+    }
+
+    constexpr bool operator<(const coord_iterator& other) const noexcept
+    {
+        return (coord < other.coord);
+    }
+
+    constexpr bool operator<=(const coord_iterator& other) const noexcept
+    {
+        return (coord <= other.coord);
+    }
+
+  private:
+    const CoordinateType aspect_ratio;
+
+    CoordinateType coord;
+};
+
 }  // namespace fiction
+
+// NOLINTBEGIN(cert-dcl58-cpp)
 
 namespace std
 {
+
 // define std::hash overload for offset::ucoord_t
 template <>
 struct hash<fiction::offset::ucoord_t>
@@ -867,17 +909,21 @@ struct hash<fiction::siqad::coord_t>
     }
 };
 
-// make offset::coord_iterator compatible with STL iterator categories
+// make coord_iterator compatible with STL iterator categories
 template <typename Coordinate>
-struct iterator_traits<fiction::offset::coord_iterator<Coordinate>>
+struct iterator_traits<fiction::coord_iterator<Coordinate>>
 {
     using iterator_category = std::forward_iterator_tag;
     using value_type        = Coordinate;
 };
+
 }  // namespace std
+
+// NOLINTEND(cert-dcl58-cpp)
 
 namespace fmt
 {
+
 // make offset::ucoord_t compatible with fmt::format
 template <>
 struct formatter<fiction::offset::ucoord_t>
@@ -910,6 +956,23 @@ struct formatter<fiction::cube::coord_t>
         return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
     }
 };
+// make siqad::coord_t compatible with fmt::format
+template <>
+struct formatter<fiction::siqad::coord_t>
+{
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const fiction::siqad::coord_t& c, FormatContext& ctx)
+    {
+        return format_to(ctx.out(), "({},{},{})", c.x, c.y, c.z);
+    }
+};
+
 }  // namespace fmt
 
 #pragma GCC diagnostic pop
