@@ -6,7 +6,7 @@
 #define FICTION_QUICKEXACT_HPP
 
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
-#include "fiction/algorithms/simulation/sidb/enum_classes_for_charge_distribution.hpp"
+#include "fiction/algorithms/simulation/sidb/enum_classes_for_sidb_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
@@ -23,22 +23,7 @@
 
 namespace fiction
 {
-/**
- * An enumeration of modes to use for the QuickExact algorithm.
- */
-enum class automatic_base_number_detection
-{
-    /**
-     * It automatically detects if a 2-state simulation is sufficient or if a 3-state simulation is required. It checks
-     * if a positive charge could occur due to maximum band bending. If this mode is active, 3-state simulation could be
-     * run even if base_num = 2 was set in the physical parameters.
-     */
-    ON,
-    /**
-     * The base number from the physical parameter is used for the simulation.
-     */
-    OFF
-};
+
 /**
  * This struct stores the parameters for the `quickexact` algorithm.
  */
@@ -218,7 +203,8 @@ class quickexact_impl
         {
             current_charge_index = (i ^ (i >> 1));  // gray code is used for the charge index.
             charge_lyt_new.set_charge_index_by_gray_code(
-                current_charge_index, previous_charge_index, dependent_cell_mode::VARIABLE, energy_calculation::KEEP,
+                current_charge_index, previous_charge_index, dependent_cell_mode::VARIABLE,
+                energy_calculation::KEEP_OLD_ENERGY_VALUE,
                 history::CONSIDER);  // "false" allows that the charge state of the dependent cell is
                                      // automatically changed based on the new charge distribution.
             previous_charge_index = current_charge_index;
@@ -286,9 +272,9 @@ class quickexact_impl
                     sim_result.charge_distributions.push_back(charge_lyt_copy);
                 }
                 charge_lyt_new.increase_charge_index_of_sub_layout_by_one(
-                    dependent_cell_mode::VARIABLE, energy_calculation::KEEP, history::CONSIDER,
-                    true);  // "false" allows that the charge state of the dependent cell is
-                            // automatically changed based on the new charge distribution.
+                    dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE, history::CONSIDER,
+                    exhaustive_algorithm::QUICKEXACT);  // "false" allows that the charge state of the dependent cell is
+                                                        // automatically changed based on the new charge distribution.
             }
 
             if (charge_lyt_new.is_physically_valid())
@@ -305,9 +291,9 @@ class quickexact_impl
             charge_lyt_new.reset_charge_index_sub_layout();
 
             charge_lyt_new.increase_charge_index_by_one(
-                dependent_cell_mode::VARIABLE, energy_calculation::KEEP, history::CONSIDER,
-                true);  // "false" allows that the charge state of the dependent cell is
-                        // automatically changed based on the new charge distribution.
+                dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE, history::CONSIDER,
+                exhaustive_algorithm::QUICKEXACT);  // "false" allows that the charge state of the dependent cell is
+                                                    // automatically changed based on the new charge distribution.
         }
         // Charge configurations of the sub layout are looped.
         while (charge_lyt_new.get_charge_index_sub_layout().first < charge_lyt_new.get_max_charge_index_sub_layout())
@@ -324,7 +310,8 @@ class quickexact_impl
                 sim_result.charge_distributions.push_back(charge_lyt_copy);
             }
             charge_lyt_new.increase_charge_index_of_sub_layout_by_one(
-                dependent_cell_mode::VARIABLE, energy_calculation::KEEP, history::CONSIDER, true);
+                dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE, history::CONSIDER,
+                exhaustive_algorithm::QUICKEXACT);
         }
 
         if (charge_lyt_new.is_physically_valid())
@@ -403,7 +390,7 @@ class quickexact_impl
                                return std::find(detected_negative_sidbs.cbegin(), detected_negative_sidbs.cend(), n) !=
                                       detected_negative_sidbs.cend();
                            }),
-            all_sidbs_in_lyt_without_negative_detected_ones.end());
+            all_sidbs_in_lyt_without_negative_detected_ones.cend());
     }
     /**
      * Cell-level layout

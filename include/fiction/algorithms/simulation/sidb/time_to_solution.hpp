@@ -25,20 +25,6 @@
 
 namespace fiction
 {
-/**
- * An enumeration of exact algorithms for the tts-simulation.
- */
-enum class exhaustive_algorithm
-{
-    /**
-     * ExGS
-     */
-    EXGS,
-    /**
-     * QuickExact
-     */
-    QUICKEXACT
-};
 
 struct time_to_solution_params
 {
