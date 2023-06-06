@@ -899,7 +899,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.is_physically_valid() == 0);
 
         charge_layout.update_charge_state_of_dependent_cell();
-        charge_layout.update_after_charge_change(false);
+        charge_layout.update_after_charge_change(dependent_cell_mode::VARIABLE);
         charge_layout.validity_check();
         CHECK(charge_layout.is_physically_valid() == 1);
     }
@@ -946,7 +946,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.is_physically_valid() == 0);
 
         charge_layout.update_charge_state_of_dependent_cell();
-        charge_layout.update_after_charge_change(false);
+        charge_layout.update_after_charge_change(dependent_cell_mode::VARIABLE);
         charge_layout.validity_check();
         CHECK(charge_layout.is_physically_valid() == 1);
     }

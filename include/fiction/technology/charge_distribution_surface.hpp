@@ -6,6 +6,7 @@
 #define FICTION_CHARGE_DISTRIBUTION_SURFACE_HPP
 
 #include "fiction/algorithms/path_finding/distance.hpp"
+#include "fiction/algorithms/simulation/sidb/enum_classes_for_charge_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
@@ -407,7 +408,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                                 defect.charge;
                         }
                     });
-                this->update_after_charge_change(true);
+                this->update_after_charge_change(dependent_cell_mode::FIXED);
             }
 
             else
@@ -426,7 +427,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     });
                 strg->defects.erase(c);
                 strg->defects.insert({c, defect});
-                this->update_after_charge_change(true);
+                this->update_after_charge_change(dependent_cell_mode::FIXED);
             }
         }
     }
@@ -495,13 +496,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param potential_value Value of the global external electrostatic potential (e.g. -0.3). Charge-transition levels
      * are shifted by this value.
      */
-    void set_global_external_potential(const double& potential_value, bool fixed_dependent_cell = true) noexcept
+    void set_global_external_potential(const double&       potential_value,
+                                       dependent_cell_mode dependent_cell = dependent_cell_mode::FIXED) noexcept
     {
         this->foreach_cell(
             [this, &potential_value](const auto& cell) {
                 strg->local_external_pot.insert({cell, potential_value});
             });
-        this->update_after_charge_change(fixed_dependent_cell);
+        this->update_after_charge_change(dependent_cell);
     }
     /**
      * This function can be used to detect which SiDBs must be negatively charged due to their location. Important:
@@ -898,9 +900,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param consider_history If set to true, the changed cells due to
      */
-    void update_local_potential(const bool consider_history = false) noexcept
+    void update_local_potential(history history_setting = history::NEGLECT) noexcept
     {
-        if (!consider_history)
+        if (history_setting == history::NEGLECT)
         {
             strg->local_pot.resize(this->num_cells(), 0);
 
@@ -1100,15 +1102,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * The function updates the local potential and the system energy after a charge change.
      */
-    void update_after_charge_change(const bool dependent_cell_fixed = true, const bool energy_calculation = true,
-                                    const bool& consider_history = false) noexcept
+    void update_after_charge_change(const dependent_cell_mode dependent_cell   = dependent_cell_mode::FIXED,
+                                    const energy_calculation  energy_calc_mode = energy_calculation::UPDATE,
+                                    const history             history_mode     = history::NEGLECT) noexcept
     {
-        this->update_local_potential(consider_history);
-        if (!dependent_cell_fixed)
+        this->update_local_potential(history_mode);
+        if (dependent_cell == dependent_cell_mode::VARIABLE)
         {
             this->update_charge_state_of_dependent_cell();
         }
-        if (energy_calculation)
+        if (energy_calc_mode == energy_calculation::UPDATE)
         {
             this->recompute_system_energy();
         }
@@ -1585,9 +1588,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * If that's the case, it is increased by one and afterward, the charge configuration is updated by invoking the
      * `index_to_charge_distribution()` function.
      */
-    void increase_charge_index_by_one(const bool& dependent_cell_fixed    = true,
-                                      const bool& recompute_system_energy = true, const bool& consider_history = false,
-                                      const bool& quickexact = false) noexcept
+
+    void increase_charge_index_by_one(dependent_cell_mode dependent_cell_fixed    = dependent_cell_mode::FIXED,
+                                      energy_calculation  recompute_system_energy = energy_calculation::UPDATE,
+                                      history             consider_history        = history::NEGLECT,
+                                      const bool&         quickexact              = false) noexcept
     {
         if (strg->charge_index.first < strg->max_charge_index)
         {
@@ -1606,10 +1611,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * electrostatic potentials of the new layout.
      * @param quickexact False by default, since this function is only used for `quickexact` anyway.
      */
-    void increase_charge_index_of_sub_layout_by_one(const bool  dependent_cell_fixed    = true,
-                                                    const bool& recompute_system_energy = true,
-                                                    const bool& consider_history        = false,
-                                                    const bool& quickexact              = true) noexcept
+    void
+    increase_charge_index_of_sub_layout_by_one(dependent_cell_mode dependent_cell_fixed    = dependent_cell_mode::FIXED,
+                                               energy_calculation  recompute_system_energy = energy_calculation::UPDATE,
+                                               history             consider_history        = history::NEGLECT,
+                                               const bool&         quickexact              = true) noexcept
     {
         if (strg->charge_index_sublayout.first < strg->max_charge_index_sulayout)
         {
@@ -1630,14 +1636,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * to speed up the calculation of the calculation of the local potential, etc.
      */
     void set_charge_index_by_gray_code(const uint64_t current_gray_code, const uint64_t previous_gray_code,
-                                       const bool& dependent_cell_fixed    = true,
-                                       const bool& recompute_system_energy = true,
-                                       const bool& consider_history        = false) noexcept
+                                       dependent_cell_mode dependent_cell   = dependent_cell_mode::FIXED,
+                                       energy_calculation  energy_calc_mode = energy_calculation::UPDATE,
+                                       history             history_mode     = history::NEGLECT) noexcept
     {
         if (current_gray_code <= strg->max_charge_index)
         {
             this->assign_charge_index_by_two_gray_codes(current_gray_code, previous_gray_code);
-            this->update_after_charge_change(dependent_cell_fixed, recompute_system_energy, consider_history);
+            this->update_after_charge_change(dependent_cell, energy_calc_mode, history_mode);
         }
     }
     /**
@@ -1647,7 +1653,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         strg->charge_index_sublayout.first = 0;
         this->index_to_charge_distribution(true);
-        this->update_after_charge_change(false, false, true);
+        this->update_after_charge_change(dependent_cell_mode::VARIABLE, energy_calculation::KEEP, history::CONSIDER);
     }
     /**
      * Returns the maximum index of the cell-level layout.

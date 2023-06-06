@@ -6,6 +6,7 @@
 #define FICTION_QUICKSIM_HPP
 
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
+#include "fiction/algorithms/simulation/sidb/enum_classes_for_charge_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
@@ -86,7 +87,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_lyt.set_physical_parameters(ps.phys_params);
         charge_lyt.set_base_number(2);
         charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
-        charge_lyt.update_after_charge_change(false);
+        charge_lyt.update_after_charge_change(dependent_cell_mode::VARIABLE);
         const auto negative_sidb_indices = charge_lyt.negative_sidb_detection();
 
         if (charge_lyt.is_physically_valid())
