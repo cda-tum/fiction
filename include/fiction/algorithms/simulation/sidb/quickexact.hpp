@@ -53,10 +53,6 @@ struct quickexact_params
      */
     automatic_base_number_detection base_number_detection = automatic_base_number_detection::ON;
     /**
-     * All placed defects (cell + defect).
-     */
-    std::unordered_map<typename Lyt::cell, const sidb_defect> defects{};
-    /**
      * Local external electrostatic potentials (e.g locally applied electrodes).
      */
     std::unordered_map<typename Lyt::cell, double> local_external_potential = {};
@@ -73,17 +69,17 @@ template <typename Lyt>
 class quickexact_impl
 {
   public:
-    quickexact_impl(Lyt& lyt, const quickexact_params<Lyt>& params) :
+    quickexact_impl(Lyt& lyt, const quickexact_params<Lyt>& parameter) :
             layout{lyt},
             charge_lyt{lyt, params.physical_parameters, sidb_charge_state::NEGATIVE},
-            parameter{params}
+            params{parameter}
     {}
 
-    void run()
+    sidb_simulation_result<Lyt> simulation_with_defects()
     {
         sidb_simulation_result<Lyt> simulation_result{};
         simulation_result.algorithm_name      = "quickexact";
-        simulation_result.physical_parameters = parameter.physical_parameters;
+        simulation_result.physical_parameters = params.physical_parameters;
         mockturtle::stopwatch<>::duration time_counter{};
         {
             const mockturtle::stopwatch stop{time_counter};
@@ -93,13 +89,11 @@ class quickexact_impl
             //  efficient way to prune the search space by 2^k with k being the number of detected negatively charged
             //  SiDBs.
             //  Determine if three state simulation (i.e. positively charged SiDBs can occur) is required.
-            bool three_state_simulation_required = false;
-            if (parameter.base_number_detection == automatic_base_number_detection::ON)
-            {
-                three_state_simulation_required = charge_lyt.three_state_sim_required();
-            }
+            const bool three_state_simulation_required =
+                params.base_number_detection == automatic_base_number_detection::ON &&
+                charge_lyt.three_state_sim_required();
 
-            // If layout has at least two SiDBs, the code inside this if-statement is executed.
+            // If the given layout has at least two SiDBs, the code inside this if-statement is executed.
             if (number_of_SiDBs > 1)
             {
                 this->generate_layout_without_negative_sidbs();
@@ -108,46 +102,51 @@ class quickexact_impl
             {
                 // The first cell from all_sidbs_in_lyt_without_negative_detected_ones is chosen as the dependent cell
                 // to initialize the layout (detected negatively charged SiDBs were erased in the step before).
-                charge_distribution_surface charge_lyt_new{layout, parameter.physical_parameters,
-                                                           sidb_charge_state::NEUTRAL,
-                                                           all_sidbs_in_lyt_without_negative_detected_ones[0]};
-                charge_lyt_new.set_local_external_potential(parameter.local_external_potential);
-                charge_lyt_new.set_global_external_potential(parameter.global_potential);
+                charge_distribution_surface charge_lyt_with_assigned_dependent_cell{
+                    layout, params.physical_parameters, sidb_charge_state::NEUTRAL,
+                    all_sidbs_in_lyt_without_negative_detected_ones[0]};
+                charge_lyt_with_assigned_dependent_cell.set_local_external_potential(params.local_external_potential);
+                charge_lyt_with_assigned_dependent_cell.set_global_external_potential(params.global_potential);
                 // IMPORTANT: The detected negatively charged SiDBs (they have to be negatively charged to fulfill the
                 // population stability) are considered as negatively charged defects in the layout. Hence, there are no
                 // "real" defects assigned but in order to set some SiDBs with a fixed negative charge, this way of
                 // implementation is chosen.
                 for (const auto& cell : detected_negative_sidbs)
                 {
-                    charge_lyt_new.assign_defect(cell, sidb_defect{sidb_defect_type::UNKNOWN, -1,
-                                                                   charge_lyt_new.get_phys_params().epsilon_r,
-                                                                   charge_lyt_new.get_phys_params().lambda_tf});
+                    charge_lyt_with_assigned_dependent_cell.assign_defect(
+                        cell, sidb_defect{sidb_defect_type::UNKNOWN, -1,
+                                          charge_lyt_with_assigned_dependent_cell.get_phys_params().epsilon_r,
+                                          charge_lyt_with_assigned_dependent_cell.get_phys_params().lambda_tf});
                 }
-                for (const auto& [cell, defect] : real_placed_defects)
-                {
-                    charge_lyt_new.assign_defect(cell, defect);
-                }
+                layout.foreach_cell(
+                    [this](const auto& cell)
+                    {
+                        //                        if (layout.get_sidb_defect(cell) !=
+                        //                        sidb_defect{sidb_defect_type::NONE})
+                        //                        {
+                        //                            charge_lyt_with_assigned_dependent_cell.assign_defect(cell,
+                        //                            layout.get_sidb_defect(cell));
+                        //                        }
+                    });
+
                 // Update all local potentials, system energy and physically validity. Flag is set to "false" to allow
                 // dependent cell to change its charge state based on the N-1 SiDBs to fulfill the local population
                 // stability at its position.
 
-                // False declares that the dependent cell is updated based on the local potential at the position.
-                charge_lyt_new.update_after_charge_change(false);
+                charge_lyt_with_assigned_dependent_cell.update_after_charge_change(false);
 
-                // If no positively charged DB can occur in the layout, this scope is executed.
+                // If no positively charged DB can occur in the layout.
                 if (!three_state_simulation_required)
                 {
-                    simulation_result.additional_simulation_parameters.emplace_back("base_number",
-                                                                                    static_cast<uint64_t>(2));
-                    this->two_state_simulation(charge_lyt_new, simulation_result);
+                    simulation_result.additional_simulation_params.emplace_back("base_number", uint64_t{2});
+                    this->two_state_simulation(charge_lyt_with_assigned_dependent_cell, simulation_result);
                 }
 
                 // If positively charged DBs can occur in the layout, 3-state simulation is conducted.
                 else
                 {
-                    simulation_result.additional_simulation_parameters.emplace_back("base_number",
-                                                                                    static_cast<uint64_t>(3));
-                    this->three_state_simulation(charge_lyt_new, simulation_result);
+                    simulation_result.additional_simulation_params.emplace_back("base_number", uint64_t{3});
+                    this->three_state_simulation(charge_lyt_with_assigned_dependent_cell, simulation_result);
                 }
             }
 
@@ -164,6 +163,8 @@ class quickexact_impl
                     charge_lyt.set_base_number(2);
                 }
 
+                // A check is made to see if the charge index is still below the maximum charge index. If not, the
+                // charge index is increased and the corresponding charge distribution is checked for physical validity.
                 while (charge_lyt.get_charge_index().first < charge_lyt.get_max_charge_index())
                 {
 
@@ -182,8 +183,7 @@ class quickexact_impl
                     simulation_result.charge_distributions.push_back(charge_lyt_copy);
                 }
             }
-            // If the layout consists of only detected negatively charged SiDBs, this scope is
-            // executed.
+            // If the layout consists of only detected negatively charged SiDBs.
             else if (all_sidbs_in_lyt_without_negative_detected_ones.empty() && number_of_SiDBs > 1)
             {
                 charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
@@ -195,12 +195,128 @@ class quickexact_impl
             }
         }
         simulation_result.simulation_runtime = time_counter;
-        result                               = simulation_result;
+        return simulation_result;
     }
 
-    sidb_simulation_result<Lyt> get_simulation_results() const
+    sidb_simulation_result<Lyt> simulation_without_defects()
     {
-        return result;
+        sidb_simulation_result<Lyt> simulation_result{};
+        simulation_result.algorithm_name      = "quickexact";
+        simulation_result.physical_parameters = params.physical_parameters;
+        mockturtle::stopwatch<>::duration time_counter{};
+        {
+            const mockturtle::stopwatch stop{time_counter};
+            this->initialize_charge_layout();
+
+            //  Determine all SiDBs that have to be negatively charged to fulfill the population stability. This is an
+            //  efficient way to prune the search space by 2^k with k being the number of detected negatively charged
+            //  SiDBs.
+            //  Determine if three state simulation (i.e. positively charged SiDBs can occur) is required.
+            const bool three_state_simulation_required =
+                params.base_number_detection == automatic_base_number_detection::ON &&
+                charge_lyt.three_state_sim_required();
+
+            // If the given layout has at least two SiDBs, the code inside this if-statement is executed.
+            if (number_of_SiDBs > 1)
+            {
+                this->generate_layout_without_negative_sidbs();
+            }
+            if (!all_sidbs_in_lyt_without_negative_detected_ones.empty() && number_of_SiDBs > 1)
+            {
+                // The first cell from all_sidbs_in_lyt_without_negative_detected_ones is chosen as the dependent cell
+                // to initialize the layout (detected negatively charged SiDBs were erased in the step before).
+                charge_distribution_surface charge_lyt_with_assigned_dependent_cell{
+                    layout, params.physical_parameters, sidb_charge_state::NEUTRAL,
+                    all_sidbs_in_lyt_without_negative_detected_ones[0]};
+                charge_lyt_with_assigned_dependent_cell.set_local_external_potential(params.local_external_potential);
+                charge_lyt_with_assigned_dependent_cell.set_global_external_potential(params.global_potential);
+                // IMPORTANT: The detected negatively charged SiDBs (they have to be negatively charged to fulfill the
+                // population stability) are considered as negatively charged defects in the layout. Hence, there are no
+                // "real" defects assigned but in order to set some SiDBs with a fixed negative charge, this way of
+                // implementation is chosen.
+                for (const auto& cell : detected_negative_sidbs)
+                {
+                    charge_lyt_with_assigned_dependent_cell.assign_defect(
+                        cell, sidb_defect{sidb_defect_type::UNKNOWN, -1,
+                                          charge_lyt_with_assigned_dependent_cell.get_phys_params().epsilon_r,
+                                          charge_lyt_with_assigned_dependent_cell.get_phys_params().lambda_tf});
+                }
+                layout.foreach_cell(
+                    [this](const auto& cell)
+                    {
+                        if (layout.get_sidb_defect(cell) != sidb_defect{sidb_defect_type::NONE})
+                        {
+                            charge_lyt_with_assigned_dependent_cell.assign_defect(cell, layout.get_sidb_defect(cell));
+                        }
+                    });
+
+                // Update all local potentials, system energy and physically validity. Flag is set to "false" to allow
+                // dependent cell to change its charge state based on the N-1 SiDBs to fulfill the local population
+                // stability at its position.
+
+                charge_lyt_with_assigned_dependent_cell.update_after_charge_change(false);
+
+                // If no positively charged DB can occur in the layout.
+                if (!three_state_simulation_required)
+                {
+                    simulation_result.additional_simulation_params.emplace_back("base_number", uint64_t{2});
+                    this->two_state_simulation(charge_lyt_with_assigned_dependent_cell, simulation_result);
+                }
+
+                // If positively charged DBs can occur in the layout, 3-state simulation is conducted.
+                else
+                {
+                    simulation_result.additional_simulation_params.emplace_back("base_number", uint64_t{3});
+                    this->three_state_simulation(charge_lyt_with_assigned_dependent_cell, simulation_result);
+                }
+            }
+
+            // In the case with only one SiDB in the layout (due to external potentials or defects, this single SiDB can
+            // be neutrally or even positively charged.)
+            else if (number_of_SiDBs == 1)
+            {
+                if (three_state_simulation_required)
+                {
+                    charge_lyt.set_base_number(3);
+                }
+                else
+                {
+                    charge_lyt.set_base_number(2);
+                }
+
+                // A check is made to see if the charge index is still below the maximum charge index. If not, the
+                // charge index is increased and the corresponding charge distribution is checked for physical validity.
+                while (charge_lyt.get_charge_index().first < charge_lyt.get_max_charge_index())
+                {
+
+                    if (charge_lyt.is_physically_valid())
+                    {
+                        charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                        simulation_result.charge_distributions.push_back(charge_lyt_copy);
+                    }
+                    charge_lyt.increase_charge_index_by_one(
+                        false);  // "false" allows that the charge state of the dependent cell is automatically changed
+                                 // based on the new charge distribution.
+                }
+                if (charge_lyt.is_physically_valid())
+                {
+                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                    simulation_result.charge_distributions.push_back(charge_lyt_copy);
+                }
+            }
+            // If the layout consists of only detected negatively charged SiDBs.
+            else if (all_sidbs_in_lyt_without_negative_detected_ones.empty() && number_of_SiDBs > 1)
+            {
+                charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                for (const auto& cell : detected_negative_sidbs)
+                {
+                    charge_lyt.adding_sidb_to_layout(cell, -1);
+                }
+                simulation_result.charge_distributions.push_back(charge_lyt_copy);
+            }
+        }
+        simulation_result.simulation_runtime = time_counter;
+        return simulation_result;
     }
 
   private:
@@ -350,7 +466,7 @@ class quickexact_impl
     void initialize_charge_layout()
     {
         // defects are initialized.
-        for (const auto& [cell, defect] : parameter.defects)
+        for (const auto& [cell, defect] : params.defects)
         {
             if (defect.epsilon_r == 0 && defect.lambda_tf == 0)
             {
@@ -374,8 +490,8 @@ class quickexact_impl
             }
         }
 
-        charge_lyt.set_local_external_potential(parameter.local_external_potential);
-        charge_lyt.set_global_external_potential(parameter.global_potential, false);
+        charge_lyt.set_local_external_potential(params.local_external_potential);
+        charge_lyt.set_global_external_potential(params.global_potential, false);
         detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
         detected_negative_sidbs.reserve(detected_negative_sidb_indices.size());
         all_sidbs_in_lyt_without_negative_detected_ones = charge_lyt.get_sidb_order();
@@ -402,11 +518,11 @@ class quickexact_impl
                            all_sidbs_in_lyt_without_negative_detected_ones.end(),
                            [this](const typename Lyt::cell& n)
                            {
-                               return std::find(detected_negative_sidbs.begin(), detected_negative_sidbs.end(), n) !=
-                                      detected_negative_sidbs.end();
+                               return std::find(detected_negative_sidbs.cbegin(), detected_negative_sidbs.cend(), n) !=
+                                      detected_negative_sidbs.cend();
                            }),
             all_sidbs_in_lyt_without_negative_detected_ones.end());
-    };
+    }
     /**
      * Cell-level layout
      */
@@ -416,9 +532,9 @@ class quickexact_impl
      */
     charge_distribution_surface<Lyt> charge_lyt{};
     /**
-     * Parameter used for the simulation.
+     * Parameters used for the simulation.
      */
-    quickexact_params<Lyt> parameter{};
+    quickexact_params<Lyt> params{};
     /**
      * Indices of all SiDBs that are detected to be negatively charged in a physically valid layout.
      */
@@ -439,10 +555,6 @@ class quickexact_impl
      * Number of SiDBs of the input layout.
      */
     uint64_t number_of_SiDBs{};
-    /**
-     * Simulation results.
-     */
-    sidb_simulation_result<Lyt> result{};
 };
 
 }  // namespace detail
@@ -466,11 +578,14 @@ sidb_simulation_result<Lyt> quickexact(Lyt& lyt, const quickexact_params<Lyt>& p
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
+    if (has_assign_sidb_defect_v<Lyt>)
+    {
+        detail::quickexact_impl<Lyt> p{lyt, params};
+        return p.simulation_with_defects();
+    }
+
     detail::quickexact_impl<Lyt> p{lyt, params};
-
-    p.run();
-
-    return p.get_simulation_results();
+    return p.simulation_without_defects();
 }
 
 }  // namespace fiction
