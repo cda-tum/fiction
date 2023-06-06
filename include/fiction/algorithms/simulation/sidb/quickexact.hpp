@@ -98,7 +98,7 @@ class quickexact_impl
             //  Determine if three state simulation (i.e. positively charged SiDBs can occur) is required.
             const bool three_state_simulation_required =
                 params.base_number_detection == automatic_base_number_detection::ON &&
-                charge_lyt.three_state_sim_required();
+                charge_lyt.three_state_simulation_required();
 
             // If layout has at least two SiDBs, the code inside this if-statement is executed.
             if (number_of_sidbs > 1)
@@ -112,8 +112,9 @@ class quickexact_impl
                 charge_distribution_surface charge_lyt_with_assigned_dependent_cell{
                     layout, params.physical_parameters, sidb_charge_state::NEUTRAL,
                     all_sidbs_in_lyt_without_negative_detected_ones[0]};
-                charge_lyt_with_assigned_dependent_cell.set_local_external_potential(params.local_external_potential);
-                charge_lyt_with_assigned_dependent_cell.set_global_external_potential(params.global_potential);
+                charge_lyt_with_assigned_dependent_cell.assign_local_external_potential(
+                    params.local_external_potential);
+                charge_lyt_with_assigned_dependent_cell.assign_global_external_potential(params.global_potential);
                 // IMPORTANT: The detected negatively charged SiDBs (they have to be negatively charged to fulfill the
                 // population stability) are considered as negatively charged defects in the layout. Hence, there are no
                 // "real" defects assigned but in order to set some SiDBs with a fixed negative charge, this way of
@@ -156,11 +157,11 @@ class quickexact_impl
             {
                 if (three_state_simulation_required)
                 {
-                    charge_lyt.set_base_number(3);
+                    charge_lyt.assign_base_number(3);
                 }
                 else
                 {
-                    charge_lyt.set_base_number(2);
+                    charge_lyt.assign_base_number(2);
                 }
 
                 // A check is made to see if the charge index is still below the maximum charge index. If not, the
@@ -208,13 +209,13 @@ class quickexact_impl
      */
     void two_state_simulation(charge_distribution_surface<Lyt>& charge_layout)
     {
-        charge_layout.set_base_number(2);
+        charge_layout.assign_base_number(2);
         uint64_t current_charge_index  = 0;
         uint64_t previous_charge_index = 0;
         for (uint64_t i = 0; i <= charge_layout.get_max_charge_index(); i++)
         {
             current_charge_index = (i ^ (i >> 1));  // gray code is used for the charge index.
-            charge_layout.set_charge_index_by_gray_code(
+            charge_layout.assign_charge_index_by_gray_code(
                 current_charge_index, previous_charge_index, dependent_cell_mode::VARIABLE,
                 energy_calculation::KEEP_OLD_ENERGY_VALUE, charge_distribution_history::CONSIDER);
             previous_charge_index = current_charge_index;
@@ -246,11 +247,11 @@ class quickexact_impl
      */
     void three_state_simulation(charge_distribution_surface<Lyt>& charge_layout)
     {
-        charge_layout.set_all_charge_states(sidb_charge_state::NEGATIVE);
+        charge_layout.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_layout.update_after_charge_change();
         // Not executed to detect if 3-state simulation is required, but to detect the SiDBs that could be positively
         // charged (important to speed up the simulation).
-        charge_layout.three_state_sim_required();
+        charge_layout.three_state_simulation_required();
         charge_layout.update_after_charge_change(dependent_cell_mode::VARIABLE);
         while (charge_layout.get_charge_index().first < charge_layout.get_max_charge_index())
         {
@@ -369,8 +370,8 @@ class quickexact_impl
             }
         }
 
-        charge_lyt.set_local_external_potential(params.local_external_potential);
-        charge_lyt.set_global_external_potential(params.global_potential, dependent_cell_mode::VARIABLE);
+        charge_lyt.assign_local_external_potential(params.local_external_potential);
+        charge_lyt.assign_global_external_potential(params.global_potential, dependent_cell_mode::VARIABLE);
         detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
         detected_negative_sidbs.reserve(detected_negative_sidb_indices.size());
         all_sidbs_in_lyt_without_negative_detected_ones = charge_lyt.get_sidb_order();

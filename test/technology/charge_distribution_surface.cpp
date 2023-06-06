@@ -213,7 +213,7 @@ TEMPLATE_TEST_CASE(
         charge_layout.assign_charge_state({5, 6}, sidb_charge_state::NEGATIVE);
 
         // all SiDBs' charge states are set to positive
-        charge_layout.set_all_charge_states(sidb_charge_state::POSITIVE);
+        charge_layout.assign_all_charge_states(sidb_charge_state::POSITIVE);
 
         // calculate potential between two sidbs (charge sign not included)
         CHECK(charge_layout.potential_between_sidbs({5, 4}, {5, 5}) > 0);
@@ -229,10 +229,10 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({5, 6}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_state({5, 1}) == sidb_charge_state::NONE);
 
-        charge_layout.set_all_charge_states(sidb_charge_state::POSITIVE);
+        charge_layout.assign_all_charge_states(sidb_charge_state::POSITIVE);
 
         // all SiDBs' charge states are set to neutral
-        charge_layout.set_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
         // read SiDBs' charge states
         CHECK(charge_layout.get_charge_state({5, 4}) == sidb_charge_state::NEUTRAL);
@@ -240,10 +240,10 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({5, 6}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_layout.get_charge_state({5, 1}) == sidb_charge_state::NONE);
 
-        charge_layout.set_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
         // all SiDBs' charge states are set to negative
-        charge_layout.set_all_charge_states(sidb_charge_state::NEGATIVE);
+        charge_layout.assign_all_charge_states(sidb_charge_state::NEGATIVE);
 
         // read SiDBs' charge states
         CHECK(charge_layout.get_charge_state({5, 4}) == sidb_charge_state::NEGATIVE);
@@ -251,7 +251,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({5, 6}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 1}) == sidb_charge_state::NONE);
 
-        charge_layout.set_all_charge_states(sidb_charge_state::NEGATIVE);
+        charge_layout.assign_all_charge_states(sidb_charge_state::NEGATIVE);
     }
 
     SECTION("overwrite the charge state")
@@ -361,7 +361,7 @@ TEMPLATE_TEST_CASE(
                 CHECK(*p < 0.0);
             });
 
-        charge_layout.set_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
         charge_layout.update_local_potential();
 
@@ -392,13 +392,13 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_system_energy() > 0);
 
         // system energy is zero when all SiDBs are neutrally charged.
-        charge_layout.set_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_layout.update_local_potential();
         charge_layout.recompute_system_energy();
         CHECK_THAT(charge_layout.get_system_energy(), Catch::Matchers::WithinAbs(0.0, 0.00001));
 
         // system energy is zero when all SiDBs are positively charged.
-        charge_layout.set_all_charge_states(sidb_charge_state::POSITIVE);
+        charge_layout.assign_all_charge_states(sidb_charge_state::POSITIVE);
         charge_layout.update_local_potential();
         charge_layout.recompute_system_energy();
         CHECK(charge_layout.get_system_energy() > 0);
@@ -489,7 +489,7 @@ TEMPLATE_TEST_CASE(
                    Catch::Matchers::WithinAbs(0, fiction::physical_constants::POP_STABILITY_ERR));
         CHECK_THAT(*charge_layout_new.get_local_potential({1, 3, 0}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
         CHECK_THAT(*charge_layout_new.get_local_potential({10, 5, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
-        charge_layout_new.set_all_charge_states(sidb_charge_state::POSITIVE);
+        charge_layout_new.assign_all_charge_states(sidb_charge_state::POSITIVE);
         charge_layout_new.update_after_charge_change();
         CHECK(charge_layout_new.get_charge_state({0, 0, 1}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout_new.get_charge_state({1, 3, 0}) == sidb_charge_state::POSITIVE);
@@ -499,16 +499,16 @@ TEMPLATE_TEST_CASE(
         CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) > -0.5);
         CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) > -0.5);
 
-        charge_layout_new.set_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_layout_new.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
-        charge_layout_new.set_local_external_potential({{{0, 0, 1}, -0.1}});
+        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.1}});
         CHECK_THAT(*charge_layout_new.get_local_potential({0, 0, 1}) + 0.1,
                    Catch::Matchers::WithinAbs(0, fiction::physical_constants::POP_STABILITY_ERR));
         CHECK_THAT(*charge_layout_new.get_local_potential({1, 3, 0}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
         CHECK_THAT(*charge_layout_new.get_local_potential({10, 5, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
 
-        charge_layout_new.set_local_external_potential({{{0, 0, 1}, -0.5}, {{10, 5, 1}, -0.1}});
-        charge_layout_new.set_all_charge_states(sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.5}, {{10, 5, 1}, -0.1}});
+        charge_layout_new.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_layout_new.update_after_charge_change();
 
         CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) < -0.5);
@@ -525,7 +525,7 @@ TEMPLATE_TEST_CASE(
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL};
         CHECK(charge_layout.get_external_potentials().empty());
-        charge_layout.set_global_external_potential(-0.1);
+        charge_layout.assign_global_external_potential(-0.1);
         CHECK(!charge_layout.get_external_potentials().empty());
 
         CHECK_THAT(*charge_layout.get_local_potential({0, 0, 1}) + 0.1,
@@ -547,7 +547,7 @@ TEMPLATE_TEST_CASE(
         charge_layout_new.update_after_charge_change();
         CHECK(charge_layout_new.is_physically_valid());
 
-        charge_layout_new.set_global_external_potential(0.2);
+        charge_layout_new.assign_global_external_potential(0.2);
         CHECK(!charge_layout_new.is_physically_valid());
 
         charge_layout_new.assign_charge_state({0, 0, 0}, sidb_charge_state::NEGATIVE);
@@ -691,7 +691,7 @@ TEMPLATE_TEST_CASE(
         CHECK(negative_sidbs[2] == 2);
         CHECK(charge_layout_new.get_charge_index().first == 0);
 
-        charge_layout_new.set_all_charge_states(sidb_charge_state::POSITIVE);
+        charge_layout_new.assign_all_charge_states(sidb_charge_state::POSITIVE);
         CHECK(charge_layout_new.get_charge_state({0, 0, 1}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout_new.get_charge_state({1, 3, 0}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout_new.get_charge_state({10, 5, 1}) == sidb_charge_state::POSITIVE);
@@ -699,7 +699,7 @@ TEMPLATE_TEST_CASE(
         charge_layout_new.charge_distribution_to_index();
         CHECK(charge_layout_new.get_charge_index().first == 26);
 
-        charge_layout_new.set_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_layout_new.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
         charge_layout_new.charge_distribution_to_index();
         CHECK(charge_layout_new.get_charge_index().first == 13);
@@ -1196,7 +1196,7 @@ TEMPLATE_TEST_CASE(
 
         const sidb_simulation_parameters params{3, -0.28};
         charge_distribution_surface      charge_lyt_first{lyt, params, sidb_charge_state::POSITIVE};
-        charge_lyt_first.set_global_external_potential(-2.0);
+        charge_lyt_first.assign_global_external_potential(-2.0);
         CHECK(charge_lyt_first.is_physically_valid());
     }
 
@@ -1213,7 +1213,7 @@ TEMPLATE_TEST_CASE(
 
         const sidb_simulation_parameters params{3, -0.28};
         charge_distribution_surface      charge_lyt_first{lyt, params, sidb_charge_state::NEGATIVE};
-        charge_lyt_first.three_state_sim_required();
+        charge_lyt_first.three_state_simulation_required();
         const auto positive_candidates = charge_lyt_first.get_positive_candidates();
         REQUIRE(positive_candidates.size() == 3);
         uint64_t loop_counter = 0;

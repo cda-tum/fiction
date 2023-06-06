@@ -327,9 +327,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Set the physical parameters for the simulation.
      *
-     * @param params Physical parameters to be set.
+     * @param params Physical parameters to be assigned.
      */
-    void set_physical_parameters(const sidb_simulation_parameters& params) noexcept
+    void assign_physical_parameters(const sidb_simulation_parameters& params) noexcept
     {
         if ((strg->phys_params.lat_a == params.lat_a) && (strg->phys_params.lat_b == params.lat_b) &&
             (strg->phys_params.lat_c == params.lat_c))
@@ -357,9 +357,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Set the base number for the simulation.
      *
-     * @param base Base number to be set.
+     * @param base Base number to be assigned.
      */
-    void set_base_number(const uint8_t base) noexcept
+    void assign_base_number(const uint8_t base) noexcept
     {
         strg->phys_params.base    = base;
         strg->charge_index.second = base;
@@ -509,15 +509,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param index The index of the cell to which a charge state is to be assigned.
      * @param cs The charge state to be assigned to the cell.
-     * @param update_chargeconf if set to `true`, the charge distribution index is updated after the charge distribution
-     * is changed.
+     * @param update_charge_configuration if set to `true`, the charge distribution index is updated after the charge
+     * distribution is changed.
      */
     void assign_charge_state_by_cell_index(const uint64_t index, const sidb_charge_state& cs,
-                                           const bool update_chargeconf = true) noexcept
+                                           const bool update_charge_configuration = true) noexcept
     {
         strg->cell_charge[index] = cs;
 
-        if (update_chargeconf)
+        if (update_charge_configuration)
         {
             this->charge_distribution_to_index();
         }
@@ -527,7 +527,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param cs The charge state to be assigned to all the SiDBs.
      */
-    void set_all_charge_states(const sidb_charge_state& cs) noexcept
+    void assign_all_charge_states(const sidb_charge_state& cs) noexcept
     {
         for (uint64_t i = 0u; i < strg->cell_charge.size(); ++i)
         {
@@ -537,14 +537,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->charge_distribution_to_index();
     }
     /**
-     * This function can be used to set a global external electrostatic potential to the layout (e.g this could be a
+     * This function can be used to assign a global external electrostatic potential to the layout (e.g this could be a
      * planar external electrode).
      *
      * @param potential_value Value of the global external electrostatic potential (e.g. -0.3). Charge-transition levels
      * are shifted by this value.
      */
-    void set_global_external_potential(const double&       potential_value,
-                                       dependent_cell_mode dependent_cell = dependent_cell_mode::FIXED) noexcept
+    void assign_global_external_potential(const double&       potential_value,
+                                          dependent_cell_mode dependent_cell = dependent_cell_mode::FIXED) noexcept
     {
         this->foreach_cell(
             [this, &potential_value](const auto& cell) {
@@ -581,7 +581,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return return value is true when three state simulation is required.
      */
-    bool three_state_sim_required() noexcept
+    bool three_state_simulation_required() noexcept
     {
         this->update_after_charge_change();
         strg->three_state_cells                    = {};
@@ -609,7 +609,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
         if (required)
         {
-            this->set_base_number_to_three();
+            this->assign_base_number_to_three();
         }
         return required;
     }
@@ -906,7 +906,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * This function can be used to assign an external electrostatic potential to the layout. All important attributes
      * of the charge layout are updated automatically.
      */
-    void set_local_external_potential(const std::unordered_map<typename Lyt::cell, double>& external_voltage) noexcept
+    void
+    assign_local_external_potential(const std::unordered_map<typename Lyt::cell, double>& external_voltage) noexcept
     {
         strg->local_external_pot = external_voltage;
         this->update_after_charge_change();
@@ -945,7 +946,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * The function calculates the local electrostatic potential for each SiDB position and external electrostatic
      * potentials (generated by electrodes, defects, etc.) are included.
      *
-     * @param consider_history If set to true, the changed cells due to
+     * @param history_mode If set to NEGLECT, the local electrostatic is calculated from scratch, without using the
+     * results of the previous charge distribution.
      */
     void update_local_potential(
         const charge_distribution_history& history_mode = charge_distribution_history::NEGLECT) noexcept
@@ -1103,7 +1105,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Sets the electrostatic system energy to zero. Can be used if only one SiDB is charged.
      */
-    void set_system_energy_to_zero() noexcept
+    void assign_system_energy_to_zero() noexcept
     {
         strg->system_energy = 0.0;
     }
@@ -1400,7 +1402,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             // A charge index of zero corresponds to a layout with all SiDBs set to negative.
             if (charge_quot == 0)
             {
-                this->set_all_charge_states(sidb_charge_state::NEGATIVE);
+                this->assign_all_charge_states(sidb_charge_state::NEGATIVE);
             }
             else
             {
@@ -1668,12 +1670,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * The charge index of the sublayout is increased by one and the charge distribution is updated correspondingly.
      *
-     * @param dependent_cell_fixed If set to true, the dependent cell's charge state is fixed and does not change if the
-     * local electrostatic potential requires.
-     * @param recompute_system_energy If set to true, the total electrostatic potential energy is computed.
-     * @param consider_history If set to true, the previous charge distribution is used to calculate the local
-     * electrostatic potentials of the new layout.
-     * @param quickexact False by default, since this function is only used for `quickexact` anyway.
+     * @param dependent_cell_fixed If set to FIXED, the dependent cell's charge state is fixed and does not change if
+     * the local electrostatic potential requires.
+     * @param recompute_system_energy If set to UPDATE_ENERGY, the total electrostatic potential energy is computed.
+     * @param consider_history If set to NEGLECT, the previous charge distribution is calculated from scratch.
+     * @param engine Set to QUICKEXACT by default, since this function is only used for `quickexact` anyway.
      */
     void increase_charge_index_of_sub_layout_by_one(
         const dependent_cell_mode&         dependent_cell_fixed    = dependent_cell_mode::FIXED,
@@ -1689,17 +1690,17 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
     /**
-     * The charge index is set by a gray code number in decimal.
+     * The charge index is assigned by a gray code number in decimal.
      *
      * @param current_gray_code gray code in decimal representing the new charge distribution.
      * @param previous_gray_code gray code in decimal representing the old charge distribution.
-     * @param dependent_cell_fixed if set to true, the dependent cell's charge state is changed based on the local
+     * @param dependent_cell if set to VARIABLE, the dependent cell's charge state is changed based on the local
      * potential at its position.
-     * @param recompute_system_energy if set to true, the system energy is calculated for the new charge distribution.
-     * @param consider_histroy if set to true, the cells which changed due to the change of the charge index, are used
-     * to speed up the calculation of the calculation of the local potential, etc.
+     * @param energy_calc_mode if set to UPDATE_ENERGY, the system energy is calculated for the new charge distribution.
+     * @param history_mode if set to NEGLECT, the values of the previous charge distribution are not used to speed up
+     * the calculation.
      */
-    void set_charge_index_by_gray_code(
+    void assign_charge_index_by_gray_code(
         const uint64_t current_gray_code, const uint64_t previous_gray_code,
         const dependent_cell_mode&         dependent_cell   = dependent_cell_mode::FIXED,
         const energy_calculation&          energy_calc_mode = energy_calculation::UPDATE_ENERGY,
@@ -1892,9 +1893,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->validity_check();
         if (three_state_simulation_detection)
         {
-            this->set_all_charge_states(sidb_charge_state::NEGATIVE);
+            this->assign_all_charge_states(sidb_charge_state::NEGATIVE);
             this->update_after_charge_change();
-            this->three_state_sim_required();
+            this->three_state_simulation_required();
             if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), strg->dependent_cell) !=
                 strg->three_state_cells.cend())
             {
@@ -1907,10 +1908,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     };
 
-    // This function is used when three state simulation is required (i.e. three_state_sim_required = true) to set the
-    // base number to three. However, it is distinguished between the cells that can be positively charged and the ones
-    // that cannot.
-    void set_base_number_to_three() noexcept
+    // This function is used when three state simulation is required (i.e. three_state_simulation_required = true) to
+    // set the base number to three. However, it is distinguished between the cells that can be positively charged and
+    // the ones that cannot.
+    void assign_base_number_to_three() noexcept
     {
         strg->phys_params.base              = 3;
         strg->charge_index.second           = 2;

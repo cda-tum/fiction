@@ -46,8 +46,8 @@ exhaustive_ground_state_simulation(const Lyt&                        lyt,
 
         charge_distribution_surface charge_lyt{lyt};
 
-        charge_lyt.set_physical_parameters(params);
-        charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
+        charge_lyt.assign_physical_parameters(params);
+        charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change();
 
         while (charge_lyt.get_charge_index().first < charge_lyt.get_max_charge_index())
