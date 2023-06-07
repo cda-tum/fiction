@@ -64,3 +64,48 @@ TEST_CASE("Defect extent", "[sidb-defects]")
     CHECK(defect_extent(sidb_defect{sidb_defect_type::GUNK}) == neutral_spacing);
     CHECK(defect_extent(sidb_defect{sidb_defect_type::UNKNOWN}) == neutral_spacing);
 }
+
+TEST_CASE("Compare Defect", "[sidb-defects]")
+{
+    SECTION("Different types")
+    {
+        const sidb_defect defect_one{sidb_defect_type::GUNK};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN};
+        CHECK(defect_one != defect_two);
+    }
+
+    SECTION("Different charge")
+    {
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -5};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1};
+        CHECK(defect_one != defect_two);
+    }
+
+    SECTION("Different epsilon_r")
+    {
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1, 2};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1, 5};
+        CHECK(defect_one != defect_two);
+    }
+
+    SECTION("Different lambda_tf")
+    {
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1, 2, 4};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1, 2, 4};
+        CHECK(defect_one != defect_two);
+    }
+
+    SECTION("Completely different")
+    {
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1, 2, 4};
+        const sidb_defect defect_two{sidb_defect_type::DB, 5, 5, 0.3};
+        CHECK(defect_one != defect_two);
+    }
+
+    SECTION("Identical Defects")
+    {
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1, 2, 4};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1, 2, 4};
+        CHECK(defect_one == defect_two);
+    }
+}
