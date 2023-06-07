@@ -73,6 +73,31 @@ struct sidb_defect
     const double lambda_tf;
 };
 /**
+ * This operator compares two sidb_defect instances for equality. It checks if the type, charge,
+ * epsilon_r, and lambda_tf members of the two instances are equal.
+ *
+ * @param lhs The left-hand side sidb_defect instance.
+ * @param rhs The right-hand side sidb_defect instance.
+ * @return Returns true if the two sidb_defect instances are equal, false otherwise.
+ */
+static constexpr bool operator==(const sidb_defect& lhs, const sidb_defect& rhs) noexcept
+{
+    return lhs.type == rhs.type && lhs.charge == rhs.charge && lhs.epsilon_r == rhs.epsilon_r &&
+           lhs.lambda_tf == rhs.lambda_tf;
+}
+/**
+ * This operator compares two sidb_defect instances for inequality. It uses the operator== to check
+ * if the two instances are equal and returns the negation of the result.
+ *
+ * @param lhs The left-hand side sidb_defect instance.
+ * @param rhs The right-hand side sidb_defect instance.
+ * @return Returns true if the two sidb_defect instances are not equal, false if they are equal.
+ */
+static constexpr bool operator!=(const sidb_defect& lhs, const sidb_defect& rhs) noexcept
+{
+    return !(lhs == rhs);
+}
+/**
  * Checks whether the given defect is charged. Charged defects are to be avoided by a larger distance.
  *
  * @param defect Defect type to check.
