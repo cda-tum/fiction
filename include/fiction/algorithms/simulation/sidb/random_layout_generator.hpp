@@ -95,7 +95,8 @@ class generate_random_layout_impl
 
                 if (parameter.prevent_positive_charges)
                 {
-                    // it checks if new coordinate is not closer than 2 cells (Euclidean distance).
+                    // it checks if the new coordinate is not closer than 2 cells (Euclidean distance) from an already
+                    // placed SiDB.
                     lyt.foreach_cell(
                         [this, &lyt, &random_coordinate, &constraint_violation_positive_sidbs](const auto& c1)
                         {
@@ -105,7 +106,7 @@ class generate_random_layout_impl
                             }
                         });
                 }
-
+                // If the constraint that no positive SiDBs occur is satisfied, the SiDB is added to the layout.
                 if (!constraint_violation_positive_sidbs)
                 {
                     lyt.assign_cell_type(random_coordinate, Lyt::cell_type::NORMAL);
