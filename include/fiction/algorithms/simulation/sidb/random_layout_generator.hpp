@@ -144,11 +144,6 @@ class generate_random_layout_impl
         return layout;
     }
 
-    //    Lyt get_layout() const
-    //    {
-    //        return layout;
-    //    }
-
   private:
     Lyt                       layout;
     random_layout_params<Lyt> parameter;
