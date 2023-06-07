@@ -97,7 +97,7 @@ Time-to-Solution (TTS) Statistics
 
 
 Random Layout Generator
-#################################
+#######################
 
 **Header:** ``fiction/algorithms/simulation/sidb/random_layout_generator.hpp``
 

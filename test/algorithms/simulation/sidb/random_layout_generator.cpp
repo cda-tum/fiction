@@ -12,6 +12,9 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 
+#include <sstream>
+#include <vector>
+
 using namespace fiction;
 
 TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",

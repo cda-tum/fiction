@@ -15,48 +15,80 @@ using namespace fiction;
 
 int main()  // NOLINT
 {
-    // This script generates random layouts as .sqd file.
-    using cell_level_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
-    const std::string     folder_name = "random_layouts_test/";
-    std::filesystem::path folder_path(EXPERIMENTS_PATH);
-    folder_path /= folder_name;
+    try
+    {
+        // This script generates random layouts as .sqd file.
+        using cell_level_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+        const std::string     folder_name = "random_layouts_test/";
+        std::filesystem::path folder_path(EXPERIMENTS_PATH);
 
-    const bool result = std::filesystem::create_directory(folder_path);
-    if (result)
-    {
-        std::cout << "Folder *random_layouts* created successfully" << std::endl;
-    }
-    else
-    {
-        std::cout << "Failed to create folder" << std::endl;
-    }
-
-    for (uint64_t num_sidbs = 25; num_sidbs < 26; num_sidbs++)
-    {
-        const std::filesystem::path dir_path = folder_path.string() + "number_sidbs_" + std::to_string(num_sidbs);
-        const std::filesystem::path dir_path_sqd =
-            folder_path.string() + "number_sidbs_" + std::to_string(num_sidbs) + "/sqd";
-        const std::filesystem::path dir_path_loc =
-            folder_path.string() + "number_sidbs_" + std::to_string(num_sidbs) + "/loc";
-        if (!std::filesystem::exists(dir_path))
+        if (std::filesystem::exists(folder_path))
         {
-            std::filesystem::create_directory(dir_path);
-            std::cout << "Folder created." << std::endl;
-            std::filesystem::create_directory(dir_path_sqd);
-            std::filesystem::create_directory(dir_path_loc);
+            std::cout << "Folder exists!" << std::endl;
         }
         else
         {
-            std::cout << "Folder already exists." << std::endl;
-        }
 
-        std::vector<cell_level_layout>                all_layouts{};
-        const random_layout_params<cell_level_layout> params{{4, 4}, num_sidbs, false};
-        for (uint64_t number_of_layouts = 0; number_of_layouts < 10; number_of_layouts++)
-        {
-            const auto lyts = generate_random_layout<cell_level_layout>(
-                params, dir_path_sqd.string() + "/layout_" + std::to_string(number_of_layouts) + ".sqd", all_layouts);
-            all_layouts.push_back(lyts);
+            folder_path /= folder_name;
+
+            if (std::filesystem::create_directory(folder_path))
+            {
+                std::cout << "Folder *random_layouts* created successfully" << std::endl;
+            }
+            else
+            {
+                std::cout << "Failed to create folder" << std::endl;
+            }
         }
+        // number of randomly generated layouts for a given number of SiDBs.
+        uint64_t number_of_layouts = 10;
+        // number of SiDBs of the first bunch of randomly generated layouts.
+        uint64_t number_of_sidbs_lower_limit = 25;
+        // number of SiDBs of the final bunch of randomly generated layouts
+        uint64_t number_of_sidbs_upper_limit = 28;
+
+        for (uint64_t num_sidbs = number_of_sidbs_lower_limit; num_sidbs < number_of_sidbs_upper_limit; num_sidbs++)
+        {
+            const std::filesystem::path dir_path = folder_path.string() + "number_sidbs_" + std::to_string(num_sidbs);
+            const std::filesystem::path dir_path_sqd =
+                folder_path.string() + "number_sidbs_" + std::to_string(num_sidbs) + "/sqd";
+            const std::filesystem::path dir_path_loc =
+                folder_path.string() + "number_sidbs_" + std::to_string(num_sidbs) + "/loc";
+            try
+            {
+                if (!std::filesystem::exists(dir_path))
+                {
+                    std::filesystem::create_directory(dir_path);
+                    std::cout << "Folder created." << std::endl;
+                    std::filesystem::create_directory(dir_path_sqd);
+                    std::filesystem::create_directory(dir_path_loc);
+                }
+                else
+                {
+                    std::cout << "Folder already exists." << std::endl;
+                }
+
+                std::vector<cell_level_layout>                all_layouts{};
+                const random_layout_params<cell_level_layout> params{{4, 4}, num_sidbs, false};
+                // Several randomly generated layouts are created (number of layouts is given by number_of_layouts).
+                // They are stored as .sqd-file in the /sqd folder and the coordinates of all placed SiDBs in /loc.
+                for (auto i = 0u; i < number_of_layouts; i++)
+                {
+                    const auto lyts = generate_random_layout<cell_level_layout>(
+                        params, dir_path_sqd.string() + "/layout_" + std::to_string(i) + ".sqd", all_layouts);
+                    all_layouts.push_back(lyts);
+                }
+            }
+            catch (const std::filesystem::filesystem_error& ex)
+            {
+                // Exception is handled.
+                std::cerr << "Filesystem error: " << ex.what() << std::endl;
+            }
+        }
+    }
+    catch (const std::filesystem::filesystem_error& ex)
+    {
+        // Exception occurred, handle it here
+        std::cerr << "Filesystem error: " << ex.what() << std::endl;
     }
 }

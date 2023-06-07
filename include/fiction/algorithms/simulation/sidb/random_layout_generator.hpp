@@ -14,7 +14,10 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
+#include <cstdint>
 #include <iostream>
+#include <random>
+#include <string_view>
 #include <vector>
 
 namespace fiction
@@ -28,11 +31,11 @@ struct random_layout_params
     /**
      * Aspect ratio of the layout (i.e. the size of the layout).
      */
-    typename Lyt::aspect_ratio max_coordinate;
+    typename Lyt::aspect_ratio dimension;
     /**
      * Number of SiDBs that are placed on the layout.
      */
-    uint64_t number_placed_sidbs = 0;
+    uint64_t number_of_sidbs = 0;
     /**
      * If positively charged SiDBs should be prevented, SiDBs are not placed closer than the minimal_spacing.
      */
@@ -62,26 +65,25 @@ class generate_random_layout_impl
             previous_layouts{all_layouts}
     {}
 
-    void run()
+    Lyt run()
     {
         bool successful_generation = false;
         while (!successful_generation && parameter.maximal_attempts)
         {
             // layout is initialized with given aspect ratio and name.
-            Lyt lyt{parameter.max_coordinate};
-            // maximal x-coordinate is stored.
-            auto x_dimension = parameter.max_coordinate.x;
-            // maximal y-coordinate is stored.
-            auto                   y_dimension = parameter.max_coordinate.y;
+            Lyt lyt{parameter.dimension};
+
             static std::mt19937_64 generator(std::random_device{}());
             uint64_t               attempt_counter = 0;
+
+            // uniform distribution of [0,x_coordinate].
+            std::uniform_int_distribution<uint64_t> dist_x(0u, static_cast<uint64_t>(lyt.x()));
+            // uniform distribution of [0,y_coordinate].
+            std::uniform_int_distribution<uint64_t> dist_y(0u, static_cast<uint64_t>(lyt.y()));
+
             // this while stops if either all SiDBs are placed or the maximum number of attempts were performed.
-            while (lyt.num_cells() < parameter.number_placed_sidbs && attempt_counter < parameter.maximal_attempts)
+            while (lyt.num_cells() < parameter.number_of_sidbs && attempt_counter < parameter.maximal_attempts)
             {
-                // uniform distribution of [0,x_coordinate].
-                std::uniform_int_distribution<uint64_t> dist_x(0u, static_cast<uint64_t>(x_dimension));
-                // uniform distribution of [0,y_coordinate].
-                std::uniform_int_distribution<uint64_t> dist_y(0u, static_cast<uint64_t>(y_dimension));
                 // random integer from [0,x_coordinate] is selected.
                 const auto random_x_coordinate = dist_x(generator);
                 // random integer from [0,y_coordinate] is selected.
@@ -131,19 +133,20 @@ class generate_random_layout_impl
 
             // if all SiDBs are placed and the new layout is not a duplication, the layout is written to the
             // std::ostream.
-            if (lyt.num_cells() == parameter.number_placed_sidbs && identical_layout_counter == 0)
+            if (lyt.num_cells() == parameter.number_of_sidbs && identical_layout_counter == 0)
             {
                 layout = lyt;
                 write_sqd_layout(lyt, os);
                 successful_generation = true;
             }
         }
-    }
-
-    Lyt get_layout() const
-    {
         return layout;
     }
+
+    //    Lyt get_layout() const
+    //    {
+    //        return layout;
+    //    }
 
   private:
     Lyt                       layout;
@@ -151,6 +154,7 @@ class generate_random_layout_impl
     std::ostream&             os;
     std::vector<Lyt>          previous_layouts;
 };
+
 }  // namespace detail
 
 /**
@@ -168,8 +172,7 @@ Lyt generate_random_layout(const random_layout_params<Lyt>& params, std::ostream
     static_assert(!has_siqad_coord_v<Lyt>, "Lyt is based on SiQAD coordinates");
 
     detail::generate_random_layout_impl<Lyt> p{params, os, layouts};
-    p.run();
-    return p.get_layout();
+    return p.run();
 }
 /**
  * This algorithm generates a layout with randomly distributed SiDBs.
