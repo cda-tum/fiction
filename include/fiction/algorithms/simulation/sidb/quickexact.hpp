@@ -57,10 +57,6 @@ struct quickexact_params
      */
     automatic_base_number_detection base_number_detection = automatic_base_number_detection::ON;
     /**
-     * All placed defects (cell + defect).
-     */
-    std::unordered_map<typename Lyt::cell, const sidb_defect> defects{};
-    /**
      * Local external electrostatic potentials (e.g locally applied electrodes).
      */
     std::unordered_map<typename Lyt::cell, double> local_external_potential = {};
@@ -115,25 +111,29 @@ class quickexact_impl
                 charge_lyt_with_assigned_dependent_cell.assign_local_external_potential(
                     params.local_external_potential);
                 charge_lyt_with_assigned_dependent_cell.assign_global_external_potential(params.global_potential);
+
+                if constexpr (has_get_sidb_defect_v<Lyt>)
+                {
+                    for (const auto& [cell, defect] : real_placed_defects)
+                    {
+                        charge_lyt_with_assigned_dependent_cell.assign_defect_to_charge_distribution_surface(cell,
+                                                                                                             defect);
+                    }
+                }
                 // IMPORTANT: The detected negatively charged SiDBs (they have to be negatively charged to fulfill the
                 // population stability) are considered as negatively charged defects in the layout. Hence, there are no
                 // "real" defects assigned but in order to set some SiDBs with a fixed negative charge, this way of
                 // implementation is chosen.
                 for (const auto& cell : detected_negative_sidbs)
                 {
-                    charge_lyt_with_assigned_dependent_cell.assign_defect(
+                    charge_lyt_with_assigned_dependent_cell.assign_defect_to_charge_distribution_surface(
                         cell, sidb_defect{sidb_defect_type::UNKNOWN, -1,
                                           charge_lyt_with_assigned_dependent_cell.get_phys_params().epsilon_r,
                                           charge_lyt_with_assigned_dependent_cell.get_phys_params().lambda_tf});
                 }
-                for (const auto& [cell, defect] : real_placed_defects)
-                {
-                    charge_lyt_with_assigned_dependent_cell.assign_defect(cell, defect);
-                }
                 // Update all local potentials, system energy and physically validity. Flag is set to "false" to allow
                 // dependent cell to change its charge state based on the N-1 SiDBs to fulfill the local population
                 // stability at its position.
-
                 charge_lyt_with_assigned_dependent_cell.update_after_charge_change(dependent_cell_mode::VARIABLE);
 
                 // If no positively charged SiDB can occur in the layout.
@@ -345,29 +345,17 @@ class quickexact_impl
      */
     void initialize_charge_layout()
     {
-        // defects are initialized.
-        for (const auto& [cell, defect] : params.defects)
+        if constexpr (has_get_sidb_defect_v<Lyt>)
         {
-            if (defect.epsilon_r == 0 && defect.lambda_tf == 0)
-            {
-                charge_lyt.assign_defect(cell,
-                                         sidb_defect{defect.type, defect.charge, charge_lyt.get_phys_params().epsilon_r,
-                                                     charge_lyt.get_phys_params().lambda_tf});
-            }
-            else if (defect.epsilon_r == 0 && defect.lambda_tf != 0)
-            {
-                charge_lyt.assign_defect(
-                    cell, sidb_defect{defect.type, defect.charge, charge_lyt.get_phys_params().epsilon_r});
-            }
-            else if (defect.epsilon_r != 0 && defect.lambda_tf == 0)
-            {
-                charge_lyt.assign_defect(cell, sidb_defect{defect.type, defect.charge, defect.epsilon_r,
-                                                           charge_lyt.get_phys_params().lambda_tf});
-            }
-            else
-            {
-                charge_lyt.assign_defect(cell, defect);
-            }
+            layout.foreach_sidb_defect(
+                [this](const auto& defect)
+                {
+                    if (layout.get_sidb_defect(defect.first) != sidb_defect{sidb_defect_type::NONE})
+                    {
+                        charge_lyt.assign_defect_to_charge_distribution_surface(defect.first,
+                                                                                layout.get_sidb_defect(defect.first));
+                    }
+                });
         }
 
         charge_lyt.assign_local_external_potential(params.local_external_potential);

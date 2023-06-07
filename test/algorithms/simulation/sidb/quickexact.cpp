@@ -11,6 +11,7 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_defects.hpp>
+#include <fiction/technology/sidb_surface.hpp>
 #include <fiction/utils/math_utils.hpp>
 
 using namespace fiction;
@@ -46,14 +47,14 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation", "[ExGS]",
 
 TEMPLATE_TEST_CASE(
     "Single SiDB ExGS simulation with one negatively charge defect (default initialization) in proximity", "[ExGS]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{{20, 10}};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
+                                                  params.physical_parameters.lambda_tf});
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
-
-    params.defects.insert({{1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1}});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -61,14 +62,16 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defect (changed lambda_tf) in proximity",
-                   "[ExGS]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+                   "[ExGS]",
+                   (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{{20, 10}};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
     quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
 
-    params.defects.insert({{1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, 0.0, 2 * 10E-9}});
+    lyt.assign_sidb_defect({1, 2, 0},
+                           sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r, 2 * 10E-9});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -76,14 +79,16 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defec
 }
 
 TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defect (changed epsilon_r) in proximity",
-                   "[ExGS]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+                   "[ExGS]",
+                   (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{{20, 10}};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
 
-    params.defects.insert({{1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, 0.3}});
+    lyt.assign_sidb_defect({1, 2, 0},
+                           sidb_defect{sidb_defect_type::UNKNOWN, -1, 0.3, params.physical_parameters.lambda_tf});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -92,14 +97,15 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defec
 }
 
 TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one highly negatively charge defect in proximity", "[ExGS]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+                   (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{{20, 10}};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
     quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.1}};
 
-    params.defects.insert({{1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10}});
+    lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
+                                                  params.physical_parameters.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -108,16 +114,15 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one highly negatively charg
 
 TEMPLATE_TEST_CASE(
     "Single SiDB ExGS simulation with one highly negatively charge defect in proximity but with high screening",
-    "[ExGS]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+    "[ExGS]", (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{{20, 10}};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.1}};
+    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.1}};
 
-    params.defects.insert({{1, 2, 0},
-                           sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
-                                       params.physical_parameters.lambda_tf * 10E-5}});
+    lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
+                                                  params.physical_parameters.lambda_tf * 10E-5});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -126,14 +131,18 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with two highly negatively and oppositely charged defects in proximity",
-                   "[ExGS]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+                   "[ExGS]",
+                   (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{{20, 10}};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.1}};
-    params.defects.insert({{2, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10}});
-    params.defects.insert({{-2, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 10}});
+    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.1}};
+
+    lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
+                                                  params.physical_parameters.lambda_tf});
+    lyt.assign_sidb_defect({-2, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 10, params.physical_parameters.epsilon_r,
+                                                   params.physical_parameters.lambda_tf});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -288,7 +297,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber", 
     CHECK_THAT(charge_lyt_first.get_system_energy(),
                Catch::Matchers::WithinAbs(0.24602741408, fiction::physical_constants::POP_STABILITY_ERR));
 }
-
+//
 TEMPLATE_TEST_CASE("ExGS simulation of a one-pair BDL wire with two perturbers", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
@@ -525,7 +534,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away)", "[ExGS]",
 }
 
 TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away) with one negatively charged defects in proximity",
-                   "[ExGS]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+                   "[ExGS]",
+                   (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{{20, 10}};
 
@@ -534,8 +544,9 @@ TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away) with one negatively
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
-    params.defects.insert({{1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1}});
+    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
+                                                  params.physical_parameters.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
@@ -548,7 +559,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away) with one negatively
 }
 
 TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away) with two negatively charged defects in proximity",
-                   "[ExGS]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+                   "[ExGS]",
+                   (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{{20, 10}};
 
@@ -557,10 +569,12 @@ TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away) with two negatively
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
 
-    params.defects.insert({{1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1}});
-    params.defects.insert({{31, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1}});
+    lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
+                                                  params.physical_parameters.lambda_tf});
+    lyt.assign_sidb_defect({31, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
+                                                   params.physical_parameters.lambda_tf});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -575,7 +589,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away) with two negatively
 
 TEMPLATE_TEST_CASE(
     "ExGS simulation of four SiDBs (far away) with one negatively and positively charged defect in proximity", "[ExGS]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{{20, 10}};
 
@@ -586,8 +600,10 @@ TEMPLATE_TEST_CASE(
 
     quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
 
-    params.defects.insert({{1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1}});
-    params.defects.insert({{31, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1}});
+    lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, params.physical_parameters.epsilon_r,
+                                                  params.physical_parameters.lambda_tf});
+    lyt.assign_sidb_defect({31, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
+                                                   params.physical_parameters.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());

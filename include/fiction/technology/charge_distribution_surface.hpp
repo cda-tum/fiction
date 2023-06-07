@@ -475,7 +475,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param c The cell to which a defect is assigned.
      * @param defect Defect which is assigned to the layout.
      */
-    void assign_defect(const typename Lyt::cell& c, const sidb_defect& defect) noexcept
+    void assign_defect_to_charge_distribution_surface(const typename Lyt::cell& c, const sidb_defect& defect) noexcept
     {
         if (std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c) == strg->sidb_order.end())
         {
