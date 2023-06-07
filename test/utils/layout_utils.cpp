@@ -10,6 +10,8 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
+#include <cstdint>
+
 using namespace fiction;
 
 TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesian_layout<offset::ucoord_t>),
@@ -59,22 +61,32 @@ TEMPLATE_TEST_CASE("siqad layout is normalized, shifted to positive coordinates"
     }
 }
 
+template <typename T1, typename T2>
+inline auto area_with_padding(const uint64_t& area, const T1& x, const T2& y) noexcept
+{
+    return area + (static_cast<uint64_t>(x) + 1) * ((static_cast<uint64_t>(y) + 1) % 2ul);
+}
+
 TEMPLATE_TEST_CASE("Convert offset::ucoord_t layout to SiQAD coordinate layout", "[layout-utils]", sidb_cell_clk_lyt)
 {
     SECTION("empty layout")
     {
-        TestType lyt{{10, 10}, "test"};
+        const auto x = 10, y = 10;
+
+        TestType lyt{{x, y}, "test"};
 
         auto lyt_transformed = convert_to_siqad_coordinates<TestType>(lyt);
 
         CHECK(lyt_transformed.is_empty());
-        CHECK(lyt_transformed.area() == static_cast<int64_t>(lyt.area()));
+        CHECK(lyt_transformed.area() == area_with_padding(lyt.area(), x, y));
         CHECK(lyt_transformed.get_layout_name() == lyt.get_layout_name());
     }
 
     SECTION("layout with one normal and one input cell")
     {
-        TestType lyt{{5, 3}};
+        const auto x = 5, y = 3;
+
+        TestType lyt{{x, y}};
 
         lyt.assign_cell_type({5, 3}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 1}, TestType::cell_type::INPUT);
@@ -82,14 +94,16 @@ TEMPLATE_TEST_CASE("Convert offset::ucoord_t layout to SiQAD coordinate layout",
         auto lyt_transformed = convert_to_siqad_coordinates<TestType>(lyt);
 
         CHECK(lyt_transformed.num_cells() == 2);
-        CHECK(lyt_transformed.area() == static_cast<int64_t>(lyt.area()));
+        CHECK(lyt_transformed.area() == area_with_padding(lyt.area(), x, y));
         CHECK(lyt_transformed.get_cell_type({5, 1, 1}) == TestType::cell_type::NORMAL);
         CHECK(lyt_transformed.get_cell_type({5, 0, 1}) == TestType::cell_type::INPUT);
     }
 
     SECTION("layout with three cells")
     {
-        TestType lyt{{5, 3}};
+        const auto x = 5, y = 3;
+
+        TestType lyt{{x, y}};
 
         lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 3}, TestType::cell_type::INPUT);
@@ -101,7 +115,7 @@ TEMPLATE_TEST_CASE("Convert offset::ucoord_t layout to SiQAD coordinate layout",
         auto lyt_transformed = convert_to_siqad_coordinates<TestType>(lyt);
 
         CHECK(lyt_transformed.num_cells() == 3);
-        CHECK(lyt_transformed.area() == static_cast<int64_t>(lyt.area()));
+        CHECK(lyt_transformed.area() == area_with_padding(lyt.area(), x, y));
         CHECK(lyt_transformed.get_cell_type({0, 0, 0}) == TestType::cell_type::NORMAL);
         CHECK(lyt_transformed.get_cell_type({5, 1, 1}) == TestType::cell_type::INPUT);
         CHECK(lyt_transformed.get_cell_type({5, 0, 1}) == TestType::cell_type::OUTPUT);
@@ -120,7 +134,7 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to offset::ucoord_t coordinate layout",
         auto lyt_transformed = convert_to_fiction_coordinates<TestType>(lyt);
 
         CHECK(lyt_transformed.is_empty());
-        CHECK(static_cast<int64_t>(lyt_transformed.area()) == lyt.area());
+        CHECK(lyt_transformed.area() == lyt.area());
         CHECK(lyt_transformed.get_layout_name() == lyt.get_layout_name());
     }
 
@@ -136,7 +150,7 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to offset::ucoord_t coordinate layout",
         auto lyt_transformed = convert_to_fiction_coordinates<TestType>(lyt);
 
         CHECK(lyt_transformed.x() == 10);
-        CHECK(lyt_transformed.y() == 4);
+        CHECK(lyt_transformed.y() == 9);
         CHECK(lyt_transformed.num_cells() == 2);
         CHECK(lyt_transformed.get_cell_type({10, 8}) == TestType::cell_type::NORMAL);
         CHECK(lyt_transformed.get_cell_type({0, 0}) == TestType::cell_type::INPUT);
@@ -156,7 +170,7 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to offset::ucoord_t coordinate layout",
         auto lyt_transformed = convert_to_fiction_coordinates<TestType>(lyt);
 
         CHECK(lyt_transformed.num_cells() == 3);
-        CHECK(static_cast<int64_t>(lyt_transformed.area()) == lyt.area());
+        CHECK(lyt_transformed.area() == lyt.area());
         CHECK(lyt_transformed.get_cell_type({5, 6}) == TestType::cell_type::NORMAL);
         CHECK(lyt_transformed.get_cell_type({0, 0}) == TestType::cell_type::INPUT);
         CHECK(lyt_transformed.get_cell_type({5, 2}) == TestType::cell_type::OUTPUT);
@@ -176,13 +190,13 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[
         auto lyt_transformed = convert_to_fiction_coordinates<TestType>(lyt);
 
         CHECK(lyt_transformed.is_empty());
-        CHECK(lyt_transformed.area() == static_cast<int64_t>(lyt.area()));
+        CHECK(lyt_transformed.area() == lyt.area());
         CHECK(lyt_transformed.get_layout_name() == lyt.get_layout_name());
     }
 
     SECTION("layout with one normal and one input cell")
     {
-        sidb_cell_clk_lyt_siqad lyt{{5, 1, 1}};
+        sidb_cell_clk_lyt_siqad lyt{{5, 1}};
 
         lyt.assign_cell_type({5, -1, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 1, 0}, TestType::cell_type::INPUT);
@@ -190,7 +204,7 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[
         auto lyt_transformed = convert_to_fiction_coordinates<TestType>(lyt);
 
         CHECK(lyt_transformed.num_cells() == 2);
-        CHECK(lyt_transformed.area() == static_cast<int64_t>(lyt.area()));
+        CHECK(lyt_transformed.area() == lyt.area());
         CHECK(lyt_transformed.get_cell_type({5, -1}) == TestType::cell_type::NORMAL);
         CHECK(lyt_transformed.get_cell_type({5, 2, 0}) == TestType::cell_type::INPUT);
     }
@@ -209,7 +223,7 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[
         auto lyt_transformed = convert_to_fiction_coordinates<TestType>(lyt);
 
         CHECK(lyt_transformed.num_cells() == 3);
-        CHECK(lyt_transformed.area() == static_cast<int64_t>(lyt.area()));
+        CHECK(lyt_transformed.area() == lyt.area());
         CHECK(lyt_transformed.get_cell_type({5, -6}) == TestType::cell_type::NORMAL);
         CHECK(lyt_transformed.get_cell_type({0, 0}) == TestType::cell_type::INPUT);
         CHECK(lyt_transformed.get_cell_type({5, 6}) == TestType::cell_type::OUTPUT);

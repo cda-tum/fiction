@@ -10,6 +10,7 @@ Layout Printing
 
 .. doxygenfunction:: fiction::print_gate_level_layout
 .. doxygenfunction:: fiction::print_cell_level_layout
+.. doxygenfunction:: fiction::print_charge_layout
 
 Graphviz (DOT) Drawers
 ######################
