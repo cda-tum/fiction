@@ -38,9 +38,9 @@ int main()  // NOLINT
                     {
                         const auto& benchmark = file.path();
 
-                        // Randomly generated layouts have the following file name format: layout_xxx (xxx is the
-                        // numbering). In the following code lines, the file name of the current file is extracted from
-                        // the file path.
+                        // When random layouts are generated with the script random_layout_generation.cpp, they have the
+                        // following file name format: layout_xxx (xxx is the numbering). In the following code lines,
+                        // the file name of the current file is extracted from the file path.
                         const std::string path  = benchmark.string();
                         const uint64_t    start = path.rfind("layout") + 7;
                         const uint64_t    end   = path.rfind(".sqd") - 1;

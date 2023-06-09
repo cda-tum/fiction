@@ -13,11 +13,13 @@
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/hash.hpp"
 
 #include <cstdint>
 #include <iostream>
 #include <random>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
 
 namespace fiction
@@ -51,159 +53,115 @@ struct random_layout_params
     uint64_t maximal_attempts = 10E6;
 };
 
-namespace detail
-{
+/**
+ * Generates a random layout of SiDBs based on the provided parameters.
+ *
+ * @tparam Lyt The layout type.
+ * @param params The parameters for generating the random layout.
+ * @return A randomly generated layout of SiDBs.
+ */
 template <typename Lyt>
-class generate_random_layout_impl
+Lyt generate_random_layout(const random_layout_params<Lyt>& params)
 {
-  public:
-    generate_random_layout_impl(const random_layout_params<Lyt>& params, std::ostream& s,
-                                std::vector<Lyt>& all_layouts) :
-
-            parameter{params},
-            os{s},
-            previous_layouts{all_layouts}
-    {}
-
-    Lyt run()
+    bool successful_generation = false;
+    while (!successful_generation && params.maximal_attempts)
     {
-        bool successful_generation = false;
-        while (!successful_generation && parameter.maximal_attempts)
+        // layout is initialized with given aspect ratio and name.
+        Lyt lyt{params.dimension};
+
+        static std::mt19937_64 generator(std::random_device{}());
+        uint64_t               attempt_counter = 0;
+
+        // uniform distribution of [0,x_coordinate].
+        std::uniform_int_distribution<uint64_t> dist_x(0u, static_cast<uint64_t>(lyt.x()));
+        // uniform distribution of [0,y_coordinate].
+        std::uniform_int_distribution<uint64_t> dist_y(0u, static_cast<uint64_t>(lyt.y()));
+
+        // this while stops if either all SiDBs are placed or the maximum number of attempts were performed.
+        while (lyt.num_cells() < params.number_of_sidbs && attempt_counter < params.maximal_attempts)
         {
-            // layout is initialized with given aspect ratio and name.
-            Lyt lyt{parameter.dimension};
+            // random integer from [0,x_coordinate] is selected.
+            const auto random_x_coordinate = dist_x(generator);
+            // random integer from [0,y_coordinate] is selected.
+            const auto random_y_coordinate = dist_y(generator);
+            // coordinate is constructed [x_coordinate, y_coordinate]
+            const auto random_coordinate = typename Lyt::coordinate({random_x_coordinate, random_y_coordinate});
 
-            static std::mt19937_64 generator(std::random_device{}());
-            uint64_t               attempt_counter = 0;
+            bool constraint_violation_positive_sidbs = false;
 
-            // uniform distribution of [0,x_coordinate].
-            std::uniform_int_distribution<uint64_t> dist_x(0u, static_cast<uint64_t>(lyt.x()));
-            // uniform distribution of [0,y_coordinate].
-            std::uniform_int_distribution<uint64_t> dist_y(0u, static_cast<uint64_t>(lyt.y()));
-
-            // this while stops if either all SiDBs are placed or the maximum number of attempts were performed.
-            while (lyt.num_cells() < parameter.number_of_sidbs && attempt_counter < parameter.maximal_attempts)
+            if (params.prevent_positive_charges)
             {
-                // random integer from [0,x_coordinate] is selected.
-                const auto random_x_coordinate = dist_x(generator);
-                // random integer from [0,y_coordinate] is selected.
-                const auto random_y_coordinate = dist_y(generator);
-                // coordinate is constructed [x_coordinate, y_coordinate]
-                const auto random_coordinate = typename Lyt::coordinate({random_x_coordinate, random_y_coordinate});
-
-                bool constraint_violation_positive_sidbs = false;
-
-                if (parameter.prevent_positive_charges)
-                {
-                    // it checks if the new coordinate is not closer than 2 cells (Euclidean distance) from an already
-                    // placed SiDB.
-                    lyt.foreach_cell(
-                        [this, &lyt, &random_coordinate, &constraint_violation_positive_sidbs](const auto& c1)
-                        {
-                            if (euclidean_distance<Lyt>(lyt, c1, random_coordinate) < parameter.minimal_spacing)
-                            {
-                                constraint_violation_positive_sidbs = true;
-                            }
-                        });
-                }
-                // If the constraint that no positive SiDBs occur is satisfied, the SiDB is added to the layout.
-                if (!constraint_violation_positive_sidbs)
-                {
-                    lyt.assign_cell_type(random_coordinate, Lyt::cell_type::NORMAL);
-                }
-                attempt_counter += 1;
-            }
-
-            // it checks if new-found layout is identical to an already found layout (all_layouts).
-            uint64_t identical_layout_counter = 0;
-            for (const auto& old_lyt : previous_layouts)
-            {
-                old_lyt.foreach_cell(
-                    [&identical_layout_counter, lyt](const auto& cell_old) mutable
+                // it checks if the new coordinate is not closer than 2 cells (Euclidean distance) from an already
+                // placed SiDB.
+                lyt.foreach_cell(
+                    [&lyt, &random_coordinate, &constraint_violation_positive_sidbs, &params](const auto& c1)
                     {
-                        lyt.foreach_cell(
-                            [&identical_layout_counter, &cell_old](const auto& cell_new) mutable
-                            {
-                                if (cell_new == cell_old)
-                                {
-                                    identical_layout_counter += 1;
-                                }
-                            });
+                        if (euclidean_distance<Lyt>(lyt, c1, random_coordinate) < params.minimal_spacing)
+                        {
+                            constraint_violation_positive_sidbs = true;
+                        }
                     });
             }
-
-            // if all SiDBs are placed and the new layout is not a duplication, the layout is written to the
-            // std::ostream.
-            if (lyt.num_cells() == parameter.number_of_sidbs && identical_layout_counter == 0)
+            // If the constraint that no positive SiDBs occur is satisfied, the SiDB is added to the layout.
+            if (!constraint_violation_positive_sidbs)
             {
-                layout = lyt;
-                write_sqd_layout(lyt, os);
-                successful_generation = true;
+                lyt.assign_cell_type(random_coordinate, Lyt::cell_type::NORMAL);
             }
+            attempt_counter += 1;
         }
-        return layout;
+
+        // if all SiDBs are placed, the layout is returned.
+        if (lyt.num_cells() == params.number_of_sidbs)
+        {
+            return lyt;
+        }
     }
-
-  private:
-    /**
-     * Generated layout.
-     */
-    Lyt layout;
-    /**
-     * Paramaters to generate random layouts.
-     */
-    random_layout_params<Lyt> parameter;
-    /**
-     * Output stream used to write the generated layout.
-     */
-    std::ostream& os;
-    /**
-     * Previously generated layouts to avoid duplication.
-     */
-    std::vector<Lyt> previous_layouts;
-};
-
-}  // namespace detail
-
-/**
- * This algorithm generates a layout with randomly distributed SiDBs.
- *
- * @tparam Lyt Cell-level with fiction coordinates.
- * @param params All parameters needed for the generation of random layouts.
- * @param os The output stream to write into.
- * @param all_layouts Previous generated layouts to avoid duplication.
- */
-template <typename Lyt>
-Lyt generate_random_layout(const random_layout_params<Lyt>& params, std::ostream& os, std::vector<Lyt> layouts)
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(!has_siqad_coord_v<Lyt>, "Lyt is based on SiQAD coordinates");
-
-    detail::generate_random_layout_impl<Lyt> p{params, os, layouts};
-    return p.run();
 }
 /**
- * This algorithm generates a layout with randomly distributed SiDBs.
+ * Generates multiple unique random layouts of SiDBs based on the provided parameters.
  *
- * @tparam Lyt Cell-level with fiction coordinates.
- * @param params All parameters needed for the generation of random layouts.
- * @param filename The file name to create and write into. Should preferably use the `.sqd` extension.
- * @param all_layouts Previous generated layouts to avoid duplication.
+ * @tparam Lyt The layout type.
+ * @param params The parameters for generating the random layouts.
+ * @param number_of_unique_generated_layouts The desired number of unique layouts to be generated.
+ * @param maximal_attempts The maximum number of attempts allowed to generate a unique layout (default: 10E6).
+ * @return A vector containing the unique randomly generated layouts.
  */
 template <typename Lyt>
-Lyt generate_random_layout(const random_layout_params<Lyt>& params, const std::string_view& filename,
-                           std::vector<Lyt>& all_layouts = {})
+std::vector<Lyt> generate_multiple_random_layout(const random_layout_params<Lyt>& params,
+                                                 const uint64_t                   number_of_unique_generated_layouts,
+                                                 const uint64_t                   maximal_attemps = 10E6)
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
-
-    if (!os.is_open())
+    std::vector<Lyt> unique_lyts{};
+    unique_lyts.reserve(number_of_unique_generated_layouts);
+    uint64_t counter = 0;
+    while (unique_lyts.size() < number_of_unique_generated_layouts && counter < maximal_attemps)
     {
-        throw std::ofstream::failure("could not open file");
-    }
+        const auto random_lyt = generate_random_layout(params);
 
-    const auto lyt = generate_random_layout(params, os, all_layouts);
-    os.close();
-    return lyt;
+        // it checks if new-found layout is identical to an already found layout (all_layouts).
+        uint64_t identical_layout_counter = 0;
+        for (const auto& old_lyt : unique_lyts)
+        {
+            old_lyt.foreach_cell(
+                [&identical_layout_counter, random_lyt](const auto& cell_old)
+                {
+                    random_lyt.foreach_cell(
+                        [&identical_layout_counter, &cell_old](const auto& cell_new)
+                        {
+                            if (cell_new == cell_old)
+                            {
+                                identical_layout_counter += 1;
+                            }
+                        });
+                });
+        }
+        if (identical_layout_counter == 0)
+        {
+            unique_lyts.push_back(random_lyt);
+        }
+        counter += 1;
+    }
+    return unique_lyts;
 }
 
 }  // namespace fiction

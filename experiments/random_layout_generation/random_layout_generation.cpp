@@ -26,11 +26,10 @@ int main()  // NOLINT
 
         if (std::filesystem::exists(folder_path))
         {
-            std::cout << "Folder exists!" << std::endl;
+            std::cout << "Folder *" << folder_path << "* exists!" << std::endl;
         }
         else
         {
-
             if (std::filesystem::create_directory(folder_path))
             {
                 std::cout << "Folder *random_layouts* created successfully" << std::endl;
@@ -40,11 +39,11 @@ int main()  // NOLINT
                 std::cout << "Failed to create folder" << std::endl;
             }
         }
-        // number of randomly generated layouts for a given number of SiDBs.
+        // number of randomly generated layouts for a given number of placed SiDBs.
         const uint64_t number_of_layouts = 10;
         // number of SiDBs of the first bunch of randomly generated layouts.
         const uint64_t number_of_sidbs_lower_limit = 10;
-        // number of SiDBs of the final bunch of randomly generated layouts
+        // number of SiDBs of the final bunch of randomly generated layouts.
         const uint64_t number_of_sidbs_upper_limit = 11;
 
         for (uint64_t num_sidbs = number_of_sidbs_lower_limit; num_sidbs < number_of_sidbs_upper_limit; num_sidbs++)
@@ -68,15 +67,12 @@ int main()  // NOLINT
                     std::cout << "Folder already exists." << std::endl;
                 }
 
-                std::vector<cell_level_layout>                all_layouts{};
                 const random_layout_params<cell_level_layout> params{{20, 20}, num_sidbs, false};
-                // Several randomly generated layouts are created (number of layouts is given by number_of_layouts).
-                // They are stored as .sqd-file in the /sqd folder and the coordinates of all placed SiDBs in /loc.
-                for (auto i = 0u; i < number_of_layouts; i++)
+
+                const auto unique_lyts = generate_multiple_random_layout<cell_level_layout>(params, number_of_layouts);
+                for (auto i = 0u; i < unique_lyts.size(); i++)
                 {
-                    const auto lyts = generate_random_layout<cell_level_layout>(
-                        params, dir_path_sqd.string() + "/layout_" + std::to_string(i) + ".sqd", all_layouts);
-                    all_layouts.push_back(lyts);
+                    write_sqd_layout(unique_lyts[i], dir_path_sqd.string() + "/layout_" + std::to_string(i) + ".sqd");
                 }
             }
             catch (const std::filesystem::filesystem_error& ex)

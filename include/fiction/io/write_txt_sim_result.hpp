@@ -11,6 +11,14 @@
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/math_utils.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <fstream>
+#include <iomanip>
+#include <string>
+#include <vector>
 
 namespace fiction
 {
@@ -31,12 +39,13 @@ class write_txt_sim_result_impl
 
     void run()
     {
-        auto min_energy = minimum_energy<sidb_cell_clk_lyt_siqad>(sim_result.charge_distributions);
+        auto min_energy =
+            round_to_n_decimal_places(minimum_energy<sidb_cell_clk_lyt_siqad>(sim_result.charge_distributions), 6);
 
         std::vector<charge_distribution_surface<sidb_cell_clk_lyt_siqad>> ground_state_layouts{};
         for (const auto& valid_layout : sim_result.charge_distributions)
         {
-            if (std::abs(valid_layout.get_system_energy() - min_energy) < physical_constants::POP_STABILITY_ERR)
+            if (round_to_n_decimal_places(valid_layout.get_system_energy(), 6) == min_energy)
             {
                 ground_state_layouts.emplace_back(charge_distribution_surface<sidb_cell_clk_lyt_siqad>{valid_layout});
             }
