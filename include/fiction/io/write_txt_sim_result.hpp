@@ -48,8 +48,8 @@ class write_txt_sim_result_impl
             os << std::fixed << std::setprecision(3);
 
             // Write the column headers
-            os << "x;"
-               << "y;";
+            os << "x [nm];"
+               << "y [nm];";
 
             for (uint64_t i = 0; i < ground_state_layouts.size(); i++)
             {
@@ -57,9 +57,10 @@ class write_txt_sim_result_impl
             }
             os << std::endl;
 
-            const auto sidbs              = ground_state_layouts.front().get_all_sidb_cells();
+            auto       sidbs              = ground_state_layouts.front().get_all_sidb_cells();
             const auto physical_parameter = ground_state_layouts.front().get_phys_params();
 
+            std::sort(sidbs.begin(), sidbs.end());
             for (const auto& sidb : sidbs)
             {
                 auto pos = sidb_nm_position<sidb_cell_clk_lyt_siqad>(physical_parameter, sidb);
