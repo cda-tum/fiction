@@ -3,19 +3,17 @@
 //
 
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
-#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
+#include "fiction/io/write_txt_sim_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/types.hpp"
 
-#include <cmath>
 #include <cstdlib>
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <vector>
 
 using namespace fiction;
 
@@ -26,7 +24,7 @@ int main()  // NOLINT
     // state (as integer).
     try
     {
-        const std::string     folder_name = "random_layouts_test/";
+        const std::string     folder_name = "random_layouts_test_new/";
         std::filesystem::path folder_path(EXPERIMENTS_PATH);
         folder_path /= folder_name;
 
@@ -55,71 +53,11 @@ int main()  // NOLINT
                         const sidb_simulation_parameters params{2, -0.32};
                         const auto                       simulation_results =
                             exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
-
-                        auto min_energy =
-                            minimum_energy<sidb_cell_clk_lyt_siqad>(simulation_results.charge_distributions);
-
-                        std::vector<charge_distribution_surface<sidb_cell_clk_lyt_siqad>> ground_state_layouts{};
-                        for (const auto& valid_layout : simulation_results.charge_distributions)
-                        {
-                            if (std::abs(valid_layout.get_system_energy() - min_energy) <
-                                physical_constants::POP_STABILITY_ERR)
-                            {
-                                ground_state_layouts.emplace_back(
-                                    charge_distribution_surface<sidb_cell_clk_lyt_siqad>{valid_layout});
-                            }
-                        }
-                        if (ground_state_layouts.size() > 1)
-                        {
-                            std::cout << "degeneracy detected!" << std::endl;
-                        }
-                        if (!ground_state_layouts.empty())
-                        {
-                            const auto        sidbs              = ground_state_layouts.front().get_all_sidb_cells();
-                            const auto        physical_parameter = ground_state_layouts.front().get_phys_params();
-                            std::stringstream ss;
-                            ss << std::fixed << std::setprecision(3) << -params.mu;
-                            std::string const file_path =
-                                folder.path().string() + "/loc/" + name + "_sim_µ_minus_" + ss.str() + ".txt";
-
-                            // Open the output file
-                            std::ofstream out_file(file_path);
-                            if (!out_file)
-                            {
-                                std::cerr << "Error opening file: " << file_path << std::endl;
-                                return EXIT_FAILURE;
-                            }
-
-                            // Set the floating-point precision for the output file
-                            out_file << std::fixed << std::setprecision(3);
-
-                            // Write the column headers
-                            out_file << "x;"
-                                     << "y;" << std::endl;
-
-                            for (uint64_t i = 0; i < ground_state_layouts.size(); i++)
-                            {
-                                out_file << std::to_string(i) << ";";
-                            }
-                            out_file << std::endl;
-
-                            for (const auto& sidb : sidbs)
-                            {
-                                auto pos = sidb_nm_position<sidb_cell_clk_lyt_siqad>(physical_parameter, sidb);
-                                out_file << pos.first << ";" << pos.second << ";";
-                                for (const auto& valid_layout : ground_state_layouts)
-                                {
-                                    out_file
-                                        << std::to_string(charge_state_to_sign(valid_layout.get_charge_state(sidb)))
-                                        << ";";
-                                }
-                                out_file << std::endl;
-                            }
-                        }
-                        else
-                        {
-                            std::cout << "no groundstate found" << std::endl;
-                        }
+                        std::stringstream ss;
+                        ss << std::fixed << std::setprecision(3) << -params.mu;
+                        std::string const file_path =
+                            folder.path().string() + "/loc/" + name + "_sim_µ_minus_" + ss.str() + ".txt";
+                        write_txt_sim_result(simulation_results, file_path);
                     }
                 }
                 else

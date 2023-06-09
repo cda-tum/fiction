@@ -17,7 +17,7 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
+TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[generate_random_layout]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>))
 {
     std::stringstream layout_stream{};
