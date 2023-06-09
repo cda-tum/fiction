@@ -21,7 +21,7 @@ int main()  // NOLINT
 {
     // This script uses the randomly generated layouts (hence, random_layout_generation.cpp should be executed first),
     // simulates them, and collects the simulation results as a text file. The text file has three columns: x,y, charge
-    // state (as integer).
+    // state (as integer) of the ground state.
     try
     {
         const std::string     folder_name = "random_layouts_test_new/";
