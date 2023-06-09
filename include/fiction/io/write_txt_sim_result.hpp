@@ -97,7 +97,7 @@ class write_txt_sim_result_impl
 }  // namespace detail
 
 /**
- * Writes the coordinates of all SiDBs of a layout together with the charge distribution of the ground state(s) into a
+ * Writes the coordinates of all SiDBs of a layout together with the charge distribution of the ground state(s) to a
  * file.
  *
  * This overload uses an output stream to write into.
@@ -117,7 +117,7 @@ void write_txt_sim_result(const sidb_simulation_result<Lyt>& sim_result, std::os
     p.run();
 }
 /**
- * Writes the coordinates of all SiDBs of a layout together with the charge distribution of the ground state(s) into a
+ * Writes the coordinates of all SiDBs of a layout together with the charge distribution of the ground state(s) to a
  * file.
  *
  * This overload uses a file name to create and write into.

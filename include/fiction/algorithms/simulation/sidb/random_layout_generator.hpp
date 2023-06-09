@@ -25,7 +25,7 @@
 namespace fiction
 {
 /**
- * This struct stores the parameters for the *generate_random_layouts* algorithm.
+ * This struct stores the parameters for the *generate_random_layout* algorithm.
  */
 template <typename Lyt>
 struct random_layout_params
@@ -123,7 +123,7 @@ Lyt generate_random_layout(const random_layout_params<Lyt>& params)
  * @tparam Lyt The layout type.
  * @param params The parameters for generating the random layouts.
  * @param number_of_unique_generated_layouts The desired number of unique layouts to be generated.
- * @param maximal_attempts The maximum number of attempts allowed to generate a unique layout (default: 10E6).
+ * @param maximal_attempts The maximum number of attempts allowed to generate a unique layout (default: \f$ 10^{6} \f$).
  * @return A vector containing the unique randomly generated layouts.
  */
 template <typename Lyt>
