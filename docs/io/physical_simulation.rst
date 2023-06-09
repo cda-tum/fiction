@@ -64,6 +64,11 @@ SiQAD
 .. doxygenfunction:: fiction::write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, std::ostream& os)
 .. doxygenfunction:: fiction::write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
 
+**Header:** ``fiction/io/write_txt_sim_result.hpp``
+
+.. doxygenfunction:: fiction::write_txt_sim_result(const sidb_simulation_result<Lyt>& sim_result, std::ostream& os)
+.. doxygenfunction:: fiction::write_txt_sim_result(const sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
+
 **Header:** ``fiction/io/read_sqd_layout.hpp``
 
 .. doxygenfunction:: fiction::read_sqd_layout(std::istream& is, const std::string_view& name = "")
