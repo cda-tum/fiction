@@ -378,25 +378,25 @@ typename Lyt::cell random_cell(const typename Lyt::cell& cell1, const typename L
     static std::mt19937_64 generator(std::random_device{}());
     if constexpr (has_offset_ucoord_v<Lyt>)
     {
-        std::uniform_int_distribution<uint64_t> dist_x(left_cell.x, right_cell.x);
-        std::uniform_int_distribution<uint64_t> dist_y(left_cell.y, right_cell.y);
-        std::uniform_int_distribution<uint64_t> dist_z(left_cell.z, right_cell.z);
+        std::uniform_int_distribution<> dist_x(left_cell.x, right_cell.x);
+        std::uniform_int_distribution<> dist_y(left_cell.y, right_cell.y);
+        std::uniform_int_distribution<> dist_z(left_cell.z, right_cell.z);
 
         return {dist_x(generator), dist_y(generator), dist_z(generator)};
     }
     else if constexpr (has_cube_coord_v<Lyt>)
     {
-        std::uniform_int_distribution<int32_t> dist_x(left_cell.x, right_cell.x);
-        std::uniform_int_distribution<int32_t> dist_y(left_cell.y, right_cell.y);
-        std::uniform_int_distribution<int32_t> dist_z(left_cell.z, right_cell.z);
+        std::uniform_int_distribution<> dist_x(left_cell.x, right_cell.x);
+        std::uniform_int_distribution<> dist_y(left_cell.y, right_cell.y);
+        std::uniform_int_distribution<> dist_z(left_cell.z, right_cell.z);
 
         return {dist_x(generator), dist_y(generator), dist_z(generator)};
     }
     else if constexpr (has_siqad_coord_v<Lyt>)
     {
-        std::uniform_int_distribution<int32_t> dist_x(left_cell.x, right_cell.x);
-        std::uniform_int_distribution<int32_t> dist_y(left_cell.y, right_cell.y);
-        std::uniform_int_distribution<uint8_t> dist_z(left_cell.z, right_cell.z);
+        std::uniform_int_distribution<> dist_x(left_cell.x, right_cell.x);
+        std::uniform_int_distribution<> dist_y(left_cell.y, right_cell.y);
+        std::uniform_int_distribution<> dist_z(left_cell.z, right_cell.z);
 
         return {dist_x(generator), dist_y(generator), dist_z(generator)};
     }
