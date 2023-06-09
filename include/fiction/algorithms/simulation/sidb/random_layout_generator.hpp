@@ -145,10 +145,22 @@ class generate_random_layout_impl
     }
 
   private:
-    Lyt                       layout;
+    /**
+     * Generated layout.
+     */
+    Lyt layout;
+    /**
+     * Paramaters to generate random layouts.
+     */
     random_layout_params<Lyt> parameter;
-    std::ostream&             os;
-    std::vector<Lyt>          previous_layouts;
+    /**
+     * Output stream used to write the generated layout.
+     */
+    std::ostream& os;
+    /**
+     * Previously generated layouts to avoid duplication.
+     */
+    std::vector<Lyt> previous_layouts;
 };
 
 }  // namespace detail

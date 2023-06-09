@@ -2,15 +2,15 @@
 // Created by Jan Drewniok on 09.06.23.
 //
 
+#ifndef FICTION_WRITE_TXT_SIM_RESULT_HPP
+#define FICTION_WRITE_TXT_SIM_RESULT_HPP
+
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/types.hpp"
-
-#ifndef FICTION_WRITE_TEXTFILE_SIM_RESULT_HPP
-#define FICTION_WRITE_TEXTFILE_SIM_RESULT_HPP
 
 namespace fiction
 {
@@ -75,12 +75,28 @@ class write_txt_sim_result_impl
     };
 
   private:
+    /**
+     * Simulation results.
+     */
     sidb_simulation_result<Lyt> sim_result;
-    std::ostream&               os;
+    /**
+     * Output stream used for writing the simulation result.
+     */
+    std::ostream& os;
 };
 
 }  // namespace detail
 
+/**
+ * Writes the coordinates of all SiDBs of a layout together with the charge distribution of the ground state(s) into a
+ * file.
+ *
+ * This overload uses an output stream to write into.
+ *
+ * @tparam Lyt Cell-level SiDB layout type.
+ * @param sim_result The simulation result to write.
+ * @param os The output stream to write into.
+ */
 template <typename Lyt>
 void write_txt_sim_result(const sidb_simulation_result<Lyt>& sim_result, std::ostream& os)
 {
@@ -91,7 +107,15 @@ void write_txt_sim_result(const sidb_simulation_result<Lyt>& sim_result, std::os
 
     p.run();
 }
-
+/**
+ * Writes the coordinates of all SiDBs of a layout together with the charge distribution of the ground state(s) into a
+ * file.
+ *
+ * This overload uses a file name to create and write into.
+ *
+ * @tparam sim_result Simulation result of physical simulation.
+ * @param filename The file name to create and write into. Should preferably use the `.sqd` extension.
+ */
 template <typename Lyt>
 void write_txt_sim_result(const sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
 {
@@ -108,4 +132,4 @@ void write_txt_sim_result(const sidb_simulation_result<Lyt>& sim_result, const s
 
 }  // namespace fiction
 
-#endif  // FICTION_WRITE_TEXTFILE_SIM_RESULT_HPP
+#endif  // FICTION_WRITE_TXT_SIM_RESULT_HPP

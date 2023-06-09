@@ -18,7 +18,6 @@ using namespace fiction;
 // Helper function to compare string output with expected string
 bool compare_output(const std::string& output, const std::string& expected)
 {
-    // Remove all whitespaces and newlines for comparison
     std::string clean_output = output;
     clean_output.erase(std::remove_if(clean_output.begin(), clean_output.end(), ::isspace), clean_output.end());
 
@@ -30,7 +29,6 @@ bool compare_output(const std::string& output, const std::string& expected)
 
 TEST_CASE("writes expected output", "[write_txt_sim_result]")
 {
-    // Create a sidb_simulation_result with dummy data for testing
     sidb_cell_clk_lyt_siqad lyt{};
 
     SECTION("Output is written to ostream correctly, degenerated GS")
