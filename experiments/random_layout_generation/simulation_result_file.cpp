@@ -24,7 +24,7 @@ int main()  // NOLINT
     // state (as integer) of the ground state.
     try
     {
-        const std::string     folder_name = "random_layouts_test_new/";
+        constexpr const char* folder_name = "random_layouts_test_new/";
         std::filesystem::path folder_path(EXPERIMENTS_PATH);
         folder_path /= folder_name;
 
@@ -68,7 +68,7 @@ int main()  // NOLINT
         }
         else
         {
-            std::cout << "Folder" + folder_name + "does not exist." << std::endl;
+            std::cout << "Folder" + std::string(folder_name) + "does not exist." << std::endl;
         }
     }
     catch (const std::filesystem::filesystem_error& ex)

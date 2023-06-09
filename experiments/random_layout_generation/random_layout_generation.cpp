@@ -19,7 +19,7 @@ int main()  // NOLINT
     {
         // This script generates random layouts as .sqd file.
         using cell_level_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
-        const std::string     folder_name = "random_layouts_test_new/";
+        constexpr const char* folder_name = "random_layouts_test_new/";
         std::filesystem::path folder_path(EXPERIMENTS_PATH);
 
         folder_path /= folder_name;

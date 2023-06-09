@@ -48,7 +48,7 @@ struct random_layout_params
      */
     double minimal_spacing = 2;
     /**
-     * Maximal number of attempts to generate the layout.
+     * Maximal number of steps to place the given number of SiDBs.
      */
     uint64_t maximal_attempts = 10E6;
 };
