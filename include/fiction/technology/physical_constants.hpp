@@ -7,10 +7,16 @@
 
 #include <units.h>
 
-namespace units
+// namespace units
+//{
+// UNIT_ADD(energy, electron_volt, electron_volts, eV, units::unit<std::ratio<1, 6'242'000'000'000'000'000>, joule>);
+// }
+
+namespace units::energy
 {
-UNIT_ADD(energy, electron_volt, electron_volts, eV, units::unit<std::ratio<6'242'000'000'000'000'000, 1>, joule>);
-}
+using electron_volt   = units::unit<std::ratio<6'242'000'000'000'000'000, 1>, joules>;
+using electron_volt_t = units::unit_t<electron_volt>;
+}  // namespace units::energy
 
 namespace fiction::physical_constants
 {

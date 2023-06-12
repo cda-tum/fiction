@@ -578,14 +578,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void recompute_system_energy() noexcept
     {
-        units::energy::joule_t total_energy(0.0);
+        units::voltage::volt_t total_potential(0.0);
 
         for (uint64_t i = 0; i < strg->loc_pot.size(); ++i)
         {
-            total_energy += 0.5 * strg->loc_pot[i] * charge_state_to_sign(strg->cell_charge[i]) * units::constants::e;
+            total_potential += 0.5 * strg->loc_pot[i] * charge_state_to_sign(strg->cell_charge[i]);
         }
 
-        strg->system_energy = units::convert<units::energy::joule, units::energy::electron_volt>(total_energy);
+        strg->system_energy = units::energy::electron_volt_t((total_potential).value());
     }
     /**
      * Return the currently stored system's total electrostatic potential energy.
