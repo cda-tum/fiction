@@ -5,7 +5,6 @@
 #ifndef PYFICTION_TYPES_HPP
 #define PYFICTION_TYPES_HPP
 
-#include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -115,6 +114,7 @@ using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb_technology>;
  */
 using py_charge_distribution_surface = fiction::charge_distribution_surface<fiction::cell_level_layout<
     fiction::sidb_technology, fiction::clocked_layout<fiction::cartesian_layout<fiction::siqad::coord_t>>>>;
+
 }  // namespace pyfiction
 
 #endif  // PYFICTION_TYPES_HPP
