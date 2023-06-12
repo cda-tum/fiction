@@ -79,4 +79,17 @@ coordinates make the most sense here.
 https://www.redblobgames.com/grids/hexagons/ is a wonderful resource
 on the topic.)doc";
 
+static const char* __doc_fiction_bounding_box_2d_overridden =
+    R"doc(Returns the minimum and maximum corner of the bounding box.
+A 2D bounding box object computes a minimum-sized box around all
+non-empty coordinates in a given layout. Layouts can be of arbitrary
+size and, thus, may be larger than their contained elements.
+Sometimes, it might be necessary to know exactly which space the
+associated layout internals occupy. A bounding box computes
+coordinates that span a minimum-sized rectangle that encloses all non-
+empty layout coordinates.
+
+Returns:
+    The minimum  and maximum enclosing coordinate in the associated layout.)doc";
+
 #endif  // FICTION_DOCSTRINGS_HPP
