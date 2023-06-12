@@ -233,8 +233,7 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[
     }
 }
 
-TEMPLATE_TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils]",
-                   (offset::ucoord_t))
+TEMPLATE_TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils]", (offset::ucoord_t))
 {
     SECTION("two identical cells as input")
     {
@@ -272,8 +271,7 @@ TEMPLATE_TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils
     }
 }
 
-TEMPLATE_TEST_CASE("Generate random cube::coord_t coordinate", "[layout-utils]",
-                   (cube::coord_t))
+TEMPLATE_TEST_CASE("Generate random cube::coord_t coordinate", "[layout-utils]", (cube::coord_t))
 {
     SECTION("two identical cells as input")
     {
@@ -307,8 +305,7 @@ TEMPLATE_TEST_CASE("Generate random cube::coord_t coordinate", "[layout-utils]",
     }
 }
 
-TEMPLATE_TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]",
-                   (siqad::coord_t))
+TEMPLATE_TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]", (siqad::coord_t))
 {
     SECTION("two identical cells as input")
     {
