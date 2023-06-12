@@ -109,8 +109,8 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
 
         .def(
             "get_node",
-            [](const GateLyt& layout, const py_offset_coordinate& coordinate) { return layout.get_node(coordinate); }, "t"_a,
-            DOC(fiction_gate_level_layout_get_node))
+            [](const GateLyt& layout, const py_offset_coordinate& coordinate) { return layout.get_node(coordinate); },
+            "t"_a, DOC(fiction_gate_level_layout_get_node))
         .def("get_tile", &GateLyt::get_tile, "n"_a, DOC(fiction_gate_level_layout_get_tile))
         .def("make_signal", &GateLyt::make_signal, "n"_a, DOC(fiction_gate_level_layout_make_signal))
 
@@ -202,11 +202,13 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
              DOC(fiction_gate_level_layout_has_north_western_outgoing_signal))
 
         .def(
-        "bounding_box_2d", [](const GateLyt& layout)
+            "bounding_box_2d",
+            [](const GateLyt& layout)
             {
                 const auto bb = fiction::bounding_box_2d<GateLyt>(layout);
                 return std::make_pair(bb.get_min(), bb.get_max());
-            })
+            },
+            DOC(fiction_bounding_box_2d_overridden))
         .def("__repr__",
              [](const GateLyt& lyt) -> std::string
              {

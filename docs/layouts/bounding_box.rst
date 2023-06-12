@@ -9,5 +9,11 @@ Bounding Box
             :members:
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.cartesian_gate_layout_bounding_box_2d
-            :members:
+        .. autofunction:: fiction.pyfiction.cartesian_gate_layout.bounding_box_2d
+        .. autofunction:: fiction.pyfiction.hexagonal_gate_layout.bounding_box_2d
+        .. autofunction:: fiction.pyfiction.cartesian_obstruction_layout.bounding_box_2d
+        .. autofunction:: fiction.pyfiction.shifted_cartesian_obstruction_layout.bounding_box_2d
+        .. autofunction:: fiction.pyfiction.hexagonal_obstruction_layout.bounding_box_2d
+        .. autofunction:: fiction.pyfiction.qca_layout.bounding_box_2d
+        .. autofunction:: fiction.pyfiction.inml_layout.bounding_box_2d
+        .. autofunction:: fiction.pyfiction.sidb_layout.bounding_box_2d
