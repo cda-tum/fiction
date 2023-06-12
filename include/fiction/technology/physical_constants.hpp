@@ -5,6 +5,13 @@
 #ifndef FICTION_PHYSICAL_CONSTANTS_HPP
 #define FICTION_PHYSICAL_CONSTANTS_HPP
 
+#include <units.h>
+
+namespace units
+{
+UNIT_ADD(energy, electron_volt, electron_volts, eV, units::unit<std::ratio<6'242'000'000'000'000'000, 1>, joule>);
+}
+
 namespace fiction::physical_constants
 {
 

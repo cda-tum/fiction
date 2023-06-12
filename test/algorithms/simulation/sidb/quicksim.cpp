@@ -19,9 +19,9 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
 {
     TestType lyt{{20, 10}};
 
-    const quicksim_params quicksim_params{sidb_simulation_parameters{2, -0.30}};
+    const quicksim_params quicksim_params{sidb_simulation_parameters{2, units::energy::electron_volt_t(-0.30)}};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.30);
+    REQUIRE(quicksim_params.phys_params.mu == units::energy::electron_volt_t(-0.30));
 
     const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
@@ -42,9 +42,9 @@ TEMPLATE_TEST_CASE("Single SiDB QuickSim simulation", "[quicksim]",
 
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quicksim_params quicksim_params{sidb_simulation_parameters{2, -0.30}};
+    const quicksim_params quicksim_params{sidb_simulation_parameters{2, units::energy::electron_volt_t(-0.30)}};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.30);
+    REQUIRE(quicksim_params.phys_params.mu == units::energy::electron_volt_t(-0.30));
 
     const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
@@ -83,11 +83,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of several SiDBs with varying thread cou
     lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
 
-    const sidb_simulation_parameters params{2, -0.30};
+    const sidb_simulation_parameters params{2, units::energy::electron_volt_t(-0.30)};
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.30);
+    REQUIRE(quicksim_params.phys_params.mu == units::energy::electron_volt_t(-0.30));
 
     SECTION("Default settings")
     {
@@ -156,11 +156,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
     lyt.assign_cell_type({15, -1, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({17, -1, 1}, TestType::cell_type::NORMAL);
     ;
-    const sidb_simulation_parameters params{2, -0.32};
+    const sidb_simulation_parameters params{2, units::energy::electron_volt_t(-0.32)};
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.32);
+    REQUIRE(quicksim_params.phys_params.mu == units::energy::electron_volt_t(-0.32));
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -185,7 +185,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
         CHECK(charge_lyt_first.get_charge_state({15, -1, 1}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_lyt_first.get_charge_state({17, -1, 1}) == sidb_charge_state::NEGATIVE);
 
-        CHECK_THAT(charge_lyt_first.get_system_energy(),
+        CHECK_THAT(charge_lyt_first.get_system_energy().value(),
                    Catch::Matchers::WithinAbs(0.47982940640, fiction::physical_constants::POP_STABILITY_ERR));
     };
 
@@ -254,11 +254,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varyi
     lyt.assign_cell_type({-7, 1, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({-7, 3, 0}, TestType::cell_type::NORMAL);
 
-    const sidb_simulation_parameters params{2, -0.32};
+    const sidb_simulation_parameters params{2, units::energy::electron_volt_t(-0.32)};
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.32);
+    REQUIRE(quicksim_params.phys_params.mu == units::energy::electron_volt_t(-0.32));
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -274,7 +274,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varyi
         CHECK(charge_lyt_first.get_charge_state({-7, 1, 1}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_lyt_first.get_charge_state({-7, 3, 0}) == sidb_charge_state::NEGATIVE);
 
-        CHECK_THAT(charge_lyt_first.get_system_energy(),
+        CHECK_THAT(charge_lyt_first.get_system_energy().value(),
                    Catch::Matchers::WithinAbs(0.3191504062951, fiction::physical_constants::POP_STABILITY_ERR));
     };
 
@@ -345,11 +345,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01 
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
     sidb_simulation_result<TestType> quicksimstats{};
-    const sidb_simulation_parameters params{2, -0.28};
+    const sidb_simulation_parameters params{2, units::energy::electron_volt_t(-0.28)};
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.28);
+    REQUIRE(quicksim_params.phys_params.mu == units::energy::electron_volt_t(-0.28));
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -366,7 +366,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01 
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
 
-        CHECK_THAT(charge_lyt_first.get_system_energy(),
+        CHECK_THAT(charge_lyt_first.get_system_energy().value(),
                    Catch::Matchers::WithinAbs(0.46621669, fiction::physical_constants::POP_STABILITY_ERR));
     };
 
@@ -429,11 +429,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread 
     lyt.assign_cell_type({8, 2, 0}, TestType::cell_type::NORMAL);
 
     const sidb_simulation_result<TestType> quicksimstats{};
-    const sidb_simulation_parameters       params{2, -0.25};
+    const sidb_simulation_parameters       params{2, units::energy::electron_volt_t(-0.25)};
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.25);
+    REQUIRE(quicksim_params.phys_params.mu == units::energy::electron_volt_t(-0.25));
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {

@@ -23,16 +23,18 @@ namespace fiction
  * @return A pair representing the `(x,y)` position of `c` in nanometers from the layout origin.
  */
 template <typename Lyt>
-constexpr std::pair<double, double> sidb_nm_position(const sidb_simulation_parameters& sp, const cell<Lyt>& c) noexcept
+constexpr std::pair<units::length::angstrom_t, units::length::angstrom_t>
+sidb_nm_position(const sidb_simulation_parameters& sp, const cell<Lyt>& c) noexcept
 {
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
-    const auto x = static_cast<double>(c.x * sp.lat_a * 0.1);
-    const auto y = static_cast<double>(c.y * sp.lat_b * 0.1 + c.z * sp.lat_c * 0.1);
+    const auto x = units::convert<units::length::meter, units::length::nanometer>(
+        units::convert<units::length::angstrom, units::length::meter>(c.x * sp.lat_a));
+    const auto y = units::convert<units::length::meter, units::length::nanometer>(
+        units::convert<units::length::angstrom, units::length::meter>(c.y * sp.lat_b + c.z * sp.lat_c));
 
     return std::make_pair(x, y);
 }
-
 }  // namespace fiction
 
 #endif  // FICTION_NM_POSITION_HPP
