@@ -15,6 +15,7 @@
 #include <cstdint>
 #include <limits>
 #include <random>
+#include <type_traits>
 
 namespace fiction
 {
@@ -352,51 +353,49 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
     return lyt_new;
 }
 /**
- * Generates a random cell between two given cells.
+ * Generates a random coordinate within the region spanned by two given coordinates. The two given coordinates form the
+ * lower left corner and the upper right corner of the spanned region.
  *
- * @tparam Lyt Cell-level layout type.
- * @param cell1 First given cell.
- * @return cell2 Second given cell.
+ * @OffsetCoordinateType The coordinate implementation to be used.
+ * @param coordinate1 Coordinate of the lower left corner.
+ * @param coordinate2 Coordinate of the upper right corner (coordinate order is not important, automatically swapped if
+ * necessary).
+ * return Randomly generated coordinate.
  */
-template <typename Lyt>
-typename Lyt::cell random_cell(const typename Lyt::cell& cell1, const typename Lyt::cell& cell2)
+template <typename CoordinateType>
+CoordinateType random_coordinate(const CoordinateType& coordinate1, const CoordinateType& coordinate2) noexcept
 {
-    typename Lyt::cell left_cell{};
-    typename Lyt::cell right_cell{};
-
-    if (cell1 <= cell2)
-    {
-        left_cell  = cell1;
-        right_cell = cell2;
-    }
-    else
-    {
-        left_cell  = cell2;
-        right_cell = cell1;
-    }
-
     static std::mt19937_64 generator(std::random_device{}());
-    if constexpr (has_offset_ucoord_v<Lyt>)
+
+    CoordinateType left_coordinate  = coordinate1;
+    CoordinateType right_coordinate = coordinate2;
+
+    if (left_coordinate > right_coordinate)
     {
-        std::uniform_int_distribution<> dist_x(left_cell.x, right_cell.x);
-        std::uniform_int_distribution<> dist_y(left_cell.y, right_cell.y);
-        std::uniform_int_distribution<> dist_z(left_cell.z, right_cell.z);
+        std::swap(left_coordinate, right_coordinate);
+    }
+
+    if constexpr (std::is_same_v<CoordinateType, offset::ucoord_t>)
+    {
+        std::uniform_int_distribution<> dist_x(left_coordinate.x, right_coordinate.x);
+        std::uniform_int_distribution<> dist_y(left_coordinate.y, right_coordinate.y);
+        std::uniform_int_distribution<> dist_z(left_coordinate.z, right_coordinate.z);
 
         return {dist_x(generator), dist_y(generator), dist_z(generator)};
     }
-    else if constexpr (has_cube_coord_v<Lyt>)
+    else if constexpr (std::is_same_v<CoordinateType, cube::coord_t>)
     {
-        std::uniform_int_distribution<> dist_x(left_cell.x, right_cell.x);
-        std::uniform_int_distribution<> dist_y(left_cell.y, right_cell.y);
-        std::uniform_int_distribution<> dist_z(left_cell.z, right_cell.z);
+        std::uniform_int_distribution<> dist_x(left_coordinate.x, right_coordinate.x);
+        std::uniform_int_distribution<> dist_y(left_coordinate.y, right_coordinate.y);
+        std::uniform_int_distribution<> dist_z(left_coordinate.z, right_coordinate.z);
 
         return {dist_x(generator), dist_y(generator), dist_z(generator)};
     }
-    else if constexpr (has_siqad_coord_v<Lyt>)
+    else if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
-        std::uniform_int_distribution<> dist_x(left_cell.x, right_cell.x);
-        std::uniform_int_distribution<> dist_y(left_cell.y, right_cell.y);
-        std::uniform_int_distribution<> dist_z(left_cell.z, right_cell.z);
+        std::uniform_int_distribution<> dist_x(left_coordinate.x, right_coordinate.x);
+        std::uniform_int_distribution<> dist_y(left_coordinate.y, right_coordinate.y);
+        std::uniform_int_distribution<> dist_z(left_coordinate.z, right_coordinate.z);
 
         return {dist_x(generator), dist_y(generator), dist_z(generator)};
     }

@@ -234,110 +234,110 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[
 }
 
 TEMPLATE_TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>))
+                   (offset::ucoord_t))
 {
     SECTION("two identical cells as input")
     {
-        const auto randomly_generated_cell = random_cell<TestType>({0, 0, 0}, {0, 0, 0});
-        CHECK(randomly_generated_cell.x == 0);
-        CHECK(randomly_generated_cell.y == 0);
-        CHECK(randomly_generated_cell.z == 0);
+        const auto randomly_generated_coordinate = random_coordinate<TestType>({0, 0, 0}, {0, 0, 0});
+        CHECK(randomly_generated_coordinate.x == 0);
+        CHECK(randomly_generated_coordinate.y == 0);
+        CHECK(randomly_generated_coordinate.z == 0);
 
-        const auto randomly_generated_cell_second = random_cell<TestType>({1, 0, 0}, {1, 0, 0});
-        CHECK(randomly_generated_cell_second.x == 1);
-        CHECK(randomly_generated_cell_second.y == 0);
-        CHECK(randomly_generated_cell_second.z == 0);
+        const auto randomly_generated_coordinate_second = random_coordinate<TestType>({1, 0, 0}, {1, 0, 0});
+        CHECK(randomly_generated_coordinate_second.x == 1);
+        CHECK(randomly_generated_coordinate_second.y == 0);
+        CHECK(randomly_generated_coordinate_second.z == 0);
     }
 
     SECTION("two unidentical cells as input, correct order")
     {
-        const auto randomly_generated_cell = random_cell<TestType>({1, 1, 1}, {5, 2, 3});
-        CHECK(randomly_generated_cell.x >= 1);
-        CHECK(randomly_generated_cell.x <= 5);
-        CHECK(randomly_generated_cell.y <= 2);
-        CHECK(randomly_generated_cell.y >= 0);
-        CHECK(randomly_generated_cell.z <= 3);
-        CHECK(randomly_generated_cell.z >= 1);
+        const auto randomly_generated_coordinate_second = random_coordinate<TestType>({1, 1, 1}, {5, 2, 3});
+        CHECK(randomly_generated_coordinate_second.x >= 1);
+        CHECK(randomly_generated_coordinate_second.x <= 5);
+        CHECK(randomly_generated_coordinate_second.y <= 2);
+        CHECK(randomly_generated_coordinate_second.y >= 0);
+        CHECK(randomly_generated_coordinate_second.z <= 3);
+        CHECK(randomly_generated_coordinate_second.z >= 1);
     }
 
     SECTION("two unidentical cells as input, switched correct order")
     {
-        const auto randomly_generated_cell = random_cell<TestType>({5, 2, 3}, {1, 1, 1});
-        CHECK(randomly_generated_cell.x >= 1);
-        CHECK(randomly_generated_cell.x <= 5);
-        CHECK(randomly_generated_cell.y <= 2);
-        CHECK(randomly_generated_cell.y >= 0);
-        CHECK(randomly_generated_cell.z <= 3);
-        CHECK(randomly_generated_cell.z >= 1);
+        const auto randomly_generated_coordinate = random_coordinate<TestType>({5, 2, 3}, {1, 1, 1});
+        CHECK(randomly_generated_coordinate.x >= 1);
+        CHECK(randomly_generated_coordinate.x <= 5);
+        CHECK(randomly_generated_coordinate.y <= 2);
+        CHECK(randomly_generated_coordinate.y >= 0);
+        CHECK(randomly_generated_coordinate.z <= 3);
+        CHECK(randomly_generated_coordinate.z >= 1);
     }
 }
 
 TEMPLATE_TEST_CASE("Generate random cube::coord_t coordinate", "[layout-utils]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>))
+                   (cube::coord_t))
 {
     SECTION("two identical cells as input")
     {
-        const auto randomly_generated_cell = random_cell<TestType>({-10, -5, 0}, {-10, -5, 0});
-        CHECK(randomly_generated_cell.x == -10);
-        CHECK(randomly_generated_cell.y == -5);
-        CHECK(randomly_generated_cell.z == 0);
+        const auto randomly_generated_coordinate = random_coordinate<TestType>({-10, -5, 0}, {-10, -5, 0});
+        CHECK(randomly_generated_coordinate.x == -10);
+        CHECK(randomly_generated_coordinate.y == -5);
+        CHECK(randomly_generated_coordinate.z == 0);
 
-        const auto randomly_generated_cell_second = random_cell<TestType>({1, 0, 0}, {1, 0, 0});
-        CHECK(randomly_generated_cell_second.x == 1);
-        CHECK(randomly_generated_cell_second.y == 0);
-        CHECK(randomly_generated_cell_second.z == 0);
+        const auto randomly_generated_coordinate_second = random_coordinate<TestType>({1, 0, 0}, {1, 0, 0});
+        CHECK(randomly_generated_coordinate_second.x == 1);
+        CHECK(randomly_generated_coordinate_second.y == 0);
+        CHECK(randomly_generated_coordinate_second.z == 0);
     }
 
     SECTION("two unidentical cells as input, correct order")
     {
-        const auto randomly_generated_cell = random_cell<TestType>({-10, -1, 3}, {-10, -1, 6});
-        CHECK(randomly_generated_cell.x == -10);
-        CHECK(randomly_generated_cell.y == -1);
-        CHECK(randomly_generated_cell.z >= 3);
-        CHECK(randomly_generated_cell.z <= 6);
+        const auto randomly_generated_coordinate = random_coordinate<TestType>({-10, -1, 3}, {-10, -1, 6});
+        CHECK(randomly_generated_coordinate.x == -10);
+        CHECK(randomly_generated_coordinate.y == -1);
+        CHECK(randomly_generated_coordinate.z >= 3);
+        CHECK(randomly_generated_coordinate.z <= 6);
     }
 
     SECTION("two unidentical cells as input, switched correct order")
     {
-        const auto randomly_generated_cell = random_cell<TestType>({-10, -1, 6}, {-10, -1, 3});
-        CHECK(randomly_generated_cell.x == -10);
-        CHECK(randomly_generated_cell.y == -1);
-        CHECK(randomly_generated_cell.z >= 3);
-        CHECK(randomly_generated_cell.z <= 6);
+        const auto randomly_generated_coordinate = random_coordinate<TestType>({-10, -1, 6}, {-10, -1, 3});
+        CHECK(randomly_generated_coordinate.x == -10);
+        CHECK(randomly_generated_coordinate.y == -1);
+        CHECK(randomly_generated_coordinate.z >= 3);
+        CHECK(randomly_generated_coordinate.z <= 6);
     }
 }
 
 TEMPLATE_TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+                   (siqad::coord_t))
 {
     SECTION("two identical cells as input")
     {
-        const auto randomly_generated_cell = random_cell<TestType>({-10, -5, 0}, {-10, -5, 0});
-        CHECK(randomly_generated_cell.x == -10);
-        CHECK(randomly_generated_cell.y == -5);
-        CHECK(randomly_generated_cell.z == 0);
+        const auto randomly_generated_coordinate = random_coordinate<TestType>({-10, -5, 0}, {-10, -5, 0});
+        CHECK(randomly_generated_coordinate.x == -10);
+        CHECK(randomly_generated_coordinate.y == -5);
+        CHECK(randomly_generated_coordinate.z == 0);
 
-        const auto randomly_generated_cell_second = random_cell<TestType>({1, 0, 0}, {1, 0, 0});
-        CHECK(randomly_generated_cell_second.x == 1);
-        CHECK(randomly_generated_cell_second.y == 0);
-        CHECK(randomly_generated_cell_second.z == 0);
+        const auto randomly_generated_coordinate_second = random_coordinate<TestType>({1, 0, 0}, {1, 0, 0});
+        CHECK(randomly_generated_coordinate_second.x == 1);
+        CHECK(randomly_generated_coordinate_second.y == 0);
+        CHECK(randomly_generated_coordinate_second.z == 0);
     }
 
     SECTION("two unidentical cells as input, correct order")
     {
-        const auto randomly_generated_cell = random_cell<TestType>({-10, -1, 0}, {-10, -1, 1});
-        CHECK(randomly_generated_cell.x == -10);
-        CHECK(randomly_generated_cell.y == -1);
-        CHECK(randomly_generated_cell.z >= 0);
-        CHECK(randomly_generated_cell.z <= 1);
+        const auto randomly_generated_coordinate = random_coordinate<TestType>({-10, -1, 0}, {-10, -1, 1});
+        CHECK(randomly_generated_coordinate.x == -10);
+        CHECK(randomly_generated_coordinate.y == -1);
+        CHECK(randomly_generated_coordinate.z >= 0);
+        CHECK(randomly_generated_coordinate.z <= 1);
     }
 
     SECTION("two unidentical cells as input, switched correct order")
     {
-        const auto randomly_generated_cell_second = random_cell<TestType>({-10, -1, 1}, {-10, -1, 0});
-        CHECK(randomly_generated_cell_second.x == -10);
-        CHECK(randomly_generated_cell_second.y == -1);
-        CHECK(randomly_generated_cell_second.z >= 0);
-        CHECK(randomly_generated_cell_second.z <= 1);
+        const auto randomly_generated_coordinate = random_coordinate<TestType>({-10, -1, 1}, {-10, -1, 0});
+        CHECK(randomly_generated_coordinate.x == -10);
+        CHECK(randomly_generated_coordinate.y == -1);
+        CHECK(randomly_generated_coordinate.z >= 0);
+        CHECK(randomly_generated_coordinate.z <= 1);
     }
 }
