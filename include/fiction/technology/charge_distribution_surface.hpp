@@ -343,8 +343,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 if (const auto local_pot = this->get_local_potential(c); local_pot.has_value())
                 {
-                    if ((units::convert<units::energy::joule, units::energy::electron_volt>(-*local_pot *
-                                                                                            units::constants::e) +
+                    if ((units::energy::electron_volt_t(
+                             units::convert<units::energy::joule, units::energy::electron_volt>(
+                                 (-*local_pot * units::constants::e).value())) +
                          strg->phys_params.mu)
                             .value() < -physical_constants::POP_STABILITY_ERR)
                     {
@@ -584,8 +585,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             total_potential += 0.5 * strg->loc_pot[i] * charge_state_to_sign(strg->cell_charge[i]);
         }
+        // convert<square_root<square_kilometer>, meter>(1.0);
+        strg->system_energy =
+            units::energy::electron_volt_t(units::convert<units::energy::joule, units::energy::electron_volt>(
+                (total_potential * units::constants::e).value()));
 
-        strg->system_energy = units::energy::electron_volt_t((total_potential).value());
+        // strg->system_energy =(units::convert<units::energy::joule, units::energy::electron_volt>(total_potential *
+        // units::constants::e));
+
+        //     strg->system_energy = units::energy::electron_volt_t((total_potential).value());
     }
     /**
      * Return the currently stored system's total electrostatic potential energy.
@@ -833,8 +841,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             strg->cell_charge[random_element]                      = sidb_charge_state::NEGATIVE;
             negative_indices.push_back(random_element);
 
-            strg->system_energy += units::convert<units::energy::joule, units::energy::electron_volt>(
-                -(this->get_local_potential_by_index(random_element).value()) * units::constants::e);
+            strg->system_energy +=
+                units::energy::electron_volt_t(units::convert<units::energy::joule, units::energy::electron_volt>(
+                    (-(*this->get_local_potential_by_index(random_element)) * units::constants::e).value()));
+
+            //            strg->system_energy =
+            //                units::energy::electron_volt_t(units::convert<units::energy::joule,
+            //                units::energy::electron_volt>(
+            //                    (total_potential * units::constants::e).value()));
 
             for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
             {

@@ -5,7 +5,7 @@
 #ifndef FICTION_SIDB_SIMULATION_PARAMETERS_HPP
 #define FICTION_SIDB_SIMULATION_PARAMETERS_HPP
 
-#include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/physical_constants_and_eV_unit.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -15,7 +15,10 @@
 namespace fiction
 {
 
-using namespace units;
+using units::literals::operator""_eV;
+using units::literals::operator""_nm;
+using units::literals::operator""_angstrom;
+
 /**
  * This struct collects all physical parameters for physical SiDB simulations. It can be useful to adjust them,
  * especially when experiments create new insights. However, the default values are commonly used.
@@ -35,21 +38,21 @@ struct sidb_simulation_parameters
      * @param b lattice constant in Å.
      * @param c lattice constant in Å.
      */
-    constexpr explicit sidb_simulation_parameters(
-        const uint8_t base_number = 3, const energy::electron_volt_t& mu_minus = energy::electron_volt_t(-0.32),
-        const double               relative_permittivity = 5.6,
-        const length::nanometer_t& screening_distance    = length::nanometer_t(5.0),
-        const length::angstrom_t& a = length::angstrom_t(3.84), const length::angstrom_t& b = length::angstrom_t(7.68),
-        const length::angstrom_t& c = length::angstrom_t(2.25)) :
+    constexpr explicit sidb_simulation_parameters(const uint8_t                         base_number = 3,
+                                                  const units::energy::electron_volt_t& mu_minus    = -0.32_eV,
+                                                  const double                          relative_permittivity = 5.6,
+                                                  const units::length::nanometer_t&     screening_distance    = 5.0_nm,
+                                                  const units::length::angstrom_t&      a = 3.84_angstrom,
+                                                  const units::length::angstrom_t&      b = 7.68_angstrom,
+                                                  const units::length::angstrom_t&      c = 2.25_angstrom) :
             lat_a{a},
             lat_b{b},
             lat_c{c},
             epsilon_r{relative_permittivity},
-            // k{constants::k_e / epsilon_r},
             k{8.988 * 1E9 / epsilon_r},
             lambda_tf{screening_distance},
             mu{mu_minus},
-            mu_p{mu - energy::electron_volt_t(0.59)},
+            mu_p{mu - units::energy::electron_volt_t(0.59)},
             base{base_number}
 
     {
@@ -59,15 +62,15 @@ struct sidb_simulation_parameters
     /**
      * lat_a is the lattice vector in x-direction (unit: Å).
      */
-    length::angstrom_t lat_a;
+    units::length::angstrom_t lat_a;
     /**
      * lat_b is the lattice vector in y-direction (unit: Å).
      */
-    length::angstrom_t lat_b;
+    units::length::angstrom_t lat_b;
     /**
      * lat_c is the dimer pair separation (unit: Å).
      */
-    length::angstrom_t lat_c;
+    units::length::angstrom_t lat_c;
     /**
      * epsilon_r is the electric permittivity. It is a material specific number (unit-less).
      */
@@ -75,19 +78,21 @@ struct sidb_simulation_parameters
     /**
      * k is the Coulomb constant and is inversely proportional to the electric permittivity (unit: SI).
      */
-    unit_t<compound_unit<force::newtons, area::square_meter, inverse<squared<charge::coulomb>>>> k;
+    units::unit_t<units::compound_unit<units::force::newtons, units::area::square_meter,
+                                       units::inverse<units::squared<units::charge::coulomb>>>>
+        k;
     /**
      * lambda_tf is the Thomas-Fermi screening distance (unit: nm).
      */
-    length::nanometer_t lambda_tf;
+    units::length::nanometer_t lambda_tf;
     /**
      * µ- is the energy transition level (0/-) (unit: eV).
      */
-    energy::electron_volt_t mu;
+    units::energy::electron_volt_t mu;
     /**
      * µ+ is the energy transition level (+/0) (unit: eV).
      */
-    energy::electron_volt_t mu_p;
+    units::energy::electron_volt_t mu_p;
     /**
      * base can be either 2 or 3 and describes the assumed number of charge states of one SiDB.
      * It often makes sense to assume only negatively and neutrally charged SiDBs.

@@ -22,126 +22,126 @@ TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
     SECTION("Empty std::any")
     {
         const std::any value{};
-        const auto     result = detail::any_to_string(value);
+        const auto     result = fiction::detail::any_to_string(value);
 
         CHECK(result.empty());
     }
     SECTION("int8_t")
     {
         const int8_t value  = -42;
-        const auto   result = detail::any_to_string(value);
+        const auto   result = fiction::detail::any_to_string(value);
 
         CHECK(result == "-42");
     }
     SECTION("uint8_t")
     {
         const uint8_t value  = 42;
-        const auto    result = detail::any_to_string(value);
+        const auto    result = fiction::detail::any_to_string(value);
 
         CHECK(result == "42");
     }
     SECTION("int16_t")
     {
         const int16_t value  = -32768;
-        const auto    result = detail::any_to_string(value);
+        const auto    result = fiction::detail::any_to_string(value);
 
         CHECK(result == "-32768");
     }
     SECTION("uint16_t")
     {
         const uint16_t value  = 65535;
-        const auto     result = detail::any_to_string(value);
+        const auto     result = fiction::detail::any_to_string(value);
 
         CHECK(result == "65535");
     }
     SECTION("int32_t")
     {
         const int32_t value  = -2'147'483'648;
-        const auto    result = detail::any_to_string(value);
+        const auto    result = fiction::detail::any_to_string(value);
 
         CHECK(result == "-2147483648");
     }
     SECTION("uint32_t")
     {
         const uint32_t value  = 4'294'967'295ul;
-        const auto     result = detail::any_to_string(value);
+        const auto     result = fiction::detail::any_to_string(value);
 
         CHECK(result == "4294967295");
     }
     SECTION("int64_t")
     {
         const int64_t value  = -9'223'372'036'854'775'807;
-        const auto    result = detail::any_to_string(value);
+        const auto    result = fiction::detail::any_to_string(value);
 
         CHECK(result == "-9223372036854775807");
     }
     SECTION("uint64_t")
     {
         const uint64_t value  = 18'446'744'073'709'551'615ull;
-        const auto     result = detail::any_to_string(value);
+        const auto     result = fiction::detail::any_to_string(value);
 
         CHECK(result == "18446744073709551615");
     }
     SECTION("float")
     {
         const float value  = -3.141593f;
-        const auto  result = detail::any_to_string(value);
+        const auto  result = fiction::detail::any_to_string(value);
 
         CHECK(result == "-3.141593");
     }
     SECTION("double")
     {
         const double value  = 3.14159265359;
-        const auto   result = detail::any_to_string(value);
+        const auto   result = fiction::detail::any_to_string(value);
 
         CHECK(result == "3.141593");  // will be rounded by std::to_string
     }
     SECTION("long double")
     {
         const long double value  = 2.7182818284590452353602874l;
-        const auto        result = detail::any_to_string(value);
+        const auto        result = fiction::detail::any_to_string(value);
 
         CHECK(result == "2.718282");  // will be rounded by std::to_string
     }
     SECTION("std::string")
     {
         const std::string value  = "hello, world!";
-        const auto        result = detail::any_to_string(value);
+        const auto        result = fiction::detail::any_to_string(value);
 
         CHECK(result == "hello, world!");
     }
     SECTION("const char*")
     {
         const char* value  = "hello, world!";
-        const auto  result = detail::any_to_string(value);
+        const auto  result = fiction::detail::any_to_string(value);
 
         CHECK(result == "hello, world!");
     }
     SECTION("char")
     {
         const char value  = 'X';
-        const auto result = detail::any_to_string(value);
+        const auto result = fiction::detail::any_to_string(value);
 
         CHECK(result == "X");
     }
     SECTION("unsupported type")
     {
         const std::vector<int> value{1, 2, 3};
-        const auto             result = detail::any_to_string(value);
+        const auto             result = fiction::detail::any_to_string(value);
 
         CHECK(result.empty());
     }
     SECTION("std::string in std::any")
     {
         const std::any value  = std::string{"hello, world!"};
-        const auto     result = detail::any_to_string(value);
+        const auto     result = fiction::detail::any_to_string(value);
 
         CHECK(result == "hello, world!");
     }
     SECTION("const char* in std::any")
     {
         const std::any value  = "hello, world!";
-        const auto     result = detail::any_to_string(value);
+        const auto     result = fiction::detail::any_to_string(value);
 
         CHECK(result == "hello, world!");
     }
@@ -184,8 +184,8 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "    </elec_dist>\n"
             "</sim_out>\n",
             FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
-            sim_result.physical_parameters.lambda_tf, sim_result.physical_parameters.epsilon_r,
-            sim_result.physical_parameters.mu);
+            sim_result.physical_parameters.lambda_tf.to<double>(), sim_result.physical_parameters.epsilon_r,
+            sim_result.physical_parameters.mu.to<double>());
 
         write_sqd_sim_result(sim_result, simulation_stream);
 
@@ -219,8 +219,8 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "    </elec_dist>\n"
             "</sim_out>\n",
             FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
-            sim_result.physical_parameters.lambda_tf, sim_result.physical_parameters.epsilon_r,
-            sim_result.physical_parameters.mu);
+            sim_result.physical_parameters.lambda_tf.value(), sim_result.physical_parameters.epsilon_r,
+            sim_result.physical_parameters.mu.value());
 
         sim_result.additional_simulation_parameters.emplace_back("param1", "value1");
         sim_result.additional_simulation_parameters.emplace_back("param2", 2);
@@ -251,7 +251,7 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
     lyt.assign_cell_type({17, 0, 0}, sidb_layout::cell_type::NORMAL);
     lyt.assign_cell_type({19, 0, 0}, sidb_layout::cell_type::NORMAL);
 
-    const sidb_simulation_parameters params{2, -0.32};
+    const sidb_simulation_parameters params{2, -0.32_eV};
 
     auto sim_result = exhaustive_ground_state_simulation<sidb_layout>(lyt, params);
 
@@ -285,13 +285,13 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
         "        <dbdot x=\"72.960000\" y=\"0.000000\"/>\n"
         "    </physloc>\n"
         "    <elec_dist>\n"
-        "        <dist energy=\"0.246027\" count=\"1\" physically_valid=\"1\" "
+        "        <dist energy=\"0.246081\" count=\"1\" physically_valid=\"1\" "
         "state_count=\"3\">-0-0-0-</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
-        sim_result.simulation_runtime.count(), sim_result.physical_parameters.lambda_tf,
-        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu);
+        sim_result.simulation_runtime.count(), sim_result.physical_parameters.lambda_tf.value(),
+        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu.value());
 
     write_sqd_sim_result(sim_result, simulation_stream);
 
@@ -310,7 +310,7 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
     lyt.assign_cell_type({6, 0, 0}, sidb_layout::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, sidb_layout::cell_type::NORMAL);
 
-    const sidb_simulation_parameters params{3, -0.32};
+    const sidb_simulation_parameters params{3, -0.32_eV};
 
     auto sim_result = exhaustive_ground_state_simulation<sidb_layout>(lyt, params);
 
@@ -339,13 +339,13 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         "        <dbdot x=\"26.880000\" y=\"0.000000\"/>\n"
         "    </physloc>\n"
         "    <elec_dist>\n"
-        "        <dist energy=\"-0.953023\" count=\"1\" physically_valid=\"1\" state_count=\"3\">-+-</dist>\n"
+        "        <dist energy=\"-0.953230\" count=\"1\" physically_valid=\"1\" state_count=\"3\">-+-</dist>\n"
         "        <dist energy=\"0.000000\" count=\"1\" physically_valid=\"1\" state_count=\"3\">0-0</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
-        sim_result.simulation_runtime.count(), sim_result.physical_parameters.lambda_tf,
-        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu);
+        sim_result.simulation_runtime.count(), sim_result.physical_parameters.lambda_tf.value(),
+        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu.value());
 
     write_sqd_sim_result(sim_result, simulation_stream);
 

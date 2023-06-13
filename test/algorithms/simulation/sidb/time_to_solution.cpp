@@ -27,7 +27,7 @@ TEMPLATE_TEST_CASE(
 
     TestType lyt{{20, 10}};
 
-    const sidb_simulation_parameters params{2, -0.30};
+    const sidb_simulation_parameters params{2, -0.30_eV};
     const quicksim_params            quicksim_params{params};
     time_to_solution_stats           tts_stat{};
 

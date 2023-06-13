@@ -6,6 +6,7 @@
 #define FICTION_ENERGY_DISTRIBUTION_HPP
 
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/physical_constants_and_eV_unit.hpp"
 #include "fiction/utils/math_utils.hpp"
 
 #include <cmath>
@@ -15,6 +16,8 @@
 
 namespace fiction
 {
+
+using units::literals::operator""_eV;
 
 /**
  *  Data type to collect electrostatic potential energies of charge distributions with corresponding degeneracy (i.e.
