@@ -26,4 +26,4 @@ Orthogonal Ordering Network
 
 Adjustment of orthogonal, which orders the PIs of the logic network in order to save area and wire crossings.
 
-.. doxygenfunction:: fiction::orthogonal_ordering_network(const Ntk& ntk, orthogonal_physical_design_params ps = {}, orthogonal_physical_design_stats* pst = nullptr)
+.. doxygenfunction:: fiction::orthogonal_ordering_network

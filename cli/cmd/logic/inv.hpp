@@ -65,8 +65,6 @@ class inv_command : public command
             }
         };
 
-        const auto test_output = substitute_inverters;
-
         std::visit(substitute_inverters, s.current());
     }
 };

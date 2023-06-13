@@ -37,7 +37,7 @@ Ntk read_ntk(const std::string& name)
     return network;
 }
 
-void ortho_ordering_mcs()
+void ortho_ordering_exp_stats()
 {
     ortho_stats = {};
 
@@ -64,7 +64,13 @@ void ortho_ordering_mcs()
         // perform layout generation with an OGD-based algorithm
         const auto lyt = fiction::orthogonal_ordering_network<gate_lyt>(ntk, {}, &ortho_stats);
 
-        fiction::gate_level_drvs(lyt);
+        fiction::gate_level_drv_stats  st = {};
+        fiction::gate_level_drv_params ps = {};
+        std::stringstream     ss{};
+        ps.out = &ss;
+        gate_level_drvs(lyt, ps, &st);
+
+        assert(st.drvs == 0);
 
         ordering_exp(benchmark, ntk.num_pis(), ntk.num_pos(), ntk.num_gates(), lyt.x() + 1, lyt.y() + 1,
                      (lyt.x() + 1) * (lyt.y() + 1), lyt.num_gates(), lyt.num_wires(),
@@ -77,7 +83,7 @@ void ortho_ordering_mcs()
 
 int main()  // NOLINT
 {
-    ortho_ordering_mcs();
+    ortho_ordering_exp_stats();
 
     return EXIT_SUCCESS;
 }
