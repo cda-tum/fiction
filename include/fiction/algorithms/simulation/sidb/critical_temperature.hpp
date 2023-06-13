@@ -13,7 +13,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/physical_constants_and_eV_unit.hpp"
+#include "fiction/technology/physical_constants_and_ev_unit.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"

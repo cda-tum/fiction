@@ -6,7 +6,7 @@
 #define FICTION_ENERGY_DISTRIBUTION_HPP
 
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/physical_constants_and_eV_unit.hpp"
+#include "fiction/technology/physical_constants_and_ev_unit.hpp"
 #include "fiction/utils/math_utils.hpp"
 
 #include <cmath>

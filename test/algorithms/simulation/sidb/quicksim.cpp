@@ -10,7 +10,7 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/physical_constants_and_eV_unit.hpp>
+#include <fiction/technology/physical_constants_and_ev_unit.hpp>
 
 using namespace fiction;
 

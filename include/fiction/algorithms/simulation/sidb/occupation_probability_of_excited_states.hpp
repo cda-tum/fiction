@@ -6,7 +6,7 @@
 #define FICTION_OCCUPATION_PROBABILITY_OF_EXCITED_STATES_HPP
 
 #include "fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
-#include "fiction/technology/physical_constants_and_eV_unit.hpp"
+#include "fiction/technology/physical_constants_and_ev_unit.hpp"
 #include "fiction/utils/math_utils.hpp"
 
 #include <algorithm>

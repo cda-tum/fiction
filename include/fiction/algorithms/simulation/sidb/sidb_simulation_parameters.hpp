@@ -5,7 +5,7 @@
 #ifndef FICTION_SIDB_SIMULATION_PARAMETERS_HPP
 #define FICTION_SIDB_SIMULATION_PARAMETERS_HPP
 
-#include "fiction/technology/physical_constants_and_eV_unit.hpp"
+#include "fiction/technology/physical_constants_and_ev_unit.hpp"
 
 #include <cassert>
 #include <cstdint>
