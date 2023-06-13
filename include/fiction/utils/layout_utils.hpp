@@ -377,11 +377,24 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
         std::swap(coordinate1, coordinate2);
     }
 
-    std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);
-    std::uniform_int_distribution<> dist_y(coordinate1.y, coordinate2.y);
-    std::uniform_int_distribution<> dist_z(coordinate1.z, coordinate2.z);
+    if constexpr (!std::is_same_v<CoordinateType, siqad::coord_t>)
+    {
+        std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);
+        std::uniform_int_distribution<> dist_y(coordinate1.y, coordinate2.y);
+        std::uniform_int_distribution<> dist_z(coordinate1.z, coordinate2.z);
 
-    return {dist_x(generator), dist_y(generator), dist_z(generator)};
+        return {dist_x(generator), dist_y(generator), dist_z(generator)};
+    }
+    else
+    {
+        const auto                      coordinate1_converted = siqad::to_fiction_coord<cube::coord_t>(coordinate1);
+        const auto                      coordinate2_converted = siqad::to_fiction_coord<cube::coord_t>(coordinate2);
+        std::uniform_int_distribution<> dist_x(coordinate1_converted.x, coordinate2_converted.x);
+        std::uniform_int_distribution<> dist_y(coordinate1_converted.y, coordinate2_converted.y);
+        std::uniform_int_distribution<> dist_z(coordinate1_converted.z, coordinate2_converted.z);
+
+        return siqad::to_siqad_coord(cube::coord_t(dist_x(generator), dist_y(generator), dist_z(generator)));
+    }
 }
 
 }  // namespace fiction
