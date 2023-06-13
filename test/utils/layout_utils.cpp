@@ -233,7 +233,7 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[
     }
 }
 
-TEMPLATE_TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils]", (offset::ucoord_t))
+TEMPLATE_TEST_CASE("Generate random coordinate", "[layout-utils]", (offset::ucoord_t))
 {
     SECTION("two identical cells as input")
     {

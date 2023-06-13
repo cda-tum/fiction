@@ -16,6 +16,7 @@
 #include <limits>
 #include <random>
 #include <type_traits>
+#include <utility>
 
 namespace fiction
 {
@@ -357,14 +358,18 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
  * lower left corner and the upper right corner of the spanned region.
  *
  * @OffsetCoordinateType The coordinate implementation to be used.
- * @param coordinate1 Coordinate of the lower left corner.
- * @param coordinate2 Coordinate of the upper right corner (coordinate order is not important, automatically swapped if
+ * @param coordinate1 Top left Coordinate.
+ * @param coordinate2 Bottom right Coordinate (coordinate order is not important, automatically swapped if
  * necessary).
  * return Randomly generated coordinate.
  */
 template <typename CoordinateType>
 CoordinateType random_coordinate(const CoordinateType& coordinate1, const CoordinateType& coordinate2) noexcept
 {
+    static_assert(std::is_same_v<CoordinateType, offset::ucoord_t> || std::is_same_v<CoordinateType, cube::coord_t> ||
+                      std::is_same_v<CoordinateType, siqad::coord_t>,
+                  "CoordinateType is unknown");
+
     static std::mt19937_64 generator(std::random_device{}());
 
     CoordinateType left_coordinate  = coordinate1;
@@ -375,30 +380,11 @@ CoordinateType random_coordinate(const CoordinateType& coordinate1, const Coordi
         std::swap(left_coordinate, right_coordinate);
     }
 
-    if constexpr (std::is_same_v<CoordinateType, offset::ucoord_t>)
-    {
-        std::uniform_int_distribution<> dist_x(left_coordinate.x, right_coordinate.x);
-        std::uniform_int_distribution<> dist_y(left_coordinate.y, right_coordinate.y);
-        std::uniform_int_distribution<> dist_z(left_coordinate.z, right_coordinate.z);
+    std::uniform_int_distribution<> dist_x(left_coordinate.x, right_coordinate.x);
+    std::uniform_int_distribution<> dist_y(left_coordinate.y, right_coordinate.y);
+    std::uniform_int_distribution<> dist_z(left_coordinate.z, right_coordinate.z);
 
-        return {dist_x(generator), dist_y(generator), dist_z(generator)};
-    }
-    else if constexpr (std::is_same_v<CoordinateType, cube::coord_t>)
-    {
-        std::uniform_int_distribution<> dist_x(left_coordinate.x, right_coordinate.x);
-        std::uniform_int_distribution<> dist_y(left_coordinate.y, right_coordinate.y);
-        std::uniform_int_distribution<> dist_z(left_coordinate.z, right_coordinate.z);
-
-        return {dist_x(generator), dist_y(generator), dist_z(generator)};
-    }
-    else if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
-    {
-        std::uniform_int_distribution<> dist_x(left_coordinate.x, right_coordinate.x);
-        std::uniform_int_distribution<> dist_y(left_coordinate.y, right_coordinate.y);
-        std::uniform_int_distribution<> dist_z(left_coordinate.z, right_coordinate.z);
-
-        return {dist_x(generator), dist_y(generator), dist_z(generator)};
-    }
+    return {dist_x(generator), dist_y(generator), dist_z(generator)};
 }
 }  // namespace fiction
 
