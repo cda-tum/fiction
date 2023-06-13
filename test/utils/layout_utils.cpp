@@ -232,3 +232,109 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[
         CHECK(lyt_transformed.get_cell_name({5, 6}) == "output cell");
     }
 }
+
+TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils]")
+{
+    SECTION("two identical cells as input")
+    {
+        const auto randomly_generated_coordinate = random_coordinate<offset::ucoord_t>({0, 0, 0}, {0, 0, 0});
+        CHECK(randomly_generated_coordinate.x == 0);
+        CHECK(randomly_generated_coordinate.y == 0);
+        CHECK(randomly_generated_coordinate.z == 0);
+
+        const auto randomly_generated_coordinate_second = random_coordinate<offset::ucoord_t>({1, 0, 0}, {1, 0, 0});
+        CHECK(randomly_generated_coordinate_second.x == 1);
+        CHECK(randomly_generated_coordinate_second.y == 0);
+        CHECK(randomly_generated_coordinate_second.z == 0);
+    }
+
+    SECTION("two unidentical cells as input, correct order")
+    {
+        const auto randomly_generated_coordinate_second = random_coordinate<offset::ucoord_t>({1, 1, 1}, {5, 2, 3});
+        CHECK(randomly_generated_coordinate_second.x >= 1);
+        CHECK(randomly_generated_coordinate_second.x <= 5);
+        CHECK(randomly_generated_coordinate_second.y <= 2);
+        CHECK(randomly_generated_coordinate_second.y >= 0);
+        CHECK(randomly_generated_coordinate_second.z <= 3);
+        CHECK(randomly_generated_coordinate_second.z >= 1);
+    }
+
+    SECTION("two unidentical cells as input, switched correct order")
+    {
+        const auto randomly_generated_coordinate = random_coordinate<offset::ucoord_t>({5, 2, 3}, {1, 1, 1});
+        CHECK(randomly_generated_coordinate.x >= 1);
+        CHECK(randomly_generated_coordinate.x <= 5);
+        CHECK(randomly_generated_coordinate.y <= 2);
+        CHECK(randomly_generated_coordinate.y >= 0);
+        CHECK(randomly_generated_coordinate.z <= 3);
+        CHECK(randomly_generated_coordinate.z >= 1);
+    }
+}
+
+TEST_CASE("Generate random cube::coord_t coordinate", "[layout-utils]")
+{
+    SECTION("two identical cells as input")
+    {
+        const auto randomly_generated_coordinate = random_coordinate<cube::coord_t>({-10, -5, 0}, {-10, -5, 0});
+        CHECK(randomly_generated_coordinate.x == -10);
+        CHECK(randomly_generated_coordinate.y == -5);
+        CHECK(randomly_generated_coordinate.z == 0);
+
+        const auto randomly_generated_coordinate_second = random_coordinate<cube::coord_t>({1, 0, 0}, {1, 0, 0});
+        CHECK(randomly_generated_coordinate_second.x == 1);
+        CHECK(randomly_generated_coordinate_second.y == 0);
+        CHECK(randomly_generated_coordinate_second.z == 0);
+    }
+
+    SECTION("two unidentical cells as input, correct order")
+    {
+        const auto randomly_generated_coordinate = random_coordinate<cube::coord_t>({-10, -1, 3}, {-10, -1, 6});
+        CHECK(randomly_generated_coordinate.x == -10);
+        CHECK(randomly_generated_coordinate.y == -1);
+        CHECK(randomly_generated_coordinate.z >= 3);
+        CHECK(randomly_generated_coordinate.z <= 6);
+    }
+
+    SECTION("two unidentical cells as input, switched correct order")
+    {
+        const auto randomly_generated_coordinate = random_coordinate<cube::coord_t>({-10, -1, 6}, {-10, -1, 3});
+        CHECK(randomly_generated_coordinate.x == -10);
+        CHECK(randomly_generated_coordinate.y == -1);
+        CHECK(randomly_generated_coordinate.z >= 3);
+        CHECK(randomly_generated_coordinate.z <= 6);
+    }
+}
+
+TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]")
+{
+    SECTION("two identical cells as input")
+    {
+        const auto randomly_generated_coordinate = random_coordinate<siqad::coord_t>({-10, -5, 0}, {-10, -5, 0});
+        CHECK(randomly_generated_coordinate.x == -10);
+        CHECK(randomly_generated_coordinate.y == -5);
+        CHECK(randomly_generated_coordinate.z == 0);
+
+        const auto randomly_generated_coordinate_second = random_coordinate<siqad::coord_t>({1, 0, 0}, {1, 0, 0});
+        CHECK(randomly_generated_coordinate_second.x == 1);
+        CHECK(randomly_generated_coordinate_second.y == 0);
+        CHECK(randomly_generated_coordinate_second.z == 0);
+    }
+
+    SECTION("two unidentical cells as input, correct order")
+    {
+        const auto randomly_generated_coordinate = random_coordinate<siqad::coord_t>({-10, -1, 0}, {-10, -1, 1});
+        CHECK(randomly_generated_coordinate.x == -10);
+        CHECK(randomly_generated_coordinate.y == -1);
+        CHECK(randomly_generated_coordinate.z >= 0);
+        CHECK(randomly_generated_coordinate.z <= 1);
+    }
+
+    SECTION("two unidentical cells as input, switched correct order")
+    {
+        const auto randomly_generated_coordinate = random_coordinate<siqad::coord_t>({-10, -1, 1}, {-10, -1, 0});
+        CHECK(randomly_generated_coordinate.x == -10);
+        CHECK(randomly_generated_coordinate.y == -1);
+        CHECK(randomly_generated_coordinate.z >= 0);
+        CHECK(randomly_generated_coordinate.z <= 1);
+    }
+}
