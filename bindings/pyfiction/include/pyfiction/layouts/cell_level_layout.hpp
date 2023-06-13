@@ -147,6 +147,14 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
                  lyt.foreach_po([&pos](const auto& c) { pos.push_back(c); });
                  return pos;
              })
+        .def(
+            "bounding_box_2d",
+            [](const py_cartesian_technology_cell_layout& lyt)
+            {
+                const auto bb = fiction::bounding_box_2d<py_cartesian_technology_cell_layout>(lyt);
+                return std::make_pair(bb.get_min(), bb.get_max());
+            },
+            DOC(fiction_bounding_box_2d_overridden))
 
         ;
 }
