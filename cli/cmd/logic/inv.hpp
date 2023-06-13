@@ -12,8 +12,10 @@
 #include <alice/alice.hpp>
 #include <fmt/format.h>
 
+#include <iostream>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <variant>
 
 namespace alice
@@ -44,16 +46,16 @@ class inv_command : public command
             return;
         }
 
-        const auto substitute_inverters = [this](auto&& ntk_ptr)
+        const auto substitute_inverters = [this, &s](auto&& ntk_ptr)
         {
             using Ntk = typename std::decay_t<decltype(ntk_ptr)>::element_type;
             if constexpr (fiction::has_is_fanout_v<Ntk>)
             {
-                auto optimized_ntk{fiction::inverter_substitution(*ntk_ptr)};
-                auto gate_dif = (*ntk_ptr).num_gates() - optimized_ntk.num_gates();
-                env->out() << "[i] Number of reduced inverters: " << gate_dif << std::endl;
+                const auto optimized_ntk{fiction::inverter_substitution(*ntk_ptr)};
+                const auto gate_dif = (*ntk_ptr).num_gates() - optimized_ntk.num_gates();
+                env->out() << "[i] the number of inverters has been reduced by: " << gate_dif << std::endl;
 
-                result = optimized_ntk;
+                s.extend() = std::make_shared<fiction::tec_nt>(optimized_ntk);
             }
             else
             {
@@ -63,20 +65,8 @@ class inv_command : public command
             }
         };
 
-        try
-        {
-            std::visit(substitute_inverters, s.current());
-            s.extend() = std::make_shared<fiction::tec_nt>(result);
-        }
-        catch (...)
-        {
-            env->out() << "[e] an error occurred while reading the technology network" << std::endl;
-        }
-        result = {};
+        std::visit(substitute_inverters, s.current());
     }
-
-  private:
-    mockturtle::names_view<fiction::technology_network> result{};
 };
 
 ALICE_ADD_COMMAND(inv, "Logic")
