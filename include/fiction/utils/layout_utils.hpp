@@ -364,7 +364,7 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
  * return Randomly generated coordinate.
  */
 template <typename CoordinateType>
-CoordinateType random_coordinate(const CoordinateType& coordinate1, const CoordinateType& coordinate2) noexcept
+CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coordinate2) noexcept
 {
     static_assert(std::is_same_v<CoordinateType, offset::ucoord_t> || std::is_same_v<CoordinateType, cube::coord_t> ||
                       std::is_same_v<CoordinateType, siqad::coord_t>,
@@ -372,20 +372,18 @@ CoordinateType random_coordinate(const CoordinateType& coordinate1, const Coordi
 
     static std::mt19937_64 generator(std::random_device{}());
 
-    CoordinateType left_coordinate  = coordinate1;
-    CoordinateType right_coordinate = coordinate2;
-
-    if (left_coordinate > right_coordinate)
+    if (coordinate1 > coordinate2)
     {
-        std::swap(left_coordinate, right_coordinate);
+        std::swap(coordinate1, coordinate2);
     }
 
-    std::uniform_int_distribution<> dist_x(left_coordinate.x, right_coordinate.x);
-    std::uniform_int_distribution<> dist_y(left_coordinate.y, right_coordinate.y);
-    std::uniform_int_distribution<> dist_z(left_coordinate.z, right_coordinate.z);
+    std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);
+    std::uniform_int_distribution<> dist_y(coordinate1.y, coordinate2.y);
+    std::uniform_int_distribution<> dist_z(coordinate1.z, coordinate2.z);
 
     return {dist_x(generator), dist_y(generator), dist_z(generator)};
 }
+
 }  // namespace fiction
 
 #endif  // FICTION_LAYOUT_UTILS_HPP
