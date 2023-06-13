@@ -14,6 +14,7 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/hash.hpp"
+#include "fiction/utils/layout_utils.hpp"
 
 #include <cstdint>
 #include <iostream>
@@ -31,9 +32,9 @@ template <typename Lyt>
 struct random_layout_params
 {
     /**
-     * Aspect ratio of the layout (i.e. the size of the layout).
+     * Two coordinates that span the region where SiDBs may be placed (order is not important).
      */
-    typename Lyt::aspect_ratio dimension;
+    std::pair<typename Lyt::cell, typename Lyt::cell> coordinate_pair;
     /**
      * Number of SiDBs that are placed on the layout.
      */
@@ -67,25 +68,13 @@ Lyt generate_random_layout(const random_layout_params<Lyt>& params)
     while (!successful_generation && params.maximal_attempts)
     {
         // layout is initialized with given aspect ratio and name.
-        Lyt lyt{params.dimension};
+        Lyt lyt{};
 
-        static std::mt19937_64 generator(std::random_device{}());
         uint64_t               attempt_counter = 0;
-
-        // uniform distribution of [0,x_coordinate].
-        std::uniform_int_distribution<uint64_t> dist_x(0u, static_cast<uint64_t>(lyt.x()));
-        // uniform distribution of [0,y_coordinate].
-        std::uniform_int_distribution<uint64_t> dist_y(0u, static_cast<uint64_t>(lyt.y()));
-
-        // this while stops if either all SiDBs are placed or the maximum number of attempts were performed.
+        // Stops if either all SiDBs are placed or the maximum number of attempts were performed.
         while (lyt.num_cells() < params.number_of_sidbs && attempt_counter < params.maximal_attempts)
         {
-            // random integer from [0,x_coordinate] is selected.
-            const auto random_x_coordinate = dist_x(generator);
-            // random integer from [0,y_coordinate] is selected.
-            const auto random_y_coordinate = dist_y(generator);
-            // coordinate is constructed [x_coordinate, y_coordinate]
-            const auto random_coordinate = typename Lyt::coordinate({random_x_coordinate, random_y_coordinate});
+            const auto random_coord = random_coordinate(params.coordinate_pair.first, params.coordinate_pair.second);
 
             bool constraint_violation_positive_sidbs = false;
 
@@ -94,9 +83,9 @@ Lyt generate_random_layout(const random_layout_params<Lyt>& params)
                 // it checks if the new coordinate is not closer than 2 cells (Euclidean distance) from an already
                 // placed SiDB.
                 lyt.foreach_cell(
-                    [&lyt, &random_coordinate, &constraint_violation_positive_sidbs, &params](const auto& c1)
+                    [&lyt, &random_coord, &constraint_violation_positive_sidbs, &params](const auto& c1)
                     {
-                        if (euclidean_distance<Lyt>(lyt, c1, random_coordinate) < params.minimal_spacing)
+                        if (euclidean_distance<Lyt>(lyt, c1, random_coord) < params.minimal_spacing)
                         {
                             constraint_violation_positive_sidbs = true;
                         }
@@ -105,7 +94,7 @@ Lyt generate_random_layout(const random_layout_params<Lyt>& params)
             // If the constraint that no positive SiDBs occur is satisfied, the SiDB is added to the layout.
             if (!constraint_violation_positive_sidbs)
             {
-                lyt.assign_cell_type(random_coordinate, Lyt::cell_type::NORMAL);
+                lyt.assign_cell_type(random_coord, Lyt::cell_type::NORMAL);
             }
             attempt_counter += 1;
         }
@@ -138,7 +127,7 @@ std::vector<Lyt> generate_multiple_random_layout(const random_layout_params<Lyt>
     {
         const auto random_lyt = generate_random_layout(params);
 
-        // it checks if new-found layout is identical to an already found layout (all_layouts).
+        // Checks if new-found layout is identical to an already found layout (all_layouts).
         uint64_t identical_layout_counter = 0;
         for (const auto& old_lyt : unique_lyts)
         {
@@ -161,6 +150,7 @@ std::vector<Lyt> generate_multiple_random_layout(const random_layout_params<Lyt>
         }
         counter += 1;
     }
+
     return unique_lyts;
 }
 
