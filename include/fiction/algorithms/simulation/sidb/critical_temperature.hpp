@@ -333,7 +333,7 @@ class critical_temperature_impl
         std::vector<units::temperature::kelvin_t> temp_values{};
         temp_values.reserve(parameter.max_temperature.value() * 100);
 
-        for (uint64_t i = 1; i <= parameter.max_temperature.value() * 100; i++)
+        for (uint64_t i = 1; i <= static_cast<uint64_t>(parameter.max_temperature.value() * 100); i++)
         {
             temp_values.emplace_back(static_cast<double>(i) / 100.0);
         }
@@ -406,7 +406,7 @@ class critical_temperature_impl
         std::vector<units::temperature::kelvin_t> temp_values{};
         temp_values.reserve(parameter.max_temperature.value() * 100);
 
-        for (uint64_t i = 1; i <= parameter.max_temperature.value() * 100; i++)
+        for (uint64_t i = 1; i <= static_cast<uint64_t>(parameter.max_temperature.value() * 100); i++)
         {
             temp_values.emplace_back(static_cast<double>(i) / 100.0);
         }

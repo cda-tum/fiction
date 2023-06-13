@@ -17,8 +17,6 @@
 namespace fiction
 {
 
-using units::literals::operator""_eV;
-
 /**
  *  Data type to collect electrostatic potential energies of charge distributions with corresponding degeneracy (i.e.
  * how often a certain energy value occurs).
