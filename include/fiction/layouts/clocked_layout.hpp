@@ -15,7 +15,7 @@
 #include <functional>
 #include <iterator>
 #include <memory>
-#include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -152,9 +152,9 @@ class clocked_layout : public CoordinateLayout
      * @param name Clocking scheme name.
      * @return `true` iff the layout is clocked by a clocking scheme of name `name`.
      */
-    [[nodiscard]] bool is_clocking_scheme(std::string&& name) const noexcept
+    [[nodiscard]] bool is_clocking_scheme(const std::string_view& name) const noexcept
     {
-        return *strg->clocking == name;
+        return *strg->clocking == name.data();
     }
     /**
      * Returns a copy of the stored clocking scheme object.
@@ -184,8 +184,8 @@ class clocked_layout : public CoordinateLayout
                get_clock_number(cz1);
     }
     /**
-     * Evaluates whether clock zone `cz2` accepts information from clock zone `cz1`, i.e., whether `cz2` is clocked with a
-     * clock number that is higher by 1 modulo `num_clocks()`.
+     * Evaluates whether clock zone `cz2` accepts information from clock zone `cz1`, i.e., whether `cz2` is clocked with
+     * a clock number that is higher by 1 modulo `num_clocks()`.
      *
      * @param cz1 Base clock zone.
      * @param cz2 Clock zone to check whether its clock number is higher by 1.

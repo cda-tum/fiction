@@ -25,7 +25,7 @@ void sidb_simulation_result(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::sidb_simulation_result<Lyt>()>("sidb_simulation_result", DOC(fiction_sidb_simulation_result))
+    py::class_<fiction::sidb_simulation_result<Lyt>>(m, "sidb_simulation_result", DOC(fiction_sidb_simulation_result))
         .def(py::init<>())
         .def_readwrite("algorithm_name", &fiction::sidb_simulation_result<Lyt>::algorithm_name,
                        DOC(fiction_sidb_simulation_result_algorithm_name))
@@ -46,8 +46,6 @@ void sidb_simulation_result(pybind11::module& m)
 
 inline void sidb_simulation_result(pybind11::module& m)
 {
-    namespace py = pybind11;
-
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::sidb_simulation_result<py_charge_distribution_surface>(m);

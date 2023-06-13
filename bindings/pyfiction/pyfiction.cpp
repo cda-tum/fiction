@@ -14,6 +14,13 @@
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
 #include "pyfiction/algorithms/properties/critical_path_length_and_throughput.hpp"
 #include "pyfiction/algorithms/simulation/logic_simulation.hpp"
+#include "pyfiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
+#include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
+#include "pyfiction/algorithms/simulation/sidb/energy_distribution.hpp"
+#include "pyfiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
+#include "pyfiction/algorithms/simulation/sidb/is_ground_state.hpp"
+#include "pyfiction/algorithms/simulation/sidb/minimum_energy.hpp"
+#include "pyfiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "pyfiction/algorithms/verification/design_rule_violations.hpp"
@@ -97,6 +104,13 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::logic_simulation(m);
     pyfiction::sidb_simulation_parameters(m);
     pyfiction::sidb_simulation_result(m);
+    pyfiction::exhaustive_ground_state_simulation(m);
+    pyfiction::quicksim(m);
+    pyfiction::is_ground_state(m);
+    pyfiction::minimum_energy(m);
+    pyfiction::energy_distribution(m);
+    pyfiction::calculate_energy_and_state_type(m);
+    pyfiction::critical_temperature(m);
     /*
      * Algorithms: Verification
      */
