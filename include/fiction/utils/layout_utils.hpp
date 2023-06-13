@@ -387,13 +387,12 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
     }
     else
     {
-        const auto                      coordinate1_converted = siqad::to_fiction_coord<cube::coord_t>(coordinate1);
-        const auto                      coordinate2_converted = siqad::to_fiction_coord<cube::coord_t>(coordinate2);
-        std::uniform_int_distribution<> dist_x(coordinate1_converted.x, coordinate2_converted.x);
-        std::uniform_int_distribution<> dist_y(coordinate1_converted.y, coordinate2_converted.y);
-        std::uniform_int_distribution<> dist_z(coordinate1_converted.z, coordinate2_converted.z);
+        std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);
+        std::uniform_int_distribution<> dist_y(coordinate1.y, coordinate2.y);
+        std::uniform_int_distribution<> dist_z(0, 1);
 
-        return siqad::to_siqad_coord(cube::coord_t(dist_x(generator), dist_y(generator), dist_z(generator)));
+        return std::clamp(siqad::coord_t{dist_x(generator), dist_y(generator), dist_z(generator)}, coordinate1,
+                          coordinate2);
     }
 }
 
