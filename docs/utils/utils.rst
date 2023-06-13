@@ -57,7 +57,7 @@ Layout Utils
 .. doxygenfunction:: fiction::normalize_layout_coordinates
 .. doxygenfunction:: fiction::convert_to_siqad_coordinates
 .. doxygenfunction:: fiction::convert_to_fiction_coordinates
-
+.. doxygenfunction:: fiction::random_coordinate
 
 
 Placement Utils
