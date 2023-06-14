@@ -48,7 +48,7 @@ TEST_CASE("conditional_coloring", "[orthogonal-coloring]")
         fanout_substitution<technology_network>(blueprints::test_fanout_swap<mockturtle::mig_network>())}});
 }
 
-TEST_CASE("Ordering Gate library application", "[orthogonal-ordering]")
+TEST_CASE("Ordering gate library application and design rule violation", "[orthogonal-ordering]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
     using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
@@ -60,6 +60,14 @@ TEST_CASE("Ordering Gate library application", "[orthogonal-ordering]")
         auto layout = orthogonal_ordering_network<gate_layout>(ntk, {}, &stats);
 
         CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(layout));
+
+        gate_level_drv_stats  st = {};
+        gate_level_drv_params ps = {};
+        std::stringstream     ss{};
+        ps.out = &ss;
+        gate_level_drvs(layout, ps, &st);
+
+        CHECK(st.drvs == 0);
     };
 
     check_ortho_ordering(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
@@ -78,7 +86,7 @@ TEST_CASE("Ordering Gate library application", "[orthogonal-ordering]")
     check_ortho_ordering(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
 }
 
-TEST_CASE("Ordering Name conservation after orthogonal physical design", "[orthogonal-ordering]")
+TEST_CASE("Ordering name conservation after orthogonal physical design", "[orthogonal-ordering]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
@@ -97,17 +105,4 @@ TEST_CASE("Ordering Name conservation after orthogonal physical design", "[ortho
 
     // PO names
     CHECK(layout.get_output_name(0) == "f");
-}
-
-TEST_CASE("TEST", "[orthogonal-ordering]")
-{
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-
-    auto test_nw = blueprints::fanout_substitution_corner_case_network<mockturtle::names_view<mockturtle::aig_network>>();
-
-    orthogonal_physical_design_stats stats{};
-
-    const auto layout = orthogonal_ordering_network<gate_layout>(test_nw, {}, &stats);
-
-    gate_level_drvs(layout);
 }

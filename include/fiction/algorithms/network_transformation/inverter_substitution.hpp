@@ -16,7 +16,6 @@
 #include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
-#include <csignal>
 #include <cstdint>
 #include <type_traits>
 #include <vector>
@@ -31,16 +30,27 @@ namespace fiction
 namespace detail
 {
 
-template <typename Ntk, typename NtkDest, typename Gate>
-bool connect_children_to_gates(Ntk& ntk, NtkDest& ntk_dest, mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new,
-                               std::vector<typename Ntk::signal> children, Gate& g)
+/**
+ * Connect all gates, that are not affected by the inverter substitution.
+ *
+ * @param ntk input network.
+ * @param ntk_dest output network.
+ * @param old2new node_map to assign the nodes of the old network to the new network.
+ * @param children children of the current node.
+ * @param g currently viewed node.
+ * @return 'true' iff the assignment was successful.
+ */
+template <typename Ntk, typename NtkDest>
+bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
+                               mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new,
+                               const std::vector<typename Ntk::signal>& children, const mockturtle::node<Ntk>& g)
 {
     if constexpr (mockturtle::has_is_and_v<Ntk> && mockturtle::has_create_and_v<Ntk>)
     {
         if (ntk.is_and(g))
         {
             old2new[g] = ntk_dest.create_and(children[0], children[1]);
-            return true;
+            return true; // keep looping
         }
     }
     if constexpr (mockturtle::has_is_or_v<Ntk> && mockturtle::has_create_or_v<Ntk>)
@@ -48,7 +58,7 @@ bool connect_children_to_gates(Ntk& ntk, NtkDest& ntk_dest, mockturtle::node_map
         if (ntk.is_or(g))
         {
             old2new[g] = ntk_dest.create_or(children[0], children[1]);
-            return true;
+            return true; // keep looping
         }
     }
     if constexpr (mockturtle::has_is_xor_v<Ntk> && mockturtle::has_create_xor_v<Ntk>)
@@ -56,7 +66,7 @@ bool connect_children_to_gates(Ntk& ntk, NtkDest& ntk_dest, mockturtle::node_map
         if (ntk.is_xor(g))
         {
             old2new[g] = ntk_dest.create_xor(children[0], children[1]);
-            return true;
+            return true; // keep looping
         }
     }
     if constexpr (mockturtle::has_is_maj_v<Ntk> && mockturtle::has_create_maj_v<Ntk>)
@@ -64,7 +74,7 @@ bool connect_children_to_gates(Ntk& ntk, NtkDest& ntk_dest, mockturtle::node_map
         if (ntk.is_maj(g))
         {
             old2new[g] = ntk_dest.create_maj(children[0], children[1], children[2]);
-            return true;
+            return true; // keep looping
         }
     }
     if constexpr (mockturtle::has_is_nary_and_v<Ntk> && mockturtle::has_create_nary_and_v<Ntk>)
@@ -72,7 +82,7 @@ bool connect_children_to_gates(Ntk& ntk, NtkDest& ntk_dest, mockturtle::node_map
         if (ntk.is_nary_and(g))
         {
             old2new[g] = ntk_dest.create_nary_and(children);
-            return true;
+            return true; // keep looping
         }
     }
     if constexpr (mockturtle::has_is_nary_or_v<Ntk> && mockturtle::has_create_nary_or_v<Ntk>)
@@ -80,7 +90,7 @@ bool connect_children_to_gates(Ntk& ntk, NtkDest& ntk_dest, mockturtle::node_map
         if (ntk.is_nary_or(g))
         {
             old2new[g] = ntk_dest.create_nary_or(children);
-            return true;
+            return true; // keep looping
         }
     }
     if constexpr (mockturtle::has_is_nary_xor_v<Ntk> && mockturtle::has_create_nary_xor_v<Ntk>)
@@ -88,10 +98,10 @@ bool connect_children_to_gates(Ntk& ntk, NtkDest& ntk_dest, mockturtle::node_map
         if (ntk.is_nary_xor(g))
         {
             old2new[g] = ntk_dest.create_nary_xor(children);
-            return true;
+            return true; // keep looping
         }
     }
-    return false;
+    return false; // gate type not supported
 }
 
 template <typename Ntk>
@@ -103,19 +113,25 @@ class inverter_substitution_impl
         // compute maximum sizes for vectors
         count_gate_types_stats st{};
         count_gate_types(fo_ntk, &st);
-        num_fos = st.num_fanout;
-        x_inv.reserve(num_fos);
-        m_inv.reserve(num_fos);
-        blc_fos.reserve(num_fos);
+        x_inv.reserve(st.num_fanout);
+        m_inv.reserve(st.num_fanout);
+        blc_fos.reserve(st.num_fanout);
+
+        // enable premature termination, when no optimizations are possible
+        if (st.num_fanout == 0 || st.num_inv < 1)
+        {
+            rerun = false;
+        }
+    }
+
+    // check if optimizations were made
+    [[nodiscard]] bool is_rerun() const
+    {
+        return rerun;
     }
 
     Ntk run()
     {
-        if (num_fos == 0)
-        {
-            return ntk;
-        }
-
         auto  init     = mockturtle::initialize_copy_network<Ntk>(ntk);
         auto& ntk_dest = init.first;
         auto& old2new  = init.second;
@@ -173,58 +189,55 @@ class inverter_substitution_impl
                 bar(i);
 #endif
                 // map all affected nodes
-                if constexpr (has_is_inv_v<TopoNtkSrc>)
+                if constexpr (mockturtle::has_create_buf_v<Ntk>)
                 {
                     if (ntk.is_inv(g) && std::find(m_inv.cbegin(), m_inv.cend(), g) != m_inv.cend())
                     {
                         old2new[g] = ntk_dest.create_buf(children[0]);
-                        if (ntk.is_po(g))
-                        {
-                            // Preserve Outputs
-                            preserved_po.push_back(g);
-                        }
-                        return true;
+                        return true;  // keep looping
                     }
-                    const auto po_it = std::find(x_inv.cbegin(), x_inv.cend(), g);
-                    if (ntk.is_inv(g) && po_it != x_inv.cend())
+                    if (const auto po_it = std::find(x_inv.cbegin(), x_inv.cend(), g);
+                        ntk.is_inv(g) && po_it != x_inv.cend())
                     {
                         if (ntk.is_po(g))
                         {
                             // Preserve Outputs
                             const auto index = po_it - x_inv.cbegin();
-                            preserved_po.push_back(m_inv[index]);
+                            preserved_po.push_back(
+                                m_inv[static_cast<std::vector<long unsigned int>::size_type>(index)]);
                         }
-                        return true;
+                        return true;  // keep looping
                     }
                 }
-                if constexpr (fiction::has_is_buf_v<TopoNtkSrc> && mockturtle::has_create_buf_v<Ntk>)
+                if constexpr (mockturtle::has_create_not_v<Ntk>)
                 {
                     if (ntk.is_buf(g) && std::find(blc_fos.cbegin(), blc_fos.cend(), g) != blc_fos.cend())
                     {
                         old2new[g] = ntk_dest.create_not(children[0]);
-                        return true;
+                        return true;  // keep looping
                     }
                 }
                 // map all unaffected nodes
                 if (connect_children_to_gates(ntk, ntk_dest, old2new, children, g))
                 {
-                    return true;
+                    return true; // keep looping
                 }
                 if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<Ntk>)
                 {
                     old2new[g] = ntk_dest.create_node(children, ntk.node_function(g));
-                    return true;
+                    return true;  // keep looping
                 }
 
-                return true;
+                return true;  // keep looping
             });
 
+        // create the POs of the network, POs of deleted inverters need to be preserved
         ntk.foreach_po(
             [this, &ntk_dest, &old2new](const auto& po)
             {
                 auto tgt_signal = old2new[ntk.get_node(po)];
                 auto tgt_po     = ntk.is_complemented(po) ? ntk_dest.create_not(tgt_signal) : tgt_signal;
-                if (tgt_po == mockturtle::signal<Ntk>{})
+                if (tgt_po == mockturtle::signal<Ntk>{} && !ntk.is_constant(po))
                 {
                     tgt_signal = old2new[ntk.get_node(preserved_po[0])];
                     preserved_po.erase(preserved_po.cbegin());
@@ -236,70 +249,45 @@ class inverter_substitution_impl
         // restore signal names if applicable
         fiction::restore_names(ntk, ntk_dest, old2new);
 
+        // check if any optimizations were made
+        if (blc_fos.empty())
+        {
+            rerun = false;
+        }
+
         return ntk_dest;
     }
 
   private:
     /**
-     * Two inverters at the fan-outs of a fan-out node are substituted with one inverter at the fan-in of this node.
-     * Therefore one inverter gets deleted and one inverter gets moved to the fan-in of the fan-out node.
-     * All nodes, with fan-ins affected by deletion or moving of nodes are taken into account by the algorithm
-     * @tparam Ntk Type of the input logic network.
-     * @param ntk Topologically ordered input logic network.
-     * @param fo_ntk Fan-out view of ntk.
-     * @param x_inv Deleted inverter nodes
-     * @param m_inv Moved inverter nodes.
-     * @param blc_fos Affected fan-out nodes.
-     * @param preserved_po Preserve POs, when deleted or moved inverter nodes are POs.
-     * @param num_fos number of fan-outs in the input network
+     * @param ntk topologically ordered input logic network.
+     * @param fo_ntk fan-out view of ntk.
+     * @param x_inv inverter nodes, which get deleted.
+     * @param m_inv inverter nodes, which get moved to fan-in position.
+     * @param blc_fos fo nodes, where balancing is applied.
+     * @param preserved_po nodes where pos need to be preserved.
      */
     using TopoNtkSrc = mockturtle::topo_view<Ntk>;
     TopoNtkSrc                          ntk;
     mockturtle::fanout_view<TopoNtkSrc> fo_ntk{ntk};
-    std::vector<mockturtle::node<Ntk>>  x_inv{};         // inverter nodes, which get deleted
-    std::vector<mockturtle::node<Ntk>>  m_inv{};         // inverter nodes, which get moved to fanin position
-    std::vector<mockturtle::node<Ntk>>  blc_fos{};       // fo nodes, where balancing is applied
-    std::vector<mockturtle::node<Ntk>>  preserved_po{};  // nodes where pos need to be preserved
-    std::uint64_t                       num_fos{};
+    std::vector<mockturtle::node<Ntk>>  x_inv{};
+    std::vector<mockturtle::node<Ntk>>  m_inv{};
+    std::vector<mockturtle::node<Ntk>>  blc_fos{};
+    std::vector<mockturtle::node<Ntk>>  preserved_po{};
+    bool rerun{true};
 };
-
-/**
- * The substitution of inverters on a fan-out node can lead to the need of substitution on another fan-out node
- * This function provides the necessary check, if another substitution has to be performed
- */
-template <typename NtkSrc>
-bool inverter_substitution_check(const NtkSrc& ntk)
-{
-    bool       rerun_check = false;
-    const auto fo_ntk      = mockturtle::fanout_view<NtkSrc>(ntk);
-    ntk.foreach_gate(
-        [&](const auto& g)
-        {
-            if (ntk.fanout_size(g) >= 2)
-            {
-                auto fanout_inv      = fanouts(fo_ntk, g);
-                auto need_substitute = std::all_of(fanout_inv.cbegin(), fanout_inv.cend(),
-                                                   [&](const auto& fo_node) { return fo_ntk.is_inv(fo_node); });
-                if (need_substitute && fanout_inv.size() > 1)
-                {
-                    rerun_check = true;
-                }
-            }
-        });
-    return rerun_check;
-}
 
 }  // namespace detail
 
 /**
- * Substitutes inverters at fan-out nodes.
+ * Substitutes two inverters at the fan-outs of a fan-out node with one inverter at the fan-in of this node.
+ * Therefore one inverter gets deleted and one inverter gets moved to the fan-in of the fan-out node.
+ * All nodes, with fan-ins affected by deletion or moving of nodes are taken into account by the algorithm.
+ * This is part of the Distribution Network I: Input_Ordering
  *
- * When both fan-outs of a fan-out node are inverted, the inverters are replaced by one inverter as fan-in of this node
- * This is part of the Distribution Newtork I: Input_Ordering
- *
- * @tparam Ntk Type of the input logic network.
+ * @tparam Ntk A logic network of type `Ntk` with optimized inverter count.
  * @param ntk The input logic network.
- * @return A logic network of type Ntk
+ * @return A logic network of type Ntk.
  */
 template <typename Ntk>
 Ntk inverter_substitution(const Ntk& ntk)
@@ -324,18 +312,17 @@ Ntk inverter_substitution(const Ntk& ntk)
 
     assert(ntk.is_combinational() && "Network has to be combinational");
 
-    detail::inverter_substitution_impl<Ntk> p{ntk};
-
-    auto result = p.run();
-    // check if the new ntk is balanced
-    bool rerun = detail::inverter_substitution_check(result);
-    while (rerun)
+    bool run = true;
+    auto result = ntk;
+    while(run)
     {
-        detail::inverter_substitution_impl<Ntk> k{result};
-
-        result = k.run();
-
-        rerun = detail::inverter_substitution_check(result);
+        detail::inverter_substitution_impl<Ntk> p{result};
+        if(!p.is_rerun())
+        {
+            break; // premature termination
+        }
+        result = p.run();
+        run = p.is_rerun();
     }
 
     return result;
