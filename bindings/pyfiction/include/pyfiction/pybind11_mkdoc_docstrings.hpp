@@ -176,8 +176,10 @@ Returns:
     building blocks defined in `GateLibrary`.)doc";
 
 static const char *__doc_fiction_area =
-R"doc(Computes the area of a given coordinate assuming its origin is
-:math:`(0, 0, 0)`. Calculates :math:`(x + 1) \cdot (y + 1)`.
+R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
+0). Calculates :math:` (|x| + 1) \cdot (|y| + 1) ` by default. The
+exception is SiQAD coordinates, for which it computes :math:` (|x| +
+1) \cdot (2 \cdot |y| + |z| + 1) `.
 
 Template parameter ``CoordinateType``:
     Coordinate type.
@@ -412,8 +414,7 @@ Cartesian grid. Its faces are organized in the following way:
 (3,2) | | | | | | +-------+-------+-------+-------+ \endverbatim
 
 Template parameter ``OffsetCoordinateType``:
-    The coordinate implementation to be used. Offset coordinates are
-    required.)doc";
+    The coordinate implementation to be used.)doc";
 
 static const char *__doc_fiction_cartesian_layout_above =
 R"doc(Returns the coordinate that is directly above a given coordinate `c`,
@@ -459,8 +460,7 @@ Returns:
     A container that contains pairs of `c`'s opposing coordinates.)doc";
 
 static const char *__doc_fiction_cartesian_layout_area =
-R"doc(Returns the layout's number of faces which are equal to :math:`(x + 1)
-\cdot (y + 1)`.
+R"doc(Returns the layout's number of faces depending on the coordinate type.
 
 Returns:
     Area of layout.)doc";
@@ -539,7 +539,8 @@ Parameter ``start``:
     First coordinate to include in the range of all coordinates.
 
 Parameter ``stop``:
-    Last coordinate to include in the range of all coordinates.
+    Last coordinate (exclusive) to include in the range of all
+    coordinates.
 
 Returns:
     An iterator range from `start` to `stop`. If they are not
@@ -616,7 +617,8 @@ Parameter ``start``:
     First coordinate to include in the range of all coordinates.
 
 Parameter ``stop``:
-    Last coordinate to include in the range of all coordinates.)doc";
+    Last coordinate (exclusive) to include in the range of all
+    coordinates.)doc";
 
 static const char *__doc_fiction_cartesian_layout_foreach_ground_coordinate =
 R"doc(Applies a function to all coordinates accessible in the layout's
@@ -635,7 +637,8 @@ Parameter ``start``:
     coordinates.
 
 Parameter ``stop``:
-    Last coordinate to include in the range of all ground coordinates.)doc";
+    Last coordinate (exclusive) to include in the range of all ground
+    coordinates.)doc";
 
 static const char *__doc_fiction_cartesian_layout_ground_coordinates =
 R"doc(Returns a range of all coordinates accessible in the layout's ground
@@ -647,12 +650,15 @@ Parameter ``start``:
     coordinates.
 
 Parameter ``stop``:
-    Last coordinate to include in the range of all ground coordinates.
+    Last coordinate (exclusive) to include in the range of all ground
+    coordinates.
 
 Returns:
     An iterator range from `start` to `stop`. If they are not
     provided, the first/last coordinate in the ground layer is used as
     a default.)doc";
+
+static const char *__doc_fiction_cartesian_layout_initialize_dimension = R"doc()doc";
 
 static const char *__doc_fiction_cartesian_layout_is_above =
 R"doc(Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
@@ -1907,6 +1913,63 @@ Parameter ``lyt``:
 Returns:
     A new equivalent layout based on SiQAD coordinates.)doc";
 
+static const char *__doc_fiction_coord_iterator =
+R"doc(An iterator type that allows to enumerate coordinates in order within
+a boundary.
+
+Template parameter ``CoordinateType``:
+    Type of coordinate to enumerate.)doc";
+
+static const char *__doc_fiction_coord_iterator_aspect_ratio = R"doc()doc";
+
+static const char *__doc_fiction_coord_iterator_coord = R"doc()doc";
+
+static const char *__doc_fiction_coord_iterator_coord_iterator =
+R"doc(Standard constructor. Initializes the iterator with a starting
+position and the boundary within to enumerate.
+
+With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following
+order would be enumerated for offset or cubic coordinates:
+
+- (0, 0, 0) - (1, 0, 0) - (0, 1, 0) - (1, 1, 0) - (0, 2, 0) - (1, 2,
+0) - (0, 0, 1) - (1, 0, 1) - (0, 1, 1) - (1, 1, 1) - (0, 2, 1) - (1,
+2, 1)
+
+For SiQAD coordinates with the same parameters, we have the following
+order of enumeration:
+
+- (0, 0, 0) - (1, 0, 0) - (0, 0, 1) - (1, 0, 1) - (0, 1, 0) - (1, 2,
+0) - (0, 1, 1) - (1, 1, 1) - (1, 1, 0) - (0, 2, 0) - (0, 2, 1) - (1,
+2, 1)
+
+coord_iterator is compatible with the STL forward_iterator category.
+Does not iterate over negative coordinates.
+
+Parameter ``dimension``:
+    Boundary within to enumerate. Iteration wraps at its limits.
+
+Parameter ``start``:
+    Starting coordinate to enumerate first.)doc";
+
+static const char *__doc_fiction_coord_iterator_operator_eq = R"doc()doc";
+
+static const char *__doc_fiction_coord_iterator_operator_inc =
+R"doc(Increments the iterator, while keeping it within the boundary. Also
+defined on iterators that are out of bounds.
+
+Returns:
+    Reference to the incremented iterator.)doc";
+
+static const char *__doc_fiction_coord_iterator_operator_inc_2 = R"doc()doc";
+
+static const char *__doc_fiction_coord_iterator_operator_le = R"doc()doc";
+
+static const char *__doc_fiction_coord_iterator_operator_lt = R"doc()doc";
+
+static const char *__doc_fiction_coord_iterator_operator_mul = R"doc()doc";
+
+static const char *__doc_fiction_coord_iterator_operator_ne = R"doc()doc";
+
 static const char *__doc_fiction_cost_functor =
 R"doc(A functor that computes costs between coordinates and can be passed as
 an object to, e.g., path finding algorithms with a standardized
@@ -2152,9 +2215,11 @@ static const char *__doc_fiction_critical_path_length_and_throughput_stats_criti
 static const char *__doc_fiction_critical_path_length_and_throughput_stats_throughput = R"doc()doc";
 
 static const char *__doc_fiction_critical_temperature =
-R"doc(This algorithm performs temperature-aware SiDB simulation. It comes in
-two flavors: gate-based and non-gate based, which can be specified
-using the `critical_temperature_mode` parameter.
+R"doc(This algorithm performs temperature-aware SiDB simulation as proposed
+in \"Temperature Behavior of Silicon Dangling Bond Logic\" by J.
+Drewniok, M. Walter, and R. Wille in IEEE-NANO 2023. It comes in two
+flavors: gate-based and non-gate based, which can be specified using
+the `critical_temperature_mode` parameter.
 
 For gate-based simulation, the Critical Temperature is defined as
 follows: The temperature at which the excited charge distributions are
@@ -2421,6 +2486,21 @@ z)"` that does not respect the dead indicator.
 
 Returns:
     String representation of the form `"(x, y, z)"`.)doc";
+
+static const char *__doc_fiction_cube_coord_t_wrap =
+R"doc(Wraps the coordinate with respect to the given aspect ratio by
+iterating over the dimensions in the order defined by the coordinate
+type. For any dimension of the coordinate that is strictly larger than
+the associated dimension of the aspect ratio, this dimension will be
+wrapped to zero, and the next dimension is increased. The resulting
+coordinate becomes a dead copy of the aspect ratio if it is not
+contained in the aspect ratio after iterating. An example use case of
+this function is the coordinate iterator, which implements iterator
+advancing by first incrementing the x dimension, then wrapping the
+coordinate to the boundary within to enumerate.
+
+Parameter ``aspect_ratio``:
+    Aspect ratio to wrap the coordinate to.)doc";
 
 static const char *__doc_fiction_cube_coord_t_x = R"doc(x coordinate.)doc";
 
@@ -6675,8 +6755,6 @@ static const char *__doc_fiction_has_foreach_adjacent_tile = R"doc()doc";
 
 static const char *__doc_fiction_has_foreach_cell = R"doc()doc";
 
-static const char *__doc_fiction_has_foreach_charge_state = R"doc()doc";
-
 static const char *__doc_fiction_has_foreach_coordinate = R"doc()doc";
 
 static const char *__doc_fiction_has_foreach_incoming_clocked_zone = R"doc()doc";
@@ -6899,8 +6977,7 @@ Returns:
     A container that contains pairs of `c`'s opposing coordinates.)doc";
 
 static const char *__doc_fiction_hexagonal_layout_area =
-R"doc(Returns the layout's number of faces which are equal to :math:`(x + 1)
-\cdot (y + 1)`.
+R"doc(Returns the layout's number of faces depending on the coordinate type.
 
 Returns:
     Area of layout.)doc";
@@ -6958,7 +7035,8 @@ Parameter ``start``:
     First coordinate to include in the range of all coordinates.
 
 Parameter ``stop``:
-    Last coordinate to include in the range of all coordinates.
+    Last coordinate (exclusive) to include in the range of all
+    coordinates.
 
 Returns:
     An iterator range from `start` to `stop`. If they are not
@@ -7047,7 +7125,8 @@ Parameter ``start``:
     First coordinate to include in the range of all coordinates.
 
 Parameter ``stop``:
-    Last coordinate to include in the range of all coordinates.)doc";
+    Last coordinate (exclusive) to include in the range of all
+    coordinates.)doc";
 
 static const char *__doc_fiction_hexagonal_layout_foreach_ground_coordinate =
 R"doc(Applies a function to all coordinates accessible in the layout's
@@ -7066,7 +7145,8 @@ Parameter ``start``:
     coordinates.
 
 Parameter ``stop``:
-    Last coordinate to include in the range of all ground coordinates.)doc";
+    Last coordinate (exclusive) to include in the range of all ground
+    coordinates.)doc";
 
 static const char *__doc_fiction_hexagonal_layout_ground_coordinates =
 R"doc(Returns a range of all coordinates accessible in the layout's ground
@@ -7078,7 +7158,8 @@ Parameter ``start``:
     coordinates.
 
 Parameter ``stop``:
-    Last coordinate to include in the range of all ground coordinates.
+    Last coordinate (exclusive) to include in the range of all ground
+    coordinates.
 
 Returns:
     An iterator range from `start` to `stop`. If they are not
@@ -7541,6 +7622,19 @@ that still belongs to the layout.
 Returns:
     z-dimension.)doc";
 
+static const char *__doc_fiction_hexagonalization =
+R"doc(Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even
+row clocked layout suitable for SiDBs by remapping all gates and wires
+as originally proposed in \"Scalable Physical Design for Silicon
+Dangling Bond Logic: How a 45° Turn Prevents the Reinvention of the
+Wheel\" by S. Hofmann, M. Walter, and R. Wille in IEEE Nano 2023.
+
+Parameter ``Lyt``:
+    Gate-level layout that is 2DDWave-clocked.
+
+Returns:
+    Hexagonal representation of the Cartesian layout.)doc";
+
 static const char *__doc_fiction_high_degree_fanin_exception =
 R"doc(Exception class that can be thrown if some network exceeds a legal
 number of fanins.)doc";
@@ -7682,6 +7776,21 @@ Parameter ``t``:
 Returns:
     ToPoliNano gate representation of `t` including I/Os, rotation,
     etc.)doc";
+
+static const char *__doc_fiction_integral_abs =
+R"doc(Takes the absolute value of an integral number if it is signed, and
+otherwise computes the identity. This avoids a compiler warning when
+taking the absolute value of an unsigned number.
+
+Template parameter ``T``:
+    The type of the number to take the absolute value of. Must be
+    integral.
+
+Parameter ``n``:
+    The number to take the absolute value of.
+
+Returns:
+    |n|.)doc";
 
 static const char *__doc_fiction_inverse_levels =
 R"doc(A clumsy implementation that returns the inverse level of each node in
@@ -8178,54 +8287,6 @@ R"doc(\verbatim / \ / \ / \ / \ / \ / \ | (0,0) | (1,0) | (2,0) | | | | | \
 \ / / \ / \ / \ / | (0,2) | (1,2) | (2,2) | | | | | \ / \ / \ / \ / \
 / \ / \endverbatim)doc";
 
-static const char *__doc_fiction_offset_coord_iterator =
-R"doc(An iterator type that allows to enumerate coordinates in order within
-a boundary.
-
-Template parameter ``CoordinateType``:
-    Type of coordinate to enumerate.)doc";
-
-static const char *__doc_fiction_offset_coord_iterator_aspect_ratio = R"doc()doc";
-
-static const char *__doc_fiction_offset_coord_iterator_coord = R"doc()doc";
-
-static const char *__doc_fiction_offset_coord_iterator_coord_iterator =
-R"doc(Standard constructor. Initializes the iterator with a starting
-position and the boundary within to enumerate.
-
-With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following
-order would be enumerated:
-
-- (0, 0, 0) - (1, 0, 0) - (0, 1, 0) - (1, 1, 0) - (0, 2, 0) - (1, 2,
-0) - (0, 0, 1) - (1, 0, 1) - (0, 1, 1) - (1, 1, 1) - (0, 2, 1) - (1,
-2, 1)
-
-coord_iterator is compatible with the STL forward_iterator category.
-
-Parameter ``dimension``:
-    Boundary within to enumerate. Iteration wraps at its limits.
-
-Parameter ``start``:
-    Starting coordinate to enumerate first.)doc";
-
-static const char *__doc_fiction_offset_coord_iterator_operator_eq = R"doc()doc";
-
-static const char *__doc_fiction_offset_coord_iterator_operator_inc =
-R"doc(Increments the iterator.
-
-Returns:
-    Reference to the incremented iterator.)doc";
-
-static const char *__doc_fiction_offset_coord_iterator_operator_inc_2 = R"doc()doc";
-
-static const char *__doc_fiction_offset_coord_iterator_operator_le = R"doc()doc";
-
-static const char *__doc_fiction_offset_coord_iterator_operator_lt = R"doc()doc";
-
-static const char *__doc_fiction_offset_coord_iterator_operator_mul = R"doc()doc";
-
-static const char *__doc_fiction_offset_coord_iterator_operator_ne = R"doc()doc";
-
 static const char *__doc_fiction_offset_operator_lshift = R"doc()doc";
 
 static const char *__doc_fiction_offset_ucoord_t =
@@ -8384,6 +8445,21 @@ bit for the x position
 
 Parameter ``t``:
     Unsigned 64-bit integer to instantiate the coordinate from.)doc";
+
+static const char *__doc_fiction_offset_ucoord_t_wrap =
+R"doc(Wraps the coordinate with respect to the given aspect ratio by
+iterating over the dimensions in the order defined by the coordinate
+type. For any dimension of the coordinate that is strictly larger than
+the associated dimension of the aspect ratio, this dimension will be
+wrapped to zero, and the next dimension is increased. The resulting
+coordinate becomes a dead copy of the aspect ratio if it is not
+contained in the aspect ratio after iterating. An example use case of
+this function is the coordinate iterator, which implements iterator
+advancing by first incrementing the x dimension, then wrapping the
+coordinate to the boundary within to enumerate.
+
+Parameter ``aspect_ratio``:
+    Aspect ratio to wrap the coordinate to.)doc";
 
 static const char *__doc_fiction_offset_ucoord_t_x = R"doc(31 bit for the x coordinate.)doc";
 
@@ -8797,6 +8873,10 @@ Parameter ``cds``:
 Parameter ``cs_color``:
     Flag to utilize color escapes for charge states.
 
+Parameter ``crop_layout``:
+    Flag to print the 2D bounding box of the layout, while leaving a
+    maximum padding of one dimer row and two columns.
+
 Parameter ``draw_lattice``:
     Flag to enable lattice background drawing.)doc";
 
@@ -8955,11 +9035,14 @@ static const char *__doc_fiction_qca_technology_is_rotated_cell_mode = R"doc()do
 static const char *__doc_fiction_qca_technology_is_vertical_cell_mode = R"doc()doc";
 
 static const char *__doc_fiction_quicksim =
-R"doc(The *QuickSim* algorithm is an electrostatic ground state simulation
-algorithm for SiDB layouts. It determines physically valid charge
-configurations (with minimal energy) of a given (already initialized)
-charge distribution layout. Depending on the simulation parameters,
-the ground state is found with a certain probability after one run.
+R"doc(The *QuickSim* algorithm which was proposed in \"QuickSim: Efficient
+and Accurate Physical Simulation of Silicon Dangling Bond Logic\" by
+J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE-
+NANO 2023 is an electrostatic ground state simulation algorithm for
+SiDB layouts. It determines physically valid charge configurations
+(with minimal energy) of a given (already initialized) charge
+distribution layout. Depending on the simulation parameters, the
+ground state is found with a certain probability after one run.
 
 Template parameter ``Lyt``:
     Cell-level layout type.
@@ -8987,6 +9070,23 @@ R"doc(Number of threads to spawn. By default the number of threads is set to
 the number of available hardware threads.)doc";
 
 static const char *__doc_fiction_quicksim_params_phys_params = R"doc(General parameters for the simulation of the physical SiDB system.)doc";
+
+static const char *__doc_fiction_random_coordinate =
+R"doc(Generates a random coordinate within the region spanned by two given
+coordinates. The two given coordinates form the top left corner and
+the bottom right corner of the spanned region.
+
+@OffsetCoordinateType The coordinate implementation to be used.
+
+Parameter ``coordinate1``:
+    Top left Coordinate.
+
+Parameter ``coordinate2``:
+    Bottom right Coordinate (coordinate order is not important,
+    automatically swapped if necessary).
+
+Returns:
+    Randomly generated coordinate.)doc";
 
 static const char *__doc_fiction_random_cost =
 R"doc(Random cost between two layout coordinates that returns a random value
@@ -9430,16 +9530,16 @@ static const char *__doc_fiction_round_to_n_decimal_places =
 R"doc(Rounds a number to a specified number of decimal places.
 
 Template parameter ``T``:
-    the type of the number to round.
+    The type of the number to round.
 
 Parameter ``number``:
-    the number to round.
+    The number to round.
 
 Parameter ``n``:
-    the number of decimal places to round to.
+    The number of decimal places to round to.
 
 Returns:
-    the number rounded to n decimal places.)doc";
+    The number rounded to n decimal places.)doc";
 
 static const char *__doc_fiction_route_path =
 R"doc(Establishes a wire routing along the given path in the given layout.
@@ -10164,6 +10264,21 @@ z)" that does not respect the dead indicator.
 Returns:
     String representation of the form "(x, y, z)".)doc";
 
+static const char *__doc_fiction_siqad_coord_t_wrap =
+R"doc(Wraps the coordinate with respect to the given aspect ratio by
+iterating over the dimensions in the order defined by the coordinate
+type. For any dimension of the coordinate that is strictly larger than
+the associated dimension of the aspect ratio, this dimension will be
+wrapped to zero, and the next dimension is increased. The resulting
+coordinate becomes a dead copy of the aspect ratio if it is not
+contained in the aspect ratio after iterating. An example use case of
+this function is the coordinate iterator, which implements iterator
+advancing by first incrementing the x dimension, then wrapping the
+coordinate to the boundary within to enumerate.
+
+Parameter ``aspect_ratio``:
+    Aspect ratio to wrap the coordinate to.)doc";
+
 static const char *__doc_fiction_siqad_coord_t_x = R"doc(31 bit for the x coordinate.)doc";
 
 static const char *__doc_fiction_siqad_coord_t_y = R"doc(31 bit for the y coordinate.)doc";
@@ -10859,9 +10974,10 @@ R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 \endverbatim)doc";
 
 static const char *__doc_fiction_volume =
-R"doc(Computes the volume of a given coordinate assuming its origin is
-:math:`(0, 0, 0)`. Calculates :math:`(x + 1) \cdot (y + 1) \cdot (z +
-1)`.
+R"doc(Computes the volume of a given coordinate assuming its origin is (0,
+0, 0). Calculates :math:` (|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1) `
+by default. For SiQAD coordinates, which are planar by definition, the
+area is returned.
 
 Template parameter ``CoordinateType``:
     Coordinate type.
