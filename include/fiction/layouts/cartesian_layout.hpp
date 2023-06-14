@@ -14,11 +14,13 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 namespace fiction
 {
+
 /**
  * A layout type that utilizes offset coordinates to represent a Cartesian grid. Its faces are organized in the
  * following way:
@@ -39,7 +41,7 @@ namespace fiction
    +-------+-------+-------+-------+
    \endverbatim
  *
- * @tparam OffsetCoordinateType The coordinate implementation to be used. Offset coordinates are required.
+ * @tparam OffsetCoordinateType The coordinate implementation to be used.
  */
 template <typename OffsetCoordinateType = offset::ucoord_t>
 class cartesian_layout
@@ -70,7 +72,9 @@ class cartesian_layout
      *
      * @param ar Highest possible position in the layout.
      */
-    explicit cartesian_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<cartesian_layout_storage>(ar)} {}
+    explicit cartesian_layout(const aspect_ratio& ar = {}) :
+            strg{std::make_shared<cartesian_layout_storage>(initialize_dimension(ar))}
+    {}
     /**
      * Copy constructor from another layout's storage.
      *
@@ -127,13 +131,13 @@ class cartesian_layout
         return strg->dimension.z;
     }
     /**
-     * Returns the layout's number of faces which are equal to \f$(x + 1) \cdot (y + 1)\f$.
+     * Returns the layout's number of faces depending on the coordinate type.
      *
      * @return Area of layout.
      */
     [[nodiscard]] auto area() const noexcept
     {
-        return (x() + 1) * (y() + 1);
+        return fiction::area(strg->dimension);
     }
     /**
      * Updates the layout's dimensions, effectively resizing it.
@@ -142,7 +146,7 @@ class cartesian_layout
      */
     void resize(const aspect_ratio& ar) noexcept
     {
-        strg->dimension = ar;
+        strg->dimension = initialize_dimension(ar);
     }
 
 #pragma endregion
@@ -800,6 +804,19 @@ class cartesian_layout
 
   private:
     storage strg;
+    /*
+     * Initializer for a cartesian layout dimension. When using SiQAD coordinates, it will default the z value to 1 if
+     * the y value is greater than 0.
+     */
+    constexpr OffsetCoordinateType initialize_dimension(const OffsetCoordinateType& coord) const
+    {
+        if constexpr (std::is_same_v<OffsetCoordinateType, siqad::coord_t>)
+        {
+            return OffsetCoordinateType{coord.x, coord.y, 1};
+        }
+
+        return coord;
+    }
 };
 
 }  // namespace fiction

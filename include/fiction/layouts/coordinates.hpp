@@ -5,9 +5,11 @@
 #ifndef FICTION_COORDINATES_HPP
 #define FICTION_COORDINATES_HPP
 
+#include "fiction/utils/math_utils.hpp"
+
 #include <fmt/format.h>
 
-#include <cassert>
+#include <algorithm>
 #include <cstdint>
 #include <functional>
 #include <iostream>
@@ -144,6 +146,42 @@ struct ucoord_t
     [[nodiscard]] constexpr ucoord_t get_dead() const noexcept
     {
         return ucoord_t{static_cast<uint64_t>(*this) | static_cast<uint64_t>(ucoord_t{})};
+    }
+    /**
+     * Wraps the coordinate with respect to the given aspect ratio by iterating over the dimensions in the order defined
+     * by the coordinate type. For any dimension of the coordinate that is strictly larger than the associated dimension
+     * of the aspect ratio, this dimension will be wrapped to zero, and the next dimension is increased. The resulting
+     * coordinate becomes a dead copy of the aspect ratio if it is not contained in the aspect ratio after iterating.
+     * An example use case of this function is the coordinate iterator, which implements iterator advancing by first
+     * incrementing the x dimension, then wrapping the coordinate to the boundary within to enumerate.
+     *
+     * @param aspect_ratio Aspect ratio to wrap the coordinate to.
+     */
+    void wrap(const ucoord_t& aspect_ratio) noexcept
+    {
+        if (x > aspect_ratio.x)
+        {
+            x = 0;
+            ++y;
+        }
+
+        if (y > aspect_ratio.y)
+        {
+            if (z == 1)
+            {
+                *this = aspect_ratio.get_dead();
+            }
+            else
+            {
+                y = 0;
+                z = 1;
+            }
+        }
+
+        if (z > aspect_ratio.z)
+        {
+            *this = aspect_ratio.get_dead();
+        }
     }
     /**
      * Compares against another coordinate for equality. Respects the dead indicator.
@@ -354,6 +392,35 @@ struct coord_t
         return dead_coord;
     }
     /**
+     * Wraps the coordinate with respect to the given aspect ratio by iterating over the dimensions in the order defined
+     * by the coordinate type. For any dimension of the coordinate that is strictly larger than the associated dimension
+     * of the aspect ratio, this dimension will be wrapped to zero, and the next dimension is increased. The resulting
+     * coordinate becomes a dead copy of the aspect ratio if it is not contained in the aspect ratio after iterating.
+     * An example use case of this function is the coordinate iterator, which implements iterator advancing by first
+     * incrementing the x dimension, then wrapping the coordinate to the boundary within to enumerate.
+     *
+     * @param aspect_ratio Aspect ratio to wrap the coordinate to.
+     */
+    void wrap(const coord_t& aspect_ratio) noexcept
+    {
+        if (x > aspect_ratio.x)
+        {
+            x = 0;
+            ++y;
+        }
+
+        if (y > aspect_ratio.y)
+        {
+            y = 0;
+            ++z;
+        }
+
+        if (z > aspect_ratio.z)
+        {
+            *this = aspect_ratio.get_dead();
+        }
+    }
+    /**
      * Compares against another coordinate for equality. Respects the dead indicator.
      *
      * @param other Right-hand side coordinate.
@@ -470,33 +537,11 @@ struct coord_t
 }  // namespace cube
 
 /**
- * Computes the area of a given coordinate assuming its origin is \f$(0, 0, 0)\f$.
- * Calculates \f$(x + 1) \cdot (y + 1)\f$.
- *
- * @tparam CoordinateType Coordinate type.
- * @param coord Coordinate.
- * @return Area of coord.
+ * Provides SiQAD coordinates. SiQAD coordinates are used to describe locations of Silicon Dangling Bonds on the
+ * H-Si(100) 2x1 surface were dimer columns and rows are identified by x and y values, respectively, while the z value
+ * (0,1) points to the top or bottom Si atom in the dimer. The coordinates are originally used in the SiQAD simulator
+ * (https://github.com/siqad).
  */
-template <typename CoordinateType>
-uint64_t area(const CoordinateType& coord) noexcept
-{
-    return (coord.x + static_cast<decltype(coord.x)>(1)) * (coord.y + static_cast<decltype(coord.y)>(1));
-}
-/**
- * Computes the volume of a given coordinate assuming its origin is \f$(0, 0, 0)\f$.
- * Calculates \f$(x + 1) \cdot (y + 1) \cdot (z + 1)\f$.
- *
- * @tparam CoordinateType Coordinate type.
- * @param coord Coordinate.
- * @return Volume of coord.
- */
-template <typename CoordinateType>
-uint64_t volume(const CoordinateType& coord) noexcept
-{
-    return (coord.x + static_cast<decltype(coord.x)>(1)) * (coord.y + static_cast<decltype(coord.y)>(1)) *
-           (coord.z + static_cast<decltype(coord.z)>(1));
-}
-
 namespace siqad
 {
 
@@ -592,6 +637,35 @@ struct coord_t
         return dead_coord;
     }
     /**
+     * Wraps the coordinate with respect to the given aspect ratio by iterating over the dimensions in the order defined
+     * by the coordinate type. For any dimension of the coordinate that is strictly larger than the associated dimension
+     * of the aspect ratio, this dimension will be wrapped to zero, and the next dimension is increased. The resulting
+     * coordinate becomes a dead copy of the aspect ratio if it is not contained in the aspect ratio after iterating.
+     * An example use case of this function is the coordinate iterator, which implements iterator advancing by first
+     * incrementing the x dimension, then wrapping the coordinate to the boundary within to enumerate.
+     *
+     * @param aspect_ratio Aspect ratio to wrap the coordinate to.
+     */
+    void wrap(const coord_t& aspect_ratio) noexcept
+    {
+        if (x > aspect_ratio.x)
+        {
+            x = 0;
+            y += z;
+            z = !z;
+        }
+
+        if (z > aspect_ratio.z)
+        {
+            *this = aspect_ratio.get_dead();
+        }
+
+        if (y > aspect_ratio.y)
+        {
+            *this = aspect_ratio.get_dead();
+        }
+    }
+    /**
      * Compares against another coordinate for equality. Respects the dead indicator.
      *
      * @param other Right-hand side coordinate.
@@ -673,7 +747,7 @@ struct coord_t
      */
     constexpr coord_t operator+(const coord_t& other) const noexcept
     {
-        return coord_t{x + other.x, y + other.y, z + other.z};
+        return coord_t{x + other.x, y + other.y + static_cast<decltype(y)>(z && other.z), z ^ other.z};
     }
     /**
      * Subtracts another coordinate from this one and returns the result. Does not modify this coordinate.
@@ -683,7 +757,7 @@ struct coord_t
      */
     constexpr coord_t operator-(const coord_t& other) const noexcept
     {
-        return coord_t{x - other.x, y - other.y, z - other.z};
+        return coord_t{x - other.x, y - other.y - static_cast<decltype(y)>(!z && other.z), z - other.z};
     }
     /**
      * Returns a string representation of the coordinate of the form "(x, y, z)" that does not respect the dead
@@ -730,6 +804,46 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 }  // namespace siqad
 
 /**
+ * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (|x| + 1) \cdot (|y| + 1)
+ * \f$ by default. The exception is SiQAD coordinates, for which it computes \f$ (|x| + 1) \cdot (2 \cdot |y| + |z| + 1)
+ * \f$.
+ *
+ * @tparam CoordinateType Coordinate type.
+ * @param coord Coordinate.
+ * @return Area of coord.
+ */
+template <typename CoordinateType>
+uint64_t area(const CoordinateType& coord) noexcept
+{
+    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    {
+        return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) *
+               (2 * static_cast<uint64_t>(integral_abs(coord.y)) + static_cast<uint64_t>(integral_abs(coord.z)) + 1);
+    }
+
+    return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1);
+}
+/**
+ * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (|x| + 1) \cdot (|y| + 1)
+ * \cdot (|z| + 1) \f$ by default. For SiQAD coordinates, which are planar by definition, the area is returned.
+ *
+ * @tparam CoordinateType Coordinate type.
+ * @param coord Coordinate.
+ * @return Volume of coord.
+ */
+template <typename CoordinateType>
+uint64_t volume(const CoordinateType& coord) noexcept
+{
+    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    {
+        return area(coord);
+    }
+
+    return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1) *
+           (static_cast<uint64_t>(integral_abs(coord.z)) + 1);
+}
+
+/**
  * An iterator type that allows to enumerate coordinates in order within a boundary.
  *
  * @tparam CoordinateType Type of coordinate to enumerate.
@@ -773,7 +887,7 @@ class coord_iterator
      * - (0, 2, 1)
      * - (1, 2, 1)
      *
-     * coord_iterator is compatible with the STL forward_iterator category.
+     * coord_iterator is compatible with the STL forward_iterator category. Does not iterate over negative coordinates.
      *
      * @param dimension Boundary within to enumerate. Iteration wraps at its limits.
      * @param start Starting coordinate to enumerate first.
@@ -786,9 +900,17 @@ class coord_iterator
                           std::is_same_v<CoordinateType, cube::coord_t> ||
                           std::is_same_v<CoordinateType, siqad::coord_t>,
                       "CoordinateType must be a supported coordinate");
+
+        // Make sure the start iterator is within the given boundary; first handle negative coordinates ...
+        coord.x = std::max(coord.x, static_cast<decltype(coord.x)>(0));
+        coord.y = std::max(coord.y, static_cast<decltype(coord.y)>(0));
+        coord.z = std::max(coord.z, static_cast<decltype(coord.z)>(0));
+
+        // ... then handle coordinates that are beyond the given boundary.
+        coord.wrap(aspect_ratio);
     }
     /**
-     * Increments the iterator.
+     * Increments the iterator, while keeping it within the boundary. Also defined on iterators that are out of bounds.
      *
      * @return Reference to the incremented iterator.
      */
@@ -798,31 +920,7 @@ class coord_iterator
         {
             ++coord.x;
 
-            if (coord.x > aspect_ratio.x)
-            {
-                coord.x = 0;
-
-                if constexpr (std::is_same_v<CoordinateType, offset::ucoord_t> ||
-                              std::is_same_v<CoordinateType, cube::coord_t>)
-                {
-                    ++coord.y;
-                    if (coord.y > aspect_ratio.y)
-                    {
-                        coord.y = 0;
-
-                        ++coord.z;
-                    }
-                }
-                else if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
-                {
-                    coord.y += coord.z;
-                    coord.z = !coord.z;
-                }
-                else
-                {
-                    assert(false && "Unsupported coordinate type");
-                }
-            }
+            coord.wrap(aspect_ratio);
         }
         else
         {

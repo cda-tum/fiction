@@ -250,13 +250,13 @@ class hexagonal_layout
         return strg->dimension.z;
     }
     /**
-     * Returns the layout's number of faces which are equal to \f$(x + 1) \cdot (y + 1)\f$.
+     * Returns the layout's number of faces depending on the coordinate type.
      *
      * @return Area of layout.
      */
     [[nodiscard]] uint64_t area() const noexcept
     {
-        return (x() + 1) * (y() + 1);
+        return fiction::area(strg->dimension);
     }
     /**
      * Updates the layout's dimensions, effectively resizing it.
