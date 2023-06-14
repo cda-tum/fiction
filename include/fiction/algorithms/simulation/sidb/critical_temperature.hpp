@@ -331,7 +331,7 @@ class critical_temperature_impl
         }
 
         std::vector<units::temperature::kelvin_t> temp_values{};
-        temp_values.reserve(parameter.max_temperature.value() * 100);
+        temp_values.reserve(static_cast<uint64_t>(parameter.max_temperature.value() * 100));
 
         for (uint64_t i = 1; i <= static_cast<uint64_t>(parameter.max_temperature.value() * 100); i++)
         {
@@ -404,7 +404,7 @@ class critical_temperature_impl
     {
         // Vector with temperature values from 0.01 to max_temperature * 100 K in 0.01 K steps is generated.
         std::vector<units::temperature::kelvin_t> temp_values{};
-        temp_values.reserve(parameter.max_temperature.value() * 100);
+        temp_values.reserve(static_cast<uint64_t>(parameter.max_temperature.value() * 100));
 
         for (uint64_t i = 1; i <= static_cast<uint64_t>(parameter.max_temperature.value() * 100); i++)
         {
