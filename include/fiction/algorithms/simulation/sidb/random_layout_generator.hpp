@@ -64,13 +64,14 @@ struct random_layout_params
 template <typename Lyt>
 Lyt generate_random_layout(const random_layout_params<Lyt>& params)
 {
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     bool successful_generation = false;
     while (!successful_generation && params.maximal_attempts)
     {
         // layout is initialized with given aspect ratio and name.
         Lyt lyt{};
 
-        uint64_t               attempt_counter = 0;
+        uint64_t attempt_counter = 0;
         // Stops if either all SiDBs are placed or the maximum number of attempts were performed.
         while (lyt.num_cells() < params.number_of_sidbs && attempt_counter < params.maximal_attempts)
         {
@@ -99,11 +100,7 @@ Lyt generate_random_layout(const random_layout_params<Lyt>& params)
             attempt_counter += 1;
         }
 
-        // if all SiDBs are placed, the layout is returned.
-        if (lyt.num_cells() == params.number_of_sidbs)
-        {
-            return lyt;
-        }
+        return lyt;
     }
 }
 /**
@@ -127,7 +124,7 @@ std::vector<Lyt> generate_multiple_random_layout(const random_layout_params<Lyt>
     {
         const auto random_lyt = generate_random_layout(params);
 
-        // Checks if new-found layout is identical to an already found layout (all_layouts).
+        // Checks if newly found layout is identical to an already found layout (all_layouts).
         uint64_t identical_layout_counter = 0;
         for (const auto& old_lyt : unique_lyts)
         {

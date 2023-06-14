@@ -40,11 +40,16 @@ int main()  // NOLINT
             }
         }
         // number of randomly generated layouts for a given number of placed SiDBs.
-        const uint64_t number_of_layouts = 10;
+        uint64_t number_of_layouts = 10;
         // number of SiDBs of the first bunch of randomly generated layouts.
-        const uint64_t number_of_sidbs_lower_limit = 10;
+        uint64_t number_of_sidbs_lower_limit = 20;
         // number of SiDBs of the final bunch of randomly generated layouts.
-        const uint64_t number_of_sidbs_upper_limit = 11;
+        uint64_t number_of_sidbs_upper_limit = 21;
+
+        if (number_of_sidbs_upper_limit < number_of_sidbs_lower_limit)
+        {
+            std::swap(number_of_sidbs_upper_limit, number_of_sidbs_lower_limit);
+        }
 
         for (uint64_t num_sidbs = number_of_sidbs_lower_limit; num_sidbs < number_of_sidbs_upper_limit; num_sidbs++)
         {
@@ -67,7 +72,7 @@ int main()  // NOLINT
                     std::cout << "Folder already exists." << std::endl;
                 }
 
-                const random_layout_params<cell_level_layout> params{{20, 20}, num_sidbs, false};
+                const random_layout_params<cell_level_layout> params{{{0, 0}, {20, 20}}, num_sidbs, false};
 
                 const auto unique_lyts = generate_multiple_random_layout<cell_level_layout>(params, number_of_layouts);
                 for (auto i = 0u; i < unique_lyts.size(); i++)
