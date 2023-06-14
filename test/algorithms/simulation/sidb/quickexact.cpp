@@ -16,7 +16,7 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("Empty layout ExGS simulation", "[ExGS]",
+TEMPLATE_TEST_CASE("Empty layout QuickExact simulation", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -31,7 +31,7 @@ TEMPLATE_TEST_CASE("Empty layout ExGS simulation", "[ExGS]",
     CHECK(simulation_results.additional_simulation_parameters.empty());
 }
 
-TEMPLATE_TEST_CASE("Single SiDB ExGS simulation", "[ExGS]",
+TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -46,7 +46,7 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation", "[ExGS]",
 }
 
 TEMPLATE_TEST_CASE(
-    "Single SiDB ExGS simulation with one negatively charge defect (default initialization) in proximity", "[ExGS]",
+    "Single SiDB QuickExact simulation with one negatively charge defect (default initialization) in proximity", "[ExGS]",
     (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{{20, 10}};
@@ -61,7 +61,7 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
 }
 
-TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defect (changed lambda_tf) in proximity",
+TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with one negatively charge defect (changed lambda_tf) in proximity",
                    "[ExGS]",
                    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
@@ -78,7 +78,7 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defec
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defect (changed epsilon_r) in proximity",
+TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with one negatively charge defect (changed epsilon_r) in proximity",
                    "[ExGS]",
                    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
@@ -96,7 +96,7 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one negatively charge defec
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::POSITIVE);
 }
 
-TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one highly negatively charge defect in proximity", "[ExGS]",
+TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with one highly negatively charge defect in proximity", "[ExGS]",
                    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{{20, 10}};
@@ -113,7 +113,7 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with one highly negatively charg
 }
 
 TEMPLATE_TEST_CASE(
-    "Single SiDB ExGS simulation with one highly negatively charge defect in proximity but with high screening",
+    "Single SiDB QuickExact simulation with one highly negatively charge defect in proximity but with high screening",
     "[ExGS]", (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{{20, 10}};
@@ -130,7 +130,7 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with two highly negatively and oppositely charged defects in proximity",
+TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with two highly negatively and oppositely charged defects in proximity",
                    "[ExGS]",
                    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
@@ -150,7 +150,7 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with two highly negatively and o
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with local external potential", "[ExGS]",
+TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with local external potential", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -166,7 +166,7 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with local external potential", 
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
 }
 
-TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with local external potential (high)", "[ExGS]",
+TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with local external potential (high)", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -181,7 +181,7 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with local external potential (h
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::POSITIVE);
 }
 
-TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with global external potential", "[ExGS]",
+TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with global external potential", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -196,7 +196,7 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with global external potential",
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
 }
 
-TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with global external potential (high)", "[ExGS]",
+TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with global external potential (high)", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -210,7 +210,7 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with global external potential (
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::POSITIVE);
 }
 
-TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with global external potential (high, positive)", "[ExGS]",
+TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with global external potential (high, positive)", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -224,7 +224,7 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation with global external potential (
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of a BDL pair", "[ExGS]",
+TEMPLATE_TEST_CASE("QuickExact simulation of a BDL pair", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -256,7 +256,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a BDL pair", "[ExGS]",
     }
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber", "[ExGS]",
+TEMPLATE_TEST_CASE("QuickExact simulation of a two-pair BDL wire with one perturber", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -297,8 +297,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber", 
     CHECK_THAT(charge_lyt_first.get_system_energy(),
                Catch::Matchers::WithinAbs(0.24602741408, fiction::physical_constants::POP_STABILITY_ERR));
 }
-//
-TEMPLATE_TEST_CASE("ExGS simulation of a one-pair BDL wire with two perturbers", "[ExGS]",
+
+TEMPLATE_TEST_CASE("QuickExact simulation of a one-pair BDL wire with two perturbers", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{50, 10}};
@@ -336,7 +336,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a one-pair BDL wire with two perturbers",
                Catch::Matchers::WithinAbs(0.1152574819, fiction::physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB arrangement", "[ExGS]",
+TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shape SiDB arrangement", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -371,7 +371,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB arrangement", "[ExGS]",
                Catch::Matchers::WithinAbs(0.31915040629512115, fiction::physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01", "[ExGS]",
+TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shape SiDB OR gate with input 01", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -408,7 +408,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01", "[
                Catch::Matchers::WithinAbs(0.46621669, fiction::physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01 and local external potential at perturber",
+TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shape SiDB OR gate with input 01 and local external potential at perturber",
                    "[ExGS]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -442,7 +442,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01 and 
     CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01 and global external potential", "[ExGS]",
+TEMPLATE_TEST_CASE("QuickExact simulation  of a Y-shape SiDB OR gate with input 01 and global external potential", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -476,7 +476,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01 and 
     CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01 and global external potential (high)",
+TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shape SiDB OR gate with input 01 and global external potential (high)",
                    "[ExGS]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -510,7 +510,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01 and 
     CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::POSITIVE);
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away)", "[ExGS]",
+TEMPLATE_TEST_CASE("QuickExact simulation of four SiDBs (far away)", "[ExGS]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -533,7 +533,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away)", "[ExGS]",
     CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away) with one negatively charged defects in proximity",
+TEMPLATE_TEST_CASE("QuickExact simulation  of four SiDBs (far away) with one negatively charged defects in proximity",
                    "[ExGS]",
                    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
@@ -558,7 +558,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away) with one negatively
     CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away) with two negatively charged defects in proximity",
+TEMPLATE_TEST_CASE("QuickExact simulation of four SiDBs (far away) with two negatively charged defects in proximity",
                    "[ExGS]",
                    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
@@ -588,7 +588,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of four SiDBs (far away) with two negatively
 }
 
 TEMPLATE_TEST_CASE(
-    "ExGS simulation of four SiDBs (far away) with one negatively and positively charged defect in proximity", "[ExGS]",
+    "QuickExact simulation of four SiDBs (far away) with one negatively and positively charged defect in proximity", "[ExGS]",
     (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{{20, 10}};
