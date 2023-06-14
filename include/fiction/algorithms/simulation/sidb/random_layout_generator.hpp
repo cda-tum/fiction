@@ -66,43 +66,41 @@ Lyt generate_random_layout(const random_layout_params<Lyt>& params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     bool successful_generation = false;
-    while (!successful_generation && params.maximal_attempts)
+    // layout is initialized with given aspect ratio and name.
+    Lyt lyt{};
+
+    uint64_t attempt_counter = 0;
+    // Stops if either all SiDBs are placed or the maximum number of attempts were performed.
+    while (lyt.num_cells() < params.number_of_sidbs && attempt_counter < params.maximal_attempts)
     {
-        // layout is initialized with given aspect ratio and name.
-        Lyt lyt{};
+        const auto random_coord = random_coordinate(params.coordinate_pair.first, params.coordinate_pair.second);
 
-        uint64_t attempt_counter = 0;
-        // Stops if either all SiDBs are placed or the maximum number of attempts were performed.
-        while (lyt.num_cells() < params.number_of_sidbs && attempt_counter < params.maximal_attempts)
+        bool constraint_violation_positive_sidbs = false;
+
+        if (params.prevent_positive_charges)
         {
-            const auto random_coord = random_coordinate(params.coordinate_pair.first, params.coordinate_pair.second);
-
-            bool constraint_violation_positive_sidbs = false;
-
-            if (params.prevent_positive_charges)
-            {
-                // it checks if the new coordinate is not closer than 2 cells (Euclidean distance) from an already
-                // placed SiDB.
-                lyt.foreach_cell(
-                    [&lyt, &random_coord, &constraint_violation_positive_sidbs, &params](const auto& c1)
+            // it checks if the new coordinate is not closer than 2 cells (Euclidean distance) from an already
+            // placed SiDB.
+            lyt.foreach_cell(
+                [&lyt, &random_coord, &constraint_violation_positive_sidbs, &params](const auto& c1)
+                {
+                    if (euclidean_distance<Lyt>(lyt, c1, random_coord) < params.minimal_spacing)
                     {
-                        if (euclidean_distance<Lyt>(lyt, c1, random_coord) < params.minimal_spacing)
-                        {
-                            constraint_violation_positive_sidbs = true;
-                        }
-                    });
-            }
-            // If the constraint that no positive SiDBs occur is satisfied, the SiDB is added to the layout.
-            if (!constraint_violation_positive_sidbs)
-            {
-                lyt.assign_cell_type(random_coord, Lyt::cell_type::NORMAL);
-            }
-            attempt_counter += 1;
+                        constraint_violation_positive_sidbs = true;
+                    }
+                });
         }
-
-        return lyt;
+        // If the constraint that no positive SiDBs occur is satisfied, the SiDB is added to the layout.
+        if (!constraint_violation_positive_sidbs)
+        {
+            lyt.assign_cell_type(random_coord, Lyt::cell_type::NORMAL);
+        }
+        attempt_counter += 1;
     }
+
+    return lyt;
 }
+
 /**
  * Generates multiple unique random layouts of SiDBs based on the provided parameters.
  *
