@@ -20,9 +20,11 @@
 #include "pyfiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "pyfiction/algorithms/simulation/sidb/minimum_energy.hpp"
+#include "pyfiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "pyfiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "pyfiction/algorithms/simulation/sidb/time_to_solution.hpp"
 #include "pyfiction/algorithms/verification/design_rule_violations.hpp"
 #include "pyfiction/algorithms/verification/equivalence_checking.hpp"
 #include "pyfiction/io/read_fqca_layout.hpp"
@@ -110,7 +112,9 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::minimum_energy(m);
     pyfiction::energy_distribution(m);
     pyfiction::calculate_energy_and_state_type(m);
+    pyfiction::occupation_probability_of_excited_states(m);
     pyfiction::critical_temperature(m);
+    pyfiction::time_to_solution(m);
     /*
      * Algorithms: Verification
      */
