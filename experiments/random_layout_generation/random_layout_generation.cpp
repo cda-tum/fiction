@@ -40,7 +40,7 @@ int main()  // NOLINT
             }
         }
         // number of randomly generated layouts for a given number of placed SiDBs.
-        uint64_t number_of_layouts = 10;
+        const uint64_t number_of_layouts = 10;
         // number of SiDBs of the first bunch of randomly generated layouts.
         uint64_t number_of_sidbs_lower_limit = 20;
         // number of SiDBs of the final bunch of randomly generated layouts.
