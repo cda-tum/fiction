@@ -22,7 +22,6 @@ namespace detail
 template <typename Lyt>
 void calculate_energy_and_state_type(pybind11::module& m)
 {
-    namespace py = pybind11;
     using namespace pybind11::literals;
 
     m.def("calculate_energy_and_state_type", &fiction::calculate_energy_and_state_type<Lyt>, "energy_distribution"_a,
@@ -33,8 +32,6 @@ void calculate_energy_and_state_type(pybind11::module& m)
 
 inline void calculate_energy_and_state_type(pybind11::module& m)
 {
-    namespace py = pybind11;
-
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::calculate_energy_and_state_type<py_charge_distribution_surface>(m);

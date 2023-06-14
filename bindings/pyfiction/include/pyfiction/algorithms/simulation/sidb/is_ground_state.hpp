@@ -22,7 +22,6 @@ namespace detail
 template <typename Lyt>
 void is_ground_state(pybind11::module& m)
 {
-    namespace py = pybind11;
     using namespace pybind11::literals;
 
     m.def("is_ground_state", &fiction::is_ground_state<Lyt>, "quicksim_results"_a, "exhaustive_results"_a,
@@ -33,8 +32,6 @@ void is_ground_state(pybind11::module& m)
 
 inline void is_ground_state(pybind11::module& m)
 {
-    namespace py = pybind11;
-
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::is_ground_state<py_charge_distribution_surface>(m);

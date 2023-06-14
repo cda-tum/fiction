@@ -22,7 +22,6 @@ namespace detail
 template <typename Lyt>
 void energy_distribution(pybind11::module& m)
 {
-    namespace py = pybind11;
     using namespace pybind11::literals;
 
     m.def("energy_distribution", &fiction::energy_distribution<Lyt>, "input_vec"_a, DOC(fiction_energy_distribution));
@@ -32,8 +31,6 @@ void energy_distribution(pybind11::module& m)
 
 inline void energy_distribution(pybind11::module& m)
 {
-    namespace py = pybind11;
-
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::energy_distribution<py_charge_distribution_surface>(m);

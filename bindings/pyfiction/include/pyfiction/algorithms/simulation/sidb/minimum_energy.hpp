@@ -22,7 +22,6 @@ namespace detail
 template <typename Lyt>
 void minimum_energy(pybind11::module& m)
 {
-    namespace py = pybind11;
     using namespace pybind11::literals;
 
     m.def("minimum_energy", &fiction::minimum_energy<Lyt>, "charge_lyts"_a, DOC(fiction_minimum_energy));
@@ -32,8 +31,6 @@ void minimum_energy(pybind11::module& m)
 
 inline void minimum_energy(pybind11::module& m)
 {
-    namespace py = pybind11;
-
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::minimum_energy<py_charge_distribution_surface>(m);

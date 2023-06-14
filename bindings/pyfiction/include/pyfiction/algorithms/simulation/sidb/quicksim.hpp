@@ -22,7 +22,6 @@ namespace detail
 template <typename Lyt>
 void quicksim(pybind11::module& m)
 {
-    namespace py = pybind11;
     using namespace pybind11::literals;
 
     m.def("quicksim", &fiction::quicksim<Lyt>, "layout"_a, "params"_a = fiction::quicksim_params{}, DOC(fiction_quicksim));
