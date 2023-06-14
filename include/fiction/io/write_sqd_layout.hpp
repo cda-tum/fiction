@@ -221,9 +221,19 @@ class write_sqd_layout_impl
                 // generate SiDB cells
                 if constexpr (has_sidb_technology_v<Lyt>)
                 {
-                    design << fmt::format(siqad::DBDOT_BLOCK,
-                                          fmt::format(siqad::LATTICE_COORDINATE, c.x, c.y / 2, c.y % 2),
-                                          siqad::NORMAL_COLOR);
+                    if constexpr (has_siqad_coord_v<Lyt>)
+                    {
+                        design << fmt::format(siqad::DBDOT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, c.x, c.y, c.z),
+                                              siqad::NORMAL_COLOR);
+                    }
+                    else
+                    {
+                        design << fmt::format(
+                            siqad::DBDOT_BLOCK,
+                            fmt::format(siqad::LATTICE_COORDINATE, fiction::siqad::to_siqad_coord(c).x,
+                                        fiction::siqad::to_siqad_coord(c).y, fiction::siqad::to_siqad_coord(c).z),
+                            siqad::NORMAL_COLOR);
+                    }
                 }
                 // generate QCA cell blocks
                 else if constexpr (has_qca_technology_v<Lyt>)

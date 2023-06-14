@@ -97,6 +97,23 @@ TEST_CASE("Write single-dot SQD layout", "[sqd]")
     compare_written_and_read_layout(layout, read_layout);
 }
 
+TEST_CASE("Write single-dot SQD layout with siqad coordinates", "[sqd]")
+{
+    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+
+    sidb_cell_clk_lyt_siqad layout{{2, 2}};
+    layout.assign_cell_type({1, 2}, sidb_technology::cell_type::NORMAL);
+
+    std::stringstream layout_stream{};
+
+    write_sqd_layout(layout, layout_stream);
+
+    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream);
+
+    CHECK(read_layout.get_cell_type({1, 4}) == sidb_layout::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({1, 2}) == sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+}
+
 TEST_CASE("Write multi-dot SQD layout", "[sqd]")
 {
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
