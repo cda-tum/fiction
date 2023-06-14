@@ -8,19 +8,32 @@ are a crucial step in the physical design flow of SiDB layouts, as they are used
 Physical Parameters
 ###################
 
-**Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp``
 
-.. doxygenstruct:: fiction::sidb_simulation_parameters
-   :members:
+        .. doxygenstruct:: fiction::sidb_simulation_parameters
+           :members:
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.sidb_simulation_parameters
+            :members:
 
 
 Simulation Result
 #################
 
-**Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp``
 
-.. doxygenstruct:: fiction::sidb_simulation_result
-   :members:
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp``
+
+        .. doxygenstruct:: fiction::sidb_simulation_result
+           :members:
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.sidb_simulation_result
+            :members:
 
 
 Heuristic Ground State Simulation
@@ -28,39 +41,61 @@ Heuristic Ground State Simulation
 
 .. _quicksim:
 
-**Header:** ``fiction/algorithms/simulation/sidb/quicksim.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/quicksim.hpp``
 
-.. doxygenstruct:: fiction::quicksim_params
-   :members:
+        .. doxygenstruct:: fiction::quicksim_params
+           :members:
 
-.. doxygenfunction:: fiction::quicksim
+        .. doxygenfunction:: fiction::quicksim
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.quicksim_params
+            :members:
+
+        .. autofunction:: fiction.pyfiction.quicksim
 
 
 Exhaustive Ground State Simulation
 ##################################
 
-**Header:** ``fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp``
 
-.. doxygenfunction:: fiction::exhaustive_ground_state_simulation
+        .. doxygenfunction:: fiction::exhaustive_ground_state_simulation
+
+    .. tab:: Python
+        .. autofunction:: fiction.pyfiction.exhaustive_ground_state_simulation
 
 
 Energy Calculation
 ##################
 
-**Header:** ``fiction/algorithms/simulation/sidb/energy_distribution.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/energy_distribution.hpp``
 
-.. doxygentypedef:: fiction::sidb_energy_distribution
-.. doxygenfunction:: fiction::energy_distribution
-
-
-**Header:** ``fiction/algorithms/simulation/sidb/minimum_energy.hpp``
-
-.. doxygenfunction:: fiction::minimum_energy
+        .. doxygentypedef:: fiction::sidb_energy_distribution
+        .. doxygenfunction:: fiction::energy_distribution
 
 
-**Header:** ``fiction/algorithms/simulation/sidb/is_ground_state.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/minimum_energy.hpp``
 
-.. doxygenfunction:: fiction::is_ground_state
+        .. doxygenfunction:: fiction::minimum_energy
+
+
+        **Header:** ``fiction/algorithms/simulation/sidb/is_ground_state.hpp``
+
+        .. doxygenfunction:: fiction::is_ground_state
+
+    .. tab:: Python
+        .. autofunction:: fiction.pyfiction.energy_distribution
+
+        .. autofunction:: fiction.pyfiction.minimum_energy
+
+        .. autofunction:: fiction.pyfiction.is_ground_state
 
 
 Temperature Behavior
@@ -68,29 +103,50 @@ Temperature Behavior
 
 .. _critical_temperature:
 
-**Header:** ``fiction/algorithms/simulation/sidb/critical_temperature.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/critical_temperature.hpp``
 
-.. doxygenenum:: fiction::critical_temperature_mode
-.. doxygenenum:: fiction::simulation_engine
-.. doxygenstruct:: fiction::critical_temperature_params
-   :members:
-.. doxygenfunction:: fiction::critical_temperature
+        .. doxygenenum:: fiction::critical_temperature_mode
+        .. doxygenenum:: fiction::simulation_engine
+        .. doxygenstruct:: fiction::critical_temperature_params
+           :members:
+        .. doxygenfunction:: fiction::critical_temperature
 
-**Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_excited_states.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_excited_states.hpp``
 
-.. doxygenfunction:: fiction::occupation_probability_gate_based
-.. doxygenfunction:: fiction::occupation_probability_non_gate_based
+        .. doxygenfunction:: fiction::occupation_probability_gate_based
+        .. doxygenfunction:: fiction::occupation_probability_non_gate_based
 
-**Header:** ``fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp``
 
-.. doxygentypedef:: fiction::sidb_energy_and_state_type
-.. doxygenfunction:: fiction::calculate_energy_and_state_type
+        .. doxygentypedef:: fiction::sidb_energy_and_state_type
+        .. doxygenfunction:: fiction::calculate_energy_and_state_type
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.critical_temperature_mode
+            :members:
+        .. autoclass:: fiction.pyfiction.simulation_engine
+            :members:
+        .. autoclass:: fiction.pyfiction.critical_temperature_params
+            :members:
+        .. autofunction:: fiction.pyfiction.critical_temperature
+
+        .. autofunction:: fiction.pyfiction.occupation_probability_gate_based
+        .. autofunction:: fiction.pyfiction.occupation_probability_non_gate_based
+
+        .. autofunction:: fiction.pyfiction.calculate_energy_and_state_type
 
 
 
 Time-to-Solution (TTS) Statistics
 #################################
 
-**Header:** ``fiction/algorithms/simulation/sidb/time_to_solution.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/time_to_solution.hpp``
 
-.. doxygenfunction:: fiction::sim_acc_tts
+        .. doxygenfunction:: fiction::sim_acc_tts
+
+    .. tab:: Python
+        .. autofunction:: fiction.pyfiction.sim_acc_tts
