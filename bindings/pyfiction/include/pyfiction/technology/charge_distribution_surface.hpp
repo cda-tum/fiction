@@ -54,6 +54,26 @@ inline void charge_distribution_surface(pybind11::module& m)
                       const fiction::sidb_simulation_parameters&, const fiction::sidb_charge_state&>(),
              "dimension"_a, "params"_a = fiction::sidb_simulation_parameters{},
              "cs"_a = fiction::sidb_charge_state::NEGATIVE)
+
+        //        .def(py::init<const fiction::aspect_ratio<py_charge_distribution_surface>&,
+        //                      const fiction::sidb_simulation_parameters&, const fiction::sidb_charge_state&>(),
+        //             "dimension"_a, "params"_a = fiction::sidb_simulation_parameters{},
+        //             "cs"_a = fiction::sidb_charge_state::NEGATIVE)
+        //
+        //            explicit charge_distribution_surface(const Lyt&                        lyt,
+        //                                                 const sidb_simulation_parameters& params =
+        //                                                 sidb_simulation_parameters{}, const sidb_charge_state& cs =
+        //                                                 sidb_charge_state::NEGATIVE) :
+        //            Lyt(lyt),
+        //    strg{std::make_shared<charge_distribution_storage>(params)}
+        //    {
+        //        static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+        //        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+        //        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+        //
+        //        initialize(cs);
+        //    };
+
         .def(
             "x", [](const py_charge_distribution_surface& lyt) { return lyt.x(); }, DOC(fiction_cartesian_layout_x))
         .def(
