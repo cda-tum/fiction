@@ -99,9 +99,17 @@ TEST_CASE("Check if output network is substituted", "[inverter-substitution]")
         blueprints::test_single_inverter_substitution_a<mockturtle::names_view<mockturtle::aig_network>>())));
     CHECK(check_substituted(fanout_substitution<mockturtle::names_view<technology_network>>(
         blueprints::test_single_inverter_substitution_b<mockturtle::names_view<mockturtle::aig_network>>())));
+    CHECK(check_substituted(fanout_substitution<mockturtle::names_view<technology_network>>(
+        blueprints::par_check<mockturtle::names_view<mockturtle::aig_network>>())));
     // two concatenated substitutions
     CHECK(check_substituted(fanout_substitution<mockturtle::names_view<technology_network>>(
         blueprints::fanout_substitution_corner_case_network<mockturtle::names_view<mockturtle::aig_network>>())));
+    // three concatenated substitutions
+    CHECK(check_substituted(fanout_substitution<mockturtle::names_view<technology_network>>(
+        blueprints::three_inverter_substitutions<mockturtle::names_view<mockturtle::aig_network>>())));
+    // four concatenated substitutions
+    CHECK(check_substituted(fanout_substitution<mockturtle::names_view<technology_network>>(
+        blueprints::four_inverter_substitutions<mockturtle::names_view<mockturtle::aig_network>>())));
 }
 
 TEST_CASE("Check output preservation", "[inverter-substitution]")

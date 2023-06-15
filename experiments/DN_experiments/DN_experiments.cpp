@@ -56,7 +56,7 @@ void ortho_ordering_exp_stats()
                      "runtime (in sec)",
                      "drvs"};
 
-    constexpr const uint64_t bench_select = fiction_experiments::ISCAS85;
+    constexpr const uint64_t bench_select = fiction_experiments::trindade16;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
