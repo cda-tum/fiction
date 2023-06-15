@@ -18,14 +18,11 @@ class SIDBSimulationResultUnitTest(unittest.TestCase):
         result.algorithm_name = "exgs"
         result.simulation_runtime = datetime.timedelta(seconds=100)
         result.physical_parameters = params
-        # result.additional_simulation_parameters = [("paramA", 2), ("paramB", 3)]
 
-        # Perform assertions on the properties
         self.assertEqual(result.algorithm_name, "exgs")
         self.assertEqual(result.physical_parameters.lat_a, params.lat_a)
         self.assertEqual(result.physical_parameters.lat_b, params.lat_b)
         self.assertEqual(result.physical_parameters.lat_c, params.lat_c)
-        # self.assertEqual(result.additional_simulation_parameters, [("paramA", "abc"), ("paramB", "def")])
 
 
 if __name__ == '__main__':
