@@ -182,8 +182,8 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     }
 
     /**
-     * Two PIs are related to each other, when they are connected to the same two fan-in gate and between the PI and this
-     * gate are only fan-out nodes or inverters.
+     * Two PIs are related to each other, when they are connected to the same two fan-in gate and between the PI and
+     * this gate are only fan-out nodes or inverters.
      */
 
     /* ! \brief getter for PIs connected to a fan-out and related to two PIs */

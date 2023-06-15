@@ -50,7 +50,7 @@ bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
         if (ntk.is_and(g))
         {
             old2new[g] = ntk_dest.create_and(children[0], children[1]);
-            return true; // keep looping
+            return true;  // keep looping
         }
     }
     if constexpr (mockturtle::has_is_or_v<Ntk> && mockturtle::has_create_or_v<Ntk>)
@@ -58,7 +58,7 @@ bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
         if (ntk.is_or(g))
         {
             old2new[g] = ntk_dest.create_or(children[0], children[1]);
-            return true; // keep looping
+            return true;  // keep looping
         }
     }
     if constexpr (mockturtle::has_is_xor_v<Ntk> && mockturtle::has_create_xor_v<Ntk>)
@@ -66,7 +66,7 @@ bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
         if (ntk.is_xor(g))
         {
             old2new[g] = ntk_dest.create_xor(children[0], children[1]);
-            return true; // keep looping
+            return true;  // keep looping
         }
     }
     if constexpr (mockturtle::has_is_maj_v<Ntk> && mockturtle::has_create_maj_v<Ntk>)
@@ -74,7 +74,7 @@ bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
         if (ntk.is_maj(g))
         {
             old2new[g] = ntk_dest.create_maj(children[0], children[1], children[2]);
-            return true; // keep looping
+            return true;  // keep looping
         }
     }
     if constexpr (mockturtle::has_is_nary_and_v<Ntk> && mockturtle::has_create_nary_and_v<Ntk>)
@@ -82,7 +82,7 @@ bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
         if (ntk.is_nary_and(g))
         {
             old2new[g] = ntk_dest.create_nary_and(children);
-            return true; // keep looping
+            return true;  // keep looping
         }
     }
     if constexpr (mockturtle::has_is_nary_or_v<Ntk> && mockturtle::has_create_nary_or_v<Ntk>)
@@ -90,7 +90,7 @@ bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
         if (ntk.is_nary_or(g))
         {
             old2new[g] = ntk_dest.create_nary_or(children);
-            return true; // keep looping
+            return true;  // keep looping
         }
     }
     if constexpr (mockturtle::has_is_nary_xor_v<Ntk> && mockturtle::has_create_nary_xor_v<Ntk>)
@@ -98,10 +98,10 @@ bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
         if (ntk.is_nary_xor(g))
         {
             old2new[g] = ntk_dest.create_nary_xor(children);
-            return true; // keep looping
+            return true;  // keep looping
         }
     }
-    return false; // gate type not supported
+    return false;  // gate type not supported
 }
 
 template <typename Ntk>
@@ -220,7 +220,7 @@ class inverter_substitution_impl
                 // map all unaffected nodes
                 if (connect_children_to_gates(ntk, ntk_dest, old2new, children, g))
                 {
-                    return true; // keep looping
+                    return true;  // keep looping
                 }
                 if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<Ntk>)
                 {
@@ -274,7 +274,7 @@ class inverter_substitution_impl
     std::vector<mockturtle::node<Ntk>>  m_inv{};
     std::vector<mockturtle::node<Ntk>>  blc_fos{};
     std::vector<mockturtle::node<Ntk>>  preserved_po{};
-    bool rerun{true};
+    bool                                rerun{true};
 };
 
 }  // namespace detail
@@ -312,17 +312,17 @@ Ntk inverter_substitution(const Ntk& ntk)
 
     assert(ntk.is_combinational() && "Network has to be combinational");
 
-    bool run = true;
+    bool run    = true;
     auto result = ntk;
-    while(run)
+    while (run)
     {
         detail::inverter_substitution_impl<Ntk> p{result};
-        if(!p.is_rerun())
+        if (!p.is_rerun())
         {
-            break; // premature termination
+            break;  // premature termination
         }
         result = p.run();
-        run = p.is_rerun();
+        run    = p.is_rerun();
     }
 
     return result;

@@ -46,7 +46,8 @@ TEST_CASE("East-south coloring", "[orthogonal]")
         blueprints::fanout_substitution_corner_case_network<technology_network>())});
     check_colors(mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::nary_operation_network<technology_network>())});
-    check_colors(mockturtle::fanout_view{fanout_substitution<technology_network>(blueprints::clpl<technology_network>())});
+    check_colors(
+        mockturtle::fanout_view{fanout_substitution<technology_network>(blueprints::clpl<technology_network>())});
     check_colors(mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::half_adder_network<mockturtle::mig_network>())});
     check_colors(mockturtle::fanout_view{

@@ -1133,8 +1133,7 @@ struct has_get_fo_two : std::false_type
 {};
 
 template <class Ntk>
-struct has_get_fo_two<Ntk, std::void_t<decltype(std::declval<Ntk>().get_fo_two())>>
-        : std::true_type
+struct has_get_fo_two<Ntk, std::void_t<decltype(std::declval<Ntk>().get_fo_two())>> : std::true_type
 {};
 
 template <class Ntk>
@@ -1147,8 +1146,7 @@ struct has_get_fo_one : std::false_type
 {};
 
 template <class Ntk>
-struct has_get_fo_one<Ntk, std::void_t<decltype(std::declval<Ntk>().get_fo_one())>>
-        : std::true_type
+struct has_get_fo_one<Ntk, std::void_t<decltype(std::declval<Ntk>().get_fo_one())>> : std::true_type
 {};
 
 template <class Ntk>
@@ -1161,8 +1159,7 @@ struct has_get_pi_to_pi : std::false_type
 {};
 
 template <class Ntk>
-struct has_get_pi_to_pi<Ntk, std::void_t<decltype(std::declval<Ntk>().get_pi_to_pi())>>
-        : std::true_type
+struct has_get_pi_to_pi<Ntk, std::void_t<decltype(std::declval<Ntk>().get_pi_to_pi())>> : std::true_type
 {};
 
 template <class Ntk>
@@ -1175,8 +1172,7 @@ struct has_nc_inv_flag : std::false_type
 {};
 
 template <class Ntk>
-struct has_nc_inv_flag<Ntk, std::void_t<decltype(std::declval<Ntk>().nc_inv_flag())>>
-        : std::true_type
+struct has_nc_inv_flag<Ntk, std::void_t<decltype(std::declval<Ntk>().nc_inv_flag())>> : std::true_type
 {};
 
 template <class Ntk>
@@ -1189,8 +1185,7 @@ struct has_nc_inv_num : std::false_type
 {};
 
 template <class Ntk>
-struct has_nc_inv_num<Ntk, std::void_t<decltype(std::declval<Ntk>().nc_inv_num())>>
-        : std::true_type
+struct has_nc_inv_num<Ntk, std::void_t<decltype(std::declval<Ntk>().nc_inv_num())>> : std::true_type
 {};
 
 template <class Ntk>

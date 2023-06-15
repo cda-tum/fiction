@@ -67,7 +67,7 @@ void ortho_ordering_exp_stats()
 
         fiction::gate_level_drv_stats  st = {};
         fiction::gate_level_drv_params ps = {};
-        std::stringstream     ss{};
+        std::stringstream              ss{};
         ps.out = &ss;
         gate_level_drvs(lyt, ps, &st);
 
