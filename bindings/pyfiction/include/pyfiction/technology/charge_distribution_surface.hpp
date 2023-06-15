@@ -59,10 +59,7 @@ inline void charge_distribution_surface(pybind11::module& m)
                     const fiction::sidb_simulation_parameters& params = fiction::sidb_simulation_parameters{},
                     const fiction::sidb_charge_state&          cs     = fiction::sidb_charge_state::NEGATIVE)
                  {
-                     // Convert layout to py_sidb_cell_layout or any other appropriate format
                      auto converted_layout = fiction::convert_to_siqad_coordinates(layout);
-
-                     // Create the py_charge_distribution_surface object using the converted layout
                      return fiction::charge_distribution_surface(converted_layout, params, cs);
                  }),
              "layout"_a, "params"_a = fiction::sidb_simulation_parameters{},
