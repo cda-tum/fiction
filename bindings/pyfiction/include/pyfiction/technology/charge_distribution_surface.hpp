@@ -54,6 +54,17 @@ inline void charge_distribution_surface(pybind11::module& m)
                       const fiction::sidb_simulation_parameters&, const fiction::sidb_charge_state&>(),
              "dimension"_a, "params"_a = fiction::sidb_simulation_parameters{},
              "cs"_a = fiction::sidb_charge_state::NEGATIVE)
+        .def(py::init(
+                 [](const py_sidb_layout&                      layout,
+                    const fiction::sidb_simulation_parameters& params = fiction::sidb_simulation_parameters{},
+                    const fiction::sidb_charge_state&          cs     = fiction::sidb_charge_state::NEGATIVE)
+                 {
+                     auto converted_layout = fiction::convert_to_siqad_coordinates(layout);
+                     return fiction::charge_distribution_surface(converted_layout, params, cs);
+                 }),
+             "layout"_a, "params"_a = fiction::sidb_simulation_parameters{},
+             "cs"_a = fiction::sidb_charge_state::NEGATIVE)
+
         .def(
             "x", [](const py_charge_distribution_surface& lyt) { return lyt.x(); }, DOC(fiction_cartesian_layout_x))
         .def(
@@ -71,6 +82,7 @@ inline void charge_distribution_surface(pybind11::module& m)
         .def("set_physical_parameters", &py_charge_distribution_surface::set_physical_parameters, "params"_a)
         .def("get_phys_params", &py_charge_distribution_surface::get_phys_params)
         .def("get_all_sidb_locations_in_nm", &py_charge_distribution_surface::get_all_sidb_locations_in_nm)
+        .def("get_all_sidb_cells", &py_charge_distribution_surface::get_all_sidb_cells)
 
         .def("charge_exists", &py_charge_distribution_surface::charge_exists, "cs"_a)
 

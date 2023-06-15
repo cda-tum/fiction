@@ -10,6 +10,7 @@
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 
+#include <pybind11/chrono.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
