@@ -11,9 +11,13 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <limits>
+#include <random>
+#include <type_traits>
+#include <utility>
 
 namespace fiction
 {
@@ -349,6 +353,49 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
     }
 
     return lyt_new;
+}
+/**
+ * Generates a random coordinate within the region spanned by two given coordinates. The two given coordinates form the
+ * top left corner and the bottom right corner of the spanned region.
+ *
+ * @OffsetCoordinateType The coordinate implementation to be used.
+ * @param coordinate1 Top left Coordinate.
+ * @param coordinate2 Bottom right Coordinate (coordinate order is not important, automatically swapped if
+ * necessary).
+ * @return Randomly generated coordinate.
+ */
+template <typename CoordinateType>
+CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coordinate2) noexcept
+{
+    static_assert(std::is_same_v<CoordinateType, offset::ucoord_t> || std::is_same_v<CoordinateType, cube::coord_t> ||
+                      std::is_same_v<CoordinateType, siqad::coord_t>,
+                  "CoordinateType is unknown");
+
+    static std::mt19937_64 generator(std::random_device{}());
+
+    if (coordinate1 > coordinate2)
+    {
+        std::swap(coordinate1, coordinate2);
+    }
+
+    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    {
+        std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);
+        std::uniform_int_distribution<> dist_y(coordinate1.y, coordinate2.y);
+        std::uniform_int_distribution<> dist_z(0, 1);
+
+        return std::clamp(siqad::coord_t{dist_x(generator), dist_y(generator), dist_z(generator)}, coordinate1,
+                          coordinate2);
+    }
+
+    else
+    {
+        std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);
+        std::uniform_int_distribution<> dist_y(coordinate1.y, coordinate2.y);
+        std::uniform_int_distribution<> dist_z(coordinate1.z, coordinate2.z);
+
+        return {dist_x(generator), dist_y(generator), dist_z(generator)};
+    }
 }
 
 }  // namespace fiction
