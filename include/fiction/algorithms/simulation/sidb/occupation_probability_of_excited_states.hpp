@@ -99,18 +99,18 @@ occupation_probability_non_gate_based(const sidb_energy_distribution&     energy
                         { return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature).value()); });
 
     // All Boltzmann factors of the excited states are summed.
-    const double p = std::accumulate(
-        energy_distribution.cbegin(), energy_distribution.cend(), 0.0,
-        [&](const double sum, const auto& it)
-        {
-            // round the energy value of the given valid_layout to six decimal places to overcome
-            // possible rounding errors and for comparability with the min_energy.
-            if (round_to_n_decimal_places(it.first, 6) != round_to_n_decimal_places(min_energy, 6))
-            {
-                return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature).value());
-            }
-            return sum;
-        });
+    const double p =
+        std::accumulate(energy_distribution.cbegin(), energy_distribution.cend(), 0.0,
+                        [&](const double sum, const auto& it)
+                        {
+                            // round the energy value of the given valid_layout to six decimal places to overcome
+                            // possible rounding errors and for comparability with the min_energy.
+                            if (round_to_n_decimal_places(it.first, 6) != round_to_n_decimal_places(min_energy, 6))
+                            {
+                                return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature).value());
+                            }
+                            return sum;
+                        });
 
     return p / partition_function;  // Occupation probability of the excited states.
 }

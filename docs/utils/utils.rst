@@ -129,12 +129,7 @@ Unit Utils
 
 **Header:** ``fiction/utils/unit_utils.hpp``
 
-.. doxygenfunction:: operator""_angstrom
-.. doxygenfunction:: operator""_eV
-.. doxygenfunction:: operator""_K
-.. doxygenfunction:: operator""_nm
-.. doxygenfunction:: operator""_s
-.. doxygenfunction:: operator""_V
+.. doxygentypedef:: coulomb_constant_unit
 
 STL Extensions
 --------------

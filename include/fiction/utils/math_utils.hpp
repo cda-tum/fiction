@@ -42,7 +42,7 @@ T round_to_n_decimal_places(const T number, const uint64_t n) noexcept
                        units::traits::is_voltage_unit<T>::value || units::traits::is_energy_unit<T>::value)
     {
         const double factor = std::pow(10, n);
-        return T{std::round(number.value() * factor) / factor};
+        return T{std::round(static_cast<double>(number.value()) * factor) / factor};
     }
 }
 
