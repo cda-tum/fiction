@@ -141,6 +141,6 @@ set(tinyxml2_BUILD_TESTING OFF)
 add_subdirectory(tinyxml2/)
 target_link_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
 
-#include units
+# Include units
 add_subdirectory(units/)
 target_link_libraries(libfiction INTERFACE units)

@@ -35,7 +35,7 @@ TEMPLATE_TEST_CASE(
 
         all_lyts.push_back(charge_layout);
 
-        CHECK(std::abs(minimum_energy(all_lyts).value() - 0) < 0.00000001);
+        CHECK(units::math::abs(minimum_energy(all_lyts) - 0_eV) < 0.00000001_eV);
     }
 
     SECTION("layout with one SiDB placed")
@@ -50,7 +50,7 @@ TEMPLATE_TEST_CASE(
 
         all_lyts.push_back(charge_layout);
 
-        CHECK(std::abs(minimum_energy(all_lyts).value() - 0) < 0.00000001);
+        CHECK(units::math::abs(minimum_energy(all_lyts) - 0_eV) < 0.00000001_eV);
     }
 
     SECTION("layout with three SiDBs placed")

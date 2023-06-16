@@ -13,17 +13,18 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/physical_constants_and_ev_unit.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/math_utils.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
+#include "fiction/utils/units_utils.hpp"
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+#include <units.h>
 
 #include <algorithm>
 #include <cassert>
@@ -35,8 +36,6 @@
 #include <ostream>
 #include <utility>
 #include <vector>
-
-#include <units.h>
 
 namespace fiction
 {
@@ -98,7 +97,7 @@ struct critical_temperature_params
      */
     double confidence_level{0.99};
     /**
-     * Simulation stops at max_temperature (room temperature ~300 K).
+     * Simulation stops at max_temperature (~ 126 °C).
      */
     units::temperature::kelvin_t max_temperature{400_K};
     /**
@@ -126,7 +125,7 @@ struct critical_temperature_stats
     /**
      * Critical Temperature of the given layout.
      */
-    units::temperature::kelvin_t critical_temperature{};
+    units::temperature::kelvin_t critical_temperature{0_K};
     /**
      * Number of physically valid charge configurations.
      */
@@ -350,7 +349,7 @@ class critical_temperature_impl
                 break;
             }
 
-            if (std::abs((temp - parameter.max_temperature).value()) < 0.001)
+            if (units::math::abs(temp - parameter.max_temperature) < 0.001_K)
             {
                 // Maximal temperature is stored as the Critical Temperature.
                 temperature_stats.critical_temperature = parameter.max_temperature;
@@ -379,8 +378,7 @@ class critical_temperature_impl
             // Check if there is at least one ground state that satisfies the logic (transparent). Round the energy
             // value of the given valid_layout to six decimal places to overcome possible rounding errors and for
             // comparability with the min_energy.
-            if ((round_to_n_decimal_places(energy.value(), 6) == round_to_n_decimal_places(min_energy.value(), 6)) &&
-                state_type)
+            if ((round_to_n_decimal_places(energy, 6) == round_to_n_decimal_places(min_energy, 6)) && state_type)
             {
                 ground_state_is_transparent = true;
             }
@@ -422,7 +420,7 @@ class critical_temperature_impl
                 break;
             }
 
-            if (std::abs((temp - parameter.max_temperature).value()) < 0.001)
+            if (units::math::abs(temp - parameter.max_temperature) < 0.001_K)
             {
                 // Maximal temperature is stored as Critical Temperature.
                 temperature_stats.critical_temperature = parameter.max_temperature;

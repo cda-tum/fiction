@@ -19,7 +19,7 @@ namespace fiction
 {
 
 /**
- *  Data type to collect electrostatic potential energies (eV) of charge distributions with corresponding state types
+ *  Data type to collect electrostatic potential energies (in eV) of charge distributions with corresponding state types
  * (i.e., true = transparent, false = erroneous).
  */
 using sidb_energy_and_state_type = std::vector<std::pair<units::energy::electron_volt_t, bool>>;
@@ -54,12 +54,12 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
     for (const auto& [energy, occurrence] : energy_distribution)
     {
         // round the energy value to six decimal places to overcome potential rounding errors.
-        const auto energy_value = round_to_n_decimal_places(energy.value(), 6);
+        const auto energy_value = round_to_n_decimal_places(energy, 6);
         for (const auto& valid_layout : valid_lyts)
         {
             // round the energy value of the given valid_layout to six decimal places to overcome possible rounding
             // errors and to provide comparability with the energy_value from before.
-            if (round_to_n_decimal_places(valid_layout.get_system_energy().value(), 6) == energy_value)
+            if (round_to_n_decimal_places(valid_layout.get_system_energy(), 6) == energy_value)
             {
                 // collect the charge state of the output SiDBs.
                 std::vector<sidb_charge_state> charge_states(output_cells.size());

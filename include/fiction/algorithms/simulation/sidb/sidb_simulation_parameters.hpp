@@ -5,19 +5,15 @@
 #ifndef FICTION_SIDB_SIMULATION_PARAMETERS_HPP
 #define FICTION_SIDB_SIMULATION_PARAMETERS_HPP
 
-#include "fiction/technology/physical_constants_and_ev_unit.hpp"
+#include "fiction/utils/units_utils.hpp"
+
+#include <units.h>
 
 #include <cassert>
 #include <cstdint>
 
-#include <units.h>
-
 namespace fiction
 {
-
-using units::literals::operator""_eV;
-using units::literals::operator""_nm;
-using units::literals::operator""_angstrom;
 
 /**
  * This struct collects all physical parameters for physical SiDB simulations. It can be useful to adjust them,
@@ -78,9 +74,7 @@ struct sidb_simulation_parameters
     /**
      * k is the Coulomb constant and is inversely proportional to the electric permittivity (unit: SI).
      */
-    units::unit_t<units::compound_unit<units::force::newtons, units::area::square_meter,
-                                       units::inverse<units::squared<units::charge::coulomb>>>>
-        k;
+    coulomb_constant_unit k;
     /**
      * lambda_tf is the Thomas-Fermi screening distance (unit: nm).
      */

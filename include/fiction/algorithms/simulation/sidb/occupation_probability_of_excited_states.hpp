@@ -6,8 +6,8 @@
 #define FICTION_OCCUPATION_PROBABILITY_OF_EXCITED_STATES_HPP
 
 #include "fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
-#include "fiction/technology/physical_constants_and_ev_unit.hpp"
 #include "fiction/utils/math_utils.hpp"
+#include "fiction/utils/units_utils.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -20,8 +20,6 @@
 
 namespace fiction
 {
-
-using units::literals::operator""_K;
 
 /**
  * This function computes the occupation probability of erroneous charge distributions (output charge does not match the
@@ -107,7 +105,7 @@ occupation_probability_non_gate_based(const sidb_energy_distribution&     energy
         {
             // round the energy value of the given valid_layout to six decimal places to overcome
             // possible rounding errors and for comparability with the min_energy.
-            if (round_to_n_decimal_places(it.first.value(), 6) != round_to_n_decimal_places(min_energy.value(), 6))
+            if (round_to_n_decimal_places(it.first, 6) != round_to_n_decimal_places(min_energy, 6))
             {
                 return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature).value());
             }

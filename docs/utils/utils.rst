@@ -59,9 +59,8 @@ Layout Utils
 .. doxygenfunction:: fiction::convert_to_fiction_coordinates
 .. doxygenfunction:: fiction::random_coordinate
 
-
-Placement Utils
----------------
+Unit Utils
+----------
 
 **Header:** ``fiction/utils/placement_utils.hpp``
 
@@ -125,6 +124,17 @@ Array Utils
 .. doxygenfunction:: fiction::convert_array
 .. doxygenfunction:: fiction::convert_array_of_arrays
 
+Unit Utils
+-----------
+
+**Header:** ``fiction/utils/unit_utils.hpp``
+
+.. doxygenfunction:: operator""_angstrom
+.. doxygenfunction:: operator""_eV
+.. doxygenfunction:: operator""_K
+.. doxygenfunction:: operator""_nm
+.. doxygenfunction:: operator""_s
+.. doxygenfunction:: operator""_V
 
 STL Extensions
 --------------

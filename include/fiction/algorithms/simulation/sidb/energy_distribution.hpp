@@ -6,8 +6,8 @@
 #define FICTION_ENERGY_DISTRIBUTION_HPP
 
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/physical_constants_and_ev_unit.hpp"
 #include "fiction/utils/math_utils.hpp"
+#include "fiction/utils/units_utils.hpp"
 
 #include <cmath>
 #include <cstdint>
@@ -43,8 +43,7 @@ energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_v
 
     for (const auto& lyt : input_vec)
     {
-        const auto energy = units::energy::electron_volt_t(
-            round_to_n_decimal_places(lyt.get_system_energy().value(), 6));  // rounding to 6 decimal places.
+        const auto energy = round_to_n_decimal_places(lyt.get_system_energy(), 6);  // rounding to 6 decimal places.
 
         distribution[energy]++;
     }

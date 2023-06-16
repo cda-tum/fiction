@@ -13,6 +13,8 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
+#include <units.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -24,8 +26,6 @@
 #include <random>
 #include <type_traits>
 #include <utility>
-
-#include <units.h>
 
 namespace fiction
 {
@@ -343,11 +343,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 if (const auto local_pot = this->get_local_potential(c); local_pot.has_value())
                 {
+                    // Check if the maximum band bending is sufficient to shift (0/-) above the Fermi level. The local
+                    // potential is converted from J to eV to compare the band bending with the Fermi level (which is
+                    // also given in eV).
                     if ((units::energy::electron_volt_t(
                              units::convert<units::energy::joule, units::energy::electron_volt>(
                                  (-*local_pot * units::constants::e).value())) +
                          strg->phys_params.mu)
-                            .value() < -physical_constants::POP_STABILITY_ERR)
+                            .value() < -POP_STABILITY_ERR)
                     {
                         negative_sidbs.push_back(cell_to_index(c));
                     }
@@ -585,15 +588,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             total_potential += 0.5 * strg->loc_pot[i] * charge_state_to_sign(strg->cell_charge[i]);
         }
-        // convert<square_root<square_kilometer>, meter>(1.0);
         strg->system_energy =
             units::energy::electron_volt_t(units::convert<units::energy::joule, units::energy::electron_volt>(
                 (total_potential * units::constants::e).value()));
-
-        // strg->system_energy =(units::convert<units::energy::joule, units::energy::electron_volt>(total_potential *
-        // units::constants::e));
-
-        //     strg->system_energy = units::energy::electron_volt_t((total_potential).value());
     }
     /**
      * Return the currently stored system's total electrostatic potential energy.
@@ -624,17 +621,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& it : strg->loc_pot)  // this for-loop checks if the "population stability" is fulfilled.
         {
-            bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
-                           ((units::energy::electron_volt_t(-it.value()) + strg->phys_params.mu).value() <
-                            physical_constants::POP_STABILITY_ERR)) ||
-                          ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
-                           ((units::energy::electron_volt_t(-it.value()) + strg->phys_params.mu_p).value() >
-                            -physical_constants::POP_STABILITY_ERR)) ||
-                          ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
-                           ((units::energy::electron_volt_t(-it.value()) + strg->phys_params.mu).value() >
-                            -physical_constants::POP_STABILITY_ERR) &&
-                           (units::energy::electron_volt_t(-it.value()) + strg->phys_params.mu_p).value() <
-                               physical_constants::POP_STABILITY_ERR));
+            bool valid =
+                (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
+                  ((units::energy::electron_volt_t(-it.value()) + strg->phys_params.mu).value() < POP_STABILITY_ERR)) ||
+                 ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
+                  ((units::energy::electron_volt_t(-it.value()) + strg->phys_params.mu_p).value() >
+                   -POP_STABILITY_ERR)) ||
+                 ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
+                  ((units::energy::electron_volt_t(-it.value()) + strg->phys_params.mu).value() > -POP_STABILITY_ERR) &&
+                  (units::energy::electron_volt_t(-it.value()) + strg->phys_params.mu_p).value() < POP_STABILITY_ERR));
             for_loop_counter += 1;
             if (!valid)
             {
@@ -675,8 +670,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
                     if (const auto e_del = hop_del(i, j);
                         (charge_state_to_sign(strg->cell_charge[j]) > charge_state_to_sign(strg->cell_charge[i])) &&
-                        (e_del.value() < -physical_constants::POP_STABILITY_ERR))  // Checks if energetically favored
-                                                                                   // hops exist between two SiDBs.
+                        (e_del.value() < -POP_STABILITY_ERR))  // Checks if energetically favored
+                                                               // hops exist between two SiDBs.
                     {
                         hop_counter = 1;
 
@@ -791,14 +786,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param negative_indices Vector of SiDBs indices that are already negatively charged (double occupied).
      */
     void adjacent_search(const double alpha, std::vector<uint64_t>& negative_indices) noexcept
-
     {
-        double     dist_max     = 0;
+        auto       dist_max     = 0_nm;
         const auto reserve_size = this->num_cells() - negative_indices.size();
 
         std::vector<uint64_t> index_vector{};
         index_vector.reserve(reserve_size);
-        std::vector<double> distance{};
+        std::vector<units::length::nanometer_t> distance{};
         distance.reserve(reserve_size);
 
         for (uint64_t unocc = 0u; unocc < strg->cell_charge.size(); unocc++)
@@ -808,10 +802,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 continue;
             }
 
-            const double dist_min =
-                std::accumulate(negative_indices.begin(), negative_indices.end(), std::numeric_limits<double>::max(),
-                                [&](const double acc, const uint64_t occ)
-                                { return std::min(acc, this->get_nm_distance_by_indices(unocc, occ).value()); });
+            const auto dist_min =
+                std::accumulate(negative_indices.begin(), negative_indices.end(),
+                                units::length::nanometer_t(std::numeric_limits<double>::max()),
+                                [&](const units::length::nanometer_t& acc, const uint64_t occ)
+                                { return units::math::min(acc, this->get_nm_distance_by_indices(unocc, occ)); });
 
             index_vector.push_back(unocc);
             distance.push_back(dist_min);
@@ -844,11 +839,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             strg->system_energy +=
                 units::energy::electron_volt_t(units::convert<units::energy::joule, units::energy::electron_volt>(
                     (-(*this->get_local_potential_by_index(random_element)) * units::constants::e).value()));
-
-            //            strg->system_energy =
-            //                units::energy::electron_volt_t(units::convert<units::energy::joule,
-            //                units::energy::electron_volt>(
-            //                    (total_potential * units::constants::e).value()));
 
             for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
             {
