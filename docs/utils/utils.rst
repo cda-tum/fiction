@@ -59,8 +59,8 @@ Layout Utils
 .. doxygenfunction:: fiction::convert_to_fiction_coordinates
 .. doxygenfunction:: fiction::random_coordinate
 
-Unit Utils
-----------
+Placement Utils
+---------------
 
 **Header:** ``fiction/utils/placement_utils.hpp``
 
