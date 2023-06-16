@@ -21,7 +21,13 @@ namespace fiction
 {
 
 /**
- *  All metastable and physically valid charge distribution layouts are computed, stored in a vector and returned.
+ * This algorithm computes all physically valid charge configurations of a given SiDB layout. All possible charge
+ * configurations are passed and checked for physical validity. As a consequence, its runtime grows exponentially with
+ * the number of SiDBs per layout. Therefore, only layouts with up to 30 DBs can be simulated in a reasonable time.
+ * However, since all charge configurations are checked for validity, 100 % simulation accuracy is guaranteed.
+ *
+ * IMPORTANT: This was the first simulation approach. However, quickexact.hpp replaces it because it provides much
+ * better runtimes and more functionality.
  *
  * @tparam Lyt Cell-level layout type.
  * @param lyt The layout to simulate.

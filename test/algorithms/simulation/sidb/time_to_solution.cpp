@@ -5,8 +5,8 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
+#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/algorithms/simulation/sidb/time_to_solution.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -38,16 +38,18 @@ TEMPLATE_TEST_CASE(
 
         CHECK(tts_stat_quickexact.algorithm == "QuickExact");
         CHECK_THAT(tts_stat_quickexact.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK_THAT(tts_stat_quickexact.time_to_solution, Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
+        CHECK_THAT(tts_stat_quickexact.time_to_solution,
+                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
         CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
 
-        time_to_solution_stats           tts_stat_exgs{};
-        const time_to_solution_params    tts_params_exgs{exhaustive_algorithm::EXGS};
+        time_to_solution_stats        tts_stat_exgs{};
+        const time_to_solution_params tts_params_exgs{exhaustive_algorithm::EXGS};
         sim_acc_tts<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
         CHECK(tts_stat_exgs.algorithm == "ExGS");
         CHECK_THAT(tts_stat_exgs.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK_THAT(tts_stat_exgs.time_to_solution, Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
+        CHECK_THAT(tts_stat_exgs.time_to_solution,
+                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
         CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
     }
 
