@@ -7,11 +7,13 @@ Distance functions compute (an approximation for) the distance between two coord
 
 .. doxygenfunction:: fiction::manhattan_distance
 .. doxygenfunction:: fiction::euclidean_distance
+.. doxygenfunction:: fiction::twoddwave_distance
 
 .. doxygenclass:: fiction::distance_functor
    :members:
 .. doxygenclass:: fiction::manhattan_distance_functor
 .. doxygenclass:: fiction::euclidean_distance_functor
+.. doxygenclass:: fiction::twoddwave_distance_functor
 
 Cost Functions
 --------------
