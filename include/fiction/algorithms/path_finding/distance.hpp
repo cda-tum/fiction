@@ -11,6 +11,7 @@
 #include <cmath>
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <type_traits>
 
 namespace fiction
@@ -61,6 +62,30 @@ template <typename Lyt, typename Dist = double>
     const auto y = static_cast<double>(source.y) - static_cast<double>(target.y);
 
     return static_cast<Dist>(std::hypot(x, y));
+}
+/**
+ * The 2DDWave distance \f$ D \f$ between two layout coordinates \f$ s = (x_1, y_1) \f$ and \f$ t = (x_2, y_2) \f$ given
+ * by
+ *
+ *  \f$ D = |x_1 - x_2| + |y_1 - y_2| \f$ iff \f$ s \leq t \f$ and \f$ \infty \f$, otherwise.
+ *
+ * @tparam Lyt Coordinate layout type.
+ * @tparam Dist Integral type for the distance.
+ * @param lyt Layout.
+ * @param source Source coordinate.
+ * @param target Target coordinate.
+ * @return 2DDWave distance between `source` and `target`.
+ */
+template <typename Lyt, typename Dist = uint64_t>
+[[nodiscard]] constexpr Dist twoddwave_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
+                                                const coordinate<Lyt>& target) noexcept
+{
+    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
+
+    return coordinate<Lyt>{source.x, source.y} <= coordinate<Lyt>{target.x, target.y} ?
+               manhattan_distance<Lyt, Dist>(lyt, source, target) :
+               std::numeric_limits<Dist>::max();
 }
 /**
  * Computes the distance between two SiDB cells in nanometers.
@@ -165,6 +190,18 @@ class euclidean_distance_functor : public distance_functor<Lyt, Dist>
 {
   public:
     euclidean_distance_functor() : distance_functor<Lyt, Dist>(&euclidean_distance<Lyt, Dist>) {}
+};
+/**
+ * A pre-defined distance functor that uses the 2DDWave distance.
+ *
+ * @tparam Lyt Coordinate layout type.
+ * @tparam Dist Integral distance type.
+ */
+template <typename Lyt, typename Dist = uint64_t>
+class twoddwave_distance_functor : public distance_functor<Lyt, Dist>
+{
+  public:
+    twoddwave_distance_functor() : distance_functor<Lyt, Dist>(&twoddwave_distance<Lyt, Dist>) {}
 };
 
 }  // namespace fiction
