@@ -74,7 +74,8 @@ int main()  // NOLINT
 
                 const random_layout_params<cell_level_layout> params{{{0, 0}, {20, 20}}, num_sidbs, false};
 
-                const auto unique_lyts = generate_multiple_random_layout<cell_level_layout>(params, number_of_layouts);
+                const auto unique_lyts =
+                    generate_multiple_random_layout<cell_level_layout>(params, cell_level_layout{}, number_of_layouts);
                 for (auto i = 0u; i < unique_lyts.size(); i++)
                 {
                     write_sqd_layout(unique_lyts[i], dir_path_sqd.string() + "/layout_" + std::to_string(i) + ".sqd");
