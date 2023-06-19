@@ -5,7 +5,7 @@
 #ifndef FICTION_UNITS_UTILS_HPP
 #define FICTION_UNITS_UTILS_HPP
 
-#include "units.h"
+#include <units.h>
 
 namespace units
 {
@@ -53,7 +53,7 @@ using coulomb_constant_unit =
 /**
  * The pop stability error is used for physical simulations to avoid floating-point errors.
  */
-constexpr double POP_STABILITY_ERR = 1E-6;
+inline constexpr double POP_STABILITY_ERR = 1E-6;
 
 }  // namespace fiction
 

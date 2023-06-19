@@ -86,7 +86,7 @@ sidb_nanometer_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& 
     const auto x = pos_c1.first - pos_c2.first;
     const auto y = pos_c1.second - pos_c2.second;
 
-    return {units::math::hypot(x, y)};
+    return units::math::hypot(x, y);
 }
 
 // NOLINTBEGIN(*-special-member-functions): virtual destructor is prudent

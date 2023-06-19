@@ -97,7 +97,7 @@ struct critical_temperature_params
      */
     double confidence_level{0.99};
     /**
-     * Simulation stops at max_temperature (~ 126 °C).
+     * Simulation stops at max_temperature (~ 126 °C by default).
      */
     units::temperature::kelvin_t max_temperature{400_K};
     /**

@@ -12,9 +12,9 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/units_utils.hpp"
-#include "units.h"
 
 #include <fmt/format.h>
+#include <units.h>
 
 #include <algorithm>
 #include <chrono>
