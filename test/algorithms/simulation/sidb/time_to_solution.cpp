@@ -60,9 +60,8 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({4, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 3, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({6, 3, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({7, 3, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({8, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 3, 0}, TestType::cell_type::NORMAL);
 
         const sidb_simulation_parameters params{3, -0.30};
         const quicksim_params            quicksim_params{params};
