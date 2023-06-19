@@ -91,7 +91,7 @@ TEST_CASE("Compare Defect", "[sidb-defects]")
     SECTION("Different lambda_tf")
     {
         const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1, 2, 4};
-        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1, 2, 4};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1, 2, 5};
         CHECK(defect_one != defect_two);
     }
 
