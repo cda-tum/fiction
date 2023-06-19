@@ -266,6 +266,7 @@ class inverter_substitution_impl
      * @param m_inv inverter nodes, which get moved to fan-in position.
      * @param blc_fos fo nodes, where balancing is applied.
      * @param preserved_po nodes where pos need to be preserved.
+     * @param rerun indicate if optimizations can be made.
      */
     using TopoNtkSrc = mockturtle::topo_view<Ntk>;
     TopoNtkSrc                          ntk;

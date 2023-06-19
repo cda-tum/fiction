@@ -572,8 +572,8 @@ class orthogonal_ordering_network_impl
         uint32_t                           inputs_border = ctn.color_ntk.num_pis();
         tile<Lyt>                          po_tile{};
         ctn.color_ntk.foreach_po(
-            [this, &out_nodes, &multi_out_node, &node2pos, &ctn, &layout, &latest_pos,
-             &inputs_border, &po_tile](const auto& po)
+            [this, &out_nodes, &multi_out_node, &node2pos, &ctn, &layout, &latest_pos, &inputs_border,
+             &po_tile](const auto& po)
             {
                 if (!ctn.color_ntk.is_constant(po))
                 {

@@ -29,7 +29,7 @@ namespace fiction
  * @tparam Ntk mockturtle network type.
  * @tparam sorted Flag that determines whether Ntk is already wrapped in a topo_view.
  */
-template <class Ntk, bool sorted = mockturtle::is_topologically_sorted_v<Ntk>>
+template <class Ntk, bool sorted = fiction::is_input_ordered_v<Ntk>>
 class input_ordering_view
 {};
 
@@ -37,9 +37,10 @@ template <typename Ntk>
 class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
 {
   public:
-    using storage = typename Ntk::storage;
-    using node    = typename Ntk::node;
-    using signal  = typename Ntk::signal;
+    using storage                          = typename Ntk::storage;
+    using node                             = typename Ntk::node;
+    using signal                           = typename Ntk::signal;
+    static constexpr bool is_input_ordered = true;
 
     /*! \brief Default constructor.
      *
