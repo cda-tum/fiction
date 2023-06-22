@@ -397,6 +397,55 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
         return {dist_x(generator), dist_y(generator), dist_z(generator)};
     }
 }
+/**
+ * Calculates the north-west and south-east cells of a minimum-sized box around all non-empty cells in a given layout.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The layout for which the two corner cells of the minimum-sized box are determined.
+ * @return North-west and south-east cells of minimum-sized box.
+ */
+template <typename Lyt>
+std::pair<typename Lyt::cell, typename Lyt::cell> bounding_box_siqad(const Lyt& lyt) noexcept
+{
+    static_assert(has_siqad_coord_v<Lyt>, "Layout is not based on siqad coordinates");
+
+    if (lyt.num_cells() == 0)
+    {
+        return {typename Lyt::cell{}, typename Lyt::cell{}};
+    }
+
+    const auto converted_layout = convert_to_fiction_coordinates<
+        cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>(lyt);
+
+    int32_t min_x = std::numeric_limits<int32_t>::max();
+    int32_t max_x = std::numeric_limits<int32_t>::min();
+
+    int32_t min_y = std::numeric_limits<int32_t>::max();
+    int32_t max_y = std::numeric_limits<int32_t>::min();
+
+    converted_layout.foreach_cell(
+        [&converted_layout, &min_x, &max_x, &min_y, &max_y](const auto& c)
+        {
+            if (c.x < min_x)
+            {
+                min_x = c.x;
+            }
+            if (c.y < min_y)
+            {
+                min_y = c.y;
+            }
+            if (c.x > max_x)
+            {
+                max_x = c.x;
+            }
+            if (c.y > max_y)
+            {
+                max_y = c.y;
+            }
+        });
+
+    return {siqad::to_siqad_coord(cube::coord_t{min_x, min_y}), siqad::to_siqad_coord(cube::coord_t{max_x, max_y})};
+}
 
 }  // namespace fiction
 

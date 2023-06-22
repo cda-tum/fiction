@@ -338,3 +338,36 @@ TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]")
         CHECK(randomly_generated_coordinate.z <= 1);
     }
 }
+
+TEST_CASE("Generate corner cells of given layout", "[layout-utils]")
+{
+    SECTION("empyt layout")
+    {
+        const sidb_cell_clk_lyt_siqad lyt{};
+        const auto [nw, se] = bounding_box_siqad<sidb_cell_clk_lyt_siqad>(lyt);
+
+        CHECK(nw == siqad::coord_t());
+        CHECK(se == siqad::coord_t());
+    }
+
+    SECTION("one cell")
+    {
+        sidb_cell_clk_lyt_siqad lyt{};
+        lyt.assign_cell_type({1, 0, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        const auto [nw, se] = bounding_box_siqad<sidb_cell_clk_lyt_siqad>(lyt);
+        CHECK(nw == siqad::coord_t{1, 0, 0});
+        CHECK(se == siqad::coord_t{1, 0, 0});
+    }
+
+    SECTION("three cells as input, switched correct order")
+    {
+        sidb_cell_clk_lyt_siqad lyt{};
+        lyt.assign_cell_type({0, 1, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        lyt.assign_cell_type({10, 0, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        lyt.assign_cell_type({5, 8, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        const auto [nw, se] = bounding_box_siqad<sidb_cell_clk_lyt_siqad>(lyt);
+
+        CHECK(nw == siqad::coord_t{0, 0, 1});
+        CHECK(se == siqad::coord_t{10, 8, 0});
+    }
+}
