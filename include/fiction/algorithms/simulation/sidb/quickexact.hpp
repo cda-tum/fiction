@@ -458,6 +458,11 @@ class quickexact_impl
  * In summary, Quickexact combines advanced SiDB detection, dependent SiDB selection, and the use of gray code
  * to achieve outstanding performance and enable efficient simulations of SiDB layouts, even in scenarios where
  * positively charged SiDBs occur due to small spacing.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt Layout to simulate.
+ * @param params Parameter required for the simulation.
+ *
  */
 template <typename Lyt>
 sidb_simulation_result<Lyt> quickexact(Lyt& lyt, const quickexact_params<Lyt>& params = {})

@@ -227,47 +227,48 @@ class critical_temperature_impl
                 }
             }
 
-            if (parameter.input_bit == 0)
-            {
-                if (lyt_copy.get_charge_state(all_cells[4]) != sidb_charge_state::NEUTRAL)
-                {
-                    temperature_stats.critical_temperature = 0.0;
-                    return true;
-                }
-                if (lyt_copy.get_charge_state(all_cells[5]) != sidb_charge_state::NEUTRAL)
-                {
-                    temperature_stats.critical_temperature = 0.0;
-                    return true;
-                }
-            }
-
-            else if (parameter.input_bit == 1)
-            {
-                if (lyt_copy.get_charge_state(all_cells[4]) != sidb_charge_state::NEUTRAL)
-                {
-                    temperature_stats.critical_temperature = 0.0;
-                    return true;
-                }
-                if (lyt_copy.get_charge_state(all_cells[3]) != sidb_charge_state::NEUTRAL)
-                {
-                    temperature_stats.critical_temperature = 0.0;
-                    return true;
-                }
-            }
-
-            else if (parameter.input_bit == 3)
-            {
-                if (lyt_copy.get_charge_state(all_cells[2]) != sidb_charge_state::NEUTRAL)
-                {
-                    temperature_stats.critical_temperature = 0.0;
-                    return true;
-                }
-                if (lyt_copy.get_charge_state(all_cells[3]) != sidb_charge_state::NEUTRAL)
-                {
-                    temperature_stats.critical_temperature = 0.0;
-                    return true;
-                }
-            }
+            // TODO This part is used for the gate generator. Something we have to discuss.
+            //            if (parameter.input_bit == 0)
+            //            {
+            //                if (lyt_copy.get_charge_state(all_cells[4]) != sidb_charge_state::NEUTRAL)
+            //                {
+            //                    temperature_stats.critical_temperature = 0.0;
+            //                    return true;
+            //                }
+            //                if (lyt_copy.get_charge_state(all_cells[5]) != sidb_charge_state::NEUTRAL)
+            //                {
+            //                    temperature_stats.critical_temperature = 0.0;
+            //                    return true;
+            //                }
+            //            }
+            //
+            //            else if (parameter.input_bit == 1)
+            //            {
+            //                if (lyt_copy.get_charge_state(all_cells[4]) != sidb_charge_state::NEUTRAL)
+            //                {
+            //                    temperature_stats.critical_temperature = 0.0;
+            //                    return true;
+            //                }
+            //                if (lyt_copy.get_charge_state(all_cells[3]) != sidb_charge_state::NEUTRAL)
+            //                {
+            //                    temperature_stats.critical_temperature = 0.0;
+            //                    return true;
+            //                }
+            //            }
+            //
+            //            else if (parameter.input_bit == 3)
+            //            {
+            //                if (lyt_copy.get_charge_state(all_cells[2]) != sidb_charge_state::NEUTRAL)
+            //                {
+            //                    temperature_stats.critical_temperature = 0.0;
+            //                    return true;
+            //                }
+            //                if (lyt_copy.get_charge_state(all_cells[3]) != sidb_charge_state::NEUTRAL)
+            //                {
+            //                    temperature_stats.critical_temperature = 0.0;
+            //                    return true;
+            //                }
+            //            }
 
             // The energy distribution of the physically valid charge configurations for the given layout is determined.
             const auto distribution = energy_distribution(simulation_results.charge_distributions);

@@ -2,41 +2,54 @@
 // Created by Jan Drewniok on 21.06.23.
 //
 
-#ifndef FICTION_MINIMUM_DEFECT_AVOIDANCE_DISTANCE_HPP
-#define FICTION_MINIMUM_DEFECT_AVOIDANCE_DISTANCE_HPP
+#ifndef FICTION_DEFECT_INFLUENCE_DISTANCE_HPP
+#define FICTION_DEFECT_INFLUENCE_DISTANCE_HPP
 
 #include "fiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_surface.hpp"
+#include "fiction/utils/layout_utils.hpp"
 
 #include <utility>
 
 namespace fiction
 {
-
-using sidb_layout = sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>;
-
+/**
+ * This function determines the minimum avoidance distance. This means that a defect has to be placed further away from
+ * the layout than the given distance to not change the ground state of the layout.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The layout for which the influence distance is simulated.
+ * @param defect Defect for which the infleunce distance is simulated.
+ * @return Pair of the maximum influence distance (i.e. the defect should be placed further away than this value to
+ * ensure correct behavior of e.g. a gate) with the corresponding position of the defect (helps to identify the
+ * sensitive part of the layout).
+ */
 template <typename Lyt>
-std::pair<double, typename Lyt::cell> minimum_avoidance_distance(Lyt& lyt, const sidb_defect& defect)
+std::pair<double, typename Lyt::cell> influence_distance(Lyt& lyt, const sidb_defect& defect)
 {
-    coordinate<Lyt> min_defect_position{};
-    double          min_distance = 1000;
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
-    sidb_layout                     layout{lyt};
+    coordinate<Lyt> min_defect_position{};
+    double          avoidance_distance = 0;
+
+    sidb_defect_layout              layout{lyt};
     std::vector<typename Lyt::cell> cells{};
     cells.reserve(lyt.num_cells());
-    lyt.foreach_cell([&](const auto& cell) { cells.push_back(cell); });
+    lyt.foreach_cell([&cells](const auto& cell) { cells.push_back(cell); });
     std::sort(cells.begin(), cells.end());
 
     const quickexact_params<Lyt> params{sidb_simulation_parameters{}, automatic_base_number_detection::OFF};
-    auto                         simulation_results = quickexact(layout, params);
+    auto                         simulation_results = quickexact(lyt, params);
 
-    const auto min_energy = minimum_energy(simulation_results.charge_distributions);
-    uint64_t   charge_index_layout;
+    const auto min_energy          = minimum_energy(simulation_results.charge_distributions);
+    uint64_t   charge_index_layout = 0;
 
-    for (const auto& lyt_result : simulation_results.charge_distributions)
+    for (auto& lyt_result : simulation_results.charge_distributions)
     {
         if (round_to_n_decimal_places(lyt_result.get_system_energy(), 6) == round_to_n_decimal_places(min_energy, 6))
         {
@@ -45,14 +58,12 @@ std::pair<double, typename Lyt::cell> minimum_avoidance_distance(Lyt& lyt, const
         }
     }
 
-    //    bounding_box_2d box{lyt};
-    //    const auto      nw_cell = box.get_min() - coordinate<Lyt>{5, 2};
-    //    const auto      se_cell = box.get_max() + coordinate<Lyt>{5, 2};
+    const auto [nw, se] = bounding_box_siqad(layout);
 
-    const auto nw_cell = cells.front() + coordinate<Lyt>{10, 2};
-    const auto se_cell = cells.back() - coordinate<Lyt>{10, 2};
+    const auto north_west = nw - coordinate<Lyt>{10, -3};
+    const auto se_cell    = se + coordinate<Lyt>{10, -3};
 
-    auto defect_cell = nw_cell;
+    auto defect_cell = north_west;
     while (defect_cell <= se_cell)
     {
         if (lyt.get_cell_type(defect_cell) == sidb_technology::cell_type::EMPTY)
@@ -68,36 +79,24 @@ std::pair<double, typename Lyt::cell> minimum_avoidance_distance(Lyt& lyt, const
             else if ((defect_cell.x == se_cell.x) && defect_cell.z == 0)
             {
                 defect_cell.z += 1;
-                defect_cell.x = nw_cell.x;
+                defect_cell.x = north_west.x;
             }
 
             else if ((defect_cell.x == se_cell.x) && defect_cell.z == 1)
             {
-                defect_cell.x = nw_cell.x;
+                defect_cell.x = north_west.x;
                 defect_cell.y += 1;
                 defect_cell.z = 0;
             }
             continue;
         }
 
-        std::cout << "x: " << std::to_string(defect_cell.x);
-        std::cout << " | y: " << std::to_string(defect_cell.y);
-        std::cout << " | z: " << std::to_string(defect_cell.z) << std::endl;
+        const quickexact_params<sidb_defect_layout> params_defect{sidb_simulation_parameters{},
+                                                                  automatic_base_number_detection::OFF};
+        auto                                        simulation_result_defect = quickexact(layout, params_defect);
 
-        //        const critical_temperature_params params{simulation_engine::EXACT,
-        //                                                 critical_temperature_mode::GATE_BASED_SIMULATION,
-        //                                                 quicksim_params{sidb_simulation_parameters{2, -0.32}},
-        //                                                 0.99,
-        //                                                 350,
-        //                                                 create_or_tt(),
-        //                                                 0};
-        //        critical_temperature_stats<Lyt>   criticalstats{};
-        //        critical_temperature(lyt, params, &criticalstats);
-
-        auto simulation_result_defect = quickexact(layout, params);
-
-        const auto min_energy_defect = minimum_energy(simulation_result_defect.charge_distributions);
-        uint64_t   charge_index_defect_layout;
+        const auto min_energy_defect          = minimum_energy(simulation_result_defect.charge_distributions);
+        uint64_t   charge_index_defect_layout = 0;
 
         for (auto& lyt_defect : simulation_result_defect.charge_distributions)
         {
@@ -109,10 +108,9 @@ std::pair<double, typename Lyt::cell> minimum_avoidance_distance(Lyt& lyt, const
             }
         }
 
-        if (charge_index_defect_layout == charge_index_layout)
+        if (charge_index_defect_layout != charge_index_layout)
         {
-
-            double distance = 1000;
+            double distance = std::numeric_limits<double>::max();
             lyt.foreach_cell(
                 [&](const auto& cell)
                 {
@@ -121,11 +119,11 @@ std::pair<double, typename Lyt::cell> minimum_avoidance_distance(Lyt& lyt, const
                         distance = sidb_nanometer_distance<Lyt>(lyt, cell, defect_cell);
                     }
                 });
-            if (distance < min_distance)
+            if (distance > avoidance_distance)
             {
                 min_defect_position = defect_cell;
-                min_distance        = distance;
-                std::cout << min_distance << std::endl;
+                avoidance_distance  = distance;
+                std::cout << avoidance_distance << std::endl;
             }
         }
 
@@ -138,19 +136,20 @@ std::pair<double, typename Lyt::cell> minimum_avoidance_distance(Lyt& lyt, const
         else if ((defect_cell.x == se_cell.x) && defect_cell.z == 0)
         {
             defect_cell.z += 1;
-            defect_cell.x = nw_cell.x;
+            defect_cell.x = north_west.x;
         }
 
         else if ((defect_cell.x == se_cell.x) && defect_cell.z == 1)
         {
-            defect_cell.x = nw_cell.x;
+            defect_cell.x = north_west.x;
             defect_cell.y += 1;
             defect_cell.z = 0;
         }
     }
 
-    return {min_distance, min_defect_position};
+    return {avoidance_distance, min_defect_position};
 }
 
 }  // namespace fiction
-#endif  // FICTION_MINIMUM_DEFECT_AVOIDANCE_DISTANCE_HPP
+
+#endif  // FICTION_DEFECT_INFLUENCE_DISTANCE_HPP
