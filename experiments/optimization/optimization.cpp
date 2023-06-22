@@ -181,7 +181,7 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, fiction::offset::ucoord_t op)
     return std::make_tuple(fanins, fanouts, to_clear, route1, route2, route3, route4);
 }
 
-bool move_gate(fiction::offset::ucoord_t old_pos, obs_gate_lyt& lyt, int width, int height)
+std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t old_pos, obs_gate_lyt lyt, int width, int height)
 {
     const fiction::a_star_params           params{true};
     std::vector<fiction::offset::ucoord_t> fanins;
@@ -203,12 +203,13 @@ bool move_gate(fiction::offset::ucoord_t old_pos, obs_gate_lyt& lyt, int width, 
     int min_y = max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.y < b.y; })->y;
     int max_x = old_pos.x;
     int max_y = old_pos.y;
+    fiction::offset::ucoord_t new_pos = {0, 0};
     for (auto fanin : fanins)
     {
         for (fiction::offset::ucoord_t i : lyt.incoming_data_flow(old_pos))
             if (i == fanin)
             {
-                return false;
+                return std::make_tuple(false, new_pos);
             }
     }
     for (auto tile : to_clear)
@@ -244,7 +245,7 @@ bool move_gate(fiction::offset::ucoord_t old_pos, obs_gate_lyt& lyt, int width, 
             }
             else if (std::min(max_y, height) >= y && y >= min_y && std::min(width, max_x) >= x && x >= min_x)
             {
-                fiction::offset::ucoord_t new_pos = {x, y};
+                new_pos = {x, y};
                 if (lyt.is_empty_tile(new_pos) && lyt.is_empty_tile({new_pos.x, new_pos.y, 1}))
                 {
                     lyt.move_node(lyt.get_node(current_pos), new_pos, {});
@@ -382,7 +383,7 @@ bool move_gate(fiction::offset::ucoord_t old_pos, obs_gate_lyt& lyt, int width, 
             lyt.move_node(lyt.get_node(fanout), fanout, fout_signals);
         }
     }
-    return optimized;
+    return std::make_tuple(optimized, new_pos);
 }
 
 void delete_row(obs_gate_lyt& lyt, int row_idx, int width, int height)
@@ -566,7 +567,7 @@ int main()  // NOLINT
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
 
     static constexpr const uint64_t bench_select =
-        fiction_experiments::clpl;  // & fiction_experiments::fontes18; // & ~fiction_experiments::log2 &
+        fiction_experiments::mux21;// & fiction_experiments::fontes18;  // & fiction_experiments::fontes18; // & ~fiction_experiments::log2 &
                                     //~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
@@ -596,6 +597,7 @@ int main()  // NOLINT
         const std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         // Optimization
         obs_gate_lyt layout = fiction::obstruction_layout<gate_lyt>(gate_level_layout);
+        std::vector<fiction::offset::ucoord_t> gates;
         for (int x = 0; x <= width; x++)
         {
             for (int y = 0; y <= height; y++)
@@ -605,38 +607,35 @@ int main()  // NOLINT
                     layout.is_or(layout.get_node({x, y})))
                 {
                     layout.obstruct_coordinate({x, y, 1});
+                    gates.push_back({x, y});
                 }
             }
         }
 
+        std::sort(gates.begin(), gates.end(), [](fiction::offset::ucoord_t a, fiction::offset::ucoord_t b) {
+                      return a.x + a.y < b.x + b.y;
+                  });
+
         int moved = 1;
-        for (int h = 0; h < 20; h++)
-        {
-            if (moved != 0)
-            {
+
+        for (int h = 0; h < 20; h++) {
+            if (moved != 0) {
                 moved = 0;
-                for (int k = 0; k < width + height + 1; k++)
-                {
-                    for (int x = 0; x < k + 1; x++)
-                    {
-                        int y = k - x;
-                        if (y <= height && x <= width)
-                        {
-                            if (layout.is_inv(layout.get_node({x, y})) || layout.is_and(layout.get_node({x, y})) ||
-                                layout.is_xor(layout.get_node({x, y})) || layout.is_fanout(layout.get_node({x, y})) ||
-                                layout.is_or(layout.get_node({x, y})))
-                            {
-                                if (move_gate({x, y}, layout, width, height))
-                                {
-                                    moved += 1;
-                                }
-                            }
-                        }
-                    }
+            } else {
+                break;
+            }
+
+            for (int gate_id = 0; gate_id < gates.size(); gate_id++) {
+                std::cout << gates[gate_id];
+                std::pair<bool, fiction::offset::ucoord_t> moved_gate = move_gate(gates[gate_id], layout, width, height);
+
+                if (moved_gate.first) {
+                    moved += 1;
+                    gates[gate_id] = moved_gate.second;
                 }
-                std::cout << moved << std::endl;
             }
         }
+
         delete_wires(layout, width, height);
         optimize_output(layout);
         const auto end = std::chrono::steady_clock::now();
