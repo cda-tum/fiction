@@ -949,6 +949,23 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         return strg->validity;
     }
+
+    void charge_distribution_to_index_simple() const noexcept
+    {
+        const uint8_t base = strg->phys_params.base;
+
+        uint64_t chargeindex = 0;
+        uint64_t counter     = 0;
+
+        for (const auto& cell : strg->sidb_order)
+        {
+            chargeindex += static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
+                                                 std::pow(base, this->num_cells() - 1 - counter));
+            counter += 1;
+        }
+
+        strg->charge_index = {chargeindex, base};
+    }
     /**
      * The charge distribution of the charge distribution surface is converted to a unique index. It is used to map
      * every possible charge distribution of an SiDB layout to a unique index.

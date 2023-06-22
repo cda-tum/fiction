@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
+#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
@@ -183,7 +184,10 @@ class critical_temperature_impl
             temperature_stats.algorithm_name = "ExGS";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            simulation_results = exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params);
+            // simulation_results = exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params);
+            const quickexact_params<Lyt> params{parameter.simulation_params.phys_params,
+                                                automatic_base_number_detection::OFF};
+            simulation_results = quickexact(layout, params);
         }
         else
         {
@@ -212,6 +216,58 @@ class critical_temperature_impl
 
             // The goal is to sort the cells from left to right and top to bottom.
             std::sort(all_cells.begin(), all_cells.end());
+
+            auto lowest_energy = round_to_n_decimal_places(minimum_energy(simulation_results.charge_distributions), 6);
+            charge_distribution_surface<Lyt> lyt_copy{};
+            for (const auto& lyt : simulation_results.charge_distributions)
+            {
+                if (round_to_n_decimal_places(lyt.get_system_energy(), 6) == lowest_energy)
+                {
+                    lyt_copy = charge_distribution_surface<Lyt>{lyt};
+                }
+            }
+
+            if (parameter.input_bit == 0)
+            {
+                if (lyt_copy.get_charge_state(all_cells[4]) != sidb_charge_state::NEUTRAL)
+                {
+                    temperature_stats.critical_temperature = 0.0;
+                    return true;
+                }
+                if (lyt_copy.get_charge_state(all_cells[5]) != sidb_charge_state::NEUTRAL)
+                {
+                    temperature_stats.critical_temperature = 0.0;
+                    return true;
+                }
+            }
+
+            else if (parameter.input_bit == 1)
+            {
+                if (lyt_copy.get_charge_state(all_cells[4]) != sidb_charge_state::NEUTRAL)
+                {
+                    temperature_stats.critical_temperature = 0.0;
+                    return true;
+                }
+                if (lyt_copy.get_charge_state(all_cells[3]) != sidb_charge_state::NEUTRAL)
+                {
+                    temperature_stats.critical_temperature = 0.0;
+                    return true;
+                }
+            }
+
+            else if (parameter.input_bit == 3)
+            {
+                if (lyt_copy.get_charge_state(all_cells[2]) != sidb_charge_state::NEUTRAL)
+                {
+                    temperature_stats.critical_temperature = 0.0;
+                    return true;
+                }
+                if (lyt_copy.get_charge_state(all_cells[3]) != sidb_charge_state::NEUTRAL)
+                {
+                    temperature_stats.critical_temperature = 0.0;
+                    return true;
+                }
+            }
 
             // The energy distribution of the physically valid charge configurations for the given layout is determined.
             const auto distribution = energy_distribution(simulation_results.charge_distributions);
@@ -428,7 +484,7 @@ class critical_temperature_impl
     /**
      * SiDB cell-level layout.
      */
-    const Lyt& layout{};
+    Lyt layout{};
     /**
      * Parameters for the `critical_temperature` algorithm.
      */
