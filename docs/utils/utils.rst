@@ -130,9 +130,17 @@ Unit Utils
 **Header:** ``fiction/utils/unit_utils.hpp``
 
 .. doxygentypedef:: coulomb_constant_unit
+.. doxygenvariable:: POP_STABILITY_ERR
 
-There are several operators exposed in this file for convenient use of units.
-The following notation is possible: value_angstrom, value_eV, value_K, value_nm, value_s, value_V (e.g. 40_K, 40.1_nm).
+There are several suffix operators exposed in this file for convenient use of units, namely
+* ``_angstrom``
+* ``_eV``
+* ``_K``
+* ``_nm``
+* ``_s``
+* ``_V``
+
+This enables the use of units as follows: e.g., ``40_K``, ``40.1_nm``.
 
 STL Extensions
 --------------
@@ -157,11 +165,11 @@ One can use the following macros to specify the execution policy for parallel ST
 platform-independent way::
 
     std::for_each(FICTION_EXECUTION_POLICY_PAR v.begin(), v.end(), lambda);
-//                                        ^ note the missing comma
+    //                                        ^ note the missing comma
 
 If parallelism or execution policies are not available, this will expand to::
 
-                                                            std::for_each(v.begin(), v.end(), lambda);
+    std::for_each(v.begin(), v.end(), lambda);
 
 .. note::
     Only include this header and do not include ``<execution>`` directly. This header will include ``<execution>`` if

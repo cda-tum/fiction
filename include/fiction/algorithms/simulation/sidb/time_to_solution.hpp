@@ -86,7 +86,7 @@ void sim_acc_tts(const Lyt& lyt, const quicksim_params& quicksim_params, time_to
 
     time_to_solution_stats st{};
     st.single_runtime_exhaustive =
-        units::time::second_t(mockturtle::to_seconds(simulation_results_exgs.simulation_runtime));
+        units::time::second_t{mockturtle::to_seconds(simulation_results_exgs.simulation_runtime)};
 
     std::size_t         gs_count = 0;
     std::vector<double> time{};
@@ -130,9 +130,9 @@ void sim_acc_tts(const Lyt& lyt, const quicksim_params& quicksim_params, time_to
         tts = (single_runtime * std::log(1.0 - confidence_level) / std::log(1.0 - acc));
     }
 
-    st.time_to_solution    = units::time::second_t(tts);
+    st.time_to_solution    = units::time::second_t{tts};
     st.acc                 = acc * 100;
-    st.mean_single_runtime = units::time::second_t(single_runtime);
+    st.mean_single_runtime = units::time::second_t{single_runtime};
 
     if (ps)
     {
