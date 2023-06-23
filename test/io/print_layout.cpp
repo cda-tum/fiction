@@ -33,6 +33,12 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
     print_gate_level_layout(print_stream, layout, false, false);
 
     CHECK(print_stream.str() == layout_print);
+
+    print_stream = {};
+
+    print_layout(layout, print_stream);
+
+    CHECK(print_stream.str() == layout_print);
 }
 
 TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
@@ -121,6 +127,12 @@ TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
     print_cell_level_layout(print_stream, layout, false, false);
 
     CHECK(print_stream.str() == layout_print);
+
+    print_stream = {};
+
+    print_layout(layout, print_stream);
+
+    CHECK(print_stream.str() == layout_print);
 }
 
 TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
@@ -203,11 +215,19 @@ TEST_CASE("Print empty charge layout", "[print-charge-layout]")
 {
     using sqd_lyt = sidb_cell_clk_lyt_siqad;
 
+    const charge_distribution_surface<sqd_lyt> layout{sqd_lyt{{2, 2}, "Empty"}};
+
     constexpr const char* layout_print = "[i] empty layout\n";
 
     std::stringstream print_stream{};
 
-    print_charge_layout(print_stream, charge_distribution_surface<sqd_lyt>{sqd_lyt{{2, 2}, "Empty"}}, false);
+    print_charge_layout(print_stream, layout, false);
+
+    CHECK(print_stream.str() == layout_print);
+
+    print_stream = {};
+
+    print_layout(layout, print_stream);
 
     CHECK(print_stream.str() == layout_print);
 }
