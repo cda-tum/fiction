@@ -60,8 +60,8 @@ std::pair<double, typename Lyt::cell> influence_distance(Lyt& lyt, const sidb_de
 
     const auto [nw, se] = bounding_box_siqad(layout);
 
-    const auto north_west = nw - coordinate<Lyt>{10, -3};
-    const auto se_cell    = se + coordinate<Lyt>{10, -3};
+    const auto north_west = nw - coordinate<Lyt>{50, -6};
+    const auto se_cell    = se + coordinate<Lyt>{50, -6};
 
     auto defect_cell = north_west;
     while (defect_cell <= se_cell)
