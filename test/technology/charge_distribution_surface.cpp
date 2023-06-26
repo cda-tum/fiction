@@ -425,16 +425,8 @@ TEMPLATE_TEST_CASE(
         charge_layout_five.assign_charge_state({4, 1, 1}, sidb_charge_state::POSITIVE);
         CHECK(charge_layout_five.get_charge_state({4, 1, 1}) == sidb_charge_state::POSITIVE);
         charge_layout_five.charge_distribution_to_index();
-        CHECK(charge_layout_five.get_charge_index().first == 2);
-
-        charge_layout_five.increase_charge_index_by_one();
-        CHECK(charge_layout_five.get_charge_index().first == 3);
-        charge_layout_five.increase_charge_index_by_one();
-        CHECK(charge_layout_five.get_charge_index().first == 4);
-        charge_layout_five.increase_charge_index_by_one();
-        CHECK(charge_layout_five.get_charge_index().first == 5);
-        charge_layout_five.increase_charge_index_by_one();
         CHECK(charge_layout_five.get_charge_index().first == 6);
+
         charge_layout_five.increase_charge_index_by_one();
         CHECK(charge_layout_five.get_charge_index().first == 7);
         charge_layout_five.increase_charge_index_by_one();
@@ -443,9 +435,15 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout_five.get_charge_index().first == 9);
         charge_layout_five.increase_charge_index_by_one();
         CHECK(charge_layout_five.get_charge_index().first == 10);
+        charge_layout_five.increase_charge_index_by_one();
+        CHECK(charge_layout_five.get_charge_index().first == 11);
+        charge_layout_five.increase_charge_index_by_one();
+        CHECK(charge_layout_five.get_charge_index().first == 12);
+        charge_layout_five.increase_charge_index_by_one();
+        CHECK(charge_layout_five.get_charge_index().first == 13);
 
         CHECK(charge_layout_five.get_charge_state({0, 0, 0}) == sidb_charge_state::NEUTRAL);
-        CHECK(charge_layout_five.get_charge_state({0, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout_five.get_charge_state({0, 2, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_layout_five.get_charge_state({4, 1, 1}) == sidb_charge_state::NEUTRAL);
     }
 
