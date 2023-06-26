@@ -722,7 +722,8 @@ TEMPLATE_TEST_CASE("four DBs next to each other, small mu-", "[ExGS]",
 
     REQUIRE(simulation_results.charge_distributions.size() == 2);
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-    CHECK(charge_lyt_first.get_system_energy() == 0);
+    CHECK_THAT(charge_lyt_first.get_system_energy(),
+               Catch::Matchers::WithinAbs(0, fiction::physical_constants::POP_STABILITY_ERR));
 }
 
 TEMPLATE_TEST_CASE("seven DBs next to each other, small mu-", "[ExGS]",
