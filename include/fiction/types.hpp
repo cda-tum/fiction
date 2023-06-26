@@ -155,8 +155,7 @@ using sidb_cell_clk_lyt_ptr = std::shared_ptr<sidb_cell_clk_lyt>;
 using sidb_cell_clk_lyt_siqad = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
 using sidb_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_cell_clk_lyt_siqad>;
 
-using sidb_defect_layout =
-    sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>;
+using sidb_defect_layout                 = sidb_surface<sidb_cell_clk_lyt_siqad>;
 using sidb_defect_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_defect_layout>;
 
 using cell_layout_t =
