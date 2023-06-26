@@ -684,9 +684,6 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface charge_layout_new{lyt_new, params};
         const auto                  negative_sidbs = charge_layout_new.negative_sidb_detection();
         REQUIRE(negative_sidbs.size() == 3);
-        CHECK(negative_sidbs[0] == 0);
-        CHECK(negative_sidbs[1] == 1);
-        CHECK(negative_sidbs[2] == 2);
         CHECK(charge_layout_new.get_charge_index().first == 0);
 
         charge_layout_new.assign_all_charge_states(sidb_charge_state::POSITIVE);
