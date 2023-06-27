@@ -827,6 +827,8 @@ TEMPLATE_TEST_CASE("5 DBs next to each other (positively charged DBs occur)", "[
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
+    CHECK(lyt.num_cells() == 6);
+
     CHECK(simulation_results.charge_distributions.size() == 1);
 }
 
@@ -882,4 +884,46 @@ TEMPLATE_TEST_CASE("3 DBs next to each other with automatic base number detectio
     CHECK(std::any_cast<uint64_t>(simulation_results_new.additional_simulation_parameters[0].second) == 2);
 
     CHECK(simulation_results_new.simulation_runtime < simulation_results.simulation_runtime);
+}
+
+TEMPLATE_TEST_CASE("13 DBs which are all negatively charged", "[ExGS]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+
+    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
+
+    sidb_layout lyt{{20, 10}};
+
+    lyt.assign_cell_type({26, 10, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({23, 19, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({0, 5, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({38, 10, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({11, 5, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({13, 2, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({40, 19, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 9, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({19, 16, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 8, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 15, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({39, 9, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({30, 15, 0}, TestType::cell_type::NORMAL);
+
+    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+
+    const auto simulation_results = quickexact<TestType>(lyt, params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    charge_lyt_first.foreach_cell([&](const auto& cell)
+                                  { CHECK(charge_lyt_first.get_charge_state(cell) == sidb_charge_state::NEGATIVE); });
+
+    CHECK(lyt.num_cells() == 13);
 }

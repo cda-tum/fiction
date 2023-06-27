@@ -189,11 +189,11 @@ class quickexact_impl
             else if (all_sidbs_in_lyt_without_negative_detected_ones.empty() && number_of_sidbs > 1)
             {
                 charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-                for (const auto& cell : detected_negative_sidbs)
-                {
-                    charge_lyt.adding_sidb_to_layout(cell, -1);
-                }
                 result.charge_distributions.push_back(charge_lyt_copy);
+            }
+            for (const auto& cell : detected_negative_sidbs)
+            {
+                layout.assign_cell_type(cell, Lyt::cell_type::NORMAL);
             }
         }
         result.simulation_runtime = time_counter;
@@ -230,10 +230,6 @@ class quickexact_impl
                     charge_lyt_copy.adding_sidb_to_layout(cell, -1);
                 }
                 result.charge_distributions.push_back(charge_lyt_copy);
-                for (const auto& cell : detected_negative_sidbs)
-                {
-                    layout.assign_cell_type(cell, Lyt::cell_type::NORMAL);
-                }
             }
         }
 
