@@ -230,6 +230,10 @@ class quickexact_impl
                     charge_lyt_copy.adding_sidb_to_layout(cell, -1);
                 }
                 result.charge_distributions.push_back(charge_lyt_copy);
+                for (const auto& cell : detected_negative_sidbs)
+                {
+                    layout.assign_cell_type(cell, Lyt::cell_type::NORMAL);
+                }
             }
         }
 
