@@ -602,3 +602,97 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
         check_charge_configuration(simulation_results);
     }
 }
+
+TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all negatively charged", "[quicksim]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+    TestType lyt{{20, 10}};
+
+    lyt.assign_cell_type({26, 10, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({23, 19, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({0, 5, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({38, 10, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({11, 5, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({13, 2, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({40, 19, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 9, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({19, 16, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 8, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 15, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({39, 9, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({30, 15, 0}, TestType::cell_type::NORMAL);
+
+    const sidb_simulation_result<TestType> quicksimstats{};
+    const sidb_simulation_parameters       params{2, -0.32};
+
+    quicksim_params quicksim_params{params};
+
+    REQUIRE(quicksim_params.phys_params.mu == -0.32);
+
+    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
+    {
+        REQUIRE(!stats.charge_distributions.empty());
+
+        REQUIRE(!energy_distribution(stats.charge_distributions).empty());
+
+        const auto& charge_lyt_first = stats.charge_distributions.front();
+
+        charge_lyt_first.foreach_cell(
+            [&](const auto& cell) { CHECK(charge_lyt_first.get_charge_state(cell) == sidb_charge_state::NEGATIVE); });
+    };
+
+    SECTION("Default settings")
+    {
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
+    }
+    SECTION("0 threads")
+    {
+        quicksim_params.number_threads = 0;
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
+    }
+    SECTION("1 thread")
+    {
+        quicksim_params.number_threads = 1;
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
+    }
+    SECTION("2 threads")
+    {
+        quicksim_params.number_threads = 2;
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
+    }
+    SECTION("100 threads")
+    {
+        quicksim_params.number_threads = 100;
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
+    }
+}
