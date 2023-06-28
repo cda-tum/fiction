@@ -24,7 +24,11 @@ void quicksim(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def("quicksim", &fiction::quicksim<Lyt>, "layout"_a, "params"_a = fiction::quicksim_params{}, DOC(fiction_quicksim));
+    m.def(
+        "quicksim",
+        [](const Lyt& layout, const fiction::quicksim_params& params) -> fiction::sidb_simulation_result<py_cds_base>
+        { return fiction::quicksim<py_cds_base>(layout, params); },
+        "layout"_a, "params"_a = fiction::quicksim_params{}, DOC(fiction_quicksim));
 }
 
 }  // namespace detail
