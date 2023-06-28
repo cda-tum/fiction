@@ -47,9 +47,15 @@ void sidb_simulation_result(pybind11::module& m)
 
 inline void sidb_simulation_result(pybind11::module& m)
 {
+    // use the base of py_charge_distribution_surface to prevent double inference of charge_distribution_surface in the
+    // template parameter, which would lead to a type not registered in pyfiction
+    using py_cds_layout_base =
+        fiction::cell_level_layout<fiction::sidb_technology,
+                                   fiction::clocked_layout<fiction::cartesian_layout<fiction::siqad::coord_t>>>;
+
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::sidb_simulation_result<py_charge_distribution_surface>(m);
+    detail::sidb_simulation_result<py_cds_layout_base>(m);
 }
 
 }  // namespace pyfiction

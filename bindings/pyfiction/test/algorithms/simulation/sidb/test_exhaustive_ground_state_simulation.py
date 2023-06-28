@@ -13,9 +13,11 @@ class TestExhaustiveGroundStateSimulation(unittest.TestCase):
 
         params = sidb_simulation_parameters()
 
-        result = exhaustive_ground_state_simulation(layout, params)
+        cds = charge_distribution_surface(layout)
 
-        self.assertEqual(result.algorithm_name, "exgs")
+        result = exhaustive_ground_state_simulation(cds, params)
+
+        self.assertEqual(result.algorithm_name, "ExGS")
         self.assertEqual(len(result.charge_distributions), 1)
 
         groundstate = result.charge_distributions[0]

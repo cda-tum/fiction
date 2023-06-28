@@ -297,14 +297,14 @@ class critical_temperature_impl
         sidb_simulation_result<Lyt> simulation_results{};
         if (parameter.engine == simulation_engine::EXACT)
         {
-            temperature_stats.algorithm_name = "exgs";
+            temperature_stats.algorithm_name = "ExGS";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params);
         }
         else
         {
-            temperature_stats.algorithm_name = "quicksim";
+            temperature_stats.algorithm_name = "QuickSim";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = quicksim(layout, parameter.simulation_params);

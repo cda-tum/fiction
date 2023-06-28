@@ -13,33 +13,36 @@ class TestCriticalTemperature(unittest.TestCase):
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
 
-        ct_mode = critical_temperature_mode.NON_GATE_BASED_SIMULATION
-        engine = simulation_engine.EXACT
-
         params = critical_temperature_params()
-        params.engine = engine
-        params.temperature_mode = ct_mode
+        params.engine = simulation_engine.EXACT
+        params.temperature_mode = critical_temperature_mode.NON_GATE_BASED_SIMULATION
 
-        CT_result = critical_temperature_params(layout, params)
+        stats = critical_temperature_stats()
 
-        self.assertEqual(CT_result.algorithm_name, "exgs")
-        self.assertEqual(CT_result.critical_temperature, 400)
-        self.assertEqual(CT_result.num_valid_lyt, 1)
+        cds = charge_distribution_surface(layout)
+
+        critical_temperature(cds, params, stats)
+
+        self.assertEqual(stats.algorithm_name, "ExGS")
+        self.assertEqual(stats.critical_temperature, 400)
+        self.assertEqual(stats.num_valid_lyt, 1)
 
     def test_bestagon_inv(self):
         layout = read_sqd_layout(dir_path + "/../../../resources/hex_inv_diag_0.sqd", "inverter_input_0")
-        ct_mode = critical_temperature_mode.GATE_BASED_SIMULATION
-        engine = simulation_engine.EXACT
 
         params = critical_temperature_params()
-        params.engine = engine
-        params.temperature_mode = ct_mode
+        params.engine = simulation_engine.APPROXIMATE
+        params.temperature_mode = critical_temperature_mode.GATE_BASED_SIMULATION
 
-        CT_result = critical_temperature_params(layout, params)
+        stats = critical_temperature_stats()
 
-        self.assertEqual(CT_result.algorithm_name, "exgs")
-        self.assertLess(CT_result.critical_temperature, 400)
-        self.assertGreater(CT_result.num_valid_lyt, 1)
+        cds = charge_distribution_surface(layout)
+
+        critical_temperature(cds, params, stats)
+
+        self.assertEqual(stats.algorithm_name, "QuickSim")
+        self.assertLessEqual(stats.critical_temperature, 400)
+        self.assertGreater(stats.num_valid_lyt, 1)
 
 
 if __name__ == '__main__':

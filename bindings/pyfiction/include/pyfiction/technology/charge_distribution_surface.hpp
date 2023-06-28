@@ -43,8 +43,8 @@ inline void charge_distribution_surface(pybind11::module& m)
     /**
      * Charge distribution surface.
      *
-     * @note All functions had to be redefined, because in the regular C++ version, this layout extends a specific
-     * hexagonal layout, which we do not expose in pyfiction.
+     * @note The charge_distribution_type in pyfiction must be viewed as a stand-alone type. It does not inherit from
+     * any other existing pyfiction types. Therefore, it does not implement functions of lower level layout types.
      */
     py::class_<py_charge_distribution_surface>(m, "charge_distribution_surface",
                                                DOC(fiction_charge_distribution_surface))

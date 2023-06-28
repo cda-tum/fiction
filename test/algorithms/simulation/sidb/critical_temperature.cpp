@@ -6,7 +6,7 @@
 
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
-#include <fiction/algorithms/simulation/sidb/quicksim.hpp>
+#include <fiction/algorithms/simulation/sidb/QuickSim.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -199,7 +199,7 @@ TEMPLATE_TEST_CASE(
                                                  critical_temperature_mode::NON_GATE_BASED_SIMULATION,
                                                  quicksim_params{sidb_simulation_parameters{2, -0.15}}, 0.99, 350};
         critical_temperature(lyt, params, &criticalstats);
-        CHECK(criticalstats.algorithm_name == "exgs");
+        CHECK(criticalstats.algorithm_name == "ExGS");
         CHECK(criticalstats.critical_temperature < 200);
         CHECK(criticalstats.critical_temperature > 0);
     }
@@ -229,7 +229,7 @@ TEMPLATE_TEST_CASE(
                                                  critical_temperature_mode::NON_GATE_BASED_SIMULATION,
                                                  quicksim_params{sidb_simulation_parameters{2, -0.15}}, 0.99, 350};
         critical_temperature(lyt, params, &criticalstats);
-        CHECK(criticalstats.algorithm_name == "quicksim");
+        CHECK(criticalstats.algorithm_name == "QuickSim");
         CHECK(criticalstats.critical_temperature < 200);
         CHECK(criticalstats.critical_temperature > 0);
     }

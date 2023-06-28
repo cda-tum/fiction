@@ -26,9 +26,11 @@ class TestQuicksim(unittest.TestCase):
         self.assertEqual(params_one.alpha, 0.4)
         self.assertEqual(params_one.number_threads, 1)
 
-        result = quicksim(layout, params)
+        cds = charge_distribution_surface(layout)
 
-        self.assertEqual(result.algorithm_name, "quicksim")
+        result = quicksim(cds, params)
+
+        self.assertEqual(result.algorithm_name, "QuickSim")
         self.assertEqual(len(result.charge_distributions), 1)
 
         groundstate = result.charge_distributions[0]
