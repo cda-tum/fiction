@@ -42,7 +42,8 @@ template <typename Lyt>
     const auto min_energy_exact  = minimum_energy(exhaustive_results.charge_distributions);
     const auto min_energy_new_ap = minimum_energy(quicksim_results.charge_distributions);
 
-    return round_to_n_decimal_places(min_energy_exact - min_energy_new_ap, 6).value() < POP_STABILITY_ERR;
+    return round_to_n_decimal_places(std::abs(min_energy_exact - min_energy_new_ap),
+                                     physical_constants::POP_STABILITY_ERR) == 0;
 }
 
 }  // namespace fiction
