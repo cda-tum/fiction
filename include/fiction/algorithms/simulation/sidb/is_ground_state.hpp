@@ -12,6 +12,8 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/math_utils.hpp"
 
+#include <units.h>
+
 #include <cmath>
 
 namespace fiction
@@ -42,8 +44,8 @@ template <typename Lyt>
     const auto min_energy_exact  = minimum_energy(exhaustive_results.charge_distributions);
     const auto min_energy_new_ap = minimum_energy(quicksim_results.charge_distributions);
 
-    return round_to_n_decimal_places(std::abs(min_energy_exact - min_energy_new_ap),
-                                     physical_constants::POP_STABILITY_ERR) == 0;
+    return round_to_n_decimal_places(units::math::abs(min_energy_exact - min_energy_new_ap), POP_STABILITY_ERR)
+               .value() == 0;
 }
 
 }  // namespace fiction

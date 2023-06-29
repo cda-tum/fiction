@@ -526,11 +526,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
     lyt.assign_cell_type({8, 10, 1}, TestType::cell_type::NORMAL);
 
     const sidb_simulation_result<TestType> quicksimstats{};
-    const sidb_simulation_parameters       params{2, -0.32};
+    const sidb_simulation_parameters       params{2, -0.32_eV};
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.32);
+    REQUIRE(quicksim_params.phys_params.mu == -0.32_eV);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -630,11 +630,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
     lyt.assign_cell_type({30, 15, 0}, TestType::cell_type::NORMAL);
 
     const sidb_simulation_result<TestType> quicksimstats{};
-    const sidb_simulation_parameters       params{2, -0.32};
+    const sidb_simulation_parameters       params{2, -0.32_eV};
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.32);
+    REQUIRE(quicksim_params.phys_params.mu == -0.32_eV);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
