@@ -19,21 +19,23 @@
 </p>
 
 This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
-in C++17 using the [EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). Thereby, *fiction*
+developed as part of the _Munich Nanotech Toolkit_ (_MNT_) by the [Chair for Design Automation](https://www.cda.cit.tum.de/)
+at the [Technical University of Munich](https://www.tum.de/). It is written in C++17 using the
+[EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). Thereby, *fiction*
 focuses on the logic synthesis, placement, routing, clocking, and verification of emerging nanotechnologies. As a
 promising class of beyond-CMOS technologies,
 [Field-coupled Nanocomputing (FCN)](https://www.springer.com/de/book/9783662437216) devices like Quantum-dot Cellular
-Automata (QCA) in manifold forms (e.g. atomic or molecular), Nanomagnet Logic (NML) devices, Silicon Dangling Bonds
+Automata (QCA) in manifold forms (e.g., atomic or molecular), Nanomagnet Logic (NML) devices, Silicon Dangling Bonds
 (SiDBs), and many more, allow for high computing performance with tremendously low power consumption without the flow of
 electric current.
 
 With ongoing research in the field, it is unclear, which technology will eventually be competing with CMOS. To be as
-generic as possible, *fiction* is able to perform physical design tasks for FCN circuit layouts on data structures that
+generic as possible, *fiction* can perform physical design tasks for FCN circuit layouts on data structures that
 abstract from particular technology or cell design. Using an extensible set of gate libraries, technologies, and cell
 types, these can easily be compiled down to any desired FCN technology for physical simulation.
 
 The *fiction* framework is academic software and aims at researchers and developers in the FCN domain who want to obtain
-cell-accurate circuit layouts from logical specifications or who want to implement their own physical design algorithms.
+cell-accurate circuit layouts from logical specifications or who want to implement their physical design algorithms.
 
 For these use cases, *fiction* provides
 a [header-only library](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-header-only-library)
@@ -184,10 +186,9 @@ Among these algorithms are
 - SMT-based [exact placement and routing](https://ieeexplore.ieee.org/document/8342060)
 - OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
 - SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
--
-SAT-based [multi-path routing](https://www.cda.cit.tum.de/files/eda/2022_nanoarch_efficient_multi-path_signal_routing_for_fcn.pdf)
+- SAT-based [multi-path routing](https://dl.acm.org/doi/10.1145/3565478.3572539)
 
-plus several path finding algorithms that work on generic layouts:
+plus several path-finding algorithms that work on generic layouts:
 
 - shortest path via the [A* algorithm](https://ieeexplore.ieee.org/document/4082128)
 - *k* shortest paths via [Yen's algorithm](https://www.ams.org/journals/qam/1970-27-04/S0033-569X-1970-0253822-7/)
@@ -203,7 +204,7 @@ using
 
 ### Physical Simulation
 
-When a layout is compiled to the cell-level via the application of a technology-dependent gate library, it can be
+When a layout is compiled to the cell level via the application of a technology-dependent gate library, it can be
 simulated using a physical model. Currently, the following simulation algorithms are implemented in *fiction*:
 
 - Silicon Dangling Bonds (SiDBs)
@@ -213,7 +214,7 @@ simulated using a physical model. Currently, the following simulation algorithms
 ## Clocking Schemes
 
 There are highly regular clocking schemes proposed for FCN technologies which can be used as a floor plan for physical
-design. However, sometimes it can make sense to have more degree of freedom and assign clock numbers on the fly. That is
+design. However, sometimes it can make sense to have more freedom and assign clock numbers on the fly. That is
 why *fiction*
 supports [regular and irregular clocking schemes](https://fiction.readthedocs.io/en/latest/layouts/clocking_scheme.html)
 with variable amounts of clock numbers as QCA for instance uses four clock phases but iNML needs only three.
