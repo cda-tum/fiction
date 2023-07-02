@@ -1,14 +1,14 @@
 # *fiction* &ndash; Design Automation for Field-coupled Nanotechnologies
 
-[![Ubuntu CI](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/ubuntu.yml?label=Ubuntu&logo=ubuntu&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
-[![macOS CI](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/macos.yml?label=macOS&logo=apple&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
-[![Windows CI](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/windows.yml?label=Windows&logo=windows&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/codeql-analysis.yml?label=CodeQL&logo=github&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/codeql-analysis.yml)
-[![Docker Image](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/docker-image.yml?label=Docker&logo=docker&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/docker-image.yml)
+[![Ubuntu CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/ubuntu.yml?label=Ubuntu&logo=ubuntu&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ubuntu.yml)
+[![macOS CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/macos.yml?label=macOS&logo=apple&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/macos.yml)
+[![Windows CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/windows.yml?label=Windows&logo=windows&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/windows.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/codeql-analysis.yml?label=CodeQL&logo=github&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/codeql-analysis.yml)
+[![Docker Image](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/docker-image.yml?label=Docker&logo=docker&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/docker-image.yml)
 [![Documentation Status](https://img.shields.io/readthedocs/fiction?label=Docs&logo=readthedocs&style=flat-square)](https://fiction.readthedocs.io/)
-[![codecov](https://img.shields.io/codecov/c/github/marcelwa/fiction?label=Coverage&logo=codecov&style=flat-square)](https://codecov.io/gh/marcelwa/fiction)
-[![License](https://img.shields.io/github/license/marcelwa/fiction?label=License&style=flat-square)](https://github.com/marcelwa/fiction/blob/main/LICENSE.txt)
-[![Release](https://img.shields.io/github/v/release/marcelwa/fiction?label=fiction&style=flat-square)](https://github.com/marcelwa/fiction/releases)
+[![codecov](https://img.shields.io/codecov/c/github/cda-tum/fiction?label=Coverage&logo=codecov&style=flat-square)](https://codecov.io/gh/cda-tum/fiction)
+[![License](https://img.shields.io/github/license/cda-tum/fiction?label=License&style=flat-square)](https://github.com/cda-tum/fiction/blob/main/LICENSE.txt)
+[![Release](https://img.shields.io/github/v/release/cda-tum/fiction?label=fiction&style=flat-square)](https://github.com/cda-tum/fiction/releases)
 [![arXiv](https://img.shields.io/static/v1?label=arXiv&message=1905.02477&color=informational&style=flat-square)](https://arxiv.org/abs/1905.02477)
 
 <p align="center">
@@ -59,7 +59,7 @@ If you have any questions, comments, or suggestions, please do not hesitate to g
 > Clone the repository and its submodules:
 
 ```bash
-git clone --recursive https://github.com/marcelwa/fiction.git
+git clone --recursive https://github.com/cda-tum/fiction.git
 ```
 
 ### The CLI
@@ -251,8 +251,8 @@ Wires are only allowed to cross other wires! Wires crossing gates is considered 
 
 <img src="docs/_static/io.png" alt="Input pin and cell output" align="right" width="200"/>
 
-In the literature, both is seen: having input cells (pins) directly located in the gate structure or using designated
-I/O elements which are located outside of gates. This distinction only makes sense on the gate-level and *fiction*
+In the literature, both are seen: having input cells (pins) directly located in the gate structure or using designated
+I/O elements that are located outside of gates. This distinction only makes sense on the gate level and *fiction*
 supports both approaches and offers usage in the implemented physical design algorithms.
 
 ## Multi Wires
@@ -261,7 +261,7 @@ supports both approaches and offers usage in the implemented physical design alg
 
 Gate-level abstraction has its limits. Often, chip area is wasted when only using a single wire per tile. In *fiction*,
 cell-level layouts allow for precise control over cell placement and can, thus, also create multiple wire segments per
-clock zone. Physical simulation can give an indication whether the built structures are implementing the intended
+clock zone. Physical simulation can give an indication of whether the built structures are implementing the intended
 functionality.
 
 ## Synchronization Elements
