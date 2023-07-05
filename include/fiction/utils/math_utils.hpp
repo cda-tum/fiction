@@ -35,13 +35,13 @@ T round_to_n_decimal_places(const T number, const uint64_t n) noexcept
 
     if constexpr (std::is_arithmetic_v<T>)
     {
-        const T factor = std::pow(10, n);
+        const T factor = std::pow(10.0, n);
         return std::round(number * factor) / static_cast<double>(factor);
     }
     else if constexpr (units::traits::is_temperature_unit<T>::value || units::traits::is_length_unit<T>::value ||
                        units::traits::is_voltage_unit<T>::value || units::traits::is_energy_unit<T>::value)
     {
-        const double factor = std::pow(10, n);
+        const double factor = std::pow(10.0, n);
         return T{std::round(static_cast<double>(number.value()) * factor) / factor};
     }
 }
