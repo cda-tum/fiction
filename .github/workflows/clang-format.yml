@@ -35,7 +35,7 @@ jobs:
         with:
           source: 'include test experiments'
           extensions: 'hpp,cpp'
-          clangFormatVersion: 16
+          clangFormatVersion: 16.0.3
           inplace: True
 
       - uses: EndBug/add-and-commit@v9
