@@ -57,7 +57,13 @@ int main()  // NOLINT
                         ss << std::fixed << std::setprecision(3) << -params.mu;
                         std::string const file_path =
                             folder.path().string() + "/loc/" + name + "_sim_µ_minus_" + ss.str() + ".txt";
-                        write_txt_sim_result(simulation_results, file_path);
+                        // Some layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
+                        // physically valid charge distribution is found) because the physical model currently works
+                        // reliably for layouts with neutrally and negatively charged SiDBs.
+                        if (!simulation_results.charge_distributions.empty())
+                        {
+                            write_txt_sim_result(simulation_results, file_path);
+                        }
                     }
                 }
                 else
