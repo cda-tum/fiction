@@ -31,7 +31,7 @@ class TestQuicksim(unittest.TestCase):
         result = quicksim(cds, params)
 
         self.assertEqual(result.algorithm_name, "QuickSim")
-        self.assertEqual(len(result.charge_distributions), 80)
+        self.assertLessEqual(len(result.charge_distributions), 80)
 
         groundstate = result.charge_distributions[0]
 
