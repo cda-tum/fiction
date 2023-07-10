@@ -142,5 +142,4 @@ add_subdirectory(tinyxml2/)
 target_link_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
 
 # Include units
-add_subdirectory(units/)
-target_link_libraries(libfiction INTERFACE units)
+target_include_directories(libfiction SYSTEM INTERFACE units/include/)
