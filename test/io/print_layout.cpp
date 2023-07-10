@@ -242,7 +242,7 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
 
     const charge_distribution_surface<sidb_cell_clk_lyt_siqad> cl{
         convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout)),
-        sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
+        sidb_simulation_parameters{3, -0.32_eV}, sidb_charge_state::NEGATIVE};
 
     cl.assign_charge_state({16, 3, 0}, sidb_charge_state::NEUTRAL);
     cl.assign_charge_state({42, 3, 0}, sidb_charge_state::NEGATIVE);
