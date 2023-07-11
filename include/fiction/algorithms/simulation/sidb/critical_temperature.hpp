@@ -447,7 +447,7 @@ class critical_temperature_impl
 /**
  *
  * This algorithm performs temperature-aware SiDB simulation as proposed in \"Temperature Behavior of Silicon Dangling
- * Bond Logic\" by J. Drewniok, M. Walter, and R. Wille in IEEE-NANO 2023. It comes in two flavors: gate-based and
+ * Bond Logic\" by J. Drewniok, M. Walter, and R. Wille in IEEE NANO 2023. It comes in two flavors: gate-based and
  * non-gate based, which can be specified using the `critical_temperature_mode` parameter.
  *
  * For gate-based simulation, the Critical Temperature is defined as follows: The temperature at which the excited
