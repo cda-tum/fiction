@@ -228,6 +228,8 @@ TEST_CASE("2DDWave distance", "[distance]")
         CHECK(twoddwave_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
         CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
         CHECK(twoddwave_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint64_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == std::numeric_limits<uint64_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == std::numeric_limits<uint64_t>::max());
 
         // ignore z-axis
         CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
@@ -246,6 +248,8 @@ TEST_CASE("2DDWave distance", "[distance]")
         CHECK(twoddwave_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
         CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
         CHECK(twoddwave_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint64_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == std::numeric_limits<uint64_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == std::numeric_limits<uint64_t>::max());
 
         // ignore z-axis
         CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
@@ -253,8 +257,9 @@ TEST_CASE("2DDWave distance", "[distance]")
 
         // negative coordinates
         CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {-1, -1}) == std::numeric_limits<uint64_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {-2, -8}, {-6, -4}) == std::numeric_limits<uint64_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {-6, -4}, {-2, -8}) == std::numeric_limits<uint64_t>::max());
         CHECK(twoddwave_distance<cart_lyt>(layout, {-4, -3}, {1, -1}) == 7);
-        CHECK(twoddwave_distance<cart_lyt>(layout, {-2, -8}, {-6, -4}) == 8);
     }
 }
 

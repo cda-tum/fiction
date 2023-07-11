@@ -87,9 +87,8 @@ template <typename Lyt, typename Dist = uint64_t>
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
 
-    return coordinate<Lyt>{source.x, source.y} <= coordinate<Lyt>{target.x, target.y} ?
-               manhattan_distance<Lyt, Dist>(lyt, source, target) :
-               std::numeric_limits<Dist>::max();
+    return source.x <= target.x && source.y <= target.y ? manhattan_distance<Lyt, Dist>(lyt, source, target) :
+                                                          std::numeric_limits<Dist>::max();
 }
 /**
  * Computes the distance between two SiDB cells in nanometers.
