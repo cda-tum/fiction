@@ -109,12 +109,12 @@ initialize_sparse_distance_map(const Lyt& lyt, const distance_functor<Lyt, Dist>
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Distance type.
  */
-template <typename Lyt, typename Dist = uint64_t>
+template <typename Lyt, typename Dist>
 class distance_map_functor : public distance_functor<Lyt, Dist>
 {
   public:
     /**
-     * Construct a distance functor from a `distance_map`.
+     * Construct the distance functor from a `distance_map`.
      *
      * @param dm Distance map.
      */
@@ -126,7 +126,7 @@ class distance_map_functor : public distance_functor<Lyt, Dist>
     /**
      * Override the call operator to query the distance map instead of the distance function.
      *
-     * @note This function will cause a SEGFAULT if the queried distance is not stored in the distance map.
+     * @note This function will throw an exception if the queried distance is not stored in the distance map.
      *
      * @param lyt Layout.
      * @param source Source coordinate.
@@ -136,7 +136,7 @@ class distance_map_functor : public distance_functor<Lyt, Dist>
     [[nodiscard]] Dist operator()(const Lyt& lyt, const coordinate<Lyt>& source,
                                   const coordinate<Lyt>& target) const override
     {
-        return static_cast<Dist>(dist_map[coordinate_index(lyt, source)][coordinate_index(lyt, target)]);
+        return static_cast<Dist>(dist_map.at(coordinate_index(lyt, source)).at(coordinate_index(lyt, target)));
     }
 
   protected:
@@ -158,7 +158,6 @@ class distance_map_functor : public distance_functor<Lyt, Dist>
         return c.y * (lyt.x() + 1) + c.x;
     }
 };
-
 /**
  * A distance functor that uses a fully precomputed `sparse_distance_map` to determine distances between coordinates. It
  * can be used as a drop-in replacement for any other distance functor in path-finding algorithms.
@@ -166,12 +165,12 @@ class distance_map_functor : public distance_functor<Lyt, Dist>
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Distance type.
  */
-template <typename Lyt, typename Dist = uint64_t>
+template <typename Lyt, typename Dist>
 class sparse_distance_map_functor : public distance_functor<Lyt, Dist>
 {
   public:
     /**
-     * Construct a distance functor from a distance map.
+     * Construct the distance functor from a sparse distance map.
      *
      * @param sdm Sparse distance map.
      */
@@ -183,17 +182,17 @@ class sparse_distance_map_functor : public distance_functor<Lyt, Dist>
     /**
      * Override the call operator to query the sparse distance map instead of the distance function.
      *
-     * @note This function will cause a SEGFAULT if the queried distance is not stored in the sparse distance map.
+     * @note This function will throw an exception if the queried distance is not stored in the sparse distance map.
      *
      * @param lyt Layout.
      * @param source Source coordinate.
      * @param target Target coordinate.
      * @return Distance between source and target according to the stored sparse distance map.
      */
-    [[nodiscard]] Dist operator()(const Lyt& lyt, const coordinate<Lyt>& source,
+    [[nodiscard]] Dist operator()(const Lyt&, const coordinate<Lyt>& source,
                                   const coordinate<Lyt>& target) const override
     {
-        return static_cast<Dist>(sparse_dist_map[{source, target}]);
+        return static_cast<Dist>(sparse_dist_map.at({source, target}));
     }
 
   protected:
@@ -201,6 +200,69 @@ class sparse_distance_map_functor : public distance_functor<Lyt, Dist>
      * Sparse distance map.
      */
     const sparse_distance_map<Lyt, Dist> sparse_dist_map;
+};
+
+/**
+ * A distance functor that internally uses a `sparse_distance_map` as a cache to prevent re-computing distances that
+ * have already been evaluated. In contrast to `distance_map_functor` and `sparse_distance_map_functor`, this functor
+ * does not require a pre-computed distance map upon construction, but instead will gradually build up its own cache
+ * when queried multiple times. It can be used as a drop-in replacement for any other distance functor in path-finding
+ * algorithms.
+ *
+ * @tparam Lyt Coordinate layout type.
+ * @tparam Dist Distance type.
+ */
+template <typename Lyt, typename Dist>
+class smart_distance_cache_functor : public distance_functor<Lyt, Dist>
+{
+  public:
+    /**
+     * Construct a distance functor from a layout and a distance function.
+     *
+     * The internal cache will be initialized empty. Distances will be computed on the fly and stored in the cache
+     * whenever they are queried.
+     *
+     * @param lyt Layout.
+     * @param dist_fn Distance function.
+     */
+    explicit smart_distance_cache_functor(
+        const Lyt&                                                                             lyt,
+        const std::function<Dist(const Lyt&, const coordinate<Lyt>&, const coordinate<Lyt>&)>& dist_fn) :
+            distance_functor<Lyt, Dist>(dist_fn)
+    {
+        distance_cache.reserve(lyt.area() * lyt.area());
+    }
+    /**
+     * Override the call operator to first query the cache instead of the distance function. Only on a cache miss,
+     * the distance function will be called and the result will be stored in the cache.
+     *
+     * @param lyt Layout.
+     * @param source Source coordinate.
+     * @param target Target coordinate.
+     * @return Distance between source and target according to the cache or the distance function.
+     */
+    [[nodiscard]] Dist operator()(const Lyt& lyt, const coordinate<Lyt>& source,
+                                  const coordinate<Lyt>& target) const override
+    {
+        if (const auto it = distance_cache.find({source, target}); it != distance_cache.cend())  // cache hit
+        {
+            return it->second;
+        }
+
+        // cache miss
+
+        const auto d = distance_functor<Lyt, Dist>(lyt, source, target);
+
+        distance_cache[{source, target}] = d;
+
+        return d;
+    }
+
+  protected:
+    /**
+     * Sparse distance map serving as a cache.
+     */
+    sparse_distance_map<Lyt, Dist> distance_cache{};
 };
 
 }  // namespace fiction

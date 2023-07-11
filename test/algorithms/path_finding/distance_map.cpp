@@ -17,13 +17,14 @@ using namespace fiction;
 TEST_CASE("Distance map", "[distance-map]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using dist = uint64_t;
 
     SECTION("2DDWave clocking")
     {
         const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, twoddwave_clocking<clk_lyt>()};
 
-        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt>{});
-        const auto dist_map_func = distance_map_functor<clk_lyt>{dist_map};
+        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
+        const auto dist_map_func = distance_map_functor<clk_lyt, dist>{dist_map};
 
         layout.foreach_coordinate(
             [&layout, &dist_map, &dist_map_func](const auto& c1, const unsigned src)
@@ -40,8 +41,8 @@ TEST_CASE("Distance map", "[distance-map]")
     {
         const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, use_clocking<clk_lyt>()};
 
-        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt>{});
-        const auto dist_map_func = distance_map_functor<clk_lyt>{dist_map};
+        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
+        const auto dist_map_func = distance_map_functor<clk_lyt, dist>{dist_map};
 
         layout.foreach_coordinate(
             [&layout, &dist_map, &dist_map_func](const auto& c1, const unsigned src)
@@ -58,8 +59,8 @@ TEST_CASE("Distance map", "[distance-map]")
     {
         const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, res_clocking<clk_lyt>()};
 
-        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt>{});
-        const auto dist_map_func = distance_map_functor<clk_lyt>{dist_map};
+        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
+        const auto dist_map_func = distance_map_functor<clk_lyt, dist>{dist_map};
 
         layout.foreach_coordinate(
             [&layout, &dist_map, &dist_map_func](const auto& c1, const unsigned src)
@@ -76,8 +77,8 @@ TEST_CASE("Distance map", "[distance-map]")
     {
         const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, cfe_clocking<clk_lyt>()};
 
-        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt>{});
-        const auto dist_map_func = distance_map_functor<clk_lyt>{dist_map};
+        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
+        const auto dist_map_func = distance_map_functor<clk_lyt, dist>{dist_map};
 
         layout.foreach_coordinate(
             [&layout, &dist_map, &dist_map_func](const auto& c1, const unsigned src)
@@ -95,13 +96,14 @@ TEST_CASE("Distance map", "[distance-map]")
 TEST_CASE("Sparse distance map", "[distance-map]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using dist = uint64_t;
 
     SECTION("2DDWave clocking")
     {
         const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, twoddwave_clocking<clk_lyt>()};
 
-        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt>{});
-        const auto dist_map_func = sparse_distance_map_functor<clk_lyt>{dist_map};
+        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
+        const auto dist_map_func = sparse_distance_map_functor<clk_lyt, dist>{dist_map};
 
         layout.foreach_coordinate(
             [&layout, &dist_map, &dist_map_func](const auto& c1)
@@ -118,8 +120,8 @@ TEST_CASE("Sparse distance map", "[distance-map]")
     {
         const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, use_clocking<clk_lyt>()};
 
-        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt>{});
-        const auto dist_map_func = sparse_distance_map_functor<clk_lyt>{dist_map};
+        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
+        const auto dist_map_func = sparse_distance_map_functor<clk_lyt, dist>{dist_map};
 
         layout.foreach_coordinate(
             [&layout, &dist_map, &dist_map_func](const auto& c1)
@@ -136,8 +138,8 @@ TEST_CASE("Sparse distance map", "[distance-map]")
     {
         const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, res_clocking<clk_lyt>()};
 
-        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt>{});
-        const auto dist_map_func = sparse_distance_map_functor<clk_lyt>{dist_map};
+        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
+        const auto dist_map_func = sparse_distance_map_functor<clk_lyt, dist>{dist_map};
 
         layout.foreach_coordinate(
             [&layout, &dist_map, &dist_map_func](const auto& c1)
@@ -154,8 +156,8 @@ TEST_CASE("Sparse distance map", "[distance-map]")
     {
         const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, cfe_clocking<clk_lyt>()};
 
-        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt>{});
-        const auto dist_map_func = sparse_distance_map_functor<clk_lyt>{dist_map};
+        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
+        const auto dist_map_func = sparse_distance_map_functor<clk_lyt, dist>{dist_map};
 
         layout.foreach_coordinate(
             [&layout, &dist_map, &dist_map_func](const auto& c1)
