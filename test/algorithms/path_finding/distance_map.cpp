@@ -17,7 +17,7 @@ using namespace fiction;
 TEST_CASE("Distance map", "[distance-map]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
-    using dist = uint64_t;
+    using dist    = uint64_t;
 
     SECTION("2DDWave clocking")
     {
@@ -96,7 +96,7 @@ TEST_CASE("Distance map", "[distance-map]")
 TEST_CASE("Sparse distance map", "[distance-map]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
-    using dist = uint64_t;
+    using dist    = uint64_t;
 
     SECTION("2DDWave clocking")
     {
