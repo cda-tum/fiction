@@ -3,8 +3,8 @@
 //
 
 #include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/algorithms/path_finding/a_star.hpp>
 #include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/algorithms/path_finding/distance_map.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -20,43 +20,152 @@ TEST_CASE("Distance map", "[distance-map]")
 
     SECTION("2DDWave clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{2, 2}, twoddwave_clocking<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, twoddwave_clocking<clk_lyt>()};
 
-        const auto dist_map = initialize_distance_map(layout, twoddwave_distance_functor<clk_lyt>{});
+        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt>{});
+        const auto dist_map_func = distance_map_functor<clk_lyt>{dist_map};
 
-        CHECK(manhattan_distance<clk_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(manhattan_distance<clk_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(manhattan_distance<clk_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(manhattan_distance<clk_lyt>(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(manhattan_distance<clk_lyt>(layout, {1, 2}, {3, 3}) == 3);
-        CHECK(manhattan_distance<clk_lyt>(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(manhattan_distance<clk_lyt>(layout, {4, 4}, {0, 0}) == 8);
-
-        // ignore z-axis
-        CHECK(manhattan_distance<clk_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
-        CHECK(manhattan_distance<clk_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
+        layout.foreach_coordinate(
+            [&layout, &dist_map, &dist_map_func](const auto& c1, const unsigned src)
+            {
+                layout.foreach_coordinate(
+                    [&layout, &dist_map, &dist_map_func, &c1, src](const auto& c2, const unsigned tgt)
+                    {
+                        CHECK(dist_map[src][tgt] == twoddwave_distance(layout, c1, c2));
+                        CHECK(dist_map[src][tgt] == dist_map_func(layout, c1, c2));
+                    });
+            });
     }
-    SECTION("Signed Cartesian layout")
+    SECTION("USE clocking")
     {
-        using cart_lyt = cartesian_layout<cube::coord_t>;
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, use_clocking<clk_lyt>()};
 
-        const cart_lyt layout{};
+        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt>{});
+        const auto dist_map_func = distance_map_functor<clk_lyt>{dist_map};
 
-        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(manhattan_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(manhattan_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
-        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(manhattan_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == 8);
+        layout.foreach_coordinate(
+            [&layout, &dist_map, &dist_map_func](const auto& c1, const unsigned src)
+            {
+                layout.foreach_coordinate(
+                    [&layout, &dist_map, &dist_map_func, &c1, src](const auto& c2, const unsigned tgt)
+                    {
+                        CHECK(dist_map[src][tgt] == a_star_distance(layout, c1, c2));
+                        CHECK(dist_map[src][tgt] == dist_map_func(layout, c1, c2));
+                    });
+            });
+    }
+    SECTION("RES clocking")
+    {
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, res_clocking<clk_lyt>()};
 
-        // ignore z-axis
-        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
-        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
+        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt>{});
+        const auto dist_map_func = distance_map_functor<clk_lyt>{dist_map};
 
-        // negative coordinates
-        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {-1, -1}) == 2);
-        CHECK(manhattan_distance<cart_lyt>(layout, {-4, -3}, {1, -1}) == 7);
-        CHECK(manhattan_distance<cart_lyt>(layout, {-2, -8}, {-6, -4}) == 8);
+        layout.foreach_coordinate(
+            [&layout, &dist_map, &dist_map_func](const auto& c1, const unsigned src)
+            {
+                layout.foreach_coordinate(
+                    [&layout, &dist_map, &dist_map_func, &c1, src](const auto& c2, const unsigned tgt)
+                    {
+                        CHECK(dist_map[src][tgt] == a_star_distance(layout, c1, c2));
+                        CHECK(dist_map[src][tgt] == dist_map_func(layout, c1, c2));
+                    });
+            });
+    }
+    SECTION("CFE clocking")
+    {
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, cfe_clocking<clk_lyt>()};
+
+        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt>{});
+        const auto dist_map_func = distance_map_functor<clk_lyt>{dist_map};
+
+        layout.foreach_coordinate(
+            [&layout, &dist_map, &dist_map_func](const auto& c1, const unsigned src)
+            {
+                layout.foreach_coordinate(
+                    [&layout, &dist_map, &dist_map_func, &c1, src](const auto& c2, const unsigned tgt)
+                    {
+                        CHECK(dist_map[src][tgt] == a_star_distance(layout, c1, c2));
+                        CHECK(dist_map[src][tgt] == dist_map_func(layout, c1, c2));
+                    });
+            });
+    }
+}
+
+TEST_CASE("Sparse distance map", "[distance-map]")
+{
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+
+    SECTION("2DDWave clocking")
+    {
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, twoddwave_clocking<clk_lyt>()};
+
+        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt>{});
+        const auto dist_map_func = sparse_distance_map_functor<clk_lyt>{dist_map};
+
+        layout.foreach_coordinate(
+            [&layout, &dist_map, &dist_map_func](const auto& c1)
+            {
+                layout.foreach_coordinate(
+                    [&layout, &dist_map, &dist_map_func, &c1](const auto& c2)
+                    {
+                        CHECK(dist_map.at({c1, c2}) == twoddwave_distance(layout, c1, c2));
+                        CHECK(dist_map.at({c1, c2}) == dist_map_func(layout, c1, c2));
+                    });
+            });
+    }
+    SECTION("USE clocking")
+    {
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, use_clocking<clk_lyt>()};
+
+        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt>{});
+        const auto dist_map_func = sparse_distance_map_functor<clk_lyt>{dist_map};
+
+        layout.foreach_coordinate(
+            [&layout, &dist_map, &dist_map_func](const auto& c1)
+            {
+                layout.foreach_coordinate(
+                    [&layout, &dist_map, &dist_map_func, &c1](const auto& c2)
+                    {
+                        CHECK(dist_map.at({c1, c2}) == a_star_distance(layout, c1, c2));
+                        CHECK(dist_map.at({c1, c2}) == dist_map_func(layout, c1, c2));
+                    });
+            });
+    }
+    SECTION("RES clocking")
+    {
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, res_clocking<clk_lyt>()};
+
+        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt>{});
+        const auto dist_map_func = sparse_distance_map_functor<clk_lyt>{dist_map};
+
+        layout.foreach_coordinate(
+            [&layout, &dist_map, &dist_map_func](const auto& c1)
+            {
+                layout.foreach_coordinate(
+                    [&layout, &dist_map, &dist_map_func, &c1](const auto& c2)
+                    {
+                        CHECK(dist_map.at({c1, c2}) == a_star_distance(layout, c1, c2));
+                        CHECK(dist_map.at({c1, c2}) == dist_map_func(layout, c1, c2));
+                    });
+            });
+    }
+    SECTION("CFE clocking")
+    {
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, cfe_clocking<clk_lyt>()};
+
+        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt>{});
+        const auto dist_map_func = sparse_distance_map_functor<clk_lyt>{dist_map};
+
+        layout.foreach_coordinate(
+            [&layout, &dist_map, &dist_map_func](const auto& c1)
+            {
+                layout.foreach_coordinate(
+                    [&layout, &dist_map, &dist_map_func, &c1](const auto& c2)
+                    {
+                        CHECK(dist_map.at({c1, c2}) == a_star_distance(layout, c1, c2));
+                        CHECK(dist_map.at({c1, c2}) == dist_map_func(layout, c1, c2));
+                    });
+            });
     }
 }

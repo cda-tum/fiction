@@ -138,7 +138,7 @@ class distance_functor
      * @param dist_fn A function that maps from layout coordinates to a distance value.
      */
     explicit distance_functor(
-        const std::function<Dist(const Lyt& lyt, const coordinate<Lyt>&, const coordinate<Lyt>&)>& dist_fn) :
+        const std::function<Dist(const Lyt&, const coordinate<Lyt>&, const coordinate<Lyt>&)>& dist_fn) :
             distance_function{dist_fn}
     {
         static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
@@ -165,7 +165,7 @@ class distance_functor
     /**
      * Distance function.
      */
-    const std::function<Dist(const Lyt& lyt, const coordinate<Lyt>&, const coordinate<Lyt>&)> distance_function;
+    const std::function<Dist(const Lyt&, const coordinate<Lyt>&, const coordinate<Lyt>&)> distance_function;
 };
 
 // NOLINTEND(*-special-member-functions)
