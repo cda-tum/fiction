@@ -28,13 +28,14 @@ template <typename Dist>
 using distance_map = std::vector<std::vector<Dist>>;
 /**
  * A sparse distance map is a flat hash map of distances between coordinates. The sparse distance map is accessed via
- * coordinate pairs.
+ * coordinate pairs. The sparse distance map is to be preferred over the distance map if only a small subset of the
+ * distances between coordinates is to be cached.
  */
 template <typename Lyt, typename Dist>
 using sparse_distance_map = phmap::parallel_flat_hash_map<std::pair<coordinate<Lyt>, coordinate<Lyt>>, Dist>;
 /**
- * This function initializes a `distance_map` for a given layout and distance functor. It computes the distances between
- * all pairs of coordinates in the layout and stores them in the distance map for quick subsequent access.
+ * This function fully initializes a `distance_map` for a given layout and distance functor. It computes the distances
+ * between all pairs of coordinates in the layout and stores them in the distance map for quick subsequent access.
  *
  * This function performs \f$ \mathcal{O}(|L|^2) \f$ distance computations, where \f$ |L| \f$ is the number of
  * coordinates in the layout.
@@ -65,8 +66,9 @@ template <typename Lyt, typename Dist>
     return dist_map;
 }
 /**
- * This function initializes a `sparse_distance_map` for a given layout and distance functor. It computes the distances
- * between all pairs of coordinates in the layout and stores them in the distance map for quick subsequent access.
+ * This function fully initializes a `sparse_distance_map` for a given layout and distance functor. It computes the
+ * distances between all pairs of coordinates in the layout and stores them in the distance map for quick subsequent
+ * access.
  *
  * This function performs \f$ \mathcal{O}(|L|^2) \f$ distance computations, where \f$ |L| \f$ is the number of
  * coordinates in the layout.
@@ -101,7 +103,8 @@ initialize_sparse_distance_map(const Lyt& lyt, const distance_functor<Lyt, Dist>
 }
 
 /**
- * A distance functor that uses a precomputed `distance_map` to determine distances between coordinates.
+ * A distance functor that uses a fully precomputed `distance_map` to determine distances between coordinates. It can be
+ * used as a drop-in replacement for any other distance functor in path-finding algorithms.
  *
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Distance type.
@@ -122,6 +125,8 @@ class distance_map_functor : public distance_functor<Lyt, Dist>
     {}
     /**
      * Override the call operator to query the distance map instead of the distance function.
+     *
+     * @note This function will cause a SEGFAULT if the queried distance is not stored in the distance map.
      *
      * @param lyt Layout.
      * @param source Source coordinate.
@@ -155,7 +160,8 @@ class distance_map_functor : public distance_functor<Lyt, Dist>
 };
 
 /**
- * A distance functor that uses a precomputed `sparse_distance_map` to determine distances between coordinates.
+ * A distance functor that uses a fully precomputed `sparse_distance_map` to determine distances between coordinates. It
+ * can be used as a drop-in replacement for any other distance functor in path-finding algorithms.
  *
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Distance type.
@@ -177,6 +183,8 @@ class sparse_distance_map_functor : public distance_functor<Lyt, Dist>
     /**
      * Override the call operator to query the sparse distance map instead of the distance function.
      *
+     * @note This function will cause a SEGFAULT if the queried distance is not stored in the sparse distance map.
+     *
      * @param lyt Layout.
      * @param source Source coordinate.
      * @param target Target coordinate.
@@ -185,7 +193,7 @@ class sparse_distance_map_functor : public distance_functor<Lyt, Dist>
     [[nodiscard]] Dist operator()(const Lyt& lyt, const coordinate<Lyt>& source,
                                   const coordinate<Lyt>& target) const override
     {
-        return static_cast<Dist>(sparse_dist_map.at({source, target}));
+        return static_cast<Dist>(sparse_dist_map[{source, target}]);
     }
 
   protected:
