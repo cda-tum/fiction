@@ -69,6 +69,10 @@ template <typename Lyt, typename Dist = double>
  *
  *  \f$ D = |x_1 - x_2| + |y_1 - y_2| \f$ iff \f$ s \leq t \f$ and \f$ \infty \f$, otherwise.
  *
+ * Thereby, \f$ s \leq t \f$ iff \f$ x_1 \leq x_2 \f$ and \f$ y_1 \leq y_2 \f$.
+ *
+ * @note To represent \f$ \infty \f$, `std::numeric_limits<Dist>::max()` is returned for distances of infinite length.
+ *
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Integral type for the distance.
  * @param lyt Layout.
