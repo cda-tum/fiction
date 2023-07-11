@@ -72,7 +72,7 @@ class miginvprop_command : public command
 
                 env->out() << fmt::format("[i] inverter cost reduction: {}\n"
                                           "[i] node count increase: {}",
-                                          st.total_gain, st.node_incraese)
+                                          st.total_gain, st.node_increase)
                            << std::endl;
 
                 fiction::restore_names(*ntk_ptr, *mig_ptr);
