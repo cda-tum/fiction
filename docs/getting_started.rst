@@ -1,7 +1,7 @@
 Getting started
 ===============
 
-The *fiction* framework provides stand-alone CLI tool as well as a header-only library that can be used in external projects.
+The *fiction* framework provides a stand-alone CLI tool as well as a header-only library that can be used in external projects.
 Both are written in C++17 and are continuously tested on Ubuntu, macOS, and Windows with multiple compilers.
 See the build badges in the README file for more information.
 
@@ -11,7 +11,7 @@ Compilation requirements
 
 The repository should always be cloned recursively with all submodules::
 
-  git clone --recursive https://github.com/marcelwa/fiction.git
+  git clone --recursive https://github.com/cda-tum/fiction.git
 
 Several third-party libraries will be cloned within the ``libs`` folder. The ``cmake`` build process will take care of
 them automatically. Should the repository have been cloned before, the commands::

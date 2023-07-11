@@ -22,13 +22,15 @@ namespace fiction
  * @return Value of the minimum energy found in the input vector.
  */
 template <typename Lyt>
-[[nodiscard]] double minimum_energy(const std::vector<charge_distribution_surface<Lyt>>& charge_lyts) noexcept
+[[nodiscard]] units::energy::electron_volt_t
+minimum_energy(const std::vector<charge_distribution_surface<Lyt>>& charge_lyts) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    return std::accumulate(charge_lyts.cbegin(), charge_lyts.cend(), std::numeric_limits<double>::max(),
-                           [](const double a, const auto& lyt) { return std::min(a, lyt.get_system_energy()); });
+    return units::energy::electron_volt_t(
+        std::accumulate(charge_lyts.cbegin(), charge_lyts.cend(), std::numeric_limits<double>::max(),
+                        [](const double a, const auto& lyt) { return std::min(a, lyt.get_system_energy().value()); }));
 }
 
 }  // namespace fiction

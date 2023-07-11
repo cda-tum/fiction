@@ -61,7 +61,7 @@ inline constexpr auto NO_COLOR = fmt::text_style{};
  */
 template <typename Lyt>
 void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_color = true,
-                             const bool clk_color = false) noexcept
+                             const bool clk_color = false)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
@@ -252,7 +252,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
  */
 template <typename Lyt>
 void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_color = true,
-                             const bool clk_color = false) noexcept
+                             const bool clk_color = false)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
@@ -327,31 +327,37 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 /**
  * Writes a simplified 2D representation of an SiDB charge layout to an output stream.
  *
- * @tparam Lyt Cell-level layout based on SiQAD coordinates.
+ * @tparam Lyt SiDB cell-level layout with charge-information based on SiQAD coordinates, e.g., a
+ * charge_distribution_surface object.
  * @param os Output stream to write into.
- * @param cds The charge distribution surface of which the charge layout is to be printed.
+ * @param lyt The layout of which the charge distribution is to be printed.
  * @param cs_color Flag to utilize color escapes for charge states.
  * @param crop_layout Flag to print the 2D bounding box of the layout, while leaving a maximum padding of one dimer row
  * and two columns.
  * @param draw_lattice Flag to enable lattice background drawing.
  */
 template <typename Lyt>
-void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt>& cds, const bool cs_color = true,
-                         const bool crop_layout = false, const bool draw_lattice = true) noexcept
+void print_charge_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = true, const bool crop_layout = false,
+                         const bool draw_lattice = true)
 {
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    static_assert(has_get_charge_state_v<Lyt>, "Lyt does not implement the get_charge_state function");
+
     // empty layout
-    if (cds.is_empty())
+    if (lyt.is_empty())
     {
         os << "[i] empty layout" << std::endl;
         return;
     }
 
     coordinate<Lyt> min{};
-    coordinate<Lyt> max{cds.x(), cds.y(), 1};
+    coordinate<Lyt> max{lyt.x(), lyt.y(), 1};
 
     if (crop_layout)
     {
-        const auto bb = bounding_box_2d{cds};
+        const auto bb = bounding_box_2d{lyt};
 
         // apply padding of maximally one dimer row and two columns
         min = bb.get_min() - coordinate<Lyt>{2, 1};
@@ -363,7 +369,7 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
     }
 
     // iterate over all coordinates in the rows determined by the vertical crop
-    cds.foreach_coordinate(
+    lyt.foreach_coordinate(
         [&](const coordinate<Lyt>& c)
         {
             if (crop_layout && (c.x < min.x || c.x > max.x))  // apply horizontal crop
@@ -371,7 +377,7 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
                 return;
             }
 
-            switch (cds.get_charge_state(c))  // switch over the charge state of the SiDB at the current coordinate
+            switch (lyt.get_charge_state(c))  // switch over the charge state of the SiDB at the current coordinate
             {
                 case sidb_charge_state::NEGATIVE:
                 {
@@ -390,7 +396,7 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
                 }
                 default:  // NONE charge state case -> empty cell
                 {
-                    os << (draw_lattice || !cds.is_empty_cell(c) ?
+                    os << (draw_lattice || !lyt.is_empty_cell(c) ?
                                fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") :
                                "  ");
                 }
@@ -405,6 +411,41 @@ void print_charge_layout(std::ostream& os, const charge_distribution_surface<Lyt
 
     // flush stream
     os << std::endl;
+}
+/**
+ * A unified printer of the versions above. Depending on the passed layout type, this function will automatically select
+ * the appropriate printer to use. This simplifies printing by enabling the statement `print_layout(lyt)`.
+ *
+ * @note This function will use the respective function's default settings to print the layout.
+ *
+ * @tparam Lyt Any coordinate layout type.
+ * @param lyt The coordinate layout.
+ * @param os The output stream to write into.
+ */
+template <typename Lyt>
+void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
+{
+    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+
+    if constexpr (is_gate_level_layout_v<Lyt>)
+    {
+        print_gate_level_layout(os, lyt);
+    }
+    else if constexpr (is_cell_level_layout_v<Lyt>)
+    {
+        if constexpr (has_sidb_technology_v<Lyt> && has_siqad_coord_v<Lyt> && has_get_charge_state_v<Lyt>)
+        {
+            print_charge_layout(os, lyt);
+        }
+        else
+        {
+            print_cell_level_layout(os, lyt);
+        }
+    }
+    else
+    {
+        os << "[e] unknown layout type" << std::endl;
+    }
 }
 
 }  // namespace fiction
