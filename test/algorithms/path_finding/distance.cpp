@@ -307,8 +307,9 @@ TEST_CASE("2DDWave distance functor", "[distance]")
 
         // negative coordinates
         CHECK(distance(layout, {0, 0}, {-1, -1}) == std::numeric_limits<uint64_t>::max());
+        CHECK(distance(layout, {-2, -8}, {-6, -4}) == std::numeric_limits<uint64_t>::max());
+        CHECK(distance(layout, {-6, -4}, {-2, -8}) == std::numeric_limits<uint64_t>::max());
         CHECK(distance(layout, {-4, -3}, {1, -1}) == 7);
-        CHECK(distance(layout, {-2, -8}, {-6, -4}) == 8);
     }
 }
 
