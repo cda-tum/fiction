@@ -171,3 +171,63 @@ TEST_CASE("Sparse distance map", "[distance-map]")
             });
     }
 }
+
+TEST_CASE("Smart distance map functor", "[distance-map]")
+{
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using dist    = uint64_t;
+
+    SECTION("2DDWave clocking")
+    {
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, twoddwave_clocking<clk_lyt>()};
+
+        const auto dist_map_func = smart_distance_cache_functor<clk_lyt, dist>{layout, &a_star_distance<clk_lyt, dist>};
+
+        layout.foreach_coordinate(
+            [&layout, &dist_map_func](const auto& c1)
+            {
+                layout.foreach_coordinate(
+                    [&layout, &dist_map_func, &c1](const auto& c2)
+                    { CHECK(dist_map_func(layout, c1, c2) == twoddwave_distance(layout, c1, c2)); });
+            });
+    }
+    SECTION("USE clocking")
+    {
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, use_clocking<clk_lyt>()};
+
+        const auto dist_map_func = smart_distance_cache_functor<clk_lyt, dist>{layout, &a_star_distance<clk_lyt, dist>};
+
+        layout.foreach_coordinate(
+            [&layout, &dist_map_func](const auto& c1)
+            {
+                layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
+                                          { CHECK(dist_map_func(layout, c1, c2) == a_star_distance(layout, c1, c2)); });
+            });
+    }
+    SECTION("RES clocking")
+    {
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, res_clocking<clk_lyt>()};
+
+        const auto dist_map_func = smart_distance_cache_functor<clk_lyt, dist>{layout, &a_star_distance<clk_lyt, dist>};
+
+        layout.foreach_coordinate(
+            [&layout, &dist_map_func](const auto& c1)
+            {
+                layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
+                                          { CHECK(dist_map_func(layout, c1, c2) == a_star_distance(layout, c1, c2)); });
+            });
+    }
+    SECTION("CFE clocking")
+    {
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, cfe_clocking<clk_lyt>()};
+
+        const auto dist_map_func = smart_distance_cache_functor<clk_lyt, dist>{layout, &a_star_distance<clk_lyt, dist>};
+
+        layout.foreach_coordinate(
+            [&layout, &dist_map_func](const auto& c1)
+            {
+                layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
+                                          { CHECK(dist_map_func(layout, c1, c2) == a_star_distance(layout, c1, c2)); });
+            });
+    }
+}
