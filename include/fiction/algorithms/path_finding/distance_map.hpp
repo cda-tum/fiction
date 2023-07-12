@@ -251,7 +251,7 @@ class smart_distance_cache_functor : public distance_functor<Lyt, Dist>
 
         // cache miss
 
-        const auto d = distance_functor<Lyt, Dist>(lyt, source, target);
+        const auto d = distance_functor<Lyt, Dist>::operator()(lyt, source, target);
 
         distance_cache[{source, target}] = d;
 
@@ -262,7 +262,7 @@ class smart_distance_cache_functor : public distance_functor<Lyt, Dist>
     /**
      * Sparse distance map serving as a cache.
      */
-    sparse_distance_map<Lyt, Dist> distance_cache{};
+    mutable sparse_distance_map<Lyt, Dist> distance_cache{};
 };
 
 }  // namespace fiction
