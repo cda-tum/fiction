@@ -33,6 +33,12 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
     print_gate_level_layout(print_stream, layout, false, false);
 
     CHECK(print_stream.str() == layout_print);
+
+    print_stream = {};
+
+    print_layout(layout, print_stream);
+
+    CHECK(print_stream.str() == layout_print);
 }
 
 TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
@@ -121,6 +127,12 @@ TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
     print_cell_level_layout(print_stream, layout, false, false);
 
     CHECK(print_stream.str() == layout_print);
+
+    print_stream = {};
+
+    print_layout(layout, print_stream);
+
+    CHECK(print_stream.str() == layout_print);
 }
 
 TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
@@ -203,11 +215,19 @@ TEST_CASE("Print empty charge layout", "[print-charge-layout]")
 {
     using sqd_lyt = sidb_cell_clk_lyt_siqad;
 
+    const charge_distribution_surface<sqd_lyt> layout{sqd_lyt{{2, 2}, "Empty"}};
+
     constexpr const char* layout_print = "[i] empty layout\n";
 
     std::stringstream print_stream{};
 
-    print_charge_layout(print_stream, charge_distribution_surface<sqd_lyt>{sqd_lyt{{2, 2}, "Empty"}}, false);
+    print_charge_layout(print_stream, layout, false);
+
+    CHECK(print_stream.str() == layout_print);
+
+    print_stream = {};
+
+    print_layout(layout, print_stream);
 
     CHECK(print_stream.str() == layout_print);
 }
@@ -222,7 +242,7 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
 
     const charge_distribution_surface<sidb_cell_clk_lyt_siqad> cl{
         convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout)),
-        sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
+        sidb_simulation_parameters{3, -0.32_eV}, sidb_charge_state::NEGATIVE};
 
     cl.assign_charge_state({16, 3, 0}, sidb_charge_state::NEUTRAL);
     cl.assign_charge_state({42, 3, 0}, sidb_charge_state::NEGATIVE);
