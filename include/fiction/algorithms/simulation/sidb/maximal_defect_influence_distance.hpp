@@ -12,6 +12,8 @@
 #include "fiction/technology/sidb_surface.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
+#include <mutex>
+#include <thread>
 #include <utility>
 
 namespace fiction
@@ -35,6 +37,10 @@ struct maximal_defect_influence_distance_params
      * also used to place defects (given in siqad coordinates).
      * */
     coordinate<Lyt> additional_scanning_area{50, 6};
+    /**
+     * Number of threads to spawn. By default the number of threads is set to the number of available hardware threads.
+     */
+    uint64_t number_threads{std::thread::hardware_concurrency()};
 };
 
 /**
@@ -56,6 +62,9 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
+    const quickexact_params<sidb_defect_layout> params_defect{sim_params.physical_params,
+                                                              automatic_base_number_detection::OFF};
 
     coordinate<Lyt> min_defect_position{};
     double          avoidance_distance = 0;
@@ -100,71 +109,15 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
     std::cout << " | se y: " << std::to_string(south_east.y);
     std::cout << " | se z: " << std::to_string(south_east.z) << std::endl;
 
-    auto defect_cell = north_west;
+    auto                            defect_cell = north_west;
+    std::vector<typename Lyt::cell> defect_cells{};
+
     while (defect_cell <= south_east)
     {
         if (lyt.get_cell_type(defect_cell) == sidb_technology::cell_type::EMPTY)
         {
-            layout.assign_sidb_defect(defect_cell, sim_params.defect);
+            defect_cells.push_back(defect_cell);
         }
-        else
-        {
-            if (defect_cell.x < south_east.x)
-            {
-                defect_cell.x += 1;
-            }
-            else if ((defect_cell.x == south_east.x) && defect_cell.z == 0)
-            {
-                defect_cell.z += 1;
-                defect_cell.x = north_west.x;
-            }
-
-            else if ((defect_cell.x == south_east.x) && defect_cell.z == 1)
-            {
-                defect_cell.x = north_west.x;
-                defect_cell.y += 1;
-                defect_cell.z = 0;
-            }
-            continue;
-        }
-
-        const quickexact_params<sidb_defect_layout> params_defect{sim_params.physical_params,
-                                                                  automatic_base_number_detection::OFF};
-        auto                                        simulation_result_defect = quickexact(layout, params_defect);
-
-        const auto min_energy_defect          = minimum_energy(simulation_result_defect.charge_distributions);
-        uint64_t   charge_index_defect_layout = 0;
-
-        for (auto& lyt_defect : simulation_result_defect.charge_distributions)
-        {
-            if (round_to_n_decimal_places(lyt_defect.get_system_energy(), 6) ==
-                round_to_n_decimal_places(min_energy_defect, 6))
-            {
-                lyt_defect.charge_distribution_to_index_general();
-                charge_index_defect_layout = lyt_defect.get_charge_index().first;
-            }
-        }
-
-        if (charge_index_defect_layout != charge_index_layout)
-        {
-            double distance = std::numeric_limits<double>::max();
-            lyt.foreach_cell(
-                [&lyt, &defect_cell, &distance](const auto& cell)
-                {
-                    if (sidb_nanometer_distance<Lyt>(lyt, cell, defect_cell) < distance)
-                    {
-                        distance = sidb_nanometer_distance<Lyt>(lyt, cell, defect_cell);
-                    }
-                });
-            if (distance > avoidance_distance)
-            {
-                min_defect_position = defect_cell;
-                avoidance_distance  = distance;
-                std::cout << avoidance_distance << std::endl;
-            }
-        }
-
-        layout.assign_sidb_defect(defect_cell, sidb_defect{sidb_defect_type::NONE});
 
         if (defect_cell.x < south_east.x)
         {
@@ -181,6 +134,127 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
             defect_cell.x = north_west.x;
             defect_cell.y += 1;
             defect_cell.z = 0;
+        }
+    }
+
+    // If the number of threads is initially set to zero, the simulation is run with one thread.
+    const uint64_t num_threads = std::max(sim_params.number_threads, uint64_t{1});
+
+    std::vector<std::thread> threads{};
+    threads.reserve(num_threads);
+    std::mutex mutex{};  // used to control access to shared resources
+
+    const auto number_per_thread = (defect_cells.size() - (defect_cells.size() % num_threads)) / num_threads;
+    const auto number_last       = defect_cells.size() % num_threads;
+
+    for (uint64_t z = 0u; z < num_threads; ++z)
+    {
+        threads.emplace_back(
+            [&]
+            {
+                for (auto i = z * number_per_thread; i < (z + 1) * number_per_thread; i++)
+                {
+                    const auto defect = defect_cells[i];
+
+                    sidb_defect_layout lyt_defect{};
+
+                    if (layout.num_cells() != 0)
+                    {
+                        layout.foreach_cell([&layout, &lyt_defect](const auto& cell)
+                                            { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
+                    }
+
+                    lyt_defect.assign_sidb_defect(defect, sim_params.defect);
+
+                    auto simulation_result_defect = quickexact(lyt_defect, params_defect);
+
+                    const auto min_energy_defect = minimum_energy(simulation_result_defect.charge_distributions);
+                    uint64_t   charge_index_defect_layout = 0;
+
+                    for (const auto& lyt_simulation_with_defect : simulation_result_defect.charge_distributions)
+                    {
+                        if (round_to_n_decimal_places(lyt_simulation_with_defect.get_system_energy(), 6) ==
+                            round_to_n_decimal_places(min_energy_defect, 6))
+                        {
+                            lyt_simulation_with_defect.charge_distribution_to_index_general();
+                            charge_index_defect_layout = lyt_simulation_with_defect.get_charge_index().first;
+                        }
+                    }
+
+                    if (charge_index_defect_layout != charge_index_layout)
+                    {
+                        double distance = std::numeric_limits<double>::max();
+                        layout.foreach_cell(
+                            [&layout, &defect, &distance](const auto& cell)
+                            {
+                                if (sidb_nanometer_distance<Lyt>(layout, cell, defect) < distance)
+                                {
+                                    distance = sidb_nanometer_distance<Lyt>(layout, cell, defect);
+                                }
+                            });
+
+                        const std::lock_guard lock{mutex};
+                        if (distance > avoidance_distance)
+                        {
+                            min_defect_position = defect;
+                            avoidance_distance  = distance;
+                        }
+                    }
+                }
+            });
+    }
+
+    for (auto& thread : threads)
+    {
+        thread.join();
+    }
+
+    for (auto f = num_threads * number_per_thread; f < num_threads * number_per_thread + number_last; f++)
+    {
+        const auto defect = defect_cells[f];
+
+        sidb_defect_layout lyt_defect{};
+
+        if (layout.num_cells() != 0)
+        {
+            layout.foreach_cell([&layout, &lyt_defect](const auto& cell)
+                                { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
+        }
+
+        lyt_defect.assign_sidb_defect(defect, sim_params.defect);
+
+        auto simulation_result_defect = quickexact(lyt_defect, params_defect);
+
+        const auto min_energy_defect          = minimum_energy(simulation_result_defect.charge_distributions);
+        uint64_t   charge_index_defect_layout = 0;
+
+        for (const auto& lyt_simulation_with_defect : simulation_result_defect.charge_distributions)
+        {
+            if (round_to_n_decimal_places(lyt_simulation_with_defect.get_system_energy(), 6) ==
+                round_to_n_decimal_places(min_energy_defect, 6))
+            {
+                lyt_simulation_with_defect.charge_distribution_to_index_general();
+                charge_index_defect_layout = lyt_simulation_with_defect.get_charge_index().first;
+            }
+        }
+
+        if (charge_index_defect_layout != charge_index_layout)
+        {
+            double distance = std::numeric_limits<double>::max();
+            layout.foreach_cell(
+                [&layout, &defect, &distance](const auto& cell)
+                {
+                    if (sidb_nanometer_distance<Lyt>(layout, cell, defect) < distance)
+                    {
+                        distance = sidb_nanometer_distance<Lyt>(layout, cell, defect);
+                    }
+                });
+
+            if (distance > avoidance_distance)
+            {
+                min_defect_position = defect;
+                avoidance_distance  = distance;
+            }
         }
     }
 
