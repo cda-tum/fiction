@@ -23,6 +23,8 @@ namespace fiction
  * indices of the coordinates in the associated layout. A coordinate index \f$ i \f$ is calculated as follows:
  * \f$ i = y \cdot W + x \f$, with \f$ W \f$ being the width of the layout. As an example, in a layout of size
  * \f$ 3 \times 3 \f$, the coordinate index of the coordinate \f$ (2, 1) \f$ has index \f$ 1 \cdot 3 + 2 = 5 \f$.
+ *
+ * The `distance_map` is to be preferred over the `sparse_distance_map` in most cases when performance is the main goal.
  */
 template <typename Dist>
 using distance_map = std::vector<std::vector<Dist>>;
@@ -30,6 +32,8 @@ using distance_map = std::vector<std::vector<Dist>>;
  * A sparse distance map is a flat hash map of distances between coordinates. The sparse distance map is accessed via
  * coordinate pairs. The sparse distance map is to be preferred over the distance map if only a small subset of the
  * distances between coordinates is to be cached.
+ *
+ * The `distance_map` is to be preferred over the `sparse_distance_map` in most cases when performance is the main goal.
  */
 template <typename Lyt, typename Dist>
 using sparse_distance_map = phmap::parallel_flat_hash_map<std::pair<coordinate<Lyt>, coordinate<Lyt>>, Dist>;

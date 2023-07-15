@@ -19,8 +19,8 @@ Distance Maps
 -------------
 
 Distance maps can store the distance from a coordinate to all other coordinates. They are particularly useful when
-repeatedly calling complex distance functions that are expensive to evaluate. The distance maps can serve as a cache for
-these cases.
+repeatedly calling complex distance functions that are expensive to evaluate. The distance maps can serve as a
+lookup-table for these cases.
 
 **Header:** ``fiction/algorithms/path_finding/distance_map.hpp``
 
@@ -33,6 +33,8 @@ these cases.
 .. doxygenclass:: fiction::distance_map_functor
    :members:
 .. doxygenclass:: fiction::sparse_distance_map_functor
+   :members:
+.. doxygenclass:: fiction::smart_distance_cache_functor
    :members:
 
 Cost Functions
