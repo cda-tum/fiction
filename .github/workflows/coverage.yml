@@ -119,3 +119,4 @@ jobs:
           files: ${{github.workspace}}/lcov_filtered.info
           fail_ci_if_error: true
           verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}

@@ -51,7 +51,7 @@ template <typename CartLyt, typename HexLyt>
 /**
  * Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even row clocked layout suitable for SiDBs by
  * remapping all gates and wires as originally proposed in \"Scalable Physical Design for Silicon Dangling Bond Logic:
- * How a 45° Turn Prevents the Reinvention of the Wheel\" by S. Hofmann, M. Walter, and R. Wille in IEEE Nano 2023.
+ * How a 45° Turn Prevents the Reinvention of the Wheel\" by S. Hofmann, M. Walter, and R. Wille in IEEE NANO 2023.
  *
  * @param Lyt Gate-level layout that is 2DDWave-clocked.
  *
