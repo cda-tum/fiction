@@ -29,7 +29,7 @@ TEMPLATE_TEST_CASE(
         all_lyts.push_back(charge_layout);
         auto result = energy_distribution(all_lyts);
         CHECK(result.size() == 1);
-        CHECK(result[0.0] == 1);
+        CHECK(result[0.0_eV] == 1);
     }
 
     SECTION("one layout with one SiDB placed")
