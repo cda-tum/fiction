@@ -150,7 +150,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
     for (uint64_t z = 0u; z < num_threads; ++z)
     {
         threads.emplace_back(
-            [&]
+            [&, z, defect_cells]
             {
                 for (auto i = z * number_per_thread; i < (z + 1) * number_per_thread; i++)
                 {
