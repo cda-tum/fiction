@@ -6,7 +6,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/io/write_txt_sim_result.hpp>
+#include <fiction/io/write_loc_sim_result.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
@@ -38,17 +38,18 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
         lyt.assign_cell_type({5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({8, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{2, -0.32};
+        const sidb_simulation_parameters params{2, -0.32_eV};
         const auto simulation_results = exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
 
         std::stringstream ss;
-        write_txt_sim_result(simulation_results, ss);
+        write_loc_sim_result(simulation_results, ss);
 
         const std::string expected_output = R"(x [nm];y [nm];GS_0;GS_1;
-                                                0.000;0.000;-1;-1;
-                                                1.152;0.000;0;-1;
-                                                1.920;0.000;-1;0;
-                                                3.072;0.000;-1;-1;)";
+                                                0.0;0.0;-1;-1;
+                                                1.152;0.0;0;-1;
+                                                1.92;0.0;-1;0;
+                                                3.072;0.0;-1;-1;)";
+
         REQUIRE(compare_output(ss.str(), expected_output));
     }
 
@@ -58,16 +59,17 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
         lyt.assign_cell_type({3, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{2, -0.32};
+        const sidb_simulation_parameters params{2, -0.32_eV};
         const auto simulation_results = exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
 
         std::stringstream ss;
-        write_txt_sim_result(simulation_results, ss);
+        write_loc_sim_result(simulation_results, ss);
 
         const std::string expected_output = R"(x [nm];y [nm];GS_0;
-                                                0.000;0.000;-1;
-                                                1.152;0.000;0;
-                                                1.920;0.000;-1;)";
+                                                0.0;0.0;-1;
+                                                1.152;0.0;0;
+                                                1.92;0.0;-1;)";
+
         REQUIRE(compare_output(ss.str(), expected_output));
     }
 }

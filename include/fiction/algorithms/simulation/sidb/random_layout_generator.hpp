@@ -21,15 +21,33 @@
 #include <random>
 #include <string_view>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 namespace fiction
 {
+
+/**
+ * An enumeration of modes to use for the generation of random layout to control control the appearance of positive
+ * charges.
+ */
+enum class positive_charges
+{
+    /**
+     * Positive charges can occur (i.e. SiDBs can be placed right next to each other).
+     */
+    ALLOWED,
+    /**
+     * Positive charges are not allowed to occur (i.e. SiDBs need to be seperated by a few lattice points).
+     */
+    FORBIDDEN
+};
+
 /**
  * This struct stores the parameters for the *generate_random_layout* algorithm.
  */
 template <typename Lyt>
-struct random_layout_params
+struct generate_random_layout_params
 {
     /**
      * Two coordinates that span the region where SiDBs may be placed (order is not important).
@@ -42,16 +60,24 @@ struct random_layout_params
     /**
      * If positively charged SiDBs should be prevented, SiDBs are not placed closer than the minimal_spacing.
      */
-    bool prevent_positive_charges = true;
+    positive_charges positive_sidbs = positive_charges::ALLOWED;
     /**
-     * If positively charged SiDBs should be prevented, SiDBs are not placed closer than this value (2 cells as
-     * Euclidean distance by default).
+     * If positively charged SiDBs should be prevented, SiDBs are not placed closer than this value (Euclidean distance
+     * of two cells).
      */
     double minimal_spacing = 2;
     /**
      * Maximal number of steps to place the given number of SiDBs.
      */
     uint64_t maximal_attempts = 10E6;
+    /**
+     * The desired number of unique layouts to be generated.
+     */
+    uint64_t number_of_unique_generated_layouts = 1;
+    /**
+     * The maximum number of attempts allowed to generate the given number of unique layouts (default: \f$ 10^{6} \f$).
+     */
+    uint64_t maximal_attempts_for_multiple_layouts = 10E6;
 };
 
 /**
@@ -61,10 +87,10 @@ struct random_layout_params
  * @param params The parameters for generating the random layout.
  * @param lyt_skeleton A layout to which random cells are added (useful if you need to add random cells to a given
  * layout).
- * @return A randomly generated layout of SiDBs.
+ * @return A randomly-generated layout of SiDBs.
  */
 template <typename Lyt>
-Lyt generate_random_layout(const random_layout_params<Lyt>& params, const Lyt& lyt_skeleton)
+Lyt generate_random_layout(const Lyt& lyt_skeleton, const generate_random_layout_params<Lyt>& params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
@@ -78,8 +104,7 @@ Lyt generate_random_layout(const random_layout_params<Lyt>& params, const Lyt& l
                                   { lyt.assign_cell_type(cell, lyt_skeleton.get_cell_type(cell)); });
     }
 
-    bool     successful_generation = false;
-    uint64_t attempt_counter       = 0;
+    uint64_t attempt_counter = 0;
 
     // Stops if either all SiDBs are placed or the maximum number of attempts were performed.
     while (lyt.num_cells() < number_of_sidbs_of_final_layout && attempt_counter < params.maximal_attempts)
@@ -88,7 +113,7 @@ Lyt generate_random_layout(const random_layout_params<Lyt>& params, const Lyt& l
 
         bool constraint_violation_positive_sidbs = false;
 
-        if (params.prevent_positive_charges)
+        if (params.positive_sidbs == positive_charges::FORBIDDEN)
         {
             // Checks if the new coordinate is not closer than 2 cells (Euclidean distance) from an already
             // placed SiDB.
@@ -116,26 +141,24 @@ Lyt generate_random_layout(const random_layout_params<Lyt>& params, const Lyt& l
  * Generates multiple unique random layouts of SiDBs based on the provided parameters.
  *
  * @tparam Lyt The layout type.
- * @param params The parameters for generating the random layouts.
  * @param lyt_skeleton A layout to which random cells are added (useful if you need to add random cells to a given
  * layout).
- * @param number_of_unique_generated_layouts The desired number of unique layouts to be generated.
- * @param maximal_attempts The maximum number of attempts allowed to generate a unique layout (default: \f$ 10^{6} \f$).
+ * @param params The parameters for generating the random layouts.
  * @return A vector containing the unique randomly generated layouts.
  */
 template <typename Lyt>
-std::vector<Lyt> generate_multiple_random_layout(const random_layout_params<Lyt>& params, const Lyt& lyt_skeleton,
-                                                 const uint64_t number_of_unique_generated_layouts,
-                                                 const uint64_t maximal_attemps = 10E6)
+std::vector<Lyt> generate_multiple_random_layouts(const Lyt&                                lyt_skeleton,
+                                                  const generate_random_layout_params<Lyt>& params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
     std::vector<Lyt> unique_lyts{};
-    unique_lyts.reserve(number_of_unique_generated_layouts);
+    unique_lyts.reserve(params.number_of_unique_generated_layouts);
     uint64_t counter = 0;
-    while (unique_lyts.size() < number_of_unique_generated_layouts && counter < maximal_attemps)
+    while (unique_lyts.size() < params.number_of_unique_generated_layouts &&
+           counter < params.maximal_attempts_for_multiple_layouts)
     {
-        const auto random_lyt = generate_random_layout(params, lyt_skeleton);
+        const auto random_lyt = generate_random_layout(lyt_skeleton, params);
 
         uint64_t identical_layout_counter = 0;
         for (const auto& old_lyt : unique_lyts)
