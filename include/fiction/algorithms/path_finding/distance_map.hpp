@@ -31,7 +31,7 @@ using distance_map = std::vector<std::vector<Dist>>;
 /**
  * A sparse distance map is a flat hash map of distances between coordinates. The sparse distance map is accessed via
  * coordinate pairs. The sparse distance map is to be preferred over the distance map if only a small subset of the
- * distances between coordinates is to be cached.
+ * distances between coordinates is to be stored.
  *
  * The `distance_map` is to be preferred over the `sparse_distance_map` in most cases when performance is the main goal.
  */

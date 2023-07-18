@@ -153,6 +153,18 @@ linked against *fiction* and compiled as a stand-alone binary using the followin
   cmake --build . -j4
 
 
+Building code benchmarks
+------------------------
+
+Using ``Catch2``'s micro-benchmarking feature, you can compile and run code tests that evaluate the performance of
+certain code constructs. The ``test/benchmark`` folder provides a selection of benchmarks we were running to evaluate
+the performance of our code during development. Any ``*.cpp`` file that is placed in that folder is automatically
+linked against *fiction* and compiled as a stand-alone binary using the following commands::
+
+  cmake . -B build -DFICTION_BENCHMARK=ON
+  cd build
+  cmake --build . -j4
+
 Uninstall
 ---------
 
