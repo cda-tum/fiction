@@ -303,62 +303,62 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate_random_layout]
                     });
             });
     }
-    //
-    //    SECTION("given previous layouts")
-    //    {
-    //        const generate_random_layout_params<sidb_cell_clk_lyt> params{
-    //            {{0, 0}, {9, 9, 2}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 3};
-    //        const auto result_lyts = generate_multiple_random_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
-    //        CHECK(result_lyts.size() == 3);
-    //
-    //        for (const auto& lyt : result_lyts)
-    //        {
-    //            lyt.foreach_cell(
-    //                [](const auto& cell)
-    //                {
-    //                    CHECK(cell.x < 10);
-    //                    CHECK(cell.y < 10);
-    //                });
-    //        }
-    //    }
-    //
-    //    SECTION("Check uniqueness of two layouts")
-    //    {
-    //        const generate_random_layout_params<sidb_cell_clk_lyt> params{
-    //            {{0, 0}, {9, 9}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 2};
-    //        const auto result_lyts = generate_multiple_random_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
-    //        REQUIRE(result_lyts.size() == 2);
-    //
-    //        const auto& first_lyt  = result_lyts.front();
-    //        const auto& second_lyt = result_lyts.back();
-    //
-    //        uint64_t counter_different_cell = 0;
-    //        first_lyt.foreach_cell(
-    //            [&second_lyt, &counter_different_cell](const auto& cell_first)
-    //            {
-    //                second_lyt.foreach_cell(
-    //                    [&cell_first, &counter_different_cell](const auto& cell_second)
-    //                    {
-    //                        if (cell_first != cell_second)
-    //                        {
-    //                            counter_different_cell += 1;
-    //                        };
-    //                    });
-    //            });
-    //        CHECK(counter_different_cell != 0);
-    //    }
-    //
-    //    SECTION("Check correct use of skeleton layout when generating only one random layout")
-    //    {
-    //        const generate_random_layout_params<sidb_cell_clk_lyt> params{{{0, 0}, {9, 9}}, 10};
-    //        sidb_cell_clk_lyt                                      skeleton_layout{};
-    //        skeleton_layout.assign_cell_type({0, 0}, sidb_cell_clk_lyt::technology::NORMAL);
-    //        skeleton_layout.assign_cell_type({9, 1}, sidb_cell_clk_lyt::technology::NORMAL);
-    //        skeleton_layout.assign_cell_type({5, 0}, sidb_cell_clk_lyt::technology::NORMAL);
-    //        const auto result_lyt = generate_random_layout<sidb_cell_clk_lyt>(skeleton_layout, params);
-    //
-    //        CHECK(result_lyt.num_cells() == 13);
-    //    }
+
+    SECTION("given previous layouts")
+    {
+        const generate_random_layout_params<sidb_cell_clk_lyt> params{
+            {{0, 0}, {9, 9, 2}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 3};
+        const auto result_lyts = generate_multiple_random_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+        CHECK(result_lyts.size() == 3);
+
+        for (const auto& lyt : result_lyts)
+        {
+            lyt.foreach_cell(
+                [](const auto& cell)
+                {
+                    CHECK(cell.x < 10);
+                    CHECK(cell.y < 10);
+                });
+        }
+    }
+
+    SECTION("Check uniqueness of two layouts")
+    {
+        const generate_random_layout_params<sidb_cell_clk_lyt> params{
+            {{0, 0}, {9, 9}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 2};
+        const auto result_lyts = generate_multiple_random_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+        REQUIRE(result_lyts.size() == 2);
+
+        const auto& first_lyt  = result_lyts.front();
+        const auto& second_lyt = result_lyts.back();
+
+        uint64_t counter_different_cell = 0;
+        first_lyt.foreach_cell(
+            [&second_lyt, &counter_different_cell](const auto& cell_first)
+            {
+                second_lyt.foreach_cell(
+                    [&cell_first, &counter_different_cell](const auto& cell_second)
+                    {
+                        if (cell_first != cell_second)
+                        {
+                            counter_different_cell += 1;
+                        };
+                    });
+            });
+        CHECK(counter_different_cell != 0);
+    }
+
+    SECTION("Check correct use of skeleton layout when generating only one random layout")
+    {
+        const generate_random_layout_params<sidb_cell_clk_lyt> params{{{0, 0}, {9, 9}}, 10};
+        sidb_cell_clk_lyt                                      skeleton_layout{};
+        skeleton_layout.assign_cell_type({0, 0}, sidb_cell_clk_lyt::technology::NORMAL);
+        skeleton_layout.assign_cell_type({9, 1}, sidb_cell_clk_lyt::technology::NORMAL);
+        skeleton_layout.assign_cell_type({5, 0}, sidb_cell_clk_lyt::technology::NORMAL);
+        const auto result_lyt = generate_random_layout<sidb_cell_clk_lyt>(skeleton_layout, params);
+
+        CHECK(result_lyt.num_cells() == 13);
+    }
     //
     //    SECTION("Check correct use of skeleton layout when generating multiple random layouts")
     //    {
