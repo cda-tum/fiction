@@ -11,6 +11,7 @@
 #include <cmath>
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <type_traits>
 
 namespace fiction
@@ -63,6 +64,33 @@ template <typename Lyt, typename Dist = double>
     return static_cast<Dist>(std::hypot(x, y));
 }
 /**
+ * The 2DDWave distance \f$ D \f$ between two layout coordinates \f$ s = (x_1, y_1) \f$ and \f$ t = (x_2, y_2) \f$ given
+ * by
+ *
+ *  \f$ D = |x_1 - x_2| + |y_1 - y_2| \f$ iff \f$ s \leq t \f$ and \f$ \infty \f$, otherwise.
+ *
+ * Thereby, \f$ s \leq t \f$ iff \f$ x_1 \leq x_2 \f$ and \f$ y_1 \leq y_2 \f$.
+ *
+ * @note To represent \f$ \infty \f$, `std::numeric_limits<Dist>::max()` is returned for distances of infinite length.
+ *
+ * @tparam Lyt Coordinate layout type.
+ * @tparam Dist Integral type for the distance.
+ * @param lyt Layout.
+ * @param source Source coordinate.
+ * @param target Target coordinate.
+ * @return 2DDWave distance between `source` and `target`.
+ */
+template <typename Lyt, typename Dist = uint64_t>
+[[nodiscard]] constexpr Dist twoddwave_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
+                                                const coordinate<Lyt>& target) noexcept
+{
+    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
+
+    return source.x <= target.x && source.y <= target.y ? manhattan_distance<Lyt, Dist>(lyt, source, target) :
+                                                          std::numeric_limits<Dist>::max();
+}
+/**
  * Computes the distance between two SiDB cells in nanometers.
  *
  * @tparam Lyt SiDB cell-level layout type.
@@ -109,7 +137,7 @@ class distance_functor
      * @param dist_fn A function that maps from layout coordinates to a distance value.
      */
     explicit distance_functor(
-        const std::function<Dist(const Lyt& lyt, const coordinate<Lyt>&, const coordinate<Lyt>&)>& dist_fn) :
+        const std::function<Dist(const Lyt&, const coordinate<Lyt>&, const coordinate<Lyt>&)>& dist_fn) :
             distance_function{dist_fn}
     {
         static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
@@ -136,7 +164,7 @@ class distance_functor
     /**
      * Distance function.
      */
-    const std::function<Dist(const Lyt& lyt, const coordinate<Lyt>&, const coordinate<Lyt>&)> distance_function;
+    const std::function<Dist(const Lyt&, const coordinate<Lyt>&, const coordinate<Lyt>&)> distance_function;
 };
 
 // NOLINTEND(*-special-member-functions)
@@ -164,6 +192,18 @@ class euclidean_distance_functor : public distance_functor<Lyt, Dist>
 {
   public:
     euclidean_distance_functor() : distance_functor<Lyt, Dist>(&euclidean_distance<Lyt, Dist>) {}
+};
+/**
+ * A pre-defined distance functor that uses the 2DDWave distance.
+ *
+ * @tparam Lyt Coordinate layout type.
+ * @tparam Dist Integral distance type.
+ */
+template <typename Lyt, typename Dist = uint64_t>
+class twoddwave_distance_functor : public distance_functor<Lyt, Dist>
+{
+  public:
+    twoddwave_distance_functor() : distance_functor<Lyt, Dist>(&twoddwave_distance<Lyt, Dist>) {}
 };
 
 }  // namespace fiction

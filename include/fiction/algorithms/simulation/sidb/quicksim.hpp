@@ -51,7 +51,7 @@ struct quicksim_params
 
 /**
  * The *QuickSim* algorithm which was proposed in \"QuickSim: Efficient and Accurate Physical Simulation of Silicon
- * Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE-NANO 2023 is an
+ * Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE NANO 2023 is an
  * electrostatic ground state simulation algorithm for SiDB layouts. It determines physically valid charge
  * configurations (with minimal energy) of a given (already initialized) charge distribution layout. Depending on the
  * simulation parameters, the ground state is found with a certain probability after one run.
