@@ -146,51 +146,51 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate_random_layout]")
             });
     }
 
-    //    SECTION("given previous layouts")
-    //    {
-    //        const generate_random_layout_params<cube_layout> params{
-    //            {{-5, -2}, {9, 9}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 3};
-    //        const auto result_lyts = generate_multiple_random_layouts<cube_layout>(cube_layout{}, params);
-    //        CHECK(result_lyts.size() == 3);
-    //
-    //        for (const auto& lyt : result_lyts)
-    //        {
-    //            lyt.foreach_cell(
-    //                [](const auto& cell)
-    //                {
-    //                    CHECK(cell.x < 10);
-    //                    CHECK(cell.x > -6);
-    //                    CHECK(cell.y < 10);
-    //                    CHECK(cell.y > -3);
-    //                });
-    //        }
-    //    }
-    //
-    //    SECTION("Check uniqueness of two layouts")
-    //    {
-    //        const generate_random_layout_params<cube_layout> params{
-    //            {{0, 0}, {9, 9}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 2};
-    //        const auto result_lyts = generate_multiple_random_layouts<cube_layout>(cube_layout{}, params);
-    //        REQUIRE(result_lyts.size() == 2);
-    //
-    //        const auto& first_lyt  = result_lyts.front();
-    //        const auto& second_lyt = result_lyts.back();
-    //
-    //        uint64_t counter_different_cell = 0;
-    //        first_lyt.foreach_cell(
-    //            [&second_lyt, &counter_different_cell](const auto& cell_first)
-    //            {
-    //                second_lyt.foreach_cell(
-    //                    [&cell_first, &counter_different_cell](const auto& cell_second)
-    //                    {
-    //                        if (cell_first != cell_second)
-    //                        {
-    //                            counter_different_cell += 1;
-    //                        };
-    //                    });
-    //            });
-    //        CHECK(counter_different_cell != 0);
-    //    }
+    SECTION("given previous layouts")
+    {
+        const generate_random_layout_params<cube_layout> params{
+            {{-5, -2}, {9, 9}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 3};
+        const auto result_lyts = generate_multiple_random_layouts<cube_layout>(cube_layout{}, params);
+        CHECK(result_lyts.size() == 3);
+
+        for (const auto& lyt : result_lyts)
+        {
+            lyt.foreach_cell(
+                [](const auto& cell)
+                {
+                    CHECK(cell.x < 10);
+                    CHECK(cell.x > -6);
+                    CHECK(cell.y < 10);
+                    CHECK(cell.y > -3);
+                });
+        }
+    }
+
+    SECTION("Check uniqueness of two layouts")
+    {
+        const generate_random_layout_params<cube_layout> params{
+            {{0, 0}, {9, 9}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 2};
+        const auto result_lyts = generate_multiple_random_layouts<cube_layout>(cube_layout{}, params);
+        REQUIRE(result_lyts.size() == 2);
+
+        const auto& first_lyt  = result_lyts.front();
+        const auto& second_lyt = result_lyts.back();
+
+        uint64_t counter_different_cell = 0;
+        first_lyt.foreach_cell(
+            [&second_lyt, &counter_different_cell](const auto& cell_first)
+            {
+                second_lyt.foreach_cell(
+                    [&cell_first, &counter_different_cell](const auto& cell_second)
+                    {
+                        if (cell_first != cell_second)
+                        {
+                            counter_different_cell += 1;
+                        };
+                    });
+            });
+        CHECK(counter_different_cell != 0);
+    }
 }
 
 TEST_CASE("Random offset::ucoord_t layout generation", "[generate_random_layout]")
