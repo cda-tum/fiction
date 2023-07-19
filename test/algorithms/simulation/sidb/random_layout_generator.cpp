@@ -1,21 +1,21 @@
-////
-//// Created by Jan Drewniok on 04.05.23.
-////
 //
-// #include <catch2/catch_template_test_macros.hpp>
-// #include <catch2/matchers/catch_matchers_floating_point.hpp>
+// Created by Jan Drewniok on 04.05.23.
 //
-// #include <fiction/algorithms/path_finding/distance.hpp>
-// #include <fiction/algorithms/simulation/sidb/random_layout_generator.hpp>
-// #include <fiction/layouts/cartesian_layout.hpp>
-// #include <fiction/layouts/cell_level_layout.hpp>
-// #include <fiction/layouts/clocked_layout.hpp>
-// #include <fiction/technology/cell_technologies.hpp>
-//
-// #include <sstream>
-// #include <vector>
-//
-// using namespace fiction;
+
+#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+#include <fiction/algorithms/path_finding/distance.hpp>
+#include <fiction/algorithms/simulation/sidb/random_layout_generator.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+
+#include <sstream>
+#include <vector>
+
+using namespace fiction;
 //
 // TEST_CASE("Random cube::coord_t layout generation", "[generate_random_layout]")
 //{
