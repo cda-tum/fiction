@@ -19,7 +19,8 @@
 </p>
 
 This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
-developed as part of the _Munich Nanotech Toolkit_ (_MNT_) by the [Chair for Design Automation](https://www.cda.cit.tum.de/)
+developed as part of the _Munich Nanotech Toolkit_ (_MNT_) by
+the [Chair for Design Automation](https://www.cda.cit.tum.de/)
 at the [Technical University of Munich](https://www.tum.de/). It is written in C++17 using the
 [EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). Thereby, *fiction*
 focuses on the logic synthesis, placement, routing, clocking, and verification of emerging nanotechnologies. As a
@@ -297,3 +298,23 @@ Cell-level layouts:
 - Number of cells
 - Bounding box
 - Area usage in nm²
+
+# Reference
+
+In case you are using *fiction* in your work, we would be thankful if you referred to it by citing the following
+publication:
+
+```bibtex
+@misc{fiction,
+      author = {Walter, Marcel and Wille, Robert and Sill Torres, Frank and Gro{\ss}e, Daniel and Drechsler, Rolf},
+      title = {{fiction: An Open Source Framework for the Design of Field-coupled Nanocomputing Circuits}},
+      archivePrefix = {arXiv},
+      eprint = {1905.02477},
+      note = {arXiv:1905.02477},
+      year = {2019},
+      month = {May}
+}
+```
+
+Additionally, many algorithms implemented in *fiction* have been published individually. For a full list of publications
+based upon *fiction*, please refer to the [documentation](https://fiction.readthedocs.io/en/latest/publications.html).
