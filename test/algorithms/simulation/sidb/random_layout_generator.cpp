@@ -359,171 +359,171 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate_random_layout]
 
         CHECK(result_lyt.num_cells() == 13);
     }
-    //
-    //    SECTION("Check correct use of skeleton layout when generating multiple random layouts")
-    //    {
-    //        const generate_random_layout_params<sidb_cell_clk_lyt> params{
-    //            {{0, 0}, {9, 9}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 2};
-    //        sidb_cell_clk_lyt skeleton_layout{};
-    //        skeleton_layout.assign_cell_type({0, 0}, sidb_cell_clk_lyt::technology::NORMAL);
-    //        skeleton_layout.assign_cell_type({3, 0}, sidb_cell_clk_lyt::technology::NORMAL);
-    //        skeleton_layout.assign_cell_type({9, 1}, sidb_cell_clk_lyt::technology::NORMAL);
-    //        const auto result_lyts = generate_multiple_random_layouts<sidb_cell_clk_lyt>(skeleton_layout, params);
-    //
-    //        REQUIRE(result_lyts.size() == 2);
-    //        CHECK(result_lyts.front().num_cells() == 13);
-    //        CHECK(result_lyts.back().num_cells() == 13);
-    //    }
-    //}
-    //
-    // TEST_CASE("Random siqad::coord_t layout generation", "[generate_random_layout]")
-    //{
-    //    SECTION("empty parameters")
-    //    {
-    //        const generate_random_layout_params<sidb_cell_clk_lyt> params{};
-    //
-    //        const auto lyt = generate_random_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
-    //
-    //        CHECK(lyt.num_cells() == 0);
-    //        CHECK(lyt.x() == 0);
-    //        CHECK(lyt.y() == 0);
-    //    }
-    //
-    //    SECTION("given two identical coordinates")
-    //    {
-    //        const generate_random_layout_params<sidb_cell_clk_lyt> params{{{5, 5, 1}, {5, 5, 1}}, 1};
-    //
-    //        const auto result_lyt = generate_random_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
-    //
-    //        CHECK(result_lyt.num_cells() == 1);
-    //        result_lyt.foreach_cell(
-    //            [](const auto& cell)
-    //            {
-    //                CHECK(cell.x == 5);
-    //                CHECK(cell.y == 5);
-    //                CHECK(cell.z == 1);
-    //            });
-    //    }
-    //
-    //    SECTION("given corner coordinates")
-    //    {
-    //        const generate_random_layout_params<sidb_cell_clk_lyt> params{{{1, 1, 0}, {5, 7, 1}}};
-    //
-    //        const auto result_lyt = generate_random_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
-    //
-    //        CHECK(result_lyt.num_cells() == 0);
-    //        result_lyt.foreach_cell(
-    //            [&](const auto& cell)
-    //            {
-    //                CHECK(cell.x == 0);
-    //                CHECK(cell.y == 0);
-    //                CHECK(cell.z == 0);
-    //            });
-    //    }
-    //
-    //    SECTION("given corner coordinates and number of placed SiDBs")
-    //    {
-    //        const generate_random_layout_params<sidb_cell_clk_lyt> params{{{1, 1, 0}, {50, 7, 1}}, 10};
-    //
-    //        const auto result_lyt = generate_random_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
-    //
-    //        CHECK(result_lyt.num_cells() == 10);
-    //        result_lyt.foreach_cell(
-    //            [](const auto& cell)
-    //            {
-    //                CHECK(cell.x < 51);
-    //                CHECK(cell.x > 0);
-    //                CHECK(cell.y < 8);
-    //                CHECK(cell.y > 0);
-    //                CHECK(cell.z < 21);
-    //                CHECK(cell.z >= 0);
-    //            });
-    //    }
-    //
-    //    SECTION("given corner coordinates and number of placed SiDBs, and forbid positive charges")
-    //    {
-    //        const generate_random_layout_params<sidb_cell_clk_lyt> params{{{0, 0, 0}, {90, 90, 0}},
-    //                                                                      100,
-    //                                                                      positive_charges::ALLOWED};
-    //
-    //        const auto result_lyt = generate_random_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
-    //
-    //        CHECK(result_lyt.num_cells() == 100);
-    //        result_lyt.foreach_cell(
-    //            [](const auto& cell)
-    //            {
-    //                CHECK(cell.x < 91);
-    //                CHECK(cell.y < 91);
-    //            });
-    //    }
-    //
-    //    SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
-    //    {
-    //        const generate_random_layout_params<sidb_cell_clk_lyt> params{{{0, 0, 0}, {90, 90, 0}},
-    //                                                                      100,
-    //                                                                      positive_charges::FORBIDDEN};
-    //
-    //        const auto result_lyt = generate_random_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
-    //
-    //        CHECK(result_lyt.num_cells() == 100);
-    //        result_lyt.foreach_cell(
-    //            [](const auto& cell)
-    //            {
-    //                CHECK(cell.x < 91);
-    //                CHECK(cell.y < 91);
-    //                CHECK(cell.z == 0);
-    //            });
-    //        // check if all cells are not closer than two cells (Euclidean distance).
-    //        result_lyt.foreach_cell(
-    //            [&result_lyt](const auto& cell_one)
-    //            {
-    //                result_lyt.foreach_cell(
-    //                    [&cell_one, &result_lyt](const auto& cell_two)
-    //                    {
-    //                        if (cell_one != cell_two)
-    //                        {
-    //                            CHECK(euclidean_distance<sidb_cell_clk_lyt>(result_lyt, cell_one, cell_two) >= 2);
-    //                        }
-    //                    });
-    //            });
-    //    }
-    //
-    //    SECTION("given previous layouts")
-    //    {
-    //        const generate_random_layout_params<sidb_cell_clk_lyt> params{
-    //            {{0, 0, 1}, {9, 9, 1}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 3};
-    //        const auto result_lyts = generate_multiple_random_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
-    //        CHECK(result_lyts.size() == 3);
-    //
-    //        for (const auto& lyt : result_lyts)
-    //        {
-    //            lyt.foreach_cell(
-    //                [](const auto& cell)
-    //                {
-    //                    CHECK(cell.x < 10);
-    //                    CHECK(cell.x >= 0);
-    //                    CHECK(cell.y < 10);
-    //                    CHECK(cell.y >= 0);
-    //                    CHECK(cell.z == 1);
-    //                });
-    //        }
-    //    }
-    //
-    //    SECTION("Check uniqueness of two layouts")
-    //    {
-    //        const generate_random_layout_params<sidb_cell_clk_lyt> params{
-    //            {{0, 0, 1}, {9, 9, 0}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 2};
-    //        const auto result_lyts = generate_multiple_random_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
-    //        REQUIRE(result_lyts.size() == 2);
-    //
-    //        const auto& first_lyt  = result_lyts.front();
-    //        const auto& second_lyt = result_lyts.back();
-    //
-    //        first_lyt.foreach_cell(
-    //            [&second_lyt](const auto& cell_first)
-    //            { second_lyt.foreach_cell([&cell_first](const auto& cell_second) { CHECK(cell_first != cell_second);
-    //            });
-    //            });
-    //    }
-    //}
+
+    SECTION("Check correct use of skeleton layout when generating multiple random layouts")
+    {
+        const generate_random_layout_params<sidb_cell_clk_lyt> params{
+            {{0, 0}, {9, 9}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 2};
+        sidb_cell_clk_lyt skeleton_layout{};
+        skeleton_layout.assign_cell_type({0, 0}, sidb_cell_clk_lyt::technology::NORMAL);
+        skeleton_layout.assign_cell_type({3, 0}, sidb_cell_clk_lyt::technology::NORMAL);
+        skeleton_layout.assign_cell_type({9, 1}, sidb_cell_clk_lyt::technology::NORMAL);
+        const auto result_lyts = generate_multiple_random_layouts<sidb_cell_clk_lyt>(skeleton_layout, params);
+
+        REQUIRE(result_lyts.size() == 2);
+        CHECK(result_lyts.front().num_cells() == 13);
+        CHECK(result_lyts.back().num_cells() == 13);
+    }
 }
+
+TEST_CASE("Random siqad::coord_t layout generation", "[generate_random_layout]")
+{
+    SECTION("empty parameters")
+    {
+        const generate_random_layout_params<sidb_cell_clk_lyt> params{};
+
+        const auto lyt = generate_random_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+
+        CHECK(lyt.num_cells() == 0);
+        CHECK(lyt.x() == 0);
+        CHECK(lyt.y() == 0);
+    }
+}
+//
+//    SECTION("given two identical coordinates")
+//    {
+//        const generate_random_layout_params<sidb_cell_clk_lyt> params{{{5, 5, 1}, {5, 5, 1}}, 1};
+//
+//        const auto result_lyt = generate_random_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+//
+//        CHECK(result_lyt.num_cells() == 1);
+//        result_lyt.foreach_cell(
+//            [](const auto& cell)
+//            {
+//                CHECK(cell.x == 5);
+//                CHECK(cell.y == 5);
+//                CHECK(cell.z == 1);
+//            });
+//    }
+//
+//    SECTION("given corner coordinates")
+//    {
+//        const generate_random_layout_params<sidb_cell_clk_lyt> params{{{1, 1, 0}, {5, 7, 1}}};
+//
+//        const auto result_lyt = generate_random_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+//
+//        CHECK(result_lyt.num_cells() == 0);
+//        result_lyt.foreach_cell(
+//            [&](const auto& cell)
+//            {
+//                CHECK(cell.x == 0);
+//                CHECK(cell.y == 0);
+//                CHECK(cell.z == 0);
+//            });
+//    }
+//
+//    SECTION("given corner coordinates and number of placed SiDBs")
+//    {
+//        const generate_random_layout_params<sidb_cell_clk_lyt> params{{{1, 1, 0}, {50, 7, 1}}, 10};
+//
+//        const auto result_lyt = generate_random_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+//
+//        CHECK(result_lyt.num_cells() == 10);
+//        result_lyt.foreach_cell(
+//            [](const auto& cell)
+//            {
+//                CHECK(cell.x < 51);
+//                CHECK(cell.x > 0);
+//                CHECK(cell.y < 8);
+//                CHECK(cell.y > 0);
+//                CHECK(cell.z < 21);
+//                CHECK(cell.z >= 0);
+//            });
+//    }
+//
+//    SECTION("given corner coordinates and number of placed SiDBs, and forbid positive charges")
+//    {
+//        const generate_random_layout_params<sidb_cell_clk_lyt> params{{{0, 0, 0}, {90, 90, 0}},
+//                                                                      100,
+//                                                                      positive_charges::ALLOWED};
+//
+//        const auto result_lyt = generate_random_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+//
+//        CHECK(result_lyt.num_cells() == 100);
+//        result_lyt.foreach_cell(
+//            [](const auto& cell)
+//            {
+//                CHECK(cell.x < 91);
+//                CHECK(cell.y < 91);
+//            });
+//    }
+//
+//    SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
+//    {
+//        const generate_random_layout_params<sidb_cell_clk_lyt> params{{{0, 0, 0}, {90, 90, 0}},
+//                                                                      100,
+//                                                                      positive_charges::FORBIDDEN};
+//
+//        const auto result_lyt = generate_random_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+//
+//        CHECK(result_lyt.num_cells() == 100);
+//        result_lyt.foreach_cell(
+//            [](const auto& cell)
+//            {
+//                CHECK(cell.x < 91);
+//                CHECK(cell.y < 91);
+//                CHECK(cell.z == 0);
+//            });
+//        // check if all cells are not closer than two cells (Euclidean distance).
+//        result_lyt.foreach_cell(
+//            [&result_lyt](const auto& cell_one)
+//            {
+//                result_lyt.foreach_cell(
+//                    [&cell_one, &result_lyt](const auto& cell_two)
+//                    {
+//                        if (cell_one != cell_two)
+//                        {
+//                            CHECK(euclidean_distance<sidb_cell_clk_lyt>(result_lyt, cell_one, cell_two) >= 2);
+//                        }
+//                    });
+//            });
+//    }
+//
+//    SECTION("given previous layouts")
+//    {
+//        const generate_random_layout_params<sidb_cell_clk_lyt> params{
+//            {{0, 0, 1}, {9, 9, 1}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 3};
+//        const auto result_lyts = generate_multiple_random_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+//        CHECK(result_lyts.size() == 3);
+//
+//        for (const auto& lyt : result_lyts)
+//        {
+//            lyt.foreach_cell(
+//                [](const auto& cell)
+//                {
+//                    CHECK(cell.x < 10);
+//                    CHECK(cell.x >= 0);
+//                    CHECK(cell.y < 10);
+//                    CHECK(cell.y >= 0);
+//                    CHECK(cell.z == 1);
+//                });
+//        }
+//    }
+//
+//    SECTION("Check uniqueness of two layouts")
+//    {
+//        const generate_random_layout_params<sidb_cell_clk_lyt> params{
+//            {{0, 0, 1}, {9, 9, 0}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 2};
+//        const auto result_lyts = generate_multiple_random_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+//        REQUIRE(result_lyts.size() == 2);
+//
+//        const auto& first_lyt  = result_lyts.front();
+//        const auto& second_lyt = result_lyts.back();
+//
+//        first_lyt.foreach_cell(
+//            [&second_lyt](const auto& cell_first)
+//            { second_lyt.foreach_cell([&cell_first](const auto& cell_second) { CHECK(cell_first != cell_second);
+//            });
+//            });
+//    }
+//}
