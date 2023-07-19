@@ -45,10 +45,10 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
         write_loc_sim_result(simulation_results, ss);
 
         const std::string expected_output = R"(x [nm];y [nm];GS_0;GS_1;
-                                                0.0;0.0;-1;-1;
-                                                1.152;0.0;0;-1;
-                                                1.92;0.0;-1;0;
-                                                3.072;0.0;-1;-1;)";
+                                                0.000;0.000;-1;-1;
+                                                1.152;0.000;0;-1;
+                                                1.920;0.000;-1;0;
+                                                3.072;0.000;-1;-1;)";
 
         REQUIRE(compare_output(ss.str(), expected_output));
     }
@@ -66,9 +66,9 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
         write_loc_sim_result(simulation_results, ss);
 
         const std::string expected_output = R"(x [nm];y [nm];GS_0;
-                                                0.0;0.0;-1;
-                                                1.152;0.0;0;
-                                                1.92;0.0;-1;)";
+                                                0.000;0.000;-1;
+                                                1.152;0.000;0;
+                                                1.920;0.000;-1;)";
 
         REQUIRE(compare_output(ss.str(), expected_output));
     }
