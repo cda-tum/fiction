@@ -16,21 +16,22 @@
 #include <vector>
 
 using namespace fiction;
-//
-// TEST_CASE("Random cube::coord_t layout generation", "[generate_random_layout]")
-//{
-//    using cube_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
-//
-//    SECTION("empty parameters")
-//    {
-//        const generate_random_layout_params<cube_layout> params{};
-//
-//        const auto lyt = generate_random_layout<cube_layout>(cube_layout{}, params);
-//
-//        CHECK(lyt.num_cells() == 0);
-//        CHECK(lyt.x() == 0);
-//        CHECK(lyt.y() == 0);
-//    }
+
+TEST_CASE("Random cube::coord_t layout generation", "[generate_random_layout]")
+{
+    using cube_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+
+    SECTION("empty parameters")
+    {
+        const generate_random_layout_params<cube_layout> params{};
+
+        const auto lyt = generate_random_layout<cube_layout>(cube_layout{}, params);
+
+        CHECK(lyt.num_cells() == 0);
+        CHECK(lyt.x() == 0);
+        CHECK(lyt.y() == 0);
+    }
+}
 //
 //    SECTION("given corner coordinates, wrong order")
 //    {
