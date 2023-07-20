@@ -591,7 +591,7 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr bool is_ground_layer(const OffsetCoordinateType& c) const noexcept
     {
-        return c.z == 0ull;
+        return c.z == decltype(c.z){0};
     }
     /**
      * Returns whether the given coordinate is located in a crossing layer where z is not minimal.
@@ -601,7 +601,7 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr bool is_crossing_layer(const OffsetCoordinateType& c) const noexcept
     {
-        return c.z > 0ull;
+        return c.z > decltype(c.z){0};
     }
     /**
      * Returns whether the given coordinate is located within the layout bounds.

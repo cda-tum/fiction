@@ -1,7 +1,7 @@
 Getting started
 ===============
 
-The *fiction* framework provides stand-alone CLI tool as well as a header-only library that can be used in external projects.
+The *fiction* framework provides a stand-alone CLI tool as well as a header-only library that can be used in external projects.
 Both are written in C++17 and are continuously tested on Ubuntu, macOS, and Windows with multiple compilers.
 See the build badges in the README file for more information.
 
@@ -11,7 +11,7 @@ Compilation requirements
 
 The repository should always be cloned recursively with all submodules::
 
-  git clone --recursive https://github.com/marcelwa/fiction.git
+  git clone --recursive https://github.com/cda-tum/fiction.git
 
 Several third-party libraries will be cloned within the ``libs`` folder. The ``cmake`` build process will take care of
 them automatically. Should the repository have been cloned before, the commands::
@@ -152,6 +152,18 @@ linked against *fiction* and compiled as a stand-alone binary using the followin
   cd build
   cmake --build . -j4
 
+
+Building code benchmarks
+------------------------
+
+Using ``Catch2``'s micro-benchmarking feature, you can compile and run code tests that evaluate the performance of
+certain code constructs. The ``test/benchmark`` folder provides a selection of benchmarks we were running to evaluate
+the performance of our code during development. Any ``*.cpp`` file that is placed in that folder is automatically
+linked against *fiction* and compiled as a stand-alone binary using the following commands::
+
+  cmake . -B build -DFICTION_BENCHMARK=ON
+  cd build
+  cmake --build . -j4
 
 Uninstall
 ---------

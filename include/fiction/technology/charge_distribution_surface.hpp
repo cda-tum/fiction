@@ -15,6 +15,8 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
+#include <units.h>
+
 #include <algorithm>
 #include <bitset>
 #include <cassert>
@@ -110,15 +112,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         /**
          * The distance matrix is a vector of vectors storing the euclidean distance.
          */
-        using distance_matrix = std::vector<std::vector<double>>;
+        using distance_matrix = std::vector<std::vector<units::length::nanometer_t>>;
         /**
          * The potential matrix is a vector of vectors storing the electrostatic potentials.
          */
-        using potential_matrix = std::vector<std::vector<double>>;
+        using potential_matrix = std::vector<std::vector<units::voltage::volt_t>>;
         /**
          * It is a vector that stores the local electrostatic potential.
          */
-        using local_potential = std::vector<double>;
+        using local_potential = std::vector<units::voltage::volt_t>;
 
       public:
         explicit charge_distribution_storage(
@@ -166,7 +168,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         /**
          * Electrostatic energy of a given charge distribution.
          */
-        double system_energy{0.0};
+        units::energy::electron_volt_t system_energy{units::energy::electron_volt_t(0.0)};
         /**
          * Label if given charge distribution is physically valid (see https://ieeexplore.ieee.org/document/8963859).
          */
@@ -293,9 +295,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Vector of SiDB nanometer positions.
      */
-    [[nodiscard]] std::vector<std::pair<double, double>> get_all_sidb_locations_in_nm() const noexcept
+    [[nodiscard]] std::vector<std::pair<units::length::nanometer_t, units::length::nanometer_t>>
+    get_all_sidb_locations_in_nm() const noexcept
     {
-        std::vector<std::pair<double, double>> positions{};
+        std::vector<std::pair<units::length::nanometer_t, units::length::nanometer_t>> positions{};
         positions.reserve(strg->sidb_order.size());
 
         for (const auto& cell : strg->sidb_order)
@@ -620,13 +623,95 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 if (const auto local_pot = this->get_local_potential(c); local_pot.has_value())
                 {
-                    if (-*local_pot + strg->phys_params.mu < -physical_constants::POP_STABILITY_ERR)
+                    // Check if the maximum band bending is sufficient to shift (0/-) above the Fermi level. The local
+                    // potential is converted from J to eV to compare the band bending with the Fermi level (which is
+                    // also given in eV).
+                    if ((units::energy::electron_volt_t(
+                             units::convert<units::energy::joule, units::energy::electron_volt>(
+                                 (-*local_pot * units::constants::e).value())) +
+                         strg->phys_params.mu)
+                            .value() < -POP_STABILITY_ERR)
                     {
                         negative_sidbs.push_back(cell_to_index(c));
                     }
                 }
             });
         return negative_sidbs;
+    }
+    /**
+     * Returns the charge state of a cell of the layout at a given index.
+     *
+     * @param index The index of the cell.
+     * @return The charge state of the cell at the given index.
+     */
+    [[nodiscard]] sidb_charge_state get_charge_state_by_index(const uint64_t index) const noexcept
+    {
+        if (index < (strg->cell_charge.size()))
+        {
+            return strg->cell_charge[index];
+        }
+
+        return sidb_charge_state::NONE;
+    }
+    /**
+     * Returns the charge state of a given cell.
+     *
+     * @param c The cell.
+     * @return The charge state of the given cell.
+     */
+    [[nodiscard]] sidb_charge_state get_charge_state(const typename Lyt::cell& c) const noexcept
+    {
+        if (const auto index = cell_to_index(c); index != -1)
+        {
+            return strg->cell_charge[static_cast<uint64_t>(index)];
+        }
+
+        return sidb_charge_state::NONE;
+    }
+    /**
+     * Finds the index of an SiDB.
+     *
+     * @param c The cell to find the index of.
+     * @return The index of the cell in the layout. Returns -1 if the cell is not part of the layout.
+     */
+    [[nodiscard]] int64_t cell_to_index(const typename Lyt::cell& c) const noexcept
+    {
+        if (const auto it = std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c);
+            it != strg->sidb_order.cend())
+        {
+            return static_cast<int64_t>(std::distance(strg->sidb_order.cbegin(), it));
+        }
+
+        return -1;
+    }
+    /**
+     *  Returns the distance between two cells.
+     *
+     *  @param c1 the first cell to compare.
+     *  @param c2 the second cell to compare.
+     *  @return a constexpr double representing the distance in nm between the two cells.
+     */
+    [[nodiscard]] units::length::nanometer_t get_nm_distance_between_cells(const typename Lyt::cell& c1,
+                                                                           const typename Lyt::cell& c2) const noexcept
+    {
+        if (const auto index1 = cell_to_index(c1), index2 = cell_to_index(c2); (index1 != -1) && (index2 != -1))
+        {
+            return strg->nm_dist_mat[static_cast<uint64_t>(index1)][static_cast<uint64_t>(index2)];
+        }
+
+        return units::length::nanometer_t(0.0);
+    }
+    /**
+     * Calculates and returns the distance between two cells (accessed by indices).
+     *
+     * @param index1 The first index.
+     * @param index2 The second index.
+     * @return The distance index between `index1` and `index2` (indices correspond to unique SiDBs).
+     */
+    [[nodiscard]] units::length::nanometer_t get_nm_distance_by_indices(const uint64_t index1,
+                                                                        const uint64_t index2) const noexcept
+    {
+        return strg->nm_dist_mat[index1][index2];
     }
     /**
      * Returns the chargeless electrostatic potential between two cells.
@@ -638,15 +723,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param c2 The second cell.
      * @return The chargeless electrostatic potential between `c1` and `c2`, i.e, \f$ \frac{V_{i,j}}{n_j} \f$.
      */
-    [[nodiscard]] double get_chargeless_potential_between_sidbs(const typename Lyt::cell& c1,
-                                                                const typename Lyt::cell& c2) const noexcept
+    [[nodiscard]] units::voltage::volt_t
+    get_chargeless_potential_between_sidbs(const typename Lyt::cell& c1, const typename Lyt::cell& c2) const noexcept
     {
         if (const auto index1 = cell_to_index(c1), index2 = cell_to_index(c2); (index1 != -1) && (index2 != -1))
         {
             return strg->pot_mat[static_cast<uint64_t>(index1)][static_cast<uint64_t>(index2)];
         }
 
-        return 0;
+        return units::voltage::volt_t(0.0);
     }
     /**
      * Calculates and returns the electrostatic potential at one cell (`c1`) generated by another cell (`c2`).
@@ -658,8 +743,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param c2 The second cell.
      * @return The electrostatic potential between `c1` and `c2`, i.e., \f$ V_{i,j} \f$.
      */
-    [[nodiscard]] double get_potential_between_sidbs(const typename Lyt::cell& c1,
-                                                     const typename Lyt::cell& c2) const noexcept
+    [[nodiscard]] units::voltage::volt_t get_potential_between_sidbs(const typename Lyt::cell& c1,
+                                                                     const typename Lyt::cell& c2) const noexcept
     {
         if (const auto index1 = cell_to_index(c1), index2 = cell_to_index(c2); (index1 != -1) && (index2 != -1))
         {
@@ -667,9 +752,39 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                    charge_state_to_sign(get_charge_state(c2));
         }
 
-        return 0;
+        return units::voltage::volt_t(0.0);
     }
+    /**
+     * Calculates and returns the potential of two indices.
+     *
+     * @param index1 The first index.
+     * @param index2 The second index.
+     * @return The potential between `index1` and `index2`.
+     */
+    [[nodiscard]] units::voltage::volt_t get_electrostatic_potential_by_indices(const uint64_t index1,
+                                                                                const uint64_t index2) const noexcept
+    {
+        return strg->pot_mat[index1][index2];
+    }
+    /**
+     * The electrostatic potential between two cells (SiDBs) is calculated.
+     *
+     * @param index1 The first index.
+     * @param index1 The second index.
+     * @return The potential between `index1` and `index2`.
+     */
+    [[nodiscard]] units::voltage::volt_t potential_between_sidbs_by_index(const uint64_t index1,
+                                                                          const uint64_t index2) const noexcept
+    {
+        if (strg->nm_dist_mat[index1][index2] == units::length::nanometer_t(0.0))
+        {
+            return units::voltage::volt_t(0.0);
+        }
 
+        return (strg->phys_params.k / units::length::meter_t(strg->nm_dist_mat[index1][index2].value() * 1E-9) *
+                std::exp(-strg->nm_dist_mat[index1][index2].value() / strg->phys_params.lambda_tf.value()) *
+                units::constants::e);
+    }
     /**
      * Calculates and returns the potential of a pair of cells based on their distance and simulation parameters.
      *
@@ -677,8 +792,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param c2 The second cell.
      * @return The potential between c1 and c2.
      */
-    [[nodiscard]] double potential_between_sidbs(const typename Lyt::cell& c1,
-                                                 const typename Lyt::cell& c2) const noexcept
+    [[nodiscard]] units::voltage::volt_t potential_between_sidbs(const typename Lyt::cell& c1,
+                                                                 const typename Lyt::cell& c2) const noexcept
     {
         const auto index1 = static_cast<std::size_t>(cell_to_index(c1));
         const auto index2 = static_cast<std::size_t>(cell_to_index(c2));
@@ -775,7 +890,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @return Local potential at given cell position. If there is no SiDB at the given cell, `std::nullopt` is
      * returned.
      */
-    std::optional<double> get_local_potential(const typename Lyt::cell& c) const noexcept
+    std::optional<units::voltage::volt_t> get_local_potential(const typename Lyt::cell& c) const noexcept
     {
         if (const auto index = cell_to_index(c); index != -1)
         {
@@ -791,13 +906,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @return local potential at given index position. If there is no SiDB at the given index (which corresponds to a
      * unique cell), `std::nullopt` is returned.
      */
-    [[nodiscard]] std::optional<double> get_local_potential_by_index(const uint64_t index) const noexcept
+    [[nodiscard]] std::optional<units::voltage::volt_t>
+    get_local_potential_by_index(const uint64_t index) const noexcept
     {
         if (index < strg->sidb_order.size())
         {
             return strg->local_pot[index];
         }
-
         return std::nullopt;
     }
     /**
@@ -805,14 +920,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_system_energy_to_zero() noexcept
     {
-        strg->system_energy = 0.0;
+        strg->system_energy = units::energy::electron_volt_t(0.0);
     }
     /**
      * Calculates the system's total electrostatic potential energy and stores it in the storage.
      */
     void recompute_system_energy() noexcept
     {
-        double total_energy = 0;
+        units::voltage::volt_t total_potential(0.0);
 
         for (uint64_t i = 0; i < strg->local_pot.size(); ++i)
         {
@@ -843,7 +958,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return The system's total electrostatic potential energy.
      */
-    [[nodiscard]] double get_system_energy() const noexcept
+    [[nodiscard]] units::energy::electron_volt_t get_system_energy() const noexcept
     {
         return strg->system_energy;
     }
@@ -877,14 +992,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& it : strg->local_pot)  // this for-loop checks if the "population stability" is fulfilled.
         {
-            const auto cell_charge = strg->cell_charge[for_loop_counter];
-            bool       valid       = (((cell_charge == sidb_charge_state::NEGATIVE) &&
-                           ((-it + strg->phys_params.mu) < physical_constants::POP_STABILITY_ERR)) ||
-                          ((cell_charge == sidb_charge_state::POSITIVE) &&
-                           ((-it + strg->phys_params.mu_p) > -physical_constants::POP_STABILITY_ERR)) ||
-                          ((cell_charge == sidb_charge_state::NEUTRAL) &&
-                           ((-it + strg->phys_params.mu) > -physical_constants::POP_STABILITY_ERR) &&
-                           (-it + strg->phys_params.mu_p) < physical_constants::POP_STABILITY_ERR));
+            bool valid =
+                (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
+                  ((units::energy::electron_volt_t(-it.value()) + strg->phys_params.mu).value() < POP_STABILITY_ERR)) ||
+                 ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
+                  ((units::energy::electron_volt_t(-it.value()) + strg->phys_params.mu_p).value() >
+                   -POP_STABILITY_ERR)) ||
+                 ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
+                  ((units::energy::electron_volt_t(-it.value()) + strg->phys_params.mu).value() > -POP_STABILITY_ERR) &&
+                  (units::energy::electron_volt_t(-it.value()) + strg->phys_params.mu_p).value() < POP_STABILITY_ERR));
             for_loop_counter += 1;
             if (!valid)
             {
@@ -925,8 +1041,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
                     if (const auto e_del = hop_del(i, j);
                         (charge_state_to_sign(strg->cell_charge[j]) > charge_state_to_sign(strg->cell_charge[i])) &&
-                        (e_del < -physical_constants::POP_STABILITY_ERR))  // Checks if energetically favored hops
-                                                                           // exist between two SiDBs.
+                        (e_del.value() < -POP_STABILITY_ERR))  // Checks if energetically favored
+                                                               // hops exist between two SiDBs.
                     {
                         hop_counter = 1;
 
@@ -1362,12 +1478,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void adjacent_search(const double alpha, std::vector<uint64_t>& negative_indices) noexcept
     {
-        double     dist_max     = 0;
+        auto       dist_max     = 0_nm;
         const auto reserve_size = this->num_cells() - negative_indices.size();
 
         std::vector<uint64_t> index_vector{};
         index_vector.reserve(reserve_size);
-        std::vector<double> distance{};
+        std::vector<units::length::nanometer_t> distance{};
         distance.reserve(reserve_size);
 
         for (uint64_t unocc = 0u; unocc < strg->cell_charge.size(); unocc++)
@@ -1378,9 +1494,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
 
             const auto dist_min =
-                std::accumulate(negative_indices.begin(), negative_indices.end(), std::numeric_limits<double>::max(),
-                                [&](const double acc, const uint64_t occ)
-                                { return std::min(acc, this->get_nm_distance_by_indices(unocc, occ)); });
+                std::accumulate(negative_indices.begin(), negative_indices.end(),
+                                units::length::nanometer_t(std::numeric_limits<double>::max()),
+                                [&](const units::length::nanometer_t& acc, const uint64_t occ)
+                                { return units::math::min(acc, this->get_nm_distance_by_indices(unocc, occ)); });
 
             index_vector.push_back(unocc);
             distance.push_back(dist_min);
@@ -1410,7 +1527,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             strg->cell_charge[random_element]                      = sidb_charge_state::NEGATIVE;
             negative_indices.push_back(random_element);
 
-            strg->system_energy += -(this->get_local_potential_by_index(random_element).value());
+            strg->system_energy +=
+                units::energy::electron_volt_t(units::convert<units::energy::joule, units::energy::electron_volt>(
+                    (-(*this->get_local_potential_by_index(random_element)) * units::constants::e).value()));
 
             for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
             {
@@ -1964,8 +2083,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void initialize_nm_distance_matrix() const noexcept
     {
-        strg->nm_dist_mat =
-            std::vector<std::vector<double>>(this->num_cells(), std::vector<double>(this->num_cells(), 0));
+        strg->nm_dist_mat = std::vector<std::vector<units::length::nanometer_t>>(
+            this->num_cells(),
+            std::vector<units::length::nanometer_t>(this->num_cells(), units::length::nanometer_t(0)));
 
         for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
         {
@@ -1981,7 +2101,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void initialize_potential_matrix() const noexcept
     {
-        strg->pot_mat = std::vector<std::vector<double>>(this->num_cells(), std::vector<double>(this->num_cells(), 0));
+        strg->pot_mat = std::vector<std::vector<units::voltage::volt_t>>(
+            this->num_cells(), std::vector<units::voltage::volt_t>(this->num_cells(), units::voltage::volt_t(0.0)));
 
         for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
         {

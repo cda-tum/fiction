@@ -44,13 +44,13 @@ class hex_command : public command
             return;
         }
 
-        const auto& lyt_ptr = gls.current();
+        const auto& lyt = gls.current();
 
         const auto check_clocking_scheme = [](auto&& lyt_ptr)
         { return lyt_ptr->is_clocking_scheme(fiction::clock_name::TWODDWAVE); };
 
         // error case: layout is not 2DDWave-clocked
-        if (const auto is_twoddwave_clocked = std::visit(check_clocking_scheme, lyt_ptr); !is_twoddwave_clocked)
+        if (const auto is_twoddwave_clocked = std::visit(check_clocking_scheme, lyt); !is_twoddwave_clocked)
         {
             env->out() << "[e] layout has to be 2DDWave-clocked" << std::endl;
             return;
@@ -74,9 +74,9 @@ class hex_command : public command
 
         try
         {
-            if (const auto lyt = std::visit(apply_hexagonalization, lyt_ptr); lyt.has_value())
+            if (const auto hex_lyt = std::visit(apply_hexagonalization, lyt); hex_lyt.has_value())
             {
-                gls.extend() = std::make_shared<fiction::hex_even_row_gate_clk_lyt>(*lyt);
+                gls.extend() = std::make_shared<fiction::hex_even_row_gate_clk_lyt>(*hex_lyt);
             }
         }
         catch (...)

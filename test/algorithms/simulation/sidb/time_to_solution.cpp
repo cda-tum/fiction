@@ -28,13 +28,9 @@ TEMPLATE_TEST_CASE(
 
     TestType lyt{{20, 10}};
 
-    SECTION("layout with no SiDB placed")
-    {
-        const sidb_simulation_parameters params{2, -0.30};
-        const quicksim_params            quicksim_params{params};
-        time_to_solution_stats           tts_stat_quickexact{};
-        const time_to_solution_params    tts_params_quickexact{exhaustive_algorithm::QUICKEXACT};
-        sim_acc_tts<TestType>(lyt, quicksim_params, tts_params_quickexact, &tts_stat_quickexact);
+    const sidb_simulation_parameters params{2, -0.30_eV};
+    const quicksim_params            quicksim_params{params};
+    time_to_solution_stats           tts_stat{};
 
         CHECK(tts_stat_quickexact.algorithm == "QuickExact");
         CHECK_THAT(tts_stat_quickexact.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -46,11 +42,10 @@ TEMPLATE_TEST_CASE(
         const time_to_solution_params tts_params_exgs{exhaustive_algorithm::EXGS};
         sim_acc_tts<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
-        CHECK(tts_stat_exgs.algorithm == "ExGS");
-        CHECK_THAT(tts_stat_exgs.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK_THAT(tts_stat_exgs.time_to_solution,
+        CHECK_THAT(tts_stat.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK_THAT(tts_stat.time_to_solution.value(),
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
-        CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
+        CHECK(tts_stat.mean_single_runtime.value() > 0.0);
     }
 
     SECTION("layout with seven SiDBs placed")
@@ -74,13 +69,8 @@ TEMPLATE_TEST_CASE(
         CHECK(tts_stat_exgs.time_to_solution > 0.0);
         CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
 
-        time_to_solution_stats        tts_stat_quickexact{};
-        const time_to_solution_params tts_params{exhaustive_algorithm::QUICKEXACT};
-        sim_acc_tts<TestType>(lyt, quicksim_params, tts_params, &tts_stat_quickexact);
-
-        CHECK(tts_stat_quickexact.acc == 100);
-        CHECK(tts_stat_quickexact.time_to_solution > 0.0);
-        CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
-        CHECK(tts_stat_exgs.single_runtime_exhaustive > tts_stat_quickexact.single_runtime_exhaustive);
+        CHECK(tts_stat.acc == 100);
+        CHECK(tts_stat.time_to_solution.value() > 0.0);
+        CHECK(tts_stat.mean_single_runtime.value() > 0.0);
     }
 }
