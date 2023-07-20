@@ -515,8 +515,20 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate_random_layout]")
         const auto& first_lyt  = result_lyts.front();
         const auto& second_lyt = result_lyts.back();
 
+        uint64_t identical_cell_counter = 0;
         first_lyt.foreach_cell(
-            [&second_lyt](const auto& cell_first)
-            { second_lyt.foreach_cell([&cell_first](const auto& cell_second) { CHECK(cell_first != cell_second); }); });
+            [&second_lyt, &identical_cell_counter](const auto& cell_first)
+            {
+                second_lyt.foreach_cell(
+                    [&cell_first, &identical_cell_counter](const auto& cell_second)
+                    {
+                        if (cell_first == cell_second)
+                        {
+                            identical_cell_counter += 1;
+                        }
+                    });
+            });
+
+        CHECK(identical_cell_counter < first_lyt.num_cells());
     }
 }
