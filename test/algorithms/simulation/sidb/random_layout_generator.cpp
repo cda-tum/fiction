@@ -12,9 +12,6 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 
-#include <sstream>
-#include <vector>
-
 using namespace fiction;
 
 TEST_CASE("Random cube::coord_t layout generation", "[generate_random_layout]")
@@ -435,8 +432,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate_random_layout]")
                 CHECK(cell.x > 0);
                 CHECK(cell.y < 8);
                 CHECK(cell.y > 0);
-                CHECK(cell.z < 21);
-                CHECK(cell.z >= 0);
+                CHECK(cell.z <= 1);
             });
     }
 
@@ -512,7 +508,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate_random_layout]")
     SECTION("Check uniqueness of two layouts")
     {
         const generate_random_layout_params<sidb_cell_clk_lyt> params{
-            {{0, 0, 1}, {9, 9, 0}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 2};
+            {{0, 0, 1}, {20, 20, 0}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 2};
         const auto result_lyts = generate_multiple_random_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
         REQUIRE(result_lyts.size() == 2);
 
