@@ -87,10 +87,25 @@ Temperature Behavior
 .. doxygenfunction:: fiction::calculate_energy_and_state_type
 
 
-
 Time-to-Solution (TTS) Statistics
 #################################
 
 **Header:** ``fiction/algorithms/simulation/sidb/time_to_solution.hpp``
 
 .. doxygenfunction:: fiction::sim_acc_tts
+
+
+Utility Functions
+#################
+
+
+Binary-dot Logic (BDL) Pair Detection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp``
+
+.. doxygenstruct:: fiction::bdl_pair
+   :members:
+.. doxygenstruct:: fiction::detect_bdl_pairs_params
+   :members:
+.. doxygenfunction:: fiction::detect_io_bdl_pairs

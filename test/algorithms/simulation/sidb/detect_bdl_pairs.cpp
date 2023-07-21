@@ -48,12 +48,12 @@ TEST_CASE("BDL wire I/O BDL detection", "[detect-bdl-pairs]")
         const auto& output_pair = result[1];
 
         CHECK(input_pair.type == layout::cell_type::INPUT);
-        CHECK(input_pair.top_sidb == cell<layout>{0, 0, 0});
-        CHECK(input_pair.bottom_sidb == cell<layout>{2, 0, 0});
+        CHECK(input_pair.top == cell<layout>{0, 0, 0});
+        CHECK(input_pair.bottom == cell<layout>{2, 0, 0});
 
         CHECK(output_pair.type == layout::cell_type::OUTPUT);
-        CHECK(output_pair.top_sidb == cell<layout>{18, 0, 0});
-        CHECK(output_pair.bottom_sidb == cell<layout>{20, 0, 0});
+        CHECK(output_pair.top == cell<layout>{18, 0, 0});
+        CHECK(output_pair.bottom == cell<layout>{20, 0, 0});
     }
     SECTION("1 nm threshold")
     {
@@ -64,12 +64,12 @@ TEST_CASE("BDL wire I/O BDL detection", "[detect-bdl-pairs]")
         const auto& output_pair = result[1];
 
         CHECK(input_pair.type == layout::cell_type::INPUT);
-        CHECK(input_pair.top_sidb == cell<layout>{0, 0, 0});
-        CHECK(input_pair.bottom_sidb == cell<layout>{2, 0, 0});
+        CHECK(input_pair.top == cell<layout>{0, 0, 0});
+        CHECK(input_pair.bottom == cell<layout>{2, 0, 0});
 
         CHECK(output_pair.type == layout::cell_type::OUTPUT);
-        CHECK(output_pair.top_sidb == cell<layout>{18, 0, 0});
-        CHECK(output_pair.bottom_sidb == cell<layout>{20, 0, 0});
+        CHECK(output_pair.top == cell<layout>{18, 0, 0});
+        CHECK(output_pair.bottom == cell<layout>{20, 0, 0});
     }
     SECTION("0.5 nm threshold")
     {
@@ -102,8 +102,6 @@ TEST_CASE("SiQAD's AND gate I/O BDL detection", "[detect-bdl-pairs]")
     lyt.assign_cell_type({10, 7, 0}, sidb_technology::cell_type::OUTPUT);
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    print_layout(charge_distribution_surface<layout>{lyt});
-
     const auto result = detect_io_bdl_pairs(lyt);
 
     REQUIRE(result.size() == 3);
@@ -112,14 +110,14 @@ TEST_CASE("SiQAD's AND gate I/O BDL detection", "[detect-bdl-pairs]")
     const auto& output_pair = result[2];
 
     CHECK(input_pair1.type == layout::cell_type::INPUT);
-    CHECK(input_pair1.top_sidb == cell<layout>{20, 0, 1});
-    CHECK(input_pair1.bottom_sidb == cell<layout>{18, 1, 1});
+    CHECK(input_pair1.top == cell<layout>{20, 0, 1});
+    CHECK(input_pair1.bottom == cell<layout>{18, 1, 1});
 
     CHECK(input_pair2.type == layout::cell_type::INPUT);
-    CHECK(input_pair2.top_sidb == cell<layout>{0, 0, 1});
-    CHECK(input_pair2.bottom_sidb == cell<layout>{2, 1, 1});
+    CHECK(input_pair2.top == cell<layout>{0, 0, 1});
+    CHECK(input_pair2.bottom == cell<layout>{2, 1, 1});
 
     CHECK(output_pair.type == layout::cell_type::OUTPUT);
-    CHECK(output_pair.top_sidb == cell<layout>{10, 6, 0});
-    CHECK(output_pair.bottom_sidb == cell<layout>{10, 7, 0});
+    CHECK(output_pair.top == cell<layout>{10, 6, 0});
+    CHECK(output_pair.bottom == cell<layout>{10, 7, 0});
 }

@@ -18,22 +18,52 @@
 namespace fiction
 {
 
+/**
+ * A Binary-dot Logic (BDL) pair is a pair of SiDBs that are close to each other and, thus, most likely share a charge.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ */
 template <typename Lyt>
 struct bdl_pair
 {
+    /**
+     * The type of the SiDBs in the pair. BDL SiDBs must be of the same type. They can either be normal, input, or
+     * output SiDBs.
+     */
     const sidb_technology::cell_type type{};
-
-    const cell<Lyt> top_sidb{};
-    const cell<Lyt> bottom_sidb{};
-
+    /**
+     * The top SiDB of the pair. Top and bottom are defined relative to each other via the `operator<` overload.
+     */
+    const cell<Lyt> top{};
+    /**
+     * The bottom SiDB of the pair. Top and bottom are defined relative to each other via the `operator<` overload.
+     */
+    const cell<Lyt> bottom{};
+    /**
+     * Standard constructor for empty BDL pairs.
+     */
     bdl_pair() = default;
-    bdl_pair(const sidb_technology::cell_type t, const cell<Lyt> top, const cell<Lyt> bottom) noexcept :
+    /**
+     * Constructor for BDL pairs.
+     *
+     * @param t Type of the SiDBs in the pair.
+     * @param upper The top SiDB of the pair.
+     * @param lower The bottom SiDB of the pair.
+     */
+    bdl_pair(const sidb_technology::cell_type t, const cell<Lyt> upper, const cell<Lyt> lower) noexcept :
             type{t},
-            top_sidb{top},
-            bottom_sidb{bottom}
-    {}
+            top{upper},
+            bottom{lower}
+    {
+        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+        static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    }
 };
 
+/**
+ * Parameters for the BDL pair detection algorithms.
+ */
 struct detect_bdl_pairs_params
 {
     /**
@@ -42,6 +72,17 @@ struct detect_bdl_pairs_params
     units::length::nanometer_t threshold{2_nm};
 };
 
+/**
+ * This algorithm detects input or output BDL pairs in an SiDB layout. It does so by first collecting all input and
+ * output dots and then uniquely pairing them up based on their distance. A threshold can be defined (default = 2 nm),
+ * after which SiDBs are no longer considered a pair. The distance between two dots is computed using the
+ * `sidb_nanometer_distance` function. The algorithm returns a vector of I/O BDL pairs.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The layout to detect I/O BDL pairs in.
+ * @param params Parameters for the BDL pair detection algorithm.
+ * @return A vector of I/O BDL pairs.
+ */
 template <typename Lyt>
 std::vector<bdl_pair<Lyt>> detect_io_bdl_pairs(const Lyt& lyt, const detect_bdl_pairs_params params = {}) noexcept
 {
