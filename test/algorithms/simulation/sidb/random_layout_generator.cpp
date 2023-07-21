@@ -504,31 +504,4 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate_random_layout]")
                 });
         }
     }
-
-    //    SECTION("Check uniqueness of two layouts")
-    //    {
-    //        const generate_random_layout_params<sidb_cell_clk_lyt> params{
-    //            {{0, 0, 1}, {20, 20, 0}}, 10, positive_charges::FORBIDDEN, 2, static_cast<uint64_t>(10E6), 2};
-    //        const auto result_lyts = generate_multiple_random_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
-    //        REQUIRE(result_lyts.size() == 2);
-    //
-    //        const auto& first_lyt  = result_lyts.front();
-    //        const auto& second_lyt = result_lyts.back();
-    //
-    //        uint64_t identical_cell_counter = 0;
-    //        first_lyt.foreach_cell(
-    //            [&second_lyt, &identical_cell_counter](const auto& cell_first)
-    //            {
-    //                second_lyt.foreach_cell(
-    //                    [&cell_first, &identical_cell_counter](const auto& cell_second)
-    //                    {
-    //                        if (cell_first == cell_second)
-    //                        {
-    //                            identical_cell_counter += 1;
-    //                        }
-    //                    });
-    //            });
-    //
-    //        CHECK(identical_cell_counter < first_lyt.num_cells());
-    //    }
 }
