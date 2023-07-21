@@ -276,12 +276,12 @@ class write_sqd_layout_impl
                     const auto& cell   = cd.first;
                     const auto& defect = cd.second;
 
-                    design << fmt::format(siqad::DEFECT_BLOCK,
-                                          fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y / 2, cell.y % 2),
-                                          is_charged_defect(defect) ? fmt::format(siqad::COULOMB, defect.charge,
-                                                                                  defect.epsilon_r, defect.lambda_tf) :
-                                                                      "",
-                                          get_defect_type_name(defect.type));
+                    design << fmt::format(
+                        siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y / 2, cell.y % 2),
+                        is_charged_defect(defect) ? fmt::format(siqad::COULOMB, defect.charge.value(), defect.epsilon_r,
+                                                                defect.lambda_tf.value()) :
+                                                    "",
+                        get_defect_type_name(defect.type));
                 });
         }
     }

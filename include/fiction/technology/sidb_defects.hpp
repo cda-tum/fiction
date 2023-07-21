@@ -52,10 +52,10 @@ struct sidb_defect
     /**
      * Standard constructor.
      */
-    constexpr explicit sidb_defect(const sidb_defect_type                  defect_type     = sidb_defect_type::UNKNOWN,
-                                   const units::charge::electron_charge_t& electric_charge = 0_e,
-                                   const double                            relative_permittivity = 0.0,
-                                   const units::length::nanometer_t&       screening_distance    = 0.0_nm) noexcept :
+    constexpr explicit sidb_defect(const sidb_defect_type                    defect_type = sidb_defect_type::UNKNOWN,
+                                   const units::charge::elementary_charge_t& electric_charge       = 0_e,
+                                   const double                              relative_permittivity = 0.0,
+                                   const units::length::nanometer_t&         screening_distance    = 0.0_nm) noexcept :
             type{defect_type},
             charge{electric_charge},
             epsilon_r{relative_permittivity},
@@ -63,8 +63,8 @@ struct sidb_defect
     {
 
         assert(((std::fmod(charge.value(), 1) == 0)) && "charge value has to be an integer");
-        assert((epsilon_r >= 0) && "charge value has to be an integer");
-        assert((screening_distance >= 0.0_nm) && "charge value has to be an integer");
+        assert((epsilon_r >= 0) && "epsilon_r has to be >= 0.0");
+        assert((lambda_tf >= 0.0_nm) && "lambda_tf has to be >= 0.0 nanometer");
     }
     /**s
      * Type of defect.
@@ -73,7 +73,7 @@ struct sidb_defect
     /**
      * Electrical charge.
      */
-    const units::charge::electron_charge_t charge;
+    const units::charge::elementary_charge_t charge;
     /**
      * Electric permittivity.
      */

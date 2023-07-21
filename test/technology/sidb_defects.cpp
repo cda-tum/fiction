@@ -82,8 +82,8 @@ TEST_CASE("Test for units", "[sidb-defects]")
     CHECK(defect_three.epsilon_r == 5);
     CHECK(defect_three.lambda_tf == 0.0_nm);
 
-    const sidb_defect defect_four{sidb_defect_type::NONE, 2_e, 5.4, 4.2_nm};
-    CHECK(defect_four.charge == 2_e);
+    const sidb_defect defect_four{sidb_defect_type::NONE, 6'242'000'000'000'000'000_e, 5.4, 4.2_nm};
+    CHECK(defect_four.charge == units::charge::coulomb_t{1});
     CHECK(defect_four.epsilon_r == 5.4);
     CHECK(defect_four.lambda_tf == 4.2_nm);
 }
