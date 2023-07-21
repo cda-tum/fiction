@@ -64,3 +64,26 @@ TEST_CASE("Defect extent", "[sidb-defects]")
     CHECK(defect_extent(sidb_defect{sidb_defect_type::GUNK}) == neutral_spacing);
     CHECK(defect_extent(sidb_defect{sidb_defect_type::UNKNOWN}) == neutral_spacing);
 }
+
+TEST_CASE("Test for units", "[sidb-defects]")
+{
+    const sidb_defect defect{sidb_defect_type::NONE};
+    CHECK(defect.charge == 0_e);
+    CHECK(defect.epsilon_r == 0);
+    CHECK(defect.lambda_tf == 0.0_nm);
+
+    const sidb_defect defect_two{sidb_defect_type::NONE, 2_e};
+    CHECK(defect_two.charge == 2_e);
+    CHECK(defect_two.epsilon_r == 0);
+    CHECK(defect_two.lambda_tf == 0.0_nm);
+
+    const sidb_defect defect_three{sidb_defect_type::NONE, 2_e, 5};
+    CHECK(defect_three.charge == 2_e);
+    CHECK(defect_three.epsilon_r == 5);
+    CHECK(defect_three.lambda_tf == 0.0_nm);
+
+    const sidb_defect defect_four{sidb_defect_type::NONE, 2_e, 5.4, 4.2_nm};
+    CHECK(defect_four.charge == 2_e);
+    CHECK(defect_four.epsilon_r == 5.4);
+    CHECK(defect_four.lambda_tf == 4.2_nm);
+}

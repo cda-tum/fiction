@@ -5,6 +5,11 @@
 #ifndef FICTION_SIDB_DEFECTS_HPP
 #define FICTION_SIDB_DEFECTS_HPP
 
+#include "fiction/utils/units_utils.hpp"
+
+#include <units.h>
+
+#include <cmath>
 #include <cstdint>
 #include <utility>
 
@@ -47,22 +52,28 @@ struct sidb_defect
     /**
      * Standard constructor.
      */
-    constexpr explicit sidb_defect(const sidb_defect_type defect_type = sidb_defect_type::UNKNOWN,
-                                   const double electric_charge = 0.0, const double relative_permittivity = 0.0,
-                                   const double screening_distance = 0.0) noexcept :
+    constexpr explicit sidb_defect(const sidb_defect_type                  defect_type     = sidb_defect_type::UNKNOWN,
+                                   const units::charge::electron_charge_t& electric_charge = 0_e,
+                                   const double                            relative_permittivity = 0.0,
+                                   const units::length::nanometer_t&       screening_distance    = 0.0_nm) noexcept :
             type{defect_type},
             charge{electric_charge},
             epsilon_r{relative_permittivity},
             lambda_tf{screening_distance}
-    {}
-    /**
+    {
+
+        assert(((std::fmod(charge.value(), 1) == 0)) && "charge value has to be an integer");
+        assert((epsilon_r >= 0) && "charge value has to be an integer");
+        assert((screening_distance >= 0.0_nm) && "charge value has to be an integer");
+    }
+    /**s
      * Type of defect.
      */
     const sidb_defect_type type;
     /**
      * Electrical charge.
      */
-    const double charge;
+    const units::charge::electron_charge_t charge;
     /**
      * Electric permittivity.
      */
@@ -70,7 +81,7 @@ struct sidb_defect
     /**
      * Thomas-Fermi screening distance in nm.
      */
-    const double lambda_tf;
+    const units::length::nanometer_t lambda_tf;
 };
 /**
  * Checks whether the given defect is charged. Charged defects are to be avoided by a larger distance.
