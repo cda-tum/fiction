@@ -110,7 +110,7 @@ class quickexact_impl
                     all_sidbs_in_lyt_without_negative_detected_ones[0]};
                 charge_lyt_with_assigned_dependent_cell.assign_local_external_potential(
                     params.local_external_potential);
-                charge_lyt_with_assigned_dependent_cell.assign_global_external_potential(params.global_potential);
+                charge_lyt_with_assigned_dependent_cell.set_global_external_potential(params.global_potential);
 
                 if constexpr (has_get_sidb_defect_v<Lyt>)
                 {
@@ -359,7 +359,7 @@ class quickexact_impl
         }
 
         charge_lyt.assign_local_external_potential(params.local_external_potential);
-        charge_lyt.assign_global_external_potential(params.global_potential, dependent_cell_mode::VARIABLE);
+        charge_lyt.set_global_external_potential(params.global_potential, dependent_cell_mode::VARIABLE);
         detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
         detected_negative_sidbs.reserve(detected_negative_sidb_indices.size());
         all_sidbs_in_lyt_without_negative_detected_ones = charge_lyt.get_sidb_order();

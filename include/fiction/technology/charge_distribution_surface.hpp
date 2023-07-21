@@ -759,7 +759,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (history_mode == charge_distribution_history::NEGLECT)
         {
-            strg->local_pot.resize(this->num_cells(), 0);
+            strg->local_pot.resize(this->num_cells(), 0_V);
 
             for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
             {
@@ -1476,8 +1476,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param potential_value Value of the global external electrostatic potential (e.g. -0.3). Charge-transition levels
      * are shifted by this value.
      */
-    void assign_global_external_potential(const double&       potential_value,
-                                          dependent_cell_mode dependent_cell = dependent_cell_mode::FIXED) noexcept
+    void set_global_external_potential(const units::voltage::volt_t& potential_value,
+                                       dependent_cell_mode dependent_cell = dependent_cell_mode::FIXED) noexcept
     {
         this->foreach_cell(
             [this, &potential_value](const auto& cell) {
