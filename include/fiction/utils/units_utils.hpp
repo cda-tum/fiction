@@ -10,7 +10,9 @@
 namespace units
 {
 UNIT_ADD(energy, electron_volt, electron_volts, eV, units::unit<std::ratio<1, 6'242'000'000'000'000'000>, joule>);
-}
+UNIT_ADD(charge, elementary_charge, elementary_charges, e,
+         units::unit<std::ratio<1, 6'242'000'000'000'000'000>, coulomb>);
+}  // namespace units
 
 namespace fiction
 {
@@ -19,6 +21,11 @@ namespace fiction
  * of type units::length::angstrom)).
  */
 using units::literals::operator""_angstrom;
+/**
+ * Can be used in combination with an integer to generate a charge in units of the elementary charge (e.g. -1 e can be
+ * defined as -1_e (is of type units::charge::elementary_charge)).
+ */
+using units::literals::operator""_e;
 /**
  * Can be used in combination with a number to generate an electron volt unit (e.g. 40.1 eV can be defined as 40.1_eV
  * (is of type units::energy::electron_volt)).
