@@ -9,15 +9,17 @@
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/traits.hpp"
 
+#include <units.h>
+
 #include <utility>
 
 namespace fiction
 {
 
 /**
- * Computes the position of a cell in nanometers from the layout origin.
+ * Computes the position of a cell in nanometers from the layout origin in an SiDB layout.
  *
- * @tparam Lyt The layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  * @param sp The simulation parameters (required for the lattice constants).
  * @param c The cell to compute the position for.
  * @return A pair representing the `(x,y)` position of `c` in nanometers from the layout origin.
@@ -26,6 +28,8 @@ template <typename Lyt>
 constexpr std::pair<units::length::nanometer_t, units::length::nanometer_t>
 sidb_nm_position(const sidb_simulation_parameters& sp, const cell<Lyt>& c) noexcept
 {
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     const auto x = units::length::nanometer_t(
