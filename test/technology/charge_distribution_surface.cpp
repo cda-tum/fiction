@@ -159,7 +159,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout_new.chargeless_potential_generated_by_defect_at_given_distance(0.0) == 0.0);
         charge_layout_new.update_after_charge_change();
         CHECK_THAT(charge_layout.get_system_energy() - charge_layout_new.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0, fiction::physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
     }
 
     SECTION("assign and read out charge states")
@@ -470,7 +470,7 @@ TEMPLATE_TEST_CASE(
     SECTION("apply external voltage at two cells")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{3, -0.32};
+        const sidb_simulation_parameters params{3, -0.32_eV};
 
         lyt_new.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -485,47 +485,49 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout_new.get_external_potentials().size() == 1);
         CHECK(charge_layout_new.get_external_potentials().size() == 1);
 
-        CHECK_THAT(*charge_layout_new.get_local_potential({0, 0, 1}) + 0.5,
-                   Catch::Matchers::WithinAbs(0, fiction::physical_constants::POP_STABILITY_ERR));
-        CHECK_THAT(*charge_layout_new.get_local_potential({1, 3, 0}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
-        CHECK_THAT(*charge_layout_new.get_local_potential({10, 5, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT((*charge_layout_new.get_local_potential({0, 0, 1})).value() + 0.5,
+                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
+        CHECK_THAT((*charge_layout_new.get_local_potential({1, 3, 0})).value(),
+                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT((*charge_layout_new.get_local_potential({10, 5, 1})).value(),
+                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
         charge_layout_new.assign_all_charge_states(sidb_charge_state::POSITIVE);
         charge_layout_new.update_after_charge_change();
         CHECK(charge_layout_new.get_charge_state({0, 0, 1}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout_new.get_charge_state({1, 3, 0}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout_new.get_charge_state({10, 5, 1}) == sidb_charge_state::POSITIVE);
 
-        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) > -0.5);
-        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) > -0.5);
-        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) > -0.5);
+        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) > -0.5_V);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) > -0.5_V);
+        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) > -0.5_V);
 
         charge_layout_new.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
-        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.1}});
-        CHECK_THAT(*charge_layout_new.get_local_potential({0, 0, 1}) + 0.1,
-                   Catch::Matchers::WithinAbs(0, fiction::physical_constants::POP_STABILITY_ERR));
+        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.1_V}});
+        CHECK_THAT(*charge_layout_new.get_local_potential({0, 0, 1}) + 0.1_V,
+                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
         CHECK_THAT(*charge_layout_new.get_local_potential({1, 3, 0}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
         CHECK_THAT(*charge_layout_new.get_local_potential({10, 5, 1}), Catch::Matchers::WithinAbs(0.000000, 0.000001));
 
-        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.5}, {{10, 5, 1}, -0.1}});
+        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.5_V}, {{10, 5, 1}, -0.1_V}});
         charge_layout_new.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_layout_new.update_after_charge_change();
 
-        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) < -0.5);
-        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) < -0.1);
-        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) < -0.5_V);
+        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) < -0.1_V);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0_V);
     }
 
     SECTION("apply homogenous external voltage to layout")
     {
-        const sidb_simulation_parameters params{3, -0.32};
+        const sidb_simulation_parameters params{3, -0.32_eV};
         lyt.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL};
         CHECK(charge_layout.get_external_potentials().empty());
-        charge_layout.assign_global_external_potential(-0.1);
+        charge_layout.assign_global_external_potential(-0.1_V);
         CHECK(!charge_layout.get_external_potentials().empty());
 
         CHECK_THAT(*charge_layout.get_local_potential({0, 0, 1}) + 0.1,
