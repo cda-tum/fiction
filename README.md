@@ -1,14 +1,14 @@
 # *fiction* &ndash; Design Automation for Field-coupled Nanotechnologies
 
-[![Ubuntu CI](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/ubuntu.yml?label=Ubuntu&logo=ubuntu&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/ubuntu.yml)
-[![macOS CI](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/macos.yml?label=macOS&logo=apple&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/macos.yml)
-[![Windows CI](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/windows.yml?label=Windows&logo=windows&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/windows.yml)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/codeql-analysis.yml?label=CodeQL&logo=github&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/codeql-analysis.yml)
-[![Docker Image](https://img.shields.io/github/actions/workflow/status/marcelwa/fiction/docker-image.yml?label=Docker&logo=docker&style=flat-square)](https://github.com/marcelwa/fiction/actions/workflows/docker-image.yml)
+[![Ubuntu CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/ubuntu.yml?label=Ubuntu&logo=ubuntu&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ubuntu.yml)
+[![macOS CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/macos.yml?label=macOS&logo=apple&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/macos.yml)
+[![Windows CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/windows.yml?label=Windows&logo=windows&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/windows.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/codeql-analysis.yml?label=CodeQL&logo=github&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/codeql-analysis.yml)
+[![Docker Image](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/docker-image.yml?label=Docker&logo=docker&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/docker-image.yml)
 [![Documentation Status](https://img.shields.io/readthedocs/fiction?label=Docs&logo=readthedocs&style=flat-square)](https://fiction.readthedocs.io/)
-[![codecov](https://img.shields.io/codecov/c/github/marcelwa/fiction?label=Coverage&logo=codecov&style=flat-square)](https://codecov.io/gh/marcelwa/fiction)
-[![License](https://img.shields.io/github/license/marcelwa/fiction?label=License&style=flat-square)](https://github.com/marcelwa/fiction/blob/main/LICENSE.txt)
-[![Release](https://img.shields.io/github/v/release/marcelwa/fiction?label=fiction&style=flat-square)](https://github.com/marcelwa/fiction/releases)
+[![codecov](https://img.shields.io/codecov/c/github/cda-tum/fiction?label=Coverage&logo=codecov&style=flat-square)](https://codecov.io/gh/cda-tum/fiction)
+[![License](https://img.shields.io/github/license/cda-tum/fiction?label=License&style=flat-square)](https://github.com/cda-tum/fiction/blob/main/LICENSE.txt)
+[![Release](https://img.shields.io/github/v/release/cda-tum/fiction?label=fiction&style=flat-square)](https://github.com/cda-tum/fiction/releases)
 [![arXiv](https://img.shields.io/static/v1?label=arXiv&message=1905.02477&color=informational&style=flat-square)](https://arxiv.org/abs/1905.02477)
 
 <p align="center">
@@ -19,21 +19,24 @@
 </p>
 
 This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
-in C++17 using the [EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). Thereby, *fiction*
+developed as part of the _Munich Nanotech Toolkit_ (_MNT_) by
+the [Chair for Design Automation](https://www.cda.cit.tum.de/)
+at the [Technical University of Munich](https://www.tum.de/). It is written in C++17 using the
+[EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). Thereby, *fiction*
 focuses on the logic synthesis, placement, routing, clocking, and verification of emerging nanotechnologies. As a
 promising class of beyond-CMOS technologies,
 [Field-coupled Nanocomputing (FCN)](https://www.springer.com/de/book/9783662437216) devices like Quantum-dot Cellular
-Automata (QCA) in manifold forms (e.g. atomic or molecular), Nanomagnet Logic (NML) devices, Silicon Dangling Bonds
+Automata (QCA) in manifold forms (e.g., atomic or molecular), Nanomagnet Logic (NML) devices, Silicon Dangling Bonds
 (SiDBs), and many more, allow for high computing performance with tremendously low power consumption without the flow of
 electric current.
 
 With ongoing research in the field, it is unclear, which technology will eventually be competing with CMOS. To be as
-generic as possible, *fiction* is able to perform physical design tasks for FCN circuit layouts on data structures that
+generic as possible, *fiction* can perform physical design tasks for FCN circuit layouts on data structures that
 abstract from particular technology or cell design. Using an extensible set of gate libraries, technologies, and cell
 types, these can easily be compiled down to any desired FCN technology for physical simulation.
 
 The *fiction* framework is academic software and aims at researchers and developers in the FCN domain who want to obtain
-cell-accurate circuit layouts from logical specifications or who want to implement their own physical design algorithms.
+cell-accurate circuit layouts from logical specifications or who want to implement their physical design algorithms.
 
 For these use cases, *fiction* provides
 a [header-only library](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-header-only-library)
@@ -57,7 +60,7 @@ If you have any questions, comments, or suggestions, please do not hesitate to g
 > Clone the repository and its submodules:
 
 ```bash
-git clone --recursive https://github.com/marcelwa/fiction.git
+git clone --recursive https://github.com/cda-tum/fiction.git
 ```
 
 ### The CLI
@@ -184,10 +187,9 @@ Among these algorithms are
 - SMT-based [exact placement and routing](https://ieeexplore.ieee.org/document/8342060)
 - OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
 - SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
--
-SAT-based [multi-path routing](https://www.cda.cit.tum.de/files/eda/2022_nanoarch_efficient_multi-path_signal_routing_for_fcn.pdf)
+- SAT-based [multi-path routing](https://dl.acm.org/doi/10.1145/3565478.3572539)
 
-plus several path finding algorithms that work on generic layouts:
+plus several path-finding algorithms that work on generic layouts:
 
 - shortest path via the [A* algorithm](https://ieeexplore.ieee.org/document/4082128)
 - *k* shortest paths via [Yen's algorithm](https://www.ams.org/journals/qam/1970-27-04/S0033-569X-1970-0253822-7/)
@@ -203,7 +205,7 @@ using
 
 ### Physical Simulation
 
-When a layout is compiled to the cell-level via the application of a technology-dependent gate library, it can be
+When a layout is compiled to the cell level via the application of a technology-dependent gate library, it can be
 simulated using a physical model. Currently, the following simulation algorithms are implemented in *fiction*:
 
 - Silicon Dangling Bonds (SiDBs)
@@ -213,7 +215,7 @@ simulated using a physical model. Currently, the following simulation algorithms
 ## Clocking Schemes
 
 There are highly regular clocking schemes proposed for FCN technologies which can be used as a floor plan for physical
-design. However, sometimes it can make sense to have more degree of freedom and assign clock numbers on the fly. That is
+design. However, sometimes it can make sense to have more freedom and assign clock numbers on the fly. That is
 why *fiction*
 supports [regular and irregular clocking schemes](https://fiction.readthedocs.io/en/latest/layouts/clocking_scheme.html)
 with variable amounts of clock numbers as QCA for instance uses four clock phases but iNML needs only three.
@@ -250,8 +252,8 @@ Wires are only allowed to cross other wires! Wires crossing gates is considered 
 
 <img src="docs/_static/io.png" alt="Input pin and cell output" align="right" width="200"/>
 
-In the literature, both is seen: having input cells (pins) directly located in the gate structure or using designated
-I/O elements which are located outside of gates. This distinction only makes sense on the gate-level and *fiction*
+In the literature, both are seen: having input cells (pins) directly located in the gate structure or using designated
+I/O elements that are located outside of gates. This distinction only makes sense on the gate level and *fiction*
 supports both approaches and offers usage in the implemented physical design algorithms.
 
 ## Multi Wires
@@ -260,7 +262,7 @@ supports both approaches and offers usage in the implemented physical design alg
 
 Gate-level abstraction has its limits. Often, chip area is wasted when only using a single wire per tile. In *fiction*,
 cell-level layouts allow for precise control over cell placement and can, thus, also create multiple wire segments per
-clock zone. Physical simulation can give an indication whether the built structures are implementing the intended
+clock zone. Physical simulation can give an indication of whether the built structures are implementing the intended
 functionality.
 
 ## Synchronization Elements
@@ -296,3 +298,23 @@ Cell-level layouts:
 - Number of cells
 - Bounding box
 - Area usage in nm²
+
+# Reference
+
+In case you are using *fiction* in your work, we would be thankful if you referred to it by citing the following
+publication:
+
+```bibtex
+@misc{fiction,
+      author = {Walter, Marcel and Wille, Robert and Sill Torres, Frank and Gro{\ss}e, Daniel and Drechsler, Rolf},
+      title = {{fiction: An Open Source Framework for the Design of Field-coupled Nanocomputing Circuits}},
+      archivePrefix = {arXiv},
+      eprint = {1905.02477},
+      note = {arXiv:1905.02477},
+      year = {2019},
+      month = {May}
+}
+```
+
+Additionally, many algorithms implemented in *fiction* have been published individually. For a full list of publications
+based upon *fiction*, please refer to the [documentation](https://fiction.readthedocs.io/en/latest/publications.html).

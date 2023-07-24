@@ -28,7 +28,7 @@ TEMPLATE_TEST_CASE(
     {
         TestType                         lyt{{20, 10}};
         charge_distribution_surface      charge_layout{lyt};
-        const sidb_simulation_parameters params{2, -0.32};
+        const sidb_simulation_parameters params{2, -0.32_eV};
         const auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(charge_layout, params);
         const quicksim_params quicksim_params{params};
         const auto            simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
@@ -51,7 +51,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface      charge_layout{lyt};
-        const sidb_simulation_parameters params{2, -0.32};
+        const sidb_simulation_parameters params{2, -0.32_eV};
 
         const auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(charge_layout, params);
 

@@ -51,7 +51,7 @@ struct quicksim_params
 
 /**
  * The *QuickSim* algorithm which was proposed in \"QuickSim: Efficient and Accurate Physical Simulation of Silicon
- * Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE-NANO 2023 is an
+ * Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE NANO 2023 is an
  * electrostatic ground state simulation algorithm for SiDB layouts. It determines physically valid charge
  * configurations (with minimal energy) of a given (already initialized) charge distribution layout. Depending on the
  * simulation parameters, the ground state is found with a certain probability after one run.
@@ -89,11 +89,13 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_lyt.update_after_charge_change();
         const auto negative_sidb_indices = charge_lyt.negative_sidb_detection();
 
+        // Check that the layout with all SiDBs negatively charged is physically valid.
         if (charge_lyt.is_physically_valid())
         {
             st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
         }
 
+        // Check that the layout with all SiDBs neutrally charged is physically valid.
         charge_lyt.set_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 
@@ -104,6 +106,21 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                 st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
             }
         }
+
+        // Check if the layout where all SiDBs that need to be negatively charged are negatively charged and the rest
+        // are neutrally charged is physically valid.
+        for (const auto& index : negative_sidb_indices)
+        {
+            charge_lyt.assign_charge_state_by_cell_index(static_cast<uint64_t>(index), sidb_charge_state::NEGATIVE);
+        }
+        charge_lyt.update_after_charge_change();
+        if (charge_lyt.is_physically_valid())
+        {
+            st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+        }
+
+        charge_lyt.set_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_lyt.update_after_charge_change();
 
         // If the number of threads is initially set to zero, the simulation is run with one thread.
         const uint64_t num_threads = std::max(ps.number_threads, uint64_t{1});
