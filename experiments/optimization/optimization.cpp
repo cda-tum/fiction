@@ -73,19 +73,11 @@ std::tuple<std::vector<fiction::offset::ucoord_t>, std::vector<fiction::offset::
            std::vector<fiction::offset::ucoord_t>, coord_path, coord_path, coord_path, coord_path>
 get_fanin_and_fanouts(obs_gate_lyt& lyt, fiction::offset::ucoord_t op)
 {
-    fiction::offset::ucoord_t              fanin1 = {1000000, 1000000};
-    fiction::offset::ucoord_t              fanin2 = {1000000, 1000000};
-    std::vector<fiction::offset::ucoord_t> fanins;
-    fiction::offset::ucoord_t              fanout1 = {1000000, 1000000};
-    fiction::offset::ucoord_t              fanout2 = {1000000, 1000000};
-    std::vector<fiction::offset::ucoord_t> fanouts;
-    std::vector<fiction::offset::ucoord_t> to_clear;
-    coord_path                             route1;
-    coord_path                             route2;
-    coord_path                             route3;
-    coord_path                             route4;
-    std::set<fiction::offset::ucoord_t>    fanins_set;
-    std::set<fiction::offset::ucoord_t>    fanouts_set;
+    fiction::offset::ucoord_t              fanin1, fanin2, fanout1, fanout2 = {1000000, 1000000};
+    std::vector<fiction::offset::ucoord_t> fanins, fanouts, to_clear;
+    coord_path                             route1, route2, route3, route4;
+    std::set<fiction::offset::ucoord_t>    fanins_set, fanouts_set;
+
     for (auto fin : lyt.incoming_data_flow(op))
     {
         if (fanins_set.find(fin) == fanins_set.end())
@@ -188,19 +180,11 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, fiction::offset::ucoord_t op)
 std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t old_pos, obs_gate_lyt lyt, int width,
                                                       int height)
 {
-    const fiction::a_star_params           params{true};
-    std::vector<fiction::offset::ucoord_t> to_clear;
+    const fiction::a_star_params params{true};
 
-    auto                                   ff      = get_fanin_and_fanouts(lyt, old_pos);
-    std::vector<fiction::offset::ucoord_t> fanins  = std::get<0>(ff);
-    std::vector<fiction::offset::ucoord_t> fanouts = std::get<1>(ff);
-    to_clear                                       = std::get<2>(ff);
-    coord_path r1                                  = std::get<3>(ff);
-    coord_path r2                                  = std::get<4>(ff);
-    coord_path r3                                  = std::get<5>(ff);
-    coord_path r4                                  = std::get<6>(ff);
-    int        min_x                               = 0;
-    int        min_y                               = 0;
+    auto [fanins, fanouts, to_clear, r1, r2, r3, r4] = get_fanin_and_fanouts(lyt, old_pos);
+    int min_x                                        = 0;
+    int min_y                                        = 0;
     if (fanins.size() > 0)
     {
         min_x = max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.x < b.x; })->x;
