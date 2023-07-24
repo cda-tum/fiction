@@ -134,6 +134,7 @@ Unit Utils
 
 There are several suffix operators exposed in this file for convenient use of units, namely
 * ``_angstrom``
+* ``_e``
 * ``_eV``
 * ``_K``
 * ``_nm``
