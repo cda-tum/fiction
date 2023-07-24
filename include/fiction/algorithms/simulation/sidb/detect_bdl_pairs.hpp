@@ -98,9 +98,8 @@ std::vector<bdl_pair<Lyt>> detect_io_bdl_pairs(const Lyt& lyt, const detect_bdl_
      * then sorting them. The smallest distances are then used to pair up the dots. The function takes a vector of dots
      * and a cell type as input. It fills the vector of BDL pairs declared above.
      */
-    const auto pair_up_dots = [&lyt, &params,
-                               &bdl_pairs](const std::vector<cell<Lyt>>&    io_dots,
-                                           const sidb_technology::cell_type type) noexcept -> void
+    const auto pair_up_dots = [&lyt, &params, &bdl_pairs](const std::vector<cell<Lyt>>&    io_dots,
+                                                          const sidb_technology::cell_type type) noexcept -> void
     {
         /**
          * Container for pairwise dot distances used in the pairing algorithm.
