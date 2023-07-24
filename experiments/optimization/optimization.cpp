@@ -73,7 +73,7 @@ std::tuple<std::vector<fiction::offset::ucoord_t>, std::vector<fiction::offset::
            std::vector<fiction::offset::ucoord_t>, coord_path, coord_path, coord_path, coord_path>
 get_fanin_and_fanouts(obs_gate_lyt& lyt, fiction::offset::ucoord_t op)
 {
-    fiction::offset::ucoord_t              fanin1, fanin2, fanout1, fanout2 = {1000000, 1000000};
+    fiction::offset::ucoord_t              fanin1= {1000000, 1000000}, fanin2 = {1000000, 1000000}, fanout1 = {1000000, 1000000}, fanout2 = {1000000, 1000000};
     std::vector<fiction::offset::ucoord_t> fanins, fanouts, to_clear;
     coord_path                             route1, route2, route3, route4;
     std::set<fiction::offset::ucoord_t>    fanins_set, fanouts_set;
