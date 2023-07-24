@@ -9,18 +9,18 @@
 
 using namespace fiction;
 
-TEST_CASE("Empty layout I/O BDL detection", "[detect-bdl-pairs]")
+TEST_CASE("Empty layout BDL detection", "[detect-bdl-pairs]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
     const layout lyt{};
 
-    const auto result = detect_io_bdl_pairs(lyt);
+    const auto result = detect_bdl_pairs(lyt, sidb_technology::cell_type::NORMAL);
 
     CHECK(result.empty());
 }
 
-TEST_CASE("Atomic wire I/O BDL detection", "[detect-bdl-pairs]")
+TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -41,28 +41,65 @@ TEST_CASE("Atomic wire I/O BDL detection", "[detect-bdl-pairs]")
 
     SECTION("default lower threshold")
     {
-        const auto result = detect_io_bdl_pairs(lyt, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
+        const auto normal_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::NORMAL, params);
 
-        REQUIRE(result.size() == 0);
+        REQUIRE(input_bdl_pairs.empty());
+        REQUIRE(output_bdl_pairs.empty());
+        REQUIRE(normal_bdl_pairs.size() == 2);
+
+        const auto& normal_pair1 = normal_bdl_pairs[0];
+        const auto& normal_pair2 = normal_bdl_pairs[1];
+
+        CHECK(normal_pair1.type == layout::cell_type::NORMAL);
+        CHECK(normal_pair1.upper == cell<layout>{2, 0, 0});
+        CHECK(normal_pair1.lower == cell<layout>{4, 0, 0});
+
+        CHECK(normal_pair2.type == layout::cell_type::NORMAL);
+        CHECK(normal_pair2.upper == cell<layout>{3, 0, 0});
+        CHECK(normal_pair2.lower == cell<layout>{5, 0, 0});
     }
     SECTION("0.5 nm lower threshold")
     {
         params.minimum_distance = 0.5_nm;
 
-        const auto result = detect_io_bdl_pairs(lyt, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
+        const auto normal_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::NORMAL, params);
 
-        REQUIRE(result.size() == 0);
+        REQUIRE(input_bdl_pairs.empty());
+        REQUIRE(output_bdl_pairs.empty());
+        REQUIRE(normal_bdl_pairs.size() == 2);
+
+        const auto& normal_pair1 = normal_bdl_pairs[0];
+        const auto& normal_pair2 = normal_bdl_pairs[1];
+
+        CHECK(normal_pair1.type == layout::cell_type::NORMAL);
+        CHECK(normal_pair1.upper == cell<layout>{2, 0, 0});
+        CHECK(normal_pair1.lower == cell<layout>{4, 0, 0});
+
+        CHECK(normal_pair2.type == layout::cell_type::NORMAL);
+        CHECK(normal_pair2.upper == cell<layout>{3, 0, 0});
+        CHECK(normal_pair2.lower == cell<layout>{5, 0, 0});
     }
     SECTION("0 nm lower threshold")
     {
         params.minimum_distance = 0_nm;
 
-        const auto result = detect_io_bdl_pairs(lyt, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
+        const auto normal_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::NORMAL, params);
 
-        REQUIRE(result.size() == 2);
+        REQUIRE(input_bdl_pairs.size() == 1);
+        REQUIRE(output_bdl_pairs.size() == 1);
+        REQUIRE(normal_bdl_pairs.size() == 2);
 
-        const auto& input_pair  = result[0];
-        const auto& output_pair = result[1];
+        const auto& input_pair  = input_bdl_pairs.front();
+        const auto& output_pair = output_bdl_pairs.front();
+
+        const auto& normal_pair1 = normal_bdl_pairs[0];
+        const auto& normal_pair2 = normal_bdl_pairs[1];
 
         CHECK(input_pair.type == layout::cell_type::INPUT);
         CHECK(input_pair.upper == cell<layout>{0, 0, 0});
@@ -71,10 +108,18 @@ TEST_CASE("Atomic wire I/O BDL detection", "[detect-bdl-pairs]")
         CHECK(output_pair.type == layout::cell_type::OUTPUT);
         CHECK(output_pair.upper == cell<layout>{6, 0, 0});
         CHECK(output_pair.lower == cell<layout>{7, 0, 0});
+
+        CHECK(normal_pair1.type == layout::cell_type::NORMAL);
+        CHECK(normal_pair1.upper == cell<layout>{2, 0, 0});
+        CHECK(normal_pair1.lower == cell<layout>{3, 0, 0});
+
+        CHECK(normal_pair2.type == layout::cell_type::NORMAL);
+        CHECK(normal_pair2.upper == cell<layout>{4, 0, 0});
+        CHECK(normal_pair2.lower == cell<layout>{5, 0, 0});
     }
 }
 
-TEST_CASE("BDL wire I/O BDL detection", "[detect-bdl-pairs]")
+TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -98,11 +143,14 @@ TEST_CASE("BDL wire I/O BDL detection", "[detect-bdl-pairs]")
 
     SECTION("default upper threshold")
     {
-        const auto result = detect_io_bdl_pairs(lyt, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
 
-        REQUIRE(result.size() == 2);
-        const auto& input_pair  = result[0];
-        const auto& output_pair = result[1];
+        REQUIRE(input_bdl_pairs.size() == 1);
+        REQUIRE(output_bdl_pairs.size() == 1);
+
+        const auto& input_pair  = input_bdl_pairs.front();
+        const auto& output_pair = output_bdl_pairs.front();
 
         CHECK(input_pair.type == layout::cell_type::INPUT);
         CHECK(input_pair.upper == cell<layout>{0, 0, 0});
@@ -116,11 +164,14 @@ TEST_CASE("BDL wire I/O BDL detection", "[detect-bdl-pairs]")
     {
         params.maximum_distance = 1_nm;
 
-        const auto result = detect_io_bdl_pairs(lyt, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
 
-        REQUIRE(result.size() == 2);
-        const auto& input_pair  = result[0];
-        const auto& output_pair = result[1];
+        REQUIRE(input_bdl_pairs.size() == 1);
+        REQUIRE(output_bdl_pairs.size() == 1);
+
+        const auto& input_pair  = input_bdl_pairs.front();
+        const auto& output_pair = output_bdl_pairs.front();
 
         CHECK(input_pair.type == layout::cell_type::INPUT);
         CHECK(input_pair.upper == cell<layout>{0, 0, 0});
@@ -134,14 +185,16 @@ TEST_CASE("BDL wire I/O BDL detection", "[detect-bdl-pairs]")
     {
         params.maximum_distance = 0.5_nm;
 
-        const auto result = detect_io_bdl_pairs(lyt, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
 
         // the threshold is too small to detect any BDL pairs
-        REQUIRE(result.size() == 0);
+        REQUIRE(input_bdl_pairs.empty());
+        REQUIRE(output_bdl_pairs.empty());
     }
 }
 
-TEST_CASE("SiQAD's AND gate I/O BDL detection", "[detect-bdl-pairs]")
+TEST_CASE("SiQAD's AND gate BDL detection", "[detect-bdl-pairs]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -164,12 +217,15 @@ TEST_CASE("SiQAD's AND gate I/O BDL detection", "[detect-bdl-pairs]")
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const auto result = detect_io_bdl_pairs(lyt);
+    const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT);
+    const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT);
 
-    REQUIRE(result.size() == 3);
-    const auto& input_pair1 = result[0];
-    const auto& input_pair2 = result[1];
-    const auto& output_pair = result[2];
+    REQUIRE(input_bdl_pairs.size() == 2);
+    REQUIRE(output_bdl_pairs.size() == 1);
+
+    const auto& input_pair1 = input_bdl_pairs[0];
+    const auto& input_pair2 = input_bdl_pairs[1];
+    const auto& output_pair = output_bdl_pairs.front();
 
     CHECK(input_pair1.type == layout::cell_type::INPUT);
     CHECK(input_pair1.upper == cell<layout>{20, 0, 1});
@@ -184,7 +240,7 @@ TEST_CASE("SiQAD's AND gate I/O BDL detection", "[detect-bdl-pairs]")
     CHECK(output_pair.lower == cell<layout>{10, 7, 0});
 }
 
-TEST_CASE("Bestagon fan-out I/O BDL detection", "[detect-bdl-pairs]")
+TEST_CASE("Bestagon fan-out BDL detection", "[detect-bdl-pairs]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -221,12 +277,15 @@ TEST_CASE("Bestagon fan-out I/O BDL detection", "[detect-bdl-pairs]")
     lyt.assign_cell_type({4, 20, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({38, 20, 0}, sidb_technology::cell_type::NORMAL);
 
-    const auto result = detect_io_bdl_pairs(lyt);
+    const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT);
+    const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT);
 
-    REQUIRE(result.size() == 3);
-    const auto& input_pair   = result[0];
-    const auto& output_pair1 = result[1];
-    const auto& output_pair2 = result[2];
+    REQUIRE(input_bdl_pairs.size() == 1);
+    REQUIRE(output_bdl_pairs.size() == 2);
+
+    const auto& input_pair   = input_bdl_pairs.front();
+    const auto& output_pair1 = output_bdl_pairs[0];
+    const auto& output_pair2 = output_bdl_pairs[1];
 
     CHECK(input_pair.type == layout::cell_type::INPUT);
     CHECK(input_pair.upper == cell<layout>{2, 1, 0});

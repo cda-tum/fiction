@@ -79,19 +79,21 @@ struct detect_bdl_pairs_params
 };
 
 /**
- * This algorithm detects input or output BDL pairs in an SiDB layout. It does so by first collecting all input and
- * output dots and then uniquely pairing them up based on their distance. Lower and upper distance thresholds can be
- * defined (defaults = 0.75 nm and 1.5 nm, respectively) to narrow down the range in which SiDBs could be considered a
- * BDL pair. The distance between two dots is computed using the `sidb_nanometer_distance` function. The algorithm
- * returns a vector of I/O BDL pairs.
+ * This algorithm detects BDL pairs in an SiDB layout. It does so by first collecting all dots of the given type and
+ * then uniquely pairing them up based on their distance. Lower and upper distance thresholds can be defined (defaults =
+ * 0.75 nm and 1.5 nm, respectively) to narrow down the range in which SiDBs could be considered a BDL pair. The
+ * distance between two dots is computed using the `sidb_nanometer_distance` function. The algorithm returns a vector of
+ * BDL pairs.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout to detect I/O BDL pairs in.
+ * @param lyt The layout to detect BDL pairs in.
+ * @param type The type of the SiDBs to detect BDL pairs for, e.g., `INPUT`, `OUTPUT`, `NORMAL`.
  * @param params Parameters for the BDL pair detection algorithm.
- * @return A vector of I/O BDL pairs.
+ * @return A vector of BDL pairs.
  */
 template <typename Lyt>
-std::vector<bdl_pair<Lyt>> detect_io_bdl_pairs(const Lyt& lyt, const detect_bdl_pairs_params params = {}) noexcept
+std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename technology<Lyt>::cell_type type,
+                                            const detect_bdl_pairs_params params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -100,16 +102,13 @@ std::vector<bdl_pair<Lyt>> detect_io_bdl_pairs(const Lyt& lyt, const detect_bdl_
     // sanity check for parameter settings
     assert(params.minimum_distance <= params.maximum_distance);
 
-    std::vector<bdl_pair<Lyt>> bdl_pairs{};
-    bdl_pairs.reserve(lyt.num_pis() / 2 + lyt.num_pos() / 2);
-
     /**
      * Pairs up dots based on their distance. It does so by first computing the pairwise distances between all dots and
      * then sorting them. The smallest distances are then used to pair up the dots. The function takes a vector of dots
-     * and a cell type as input. It fills the vector of BDL pairs declared above.
+     * as input.
      */
-    const auto pair_up_dots = [&lyt, &params, &bdl_pairs](const std::vector<cell<Lyt>>&    io_dots,
-                                                          const sidb_technology::cell_type type) noexcept -> void
+    const auto pair_up_dots = [&lyt, &type,
+                               &params](const std::vector<cell<Lyt>>& dots) noexcept -> std::vector<bdl_pair<Lyt>>
     {
         /**
          * Container for pairwise dot distances used in the pairing algorithm.
@@ -148,11 +147,10 @@ std::vector<bdl_pair<Lyt>> detect_io_bdl_pairs(const Lyt& lyt, const detect_bdl_
         /**
          * Computes the pairwise distances between all dots in the input vector.
          */
-        const auto compute_pairwise_dot_distances =
-            [&lyt](const std::vector<cell<Lyt>>& dots) noexcept -> std::vector<pairwise_dot_distance>
+        const auto compute_pairwise_dot_distances = [&lyt, &dots]() noexcept -> std::vector<pairwise_dot_distance>
         {
             std::vector<pairwise_dot_distance> pairwise_distances{};
-            pairwise_distances.reserve(dots.size() * (dots.size() - 1) / 2);
+            pairwise_distances.reserve((dots.size() * (dots.size() - 1)) / 2);
 
             for (auto i = 0u; i < dots.size(); ++i)
             {
@@ -170,20 +168,24 @@ std::vector<bdl_pair<Lyt>> detect_io_bdl_pairs(const Lyt& lyt, const detect_bdl_
         const auto dot_distance_comparator = [](const auto& lhs, const auto& rhs) noexcept -> bool
         { return lhs.distance < rhs.distance; };
 
+        // container for the detected BDL pairs
+        std::vector<bdl_pair<Lyt>> bdl_pairs{};
+        bdl_pairs.reserve(dots.size() / 2);
+
         // compute pairwise distances
-        auto input_pairwise_distances = compute_pairwise_dot_distances(io_dots);
+        auto pairwise_distances = compute_pairwise_dot_distances();
         // sort pairwise distances
-        std::sort(input_pairwise_distances.begin(), input_pairwise_distances.end(), dot_distance_comparator);
+        std::sort(pairwise_distances.begin(), pairwise_distances.end(), dot_distance_comparator);
         // pair unique dots with the smallest distance
         std::unordered_set<cell<Lyt>> paired_dots{};
-        paired_dots.reserve(io_dots.size());
+        paired_dots.reserve(dots.size());
         /**
          * Checks whether a dot has already been paired up.
          */
         const auto already_paired_up = [&paired_dots](const auto& dot) noexcept -> bool
         { return paired_dots.find(dot) != paired_dots.cend(); };
 
-        for (auto& potential_bdl_pair : input_pairwise_distances)
+        for (auto& potential_bdl_pair : pairwise_distances)
         {
             // if the distance is smaller than the lower bound threshold, we can continue to the next pairing; this
             // prevents the pairing of dots that are too close to each other, e.g., in an atomic wire
@@ -219,26 +221,46 @@ std::vector<bdl_pair<Lyt>> detect_io_bdl_pairs(const Lyt& lyt, const detect_bdl_
             paired_dots.insert(potential_bdl_pair.sidb1);
             paired_dots.insert(potential_bdl_pair.sidb2);
         }
+
+        return bdl_pairs;
     };
 
-    // collect all input dots
-    std::vector<cell<Lyt>> input_dots{};
-    input_dots.reserve(lyt.num_pis());
-    lyt.foreach_pi([&input_dots](const auto& pi) { input_dots.push_back(pi); });
+    // collect all dots of the given type
+    std::vector<cell<Lyt>> dots_of_given_type{};
+    switch (type)
+    {
+        case (technology<Lyt>::cell_type::INPUT):
+        {
+            dots_of_given_type.reserve(lyt.num_pis());
+            lyt.foreach_pi([&dots_of_given_type](const auto& pi) { dots_of_given_type.push_back(pi); });
 
-    // pair up input dots
-    pair_up_dots(input_dots, sidb_technology::cell_type::INPUT);
+            break;
+        }
+        case (technology<Lyt>::cell_type::OUTPUT):
+        {
+            dots_of_given_type.reserve(lyt.num_pos());
+            lyt.foreach_po([&dots_of_given_type](const auto& po) { dots_of_given_type.push_back(po); });
 
-    // collect all output dots
-    std::vector<cell<Lyt>> output_dots{};
-    output_dots.reserve(lyt.num_pos());
-    lyt.foreach_po([&output_dots](const auto& po) { output_dots.push_back(po); });
+            break;
+        }
+        default:
+        {
+            dots_of_given_type.reserve(lyt.num_cells());
+            lyt.foreach_cell(
+                [&lyt, &type, &dots_of_given_type](const auto& c)
+                {
+                    if (lyt.get_cell_type(c) == type)
+                    {
+                        dots_of_given_type.push_back(c);
+                    }
+                });
 
-    // pair up output dots
-    pair_up_dots(output_dots, sidb_technology::cell_type::OUTPUT);
+            break;
+        }
+    }
 
-    // return the detected I/O BDL pairs
-    return bdl_pairs;
+    // pair up dots and return the detected BDL pairs
+    return pair_up_dots(dots_of_given_type);
 }
 
 };      // namespace fiction
