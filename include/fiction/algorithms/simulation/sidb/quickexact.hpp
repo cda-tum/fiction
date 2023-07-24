@@ -14,6 +14,7 @@
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
+#include <units.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -59,11 +60,11 @@ struct quickexact_params
     /**
      * Local external electrostatic potentials (e.g locally applied electrodes).
      */
-    std::unordered_map<typename Lyt::cell, double> local_external_potential = {};
+    std::unordered_map<typename Lyt::cell, units::voltage::volt_t> local_external_potential = {};
     /**
      * Global external electrostatic potential. Value is applied on each cell in the layout.
      */
-    double global_potential = 0;
+    units::voltage::volt_t global_potential = 0_V;
 };
 
 namespace detail

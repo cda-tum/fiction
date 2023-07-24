@@ -861,7 +861,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             total_potential += 0.5 * strg->local_pot[i] * charge_state_to_sign(strg->cell_charge[i]);
         }
-        strg->system_energy = units::energy::electron_volt_t{total_potential.value()};
 
         units::energy::electron_volt_t defect_energy = 0_eV;
         for (const auto& [cell, pot] : strg->defect_local_pot)
@@ -869,7 +868,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             defect_energy += units::energy::electron_volt_t{
                 pot.value() * static_cast<double>(charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]))};
         }
-        strg->system_energy = units::energy::electron_volt_t{total_potential.value()} + 0.5 * defect_energy;
 
         units::energy::electron_volt_t defect_interaction = 0_eV;
         for (const auto& [cell1, defect1] : strg->defects)
@@ -1645,8 +1643,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             return units::voltage::volt_t(0.0);
         }
 
-        return 1.0 / (4.0 * units::constants::pi * units::constants::epsilon0 * defect.epsilon_r) / distance * 1E9 *
-               std::exp(-(distance / defect.lambda_tf).value()) * units::constants::e;
+        return strg->phys_params.k * strg->phys_params.epsilon_r / defect.epsilon_r /
+               units::length::meter_t{distance.value() * 1e-9} *
+               std::exp(-distance.value() / defect.lambda_tf.value()) * units::constants::e;
     }
     /**
      * This function can be used to assign an external electrostatic potential to the layout. All important attributes

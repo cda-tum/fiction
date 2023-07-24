@@ -52,7 +52,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a one BDL pair with one perturber", "[ExG
     lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
 
-    const sidb_simulation_parameters params{2, -0.32};
+    const sidb_simulation_parameters params{2, -0.32_eV};
 
     const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
     CHECK(1 == 1);
@@ -97,7 +97,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber", 
     CHECK(charge_lyt_first.get_charge_state({17, 0, 0}) == sidb_charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({19, 0, 0}) == sidb_charge_state::NEGATIVE);
 
-    CHECK_THAT(charge_lyt_first.get_system_energy().value(), Catch::Matchers::WithinAbs(0.246080, POP_STABILITY_ERR));
+    CHECK_THAT(charge_lyt_first.get_system_energy().value(),
+               Catch::Matchers::WithinAbs(0.246061589, POP_STABILITY_ERR));
 }
 
 TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB arrangement", "[ExGS]",
@@ -131,7 +132,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB arrangement", "[ExGS]",
     CHECK(charge_lyt_first.get_charge_state({-7, 1, 1}) == sidb_charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({-7, 3, 0}) == sidb_charge_state::NEGATIVE);
 
-    CHECK_THAT(charge_lyt_first.get_system_energy().value(), Catch::Matchers::WithinAbs(0.319219, POP_STABILITY_ERR));
+    CHECK_THAT(charge_lyt_first.get_system_energy().value(),
+               Catch::Matchers::WithinAbs(0.3191947396, POP_STABILITY_ERR));
 }
 
 TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01", "[ExGS]",
@@ -167,5 +169,6 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01", "[
     CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
 
-    CHECK_THAT(charge_lyt_first.get_system_energy().value(), Catch::Matchers::WithinAbs(0.466318, POP_STABILITY_ERR));
+    CHECK_THAT(charge_lyt_first.get_system_energy().value(),
+               Catch::Matchers::WithinAbs(0.4662814571, POP_STABILITY_ERR));
 }
