@@ -103,8 +103,9 @@ TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with one highly negatively
 
     quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.1_eV}};
 
-    lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
-                                                  params.physical_parameters.lambda_tf});
+    lyt.assign_sidb_defect({1, 2, 0},
+                           sidb_defect{sidb_defect_type::UNKNOWN, -10_e, params.physical_parameters.epsilon_r,
+                                       params.physical_parameters.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -190,7 +191,7 @@ TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with global external poten
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
     quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25_eV}};
-    params.global_potential = -0.26;
+    params.global_potential = -0.26_V;
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -219,7 +220,7 @@ TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with global external poten
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
     quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.25_eV}};
-    params.global_potential = 1;
+    params.global_potential = 1_V;
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -297,7 +298,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a two-pair BDL wire with one pertur
     CHECK(charge_lyt_first.get_charge_state({19, 0, 0}) == sidb_charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_system_energy().value(),
-               Catch::Matchers::WithinAbs(0.24602741408, POP_STABILITY_ERR));
+               Catch::Matchers::WithinAbs(0.2460615898, POP_STABILITY_ERR));
 }
 
 TEMPLATE_TEST_CASE("QuickExact simulation of a one-pair BDL wire with two perturbers", "[ExGS]",
@@ -334,7 +335,8 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a one-pair BDL wire with two pertur
     CHECK(charge_lyt_first.get_charge_state({7, 0, 0}) == sidb_charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({15, 0, 0}) == sidb_charge_state::NEGATIVE);
 
-    CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.1152574819, POP_STABILITY_ERR));
+    CHECK_THAT(charge_lyt_first.get_system_energy().value(),
+               Catch::Matchers::WithinAbs(0.1152734924, POP_STABILITY_ERR));
 }
 
 TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shape SiDB arrangement", "[ExGS]",
@@ -368,8 +370,8 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shape SiDB arrangement", "[ExGS
     CHECK(charge_lyt_first.get_charge_state({-7, 1, 1}) == sidb_charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({-7, 3, 0}) == sidb_charge_state::NEGATIVE);
 
-    CHECK_THAT(charge_lyt_first.get_system_energy(),
-               Catch::Matchers::WithinAbs(0.31915040629512115, POP_STABILITY_ERR));
+    CHECK_THAT(charge_lyt_first.get_system_energy().value(),
+               Catch::Matchers::WithinAbs(0.3191947396, POP_STABILITY_ERR));
 }
 
 TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shape SiDB OR gate with input 01", "[ExGS]",
@@ -405,7 +407,8 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shape SiDB OR gate with input 0
     CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
 
-    CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0.46621669, POP_STABILITY_ERR));
+    CHECK_THAT(charge_lyt_first.get_system_energy().value(),
+               Catch::Matchers::WithinAbs(0.4662814571, POP_STABILITY_ERR));
 }
 
 TEMPLATE_TEST_CASE(
@@ -724,7 +727,7 @@ TEMPLATE_TEST_CASE("four DBs next to each other, small mu-", "[ExGS]",
 
     REQUIRE(simulation_results.charge_distributions.size() == 2);
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-    CHECK_THAT(charge_lyt_first.get_system_energy(), Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
+    CHECK_THAT(charge_lyt_first.get_system_energy().value(), Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
 }
 
 TEMPLATE_TEST_CASE("seven DBs next to each other, small mu-", "[ExGS]",

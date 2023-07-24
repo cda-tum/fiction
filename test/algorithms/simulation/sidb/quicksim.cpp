@@ -187,7 +187,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
         CHECK(charge_lyt_first.get_charge_state({17, -1, 1}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy().value(),
-                   Catch::Matchers::WithinAbs(0.479933, POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.4798960597, POP_STABILITY_ERR));
     };
 
     SECTION("Default settings")
@@ -276,7 +276,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varyi
         CHECK(charge_lyt_first.get_charge_state({-7, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy().value(),
-                   Catch::Matchers::WithinAbs(0.319219, POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.3191947396, POP_STABILITY_ERR));
     };
 
     SECTION("Default settings")
@@ -368,7 +368,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01 
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy().value(),
-                   Catch::Matchers::WithinAbs(0.4663181, POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.4662814571, POP_STABILITY_ERR));
     };
 
     SECTION("Default settings")

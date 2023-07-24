@@ -1624,7 +1624,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             return 0.0_V;
         }
-        return (strg->phys_params.k / units::length::meter_t(distance * 1E-9) *
+        return (strg->phys_params.k / units::length::meter_t(distance.value() * 1E-9) *
                 std::exp(-distance.value() / strg->phys_params.lambda_tf.value()) * units::constants::e);
     }
     /**

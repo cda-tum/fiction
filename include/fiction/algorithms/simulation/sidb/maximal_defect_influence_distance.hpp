@@ -12,6 +12,8 @@
 #include "fiction/technology/sidb_surface.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
+#include <units.h>
+
 #include <mutex>
 #include <thread>
 #include <utility>
@@ -56,7 +58,7 @@ struct maximal_defect_influence_distance_params
  * sensitive part of the layout).
  */
 template <typename Lyt>
-std::pair<double, typename Lyt::cell>
+std::pair<units::length::nanometer_t, typename Lyt::cell>
 maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_distance_params<Lyt>& sim_params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -67,7 +69,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
                                                               automatic_base_number_detection::OFF};
 
     coordinate<Lyt> min_defect_position{};
-    double          avoidance_distance = 0;
+    auto            avoidance_distance = 0_nm;
 
     sidb_defect_layout              layout{lyt};
     std::vector<typename Lyt::cell> cells{};
@@ -183,7 +185,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
 
                     if (charge_index_defect_layout != charge_index_layout)
                     {
-                        double distance = std::numeric_limits<double>::max();
+                        auto distance = units::length::nanometer_t{std::numeric_limits<double>::max()};
                         layout.foreach_cell(
                             [&layout, &defect, &distance](const auto& cell)
                             {
@@ -240,7 +242,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
 
         if (charge_index_defect_layout != charge_index_layout)
         {
-            double distance = std::numeric_limits<double>::max();
+            auto distance = units::length::nanometer_t{std::numeric_limits<double>::max()};
             layout.foreach_cell(
                 [&layout, &defect, &distance](const auto& cell)
                 {

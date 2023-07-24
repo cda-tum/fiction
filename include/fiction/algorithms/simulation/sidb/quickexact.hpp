@@ -128,7 +128,7 @@ class quickexact_impl
                 for (const auto& cell : detected_negative_sidbs)
                 {
                     charge_lyt_with_assigned_dependent_cell.assign_defect_to_charge_distribution_surface(
-                        cell, sidb_defect{sidb_defect_type::UNKNOWN, -1,
+                        cell, sidb_defect{sidb_defect_type::UNKNOWN, -1_e,
                                           charge_lyt_with_assigned_dependent_cell.get_phys_params().epsilon_r,
                                           charge_lyt_with_assigned_dependent_cell.get_phys_params().lambda_tf});
                 }

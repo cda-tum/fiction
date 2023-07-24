@@ -65,11 +65,14 @@ struct time_to_solution_stats
      * Average single simulation runtime in seconds.
      */
     units::time::second_t mean_single_runtime{};
-
     /**
      * Single simulation runtime of the exhaustive ground state searcher.
      */
     units::time::second_t single_runtime_exhaustive{};
+    /**
+     * Exhaustive simulation algorithm used to simulate the ground state as reference.
+     */
+    std::string algorithm;
 
     /**
      * Print the results to the given output stream.
@@ -78,9 +81,9 @@ struct time_to_solution_stats
      */
     void report(std::ostream& out = std::cout)
     {
-        out << fmt::format("[i] time_to_solution: {} | acc: {} | t_(s): {} | t_exhaustive(s): {}\n",
+        out << fmt::format("[i] time_to_solution: {} | acc: {} | t_(s): {} | t_exhaustive(s): {} | exact alg.: {}\n",
                            time_to_solution.value(), acc, mean_single_runtime.value(),
-                           single_runtime_exhaustive.value());
+                           single_runtime_exhaustive.value(), algorithm);
     }
 };
 /**
@@ -103,23 +106,22 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to
     const auto simulation_results_exgs = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
 
     time_to_solution_stats st{};
-    st.single_runtime_exhaustive =
-        units::time::second_t{mockturtle::to_seconds(simulation_results_exgs.simulation_runtime)};
-    st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_results_exgs.simulation_runtime);
+
     sidb_simulation_result<Lyt> simulation_result{};
     if (tts_params.engine == exhaustive_algorithm::EXGS)
     {
-        st.algorithm      = "ExGS";
+        st.algorithm      = "exgs";
         simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
     }
     else
     {
         const quickexact_params<Lyt> params{quicksim_params.phys_params};
-        st.algorithm      = "QuickExact";
+        st.algorithm      = "quickexact";
         simulation_result = quickexact(lyt, params);
     }
 
-    st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_result.simulation_runtime);
+    st.single_runtime_exhaustive =
+        units::time::second_t{mockturtle::to_seconds(simulation_results_exgs.simulation_runtime)};
 
     std::size_t         gs_count = 0;
     std::vector<double> time{};
