@@ -5,7 +5,6 @@
 #include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
-#include <fiction/io/print_layout.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
@@ -120,4 +119,61 @@ TEST_CASE("SiQAD's AND gate I/O BDL detection", "[detect-bdl-pairs]")
     CHECK(output_pair.type == layout::cell_type::OUTPUT);
     CHECK(output_pair.top == cell<layout>{10, 6, 0});
     CHECK(output_pair.bottom == cell<layout>{10, 7, 0});
+}
+
+TEST_CASE("Bestagon fan-out I/O BDL detection", "[detect-bdl-pairs]")
+{
+    using layout = sidb_cell_clk_lyt_siqad;
+
+    layout lyt{{42, 21}, "Fan-out"};
+
+    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::INPUT);
+
+    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 4, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 6, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({20, 7, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({21, 8, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({19, 12, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({23, 12, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 14, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({16, 16, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 17, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({28, 17, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({10, 18, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 19, 0}, sidb_technology::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({34, 19, 0}, sidb_technology::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({4, 20, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({38, 20, 0}, sidb_technology::cell_type::NORMAL);
+
+    const auto result = detect_io_bdl_pairs(lyt);
+
+    REQUIRE(result.size() == 3);
+    const auto& input_pair   = result[0];
+    const auto& output_pair1 = result[1];
+    const auto& output_pair2 = result[2];
+
+    CHECK(input_pair.type == layout::cell_type::INPUT);
+    CHECK(input_pair.top == cell<layout>{2, 1, 0});
+    CHECK(input_pair.bottom == cell<layout>{4, 2, 0});
+
+    CHECK(output_pair1.type == layout::cell_type::OUTPUT);
+    CHECK(output_pair1.top == cell<layout>{10, 18, 0});
+    CHECK(output_pair1.bottom == cell<layout>{8, 19, 0});
+
+    CHECK(output_pair2.type == layout::cell_type::OUTPUT);
+    CHECK(output_pair2.top == cell<layout>{32, 18, 0});
+    CHECK(output_pair2.bottom == cell<layout>{34, 19, 0});
 }
