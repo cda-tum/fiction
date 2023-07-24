@@ -67,16 +67,23 @@ struct bdl_pair
 struct detect_bdl_pairs_params
 {
     /**
-     * The maximum distance between two dots to be considered a BDL pair.
+     * The minimum distance between two dots to be considered a BDL pair. This is useful to prevent, e.g., SiDBs of
+     * atomic wires to be considered BDL pairs.
      */
-    units::length::nanometer_t threshold{2_nm};
+    units::length::nanometer_t minimum_distance{0.75_nm};
+    /**
+     * The maximum distance between two dots to be considered a BDL pair. This is useful to prevent unlikely pairings
+     * of SiDBs that are far apart and to improve performance of the matching algorithm.
+     */
+    units::length::nanometer_t maximum_distance{1.5_nm};
 };
 
 /**
  * This algorithm detects input or output BDL pairs in an SiDB layout. It does so by first collecting all input and
- * output dots and then uniquely pairing them up based on their distance. A threshold can be defined (default = 2 nm),
- * after which SiDBs are no longer considered a pair. The distance between two dots is computed using the
- * `sidb_nanometer_distance` function. The algorithm returns a vector of I/O BDL pairs.
+ * output dots and then uniquely pairing them up based on their distance. Lower and upper distance thresholds can be
+ * defined (defaults = 0.75 nm and 1.5 nm, respectively) to narrow down the range in which SiDBs could be considered a
+ * BDL pair. The distance between two dots is computed using the `sidb_nanometer_distance` function. The algorithm
+ * returns a vector of I/O BDL pairs.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to detect I/O BDL pairs in.
@@ -89,6 +96,9 @@ std::vector<bdl_pair<Lyt>> detect_io_bdl_pairs(const Lyt& lyt, const detect_bdl_
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
+    // sanity check for parameter settings
+    assert(params.minimum_distance <= params.maximum_distance);
 
     std::vector<bdl_pair<Lyt>> bdl_pairs{};
     bdl_pairs.reserve(lyt.num_pis() / 2 + lyt.num_pos() / 2);
@@ -175,9 +185,16 @@ std::vector<bdl_pair<Lyt>> detect_io_bdl_pairs(const Lyt& lyt, const detect_bdl_
 
         for (auto& potential_bdl_pair : input_pairwise_distances)
         {
-            // if the distance is larger than the threshold, we can break the loop because the remaining distances
-            // must be larger as well due to the prior sorting; this prevents unlikely pairings and helps performance
-            if (potential_bdl_pair.distance > params.threshold)
+            // if the distance is smaller than the lower bound threshold, we can continue to the next pairing; this
+            // prevents the pairing of dots that are too close to each other, e.g., in an atomic wire
+            if (potential_bdl_pair.distance < params.minimum_distance)
+            {
+                continue;
+            }
+            // if the distance is larger than the upper bound threshold, we can break the loop because the remaining
+            // distances must be larger as well due to the prior sorting; this prevents unlikely pairings and helps
+            // performance
+            if (potential_bdl_pair.distance > params.maximum_distance)
             {
                 break;
             }

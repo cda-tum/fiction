@@ -2,7 +2,7 @@
 // Created by marcel on 21.07.23.
 //
 
-#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
 #include <fiction/types.hpp>
@@ -20,11 +20,65 @@ TEST_CASE("Empty layout I/O BDL detection", "[detect-bdl-pairs]")
     CHECK(result.empty());
 }
 
+TEST_CASE("Atomic wire I/O BDL detection", "[detect-bdl-pairs]")
+{
+    using layout = sidb_cell_clk_lyt_siqad;
+
+    layout lyt{{7, 0}, "Atomic wire"};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::INPUT);
+
+    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::OUTPUT);
+
+    detect_bdl_pairs_params params{};
+
+    SECTION("default lower threshold")
+    {
+        const auto result = detect_io_bdl_pairs(lyt, params);
+
+        REQUIRE(result.size() == 0);
+    }
+    SECTION("0.5 nm lower threshold")
+    {
+        params.minimum_distance = 0.5_nm;
+
+        const auto result = detect_io_bdl_pairs(lyt, params);
+
+        REQUIRE(result.size() == 0);
+    }
+    SECTION("0 nm lower threshold")
+    {
+        params.minimum_distance = 0_nm;
+
+        const auto result = detect_io_bdl_pairs(lyt, params);
+
+        REQUIRE(result.size() == 2);
+
+        const auto& input_pair  = result[0];
+        const auto& output_pair = result[1];
+
+        CHECK(input_pair.type == layout::cell_type::INPUT);
+        CHECK(input_pair.upper == cell<layout>{0, 0, 0});
+        CHECK(input_pair.lower == cell<layout>{1, 0, 0});
+
+        CHECK(output_pair.type == layout::cell_type::OUTPUT);
+        CHECK(output_pair.upper == cell<layout>{6, 0, 0});
+        CHECK(output_pair.lower == cell<layout>{7, 0, 0});
+    }
+}
+
 TEST_CASE("BDL wire I/O BDL detection", "[detect-bdl-pairs]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
-    layout lyt{{0, 20}, "BDL wire"};
+    layout lyt{{20, 0}, "BDL wire"};
 
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -38,9 +92,13 @@ TEST_CASE("BDL wire I/O BDL detection", "[detect-bdl-pairs]")
     lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
     lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
 
-    SECTION("default threshold")
+    detect_bdl_pairs_params params{};
+    // set default lower threshold to 0 for testing
+    params.minimum_distance = 0_nm;
+
+    SECTION("default upper threshold")
     {
-        const auto result = detect_io_bdl_pairs(lyt);
+        const auto result = detect_io_bdl_pairs(lyt, params);
 
         REQUIRE(result.size() == 2);
         const auto& input_pair  = result[0];
@@ -54,9 +112,11 @@ TEST_CASE("BDL wire I/O BDL detection", "[detect-bdl-pairs]")
         CHECK(output_pair.upper == cell<layout>{18, 0, 0});
         CHECK(output_pair.lower == cell<layout>{20, 0, 0});
     }
-    SECTION("1 nm threshold")
+    SECTION("1 nm upper threshold")
     {
-        const auto result = detect_io_bdl_pairs(lyt, {1_nm});
+        params.maximum_distance = 1_nm;
+
+        const auto result = detect_io_bdl_pairs(lyt, params);
 
         REQUIRE(result.size() == 2);
         const auto& input_pair  = result[0];
@@ -70,9 +130,11 @@ TEST_CASE("BDL wire I/O BDL detection", "[detect-bdl-pairs]")
         CHECK(output_pair.upper == cell<layout>{18, 0, 0});
         CHECK(output_pair.lower == cell<layout>{20, 0, 0});
     }
-    SECTION("0.5 nm threshold")
+    SECTION("0.5 nm upper threshold")
     {
-        const auto result = detect_io_bdl_pairs(lyt, {0.5_nm});
+        params.maximum_distance = 0.5_nm;
+
+        const auto result = detect_io_bdl_pairs(lyt, params);
 
         // the threshold is too small to detect any BDL pairs
         REQUIRE(result.size() == 0);
@@ -99,6 +161,7 @@ TEST_CASE("SiQAD's AND gate I/O BDL detection", "[detect-bdl-pairs]")
 
     lyt.assign_cell_type({10, 6, 0}, sidb_technology::cell_type::OUTPUT);
     lyt.assign_cell_type({10, 7, 0}, sidb_technology::cell_type::OUTPUT);
+
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
     const auto result = detect_io_bdl_pairs(lyt);
