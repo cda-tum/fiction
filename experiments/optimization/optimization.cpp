@@ -32,6 +32,7 @@ using coord_path   = fiction::layout_coordinate_path<obs_gate_lyt>;
 using dist         = fiction::manhattan_distance_functor<obs_gate_lyt, uint64_t>;
 using cost         = fiction::unit_cost_functor<obs_gate_lyt, uint8_t>;
 
+// If wires cross over empty tiles, move them down one layer
 coord_path check_wires(obs_gate_lyt lyt, std::vector<fiction::offset::ucoord_t> tc)
 {
     coord_path moved_tiles;
@@ -39,23 +40,25 @@ coord_path check_wires(obs_gate_lyt lyt, std::vector<fiction::offset::ucoord_t> 
     {
         if (lyt.is_empty_tile({tile.x, tile.y, 0}) && lyt.is_wire_tile({tile.x, tile.y, 1}))
         {
-            auto fint  = lyt.incoming_data_flow({tile.x, tile.y, 1})[0];
-            auto foutt = lyt.outgoing_data_flow({tile.x, tile.y, 1})[0];
+            auto incoming_tile = lyt.incoming_data_flow({tile.x, tile.y, 1})[0];
+            auto outgoing_tile = lyt.outgoing_data_flow({tile.x, tile.y, 1})[0];
             lyt.move_node(lyt.get_node({tile.x, tile.y, 1}), {tile.x, tile.y, 0},
-                          {lyt.make_signal(lyt.get_node(fint))});
-            if (lyt.incoming_data_flow(foutt).size() &&
-                (find(tc.begin(), tc.end(), lyt.incoming_data_flow(foutt)[0]) == tc.end() ||
-                 find(moved_tiles.begin(), moved_tiles.end(), lyt.incoming_data_flow(foutt)[0]) != moved_tiles.end()))
+                          {lyt.make_signal(lyt.get_node(incoming_tile))});
+            if (lyt.incoming_data_flow(outgoing_tile).size() &&
+                (find(tc.begin(), tc.end(), lyt.incoming_data_flow(outgoing_tile)[0]) == tc.end() ||
+                 find(moved_tiles.begin(), moved_tiles.end(), lyt.incoming_data_flow(outgoing_tile)[0]) !=
+                     moved_tiles.end()))
             {
-                lyt.move_node(lyt.get_node(foutt), foutt,
+                lyt.move_node(lyt.get_node(outgoing_tile), outgoing_tile,
                               {
                                   lyt.make_signal(lyt.get_node({tile.x, tile.y, 0})),
-                                  lyt.make_signal(lyt.get_node(lyt.incoming_data_flow(foutt)[0])),
+                                  lyt.make_signal(lyt.get_node(lyt.incoming_data_flow(outgoing_tile)[0])),
                               });
             }
             else
             {
-                lyt.move_node(lyt.get_node(foutt), foutt, {lyt.make_signal(lyt.get_node({tile.x, tile.y, 0}))});
+                lyt.move_node(lyt.get_node(outgoing_tile), outgoing_tile,
+                              {lyt.make_signal(lyt.get_node({tile.x, tile.y, 0}))});
             }
             lyt.obstruct_coordinate({tile.x, tile.y, 0});
             lyt.clear_obstructed_coordinate({tile.x, tile.y, 1});
@@ -65,6 +68,7 @@ coord_path check_wires(obs_gate_lyt lyt, std::vector<fiction::offset::ucoord_t> 
     return moved_tiles;
 }
 
+// Trace back wires of a gate
 std::tuple<std::vector<fiction::offset::ucoord_t>, std::vector<fiction::offset::ucoord_t>,
            std::vector<fiction::offset::ucoord_t>, coord_path, coord_path, coord_path, coord_path>
 get_fanin_and_fanouts(obs_gate_lyt& lyt, fiction::offset::ucoord_t op)
@@ -181,29 +185,35 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, fiction::offset::ucoord_t op)
     return std::make_tuple(fanins, fanouts, to_clear, route1, route2, route3, route4);
 }
 
-std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t old_pos, obs_gate_lyt lyt, int width, int height)
+std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t old_pos, obs_gate_lyt lyt, int width,
+                                                      int height)
 {
     const fiction::a_star_params           params{true};
-    std::vector<fiction::offset::ucoord_t> fanins;
-    std::vector<fiction::offset::ucoord_t> fanouts;
     std::vector<fiction::offset::ucoord_t> to_clear;
-    coord_path                             r1;
-    coord_path                             r2;
-    coord_path                             r3;
-    coord_path                             r4;
-    auto                                   ff = get_fanin_and_fanouts(lyt, old_pos);
-    fanins                                    = std::get<0>(ff);
-    fanouts                                   = std::get<1>(ff);
-    to_clear                                  = std::get<2>(ff);
-    r1                                        = std::get<3>(ff);
-    r2                                        = std::get<4>(ff);
-    r3                                        = std::get<5>(ff);
-    r4                                        = std::get<6>(ff);
-    int min_x = max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.x < b.x; })->x;
-    int min_y = max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.y < b.y; })->y;
-    int max_x = old_pos.x;
-    int max_y = old_pos.y;
+
+    auto                                   ff      = get_fanin_and_fanouts(lyt, old_pos);
+    std::vector<fiction::offset::ucoord_t> fanins  = std::get<0>(ff);
+    std::vector<fiction::offset::ucoord_t> fanouts = std::get<1>(ff);
+    to_clear                                       = std::get<2>(ff);
+    coord_path r1                                  = std::get<3>(ff);
+    coord_path r2                                  = std::get<4>(ff);
+    coord_path r3                                  = std::get<5>(ff);
+    coord_path r4                                  = std::get<6>(ff);
+    int        min_x                               = 0;
+    int        min_y                               = 0;
+    if (fanins.size() > 0)
+    {
+        min_x = max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.x < b.x; })->x;
+        min_y = max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.y < b.y; })->y;
+    }
+
+    int max_x        = old_pos.x;
+    int max_y        = old_pos.y;
+    int max_diagonal = max_x + max_y;
+
     fiction::offset::ucoord_t new_pos = {0, 0};
+
+    // if gate is directly connected to one of its fanins, no improvement is possible
     for (auto fanin : fanins)
     {
         for (fiction::offset::ucoord_t i : lyt.incoming_data_flow(old_pos))
@@ -212,11 +222,14 @@ std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t 
                 return std::make_tuple(false, new_pos);
             }
     }
+
     for (auto tile : to_clear)
     {
         lyt.clear_tile(tile);
         lyt.clear_obstructed_coordinate(tile);
     }
+
+    // update children of fanouts
     for (auto fanout : fanouts)
     {
         std::vector<gate_lyt::signal> fins;
@@ -229,11 +242,16 @@ std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t 
         }
         lyt.move_node(lyt.get_node(fanout), fanout, fins);
     }
+
+    // remove children of gate to be moved
     lyt.move_node(lyt.get_node(old_pos), old_pos, {});
+    // fix wires that cross over empty tiles
     check_wires(lyt, to_clear);
     bool                      success     = false;
     fiction::offset::ucoord_t current_pos = old_pos;
     bool                      optimized   = false;
+
+    // iterate over layout diagonally
     for (int k = 0; k < width + height + 1; k++)
     {
         for (int x = 0; x < k + 1; x++)
@@ -243,7 +261,9 @@ std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t 
             {
                 break;
             }
-            else if (std::min(max_y, height) >= y && y >= min_y && std::min(width, max_x) >= x && x >= min_x)
+            // only check better positions
+            else if (height >= y && y >= min_y && width >= x && x >= min_x && ((x + y) <= max_diagonal) &&
+                     ((!lyt.is_pi_tile(current_pos)) || (lyt.is_pi_tile(current_pos) && (x == 0 || y == 0))))
             {
                 new_pos = {x, y};
                 if (lyt.is_empty_tile(new_pos) && lyt.is_empty_tile({new_pos.x, new_pos.y, 1}))
@@ -253,11 +273,18 @@ std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t 
                     lyt.obstruct_coordinate({new_pos.x, new_pos.y, 1});
                     lyt.clear_obstructed_coordinate(current_pos);
                     lyt.clear_obstructed_coordinate({current_pos.x, current_pos.y, 1});
-                    coord_path path1 = fiction::a_star<coord_path>(lyt, {fanins[0], new_pos}, dist(), cost(), params);
-                    for (auto tile : path1)
+
+                    // get paths for faninsa and fanouts
+                    coord_path path1;
+                    if (fanins.size() > 0)
                     {
-                        lyt.obstruct_coordinate(tile);
+                        path1 = fiction::a_star<coord_path>(lyt, {fanins[0], new_pos}, dist(), cost(), params);
+                        for (auto tile : path1)
+                        {
+                            lyt.obstruct_coordinate(tile);
+                        }
                     }
+
                     coord_path path2;
                     if (fanins.size() == 2)
                     {
@@ -267,6 +294,7 @@ std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t 
                             lyt.obstruct_coordinate(tile);
                         }
                     }
+
                     coord_path path3;
                     if (!fanouts.empty())
                     {
@@ -276,6 +304,7 @@ std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t 
                             lyt.obstruct_coordinate(tile);
                         }
                     }
+
                     coord_path path4;
                     if (fanouts.size() == 2)
                     {
@@ -285,8 +314,10 @@ std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t 
                             lyt.obstruct_coordinate(tile);
                         }
                     }
-                    if (!path1.empty() && !path3.empty() && !(fanins.size() == 2 && path2.empty()) &&
-                        !(fanouts.size() == 2 and path4.empty()))
+
+                    // if possible routing was found, it will be applied
+                    if (!(fanins.size() > 0 && path1.empty()) && !(fanins.size() == 2 && path2.empty()) &&
+                        !(fanouts.size() > 0 and path3.empty()) && !(fanouts.size() == 2 and path4.empty()))
                     {
                         for (auto path : {path1, path2, path3, path4})
                         {
@@ -312,7 +343,7 @@ std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t 
                                               lyt.make_signal(lyt.get_node(path2[path2.size() - 2])),
                                           });
                         }
-                        else
+                        else if (fanins.size() == 1)
                         {
                             lyt.move_node(lyt.get_node(new_pos), new_pos,
                                           {lyt.make_signal(lyt.get_node(path1[path1.size() - 2]))});
@@ -327,6 +358,7 @@ std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t 
                             lyt.move_node(lyt.get_node(fanout), fanout, signals);
                         }
                     }
+                    // if no routing was found, remove added obstructions
                     else
                     {
                         for (auto path : {path1, path2, path3, path4})
@@ -349,6 +381,7 @@ std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t 
             break;
         }
     }
+    // if no better coordinate was found, restore old wiring
     if (!success)
     {
         lyt.move_node(lyt.get_node(current_pos), old_pos, {});
@@ -386,6 +419,7 @@ std::tuple<bool, fiction::offset::ucoord_t> move_gate(fiction::offset::ucoord_t 
     return std::make_tuple(optimized, new_pos);
 }
 
+// deletes a row in the layout by moving all southern gates up on positions
 void delete_row(obs_gate_lyt& lyt, int row_idx, int width, int height)
 {
     std::map<int, std::map<int, std::map<int, std::vector<fiction::offset::ucoord_t>>>> fanins;
@@ -448,6 +482,7 @@ void delete_row(obs_gate_lyt& lyt, int row_idx, int width, int height)
     }
 }
 
+// deletes rows that only contain vertically connected wires
 void delete_wires(obs_gate_lyt& lyt, int width, int height)
 {
     for (int y = height; y >= 0; y--)
@@ -478,6 +513,7 @@ void delete_wires(obs_gate_lyt& lyt, int width, int height)
     }
 }
 
+// trace back all output nodes and calculate optimal positions
 void optimize_output(obs_gate_lyt& lyt)
 {
     std::vector<fiction::offset::ucoord_t> pos{};
@@ -504,6 +540,8 @@ void optimize_output(obs_gate_lyt& lyt)
         std::max_element(paths.begin(), paths.end(), [](auto& a, auto& b) { return a[1].x < b[1].x; })->at(1).x;
     auto min_y =
         std::max_element(paths.begin(), paths.end(), [](auto& a, auto& b) { return a[1].y < b[1].y; })->at(1).y;
+    std::vector<std::tuple<fiction::offset::ucoord_t, fiction::offset::ucoord_t, fiction::offset::ucoord_t>> updates;
+
     for (auto& route : paths)
     {
         fiction::offset::ucoord_t dangling = {100000, 100000};
@@ -527,7 +565,9 @@ void optimize_output(obs_gate_lyt& lyt)
             {
                 if (new_pos.x != 100000)
                 {
-                    lyt.move_node(lyt.get_node(tile), new_pos, {lyt.make_signal(lyt.get_node(dangling))});
+                    new_pos = {new_pos.x, new_pos.y, 0};
+                    updates.push_back(std::make_tuple(tile, new_pos, dangling));
+                    // lyt.move_node(lyt.get_node(tile), new_pos, {lyt.make_signal(lyt.get_node(dangling))});
                 }
                 moved = true;
             }
@@ -535,6 +575,46 @@ void optimize_output(obs_gate_lyt& lyt)
         if (!moved)
         {
             lyt.move_node(lyt.get_node(route.back()), route[1], {lyt.make_signal(lyt.get_node(route[0]))});
+        }
+    }
+    for (std::tuple<fiction::offset::ucoord_t, fiction::offset::ucoord_t, fiction::offset::ucoord_t>& update : updates)
+    {
+        fiction::offset::ucoord_t tile;
+        fiction::offset::ucoord_t new_pos;
+        fiction::offset::ucoord_t dangling;
+        std::tie(tile, new_pos, dangling) = update;
+        lyt.move_node(lyt.get_node(tile), new_pos, {lyt.make_signal(lyt.get_node(tile))});
+    }
+}
+
+// fixes dead node warning by moving gates back and forth
+void fix_dead_nodes(obs_gate_lyt& lyt, std::vector<fiction::offset::ucoord_t>& gt)
+{
+    fiction::offset::ucoord_t empty_pos = {100000, 100000};
+    for (auto coord : lyt.coordinates())
+    {
+        if (lyt.is_empty_tile(coord))
+        {
+            empty_pos = coord;
+            break;
+        }
+    }
+    if (empty_pos.x != 100000)
+    {
+        for (auto gate : gt)
+        {
+            if (lyt.is_dead(lyt.get_node(gate)))
+            {
+                std::vector<fiction::offset::ucoord_t> ins = lyt.incoming_data_flow(gate);
+                lyt.move_node(lyt.get_node(gate), empty_pos);
+                lyt.clear_tile(gate);
+                std::vector<gate_lyt::signal> signals;
+                for (auto fanin : ins)
+                {
+                    signals.push_back(lyt.make_signal(lyt.get_node(fanin)));
+                }
+                lyt.move_node(lyt.get_node(empty_pos), gate, signals);
+            }
         }
     }
 }
@@ -567,8 +647,9 @@ int main()  // NOLINT
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
 
     static constexpr const uint64_t bench_select =
-        fiction_experiments::mux21;// & fiction_experiments::fontes18;  // & fiction_experiments::fontes18; // & ~fiction_experiments::log2 &
-                                    //~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
+        fiction_experiments::parity;  // & fiction_experiments::fontes18;  // & fiction_experiments::fontes18; // &
+                                      // ~fiction_experiments::log2 &
+                                      //~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
@@ -581,10 +662,7 @@ int main()  // NOLINT
 
         // perform layout generation with an SMT-based exact algorithm
         const auto gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &orthogonal_stats);
-        // std::stringstream print_stream1{};
 
-        // print_gate_level_layout(print_stream1, gate_level_layout, true, false);
-        // std::cout << print_stream1.str();
         //  compute critical path and throughput
         fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
         fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats);
@@ -597,6 +675,7 @@ int main()  // NOLINT
         const std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         // Optimization
         obs_gate_lyt layout = fiction::obstruction_layout<gate_lyt>(gate_level_layout);
+
         std::vector<fiction::offset::ucoord_t> gates;
         for (int x = 0; x <= width; x++)
         {
@@ -604,7 +683,7 @@ int main()  // NOLINT
             {
                 if (layout.is_inv(layout.get_node({x, y})) || layout.is_and(layout.get_node({x, y})) ||
                     layout.is_xor(layout.get_node({x, y})) || layout.is_fanout(layout.get_node({x, y})) ||
-                    layout.is_or(layout.get_node({x, y})))
+                    layout.is_or(layout.get_node({x, y})) || layout.is_pi_tile({x, y}))
                 {
                     layout.obstruct_coordinate({x, y, 1});
                     gates.push_back({x, y});
@@ -612,32 +691,42 @@ int main()  // NOLINT
             }
         }
 
-        std::sort(gates.begin(), gates.end(), [](fiction::offset::ucoord_t a, fiction::offset::ucoord_t b) {
-                      return a.x + a.y < b.x + b.y;
-                  });
+        // sort gates based on diagonal line
+        std::sort(gates.begin(), gates.end(),
+                  [](fiction::offset::ucoord_t a, fiction::offset::ucoord_t b) { return a.x + a.y < b.x + b.y; });
 
         int moved = 1;
 
-        for (int h = 0; h < 20; h++) {
-            if (moved != 0) {
+        for (int h = 0; h < 20; h++)
+        {
+            if (moved != 0)
+            {
                 moved = 0;
-            } else {
+            }
+            else  // if no gates were moved, stop optimization
+            {
                 break;
             }
 
-            for (int gate_id = 0; gate_id < gates.size(); gate_id++) {
-                std::cout << gates[gate_id];
-                std::pair<bool, fiction::offset::ucoord_t> moved_gate = move_gate(gates[gate_id], layout, width, height);
+            for (int gate_id = 0; gate_id < gates.size(); gate_id++)
+            {
+                std::pair<bool, fiction::offset::ucoord_t> moved_gate =
+                    move_gate(gates[gate_id], layout, width, height);
 
-                if (moved_gate.first) {
+                if (moved_gate.first)
+                {
                     moved += 1;
-                    gates[gate_id] = moved_gate.second;
+                    gates[gate_id] = moved_gate.second;  // update gate location
                 }
             }
+            std::sort(gates.begin(), gates.end(),
+                      [](fiction::offset::ucoord_t a, fiction::offset::ucoord_t b) { return a.x + a.y < b.x + b.y; });
         }
 
         delete_wires(layout, width, height);
         optimize_output(layout);
+        fix_dead_nodes(layout, gates);
+
         const auto end = std::chrono::steady_clock::now();
         // check equivalence
         std::stringstream print_stream1{};
