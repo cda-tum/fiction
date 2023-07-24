@@ -52,10 +52,10 @@ struct sidb_defect
     /**
      * Standard constructor.
      */
-    constexpr explicit sidb_defect(const sidb_defect_type                    defect_type = sidb_defect_type::UNKNOWN,
-                                   const units::charge::elementary_charge_t& electric_charge       = 0_e,
-                                   const double                              relative_permittivity = 0.0,
-                                   const units::length::nanometer_t&         screening_distance    = 0.0_nm) noexcept :
+    explicit sidb_defect(const sidb_defect_type                    defect_type           = sidb_defect_type::UNKNOWN,
+                         const units::charge::elementary_charge_t& electric_charge       = 0_e,
+                         const double                              relative_permittivity = 0.0,
+                         const units::length::nanometer_t&         screening_distance    = 0.0_nm) noexcept :
             type{defect_type},
             charge{electric_charge},
             epsilon_r{relative_permittivity},
@@ -83,31 +83,6 @@ struct sidb_defect
      */
     const units::length::nanometer_t lambda_tf;
 };
-/**
- * This operator compares two sidb_defect instances for equality. It checks if the type, charge,
- * epsilon_r, and lambda_tf members of the two instances are equal.
- *
- * @param lhs The left-hand side sidb_defect instance.
- * @param rhs The right-hand side sidb_defect instance.
- * @return Returns true if the two sidb_defect instances are equal, false otherwise.
- */
-static constexpr bool operator==(const sidb_defect& lhs, const sidb_defect& rhs) noexcept
-{
-    return lhs.type == rhs.type && lhs.charge == rhs.charge && lhs.epsilon_r == rhs.epsilon_r &&
-           lhs.lambda_tf == rhs.lambda_tf;
-}
-/**
- * This operator compares two sidb_defect instances for inequality. It uses the operator== to check
- * if the two instances are equal and returns the negation of the result.
- *
- * @param lhs The left-hand side sidb_defect instance.
- * @param rhs The right-hand side sidb_defect instance.
- * @return Returns true if the two sidb_defect instances are not equal, false if they are equal.
- */
-static constexpr bool operator!=(const sidb_defect& lhs, const sidb_defect& rhs) noexcept
-{
-    return !(lhs == rhs);
-}
 /**
  * Checks whether the given defect is charged. Charged defects are to be avoided by a larger distance.
  *
