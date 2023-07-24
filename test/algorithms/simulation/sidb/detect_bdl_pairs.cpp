@@ -47,12 +47,12 @@ TEST_CASE("BDL wire I/O BDL detection", "[detect-bdl-pairs]")
         const auto& output_pair = result[1];
 
         CHECK(input_pair.type == layout::cell_type::INPUT);
-        CHECK(input_pair.top == cell<layout>{0, 0, 0});
-        CHECK(input_pair.bottom == cell<layout>{2, 0, 0});
+        CHECK(input_pair.upper == cell<layout>{0, 0, 0});
+        CHECK(input_pair.lower == cell<layout>{2, 0, 0});
 
         CHECK(output_pair.type == layout::cell_type::OUTPUT);
-        CHECK(output_pair.top == cell<layout>{18, 0, 0});
-        CHECK(output_pair.bottom == cell<layout>{20, 0, 0});
+        CHECK(output_pair.upper == cell<layout>{18, 0, 0});
+        CHECK(output_pair.lower == cell<layout>{20, 0, 0});
     }
     SECTION("1 nm threshold")
     {
@@ -63,12 +63,12 @@ TEST_CASE("BDL wire I/O BDL detection", "[detect-bdl-pairs]")
         const auto& output_pair = result[1];
 
         CHECK(input_pair.type == layout::cell_type::INPUT);
-        CHECK(input_pair.top == cell<layout>{0, 0, 0});
-        CHECK(input_pair.bottom == cell<layout>{2, 0, 0});
+        CHECK(input_pair.upper == cell<layout>{0, 0, 0});
+        CHECK(input_pair.lower == cell<layout>{2, 0, 0});
 
         CHECK(output_pair.type == layout::cell_type::OUTPUT);
-        CHECK(output_pair.top == cell<layout>{18, 0, 0});
-        CHECK(output_pair.bottom == cell<layout>{20, 0, 0});
+        CHECK(output_pair.upper == cell<layout>{18, 0, 0});
+        CHECK(output_pair.lower == cell<layout>{20, 0, 0});
     }
     SECTION("0.5 nm threshold")
     {
@@ -109,16 +109,16 @@ TEST_CASE("SiQAD's AND gate I/O BDL detection", "[detect-bdl-pairs]")
     const auto& output_pair = result[2];
 
     CHECK(input_pair1.type == layout::cell_type::INPUT);
-    CHECK(input_pair1.top == cell<layout>{20, 0, 1});
-    CHECK(input_pair1.bottom == cell<layout>{18, 1, 1});
+    CHECK(input_pair1.upper == cell<layout>{20, 0, 1});
+    CHECK(input_pair1.lower == cell<layout>{18, 1, 1});
 
     CHECK(input_pair2.type == layout::cell_type::INPUT);
-    CHECK(input_pair2.top == cell<layout>{0, 0, 1});
-    CHECK(input_pair2.bottom == cell<layout>{2, 1, 1});
+    CHECK(input_pair2.upper == cell<layout>{0, 0, 1});
+    CHECK(input_pair2.lower == cell<layout>{2, 1, 1});
 
     CHECK(output_pair.type == layout::cell_type::OUTPUT);
-    CHECK(output_pair.top == cell<layout>{10, 6, 0});
-    CHECK(output_pair.bottom == cell<layout>{10, 7, 0});
+    CHECK(output_pair.upper == cell<layout>{10, 6, 0});
+    CHECK(output_pair.lower == cell<layout>{10, 7, 0});
 }
 
 TEST_CASE("Bestagon fan-out I/O BDL detection", "[detect-bdl-pairs]")
@@ -166,14 +166,14 @@ TEST_CASE("Bestagon fan-out I/O BDL detection", "[detect-bdl-pairs]")
     const auto& output_pair2 = result[2];
 
     CHECK(input_pair.type == layout::cell_type::INPUT);
-    CHECK(input_pair.top == cell<layout>{2, 1, 0});
-    CHECK(input_pair.bottom == cell<layout>{4, 2, 0});
+    CHECK(input_pair.upper == cell<layout>{2, 1, 0});
+    CHECK(input_pair.lower == cell<layout>{4, 2, 0});
 
     CHECK(output_pair1.type == layout::cell_type::OUTPUT);
-    CHECK(output_pair1.top == cell<layout>{10, 18, 0});
-    CHECK(output_pair1.bottom == cell<layout>{8, 19, 0});
+    CHECK(output_pair1.upper == cell<layout>{10, 18, 0});
+    CHECK(output_pair1.lower == cell<layout>{8, 19, 0});
 
     CHECK(output_pair2.type == layout::cell_type::OUTPUT);
-    CHECK(output_pair2.top == cell<layout>{32, 18, 0});
-    CHECK(output_pair2.bottom == cell<layout>{34, 19, 0});
+    CHECK(output_pair2.upper == cell<layout>{32, 18, 0});
+    CHECK(output_pair2.lower == cell<layout>{34, 19, 0});
 }

@@ -32,13 +32,13 @@ struct bdl_pair
      */
     const sidb_technology::cell_type type{};
     /**
-     * The top SiDB of the pair. Top and bottom are defined relative to each other via the `operator<` overload.
+     * The upper SiDB of the pair. Upper and lower are defined relative to each other via the `operator<` overload.
      */
-    const cell<Lyt> top{};
+    const cell<Lyt> upper{};
     /**
-     * The bottom SiDB of the pair. Top and bottom are defined relative to each other via the `operator<` overload.
+     * The lower SiDB of the pair. Upper and lower are defined relative to each other via the `operator<` overload.
      */
-    const cell<Lyt> bottom{};
+    const cell<Lyt> lower{};
     /**
      * Standard constructor for empty BDL pairs.
      */
@@ -47,13 +47,13 @@ struct bdl_pair
      * Constructor for BDL pairs.
      *
      * @param t Type of the SiDBs in the pair.
-     * @param upper The top SiDB of the pair.
-     * @param lower The bottom SiDB of the pair.
+     * @param u The upper SiDB of the pair.
+     * @param l The lower SiDB of the pair.
      */
-    bdl_pair(const sidb_technology::cell_type t, const cell<Lyt> upper, const cell<Lyt> lower) noexcept :
+    bdl_pair(const sidb_technology::cell_type t, const cell<Lyt> u, const cell<Lyt> l) noexcept :
             type{t},
-            top{upper},
-            bottom{lower}
+            upper{u},
+            lower{l}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -86,28 +86,61 @@ struct detect_bdl_pairs_params
 template <typename Lyt>
 std::vector<bdl_pair<Lyt>> detect_io_bdl_pairs(const Lyt& lyt, const detect_bdl_pairs_params params = {}) noexcept
 {
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
     std::vector<bdl_pair<Lyt>> bdl_pairs{};
     bdl_pairs.reserve(lyt.num_pis() / 2 + lyt.num_pos() / 2);
 
-    const auto pair_up_dots = [&lyt, &params, &bdl_pairs](const std::vector<cell<Lyt>>&    io_dots,
-                                                          const sidb_technology::cell_type type) noexcept
+    /**
+     * Pairs up dots based on their distance. It does so by first computing the pairwise distances between all dots and
+     * then sorting them. The smallest distances are then used to pair up the dots. The function takes a vector of dots
+     * and a cell type as input. It fills the vector of BDL pairs declared above.
+     */
+    const auto pair_up_dots = [&lyt, &params,
+                               &bdl_pairs](const std::vector<cell<Lyt>>&    io_dots,
+                                           const sidb_technology::cell_type type) noexcept -> void
     {
+        /**
+         * Container for pairwise dot distances used in the pairing algorithm.
+         */
         struct pairwise_dot_distance
         {
+            /**
+             * First dot.
+             */
             cell<Lyt> sidb1{};
+            /**
+             * Second dot.
+             */
             cell<Lyt> sidb2{};
-
+            /**
+             * Distance between the two dots.
+             */
             units::length::nanometer_t distance{};
-
+            /**
+             * Standard constructor for empty pairwise dot distances.
+             */
             pairwise_dot_distance() = default;
+            /**
+             * Constructor for pairwise dot distances.
+             *
+             * @param s1 The first dot.
+             * @param s2 The second dot.
+             * @param d The distance between the two dots.
+             */
             pairwise_dot_distance(const cell<Lyt> s1, const cell<Lyt> s2, const units::length::nanometer_t d) noexcept :
                     sidb1{s1},
                     sidb2{s2},
                     distance{d}
             {}
         };
-
-        const auto compute_pairwise_dot_distances = [&lyt](const std::vector<cell<Lyt>>& dots) noexcept
+        /**
+         * Computes the pairwise distances between all dots in the input vector.
+         */
+        const auto compute_pairwise_dot_distances =
+            [&lyt](const std::vector<cell<Lyt>>& dots) noexcept -> std::vector<pairwise_dot_distance>
         {
             std::vector<pairwise_dot_distance> pairwise_distances{};
             pairwise_distances.reserve(dots.size() * (dots.size() - 1) / 2);
@@ -122,8 +155,10 @@ std::vector<bdl_pair<Lyt>> detect_io_bdl_pairs(const Lyt& lyt, const detect_bdl_
 
             return pairwise_distances;
         };
-
-        const auto dot_distance_comparator = [](const auto& lhs, const auto& rhs) noexcept
+        /**
+         * Comparator for pairwise dot distances. Used in the sorting algorithm.
+         */
+        const auto dot_distance_comparator = [](const auto& lhs, const auto& rhs) noexcept -> bool
         { return lhs.distance < rhs.distance; };
 
         // compute pairwise distances
@@ -133,7 +168,10 @@ std::vector<bdl_pair<Lyt>> detect_io_bdl_pairs(const Lyt& lyt, const detect_bdl_
         // pair unique dots with the smallest distance
         std::unordered_set<cell<Lyt>> paired_dots{};
         paired_dots.reserve(io_dots.size());
-        const auto already_paired_up = [&paired_dots](const auto& dot) noexcept
+        /**
+         * Checks whether a dot has already been paired up.
+         */
+        const auto already_paired_up = [&paired_dots](const auto& dot) noexcept -> bool
         { return paired_dots.find(dot) != paired_dots.cend(); };
 
         for (auto& potential_bdl_pair : input_pairwise_distances)
