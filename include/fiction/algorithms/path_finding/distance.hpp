@@ -91,16 +91,16 @@ template <typename Lyt, typename Dist = uint64_t>
                                                           std::numeric_limits<Dist>::max();
 }
 /**
- * Computes the distance between two SiDB cells in nanometers.
+ * Computes the distance between two SiDB cells in nanometers (unit: nm).
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam Dist Floating-point type for the distance.
  * @param c1 The first cell.
  * @param c2 The second cell.
- * @return The distance between the two cells in nanometers.
+ * @return The distance between the two cells in nanometers (unit: nm).
  */
 template <typename Lyt>
-[[nodiscard]] constexpr units::length::nanometer_t
+[[nodiscard]] constexpr double
 sidb_nanometer_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source, const coordinate<Lyt>& target,
                         const sidb_simulation_parameters& sp = sidb_simulation_parameters{}) noexcept
 {
@@ -114,7 +114,7 @@ sidb_nanometer_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& 
     const auto x = pos_c1.first - pos_c2.first;
     const auto y = pos_c1.second - pos_c2.second;
 
-    return units::math::hypot(x, y);
+    return std::hypot(x, y);
 }
 
 // NOLINTBEGIN(*-special-member-functions): virtual destructor is prudent
