@@ -99,7 +99,6 @@ TEST_CASE("Operators", "[bdl-input-iterators]")
     CHECK(bii[2] == 3ull);
     CHECK(bii[3] == 6ull);
     CHECK(bii[4] == 10ull);
-
 }
 
 TEST_CASE("Empty layout iteration", "[bdl-input-iterator]")
