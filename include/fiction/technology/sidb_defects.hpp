@@ -48,9 +48,9 @@ struct sidb_defect
     /**
      * Standard constructor.
      */
-    constexpr explicit sidb_defect(const sidb_defect_type defect_type = sidb_defect_type::UNKNOWN,
-                                   const int64_t electric_charge = 0.0, const double relative_permittivity = 0.0,
-                                   const double screening_distance = 0.0) noexcept :
+    explicit sidb_defect(const sidb_defect_type defect_type = sidb_defect_type::UNKNOWN,
+                         const int64_t electric_charge = 0.0, const double relative_permittivity = 0.0,
+                         const double screening_distance = 0.0) noexcept :
             type{defect_type},
             charge{electric_charge},
             epsilon_r{relative_permittivity},
@@ -66,11 +66,11 @@ struct sidb_defect
      */
     const sidb_defect_type type;
     /**
-     * Electrical charge in units of the elementary charge e (e.g., 1*e, -2*e).
+     * Electrical charge in units of the elementary charge e (e.g., 1 ^= 1*e, -2 ^= -2*e).
      */
     const int64_t charge;
     /**
-     * Electric permittivity.
+     * Electric permittivity (unitless).
      */
     const double epsilon_r;
     /**

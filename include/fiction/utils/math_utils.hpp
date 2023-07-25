@@ -14,8 +14,7 @@ namespace fiction
 {
 
 /**
- * Rounds a number to a specified number of decimal
- * places.
+ * Rounds a number to a specified number of decimal places.
  *
  * @tparam T The type of the number to round.
  * @param number The number to round.

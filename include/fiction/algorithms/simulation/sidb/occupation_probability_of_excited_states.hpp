@@ -39,7 +39,7 @@ namespace fiction
         return 0.0;
     }
 
-    auto min_energy = std::numeric_limits<double>::infinity();
+    auto min_energy = std::numeric_limits<double>::infinity();  // unit: eV
 
     // Determine the minimal energy.
     const auto [energy, state_type] = *std::min_element(energy_and_state_type.cbegin(), energy_and_state_type.cend(),
@@ -71,8 +71,8 @@ namespace fiction
  * This function computes the occupation probability of excited states (charge distributions with energy higher than the
  * ground state) at a given temperature.
  *
- * @param energy_distribution This contains the energies of all possible charge distributions with the degeneracy.
- * @param temperature System temperature to assume.
+ * @param energy_distribution This contains the energies in eV of all possible charge distributions with the degeneracy.
+ * @param temperature System temperature to assume (unit: K).
  * @return The total occupation probability of all excited states is returned.
  */
 [[nodiscard]] inline double occupation_probability_non_gate_based(const sidb_energy_distribution& energy_distribution,
@@ -88,7 +88,7 @@ namespace fiction
     auto min_energy = std::numeric_limits<double>::infinity();
 
     const auto& [energy, degeneracy] = *(energy_distribution.begin());
-    min_energy                       = energy;
+    min_energy                       = energy;  // unit: eV
 
     // The partition function is obtained by summing up all the Boltzmann factors.
     const double partition_function =
