@@ -23,7 +23,7 @@ TEST_CASE("Traits", "[bdl-input-iterator]")
 
     CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator<layout>>::value_type, layout>);
 
-    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator<layout>>::difference_type, std::size_t>);
+    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator<layout>>::difference_type, int64_t>);
 }
 
 TEST_CASE("Operators", "[bdl-input-iterators]")
@@ -91,15 +91,14 @@ TEST_CASE("Operators", "[bdl-input-iterators]")
     CHECK(bii >= 0ull);
 
     // difference
-    CHECK(bii_cp - bii == 2ull);
+    CHECK(bii_cp - bii == 2);
 
     // subscript
     CHECK(bii[0] == 0ull);
     CHECK(bii[1] == 1ull);
-    CHECK(bii[2] == 3ull);
-    CHECK(bii[3] == 6ull);
-    CHECK(bii[4] == 10ull);
-
+    CHECK(bii[2] == 2ull);
+    CHECK(bii[3] == 3ull);
+    CHECK(bii[4] == 4ull);
 }
 
 TEST_CASE("Empty layout iteration", "[bdl-input-iterator]")

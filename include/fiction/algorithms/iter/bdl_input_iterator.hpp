@@ -86,18 +86,49 @@ class bdl_input_iterator
         return result;
     }
     /**
+     * Addition operator. Computes the input state of the current iterator plus the given integer.
+     *
+     * @param m The amount of input states to skip.
+     * @return The input state of the current iterator plus the given integer.
+     */
+    [[nodiscard]] bdl_input_iterator operator+(const int m) const noexcept
+    {
+        auto result{*this};
+
+        result += m;
+
+        return result;
+    }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+    /**
      * Addition assignment operator. Sets a next input state.
      *
      * @param m The amount of input states to skip.
      * @return Reference to `this`.
      */
-    bdl_input_iterator& operator+=(const uint64_t m) noexcept
+    bdl_input_iterator& operator+=(const int m) noexcept
     {
         current_input_index += m;
 
         set_all_inputs();
 
         return *this;
+    }
+#pragma GCC diagnostic pop
+    /**
+     * Subtraction operator. Computes the input state of the current iterator minus the given integer.
+     *
+     * @param m The amount of input states to skip.
+     * @return The input state of the current iterator minus the given integer.
+     */
+    [[nodiscard]] bdl_input_iterator operator-(const int m) const noexcept
+    {
+        auto result{*this};
+
+        result -= m;
+
+        return result;
     }
     /**
      * Prefix decrement operator. Sets the previous input state.
@@ -125,13 +156,15 @@ class bdl_input_iterator
 
         return result;
     }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
     /**
      * Subtraction assignment operator. Sets a previous input state.
      *
      * @param m The amount of input states to skip.
      * @return Reference to `this`.
      */
-    bdl_input_iterator& operator-=(const uint64_t m) noexcept
+    bdl_input_iterator& operator-=(const int m) noexcept
     {
         current_input_index -= m;
 
@@ -139,19 +172,16 @@ class bdl_input_iterator
 
         return *this;
     }
+#pragma GCC diagnostic pop
     /**
-     * Subscript operator. Sets the input state to the current one plus the given subscript.
+     * Subscript operator. Computes the input state of the current iterator plus the given integer.
      *
      * @param m The amount of input states to skip.
-     * @return Reference to `this`.
+     * @return The input state of the current iterator plus the given integer.
      */
-    bdl_input_iterator& operator[](const uint64_t m) noexcept
+    [[nodiscard]] bdl_input_iterator operator[](const int m) const noexcept
     {
-        current_input_index += m;
-
-        set_all_inputs();
-
-        return *this;
+        return (*this + m);
     }
     /**
      * Subtraction operator. Computes the difference between the current input index and the given iterator ones.
@@ -159,9 +189,9 @@ class bdl_input_iterator
      * @param other Iterator to compute the difference with.
      * @return The difference between the current input index and the given iterator ones.
      */
-    [[nodiscard]] std::size_t operator-(const bdl_input_iterator& other) const noexcept
+    [[nodiscard]] int64_t operator-(const bdl_input_iterator& other) const noexcept
     {
-        return current_input_index - other.current_input_index;
+        return static_cast<int64_t>(current_input_index) - static_cast<int64_t>(other.current_input_index);
     }
     /**
      * Equality operator. Compares the current input index with the given integer.
@@ -279,7 +309,7 @@ template <typename Lyt>
 struct iterator_traits<fiction::bdl_input_iterator<Lyt>>
 {
     using iterator_category = std::random_access_iterator_tag;
-    using difference_type   = std::size_t;
+    using difference_type   = int64_t;
     using value_type        = Lyt;
 };
 }  // namespace std
