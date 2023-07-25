@@ -26,13 +26,12 @@
 #include <vector>
 
 using coordinate = fiction::offset::ucoord_t;
-using gate_lyt = fiction::gate_level_layout<
+using gate_lyt   = fiction::gate_level_layout<
     fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<coordinate>>>>;
 using obs_gate_lyt = fiction::obstruction_layout<gate_lyt>;
 using coord_path   = fiction::layout_coordinate_path<obs_gate_lyt>;
 using dist         = fiction::manhattan_distance_functor<obs_gate_lyt, uint64_t>;
 using cost         = fiction::unit_cost_functor<obs_gate_lyt, uint8_t>;
-
 
 // If wires cross over empty tiles, move them down one layer
 coord_path check_wires(obs_gate_lyt lyt, std::vector<coordinate> tc)
@@ -74,13 +73,13 @@ coord_path check_wires(obs_gate_lyt lyt, std::vector<coordinate> tc)
 }
 
 // Trace back wires of a gate
-std::tuple<std::vector<coordinate>, std::vector<coordinate>,
-           std::vector<coordinate>, coord_path, coord_path, coord_path, coord_path>
+std::tuple<std::vector<coordinate>, std::vector<coordinate>, std::vector<coordinate>, coord_path, coord_path,
+           coord_path, coord_path>
 get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op)
 {
-    auto              fanin1 = coordinate{}, fanin2= coordinate{}, fanout1= coordinate{}, fanout2 = coordinate{};
+    auto fanin1 = coordinate{}, fanin2 = coordinate{}, fanout1 = coordinate{}, fanout2 = coordinate{};
     std::vector<coordinate> fanins, fanouts, to_clear;
-    coord_path                             route1, route2, route3, route4;
+    coord_path              route1, route2, route3, route4;
     std::set<coordinate>    fanins_set, fanouts_set;
 
     // trace back fanins
@@ -186,8 +185,7 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op)
     return std::make_tuple(fanins, fanouts, to_clear, route1, route2, route3, route4);
 }
 
-std::tuple<bool, coordinate> move_gate(coordinate old_pos, obs_gate_lyt lyt, int width,
-                                                      int height)
+std::tuple<bool, coordinate> move_gate(coordinate old_pos, obs_gate_lyt lyt, int width, int height)
 {
     const fiction::a_star_params params{true};
 
@@ -206,7 +204,7 @@ std::tuple<bool, coordinate> move_gate(coordinate old_pos, obs_gate_lyt lyt, int
     int max_y        = old_pos.y;
     int max_diagonal = max_x + max_y;
 
-    auto new_pos = coordinate {};
+    auto new_pos = coordinate{};
 
     // if gate is directly connected to one of its fanins, no improvement is possible
     for (auto fanin : fanins)
@@ -245,9 +243,9 @@ std::tuple<bool, coordinate> move_gate(coordinate old_pos, obs_gate_lyt lyt, int
     // fix wires that cross over empty tiles
     check_wires(lyt, to_clear);
 
-    bool                      success     = false;
+    bool       success     = false;
     coordinate current_pos = old_pos;
-    bool                      optimized   = false;
+    bool       optimized   = false;
 
     // iterate over layout diagonally
     for (int k = 0; k < width + height + 1; k++)
@@ -442,9 +440,9 @@ void delete_row(obs_gate_lyt& lyt, int row_idx, int width, int height)
             {
                 if (y == row_idx && lyt.incoming_data_flow({x, y, z}).size() > 0)
                 {
-                    coordinate             fanin_row      = lyt.incoming_data_flow({x, y, z})[0];
+                    coordinate              fanin_row      = lyt.incoming_data_flow({x, y, z})[0];
                     std::vector<coordinate> fanin_next_row = lyt.incoming_data_flow({x, y + 1, z});
-                    fanins[y][x][z]                                       = {};
+                    fanins[y][x][z]                        = {};
                     for (coordinate fanin : fanin_next_row)
                     {
                         if (fanin.y == y)
@@ -482,7 +480,7 @@ void delete_row(obs_gate_lyt& lyt, int row_idx, int width, int height)
                     // move up one position
                     else
                     {
-                        coordinate     new_pos = {x, y - 1, z};
+                        coordinate                    new_pos = {x, y - 1, z};
                         std::vector<gate_lyt::signal> fins;
                         for (coordinate fanin : fanins[y - 1][x][z])
                         {
@@ -569,7 +567,7 @@ void optimize_output(obs_gate_lyt& lyt)
     {
         auto dangling = coordinate{};
         auto new_pos  = coordinate{};
-        bool                      moved    = false;
+        bool moved    = false;
         for (auto& tile : route)
         {
             if ((tile.x < min_x && tile.y < min_y))
@@ -715,8 +713,7 @@ int main()  // NOLINT
         }
 
         // sort gates based on diagonal line
-        std::sort(gates.begin(), gates.end(),
-                  [](coordinate a, coordinate b) { return a.x + a.y < b.x + b.y; });
+        std::sort(gates.begin(), gates.end(), [](coordinate a, coordinate b) { return a.x + a.y < b.x + b.y; });
 
         int moved = 1;
 
@@ -733,8 +730,7 @@ int main()  // NOLINT
 
             for (int gate_id = 0; gate_id < gates.size(); gate_id++)
             {
-                std::pair<bool, coordinate> moved_gate =
-                    move_gate(gates[gate_id], layout, width, height);
+                std::pair<bool, coordinate> moved_gate = move_gate(gates[gate_id], layout, width, height);
 
                 if (moved_gate.first)
                 {
@@ -742,8 +738,7 @@ int main()  // NOLINT
                     gates[gate_id] = moved_gate.second;  // update gate location
                 }
             }
-            std::sort(gates.begin(), gates.end(),
-                      [](coordinate a, coordinate b) { return a.x + a.y < b.x + b.y; });
+            std::sort(gates.begin(), gates.end(), [](coordinate a, coordinate b) { return a.x + a.y < b.x + b.y; });
         }
 
         delete_wires(layout, width, height);
