@@ -124,12 +124,13 @@ TEMPLATE_TEST_CASE(
         charge_layout.set_all_charge_states(sidb_charge_state::POSITIVE);
 
         // calculate potential between two sidbs (charge sign not included)
-        CHECK(charge_layout.potential_between_sidbs({5, 4}, {5, 5}) > 0.0);
-        CHECK_THAT(charge_layout.potential_between_sidbs({5, 4}, {5, 4}), Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK(charge_layout.potential_between_sidbs({5, 4}, {5, 6}) > 0);
-        CHECK(charge_layout.potential_between_sidbs({5, 5}, {5, 6}) > 0);
-        CHECK_THAT(charge_layout.potential_between_sidbs({5, 6}, {5, 5}) -
-                       charge_layout.potential_between_sidbs({5, 5}, {5, 6}),
+        CHECK(charge_layout.chargeless_potential_between_sidbs({5, 4}, {5, 5}) > 0.0);
+        CHECK_THAT(charge_layout.chargeless_potential_between_sidbs({5, 4}, {5, 4}),
+                   Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK(charge_layout.chargeless_potential_between_sidbs({5, 4}, {5, 6}) > 0);
+        CHECK(charge_layout.chargeless_potential_between_sidbs({5, 5}, {5, 6}) > 0);
+        CHECK_THAT(charge_layout.chargeless_potential_between_sidbs({5, 6}, {5, 5}) -
+                       charge_layout.chargeless_potential_between_sidbs({5, 5}, {5, 6}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
         // read SiDBs' charge states
         CHECK(charge_layout.get_charge_state({5, 4}) == sidb_charge_state::POSITIVE);

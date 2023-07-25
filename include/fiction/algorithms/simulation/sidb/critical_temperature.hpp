@@ -95,7 +95,7 @@ struct critical_temperature_params
      */
     double confidence_level{0.99};
     /**
-     * Simulation stops at max_temperature (~ 126 °C by default).
+     * Simulation stops at max_temperature (~ 126 °C by default) (unit: K).
      */
     double max_temperature{400};
     /**
@@ -326,7 +326,7 @@ class critical_temperature_impl
                 (first_excited_state_energy - ground_state_energy) * 1000;
         }
 
-        std::vector<double> temp_values{};
+        std::vector<double> temp_values{};  // unit: K
         temp_values.reserve(static_cast<uint64_t>(parameter.max_temperature * 100));
 
         for (uint64_t i = 1; i <= static_cast<uint64_t>(parameter.max_temperature * 100); i++)
@@ -363,7 +363,7 @@ class critical_temperature_impl
      *
      * @param energy_and_state_type All energies of all physically valid charge distributions with the corresponding
      * state type (i.e. transparent, erroneous).
-     * @param min_energy Minimal energy of all physically valid charge distributions of a given layout.
+     * @param min_energy Minimal energy of all physically valid charge distributions of a given layout (unit: eV).
      * @return State type (i.e. transparent, erroneous) of the ground state is returned.
      */
     bool energy_between_ground_state_and_first_erroneous(const sidb_energy_and_state_type& energy_and_state_type,
