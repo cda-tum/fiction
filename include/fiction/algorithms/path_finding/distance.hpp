@@ -71,7 +71,8 @@ template <typename Lyt, typename Dist = double>
  *
  * Thereby, \f$ s \leq t \f$ iff \f$ x_1 \leq x_2 \f$ and \f$ y_1 \leq y_2 \f$.
  *
- * @note To represent \f$ \infty \f$, `std::numeric_limits<Dist>::max()` is returned for distances of infinite length.
+ * @note To represent \f$ \infty \f$, `std::numeric_limits<uint32_t>::max()` is returned for distances of infinite
+ * length. We are using `uint32_t` to prevent overflows when adding distances in the default `uint64_t` number range.
  *
  * @tparam Lyt Coordinate layout type.
  * @tparam Dist Integral type for the distance.
@@ -88,7 +89,7 @@ template <typename Lyt, typename Dist = uint64_t>
     static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
 
     return source.x <= target.x && source.y <= target.y ? manhattan_distance<Lyt, Dist>(lyt, source, target) :
-                                                          std::numeric_limits<Dist>::max();
+                                                          static_cast<Dist>(std::numeric_limits<uint32_t>::max());
 }
 /**
  * Computes the distance between two SiDB cells in nanometers (unit: nm).
