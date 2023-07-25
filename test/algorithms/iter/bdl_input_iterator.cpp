@@ -8,7 +8,99 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/types.hpp>
 
+#include <cstdint>
+#include <iterator>
+#include <type_traits>
+
 using namespace fiction;
+
+TEST_CASE("Traits", "[bdl-input-iterator]")
+{
+    using layout = sidb_cell_clk_lyt_siqad;
+
+    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator<layout>>::iterator_category,
+                         std::random_access_iterator_tag>);
+
+    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator<layout>>::value_type, layout>);
+
+    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator<layout>>::difference_type, std::size_t>);
+}
+
+TEST_CASE("Operators", "[bdl-input-iterators]")
+{
+    using layout = sidb_cell_clk_lyt_siqad;
+
+    layout lyt{};
+
+    bdl_input_iterator<layout> bii{lyt};
+
+    CHECK(bii == 0ull);
+    CHECK(bii != 1ull);
+
+    CHECK(bii < 1ull);
+    CHECK(bii <= 1ull);
+
+    CHECK(bii >= 0ull);
+
+    // increment
+    ++bii;
+
+    CHECK(bii == 1ull);
+    CHECK(bii != 0ull);
+
+    CHECK(bii < 2ull);
+    CHECK(bii <= 2ull);
+
+    CHECK(bii > 0ull);
+    CHECK(bii >= 0ull);
+
+    // decrement
+    --bii;
+
+    CHECK(bii == 0ull);
+    CHECK(bii != 1ull);
+
+    CHECK(bii < 1ull);
+    CHECK(bii <= 1ull);
+
+    CHECK(bii >= 0ull);
+
+    // increment assignment
+    bii += 2ull;
+
+    CHECK(bii == 2ull);
+    CHECK(bii != 1ull);
+
+    CHECK(bii < 3ull);
+    CHECK(bii <= 3ull);
+
+    CHECK(bii > 1ull);
+    CHECK(bii >= 1ull);
+
+    const auto bii_cp = bii;
+
+    // decrement assignment
+    bii -= 2ull;
+
+    CHECK(bii == 0ull);
+    CHECK(bii != 1ull);
+
+    CHECK(bii < 1ull);
+    CHECK(bii <= 1ull);
+
+    CHECK(bii >= 0ull);
+
+    // difference
+    CHECK(bii_cp - bii == 2ull);
+
+    // subscript
+    CHECK(bii[0] == 0ull);
+    CHECK(bii[1] == 1ull);
+    CHECK(bii[2] == 3ull);
+    CHECK(bii[3] == 6ull);
+    CHECK(bii[4] == 10ull);
+
+}
 
 TEST_CASE("Empty layout iteration", "[bdl-input-iterator]")
 {
@@ -20,6 +112,8 @@ TEST_CASE("Empty layout iteration", "[bdl-input-iterator]")
 
     CHECK((*bii).num_cells() == 0);
 
+    // increment
+
     ++bii;
 
     CHECK((*bii).num_cells() == 0);
@@ -28,6 +122,18 @@ TEST_CASE("Empty layout iteration", "[bdl-input-iterator]")
 
     CHECK((*bii).num_cells() == 0);
     CHECK((*bii_cp).num_cells() == 0);
+
+    // decrement
+
+    --bii;
+
+    CHECK((*bii).num_cells() == 0);
+
+    auto bii_cm = bii--;
+
+    CHECK((*bii).num_cells() == 0);
+
+    CHECK((*bii_cm).num_cells() == 0);
 }
 
 TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
@@ -49,6 +155,9 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
     lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
 
     bdl_input_iterator<layout> bii{lyt};
+    CHECK(bii == 0ull);
+
+    // start by incrementing over all input states
 
     // layout at input state 0
     const auto& lyt_0 = *bii;
@@ -58,6 +167,7 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
     CHECK(lyt_0.get_cell_type({2, 0, 0}) == sidb_technology::cell_type::EMPTY);
 
     ++bii;
+    CHECK(bii == 1ull);
 
     // layout at input state 1
     const auto& lyt_1 = *bii;
@@ -68,11 +178,30 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
 
     // doing another iteration should overflow and set it back to 0
     ++bii;
+    CHECK(bii == 2ull);
 
     const auto& lyt_2 = *bii;
 
     CHECK(lyt_2.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::INPUT);
     CHECK(lyt_2.get_cell_type({2, 0, 0}) == sidb_technology::cell_type::EMPTY);
+
+    // finally, decrement back to the initial state, doing another wrap-around
+
+    --bii;
+    CHECK(bii == 1ull);
+
+    const auto& lyt_1_1 = *bii;
+
+    CHECK(lyt_1_1.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::EMPTY);
+    CHECK(lyt_1_1.get_cell_type({2, 0, 0}) == sidb_technology::cell_type::INPUT);
+
+    --bii;
+    CHECK(bii == 0ull);
+
+    const auto& lyt_0_1 = *bii;
+
+    CHECK(lyt_0_1.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::INPUT);
+    CHECK(lyt_0_1.get_cell_type({2, 0, 0}) == sidb_technology::cell_type::EMPTY);
 }
 
 TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")

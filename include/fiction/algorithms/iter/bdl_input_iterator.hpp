@@ -23,7 +23,8 @@ namespace fiction
  * set. To this end, the iterator alters the given layout. The state enumeration wraps around, i.e. after the last
  * possible input state, the first input state is set again.
  *
- * The iterator is bidirectional and can be used in iterator-based `for` loops.
+ * The iterator satisfies the requirements of `LegacyRandomAccessIterator` and can be used in iterator-based `for`
+ * loops.
  *
  * @tparam Lyt SiDB cell-level layout type.
  */
@@ -48,6 +49,15 @@ class bdl_input_iterator
         static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
         set_all_inputs();
+    }
+    /**
+     * Dereference operator. Returns a reference to the layout with the current input state.
+     *
+     * @return Reference to the current layout.
+     */
+    [[nodiscard]] Lyt& operator*() const noexcept
+    {
+        return layout;
     }
     /**
      * Prefix increment operator. Sets the next input state.
@@ -76,6 +86,20 @@ class bdl_input_iterator
         return result;
     }
     /**
+     * Addition assignment operator. Sets a next input state.
+     *
+     * @param m The amount of input states to skip.
+     * @return Reference to `this`.
+     */
+    bdl_input_iterator& operator+=(const uint64_t m) noexcept
+    {
+        current_input_index += m;
+
+        set_all_inputs();
+
+        return *this;
+    }
+    /**
      * Prefix decrement operator. Sets the previous input state.
      *
      * @return Reference to `this`.
@@ -102,13 +126,42 @@ class bdl_input_iterator
         return result;
     }
     /**
-     * Dereference operator. Returns a reference to the layout with the current input state.
+     * Subtraction assignment operator. Sets a previous input state.
      *
-     * @return Reference to the current layout.
+     * @param m The amount of input states to skip.
+     * @return Reference to `this`.
      */
-    [[nodiscard]] Lyt& operator*() const noexcept
+    bdl_input_iterator& operator-=(const uint64_t m) noexcept
     {
-        return layout;
+        current_input_index -= m;
+
+        set_all_inputs();
+
+        return *this;
+    }
+    /**
+     * Subscript operator. Sets the input state to the current one plus the given subscript.
+     *
+     * @param m The amount of input states to skip.
+     * @return Reference to `this`.
+     */
+    bdl_input_iterator& operator[](const uint64_t m) noexcept
+    {
+        current_input_index += m;
+
+        set_all_inputs();
+
+        return *this;
+    }
+    /**
+     * Subtraction operator. Computes the difference between the current input index and the given iterator ones.
+     *
+     * @param other Iterator to compute the difference with.
+     * @return The difference between the current input index and the given iterator ones.
+     */
+    [[nodiscard]] std::size_t operator-(const bdl_input_iterator& other) const noexcept
+    {
+        return current_input_index - other.current_input_index;
     }
     /**
      * Equality operator. Compares the current input index with the given integer.
@@ -225,7 +278,8 @@ namespace std
 template <typename Lyt>
 struct iterator_traits<fiction::bdl_input_iterator<Lyt>>
 {
-    using iterator_category = std::bidirectional_iterator_tag;
+    using iterator_category = std::random_access_iterator_tag;
+    using difference_type   = std::size_t;
     using value_type        = Lyt;
 };
 }  // namespace std
