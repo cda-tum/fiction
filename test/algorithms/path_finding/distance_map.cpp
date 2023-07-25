@@ -186,18 +186,16 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
         layout.foreach_coordinate(
             [&layout, &dist_map_func](const auto& c1)
             {
-                layout.foreach_coordinate(
-                    [&layout, &dist_map_func, &c1](const auto& c2)
-                    { CHECK(dist_map_func(layout, c1, c2) == a_star_distance(layout, c1, c2)); });
+                layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
+                                          { CHECK(dist_map_func(layout, c1, c2) == a_star_distance(layout, c1, c2)); });
             });
 
         // check that the cached distances are correct
         layout.foreach_coordinate(
             [&layout, &dist_map_func](const auto& c1)
             {
-                layout.foreach_coordinate(
-                    [&layout, &dist_map_func, &c1](const auto& c2)
-                    { CHECK(dist_map_func(layout, c1, c2) == a_star_distance(layout, c1, c2)); });
+                layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
+                                          { CHECK(dist_map_func(layout, c1, c2) == a_star_distance(layout, c1, c2)); });
             });
     }
     SECTION("USE clocking")
