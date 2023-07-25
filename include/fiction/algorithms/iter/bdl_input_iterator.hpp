@@ -150,6 +150,26 @@ class bdl_input_iterator
     {
         return current_input_index <= m;
     }
+    /**
+     * Greater-than operator. Compares the current input index with the given integer.
+     *
+     * @param m Integer to compare with.
+     * @return `true` if the current input index is greater than `m`, `false` otherwise.
+     */
+    [[nodiscard]] bool operator>(const uint64_t m) const noexcept
+    {
+        return current_input_index > m;
+    }
+    /**
+     * Greater-or-equal-than operator. Compares the current input index with the given integer.
+     *
+     * @param m Integer to compare with.
+     * @return `true` if the current input index is greater than or equal to `m`, `false` otherwise.
+     */
+    [[nodiscard]] bool operator>=(const uint64_t m) const noexcept
+    {
+        return current_input_index >= m;
+    }
 
   private:
     /**
@@ -175,7 +195,7 @@ class bdl_input_iterator
      * is `1`, the lower BDL dot is set and the upper BDL dot removed. If the bit is `0`, the upper BDL dot is removed
      * and the lower BDL dot set.
      */
-    void set_all_inputs()
+    void set_all_inputs() noexcept
     {
         for (uint8_t i = 0; i < num_inputs; ++i)
         {
