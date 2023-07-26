@@ -13,6 +13,8 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 
+#include <cmath>
+
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(
@@ -30,12 +32,11 @@ TEMPLATE_TEST_CASE(
         const charge_distribution_surface                  charge_layout{lyt};
         std::vector<charge_distribution_surface<TestType>> all_lyts{};
 
-        CHECK_THAT(minimum_energy(all_lyts).value(),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
+        CHECK_THAT(minimum_energy(all_lyts), Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
 
         all_lyts.push_back(charge_layout);
 
-        CHECK(units::math::abs(minimum_energy(all_lyts) - 0_eV) < 0.00000001_eV);
+        CHECK(std::abs(minimum_energy(all_lyts) - 0) < 0.00000001);
     }
 
     SECTION("layout with one SiDB placed")
@@ -45,12 +46,11 @@ TEMPLATE_TEST_CASE(
         const charge_distribution_surface                  charge_layout{lyt};
         std::vector<charge_distribution_surface<TestType>> all_lyts{};
 
-        CHECK_THAT(minimum_energy(all_lyts).value(),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
+        CHECK_THAT(minimum_energy(all_lyts), Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
 
         all_lyts.push_back(charge_layout);
 
-        CHECK(units::math::abs(minimum_energy(all_lyts) - 0_eV) < 0.00000001_eV);
+        CHECK(std::abs(minimum_energy(all_lyts) - 0) < 0.00000001);
     }
 
     SECTION("layout with three SiDBs placed")
@@ -62,8 +62,7 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface                        charge_layout_first{lyt};
         std::vector<charge_distribution_surface<TestType>> all_lyts{};
 
-        CHECK_THAT(minimum_energy(all_lyts).value(),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
+        CHECK_THAT(minimum_energy(all_lyts), Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
 
         charge_layout_first.assign_charge_state({0, 0}, sidb_charge_state::NEUTRAL);
 
@@ -80,6 +79,6 @@ TEMPLATE_TEST_CASE(
         charge_layout_second.recompute_system_energy();
         all_lyts.push_back(charge_layout_second);
 
-        CHECK_THAT(minimum_energy(all_lyts).value(), Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK_THAT(minimum_energy(all_lyts), Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
 }
