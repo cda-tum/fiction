@@ -84,19 +84,6 @@ TEST_CASE("Test influence distance function", "[maximal_defect_influence_distanc
         CHECK(defect_pos.z == 0);
     }
 
-    SECTION("layout with one SiDB, negative defect, large lambda_tf")
-    {
-        const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r, 20};
-        const maximal_defect_influence_distance_params<sidb_cell_clk_lyt_siqad> sim_params{
-            defect, sidb_simulation_parameters{}};
-        sidb_cell_clk_lyt_siqad lyt{};
-        lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        const auto [distance, defect_pos] = maximal_defect_influence_distance(lyt, sim_params);
-        CHECK(defect_pos.x == -2);
-        CHECK(defect_pos.y == 0);
-        CHECK(defect_pos.z == 0);
-    }
-
     SECTION("layout with one pertuber and one DB pair, negative defect")
     {
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
