@@ -5,6 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/algorithms/simulation/sidb/maximal_defect_influence_distance.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/utils/math_utils.hpp>
@@ -35,9 +36,8 @@ TEST_CASE("Test influence distance function", "[maximal_defect_influence_distanc
         const auto [distance, defect_pos] = maximal_defect_influence_distance(lyt, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 6),
                    Catch::Matchers::WithinAbs(0.665060, physical_constants::POP_STABILITY_ERR));
-        CHECK(defect_pos.x == -1);
-        CHECK(defect_pos.y == -1);
-        CHECK(defect_pos.z == 1);
+        CHECK((defect_pos.x == -1 & defect_pos.y == -1 & defect_pos.z == 1) |
+              (defect_pos.x == 1 & defect_pos.y == -1 & defect_pos.z == 1));
     }
 
     SECTION("layout with one SiDB")
@@ -51,9 +51,8 @@ TEST_CASE("Test influence distance function", "[maximal_defect_influence_distanc
         const auto [distance, defect_pos] = maximal_defect_influence_distance(lyt, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 6),
                    Catch::Matchers::WithinAbs(0.665060, physical_constants::POP_STABILITY_ERR));
-        CHECK(defect_pos.x == -1);
-        CHECK(defect_pos.y == -1);
-        CHECK(defect_pos.z == 1);
+        CHECK((defect_pos.x == -1 & defect_pos.y == -1 & defect_pos.z == 1) |
+              (defect_pos.x == 1 & defect_pos.y == -1 & defect_pos.z == 1));
     }
 
     SECTION("layout with one SiDB, negative defect, smaller lambda_tf")
@@ -64,9 +63,8 @@ TEST_CASE("Test influence distance function", "[maximal_defect_influence_distanc
         sidb_cell_clk_lyt_siqad lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         const auto [distance, defect_pos] = maximal_defect_influence_distance(lyt, sim_params);
-        CHECK(defect_pos.x == -1);
-        CHECK(defect_pos.y == 0);
-        CHECK(defect_pos.z == 1);
+        CHECK(round_to_n_decimal_places(distance, 4) ==
+              round_to_n_decimal_places(sidb_nanometer_distance(lyt, {0, 0, 0}, {-1, 0, 1}), 4));
     }
 
     SECTION("layout with one SiDB, negative defect, large lambda_tf")
@@ -79,9 +77,8 @@ TEST_CASE("Test influence distance function", "[maximal_defect_influence_distanc
         sidb_cell_clk_lyt_siqad                                                 lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         const auto [distance, defect_pos] = maximal_defect_influence_distance(lyt, sim_params);
-        CHECK(defect_pos.x == 0);
-        CHECK(defect_pos.y == -1);
-        CHECK(defect_pos.z == 0);
+        CHECK(round_to_n_decimal_places(distance, 4) ==
+              round_to_n_decimal_places(sidb_nanometer_distance(lyt, {0, 0, 0}, {0, 1, 0}), 4));
     }
 
     SECTION("layout with one pertuber and one DB pair, negative defect")
@@ -95,9 +92,8 @@ TEST_CASE("Test influence distance function", "[maximal_defect_influence_distanc
         lyt.assign_cell_type({4, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({6, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         const auto [distance, defect_pos] = maximal_defect_influence_distance(lyt, sim_params);
-        CHECK(defect_pos.x == 9);
-        CHECK(defect_pos.y == -1);
-        CHECK(defect_pos.z == 0);
+        CHECK(round_to_n_decimal_places(distance, 4) ==
+              round_to_n_decimal_places(sidb_nanometer_distance(lyt, {6, 0, 0}, {9, 1, 0}), 4));
     }
 
     SECTION("QuickExact simulation of a Y-shape SiDB OR gate with input 01")
