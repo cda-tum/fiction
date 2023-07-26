@@ -362,9 +362,8 @@ TEST_CASE("A* distance", "[distance]")
     }
 }
 
-TEST_CASE("sidb nanometer distance", "[distance]")
+TEST_CASE("SiDB nanometer distance", "[distance]")
 {
-
     const sidb_cell_clk_lyt_siqad layout{};
 
     CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 0}) == 0);
