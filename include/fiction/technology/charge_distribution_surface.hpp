@@ -156,8 +156,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          */
         std::unordered_map<typename Lyt::cell, double> defect_local_pot{};
         /**
-         * External electrostatic potential at each SiDB position (can be used when different potentials are applied to
-         * different SiDBs).
+         * External electrostatic potential in V at each SiDB position (can be used when different potentials are
+         * applied to different SiDBs).
          */
         std::unordered_map<typename Lyt::cell, double> local_external_pot{};
         /**
@@ -291,9 +291,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
 
     /**
-     * Returns the locations of all SiDBs in nm of the form `(x,y)`.
+     * This function returns the locations of all SiDBs in nm of the form `(x,y)`.
      *
-     * @return Vector of SiDB nanometer positions.
+     * @return Vector of SiDB nanometer positions (unit: nm).
      */
     [[nodiscard]] std::vector<std::pair<double, double>> get_all_sidb_locations_in_nm() const noexcept
     {
@@ -318,7 +318,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return strg->sidb_order;
     }
     /**
-     * Set the physical parameters for the simulation.
+     * This function assigns the physical parameters for the simulation.
      *
      * @param params Physical parameters to be assigned.
      */
@@ -347,7 +347,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
     /**
-     * Retrieves the physical parameters of the simulation.
+     * This function retrieves the physical parameters of the simulation.
      *
      * @return sidb_simulation_parameters struct containing the physical parameters of the simulation.
      */
@@ -413,7 +413,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->charge_distribution_to_index();
     }
     /**
-     * Assigns the charge state of all SiDBs in the layout to a given charge state.
+     * This function assigns the charge state of all SiDBs in the layout to a given charge state.
      *
      * @param cs The charge state to be assigned to all the SiDBs.
      */
@@ -426,7 +426,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->charge_distribution_to_index();
     }
     /**
-     * Assign the base number for the simulation.
+     * This function assigns the base number for the simulation.
      *
      * @param base Base number to be assigned.
      */
@@ -541,7 +541,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
     /**
-     * Returns the charge state of a given cell.
+     * This functio returns the charge state of a given cell.
      *
      * @param c The cell.
      * @return The charge state of the given cell.
@@ -556,7 +556,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return sidb_charge_state::NONE;
     }
     /**
-     * Returns the charge state of a cell of the layout at a given index.
+     * This function returns the charge state of a cell of the layout at a given index.
      *
      * @param index The index of the cell.
      * @return The charge state of the cell at the given index.
@@ -571,9 +571,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return sidb_charge_state::NONE;
     }
     /**
-     * Returns all SiDB charges of the placed SiDBs as a vector.
+     * This function returns all SiDB charges of the placed SiDBs as a vector.
      *
-     * @return Vector of SiDB charges.
+     * @return Vector of SiDB charge states.
      */
     [[maybe_unused]] [[nodiscard]] std::vector<sidb_charge_state> get_all_sidb_charges() const noexcept
     {
@@ -606,7 +606,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return negative_sidbs;
     }
     /**
-     *  Returns the distance between two cells.
+     *  This function returns the distance between two cells in nanometer (unit: nm).
      *
      *  @param c1 the first cell to compare.
      *  @param c2 the second cell to compare.
@@ -623,18 +623,20 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return 0.0;
     }
     /**
-     * Calculates and returns the distance between two cells (accessed by indices).
+     * This function calculates and returns the distance between two cells in nanometer (accessed by indices) (unit:
+     * nm).
      *
      * @param index1 The first index.
      * @param index2 The second index.
-     * @return The distance index between `index1` and `index2` (indices correspond to unique SiDBs) (unit: nm).
+     * @return The distance in nanometer between `index1` and `index2` (indices correspond to unique SiDBs) (unit: nm).
      */
     [[nodiscard]] double get_nm_distance_by_indices(const uint64_t index1, const uint64_t index2) const noexcept
     {
         return strg->nm_dist_mat[index1][index2];
     }
     /**
-     * The chargeless electrostatic potential between two cells (SiDBs) is calculated in Volt.
+     * This function calculates and returns the chargeless electrostatic potential between two cells (SiDBs) in Volt
+     * (unit: V).
      *
      * @param index1 The first index.
      * @param index1 The second index.
@@ -653,12 +655,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 physical_constants::ELEMENTARY_CHARGE);
     }
     /**
-     * Calculates and returns the chargeless potential of a pair of cells based on their distance and simulation
-     * parameters.
+     * This function calculates and returns the chargeless potential in Volt of a pair of cells based on their distance
+     * and simulation parameters (unit: V).
      *
      * @param c1 The first cell.
      * @param c2 The second cell.
-     * @return The potential between c1 and c2 (unit: eV).
+     * @return The potential between c1 and c2 (unit: V).
      */
     [[nodiscard]] double calculate_chargeless_potential_between_sidbs(const typename Lyt::cell& c1,
                                                                       const typename Lyt::cell& c2) const noexcept
@@ -669,7 +671,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return calculate_chargeless_potential_between_sidbs_by_index(index1, index2);
     }
     /**
-     * Returns the chargeless electrostatic potential between two cells.
+     * This function returns the chargeless electrostatic potential between two cells in V (unit: V).
      *
      * @note If the signed electrostatic potential \f$ V_{i,j} \f$ is required, use the `get_potential_between_sidbs`
      * function.
@@ -689,7 +691,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return 0.0;
     }
     /**
-     * Calculates and returns the potential of two indices.
+     * This function calculates and returns the chargeless potential of two indices (representing two SiDBs) in Volt
+     * (unit: V).
      *
      * @param index1 The first index.
      * @param index2 The second index.
@@ -700,7 +703,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return strg->pot_mat[index1][index2];
     }
     /**
-     * Calculates and returns the electrostatic potential at one cell (`c1`) generated by another cell (`c2`).
+     * This function calculates and returns the electrostatic potential at one cell (`c1`) generated by another cell
+     * (`c2`) in Volt (unit: V).
      *
      * @note If the chargeless electrostatic potential \f$ \frac{V_{i,j}}{n_j} \f$ is required, use the
      * `get_chargeless_potential_between_sidbs` function.
@@ -721,11 +725,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return 0.0;
     }
     /**
-     * Calculates and returns the potential of two indices.
+     * This function calculates and returns the electrostatic potential of two indices (representing two SiDBs) in Volt
+     * (unit: V).
      *
      * @param index1 The first index.
      * @param index2 The second index.
-     * @return The potential between `index1` and `index2`.
+     * @return The potential between `index1` and `index2` (unit: V).
      */
     [[nodiscard]] double get_electrostatic_potential_by_indices(const uint64_t index1,
                                                                                 const uint64_t index2) const noexcept
@@ -733,11 +738,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return strg->pot_mat[index1][index2];
     }
     /**
-     * The electrostatic potential between two cells (SiDBs) is calculated.
+     * The electrostatic potential in Volt between two cells (SiDBs) is calculated and returned (unit: V).
      *
      * @param index1 The first index.
      * @param index1 The second index.
-     * @return The potential between `index1` and `index2`.
+     * @return The potential between `index1` and `index2` (unit: V).
      */
     [[nodiscard]] double potential_between_sidbs_by_index(const uint64_t index1,
                                                                           const uint64_t index2) const noexcept
@@ -752,11 +757,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 physical_constants::ELEMENTARY_CHARGE);
     }
     /**
-     * Calculates and returns the potential of a pair of cells based on their distance and simulation parameters.
+     * This function calculates and returns the electrostatic potential in Volt of a pair of cells based on their
+     * distance and simulation parameters (unit: V).
      *
      * @param c1 The first cell.
      * @param c2 The second cell.
-     * @return The potential between c1 and c2.
+     * @return The electrostatic potential between c1 and c2 (unit: V).
      */
     [[nodiscard]] double potential_between_sidbs(const typename Lyt::cell& c1,
                                                                  const typename Lyt::cell& c2) const noexcept
@@ -767,11 +773,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return potential_between_sidbs_by_indices(index1, index2);
     }
     /**
-     * The electrostatic potential between two cells (SiDBs) is calculated.
+     * This function calculates and returns the electrostatic potential in Volt between two cells (SiDBs) (unit: V).
      *
      * @param index1 The first index.
      * @param index1 The second index.
-     * @return The potential between `index1` and `index2`.
+     * @return The electrostatic potential between `index1` and `index2` (unit: V).
      */
     [[nodiscard]] double potential_between_sidbs_by_indices(const uint64_t index1,
                                                                             const uint64_t index2) const noexcept
@@ -787,8 +793,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
 
     /**
-     * The function calculates the local electrostatic potential for each SiDB position and external electrostatic
-     * potentials (generated by electrodes, defects, etc.) are included.
+     * This function calculates the local electrostatic potential in Volt for each SiDB position, including external
+     * electrostatic potentials (generated by electrodes, defects, etc.) (unit: V).
      *
      * @param history_mode If set to NEGLECT, the local electrostatic is calculated from scratch, without using the
      * results of the previous charge distribution.
@@ -867,7 +873,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return std::nullopt;
     }
     /**
-     * The function returns the local electrostatic potential at a given index position in V.
+     * This function returns the local electrostatic potential at a given index position in Volt (unit: V).
      *
      * @param index The index defining the SiDB position.
      * @return local potential at given index position. If there is no SiDB at the given index (which corresponds to a
@@ -882,14 +888,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return std::nullopt;
     }
     /**
-     * Sets the electrostatic system energy to zero. Can be used if only one SiDB is charged.
+     * This function assign the electrostatic system energy to zero (unit: eV). It can be used if only one SiDB is
+     * charged.
      */
     void assign_system_energy_to_zero() noexcept
     {
         strg->system_energy = 0.0;
     }
     /**
-     * Calculates the system's total electrostatic potential energy and stores it in the storage.
+     * This function calculates the system's total electrostatic potential energy and stores it in the storage (unit:
+     * eV).
      */
     void recompute_system_energy() noexcept
     {
