@@ -154,9 +154,9 @@ TEST_CASE("Read single defect SQD layout", "[sqd]")
 
     const auto defect = layout.get_sidb_defect({5, 4});
     CHECK(defect.type == sidb_defect_type::UNKNOWN);
-    CHECK(defect.charge == 2_e);
+    CHECK(defect.charge == 2);
     CHECK(defect.epsilon_r == 1.2);
-    CHECK(defect.lambda_tf == 3.4_nm);
+    CHECK(defect.lambda_tf == 3.4);
 }
 
 TEST_CASE("Read multiple defects SQD layout", "[sqd]")
@@ -226,21 +226,21 @@ TEST_CASE("Read multiple defects SQD layout", "[sqd]")
     {
         const auto defect = layout.get_sidb_defect({5, 4});
         CHECK(defect.type == sidb_defect_type::SILOXANE);
-        CHECK(defect.charge == -1_e);
+        CHECK(defect.charge == -1);
         CHECK(defect.epsilon_r == 5.6);
-        CHECK(defect.lambda_tf == 5.0_nm);
+        CHECK(defect.lambda_tf == 5.0);
     }
     {
         const auto defect1 = layout.get_sidb_defect({3, 4});
         const auto defect2 = layout.get_sidb_defect({3, 5});
         CHECK(defect1.type == sidb_defect_type::MISSING_DIMER);
-        CHECK(defect1.charge == -1_e);
+        CHECK(defect1.charge == -1);
         CHECK(defect1.epsilon_r == 5.6);
-        CHECK(defect1.lambda_tf == 5.0_nm);
+        CHECK(defect1.lambda_tf == 5.0);
         CHECK(defect2.type == sidb_defect_type::MISSING_DIMER);
-        CHECK(defect2.charge == -1_e);
+        CHECK(defect2.charge == -1);
         CHECK(defect2.epsilon_r == 5.6);
-        CHECK(defect2.lambda_tf == 5.0_nm);
+        CHECK(defect2.lambda_tf == 5.0);
     }
     {
         const auto defect1 = layout.get_sidb_defect({0, 4});
@@ -248,21 +248,21 @@ TEST_CASE("Read multiple defects SQD layout", "[sqd]")
         const auto defect3 = layout.get_sidb_defect({1, 4});
         const auto defect4 = layout.get_sidb_defect({1, 5});
         CHECK(defect1.type == sidb_defect_type::ETCH_PIT);
-        CHECK(defect1.charge == -1_e);
+        CHECK(defect1.charge == -1);
         CHECK(defect1.epsilon_r == 5.6);
-        CHECK(defect1.lambda_tf == 5.0_nm);
+        CHECK(defect1.lambda_tf == 5.0);
         CHECK(defect2.type == sidb_defect_type::ETCH_PIT);
-        CHECK(defect2.charge == -1_e);
+        CHECK(defect2.charge == -1);
         CHECK(defect2.epsilon_r == 5.6);
-        CHECK(defect2.lambda_tf == 5.0_nm);
+        CHECK(defect2.lambda_tf == 5.0);
         CHECK(defect3.type == sidb_defect_type::ETCH_PIT);
-        CHECK(defect3.charge == -1_e);
+        CHECK(defect3.charge == -1);
         CHECK(defect3.epsilon_r == 5.6);
-        CHECK(defect3.lambda_tf == 5.0_nm);
+        CHECK(defect3.lambda_tf == 5.0);
         CHECK(defect4.type == sidb_defect_type::ETCH_PIT);
-        CHECK(defect4.charge == -1_e);
+        CHECK(defect4.charge == -1);
         CHECK(defect4.epsilon_r == 5.6);
-        CHECK(defect4.lambda_tf == 5.0_nm);
+        CHECK(defect4.lambda_tf == 5.0);
     }
 }
 
@@ -338,9 +338,9 @@ TEST_CASE("Read multi-dot SQD layout with multi-cell defect", "[sqd]")
 
             CHECK(defect.type == sidb_defect_type::DB);
 
-            CHECK(defect.charge == -1_e);
+            CHECK(defect.charge == -1);
             CHECK(defect.epsilon_r == 5.6);
-            CHECK(defect.lambda_tf == 5.0_nm);
+            CHECK(defect.lambda_tf == 5.0);
         });
 }
 
@@ -442,9 +442,9 @@ TEST_CASE("Read SQD defect despite missing <coulomb> element", "[sqd]")
 
     CHECK(defect.type == sidb_defect_type::UNKNOWN);
 
-    CHECK(defect.charge == 0.0_e);
+    CHECK(defect.charge == 0.0);
     CHECK(defect.epsilon_r == 0.0);
-    CHECK(defect.lambda_tf == 0.0_nm);
+    CHECK(defect.lambda_tf == 0.0);
 }
 
 TEST_CASE("SQD parsing error: missing <siqad> element", "[sqd]")

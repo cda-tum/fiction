@@ -13,10 +13,8 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/units_utils.hpp"
 
 #include <fmt/format.h>
-#include <units.h>
 
 #include <algorithm>
 #include <chrono>
@@ -56,7 +54,7 @@ struct time_to_solution_stats
     /**
      * Time-to-solution in seconds.
      */
-    units::time::second_t time_to_solution{0_s};
+    double time_to_solution{0};
     /**
      * Accuracy of the simulation.
      */
@@ -64,11 +62,11 @@ struct time_to_solution_stats
     /**
      * Average single simulation runtime in seconds.
      */
-    units::time::second_t mean_single_runtime{};
+    double mean_single_runtime{};
     /**
-     * Single simulation runtime of the exhaustive ground state searcher.
+     * Single simulation runtime of the exhaustive ground state searcher in seconds.
      */
-    units::time::second_t single_runtime_exhaustive{};
+    double single_runtime_exhaustive{};
     /**
      * Exhaustive simulation algorithm used to simulate the ground state as reference.
      */
@@ -82,8 +80,8 @@ struct time_to_solution_stats
     void report(std::ostream& out = std::cout)
     {
         out << fmt::format("[i] time_to_solution: {} | acc: {} | t_(s): {} | t_exhaustive(s): {} | exact alg.: {}\n",
-                           time_to_solution.value(), acc, mean_single_runtime.value(),
-                           single_runtime_exhaustive.value(), algorithm);
+                           time_to_solution, acc, mean_single_runtime,
+                           single_runtime_exhaustive, algorithm);
     }
 };
 /**
@@ -120,8 +118,7 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to
         simulation_result = quickexact(lyt, params);
     }
 
-    st.single_runtime_exhaustive =
-        units::time::second_t{mockturtle::to_seconds(simulation_results_exgs.simulation_runtime)};
+    st.single_runtime_exhaustive =mockturtle::to_seconds(simulation_results_exgs.simulation_runtime);
 
     std::size_t         gs_count = 0;
     std::vector<double> time{};
@@ -166,9 +163,9 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to
         tts = (single_runtime * std::log(1.0 - tts_params.confidence_level) / std::log(1.0 - acc));
     }
 
-    st.time_to_solution    = units::time::second_t{tts};
+    st.time_to_solution    = tts;
     st.acc                 = acc * 100;
-    st.mean_single_runtime = units::time::second_t{single_runtime};
+    st.mean_single_runtime = single_runtime;
 
     if (ps)
     {
