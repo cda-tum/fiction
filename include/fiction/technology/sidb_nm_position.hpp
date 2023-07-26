@@ -28,7 +28,7 @@ constexpr std::pair<double, double> sidb_nm_position(const sidb_simulation_param
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     const auto x = (c.x * sp.lat_a) * 0.1;
-    const auto y = (c.y * sp.lat_b + c.z * sp.lat_c) * 0.1;
+    const auto y = (c.y * sp.lat_b + c.z * sp.lat_c) * .1;
 
     return std::make_pair(x, y);
 }

@@ -434,8 +434,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param index1 The second index.
      * @return The chargeless electrostatic potential between `index1` and `index2` (unit: V).
      */
-    [[nodiscard]] double chargeless_potential_between_sidbs_by_index(const uint64_t index1,
-                                                                     const uint64_t index2) const noexcept
+    [[nodiscard]] double calculate_chargeless_potential_between_sidbs_by_index(const uint64_t index1,
+                                                                               const uint64_t index2) const noexcept
     {
         if (strg->nm_dist_mat[index1][index2] == 0.0)
         {
@@ -454,13 +454,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param c2 The second cell.
      * @return The potential between c1 and c2 (unit: eV).
      */
-    [[nodiscard]] double chargeless_potential_between_sidbs(const typename Lyt::cell& c1,
-                                                            const typename Lyt::cell& c2) const noexcept
+    [[nodiscard]] double calculate_chargeless_potential_between_sidbs(const typename Lyt::cell& c1,
+                                                                      const typename Lyt::cell& c2) const noexcept
     {
         const auto index1 = static_cast<std::size_t>(cell_to_index(c1));
         const auto index2 = static_cast<std::size_t>(cell_to_index(c2));
 
-        return chargeless_potential_between_sidbs_by_index(index1, index2);
+        return calculate_chargeless_potential_between_sidbs_by_index(index1, index2);
     }
     /**
      * Returns the chargeless electrostatic potential between two cells.
@@ -891,7 +891,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
             {
-                strg->pot_mat[i][j] = chargeless_potential_between_sidbs_by_index(i, j);
+                strg->pot_mat[i][j] = calculate_chargeless_potential_between_sidbs_by_index(i, j);
             }
         }
     }

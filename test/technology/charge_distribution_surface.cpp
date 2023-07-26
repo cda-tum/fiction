@@ -124,13 +124,13 @@ TEMPLATE_TEST_CASE(
         charge_layout.set_all_charge_states(sidb_charge_state::POSITIVE);
 
         // calculate potential between two sidbs (charge sign not included)
-        CHECK(charge_layout.chargeless_potential_between_sidbs({5, 4}, {5, 5}) > 0.0);
-        CHECK_THAT(charge_layout.chargeless_potential_between_sidbs({5, 4}, {5, 4}),
+        CHECK(charge_layout.calculate_chargeless_potential_between_sidbs({5, 4}, {5, 5}) > 0.0);
+        CHECK_THAT(charge_layout.calculate_chargeless_potential_between_sidbs({5, 4}, {5, 4}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK(charge_layout.chargeless_potential_between_sidbs({5, 4}, {5, 6}) > 0);
-        CHECK(charge_layout.chargeless_potential_between_sidbs({5, 5}, {5, 6}) > 0);
-        CHECK_THAT(charge_layout.chargeless_potential_between_sidbs({5, 6}, {5, 5}) -
-                       charge_layout.chargeless_potential_between_sidbs({5, 5}, {5, 6}),
+        CHECK(charge_layout.calculate_chargeless_potential_between_sidbs({5, 4}, {5, 6}) > 0);
+        CHECK(charge_layout.calculate_chargeless_potential_between_sidbs({5, 5}, {5, 6}) > 0);
+        CHECK_THAT(charge_layout.calculate_chargeless_potential_between_sidbs({5, 6}, {5, 5}) -
+                       charge_layout.calculate_chargeless_potential_between_sidbs({5, 5}, {5, 6}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
         // read SiDBs' charge states
         CHECK(charge_layout.get_charge_state({5, 4}) == sidb_charge_state::POSITIVE);
@@ -185,6 +185,34 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({5, 6}) == sidb_charge_state::POSITIVE);
     }
 
+    SECTION("set physical simulation parameters")
+    {
+        // assign SiDBs and charge states to three different cells
+        lyt.assign_cell_type({5, 4}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 6}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
+
+        charge_layout.set_physical_parameters(sidb_simulation_parameters{2, -0.2});
+        CHECK(charge_layout.get_phys_params().base == 2);
+        CHECK(charge_layout.get_phys_params().mu == -0.2);
+        CHECK(charge_layout.get_phys_params().epsilon_r == 5.6);
+        CHECK(charge_layout.get_phys_params().lambda_tf == 5.0);
+        CHECK(charge_layout.get_phys_params().lat_a == 3.84);
+        CHECK(charge_layout.get_phys_params().lat_b == 7.68);
+        CHECK(charge_layout.get_phys_params().lat_c == 2.25);
+
+        charge_layout.set_physical_parameters(sidb_simulation_parameters{3, -0.4, 5.1, 5.5, 1, 2, 3});
+        CHECK(charge_layout.get_phys_params().base == 3);
+        CHECK(charge_layout.get_phys_params().mu == -0.4);
+        CHECK(charge_layout.get_phys_params().epsilon_r == 5.1);
+        CHECK(charge_layout.get_phys_params().lambda_tf == 5.5);
+        CHECK(charge_layout.get_phys_params().lat_a == 1);
+        CHECK(charge_layout.get_phys_params().lat_b == 2);
+        CHECK(charge_layout.get_phys_params().lat_c == 3);
+    }
+
     SECTION("Distance matrix")
     {
         lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -192,6 +220,9 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({1, 1, 1}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
+
+        // Take cells that are not part of the layout
+        CHECK(charge_layout.get_nm_distance_between_cells({3, 0, 0}, {3, 0, 0}) == 0.0);
 
         CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {0, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -247,6 +278,10 @@ TEMPLATE_TEST_CASE(
         charge_layout.assign_charge_state({1, 10, 1}, sidb_charge_state::POSITIVE);
 
         charge_layout.update_local_potential();
+
+        // cell and index are not part of the layout.
+        CHECK(!charge_layout.get_local_potential({2, 0, 0}).has_value());
+        CHECK(!charge_layout.get_local_potential_by_index(4).has_value());
 
         charge_layout.foreach_cell(
             [&charge_layout](const auto& c)
@@ -422,7 +457,7 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params};
+        const charge_distribution_surface charge_layout_new{lyt_new, params};
 
         charge_layout_new.assign_charge_state({0, 0, 1}, sidb_charge_state::NEGATIVE);
         charge_layout_new.assign_charge_state({1, 3, 0}, sidb_charge_state::POSITIVE);
@@ -431,6 +466,13 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout_new.get_charge_state({0, 0, 1}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout_new.get_charge_state({1, 3, 0}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout_new.get_charge_state({10, 5, 1}) == sidb_charge_state::NEUTRAL);
+
+        CHECK_THAT(charge_layout_new.get_chargeless_potential_between_sidbs({0, 0, 1}, {1, 3, 0}) -
+                       charge_layout_new.calculate_chargeless_potential_between_sidbs({0, 0, 1}, {1, 3, 0}),
+                   Catch::Matchers::WithinAbs(0.0, 0.000001));
+
+        CHECK(charge_layout_new.get_chargeless_potential_between_sidbs({0, 0, 1}, {0, 0, 1}) == 0.0);
+        CHECK(charge_layout_new.get_potential_between_sidbs({0, 0, 1}, {0, 0, 1}) == 0.0);
 
         CHECK(charge_layout_new.get_chargeless_potential_between_sidbs({0, 0, 1}, {1, 3, 0}) > 0.0);
         CHECK(charge_layout_new.get_potential_between_sidbs({0, 0, 1}, {1, 3, 0}) > 0.0);
