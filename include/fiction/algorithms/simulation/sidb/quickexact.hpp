@@ -14,7 +14,6 @@
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
-#include <units.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -60,11 +59,11 @@ struct quickexact_params
     /**
      * Local external electrostatic potentials (e.g locally applied electrodes).
      */
-    std::unordered_map<typename Lyt::cell, units::voltage::volt_t> local_external_potential = {};
+    std::unordered_map<typename Lyt::cell, double> local_external_potential = {};
     /**
      * Global external electrostatic potential. Value is applied on each cell in the layout.
      */
-    units::voltage::volt_t global_potential = 0_V;
+    double global_potential = 0;
 };
 
 namespace detail
@@ -111,14 +110,13 @@ class quickexact_impl
                     all_sidbs_in_lyt_without_negative_detected_ones[0]};
                 charge_lyt_with_assigned_dependent_cell.assign_local_external_potential(
                     params.local_external_potential);
-                charge_lyt_with_assigned_dependent_cell.set_global_external_potential(params.global_potential);
+                charge_lyt_with_assigned_dependent_cell.assign_global_external_potential(params.global_potential);
 
                 if constexpr (has_get_sidb_defect_v<Lyt>)
                 {
                     for (const auto& [cell, defect] : real_placed_defects)
                     {
-                        charge_lyt_with_assigned_dependent_cell.assign_defect_to_charge_distribution_surface(cell,
-                                                                                                             defect);
+                        charge_lyt_with_assigned_dependent_cell.add_defect_to_charge_distribution_surface(cell, defect);
                     }
                 }
                 // IMPORTANT: The detected negatively charged SiDBs (they have to be negatively charged to fulfill the
@@ -127,8 +125,8 @@ class quickexact_impl
                 // implementation is chosen.
                 for (const auto& cell : detected_negative_sidbs)
                 {
-                    charge_lyt_with_assigned_dependent_cell.assign_defect_to_charge_distribution_surface(
-                        cell, sidb_defect{sidb_defect_type::UNKNOWN, -1_e,
+                    charge_lyt_with_assigned_dependent_cell.add_defect_to_charge_distribution_surface(
+                        cell, sidb_defect{sidb_defect_type::UNKNOWN, -1,
                                           charge_lyt_with_assigned_dependent_cell.get_phys_params().epsilon_r,
                                           charge_lyt_with_assigned_dependent_cell.get_phys_params().lambda_tf});
                 }
@@ -353,14 +351,14 @@ class quickexact_impl
                 {
                     if (layout.get_sidb_defect(defect.first) != sidb_defect{sidb_defect_type::NONE})
                     {
-                        charge_lyt.assign_defect_to_charge_distribution_surface(defect.first,
-                                                                                layout.get_sidb_defect(defect.first));
+                        charge_lyt.add_defect_to_charge_distribution_surface(defect.first,
+                                                                             layout.get_sidb_defect(defect.first));
                     }
                 });
         }
 
         charge_lyt.assign_local_external_potential(params.local_external_potential);
-        charge_lyt.set_global_external_potential(params.global_potential, dependent_cell_mode::VARIABLE);
+        charge_lyt.assign_global_external_potential(params.global_potential, dependent_cell_mode::VARIABLE);
         detected_negative_sidb_indices = charge_lyt.negative_sidb_detection();
         detected_negative_sidbs.reserve(detected_negative_sidb_indices.size());
         all_sidbs_in_lyt_without_negative_detected_ones = charge_lyt.get_sidb_order();

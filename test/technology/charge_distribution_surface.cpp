@@ -11,6 +11,7 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 
 using namespace fiction;
@@ -153,13 +154,13 @@ TEMPLATE_TEST_CASE(
         const charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
         lyt.assign_cell_type({5, 6}, TestType::cell_type::EMPTY);
         charge_distribution_surface charge_layout_new{lyt, sidb_simulation_parameters{}};
-        charge_layout_new.assign_defect_to_charge_distribution_surface(
-            {5, 6}, sidb_defect{sidb_defect_type::UNKNOWN, -1_e, charge_layout_new.get_phys_params().epsilon_r,
+        charge_layout_new.add_defect_to_charge_distribution_surface(
+            {5, 6}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout_new.get_phys_params().epsilon_r,
                                 charge_layout_new.get_phys_params().lambda_tf});
-        CHECK(charge_layout_new.chargeless_potential_generated_by_defect_at_given_distance(0.0_nm) == 0.0_V);
+        CHECK(charge_layout_new.chargeless_potential_generated_by_defect_at_given_distance(0.0) == 0.0);
         charge_layout_new.update_after_charge_change();
-        CHECK_THAT(charge_layout.get_system_energy().value() - charge_layout_new.get_system_energy().value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
+        CHECK_THAT(charge_layout.get_system_energy() - charge_layout_new.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("assign and read out charge states")
@@ -286,7 +287,7 @@ TEMPLATE_TEST_CASE(
 
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
-        charge_layout.set_physical_parameters(sidb_simulation_parameters{2, -0.2});
+        charge_layout.assign_physical_parameters(sidb_simulation_parameters{2, -0.2});
         CHECK(charge_layout.get_phys_params().base == 2);
         CHECK(charge_layout.get_phys_params().mu == -0.2);
         CHECK(charge_layout.get_phys_params().epsilon_r == 5.6);
@@ -295,7 +296,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_phys_params().lat_b == 7.68);
         CHECK(charge_layout.get_phys_params().lat_c == 2.25);
 
-        charge_layout.set_physical_parameters(sidb_simulation_parameters{3, -0.4, 5.1, 5.5, 1, 2, 3});
+        charge_layout.assign_physical_parameters(sidb_simulation_parameters{3, -0.4, 5.1, 5.5, 1, 2, 3});
         CHECK(charge_layout.get_phys_params().base == 3);
         CHECK(charge_layout.get_phys_params().mu == -0.4);
         CHECK(charge_layout.get_phys_params().epsilon_r == 5.1);
@@ -504,7 +505,7 @@ TEMPLATE_TEST_CASE(
     SECTION("apply external voltage at two cells")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{3, -0.32_eV};
+        const sidb_simulation_parameters params{3, -0.32};
 
         lyt_new.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -514,16 +515,15 @@ TEMPLATE_TEST_CASE(
                                                       params,
                                                       sidb_charge_state::NEUTRAL,
                                                       {},
-                                                      {{{0, 0, 1}, -0.5_V}}};
+                                                      {{{0, 0, 1}, -0.5}}};
         REQUIRE(!charge_layout_new.get_external_potentials().empty());
         CHECK(charge_layout_new.get_external_potentials().size() == 1);
         CHECK(charge_layout_new.get_external_potentials().size() == 1);
 
-        CHECK_THAT((*charge_layout_new.get_local_potential({0, 0, 1})).value() + 0.5,
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT((*charge_layout_new.get_local_potential({1, 3, 0})).value(),
-                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
-        CHECK_THAT((*charge_layout_new.get_local_potential({10, 5, 1})).value(),
+        CHECK_THAT((*charge_layout_new.get_local_potential({0, 0, 1})) + 0.5,
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT((*charge_layout_new.get_local_potential({1, 3, 0})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT((*charge_layout_new.get_local_potential({10, 5, 1})),
                    Catch::Matchers::WithinAbs(0.000000, 0.000001));
         charge_layout_new.assign_all_charge_states(sidb_charge_state::POSITIVE);
         charge_layout_new.update_after_charge_change();
@@ -531,47 +531,46 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout_new.get_charge_state({1, 3, 0}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout_new.get_charge_state({10, 5, 1}) == sidb_charge_state::POSITIVE);
 
-        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) > -0.5_V);
-        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) > -0.5_V);
-        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) > -0.5_V);
+        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) > -0.5);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) > -0.5);
+        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) > -0.5);
 
         charge_layout_new.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
-        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.1_V}});
-        CHECK_THAT((*charge_layout_new.get_local_potential({0, 0, 1})).value() + 0.1,
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT((*charge_layout_new.get_local_potential({1, 3, 0})).value(),
-                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
-        CHECK_THAT((*charge_layout_new.get_local_potential({10, 5, 1})).value(),
+        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.1}});
+        CHECK_THAT((*charge_layout_new.get_local_potential({0, 0, 1})) + 0.1,
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT((*charge_layout_new.get_local_potential({1, 3, 0})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT((*charge_layout_new.get_local_potential({10, 5, 1})),
                    Catch::Matchers::WithinAbs(0.000000, 0.000001));
 
-        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.5_V}, {{10, 5, 1}, -0.1_V}});
+        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.5}, {{10, 5, 1}, -0.1}});
         charge_layout_new.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_layout_new.update_after_charge_change();
 
-        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) < -0.5_V);
-        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) < -0.1_V);
-        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0_V);
+        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) < -0.5);
+        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) < -0.1);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0);
     }
 
     SECTION("apply homogenous external voltage to layout")
     {
-        const sidb_simulation_parameters params{3, -0.32_eV};
+        const sidb_simulation_parameters params{3, -0.32};
         lyt.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL};
         CHECK(charge_layout.get_external_potentials().empty());
-        charge_layout.set_global_external_potential(-0.1_V);
+        charge_layout.assign_global_external_potential(-0.1);
         CHECK(!charge_layout.get_external_potentials().empty());
 
-        CHECK_THAT((*charge_layout.get_local_potential({0, 0, 1})).value() + 0.1,
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT((*charge_layout.get_local_potential({1, 3, 0})).value() + 0.1,
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT((*charge_layout.get_local_potential({10, 5, 1})).value() + 0.1,
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
+        CHECK_THAT((*charge_layout.get_local_potential({0, 0, 1})) + 0.1,
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT((*charge_layout.get_local_potential({1, 3, 0})) + 0.1,
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT((*charge_layout.get_local_potential({10, 5, 1})) + 0.1,
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
 
         lyt.assign_cell_type({0, 0, 1}, TestType::cell_type::EMPTY);
         lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::EMPTY);
@@ -585,7 +584,7 @@ TEMPLATE_TEST_CASE(
         charge_layout_new.update_after_charge_change();
         CHECK(charge_layout_new.is_physically_valid());
 
-        charge_layout_new.set_global_external_potential(0.2_V);
+        charge_layout_new.assign_global_external_potential(0.2);
         CHECK(!charge_layout_new.is_physically_valid());
 
         charge_layout_new.assign_charge_state({0, 0, 0}, sidb_charge_state::NEGATIVE);
@@ -598,7 +597,7 @@ TEMPLATE_TEST_CASE(
     SECTION("no external voltage given")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{3, -0.32_eV};
+        const sidb_simulation_parameters params{3, -0.32};
 
         lyt_new.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -606,18 +605,16 @@ TEMPLATE_TEST_CASE(
 
         charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
 
-        CHECK_THAT((*charge_layout_new.get_local_potential({0, 0, 1})).value(),
-                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
-        CHECK_THAT((*charge_layout_new.get_local_potential({1, 3, 1})).value(),
-                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
-        CHECK_THAT((*charge_layout_new.get_local_potential({10, 5, 1})).value(),
+        CHECK_THAT((*charge_layout_new.get_local_potential({0, 0, 1})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT((*charge_layout_new.get_local_potential({1, 3, 1})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT((*charge_layout_new.get_local_potential({10, 5, 1})),
                    Catch::Matchers::WithinAbs(0.000000, 0.000001));
     }
 
     SECTION("assign defect | negative defect")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{3, -0.32_eV};
+        const sidb_simulation_parameters params{3, -0.32};
 
         lyt_new.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -625,19 +622,19 @@ TEMPLATE_TEST_CASE(
 
         charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
 
-        charge_layout_new.assign_defect_to_charge_distribution_surface(
-            {5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1_e, charge_layout_new.get_phys_params().epsilon_r,
+        charge_layout_new.add_defect_to_charge_distribution_surface(
+            {5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout_new.get_phys_params().epsilon_r,
                                    charge_layout_new.get_phys_params().lambda_tf});
 
-        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) < 0_V);
-        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0_V);
-        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) < 0_V);
+        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) < 0);
     }
 
     SECTION("assign defect | positive defect")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{3, -0.32_eV};
+        const sidb_simulation_parameters params{3, -0.32};
 
         lyt_new.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -645,19 +642,19 @@ TEMPLATE_TEST_CASE(
 
         charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
 
-        charge_layout_new.assign_defect_to_charge_distribution_surface(
-            {5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1_e, charge_layout_new.get_phys_params().epsilon_r,
+        charge_layout_new.add_defect_to_charge_distribution_surface(
+            {5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout_new.get_phys_params().epsilon_r,
                                    charge_layout_new.get_phys_params().lambda_tf});
 
-        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) > 0_V);
-        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) > 0_V);
-        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) > 0_V);
+        CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) > 0);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) > 0);
+        CHECK(*charge_layout_new.get_local_potential({10, 5, 1}) > 0);
     }
 
     SECTION("assign defect and perturber")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{3, -0.32_eV};
+        const sidb_simulation_parameters params{3, -0.32};
 
         lyt_new.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
@@ -665,17 +662,16 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
 
         charge_layout_new.assign_charge_state({10, 5, 1}, sidb_charge_state::NEGATIVE);
-        charge_layout_new.assign_defect_to_charge_distribution_surface(
-            {-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1_e, charge_layout_new.get_phys_params().epsilon_r,
+        charge_layout_new.add_defect_to_charge_distribution_surface(
+            {-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout_new.get_phys_params().epsilon_r,
                                      charge_layout_new.get_phys_params().lambda_tf});
-        CHECK_THAT((*charge_layout_new.get_local_potential({0, 0, 1})).value(),
-                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT((*charge_layout_new.get_local_potential({0, 0, 1})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
     }
 
     SECTION("layout with perturber |assigning and erasing defect")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{3, -0.32_eV};
+        const sidb_simulation_parameters params{3, -0.32};
 
         lyt_new.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
@@ -684,38 +680,35 @@ TEMPLATE_TEST_CASE(
 
         charge_layout.assign_charge_state({10, 5, 1}, sidb_charge_state::NEGATIVE);
         charge_layout.update_after_charge_change();
-        charge_layout.assign_defect_to_charge_distribution_surface(
-            {-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1_e, charge_layout.get_phys_params().epsilon_r,
+        charge_layout.add_defect_to_charge_distribution_surface(
+            {-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_phys_params().epsilon_r,
                                      charge_layout.get_phys_params().lambda_tf});
 
-        CHECK_THAT((*charge_layout.get_local_potential({0, 0, 0})).value(),
-                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT((*charge_layout.get_local_potential({0, 0, 0})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
 
         charge_layout.erase_defect({-10, 5, 1});
-        CHECK(charge_layout.get_local_potential({0, 0, 0}) < 0_V);
+        CHECK(charge_layout.get_local_potential({0, 0, 0}) < 0);
     }
 
     SECTION("layout with neutrally charged SiDBs |assigning and erasing defect")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{3, -0.32_eV};
+        const sidb_simulation_parameters params{3, -0.32};
 
         lyt_new.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface charge_layout{lyt_new, params, sidb_charge_state::NEUTRAL};
-        charge_layout.assign_defect_to_charge_distribution_surface(
-            {-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1_e, charge_layout.get_phys_params().epsilon_r,
+        charge_layout.add_defect_to_charge_distribution_surface(
+            {-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_phys_params().epsilon_r,
                                      charge_layout.get_phys_params().lambda_tf});
 
-        CHECK(*charge_layout.get_local_potential({0, 0, 0}) > 0_V);
-        CHECK(*charge_layout.get_local_potential({10, 5, 1}) > 0_V);
+        CHECK(*charge_layout.get_local_potential({0, 0, 0}) > 0);
+        CHECK(*charge_layout.get_local_potential({10, 5, 1}) > 0);
 
         charge_layout.erase_defect({-10, 5, 1});
-        CHECK_THAT((*charge_layout.get_local_potential({0, 0, 0})).value(),
-                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
-        CHECK_THAT((*charge_layout.get_local_potential({10, 5, 1})).value(),
-                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT((*charge_layout.get_local_potential({0, 0, 0})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT((*charge_layout.get_local_potential({10, 5, 1})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
     }
 
     SECTION("increase charge index")
@@ -755,7 +748,7 @@ TEMPLATE_TEST_CASE(
     SECTION("detecting perturber in layout with only one SiDB")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{3, -0.32_eV};
+        const sidb_simulation_parameters params{3, -0.32};
 
         lyt_new.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
@@ -776,7 +769,7 @@ TEMPLATE_TEST_CASE(
 
         lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
-        const sidb_simulation_parameters params{2, -0.28_eV};
+        const sidb_simulation_parameters params{2, -0.28};
         charge_distribution_surface      charge_layout_new{lyt, params};
         charge_layout_new.assign_charge_state({1, 3, 0}, sidb_charge_state::NEGATIVE);
         charge_layout_new.assign_charge_state({3, 3, 0}, sidb_charge_state::NEUTRAL);
@@ -838,7 +831,7 @@ TEMPLATE_TEST_CASE(
     SECTION("adding dependent cell")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{3, -0.32_eV};
+        const sidb_simulation_parameters params{3, -0.32};
 
         lyt_new.assign_cell_type({0, 3, 1}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -854,9 +847,9 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout_new.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout_new.get_charge_state({10, 4, 1}) == sidb_charge_state::NEUTRAL);
         charge_layout_new.update_after_charge_change();
-        CHECK(*charge_layout_new.get_local_potential({0, 3, 1}) < 0_V);
-        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0_V);
-        CHECK(*charge_layout_new.get_local_potential({10, 4, 1}) < 0_V);
+        CHECK(*charge_layout_new.get_local_potential({0, 3, 1}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({10, 4, 1}) < 0);
         charge_layout_new.update_charge_state_of_dependent_cell();
         CHECK(charge_layout_new.get_charge_state({10, 4, 1}) == sidb_charge_state::NEGATIVE);
     }
@@ -864,7 +857,7 @@ TEMPLATE_TEST_CASE(
     SECTION("adding dependent cell and increase index")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{2, -0.32_eV};
+        const sidb_simulation_parameters params{2, -0.32};
 
         lyt_new.assign_cell_type({0, 3, 1}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -872,9 +865,9 @@ TEMPLATE_TEST_CASE(
 
         charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEGATIVE, {10, 4, 1}};
 
-        CHECK(*charge_layout_new.get_local_potential({0, 3, 1}) < 0_V);
-        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0_V);
-        CHECK(*charge_layout_new.get_local_potential({10, 4, 1}) < 0_V);
+        CHECK(*charge_layout_new.get_local_potential({0, 3, 1}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({10, 4, 1}) < 0);
 
         for (uint64_t i = 0; i < 3; i++)
         {
@@ -886,7 +879,7 @@ TEMPLATE_TEST_CASE(
     SECTION("adding dependent cell and compare local potential and system energy")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{2, -0.32_eV};
+        const sidb_simulation_parameters params{2, -0.32};
 
         lyt_new.assign_cell_type({0, 3, 1}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -899,9 +892,9 @@ TEMPLATE_TEST_CASE(
         charge_layout_new.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
         charge_layout_new.update_after_charge_change();
 
-        CHECK(*charge_layout_new.get_local_potential({0, 3, 1}) == 0.0_V);
-        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0_V);
-        CHECK(*charge_layout_new.get_local_potential({10, 4, 1}) < 0_V);
+        CHECK(*charge_layout_new.get_local_potential({0, 3, 1}) == 0.0);
+        CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0);
+        CHECK(*charge_layout_new.get_local_potential({10, 4, 1}) < 0);
 
         charge_layout_new.update_charge_state_of_dependent_cell();
         CHECK(charge_layout_new.get_charge_state({0, 3, 1}) == sidb_charge_state::NEGATIVE);
@@ -910,9 +903,9 @@ TEMPLATE_TEST_CASE(
         const auto loc_one   = *charge_layout_new.get_local_potential({0, 3, 1});
         const auto loc_two   = *charge_layout_new.get_local_potential({1, 3, 0});
         const auto loc_three = *charge_layout_new.get_local_potential({10, 4, 1});
-        CHECK(loc_one < 0_V);
-        CHECK(loc_two < 0_V);
-        CHECK(loc_three < 0_V);
+        CHECK(loc_one < 0);
+        CHECK(loc_two < 0);
+        CHECK(loc_three < 0);
         charge_layout_new.recompute_system_energy();
         auto system_energy_first = charge_layout_new.get_system_energy();
 
@@ -920,15 +913,15 @@ TEMPLATE_TEST_CASE(
         charge_layout_new.assign_charge_state({1, 3, 0}, sidb_charge_state::NEUTRAL);
         charge_layout_new.assign_charge_state({10, 4, 1}, sidb_charge_state::NEGATIVE);
         charge_layout_new.update_after_charge_change();
-        CHECK_THAT(loc_one.value() - (*charge_layout_new.get_local_potential({0, 3, 1})).value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT(loc_two.value() - (*charge_layout_new.get_local_potential({1, 3, 0})).value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT(loc_three.value() - (*charge_layout_new.get_local_potential({10, 4, 1})).value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
+        CHECK_THAT(loc_one - (*charge_layout_new.get_local_potential({0, 3, 1})),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT(loc_two - (*charge_layout_new.get_local_potential({1, 3, 0})),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT(loc_three - (*charge_layout_new.get_local_potential({10, 4, 1})),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
         auto system_energy_second = charge_layout_new.get_system_energy();
-        CHECK_THAT(system_energy_first.value() - system_energy_second.value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
+        CHECK_THAT(system_energy_first - system_energy_second,
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("Physical validity check after dependent cell is updated")
@@ -958,7 +951,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{2, -0.32_eV};
+        const sidb_simulation_parameters params{2, -0.32};
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE, {3, 0, 0}};
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1005,7 +998,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{2, -0.32_eV};
+        const sidb_simulation_parameters params{2, -0.32};
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE, {0, 0, 0}};
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1031,7 +1024,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{2, -0.32_eV};
+        const sidb_simulation_parameters params{2, -0.32};
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE, {0, 0, 0}};
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1041,8 +1034,8 @@ TEMPLATE_TEST_CASE(
         auto loc_two_wo_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_wo_defect = *charge_layout.get_local_potential({5, 0, 0});
 
-        charge_layout.assign_defect_to_charge_distribution_surface(
-            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1_e, charge_layout.get_phys_params().epsilon_r,
+        charge_layout.add_defect_to_charge_distribution_surface(
+            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
                                     charge_layout.get_phys_params().lambda_tf});
         auto loc_one_w_negative_defect   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_negative_defect   = *charge_layout.get_local_potential({3, 0, 0});
@@ -1054,21 +1047,21 @@ TEMPLATE_TEST_CASE(
         CHECK(loc_two_wo_defect > loc_two_w_negative_defect);
         CHECK(loc_three_wo_defect > loc_three_w_negative_defect);
 
-        charge_layout.assign_defect_to_charge_distribution_surface(
-            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 0_e, charge_layout.get_phys_params().epsilon_r,
+        charge_layout.add_defect_to_charge_distribution_surface(
+            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 0, charge_layout.get_phys_params().epsilon_r,
                                     charge_layout.get_phys_params().lambda_tf});
         auto loc_one_w_neutral_defect   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_neutral_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_w_neutral_defect = *charge_layout.get_local_potential({5, 0, 0});
-        CHECK_THAT(loc_one_wo_defect.value() - loc_one_w_neutral_defect.value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT(loc_two_wo_defect.value() - loc_two_w_neutral_defect.value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT(loc_three_wo_defect.value() - loc_three_w_neutral_defect.value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
+        CHECK_THAT(loc_one_wo_defect - loc_one_w_neutral_defect,
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT(loc_two_wo_defect - loc_two_w_neutral_defect,
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT(loc_three_wo_defect - loc_three_w_neutral_defect,
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
 
-        charge_layout.assign_defect_to_charge_distribution_surface(
-            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1_e, charge_layout.get_phys_params().epsilon_r,
+        charge_layout.add_defect_to_charge_distribution_surface(
+            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_phys_params().epsilon_r,
                                     charge_layout.get_phys_params().lambda_tf});
         auto loc_one_w_positive_defect   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_positive_defect   = *charge_layout.get_local_potential({3, 0, 0});
@@ -1080,11 +1073,11 @@ TEMPLATE_TEST_CASE(
         CHECK(loc_two_w_positive_defect > loc_two_w_neutral_defect);
         CHECK(loc_three_w_positive_defect > loc_three_w_neutral_defect);
 
-        CHECK_THAT((defect_potentials_negative[{0, 0, 0}] + defect_potentials_positive[{0, 0, 0}]).value(),
+        CHECK_THAT((defect_potentials_negative[{0, 0, 0}] + defect_potentials_positive[{0, 0, 0}]),
                    Catch::Matchers::WithinAbs(0.0, 0.000001));
-        CHECK_THAT((defect_potentials_negative[{3, 0, 0}] + defect_potentials_positive[{3, 0, 0}]).value(),
+        CHECK_THAT((defect_potentials_negative[{3, 0, 0}] + defect_potentials_positive[{3, 0, 0}]),
                    Catch::Matchers::WithinAbs(0.0, 0.000001));
-        CHECK_THAT((defect_potentials_negative[{5, 0, 0}] + defect_potentials_positive[{5, 0, 0}]).value(),
+        CHECK_THAT((defect_potentials_negative[{5, 0, 0}] + defect_potentials_positive[{5, 0, 0}]),
                    Catch::Matchers::WithinAbs(0.0, 0.000001));
     }
 
@@ -1094,7 +1087,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{2, -0.32_eV};
+        const sidb_simulation_parameters params{2, -0.32};
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE, {0, 0, 0}};
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1104,8 +1097,8 @@ TEMPLATE_TEST_CASE(
         auto loc_two_wo_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_wo_defect = *charge_layout.get_local_potential({5, 0, 0});
 
-        charge_layout.assign_defect_to_charge_distribution_surface(
-            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1_e, charge_layout.get_phys_params().epsilon_r,
+        charge_layout.add_defect_to_charge_distribution_surface(
+            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
                                     charge_layout.get_phys_params().lambda_tf});
         auto loc_one_w_negative_defect   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_negative_defect   = *charge_layout.get_local_potential({3, 0, 0});
@@ -1117,22 +1110,22 @@ TEMPLATE_TEST_CASE(
         CHECK(loc_two_wo_defect > loc_two_w_negative_defect);
         CHECK(loc_three_wo_defect > loc_three_w_negative_defect);
 
-        charge_layout.assign_defect_to_charge_distribution_surface(
-            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 0_e, charge_layout.get_phys_params().epsilon_r,
+        charge_layout.add_defect_to_charge_distribution_surface(
+            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 0, charge_layout.get_phys_params().epsilon_r,
                                     charge_layout.get_phys_params().lambda_tf});
         auto loc_one_w_neutral_defect   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_neutral_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_w_neutral_defect = *charge_layout.get_local_potential({5, 0, 0});
 
-        CHECK_THAT(loc_one_wo_defect.value() - loc_one_w_neutral_defect.value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT(loc_two_wo_defect.value() - loc_two_w_neutral_defect.value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT(loc_three_wo_defect.value() - loc_three_w_neutral_defect.value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
+        CHECK_THAT(loc_one_wo_defect - loc_one_w_neutral_defect,
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT(loc_two_wo_defect - loc_two_w_neutral_defect,
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT(loc_three_wo_defect - loc_three_w_neutral_defect,
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
 
-        charge_layout.assign_defect_to_charge_distribution_surface(
-            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1_e, charge_layout.get_phys_params().epsilon_r,
+        charge_layout.add_defect_to_charge_distribution_surface(
+            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_phys_params().epsilon_r,
                                     charge_layout.get_phys_params().lambda_tf});
         auto loc_one_w_positive_defect   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_positive_defect   = *charge_layout.get_local_potential({3, 0, 0});
@@ -1144,11 +1137,11 @@ TEMPLATE_TEST_CASE(
         CHECK(loc_two_w_positive_defect > loc_two_w_neutral_defect);
         CHECK(loc_three_w_positive_defect > loc_three_w_neutral_defect);
 
-        CHECK_THAT((defect_potentials_negative[{0, 0, 0}].value() + defect_potentials_positive[{0, 0, 0}].value()),
+        CHECK_THAT((defect_potentials_negative[{0, 0, 0}] + defect_potentials_positive[{0, 0, 0}]),
                    Catch::Matchers::WithinAbs(0.0, 0.000001));
-        CHECK_THAT((defect_potentials_negative[{3, 0, 0}].value() + defect_potentials_positive[{3, 0, 0}].value()),
+        CHECK_THAT((defect_potentials_negative[{3, 0, 0}] + defect_potentials_positive[{3, 0, 0}]),
                    Catch::Matchers::WithinAbs(0.0, 0.000001));
-        CHECK_THAT((defect_potentials_negative[{5, 0, 0}].value() + defect_potentials_positive[{5, 0, 0}].value()),
+        CHECK_THAT((defect_potentials_negative[{5, 0, 0}] + defect_potentials_positive[{5, 0, 0}]),
                    Catch::Matchers::WithinAbs(0.0, 0.000001));
     }
 
@@ -1158,7 +1151,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{2, -0.32_eV};
+        const sidb_simulation_parameters params{2, -0.32};
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL, {0, 0, 0}};
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEUTRAL);
@@ -1168,16 +1161,16 @@ TEMPLATE_TEST_CASE(
         auto loc_two_wo_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_wo_defect = *charge_layout.get_local_potential({5, 0, 0});
 
-        charge_layout.assign_defect_to_charge_distribution_surface(
-            {0, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1_e, charge_layout.get_phys_params().epsilon_r,
+        charge_layout.add_defect_to_charge_distribution_surface(
+            {0, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
                                    charge_layout.get_phys_params().lambda_tf});
 
-        CHECK_THAT(loc_one_wo_defect.value() - (*charge_layout.get_local_potential({0, 0, 0})).value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT(loc_two_wo_defect.value() - (*charge_layout.get_local_potential({3, 0, 0})).value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT(loc_three_wo_defect.value() - (*charge_layout.get_local_potential({5, 0, 0})).value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
+        CHECK_THAT(loc_one_wo_defect - (*charge_layout.get_local_potential({0, 0, 0})),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT(loc_two_wo_defect - (*charge_layout.get_local_potential({3, 0, 0})),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT(loc_three_wo_defect - (*charge_layout.get_local_potential({5, 0, 0})),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
 
         auto defect_potentials_negative = charge_layout.get_defect_potentials();
         CHECK(defect_potentials_negative.empty());
@@ -1189,23 +1182,23 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{2, -0.32_eV};
+        const sidb_simulation_parameters params{2, -0.32};
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL, {0, 0, 0}};
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEUTRAL);
 
-        charge_layout.assign_defect_to_charge_distribution_surface(
-            {8, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1_e, charge_layout.get_phys_params().epsilon_r,
+        charge_layout.add_defect_to_charge_distribution_surface(
+            {8, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
                                    charge_layout.get_phys_params().lambda_tf});
 
         auto loc_one_w_defect_normal_screening   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_defect_normal_screening   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_w_defect_normal_screening = *charge_layout.get_local_potential({5, 0, 0});
 
-        charge_layout.assign_defect_to_charge_distribution_surface(
-            {8, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1_e, charge_layout.get_phys_params().epsilon_r,
+        charge_layout.add_defect_to_charge_distribution_surface(
+            {8, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
                                    charge_layout.get_phys_params().lambda_tf * 20});
 
         auto loc_one_w_defec_strong_screening    = *charge_layout.get_local_potential({0, 0, 0});
@@ -1220,12 +1213,12 @@ TEMPLATE_TEST_CASE(
         CHECK(loc_three_w_defect_normal_screening > loc_three_w_defect_strong_screening);
 
         charge_layout.erase_defect({8, 0, 0});
-        CHECK_THAT((*charge_layout.get_local_potential({0, 0, 0})).value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT((*charge_layout.get_local_potential({3, 0, 0})).value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
-        CHECK_THAT((*charge_layout.get_local_potential({5, 0, 0})).value(),
-                   Catch::Matchers::WithinAbs(0, POP_STABILITY_ERR));
+        CHECK_THAT((*charge_layout.get_local_potential({0, 0, 0})),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT((*charge_layout.get_local_potential({3, 0, 0})),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT((*charge_layout.get_local_potential({5, 0, 0})),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("Y-shape SiDB OR gate with input 01 and global external potential (high)")
@@ -1242,9 +1235,9 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{3, -0.28_eV};
+        const sidb_simulation_parameters params{3, -0.28};
         charge_distribution_surface      charge_lyt_first{lyt, params, sidb_charge_state::POSITIVE};
-        charge_lyt_first.set_global_external_potential(-2.0_V);
+        charge_lyt_first.assign_global_external_potential(-2.0);
         CHECK(charge_lyt_first.is_physically_valid());
     }
 
@@ -1259,7 +1252,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({20, 2, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({23, 2, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{3, -0.28_eV};
+        const sidb_simulation_parameters params{3, -0.28};
         charge_distribution_surface      charge_lyt_first{lyt, params, sidb_charge_state::NEGATIVE};
         charge_lyt_first.three_state_simulation_required();
         const auto positive_candidates = charge_lyt_first.get_positive_candidates();
@@ -1302,7 +1295,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{3, -0.32_eV};
+        const sidb_simulation_parameters params{3, -0.32};
         charge_distribution_surface      charge_lyt_first{lyt, params, sidb_charge_state::NEGATIVE};
         charge_lyt_first.assign_charge_state({0, 0, 0}, sidb_charge_state::NEGATIVE);
         charge_lyt_first.assign_charge_state({4, 0, 0}, sidb_charge_state::NEUTRAL);

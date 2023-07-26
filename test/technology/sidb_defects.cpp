@@ -93,36 +93,36 @@ TEST_CASE("Compare Defect", "[sidb-defects]")
 
     SECTION("Different charge")
     {
-        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -5_e};
-        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1_e};
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -5};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1};
         CHECK(defect_one != defect_two);
     }
 
     SECTION("Different epsilon_r")
     {
-        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1_e, 2};
-        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1_e, 5};
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1, 2};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1, 5};
         CHECK(defect_one != defect_two);
     }
 
     SECTION("Different lambda_tf")
     {
-        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1_e, 2, 4_nm};
-        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1_e, 2, 5_nm};
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1, 2, 4};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1, 2, 5};
         CHECK(defect_one != defect_two);
     }
 
     SECTION("Completely different")
     {
-        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1_e, 2, 4_nm};
-        const sidb_defect defect_two{sidb_defect_type::DB, 5_e, 5, 0.3_nm};
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1, 2, 4};
+        const sidb_defect defect_two{sidb_defect_type::DB, 5, 5, 0.3};
         CHECK(defect_one != defect_two);
     }
 
     SECTION("Identical Defects")
     {
-        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1_e, 2, 4_nm};
-        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1_e, 2, 4_nm};
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1, 2, 4};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1, 2, 4};
         CHECK(defect_one == defect_two);
     }
 }
