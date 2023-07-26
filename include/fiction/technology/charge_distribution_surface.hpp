@@ -123,9 +123,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
       public:
         explicit charge_distribution_storage(
-            const sidb_simulation_parameters&                                     params = sidb_simulation_parameters{},
+            const sidb_simulation_parameters&                     params             = sidb_simulation_parameters{},
             const std::unordered_map<typename Lyt::cell, double>& external_potential = {},
-            const typename Lyt::cell&                                             variable_cell      = {}) :
+            const typename Lyt::cell&                             variable_cell      = {}) :
                 phys_params{params},
                 local_external_pot{external_potential},
                 dependent_cell{variable_cell} {};
@@ -733,7 +733,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @return The potential between `index1` and `index2` (unit: V).
      */
     [[nodiscard]] double get_electrostatic_potential_by_indices(const uint64_t index1,
-                                                                                const uint64_t index2) const noexcept
+                                                                const uint64_t index2) const noexcept
     {
         return strg->pot_mat[index1][index2];
     }
@@ -744,8 +744,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param index1 The second index.
      * @return The potential between `index1` and `index2` (unit: V).
      */
-    [[nodiscard]] double potential_between_sidbs_by_index(const uint64_t index1,
-                                                                          const uint64_t index2) const noexcept
+    [[nodiscard]] double potential_between_sidbs_by_index(const uint64_t index1, const uint64_t index2) const noexcept
     {
         if (strg->nm_dist_mat[index1][index2] == 0.0)
         {
@@ -765,7 +764,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @return The electrostatic potential between c1 and c2 (unit: V).
      */
     [[nodiscard]] double potential_between_sidbs(const typename Lyt::cell& c1,
-                                                                 const typename Lyt::cell& c2) const noexcept
+                                                 const typename Lyt::cell& c2) const noexcept
     {
         const auto index1 = static_cast<std::size_t>(cell_to_index(c1));
         const auto index2 = static_cast<std::size_t>(cell_to_index(c2));
@@ -779,8 +778,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param index1 The second index.
      * @return The electrostatic potential between `index1` and `index2` (unit: V).
      */
-    [[nodiscard]] double potential_between_sidbs_by_indices(const uint64_t index1,
-                                                                            const uint64_t index2) const noexcept
+    [[nodiscard]] double potential_between_sidbs_by_indices(const uint64_t index1, const uint64_t index2) const noexcept
     {
         if (strg->nm_dist_mat[index1][index2] == 0.0)
         {
@@ -806,13 +804,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             strg->local_pot.resize(this->num_cells(), 0);
 
-        for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
-        {
-            double collect = 0.0;
-            for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
+            for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
             {
-                collect += strg->pot_mat[i][j] * static_cast<double>(charge_state_to_sign(strg->cell_charge[j]));
-            }
+                double collect = 0.0;
+                for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
+                {
+                    collect += strg->pot_mat[i][j] * static_cast<double>(charge_state_to_sign(strg->cell_charge[j]));
+                }
 
                 strg->local_pot[i] = collect;
             }
@@ -919,9 +917,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             for (const auto& [cell2, defect2] : strg->defects)
             {
-                defect_interaction +=
-                    chargeless_potential_at_given_distance(
-                        sidb_nanometer_distance<Lyt>(*this, cell1, cell2, strg->phys_params));
+                defect_interaction += chargeless_potential_at_given_distance(
+                    sidb_nanometer_distance<Lyt>(*this, cell1, cell2, strg->phys_params));
             }
         }
         strg->system_energy = total_potential + 0.5 * defect_energy + 0.5 * defect_interaction;
@@ -1658,15 +1655,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param distance Distance in nanometer between position and defect (unit: nm).
      * @return The chargeless electrostatic potential at a given distance (unit: V).
      */
-    [[nodiscard]] double
-    chargeless_potential_at_given_distance(const double distance) const noexcept
+    [[nodiscard]] double chargeless_potential_at_given_distance(const double distance) const noexcept
     {
         if (distance == 0.0)
         {
             return 0.0;
         }
-        return (strg->phys_params.k / (distance * 1E-9) *
-                std::exp(-distance/ strg->phys_params.lambda_tf) * physical_constants::ELEMENTARY_CHARGE);
+        return (strg->phys_params.k / (distance * 1E-9) * std::exp(-distance / strg->phys_params.lambda_tf) *
+                physical_constants::ELEMENTARY_CHARGE);
     }
     /**
      * This function calculates the chargeless potential in Volt generated by a defect at a given distance in nanometer.
@@ -1676,7 +1672,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @return The chargeless electrostatic potential in Volt generated by the defect at a given distance (unit: V).
      */
     [[nodiscard]] double
-    chargeless_potential_generated_by_defect_at_given_distance(const double distance,
+    chargeless_potential_generated_by_defect_at_given_distance(const double       distance,
                                                                const sidb_defect& defect = sidb_defect{}) const noexcept
     {
         if (distance == 0.0)
@@ -1684,8 +1680,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             return 0.0;
         }
 
-        return strg->phys_params.k * strg->phys_params.epsilon_r / defect.epsilon_r /
-               (distance * 1e-9) *
+        return strg->phys_params.k * strg->phys_params.epsilon_r / defect.epsilon_r / (distance * 1e-9) *
                std::exp(-distance / defect.lambda_tf) * physical_constants::ELEMENTARY_CHARGE;
     }
     /**

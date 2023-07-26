@@ -79,8 +79,7 @@ struct time_to_solution_stats
     void report(std::ostream& out = std::cout)
     {
         out << fmt::format("[i] time_to_solution: {} | acc: {} | t_(s): {} | t_exhaustive(s): {} | exact alg.: {}\n",
-                           time_to_solution, acc, mean_single_runtime,
-                           single_runtime_exhaustive, algorithm);
+                           time_to_solution, acc, mean_single_runtime, single_runtime_exhaustive, algorithm);
     }
 };
 /**
@@ -117,7 +116,7 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to
         simulation_result = quickexact(lyt, params);
     }
 
-    st.single_runtime_exhaustive =mockturtle::to_seconds(simulation_results_exgs.simulation_runtime);
+    st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_results_exgs.simulation_runtime);
 
     std::size_t         gs_count = 0;
     std::vector<double> time{};
