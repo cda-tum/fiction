@@ -71,7 +71,6 @@ struct time_to_solution_stats
      * Exhaustive simulation algorithm used to simulate the ground state as reference.
      */
     std::string algorithm;
-
     /**
      * Print the results to the given output stream.
      *
