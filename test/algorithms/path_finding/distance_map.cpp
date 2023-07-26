@@ -32,7 +32,7 @@ TEST_CASE("Distance map", "[distance-map]")
                 layout.foreach_coordinate(
                     [&layout, &dist_map, &dist_map_func, &c1, src](const auto& c2, const unsigned tgt)
                     {
-                        CHECK(dist_map[src][tgt] == twoddwave_distance(layout, c1, c2));
+                        CHECK(dist_map[src][tgt] == a_star_distance(layout, c1, c2));
                         CHECK(dist_map[src][tgt] == dist_map_func(layout, c1, c2));
                     });
             });
@@ -111,7 +111,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
                 layout.foreach_coordinate(
                     [&layout, &dist_map, &dist_map_func, &c1](const auto& c2)
                     {
-                        CHECK(dist_map.at({c1, c2}) == twoddwave_distance(layout, c1, c2));
+                        CHECK(dist_map.at({c1, c2}) == a_star_distance(layout, c1, c2));
                         CHECK(dist_map.at({c1, c2}) == dist_map_func(layout, c1, c2));
                     });
             });
@@ -186,18 +186,16 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
         layout.foreach_coordinate(
             [&layout, &dist_map_func](const auto& c1)
             {
-                layout.foreach_coordinate(
-                    [&layout, &dist_map_func, &c1](const auto& c2)
-                    { CHECK(dist_map_func(layout, c1, c2) == twoddwave_distance(layout, c1, c2)); });
+                layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
+                                          { CHECK(dist_map_func(layout, c1, c2) == a_star_distance(layout, c1, c2)); });
             });
 
         // check that the cached distances are correct
         layout.foreach_coordinate(
             [&layout, &dist_map_func](const auto& c1)
             {
-                layout.foreach_coordinate(
-                    [&layout, &dist_map_func, &c1](const auto& c2)
-                    { CHECK(dist_map_func(layout, c1, c2) == twoddwave_distance(layout, c1, c2)); });
+                layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
+                                          { CHECK(dist_map_func(layout, c1, c2) == a_star_distance(layout, c1, c2)); });
             });
     }
     SECTION("USE clocking")
