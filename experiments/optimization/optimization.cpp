@@ -615,8 +615,8 @@ void optimize_output(obs_gate_lyt& lyt)
         }
         if (!moved)
         {
-            std::cout << route.back() << route[1] << route[0] << std::endl;
-            lyt.move_node(lyt.get_node(route.back()), {route[1].x, route[1].y, 0}, {lyt.make_signal(lyt.get_node(route[0]))});
+            new_pos = {route[1].x, route[1].y, 0};
+            updates.push_back(std::make_tuple(route.back(), new_pos, route[0]));
         }
     }
     for (std::tuple<coordinate, coordinate, coordinate>& update : updates)
@@ -724,7 +724,6 @@ int main()  // NOLINT
         const auto gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &orthogonal_stats);
         std::stringstream print_stream1{};
 
-        print_gate_level_layout(print_stream1, gate_level_layout, true, false);
         //  compute critical path and throughput
         fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
         fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats);
