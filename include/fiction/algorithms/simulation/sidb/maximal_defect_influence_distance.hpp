@@ -12,8 +12,6 @@
 #include "fiction/technology/sidb_surface.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
-#include <units.h>
-
 #include <mutex>
 #include <thread>
 #include <utility>
@@ -58,7 +56,7 @@ struct maximal_defect_influence_distance_params
  * sensitive part of the layout).
  */
 template <typename Lyt>
-std::pair<units::length::nanometer_t, typename Lyt::cell>
+std::pair<double, typename Lyt::cell>
 maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_distance_params<Lyt>& sim_params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -69,7 +67,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
                                                               automatic_base_number_detection::OFF};
 
     coordinate<Lyt> min_defect_position{};
-    auto            avoidance_distance = 0_nm;
+    double          avoidance_distance = 0;
 
     sidb_defect_layout              layout{lyt};
     std::vector<typename Lyt::cell> cells{};
@@ -100,16 +98,16 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
     north_west.x = nw.x - sim_params.additional_scanning_area.x;
     north_west.y = nw.y - sim_params.additional_scanning_area.y;
 
-    std::cout << "nw x: " << std::to_string(north_west.x);
-    std::cout << " | nw y: " << std::to_string(north_west.y);
-    std::cout << " | nw z: " << std::to_string(north_west.z) << std::endl;
+    //    std::cout << "nw x: " << std::to_string(north_west.x);
+    //    std::cout << " | nw y: " << std::to_string(north_west.y);
+    //    std::cout << " | nw z: " << std::to_string(north_west.z) << std::endl;
 
     south_east.x = se.x + sim_params.additional_scanning_area.x;
     south_east.y = se.y + sim_params.additional_scanning_area.y;
 
-    std::cout << "se x: " << std::to_string(south_east.x);
-    std::cout << " | se y: " << std::to_string(south_east.y);
-    std::cout << " | se z: " << std::to_string(south_east.z) << std::endl;
+    //    std::cout << "se x: " << std::to_string(south_east.x);
+    //    std::cout << " | se y: " << std::to_string(south_east.y);
+    //    std::cout << " | se z: " << std::to_string(south_east.z) << std::endl;
 
     auto                            defect_cell = north_west;
     std::vector<typename Lyt::cell> defect_cells{};
@@ -173,7 +171,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
                     const auto min_energy_defect = minimum_energy(simulation_result_defect.charge_distributions);
                     uint64_t   charge_index_defect_layout = 0;
 
-                    for (const auto& lyt_simulation_with_defect : simulation_result_defect.charge_distributions)
+                    for (auto& lyt_simulation_with_defect : simulation_result_defect.charge_distributions)
                     {
                         if (round_to_n_decimal_places(lyt_simulation_with_defect.get_system_energy(), 6) ==
                             round_to_n_decimal_places(min_energy_defect, 6))
@@ -185,7 +183,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
 
                     if (charge_index_defect_layout != charge_index_layout)
                     {
-                        auto distance = units::length::nanometer_t{std::numeric_limits<double>::max()};
+                        auto distance = std::numeric_limits<double>::max();
                         layout.foreach_cell(
                             [&layout, &defect, &distance](const auto& cell)
                             {
@@ -196,10 +194,12 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
                             });
 
                         const std::lock_guard lock{mutex};
-                        if (distance > avoidance_distance)
                         {
-                            min_defect_position = defect;
-                            avoidance_distance  = distance;
+                            if (distance > avoidance_distance)
+                            {
+                                min_defect_position = defect;
+                                avoidance_distance  = distance;
+                            }
                         }
                     }
                 }
@@ -242,7 +242,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
 
         if (charge_index_defect_layout != charge_index_layout)
         {
-            auto distance = units::length::nanometer_t{std::numeric_limits<double>::max()};
+            auto distance = std::numeric_limits<double>::max();
             layout.foreach_cell(
                 [&layout, &defect, &distance](const auto& cell)
                 {
