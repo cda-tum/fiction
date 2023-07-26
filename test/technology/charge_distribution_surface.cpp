@@ -665,7 +665,7 @@ TEMPLATE_TEST_CASE(
         charge_layout_new.add_defect_to_charge_distribution_surface(
             {-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout_new.get_phys_params().epsilon_r,
                                      charge_layout_new.get_phys_params().lambda_tf});
-        CHECK_THAT((*charge_layout_new.get_local_potential({0, 0, 1})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT((*charge_layout_new.get_local_potential({0, 0, 0})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
     }
 
     SECTION("layout with perturber |assigning and erasing defect")
