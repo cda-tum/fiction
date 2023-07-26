@@ -927,7 +927,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         strg->system_energy = total_potential + 0.5 * defect_energy + 0.5 * defect_interaction;
     }
     /**
-     * Return the currently stored system's total electrostatic potential energy in eV.
+     * This function returns the currently stored system's total electrostatic potential energy in eV.
      *
      * @return The system's total electrostatic potential energy (unit: eV).
      */
@@ -936,7 +936,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return strg->system_energy;
     }
     /**
-     * The function updates the local potential and the system energy after a charge change.
+     * The function updates the local potential (unit: Volt) and the system energy (unit: eV) after a charge change.
      */
     void update_after_charge_change(
         const dependent_cell_mode&         dependent_cell   = dependent_cell_mode::FIXED,
@@ -1028,7 +1028,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
     /**
-     * Returns the currently stored validity of the present charge distribution layout.
+     * This function returns the currently stored validity of the present charge distribution layout.
      *
      * @returns The validity of the present charge distribution.
      */
@@ -1418,7 +1418,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
     /**
-     * Returns the maximum index of the cell-level layout.
+     * This function returns the maximum index of the cell-level layout.
      *
      * @returns The maximal possible charge distribution index.
      */
@@ -1427,8 +1427,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return strg->max_charge_index;
     }
     /**
-     * Assign a given charge index to the charge distribution layout. Charge distribution is updated according to the
-     * set charge index.
+     * This function assigns a given charge index to the charge distribution layout. Charge distribution is updated
+     * according to the set charge index.
      *
      * @param charge_index charge index of the new charge distribution.
      */
@@ -1506,11 +1506,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
     /**
-     * This function can be used to assign a global external electrostatic potential to the layout (e.g this could be a
-     * planar external electrode).
+     * This function can be used to assign a global external electrostatic potential in Volt (unit: V) to the layout
+     * (e.g this could be a planar external electrode).
      *
-     * @param potential_value Value of the global external electrostatic potential (e.g. -0.3). Charge-transition levels
-     * are shifted by this value.
+     * @param potential_value Value of the global external electrostatic potential in Volt (e.g. -0.3).
+     * Charge-transition levels are shifted by this value.
      */
     void assign_global_external_potential(const double        potential_value,
                                           dependent_cell_mode dependent_cell = dependent_cell_mode::FIXED) noexcept
@@ -1560,8 +1560,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return required;
     }
     /**
-     * Returns all cells that could be positively charged. However, this must not be necessarily the case in a
-     * physically valid layout.
+     * This functions returns all cells that could be positively charged. However, this must not be necessarily the case
+     * in a physically valid layout.
      *
      * @return All cell that could be positively charged.
      */
@@ -1619,10 +1619,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return {};
     }
     /**
-     * Finds the cell which is a candidate to be positively charged of a given index.
+     * This function finds the cell for a given index which is a candidate to be positively charged of a given index.
      *
-     * @param c The index to find the cell of.
-     * @return The cell in the layout for the given index. Returns dead-coordinate if the index is not assigned to a not
+     * @param c The index to find the cell of (cell is candidate to be positively charged).
+     * @return Positive cell candidate. Dead-coordinate is returned if the index is not assigned to a not
      * empty cell in the layout.
      */
     [[nodiscard]] typename Lyt::cell index_to_three_state_cell(const uint64_t index) const noexcept
@@ -1636,11 +1636,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
 
     /**
-     * Finds the cell which can only be neutrally or negatively charged of a given index.
+     * This function finds the cell which can only be neutrally or negatively charged of a given index.
      *
      * @param c The index to find the cell of.
-     * @return The cell in the layout for the given index. Returns dead-coordinate if the index is not assigned to a not
-     * empty cell in the layout.
+     * @return The cell (which cannot be positively charged) in the layout for the given index. Dead-coordinate is
+     * returned if the index is not assigned to a not empty cell in the layout.
      */
     [[nodiscard]] typename Lyt::cell index_to_two_state_cell(const uint64_t index) const noexcept
     {
@@ -1652,10 +1652,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return {};
     }
     /**
-     * Calculates the chargeless potential at a given distance.
+     * This function calculates and returns the chargeless electrostatic potential in Volt for a given distance in
+     * nanometer.
      *
-     * @param distance Distance between position and defect.
-     * @return The chargeless electrostatic potential at a given distance.
+     * @param distance Distance in nanometer between position and defect (unit: nm).
+     * @return The chargeless electrostatic potential at a given distance (unit: V).
      */
     [[nodiscard]] double
     chargeless_potential_at_given_distance(const double distance) const noexcept
@@ -1668,11 +1669,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 std::exp(-distance/ strg->phys_params.lambda_tf) * physical_constants::ELEMENTARY_CHARGE);
     }
     /**
-     * Calculates the chargeless potential generated by a defects at a given distance.
+     * This function calculates the chargeless potential in Volt generated by a defect at a given distance in nanometer.
      *
-     * @param distance Distance between position and defect.
+     * @param distance Distance between position and defect (unit: nm.
      * @param sidb_defect Defect (including defect specific parameters).
-     * @return The chargeless electrostatic potential generated by the defect at a given distance.
+     * @return The chargeless electrostatic potential in Volt generated by the defect at a given distance (unit: V).
      */
     [[nodiscard]] double
     chargeless_potential_generated_by_defect_at_given_distance(const double distance,
@@ -1688,37 +1689,39 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                std::exp(-distance / defect.lambda_tf) * physical_constants::ELEMENTARY_CHARGE;
     }
     /**
-     * This function can be used to assign an external electrostatic potential to the layout. All important attributes
-     * of the charge layout are updated automatically.
+     * This function can be used to assign an external local electrostatic potential in Volt to the layout. All
+     * important attributes of the charge layout are updated automatically.
+     *
+     * @param external_voltage External electrostatic potential in Volt applied to different cells.
      */
-    void assign_local_external_potential(
-        const std::unordered_map<typename Lyt::cell, double>& external_voltage) noexcept
+    void
+    assign_local_external_potential(const std::unordered_map<typename Lyt::cell, double>& external_potential) noexcept
     {
-        strg->local_external_pot = external_voltage;
+        strg->local_external_pot = external_potential;
         this->update_after_charge_change();
     }
 
     /**
-     * The function returns the external electrostatic potential applied to the charge distribution surface.
+     * This function returns the external electrostatic potential in Volt applied to the layout.
      *
      * @return External electrostatic potential as unordered map. The cell is used as key and the external electrostatic
-     * potential at its position as value.
+     * potential in Volt (unit: V) at its position as value.
      */
     std::unordered_map<typename Lyt::cell, double> get_external_potentials() noexcept
     {
         return strg->local_external_pot;
     }
     /**
-     * Returns the local potentials which are generated by defects.
+     * This function returns the local electrostatic potentials which are generated by defects.
      *
-     * @return local electrostatic potentials at each each.
+     * @return Local electrostatic potential in Volt generated by the defects at each each cell.
      */
     std::unordered_map<typename Lyt::cell, double> get_defect_potentials() noexcept
     {
         return strg->defect_local_pot;
     }
     /**
-     * Returns the defects.
+     * This function returns the defects.
      *
      * @return Placed defects with cell position and type.
      */
@@ -1790,7 +1793,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
     /**
-     * Returns the charge index of the sublayout (cells that can be positively charged).
+     * This function returns the charge index of the sublayout (cells that can be positively charged).
      *
      * @returns The charge distribution index of the sublayout.
      */
