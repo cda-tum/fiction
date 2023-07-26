@@ -30,7 +30,7 @@ using gate_lyt   = fiction::gate_level_layout<
     fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<coordinate>>>>;
 using obs_gate_lyt = fiction::obstruction_layout<gate_lyt>;
 using coord_path   = fiction::layout_coordinate_path<obs_gate_lyt>;
-using dist         = fiction::manhattan_distance_functor<obs_gate_lyt, uint64_t>;
+using dist         = fiction::twoddwave_distance_functor<obs_gate_lyt, uint64_t>;
 using cost         = fiction::unit_cost_functor<obs_gate_lyt, uint8_t>;
 
 // If wires cross over empty tiles, move them down one layer
@@ -43,9 +43,11 @@ coord_path check_wires(obs_gate_lyt lyt, std::vector<coordinate> tc)
         {
             auto incoming_tile = lyt.incoming_data_flow({tile.x, tile.y, 1})[0];
             auto outgoing_tile = lyt.outgoing_data_flow({tile.x, tile.y, 1})[0];
+
             // move wire from z=1 to z=0
             lyt.move_node(lyt.get_node({tile.x, tile.y, 1}), {tile.x, tile.y, 0},
                           {lyt.make_signal(lyt.get_node(incoming_tile))});
+
             // if outgoing tile has other incoming signals (e.g. AND), update children
             if (lyt.incoming_data_flow(outgoing_tile).size() &&
                 (find(tc.begin(), tc.end(), lyt.incoming_data_flow(outgoing_tile)[0]) == tc.end() ||
@@ -58,12 +60,15 @@ coord_path check_wires(obs_gate_lyt lyt, std::vector<coordinate> tc)
                                   lyt.make_signal(lyt.get_node(lyt.incoming_data_flow(outgoing_tile)[0])),
                               });
             }
+
             // otherwise, wire is only incoming signal
             else
             {
                 lyt.move_node(lyt.get_node(outgoing_tile), outgoing_tile,
                               {lyt.make_signal(lyt.get_node({tile.x, tile.y, 0}))});
             }
+
+            // update obstructions
             lyt.obstruct_coordinate({tile.x, tile.y, 0});
             lyt.clear_obstructed_coordinate({tile.x, tile.y, 1});
             moved_tiles.push_back(tile);
@@ -88,6 +93,8 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op)
         if (fanins_set.find(fin) == fanins_set.end())
         {
             coordinate fanin = fin;
+
+            // switch between first and second fanin
             if (fanins_set.empty())
             {
                 route1.insert(route1.begin(), op);
@@ -98,12 +105,15 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op)
                 route2.insert(route2.begin(), op);
                 route2.insert(route2.begin(), fanin);
             }
+
             // go back till gate or pi is found
             while (lyt.is_wire_tile(fanin) && lyt.fanout_size(lyt.get_node(fanin)) != 2 &&
                    lyt.fanin_size(lyt.get_node(fanin)) != 0)
             {
                 to_clear.push_back(fanin);
                 fanin = lyt.incoming_data_flow(fanin)[0];
+
+                // switch between first and second fanin
                 if (fanins_set.empty())
                 {
                     route1.insert(route1.begin(), fanin);
@@ -113,6 +123,8 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op)
                     route2.insert(route2.begin(), fanin);
                 }
             }
+
+            // switch between first and second fanin
             if (fanins_set.empty())
             {
                 fanin1 = fanin;
@@ -130,6 +142,8 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op)
         if (fanouts_set.find(fout) == fanouts_set.end())
         {
             coordinate fanout = fout;
+
+            // switch between first and second fanout
             if (fanouts_set.empty())
             {
                 route3.push_back(op);
@@ -140,12 +154,15 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op)
                 route4.push_back(op);
                 route4.push_back(fanout);
             }
+
             // continue until gate or po is found
             while (lyt.is_wire_tile(fanout) && lyt.fanout_size(lyt.get_node(fanout)) != 0 &&
                    lyt.fanout_size(lyt.get_node(fanout)) != 2)
             {
                 to_clear.push_back(fanout);
                 fanout = lyt.outgoing_data_flow(fanout)[0];
+
+                // switch between first and second fanout
                 if (fanouts_set.empty())
                 {
                     route3.push_back(fanout);
@@ -155,6 +172,8 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op)
                     route4.push_back(fanout);
                 }
             }
+
+            // switch between first and second fanout
             if (fanouts_set.empty())
             {
                 fanout1 = fanout;
@@ -166,6 +185,8 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op)
             fanouts_set.insert(fanout);
         }
     }
+
+    // add fanins and fanouts if existing
     if (!fanin1.is_dead())
     {
         fanins.push_back(fanin1);
@@ -603,7 +624,7 @@ void optimize_output(obs_gate_lyt& lyt)
         coordinate new_pos;
         coordinate dangling;
         std::tie(tile, new_pos, dangling) = update;
-        lyt.move_node(lyt.get_node(tile), new_pos, {lyt.make_signal(lyt.get_node(tile))});
+        lyt.move_node(lyt.get_node(tile), new_pos, {lyt.make_signal(lyt.get_node(dangling))});
     }
 }
 
@@ -668,7 +689,7 @@ int main()  // NOLINT
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
 
     static constexpr const uint64_t bench_select =
-        fiction_experiments::parity;  // & fiction_experiments::fontes18;  // & fiction_experiments::fontes18; // &
+        fiction_experiments::all & ~fiction_experiments::epfl & ~fiction_experiments::iscas85;  // & fiction_experiments::fontes18; // &
                                       // ~fiction_experiments::log2 &
                                       //~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
 
@@ -683,7 +704,9 @@ int main()  // NOLINT
 
         // perform layout generation with an SMT-based exact algorithm
         const auto gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &orthogonal_stats);
+        std::stringstream print_stream1{};
 
+        print_gate_level_layout(print_stream1, gate_level_layout, true, false);
         //  compute critical path and throughput
         fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
         fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats);
@@ -744,19 +767,17 @@ int main()  // NOLINT
         delete_wires(layout, width, height);
         optimize_output(layout);
         fix_dead_nodes(layout, gates);
-
-        const auto end = std::chrono::steady_clock::now();
-        // check equivalence
-        std::stringstream print_stream1{};
-
         print_gate_level_layout(print_stream1, layout, true, false);
         std::cout << print_stream1.str();
-        fiction::equivalence_checking_stats eq_stats{};
-        // fiction::equivalence_checking<fiction::technology_network, obs_gate_lyt>(network, layout, &eq_stats);
+        const auto end = std::chrono::steady_clock::now();
+        // check equivalence
 
-        // const std::string eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
-        //                               eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
-        //                                                                         "NO";
+        fiction::equivalence_checking_stats eq_stats{};
+        fiction::equivalence_checking<fiction::technology_network, obs_gate_lyt>(network, layout, &eq_stats);
+
+        const std::string eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
+                                      eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
+                                                                                "NO";
 
         // calculate bounding box
         const auto bounding_box            = fiction::bounding_box_2d(layout);
@@ -764,8 +785,8 @@ int main()  // NOLINT
         const auto optimized_layout_height = bounding_box.get_y_size();
         layout.resize({optimized_layout_width, optimized_layout_height, 1});
         const double improv =
-            100 * (((width + 1) * (height + 1)) - ((optimized_layout_width + 1) * (optimized_layout_height + 1))) /
-            ((width + 1) * (height + 1));
+            100 * (static_cast<float>(((width + 1) * (height + 1)) - ((optimized_layout_width + 1) * (optimized_layout_height + 1)))) /
+            static_cast<float>((width + 1) * (height + 1));
         // log results
         optimization_exp(benchmark, network.num_pis(), network.num_pos(), network.num_gates(), width + 1, height + 1,
                          (width + 1) * (height + 1), optimized_layout_width + 1, optimized_layout_height + 1,
@@ -773,7 +794,7 @@ int main()  // NOLINT
                          layout.num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
                          mockturtle::to_seconds(orthogonal_stats.time_total),
                          static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(end - begin).count()),
-                         improv, "??");
+                         improv, eq_result);
 
         optimization_exp.save();
         optimization_exp.table();
