@@ -615,7 +615,8 @@ void optimize_output(obs_gate_lyt& lyt)
         }
         if (!moved)
         {
-            lyt.move_node(lyt.get_node(route.back()), route[1], {lyt.make_signal(lyt.get_node(route[0]))});
+            std::cout << route.back() << route[1] << route[0] << std::endl;
+            lyt.move_node(lyt.get_node(route.back()), {route[1].x, route[1].y, 0}, {lyt.make_signal(lyt.get_node(route[0]))});
         }
     }
     for (std::tuple<coordinate, coordinate, coordinate>& update : updates)
@@ -624,7 +625,24 @@ void optimize_output(obs_gate_lyt& lyt)
         coordinate new_pos;
         coordinate dangling;
         std::tie(tile, new_pos, dangling) = update;
-        lyt.move_node(lyt.get_node(tile), new_pos, {lyt.make_signal(lyt.get_node(dangling))});
+
+        if (lyt.is_empty_tile(new_pos)) {
+            lyt.move_node(lyt.get_node(tile), new_pos, {lyt.make_signal(lyt.get_node(dangling))});
+        } else if (new_pos.x == min_x) {
+            lyt.create_buf(lyt.get_node(dangling), {new_pos.x, new_pos.y, 1});
+            if (lyt.is_empty_tile({new_pos.x, new_pos.y + 1, 0})) {
+                lyt.move_node(lyt.get_node(tile), {new_pos.x, new_pos.y + 1, 0}, {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
+            } else {
+                lyt.move_node(lyt.get_node(tile), {new_pos.x + 1, new_pos.y, 0}, {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
+            }
+        } else {
+            lyt.create_buf(lyt.make_signal(lyt.get_node(dangling)), {new_pos.x, new_pos.y, 1});
+            if (lyt.is_empty_tile({new_pos.x + 1, new_pos.y, 0})) {
+                lyt.move_node(lyt.get_node(tile), {new_pos.x + 1, new_pos.y, 0}, {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
+            } else {
+                lyt.move_node(lyt.get_node(tile), {new_pos.x, new_pos.y + 1, 0}, {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
+            }
+        }
     }
 }
 
