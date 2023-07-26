@@ -806,6 +806,9 @@ TEMPLATE_TEST_CASE(
                        charge_layout_new.calculate_chargeless_potential_between_sidbs({0, 0, 1}, {1, 3, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.000001));
 
+        CHECK(charge_layout_new.get_chargeless_potential_between_sidbs({0, 0, 0}, {0, 0, 1}) == 0.0);
+        CHECK(charge_layout_new.get_potential_between_sidbs({0, 0, 0}, {0, 0, 1}) == 0.0);
+
         CHECK(charge_layout_new.get_chargeless_potential_between_sidbs({0, 0, 1}, {0, 0, 1}) == 0.0);
         CHECK(charge_layout_new.get_potential_between_sidbs({0, 0, 1}, {0, 0, 1}) == 0.0);
 
