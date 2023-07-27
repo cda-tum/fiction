@@ -41,7 +41,7 @@ class bdl_input_iterator
      */
     explicit bdl_input_iterator(Lyt& lyt, const detect_bdl_pairs_params& params = {}) noexcept :
             layout{lyt},
-            input_pairs{detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params)},
+            input_pairs{detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params)},
             num_inputs{static_cast<uint8_t>(input_pairs.size())}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -173,6 +173,17 @@ class bdl_input_iterator
         return *this;
     }
 #pragma GCC diagnostic pop
+    /**
+     * Assignment operator. Sets the input state to the given integer.
+     *
+     * @param m The input state to set.
+     */
+    void operator=(const uint64_t m) noexcept
+    {
+        current_input_index = m;
+
+        set_all_inputs();
+    }
     /**
      * Subscript operator. Computes the input state of the current iterator plus the given integer.
      *
