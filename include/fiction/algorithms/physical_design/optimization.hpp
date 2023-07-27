@@ -747,12 +747,12 @@ template <typename Lyt>
 
         for (int gate_id = 0; gate_id < gates.size(); gate_id++)
         {
-            std::pair<bool, detail::coordinate> moved_gate = detail::move_gate(gates[gate_id], layout, width, height);
+            std::tuple<bool, detail::coordinate> moved_gate = detail::move_gate(gates[gate_id], layout, width, height);
 
-            if (moved_gate.first)
+            if (std::get<0>(moved_gate))
             {
                 moved += 1;
-                gates[gate_id] = moved_gate.second;  // update gate location
+                gates[gate_id] = std::get<1>(moved_gate);  // update gate location
             }
         }
         std::sort(gates.begin(), gates.end(),
