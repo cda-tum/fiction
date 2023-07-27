@@ -9,19 +9,19 @@
 #include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/placement_utils.hpp"
+
 #include <fiction/algorithms/path_finding/a_star.hpp>
 #include <fiction/algorithms/path_finding/cost.hpp>
-#include <fiction/algorithms/path_finding/distance.hpp>       // pre-defined types suitable for the FCN domain
+#include <fiction/algorithms/path_finding/distance.hpp>  // pre-defined types suitable for the FCN domain
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/layouts/obstruction_layout.hpp>
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/obstruction_layout.hpp>
 
 #include <mockturtle/traits.hpp>
 
 #include <cmath>
 #include <cstdint>
-
 
 namespace fiction
 {
@@ -29,14 +29,14 @@ namespace fiction
 namespace detail
 {
 
-using coordinate = offset::ucoord_t;
-using gate_lyt   = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coordinate>>>>;
+using coordinate   = offset::ucoord_t;
+using gate_lyt     = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coordinate>>>>;
 using obs_gate_lyt = obstruction_layout<gate_lyt>;
 using coord_path   = layout_coordinate_path<obs_gate_lyt>;
 using dist         = twoddwave_distance_functor<obs_gate_lyt, uint64_t>;
 using cost         = unit_cost_functor<obs_gate_lyt, uint8_t>;
 
-template <typename Obs_Lyt , typename Coord_Vec>
+template <typename Obs_Lyt, typename Coord_Vec>
 void check_wires(Obs_Lyt lyt, Coord_Vec tc) noexcept
 {
     coord_path moved_tiles;
@@ -80,8 +80,9 @@ void check_wires(Obs_Lyt lyt, Coord_Vec tc) noexcept
 }
 
 // Trace back wires of a gate
-[[nodiscard]] std::tuple<std::vector<coordinate>, std::vector<coordinate>, std::vector<coordinate>, coord_path, coord_path,
-           coord_path, coord_path> get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op) noexcept
+[[nodiscard]] std::tuple<std::vector<coordinate>, std::vector<coordinate>, std::vector<coordinate>, coord_path,
+                         coord_path, coord_path, coord_path>
+get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op) noexcept
 {
     auto fanin1 = coordinate{}, fanin2 = coordinate{}, fanout1 = coordinate{}, fanout2 = coordinate{};
     std::vector<coordinate> fanins, fanouts, to_clear;
@@ -207,7 +208,8 @@ void check_wires(Obs_Lyt lyt, Coord_Vec tc) noexcept
     return std::make_tuple(fanins, fanouts, to_clear, route1, route2, route3, route4);
 }
 
-[[nodiscard]] std::tuple<bool, coordinate> move_gate(coordinate old_pos, obs_gate_lyt lyt, int width, int height) noexcept
+[[nodiscard]] std::tuple<bool, coordinate> move_gate(coordinate old_pos, obs_gate_lyt lyt, int width,
+                                                     int height) noexcept
 {
     const fiction::a_star_params params{true};
 
@@ -627,21 +629,36 @@ void optimize_output(obs_gate_lyt& lyt) noexcept
         coordinate dangling;
         std::tie(tile, new_pos, dangling) = update;
 
-        if (lyt.is_empty_tile(new_pos)) {
+        if (lyt.is_empty_tile(new_pos))
+        {
             lyt.move_node(lyt.get_node(tile), new_pos, {lyt.make_signal(lyt.get_node(dangling))});
-        } else if (new_pos.x == min_x) {
+        }
+        else if (new_pos.x == min_x)
+        {
             lyt.create_buf(lyt.get_node(dangling), {new_pos.x, new_pos.y, 1});
-            if (lyt.is_empty_tile({new_pos.x, new_pos.y + 1, 0})) {
-                lyt.move_node(lyt.get_node(tile), {new_pos.x, new_pos.y + 1, 0}, {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
-            } else {
-                lyt.move_node(lyt.get_node(tile), {new_pos.x + 1, new_pos.y, 0}, {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
+            if (lyt.is_empty_tile({new_pos.x, new_pos.y + 1, 0}))
+            {
+                lyt.move_node(lyt.get_node(tile), {new_pos.x, new_pos.y + 1, 0},
+                              {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
             }
-        } else {
+            else
+            {
+                lyt.move_node(lyt.get_node(tile), {new_pos.x + 1, new_pos.y, 0},
+                              {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
+            }
+        }
+        else
+        {
             lyt.create_buf(lyt.make_signal(lyt.get_node(dangling)), {new_pos.x, new_pos.y, 1});
-            if (lyt.is_empty_tile({new_pos.x + 1, new_pos.y, 0})) {
-                lyt.move_node(lyt.get_node(tile), {new_pos.x + 1, new_pos.y, 0}, {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
-            } else {
-                lyt.move_node(lyt.get_node(tile), {new_pos.x, new_pos.y + 1, 0}, {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
+            if (lyt.is_empty_tile({new_pos.x + 1, new_pos.y, 0}))
+            {
+                lyt.move_node(lyt.get_node(tile), {new_pos.x + 1, new_pos.y, 0},
+                              {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
+            }
+            else
+            {
+                lyt.move_node(lyt.get_node(tile), {new_pos.x, new_pos.y + 1, 0},
+                              {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
             }
         }
     }
@@ -681,7 +698,6 @@ void fix_dead_nodes(obs_gate_lyt& lyt, std::vector<coordinate>& gt) noexcept
 }
 }  // namespace detail
 
-
 template <typename Lyt>
 [[nodiscard]] detail::obs_gate_lyt optimize(const Lyt& lyt) noexcept
 {
@@ -713,7 +729,8 @@ template <typename Lyt>
     }
 
     // sort gates based on diagonal line
-    std::sort(gates.begin(), gates.end(), [](detail::coordinate a, detail::coordinate b) { return a.x + a.y < b.x + b.y; });
+    std::sort(gates.begin(), gates.end(),
+              [](detail::coordinate a, detail::coordinate b) { return a.x + a.y < b.x + b.y; });
 
     int moved = 1;
 
@@ -738,7 +755,8 @@ template <typename Lyt>
                 gates[gate_id] = moved_gate.second;  // update gate location
             }
         }
-        std::sort(gates.begin(), gates.end(), [](detail::coordinate a, detail::coordinate b) { return a.x + a.y < b.x + b.y; });
+        std::sort(gates.begin(), gates.end(),
+                  [](detail::coordinate a, detail::coordinate b) { return a.x + a.y < b.x + b.y; });
     }
 
     detail::delete_wires(layout, width, height);

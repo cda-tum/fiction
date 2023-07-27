@@ -1,8 +1,8 @@
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/physical_design/optimization.hpp>  // scalable heuristic for physical design of FCN layouts
+#include <fiction/algorithms/physical_design/orthogonal.hpp>    // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/print_layout.hpp>
@@ -52,9 +52,10 @@ int main()  // NOLINT
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
 
     static constexpr const uint64_t bench_select =
-        fiction_experiments::all & ~fiction_experiments::epfl & ~fiction_experiments::iscas85;  // & fiction_experiments::fontes18; // &
-                                      // ~fiction_experiments::log2 &
-                                      //~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
+        fiction_experiments::all & ~fiction_experiments::epfl &
+        ~fiction_experiments::iscas85;  // & fiction_experiments::fontes18; // &
+                                        // ~fiction_experiments::log2 &
+                                        //~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
@@ -66,7 +67,7 @@ int main()  // NOLINT
         assert(read_verilog_result == lorina::return_code::success);
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &orthogonal_stats);
+        const auto        gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &orthogonal_stats);
         std::stringstream print_stream1{};
 
         //  compute critical path and throughput
@@ -99,9 +100,10 @@ int main()  // NOLINT
         const auto optimized_layout_width  = bounding_box.get_x_size();
         const auto optimized_layout_height = bounding_box.get_y_size();
         layout.resize({optimized_layout_width, optimized_layout_height, 1});
-        const double improv =
-            100 * (static_cast<float>(((width + 1) * (height + 1)) - ((optimized_layout_width + 1) * (optimized_layout_height + 1)))) /
-            static_cast<float>((width + 1) * (height + 1));
+        const double improv = 100 *
+                              (static_cast<float>(((width + 1) * (height + 1)) -
+                                                  ((optimized_layout_width + 1) * (optimized_layout_height + 1)))) /
+                              static_cast<float>((width + 1) * (height + 1));
         // log results
         optimization_exp(benchmark, network.num_pis(), network.num_pos(), network.num_gates(), width + 1, height + 1,
                          (width + 1) * (height + 1), optimized_layout_width + 1, optimized_layout_height + 1,
