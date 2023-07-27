@@ -1,30 +1,23 @@
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/path_finding/a_star.hpp>
-#include <fiction/algorithms/path_finding/cost.hpp>
-#include <fiction/algorithms/path_finding/distance.hpp>       // pre-defined types suitable for the FCN domain
 #include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
-#include <fiction/algorithms/physical_design/layout_optimization.hpp>  // scalable heuristic for physical design of FCN layouts
+#include <fiction/algorithms/physical_design/optimization.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/print_layout.hpp>
 #include <fiction/layouts/obstruction_layout.hpp>
-#include <fiction/traits.hpp>  // traits for type-checking
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>                      // output formatting
-#include <lorina/genlib.hpp>                 // Genlib file parsing
 #include <lorina/lorina.hpp>                 // Verilog/BLIF/AIGER/... file parsing
 #include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
 
-#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cstdlib>
 #include <sstream>
 #include <string>
-#include <vector>
 
 using coordinate = fiction::offset::ucoord_t;
 using gate_lyt   = fiction::gate_level_layout<
@@ -87,7 +80,7 @@ int main()  // NOLINT
 
         const std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         // Optimization
-        obs_gate_lyt layout = fiction::optimize_layout<gate_lyt>(gate_level_layout);
+        obs_gate_lyt layout = fiction::optimize<gate_lyt>(gate_level_layout);
 
         print_gate_level_layout(print_stream1, layout, true, false);
         std::cout << print_stream1.str();

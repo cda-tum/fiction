@@ -2,8 +2,8 @@
 // Created by simon on 14.04.23.
 //
 
-#ifndef FICTION_HEXAGONALIZATION_HPP
-#define FICTION_HEXAGONALIZATION_HPP
+#ifndef FICTION_OPTIMIZATION_HPP
+#define FICTION_OPTIMIZATION_HPP
 
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
@@ -15,10 +15,9 @@
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/layouts/obstruction_layout.hpp>
+#include <fiction/layouts/bounding_box.hpp>
 
 #include <mockturtle/traits.hpp>
-#include <mockturtle/utils/node_map.hpp>
-#include <mockturtle/views/topo_view.hpp>
 
 #include <cmath>
 #include <cstdint>
@@ -684,7 +683,7 @@ void fix_dead_nodes(obs_gate_lyt& lyt, std::vector<coordinate>& gt) noexcept
 
 
 template <typename Lyt>
-[[nodiscard]] detail::obs_gate_lyt optimize_layout(const Lyt& lyt) noexcept
+[[nodiscard]] detail::obs_gate_lyt optimize(const Lyt& lyt) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -696,12 +695,9 @@ template <typename Lyt>
     const auto height              = bounding_box_before.get_y_size();
 
     // Optimization
-    using obs_gate_lyt = fiction::obstruction_layout<Lyt>;
-    obs_gate_lyt layout = fiction::obstruction_layout<Lyt>(lyt);
+    detail::obs_gate_lyt layout = fiction::obstruction_layout<Lyt>(lyt);
 
-    using coordinate = fiction::offset::ucoord_t;
-
-    std::vector<coordinate> gates;
+    std::vector<detail::coordinate> gates;
     for (int x = 0; x <= width; x++)
     {
         for (int y = 0; y <= height; y++)
@@ -717,7 +713,7 @@ template <typename Lyt>
     }
 
     // sort gates based on diagonal line
-    std::sort(gates.begin(), gates.end(), [](coordinate a, coordinate b) { return a.x + a.y < b.x + b.y; });
+    std::sort(gates.begin(), gates.end(), [](detail::coordinate a, detail::coordinate b) { return a.x + a.y < b.x + b.y; });
 
     int moved = 1;
 
@@ -734,7 +730,7 @@ template <typename Lyt>
 
         for (int gate_id = 0; gate_id < gates.size(); gate_id++)
         {
-            std::pair<bool, coordinate> moved_gate = detail::move_gate(gates[gate_id], layout, width, height);
+            std::pair<bool, detail::coordinate> moved_gate = detail::move_gate(gates[gate_id], layout, width, height);
 
             if (moved_gate.first)
             {
@@ -742,7 +738,7 @@ template <typename Lyt>
                 gates[gate_id] = moved_gate.second;  // update gate location
             }
         }
-        std::sort(gates.begin(), gates.end(), [](coordinate a, coordinate b) { return a.x + a.y < b.x + b.y; });
+        std::sort(gates.begin(), gates.end(), [](detail::coordinate a, detail::coordinate b) { return a.x + a.y < b.x + b.y; });
     }
 
     detail::delete_wires(layout, width, height);
@@ -759,4 +755,4 @@ template <typename Lyt>
 
 }  // namespace fiction
 
-#endif  // FICTION_HEXAGONALIZATION_HPP
+#endif  // FICTION_OPTIMIZATION_HPP
