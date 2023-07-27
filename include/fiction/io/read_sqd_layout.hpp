@@ -11,7 +11,6 @@
 #include "fiction/utils/name_utils.hpp"
 
 #include <tinyxml2.h>
-#include <units.h>
 
 #include <algorithm>
 #include <cctype>
@@ -268,11 +267,11 @@ class read_sqd_layout_impl
     {
         if constexpr (has_assign_sidb_defect_v<Lyt>)
         {
-            std::vector<cell<Lyt>>             incl_cells{};
-            sidb_defect_type                   defect_type{sidb_defect_type::UNKNOWN};
-            units::charge::elementary_charge_t charge{0};
-            double                             eps_r{0.0};
-            units::length::nanometer_t         lambda_tf{0.0};
+            std::vector<cell<Lyt>> incl_cells{};
+            sidb_defect_type       defect_type{sidb_defect_type::UNKNOWN};
+            int64_t                charge{0};
+            double                 eps_r{0.0};
+            double                 lambda_tf{0.0};
 
             if (const auto* const incl_coords = defect->FirstChildElement("incl_coords"); incl_coords != nullptr)
             {
@@ -311,9 +310,9 @@ class read_sqd_layout_impl
                         "Error parsing SQD file: no attribute 'charge', 'eps_r', or 'lambda_tf' in element 'coulomb'");
                 }
 
-                charge    = units::charge::elementary_charge_t{std::stod(charge_string)};
+                charge    = std::stoll(charge_string);
                 eps_r     = std::stod(eps_r_string);
-                lambda_tf = units::length::nanometer_t{std::stod(lambda_tf_string)};
+                lambda_tf = std::stod(lambda_tf_string);
             }
 
             std::for_each(incl_cells.begin(), incl_cells.end(),

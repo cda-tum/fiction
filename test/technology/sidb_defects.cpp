@@ -68,22 +68,17 @@ TEST_CASE("Defect extent", "[sidb-defects]")
 TEST_CASE("Test for units", "[sidb-defects]")
 {
     const sidb_defect defect{sidb_defect_type::NONE};
-    CHECK(defect.charge == 0_e);
+    CHECK(defect.charge == 0);
     CHECK(defect.epsilon_r == 0);
-    CHECK(defect.lambda_tf == 0.0_nm);
+    CHECK(defect.lambda_tf == 0.0);
 
-    const sidb_defect defect_two{sidb_defect_type::NONE, 2_e};
-    CHECK(defect_two.charge == 2_e);
+    const sidb_defect defect_two{sidb_defect_type::NONE, 2};
+    CHECK(defect_two.charge == 2);
     CHECK(defect_two.epsilon_r == 0);
-    CHECK(defect_two.lambda_tf == 0.0_nm);
+    CHECK(defect_two.lambda_tf == 0.0);
 
-    const sidb_defect defect_three{sidb_defect_type::NONE, 2_e, 5};
-    CHECK(defect_three.charge == 2_e);
+    const sidb_defect defect_three{sidb_defect_type::NONE, 2, 5};
+    CHECK(defect_three.charge == 2);
     CHECK(defect_three.epsilon_r == 5);
-    CHECK(defect_three.lambda_tf == 0.0_nm);
-
-    const sidb_defect defect_four{sidb_defect_type::NONE, 6'242'000'000'000'000'000_e, 5.4, 4.2_nm};
-    CHECK(defect_four.charge == units::charge::coulomb_t{1});
-    CHECK(defect_four.epsilon_r == 5.4);
-    CHECK(defect_four.lambda_tf == 4.2_nm);
+    CHECK(defect_three.lambda_tf == 0.0);
 }
