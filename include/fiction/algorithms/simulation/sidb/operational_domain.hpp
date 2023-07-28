@@ -16,6 +16,7 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cassert>
+#include <cstdint>
 #include <utility>
 #include <vector>
 
@@ -24,10 +25,22 @@
 namespace fiction
 {
 
+/**
+ * An operational domain is a set of simulation parameter values for which a given SiDB layout is logically operational.
+ * This means that a layout is deemed operational if the layout's ground state corresponds with a given Boolean function
+ * at the layout's outputs for all possible input combinations. In this implementation, \f$ n \f$ BDL input wires and a
+ * single BDL output wire are assumed for a given layout. Any operational domain computation algorithm toggles through
+ * all \f$ 2^n \f$ input combinations and evaluates the layout's output behavior in accordance with the given Boolean
+ * function. The layout is only considered operational for a certain parameter combination, if the output behavior is
+ * correct for all input combinations. The operational domain can be computed by sweeping over specified simulation
+ * parameters and checking the operational status of the layout for each parameter combination. The operational domain
+ * is then defined as the set of all parameter combinations for which the layout is operational. Different techniques
+ * for performing these sweep are implemented.
+ */
 struct operational_domain
 {
     /**
-     * The sweep parameters for the operational domain computation.
+     * Possible sweep parameters for the operational domain computation.
      */
     enum class sweep_parameter
     {
@@ -44,10 +57,17 @@ struct operational_domain
          */
         MU_MINUS
     };
-
+    /**
+     * X dimension sweep parameter.
+     */
     sweep_parameter x_dimension{operational_domain::sweep_parameter::EPSILON_R};
+    /**
+     * Y dimension sweep parameter.
+     */
     sweep_parameter y_dimension{operational_domain::sweep_parameter::LAMBDA_TF};
-
+    /**
+     * Possible operational status of a layout.
+     */
     enum class operational_status
     {
         /**
@@ -59,39 +79,85 @@ struct operational_domain
          */
         NON_OPERATIONAL
     };
-
+    /**
+     * The operational status of the layout for each specified parameter combination. This constitutes the operational
+     * domain. The first element of the pair is the x dimension value, the second element is the y dimension value.
+     * The operational status is stored as the value of the map.
+     */
     phmap::btree_map<std::pair<double, double>, operational_status> operational_values{};
 };
 
+/**
+ * Parameters for the operational domain computation. The parameters are used across the different operational domain
+ * computation algorithms.
+ */
 struct operational_domain_params
 {
     /**
-     * The simulation parameters for the operational domain computation. The sweep parameters are overwritten in each
-     * simulation step.
+     * The simulation parameters for the operational domain computation. Most parameters will be kept constant across
+     * sweeps, but the sweep parameters are adjusted in each simulation step and thus overwritten in this object.
      */
     sidb_simulation_parameters sim_params{};
-
+    /**
+     * The sweep parameter for the x dimension.
+     */
     operational_domain::sweep_parameter x_dimension{operational_domain::sweep_parameter::EPSILON_R};
-
+    /**
+     * The minimum value of the x dimension sweep.
+     */
     double x_min{0.0};
+    /**
+     * The maximum value of the x dimension sweep.
+     */
     double x_max{10.0};
+    /**
+     * The step size of the x dimension sweep.
+     */
     double x_step{0.1};
-
+    /**
+     * The sweep parameter for the y dimension.
+     */
     operational_domain::sweep_parameter y_dimension{operational_domain::sweep_parameter::LAMBDA_TF};
-
+    /**
+     * The minimum value of the y dimension sweep.
+     */
     double y_min{0.0};
+    /**
+     * The maximum value of the y dimension sweep.
+     */
     double y_max{10.0};
+    /**
+     * The step size of the y dimension sweep.
+     */
     double y_step{0.1};
-
+    /**
+     * The parameters for the BDL pair detection, which is necessary during the operational domain computation to
+     * detect input and output BDL pairs.
+     */
     detect_bdl_pairs_params bdl_params{};
 };
-
+/**
+ * Statistics for the operational domain computation. The statistics are used across the different operational domain
+ * computation algorithms.
+ */
 struct operational_domain_stats
 {
     /**
      * The total runtime of the operational domain computation.
      */
     mockturtle::stopwatch<>::duration time_total{0};
+    /**
+     * Number of evaluated parameter combinations.
+     */
+    std::size_t num_evaluated_parameter_combinations{0};
+    /**
+     * Number of parameter combinations, for which the layout is operational.
+     */
+    std::size_t num_operational_parameter_combinations{0};
+    /**
+     * Number of parameter combinations, for which the layout is non-operational.
+     */
+    std::size_t num_non_operational_parameter_combinations{0};
 };
 
 namespace detail
@@ -101,20 +167,35 @@ template <typename Lyt, typename TT>
 class operational_domain_impl
 {
   public:
+    /**
+     * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also detects
+     * the output BDL pair, which is necessary for the operational domain computation. The layout must have exactly
+     * one output BDL pair.
+     *
+     * @param lyt SiDB cell-level layout to be evaluated.
+     * @param tt Truth table of the Boolean function, which the layout should implement.
+     * @param ps Parameters for the operational domain computation.
+     * @param st Statistics of the process.
+     */
     operational_domain_impl(Lyt& lyt, const TT& tt, const operational_domain_params& ps,
                             operational_domain_stats& st) noexcept :
             layout{lyt},
             truth_table{tt},
             params{ps},
-            pst{st},
+            stats{st},
             output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)}
     {
         assert(output_bdl_pairs.size() == 1 && "The layout must have exactly one output BDL pair");
     }
-
+    /**
+     * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
+     * has quadratic complexity. The operational domain is computed for each parameter combination.
+     *
+     * @return The operational domain of the layout.
+     */
     operational_domain grid_search() noexcept
     {
-        mockturtle::stopwatch stop{pst.time_total};
+        mockturtle::stopwatch stop{stats.time_total};
 
         operational_domain opdomain{};
 
@@ -142,7 +223,7 @@ class operational_domain_impl
 
   private:
     /**
-     * The layout to investigate.
+     * The SiDB cell-level layout to investigate.
      */
     Lyt& layout;
     /**
@@ -156,7 +237,7 @@ class operational_domain_impl
     /**
      * The statistics of the operational domain computation.
      */
-    operational_domain_stats& pst;
+    operational_domain_stats& stats;
     /**
      * The output BDL pair of the layout.
      */
@@ -166,6 +247,12 @@ class operational_domain_impl
      */
     bdl_input_iterator<Lyt> bii{layout, params.bdl_params};
 
+    /**
+     * Helper function that sets the value of the x dimension in the simulation parameters.
+     *
+     * @param sim_params Simulation parameter object to set the x dimension value of.
+     * @param val Value to set the x dimension to.
+     */
     inline void set_x_dimension_value(sidb_simulation_parameters& sim_params, const double val) const noexcept
     {
         switch (params.x_dimension)
@@ -191,7 +278,12 @@ class operational_domain_impl
             }
         }
     }
-
+    /**
+     * Helper function that sets the value of the y dimension in the simulation parameters.
+     *
+     * @param sim_params Simulation parameter object to set the y dimension value of.
+     * @param val Value to set the y dimension to.
+     */
     inline void set_y_dimension_value(sidb_simulation_parameters& sim_params, const double val) const noexcept
     {
         switch (params.y_dimension)
@@ -217,10 +309,22 @@ class operational_domain_impl
             }
         }
     }
-
+    /**
+     * Performs an exhaustive ground state simulation for all input combinations of the stored layout using the given
+     * simulation parameters. This function is used by all operational domain computation techniques. The function
+     * terminates as soon as a non-operational state is found. In the worst case, the function performs \f$ 2^n \f$
+     * simulations, where \f$ n \f$ is the number of inputs of the layout.
+     *
+     * @param sim_params Simulation parameters to use for the simulation.
+     * @return The operational status of the layout under the given simulation parameters.
+     */
     [[nodiscard]] operational_domain::operational_status
     is_operational(const sidb_simulation_parameters& sim_params) noexcept
     {
+        // increment the number of evaluated parameter combinations
+        ++stats.num_evaluated_parameter_combinations;
+
+        // take the first (and only) output BDL pair
         const auto& output_bdl_pair = output_bdl_pairs.front();
 
         // reset the BDL input iterator
@@ -229,22 +333,29 @@ class operational_domain_impl
         // for each input combination
         for (auto i = 0u; i < truth_table.num_bits(); ++i, ++bii)
         {
+            // the expected output of the layout is the i-th bit of the truth table
             const auto expected_output = kitty::get_bit(truth_table, i);
 
+            // TODO replace with QuickExact
+            // perform an exhaustive ground state simulation
             const auto sim_result = exhaustive_ground_state_simulation(*bii, sim_params);
 
+            // TODO is this necessary or is it guaranteed that the ground state is always the first element?
             // find the ground state, which is the charge distribution with the lowest energy
             const auto ground_state =
                 std::min_element(sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend(),
                                  [](const auto& lhs, const auto& rhs)
                                  { return lhs.get_system_energy().value() < rhs.get_system_energy().value(); });
 
+            // fetch the charge states of the output BDL pair
             const auto charge_state_output_upper = ground_state->get_charge_state(output_bdl_pair.upper);
             const auto charge_state_output_lower = ground_state->get_charge_state(output_bdl_pair.lower);
 
             // if the output charge states are equal, the layout is not operational
             if (charge_state_output_lower == charge_state_output_upper)
             {
+                ++stats.num_non_operational_parameter_combinations;
+
                 return operational_domain::operational_status::NON_OPERATIONAL;
             }
 
@@ -254,6 +365,8 @@ class operational_domain_impl
                 if (charge_state_output_upper != sidb_charge_state::NEUTRAL ||
                     charge_state_output_lower != sidb_charge_state::NEGATIVE)
                 {
+                    ++stats.num_non_operational_parameter_combinations;
+
                     return operational_domain::operational_status::NON_OPERATIONAL;
                 }
             }
@@ -263,18 +376,43 @@ class operational_domain_impl
                 if (charge_state_output_upper != sidb_charge_state::NEGATIVE ||
                     charge_state_output_lower != sidb_charge_state::NEUTRAL)
                 {
+                    ++stats.num_non_operational_parameter_combinations;
+
                     return operational_domain::operational_status::NON_OPERATIONAL;
                 }
             }
         }
 
         // if we made it here, the layout is operational
+        ++stats.num_operational_parameter_combinations;
+
         return operational_domain::operational_status::OPERATIONAL;
     }
 };
 
 }  // namespace detail
 
+/**
+ * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
+ * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
+ * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
+ * inputs of the truth table. // TODO implement the matching of truth table inputs and BDL pair ordering
+ *
+ * This algorithm uses a grid search to find the operational domain. The grid search is performed by exhaustively
+ * sweeping the parameter space in the x and y dimensions. Since grid search is exhaustive, the algorithm is guaranteed
+ * to find the operational domain, if it exists within the parameter range. However, the algorithm performs a quadratic
+ * number of operational checks on the layout, where each operational check consists of up to \f$ 2^n \f$ exact ground
+ * state simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact ground state simulation has
+ * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt Layout to compute the operational domain for.
+ * @param spec Expected truth table of the layout.
+ * @param params Operational domain computation parameters.
+ * @param pst Operational domain computation statistics.
+ * @return The operational domain of the layout.
+ */
 template <typename Lyt, typename TT>
 operational_domain operational_domain_grid_search(Lyt& lyt, const TT& spec,
                                                   const operational_domain_params& params = {},
@@ -282,6 +420,7 @@ operational_domain operational_domain_grid_search(Lyt& lyt, const TT& spec,
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     operational_domain_stats                 st{};

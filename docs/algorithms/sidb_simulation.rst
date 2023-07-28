@@ -95,6 +95,22 @@ Time-to-Solution (TTS) Statistics
 .. doxygenfunction:: fiction::sim_acc_tts
 
 
+Operational Domain Computation
+##############################
+
+**Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
+
+.. doxygenstruct:: fiction::operational_domain
+   :members:
+
+.. doxygenstruct:: fiction::operational_domain_params
+   :members:
+.. doxygenstruct:: fiction::operational_domain_stats
+   :members:
+
+.. doxygenfunction:: fiction::operational_domain_grid_search
+
+
 Utility Functions
 #################
 
