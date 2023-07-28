@@ -5,6 +5,7 @@
 #ifndef FICTION_SIDB_DEFECTS_HPP
 #define FICTION_SIDB_DEFECTS_HPP
 
+#include <cmath>
 #include <cstdint>
 #include <utility>
 
@@ -47,24 +48,29 @@ struct sidb_defect
     /**
      * Standard constructor.
      */
-    constexpr explicit sidb_defect(const sidb_defect_type defect_type = sidb_defect_type::UNKNOWN,
-                                   const double electric_charge = 0.0, const double relative_permittivity = 0.0,
-                                   const double screening_distance = 0.0) noexcept :
+    explicit sidb_defect(const sidb_defect_type defect_type = sidb_defect_type::UNKNOWN,
+                         const int64_t electric_charge = 0.0, const double relative_permittivity = 0.0,
+                         const double screening_distance = 0.0) noexcept :
             type{defect_type},
             charge{electric_charge},
             epsilon_r{relative_permittivity},
             lambda_tf{screening_distance}
-    {}
-    /**
+    {
+
+        assert(((std::fmod(charge, 1) == 0)) && "charge value has to be an integer");
+        assert((epsilon_r >= 0) && "epsilon_r has to be >= 0.0");
+        assert((lambda_tf >= 0.0) && "lambda_tf has to be >= 0.0 nanometer");
+    }
+    /**s
      * Type of defect.
      */
     const sidb_defect_type type;
     /**
-     * Electrical charge.
+     * Electrical charge in units of the elementary charge e (e.g., 1 ^= 1*e, -2 ^= -2*e).
      */
-    const double charge;
+    const int64_t charge;
     /**
-     * Electric permittivity.
+     * Electric permittivity (unitless).
      */
     const double epsilon_r;
     /**

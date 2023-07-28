@@ -7,10 +7,12 @@
 
 #include <fiction/algorithms/path_finding/a_star.hpp>
 #include <fiction/algorithms/path_finding/distance.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/types.hpp>
 
 #include <cmath>
 #include <limits>
@@ -227,9 +229,9 @@ TEST_CASE("2DDWave distance", "[distance]")
         CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
         CHECK(twoddwave_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
         CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(twoddwave_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint64_t>::max());
-        CHECK(twoddwave_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == std::numeric_limits<uint64_t>::max());
-        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == std::numeric_limits<uint64_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == std::numeric_limits<uint32_t>::max());
 
         // ignore z-axis
         CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
@@ -247,18 +249,18 @@ TEST_CASE("2DDWave distance", "[distance]")
         CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
         CHECK(twoddwave_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
         CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(twoddwave_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint64_t>::max());
-        CHECK(twoddwave_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == std::numeric_limits<uint64_t>::max());
-        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == std::numeric_limits<uint64_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == std::numeric_limits<uint32_t>::max());
 
         // ignore z-axis
         CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
         CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
 
         // negative coordinates
-        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {-1, -1}) == std::numeric_limits<uint64_t>::max());
-        CHECK(twoddwave_distance<cart_lyt>(layout, {-2, -8}, {-6, -4}) == std::numeric_limits<uint64_t>::max());
-        CHECK(twoddwave_distance<cart_lyt>(layout, {-6, -4}, {-2, -8}) == std::numeric_limits<uint64_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {-1, -1}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {-2, -8}, {-6, -4}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {-6, -4}, {-2, -8}) == std::numeric_limits<uint32_t>::max());
         CHECK(twoddwave_distance<cart_lyt>(layout, {-4, -3}, {1, -1}) == 7);
     }
 }
@@ -279,7 +281,7 @@ TEST_CASE("2DDWave distance functor", "[distance]")
         CHECK(distance(layout, {0, 0}, {1, 1}) == 2);
         CHECK(distance(layout, {1, 2}, {3, 3}) == 3);
         CHECK(distance(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(distance(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint64_t>::max());
+        CHECK(distance(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint32_t>::max());
 
         // ignore z-axis
         CHECK(distance(layout, {0, 0, 1}, {8, 9, 0}) == 17);
@@ -299,16 +301,16 @@ TEST_CASE("2DDWave distance functor", "[distance]")
         CHECK(distance(layout, {0, 0}, {1, 1}) == 2);
         CHECK(distance(layout, {1, 2}, {3, 3}) == 3);
         CHECK(distance(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(distance(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint64_t>::max());
+        CHECK(distance(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint32_t>::max());
 
         // ignore z-axis
         CHECK(distance(layout, {0, 0, 1}, {8, 9, 0}) == 17);
         CHECK(distance(layout, {0, 0, 1}, {8, 9, 1}) == 17);
 
         // negative coordinates
-        CHECK(distance(layout, {0, 0}, {-1, -1}) == std::numeric_limits<uint64_t>::max());
-        CHECK(distance(layout, {-2, -8}, {-6, -4}) == std::numeric_limits<uint64_t>::max());
-        CHECK(distance(layout, {-6, -4}, {-2, -8}) == std::numeric_limits<uint64_t>::max());
+        CHECK(distance(layout, {0, 0}, {-1, -1}) == std::numeric_limits<uint32_t>::max());
+        CHECK(distance(layout, {-2, -8}, {-6, -4}) == std::numeric_limits<uint32_t>::max());
+        CHECK(distance(layout, {-6, -4}, {-2, -8}) == std::numeric_limits<uint32_t>::max());
         CHECK(distance(layout, {-4, -3}, {1, -1}) == 7);
     }
 }
@@ -358,6 +360,38 @@ TEST_CASE("A* distance", "[distance]")
             }
         }
     }
+}
+
+TEST_CASE("SiDB nanometer distance", "[distance]")
+{
+    const sidb_cell_clk_lyt_siqad layout{};
+
+    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 0}) == 0);
+    CHECK(sidb_nanometer_distance(layout, {1, 0}, {1, 0}) == 0);
+    CHECK(sidb_nanometer_distance(layout, {0, 1}, {0, 1}) == 0);
+
+    CHECK(sidb_nanometer_distance(layout, {-3, 0}, {-3, 0}) == 0);
+    CHECK(sidb_nanometer_distance(layout, {0, -5}, {0, -5}) == 0);
+
+    CHECK(sidb_nanometer_distance(layout, {0, 1, 1}, {0, 1, 1}) == 0);
+    CHECK(sidb_nanometer_distance(layout, {0, 0}, {1, 0}) == sidb_simulation_parameters{}.lat_a * 0.1);
+    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 1}) == sidb_simulation_parameters{}.lat_b * 0.1);
+    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 0, 1}) == sidb_simulation_parameters{}.lat_c * 0.1);
+
+    CHECK(sidb_nanometer_distance(layout, {0, 0}, {-1, 0}) == sidb_simulation_parameters{}.lat_a * 0.1);
+    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, -1}) == sidb_simulation_parameters{}.lat_b * 0.1);
+    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 0, -1}) == sidb_simulation_parameters{}.lat_c * 0.1);
+
+    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 2, 1}) ==
+          sidb_simulation_parameters{}.lat_b * 0.2 + sidb_simulation_parameters{}.lat_c * 0.1);
+    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, -2, 1}) ==
+          sidb_simulation_parameters{}.lat_b * 0.2 - sidb_simulation_parameters{}.lat_c * 0.1);
+    CHECK(sidb_nanometer_distance(layout, {0, -2, 1}, {0, 0}) ==
+          sidb_simulation_parameters{}.lat_b * 0.2 - sidb_simulation_parameters{}.lat_c * 0.1);
+
+    CHECK(sidb_nanometer_distance(layout, {0, 2, 1}, {-5, 1, 0}) ==
+          std::hypot(sidb_simulation_parameters{}.lat_a * 0.5,
+                     sidb_simulation_parameters{}.lat_b * 0.1 + sidb_simulation_parameters{}.lat_c * 0.1));
 }
 
 TEST_CASE("a_star distance functor", "[distance]")

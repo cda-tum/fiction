@@ -19,18 +19,16 @@ namespace fiction
  *
  * @tparam Lyt Cell-level layout type.
  * @param charge_lyts Vector of charge_distribution_surface objects.
- * @return Value of the minimum energy found in the input vector.
+ * @return Value of the minimum energy found in the input vector (unit: eV).
  */
 template <typename Lyt>
-[[nodiscard]] units::energy::electron_volt_t
-minimum_energy(const std::vector<charge_distribution_surface<Lyt>>& charge_lyts) noexcept
+[[nodiscard]] double minimum_energy(const std::vector<charge_distribution_surface<Lyt>>& charge_lyts) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    return units::energy::electron_volt_t(
-        std::accumulate(charge_lyts.cbegin(), charge_lyts.cend(), std::numeric_limits<double>::max(),
-                        [](const double a, const auto& lyt) { return std::min(a, lyt.get_system_energy().value()); }));
+    return std::accumulate(charge_lyts.cbegin(), charge_lyts.cend(), std::numeric_limits<double>::max(),
+                           [](const double a, const auto& lyt) { return std::min(a, lyt.get_system_energy()); });
 }
 
 }  // namespace fiction

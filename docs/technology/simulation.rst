@@ -30,3 +30,15 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
    :members:
 .. doxygenclass:: fiction::charge_distribution_surface< Lyt, false >
    :members:
+
+
+Physical Constants
+------------------
+
+**Header:** ``fiction/technology/physical_constants.hpp``
+
+.. doxygenvariable:: EPSILON
+.. doxygenvariable:: ELEMENTARY_CHARGE
+.. doxygenvariable:: K
+.. doxygenvariable:: POP_STABILITY_ERR
+.. doxygenvariable:: PI
