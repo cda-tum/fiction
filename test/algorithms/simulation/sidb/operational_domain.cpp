@@ -65,6 +65,9 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 100);
+        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
     }
     SECTION("non-operational area")
     {
@@ -85,5 +88,68 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
+        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 100);
     }
+}
+
+TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domain]")
+{
+    using layout = sidb_cell_clk_lyt_siqad;
+
+    layout lyt{{20, 10}, "AND gate"};
+
+    lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);
+
+    lyt.assign_cell_type({20, 0, 1}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({18, 1, 1}, sidb_technology::cell_type::INPUT);
+
+    lyt.assign_cell_type({4, 2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 1}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({14, 3, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 2, 1}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({10, 6, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 7, 0}, sidb_technology::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
+
+    sidb_simulation_parameters sim_params{};
+    sim_params.base = 2;
+    sim_params.mu   = -0.28;
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.sim_params  = sim_params;
+    op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min       = 5.1;
+    op_domain_params.x_max       = 6.1;
+    op_domain_params.x_step      = 0.1;
+    op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min       = 4.5;
+    op_domain_params.y_max       = 5.5;
+    op_domain_params.y_step      = 0.1;
+
+    operational_domain_stats op_domain_stats{};
+
+    const auto op_domain = operational_domain_grid_search(lyt, create_and_tt(), op_domain_params, &op_domain_stats);
+
+    CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
+    CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
+
+    // check if the operational domain has the correct size (10 steps in each dimension)
+    CHECK(op_domain.operational_values.size() == 100);
+
+    // for the selected range, all samples should be operational
+    for (const auto& [coord, op_value] : op_domain.operational_values)
+    {
+        CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
+    }
+
+    CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+    CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
+    CHECK(op_domain_stats.num_operational_parameter_combinations == 100);
+    CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
 }
