@@ -9,8 +9,6 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 
-#include <units.h>
-
 #include <algorithm>
 #include <cassert>
 #include <unordered_set>
@@ -69,14 +67,14 @@ struct detect_bdl_pairs_params
 {
     /**
      * The minimum distance between two dots to be considered a BDL pair. This is useful to prevent, e.g., SiDBs of
-     * atomic wires to be considered BDL pairs.
+     * atomic wires to be considered BDL pairs. (unit: nm).
      */
-    units::length::nanometer_t minimum_distance{0.75_nm};
+    double minimum_distance{0.75};
     /**
      * The maximum distance between two dots to be considered a BDL pair. This is useful to prevent unlikely pairings
-     * of SiDBs that are far apart and to improve performance of the matching algorithm.
+     * of SiDBs that are far apart and to improve performance of the matching algorithm. (unit: nm).
      */
-    units::length::nanometer_t maximum_distance{1.5_nm};
+    double maximum_distance{1.5};
 };
 
 /**
@@ -125,9 +123,9 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
              */
             cell<Lyt> sidb2{};
             /**
-             * Distance between the two dots.
+             * Distance between the two dots. (unit: nm).
              */
-            units::length::nanometer_t distance{};
+            double distance{};
             /**
              * Standard constructor for empty pairwise dot distances.
              */
@@ -137,9 +135,9 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
              *
              * @param s1 The first dot.
              * @param s2 The second dot.
-             * @param d The distance between the two dots.
+             * @param d The distance between the two dots. (unit: nm).
              */
-            pairwise_dot_distance(const cell<Lyt> s1, const cell<Lyt> s2, const units::length::nanometer_t d) noexcept :
+            pairwise_dot_distance(const cell<Lyt> s1, const cell<Lyt> s2, const double d) noexcept :
                     sidb1{s1},
                     sidb2{s2},
                     distance{d}

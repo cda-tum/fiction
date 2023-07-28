@@ -68,7 +68,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     }
     SECTION("non-operational area")
     {
-        op_domain_params.sim_params.mu = -0.15_eV;
+        op_domain_params.sim_params.mu = -0.15;
 
         const auto op_domain = operational_domain_grid_search(lyt, create_id_tt(), op_domain_params, &op_domain_stats);
 

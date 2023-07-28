@@ -264,12 +264,12 @@ class operational_domain_impl
             }
             case operational_domain::sweep_parameter::LAMBDA_TF:
             {
-                sim_params.lambda_tf = units::length::nanometer_t{val};
+                sim_params.lambda_tf = val;
                 break;
             }
             case operational_domain::sweep_parameter::MU_MINUS:
             {
-                sim_params.mu = units::energy::electron_volt_t{val};
+                sim_params.mu = val;
                 break;
             }
             default:
@@ -295,12 +295,12 @@ class operational_domain_impl
             }
             case operational_domain::sweep_parameter::LAMBDA_TF:
             {
-                sim_params.lambda_tf = units::length::nanometer_t{val};
+                sim_params.lambda_tf = val;
                 break;
             }
             case operational_domain::sweep_parameter::MU_MINUS:
             {
-                sim_params.mu = units::energy::electron_volt_t{val};
+                sim_params.mu = val;
                 break;
             }
             default:
@@ -342,10 +342,9 @@ class operational_domain_impl
 
             // TODO is this necessary or is it guaranteed that the ground state is always the first element?
             // find the ground state, which is the charge distribution with the lowest energy
-            const auto ground_state =
-                std::min_element(sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend(),
-                                 [](const auto& lhs, const auto& rhs)
-                                 { return lhs.get_system_energy().value() < rhs.get_system_energy().value(); });
+            const auto ground_state = std::min_element(
+                sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend(),
+                [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
             // fetch the charge states of the output BDL pair
             const auto charge_state_output_upper = ground_state->get_charge_state(output_bdl_pair.upper);

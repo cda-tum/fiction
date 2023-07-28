@@ -62,7 +62,7 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
     }
     SECTION("0.5 nm lower threshold")
     {
-        params.minimum_distance = 0.5_nm;
+        params.minimum_distance = 0.5;
 
         const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
         const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
@@ -85,7 +85,7 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
     }
     SECTION("0 nm lower threshold")
     {
-        params.minimum_distance = 0_nm;
+        params.minimum_distance = 0;
 
         const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
         const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
@@ -139,7 +139,7 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
 
     detect_bdl_pairs_params params{};
     // set default lower threshold to 0 for testing
-    params.minimum_distance = 0_nm;
+    params.minimum_distance = 0;
 
     SECTION("default upper threshold")
     {
@@ -162,7 +162,7 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
     }
     SECTION("1 nm upper threshold")
     {
-        params.maximum_distance = 1_nm;
+        params.maximum_distance = 1;
 
         const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
         const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
@@ -183,7 +183,7 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
     }
     SECTION("0.5 nm upper threshold")
     {
-        params.maximum_distance = 0.5_nm;
+        params.maximum_distance = 0.5;
 
         const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
         const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
