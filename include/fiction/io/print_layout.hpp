@@ -471,16 +471,16 @@ void print_charge_layout(std::ostream& os, const Lyt& lyt, const bool cs_color =
             {
                 if (is_negatively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
                 {
-                    os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ⊟ ");
+                    os << fmt::format(cs_color ? detail::SIDB_DEF_NEG_COLOR : detail::NO_COLOR, " ⊟ ");
                 }
 
                 else if (is_positively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
                 {
-                    os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ⊞ ");
+                    os << fmt::format(cs_color ? detail::SIDB_DEF_POS_COLOR : detail::NO_COLOR, " ⊞ ");
                 }
                 else if (is_neutrally_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
                 {
-                    os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ⊡ ");
+                    os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " ⊡ ");
                 }
             }
             else
