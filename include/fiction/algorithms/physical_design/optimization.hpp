@@ -338,7 +338,7 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op) noexcept
 
                     // if possible routing was found, it will be applied
                     if (!(fanins.size() > 0 && path1.empty()) && !(fanins.size() == 2 && path2.empty()) &&
-                        !(fanouts.size() > 0 and path3.empty()) && !(fanouts.size() == 2 and path4.empty()))
+                        !(fanouts.size() > 0 && path3.empty()) && !(fanouts.size() == 2 && path4.empty()))
                     {
                         for (auto path : {path1, path2, path3, path4})
                         {
