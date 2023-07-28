@@ -78,8 +78,8 @@ TEST_CASE("Test for units", "[sidb-defects]")
     CHECK(defect_two.epsilon_r == 0);
     CHECK(defect_two.lambda_tf == 0.0);
 
-    const sidb_defect defect_three{sidb_defect_type::NONE, 2, 5};
-    CHECK(is_negatively_charged_defect(defect_two));
+    const sidb_defect defect_three{sidb_defect_type::NONE, -2, 5};
+    CHECK(is_negatively_charged_defect(defect_three));
     CHECK(defect_three.charge == -2);
     CHECK(defect_three.epsilon_r == 5);
     CHECK(defect_three.lambda_tf == 0.0);
