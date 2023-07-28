@@ -5,6 +5,7 @@
 #ifndef FICTION_SIDB_DEFECTS_HPP
 #define FICTION_SIDB_DEFECTS_HPP
 
+#include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <utility>
@@ -57,7 +58,7 @@ struct sidb_defect
             lambda_tf{screening_distance}
     {
 
-        assert(((std::fmod(charge, 1) == 0)) && "charge value has to be an integer");
+        assert((std::fmod(charge, 1) == 0) && "charge value has to be an integer");
         assert((epsilon_r >= 0) && "epsilon_r has to be >= 0.0");
         assert((lambda_tf >= 0.0) && "lambda_tf has to be >= 0.0 nanometer");
     }
@@ -79,6 +80,31 @@ struct sidb_defect
     const double lambda_tf;
 };
 /**
+ * This operator compares two sidb_defect instances for equality. It checks if the type, charge,
+ * epsilon_r, and lambda_tf members of the two instances are equal.
+ *
+ * @param lhs The left-hand side sidb_defect instance.
+ * @param rhs The right-hand side sidb_defect instance.
+ * @return Returns true if the two sidb_defect instances are equal, false otherwise.
+ */
+static constexpr bool operator==(const sidb_defect& lhs, const sidb_defect& rhs) noexcept
+{
+    return lhs.type == rhs.type && lhs.charge == rhs.charge && lhs.epsilon_r == rhs.epsilon_r &&
+           lhs.lambda_tf == rhs.lambda_tf;
+}
+/**
+ * This operator compares two sidb_defect instances for inequality. It uses the operator== to check
+ * if the two instances are equal and returns the negation of the result.
+ *
+ * @param lhs The left-hand side sidb_defect instance.
+ * @param rhs The right-hand side sidb_defect instance.
+ * @return Returns true if the two sidb_defect instances are not equal, false if they are equal.
+ */
+static constexpr bool operator!=(const sidb_defect& lhs, const sidb_defect& rhs) noexcept
+{
+    return !(lhs == rhs);
+}
+/**
  * Checks whether the given defect is charged. Charged defects are to be avoided by a larger distance.
  *
  * @param defect Defect type to check.
@@ -87,6 +113,36 @@ struct sidb_defect
 [[nodiscard]] static constexpr bool is_charged_defect(const sidb_defect& defect) noexcept
 {
     return defect.type == sidb_defect_type::DB || defect.type == sidb_defect_type::SI_VACANCY;
+}
+/**
+ * Checks whether the given defect is positively charged.
+ *
+ * @param defect Defect to check.
+ * @return `true` iff defect is positively charged.
+ */
+[[nodiscard]] static constexpr bool is_positively_charged_defect(const sidb_defect& defect) noexcept
+{
+    return defect.charge > 0;
+}
+/**
+ * Checks whether the given defect is negatively charged.
+ *
+ * @param defect Defect to check.
+ * @return `true` iff defect is negatively charged.
+ */
+[[nodiscard]] static constexpr bool is_negatively_charged_defect(const sidb_defect& defect) noexcept
+{
+    return defect.charge < 0;
+}
+/**
+ * Checks whether the given defect is neutrally charged.
+ *
+ * @param defect Defect to check.
+ * @return `true` iff defect is neutrally charged.
+ */
+[[nodiscard]] static constexpr bool is_neutrally_charged_defect(const sidb_defect& defect) noexcept
+{
+    return defect.charge == 0;
 }
 /**
  * Checks whether the given defect is not charged. Neutral defects are to be avoided but not by such a large distance.
