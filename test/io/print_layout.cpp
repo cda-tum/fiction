@@ -233,6 +233,27 @@ TEST_CASE("Print empty charge layout", "[print-charge-layout]")
     CHECK(print_stream.str() == layout_print);
 }
 
+TEST_CASE("layout which is sidb_surface and charge distribution surface but empty", "[print-charge-layout]")
+{
+    const sidb_surface<sidb_cell_clk_lyt_siqad> sidb_layout{{2, 2}};
+
+    const charge_distribution_surface<sidb_surface<sidb_cell_clk_lyt_siqad>> layout{sidb_layout};
+
+    constexpr const char* layout_print = "[i] empty layout\n";
+
+    std::stringstream print_stream{};
+
+    print_charge_layout(print_stream, layout, false);
+
+    CHECK(print_stream.str() == layout_print);
+
+    print_stream = {};
+
+    print_layout(layout, print_stream);
+
+    CHECK(print_stream.str() == layout_print);
+}
+
 TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
 {
     using hex_gate_lyt = hex_odd_row_gate_clk_lyt;
