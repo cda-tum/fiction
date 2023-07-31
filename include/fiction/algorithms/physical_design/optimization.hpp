@@ -1,5 +1,5 @@
 //
-// Created by simon on 14.04.23.
+// Created by simon on 14.06.23.
 //
 
 #ifndef FICTION_OPTIMIZATION_HPP
@@ -13,8 +13,6 @@
 #include <fiction/algorithms/path_finding/a_star.hpp>
 #include <fiction/algorithms/path_finding/cost.hpp>
 #include <fiction/algorithms/path_finding/distance.hpp>  // pre-defined types suitable for the FCN domain
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
-#include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/obstruction_layout.hpp>
 
