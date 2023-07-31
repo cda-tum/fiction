@@ -218,8 +218,8 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op) noexcept
     // determine minimum coordinates for new placements
     if (fanins.size() > 0)
     {
-        min_x = max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.x < b.x; })->x;
-        min_y = max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.y < b.y; })->y;
+        min_x = static_cast<int>(max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.x < b.x; })->x);
+        min_y = static_cast<int>(max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.y < b.y; })->y);
     }
 
     int max_x        = old_pos.x;
@@ -712,9 +712,9 @@ template <typename Lyt>
     detail::obs_gate_lyt layout = fiction::obstruction_layout<Lyt>(lyt);
 
     std::vector<detail::coordinate> gates;
-    for (int x = 0; x <= width; x++)
+    for (int x = 0; x <= static_cast<int>(width); x++)
     {
-        for (int y = 0; y <= height; y++)
+        for (int y = 0; y <= static_cast<int>(height); y++)
         {
             if (layout.is_inv(layout.get_node({x, y})) || layout.is_and(layout.get_node({x, y})) ||
                 layout.is_xor(layout.get_node({x, y})) || layout.is_fanout(layout.get_node({x, y})) ||
@@ -743,9 +743,9 @@ template <typename Lyt>
             break;
         }
 
-        for (int gate_id = 0; gate_id < gates.size(); gate_id++)
+        for (size_t gate_id = 0; gate_id < gates.size(); gate_id++)
         {
-            std::tuple<bool, detail::coordinate> moved_gate = detail::move_gate(gates[gate_id], layout, width, height);
+            std::tuple<bool, detail::coordinate> moved_gate = detail::move_gate(gates[gate_id], layout, static_cast<int>(width), static_cast<int>(height));
 
             if (std::get<0>(moved_gate))
             {
@@ -757,7 +757,7 @@ template <typename Lyt>
                   [](detail::coordinate a, detail::coordinate b) { return a.x + a.y < b.x + b.y; });
     }
 
-    detail::delete_wires(layout, width, height);
+    detail::delete_wires(layout, static_cast<int>(width), static_cast<int>(height));
     detail::optimize_output(layout);
     detail::fix_dead_nodes(layout, gates);
 
