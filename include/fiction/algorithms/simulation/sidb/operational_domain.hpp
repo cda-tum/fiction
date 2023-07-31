@@ -11,16 +11,16 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/traits.hpp"
 
+#include <btree.h>
 #include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
+#include <phmap.h>
 
 #include <cassert>
 #include <cstdint>
 #include <utility>
 #include <vector>
-
-#include <btree.h>
 
 namespace fiction
 {
@@ -193,7 +193,7 @@ class operational_domain_impl
      *
      * @return The operational domain of the layout.
      */
-    operational_domain grid_search() noexcept
+    [[nodiscard]] operational_domain grid_search() noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -208,14 +208,81 @@ class operational_domain_impl
 
         for (auto y = 0; y < (params.y_max - params.y_min) / params.y_step; ++y)
         {
-            set_y_dimension_value(sim_params, params.y_min + y * params.y_step);
+            const double y_val = params.y_min + y * params.y_step;
+
+            set_y_dimension_value(sim_params, y_val);
 
             for (auto x = 0; x < (params.x_max - params.x_min) / params.x_step; ++x)
             {
-                set_x_dimension_value(sim_params, params.x_min + x * params.x_step);
+                const double x_val = params.x_min + x * params.x_step;
 
-                opdomain.operational_values[{x, y}] = is_operational(sim_params);
+                set_x_dimension_value(sim_params, x_val);
+
+                opdomain.operational_values[{x_val, y_val}] = is_operational(sim_params);
             }
+        }
+
+        return opdomain;
+    }
+    /**
+     * Performs a random sampling of the specified number of samples within the specified parameter range. The
+     * operational domain is computed for each sample point.
+     *
+     * @param samples Number of samples to be taken.
+     * @return The (partial) operational domain of the layout.
+     */
+    [[nodiscard]] operational_domain random_sampling(const std::size_t samples) noexcept
+    {
+        mockturtle::stopwatch stop{stats.time_total};
+
+        operational_domain opdomain{};
+
+        opdomain.x_dimension = params.x_dimension;
+        opdomain.y_dimension = params.y_dimension;
+
+        sidb_simulation_parameters sim_params = params.sim_params;
+
+        phmap::flat_hash_set<std::pair<std::size_t, std::size_t>> sampled_points{};
+        sampled_points.reserve(samples);
+
+        const auto already_sampled = [&sampled_points](const std::size_t x, const std::size_t y) {
+            return sampled_points.find({x, y}) != sampled_points.end();
+        };
+
+        static std::mt19937_64 generator{std::random_device{}()};
+
+        // calculate the number of steps in x and y dimension to instantiate distributions
+        const auto num_x_steps = static_cast<std::size_t>((params.x_max - params.x_min) / params.x_step);
+        const auto num_y_steps = static_cast<std::size_t>((params.y_max - params.y_min) / params.y_step);
+
+        // instantiate distributions
+        std::uniform_int_distribution<std::size_t> x_distribution{0, num_x_steps - 1};
+        std::uniform_int_distribution<std::size_t> y_distribution{0, num_y_steps - 1};
+
+        for (std::size_t i = 0; i < samples; ++i)
+        {
+            // sample x and y dimension
+            const auto x_sample = x_distribution(generator);
+            const auto y_sample = y_distribution(generator);
+
+            // check if the point has already been sampled
+            if (already_sampled(x_sample, y_sample))
+            {
+                // --i;  // TODO do we want to have a fixed number of sample attempts or a fixed number of samples?
+                continue;
+            }
+
+            // add the point to the set of sampled points
+            sampled_points.insert({x_sample, y_sample});
+
+            // convert the sample to the actual value
+            const auto x_val = params.x_min + static_cast<double>(x_sample) * params.x_step;
+            const auto y_val = params.y_min + static_cast<double>(y_sample) * params.y_step;
+
+            set_x_dimension_value(sim_params, x_val);
+            set_y_dimension_value(sim_params, y_val);
+
+            opdomain.operational_values[{x_val, y_val}] = is_operational(sim_params);
         }
 
         return opdomain;
@@ -426,6 +493,49 @@ operational_domain operational_domain_grid_search(Lyt& lyt, const TT& spec,
     detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
     const auto result = p.grid_search();
+
+    if (pst)
+    {
+        *pst = st;
+    }
+
+    return result;
+}
+/**
+ * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
+ * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
+ * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
+ * inputs of the truth table. // TODO implement the matching of truth table inputs and BDL pair ordering
+ *
+ * This algorithm uses random sampling to find a part of the operational domain that might not be complete. It performs
+ * a total of `samples` uniformly-distributed random samples within the parameter range. For each sample, the algorithm
+ * performs one operational checks on the layout, where each operational check consists of up to \f$ 2^n \f$ exact
+ * ground state simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact ground state simulation
+ * has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt Layout to compute the operational domain for.
+ * @param spec Expected truth table of the layout.
+ * @param samples Number of samples to perform.
+ * @param params Operational domain computation parameters.
+ * @param pst Operational domain computation statistics.
+ * @return The (partial) operational domain of the layout.
+ */
+template <typename Lyt, typename TT>
+operational_domain operational_domain_random_sampling(Lyt& lyt, const TT& spec, const std::size_t samples,
+                                                      const operational_domain_params& params = {},
+                                                      operational_domain_stats*        pst    = nullptr)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    operational_domain_stats                 st{};
+    detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+
+    const auto result = p.random_sampling(samples);
 
     if (pst)
     {
