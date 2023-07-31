@@ -34,6 +34,12 @@ using coord_path   = layout_coordinate_path<obs_gate_lyt>;
 using dist         = twoddwave_distance_functor<obs_gate_lyt, uint64_t>;
 using cost         = unit_cost_functor<obs_gate_lyt, uint8_t>;
 
+/**
+ * Utility function to move wires that cross over empty tiles down one layer.
+ *
+ * @param lyt Gate level layout.
+ * @param tc Tiles that got deleted.
+ */
 template <typename Obs_Lyt, typename Coord_Vec>
 void check_wires(Obs_Lyt lyt, Coord_Vec tc) noexcept
 {
@@ -77,7 +83,14 @@ void check_wires(Obs_Lyt lyt, Coord_Vec tc) noexcept
     }
 }
 
-// Trace back wires of a gate
+/**
+ * Utility function to trace back fanins and fanouts of a gate.
+ *
+ * @param lyt Gate level layout.
+ * @param op Coordinate of the gate to be moved.
+ *
+ * @return fanin and fanout gates, wires to be deleted and old routing paths.
+ */
 [[nodiscard]] std::tuple<std::vector<coordinate>, std::vector<coordinate>, std::vector<coordinate>, coord_path,
                          coord_path, coord_path, coord_path>
 get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op) noexcept
@@ -206,6 +219,15 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op) noexcept
     return std::make_tuple(fanins, fanouts, to_clear, route1, route2, route3, route4);
 }
 
+/**
+ * Utility function that moves gates to new coordinates and checks if routing is possible.
+ *
+ * @param old_pos Old position of the gate to be moved.
+ * @param width Width of the gate level layout.
+ * @param height Height of the gate level layout.
+ *
+ * @return flag that indicates if gate was moved successfully, new coordinate.
+ */
 [[nodiscard]] std::tuple<bool, coordinate> move_gate(coordinate old_pos, obs_gate_lyt lyt, int width,
                                                      int height) noexcept
 {
@@ -218,8 +240,10 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op) noexcept
     // determine minimum coordinates for new placements
     if (fanins.size() > 0)
     {
-        min_x = static_cast<int>(max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.x < b.x; })->x);
-        min_y = static_cast<int>(max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.y < b.y; })->y);
+        min_x =
+            static_cast<int>(max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.x < b.x; })->x);
+        min_y =
+            static_cast<int>(max_element(fanins.begin(), fanins.end(), [](auto a, auto b) { return a.y < b.y; })->y);
     }
 
     int max_x        = old_pos.x;
@@ -447,7 +471,14 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op) noexcept
     return std::make_tuple(optimized, new_pos);
 }
 
-// deletes a row in the layout by moving all southern gates up on positions
+/**
+ * Utility function that deletes a row in the layout by moving all southern gates up on positions.
+ *
+ * @param lyt Gate level layout.
+ * @param row_idx Row to be deleted.
+ * @param width Width of the gate level layout.
+ * @param height Height of the gate level layout.
+ */
 void delete_row(obs_gate_lyt& lyt, int row_idx, int width, int height) noexcept
 {
     // create a map that store fanins of each coordinate
@@ -516,7 +547,13 @@ void delete_row(obs_gate_lyt& lyt, int row_idx, int width, int height) noexcept
     }
 }
 
-// deletes rows that only contain vertically connected wires
+/**
+ * Utility function that deletes rows that only contain vertically connected wires.
+ *
+ * @param lyt Gate level layout.
+ * @param width Width of the gate level layout.
+ * @param height Height of the gate level layout.
+ */
 void delete_wires(obs_gate_lyt& lyt, int width, int height) noexcept
 {
     for (int y = height; y >= 0; y--)
@@ -549,7 +586,11 @@ void delete_wires(obs_gate_lyt& lyt, int width, int height) noexcept
     }
 }
 
-// trace back all output nodes and calculate optimal positions
+/**
+ * Utility function that traces back all output nodes and calculate optimal positions.
+ *
+ * @param lyt Gate level layout.
+ */
 void optimize_output(obs_gate_lyt& lyt) noexcept
 {
     // get all outputs
@@ -662,7 +703,12 @@ void optimize_output(obs_gate_lyt& lyt) noexcept
     }
 }
 
-// fixes dead node warning by moving gates back and forth
+/**
+ * Utility function that fixes dead node warning by moving gates back and forth.
+ *
+ * @param lyt Gate level layout.
+ * @param gt Gate locations.
+ */
 void fix_dead_nodes(obs_gate_lyt& lyt, std::vector<coordinate>& gt) noexcept
 {
     // find an empty coordinate to move gate to
@@ -696,6 +742,13 @@ void fix_dead_nodes(obs_gate_lyt& lyt, std::vector<coordinate>& gt) noexcept
 }
 }  // namespace detail
 
+/**
+ * Main optimization function.
+ *
+ * @param lyt Gate level layout.
+ *
+ * @return optimized layout.
+ */
 template <typename Lyt>
 [[nodiscard]] detail::obs_gate_lyt optimize(const Lyt& lyt) noexcept
 {
@@ -745,7 +798,8 @@ template <typename Lyt>
 
         for (size_t gate_id = 0; gate_id < gates.size(); gate_id++)
         {
-            std::tuple<bool, detail::coordinate> moved_gate = detail::move_gate(gates[gate_id], layout, static_cast<int>(width), static_cast<int>(height));
+            std::tuple<bool, detail::coordinate> moved_gate =
+                detail::move_gate(gates[gate_id], layout, static_cast<int>(width), static_cast<int>(height));
 
             if (std::get<0>(moved_gate))
             {
