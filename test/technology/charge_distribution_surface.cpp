@@ -154,9 +154,9 @@ TEMPLATE_TEST_CASE(
         const charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
         lyt.assign_cell_type({5, 6}, TestType::cell_type::EMPTY);
         charge_distribution_surface charge_layout_new{lyt, sidb_simulation_parameters{}};
-        charge_layout_new.add_defect_to_charge_distribution_surface(
-            {5, 6}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout_new.get_phys_params().epsilon_r,
-                                charge_layout_new.get_phys_params().lambda_tf});
+        charge_layout_new.add_defect({5, 6}, sidb_defect{sidb_defect_type::UNKNOWN, -1,
+                                                         charge_layout_new.get_phys_params().epsilon_r,
+                                                         charge_layout_new.get_phys_params().lambda_tf});
         CHECK(charge_layout_new.chargeless_potential_generated_by_defect_at_given_distance(0.0) == 0.0);
         charge_layout_new.update_after_charge_change();
         CHECK_THAT(charge_layout.get_system_energy() - charge_layout_new.get_system_energy(),
@@ -622,9 +622,9 @@ TEMPLATE_TEST_CASE(
 
         charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
 
-        charge_layout_new.add_defect_to_charge_distribution_surface(
-            {5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout_new.get_phys_params().epsilon_r,
-                                   charge_layout_new.get_phys_params().lambda_tf});
+        charge_layout_new.add_defect({5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1,
+                                                            charge_layout_new.get_phys_params().epsilon_r,
+                                                            charge_layout_new.get_phys_params().lambda_tf});
 
         CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) < 0);
         CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) < 0);
@@ -642,9 +642,9 @@ TEMPLATE_TEST_CASE(
 
         charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
 
-        charge_layout_new.add_defect_to_charge_distribution_surface(
-            {5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout_new.get_phys_params().epsilon_r,
-                                   charge_layout_new.get_phys_params().lambda_tf});
+        charge_layout_new.add_defect({5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1,
+                                                            charge_layout_new.get_phys_params().epsilon_r,
+                                                            charge_layout_new.get_phys_params().lambda_tf});
 
         CHECK(*charge_layout_new.get_local_potential({0, 0, 1}) > 0);
         CHECK(*charge_layout_new.get_local_potential({1, 3, 0}) > 0);
@@ -662,9 +662,9 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
 
         charge_layout_new.assign_charge_state({10, 5, 1}, sidb_charge_state::NEGATIVE);
-        charge_layout_new.add_defect_to_charge_distribution_surface(
-            {-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout_new.get_phys_params().epsilon_r,
-                                     charge_layout_new.get_phys_params().lambda_tf});
+        charge_layout_new.add_defect({-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1,
+                                                              charge_layout_new.get_phys_params().epsilon_r,
+                                                              charge_layout_new.get_phys_params().lambda_tf});
         CHECK_THAT((*charge_layout_new.get_local_potential({0, 0, 0})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
     }
 
@@ -680,9 +680,9 @@ TEMPLATE_TEST_CASE(
 
         charge_layout.assign_charge_state({10, 5, 1}, sidb_charge_state::NEGATIVE);
         charge_layout.update_after_charge_change();
-        charge_layout.add_defect_to_charge_distribution_surface(
-            {-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_phys_params().epsilon_r,
-                                     charge_layout.get_phys_params().lambda_tf});
+        charge_layout.add_defect({-10, 5, 1},
+                                 sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_phys_params().epsilon_r,
+                                             charge_layout.get_phys_params().lambda_tf});
 
         CHECK_THAT((*charge_layout.get_local_potential({0, 0, 0})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
 
@@ -699,9 +699,9 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface charge_layout{lyt_new, params, sidb_charge_state::NEUTRAL};
-        charge_layout.add_defect_to_charge_distribution_surface(
-            {-10, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_phys_params().epsilon_r,
-                                     charge_layout.get_phys_params().lambda_tf});
+        charge_layout.add_defect({-10, 5, 1},
+                                 sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_phys_params().epsilon_r,
+                                             charge_layout.get_phys_params().lambda_tf});
 
         CHECK(*charge_layout.get_local_potential({0, 0, 0}) > 0);
         CHECK(*charge_layout.get_local_potential({10, 5, 1}) > 0);
@@ -1034,9 +1034,9 @@ TEMPLATE_TEST_CASE(
         auto loc_two_wo_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_wo_defect = *charge_layout.get_local_potential({5, 0, 0});
 
-        charge_layout.add_defect_to_charge_distribution_surface(
-            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
-                                    charge_layout.get_phys_params().lambda_tf});
+        charge_layout.add_defect({-4, 0, 0},
+                                 sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
+                                             charge_layout.get_phys_params().lambda_tf});
         auto loc_one_w_negative_defect   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_negative_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_w_negative_defect = *charge_layout.get_local_potential({5, 0, 0});
@@ -1047,9 +1047,9 @@ TEMPLATE_TEST_CASE(
         CHECK(loc_two_wo_defect > loc_two_w_negative_defect);
         CHECK(loc_three_wo_defect > loc_three_w_negative_defect);
 
-        charge_layout.add_defect_to_charge_distribution_surface(
-            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 0, charge_layout.get_phys_params().epsilon_r,
-                                    charge_layout.get_phys_params().lambda_tf});
+        charge_layout.add_defect({-4, 0, 0},
+                                 sidb_defect{sidb_defect_type::UNKNOWN, 0, charge_layout.get_phys_params().epsilon_r,
+                                             charge_layout.get_phys_params().lambda_tf});
         auto loc_one_w_neutral_defect   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_neutral_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_w_neutral_defect = *charge_layout.get_local_potential({5, 0, 0});
@@ -1060,9 +1060,9 @@ TEMPLATE_TEST_CASE(
         CHECK_THAT(loc_three_wo_defect - loc_three_w_neutral_defect,
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
 
-        charge_layout.add_defect_to_charge_distribution_surface(
-            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_phys_params().epsilon_r,
-                                    charge_layout.get_phys_params().lambda_tf});
+        charge_layout.add_defect({-4, 0, 0},
+                                 sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_phys_params().epsilon_r,
+                                             charge_layout.get_phys_params().lambda_tf});
         auto loc_one_w_positive_defect   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_positive_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_w_positive_defect = *charge_layout.get_local_potential({5, 0, 0});
@@ -1097,9 +1097,9 @@ TEMPLATE_TEST_CASE(
         auto loc_two_wo_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_wo_defect = *charge_layout.get_local_potential({5, 0, 0});
 
-        charge_layout.add_defect_to_charge_distribution_surface(
-            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
-                                    charge_layout.get_phys_params().lambda_tf});
+        charge_layout.add_defect({-4, 0, 0},
+                                 sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
+                                             charge_layout.get_phys_params().lambda_tf});
         auto loc_one_w_negative_defect   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_negative_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_w_negative_defect = *charge_layout.get_local_potential({5, 0, 0});
@@ -1110,9 +1110,9 @@ TEMPLATE_TEST_CASE(
         CHECK(loc_two_wo_defect > loc_two_w_negative_defect);
         CHECK(loc_three_wo_defect > loc_three_w_negative_defect);
 
-        charge_layout.add_defect_to_charge_distribution_surface(
-            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 0, charge_layout.get_phys_params().epsilon_r,
-                                    charge_layout.get_phys_params().lambda_tf});
+        charge_layout.add_defect({-4, 0, 0},
+                                 sidb_defect{sidb_defect_type::UNKNOWN, 0, charge_layout.get_phys_params().epsilon_r,
+                                             charge_layout.get_phys_params().lambda_tf});
         auto loc_one_w_neutral_defect   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_neutral_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_w_neutral_defect = *charge_layout.get_local_potential({5, 0, 0});
@@ -1124,9 +1124,9 @@ TEMPLATE_TEST_CASE(
         CHECK_THAT(loc_three_wo_defect - loc_three_w_neutral_defect,
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
 
-        charge_layout.add_defect_to_charge_distribution_surface(
-            {-4, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_phys_params().epsilon_r,
-                                    charge_layout.get_phys_params().lambda_tf});
+        charge_layout.add_defect({-4, 0, 0},
+                                 sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout.get_phys_params().epsilon_r,
+                                             charge_layout.get_phys_params().lambda_tf});
         auto loc_one_w_positive_defect   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_positive_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_w_positive_defect = *charge_layout.get_local_potential({5, 0, 0});
@@ -1161,9 +1161,9 @@ TEMPLATE_TEST_CASE(
         auto loc_two_wo_defect   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_wo_defect = *charge_layout.get_local_potential({5, 0, 0});
 
-        charge_layout.add_defect_to_charge_distribution_surface(
-            {0, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
-                                   charge_layout.get_phys_params().lambda_tf});
+        charge_layout.add_defect({0, 0, 0},
+                                 sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
+                                             charge_layout.get_phys_params().lambda_tf});
 
         CHECK_THAT(loc_one_wo_defect - (*charge_layout.get_local_potential({0, 0, 0})),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
@@ -1189,17 +1189,17 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEUTRAL);
 
-        charge_layout.add_defect_to_charge_distribution_surface(
-            {8, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
-                                   charge_layout.get_phys_params().lambda_tf});
+        charge_layout.add_defect({8, 0, 0},
+                                 sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
+                                             charge_layout.get_phys_params().lambda_tf});
 
         auto loc_one_w_defect_normal_screening   = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_defect_normal_screening   = *charge_layout.get_local_potential({3, 0, 0});
         auto loc_three_w_defect_normal_screening = *charge_layout.get_local_potential({5, 0, 0});
 
-        charge_layout.add_defect_to_charge_distribution_surface(
-            {8, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
-                                   charge_layout.get_phys_params().lambda_tf * 20});
+        charge_layout.add_defect({8, 0, 0},
+                                 sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
+                                             charge_layout.get_phys_params().lambda_tf * 20});
 
         auto loc_one_w_defec_strong_screening    = *charge_layout.get_local_potential({0, 0, 0});
         auto loc_two_w_defect_strong_screening   = *charge_layout.get_local_potential({3, 0, 0});
