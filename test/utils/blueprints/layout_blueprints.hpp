@@ -375,6 +375,27 @@ GateLyt row_clocked_and_xor_gate_layout() noexcept
     return layout;
 }
 
+template <typename GateLyt>
+GateLyt optimization_layout() noexcept
+{
+    GateLyt layout{{2, 3, 1}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {2, 0});
+
+    const auto w1 = layout.create_buf(x1, {0, 1});
+    const auto w2 = layout.create_buf(w1, {0, 2});
+    const auto w3 = layout.create_buf(w2, {1, 2});
+    const auto w4 = layout.create_buf(x2, {2, 1});
+
+    const auto and1 = layout.create_and(w3, w4, {2, 2});
+
+    layout.create_po(w2, "f1", {0, 3});
+    layout.create_po(and1, "f2", {2, 3});
+
+    return layout;
+}
+
 template <typename CellLyt>
 CellLyt single_layer_qca_and_gate() noexcept
 {
