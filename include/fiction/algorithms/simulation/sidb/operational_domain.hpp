@@ -315,28 +315,41 @@ class operational_domain_impl
     bdl_input_iterator<Lyt> bii{layout, params.bdl_params};
 
     /**
-     * Helper function that sets the value of the x dimension in the simulation parameters.
-     *
-     * @param sim_params Simulation parameter object to set the x dimension value of.
-     * @param val Value to set the x dimension to.
+     * Potential sweep dimensions.
      */
-    inline void set_x_dimension_value(sidb_simulation_parameters& sim_params, const double val) const noexcept
+    enum class sweep_dimension : uint8_t
     {
-        switch (params.x_dimension)
+        X,
+        Y
+    };
+    /**
+     * Helper function that sets the value of a sweep dimension in the simulation parameters.
+     *
+     * @param sim_parameters Simulation parameter object to set the sweep dimension `dim` to value `val`.
+     * @param val Value to set the dimension `dim` to.
+     * @param dim Sweep dimension to set the value `val` to.
+     */
+    inline void set_dimension_value(sidb_simulation_parameters& sim_parameters, double val,
+                                    sweep_dimension dim) const noexcept
+    {
+        operational_domain::sweep_parameter sweep_parameter =
+            dim == sweep_dimension::X ? params.x_dimension : params.y_dimension;
+
+        switch (sweep_parameter)
         {
             case operational_domain::sweep_parameter::EPSILON_R:
             {
-                sim_params.epsilon_r = val;
+                sim_parameters.epsilon_r = val;
                 break;
             }
             case operational_domain::sweep_parameter::LAMBDA_TF:
             {
-                sim_params.lambda_tf = val;
+                sim_parameters.lambda_tf = val;
                 break;
             }
             case operational_domain::sweep_parameter::MU_MINUS:
             {
-                sim_params.mu = val;
+                sim_parameters.mu = val;
                 break;
             }
             default:
@@ -346,6 +359,16 @@ class operational_domain_impl
         }
     }
     /**
+     * Helper function that sets the value of the x dimension in the simulation parameters.
+     *
+     * @param sim_params Simulation parameter object to set the x dimension value of.
+     * @param val Value to set the x dimension to.
+     */
+    inline void set_x_dimension_value(sidb_simulation_parameters& sim_params, const double val) const noexcept
+    {
+        set_dimension_value(sim_params, val, sweep_dimension::X);
+    }
+    /**
      * Helper function that sets the value of the y dimension in the simulation parameters.
      *
      * @param sim_params Simulation parameter object to set the y dimension value of.
@@ -353,28 +376,7 @@ class operational_domain_impl
      */
     inline void set_y_dimension_value(sidb_simulation_parameters& sim_params, const double val) const noexcept
     {
-        switch (params.y_dimension)
-        {
-            case operational_domain::sweep_parameter::EPSILON_R:
-            {
-                sim_params.epsilon_r = val;
-                break;
-            }
-            case operational_domain::sweep_parameter::LAMBDA_TF:
-            {
-                sim_params.lambda_tf = val;
-                break;
-            }
-            case operational_domain::sweep_parameter::MU_MINUS:
-            {
-                sim_params.mu = val;
-                break;
-            }
-            default:
-            {
-                assert(false && "Unknown sweep parameter");
-            }
-        }
+        set_dimension_value(sim_params, val, sweep_dimension::Y);
     }
     /**
      * Performs an exhaustive ground state simulation for all input combinations of the stored layout using the given
