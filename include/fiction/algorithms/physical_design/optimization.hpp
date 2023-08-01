@@ -472,7 +472,7 @@ get_fanin_and_fanouts(obs_gate_lyt& lyt, coordinate op) noexcept
 }
 
 /**
- * Utility function that deletes a row in the layout by moving all southern gates up on positions.
+ * Utility function that deletes a row in the layout by moving all southern gates up one positions.
  *
  * @param lyt Gate level layout.
  * @param row_idx Row to be deleted.
@@ -548,6 +548,82 @@ void delete_row(obs_gate_lyt& lyt, int row_idx, int width, int height) noexcept
 }
 
 /**
+ * Utility function that deletes a column in the layout by moving all eastern gates to the left by one positions.
+ *
+ * @param lyt Gate level layout.
+ * @param column_idx Column to be deleted.
+ * @param width Width of the gate level layout.
+ * @param height Height of the gate level layout.
+ */
+void delete_column(obs_gate_lyt& lyt, int column_idx, int width, int height) noexcept
+{
+    // create a map that store fanins of each coordinate
+    std::map<int, std::map<int, std::map<int, std::vector<coordinate>>>> fanins;
+    for (int x = column_idx; x <= width; x++)
+    {
+        fanins[x] = {};
+        for (int y = 0; y <= height; y++)
+        {
+            fanins[x][y] = {};
+            for (int z = 0; z < 2; z++)
+            {
+                if (x == column_idx && lyt.incoming_data_flow({x, y, z}).size() > 0)
+                {
+                    coordinate              fanin_column      = lyt.incoming_data_flow({x, y, z})[0];
+                    std::vector<coordinate> fanin_next_column = lyt.incoming_data_flow({x + 1, y, z});
+                    fanins[x][y][z]                        = {};
+                    for (coordinate fanin : fanin_next_column)
+                    {
+                        if (fanin.x == x)
+                        {
+                            fanins[x][y][z].push_back(
+                                fiction::coordinate<obs_gate_lyt>{fanin_column.x + 1, fanin_column.y, fanin_column.z});
+                        }
+                        else
+                        {
+                            fanins[x][y][z].push_back(fanin);
+                        }
+                    }
+                }
+                else
+                {
+                    fanins[x][y][z] = lyt.incoming_data_flow({x + 1, y, z});
+                }
+            }
+        }
+
+        // iterate through column and move gates
+        for (int y = 0; y <= height; y++)
+        {
+            for (int z = 0; z < 2; z++)
+            {
+                coordinate old_pos = {x, y, z};
+                if (!lyt.is_empty_tile(old_pos))
+                {
+                    // delete row
+                    if (x == column_idx)
+                    {
+                        lyt.clear_tile(old_pos);
+                    }
+
+                    // move left one position
+                    else
+                    {
+                        coordinate                    new_pos = {x - 1, y, z};
+                        std::vector<gate_lyt::signal> fins;
+                        for (coordinate fanin : fanins[x - 1][y][z])
+                        {
+                            fins.push_back(lyt.make_signal(lyt.get_node({fanin.x - 1, fanin.y, fanin.z})));
+                        }
+                        lyt.move_node(lyt.get_node(old_pos), new_pos, fins);
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
  * Utility function that deletes rows that only contain vertically connected wires.
  *
  * @param lyt Gate level layout.
@@ -582,6 +658,35 @@ void delete_wires(obs_gate_lyt& lyt, int width, int height) noexcept
         {
             std::cout << "Row " << y << " can be deleted" << std::endl;
             delete_row(lyt, y, width, height);
+        }
+    }
+
+    for (int x = width; x >= 0; x--)
+    {
+        bool found_column = true;
+        for (int y = height; y >= 0; y--)
+        {
+            // check if tile has vertically connected wire
+            if (lyt.is_wire_tile({x, y}) && lyt.fanin_size(lyt.get_node({x, y})) == 1 &&
+                lyt.fanout_size(lyt.get_node({x, y})) == 1 && lyt.has_western_incoming_signal({x, y}) &&
+                lyt.has_eastern_outgoing_signal({x, y}))
+            {
+                // do nothing
+            }
+            else if (lyt.is_empty_tile({x, y}))
+            {
+                // do nothing
+            }
+            // if row has gates or bent/ horizontal wires, row cannot be deleted
+            else
+            {
+                found_column = false;
+            }
+        }
+        if (found_column)
+        {
+            std::cout << "Column " << x << " can be deleted" << std::endl;
+            delete_column(lyt, x, width, height);
         }
     }
 }
