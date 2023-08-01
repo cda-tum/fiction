@@ -81,7 +81,7 @@ int main()  // NOLINT
 
         const std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         // Optimization
-        obs_gate_lyt layout = fiction::optimize<gate_lyt>(gate_level_layout);
+        obs_gate_lyt layout = fiction::post_layout_optimization<gate_lyt>(gate_level_layout);
 
         print_gate_level_layout(print_stream1, layout, true, false);
         std::cout << print_stream1.str();
