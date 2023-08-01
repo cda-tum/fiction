@@ -571,7 +571,7 @@ void delete_column(obs_gate_lyt& lyt, int column_idx, int width, int height) noe
                 {
                     coordinate              fanin_column      = lyt.incoming_data_flow({x, y, z})[0];
                     std::vector<coordinate> fanin_next_column = lyt.incoming_data_flow({x + 1, y, z});
-                    fanins[x][y][z]                        = {};
+                    fanins[x][y][z]                           = {};
                     for (coordinate fanin : fanin_next_column)
                     {
                         if (fanin.x == x)

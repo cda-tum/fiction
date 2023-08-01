@@ -46,7 +46,7 @@ void check_mapping_equiv_all()
     check_mapping_equiv<Lyt>(blueprints::full_adder_network<technology_network>());
     check_mapping_equiv<Lyt>(blueprints::mux21_network<technology_network>());
     check_mapping_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>());
-    //check_mapping_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
+    // check_mapping_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
     check_mapping_equiv<Lyt>(blueprints::inverter_network<technology_network>());
     check_mapping_equiv<Lyt>(blueprints::clpl<technology_network>());
     check_mapping_equiv<Lyt>(blueprints::one_to_five_path_difference_network<technology_network>());
