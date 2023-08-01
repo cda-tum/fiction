@@ -44,7 +44,7 @@ void check_wires(Lyt& lyt, const std::vector<coordinate<Lyt>>& deleted_coords) n
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a cartesian layout");
 
     std::unordered_set<coordinate<Lyt>> moved_tiles{};
-
+    moved_tiles.reserve(deleted_coords.size());
     for (const auto& tile : deleted_coords)
     {
         const auto ground = lyt.below(tile);
@@ -111,8 +111,11 @@ get_fanin_and_fanouts(const Lyt& lyt, const coordinate<Lyt>& op) noexcept
     auto fanout2 = coordinate<Lyt>{};
 
     std::vector<coordinate<Lyt>> fanins;
+    fanins.reserve(2);
     std::vector<coordinate<Lyt>> fanouts;
+    fanouts.reserve(2);
     std::vector<coordinate<Lyt>> to_clear;
+    to_clear.reserve(lyt.num_wires() - 2);
 
     layout_coordinate_path<Lyt> route1{};
     layout_coordinate_path<Lyt> route2{};
@@ -120,7 +123,9 @@ get_fanin_and_fanouts(const Lyt& lyt, const coordinate<Lyt>& op) noexcept
     layout_coordinate_path<Lyt> route4{};
 
     std::unordered_set<coordinate<Lyt>> fanins_set{};
+    fanins_set.reserve(lyt.num_wires() + lyt.num_gates() - 2);
     std::unordered_set<coordinate<Lyt>> fanouts_set{};
+    fanouts_set.reserve(lyt.num_wires() + lyt.num_gates() - 2);
 
     // trace back fanins
     for (const auto& fin : lyt.incoming_data_flow(op))
@@ -304,6 +309,7 @@ template <typename Lyt>
     for (const auto& fanout : fanouts)
     {
         std::vector<mockturtle::signal<Lyt>> fins{};
+        fins.reserve(2);
         for (const auto& fout : lyt.incoming_data_flow(fanout))
         {
             if (fout != old_pos)
@@ -434,6 +440,7 @@ template <typename Lyt>
                         for (const auto& fanout : fanouts)
                         {
                             std::vector<mockturtle::signal<Lyt>> signals{};
+                            signals.reserve(lyt.fanin_size(lyt.get_node(fanout)));
                             for (const auto& fout : lyt.incoming_data_flow(fanout))
                             {
                                 signals.push_back(lyt.make_signal(lyt.get_node(fout)));
@@ -490,6 +497,7 @@ template <typename Lyt>
 
         // update children on old position
         std::vector<mockturtle::signal<Lyt>> signals{};
+        signals.reserve(lyt.fanin_size(lyt.get_node(old_pos)));
         for (const auto& fanin : lyt.incoming_data_flow(old_pos))
         {
             signals.push_back(lyt.make_signal(lyt.get_node(fanin)));
@@ -501,6 +509,7 @@ template <typename Lyt>
         for (const auto& fanout : fanouts)
         {
             std::vector<mockturtle::signal<Lyt>> fout_signals{};
+            fout_signals.reserve(lyt.fanin_size(lyt.get_node(fanout)));
             for (const auto& fout : lyt.incoming_data_flow(fanout))
             {
                 fout_signals.push_back(lyt.make_signal(lyt.get_node(fout)));
@@ -529,6 +538,7 @@ void delete_row(Lyt& lyt, const int row_idx, const int width, const int height) 
 
     // create a map that stores fanins of each coordinate
     std::unordered_map<int, std::unordered_map<int, std::unordered_map<int, std::vector<coordinate<Lyt>>>>> fanins{};
+    fanins.reserve((width + 1) * (height + 1 - row_idx) * (lyt.z() + 1));
 
     for (auto y = row_idx; y <= height; y++)
     {
@@ -538,7 +548,7 @@ void delete_row(Lyt& lyt, const int row_idx, const int width, const int height) 
         {
             fanins[y][x] = {};
 
-            for (auto z = 0; z < 2; z++)
+            for (auto z = 0; z <= lyt.z(); z++)
             {
                 if (y == row_idx && lyt.incoming_data_flow({x, y, z}).size() > 0)
                 {
@@ -569,7 +579,7 @@ void delete_row(Lyt& lyt, const int row_idx, const int width, const int height) 
         // iterate through row and move gates
         for (auto x = 0; x <= width; x++)
         {
-            for (auto z = 0; z < 2; z++)
+            for (auto z = 0; z <= lyt.z(); z++)
             {
                 const coordinate<Lyt> old_pos = {x, y, z};
                 if (!lyt.is_empty_tile(old_pos))
@@ -586,6 +596,7 @@ void delete_row(Lyt& lyt, const int row_idx, const int width, const int height) 
                         const coordinate<Lyt> new_pos = {x, y - 1, z};
 
                         std::vector<mockturtle::signal<Lyt>> fins{};
+                        fins.reserve(fanins[y - 1][x][z].size());
                         for (const auto& fanin : fanins[y - 1][x][z])
                         {
                             fins.push_back(lyt.make_signal(lyt.get_node({fanin.x, fanin.y - 1, fanin.z})));
@@ -616,6 +627,7 @@ void delete_column(Lyt& lyt, const int column_idx, const int width, const int he
     // create a map that stores fanins of each coordinate
     std::unordered_map<int, std::unordered_map<int, std::unordered_map<int, std::vector<coordinate<Lyt>>>>>
         fanins{};  // TODO this needs its own type; it's too convoluted
+    fanins.reserve((width + 1 - column_idx) * (height + 1) * (lyt.z() + 1));
 
     for (auto x = column_idx; x <= width; x++)
     {
@@ -623,7 +635,7 @@ void delete_column(Lyt& lyt, const int column_idx, const int width, const int he
         for (auto y = 0; y <= height; y++)
         {
             fanins[x][y] = {};
-            for (auto z = 0; z < 2; z++)
+            for (auto z = 0; z <= lyt.z(); z++)
             {
                 if (x == column_idx && lyt.incoming_data_flow({x, y, z}).size() > 0)
                 {
@@ -654,7 +666,7 @@ void delete_column(Lyt& lyt, const int column_idx, const int width, const int he
         // iterate through column and move gates
         for (auto y = 0; y <= height; y++)
         {
-            for (auto z = 0; z < 2; z++)
+            for (auto z = 0; z <= lyt.z(); z++)
             {
                 const coordinate<Lyt> old_pos = {x, y, z};
                 if (!lyt.is_empty_tile(old_pos))
@@ -671,6 +683,7 @@ void delete_column(Lyt& lyt, const int column_idx, const int width, const int he
                         const coordinate<Lyt> new_pos = {x - 1, y, z};
 
                         std::vector<mockturtle::signal<Lyt>> fins{};
+                        fins.reserve(fanins[x - 1][y][z].size());
                         for (const auto& fanin : fanins[x - 1][y][z])
                         {
                             fins.push_back(lyt.make_signal(lyt.get_node({fanin.x - 1, fanin.y, fanin.z})));
@@ -702,22 +715,14 @@ void delete_wires(Lyt& lyt, const int width, const int height) noexcept
         bool found_row = true;
         for (auto x = width; x >= 0; x--)
         {
-            // check if tile has vertically connected wire
-            if (lyt.is_wire_tile({x, y}) && lyt.fanin_size(lyt.get_node({x, y})) == 1 &&
-                lyt.fanout_size(lyt.get_node({x, y})) == 1 && lyt.has_northern_incoming_signal({x, y}) &&
-                lyt.has_southern_outgoing_signal({x, y}))
-            {
-                // do nothing
-            }
-            else if (lyt.is_empty_tile({x, y}))
-            {
-                // do nothing
-            }
             // if row has gates or bent/ horizontal wires, row cannot be deleted
-            else
+            if (!((lyt.is_wire_tile({x, y}) && lyt.fanin_size(lyt.get_node({x, y})) == 1 &&
+                   lyt.fanout_size(lyt.get_node({x, y})) == 1 && lyt.has_northern_incoming_signal({x, y}) &&
+                   lyt.has_southern_outgoing_signal({x, y})) ||
+                  lyt.is_empty_tile({x, y})))
             {
                 found_row = false;
-            }  // TODO rewrite to avoid "do nothing" branches
+            }
         }
         if (found_row)
         {
@@ -731,22 +736,14 @@ void delete_wires(Lyt& lyt, const int width, const int height) noexcept
         bool found_column = true;
         for (auto y = height; y >= 0; y--)
         {
-            // check if tile has vertically connected wire
-            if (lyt.is_wire_tile({x, y}) && lyt.fanin_size(lyt.get_node({x, y})) == 1 &&
-                lyt.fanout_size(lyt.get_node({x, y})) == 1 && lyt.has_western_incoming_signal({x, y}) &&
-                lyt.has_eastern_outgoing_signal({x, y}))
-            {
-                // do nothing
-            }
-            else if (lyt.is_empty_tile({x, y}))
-            {
-                // do nothing
-            }
-            // if row has gates or bent/ horizontal wires, row cannot be deleted
-            else
+            // if column has gates or bent/ horizontal wires, column cannot be deleted
+            if (!((lyt.is_wire_tile({x, y}) && lyt.fanin_size(lyt.get_node({x, y})) == 1 &&
+                   lyt.fanout_size(lyt.get_node({x, y})) == 1 && lyt.has_western_incoming_signal({x, y}) &&
+                   lyt.has_eastern_outgoing_signal({x, y})) ||
+                  lyt.is_empty_tile({x, y})))
             {
                 found_column = false;
-            }  // TODO rewrite to avoid "do nothing" branches
+            }
         }
         if (found_column)
         {
@@ -769,10 +766,12 @@ void optimize_output(Lyt& lyt) noexcept
 
     // get all outputs
     std::vector<coordinate<Lyt>> pos{};
+    pos.reserve(lyt.num_pos());
     lyt.foreach_po([&pos, &lyt](const auto& po) { pos.push_back(lyt.get_tile(lyt.get_node(po))); });
 
     // get path from output to preceding gate
     std::vector<layout_coordinate_path<Lyt>> paths{};
+    paths.reserve(pos.size());
 
     for (const auto& po : pos)
     {
@@ -956,8 +955,7 @@ post_layout_optimization(const Lyt& lyt) noexcept  // TODO do operations in-plac
     auto layout = obstruction_layout<Lyt>(lyt);
 
     std::vector<coordinate<Lyt>> gates{};
-    // TODO for every vector, set, map, etc., use reserve() after construction to avoid reallocation
-    // TODO you need to know the upper bound of the number of elements in the container to make use of reserve()
+    gates.reserve(layout.num_wires() + layout.num_gates());
 
     for (auto x = 0; x <= static_cast<int>(width); x++)
     {
@@ -978,16 +976,9 @@ post_layout_optimization(const Lyt& lyt) noexcept  // TODO do operations in-plac
 
     auto moved = 1;
 
-    for (auto h = 0; h < 20; h++)  // TODO what is 20? avoid magic numbers!
+    while (moved != 0)
     {
-        if (moved != 0)
-        {
-            moved = 0;
-        }
-        else  // if no gates were moved, stop optimization
-        {
-            break;
-        }
+        moved = 0;
 
         for (auto& gate : gates)
         {
@@ -1013,7 +1004,7 @@ post_layout_optimization(const Lyt& lyt) noexcept  // TODO do operations in-plac
     const auto optimized_layout_width  = bounding_box.get_x_size();
     const auto optimized_layout_height = bounding_box.get_y_size();
 
-    layout.resize({optimized_layout_width, optimized_layout_height, 1});  // TODO why 1? what if the input layout is 2D?
+    layout.resize({optimized_layout_width, optimized_layout_height, layout.z()});
 
     return layout;
 }
