@@ -934,12 +934,9 @@ void fix_dead_nodes(Lyt& lyt, std::vector<coordinate<Lyt>>& gt) noexcept
  * Main optimization function.
  *
  * @param lyt Gate level layout.
- *
- * @return optimized layout.
  */
 template <typename Lyt>
-[[nodiscard]] obstruction_layout<Lyt>
-post_layout_optimization(const Lyt& lyt) noexcept  // TODO do operations in-place, and don't return a new layout
+void post_layout_optimization(const Lyt& lyt) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -1006,7 +1003,7 @@ post_layout_optimization(const Lyt& lyt) noexcept  // TODO do operations in-plac
 
     layout.resize({optimized_layout_width, optimized_layout_height, layout.z()});
 
-    return layout;
+    // return layout;
 }
 
 }  // namespace fiction

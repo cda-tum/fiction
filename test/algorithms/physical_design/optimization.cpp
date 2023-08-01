@@ -28,12 +28,10 @@ using namespace fiction;
 template <typename Lyt, typename Ntk>
 void check_mapping_equiv(const Ntk& ntk)
 {
-    const auto layout     = orthogonal<Lyt>(ntk, {});
-    const auto opt_layout = post_layout_optimization<Lyt>(layout);
+    auto layout = orthogonal<Lyt>(ntk, {});
+    post_layout_optimization<Lyt>(layout);
 
     check_eq(ntk, layout);
-    check_eq(ntk, opt_layout);
-    check_eq(layout, opt_layout);
 }
 
 template <typename Lyt>
