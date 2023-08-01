@@ -88,6 +88,18 @@ void check_wires(Lyt& lyt, const std::vector<coordinate<Lyt>>& deleted_coords) n
     }
 }
 
+template <typename Lyt>
+struct FaninFanoutData
+{
+    std::vector<coordinate<Lyt>> fanins;
+    std::vector<coordinate<Lyt>> fanouts;
+    std::vector<coordinate<Lyt>> to_clear;
+    layout_coordinate_path<Lyt>  route_fanin_1_to_gate;
+    layout_coordinate_path<Lyt>  route_fanin_2_to_gate;
+    layout_coordinate_path<Lyt>  route_gate_to_fanout_1;
+    layout_coordinate_path<Lyt>  route_gate_to_fanout_2;
+};
+
 /**
  * Utility function to trace back fanins and fanouts of a gate.
  *
@@ -97,30 +109,17 @@ void check_wires(Lyt& lyt, const std::vector<coordinate<Lyt>>& deleted_coords) n
  * @return fanin and fanout gates, wires to be deleted and old routing paths.
  */
 template <typename Lyt>
-[[nodiscard]] std::tuple<std::vector<coordinate<Lyt>>, std::vector<coordinate<Lyt>>, std::vector<coordinate<Lyt>>,
-                         layout_coordinate_path<Lyt>, layout_coordinate_path<Lyt>, layout_coordinate_path<Lyt>,
-                         layout_coordinate_path<Lyt>>  // TODO this must be its own type
-get_fanin_and_fanouts(const Lyt& lyt, const coordinate<Lyt>& op) noexcept
+[[nodiscard]] FaninFanoutData<Lyt> get_fanin_and_fanouts(const Lyt& lyt, const coordinate<Lyt>& op) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a cartesian layout");
+
+    FaninFanoutData<Lyt> faninFanoutData;
 
     auto fanin1  = coordinate<Lyt>{};
     auto fanin2  = coordinate<Lyt>{};
     auto fanout1 = coordinate<Lyt>{};
     auto fanout2 = coordinate<Lyt>{};
-
-    std::vector<coordinate<Lyt>> fanins;
-    fanins.reserve(2);
-    std::vector<coordinate<Lyt>> fanouts;
-    fanouts.reserve(2);
-    std::vector<coordinate<Lyt>> to_clear;
-    to_clear.reserve(lyt.num_wires() - 2);
-
-    layout_coordinate_path<Lyt> route1{};
-    layout_coordinate_path<Lyt> route2{};
-    layout_coordinate_path<Lyt> route3{};
-    layout_coordinate_path<Lyt> route4{};
 
     std::unordered_set<coordinate<Lyt>> fanins_set{};
     fanins_set.reserve(lyt.num_wires() + lyt.num_gates() - 2);
@@ -137,30 +136,30 @@ get_fanin_and_fanouts(const Lyt& lyt, const coordinate<Lyt>& op) noexcept
             // switch between first and second fanin
             if (fanins_set.empty())
             {
-                route1.insert(route1.cbegin(), op);
-                route1.insert(route1.cbegin(), fanin);
+                faninFanoutData.route_fanin_1_to_gate.insert(faninFanoutData.route_fanin_1_to_gate.cbegin(), op);
+                faninFanoutData.route_fanin_1_to_gate.insert(faninFanoutData.route_fanin_1_to_gate.cbegin(), fanin);
             }
             else
             {
-                route2.insert(route2.cbegin(), op);
-                route2.insert(route2.cbegin(), fanin);
+                faninFanoutData.route_fanin_2_to_gate.insert(faninFanoutData.route_fanin_2_to_gate.cbegin(), op);
+                faninFanoutData.route_fanin_2_to_gate.insert(faninFanoutData.route_fanin_2_to_gate.cbegin(), fanin);
             }
 
             // go back till gate or pi is found
             while (lyt.is_wire_tile(fanin) && lyt.fanout_size(lyt.get_node(fanin)) != 2 &&
                    lyt.fanin_size(lyt.get_node(fanin)) != 0)
             {
-                to_clear.push_back(fanin);
+                faninFanoutData.to_clear.push_back(fanin);
                 fanin = lyt.incoming_data_flow(fanin)[0];
 
                 // switch between first and second fanin
                 if (fanins_set.empty())
                 {
-                    route1.insert(route1.begin(), fanin);
+                    faninFanoutData.route_fanin_1_to_gate.insert(faninFanoutData.route_fanin_1_to_gate.begin(), fanin);
                 }
                 else
                 {
-                    route2.insert(route2.begin(), fanin);
+                    faninFanoutData.route_fanin_2_to_gate.insert(faninFanoutData.route_fanin_2_to_gate.begin(), fanin);
                 }
             }
 
@@ -187,30 +186,30 @@ get_fanin_and_fanouts(const Lyt& lyt, const coordinate<Lyt>& op) noexcept
             // switch between first and second fanout
             if (fanouts_set.empty())
             {
-                route3.push_back(op);
-                route3.push_back(fanout);
+                faninFanoutData.route_gate_to_fanout_1.push_back(op);
+                faninFanoutData.route_gate_to_fanout_1.push_back(fanout);
             }
             else
             {
-                route4.push_back(op);
-                route4.push_back(fanout);
+                faninFanoutData.route_gate_to_fanout_2.push_back(op);
+                faninFanoutData.route_gate_to_fanout_2.push_back(fanout);
             }
 
             // continue until gate or po is found
             while (lyt.is_wire_tile(fanout) && lyt.fanout_size(lyt.get_node(fanout)) != 0 &&
                    lyt.fanout_size(lyt.get_node(fanout)) != 2)
             {
-                to_clear.push_back(fanout);
+                faninFanoutData.to_clear.push_back(fanout);
                 fanout = lyt.outgoing_data_flow(fanout)[0];
 
                 // switch between first and second fanout
                 if (fanouts_set.empty())
                 {
-                    route3.push_back(fanout);
+                    faninFanoutData.route_gate_to_fanout_1.push_back(fanout);
                 }
                 else
                 {
-                    route4.push_back(fanout);
+                    faninFanoutData.route_gate_to_fanout_2.push_back(fanout);
                 }
             }
 
@@ -231,22 +230,22 @@ get_fanin_and_fanouts(const Lyt& lyt, const coordinate<Lyt>& op) noexcept
     // add fanins and fanouts if existing
     if (!fanin1.is_dead())
     {
-        fanins.push_back(fanin1);
+        faninFanoutData.fanins.push_back(fanin1);
     }
     if (!fanin2.is_dead())
     {
-        fanins.push_back(fanin2);
+        faninFanoutData.fanins.push_back(fanin2);
     }
     if (!fanout1.is_dead())
     {
-        fanouts.push_back(fanout1);
+        faninFanoutData.fanouts.push_back(fanout1);
     }
     if (!fanout2.is_dead())
     {
-        fanouts.push_back(fanout2);
+        faninFanoutData.fanouts.push_back(fanout2);
     }
 
-    return std::make_tuple(fanins, fanouts, to_clear, route1, route2, route3, route4);
+    return faninFanoutData;
 }
 
 /**
@@ -522,6 +521,27 @@ template <typename Lyt>
     return std::make_tuple(optimized, new_pos);
 }
 
+template <typename Lyt>
+struct DepthMap
+{
+    using CoordinateVector = std::vector<coordinate<Lyt>>;
+    std::unordered_map<int, CoordinateVector> depthMap;
+};
+
+template <typename Lyt>
+struct RowMap
+{
+    using InnerMap = std::unordered_map<int, DepthMap<Lyt>>;
+    InnerMap rowMap;
+};
+
+template <typename Lyt>
+struct ColumnMap
+{
+    using RowMapType = RowMap<Lyt>;
+    std::unordered_map<int, RowMapType> columnMap;
+};
+
 /**
  * Utility function that deletes a row in the layout by moving all southern gates up one positions.
  *
@@ -537,17 +557,12 @@ void delete_row(Lyt& lyt, const int row_idx, const int width, const int height) 
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a cartesian layout");
 
     // create a map that stores fanins of each coordinate
-    std::unordered_map<int, std::unordered_map<int, std::unordered_map<int, std::vector<coordinate<Lyt>>>>> fanins{};
-    fanins.reserve((width + 1) * (height + 1 - row_idx) * (lyt.z() + 1));
+    ColumnMap<Lyt> fanins;
 
     for (auto y = row_idx; y <= height; y++)
     {
-        fanins[y] = {};
-
         for (auto x = 0; x <= width; x++)
         {
-            fanins[y][x] = {};
-
             for (auto z = 0; z <= lyt.z(); z++)
             {
                 if (y == row_idx && lyt.incoming_data_flow({x, y, z}).size() > 0)
@@ -555,23 +570,22 @@ void delete_row(Lyt& lyt, const int row_idx, const int width, const int height) 
                     const coordinate<Lyt>              fanin_row      = lyt.incoming_data_flow({x, y, z})[0];
                     const std::vector<coordinate<Lyt>> fanin_next_row = lyt.incoming_data_flow({x, y + 1, z});
 
-                    fanins[y][x][z] = {};
-
                     for (const auto& fanin : fanin_next_row)
                     {
                         if (fanin.y == y)
                         {
-                            fanins[y][x][z].push_back(coordinate<Lyt>{fanin_row.x, fanin_row.y + 1, fanin_row.z});
+                            fanins.columnMap[x].rowMap[y].depthMap[z].push_back(
+                                coordinate<Lyt>{fanin_row.x, fanin_row.y + 1, fanin_row.z});
                         }
                         else
                         {
-                            fanins[y][x][z].push_back(fanin);
+                            fanins.columnMap[x].rowMap[y].depthMap[z].push_back(fanin);
                         }
                     }
                 }
                 else
                 {
-                    fanins[y][x][z] = lyt.incoming_data_flow({x, y + 1, z});
+                    fanins.columnMap[x].rowMap[y].depthMap[z] = lyt.incoming_data_flow({x, y + 1, z});
                 }
             }
         }
@@ -596,8 +610,8 @@ void delete_row(Lyt& lyt, const int row_idx, const int width, const int height) 
                         const coordinate<Lyt> new_pos = {x, y - 1, z};
 
                         std::vector<mockturtle::signal<Lyt>> fins{};
-                        fins.reserve(fanins[y - 1][x][z].size());
-                        for (const auto& fanin : fanins[y - 1][x][z])
+                        fins.reserve(fanins.columnMap[x].rowMap[y - 1].depthMap[z].size());
+                        for (const auto& fanin : fanins.columnMap[x].rowMap[y - 1].depthMap[z])
                         {
                             fins.push_back(lyt.make_signal(lyt.get_node({fanin.x, fanin.y - 1, fanin.z})));
                         }
@@ -625,40 +639,35 @@ void delete_column(Lyt& lyt, const int column_idx, const int width, const int he
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a cartesian layout");
 
     // create a map that stores fanins of each coordinate
-    std::unordered_map<int, std::unordered_map<int, std::unordered_map<int, std::vector<coordinate<Lyt>>>>>
-        fanins{};  // TODO this needs its own type; it's too convoluted
-    fanins.reserve((width + 1 - column_idx) * (height + 1) * (lyt.z() + 1));
+    ColumnMap<Lyt> fanins;
 
     for (auto x = column_idx; x <= width; x++)
     {
-        fanins[x] = {};
         for (auto y = 0; y <= height; y++)
         {
-            fanins[x][y] = {};
             for (auto z = 0; z <= lyt.z(); z++)
             {
                 if (x == column_idx && lyt.incoming_data_flow({x, y, z}).size() > 0)
                 {
                     const auto fanin_column      = lyt.incoming_data_flow({x, y, z})[0];
                     const auto fanin_next_column = lyt.incoming_data_flow({x + 1, y, z});
-                    fanins[x][y][z]              = {};
 
                     for (const auto& fanin : fanin_next_column)
                     {
                         if (fanin.x == x)
                         {
-                            fanins[x][y][z].push_back(
+                            fanins.columnMap[x].rowMap[y].depthMap[z].push_back(
                                 coordinate<Lyt>{fanin_column.x + 1, fanin_column.y, fanin_column.z});
                         }
                         else
                         {
-                            fanins[x][y][z].push_back(fanin);
+                            fanins.columnMap[x].rowMap[y].depthMap[z].push_back(fanin);
                         }
                     }
                 }
                 else
                 {
-                    fanins[x][y][z] = lyt.incoming_data_flow({x + 1, y, z});
+                    fanins.columnMap[x].rowMap[y].depthMap[z] = lyt.incoming_data_flow({x + 1, y, z});
                 }
             }
         }
@@ -683,8 +692,8 @@ void delete_column(Lyt& lyt, const int column_idx, const int width, const int he
                         const coordinate<Lyt> new_pos = {x - 1, y, z};
 
                         std::vector<mockturtle::signal<Lyt>> fins{};
-                        fins.reserve(fanins[x - 1][y][z].size());
-                        for (const auto& fanin : fanins[x - 1][y][z])
+                        fins.reserve(fanins.columnMap[x - 1].rowMap[y].depthMap[z].size());
+                        for (const auto& fanin : fanins.columnMap[x - 1].rowMap[y].depthMap[z])
                         {
                             fins.push_back(lyt.make_signal(lyt.get_node({fanin.x - 1, fanin.y, fanin.z})));
                         }
