@@ -111,7 +111,6 @@ void write_operational_domain(const operational_domain& opdom, std::ostream& os,
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
-template <typename Lyt>
 void write_operational_domain(const operational_domain& opdom, const std::string_view& filename,
                               const write_operational_domain_params& params = {})
 {
