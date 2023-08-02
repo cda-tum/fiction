@@ -697,3 +697,164 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
         check_charge_configuration(simulation_results);
     }
 }
+
+TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01", "[ExGS]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+    TestType lyt{{20, 10}};
+
+    lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 3, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({14, 2, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 5, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({10, 6, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
+
+    sidb_simulation_parameters params{2, -0.28};
+
+    SECTION("Standard Physical Parameters")
+    {
+        const quicksim_params quicksim_params{params};
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        REQUIRE(!simulation_results.charge_distributions.empty());
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
+
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
+    }
+
+    SECTION("Increased mu")
+    {
+        params.mu = -0.1;
+
+        const quicksim_params quicksim_params{params};
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        REQUIRE(!simulation_results.charge_distributions.empty());
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
+
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0.061037632, physical_constants::POP_STABILITY_ERR));
+    }
+
+    SECTION("Decreased mu")
+    {
+        params.mu = -0.7;
+
+        const quicksim_params quicksim_params{params};
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        REQUIRE(!simulation_results.charge_distributions.empty());
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
+
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(2.069954113, physical_constants::POP_STABILITY_ERR));
+    }
+
+    SECTION("Decreased lambda_tf")
+    {
+        params.lambda_tf = 1;
+
+        const quicksim_params quicksim_params{params};
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        REQUIRE(!simulation_results.charge_distributions.empty());
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
+
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0.5432404075, physical_constants::POP_STABILITY_ERR));
+    }
+
+    SECTION("Increased lambda_tf")
+    {
+        params.lambda_tf = 10;
+
+        const quicksim_params quicksim_params{params};
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        REQUIRE(!simulation_results.charge_distributions.empty());
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
+
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0.2930574885, physical_constants::POP_STABILITY_ERR));
+    }
+
+    SECTION("Increased epsilon_r")
+    {
+        params.epsilon_r = 10;
+
+        const quicksim_params quicksim_params{params};
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        REQUIRE(!simulation_results.charge_distributions.empty());
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
+
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0.505173434, physical_constants::POP_STABILITY_ERR));
+    }
+}

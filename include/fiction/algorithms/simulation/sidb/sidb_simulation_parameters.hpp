@@ -40,10 +40,8 @@ struct sidb_simulation_parameters
             lat_b{b},
             lat_c{c},
             epsilon_r{relative_permittivity},
-            k{physical_constants::K / epsilon_r},
             lambda_tf{screening_distance},
             mu{mu_minus},
-            mu_p{mu - 0.59},
             base{base_number}
 
     {
@@ -67,11 +65,6 @@ struct sidb_simulation_parameters
      */
     double epsilon_r;
     /**
-     * k is the Coulomb constant and is inversely proportional to the electric permittivity (unit: \f$ N \cdot m^{2}
-     * \cdot C^{-2} \f$).
-     */
-    double k;
-    /**
      * lambda_tf is the Thomas-Fermi screening distance (unit: nm).
      */
     double lambda_tf;
@@ -80,14 +73,25 @@ struct sidb_simulation_parameters
      */
     double mu;
     /**
-     * µ+ is the energy transition level (+/0) (unit: eV).
-     */
-    double mu_p;
-    /**
      * base can be either 2 or 3 and describes the assumed number of charge states of one SiDB.
      * It often makes sense to assume only negatively and neutrally charged SiDBs.
      */
     uint8_t base;
+    /**
+     * k is the Coulomb constant K_E divided by epsilon_r (unit: \f$ N \cdot m^{2}
+     * \cdot C^{-2} \f$).
+     */
+    [[nodiscard]] double k() const noexcept
+    {
+        return physical_constants::K_E / epsilon_r;
+    }
+    /**
+     * µ+ is the energy transition level (+/0) (unit: eV).
+     */
+    [[nodiscard]] double mu_p() const noexcept
+    {
+        return mu - 0.59;
+    };
 };
 
 }  // namespace fiction
