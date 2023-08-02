@@ -24,7 +24,7 @@ struct sidb_simulation_parameters
      *
      * @param base_number simulation can be conducted with 2 and 3 charge states. 2 = (Negative, Neutral), 3 =
      * (Negative, Neutral, Positive).
-     * @param mu_minus it is the energy transition level (0/-) in eV.
+     * @param mu (µ-) is the energy transition level (0/-) in eV.
      * @param relative_permittivity it describes the electric field reduction due to polarization.
      * @param screening_distance also known as "Thomas-Fermi screening" and it describes the electric field screening
      * due to free charges in nm.
@@ -32,7 +32,7 @@ struct sidb_simulation_parameters
      * @param b lattice constant in Å.
      * @param c lattice constant in Å.
      */
-    constexpr explicit sidb_simulation_parameters(const uint8_t base_number = 3, const double mu_minus = -0.32,
+    constexpr explicit sidb_simulation_parameters(const uint8_t base_number = 3, const double mu = -0.32,
                                                   const double relative_permittivity = 5.6,
                                                   const double screening_distance = 5.0, const double a = 3.84,
                                                   const double b = 7.68, const double c = 2.25) :
@@ -41,7 +41,7 @@ struct sidb_simulation_parameters
             lat_c{c},
             epsilon_r{relative_permittivity},
             lambda_tf{screening_distance},
-            mu_minus{mu_minus},
+            mu_minus{mu},
             base{base_number}
 
     {
