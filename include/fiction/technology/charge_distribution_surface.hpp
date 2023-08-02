@@ -450,7 +450,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param c The cell to which a defect is added.
      * @param defect Defect which is added to the layout.
      */
-    void add_defect_to_charge_distribution_surface(const typename Lyt::cell& c, const sidb_defect& defect) noexcept
+    void add_defect(const typename Lyt::cell& c, const sidb_defect& defect) noexcept
     {
         if (std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c) == strg->sidb_order.end())
         {
@@ -460,40 +460,38 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 this->foreach_cell(
                     [this, &c, &defect](const auto& c1)
                     {
+                        const auto dist = sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params);
+                        const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(dist, defect);
+
                         if (strg->defect_local_pot.empty())
                         {
-                            strg->defect_local_pot.insert(std::make_pair(
-                                c1, chargeless_potential_generated_by_defect_at_given_distance(
-                                        sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params), defect) *
-                                        defect.charge));
+                            strg->defect_local_pot.insert(std::make_pair(c1, pot * defect.charge));
                         }
                         else
                         {
-                            strg->defect_local_pot[c1] +=
-                                chargeless_potential_generated_by_defect_at_given_distance(
-                                    sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params), defect) *
-                                defect.charge;
+                            strg->defect_local_pot[c1] += pot * defect.charge;
                         }
                     });
+
                 this->update_after_charge_change(dependent_cell_mode::FIXED);
             }
-
             else
             {
                 this->foreach_cell(
                     [this, &c, &defect](const auto& c1)
                     {
+                        const auto dist = sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params);
+
                         strg->defect_local_pot[c1] =
                             strg->defect_local_pot[c1] +
-                            chargeless_potential_generated_by_defect_at_given_distance(
-                                sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params), defect) *
-                                defect.charge -
-                            chargeless_potential_generated_by_defect_at_given_distance(
-                                sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params), strg->defects[c]) *
+                            chargeless_potential_generated_by_defect_at_given_distance(dist, defect) * defect.charge -
+                            chargeless_potential_generated_by_defect_at_given_distance(dist, strg->defects[c]) *
                                 strg->defects[c].charge;
                     });
+
                 strg->defects.erase(c);
                 strg->defects.insert({c, defect});
+
                 this->update_after_charge_change(dependent_cell_mode::FIXED);
             }
         }
@@ -541,7 +539,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
     /**
-     * This functio returns the charge state of a given cell.
+     * This function returns the charge state of a given cell.
      *
      * @param c The cell.
      * @return The charge state of the given cell.
@@ -1530,6 +1528,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         strg->three_state_cells                    = {};
         strg->sidb_order_without_three_state_cells = {};
         bool required                              = false;
+
         this->foreach_cell(
             [&required, this](const auto& c)
             {
@@ -1542,6 +1541,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     }
                 }
             });
+
         for (const auto& cell : strg->sidb_order)
         {
             if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), cell) ==
@@ -1550,10 +1550,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 strg->sidb_order_without_three_state_cells.push_back(cell);
             }
         }
+
         if (required)
         {
             this->assign_base_number_to_three();
         }
+
         return required;
     }
     /**
@@ -1580,6 +1582,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             return static_cast<int64_t>(std::distance(strg->three_state_cells.cbegin(), it));
         }
+
         return -1;
     }
     /**
@@ -1597,6 +1600,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             return static_cast<int64_t>(std::distance(strg->sidb_order_without_three_state_cells.cbegin(), it));
         }
+
         return -1;
     }
     /**
@@ -1661,6 +1665,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             return 0.0;
         }
+
         return (strg->phys_params.k / (distance * 1E-9) * std::exp(-distance / strg->phys_params.lambda_tf) *
                 physical_constants::ELEMENTARY_CHARGE);
     }
