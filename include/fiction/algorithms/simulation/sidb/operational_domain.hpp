@@ -105,7 +105,7 @@ struct operational_domain_params
     /**
      * The minimum value of the x dimension sweep.
      */
-    double x_min{0.0};
+    double x_min{1.0};
     /**
      * The maximum value of the x dimension sweep.
      */
@@ -121,7 +121,7 @@ struct operational_domain_params
     /**
      * The minimum value of the y dimension sweep.
      */
-    double y_min{0.0};
+    double y_min{1.0};
     /**
      * The maximum value of the y dimension sweep.
      */
