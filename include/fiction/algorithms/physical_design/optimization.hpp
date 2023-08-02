@@ -32,7 +32,8 @@ namespace detail
 {
 
 /**
- * Utility function to move wires that cross over empty tiles down one layer.
+ * Utility function to move wires that cross over empty tiles down one layer. This can happen if the wiring of a gate is
+ * deleted.
  *
  * @param lyt Gate level layout.
  * @param deleted_coords Tiles that got deleted.
@@ -101,7 +102,9 @@ struct FaninFanoutData
 };
 
 /**
- * Utility function to trace back fanins and fanouts of a gate.
+ * Utility function to trace back fanins and fanouts of a gate. Based on the gate to be moved, this function returns the
+ * location of the fanins and fanouts, as well as the wiring in between them. Additionally, all wire tiles between
+ * fanins and the gate, as well as between the gate and fanouts are collected for deletion.
  *
  * @param lyt Gate level layout.
  * @param op coordinate<Lyt>of the gate to be moved.
@@ -250,12 +253,20 @@ template <typename Lyt>
 
 /**
  * Utility function that moves gates to new coordinates and checks if routing is possible.
+ * This includes:
+ *
+ * - removing the old wiring between fanins, the gate and fanouts
+ * - updating the incoming signals
+ * - determining coordinates that would improve the layout
+ * - testing all those coordinates by moving the gate to each one and checking if a new wiring can be found
+ * - if a new coordinate is found and wiring is possible, it is applied and incoming signals are updated
+ * - if no better coordinate is found, the old wiring is restored
  *
  * @param old_pos Old position of the gate to be moved.
  * @param width Width of the gate level layout.
  * @param height Height of the gate level layout.
  *
- * @return flag that indicates if gate was moved successfully, new coordinate.
+ * @return flag that indicates if gate was moved successfully and the new coordinate of the moved gate.
  */
 template <typename Lyt>
 [[nodiscard]] std::tuple<bool, coordinate<Lyt>> move_gate(const coordinate<Lyt>& old_pos, Lyt& lyt, const int width,
@@ -933,7 +944,19 @@ void fix_dead_nodes(Lyt& lyt, std::vector<coordinate<Lyt>>& gt) noexcept
 }  // namespace detail
 
 /**
- * Main optimization function.
+ * Optimization algorithm that can be used to reduce the layout area of sub-optimal physical design created by
+ * heuristics or machine learning. This optimization utilizes the distinct characterisics of the 2DDWave clocking scheme,
+ * which only allow information flow from top to bottom and left to right, therefore only aforementioned clocking scheme
+ * if supported.
+ *
+ * To reduce the layout are, first, gates are moved up and to left as far as possible, include rerouting. This creates
+ * more compact layouts by freeing up space on the right and bottom, as all gates were moved to the top left corner.
+ *
+ * After moving all gates, this algorithm also checks if excess wiring exists on the layout, i.e., rows that only
+ * contain vertical wires or columns that only contain horizontal wires and removes them.
+ *
+ * As outputs have to lay on the border of a layout for better accessibility, they are also moved to new borders
+ * determined on the location of all other gates.
  *
  * @param lyt Gate level layout.
  */
