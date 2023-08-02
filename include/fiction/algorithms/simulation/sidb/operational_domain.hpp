@@ -409,6 +409,14 @@ class operational_domain_impl
             // perform an exhaustive ground state simulation
             const auto sim_result = exhaustive_ground_state_simulation(*bii, sim_params);
 
+            // if no physically-valid charge distributions were found, the layout is non-operational
+            if (sim_result.charge_distributions.empty())
+            {
+                ++stats.num_non_operational_parameter_combinations;
+
+                return operational_domain::operational_status::NON_OPERATIONAL;
+            }
+
             // TODO is this necessary or is it guaranteed that the ground state is always the first element?
             // find the ground state, which is the charge distribution with the lowest energy
             const auto ground_state = std::min_element(
