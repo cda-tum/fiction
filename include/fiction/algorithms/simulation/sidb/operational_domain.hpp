@@ -329,8 +329,8 @@ class operational_domain_impl
      * @param val Value to set the dimension `dim` to.
      * @param dim Sweep dimension to set the value `val` to.
      */
-    inline void set_dimension_value(sidb_simulation_parameters& sim_parameters, double val,
-                                    sweep_dimension dim) const noexcept
+    inline void set_dimension_value(sidb_simulation_parameters& sim_parameters, const double val,
+                                    const sweep_dimension dim) const noexcept
     {
         operational_domain::sweep_parameter sweep_parameter =
             dim == sweep_dimension::X ? params.x_dimension : params.y_dimension;
