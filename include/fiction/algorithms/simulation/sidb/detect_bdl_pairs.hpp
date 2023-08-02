@@ -184,7 +184,7 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
         const auto already_paired_up = [&paired_dots](const auto& dot) noexcept -> bool
         { return paired_dots.find(dot) != paired_dots.cend(); };
 
-        for (auto& potential_bdl_pair : pairwise_distances)
+        for (const auto& potential_bdl_pair : pairwise_distances)
         {
             // if the distance is smaller than the lower bound threshold, we can continue to the next pairing; this
             // prevents the pairing of dots that are too close to each other, e.g., in an atomic wire
@@ -262,6 +262,6 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
     return pair_up_dots(dots_of_given_type);
 }
 
-};      // namespace fiction
+};  // namespace fiction
 
 #endif  // FICTION_DETECT_BDL_PAIRS_HPP
