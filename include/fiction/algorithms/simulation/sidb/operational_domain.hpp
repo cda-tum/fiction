@@ -478,13 +478,13 @@ class operational_domain_impl
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected truth table of the layout.
  * @param params Operational domain computation parameters.
- * @param pst Operational domain computation statistics.
+ * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
  */
 template <typename Lyt, typename TT>
 operational_domain operational_domain_grid_search(Lyt& lyt, const TT& spec,
                                                   const operational_domain_params& params = {},
-                                                  operational_domain_stats*        pst    = nullptr)
+                                                  operational_domain_stats*        stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -496,9 +496,9 @@ operational_domain operational_domain_grid_search(Lyt& lyt, const TT& spec,
 
     const auto result = p.grid_search();
 
-    if (pst)
+    if (stats)
     {
-        *pst = st;
+        *stats = st;
     }
 
     return result;
@@ -521,13 +521,13 @@ operational_domain operational_domain_grid_search(Lyt& lyt, const TT& spec,
  * @param spec Expected truth table of the layout.
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
- * @param pst Operational domain computation statistics.
+ * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
 operational_domain operational_domain_random_sampling(Lyt& lyt, const TT& spec, const std::size_t samples,
                                                       const operational_domain_params& params = {},
-                                                      operational_domain_stats*        pst    = nullptr)
+                                                      operational_domain_stats*        stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -539,9 +539,9 @@ operational_domain operational_domain_random_sampling(Lyt& lyt, const TT& spec, 
 
     const auto result = p.random_sampling(samples);
 
-    if (pst)
+    if (stats)
     {
-        *pst = st;
+        *stats = st;
     }
 
     return result;
