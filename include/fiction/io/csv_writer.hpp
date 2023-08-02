@@ -84,7 +84,7 @@ class csv_writer
     /**
      * The delimiter to use.
      */
-    static constexpr const char* DELIMITER = ", ";
+    static constexpr char DELIMITER = ',';
 };
 
 }  // namespace fiction
