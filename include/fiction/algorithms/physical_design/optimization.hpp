@@ -803,6 +803,10 @@ void optimize_output(Lyt& lyt) noexcept
         }
 
         paths.push_back(route);
+        if (route.size() != 2)
+        {
+            lyt.move_node(lyt.get_node(po), po, {});
+        }
     }
 
     // calculate bounding box around gates without outputs
@@ -816,6 +820,7 @@ void optimize_output(Lyt& lyt) noexcept
             .y;
 
     std::vector<std::tuple<coordinate<Lyt>, coordinate<Lyt>, coordinate<Lyt>>> updates{};
+    std::vector<coordinate<Lyt>>                                               cleared{};
 
     // move output along its wiring until it lies on the bounding box
     for (const auto& route : paths)
@@ -833,6 +838,7 @@ void optimize_output(Lyt& lyt) noexcept
             else if (!lyt.is_po_tile(tile) && lyt.is_wire_tile(tile) && lyt.fanout_size(lyt.get_node(tile)) != 2)
             {
                 lyt.clear_tile(tile);
+                cleared.emplace_back(tile);
                 if (new_pos.is_dead())
                 {
                     new_pos = tile;
@@ -854,15 +860,16 @@ void optimize_output(Lyt& lyt) noexcept
             updates.emplace_back(route.back(), new_pos, route[0]);
         }
     }
+    detail::check_wires(lyt, cleared);
     for (const auto& [tile, new_pos, dangling] : updates)
     {
-        if (lyt.is_empty_tile(new_pos))
+        if (lyt.is_empty_tile(new_pos) || (tile == new_pos))
         {
             lyt.move_node(lyt.get_node(tile), new_pos, {lyt.make_signal(lyt.get_node(dangling))});
         }
         else if (new_pos.x == min_x)
         {
-            lyt.create_buf(lyt.get_node(dangling), {new_pos.x, new_pos.y, 1});
+            lyt.create_buf(lyt.make_signal(lyt.get_node(dangling)), {new_pos.x, new_pos.y, 1});
             if (lyt.is_empty_tile({new_pos.x, new_pos.y + 1, 0}))
             {
                 lyt.move_node(lyt.get_node(tile), {new_pos.x, new_pos.y + 1, 0},
