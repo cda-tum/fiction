@@ -56,6 +56,8 @@ std::string sweep_parameter_to_string(const operational_domain::sweep_parameter&
             return "mu_minus";
         }
     }
+
+    return "";
 }
 
 }  // namespace detail
