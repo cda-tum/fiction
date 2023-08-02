@@ -262,6 +262,6 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
     return pair_up_dots(dots_of_given_type);
 }
 
-};  // namespace fiction
+};      // namespace fiction
 
 #endif  // FICTION_DETECT_BDL_PAIRS_HPP
