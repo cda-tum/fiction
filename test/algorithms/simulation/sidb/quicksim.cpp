@@ -21,7 +21,7 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
 
     const quicksim_params quicksim_params{sidb_simulation_parameters{2, -0.30}};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.30);
+    REQUIRE(quicksim_params.phys_params.mu_minus == -0.30);
 
     const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
@@ -44,7 +44,7 @@ TEMPLATE_TEST_CASE("Single SiDB QuickSim simulation", "[quicksim]",
 
     const quicksim_params quicksim_params{sidb_simulation_parameters{2, -0.30}};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.30);
+    REQUIRE(quicksim_params.phys_params.mu_minus == -0.30);
 
     const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
@@ -87,7 +87,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of several SiDBs with varying thread cou
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.30);
+    REQUIRE(quicksim_params.phys_params.mu_minus == -0.30);
 
     SECTION("Default settings")
     {
@@ -161,7 +161,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.32);
+    REQUIRE(quicksim_params.phys_params.mu_minus == -0.32);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -259,7 +259,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varyi
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.32);
+    REQUIRE(quicksim_params.phys_params.mu_minus == -0.32);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -350,7 +350,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01 
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.28);
+    REQUIRE(quicksim_params.phys_params.mu_minus == -0.28);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -434,7 +434,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread 
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.25);
+    REQUIRE(quicksim_params.phys_params.mu_minus == -0.25);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -530,7 +530,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.32);
+    REQUIRE(quicksim_params.phys_params.mu_minus == -0.32);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -634,7 +634,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu == -0.32);
+    REQUIRE(quicksim_params.phys_params.mu_minus == -0.32);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -738,9 +738,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01"
                    Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
     }
 
-    SECTION("Increased mu")
+    SECTION("Increased mu_minus")
     {
-        params.mu = -0.1;
+        params.mu_minus = -0.1;
 
         const quicksim_params quicksim_params{params};
 
@@ -762,9 +762,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01"
                    Catch::Matchers::WithinAbs(0.061037632, physical_constants::POP_STABILITY_ERR));
     }
 
-    SECTION("Decreased mu")
+    SECTION("Decreased mu_minus")
     {
-        params.mu = -0.7;
+        params.mu_minus = -0.7;
 
         const quicksim_params quicksim_params{params};
 

@@ -346,7 +346,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     // Check if the maximum band bending is sufficient to shift (0/-) above the Fermi level. The local
                     // potential is converted from J to eV to compare the band bending with the Fermi level (which is
                     // also given in eV).
-                    if ((-*local_pot + strg->phys_params.mu) < -physical_constants::POP_STABILITY_ERR)
+                    if ((-*local_pot + strg->phys_params.mu_minus) < -physical_constants::POP_STABILITY_ERR)
                     {
                         negative_sidbs.push_back(cell_to_index(c));
                     }
@@ -612,16 +612,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         uint64_t   population_stability_not_fulfilled_counter = 0;
         uint64_t   for_loop_counter                           = 0;
-        const auto mu_p                                       = strg->phys_params.mu_p();
+        const auto mu_p                                       = strg->phys_params.mu_plus();
 
         for (const auto& it : strg->loc_pot)  // this for-loop checks if the "population stability" is fulfilled.
         {
             bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
-                           (-it + strg->phys_params.mu < physical_constants::POP_STABILITY_ERR)) ||
+                           (-it + strg->phys_params.mu_minus < physical_constants::POP_STABILITY_ERR)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
                            (-it + mu_p > -physical_constants::POP_STABILITY_ERR)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
-                           (-it + strg->phys_params.mu > -physical_constants::POP_STABILITY_ERR) &&
+                           (-it + strg->phys_params.mu_minus > -physical_constants::POP_STABILITY_ERR) &&
                            (-it + mu_p < physical_constants::POP_STABILITY_ERR)));
             for_loop_counter += 1;
             if (!valid)

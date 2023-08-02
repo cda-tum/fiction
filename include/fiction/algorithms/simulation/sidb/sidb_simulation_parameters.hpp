@@ -41,7 +41,7 @@ struct sidb_simulation_parameters
             lat_c{c},
             epsilon_r{relative_permittivity},
             lambda_tf{screening_distance},
-            mu{mu_minus},
+            mu_minus{mu_minus},
             base{base_number}
 
     {
@@ -69,9 +69,9 @@ struct sidb_simulation_parameters
      */
     double lambda_tf;
     /**
-     * µ- is the energy transition level (0/-) (unit: eV).
+     * mu_minus (µ-) is the energy transition level (0/-) (unit: eV).
      */
-    double mu;
+    double mu_minus;
     /**
      * base can be either 2 or 3 and describes the assumed number of charge states of one SiDB.
      * It often makes sense to assume only negatively and neutrally charged SiDBs.
@@ -86,11 +86,11 @@ struct sidb_simulation_parameters
         return physical_constants::K_E / epsilon_r;
     }
     /**
-     * µ+ is the energy transition level (+/0) (unit: eV).
+     * mu_plus (µ+) is the energy transition level (+/0) (unit: eV).
      */
-    [[nodiscard]] double mu_p() const noexcept
+    [[nodiscard]] double mu_plus() const noexcept
     {
-        return mu - 0.59;
+        return mu_minus - 0.59;
     };
 };
 

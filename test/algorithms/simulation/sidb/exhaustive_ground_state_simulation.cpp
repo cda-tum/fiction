@@ -159,9 +159,9 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01", "[
                    Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
     }
 
-    SECTION("Increased mu")
+    SECTION("Increased mu_minus")
     {
-        params.mu = -0.1;
+        params.mu_minus = -0.1;
 
         const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
 
@@ -181,9 +181,9 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01", "[
                    Catch::Matchers::WithinAbs(0.061037632, physical_constants::POP_STABILITY_ERR));
     }
 
-    SECTION("Decreased mu")
+    SECTION("Decreased mu_minus")
     {
-        params.mu = -0.7;
+        params.mu_minus = -0.7;
 
         const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
 
