@@ -536,8 +536,8 @@ void print_charge_layout(std::ostream& os, const Lyt& lyt, const bool cs_color =
                 os << "\n";
             }
             loop_coordinate.x = min_nw.x;
-            loop_coordinate.y += 1 ? loop_coordinate.z == 1 : 0;
-            loop_coordinate.z = 1 ? loop_coordinate.z == 0 : 0;
+            loop_coordinate.y += (loop_coordinate.z == 1) ? 1 : 0;
+            loop_coordinate.z = (loop_coordinate.z == 0) ? 1 : 0;
         }
         else if (loop_coordinate == max_se)
         {
