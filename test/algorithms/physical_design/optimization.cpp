@@ -16,7 +16,7 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
-#include <fiction/io/print_layout.hpp>
+
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/names_view.hpp>
 
@@ -67,11 +67,11 @@ TEST_CASE("Layout equivalence", "[optimization]")
     {
         using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 
-        const auto layout_corner_case_1    = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
+        const auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
         post_layout_optimization<gate_layout>(layout_corner_case_1);
         check_eq(blueprints::optimization_layout_corner_case_outputs_1<gate_layout>(), layout_corner_case_1);
 
-        const auto layout_corner_case_2    = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
+        const auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
         post_layout_optimization<gate_layout>(layout_corner_case_2);
         check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
     }
