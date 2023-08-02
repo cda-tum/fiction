@@ -945,9 +945,9 @@ void fix_dead_nodes(Lyt& lyt, std::vector<coordinate<Lyt>>& gt) noexcept
 
 /**
  * Optimization algorithm that can be used to reduce the layout area of sub-optimal physical design created by
- * heuristics or machine learning. This optimization utilizes the distinct characterisics of the 2DDWave clocking scheme,
- * which only allow information flow from top to bottom and left to right, therefore only aforementioned clocking scheme
- * if supported.
+ * heuristics or machine learning. This optimization utilizes the distinct characterisics of the 2DDWave clocking
+ * scheme, which only allow information flow from top to bottom and left to right, therefore only aforementioned
+ * clocking scheme if supported.
  *
  * To reduce the layout are, first, gates are moved up and to left as far as possible, include rerouting. This creates
  * more compact layouts by freeing up space on the right and bottom, as all gates were moved to the top left corner.
