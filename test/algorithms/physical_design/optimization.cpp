@@ -129,7 +129,7 @@ TEST_CASE("Optimization steps", "[optimization]")
     const coordinate<gate_layout>                   old_pos_1 = {2, 0};
     const coordinate<gate_layout>                   new_pos_1 = {1, 0};
     const std::tuple<bool, coordinate<gate_layout>> moved_gate_1 =
-        detail::move_gate(old_pos_1, obstr_lyt, static_cast<int>(width), static_cast<int>(height));
+        detail::improve_gate_location(old_pos_1, obstr_lyt, width, height);
     // I I→=
     // ↓   ↓
     // = ▢ =
@@ -148,7 +148,7 @@ TEST_CASE("Optimization steps", "[optimization]")
     const coordinate<gate_layout>                   old_pos_2 = {0, 2};
     const coordinate<gate_layout>                   new_pos_2 = {0, 1};
     const std::tuple<bool, coordinate<gate_layout>> moved_gate_2 =
-        detail::move_gate(old_pos_2, obstr_lyt, static_cast<int>(width), static_cast<int>(height));
+        detail::improve_gate_location(old_pos_2, obstr_lyt, width, height);
     // I I→=
     // ↓   ↓
     // F→= =
@@ -167,7 +167,7 @@ TEST_CASE("Optimization steps", "[optimization]")
     const coordinate<gate_layout>                   old_pos_3 = {2, 2};
     const coordinate<gate_layout>                   new_pos_3 = {1, 1};
     const std::tuple<bool, coordinate<gate_layout>> moved_gate_3 =
-        detail::move_gate(old_pos_3, obstr_lyt, static_cast<int>(width), static_cast<int>(height));
+        detail::improve_gate_location(old_pos_3, obstr_lyt, width, height);
     // I I ▢
     // ↓ ↓
     // F→&→=
@@ -183,7 +183,7 @@ TEST_CASE("Optimization steps", "[optimization]")
         CHECK(obstr_lyt.is_and(obstr_lyt.get_node(old_pos_3)) == false);
     }
 
-    detail::delete_wires(obstr_lyt, static_cast<int>(width), static_cast<int>(height));
+    detail::delete_wires(obstr_lyt, width, height);
     // I I ▢
     // ↓ ↓
     // F→&→=
@@ -199,7 +199,7 @@ TEST_CASE("Optimization steps", "[optimization]")
         CHECK(obstr_lyt.is_po_tile(coordinate<gate_layout>{2, 3}) == false);
     }
 
-    detail::optimize_output(obstr_lyt);
+    detail::optimize_output_positions(obstr_lyt);
     // I I ▢
     // ↓ ↓
     // F→&→O
