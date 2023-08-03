@@ -1538,7 +1538,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 if (const auto local_pot = this->get_local_potential(c); local_pot.has_value())
                 {
-                    if ((-(*local_pot) + strg->phys_params.mu_p) > -physical_constants::POP_STABILITY_ERR)
+                    if ((-(*local_pot) + strg->phys_params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
                     {
                         strg->three_state_cells.emplace_back(c);
                         required = true;
@@ -1670,7 +1670,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             return 0.0;
         }
 
-        return (strg->phys_params.k / (distance * 1E-9) * std::exp(-distance / strg->phys_params.lambda_tf) *
+        return (strg->phys_params.k() / (distance * 1E-9) * std::exp(-distance / strg->phys_params.lambda_tf) *
                 physical_constants::ELEMENTARY_CHARGE);
     }
     /**
@@ -1689,7 +1689,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             return 0.0;
         }
 
-        return strg->phys_params.k * strg->phys_params.epsilon_r / defect.epsilon_r / (distance * 1e-9) *
+        return strg->phys_params.k() * strg->phys_params.epsilon_r / defect.epsilon_r / (distance * 1e-9) *
                std::exp(-distance / defect.lambda_tf) * physical_constants::ELEMENTARY_CHARGE;
     }
     /**
@@ -1742,7 +1742,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         if (!strg->dependent_cell.is_dead())
         {
             const auto loc_pot_cell = -strg->local_pot[strg->dependent_cell_index];
-            if ((loc_pot_cell + strg->phys_params.mu) < physical_constants::POP_STABILITY_ERR)
+            if ((loc_pot_cell + strg->phys_params.mu_minus) < physical_constants::POP_STABILITY_ERR)
             {
                 if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::NEGATIVE)
                 {
@@ -1759,7 +1759,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::NEGATIVE;
                 }
             }
-            else if ((loc_pot_cell + strg->phys_params.mu_p) > -physical_constants::POP_STABILITY_ERR)
+            else if ((loc_pot_cell + strg->phys_params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
             {
                 if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::POSITIVE)
                 {
