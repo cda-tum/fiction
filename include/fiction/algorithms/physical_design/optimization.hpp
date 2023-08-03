@@ -240,8 +240,6 @@ template <typename Lyt>
     std::unordered_set<coordinate<Lyt>> fanouts_set{};
     fanouts_set.reserve(lyt.num_wires() + lyt.num_gates() - 2);
 
-    // TODO whenever you have a for loop like this, it would be better to refactor it
-    // TODO using lyt.foreach_fanin(op) for performance reasons. Same for fanouts.
     lyt.foreach_fanin(lyt.get_node(op),
                       [&](const auto& fin)
                       {
