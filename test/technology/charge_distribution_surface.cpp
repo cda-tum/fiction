@@ -1257,7 +1257,7 @@ TEMPLATE_TEST_CASE(
 
         const sidb_simulation_parameters params{3, -0.28};
         charge_distribution_surface      charge_lyt_first{lyt, params, sidb_charge_state::NEGATIVE};
-        charge_lyt_first.three_state_simulation_required();
+        charge_lyt_first.is_three_state_simulation_required();
         const auto positive_candidates = charge_lyt_first.get_positive_candidates();
         REQUIRE(positive_candidates.size() == 3);
         uint64_t loop_counter = 0;

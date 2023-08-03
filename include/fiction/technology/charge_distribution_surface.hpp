@@ -1522,7 +1522,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return return value is true when three state simulation is required.
      */
-    bool three_state_simulation_required() noexcept
+    bool is_three_state_simulation_required() noexcept
     {
         this->update_after_charge_change();
         strg->three_state_cells                    = {};
@@ -1988,7 +1988,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             this->assign_all_charge_states(sidb_charge_state::NEGATIVE);
             this->update_after_charge_change();
-            this->three_state_simulation_required();
+            this->is_three_state_simulation_required();
             if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), strg->dependent_cell) !=
                 strg->three_state_cells.cend())
             {
@@ -2001,7 +2001,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     };
 
-    // This function is used when three state simulation is required (i.e. three_state_simulation_required = true) to
+    // This function is used when three state simulation is required (i.e. is_three_state_simulation_required = true) to
     // set the base number to three. However, it is distinguished between the cells that can be positively charged and
     // the ones that cannot.
     void assign_base_number_to_three() noexcept

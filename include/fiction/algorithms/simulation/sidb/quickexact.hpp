@@ -95,7 +95,7 @@ class quickexact_impl
             //  Determine if three state simulation (i.e. positively charged SiDBs can occur) is required.
             const bool three_state_simulation_required =
                 params.base_number_detection == automatic_base_number_detection::ON &&
-                charge_lyt.three_state_simulation_required();
+                charge_lyt.is_three_state_simulation_required();
 
             // If layout has at least two SiDBs, the code inside this if-statement is executed.
             if (number_of_sidbs > 1)
@@ -297,7 +297,7 @@ class quickexact_impl
         charge_layout.update_after_charge_change();
         // Not executed to detect if 3-state simulation is required, but to detect the SiDBs that could be positively
         // charged (important to speed up the simulation).
-        charge_layout.three_state_simulation_required();
+        charge_layout.is_three_state_simulation_required();
         charge_layout.update_after_charge_change(dependent_cell_mode::VARIABLE);
 
         while (charge_layout.get_charge_index().first < charge_layout.get_max_charge_index())
