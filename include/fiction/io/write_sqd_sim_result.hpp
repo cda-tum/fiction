@@ -193,7 +193,7 @@ class write_sqd_sim_result_impl
 
         // physical parameters
         os << fmt::format(siqad::PHYS_SIM_PARAMS, sim_result.physical_parameters.lambda_tf,
-                          sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu);
+                          sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu_minus);
 
         // additional simulation parameters
         std::for_each(sim_result.additional_simulation_parameters.cbegin(),
