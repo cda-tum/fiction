@@ -289,7 +289,7 @@ TEMPLATE_TEST_CASE(
 
         charge_layout.assign_physical_parameters(sidb_simulation_parameters{2, -0.2});
         CHECK(charge_layout.get_phys_params().base == 2);
-        CHECK(charge_layout.get_phys_params().mu == -0.2);
+        CHECK(charge_layout.get_phys_params().mu_minus == -0.2);
         CHECK(charge_layout.get_phys_params().epsilon_r == 5.6);
         CHECK(charge_layout.get_phys_params().lambda_tf == 5.0);
         CHECK(charge_layout.get_phys_params().lat_a == 3.84);
@@ -298,7 +298,7 @@ TEMPLATE_TEST_CASE(
 
         charge_layout.assign_physical_parameters(sidb_simulation_parameters{3, -0.4, 5.1, 5.5, 1, 2, 3});
         CHECK(charge_layout.get_phys_params().base == 3);
-        CHECK(charge_layout.get_phys_params().mu == -0.4);
+        CHECK(charge_layout.get_phys_params().mu_minus == -0.4);
         CHECK(charge_layout.get_phys_params().epsilon_r == 5.1);
         CHECK(charge_layout.get_phys_params().lambda_tf == 5.5);
         CHECK(charge_layout.get_phys_params().lat_a == 1);

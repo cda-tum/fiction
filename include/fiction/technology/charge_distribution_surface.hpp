@@ -324,8 +324,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_physical_parameters(const sidb_simulation_parameters& params) noexcept
     {
-        if ((strg->phys_params.lat_a == params.lat_a) && (strg->phys_params.lat_b == params.lat_b) &&
-            (strg->phys_params.lat_c == params.lat_c))
+        if ((strg->phys_params.base == params.base) && (strg->phys_params.lat_b == params.lat_b) &&
+            (strg->phys_params.lat_c == params.lat_c) && (strg->phys_params.epsilon_r == params.epsilon_r) &&
+            (strg->phys_params.lambda_tf == params.lambda_tf))
         {
             strg->phys_params         = params;
             strg->charge_index.second = params.base;
@@ -595,7 +596,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     // Check if the maximum band bending is sufficient to shift (0/-) above the Fermi level. The local
                     // potential is converted from J to eV to compare the band bending with the Fermi level (which is
                     // also given in eV).
-                    if ((-*local_pot + strg->phys_params.mu) < -physical_constants::POP_STABILITY_ERR)
+                    if ((-*local_pot + strg->phys_params.mu_minus) < -physical_constants::POP_STABILITY_ERR)
                     {
                         negative_sidbs.push_back(cell_to_index(c));
                     }
@@ -643,12 +644,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     [[nodiscard]] double calculate_chargeless_potential_between_sidbs_by_index(const uint64_t index1,
                                                                                const uint64_t index2) const noexcept
     {
+        assert(strg->phys_params.lambda_tf > 0.0 && "lambda_tf has to be > 0.0");
+
         if (strg->nm_dist_mat[index1][index2] == 0.0)
         {
             return 0.0;
         }
 
-        return (strg->phys_params.k / (strg->nm_dist_mat[index1][index2] * 1E-9) *
+        return (strg->phys_params.k() / (strg->nm_dist_mat[index1][index2] * 1E-9) *
                 std::exp(-strg->nm_dist_mat[index1][index2] / strg->phys_params.lambda_tf) *
                 physical_constants::ELEMENTARY_CHARGE);
     }
@@ -955,18 +958,19 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void validity_check() noexcept
     {
-        uint64_t population_stability_not_fulfilled_counter = 0;
-        uint64_t for_loop_counter                           = 0;
+        uint64_t   population_stability_not_fulfilled_counter = 0;
+        uint64_t   for_loop_counter                           = 0;
+        const auto mu_p                                       = strg->phys_params.mu_plus();
 
         for (const auto& it : strg->local_pot)  // this for-loop checks if the "population stability" is fulfilled.
         {
             bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
-                           (-it + strg->phys_params.mu < physical_constants::POP_STABILITY_ERR)) ||
+                           (-it + strg->phys_params.mu_minus < physical_constants::POP_STABILITY_ERR)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
-                           (-it + strg->phys_params.mu_p > -physical_constants::POP_STABILITY_ERR)) ||
+                           (-it + mu_p > -physical_constants::POP_STABILITY_ERR)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
-                           (-it + strg->phys_params.mu > -physical_constants::POP_STABILITY_ERR) &&
-                           (-it + strg->phys_params.mu_p < physical_constants::POP_STABILITY_ERR)));
+                           (-it + strg->phys_params.mu_minus > -physical_constants::POP_STABILITY_ERR) &&
+                           (-it + mu_p < physical_constants::POP_STABILITY_ERR)));
             for_loop_counter += 1;
             if (!valid)
             {
