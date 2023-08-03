@@ -245,8 +245,8 @@ class operational_domain_impl
         phmap::flat_hash_set<std::pair<std::size_t, std::size_t>> sampled_points{};
         sampled_points.reserve(samples);
 
-        const auto already_sampled = [&sampled_points](const std::size_t x, const std::size_t y) {
-            return sampled_points.find({x, y}) != sampled_points.end();
+        const auto is_already_sampled = [&sampled_points](const auto x, const auto y) -> bool {
+            return sampled_points.find({x, y}) != sampled_points.cend();
         };
 
         static std::mt19937_64 generator{std::random_device{}()};
@@ -266,7 +266,7 @@ class operational_domain_impl
             const auto y_sample = y_distribution(generator);
 
             // check if the point has already been sampled
-            if (already_sampled(x_sample, y_sample))
+            if (is_already_sampled(x_sample, y_sample))
             {
                 // --i;  // TODO do we want to have a fixed number of sample attempts or a fixed number of samples?
                 continue;
@@ -319,7 +319,13 @@ class operational_domain_impl
      */
     enum class sweep_dimension : uint8_t
     {
+        /**
+         * Sweep dimension X.
+         */
         X,
+        /**
+         * Sweep dimension Y.
+         */
         Y
     };
     /**
@@ -417,7 +423,6 @@ class operational_domain_impl
                 return operational_domain::operational_status::NON_OPERATIONAL;
             }
 
-            // TODO is this necessary or is it guaranteed that the ground state is always the first element?
             // find the ground state, which is the charge distribution with the lowest energy
             const auto ground_state = std::min_element(
                 sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend(),
