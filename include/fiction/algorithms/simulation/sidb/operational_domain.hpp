@@ -186,6 +186,9 @@ class operational_domain_impl
             output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)}
     {
         assert(output_bdl_pairs.size() == 1 && "The layout must have exactly one output BDL pair");
+
+        op_domain.x_dimension = params.x_dimension;
+        op_domain.y_dimension = params.y_dimension;
     }
     /**
      * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
@@ -196,11 +199,6 @@ class operational_domain_impl
     [[nodiscard]] operational_domain grid_search() noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
-
-        operational_domain opdomain{};
-
-        opdomain.x_dimension = params.x_dimension;
-        opdomain.y_dimension = params.y_dimension;
 
         sidb_simulation_parameters sim_params = params.sim_params;
 
@@ -218,11 +216,11 @@ class operational_domain_impl
 
                 set_x_dimension_value(sim_params, x_val);
 
-                opdomain.operational_values[{x_val, y_val}] = is_operational(sim_params);
+                op_domain.operational_values[{x_val, y_val}] = is_operational(sim_params);
             }
         }
 
-        return opdomain;
+        return op_domain;
     }
     /**
      * Performs a random sampling of the specified number of samples within the specified parameter range. The
@@ -235,25 +233,14 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        operational_domain opdomain{};
-
-        opdomain.x_dimension = params.x_dimension;
-        opdomain.y_dimension = params.y_dimension;
-
         sidb_simulation_parameters sim_params = params.sim_params;
 
-        phmap::flat_hash_set<std::pair<std::size_t, std::size_t>> sampled_points{};
         sampled_points.reserve(samples);
-
-        const auto is_already_sampled = [&sampled_points](const auto x, const auto y) -> bool {
-            return sampled_points.find({x, y}) != sampled_points.cend();
-        };
 
         static std::mt19937_64 generator{std::random_device{}()};
 
         // calculate the number of steps in x and y dimension to instantiate distributions
-        const auto num_x_steps = static_cast<std::size_t>((params.x_max - params.x_min) / params.x_step);
-        const auto num_y_steps = static_cast<std::size_t>((params.y_max - params.y_min) / params.y_step);
+        const auto [num_x_steps, num_y_steps] = num_steps();
 
         // instantiate distributions
         std::uniform_int_distribution<std::size_t> x_distribution{0, num_x_steps - 1};
@@ -266,9 +253,8 @@ class operational_domain_impl
             const auto y_sample = y_distribution(generator);
 
             // check if the point has already been sampled
-            if (is_already_sampled(x_sample, y_sample))
+            if (has_already_been_sampled(x_sample, y_sample))
             {
-                // --i;  // TODO do we want to have a fixed number of sample attempts or a fixed number of samples?
                 continue;
             }
 
@@ -282,10 +268,10 @@ class operational_domain_impl
             set_x_dimension_value(sim_params, x_val);
             set_y_dimension_value(sim_params, y_val);
 
-            opdomain.operational_values[{x_val, y_val}] = is_operational(sim_params);
+            op_domain.operational_values[{x_val, y_val}] = is_operational(sim_params);
         }
 
-        return opdomain;
+        return op_domain;
     }
 
   private:
@@ -313,7 +299,35 @@ class operational_domain_impl
      * The BDL input iterator for the layout.
      */
     bdl_input_iterator<Lyt> bii{layout, params.bdl_params};
-
+    /**
+     * The operational domain of the layout.
+     */
+    operational_domain op_domain{};
+    /**
+     * The set of sampled points. Used to avoid sampling the same point multiple times.
+     */
+    phmap::flat_hash_set<std::pair<std::size_t, std::size_t>> sampled_points{};
+    /**
+     * Determines whether the point `(x, y)` has already been sampled.
+     *
+     * @param x X dimension value.
+     * @param y Y dimension value.
+     * @return `true` iff the point `(x, y)` has already been sampled.
+     */
+    [[nodiscard]] inline bool has_already_been_sampled(const std::size_t x, const std::size_t y) const noexcept
+    {
+        return sampled_points.find({x, y}) != sampled_points.cend();
+    }
+    /**
+     * Calculates the number of steps in the x and y dimension based on the provided parameters.
+     *
+     * @return The number of steps in the x and y dimension.
+     */
+    [[nodiscard]] inline std::pair<std::size_t, std::size_t> num_steps() const noexcept
+    {
+        return {static_cast<std::size_t>((params.x_max - params.x_min) / params.x_step),
+                static_cast<std::size_t>((params.y_max - params.y_min) / params.y_step)};
+    }
     /**
      * Potential sweep dimensions.
      */
