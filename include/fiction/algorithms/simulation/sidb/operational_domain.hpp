@@ -355,7 +355,7 @@ class operational_domain_impl
             }
             case operational_domain::sweep_parameter::MU_MINUS:
             {
-                sim_parameters.mu = val;
+                sim_parameters.mu_minus = val;
                 break;
             }
             default:

@@ -20,7 +20,7 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 
     SECTION("default sweep dimensions")
     {
-        static constexpr const char* expected = "epsilon_r, lambda_tf, operational status\n";
+        static constexpr const char* expected = "epsilon_r,lambda_tf,operational status\n";
 
         write_operational_domain(opdom, os);
 
@@ -31,7 +31,7 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
         opdom.x_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
         opdom.y_dimension = operational_domain::sweep_parameter::MU_MINUS;
 
-        static constexpr const char* expected = "lambda_tf, mu_minus, operational status\n";
+        static constexpr const char* expected = "lambda_tf,mu_minus,operational status\n";
 
         write_operational_domain(opdom, os);
 
@@ -50,7 +50,7 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
     SECTION("default operational tags")
     {
         static constexpr const char* expected =
-            "epsilon_r, lambda_tf, operational status\n0, 0, operational\n0, 1, non-operational\n";
+            "epsilon_r,lambda_tf,operational status\n0,0,operational\n0,1,non-operational\n";
 
         write_operational_domain(opdom, os);
 
@@ -60,7 +60,7 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
     {
         const write_operational_domain_params params = {"True", "False"};
 
-        static constexpr const char* expected = "epsilon_r, lambda_tf, operational status\n0, 0, True\n0, 1, False\n";
+        static constexpr const char* expected = "epsilon_r,lambda_tf,operational status\n0,0,True\n0,1,False\n";
 
         write_operational_domain(opdom, os, params);
 
@@ -81,8 +81,8 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
     SECTION("default operational tags")
     {
         static constexpr const char* expected =
-            "epsilon_r, lambda_tf, operational status\n0.1, 0.2, operational\n0.3, 0.4, non-operational\n1.2, 1.4, "
-            "operational\n2.4, 5.75, non-operational\n";
+            "epsilon_r,lambda_tf,operational status\n0.1,0.2,operational\n0.3,0.4,non-operational\n1.2,1.4,"
+            "operational\n2.4,5.75,non-operational\n";
 
         write_operational_domain(opdom, os);
 
@@ -92,8 +92,8 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
     {
         const write_operational_domain_params params = {"1", "0"};
 
-        static constexpr const char* expected = "epsilon_r, lambda_tf, operational status\n0.1, 0.2, 1\n0.3, 0.4, "
-                                                "0\n1.2, 1.4, 1\n2.4, 5.75, 0\n";
+        static constexpr const char* expected = "epsilon_r,lambda_tf,operational status\n0.1,0.2,1\n0.3,0.4,"
+                                                "0\n1.2,1.4,1\n2.4,5.75,0\n";
 
         write_operational_domain(opdom, os, params);
 

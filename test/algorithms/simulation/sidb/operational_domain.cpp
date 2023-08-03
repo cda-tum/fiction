@@ -107,7 +107,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     }
     SECTION("non-operational area")
     {
-        op_domain_params.sim_params.mu = -0.15;
+        op_domain_params.sim_params.mu_minus = -0.15;
 
         SECTION("grid_search")
         {
@@ -185,8 +185,8 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
     sidb_simulation_parameters sim_params{};
-    sim_params.base = 2;
-    sim_params.mu   = -0.28;
+    sim_params.base     = 2;
+    sim_params.mu_minus = -0.28;
 
     operational_domain_params op_domain_params{};
     op_domain_params.sim_params  = sim_params;
