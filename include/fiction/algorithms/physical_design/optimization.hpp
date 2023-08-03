@@ -1214,7 +1214,7 @@ void post_layout_optimization(const Lyt& lyt) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-    std::cout << "here";
+
     assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE) && "Clocking scheme is not 2DDWave");
 
     // calculate bounding box
