@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/physical_constants.hpp>
@@ -61,10 +62,10 @@ TEST_CASE("Test sidb_simulation_parameters", "[sidb_simulation_parameters]")
 
         const double epsilon_r  = 5.6;
         const double k_expected = physical_constants::K_E / epsilon_r;
-        REQUIRE(round_to_n_decimal_places(params.k(), 4) == round_to_n_decimal_places(k_expected, 4));
+        CHECK_THAT(params.k() - k_expected, Catch::Matchers::WithinAbs(0.0, 0.00001));
 
         const double mu_minus         = -0.32;
         const double mu_plus_expected = mu_minus - 0.59;
-        REQUIRE(round_to_n_decimal_places(params.mu_plus(), 4) == round_to_n_decimal_places((mu_plus_expected), 4));
+        CHECK_THAT(params.mu_plus() - mu_plus_expected, Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
 }
