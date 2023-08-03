@@ -385,7 +385,6 @@ void print_charge_layout(std::ostream& os, const Lyt& lyt, const bool cs_color =
     // Check if defects exist in the layout.
     if constexpr (has_get_sidb_defect_v<Lyt>)
     {
-
         defects.reserve(lyt.num_defects());
         lyt.foreach_sidb_defect([&defects](const auto& c) { defects.push_back(c.first); });
         std::sort(defects.begin(), defects.end());
@@ -416,81 +415,11 @@ void print_charge_layout(std::ostream& os, const Lyt& lyt, const bool cs_color =
 
     while (loop_coordinate <= max_se)
     {
-        // Check if layout is a sidb_surface and a charge distribution surface.
-        if constexpr (has_get_sidb_defect_v<Lyt> && has_get_charge_state_v<Lyt>)
-        {
-            if (lyt.get_sidb_defect(loop_coordinate) != sidb_defect{sidb_defect_type::NONE})
-            {
-                if (is_negatively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
-                {
-                    os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ⊟ ");
-                }
-
-                else if (is_positively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
-                {
-                    os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ⊞ ");
-                }
-                else if (is_neutrally_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
-                {
-                    os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ⊡ ");
-                }
-            }
-            else
-            {
-                switch (lyt.get_charge_state(
-                    loop_coordinate))  // switch over the charge state of the SiDB at the current coordinate
-                {
-                    case sidb_charge_state::NEGATIVE:
-                    {
-                        os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ● ");
-                        break;
-                    }
-                    case sidb_charge_state::POSITIVE:
-                    {
-                        os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ⨁ ");
-                        break;
-                    }
-                    case sidb_charge_state::NEUTRAL:
-                    {
-                        os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : detail::NO_COLOR, " ◯ ");
-                        break;
-                    }
-                    default:  // NONE charge state case -> empty cell
-                    {
-                        os << (draw_lattice ? fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") :
-                                              "  ");
-                    }
-                }
-            }
-        }
-
-        // Check if layout is only a sidb_surface.
-        else if constexpr (has_get_sidb_defect_v<Lyt>)
-        {
-            if (lyt.get_sidb_defect(loop_coordinate) != sidb_defect{sidb_defect_type::NONE})
-            {
-                if (is_negatively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
-                {
-                    os << fmt::format(cs_color ? detail::SIDB_DEF_NEG_COLOR : detail::NO_COLOR, " ⊟ ");
-                }
-
-                else if (is_positively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
-                {
-                    os << fmt::format(cs_color ? detail::SIDB_DEF_POS_COLOR : detail::NO_COLOR, " ⊞ ");
-                }
-                else if (is_neutrally_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
-                {
-                    os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " ⊡ ");
-                }
-            }
-            else
-            {
-                os << (draw_lattice ? fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") : "  ");
-            }
-        }
+        // Is set to true if either charge or defect is printed at loop coordinate.
+        bool already_printed = false;
 
         // Check if layout is only a charge distribution surface.
-        else if constexpr (has_get_charge_state_v<Lyt>)
+        if constexpr (has_get_charge_state_v<Lyt>)
         {
             switch (lyt.get_charge_state(
                 loop_coordinate))  // switch over the charge state of the SiDB at the current coordinate
@@ -498,24 +427,50 @@ void print_charge_layout(std::ostream& os, const Lyt& lyt, const bool cs_color =
                 case sidb_charge_state::NEGATIVE:
                 {
                     os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ● ");
+                    already_printed = true;
                     break;
                 }
                 case sidb_charge_state::POSITIVE:
                 {
                     os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ⨁ ");
+                    already_printed = true;
                     break;
                 }
                 case sidb_charge_state::NEUTRAL:
                 {
                     os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : detail::NO_COLOR, " ◯ ");
+                    already_printed = true;
                     break;
                 }
-                default:  // NONE charge state case -> empty cell
+            }
+        }
+
+        if constexpr (has_get_sidb_defect_v<Lyt>)
+        {
+            if (lyt.get_sidb_defect(loop_coordinate) != sidb_defect{sidb_defect_type::NONE})
+            {
+                if (is_negatively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
                 {
-                    os << (draw_lattice ? fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") :
-                                          "  ");
+                    os << fmt::format(cs_color ? detail::SIDB_DEF_NEG_COLOR : detail::NO_COLOR, " ⊟ ");
+                    already_printed = true;
+                }
+
+                else if (is_positively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_DEF_POS_COLOR : detail::NO_COLOR, " ⊞ ");
+                    already_printed = true;
+                }
+                else if (is_neutrally_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " ⊡ ");
+                    already_printed = true;
                 }
             }
+        }
+
+        if (!already_printed)
+        {
+            os << (draw_lattice ? fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") : "  ");
         }
 
         // If the x-coordinate of loop_coordinate is still less than the x-coordinate of the south-west cell, the
