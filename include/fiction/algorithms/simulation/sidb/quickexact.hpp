@@ -94,8 +94,10 @@ class quickexact_impl
 
             //  Determine if three state simulation (i.e. positively charged SiDBs can occur) is required.
             const bool three_state_simulation_required =
-                params.base_number_detection == automatic_base_number_detection::ON &&
-                charge_lyt.is_three_state_simulation_required();
+                (params.base_number_detection == automatic_base_number_detection::ON &&
+                 charge_lyt.is_three_state_simulation_required()) ||
+                (params.base_number_detection == automatic_base_number_detection::OFF &&
+                 params.physical_parameters.base == 3);
 
             // If layout has at least two SiDBs, the code inside this if-statement is executed.
             if (number_of_sidbs > 1)
