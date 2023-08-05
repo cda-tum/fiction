@@ -385,11 +385,11 @@ void print_charge_layout(std::ostream& os, const Lyt& lyt, const bool cs_color =
     // Check if defects exist in the layout.
     if constexpr (has_get_sidb_defect_v<Lyt>)
     {
-        defects.reserve(lyt.num_defects());
-        lyt.foreach_sidb_defect([&defects](const auto& c) { defects.push_back(c.first); });
-        std::sort(defects.begin(), defects.end());
         if (!defects.empty())
         {
+            defects.reserve(lyt.num_defects());
+            lyt.foreach_sidb_defect([&defects](const auto& c) { defects.push_back(c.first); });
+            std::sort(defects.begin(), defects.end());
             min_nw = min_nw > defects.front() ?
                          defects.front() :
                          min_nw;  // if a defect is more north-west than nw, this position is used as min.
