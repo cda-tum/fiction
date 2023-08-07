@@ -19,6 +19,8 @@
 
 #include <cassert>
 #include <cstdint>
+#include <optional>
+#include <queue>
 #include <utility>
 #include <vector>
 
@@ -192,7 +194,7 @@ class operational_domain_impl
     }
     /**
      * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
-     * has quadratic complexity. The operational domain is computed for each parameter combination.
+     * has quadratic complexity. The operational status is computed for each parameter combination.
      *
      * @return The operational domain of the layout.
      */
@@ -216,6 +218,7 @@ class operational_domain_impl
 
                 set_x_dimension_value(sim_params, x_val);
 
+                // determine the operational status
                 op_domain.operational_values[{x_val, y_val}] = is_operational(sim_params);
             }
         }
@@ -224,9 +227,9 @@ class operational_domain_impl
     }
     /**
      * Performs a random sampling of the specified number of samples within the specified parameter range. The
-     * operational domain is computed for each sample point.
+     * operational status is computed for each sample point.
      *
-     * @param samples Number of samples to be taken.
+     * @param samples Number of random samples to be taken.
      * @return The (partial) operational domain of the layout.
      */
     [[nodiscard]] operational_domain random_sampling(const std::size_t samples) noexcept
@@ -268,7 +271,118 @@ class operational_domain_impl
             set_x_dimension_value(sim_params, x_val);
             set_y_dimension_value(sim_params, y_val);
 
+            // determine the operational status
             op_domain.operational_values[{x_val, y_val}] = is_operational(sim_params);
+        }
+
+        return op_domain;
+    }
+    /**
+     * Performs flood fill to determine the operational domain. The algorithm first performs a random sampling of up to
+     * the specified number of samples. It stops random sampling once it finds a single operational point, from which it
+     * starts the flood fill. The operational domain will finally only contain up to `samples` random non-operational
+     * points as well as all operational points that are reachable via flood fill from the first found operational
+     * point.
+     *
+     * @param samples Maximum number of random samples to be taken before flood fill.
+     * @return The (partial) operational domain of the layout.
+     */
+    [[nodiscard]] operational_domain flood_fill(const std::size_t samples) noexcept
+    {
+        mockturtle::stopwatch stop{stats.time_total};
+
+        // first, perform random sampling to find an operational starting point
+        const auto starting_point = find_operational_parameters_via_random_sampling(samples);
+
+        // if no operational point was found within the specified number of samples, return
+        if (!starting_point.has_value())
+        {
+            return op_domain;
+        }
+
+        sidb_simulation_parameters sim_params = params.sim_params;
+
+        // calculate the number of steps in x and y dimension to instantiate distributions
+        const auto [num_x_steps, num_y_steps] = num_steps();
+
+        // a queue of (x, y) dimension steps to be evaluated
+        using parameter_queue = std::queue<std::pair<std::size_t, std::size_t>>;
+        parameter_queue queue{};
+
+        // a utility function that adds the adjacent points to the queue for further evaluation
+        const auto queue_next_points = [&, this](const auto x, const auto y)
+        {
+            // increase in x dimension
+            if (const auto incr_x = x + 1; incr_x < num_x_steps)
+            {
+                if (!has_already_been_sampled(incr_x, y))
+                {
+                    queue.emplace(incr_x, y);
+                }
+            }
+            // decrease in x dimension
+            if (const auto decr_x = x - 1; x > 0)
+            {
+                if (!has_already_been_sampled(decr_x, y))
+                {
+                    queue.emplace(decr_x, y);
+                }
+            }
+            // increase in y dimension
+            if (const auto incr_y = y + 1; incr_y < num_x_steps)
+            {
+                if (!has_already_been_sampled(x, incr_y))
+                {
+                    queue.emplace(x, incr_y);
+                }
+            }
+            // decrease in y dimension
+            if (const auto decr_y = y - 1; y > 0)
+            {
+                if (!has_already_been_sampled(x, decr_y))
+                {
+                    queue.emplace(x, decr_y);
+                }
+            }
+        };
+
+        // add the neighbors of the starting point to the queue
+        queue_next_points(starting_point->first, starting_point->second);
+
+        // for each point in the queue
+        while (!queue.empty())
+        {
+            // get the parameter combination and remove it from the queue
+            const auto [x, y] = queue.front();
+            queue.pop();
+
+            // convert steps to actual values
+            const auto x_val = params.x_min + static_cast<double>(x) * params.x_step;
+            const auto y_val = params.y_min + static_cast<double>(y) * params.y_step;
+
+            // if the point has already been sampled, continue with the next
+            if (has_already_been_sampled(x, y))
+            {
+                continue;
+            }
+
+            set_x_dimension_value(sim_params, x_val);
+            set_y_dimension_value(sim_params, y_val);
+
+            // check if the point is operational
+            const auto operational_status = is_operational(sim_params);
+
+            // add the point to the operational domain
+            op_domain.operational_values[{x_val, y_val}] = operational_status;
+
+            // add the point to the set of sampled points
+            sampled_points.insert({x, y});
+
+            // if the point is operational, add its four neighbors to the queue
+            if (operational_status == operational_domain::operational_status::OPERATIONAL)
+            {
+                queue_next_points(x, y);
+            }
         }
 
         return op_domain;
@@ -308,11 +422,12 @@ class operational_domain_impl
      */
     phmap::flat_hash_set<std::pair<std::size_t, std::size_t>> sampled_points{};
     /**
-     * Determines whether the point `(x, y)` has already been sampled.
+     * Determines whether the point at step position `(x, y)` has already been sampled. Here, `x` and `y` represent
+     * steps in the x and y dimension, respectively, not the actual values of the parameters.
      *
-     * @param x X dimension value.
-     * @param y Y dimension value.
-     * @return `true` iff the point `(x, y)` has already been sampled.
+     * @param x X dimension step value.
+     * @param y Y dimension step value.
+     * @return `true` iff the point at step position `(x, y)` has already been sampled.
      */
     [[nodiscard]] inline bool has_already_been_sampled(const std::size_t x, const std::size_t y) const noexcept
     {
@@ -483,6 +598,73 @@ class operational_domain_impl
 
         return operational_domain::operational_status::OPERATIONAL;
     }
+    /**
+     * Performs random sampling to find any operational parameter combination. This function is useful if a single
+     * starting point is required within the domain to expand from. This function returns the step in x and y dimension
+     * of the first operational point found. If no operational parameter combination can be found within the given
+     * number of samples, the function returns std::nullopt.
+     *
+     * This function adds any sampled points to the `sampled_points` and `op_domain` member variables.
+     *
+     * // TODO this function contains a lot of code duplication from `random_sampling` as of right now.
+     * // TODO This must be refactored.
+     *
+     * @param samples Maximum number of samples to take. Works as a timeout.
+     * @return The first pair of operational parameters given as x and y steps, if any could be found, std::nullopt
+     * otherwise.
+     */
+    [[nodiscard]] std::optional<std::pair<std::size_t, std::size_t>>
+    find_operational_parameters_via_random_sampling(const std::size_t samples) noexcept
+    {
+        sidb_simulation_parameters sim_params = params.sim_params;
+
+        sampled_points.reserve(samples);
+
+        static std::mt19937_64 generator{std::random_device{}()};
+
+        // calculate the number of steps in x and y dimension to instantiate distributions
+        const auto [num_x_steps, num_y_steps] = num_steps();
+
+        // instantiate distributions
+        std::uniform_int_distribution<std::size_t> x_distribution{0, num_x_steps - 1};
+        std::uniform_int_distribution<std::size_t> y_distribution{0, num_y_steps - 1};
+
+        for (std::size_t i = 0; i < samples; ++i)
+        {
+            // sample x and y dimension
+            const auto x_sample = x_distribution(generator);
+            const auto y_sample = y_distribution(generator);
+
+            // check if the point has already been sampled
+            if (has_already_been_sampled(x_sample, y_sample))
+            {
+                continue;
+            }
+
+            // add the point to the set of sampled points
+            sampled_points.insert({x_sample, y_sample});
+
+            // convert the sample to the actual value
+            const auto x_val = params.x_min + static_cast<double>(x_sample) * params.x_step;
+            const auto y_val = params.y_min + static_cast<double>(y_sample) * params.y_step;
+
+            set_x_dimension_value(sim_params, x_val);
+            set_y_dimension_value(sim_params, y_val);
+
+            // determine the operational status
+            const auto operational_value = is_operational(sim_params);
+
+            op_domain.operational_values[{x_val, y_val}] = operational_value;
+
+            // if the parameter combination is operational, return its step values in x and y dimension
+            if (operational_value == operational_domain::operational_status::OPERATIONAL)
+            {
+                return std::make_pair(x_sample, y_sample);
+            }
+        }
+
+        return std::nullopt;
+    }
 };
 
 }  // namespace detail
@@ -538,7 +720,7 @@ operational_domain operational_domain_grid_search(Lyt& lyt, const TT& spec,
  *
  * This algorithm uses random sampling to find a part of the operational domain that might not be complete. It performs
  * a total of `samples` uniformly-distributed random samples within the parameter range. For each sample, the algorithm
- * performs one operational checks on the layout, where each operational check consists of up to \f$ 2^n \f$ exact
+ * performs one operational check on the layout, where each operational check consists of up to \f$ 2^n \f$ exact
  * ground state simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact ground state simulation
  * has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
@@ -565,6 +747,55 @@ operational_domain operational_domain_random_sampling(Lyt& lyt, const TT& spec, 
     detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
     const auto result = p.random_sampling(samples);
+
+    if (stats)
+    {
+        *stats = st;
+    }
+
+    return result;
+}
+/**
+ * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
+ * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
+ * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
+ * inputs of the truth table. // TODO implement the matching of truth table inputs and BDL pair ordering
+ *
+ * This algorithm first uses random sampling to find a single operational point within the parameter range. From there,
+ * it employs the "flood fill" algorithm to explore the operational domain. If the operational domain is connected, the
+ * algorithm is guaranteed to find the entire operational domain within the parameter range if the initial random
+ * sampling found an operational point.
+ *
+ * It performs up to `samples` uniformly-distributed random samples within the parameter range until an operational
+ * point is found. From there, it performs another number of samples equal to the number of points within the
+ * operational domain plus the first non-operational point in each direction. For each sample, the algorithm performs
+ * one operational check on the layout, where each operational check consists of up to \f$ 2^n \f$ exact ground state
+ * simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact ground state simulation has
+ * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt Layout to compute the operational domain for.
+ * @param spec Expected truth table of the layout.
+ * @param samples Number of samples to perform.
+ * @param params Operational domain computation parameters.
+ * @param stats Operational domain computation statistics.
+ * @return The (partial) operational domain of the layout.
+ */
+template <typename Lyt, typename TT>
+operational_domain operational_domain_flood_fill(Lyt& lyt, const TT& spec, const std::size_t samples,
+                                                 const operational_domain_params& params = {},
+                                                 operational_domain_stats*        stats  = nullptr)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    operational_domain_stats                 st{};
+    detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+
+    const auto result = p.flood_fill(samples);
 
     if (stats)
     {

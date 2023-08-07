@@ -101,7 +101,35 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
+            CHECK(op_domain_stats.num_evaluated_parameter_combinations > 0);
             CHECK(op_domain_stats.num_operational_parameter_combinations <= 100);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+        }
+        SECTION("flood_fill")
+        {
+            const auto op_domain =
+                operational_domain_flood_fill(lyt, create_id_tt(), 1, op_domain_params, &op_domain_stats);
+
+            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
+            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
+
+            // check if the operational domain has the correct size (max 10 steps in each dimension)
+            CHECK(op_domain.operational_values.size() == 100);
+
+            // for the selected range, all samples should be within the parameters and operational
+            for (const auto& [coord, op_value] : op_domain.operational_values)
+            {
+                CHECK(coord.first >= 5.1);
+                CHECK(coord.first <= 6.1);
+                CHECK(coord.second >= 4.5);
+                CHECK(coord.second <= 5.5);
+
+                CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
+            }
+
+            CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+            CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
+            CHECK(op_domain_stats.num_operational_parameter_combinations == 100);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
         }
     }
@@ -150,6 +178,28 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                 CHECK(coord.second >= 4.5);
                 CHECK(coord.second <= 5.5);
 
+                CHECK(op_value == operational_domain::operational_status::NON_OPERATIONAL);
+            }
+
+            CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
+            CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
+        }
+        SECTION("flood_fill")
+        {
+            const auto op_domain =
+                operational_domain_flood_fill(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
+
+            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
+            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
+
+            // check if the operational domain has the correct size (10 steps in each dimension)
+            CHECK(op_domain.operational_values.size() <= 100);
+
+            // for the selected range, all samples should be within the parameters and non-operational
+            for (const auto& [coord, op_value] : op_domain.operational_values)
+            {
                 CHECK(op_value == operational_domain::operational_status::NON_OPERATIONAL);
             }
 
@@ -252,6 +302,33 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
         CHECK(op_domain_stats.num_operational_parameter_combinations <= 100);
+        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+    }
+    SECTION("flood_fill")
+    {
+        const auto op_domain =
+            operational_domain_flood_fill(lyt, create_and_tt(), 1, op_domain_params, &op_domain_stats);
+
+        CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
+        CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
+
+        // check if the operational domain has the correct size (10 steps in each dimension)
+        CHECK(op_domain.operational_values.size() == 100);
+
+        // for the selected range, all samples should be within the parameters and operational
+        for (const auto& [coord, op_value] : op_domain.operational_values)
+        {
+            CHECK(coord.first >= 5.1);
+            CHECK(coord.first <= 6.1);
+            CHECK(coord.second >= 4.5);
+            CHECK(coord.second <= 5.5);
+
+            CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
+        }
+
+        CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 100);
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
     }
 }
