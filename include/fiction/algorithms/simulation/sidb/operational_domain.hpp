@@ -303,14 +303,15 @@ class operational_domain_impl
         sidb_simulation_parameters sim_params = params.sim_params;
 
         // calculate the number of steps in x and y dimension to instantiate distributions
-        const auto [num_x_steps, num_y_steps] = num_steps();
+        const auto n_steps = num_steps();
 
         // a queue of (x, y) dimension steps to be evaluated
         using parameter_queue = std::queue<std::pair<std::size_t, std::size_t>>;
         parameter_queue queue{};
 
         // a utility function that adds the adjacent points to the queue for further evaluation
-        const auto queue_next_points = [&, this](const auto x, const auto y)
+        const auto queue_next_points =
+            [this, &queue, num_x_steps = n_steps.first, num_y_steps = n_steps.second](const auto x, const auto y)
         {
             // increase in x dimension
             if (const auto incr_x = x + 1; incr_x < num_x_steps)
