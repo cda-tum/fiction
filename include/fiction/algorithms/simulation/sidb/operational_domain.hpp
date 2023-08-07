@@ -329,7 +329,7 @@ class operational_domain_impl
                 }
             }
             // increase in y dimension
-            if (const auto incr_y = y + 1; incr_y < num_x_steps)
+            if (const auto incr_y = y + 1; incr_y < num_y_steps)
             {
                 if (!has_already_been_sampled(x, incr_y))
                 {
