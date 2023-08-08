@@ -442,7 +442,7 @@ TEST_CASE("Read SQD defect despite missing <coulomb> element", "[sqd]")
 
     CHECK(defect.type == sidb_defect_type::UNKNOWN);
 
-    CHECK(defect.charge == 0.0);
+    CHECK(defect.charge == 0);
     CHECK(defect.epsilon_r == 0.0);
     CHECK(defect.lambda_tf == 0.0);
 }
