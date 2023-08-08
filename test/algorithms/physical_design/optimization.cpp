@@ -101,7 +101,7 @@ TEST_CASE("Optimization steps", "[optimization]")
         CHECK(to_clear == std::vector<coordinate<gate_layout>>{{0, 1}, {1, 2}});
 
         CHECK(r1 == coord_path{{0, 0}, {0, 1}, {0, 2}});
-        CHECK(r2 == coord_path{});
+        CHECK(r2.empty());
         CHECK(r3 == coord_path{{0, 2}, {1, 2}, {2, 2}});
         CHECK(r4 == coord_path{{0, 2}, {0, 3}});
     }
@@ -118,7 +118,7 @@ TEST_CASE("Optimization steps", "[optimization]")
         CHECK(r1 == coord_path{{0, 2}, {1, 2}, {2, 2}});
         CHECK(r2 == coord_path{{2, 0}, {2, 1}, {2, 2}});
         CHECK(r3 == coord_path{{2, 2}, {2, 3}});
-        CHECK(r4 == coord_path{});
+        CHECK(r4.empty());
     }
 
     // calculate bounding box

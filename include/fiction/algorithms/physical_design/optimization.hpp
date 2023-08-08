@@ -170,13 +170,13 @@ struct fanin_fanout_data
  * @tparam Lyt Gate-level layout type.
  *
  * @param fanin The fanin coordinate to be added to the route.
- * @param isFirstFanin A boolean indicating whether this is part of the route from the first fanin to the gate.
+ * @param is_first_fanin A boolean indicating whether this is part of the route from the first fanin to the gate.
  * @param ffd Reference to the fanin_fanout_data structure containing the routes.
  */
 template <typename Lyt>
-void addFaninToRoute(const coordinate<Lyt>& fanin, bool isFirstFanin, fanin_fanout_data<Lyt>& ffd)
+void add_fanin_to_route(const coordinate<Lyt>& fanin, bool is_first_fanin, fanin_fanout_data<Lyt>& ffd)
 {
-    if (isFirstFanin)
+    if (is_first_fanin)
     {
         ffd.route_fanin_1_to_gate.insert(ffd.route_fanin_1_to_gate.cbegin(), fanin);
     }
@@ -195,13 +195,13 @@ void addFaninToRoute(const coordinate<Lyt>& fanin, bool isFirstFanin, fanin_fano
  * @tparam Lyt Gate-level layout type.
  *
  * @param fanout The fanout coordinate to be added to the route.
- * @param isFirstFanout A boolean indicating whether it belongs to the route from the gate to the first fanout.
+ * @param is_first_fanout A boolean indicating whether it belongs to the route from the gate to the first fanout.
  * @param ffd Reference to the fanin_fanout_data structure containing the routes.
  */
 template <typename Lyt>
-void addFanoutToRoute(const coordinate<Lyt>& fanout, bool isFirstFanout, fanin_fanout_data<Lyt>& ffd)
+void add_fanout_to_route(const coordinate<Lyt>& fanout, bool is_first_fanout, fanin_fanout_data<Lyt>& ffd)
 {
-    if (isFirstFanout)
+    if (is_first_fanout)
     {
         ffd.route_gate_to_fanout_1.push_back(fanout);
     }
@@ -248,8 +248,8 @@ template <typename Lyt>
                           {
 
                               // Add fanin to the respective route
-                              addFaninToRoute(op, fanins_set.empty(), ffd);
-                              addFaninToRoute(fanin, fanins_set.empty(), ffd);
+                              add_fanin_to_route(op, fanins_set.empty(), ffd);
+                              add_fanin_to_route(fanin, fanins_set.empty(), ffd);
 
                               // Continue until gate or primary input (PI) is found
                               while (lyt.is_wire_tile(fanin) && lyt.fanout_size(lyt.get_node(fanin)) == 1 &&
@@ -259,7 +259,7 @@ template <typename Lyt>
                                   fanin = lyt.incoming_data_flow(fanin).front();
 
                                   // Add fanin to the respective route
-                                  addFaninToRoute(fanin, fanins_set.empty(), ffd);
+                                  add_fanin_to_route(fanin, fanins_set.empty(), ffd);
                               }
 
                               // Set the respective fanin based on the route
@@ -285,8 +285,8 @@ template <typename Lyt>
                            {
 
                                // Add fanout to the respective route
-                               addFanoutToRoute(op, fanouts_set.empty(), ffd);
-                               addFanoutToRoute(fanout, fanouts_set.empty(), ffd);
+                               add_fanout_to_route(op, fanouts_set.empty(), ffd);
+                               add_fanout_to_route(fanout, fanouts_set.empty(), ffd);
 
                                // Continue until gate or primary output (PO) is found
                                while (lyt.is_wire_tile(fanout) && lyt.fanout_size(lyt.get_node(fanout)) != 0 &&
@@ -296,7 +296,7 @@ template <typename Lyt>
                                    fanout = lyt.outgoing_data_flow(fanout).front();
 
                                    // Add fanout to the respective route
-                                   addFanoutToRoute(fanout, fanouts_set.empty(), ffd);
+                                   add_fanout_to_route(fanout, fanouts_set.empty(), ffd);
                                }
 
                                // Set the respective fanout based on the route
@@ -352,10 +352,10 @@ template <typename Lyt>
  * @return The computed path as a sequence of coordinates in the layout.
  */
 template <typename Lyt>
-layout_coordinate_path<Lyt> getPathAndObstruct(Lyt& lyt, const coordinate<Lyt>& start, const coordinate<Lyt>& end,
-                                               const twoddwave_distance_functor<Lyt, uint64_t>& distance,
-                                               const unit_cost_functor<Lyt, uint8_t>&           cost_func,
-                                               const a_star_params&                             params)
+layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const coordinate<Lyt>& start, const coordinate<Lyt>& end,
+                                                  const twoddwave_distance_functor<Lyt, uint64_t>& distance,
+                                                  const unit_cost_functor<Lyt, uint8_t>&           cost_func,
+                                                  const a_star_params&                             params)
 {
     layout_coordinate_path<Lyt> path =
         a_star<layout_coordinate_path<Lyt>>(lyt, {start, end}, distance, cost_func, params);
@@ -499,22 +499,22 @@ improve_gate_location(const coordinate<Lyt>& old_pos, Lyt& lyt, const uint64_t w
                     // Get paths for fanins and fanouts
                     if (!fanins.empty())
                     {
-                        path1 = getPathAndObstruct<Lyt>(lyt, fanins[0], new_pos, dist(), cost(), params);
+                        path1 = get_path_and_obstruct<Lyt>(lyt, fanins[0], new_pos, dist(), cost(), params);
                     }
 
                     if (fanins.size() == 2)
                     {
-                        path2 = getPathAndObstruct(lyt, fanins[1], new_pos, dist(), cost(), params);
+                        path2 = get_path_and_obstruct(lyt, fanins[1], new_pos, dist(), cost(), params);
                     }
 
                     if (!fanouts.empty())
                     {
-                        path3 = getPathAndObstruct(lyt, new_pos, fanouts[0], dist(), cost(), params);
+                        path3 = get_path_and_obstruct(lyt, new_pos, fanouts[0], dist(), cost(), params);
                     }
 
                     if (fanouts.size() == 2)
                     {
-                        path4 = getPathAndObstruct(lyt, new_pos, fanouts[1], dist(), cost(), params);
+                        path4 = get_path_and_obstruct(lyt, new_pos, fanouts[1], dist(), cost(), params);
                     }
 
                     // if possible routing was found, it will be applied
@@ -660,7 +660,7 @@ improve_gate_location(const coordinate<Lyt>& old_pos, Lyt& lyt, const uint64_t w
  * @tparam Lyt Gate-level layout.
  */
 template <typename Lyt>
-struct IncomingSignalsMap
+struct incoming_signals_map
 {
   private:
     using coord_vec_t = std::vector<coordinate<Lyt>>;
@@ -685,11 +685,11 @@ struct IncomingSignalsMap
  * @tparam Lyt Gate-level layout.
  */
 template <typename Lyt>
-struct RowIncomingSignalsMap
+struct row_incoming_signals_map
 {
   private:
-    using DepthMapType = IncomingSignalsMap<Lyt>;
-    using InnerMapType = std::unordered_map<uint64_t, DepthMapType>;
+    using depth_map_type = incoming_signals_map<Lyt>;
+    using inner_map_type = std::unordered_map<uint64_t, depth_map_type>;
 
   public:
     /**
@@ -699,7 +699,7 @@ struct RowIncomingSignalsMap
      * structures. Each row index represents a specific row in the layout, and the associated DepthMapType stores the
      * coordinates of incoming signals at different depth levels within that row.
      */
-    InnerMapType row{};
+    inner_map_type row{};
 };
 
 /**
@@ -711,10 +711,10 @@ struct RowIncomingSignalsMap
  * @tparam Lyt Gate-level layout.
  */
 template <typename Lyt>
-struct ColumnIncomingSignalsMap
+struct column_incoming_signals_map
 {
   private:
-    using RowIncomingSignalsMapType = RowIncomingSignalsMap<Lyt>;
+    using row_incoming_signals_map_type = row_incoming_signals_map<Lyt>;
 
   public:
     /**
@@ -725,7 +725,7 @@ struct ColumnIncomingSignalsMap
      * associated RowIncomingSignalsMapType stores the coordinates of incoming signals at different row and depth levels
      * within that column.
      */
-    std::unordered_map<uint64_t, RowIncomingSignalsMapType> column{};
+    std::unordered_map<uint64_t, row_incoming_signals_map_type> column{};
 };
 
 /**
@@ -746,7 +746,7 @@ void delete_row(Lyt& lyt, const uint64_t row_idx, const uint64_t width, const ui
     assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE) && "Clocking scheme is not 2DDWave");
 
     // create a map that stores fanins of each coordinate
-    ColumnIncomingSignalsMap<Lyt> fanins{};
+    column_incoming_signals_map<Lyt> fanins{};
 
     for (uint64_t y = row_idx; y <= height; ++y)
     {
@@ -830,7 +830,7 @@ void delete_column(Lyt& lyt, const uint64_t column_idx, const uint64_t width, co
     assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE) && "Clocking scheme is not 2DDWave");
 
     // create a map that stores fanins of each coordinate
-    ColumnIncomingSignalsMap<Lyt> fanins{};
+    column_incoming_signals_map<Lyt> fanins{};
 
     for (uint64_t x = column_idx; x <= width; ++x)
     {
@@ -913,10 +913,10 @@ void delete_wires(Lyt& lyt, const uint64_t width, const uint64_t height) noexcep
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE) && "Clocking scheme is not 2DDWave");
 
-    for (int64_t y = static_cast<int64_t>(height); y >= 0; --y)
+    for (auto y = static_cast<int64_t>(height); y >= 0; --y)
     {
         bool found_row = true;
-        for (int64_t x = static_cast<int64_t>(width); x >= 0; --x)
+        for (auto x = static_cast<int64_t>(width); x >= 0; --x)
         {
             // Check if the row can be deleted based on certain conditions
             const bool is_vertical_wire =
@@ -935,10 +935,10 @@ void delete_wires(Lyt& lyt, const uint64_t width, const uint64_t height) noexcep
         }
     }
 
-    for (int64_t x = static_cast<int64_t>(width); x >= 0; --x)
+    for (auto x = static_cast<int64_t>(width); x >= 0; --x)
     {
         bool found_column = true;
-        for (int64_t y = static_cast<int64_t>(height); y >= 0; --y)
+        for (auto y = static_cast<int64_t>(height); y >= 0; --y)
         {
             // Check if the column can be deleted based on certain conditions
             const bool is_horizontal_wire =
@@ -967,36 +967,36 @@ void delete_wires(Lyt& lyt, const uint64_t width, const uint64_t height) noexcep
  * @tparam Lyt Gate-level layout.
  */
 template <typename Lyt>
-struct Update
+struct update
 {
     /**
      * @brief The old coordinate of the PO.
      */
-    coordinate<Lyt> oldCoordinate;
+    coordinate<Lyt> old_coordinate;
 
     /**
      * @brief The new coordinate of the PO.
      */
-    coordinate<Lyt> newCoordinate;
+    coordinate<Lyt> new_coordinate;
 
     /**
      * @brief The coordinate of the child node (after the update).
      *
      * This is the coordinate of the new child (i.e. incoming signal) after the update.
      */
-    coordinate<Lyt> childCoordinate;
+    coordinate<Lyt> child_coordinate;
 
     /**
      * @brief Construct a new Update object.
      *
-     * @param oldCoord The old coordinate of the PO.
-     * @param newCoord The new coordinate of the PO.
-     * @param childCoord The coordinate of the child node (after the update).
+     * @param old_coord The old coordinate of the PO.
+     * @param new_coord The new coordinate of the PO.
+     * @param child_coord The coordinate of the child node (after the update).
      */
-    Update(const coordinate<Lyt>& oldCoord, const coordinate<Lyt>& newCoord, const coordinate<Lyt>& childCoord) :
-            oldCoordinate(oldCoord),
-            newCoordinate(newCoord),
-            childCoordinate(childCoord)
+    update(const coordinate<Lyt>& old_coord, const coordinate<Lyt>& new_coord, const coordinate<Lyt>& child_coord) :
+            old_coordinate(old_coord),
+            new_coordinate(new_coord),
+            child_coordinate(child_coord)
     {}
 };
 
@@ -1063,7 +1063,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
             ->at(1)
             .y;
 
-    std::vector<Update<Lyt>>     updates;
+    std::vector<update<Lyt>>     updates;
     std::vector<coordinate<Lyt>> cleared{};
 
     // move output along its wiring until it lies on the bounding box
@@ -1093,8 +1093,8 @@ void optimize_output_positions(Lyt& lyt) noexcept
                 if (!new_pos.is_dead())
                 {
                     new_pos = {new_pos.x, new_pos.y, 0};
-                    Update<Lyt> update(tile, new_pos, dangling);
-                    updates.emplace_back(update);
+                    update<Lyt> new_update(tile, new_pos, dangling);
+                    updates.emplace_back(new_update);
                 }
                 moved = true;
             }
@@ -1102,8 +1102,8 @@ void optimize_output_positions(Lyt& lyt) noexcept
         if (!moved)
         {
             new_pos = {route[1].x, route[1].y, 0};
-            Update<Lyt> update(route.back(), new_pos, route.front());
-            updates.emplace_back(update);
+            update<Lyt> new_update(route.back(), new_pos, route.front());
+            updates.emplace_back(new_update);
         }
     }
 
@@ -1246,7 +1246,7 @@ void post_layout_optimization(const Lyt& lyt) noexcept
     std::sort(gates.begin(), gates.end(), [](const auto& a, const auto& b) { return a.x + a.y < b.x + b.y; });
 
     bool moved_gates = true;
-    int  moved;
+    int  moved       = 0;
 
     while (moved_gates)
     {
