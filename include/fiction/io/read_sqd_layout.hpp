@@ -87,7 +87,7 @@ class read_sqd_layout_impl
                 throw sqd_parsing_error("Error parsing SQD file: no attribute 'type' in element 'layer'");
             }
 
-            if (layer_type == std::string{"DB"} && !has_siqad_coord_v<Lyt>)
+            if (std::string{layer_type} == "DB")
             {
                 for (const auto* db_dot = layer->FirstChildElement("dbdot"); db_dot != nullptr;
                      db_dot             = db_dot->NextSiblingElement("dbdot"))
@@ -96,7 +96,7 @@ class read_sqd_layout_impl
                 }
             }
 
-            else if (layer_type == std::string{"Defects"})
+            else if (std::string{layer_type} == "Defects")
             {
                 for (const auto* defect = layer->FirstChildElement("defect"); defect != nullptr;
                      defect             = defect->NextSiblingElement("defect"))
@@ -181,7 +181,7 @@ class read_sqd_layout_impl
         // special case for SiQAD coordinates
         if constexpr (has_siqad_coord_v<Lyt>)
         {
-            cell<Lyt>(std::stoll(n), std::stoll(m), std::stoll(l));
+            return cell<Lyt>{std::stoll(n), std::stoll(m), std::stoll(l)};
         }
 
         // Cartesian coordinates
