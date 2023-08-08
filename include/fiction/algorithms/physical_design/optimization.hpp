@@ -1195,7 +1195,7 @@ void fix_dead_nodes(Lyt& lyt, std::vector<coordinate<Lyt>>& gt) noexcept
  * scheme, which only allows information flow from top to bottom and left to right, therefore only aforementioned
  * clocking scheme is supported.
  *
- * To reduce the layout area, first, gates are moved up and to left as far as possible, including rerouting. This
+ * To reduce the layout area, first, gates are moved up and to the left as far as possible, including rerouting. This
  * creates more compact layouts by freeing up space to the right and bottom, as all gates were moved to the top left
  * corner.
  *
