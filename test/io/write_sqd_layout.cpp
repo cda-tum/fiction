@@ -46,7 +46,7 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt) noexcep
     CHECK(wlyt.num_pis() == rlyt.num_pis());
     CHECK(wlyt.num_pos() == rlyt.num_pos());
 
-    wlyt.foreach_cell([&rlyt](const auto& c) { CHECK(rlyt.get_cell_type(c) == sidb_technology::cell_type::NORMAL); });
+    wlyt.foreach_cell([&wlyt, &rlyt](const auto& c) { CHECK(wlyt.get_cell_type(c) == rlyt.get_cell_type(c)); });
 
     if constexpr (has_foreach_sidb_defect_v<WLyt> && has_get_sidb_defect_v<RLyt>)
     {
@@ -117,14 +117,34 @@ TEST_CASE("Write multi-dot SQD layout", "[sqd]")
     compare_written_and_read_layout(layout, read_layout);
 }
 
-TEST_CASE("Write bestagon SQD layout", "[sqd]")
+TEST_CASE("Write multi-dot SQD layout with differing dot types", "[sqd]")
+{
+    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+
+    sidb_layout layout{{4, 4}};
+    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::INPUT);
+    layout.assign_cell_type({1, 1}, sidb_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 3}, sidb_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({4, 4}, sidb_technology::cell_type::INPUT);
+
+    std::stringstream layout_stream{};
+
+    write_sqd_layout(layout, layout_stream);
+
+    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream);
+
+    compare_written_and_read_layout(layout, read_layout);
+}
+
+TEST_CASE("Write Bestagon SQD layout", "[sqd]")
 {
     using gate_layout =
         gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>>;
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
     auto g_layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();
-    g_layout.set_layout_name("bestagon");
+    g_layout.set_layout_name("Bestagon");
 
     const auto c_layout = apply_gate_library<sidb_layout, sidb_bestagon_library>(g_layout);
 
@@ -132,7 +152,7 @@ TEST_CASE("Write bestagon SQD layout", "[sqd]")
 
     write_sqd_layout(c_layout, layout_stream);
 
-    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream, "bestagon");
+    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream, "Bestagon");
 
     compare_written_and_read_layout(c_layout, read_layout);
 }

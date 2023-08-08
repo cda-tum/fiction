@@ -112,10 +112,12 @@ inline constexpr const char* CLOSE_DEFECTS_LAYER = "        </layer>\n";
 inline constexpr const char* CLOSE_DESIGN        = "    </design>\n";
 
 inline constexpr const char* LATTICE_COORDINATE = R"(<latcoord n="{}" m="{}" l="{}"/>)";
+inline constexpr const char* DOT_TYPE           = R"(<type>{}</type>)";
 
 inline constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"
                                            "                <layer_id>2</layer_id>\n"
-                                           "                {}\n"
+                                           "                {}\n"  // lattice coordinates
+                                           "                {}\n"  // dot type
                                            "                <color>{}</color>\n"
                                            "            </dbdot>\n";
 
@@ -221,8 +223,15 @@ class write_sqd_layout_impl
                 // generate SiDB cells
                 if constexpr (has_sidb_technology_v<Lyt>)
                 {
+                    const auto type = this->lyt.get_cell_type(c);
+                    const auto type_str =
+                        type == sidb_technology::cell_type::NORMAL ? "" :
+                        type == sidb_technology::cell_type::INPUT  ? fmt::format(siqad::DOT_TYPE, "input") :
+                        type == sidb_technology::cell_type::OUTPUT ? fmt::format(siqad::DOT_TYPE, "output") :
+                                                                     "";
+
                     design << fmt::format(siqad::DBDOT_BLOCK,
-                                          fmt::format(siqad::LATTICE_COORDINATE, c.x, c.y / 2, c.y % 2),
+                                          fmt::format(siqad::LATTICE_COORDINATE, c.x, c.y / 2, c.y % 2), type_str,
                                           siqad::NORMAL_COLOR);
                 }
                 // generate QCA cell blocks
@@ -239,21 +248,21 @@ class write_sqd_layout_impl
                     {
                         // top left
                         design << fmt::format(siqad::DBDOT_BLOCK,
-                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, c.y * 7, 0), color);
+                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, c.y * 7, 0), "", color);
                         // bottom right
                         design << fmt::format(siqad::DBDOT_BLOCK,
                                               fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, (c.y * 7) + 3, 0),
-                                              color);
+                                              "", color);
                     }
                     if (!qca_technology::is_const_0_cell(type))
                     {
                         // top right
                         design << fmt::format(siqad::DBDOT_BLOCK,
-                                              fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, c.y * 7, 0),
+                                              fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, c.y * 7, 0), "",
                                               color);
                         // bottom left
                         design << fmt::format(siqad::DBDOT_BLOCK,
-                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, (c.y * 7) + 3, 0),
+                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, (c.y * 7) + 3, 0), "",
                                               color);
                     }
                 }
