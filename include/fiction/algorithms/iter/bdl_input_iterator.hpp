@@ -20,8 +20,8 @@ namespace fiction
  * for an \f$n\f$-input BDL layout, each with a unique input index. The input index is interpreted as a binary number,
  * where the \f$i\f$-th bit represents the input state of the \f$i\f$-th input BDL pair. If the bit is `1`, the lower
  * BDL dot is set and the upper BDL dot removed. If the bit is `0`, the upper BDL dot is removed and the lower BDL dot
- * set. To this end, the iterator alters the given layout. The state enumeration wraps around, i.e. after the last
- * possible input state, the first input state is set again.
+ * set. The iterator creates and stores a deep-copy of the given layout. The state enumeration wraps around, i.e. after
+ * the last possible input state, the first input state is set again.
  *
  * The iterator satisfies the requirements of `LegacyRandomAccessIterator` and can be used in iterator-based `for`
  * loops.
@@ -39,8 +39,8 @@ class bdl_input_iterator
      * @param lyt The SiDB BDL layout to iterate over.
      * @param params Parameters for the BDL pair detection.
      */
-    explicit bdl_input_iterator(Lyt& lyt, const detect_bdl_pairs_params& params = {}) noexcept :
-            layout{lyt},
+    explicit bdl_input_iterator(const Lyt& lyt, const detect_bdl_pairs_params& params = {}) noexcept :
+            layout{lyt.clone()},
             input_pairs{detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params)},
             num_inputs{static_cast<uint8_t>(input_pairs.size())}
     {
@@ -55,7 +55,7 @@ class bdl_input_iterator
      *
      * @return Reference to the current layout.
      */
-    [[nodiscard]] Lyt& operator*() const noexcept
+    [[nodiscard]] const Lyt& operator*() const noexcept
     {
         return layout;
     }
@@ -269,7 +269,7 @@ class bdl_input_iterator
     /**
      * The layout to iterate over.
      */
-    Lyt& layout;
+    Lyt layout;
     /**
      * The detected input BDL pairs.
      */
