@@ -110,6 +110,7 @@ Operational Domain Computation
 
 .. doxygenfunction:: fiction::operational_domain_grid_search
 .. doxygenfunction:: fiction::operational_domain_random_sampling
+.. doxygenfunction:: fiction::operational_domain_flood_fill
 
 
 Utility Functions
