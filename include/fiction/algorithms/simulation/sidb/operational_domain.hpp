@@ -10,15 +10,18 @@
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/execution_utils.hpp"
+#include "fiction/utils/phmap_utils.hpp"
 
-#include <btree.h>
 #include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <phmap.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <mutex>
 #include <optional>
 #include <queue>
 #include <utility>
@@ -86,7 +89,7 @@ struct operational_domain
      * domain. The first element of the pair is the x dimension value, the second element is the y dimension value.
      * The operational status is stored as the value of the map.
      */
-    phmap::btree_map<std::pair<double, double>, operational_status> operational_values{};
+    locked_parallel_flat_hash_map<std::pair<double, double>, operational_status> operational_values{};
 };
 
 /**
@@ -179,7 +182,7 @@ class operational_domain_impl
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
-    operational_domain_impl(Lyt& lyt, const TT& tt, const operational_domain_params& ps,
+    operational_domain_impl(const Lyt& lyt, const TT& tt, const operational_domain_params& ps,
                             operational_domain_stats& st) noexcept :
             layout{lyt},
             truth_table{tt},
@@ -202,26 +205,47 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        sidb_simulation_parameters sim_params = params.sim_params;
+        // pre-calculate the number of steps for each dimension
+        const auto [num_x_steps, num_y_steps] = num_steps();
+        // pre-allocate the vectors for the x and y dimension values
+        std::vector<double> x_values(num_x_steps);
+        std::vector<double> y_values(num_y_steps);
 
-        // for x and y counters, we pre-compute the number of steps to avoid using floating-point numbers in the loop
+        // generate the x dimension values
+        std::generate(x_values.begin(), x_values.end(),
+                      [n = 0, this]() mutable
+                      {
+                          const double x_val = params.x_min + n * params.x_step;
+                          ++n;
+                          return x_val;
+                      });
 
-        for (auto y = 0; y < (params.y_max - params.y_min) / params.y_step; ++y)
-        {
-            const double y_val = params.y_min + y * params.y_step;
+        // generate the y dimension values
+        std::generate(y_values.begin(), y_values.end(),
+                      [n = 0, this]() mutable
+                      {
+                          const double y_val = params.y_min + n * params.y_step;
+                          ++n;
+                          return y_val;
+                      });
 
-            set_y_dimension_value(sim_params, y_val);
+        // for each x value in parallel
+        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ x_values.begin(), x_values.end(),
+                      [this, &y_values](const double x_val)
+                      {
+                          // for each y value in parallel
+                          std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_values.begin(), y_values.end(),
+                                        [this, x_val](const double y_val)
+                                        {
+                                            sidb_simulation_parameters sim_params = params.sim_params;
 
-            for (auto x = 0; x < (params.x_max - params.x_min) / params.x_step; ++x)
-            {
-                const double x_val = params.x_min + x * params.x_step;
+                                            set_x_dimension_value(sim_params, x_val);
+                                            set_y_dimension_value(sim_params, y_val);
 
-                set_x_dimension_value(sim_params, x_val);
-
-                // determine the operational status
-                op_domain.operational_values[{x_val, y_val}] = is_operational(sim_params);
-            }
-        }
+                                            // determine the operational status
+                                            op_domain.operational_values[{x_val, y_val}] = is_operational(sim_params);
+                                        });
+                      });
 
         return op_domain;
     }
@@ -393,7 +417,7 @@ class operational_domain_impl
     /**
      * The SiDB cell-level layout to investigate.
      */
-    Lyt& layout;
+    const Lyt& layout;
     /**
      * The specification of the layout.
      */
@@ -407,13 +431,13 @@ class operational_domain_impl
      */
     operational_domain_stats& stats;
     /**
+     * A mutex to protect the statistics.
+     */
+    std::mutex stats_mutex{};
+    /**
      * The output BDL pair of the layout.
      */
     const std::vector<bdl_pair<Lyt>> output_bdl_pairs;
-    /**
-     * The BDL input iterator for the layout.
-     */
-    bdl_input_iterator<Lyt> bii{layout, params.bdl_params};
     /**
      * The operational domain of the layout.
      */
@@ -526,14 +550,19 @@ class operational_domain_impl
     [[nodiscard]] operational_domain::operational_status
     is_operational(const sidb_simulation_parameters& sim_params) noexcept
     {
-        // increment the number of evaluated parameter combinations
-        ++stats.num_evaluated_parameter_combinations;
+        {
+            // lock the stats
+            const std::lock_guard<std::mutex> lock{stats_mutex};
+
+            // increment the number of evaluated parameter combinations
+            ++stats.num_evaluated_parameter_combinations;
+        }
 
         // take the first (and only) output BDL pair
         const auto& output_bdl_pair = output_bdl_pairs.front();
 
-        // reset the BDL input iterator
-        bii = 0ull;
+        // initialize a BDL input iterator
+        bdl_input_iterator<Lyt> bii{layout, params.bdl_params};
 
         // for each input combination
         for (auto i = 0u; i < truth_table.num_bits(); ++i, ++bii)
@@ -548,7 +577,12 @@ class operational_domain_impl
             // if no physically-valid charge distributions were found, the layout is non-operational
             if (sim_result.charge_distributions.empty())
             {
-                ++stats.num_non_operational_parameter_combinations;
+                {
+                    // lock the stats
+                    const std::lock_guard<std::mutex> lock{stats_mutex};
+
+                    ++stats.num_non_operational_parameter_combinations;
+                }
 
                 return operational_domain::operational_status::NON_OPERATIONAL;
             }
@@ -565,7 +599,12 @@ class operational_domain_impl
             // if the output charge states are equal, the layout is not operational
             if (charge_state_output_lower == charge_state_output_upper)
             {
-                ++stats.num_non_operational_parameter_combinations;
+                {
+                    // lock the stats
+                    const std::lock_guard<std::mutex> lock{stats_mutex};
+
+                    ++stats.num_non_operational_parameter_combinations;
+                }
 
                 return operational_domain::operational_status::NON_OPERATIONAL;
             }
@@ -576,7 +615,12 @@ class operational_domain_impl
                 if (charge_state_output_upper != sidb_charge_state::NEUTRAL ||
                     charge_state_output_lower != sidb_charge_state::NEGATIVE)
                 {
-                    ++stats.num_non_operational_parameter_combinations;
+                    {
+                        // lock the stats
+                        const std::lock_guard<std::mutex> lock{stats_mutex};
+
+                        ++stats.num_non_operational_parameter_combinations;
+                    }
 
                     return operational_domain::operational_status::NON_OPERATIONAL;
                 }
@@ -587,15 +631,25 @@ class operational_domain_impl
                 if (charge_state_output_upper != sidb_charge_state::NEGATIVE ||
                     charge_state_output_lower != sidb_charge_state::NEUTRAL)
                 {
-                    ++stats.num_non_operational_parameter_combinations;
+                    {
+                        // lock the stats
+                        const std::lock_guard<std::mutex> lock{stats_mutex};
+
+                        ++stats.num_non_operational_parameter_combinations;
+                    }
 
                     return operational_domain::operational_status::NON_OPERATIONAL;
                 }
             }
         }
 
-        // if we made it here, the layout is operational
-        ++stats.num_operational_parameter_combinations;
+        {
+            // lock the stats
+            const std::lock_guard<std::mutex> lock{stats_mutex};
+
+            // if we made it here, the layout is operational
+            ++stats.num_operational_parameter_combinations;
+        }
 
         return operational_domain::operational_status::OPERATIONAL;
     }
@@ -692,7 +746,7 @@ class operational_domain_impl
  * @return The operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_grid_search(Lyt& lyt, const TT& spec,
+operational_domain operational_domain_grid_search(const Lyt& lyt, const TT& spec,
                                                   const operational_domain_params& params = {},
                                                   operational_domain_stats*        stats  = nullptr)
 {
@@ -735,7 +789,7 @@ operational_domain operational_domain_grid_search(Lyt& lyt, const TT& spec,
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_random_sampling(Lyt& lyt, const TT& spec, const std::size_t samples,
+operational_domain operational_domain_random_sampling(const Lyt& lyt, const TT& spec, const std::size_t samples,
                                                       const operational_domain_params& params = {},
                                                       operational_domain_stats*        stats  = nullptr)
 {
@@ -784,7 +838,7 @@ operational_domain operational_domain_random_sampling(Lyt& lyt, const TT& spec, 
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_flood_fill(Lyt& lyt, const TT& spec, const std::size_t samples,
+operational_domain operational_domain_flood_fill(const Lyt& lyt, const TT& spec, const std::size_t samples,
                                                  const operational_domain_params& params = {},
                                                  operational_domain_stats*        stats  = nullptr)
 {

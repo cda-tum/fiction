@@ -49,22 +49,35 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 
     SECTION("default operational tags")
     {
-        static constexpr const char* expected =
-            "epsilon_r,lambda_tf,operational status\n0,0,operational\n0,1,non-operational\n";
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,operational",
+                                       "0,1,non-operational"};
 
         write_operational_domain(opdom, os);
+        const auto os_str = os.str();
 
-        CHECK(os.str() == expected);
+        std::istringstream is{os_str};
+
+        for (std::string line{}; std::getline(is, line);)
+        {
+            CHECK(expected.find(std::move(line)) != expected.end());
+        }
     }
+
     SECTION("custom operational tags")
     {
         const write_operational_domain_params params = {"True", "False"};
 
-        static constexpr const char* expected = "epsilon_r,lambda_tf,operational status\n0,0,True\n0,1,False\n";
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,True", "0,1,False"};
 
         write_operational_domain(opdom, os, params);
+        const auto os_str = os.str();
 
-        CHECK(os.str() == expected);
+        std::istringstream is{os_str};
+
+        for (std::string line{}; std::getline(is, line);)
+        {
+            CHECK(expected.find(std::move(line)) != expected.end());
+        }
     }
 }
 
@@ -80,23 +93,37 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
 
     SECTION("default operational tags")
     {
-        static constexpr const char* expected =
-            "epsilon_r,lambda_tf,operational status\n0.1,0.2,operational\n0.3,0.4,non-operational\n1.2,1.4,"
-            "operational\n2.4,5.75,non-operational\n";
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,operational",
+                                       "0.3,0.4,non-operational",
+                                       "1.2,1.4,"
+                                       "operational",
+                                       "2.4,5.75,non-operational"};
 
         write_operational_domain(opdom, os);
+        const auto os_str = os.str();
 
-        CHECK(os.str() == expected);
+        std::istringstream is{os_str};
+
+        for (std::string line{}; std::getline(is, line);)
+        {
+            CHECK(expected.find(std::move(line)) != expected.end());
+        }
     }
     SECTION("custom operational tags")
     {
         const write_operational_domain_params params = {"1", "0"};
 
-        static constexpr const char* expected = "epsilon_r,lambda_tf,operational status\n0.1,0.2,1\n0.3,0.4,"
-                                                "0\n1.2,1.4,1\n2.4,5.75,0\n";
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "0.3,0.4,0", "1.2,1.4,1",
+                                       "2.4,5.75,0"};
 
         write_operational_domain(opdom, os, params);
+        const auto os_str = os.str();
 
-        CHECK(os.str() == expected);
+        std::istringstream is{os_str};
+
+        for (std::string line{}; std::getline(is, line);)
+        {
+            CHECK(expected.find(std::move(line)) != expected.end());
+        }
     }
 }
