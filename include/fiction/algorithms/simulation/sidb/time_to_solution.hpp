@@ -6,6 +6,7 @@
 #define FICTION_TIME_TO_SOLUTION_HPP
 
 #include "fiction/algorithms/simulation/sidb/enum_class_exhaustive_algorithm.hpp"
+#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
@@ -99,8 +100,6 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
-    const auto simulation_results_exgs = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
-
     time_to_solution_stats st{};
 
     sidb_simulation_result<Lyt> simulation_result{};
@@ -116,7 +115,7 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to
         simulation_result = quickexact(lyt, params);
     }
 
-    st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_results_exgs.simulation_runtime);
+    st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_result.simulation_runtime);
 
     std::size_t         gs_count = 0;
     std::vector<double> time{};
@@ -136,7 +135,7 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to
 
         time.push_back(diff_first);
 
-        if (is_ground_state(simulation_results_quicksim, simulation_results_exgs))
+        if (is_ground_state(simulation_results_quicksim, simulation_result))
         {
             gs_count += 1;
         }
