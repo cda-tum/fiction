@@ -8,6 +8,8 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
+#include "fiction/algorithms/simulation/sidb/quicksim.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/execution_utils.hpp"
@@ -105,6 +107,10 @@ struct operational_domain_params
      * sweeps, but the sweep parameters are adjusted in each simulation step and thus overwritten in this object.
      */
     sidb_simulation_parameters sim_params{};
+    /**
+     * The simulation engine to be used for the operational domain computation.
+     */
+    sidb_simulation_engine sim_engine{sidb_simulation_engine::EXGS};
     /**
      * The sweep parameter for the x dimension.
      */
@@ -594,9 +600,23 @@ class operational_domain_impl
             // the expected output of the layout is the i-th bit of the truth table
             const auto expected_output = kitty::get_bit(truth_table, i);
 
-            // TODO replace with engine selector via parameter
-            // perform an exhaustive ground state simulation
-            const auto sim_result = exhaustive_ground_state_simulation(*bii, sim_params);
+            sidb_simulation_result<Lyt> sim_result{};
+
+            if (params.sim_engine == sidb_simulation_engine::EXGS)
+            {
+                // perform an exhaustive ground state simulation
+                sim_result = exhaustive_ground_state_simulation(*bii, sim_params);
+            }
+            else if (params.sim_engine == sidb_simulation_engine::QUICKSIM)
+            {
+                // perform a heuristic simulation
+                const quicksim_params qs_params{params.sim_params, 100, 0.6};
+                sim_result = quicksim(*bii, qs_params);
+            }
+            else
+            {
+                assert(false && "unsupported simulation engine");
+            }
 
             ++num_simulator_invocations;
 
