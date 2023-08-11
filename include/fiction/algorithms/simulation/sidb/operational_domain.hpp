@@ -610,7 +610,7 @@ class operational_domain_impl
             else if (params.sim_engine == sidb_simulation_engine::QUICKSIM)
             {
                 // perform a heuristic simulation
-                const quicksim_params qs_params{params.sim_params, 100, 0.6};
+                const quicksim_params qs_params{sim_params, 500, 0.6, 1};
                 sim_result = quicksim(*bii, qs_params);
             }
             else
