@@ -41,7 +41,7 @@ class bdl_input_iterator
      */
     explicit bdl_input_iterator(const Lyt& lyt, const detect_bdl_pairs_params& params = {}) noexcept :
             layout{lyt.clone()},
-            input_pairs{detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params)},
+            input_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::INPUT, params)},
             num_inputs{static_cast<uint8_t>(input_pairs.size())}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
