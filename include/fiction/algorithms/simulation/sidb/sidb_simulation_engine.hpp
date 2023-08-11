@@ -28,6 +28,6 @@ enum class sidb_simulation_engine
     QUICKEXACT
 };
 
-}
+}  // namespace fiction
 
 #endif  // FICTION_SIDB_SIMULATION_ENGINE_HPP
