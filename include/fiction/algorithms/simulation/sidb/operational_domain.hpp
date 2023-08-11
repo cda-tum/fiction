@@ -19,9 +19,11 @@
 #include <phmap.h>
 
 #include <algorithm>
+#include <atomic>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
-#include <mutex>
+#include <iterator>
 #include <optional>
 #include <queue>
 #include <utility>
@@ -152,6 +154,10 @@ struct operational_domain_stats
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
+     * Number of simulator invocations.
+     */
+    std::size_t num_simulator_invocations{0};
+    /**
      * Number of evaluated parameter combinations.
      */
     std::size_t num_evaluated_parameter_combinations{0};
@@ -205,6 +211,9 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
+        // TODO refactor the ranges and steps into an attribute of this class
+        // TODO replace vectors with ranges for memory efficiency
+
         // pre-calculate the number of steps for each dimension
         const auto [num_x_steps, num_y_steps] = num_steps();
         // pre-allocate the vectors for the x and y dimension values
@@ -246,6 +255,8 @@ class operational_domain_impl
                                             op_domain.operational_values[{x_val, y_val}] = is_operational(sim_params);
                                         });
                       });
+
+        log_stats();
 
         return op_domain;
     }
@@ -298,6 +309,8 @@ class operational_domain_impl
             // determine the operational status
             op_domain.operational_values[{x_val, y_val}] = is_operational(sim_params);
         }
+
+        log_stats();
 
         return op_domain;
     }
@@ -410,6 +423,8 @@ class operational_domain_impl
             }
         }
 
+        log_stats();
+
         return op_domain;
     }
 
@@ -431,10 +446,6 @@ class operational_domain_impl
      */
     operational_domain_stats& stats;
     /**
-     * A mutex to protect the statistics.
-     */
-    std::mutex stats_mutex{};
-    /**
      * The output BDL pair of the layout.
      */
     const std::vector<bdl_pair<Lyt>> output_bdl_pairs;
@@ -446,6 +457,22 @@ class operational_domain_impl
      * The set of sampled points. Used to avoid sampling the same point multiple times.
      */
     phmap::flat_hash_set<std::pair<std::size_t, std::size_t>> sampled_points{};
+    /**
+     * Number of simulator invocations.
+     */
+    std::atomic<std::size_t> num_simulator_invocations{0};
+    /**
+     * Number of evaluated parameter combinations.
+     */
+    std::atomic<std::size_t> num_evaluated_parameter_combinations{0};
+    /**
+     * Number of parameter combinations, for which the layout is operational.
+     */
+    std::atomic<std::size_t> num_operational_parameter_combinations{0};
+    /**
+     * Number of parameter combinations, for which the layout is non-operational.
+     */
+    std::atomic<std::size_t> num_non_operational_parameter_combinations{0};
     /**
      * Determines whether the point at step position `(x, y)` has already been sampled. Here, `x` and `y` represent
      * steps in the x and y dimension, respectively, not the actual values of the parameters.
@@ -544,19 +571,16 @@ class operational_domain_impl
      * terminates as soon as a non-operational state is found. In the worst case, the function performs \f$ 2^n \f$
      * simulations, where \f$ n \f$ is the number of inputs of the layout.
      *
+     * // TODO it would be nice if is_operational could keep track of has_already_been_sampled to avoid code duplication
+     *
      * @param sim_params Simulation parameters to use for the simulation.
      * @return The operational status of the layout under the given simulation parameters.
      */
     [[nodiscard]] operational_domain::operational_status
     is_operational(const sidb_simulation_parameters& sim_params) noexcept
     {
-        {
-            // lock the stats
-            const std::lock_guard<std::mutex> lock{stats_mutex};
-
-            // increment the number of evaluated parameter combinations
-            ++stats.num_evaluated_parameter_combinations;
-        }
+        // increment the number of evaluated parameter combinations
+        ++num_evaluated_parameter_combinations;
 
         // take the first (and only) output BDL pair
         const auto& output_bdl_pair = output_bdl_pairs.front();
@@ -570,19 +594,16 @@ class operational_domain_impl
             // the expected output of the layout is the i-th bit of the truth table
             const auto expected_output = kitty::get_bit(truth_table, i);
 
-            // TODO replace with QuickExact
+            // TODO replace with engine selector via parameter
             // perform an exhaustive ground state simulation
             const auto sim_result = exhaustive_ground_state_simulation(*bii, sim_params);
+
+            ++num_simulator_invocations;
 
             // if no physically-valid charge distributions were found, the layout is non-operational
             if (sim_result.charge_distributions.empty())
             {
-                {
-                    // lock the stats
-                    const std::lock_guard<std::mutex> lock{stats_mutex};
-
-                    ++stats.num_non_operational_parameter_combinations;
-                }
+                ++num_non_operational_parameter_combinations;
 
                 return operational_domain::operational_status::NON_OPERATIONAL;
             }
@@ -599,12 +620,7 @@ class operational_domain_impl
             // if the output charge states are equal, the layout is not operational
             if (charge_state_output_lower == charge_state_output_upper)
             {
-                {
-                    // lock the stats
-                    const std::lock_guard<std::mutex> lock{stats_mutex};
-
-                    ++stats.num_non_operational_parameter_combinations;
-                }
+                ++num_non_operational_parameter_combinations;
 
                 return operational_domain::operational_status::NON_OPERATIONAL;
             }
@@ -615,12 +631,7 @@ class operational_domain_impl
                 if (charge_state_output_upper != sidb_charge_state::NEUTRAL ||
                     charge_state_output_lower != sidb_charge_state::NEGATIVE)
                 {
-                    {
-                        // lock the stats
-                        const std::lock_guard<std::mutex> lock{stats_mutex};
-
-                        ++stats.num_non_operational_parameter_combinations;
-                    }
+                    ++num_non_operational_parameter_combinations;
 
                     return operational_domain::operational_status::NON_OPERATIONAL;
                 }
@@ -631,25 +642,15 @@ class operational_domain_impl
                 if (charge_state_output_upper != sidb_charge_state::NEGATIVE ||
                     charge_state_output_lower != sidb_charge_state::NEUTRAL)
                 {
-                    {
-                        // lock the stats
-                        const std::lock_guard<std::mutex> lock{stats_mutex};
-
-                        ++stats.num_non_operational_parameter_combinations;
-                    }
+                    ++num_non_operational_parameter_combinations;
 
                     return operational_domain::operational_status::NON_OPERATIONAL;
                 }
             }
         }
 
-        {
-            // lock the stats
-            const std::lock_guard<std::mutex> lock{stats_mutex};
-
-            // if we made it here, the layout is operational
-            ++stats.num_operational_parameter_combinations;
-        }
+        // if we made it here, the layout is operational
+        ++num_operational_parameter_combinations;
 
         return operational_domain::operational_status::OPERATIONAL;
     }
@@ -719,6 +720,18 @@ class operational_domain_impl
         }
 
         return std::nullopt;
+    }
+    /**
+     * Helper function that writes the the statistics of the operational domain computation to the statistics object.
+     * Due to data races that can occur during the computation, each value is temporarily held in an atomic variable and
+     * written to the statistics object only after the computation has finished.
+     */
+    void log_stats() const noexcept
+    {
+        stats.num_simulator_invocations                  = num_simulator_invocations;
+        stats.num_evaluated_parameter_combinations       = num_evaluated_parameter_combinations;
+        stats.num_operational_parameter_combinations     = num_operational_parameter_combinations;
+        stats.num_non_operational_parameter_combinations = num_non_operational_parameter_combinations;
     }
 };
 

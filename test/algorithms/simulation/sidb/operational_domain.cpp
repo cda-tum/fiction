@@ -73,6 +73,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             }
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+            CHECK(op_domain_stats.num_simulator_invocations == 200);
             CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 100);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
@@ -100,6 +101,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             }
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+            CHECK(op_domain_stats.num_simulator_invocations <= 200);
             CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
             CHECK(op_domain_stats.num_evaluated_parameter_combinations > 0);
             CHECK(op_domain_stats.num_operational_parameter_combinations <= 100);
@@ -128,6 +130,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             }
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+            CHECK(op_domain_stats.num_simulator_invocations == 200);
             CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 100);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
@@ -155,6 +158,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             }
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+            CHECK(op_domain_stats.num_simulator_invocations <= 200);
             CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 100);
@@ -182,6 +186,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             }
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+            CHECK(op_domain_stats.num_simulator_invocations <= 200);
             CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
@@ -204,6 +209,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             }
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+            CHECK(op_domain_stats.num_simulator_invocations <= 200);
             CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
@@ -273,6 +279,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         }
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+        CHECK(op_domain_stats.num_simulator_invocations == 400);
         CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
         CHECK(op_domain_stats.num_operational_parameter_combinations == 100);
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
@@ -300,6 +307,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         }
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+        CHECK(op_domain_stats.num_simulator_invocations <= 400);
         CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
         CHECK(op_domain_stats.num_operational_parameter_combinations <= 100);
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
@@ -327,6 +335,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         }
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+        CHECK(op_domain_stats.num_simulator_invocations == 400);
         CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
         CHECK(op_domain_stats.num_operational_parameter_combinations == 100);
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
