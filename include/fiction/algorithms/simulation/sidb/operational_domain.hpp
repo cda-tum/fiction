@@ -403,18 +403,10 @@ class operational_domain_impl
             return op_domain;
         }
 
-        sidb_simulation_parameters sim_params = params.sim_params;
-
-        // calculate the number of steps in x and y dimension to instantiate distributions
-        const auto n_steps = num_steps();
-
-        const auto find_boundary_starting_point = [this, &starting_point,
-                                                   &sim_params]() noexcept -> std::pair<std::size_t, std::size_t>
+        const auto find_boundary_starting_point = [this,
+                                                   &starting_point]() noexcept -> std::pair<std::size_t, std::size_t>
         {
             // TODO make this smarter
-
-            const auto y_val = params.y_min + static_cast<double>(starting_point->second) * params.y_step;
-            set_y_dimension_value(sim_params, y_val);
 
             auto latest_operational_point = *starting_point;
 
@@ -422,11 +414,7 @@ class operational_domain_impl
             // found
             for (std::size_t x = starting_point->first; x > 0; --x)
             {
-                const auto x_val = params.x_min + static_cast<double>(x) * params.x_step;
-                set_x_dimension_value(sim_params, x_val);
-
-                const auto operational_status                = is_operational(sim_params);
-                op_domain.operational_values[{x_val, y_val}] = operational_status;
+                const auto operational_status = is_operational(x, starting_point->second);
 
                 if (operational_status == operational_domain::operational_status::OPERATIONAL)
                 {
@@ -443,16 +431,15 @@ class operational_domain_impl
             return latest_operational_point;
         };
 
-        const auto moore_neighborhood =
-            [num_x_steps = n_steps.first, num_y_steps = n_steps.second](const auto x, const auto y) noexcept
+        const auto moore_neighborhood = [this](const auto x, const auto y) noexcept
         {
             std::vector<std::pair<std::size_t, std::size_t>> neighbors{};
             neighbors.reserve(8);
 
             auto decr_x = (x > 0) ? x - 1 : x;
-            auto incr_x = (x + 1 < num_x_steps) ? x + 1 : x;
+            auto incr_x = (x + 1 < x_values.size()) ? x + 1 : x;
             auto decr_y = (y > 0) ? y - 1 : y;
-            auto incr_y = (y + 1 < num_y_steps) ? y + 1 : y;
+            auto incr_y = (y + 1 < x_values.size()) ? y + 1 : y;
 
             // add neighbors in clockwise direction
 
@@ -527,14 +514,7 @@ class operational_domain_impl
 
         while (next_point != boundary_starting_point)
         {
-            const auto x_val = params.x_min + static_cast<double>(next_point.first) * params.x_step;
-            const auto y_val = params.y_min + static_cast<double>(next_point.second) * params.y_step;
-
-            set_x_dimension_value(sim_params, x_val);
-            set_y_dimension_value(sim_params, y_val);
-
-            const auto operational_status                = is_operational(sim_params);
-            op_domain.operational_values[{x_val, y_val}] = operational_status;
+            const auto operational_status = is_operational(next_point.first, next_point.second);
 
             if (operational_status == operational_domain::operational_status::OPERATIONAL)
             {
