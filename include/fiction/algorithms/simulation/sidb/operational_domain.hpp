@@ -600,6 +600,13 @@ class operational_domain_impl
             // the expected output of the layout is the i-th bit of the truth table
             const auto expected_output = kitty::get_bit(truth_table, i);
 
+            if (can_positive_charges_occur(*bii, sim_params))
+            {
+                ++num_non_operational_parameter_combinations;
+
+                return operational_domain::operational_status::NON_OPERATIONAL;
+            }
+
             sidb_simulation_result<Lyt> sim_result{};
 
             if (params.sim_engine == sidb_simulation_engine::EXGS)
@@ -752,6 +759,32 @@ class operational_domain_impl
         stats.num_evaluated_parameter_combinations       = num_evaluated_parameter_combinations;
         stats.num_operational_parameter_combinations     = num_operational_parameter_combinations;
         stats.num_non_operational_parameter_combinations = num_non_operational_parameter_combinations;
+    }
+
+    [[nodiscard]] bool can_positive_charges_occur(const Lyt&                        lyt,
+                                                  const sidb_simulation_parameters& sim_params) const noexcept
+    {
+        const charge_distribution_surface charge_lyt{lyt, sim_params, sidb_charge_state::NEGATIVE};
+
+        bool result = false;
+
+        charge_lyt.foreach_cell(
+            [this, &result, &sim_params, charge_lyt](const auto& c)
+            {
+                if (const auto local_pot = charge_lyt.get_local_potential(c); local_pot.has_value())
+                {
+                    if ((-(*local_pot) + sim_params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
+                    {
+                        result = true;
+
+                        return false;  // break
+                    }
+                }
+
+                return true;  // continue
+            });
+
+        return result;
     }
 };
 
