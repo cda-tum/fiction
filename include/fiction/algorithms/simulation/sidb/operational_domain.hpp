@@ -201,13 +201,18 @@ class operational_domain_impl
             params{ps},
             stats{st},
             output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)},
-            x_values(num_x_steps()),  // pre-allocate the vectors for the x dimension values
-            y_values(num_y_steps())   // pre-allocate the vectors for the y dimension values
+            x_indices(num_x_steps()),  // pre-allocate the x dimension indices
+            y_indices(num_y_steps()),  // pre-allocate the y dimension indices
+            x_values(num_x_steps()),   // pre-allocate the x dimension values
+            y_values(num_y_steps())    // pre-allocate the y dimension values
     {
         assert(output_bdl_pairs.size() == 1 && "The layout must have exactly one output BDL pair");
 
         op_domain.x_dimension = params.x_dimension;
         op_domain.y_dimension = params.y_dimension;
+
+        std::iota(x_indices.begin(), x_indices.end(), 0ul);
+        std::iota(y_indices.begin(), y_indices.end(), 0ul);
 
         // generate the x dimension values
         std::generate(x_values.begin(), x_values.end(),
@@ -239,14 +244,9 @@ class operational_domain_impl
 
         // TODO replace vectors with ranges for memory efficiency
 
-        std::vector<std::size_t> x_indices(x_values.size());
-        std::vector<std::size_t> y_indices(y_values.size());
-        std::iota(x_indices.begin(), x_indices.end(), 0ul);
-        std::iota(y_indices.begin(), y_indices.end(), 0ul);
-
         // for each x value in parallel
         std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ x_indices.cbegin(), x_indices.cend(),
-                      [this, &y_indices](const auto x)
+                      [this](const auto x)
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
@@ -270,19 +270,26 @@ class operational_domain_impl
 
         static std::mt19937_64 generator{std::random_device{}()};
 
-        // instantiate distributions
-        std::uniform_int_distribution<std::size_t> x_distribution{0, x_values.size() - 1};
-        std::uniform_int_distribution<std::size_t> y_distribution{0, y_values.size() - 1};
+        std::vector<std::size_t> x_samples{};
+        std::vector<std::size_t> y_samples{};
 
-        for (std::size_t i = 0; i < samples; ++i)
-        {
-            // sample x and y dimension
-            const auto x_sample = x_distribution(generator);
-            const auto y_sample = y_distribution(generator);
+        x_samples.reserve(samples);
+        y_samples.reserve(samples);
 
-            // determine the operational status
-            is_operational(x_sample, y_sample);
-        }
+        // sample x and y indices
+        std::sample(x_indices.begin(), x_indices.end(), std::back_inserter(x_samples), samples, generator);
+        std::sample(y_indices.begin(), y_indices.end(), std::back_inserter(y_samples), samples, generator);
+
+        std::vector<std::pair<std::size_t, std::size_t>> xy_samples{};
+        xy_samples.reserve(samples);
+
+        // tie x and y indices together
+        std::transform(x_samples.cbegin(), x_samples.cend(), y_samples.cbegin(), std::back_inserter(xy_samples),
+                       [](const auto x, const auto y) { return std::make_pair(x, y); });
+
+        // for each sample point in parallel
+        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ xy_samples.cbegin(), xy_samples.cend(),
+                      [this](const auto xy) { is_operational(xy.first, xy.second); });
 
         log_stats();
 
@@ -404,6 +411,14 @@ class operational_domain_impl
      * The output BDL pair of the layout.
      */
     const std::vector<bdl_pair<Lyt>> output_bdl_pairs;
+    /**
+     * X dimension steps.
+     */
+    std::vector<std::size_t> x_indices;
+    /**
+     * Y dimension steps.
+     */
+    std::vector<std::size_t> y_indices;
     /**
      * All x dimension values.
      */
