@@ -434,6 +434,171 @@ class operational_domain_impl
         return op_domain;
     }
 
+    [[nodiscard]] operational_domain contour_tracing(const std::size_t samples) noexcept
+    {
+        mockturtle::stopwatch stop{stats.time_total};
+
+        // first, perform random sampling to find an operational starting point
+        const auto starting_point = find_operational_parameters_via_random_sampling(samples);
+
+        // if no operational point was found within the specified number of samples, return
+        if (!starting_point.has_value())
+        {
+            return op_domain;
+        }
+
+        sidb_simulation_parameters sim_params = params.sim_params;
+
+        // calculate the number of steps in x and y dimension to instantiate distributions
+        const auto n_steps = num_steps();
+
+        const auto find_boundary_starting_point = [this, &starting_point,
+                                                   &sim_params]() noexcept -> std::pair<std::size_t, std::size_t>
+        {
+            // TODO make this smarter
+
+            const auto y_val = params.y_min + static_cast<double>(starting_point->second) * params.y_step;
+            set_y_dimension_value(sim_params, y_val);
+
+            auto latest_operational_point = *starting_point;
+
+            // travel left and return the previous operational point as soon as the first non-operational point was
+            // found
+            for (std::size_t x = starting_point->first; x > 0; --x)
+            {
+                const auto x_val = params.x_min + static_cast<double>(x) * params.x_step;
+                set_x_dimension_value(sim_params, x_val);
+
+                const auto operational_status                = is_operational(sim_params);
+                op_domain.operational_values[{x_val, y_val}] = operational_status;
+
+                if (operational_status == operational_domain::operational_status::OPERATIONAL)
+                {
+                    latest_operational_point = {x, starting_point->second};
+                }
+                else
+                {
+                    return latest_operational_point;
+                }
+            }
+
+            // if no boundary point was found, the operational area extends outside the parameter range
+            // return the latest operational point
+            return latest_operational_point;
+        };
+
+        const auto moore_neighborhood =
+            [num_x_steps = n_steps.first, num_y_steps = n_steps.second](const auto x, const auto y) noexcept
+        {
+            std::vector<std::pair<std::size_t, std::size_t>> neighbors{};
+            neighbors.reserve(8);
+
+            auto decr_x = (x > 0) ? x - 1 : x;
+            auto incr_x = (x + 1 < num_x_steps) ? x + 1 : x;
+            auto decr_y = (y > 0) ? y - 1 : y;
+            auto incr_y = (y + 1 < num_y_steps) ? y + 1 : y;
+
+            // add neighbors in clockwise direction
+
+            // right
+            if (x != incr_x)
+            {
+                neighbors.emplace_back(incr_x, y);
+            }
+            // lower-right
+            if (x != incr_x && y != decr_y)
+            {
+                neighbors.emplace_back(incr_x, decr_y);
+            }
+            // down
+            if (y != decr_y)
+            {
+                neighbors.emplace_back(x, decr_y);
+            }
+            // lower-left
+            if (x != decr_x && y != decr_y)
+            {
+                neighbors.emplace_back(decr_x, decr_y);
+            }
+            // left
+            if (x != decr_x)
+            {
+                neighbors.emplace_back(decr_x, y);
+            }
+            // upper-left
+            if (x != decr_x && y != incr_y)
+            {
+                neighbors.emplace_back(decr_x, incr_y);
+            }
+            // up
+            if (y != incr_y)
+            {
+                neighbors.emplace_back(x, incr_y);
+            }
+            // upper-right
+            if (x != incr_x && y != incr_y)
+            {
+                neighbors.emplace_back(incr_x, incr_y);
+            }
+
+            return neighbors;
+        };
+
+        const auto next_clockwise_point = [](auto&       neighborhood,
+                                             const auto& backtrack) noexcept -> std::pair<std::size_t, std::size_t>
+        {
+            assert(std::find(neighborhood.cbegin(), neighborhood.cend(), backtrack) != neighborhood.cend() &&
+                   "The backtrack point must be part of the neighborhood");
+
+            while (neighborhood.back() != backtrack)
+            {
+                std::rotate(neighborhood.begin(), neighborhood.begin() + 1, neighborhood.end());
+            }
+
+            return neighborhood.front();
+        };
+
+        // find a boundary sample point
+        const auto boundary_starting_point = find_boundary_starting_point();
+
+        auto current_boundary_point = boundary_starting_point;
+        auto backtrack_point        = current_boundary_point.first == 0 ?
+                                          current_boundary_point :
+                                          std::pair{current_boundary_point.first - 1, current_boundary_point.second};
+
+        auto current_neighborhood = moore_neighborhood(current_boundary_point.first, current_boundary_point.second);
+        auto next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
+
+        while (next_point != boundary_starting_point)
+        {
+            const auto x_val = params.x_min + static_cast<double>(next_point.first) * params.x_step;
+            const auto y_val = params.y_min + static_cast<double>(next_point.second) * params.y_step;
+
+            set_x_dimension_value(sim_params, x_val);
+            set_y_dimension_value(sim_params, y_val);
+
+            const auto operational_status                = is_operational(sim_params);
+            op_domain.operational_values[{x_val, y_val}] = operational_status;
+
+            if (operational_status == operational_domain::operational_status::OPERATIONAL)
+            {
+                backtrack_point        = current_boundary_point;
+                current_boundary_point = next_point;
+            }
+            else
+            {
+                backtrack_point = next_point;
+            }
+
+            current_neighborhood = moore_neighborhood(current_boundary_point.first, current_boundary_point.second);
+            next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
+        }
+
+        log_stats();
+
+        return op_domain;
+    }
+
   private:
     /**
      * The SiDB cell-level layout to investigate.
@@ -918,6 +1083,57 @@ operational_domain operational_domain_flood_fill(const Lyt& lyt, const TT& spec,
     detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
     const auto result = p.flood_fill(samples);
+
+    if (stats)
+    {
+        *stats = st;
+    }
+
+    return result;
+}
+/**
+ * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
+ * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
+ * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
+ * inputs of the truth table. // TODO implement the matching of truth table inputs and BDL pair ordering
+ *
+ * This algorithm first uses random sampling to find a single operational point within the parameter range. From there,
+ * it traverses outwards to find the edge of the operational area and performs Moore neighborhood contour tracing to
+ * explore the contour of the operational domain. If the operational domain is connected, the algorithm is guaranteed to
+ * find the contours of the entire operational domain within the parameter range if the initial random sampling found an
+ * operational point.
+ *
+ * It performs up to `samples` uniformly-distributed random samples within the parameter range until an operational
+ * point is found. From there, it performs another number of samples equal to the distance to an edge of the operational
+ * area. Finally, it performs up to 8 samples for each contour point (however, the actual number is usually much lower).
+ * For each sample, the algorithm performs one operational check on the layout, where each operational check consists of
+ * up to \f$ 2^n \f$ exact ground state simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact
+ * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
+ * layouts with few inputs.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt Layout to compute the operational domain for.
+ * @param spec Expected truth table of the layout.
+ * @param samples Number of samples to perform.
+ * @param params Operational domain computation parameters.
+ * @param stats Operational domain computation statistics.
+ * @return The (partial) operational domain of the layout.
+ */
+template <typename Lyt, typename TT>
+operational_domain operational_domain_contour_tracing(const Lyt& lyt, const TT& spec, const std::size_t samples,
+                                                      const operational_domain_params& params = {},
+                                                      operational_domain_stats*        stats  = nullptr)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    operational_domain_stats                 st{};
+    detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+
+    const auto result = p.contour_tracing(samples);
 
     if (stats)
     {
