@@ -200,12 +200,37 @@ class operational_domain_impl
             truth_table{tt},
             params{ps},
             stats{st},
-            output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)}
+            output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)},
+            x_indices(num_x_steps()),  // pre-allocate the x dimension indices
+            y_indices(num_y_steps()),  // pre-allocate the y dimension indices
+            x_values(num_x_steps()),   // pre-allocate the x dimension values
+            y_values(num_y_steps())    // pre-allocate the y dimension values
     {
         assert(output_bdl_pairs.size() == 1 && "The layout must have exactly one output BDL pair");
 
         op_domain.x_dimension = params.x_dimension;
         op_domain.y_dimension = params.y_dimension;
+
+        std::iota(x_indices.begin(), x_indices.end(), 0ul);
+        std::iota(y_indices.begin(), y_indices.end(), 0ul);
+
+        // generate the x dimension values
+        std::generate(x_values.begin(), x_values.end(),
+                      [x = 0, this]() mutable
+                      {
+                          const double x_val = params.x_min + x * params.x_step;
+                          ++x;
+                          return x_val;
+                      });
+
+        // generate the y dimension values
+        std::generate(y_values.begin(), y_values.end(),
+                      [y = 0, this]() mutable
+                      {
+                          const double y_val = params.y_min + y * params.y_step;
+                          ++y;
+                          return y_val;
+                      });
     }
     /**
      * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
@@ -217,49 +242,15 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        // TODO refactor the ranges and steps into an attribute of this class
         // TODO replace vectors with ranges for memory efficiency
 
-        // pre-calculate the number of steps for each dimension
-        const auto [num_x_steps, num_y_steps] = num_steps();
-        // pre-allocate the vectors for the x and y dimension values
-        std::vector<double> x_values(num_x_steps);
-        std::vector<double> y_values(num_y_steps);
-
-        // generate the x dimension values
-        std::generate(x_values.begin(), x_values.end(),
-                      [n = 0, this]() mutable
-                      {
-                          const double x_val = params.x_min + n * params.x_step;
-                          ++n;
-                          return x_val;
-                      });
-
-        // generate the y dimension values
-        std::generate(y_values.begin(), y_values.end(),
-                      [n = 0, this]() mutable
-                      {
-                          const double y_val = params.y_min + n * params.y_step;
-                          ++n;
-                          return y_val;
-                      });
-
         // for each x value in parallel
-        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ x_values.begin(), x_values.end(),
-                      [this, &y_values](const double x_val)
+        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ x_indices.cbegin(), x_indices.cend(),
+                      [this](const auto x)
                       {
                           // for each y value in parallel
-                          std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_values.begin(), y_values.end(),
-                                        [this, x_val](const double y_val)
-                                        {
-                                            sidb_simulation_parameters sim_params = params.sim_params;
-
-                                            set_x_dimension_value(sim_params, x_val);
-                                            set_y_dimension_value(sim_params, y_val);
-
-                                            // determine the operational status
-                                            op_domain.operational_values[{x_val, y_val}] = is_operational(sim_params);
-                                        });
+                          std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
+                                        [this, x](const auto y) { is_operational(x, y); });
                       });
 
         log_stats();
@@ -277,44 +268,28 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        sidb_simulation_parameters sim_params = params.sim_params;
-
-        sampled_points.reserve(samples);
-
         static std::mt19937_64 generator{std::random_device{}()};
 
-        // calculate the number of steps in x and y dimension to instantiate distributions
-        const auto [num_x_steps, num_y_steps] = num_steps();
+        std::vector<std::size_t> x_samples{};
+        std::vector<std::size_t> y_samples{};
 
-        // instantiate distributions
-        std::uniform_int_distribution<std::size_t> x_distribution{0, num_x_steps - 1};
-        std::uniform_int_distribution<std::size_t> y_distribution{0, num_y_steps - 1};
+        x_samples.reserve(samples);
+        y_samples.reserve(samples);
 
-        for (std::size_t i = 0; i < samples; ++i)
-        {
-            // sample x and y dimension
-            const auto x_sample = x_distribution(generator);
-            const auto y_sample = y_distribution(generator);
+        // sample x and y indices
+        std::sample(x_indices.begin(), x_indices.end(), std::back_inserter(x_samples), samples, generator);
+        std::sample(y_indices.begin(), y_indices.end(), std::back_inserter(y_samples), samples, generator);
 
-            // check if the point has already been sampled
-            if (has_already_been_sampled(x_sample, y_sample))
-            {
-                continue;
-            }
+        std::vector<std::pair<std::size_t, std::size_t>> xy_samples{};
+        xy_samples.reserve(samples);
 
-            // add the point to the set of sampled points
-            sampled_points.insert({x_sample, y_sample});
+        // tie x and y indices together
+        std::transform(x_samples.cbegin(), x_samples.cend(), y_samples.cbegin(), std::back_inserter(xy_samples),
+                       [](const auto x, const auto y) { return std::make_pair(x, y); });
 
-            // convert the sample to the actual value
-            const auto x_val = params.x_min + static_cast<double>(x_sample) * params.x_step;
-            const auto y_val = params.y_min + static_cast<double>(y_sample) * params.y_step;
-
-            set_x_dimension_value(sim_params, x_val);
-            set_y_dimension_value(sim_params, y_val);
-
-            // determine the operational status
-            op_domain.operational_values[{x_val, y_val}] = is_operational(sim_params);
-        }
+        // for each sample point in parallel
+        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ xy_samples.cbegin(), xy_samples.cend(),
+                      [this](const auto xy) { is_operational(xy.first, xy.second); });
 
         log_stats();
 
@@ -343,21 +318,15 @@ class operational_domain_impl
             return op_domain;
         }
 
-        sidb_simulation_parameters sim_params = params.sim_params;
-
-        // calculate the number of steps in x and y dimension to instantiate distributions
-        const auto n_steps = num_steps();
-
         // a queue of (x, y) dimension steps to be evaluated
         using parameter_queue = std::queue<std::pair<std::size_t, std::size_t>>;
         parameter_queue queue{};
 
         // a utility function that adds the adjacent points to the queue for further evaluation
-        const auto queue_next_points =
-            [this, &queue, num_x_steps = n_steps.first, num_y_steps = n_steps.second](const auto x, const auto y)
+        const auto queue_next_points = [this, &queue](const auto x, const auto y)
         {
             // increase in x dimension
-            if (const auto incr_x = x + 1; incr_x < num_x_steps)
+            if (const auto incr_x = x + 1; incr_x < x_values.size())
             {
                 if (!has_already_been_sampled(incr_x, y))
                 {
@@ -373,7 +342,7 @@ class operational_domain_impl
                 }
             }
             // increase in y dimension
-            if (const auto incr_y = y + 1; incr_y < num_y_steps)
+            if (const auto incr_y = y + 1; incr_y < y_values.size())
             {
                 if (!has_already_been_sampled(x, incr_y))
                 {
@@ -400,27 +369,14 @@ class operational_domain_impl
             const auto [x, y] = queue.front();
             queue.pop();
 
-            // convert steps to actual values
-            const auto x_val = params.x_min + static_cast<double>(x) * params.x_step;
-            const auto y_val = params.y_min + static_cast<double>(y) * params.y_step;
-
             // if the point has already been sampled, continue with the next
             if (has_already_been_sampled(x, y))
             {
                 continue;
             }
 
-            set_x_dimension_value(sim_params, x_val);
-            set_y_dimension_value(sim_params, y_val);
-
             // check if the point is operational
-            const auto operational_status = is_operational(sim_params);
-
-            // add the point to the operational domain
-            op_domain.operational_values[{x_val, y_val}] = operational_status;
-
-            // add the point to the set of sampled points
-            sampled_points.insert({x, y});
+            const auto operational_status = is_operational(x, y);
 
             // if the point is operational, add its four neighbors to the queue
             if (operational_status == operational_domain::operational_status::OPERATIONAL)
@@ -621,13 +577,25 @@ class operational_domain_impl
      */
     const std::vector<bdl_pair<Lyt>> output_bdl_pairs;
     /**
+     * X dimension steps.
+     */
+    std::vector<std::size_t> x_indices;
+    /**
+     * Y dimension steps.
+     */
+    std::vector<std::size_t> y_indices;
+    /**
+     * All x dimension values.
+     */
+    std::vector<double> x_values;
+    /**
+     * All y dimension values.
+     */
+    std::vector<double> y_values;
+    /**
      * The operational domain of the layout.
      */
     operational_domain op_domain{};
-    /**
-     * The set of sampled points. Used to avoid sampling the same point multiple times.
-     */
-    phmap::flat_hash_set<std::pair<std::size_t, std::size_t>> sampled_points{};
     /**
      * Number of simulator invocations.
      */
@@ -645,26 +613,43 @@ class operational_domain_impl
      */
     std::atomic<std::size_t> num_non_operational_parameter_combinations{0};
     /**
-     * Determines whether the point at step position `(x, y)` has already been sampled. Here, `x` and `y` represent
-     * steps in the x and y dimension, respectively, not the actual values of the parameters.
+     * Determines whether the point at step position `(x, y)` has already been sampled and returns the operational value
+     * at `(x, y)` if it already exists. Here, `x` and `y` represent steps in the x and y dimension, respectively, not
+     * the actual values of the parameters.
      *
      * @param x X dimension step value.
      * @param y Y dimension step value.
-     * @return `true` iff the point at step position `(x, y)` has already been sampled.
+     * @return The operational status of the point at step position `(x, y)` or `std::nullopt` if `(x, y)` has not been
+     * sampled yet.
      */
-    [[nodiscard]] inline bool has_already_been_sampled(const std::size_t x, const std::size_t y) const noexcept
+    [[nodiscard]] inline std::optional<operational_domain::operational_status>
+    has_already_been_sampled(const std::size_t x, const std::size_t y) const noexcept
     {
-        return sampled_points.find({x, y}) != sampled_points.cend();
+        if (const auto it = op_domain.operational_values.find({x_values[x], y_values[y]});
+            it != op_domain.operational_values.cend())
+        {
+            return it->second;
+        }
+
+        return std::nullopt;
     }
     /**
-     * Calculates the number of steps in the x and y dimension based on the provided parameters.
+     * Calculates the number of steps in the x dimension based on the provided parameters.
      *
-     * @return The number of steps in the x and y dimension.
+     * @return The number of steps in the x dimension.
      */
-    [[nodiscard]] inline std::pair<std::size_t, std::size_t> num_steps() const noexcept
+    [[nodiscard]] inline std::size_t num_x_steps() const noexcept
     {
-        return {static_cast<std::size_t>((params.x_max - params.x_min) / params.x_step),
-                static_cast<std::size_t>((params.y_max - params.y_min) / params.y_step)};
+        return static_cast<std::size_t>((params.x_max - params.x_min) / params.x_step);
+    }
+    /**
+     * Calculates the number of steps in the y dimension based on the provided parameters.
+     *
+     * @return The number of steps in the y dimension.
+     */
+    [[nodiscard]] inline std::size_t num_y_steps() const noexcept
+    {
+        return static_cast<std::size_t>((params.y_max - params.y_min) / params.y_step);
     }
     /**
      * Potential sweep dimensions.
@@ -742,15 +727,43 @@ class operational_domain_impl
      * terminates as soon as a non-operational state is found. In the worst case, the function performs \f$ 2^n \f$
      * simulations, where \f$ n \f$ is the number of inputs of the layout.
      *
-     * // TODO it would be nice if is_operational could keep track of has_already_been_sampled to avoid code duplication
-     * // TODO is_operational should also insert the point into the op_domain automatically
+     * If the point `(x, y)` has already been investigated, the stored operational status is returned without conducting
+     * another simulation.
      *
-     * @param sim_params Simulation parameters to use for the simulation.
+     * @param x X dimension step value.
+     * @param y Y dimension step value.
      * @return The operational status of the layout under the given simulation parameters.
      */
-    [[nodiscard]] operational_domain::operational_status
-    is_operational(const sidb_simulation_parameters& sim_params) noexcept
+    operational_domain::operational_status is_operational(const std::size_t x, const std::size_t y) noexcept
     {
+        // if the point has already been sampled, return the stored operational status
+        if (const auto op_value = has_already_been_sampled(x, y); op_value.has_value())
+        {
+            return *op_value;
+        }
+
+        // fetch the x and y dimension values
+        const auto x_val = x_values[x];
+        const auto y_val = y_values[y];
+
+        const auto operational = [this, x_val, y_val]()
+        {
+            ++num_operational_parameter_combinations;
+
+            op_domain.operational_values[{x_val, y_val}] = operational_domain::operational_status::OPERATIONAL;
+
+            return operational_domain::operational_status::OPERATIONAL;
+        };
+
+        const auto non_operational = [this, x_val, y_val]()
+        {
+            ++num_non_operational_parameter_combinations;
+
+            op_domain.operational_values[{x_val, y_val}] = operational_domain::operational_status::NON_OPERATIONAL;
+
+            return operational_domain::operational_status::NON_OPERATIONAL;
+        };
+
         // increment the number of evaluated parameter combinations
         ++num_evaluated_parameter_combinations;
 
@@ -760,6 +773,10 @@ class operational_domain_impl
         // initialize a BDL input iterator
         bdl_input_iterator<Lyt> bii{layout, params.bdl_params};
 
+        sidb_simulation_parameters sim_params = params.sim_params;
+        set_x_dimension_value(sim_params, x_val);
+        set_y_dimension_value(sim_params, y_val);
+
         // for each input combination
         for (auto i = 0u; i < truth_table.num_bits(); ++i, ++bii)
         {
@@ -768,9 +785,7 @@ class operational_domain_impl
 
             if (can_positive_charges_occur(*bii, sim_params))
             {
-                ++num_non_operational_parameter_combinations;
-
-                return operational_domain::operational_status::NON_OPERATIONAL;
+                return non_operational();
             }
 
             sidb_simulation_result<Lyt> sim_result{};
@@ -796,9 +811,7 @@ class operational_domain_impl
             // if no physically-valid charge distributions were found, the layout is non-operational
             if (sim_result.charge_distributions.empty())
             {
-                ++num_non_operational_parameter_combinations;
-
-                return operational_domain::operational_status::NON_OPERATIONAL;
+                return non_operational();
             }
 
             // find the ground state, which is the charge distribution with the lowest energy
@@ -813,20 +826,15 @@ class operational_domain_impl
             // if the output charge states are equal, the layout is not operational
             if (charge_state_output_lower == charge_state_output_upper)
             {
-                ++num_non_operational_parameter_combinations;
-
-                return operational_domain::operational_status::NON_OPERATIONAL;
+                return non_operational();
             }
-
             // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
             if (expected_output)
             {
                 if (charge_state_output_upper != sidb_charge_state::NEUTRAL ||
                     charge_state_output_lower != sidb_charge_state::NEGATIVE)
                 {
-                    ++num_non_operational_parameter_combinations;
-
-                    return operational_domain::operational_status::NON_OPERATIONAL;
+                    return non_operational();
                 }
             }
             // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
@@ -835,17 +843,13 @@ class operational_domain_impl
                 if (charge_state_output_upper != sidb_charge_state::NEGATIVE ||
                     charge_state_output_lower != sidb_charge_state::NEUTRAL)
                 {
-                    ++num_non_operational_parameter_combinations;
-
-                    return operational_domain::operational_status::NON_OPERATIONAL;
+                    return non_operational();
                 }
             }
         }
 
         // if we made it here, the layout is operational
-        ++num_operational_parameter_combinations;
-
-        return operational_domain::operational_status::OPERATIONAL;
+        return operational();
     }
     /**
      * Performs random sampling to find any operational parameter combination. This function is useful if a single
@@ -853,30 +857,23 @@ class operational_domain_impl
      * of the first operational point found. If no operational parameter combination can be found within the given
      * number of samples, the function returns std::nullopt.
      *
-     * This function adds any sampled points to the `sampled_points` and `op_domain` member variables.
+     * This function adds any sampled points to the `op_domain` member variables.
      *
      * // TODO this function contains a lot of code duplication from `random_sampling` as of right now.
      * // TODO This must be refactored.
      *
      * @param samples Maximum number of samples to take. Works as a timeout.
-     * @return The first pair of operational parameters given as x and y steps, if any could be found, std::nullopt
+     * @return The first pair of operational parameters given as x and y steps, if any could be found, `std::nullopt`
      * otherwise.
      */
     [[nodiscard]] std::optional<std::pair<std::size_t, std::size_t>>
     find_operational_parameters_via_random_sampling(const std::size_t samples) noexcept
     {
-        sidb_simulation_parameters sim_params = params.sim_params;
-
-        sampled_points.reserve(samples);
-
         static std::mt19937_64 generator{std::random_device{}()};
 
-        // calculate the number of steps in x and y dimension to instantiate distributions
-        const auto [num_x_steps, num_y_steps] = num_steps();
-
         // instantiate distributions
-        std::uniform_int_distribution<std::size_t> x_distribution{0, num_x_steps - 1};
-        std::uniform_int_distribution<std::size_t> y_distribution{0, num_y_steps - 1};
+        std::uniform_int_distribution<std::size_t> x_distribution{0, x_values.size() - 1};
+        std::uniform_int_distribution<std::size_t> y_distribution{0, y_values.size() - 1};
 
         for (std::size_t i = 0; i < samples; ++i)
         {
@@ -884,26 +881,8 @@ class operational_domain_impl
             const auto x_sample = x_distribution(generator);
             const auto y_sample = y_distribution(generator);
 
-            // check if the point has already been sampled
-            if (has_already_been_sampled(x_sample, y_sample))
-            {
-                continue;
-            }
-
-            // add the point to the set of sampled points
-            sampled_points.insert({x_sample, y_sample});
-
-            // convert the sample to the actual value
-            const auto x_val = params.x_min + static_cast<double>(x_sample) * params.x_step;
-            const auto y_val = params.y_min + static_cast<double>(y_sample) * params.y_step;
-
-            set_x_dimension_value(sim_params, x_val);
-            set_y_dimension_value(sim_params, y_val);
-
             // determine the operational status
-            const auto operational_value = is_operational(sim_params);
-
-            op_domain.operational_values[{x_val, y_val}] = operational_value;
+            const auto operational_value = is_operational(x_sample, y_sample);
 
             // if the parameter combination is operational, return its step values in x and y dimension
             if (operational_value == operational_domain::operational_status::OPERATIONAL)
