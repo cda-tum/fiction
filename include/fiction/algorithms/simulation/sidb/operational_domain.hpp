@@ -578,6 +578,7 @@ class operational_domain_impl
      * simulations, where \f$ n \f$ is the number of inputs of the layout.
      *
      * // TODO it would be nice if is_operational could keep track of has_already_been_sampled to avoid code duplication
+     * // TODO is_operational should also insert the point into the op_domain automatically
      *
      * @param sim_params Simulation parameters to use for the simulation.
      * @return The operational status of the layout under the given simulation parameters.
@@ -769,7 +770,7 @@ class operational_domain_impl
         bool result = false;
 
         charge_lyt.foreach_cell(
-            [this, &result, &sim_params, charge_lyt](const auto& c)
+            [&result, &sim_params, charge_lyt](const auto& c)
             {
                 if (const auto local_pot = charge_lyt.get_local_potential(c); local_pot.has_value())
                 {
