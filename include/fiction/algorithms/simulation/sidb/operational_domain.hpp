@@ -200,31 +200,14 @@ class operational_domain_impl
             truth_table{tt},
             params{ps},
             stats{st},
-            output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)}
+            output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)},
+            x_values(num_x_steps()),  // pre-allocate the vectors for the x dimension values
+            y_values(num_y_steps())   // pre-allocate the vectors for the y dimension values
     {
         assert(output_bdl_pairs.size() == 1 && "The layout must have exactly one output BDL pair");
 
         op_domain.x_dimension = params.x_dimension;
         op_domain.y_dimension = params.y_dimension;
-    }
-    /**
-     * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
-     * has quadratic complexity. The operational status is computed for each parameter combination.
-     *
-     * @return The operational domain of the layout.
-     */
-    [[nodiscard]] operational_domain grid_search() noexcept
-    {
-        mockturtle::stopwatch stop{stats.time_total};
-
-        // TODO refactor the ranges and steps into an attribute of this class
-        // TODO replace vectors with ranges for memory efficiency
-
-        // pre-calculate the number of steps for each dimension
-        const auto [num_x_steps, num_y_steps] = num_steps();
-        // pre-allocate the vectors for the x and y dimension values
-        std::vector<double> x_values(num_x_steps);
-        std::vector<double> y_values(num_y_steps);
 
         // generate the x dimension values
         std::generate(x_values.begin(), x_values.end(),
@@ -243,10 +226,22 @@ class operational_domain_impl
                           ++n;
                           return y_val;
                       });
+    }
+    /**
+     * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
+     * has quadratic complexity. The operational status is computed for each parameter combination.
+     *
+     * @return The operational domain of the layout.
+     */
+    [[nodiscard]] operational_domain grid_search() noexcept
+    {
+        mockturtle::stopwatch stop{stats.time_total};
+
+        // TODO replace vectors with ranges for memory efficiency
 
         // for each x value in parallel
         std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ x_values.begin(), x_values.end(),
-                      [this, &y_values](const double x_val)
+                      [this](const double x_val)
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_values.begin(), y_values.end(),
@@ -283,12 +278,9 @@ class operational_domain_impl
 
         static std::mt19937_64 generator{std::random_device{}()};
 
-        // calculate the number of steps in x and y dimension to instantiate distributions
-        const auto [num_x_steps, num_y_steps] = num_steps();
-
         // instantiate distributions
-        std::uniform_int_distribution<std::size_t> x_distribution{0, num_x_steps - 1};
-        std::uniform_int_distribution<std::size_t> y_distribution{0, num_y_steps - 1};
+        std::uniform_int_distribution<std::size_t> x_distribution{0, x_values.size() - 1};
+        std::uniform_int_distribution<std::size_t> y_distribution{0, y_values.size() - 1};
 
         for (std::size_t i = 0; i < samples; ++i)
         {
@@ -306,8 +298,8 @@ class operational_domain_impl
             sampled_points.insert({x_sample, y_sample});
 
             // convert the sample to the actual value
-            const auto x_val = params.x_min + static_cast<double>(x_sample) * params.x_step;
-            const auto y_val = params.y_min + static_cast<double>(y_sample) * params.y_step;
+            const auto x_val = x_values[x_sample];
+            const auto y_val = y_values[y_sample];
 
             set_x_dimension_value(sim_params, x_val);
             set_y_dimension_value(sim_params, y_val);
@@ -345,19 +337,15 @@ class operational_domain_impl
 
         sidb_simulation_parameters sim_params = params.sim_params;
 
-        // calculate the number of steps in x and y dimension to instantiate distributions
-        const auto n_steps = num_steps();
-
         // a queue of (x, y) dimension steps to be evaluated
         using parameter_queue = std::queue<std::pair<std::size_t, std::size_t>>;
         parameter_queue queue{};
 
         // a utility function that adds the adjacent points to the queue for further evaluation
-        const auto queue_next_points =
-            [this, &queue, num_x_steps = n_steps.first, num_y_steps = n_steps.second](const auto x, const auto y)
+        const auto queue_next_points = [this, &queue](const auto x, const auto y)
         {
             // increase in x dimension
-            if (const auto incr_x = x + 1; incr_x < num_x_steps)
+            if (const auto incr_x = x + 1; incr_x < x_values.size())
             {
                 if (!has_already_been_sampled(incr_x, y))
                 {
@@ -373,7 +361,7 @@ class operational_domain_impl
                 }
             }
             // increase in y dimension
-            if (const auto incr_y = y + 1; incr_y < num_y_steps)
+            if (const auto incr_y = y + 1; incr_y < y_values.size())
             {
                 if (!has_already_been_sampled(x, incr_y))
                 {
@@ -401,8 +389,8 @@ class operational_domain_impl
             queue.pop();
 
             // convert steps to actual values
-            const auto x_val = params.x_min + static_cast<double>(x) * params.x_step;
-            const auto y_val = params.y_min + static_cast<double>(y) * params.y_step;
+            const auto x_val = x_values[x];
+            const auto y_val = y_values[y];
 
             // if the point has already been sampled, continue with the next
             if (has_already_been_sampled(x, y))
@@ -456,6 +444,14 @@ class operational_domain_impl
      */
     const std::vector<bdl_pair<Lyt>> output_bdl_pairs;
     /**
+     * All x dimension values.
+     */
+    std::vector<double> x_values;
+    /**
+     * All y dimension values.
+     */
+    std::vector<double> y_values;
+    /**
      * The operational domain of the layout.
      */
     operational_domain op_domain{};
@@ -492,14 +488,22 @@ class operational_domain_impl
         return sampled_points.find({x, y}) != sampled_points.cend();
     }
     /**
-     * Calculates the number of steps in the x and y dimension based on the provided parameters.
+     * Calculates the number of steps in the x dimension based on the provided parameters.
      *
-     * @return The number of steps in the x and y dimension.
+     * @return The number of steps in the x dimension.
      */
-    [[nodiscard]] inline std::pair<std::size_t, std::size_t> num_steps() const noexcept
+    [[nodiscard]] inline std::size_t num_x_steps() const noexcept
     {
-        return {static_cast<std::size_t>((params.x_max - params.x_min) / params.x_step),
-                static_cast<std::size_t>((params.y_max - params.y_min) / params.y_step)};
+        return static_cast<std::size_t>((params.x_max - params.x_min) / params.x_step);
+    }
+    /**
+     * Calculates the number of steps in the y dimension based on the provided parameters.
+     *
+     * @return The number of steps in the y dimension.
+     */
+    [[nodiscard]] inline std::size_t num_y_steps() const noexcept
+    {
+        return static_cast<std::size_t>((params.y_max - params.y_min) / params.y_step);
     }
     /**
      * Potential sweep dimensions.
@@ -706,12 +710,9 @@ class operational_domain_impl
 
         static std::mt19937_64 generator{std::random_device{}()};
 
-        // calculate the number of steps in x and y dimension to instantiate distributions
-        const auto [num_x_steps, num_y_steps] = num_steps();
-
         // instantiate distributions
-        std::uniform_int_distribution<std::size_t> x_distribution{0, num_x_steps - 1};
-        std::uniform_int_distribution<std::size_t> y_distribution{0, num_y_steps - 1};
+        std::uniform_int_distribution<std::size_t> x_distribution{0, x_values.size() - 1};
+        std::uniform_int_distribution<std::size_t> y_distribution{0, y_values.size() - 1};
 
         for (std::size_t i = 0; i < samples; ++i)
         {
@@ -729,8 +730,8 @@ class operational_domain_impl
             sampled_points.insert({x_sample, y_sample});
 
             // convert the sample to the actual value
-            const auto x_val = params.x_min + static_cast<double>(x_sample) * params.x_step;
-            const auto y_val = params.y_min + static_cast<double>(y_sample) * params.y_step;
+            const auto x_val = x_values[x_sample];
+            const auto y_val = y_values[y_sample];
 
             set_x_dimension_value(sim_params, x_val);
             set_y_dimension_value(sim_params, y_val);
