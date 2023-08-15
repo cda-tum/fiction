@@ -763,6 +763,8 @@ class operational_domain_impl
             // the expected output of the layout is the i-th bit of the truth table
             const auto expected_output = kitty::get_bit(truth_table, i);
 
+            ++num_simulator_invocations;
+
             if (can_positive_charges_occur(*bii, sim_params))
             {
                 return non_operational();
@@ -785,8 +787,6 @@ class operational_domain_impl
             {
                 assert(false && "unsupported simulation engine");
             }
-
-            ++num_simulator_invocations;
 
             // if no physically-valid charge distributions were found, the layout is non-operational
             if (sim_result.charge_distributions.empty())
