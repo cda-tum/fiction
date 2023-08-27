@@ -27,6 +27,9 @@ bool can_positive_charge_occur(const Lyt& lyt, const sidb_simulation_parameters&
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
+    if constexpr (has_get_charge_state_v<Lyt>)
+    {}
+
     const charge_distribution_surface charge_lyt{lyt, params, sidb_charge_state::NEGATIVE};
     bool                              required = false;
 
@@ -38,6 +41,7 @@ bool can_positive_charge_occur(const Lyt& lyt, const sidb_simulation_parameters&
                 if ((-(*local_pot) + params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
                 {
                     required = true;
+                    return false;  // pre-mature break
                 }
             }
         });
