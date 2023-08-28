@@ -434,6 +434,21 @@ GateLyt optimization_layout_corner_case_outputs_2() noexcept
     return layout;
 }
 
+template <typename GateLyt>
+GateLyt optimization_layout_corner_case_wiring() noexcept
+{
+    GateLyt layout{{3, 0, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+
+    const auto w1   = layout.create_buf(x1, {1, 0});
+    const auto not1 = layout.create_not(w1, {2, 0});
+
+    layout.create_po(not1, "f1", {3, 0});
+
+    return layout;
+}
+
 template <typename CellLyt>
 CellLyt single_layer_qca_and_gate() noexcept
 {

@@ -74,6 +74,10 @@ TEST_CASE("Layout equivalence", "[optimization]")
         const auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
         post_layout_optimization<gate_layout>(layout_corner_case_2);
         check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
+
+        const auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_wiring<gate_layout>();
+        post_layout_optimization<gate_layout>(layout_corner_case_3);
+        check_eq(blueprints::optimization_layout_corner_case_wiring<gate_layout>(), layout_corner_case_3);
     }
 }
 
