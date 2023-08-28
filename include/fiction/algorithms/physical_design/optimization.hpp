@@ -735,8 +735,8 @@ struct column_incoming_signals_map
  * @note This function requires the layout to be a gate-level layout, a Cartesian layout and 2DDWave-clocked.
  */
 template <typename Lyt>
-void delete_rows_and_columns(Lyt& lyt, const std::vector<uint64_t> rows_to_delete,
-                             const std::vector<uint64_t> columns_to_delete) noexcept
+void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
+                             std::vector<uint64_t>& columns_to_delete) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
