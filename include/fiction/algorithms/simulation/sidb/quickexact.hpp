@@ -78,7 +78,7 @@ class quickexact_impl
 
     sidb_simulation_result<Lyt> run()
     {
-        result.algorithm_name      = "quickexact";
+        result.algorithm_name      = "QuickExact";
         result.physical_parameters = params.physical_parameters;
 
         mockturtle::stopwatch<>::duration time_counter{};
