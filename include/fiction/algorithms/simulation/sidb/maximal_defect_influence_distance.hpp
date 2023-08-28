@@ -86,7 +86,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
         if (round_to_n_decimal_places(lyt_result.get_system_energy(), 6) == round_to_n_decimal_places(min_energy, 6))
         {
             lyt_result.charge_distribution_to_index_general();
-            charge_index_layout = lyt_result.get_charge_index().first;
+            charge_index_layout = lyt_result.get_charge_index_and_base().first;
         }
     }
 
@@ -177,7 +177,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
                             round_to_n_decimal_places(min_energy_defect, 6))
                         {
                             lyt_simulation_with_defect.charge_distribution_to_index_general();
-                            charge_index_defect_layout = lyt_simulation_with_defect.get_charge_index().first;
+                            charge_index_defect_layout = lyt_simulation_with_defect.get_charge_index_and_base().first;
                         }
                     }
 
@@ -236,7 +236,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
                 round_to_n_decimal_places(min_energy_defect, 6))
             {
                 lyt_simulation_with_defect.charge_distribution_to_index_general();
-                charge_index_defect_layout = lyt_simulation_with_defect.get_charge_index().first;
+                charge_index_defect_layout = lyt_simulation_with_defect.get_charge_index_and_base().first;
             }
         }
 

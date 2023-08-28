@@ -56,7 +56,7 @@ exhaustive_ground_state_simulation(const Lyt&                        lyt,
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change();
 
-        while (charge_lyt.get_charge_index().first < charge_lyt.get_max_charge_index())
+        while (charge_lyt.get_charge_index_and_base().first < charge_lyt.get_max_charge_index())
         {
 
             if (charge_lyt.is_physically_valid())

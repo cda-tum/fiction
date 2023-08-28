@@ -457,27 +457,27 @@ TEMPLATE_TEST_CASE(
         charge_layout_five.update_local_potential();
         charge_layout_five.recompute_system_energy();
         charge_layout_five.validity_check();
-        CHECK(charge_layout_five.get_charge_index().first == 0);
+        CHECK(charge_layout_five.get_charge_index_and_base().first == 0);
 
         charge_layout_five.assign_charge_state({4, 1, 1}, sidb_charge_state::POSITIVE);
         CHECK(charge_layout_five.get_charge_state({4, 1, 1}) == sidb_charge_state::POSITIVE);
         charge_layout_five.charge_distribution_to_index();
-        CHECK(charge_layout_five.get_charge_index().first == 6);
+        CHECK(charge_layout_five.get_charge_index_and_base().first == 6);
 
         charge_layout_five.increase_charge_index_by_one();
-        CHECK(charge_layout_five.get_charge_index().first == 7);
+        CHECK(charge_layout_five.get_charge_index_and_base().first == 7);
         charge_layout_five.increase_charge_index_by_one();
-        CHECK(charge_layout_five.get_charge_index().first == 8);
+        CHECK(charge_layout_five.get_charge_index_and_base().first == 8);
         charge_layout_five.increase_charge_index_by_one();
-        CHECK(charge_layout_five.get_charge_index().first == 9);
+        CHECK(charge_layout_five.get_charge_index_and_base().first == 9);
         charge_layout_five.increase_charge_index_by_one();
-        CHECK(charge_layout_five.get_charge_index().first == 10);
+        CHECK(charge_layout_five.get_charge_index_and_base().first == 10);
         charge_layout_five.increase_charge_index_by_one();
-        CHECK(charge_layout_five.get_charge_index().first == 11);
+        CHECK(charge_layout_five.get_charge_index_and_base().first == 11);
         charge_layout_five.increase_charge_index_by_one();
-        CHECK(charge_layout_five.get_charge_index().first == 12);
+        CHECK(charge_layout_five.get_charge_index_and_base().first == 12);
         charge_layout_five.increase_charge_index_by_one();
-        CHECK(charge_layout_five.get_charge_index().first == 13);
+        CHECK(charge_layout_five.get_charge_index_and_base().first == 13);
 
         CHECK(charge_layout_five.get_charge_state({0, 0, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_layout_five.get_charge_state({0, 2, 0}) == sidb_charge_state::NEUTRAL);
@@ -723,7 +723,7 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface charge_layout_new{lyt_new, params};
         const auto                  negative_sidbs = charge_layout_new.negative_sidb_detection();
         REQUIRE(negative_sidbs.size() == 3);
-        CHECK(charge_layout_new.get_charge_index().first == 0);
+        CHECK(charge_layout_new.get_charge_index_and_base().first == 0);
 
         charge_layout_new.assign_all_charge_states(sidb_charge_state::POSITIVE);
         CHECK(charge_layout_new.get_charge_state({0, 0, 1}) == sidb_charge_state::POSITIVE);
@@ -731,18 +731,18 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout_new.get_charge_state({10, 5, 1}) == sidb_charge_state::POSITIVE);
 
         charge_layout_new.charge_distribution_to_index();
-        CHECK(charge_layout_new.get_charge_index().first == 26);
+        CHECK(charge_layout_new.get_charge_index_and_base().first == 26);
 
         charge_layout_new.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
         charge_layout_new.charge_distribution_to_index();
-        CHECK(charge_layout_new.get_charge_index().first == 13);
+        CHECK(charge_layout_new.get_charge_index_and_base().first == 13);
 
         charge_layout_new.increase_charge_index_by_one();
         charge_layout_new.charge_distribution_to_index();
-        CHECK(charge_layout_new.get_charge_index().first == 14);
+        CHECK(charge_layout_new.get_charge_index_and_base().first == 14);
         charge_layout_new.increase_charge_index_by_one();
-        CHECK(charge_layout_new.get_charge_index().first == 15);
+        CHECK(charge_layout_new.get_charge_index_and_base().first == 15);
     }
 
     SECTION("detecting perturber in layout with only one SiDB")
@@ -960,18 +960,18 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(charge_layout.get_charge_index().first == 0);
+        CHECK(charge_layout.get_charge_index_and_base().first == 0);
 
         charge_layout.increase_charge_index_by_one();
-        CHECK(charge_layout.get_charge_index().first == 1);
+        CHECK(charge_layout.get_charge_index_and_base().first == 1);
         charge_layout.increase_charge_index_by_one();
-        CHECK(charge_layout.get_charge_index().first == 2);
+        CHECK(charge_layout.get_charge_index_and_base().first == 2);
         charge_layout.increase_charge_index_by_one();
-        CHECK(charge_layout.get_charge_index().first == 3);
+        CHECK(charge_layout.get_charge_index_and_base().first == 3);
 
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEUTRAL);
-        CHECK(charge_layout.get_charge_index().first == 3);
+        CHECK(charge_layout.get_charge_index_and_base().first == 3);
     }
 
     SECTION("Physical validity check after dependent cell is updated")
@@ -1007,18 +1007,18 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(charge_layout.get_charge_index().first == 0);
+        CHECK(charge_layout.get_charge_index_and_base().first == 0);
 
         charge_layout.increase_charge_index_by_one();
-        CHECK(charge_layout.get_charge_index().first == 1);
+        CHECK(charge_layout.get_charge_index_and_base().first == 1);
         charge_layout.increase_charge_index_by_one();
-        CHECK(charge_layout.get_charge_index().first == 2);
+        CHECK(charge_layout.get_charge_index_and_base().first == 2);
         charge_layout.increase_charge_index_by_one();
-        CHECK(charge_layout.get_charge_index().first == 3);
+        CHECK(charge_layout.get_charge_index_and_base().first == 3);
 
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEUTRAL);
-        CHECK(charge_layout.get_charge_index().first == 3);
+        CHECK(charge_layout.get_charge_index_and_base().first == 3);
     }
 
     SECTION("experiments with defects")

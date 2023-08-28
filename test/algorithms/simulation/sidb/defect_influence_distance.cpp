@@ -63,8 +63,9 @@ TEST_CASE("Test influence distance function", "[maximal_defect_influence_distanc
         sidb_cell_clk_lyt_siqad lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         const auto [distance, defect_pos] = maximal_defect_influence_distance(lyt, sim_params);
-        CHECK(round_to_n_decimal_places(distance, 4) ==
-              round_to_n_decimal_places(sidb_nanometer_distance(lyt, {0, 0, 0}, {-1, 0, 1}), 4));
+        CHECK_THAT(round_to_n_decimal_places(distance, 4) -
+                       round_to_n_decimal_places(sidb_nanometer_distance(lyt, {0, 0, 0}, {-1, 0, 1}), 4),
+                   Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("layout with one SiDB, negative defect, large lambda_tf")
@@ -77,8 +78,9 @@ TEST_CASE("Test influence distance function", "[maximal_defect_influence_distanc
         sidb_cell_clk_lyt_siqad                                                 lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         const auto [distance, defect_pos] = maximal_defect_influence_distance(lyt, sim_params);
-        CHECK(round_to_n_decimal_places(distance, 4) ==
-              round_to_n_decimal_places(sidb_nanometer_distance(lyt, {0, 0, 0}, {0, 1, 0}), 4));
+        CHECK_THAT(round_to_n_decimal_places(distance, 4) -
+                       round_to_n_decimal_places(sidb_nanometer_distance(lyt, {0, 0, 0}, {0, 1, 0}), 4),
+                   Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("layout with one pertuber and one DB pair, negative defect")
