@@ -439,6 +439,10 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
                     already_printed = true;
                     break;
                 }
+                case sidb_charge_state::NONE:
+                {
+                    break;
+                }
             }
         }
 

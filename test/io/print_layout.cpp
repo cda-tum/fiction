@@ -522,7 +522,7 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
 
 TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 {
-    sidb_cell_clk_lyt layout{{2, 2}};
+    const sidb_cell_clk_lyt layout{{2, 2}};
 
     sidb_surface<sidb_cell_clk_lyt_siqad> cl{convert_to_siqad_coordinates(layout)};
 

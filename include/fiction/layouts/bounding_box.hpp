@@ -72,7 +72,7 @@ class bounding_box_2d
             int32_t max_y = std::numeric_limits<int32_t>::min();
 
             converted_layout.foreach_cell(
-                [&converted_layout, &min_x, &max_x, &min_y, &max_y](const auto& c)
+                [&min_x, &max_x, &min_y, &max_y](const auto& c)
                 {
                     if (c.x < min_x)
                     {
