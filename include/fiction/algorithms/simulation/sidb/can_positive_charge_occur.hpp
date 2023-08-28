@@ -11,42 +11,41 @@
 
 #include <fmt/format.h>
 
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <cstdint>
-#include <iostream>
-#include <vector>
-
 namespace fiction
 {
-
+/**
+ * This algorithm determines if positively charged SiDBs can occur in a given SiDB cell-level layout due to strong
+ * electrostatic interaction.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The layout to be analyzed.
+ * @param sim_params Physical parameters used to determine whether positively charged SiDBs can occur.
+ */
 template <typename Lyt>
-bool can_positive_charge_occur(const Lyt& lyt, const sidb_simulation_parameters& params = sidb_simulation_parameters{})
+bool can_positive_charge_occur(const Lyt& lyt, const sidb_simulation_parameters& sim_params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    if constexpr (has_get_charge_state_v<Lyt>)
-    {}
+    bool       result  = false;
+    const auto mu_plus = sim_params.mu_plus();
 
-    const charge_distribution_surface charge_lyt{lyt, params, sidb_charge_state::NEGATIVE};
-    bool                              required = false;
-
+    const charge_distribution_surface charge_lyt{lyt, sim_params, sidb_charge_state::NEGATIVE};
     charge_lyt.foreach_cell(
-        [&required, &params, charge_lyt](const auto& c)
+        [&result, &mu_plus, charge_lyt](const auto& c)
         {
             if (const auto local_pot = charge_lyt.get_local_potential(c); local_pot.has_value())
             {
-                if ((-(*local_pot) + params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
+                if ((-(*local_pot) + mu_plus) > -physical_constants::POP_STABILITY_ERR)
                 {
-                    required = true;
-                    return false;  // pre-mature break
+                    result = true;
+                    return false;  // break
                 }
             }
+            return true;
         });
 
-    return required;
+    return result;
 }
 
 }  // namespace fiction

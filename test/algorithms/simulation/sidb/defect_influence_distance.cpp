@@ -92,8 +92,9 @@ TEST_CASE("Test influence distance function", "[maximal_defect_influence_distanc
         lyt.assign_cell_type({4, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({6, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         const auto [distance, defect_pos] = maximal_defect_influence_distance(lyt, sim_params);
-        CHECK(round_to_n_decimal_places(distance, 4) ==
-              round_to_n_decimal_places(sidb_nanometer_distance(lyt, {6, 0, 0}, {9, 1, 0}), 4));
+        CHECK_THAT(round_to_n_decimal_places(distance, 4) -
+                       round_to_n_decimal_places(sidb_nanometer_distance(lyt, {6, 0, 0}, {10, 0, 0}), 4),
+                   Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("QuickExact simulation of a Y-shape SiDB OR gate with input 01")

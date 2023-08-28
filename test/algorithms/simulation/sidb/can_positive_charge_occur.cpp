@@ -5,14 +5,11 @@
 #include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/can_positive_charge_occur.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/technology/cell_technologies.hpp>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("Simulation of a one BDL pair with one perturber", "[can_positive_charge_occur]",
+TEMPLATE_TEST_CASE("One BDL pair with one perturber", "[can_positive_charge_occur]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -40,7 +37,7 @@ TEMPLATE_TEST_CASE("Simulation of a one BDL pair with one perturber", "[can_posi
     }
 }
 
-TEMPLATE_TEST_CASE("Simulation of a Y-shape SiDB OR gate with input 01", "[can_positive_charge_occur]",
+TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01", "[can_positive_charge_occur]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};

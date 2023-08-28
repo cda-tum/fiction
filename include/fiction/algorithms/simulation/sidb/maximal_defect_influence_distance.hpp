@@ -45,8 +45,8 @@ struct maximal_defect_influence_distance_params
 
 /**
  * This function determines the maximum distance at which a placed defect can still affect the layout (i.e. different
- * ground state). This means that a defect must be placed further away from the distance from the layout in order not to
- * change the layout's ground state.
+ * ground state). This means that a defect must be placed further away from the layout than the given distance in order
+ * not to change the layout's ground state.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout for which the influence distance is simulated.
