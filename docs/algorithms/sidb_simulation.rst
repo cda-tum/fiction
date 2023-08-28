@@ -1,8 +1,7 @@
-SiDB Electrostatic Ground State Simulation
-------------------------------------------
+Physical Simulation of Silicon Dangling Bond Logic
+--------------------------------------------------
 
-These headers provide functions for physically simulating the *ground state* of an SiDB layout. Ground state simulations
-are a crucial step in the physical design flow of SiDB layouts, as they are used to validate their functionality.
+These headers provide functions for physically simulating an SiDB layout, which is a crucial step in the physical design flow of SiDB layouts, as they are used to validate their functionality.
 
 
 Physical Parameters
@@ -94,7 +93,6 @@ Temperature Behavior
 .. doxygenfunction:: fiction::calculate_energy_and_state_type
 
 
-
 Time-to-Solution (TTS) Statistics
 #################################
 
@@ -104,3 +102,11 @@ Time-to-Solution (TTS) Statistics
 .. doxygenstruct:: fiction::time_to_solution_params
    :members:
 .. doxygenfunction:: fiction::sim_acc_tts
+
+
+Utils
+#####
+
+**Header:** ``fiction/algorithms/simulation/sidb/can_positive_charge_occur.hpp``
+
+.. doxygenfunction:: fiction::can_positive_charge_occur
