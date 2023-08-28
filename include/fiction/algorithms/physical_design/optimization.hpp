@@ -742,6 +742,7 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE) && "Clocking scheme is not 2DDWave");
 
+    // get fanins for each coordinate
     column_incoming_signals_map<Lyt> fanins{};
     for (uint64_t x = 0; x <= lyt.x(); ++x)
     {
@@ -749,16 +750,20 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
         {
             for (uint64_t z = 0; z <= lyt.z(); ++z)
             {
-                const auto fins = lyt.incoming_data_flow({x, y, z});
-
-                for (const auto& fanin : fins)
+                if (const coordinate<Lyt> coord = {x, y, z}; !lyt.is_empty_tile(coord))
                 {
-                    fanins.column[x].row[y].depth[z].push_back({fanin.x, fanin.y, fanin.z});
+                    const auto fins = lyt.incoming_data_flow(coord);
+
+                    for (const auto& fanin : fins)
+                    {
+                        fanins.column[coord.x].row[coord.y].depth[coord.z].push_back({fanin.x, fanin.y, fanin.z});
+                    }
                 }
             }
         }
     }
 
+    // delete all excess wiring in rows with only vertical wires
     for (uint64_t row : rows_to_delete)
     {
         for (uint64_t x = 0; x <= lyt.x(); ++x)
@@ -770,6 +775,7 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
         }
     }
 
+    // delete all excess wiring in columns with only horizontal wires
     for (uint64_t column : columns_to_delete)
     {
         for (uint64_t y = 0; y <= lyt.y(); ++y)
@@ -783,6 +789,7 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
 
     for (uint64_t x = 0; x <= lyt.x(); ++x)
     {
+        // calculate column offset based on number of columns deleted to the left of current column
         uint64_t column_offset = 0;
         if (!columns_to_delete.empty())
         {
@@ -791,6 +798,7 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
         }
         for (uint64_t y = 0; y <= lyt.y(); ++y)
         {
+            // calculate row offset based on number of rows deleted above the current row
             uint64_t row_offset = 0;
             if (!rows_to_delete.empty())
             {
@@ -809,6 +817,7 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
 
                     for (auto& fanin : fanins.column[old_pos.x].row[old_pos.y].depth[old_pos.z])
                     {
+                        // skip removed columns and decrease column offset
                         uint64_t excess_column_offset = 0;
                         if (!columns_to_delete.empty())
                         {
@@ -820,6 +829,7 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
                             }
                         }
 
+                        // skip removed rows and decrease row offset
                         uint64_t excess_row_offset = 0;
                         if (!rows_to_delete.empty())
                         {
