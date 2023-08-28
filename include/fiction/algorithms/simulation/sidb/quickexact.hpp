@@ -457,13 +457,13 @@ class quickexact_impl
 /**
  * *QuickExact* is a quick and exact physical simulation algorithm designed specifically for SiDB layouts.
  * It determines all physically valid charge configurations of a given layout, providing a significant
- * performance advantage of more than three orders of magnitude over *ExGs* (exhaustive_ground_state_simulation.hpp).
+ * performance advantage of more than three orders of magnitude over *ExGS* (exhaustive_ground_state_simulation.hpp).
  *
  * The performance improvement of QuickExact can be attributed to the incorporation of three key ideas:
  *
  * 1. Advanced Negative SiDB Detection: QuickExact efficiently identifies SiDBs that require negative charges
  *    in a physically valid charge distribution. By detecting them in advance, the search space is pruned
- *    by a factor of 2^k, where k is the number of found SiDBs.
+ *    by a factor of \f$2^k\f$, where k is the number of found SiDBs.
  *
  * 2. Dependent SiDB Selection: The algorithm selects a dependent SiDB, whose charge state is always derived
  *    from its n-1 neighbors. This dependency simplifies the computation process and contributes to the overall

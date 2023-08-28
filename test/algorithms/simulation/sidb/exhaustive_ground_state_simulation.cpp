@@ -55,7 +55,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a one BDL pair with one perturber", "[ExG
     const sidb_simulation_parameters params{2, -0.32};
 
     const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
-    CHECK(1 == 1);
+    CHECK(simulation_results.charge_distributions.size() == 1);
 }
 
 TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber", "[ExGS]",
