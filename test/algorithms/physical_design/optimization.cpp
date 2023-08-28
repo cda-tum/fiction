@@ -121,15 +121,9 @@ TEST_CASE("Optimization steps", "[optimization]")
         CHECK(r4.empty());
     }
 
-    // calculate bounding box
-    const auto bounding_box_before = bounding_box_2d(obstr_lyt);
-    const auto width               = bounding_box_before.get_x_size();
-    const auto height              = bounding_box_before.get_y_size();
-
-    const coordinate<gate_layout>                   old_pos_1 = {2, 0};
-    const coordinate<gate_layout>                   new_pos_1 = {1, 0};
-    const std::tuple<bool, coordinate<gate_layout>> moved_gate_1 =
-        detail::improve_gate_location(old_pos_1, obstr_lyt, width, height);
+    const coordinate<gate_layout>                   old_pos_1    = {2, 0};
+    const coordinate<gate_layout>                   new_pos_1    = {1, 0};
+    const std::tuple<bool, coordinate<gate_layout>> moved_gate_1 = detail::improve_gate_location(old_pos_1, obstr_lyt);
     // I I→=
     // ↓   ↓
     // = ▢ =
@@ -145,10 +139,9 @@ TEST_CASE("Optimization steps", "[optimization]")
         CHECK(obstr_lyt.is_pi_tile(old_pos_1) == false);
     }
 
-    const coordinate<gate_layout>                   old_pos_2 = {0, 2};
-    const coordinate<gate_layout>                   new_pos_2 = {0, 1};
-    const std::tuple<bool, coordinate<gate_layout>> moved_gate_2 =
-        detail::improve_gate_location(old_pos_2, obstr_lyt, width, height);
+    const coordinate<gate_layout>                   old_pos_2    = {0, 2};
+    const coordinate<gate_layout>                   new_pos_2    = {0, 1};
+    const std::tuple<bool, coordinate<gate_layout>> moved_gate_2 = detail::improve_gate_location(old_pos_2, obstr_lyt);
     // I I→=
     // ↓   ↓
     // F→= =
@@ -164,10 +157,9 @@ TEST_CASE("Optimization steps", "[optimization]")
         CHECK(obstr_lyt.fanout_size(obstr_lyt.get_node(new_pos_2)) == 2);
     }
 
-    const coordinate<gate_layout>                   old_pos_3 = {2, 2};
-    const coordinate<gate_layout>                   new_pos_3 = {1, 1};
-    const std::tuple<bool, coordinate<gate_layout>> moved_gate_3 =
-        detail::improve_gate_location(old_pos_3, obstr_lyt, width, height);
+    const coordinate<gate_layout>                   old_pos_3    = {2, 2};
+    const coordinate<gate_layout>                   new_pos_3    = {1, 1};
+    const std::tuple<bool, coordinate<gate_layout>> moved_gate_3 = detail::improve_gate_location(old_pos_3, obstr_lyt);
     // I I ▢
     // ↓ ↓
     // F→&→=
@@ -183,7 +175,7 @@ TEST_CASE("Optimization steps", "[optimization]")
         CHECK(obstr_lyt.is_and(obstr_lyt.get_node(old_pos_3)) == false);
     }
 
-    detail::delete_wires(obstr_lyt, width, height);
+    detail::delete_wires(obstr_lyt);
     // I I ▢
     // ↓ ↓
     // F→&→=

@@ -381,16 +381,13 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const coordinate<Lyt
  * - if no better coordinate is found, the old wiring is restored
  *
  * @param old_pos Old position of the gate to be moved.
- * @param width Width of the gate-level layout.
- * @param height Height of the gate-level layout.
  * @return Flag that indicates if gate was moved successfully and the new coordinate of the moved gate.
  *
  * @note This function requires the layout to be a gate-level layout, a Cartesian layout, 2DDWave-clocked and implement
  * the obstruction interface.
  */
 template <typename Lyt>
-[[nodiscard]] std::tuple<bool, coordinate<Lyt>>
-improve_gate_location(const coordinate<Lyt>& old_pos, Lyt& lyt, const uint64_t width, const uint64_t height) noexcept
+[[nodiscard]] std::tuple<bool, coordinate<Lyt>> improve_gate_location(const coordinate<Lyt>& old_pos, Lyt& lyt) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -466,7 +463,7 @@ improve_gate_location(const coordinate<Lyt>& old_pos, Lyt& lyt, const uint64_t w
     coordinate<Lyt> current_pos            = old_pos;
     bool            improved_gate_location = false;
     // iterate over layout diagonally
-    for (uint64_t k = 0; k < width + height + 1; k++)
+    for (uint64_t k = 0; k < lyt.x() + lyt.y() + 1; k++)
     {
         for (uint64_t x = 0; x < k + 1; ++x)
         {
@@ -478,7 +475,7 @@ improve_gate_location(const coordinate<Lyt>& old_pos, Lyt& lyt, const uint64_t w
             }
 
             // only check better positions
-            if (height >= y && y >= min_y && width >= x && x >= min_x && ((x + y) <= max_diagonal) &&
+            if (lyt.y() >= y && y >= min_y && lyt.x() >= x && x >= min_x && ((x + y) <= max_diagonal) &&
                 ((!lyt.is_pi_tile(current_pos)) || (lyt.is_pi_tile(current_pos) && (x == 0 || y == 0))))
             {
                 new_pos = {x, y};
@@ -729,168 +726,116 @@ struct column_incoming_signals_map
 };
 
 /**
- * Utility function that deletes a row in the layout by moving all southern gates up one positions.
+ * Utility function that deletes all specified rows and columns.
  *
  * @param lyt Gate-level layout.
- * @param row_idx Row to be deleted.
- * @param width Width of the gate-level layout.
- * @param height Height of the gate-level layout.
+ * @param rows_to_delete Rows to be deleted.
+ * @param columns_to_delete Columns to be deleted.
  *
  * @note This function requires the layout to be a gate-level layout, a Cartesian layout and 2DDWave-clocked.
  */
 template <typename Lyt>
-void delete_row(Lyt& lyt, const uint64_t row_idx, const uint64_t width, const uint64_t height) noexcept
+void delete_rows_and_columns(Lyt& lyt, const std::vector<uint64_t> rows_to_delete,
+                             const std::vector<uint64_t> columns_to_delete) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE) && "Clocking scheme is not 2DDWave");
 
-    // create a map that stores fanins of each coordinate
     column_incoming_signals_map<Lyt> fanins{};
-
-    for (uint64_t y = row_idx; y <= height; ++y)
+    for (uint64_t x = 0; x <= lyt.x(); ++x)
     {
-        for (uint64_t x = 0; x <= width; ++x)
+        for (uint64_t y = 0; y <= lyt.y(); ++y)
         {
             for (uint64_t z = 0; z <= lyt.z(); ++z)
             {
-                if (y == row_idx && lyt.incoming_data_flow({x, y, z}).size() > 0)
+                const auto fins = lyt.incoming_data_flow({x, y, z});
+
+                for (const auto& fanin : fins)
                 {
-                    const auto fanin_row      = lyt.incoming_data_flow({x, y, z}).front();
-                    const auto fanin_next_row = lyt.incoming_data_flow({x, y + 1, z});
-
-                    for (const auto& fanin : fanin_next_row)
-                    {
-                        if (fanin.y == y)
-                        {
-                            fanins.column[x].row[y].depth[z].push_back({fanin_row.x, fanin_row.y + 1, fanin_row.z});
-                        }
-                        else
-                        {
-                            fanins.column[x].row[y].depth[z].push_back(fanin);
-                        }
-                    }
-                }
-                else
-                {
-                    fanins.column[x].row[y].depth[z] = lyt.incoming_data_flow({x, y + 1, z});
-                }
-            }
-        }
-
-        // iterate through row and move gates
-        for (uint64_t x = 0; x <= width; ++x)
-        {
-            for (uint64_t z = 0; z <= lyt.z(); ++z)
-            {
-                if (const coordinate<Lyt> old_pos{x, y, z}; !lyt.is_empty_tile(old_pos))
-                {
-                    // delete row
-                    if (y == row_idx)
-                    {
-                        lyt.clear_tile(old_pos);
-                    }
-
-                    // move up one position
-                    else
-                    {
-                        const coordinate<Lyt> new_pos{x, y - 1, z};
-
-                        std::vector<mockturtle::signal<Lyt>> fins{};
-                        fins.reserve(fanins.column[x].row[y - 1].depth[z].size());
-
-                        for (const auto& fanin : fanins.column[x].row[y - 1].depth[z])
-                        {
-                            fins.push_back(lyt.make_signal(lyt.get_node({fanin.x, fanin.y - 1, fanin.z})));
-                        }
-
-                        lyt.move_node(lyt.get_node(old_pos), new_pos, fins);
-                    }
+                    fanins.column[x].row[y].depth[z].push_back({fanin.x, fanin.y, fanin.z});
                 }
             }
         }
     }
-}
 
-/**
- * Utility function that deletes a column in the layout by moving all eastern gates to the left by one positions.
- *
- * @param lyt Gate-level layout.
- * @param column_idx Column to be deleted.
- * @param width Width of the gate-level layout.
- * @param height Height of the gate-level layout.
- *
- * @note This function requires the layout to be a gate-level layout, a Cartesian layout and 2DDWave-clocked.
- */
-template <typename Lyt>
-void delete_column(Lyt& lyt, const uint64_t column_idx, const uint64_t width, const uint64_t height) noexcept
-{
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-    assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE) && "Clocking scheme is not 2DDWave");
-
-    // create a map that stores fanins of each coordinate
-    column_incoming_signals_map<Lyt> fanins{};
-
-    for (uint64_t x = column_idx; x <= width; ++x)
+    for (uint64_t row : rows_to_delete)
     {
-        for (uint64_t y = 0; y <= height; ++y)
+        for (uint64_t x = 0; x <= lyt.x(); ++x)
         {
-            for (uint64_t z = 0; z <= lyt.z(); ++z)
+            if (const coordinate<Lyt> old_pos = {x, row, 0}; !lyt.is_empty_tile(old_pos))
             {
-                if (x == column_idx && lyt.fanin_size(lyt.get_node({x, y, z})) > 0)
-                {
-                    const auto fanin_column      = lyt.incoming_data_flow({x, y, z}).front();
-                    const auto fanin_next_column = lyt.incoming_data_flow({x + 1, y, z});
-
-                    for (const auto& fanin : fanin_next_column)
-                    {
-                        if (fanin.x == x)
-                        {
-                            fanins.column[x].row[y].depth[z].push_back(
-                                {fanin_column.x + 1, fanin_column.y, fanin_column.z});
-                        }
-                        else
-                        {
-                            fanins.column[x].row[y].depth[z].push_back(fanin);
-                        }
-                    }
-                }
-                else
-                {
-                    fanins.column[x].row[y].depth[z] = lyt.incoming_data_flow({x + 1, y, z});
-                }
+                lyt.clear_tile(old_pos);
             }
         }
+    }
 
-        // iterate through column and move gates
-        for (uint64_t y = 0; y <= height; ++y)
+    for (uint64_t column : columns_to_delete)
+    {
+        for (uint64_t y = 0; y <= lyt.y(); ++y)
         {
+            if (const coordinate<Lyt> old_pos = {column, y, 0}; !lyt.is_empty_tile(old_pos))
+            {
+                lyt.clear_tile(old_pos);
+            }
+        }
+    }
+
+    for (uint64_t x = 0; x <= lyt.x(); ++x)
+    {
+        uint64_t column_offset = 0;
+        if (!columns_to_delete.empty())
+        {
+            column_offset = static_cast<uint64_t>(
+                std::upper_bound(columns_to_delete.begin(), columns_to_delete.end(), x) - columns_to_delete.begin());
+        }
+        for (uint64_t y = 0; y <= lyt.y(); ++y)
+        {
+            uint64_t row_offset = 0;
+            if (!rows_to_delete.empty())
+            {
+                row_offset = static_cast<uint64_t>(std::upper_bound(rows_to_delete.begin(), rows_to_delete.end(), y) -
+                                                   rows_to_delete.begin());
+            }
+
             for (uint64_t z = 0; z <= lyt.z(); ++z)
             {
+
                 if (const coordinate<Lyt> old_pos = {x, y, z}; !lyt.is_empty_tile(old_pos))
                 {
-                    // delete row
-                    if (x == column_idx)
+                    const coordinate<Lyt> new_pos = {x - column_offset, y - row_offset, z};
+
+                    std::vector<mockturtle::signal<Lyt>> fins{};
+
+                    for (auto& fanin : fanins.column[old_pos.x].row[old_pos.y].depth[old_pos.z])
                     {
-                        lyt.clear_tile(old_pos);
-                    }
-
-                    // move left one position
-                    else
-                    {
-                        const coordinate<Lyt> new_pos = {x - 1, y, z};
-
-                        std::vector<mockturtle::signal<Lyt>> fins{};
-                        fins.reserve(fanins.column[x - 1].row[y].depth[z].size());
-
-                        for (const auto& fanin : fanins.column[x - 1].row[y].depth[z])
+                        uint64_t excess_column_offset = 0;
+                        if (!columns_to_delete.empty())
                         {
-                            fins.push_back(lyt.make_signal(lyt.get_node({fanin.x - 1, fanin.y, fanin.z})));
+                            while (std::find(std::begin(columns_to_delete), std::end(columns_to_delete), fanin.x) !=
+                                   std::end(columns_to_delete))
+                            {
+                                fanin = fanins.column[fanin.x].row[fanin.y].depth[fanin.z][0];
+                                excess_column_offset++;
+                            }
                         }
 
-                        lyt.move_node(lyt.get_node(old_pos), new_pos, fins);
+                        uint64_t excess_row_offset = 0;
+                        if (!rows_to_delete.empty())
+                        {
+                            while (std::find(std::begin(rows_to_delete), std::end(rows_to_delete), fanin.y) !=
+                                   std::end(rows_to_delete))
+                            {
+                                fanin = fanins.column[fanin.x].row[fanin.y].depth[fanin.z][0];
+                                excess_row_offset++;
+                            }
+                        }
+
+                        fins.push_back(
+                            lyt.make_signal(lyt.get_node({fanin.x - column_offset + excess_column_offset,
+                                                          fanin.y - row_offset + excess_row_offset, fanin.z})));
                     }
+                    lyt.move_node(lyt.get_node(old_pos), new_pos, fins);
                 }
             }
         }
@@ -901,24 +846,22 @@ void delete_column(Lyt& lyt, const uint64_t column_idx, const uint64_t width, co
  * Utility function that deletes rows that only contain vertically connected wires.
  *
  * @param lyt Gate-level layout.
- * @param width Width of the gate-level layout.
- * @param height Height of the gate-level layout.
  *
  * @note This function requires the layout to be a gate-level layout, a Cartesian layout and 2DDWave-clocked.
  */
 template <typename Lyt>
-void delete_wires(Lyt& lyt, const uint64_t width, const uint64_t height) noexcept
+void delete_wires(Lyt& lyt) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE) && "Clocking scheme is not 2DDWave");
 
-    for (auto y = static_cast<int64_t>(height); y >= 0; --y)
+    std::vector<uint64_t> rows_to_delete{};
+    for (uint64_t y = 0; y <= lyt.y(); ++y)
     {
         bool found_row = true;
-        for (auto x = static_cast<int64_t>(width); x >= 0; --x)
+        for (uint64_t x = 0; x <= lyt.x(); ++x)
         {
-            // Check if the row can be deleted based on certain conditions
             const bool is_vertical_wire =
                 (lyt.is_wire_tile({x, y}) && lyt.fanin_size(lyt.get_node({x, y})) == 1 &&
                  lyt.fanout_size(lyt.get_node({x, y})) == 1 && lyt.has_northern_incoming_signal({x, y}) &&
@@ -931,14 +874,15 @@ void delete_wires(Lyt& lyt, const uint64_t width, const uint64_t height) noexcep
         }
         if (found_row)
         {
-            delete_row(lyt, static_cast<uint64_t>(y), width, height);
+            rows_to_delete.push_back(y);
         }
     }
 
-    for (auto x = static_cast<int64_t>(width); x >= 0; --x)
+    std::vector<uint64_t> columns_to_delete{};
+    for (uint64_t x = 0; x <= lyt.x(); --x)
     {
         bool found_column = true;
-        for (auto y = static_cast<int64_t>(height); y >= 0; --y)
+        for (uint64_t y = 0; y <= lyt.y(); --y)
         {
             // Check if the column can be deleted based on certain conditions
             const bool is_horizontal_wire =
@@ -953,9 +897,11 @@ void delete_wires(Lyt& lyt, const uint64_t width, const uint64_t height) noexcep
         }
         if (found_column)
         {
-            delete_column(lyt, static_cast<uint64_t>(x), width, height);
+            columns_to_delete.push_back(x);
         }
     }
+
+    delete_rows_and_columns(lyt, rows_to_delete, columns_to_delete);
 }
 
 /**
@@ -1217,20 +1163,15 @@ void post_layout_optimization(const Lyt& lyt) noexcept
 
     assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE) && "Clocking scheme is not 2DDWave");
 
-    // calculate bounding box
-    const auto bounding_box_before = bounding_box_2d(lyt);
-    const auto width               = bounding_box_before.get_x_size();
-    const auto height              = bounding_box_before.get_y_size();
-
     // Optimization
     auto layout = obstruction_layout<Lyt>(lyt);
 
     std::vector<coordinate<Lyt>> gates{};
     gates.reserve(layout.num_wires() + layout.num_gates());
 
-    for (auto x = 0; x <= static_cast<int>(width); ++x)
+    for (auto x = 0; x <= static_cast<int>(lyt.x()); ++x)
     {
-        for (auto y = 0; y <= static_cast<int>(height); ++y)
+        for (auto y = 0; y <= static_cast<int>(lyt.y()); ++y)
         {
             if (layout.is_inv(layout.get_node({x, y})) || layout.is_and(layout.get_node({x, y})) ||
                 layout.is_xor(layout.get_node({x, y})) || layout.is_fanout(layout.get_node({x, y})) ||
@@ -1254,7 +1195,7 @@ void post_layout_optimization(const Lyt& lyt) noexcept
 
         for (auto& gate : gates)
         {
-            const auto moved_gate = detail::improve_gate_location(gate, layout, width, height);
+            const auto moved_gate = detail::improve_gate_location(gate, layout);
 
             if (std::get<0>(moved_gate))
             {
@@ -1270,7 +1211,7 @@ void post_layout_optimization(const Lyt& lyt) noexcept
         }
     }
 
-    detail::delete_wires(layout, width, height);
+    detail::delete_wires(layout);
     detail::optimize_output_positions(layout);
     detail::fix_dead_nodes(layout, gates);
 
