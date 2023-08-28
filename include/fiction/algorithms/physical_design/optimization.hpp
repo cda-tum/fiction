@@ -889,10 +889,10 @@ void delete_wires(Lyt& lyt) noexcept
     }
 
     std::vector<uint64_t> columns_to_delete{};
-    for (uint64_t x = 0; x <= lyt.x(); --x)
+    for (uint64_t x = 0; x <= lyt.x(); ++x)
     {
         bool found_column = true;
-        for (uint64_t y = 0; y <= lyt.y(); --y)
+        for (uint64_t y = 0; y <= lyt.y(); ++y)
         {
             // Check if the column can be deleted based on certain conditions
             const bool is_horizontal_wire =
