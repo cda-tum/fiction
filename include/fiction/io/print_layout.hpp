@@ -335,26 +335,24 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     os << std::endl;
 }
 /**
- * Writes a simplified 2D representation of an SiDB surface or charge distribution surface to an output stream.
+ * Writes a simplified 2D representation of an SiDB layout (SiDB and defect charges are supported) to an output stream.
  *
- * @tparam Lyt SiDB cell-level layout with charge-information based on SiQAD coordinates, e.g., a
- * charge_distribution_surface object.
+ * @tparam Lyt SiDB cell-level layout with charge-information based on SiQAD coordinates or defect-information, e.g., a
+ * charge_distribution_surface or sidb_surface.
  * @param os Output stream to write into.
- * @param lyt The layout of which the charge distribution is to be printed.
+ * @param lyt The layout of which the information is to be printed.
  * @param cs_color Flag to utilize color escapes for charge states.
  * @param crop_layout Flag to print the 2D bounding box of the layout, while leaving a maximum padding of one dimer row
  * and two columns.
  * @param draw_lattice Flag to enable lattice background drawing.
  */
 template <typename Lyt>
-void print_charge_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = true, const bool crop_layout = false,
-                         const bool draw_lattice = true)
+void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = true, const bool crop_layout = false,
+                       const bool draw_lattice = true)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-    static_assert(has_get_charge_state_v<Lyt> | has_get_sidb_defect_v<Lyt>,
-                  "Lyt does not implement the get_charge_state function");
 
     // empty layout
     if (lyt.is_empty())
@@ -374,18 +372,17 @@ void print_charge_layout(std::ostream& os, const Lyt& lyt, const bool cs_color =
         }
     }
 
-    // determine the north-west and south-west cell in siqad-coordinates.
-    const auto [nw, se] = bounding_box_siqad<Lyt>(lyt);
+    const bounding_box_2d bb{lyt};
 
-    auto min_nw = nw;
-    auto max_se = se;
+    auto min_nw = bb.get_min();
+    auto max_se = bb.get_max();
 
     std::vector<typename Lyt::cell> defects{};
 
     // Check if defects exist in the layout.
     if constexpr (has_get_sidb_defect_v<Lyt>)
     {
-        if (!defects.empty())
+        if (lyt.num_defects() != 0)
         {
             defects.reserve(lyt.num_defects());
             lyt.foreach_sidb_defect([&defects](const auto& c) { defects.push_back(c.first); });
@@ -468,6 +465,12 @@ void print_charge_layout(std::ostream& os, const Lyt& lyt, const bool cs_color =
             }
         }
 
+        if (!already_printed && lyt.get_cell_type(loop_coordinate) != sidb_technology::cell_type::EMPTY)
+        {
+            os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " o ");
+            already_printed = true;
+        }
+
         if (!already_printed)
         {
             os << (draw_lattice ? fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") : "  ");
@@ -524,9 +527,9 @@ void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
     }
     else if constexpr (is_cell_level_layout_v<Lyt>)
     {
-        if constexpr (has_sidb_technology_v<Lyt> && has_siqad_coord_v<Lyt> && has_get_charge_state_v<Lyt>)
+        if constexpr (has_sidb_technology_v<Lyt>)
         {
-            print_charge_layout(os, lyt);
+            print_sidb_layout(os, lyt);
         }
         else
         {

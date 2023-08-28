@@ -222,7 +222,7 @@ TEST_CASE("Print empty charge layout", "[print-charge-layout]")
 
     std::stringstream print_stream{};
 
-    print_charge_layout(print_stream, layout, false);
+    print_sidb_layout(print_stream, layout, false);
 
     CHECK(print_stream.str() == layout_print);
 
@@ -243,7 +243,7 @@ TEST_CASE("layout which is sidb_surface and charge distribution surface but empt
 
     std::stringstream print_stream{};
 
-    print_charge_layout(print_stream, layout, false);
+    print_sidb_layout(print_stream, layout, false);
 
     CHECK(print_stream.str() == layout_print);
 
@@ -268,7 +268,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
 
     cl.assign_charge_state({16, 3, 0}, sidb_charge_state::NEUTRAL);
     cl.assign_charge_state({42, 3, 0}, sidb_charge_state::NEGATIVE);
-    cl.assign_charge_state({18, 4, 0}, sidb_charge_state::NONE);
+    cl.assign_charge_state({18, 4, 0}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({40, 4, 0}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({22, 5, 0}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({36, 5, 0}, sidb_charge_state::NEUTRAL);
@@ -276,7 +276,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
     cl.assign_charge_state({34, 6, 0}, sidb_charge_state::POSITIVE);
     cl.assign_charge_state({27, 9, 0}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({32, 10, 0}, sidb_charge_state::POSITIVE);
-    cl.assign_charge_state({27, 10, 1}, sidb_charge_state::NONE);
+    cl.assign_charge_state({27, 10, 1}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({29, 11, 1}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({29, 14, 0}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({30, 15, 0}, sidb_charge_state::NEGATIVE);
@@ -289,7 +289,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
 
     SECTION("Cropped")
     {
-        print_charge_layout(print_stream, cl, false, true, true);
+        print_sidb_layout(print_stream, cl, false, true, true);
 
         constexpr const char* layout_print =
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -298,7 +298,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
             " ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  · \n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             "\n"
-            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  · \n"
+            " ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  · \n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             "\n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -317,7 +317,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             "\n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ⨁  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             "\n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -357,13 +357,13 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
     {
         print_stream.clear();
 
-        print_charge_layout(print_stream, cl, false);
+        print_sidb_layout(print_stream, cl, false);
 
         constexpr const char* layout_print =
             " ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ● \n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             "\n"
-            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  · \n"
+            " ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  · \n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             "\n"
             " ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  · \n"
@@ -382,7 +382,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             "\n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ⨁  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             "\n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -436,7 +436,7 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
 
     cl.assign_charge_state({16, 3, 0}, sidb_charge_state::NEUTRAL);
     cl.assign_charge_state({42, 3, 0}, sidb_charge_state::NEGATIVE);
-    cl.assign_charge_state({18, 4, 0}, sidb_charge_state::NONE);
+    cl.assign_charge_state({18, 4, 0}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({40, 4, 0}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({22, 5, 0}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({36, 5, 0}, sidb_charge_state::NEUTRAL);
@@ -444,7 +444,7 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
     cl.assign_charge_state({34, 6, 0}, sidb_charge_state::POSITIVE);
     cl.assign_charge_state({27, 9, 0}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({32, 10, 0}, sidb_charge_state::POSITIVE);
-    cl.assign_charge_state({27, 10, 1}, sidb_charge_state::NONE);
+    cl.assign_charge_state({27, 10, 1}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({29, 11, 1}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({29, 14, 0}, sidb_charge_state::NEGATIVE);
     cl.assign_charge_state({30, 15, 0}, sidb_charge_state::NEGATIVE);
@@ -455,7 +455,7 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
 
     std::stringstream print_stream{};
 
-    print_charge_layout(print_stream, cl, false, true, true);
+    print_sidb_layout(print_stream, cl, false, true, true);
 
     constexpr const char* layout_print =
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -464,7 +464,7 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
         " ·  ·  ◯  ·  ⊞  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ⊟  ·  ●  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -483,7 +483,7 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ⨁  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -538,7 +538,7 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 
     SECTION("crop_layout option activated")
     {
-        print_charge_layout(print_stream, cl, false, true, true);
+        print_sidb_layout(print_stream, cl, false, true, true);
         //
         constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
                                              " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -556,7 +556,7 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 
     SECTION("crop_layout option deactivated")
     {
-        print_charge_layout(print_stream, cl, false, false, true);
+        print_sidb_layout(print_stream, cl, false, false, true);
         //
         constexpr const char* layout_print = " ⊞  ·  ·  ·  · \n"
                                              " ·  ⊡  ·  ·  ⊟ \n"
@@ -565,4 +565,82 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 
         CHECK(layout_print == print_stream.str());
     }
+}
+
+TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
+{
+    using hex_gate_lyt = hex_odd_row_gate_clk_lyt;
+
+    hex_gate_lyt layout{aspect_ratio<hex_gate_lyt>{0, 0}};
+
+    layout.create_or({}, {}, {0, 0});
+
+    const auto cell_layout_or       = apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout);
+    const auto cell_layout_or_siqad = convert_to_siqad_coordinates(cell_layout_or);
+
+    std::stringstream print_stream{};
+
+    print_sidb_layout(print_stream, cell_layout_or_siqad, false, true, true);
+
+    constexpr const char* layout_print =
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        "\n";
+
+    CHECK(layout_print == print_stream.str());
 }
