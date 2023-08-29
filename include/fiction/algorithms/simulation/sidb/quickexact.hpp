@@ -157,6 +157,13 @@ class quickexact_impl
                 else if (all_sidbs_in_lyt_without_negative_detected_ones.empty())
                 {
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                    if constexpr (has_get_sidb_defect_v<Lyt>)
+                    {
+                        for (const auto& [cell, defect] : real_placed_defects)
+                        {
+                            charge_lyt_copy.assign_sidb_defect(cell, defect);
+                        }
+                    }
                     result.charge_distributions.push_back(charge_lyt_copy);
                 }
             }
@@ -179,7 +186,15 @@ class quickexact_impl
                 {
                     if (charge_lyt.is_physically_valid())
                     {
-                        result.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+                        charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                        if constexpr (has_get_sidb_defect_v<Lyt>)
+                        {
+                            for (const auto& [cell, defect] : real_placed_defects)
+                            {
+                                charge_lyt_copy.assign_sidb_defect(cell, defect);
+                            }
+                        }
+                        result.charge_distributions.push_back(charge_lyt_copy);
                     }
 
                     charge_lyt.increase_charge_index_by_one(
@@ -190,7 +205,15 @@ class quickexact_impl
 
                 if (charge_lyt.is_physically_valid())
                 {
-                    result.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                    if constexpr (has_get_sidb_defect_v<Lyt>)
+                    {
+                        for (const auto& [cell, defect] : real_placed_defects)
+                        {
+                            charge_lyt_copy.assign_sidb_defect(cell, defect);
+                        }
+                    }
+                    result.charge_distributions.push_back(charge_lyt_copy);
                 }
             }
 
@@ -275,6 +298,13 @@ class quickexact_impl
                     charge_lyt_copy.add_sidb(cell, sidb_charge_state::NEGATIVE);
                 }
 
+                if constexpr (has_get_sidb_defect_v<Lyt>)
+                {
+                    for (const auto& [cell, defect] : real_placed_defects)
+                    {
+                        charge_lyt_copy.assign_sidb_defect(cell, defect);
+                    }
+                }
                 result.charge_distributions.push_back(charge_lyt_copy);
             }
         }
@@ -312,6 +342,14 @@ class quickexact_impl
                     charge_lyt_copy.add_sidb(cell, sidb_charge_state::NEGATIVE);
                 }
 
+                if constexpr (has_get_sidb_defect_v<Lyt>)
+                {
+                    for (const auto& [cell, defect] : real_placed_defects)
+                    {
+                        charge_lyt_copy.assign_sidb_defect(cell, defect);
+                    }
+                }
+
                 result.charge_distributions.push_back(charge_lyt_copy);
             }
 
@@ -326,6 +364,14 @@ class quickexact_impl
                     for (const auto& cell : detected_negative_sidbs)
                     {
                         charge_lyt_copy.add_sidb(cell, sidb_charge_state::NEGATIVE);
+                    }
+
+                    if constexpr (has_get_sidb_defect_v<Lyt>)
+                    {
+                        for (const auto& [cell, defect] : real_placed_defects)
+                        {
+                            charge_lyt_copy.assign_sidb_defect(cell, defect);
+                        }
                     }
 
                     result.charge_distributions.push_back(charge_lyt_copy);
@@ -346,6 +392,14 @@ class quickexact_impl
                 for (const auto& cell : detected_negative_sidbs)
                 {
                     charge_lyt_copy.add_sidb(cell, sidb_charge_state::NEGATIVE);
+                }
+
+                if constexpr (has_get_sidb_defect_v<Lyt>)
+                {
+                    for (const auto& [cell, defect] : real_placed_defects)
+                    {
+                        charge_lyt_copy.assign_sidb_defect(cell, defect);
+                    }
                 }
 
                 result.charge_distributions.push_back(charge_lyt_copy);
@@ -374,6 +428,14 @@ class quickexact_impl
                     charge_lyt_copy.add_sidb(cell, sidb_charge_state::NEGATIVE);
                 }
 
+                if constexpr (has_get_sidb_defect_v<Lyt>)
+                {
+                    for (const auto& [cell, defect] : real_placed_defects)
+                    {
+                        charge_lyt_copy.assign_sidb_defect(cell, defect);
+                    }
+                }
+
                 result.charge_distributions.push_back(charge_lyt_copy);
             }
 
@@ -389,6 +451,14 @@ class quickexact_impl
             for (const auto& cell : detected_negative_sidbs)
             {
                 charge_lyt_copy.add_sidb(cell, sidb_charge_state::NEGATIVE);
+            }
+
+            if constexpr (has_get_sidb_defect_v<Lyt>)
+            {
+                for (const auto& [cell, defect] : real_placed_defects)
+                {
+                    charge_lyt_copy.assign_sidb_defect(cell, defect);
+                }
             }
 
             result.charge_distributions.push_back(charge_lyt_copy);
