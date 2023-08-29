@@ -96,6 +96,7 @@ TEMPLATE_TEST_CASE(
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
+    CHECK(simulation_results.charge_distributions.front().num_defects() == 1);
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::POSITIVE);
 }
 
@@ -113,6 +114,7 @@ TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with one highly negatively
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
+    CHECK(simulation_results.charge_distributions.front().num_defects() == 1);
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::POSITIVE);
 }
 
@@ -153,6 +155,7 @@ TEMPLATE_TEST_CASE(
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
+    CHECK(simulation_results.charge_distributions.front().num_defects() == 2);
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
 }
 
@@ -588,6 +591,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of four SiDBs (far away) with two nega
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
+    CHECK(simulation_results.charge_distributions.front().num_defects() == 2);
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
     CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == sidb_charge_state::NEUTRAL);
@@ -617,6 +621,7 @@ TEMPLATE_TEST_CASE(
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
+    CHECK(simulation_results.charge_distributions.front().num_defects() == 2);
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
     CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
