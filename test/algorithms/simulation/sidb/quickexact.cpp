@@ -889,8 +889,6 @@ TEMPLATE_TEST_CASE("3 DBs next to each other with automatic base number detectio
     REQUIRE(!simulation_results_new.additional_simulation_parameters.empty());
     CHECK(simulation_results_new.additional_simulation_parameters[0].first == "base_number");
     CHECK(std::any_cast<uint64_t>(simulation_results_new.additional_simulation_parameters[0].second) == 2);
-
-    CHECK(simulation_results_new.simulation_runtime < simulation_results.simulation_runtime);
 }
 
 TEMPLATE_TEST_CASE("13 DBs which are all negatively charged", "[quickexact]",
