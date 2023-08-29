@@ -21,6 +21,7 @@
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <map>
 #include <sstream>
@@ -172,6 +173,43 @@ TEST_CASE("Write defective surface SQD layout", "[sqd]")
     write_sqd_layout(defect_layout, layout_stream);
 
     const auto read_layout = read_sqd_layout<sidb_surface<sidb_layout>>(layout_stream);
+
+    compare_written_and_read_layout(defect_layout, read_layout);
+}
+
+TEST_CASE("Write defective surface SQD layout based on siqad coordinates", "[sqd]")
+{
+    static const std::map<cell<sidb_cell_clk_lyt_siqad>, sidb_defect> defect_map{
+        {{{0, 0, 1}, sidb_defect{sidb_defect_type::NONE}},
+         {{0, 1}, sidb_defect{sidb_defect_type::DB}},
+         {{0, 2}, sidb_defect{sidb_defect_type::SI_VACANCY}},
+         {{0, 3}, sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE}},
+         {{0, 4, 1}, sidb_defect{sidb_defect_type::DIHYDRIDE_PAIR}},
+         {{0, 5, 1}, sidb_defect{sidb_defect_type::ONE_BY_ONE}},
+         {{0, 6}, sidb_defect{sidb_defect_type::THREE_BY_ONE}},
+         {{0, 7}, sidb_defect{sidb_defect_type::SILOXANE}},
+         {{0, 8}, sidb_defect{sidb_defect_type::RAISED_SI}},
+         {{0, 9}, sidb_defect{sidb_defect_type::MISSING_DIMER}},
+         {{0, 10, 1}, sidb_defect{sidb_defect_type::ETCH_PIT}},
+         {{0, 11}, sidb_defect{sidb_defect_type::STEP_EDGE}},
+         {{0, 12, 0}, sidb_defect{sidb_defect_type::GUNK}},
+         {{0, 13}, sidb_defect{sidb_defect_type::UNKNOWN}}}};
+
+    const sidb_cell_clk_lyt_siqad lyt{aspect_ratio<sidb_cell_clk_lyt_siqad>{0, defect_map.size() - 1}};
+
+    sidb_surface<sidb_cell_clk_lyt_siqad> defect_layout{lyt};
+
+    // assign defects
+    for (const auto& [c, d] : defect_map)
+    {
+        defect_layout.assign_sidb_defect(c, d);
+    }
+
+    std::stringstream layout_stream{};
+
+    write_sqd_layout(defect_layout, layout_stream);
+
+    const auto read_layout = read_sqd_layout<sidb_surface<sidb_cell_clk_lyt_siqad>>(layout_stream);
 
     compare_written_and_read_layout(defect_layout, read_layout);
 }
