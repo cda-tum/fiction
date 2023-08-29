@@ -57,8 +57,6 @@ struct sidb_defect
             epsilon_r{relative_permittivity},
             lambda_tf{screening_distance}
     {
-
-        assert((std::fmod(charge, 1) == 0) && "charge value has to be an integer");
         assert((epsilon_r >= 0) && "epsilon_r has to be >= 0.0");
         assert((lambda_tf >= 0.0) && "lambda_tf has to be >= 0.0 nanometer");
     }

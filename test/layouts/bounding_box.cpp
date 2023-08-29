@@ -174,4 +174,50 @@ TEST_CASE("2D bounding box for siqad layout", "[bounding-box]")
         CHECK(nw == siqad::coord_t{0, 0, 1});
         CHECK(se == siqad::coord_t{10, 8, 0});
     }
+
+    SECTION("two cells as input, on the same height in y-direction")
+    {
+        sidb_cell_clk_lyt_siqad lyt{};
+        lyt.assign_cell_type({-3, 0, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        lyt.assign_cell_type({3, 0, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+
+        const bounding_box_2d bb{lyt};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == siqad::coord_t{-3, 0, 1});
+        CHECK(se == siqad::coord_t{3, 0, 1});
+    }
+
+    SECTION("four cells as input, three on the same dimer")
+    {
+        sidb_cell_clk_lyt_siqad lyt{};
+        lyt.assign_cell_type({3, 0, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        lyt.assign_cell_type({0, 3, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        lyt.assign_cell_type({5, 3, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        lyt.assign_cell_type({10, 3, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+
+        const bounding_box_2d bb{lyt};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == siqad::coord_t{0, 0, 0});
+        CHECK(se == siqad::coord_t{10, 3, 1});
+    }
+
+    SECTION("four cells as input, two on the same dimer")
+    {
+        sidb_cell_clk_lyt_siqad lyt{};
+        lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        lyt.assign_cell_type({1, 0, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        lyt.assign_cell_type({-2, 4, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        lyt.assign_cell_type({2, 4, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+
+        const bounding_box_2d bb{lyt};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == siqad::coord_t{-2, 0, 0});
+        CHECK(se == siqad::coord_t{2, 4, 1});
+    }
 }

@@ -61,38 +61,49 @@ class bounding_box_2d
         // the layout is based on SiQAD coordinates
         if constexpr (has_siqad_coord_v<Lyt>)
         {
-            // the layout is first converted to fiction coordinates
-            const auto converted_layout = convert_to_fiction_coordinates<
-                cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>(layout);
-
             int32_t min_x = std::numeric_limits<int32_t>::max();
             int32_t max_x = std::numeric_limits<int32_t>::min();
 
             int32_t min_y = std::numeric_limits<int32_t>::max();
             int32_t max_y = std::numeric_limits<int32_t>::min();
 
-            converted_layout.foreach_cell(
-                [&min_x, &max_x, &min_y, &max_y](const auto& c)
+            uint8_t min_z = 0;
+            uint8_t max_z = 0;
+
+            layout.foreach_cell(
+                [&min_x, &max_x, &min_y, &max_y, &min_z, &max_z](const auto& c)
                 {
                     if (c.x < min_x)
                     {
                         min_x = c.x;
                     }
-                    if (c.y < min_y)
-                    {
-                        min_y = c.y;
-                    }
                     if (c.x > max_x)
                     {
                         max_x = c.x;
                     }
+
+                    if (c.y == min_y && c.z < min_z)
+                    {
+                        min_z = c.z;
+                    }
+                    if (c.y < min_y)
+                    {
+                        min_y = c.y;
+                        min_z = c.z;
+                    }
+
+                    if (c.y == max_y && c.z > max_z)
+                    {
+                        max_z = c.z;
+                    }
                     if (c.y > max_y)
                     {
                         max_y = c.y;
+                        max_z = c.z;
                     }
                 });
-            min = siqad::to_siqad_coord(cube::coord_t{min_x, min_y});
-            max = siqad::to_siqad_coord(cube::coord_t{max_x, max_y});
+            min = {min_x, min_y, min_z};
+            max = {max_x, max_y, max_z};
         }
         else
         {
