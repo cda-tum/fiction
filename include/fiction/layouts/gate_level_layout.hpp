@@ -181,11 +181,32 @@ class gate_level_layout : public ClockedLayout
      *
      * @param s Storage of another gate_level_layout.
      */
-    explicit gate_level_layout(std::shared_ptr<gate_level_layout_storage> s) :
+    explicit gate_level_layout(storage s) :
             strg{std::move(s)},
             evnts{std::make_shared<typename event_storage::element_type>()}
     {
         static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+    }
+    /**
+     * Copy constructor from another layout's storage.
+     *
+     * @param s Storage of another gate_level_layout.
+     * @param e Event storage of another gate_level_layout.
+     */
+    gate_level_layout(storage s, event_storage e) : strg{std::move(s)}, evnts{std::move(e)}
+    {
+        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+    }
+    /**
+     * Clones the layout returning a deep copy.
+     *
+     * @return Deep copy of the layout.
+     */
+    gate_level_layout clone() const noexcept
+    {
+        const auto copy_strg  = std::make_shared<gate_level_layout_storage>(*strg);
+        const auto copy_evnts = std::make_shared<mockturtle::network_events<base_type>>(*evnts);
+        return gate_level_layout(copy_strg, copy_evnts);
     }
 
 #pragma endregion
