@@ -338,7 +338,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
  * Writes a simplified 2D representation of an SiDB layout (SiDB and defect charges are supported) to an output stream.
  *
  * @tparam Lyt SiDB cell-level layout with charge-information based on SiQAD coordinates or defect-information, e.g., a
- * charge_distribution_surface or sidb_surface.
+ * `charge_distribution_surface` or `sidb_surface`.
  * @param os Output stream to write into.
  * @param lyt The layout of which the information is to be printed.
  * @param cs_color Flag to utilize color escapes for charge states.
@@ -379,20 +379,22 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
 
     std::vector<typename Lyt::cell> defects{};
 
-    // Check if defects exist in the layout.
+    // if defects exist in the layout
     if constexpr (has_get_sidb_defect_v<Lyt>)
     {
         if (lyt.num_defects() != 0)
         {
             defects.reserve(lyt.num_defects());
             lyt.foreach_sidb_defect([&defects](const auto& c) { defects.push_back(c.first); });
+
             std::sort(defects.begin(), defects.end());
+
             min_nw = min_nw > defects.front() ?
                          defects.front() :
-                         min_nw;  // if a defect is more north-west than nw, this position is used as min.
+                         min_nw;  // if a defect is more north-west than nw, this position is used as min
             max_se = max_se < defects.back() ?
                          defects.back() :
-                         max_se;  // if a defect is more south-east than se, this position is used as max.
+                         max_se;  // if a defect is more south-east than se, this position is used as max
         }
     }
 
@@ -407,15 +409,15 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
         max_se.z = 1;
     }
 
-    // loop coordinate is initialized with the north-west coordinate.
+    // loop coordinate is initialized with the north-west coordinate
     auto loop_coordinate = min_nw;
 
     while (loop_coordinate <= max_se)
     {
-        // Is set to true if either charge or defect is printed at loop coordinate.
+        // Is set to true if either charge or defect is printed at loop coordinate
         bool already_printed = false;
 
-        // Check if layout is only a charge distribution surface.
+        // Check if layout is only a charge distribution surface
         if constexpr (has_get_charge_state_v<Lyt>)
         {
             switch (lyt.get_charge_state(
@@ -455,7 +457,6 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
                     os << fmt::format(cs_color ? detail::SIDB_DEF_NEG_COLOR : detail::NO_COLOR, " ⊟ ");
                     already_printed = true;
                 }
-
                 else if (is_positively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
                 {
                     os << fmt::format(cs_color ? detail::SIDB_DEF_POS_COLOR : detail::NO_COLOR, " ⊞ ");
@@ -480,18 +481,17 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
             os << (draw_lattice ? fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") : "  ");
         }
 
-        // If the x-coordinate of loop_coordinate is still less than the x-coordinate of the south-west cell, the
-        // x-coordinate is increased by 1.
+        // if the x-coordinate of loop_coordinate is still less than the x-coordinate of the south-west cell, the
+        // x-coordinate is increased by 1
         if (loop_coordinate.x < max_se.x)
         {
             loop_coordinate.x += 1;
         }
-
         else if (loop_coordinate.x == max_se.x && loop_coordinate != max_se)
         {
             if (loop_coordinate.z == 1)
             {
-                os << "\n\n";  // gap between two dimers.
+                os << "\n\n";  // gap between two dimers
             }
             else
             {
@@ -503,7 +503,7 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
         }
         else if (loop_coordinate == max_se)
         {
-            os << "\n\n";  // add a gap between two dimers.
+            os << "\n\n";  // add a gap between two dimers
             break;
         }
     }

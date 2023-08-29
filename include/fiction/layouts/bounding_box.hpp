@@ -58,7 +58,7 @@ class bounding_box_2d
             return;
         }
 
-        // the layout is based on siqad-coordinates
+        // the layout is based on SiQAD coordinates
         if constexpr (has_siqad_coord_v<Lyt>)
         {
             // the layout is first converted to fiction coordinates
