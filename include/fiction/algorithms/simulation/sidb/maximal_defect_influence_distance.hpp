@@ -98,16 +98,8 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
     north_west.x = nw.x - sim_params.additional_scanning_area.x;
     north_west.y = nw.y - sim_params.additional_scanning_area.y;
 
-    //    std::cout << "nw x: " << std::to_string(north_west.x);
-    //    std::cout << " | nw y: " << std::to_string(north_west.y);
-    //    std::cout << " | nw z: " << std::to_string(north_west.z) << std::endl;
-
     south_east.x = se.x + sim_params.additional_scanning_area.x;
     south_east.y = se.y + sim_params.additional_scanning_area.y;
-
-    //    std::cout << "se x: " << std::to_string(south_east.x);
-    //    std::cout << " | se y: " << std::to_string(south_east.y);
-    //    std::cout << " | se z: " << std::to_string(south_east.z) << std::endl;
 
     auto                            defect_cell = north_west;
     std::vector<typename Lyt::cell> defect_cells{};
