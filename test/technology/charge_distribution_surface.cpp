@@ -606,7 +606,7 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
 
         CHECK_THAT((*charge_layout_new.get_local_potential({0, 0, 1})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
-        CHECK_THAT((*charge_layout_new.get_local_potential({1, 3, 1})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
+        CHECK_THAT((*charge_layout_new.get_local_potential({1, 3, 0})), Catch::Matchers::WithinAbs(0.000000, 0.000001));
         CHECK_THAT((*charge_layout_new.get_local_potential({10, 5, 1})),
                    Catch::Matchers::WithinAbs(0.000000, 0.000001));
     }
