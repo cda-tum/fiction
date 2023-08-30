@@ -36,10 +36,10 @@ struct maximal_defect_influence_distance_params
      */
     sidb_simulation_parameters physical_params{};
     /**
-     * The coordinate describes the width and height of the area around the gate, which is
+     * The pair describes the width and height of the area around the gate, which is
      * also used to place defects (given in siqad coordinates).
      */
-    coordinate<Lyt> additional_scanning_area{50, 6};
+    std::pair<uint64_t, uint64_t> additional_scanning_area{50, 6};
     /**
      * Number of threads to spawn. By default the number of threads is set to the number of available hardware threads.
      */
@@ -100,11 +100,11 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
     auto se = bb.get_max();  // south-east cell
 
     // shift nw and se cell by the additional scanning area to cover an area that is larger than the gate area.
-    nw.x = nw.x - sim_params.additional_scanning_area.x;
-    nw.y = nw.y - sim_params.additional_scanning_area.y;
+    nw.x = nw.x - sim_params.additional_scanning_area.first;
+    nw.y = nw.y - sim_params.additional_scanning_area.second;
 
-    se.x = se.x + sim_params.additional_scanning_area.x;
-    se.y = se.y + sim_params.additional_scanning_area.y;
+    se.x = se.x + sim_params.additional_scanning_area.first;
+    se.y = se.y + sim_params.additional_scanning_area.second;
 
     // start to place the defect at the north-west cell
     auto defect_cell = nw;
