@@ -5,12 +5,16 @@
 #ifndef FICTION_CMD_OPTIMIZE_HPP
 #define FICTION_CMD_OPTIMIZE_HPP
 
-#include <fiction/algorithms/physical_design/optimization.hpp>
+#include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
+
+#include <iostream>
+#include <optional>
+#include <variant>
 
 namespace alice
 {
@@ -25,7 +29,10 @@ class optimize_command : public command
      *
      * @param e alice::environment that specifies stores etc.
      */
-    explicit optimize_command(const environment::ptr& e) : command(e, "Optimizes a 2DDWave-clocked Cartesian layout.")
+    explicit optimize_command(const environment::ptr& e) :
+            command(e, "Optimizes a 2DDWave-clocked Cartesian layout with respect to area. It achieves this objective "
+                       "by strategically repositioning gates within the layout, removing excess wiring, and "
+                       "effectively relocating outputs to more favorable positions.")
     {}
 
   protected:

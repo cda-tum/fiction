@@ -1,8 +1,8 @@
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/optimization.hpp>  // scalable heuristic for physical design of FCN layouts
-#include <fiction/algorithms/physical_design/orthogonal.hpp>    // scalable heuristic for physical design of FCN layouts
+#include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
+#include <fiction/algorithms/physical_design/post_layout_optimization.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/print_layout.hpp>

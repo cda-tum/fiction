@@ -2,8 +2,8 @@
 // Created by simon on 14.06.23.
 //
 
-#ifndef FICTION_OPTIMIZATION_HPP
-#define FICTION_OPTIMIZATION_HPP
+#ifndef FICTION_POST_LAYOUT_OPTIMIZATION_HPP
+#define FICTION_POST_LAYOUT_OPTIMIZATION_HPP
 
 #include "fiction/algorithms/path_finding/a_star.hpp"
 #include "fiction/algorithms/path_finding/cost.hpp"
@@ -1235,4 +1235,4 @@ void post_layout_optimization(const Lyt& lyt) noexcept
 
 }  // namespace fiction
 
-#endif  // FICTION_OPTIMIZATION_HPP
+#endif  // FICTION_POST_LAYOUT_OPTIMIZATION_HPP
