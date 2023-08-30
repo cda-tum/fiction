@@ -49,6 +49,19 @@ class gray_code_iterator
         return *this;
     }
     /**
+     * Postfix increment operator. Sets the next Gray Code.
+     *
+     * @return Copy of `this` before incrementing.
+     */
+    gray_code_iterator operator++(int) noexcept
+    {
+        auto result{*this};
+
+        ++(*this);
+
+        return result;
+    }
+    /**
      * Addition operator. Computes the Gray code of the current iterator plus the given integer.
      *
      * @param m The amount of Gray codes to skip.
@@ -96,7 +109,7 @@ class gray_code_iterator
         return result;
     }
     /**
-     * Prefix decrement operator. Sets the previous input state.
+     * Prefix decrement operator. Sets the previous Gray code.
      *
      * @return Reference to `this`.
      */
@@ -109,7 +122,7 @@ class gray_code_iterator
         return *this;
     }
     /**
-     * Postfix decrement operator. Sets the previous input state.
+     * Postfix decrement operator. Sets the previous Gray Code.
      *
      * @return Copy of `this` before decrementing.
      */
