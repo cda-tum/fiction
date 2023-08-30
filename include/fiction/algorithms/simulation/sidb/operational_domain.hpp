@@ -325,36 +325,11 @@ class operational_domain_impl
         // a utility function that adds the adjacent points to the queue for further evaluation
         const auto queue_next_points = [this, &queue](const auto x, const auto y)
         {
-            // increase in x dimension
-            if (const auto incr_x = x + 1; incr_x < x_values.size())
+            for (const auto& m : moore_neighborhood(x, y))
             {
-                if (!has_already_been_sampled(incr_x, y))
+                if (!has_already_been_sampled(m.first, m.second))
                 {
-                    queue.emplace(incr_x, y);
-                }
-            }
-            // decrease in x dimension
-            if (const auto decr_x = x - 1; x > 0)
-            {
-                if (!has_already_been_sampled(decr_x, y))
-                {
-                    queue.emplace(decr_x, y);
-                }
-            }
-            // increase in y dimension
-            if (const auto incr_y = y + 1; incr_y < y_values.size())
-            {
-                if (!has_already_been_sampled(x, incr_y))
-                {
-                    queue.emplace(x, incr_y);
-                }
-            }
-            // decrease in y dimension
-            if (const auto decr_y = y - 1; y > 0)
-            {
-                if (!has_already_been_sampled(x, decr_y))
-                {
-                    queue.emplace(x, decr_y);
+                    queue.emplace(m.first, m.second);
                 }
             }
         };
