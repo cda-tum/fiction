@@ -177,7 +177,25 @@ TEST_CASE("Write defective surface SQD layout", "[sqd]")
     compare_written_and_read_layout(defect_layout, read_layout);
 }
 
-TEST_CASE("Write defective surface SQD layout based on siqad coordinates", "[sqd]")
+TEST_CASE("Write multi-dot SQD layout based on SiQAD coordinates", "[sqd]")
+{
+    sidb_cell_clk_lyt_siqad layout{{4, 4}};
+    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 1}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 2}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 3}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 4}, sidb_technology::cell_type::NORMAL);
+
+    std::stringstream layout_stream{};
+
+    write_sqd_layout(layout, layout_stream);
+
+    const auto read_layout = read_sqd_layout<sidb_cell_clk_lyt_siqad>(layout_stream);
+
+    compare_written_and_read_layout(layout, read_layout);
+}
+
+TEST_CASE("Write defective surface SQD layout based on SiQAD coordinates", "[sqd]")
 {
     static const std::map<cell<sidb_cell_clk_lyt_siqad>, sidb_defect> defect_map{
         {{{0, 0, 1}, sidb_defect{sidb_defect_type::NONE}},
