@@ -184,7 +184,7 @@ struct fanin_fanout_data
  * @param ffd Reference to the fanin_fanout_data structure containing the routes.
  */
 template <typename Lyt>
-void add_fanin_to_route(const coordinate<Lyt>& fanin, bool is_first_fanin, fanin_fanout_data<Lyt>& ffd)
+void add_fanin_to_route(const coordinate<Lyt>& fanin, bool is_first_fanin, fanin_fanout_data<Lyt>& ffd) noexcept
 {
     if (is_first_fanin)
     {
@@ -209,7 +209,7 @@ void add_fanin_to_route(const coordinate<Lyt>& fanin, bool is_first_fanin, fanin
  * @param ffd Reference to the fanin_fanout_data structure containing the routes.
  */
 template <typename Lyt>
-void add_fanout_to_route(const coordinate<Lyt>& fanout, bool is_first_fanout, fanin_fanout_data<Lyt>& ffd)
+void add_fanout_to_route(const coordinate<Lyt>& fanout, bool is_first_fanout, fanin_fanout_data<Lyt>& ffd) noexcept
 {
     if (is_first_fanout)
     {
@@ -254,7 +254,7 @@ template <typename Lyt>
                       [&](const auto& fin)
                       {
                           coordinate<Lyt> fanin = static_cast<tile<Lyt>>(fin);
-                          if (fanins_set.find(fanin) == fanins_set.end())
+                          if (fanins_set.find(fanin) == fanins_set.cend())
                           {
 
                               // Add fanin to the respective route
@@ -291,7 +291,7 @@ template <typename Lyt>
                        {
                            coordinate<Lyt> fanout = lyt.get_tile(fout);
 
-                           if (fanouts_set.find(fanout) == fanouts_set.end())
+                           if (fanouts_set.find(fanout) == fanouts_set.cend())
                            {
 
                                // Add fanout to the respective route
@@ -404,7 +404,7 @@ template <typename Lyt>
     assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE) && "Clocking scheme is not 2DDWave");
     static_assert(has_is_obstructed_coordinate_v<Lyt>, "Lyt is not an obstruction layout");
 
-    const a_star_params params{true};
+    static const a_star_params params{true};
 
     const auto& [fanins, fanouts, to_clear, r1, r2, r3, r4] = get_fanin_and_fanouts(lyt, old_pos);
 
@@ -470,10 +470,10 @@ template <typename Lyt>
     fix_wires(lyt, to_clear);
 
     bool            moved_gate             = false;
-    coordinate<Lyt> current_pos            = old_pos;
+    auto current_pos            = old_pos;
     bool            improved_gate_location = false;
     // iterate over layout diagonally
-    for (uint64_t k = 0; k < lyt.x() + lyt.y() + 1; k++)
+    for (uint64_t k = 0; k < lyt.x() + lyt.y() + 1; ++k)
     {
         for (uint64_t x = 0; x < k + 1; ++x)
         {
@@ -506,7 +506,7 @@ template <typename Lyt>
                     // Get paths for fanins and fanouts
                     if (!fanins.empty())
                     {
-                        path1 = get_path_and_obstruct<Lyt>(lyt, fanins[0], new_pos, dist(), cost(), params);
+                        path1 = get_path_and_obstruct(lyt, fanins[0], new_pos, dist(), cost(), params);
                     }
 
                     if (fanins.size() == 2)
@@ -533,7 +533,7 @@ template <typename Lyt>
                             if (!path.empty())
                             {
                                 route_path(lyt, path);
-                                for (auto tile : path)
+                                for (const auto& tile : path)
                                 {
                                     lyt.obstruct_coordinate(tile);
                                 }
@@ -804,7 +804,7 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
         if (!columns_to_delete.empty())
         {
             column_offset = static_cast<uint64_t>(
-                std::upper_bound(columns_to_delete.begin(), columns_to_delete.end(), x) - columns_to_delete.begin());
+                std::upper_bound(columns_to_delete.cbegin(), columns_to_delete.cend(), x) - columns_to_delete.cbegin());
         }
         for (uint64_t y = 0; y <= lyt.y(); ++y)
         {
@@ -812,8 +812,8 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
             uint64_t row_offset = 0;
             if (!rows_to_delete.empty())
             {
-                row_offset = static_cast<uint64_t>(std::upper_bound(rows_to_delete.begin(), rows_to_delete.end(), y) -
-                                                   rows_to_delete.begin());
+                row_offset = static_cast<uint64_t>(std::upper_bound(rows_to_delete.cbegin(), rows_to_delete.cend(), y) -
+                                                   rows_to_delete.cbegin());
             }
 
             for (uint64_t z = 0; z <= lyt.z(); ++z)
@@ -831,8 +831,8 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
                         uint64_t excess_column_offset = 0;
                         if (!columns_to_delete.empty())
                         {
-                            while (std::find(std::begin(columns_to_delete), std::end(columns_to_delete), fanin.x) !=
-                                   std::end(columns_to_delete))
+                            while (std::find(std::cbegin(columns_to_delete), std::cend(columns_to_delete), fanin.x) !=
+                                   std::cend(columns_to_delete))
                             {
                                 fanin = fanins.column[fanin.x].row[fanin.y].depth[fanin.z][0];
                                 excess_column_offset++;
@@ -1029,7 +1029,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
             ->at(1)
             .y;
 
-    std::vector<update<Lyt>>     updates;
+    std::vector<update<Lyt>>     updates{};
     std::vector<coordinate<Lyt>> cleared{};
 
     // move output along its wiring until it lies on the bounding box
