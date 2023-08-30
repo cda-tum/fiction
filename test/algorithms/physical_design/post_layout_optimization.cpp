@@ -28,8 +28,9 @@ using namespace fiction;
 template <typename Lyt, typename Ntk>
 void check_mapping_equiv(const Ntk& ntk)
 {
-    auto layout = orthogonal<Lyt>(ntk, {});
-    post_layout_optimization<Lyt>(layout);
+    auto                           layout = orthogonal<Lyt>(ntk, {});
+    post_layout_optimization_stats stats{};
+    post_layout_optimization<Lyt>(layout, &stats);
 
     check_eq(ntk, layout);
 }
@@ -68,11 +69,13 @@ TEST_CASE("Layout equivalence", "[optimization]")
         using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 
         const auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
-        post_layout_optimization<gate_layout>(layout_corner_case_1);
+        post_layout_optimization_stats stats_corner_case_1{};
+        post_layout_optimization<gate_layout>(layout_corner_case_1, &stats_corner_case_1);
         check_eq(blueprints::optimization_layout_corner_case_outputs_1<gate_layout>(), layout_corner_case_1);
 
         const auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
-        post_layout_optimization<gate_layout>(layout_corner_case_2);
+        post_layout_optimization_stats stats_corner_case_2{};
+        post_layout_optimization<gate_layout>(layout_corner_case_2, &stats_corner_case_2);
         check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
     }
 }
