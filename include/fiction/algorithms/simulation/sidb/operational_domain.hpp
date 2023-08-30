@@ -300,7 +300,7 @@ class operational_domain_impl
      * the specified number of samples. It stops random sampling once it finds a single operational point, from which it
      * starts the flood fill. The operational domain will finally only contain up to `samples` random non-operational
      * points as well as all operational points that are reachable via flood fill from the first found operational
-     * point.
+     * point plus a one pixel wide border around the domain.
      *
      * @param samples Maximum number of random samples to be taken before flood fill.
      * @return The (partial) operational domain of the layout.
@@ -389,7 +389,17 @@ class operational_domain_impl
 
         return op_domain;
     }
-
+    /**
+     * Performs contour tracing to determine the operational domain. The algorithm first performs a random sampling of
+     * up to the specified number of samples. It stops random sampling once it finds a single operational point, from
+     * which it moves straight outwards until it encounters the counter of the operational domain. From this point, it
+     * traces the contour until it reaches the initial contour point again. The operational domain will finally only
+     * contain up to `samples` random non-operational points as well as the contour of the found operational domain plus
+     * a one pixel wide border around it.
+     *
+     * @param samples Maximum number of random samples to be taken before contour tracing.
+     * @return The (partial) operational domain of the layout.
+     */
     [[nodiscard]] operational_domain contour_tracing(const std::size_t samples) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
@@ -402,90 +412,6 @@ class operational_domain_impl
         {
             return op_domain;
         }
-
-        const auto find_boundary_starting_point = [this,
-                                                   &starting_point]() noexcept -> std::pair<std::size_t, std::size_t>
-        {
-            // TODO make this smarter
-
-            auto latest_operational_point = *starting_point;
-
-            // travel left and return the previous operational point as soon as the first non-operational point was
-            // found
-            for (std::size_t x = starting_point->first; x > 0; --x)
-            {
-                const auto operational_status = is_operational(x, starting_point->second);
-
-                if (operational_status == operational_domain::operational_status::OPERATIONAL)
-                {
-                    latest_operational_point = {x, starting_point->second};
-                }
-                else
-                {
-                    return latest_operational_point;
-                }
-            }
-
-            // if no boundary point was found, the operational area extends outside the parameter range
-            // return the latest operational point
-            return latest_operational_point;
-        };
-
-        const auto moore_neighborhood = [this](const auto x, const auto y) noexcept
-        {
-            std::vector<std::pair<std::size_t, std::size_t>> neighbors{};
-            neighbors.reserve(8);
-
-            auto decr_x = (x > 0) ? x - 1 : x;
-            auto incr_x = (x + 1 < x_values.size()) ? x + 1 : x;
-            auto decr_y = (y > 0) ? y - 1 : y;
-            auto incr_y = (y + 1 < x_values.size()) ? y + 1 : y;
-
-            // add neighbors in clockwise direction
-
-            // right
-            if (x != incr_x)
-            {
-                neighbors.emplace_back(incr_x, y);
-            }
-            // lower-right
-            if (x != incr_x && y != decr_y)
-            {
-                neighbors.emplace_back(incr_x, decr_y);
-            }
-            // down
-            if (y != decr_y)
-            {
-                neighbors.emplace_back(x, decr_y);
-            }
-            // lower-left
-            if (x != decr_x && y != decr_y)
-            {
-                neighbors.emplace_back(decr_x, decr_y);
-            }
-            // left
-            if (x != decr_x)
-            {
-                neighbors.emplace_back(decr_x, y);
-            }
-            // upper-left
-            if (x != decr_x && y != incr_y)
-            {
-                neighbors.emplace_back(decr_x, incr_y);
-            }
-            // up
-            if (y != incr_y)
-            {
-                neighbors.emplace_back(x, incr_y);
-            }
-            // upper-right
-            if (x != incr_x && y != incr_y)
-            {
-                neighbors.emplace_back(incr_x, incr_y);
-            }
-
-            return neighbors;
-        };
 
         const auto next_clockwise_point = [](auto&       neighborhood,
                                              const auto& backtrack) noexcept -> std::pair<std::size_t, std::size_t>
@@ -501,32 +427,32 @@ class operational_domain_impl
             return neighborhood.front();
         };
 
-        // find a boundary sample point
-        const auto boundary_starting_point = find_boundary_starting_point();
+        // find an operational point on the contour starting from the randomly determined starting point
+        const auto contour_starting_point = find_operational_contour_point(*starting_point);
 
-        auto current_boundary_point = boundary_starting_point;
-        auto backtrack_point        = current_boundary_point.first == 0 ?
-                                          current_boundary_point :
-                                          std::pair{current_boundary_point.first - 1, current_boundary_point.second};
+        auto current_contour_point = contour_starting_point;
+        auto backtrack_point       = current_contour_point.first == 0 ?
+                                         current_contour_point :
+                                         std::pair{current_contour_point.first - 1, current_contour_point.second};
 
-        auto current_neighborhood = moore_neighborhood(current_boundary_point.first, current_boundary_point.second);
+        auto current_neighborhood = moore_neighborhood(current_contour_point.first, current_contour_point.second);
         auto next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
 
-        while (next_point != boundary_starting_point)
+        while (next_point != contour_starting_point)
         {
             const auto operational_status = is_operational(next_point.first, next_point.second);
 
             if (operational_status == operational_domain::operational_status::OPERATIONAL)
             {
-                backtrack_point        = current_boundary_point;
-                current_boundary_point = next_point;
+                backtrack_point       = current_contour_point;
+                current_contour_point = next_point;
             }
             else
             {
                 backtrack_point = next_point;
             }
 
-            current_neighborhood = moore_neighborhood(current_boundary_point.first, current_boundary_point.second);
+            current_neighborhood = moore_neighborhood(current_contour_point.first, current_contour_point.second);
             next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
         }
 
@@ -873,6 +799,169 @@ class operational_domain_impl
 
         return std::nullopt;
     }
+    /**
+     * Finds a boundary starting point for the contour tracing algorithm. This function starts at the given starting
+     * point and moves towards the closest edge of the parameter range. It returns the last operational point it
+     * encounters before it reaches the edge. If no operational point is found, the operational area extends outside the
+     * parameter range and the function returns the last operational point that was investigated, i.e., a point at the
+     * border of the parameter range.
+     *
+     * @param starting_point Starting point for the boundary search.
+     * @return An operational point at the edge of the operational domain `starting_point` is located in.
+     */
+    [[nodiscard]] std::pair<std::size_t, std::size_t>
+    find_operational_contour_point(const std::pair<std::size_t, std::size_t>& starting_point) noexcept
+    {
+        auto latest_operational_point = starting_point;
+
+        // calculate the distances to each edge
+        const auto left_distance   = starting_point.first;
+        const auto right_distance  = x_indices.size() - starting_point.first;
+        const auto top_distance    = starting_point.second;
+        const auto bottom_distance = y_indices.size() - starting_point.second;
+
+        // find the minimum distance
+        const auto min_distance = std::min({left_distance, right_distance, top_distance, bottom_distance});
+
+        // going towards the left border of the parameter range
+        if (min_distance == left_distance)
+        {
+            for (std::size_t x = starting_point.first; x > 0; --x)
+            {
+                const auto operational_status = is_operational(x, starting_point.second);
+
+                if (operational_status == operational_domain::operational_status::OPERATIONAL)
+                {
+                    latest_operational_point = {x, starting_point.second};
+                }
+                else
+                {
+                    return latest_operational_point;
+                }
+            }
+        }
+        // going towards right border of the parameter range
+        else if (min_distance == right_distance)
+        {
+            for (std::size_t x = starting_point.first; x < x_indices.size(); ++x)
+            {
+                const auto operational_status = is_operational(x, starting_point.second);
+
+                if (operational_status == operational_domain::operational_status::OPERATIONAL)
+                {
+                    latest_operational_point = {x, starting_point.second};
+                }
+                else
+                {
+                    return latest_operational_point;
+                }
+            }
+        }
+        // going towards the top border of the parameter range
+        else if (min_distance == top_distance)
+        {
+            for (std::size_t y = starting_point.second; y < y_indices.size(); ++y)
+            {
+                const auto operational_status = is_operational(y, starting_point.second);
+
+                if (operational_status == operational_domain::operational_status::OPERATIONAL)
+                {
+                    latest_operational_point = {starting_point.first, y};
+                }
+                else
+                {
+                    return latest_operational_point;
+                }
+            }
+        }
+        // going towards the bottom border of the parameter range
+        else
+        {
+            for (std::size_t y = starting_point.second; y > 0; --y)
+            {
+                const auto operational_status = is_operational(y, starting_point.second);
+
+                if (operational_status == operational_domain::operational_status::OPERATIONAL)
+                {
+                    latest_operational_point = {starting_point.first, y};
+                }
+                else
+                {
+                    return latest_operational_point;
+                }
+            }
+        }
+
+        // if no boundary point was found, the operational area extends outside the parameter range
+        // return the latest operational point
+        return latest_operational_point;
+    }
+    /**
+     * Returns the Moore neighborhood of the step point at `(x, y)`. The Moore neighborhood is the set of all points
+     * that are adjacent to `(x, y)` including the diagonals. Thereby, the Moore neighborhood contains up to 8 points as
+     * points outside of the parameter range are not gathered. The points are returned in clockwise order starting from
+     * the right neighbor.
+     *
+     * @param x X dimension step value.
+     * @param y Y dimension step value.
+     * @return The Moore neighborhood of the step point at `(x, y)`.
+     */
+    [[nodiscard]] std::vector<std::pair<std::size_t, std::size_t>>
+    moore_neighborhood(const std::size_t x, const std::size_t y) const noexcept
+    {
+        std::vector<std::pair<std::size_t, std::size_t>> neighbors{};
+        neighbors.reserve(8);
+
+        auto decr_x = (x > 0) ? x - 1 : x;
+        auto incr_x = (x + 1 < x_values.size()) ? x + 1 : x;
+        auto decr_y = (y > 0) ? y - 1 : y;
+        auto incr_y = (y + 1 < x_values.size()) ? y + 1 : y;
+
+        // add neighbors in clockwise direction
+
+        // right
+        if (x != incr_x)
+        {
+            neighbors.emplace_back(incr_x, y);
+        }
+        // lower-right
+        if (x != incr_x && y != decr_y)
+        {
+            neighbors.emplace_back(incr_x, decr_y);
+        }
+        // down
+        if (y != decr_y)
+        {
+            neighbors.emplace_back(x, decr_y);
+        }
+        // lower-left
+        if (x != decr_x && y != decr_y)
+        {
+            neighbors.emplace_back(decr_x, decr_y);
+        }
+        // left
+        if (x != decr_x)
+        {
+            neighbors.emplace_back(decr_x, y);
+        }
+        // upper-left
+        if (x != decr_x && y != incr_y)
+        {
+            neighbors.emplace_back(decr_x, incr_y);
+        }
+        // up
+        if (y != incr_y)
+        {
+            neighbors.emplace_back(x, incr_y);
+        }
+        // upper-right
+        if (x != incr_x && y != incr_y)
+        {
+            neighbors.emplace_back(incr_x, incr_y);
+        }
+
+        return neighbors;
+    };
     /**
      * Helper function that writes the the statistics of the operational domain computation to the statistics object.
      * Due to data races that can occur during the computation, each value is temporarily held in an atomic variable and
