@@ -28,6 +28,16 @@
 namespace fiction
 {
 
+struct post_layout_optimization_stats
+{
+    mockturtle::stopwatch<>::duration time_total{0};
+
+    void report(std::ostream& out = std::cout) const
+    {
+        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+    }
+};
+
 namespace detail
 {
 
@@ -1166,12 +1176,15 @@ void fix_dead_nodes(Lyt& lyt, std::vector<coordinate<Lyt>>& gt) noexcept
  * @note This function requires the layout to be a gate-level layout and a Cartesian layout.
  */
 template <typename Lyt>
-void post_layout_optimization(const Lyt& lyt) noexcept
+void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* pst = nullptr) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
     assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE) && "Clocking scheme is not 2DDWave");
+
+    // measure run time
+    mockturtle::stopwatch stop{pst->time_total};
 
     // Optimization
     auto layout = obstruction_layout<Lyt>(lyt);

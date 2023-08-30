@@ -20,7 +20,7 @@ int main()  // NOLINT
         fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
-                            uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, double, double, std::string>
+                            uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, double, float, std::string>
         optimization_exp{"optimization",
                          "benchmark",
                          "inputs",
@@ -43,6 +43,7 @@ int main()  // NOLINT
 
     // stats for SMT-based physical design
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
+    fiction::post_layout_optimization_stats   post_layout_optimization_stats{};
 
     static constexpr const uint64_t bench_select =
         fiction_experiments::all & ~fiction_experiments::epfl & ~fiction_experiments::iscas85;
@@ -65,15 +66,14 @@ int main()  // NOLINT
         fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats);
 
         // calculate bounding box
-        const auto bounding_box_before = fiction::bounding_box_2d(gate_level_layout);
+        const auto bounding_box_before_optimization = fiction::bounding_box_2d(gate_level_layout);
 
-        const auto width  = bounding_box_before.get_x_size();
-        const auto height = bounding_box_before.get_y_size();
-
-        const auto begin = std::chrono::steady_clock::now();
+        const auto width_before_optimization  = bounding_box_before_optimization.get_x_size() + 1;
+        const auto height_before_optimization = bounding_box_before_optimization.get_y_size() + 1;
+        const auto area_before_optimization   = width_before_optimization * height_before_optimization;
 
         // perform post-layout optimization
-        fiction::post_layout_optimization<gate_lyt>(gate_level_layout);
+        fiction::post_layout_optimization<gate_lyt>(gate_level_layout, &post_layout_optimization_stats);
 
         const auto end = std::chrono::steady_clock::now();
 
@@ -86,25 +86,21 @@ int main()  // NOLINT
                                                                                 "NO";
 
         // calculate bounding box
-        const auto bounding_box = fiction::bounding_box_2d(gate_level_layout);
+        const auto bounding_box_after_optimization = fiction::bounding_box_2d(gate_level_layout);
 
-        const auto optimized_layout_width  = bounding_box.get_x_size();
-        const auto optimized_layout_height = bounding_box.get_y_size();
+        const auto width_after_optimization  = bounding_box_after_optimization.get_x_size() + 1;
+        const auto height_after_optimization = bounding_box_after_optimization.get_y_size() + 1;
+        const auto area_after_optimization   = width_after_optimization * height_after_optimization;
 
-        gate_level_layout.resize({optimized_layout_width, optimized_layout_height, 1});
-
-        const double improv = 100 *
-                              (static_cast<float>(((width + 1) * (height + 1)) -
-                                                  ((optimized_layout_width + 1) * (optimized_layout_height + 1)))) /
-                              static_cast<float>((width + 1) * (height + 1));
+        const float improv = 100 * static_cast<float>((area_before_optimization - area_after_optimization)) /
+                             static_cast<float>(area_before_optimization);
         // log results
-        optimization_exp(benchmark, network.num_pis(), network.num_pos(), network.num_gates(), width + 1, height + 1,
-                         (width + 1) * (height + 1), optimized_layout_width + 1, optimized_layout_height + 1,
-                         (optimized_layout_width + 1) * (optimized_layout_height + 1), gate_level_layout.num_gates(),
-                         gate_level_layout.num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
-                         mockturtle::to_seconds(orthogonal_stats.time_total),
-                         static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(end - begin).count()),
-                         improv, eq_result);
+        optimization_exp(benchmark, network.num_pis(), network.num_pos(), network.num_gates(),
+                         width_before_optimization, height_before_optimization, area_before_optimization,
+                         width_after_optimization, height_after_optimization, area_after_optimization,
+                         gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp_stats.critical_path_length,
+                         cp_tp_stats.throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
+                         mockturtle::to_seconds(post_layout_optimization_stats.time_total), improv, eq_result);
 
         optimization_exp.save();
         optimization_exp.table();
