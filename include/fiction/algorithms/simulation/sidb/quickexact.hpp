@@ -5,6 +5,7 @@
 #ifndef FICTION_QUICKEXACT_HPP
 #define FICTION_QUICKEXACT_HPP
 
+#include "fiction/algorithms/iter/gray_code_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/enum_class_exhaustive_algorithm.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
@@ -274,18 +275,17 @@ class quickexact_impl
     void two_state_simulation(charge_distribution_surface<Lyt>& charge_layout)
     {
         charge_layout.assign_base_number(2);
-        uint64_t current_charge_index  = 0;
         uint64_t previous_charge_index = 0;
 
-        for (uint64_t i = 0; i <= charge_layout.get_max_charge_index(); i++)
-        {
-            current_charge_index = (i ^ (i >> 1u));  // Gray code is used for the charge index.
+        gray_code_iterator bii{0, charge_layout.get_max_charge_index()};
 
+        while (bii <= bii.get_final_number())
+        {
             charge_layout.assign_charge_index_by_gray_code(
-                current_charge_index, previous_charge_index, dependent_cell_mode::VARIABLE,
+                bii.get_current_gray_code(), previous_charge_index, dependent_cell_mode::VARIABLE,
                 energy_calculation::KEEP_OLD_ENERGY_VALUE, charge_distribution_history::CONSIDER);
 
-            previous_charge_index = current_charge_index;
+            previous_charge_index = bii.get_current_gray_code();
 
             if (charge_layout.is_physically_valid())
             {
@@ -306,6 +306,14 @@ class quickexact_impl
                     }
                 }
                 result.charge_distributions.push_back(charge_lyt_copy);
+            }
+            if (bii.has_next())
+            {
+                ++bii;
+            }
+            else
+            {
+                break;
             }
         }
 
