@@ -59,7 +59,7 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 
         for (std::string line{}; std::getline(is, line);)
         {
-            CHECK(expected.find(std::move(line)) != expected.end());
+            CHECK(expected.find(line) != expected.end());
         }
     }
 
@@ -76,7 +76,7 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 
         for (std::string line{}; std::getline(is, line);)
         {
-            CHECK(expected.find(std::move(line)) != expected.end());
+            CHECK(expected.find(line) != expected.end());
         }
     }
 }
@@ -106,7 +106,7 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
 
         for (std::string line{}; std::getline(is, line);)
         {
-            CHECK(expected.find(std::move(line)) != expected.end());
+            CHECK(expected.find(line) != expected.end());
         }
     }
     SECTION("custom operational tags")
@@ -123,7 +123,7 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
 
         for (std::string line{}; std::getline(is, line);)
         {
-            CHECK(expected.find(std::move(line)) != expected.end());
+            CHECK(expected.find(line) != expected.end());
         }
     }
 }
