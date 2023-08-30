@@ -270,22 +270,19 @@ class operational_domain_impl
 
         static std::mt19937_64 generator{std::random_device{}()};
 
-        std::vector<std::size_t> x_samples{};
-        std::vector<std::size_t> y_samples{};
+        // instantiate distributions
+        std::uniform_int_distribution<std::size_t> x_distribution{0, x_values.size() - 1};
+        std::uniform_int_distribution<std::size_t> y_distribution{0, y_values.size() - 1};
 
-        x_samples.reserve(samples);
-        y_samples.reserve(samples);
-
-        // sample x and y indices
-        std::sample(x_indices.begin(), x_indices.end(), std::back_inserter(x_samples), samples, generator);
-        std::sample(y_indices.begin(), y_indices.end(), std::back_inserter(y_samples), samples, generator);
-
+        // container for the random samples
         std::vector<std::pair<std::size_t, std::size_t>> xy_samples{};
         xy_samples.reserve(samples);
 
-        // tie x and y indices together
-        std::transform(x_samples.cbegin(), x_samples.cend(), y_samples.cbegin(), std::back_inserter(xy_samples),
-                       [](const auto x, const auto y) { return std::make_pair(x, y); });
+        for (std::size_t i = 0; i < samples; ++i)
+        {
+            // sample x and y dimension
+            xy_samples.emplace_back(x_distribution(generator), y_distribution(generator));
+        }
 
         // for each sample point in parallel
         std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ xy_samples.cbegin(), xy_samples.cend(),
