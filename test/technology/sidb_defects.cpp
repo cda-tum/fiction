@@ -73,15 +73,62 @@ TEST_CASE("Test for units", "[sidb-defects]")
     CHECK(defect.lambda_tf == 0.0);
 
     const sidb_defect defect_two{sidb_defect_type::NONE, 2};
+    CHECK(is_positively_charged_defect(defect_two));
     CHECK(defect_two.charge == 2);
     CHECK(defect_two.epsilon_r == 0);
     CHECK(defect_two.lambda_tf == 0.0);
 
-    const sidb_defect defect_three{sidb_defect_type::NONE, 2, 5};
-    CHECK(defect_three.charge == 2);
+    const sidb_defect defect_three{sidb_defect_type::NONE, -2, 5};
+    CHECK(is_negatively_charged_defect(defect_three));
+    CHECK(defect_three.charge == -2);
     CHECK(defect_three.epsilon_r == 5);
     CHECK(defect_three.lambda_tf == 0.0);
 }
+TEST_CASE("Compare Defect", "[sidb-defects]")
+{
+    SECTION("Different types")
+    {
+        const sidb_defect defect_one{sidb_defect_type::GUNK};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN};
+        CHECK(defect_one != defect_two);
+    }
+
+    SECTION("Different charge")
+    {
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -5};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1};
+        CHECK(defect_one != defect_two);
+    }
+
+    SECTION("Different epsilon_r")
+    {
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1, 2};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1, 5};
+        CHECK(defect_one != defect_two);
+    }
+
+    SECTION("Different lambda_tf")
+    {
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1, 2, 4};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1, 2, 5};
+        CHECK(defect_one != defect_two);
+    }
+
+    SECTION("Completely different")
+    {
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1, 2, 4};
+        const sidb_defect defect_two{sidb_defect_type::DB, 5, 5, 0.3};
+        CHECK(defect_one != defect_two);
+    }
+
+    SECTION("Identical Defects")
+    {
+        const sidb_defect defect_one{sidb_defect_type::UNKNOWN, -1, 2, 4};
+        const sidb_defect defect_two{sidb_defect_type::UNKNOWN, -1, 2, 4};
+        CHECK(defect_one == defect_two);
+    }
+}
+
 TEST_CASE("Compare Defect", "[sidb-defects]")
 {
     SECTION("Different types")
