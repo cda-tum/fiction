@@ -39,7 +39,7 @@ namespace detail
  * @param param The sweep parameter to be converted.
  * @return The string representation of the sweep parameter.
  */
-std::string sweep_parameter_to_string(const operational_domain::sweep_parameter& param) noexcept
+static inline std::string sweep_parameter_to_string(const operational_domain::sweep_parameter& param) noexcept
 {
     switch (param)
     {
@@ -79,8 +79,8 @@ std::string sweep_parameter_to_string(const operational_domain::sweep_parameter&
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
-void write_operational_domain(const operational_domain& opdom, std::ostream& os,
-                              const write_operational_domain_params& params = {})
+inline void write_operational_domain(const operational_domain& opdom, std::ostream& os,
+                                     const write_operational_domain_params& params = {})
 {
     csv_writer writer{os};
 
@@ -111,8 +111,8 @@ void write_operational_domain(const operational_domain& opdom, std::ostream& os,
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
-void write_operational_domain(const operational_domain& opdom, const std::string_view& filename,
-                              const write_operational_domain_params& params = {})
+inline void write_operational_domain(const operational_domain& opdom, const std::string_view& filename,
+                                     const write_operational_domain_params& params = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 

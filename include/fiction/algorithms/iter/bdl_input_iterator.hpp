@@ -178,11 +178,13 @@ class bdl_input_iterator
      *
      * @param m The input state to set.
      */
-    void operator=(const uint64_t m) noexcept
+    bdl_input_iterator& operator=(const uint64_t m) noexcept
     {
         current_input_index = m;
 
         set_all_inputs();
+
+        return *this;
     }
     /**
      * Subscript operator. Computes the input state of the current iterator plus the given integer.
