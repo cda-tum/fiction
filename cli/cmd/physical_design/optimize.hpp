@@ -37,6 +37,11 @@ class optimize_command : public command
 
   protected:
     /**
+     * Statistics.
+     */
+    fiction::post_layout_optimization_stats st{};
+
+    /**
      * Optimizes a 2DDWave-clocked Cartesian layout.
      */
     void execute() override
@@ -62,13 +67,13 @@ class optimize_command : public command
             return;
         }
 
-        const auto apply_optimization = [](auto&& lyt_ptr)
+        const auto apply_optimization = [this](auto&& lyt_ptr)
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
             if constexpr (fiction::is_cartesian_layout_v<Lyt>)
             {
-                fiction::post_layout_optimization(*lyt_ptr);
+                fiction::post_layout_optimization(*lyt_ptr, &st);
             }
             else
             {

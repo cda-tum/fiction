@@ -74,9 +74,7 @@ int main()  // NOLINT
 
         // perform post-layout optimization
         fiction::post_layout_optimization<gate_lyt>(gate_level_layout, &post_layout_optimization_stats);
-
-        const auto end = std::chrono::steady_clock::now();
-
+        
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};
         fiction::equivalence_checking<fiction::technology_network, gate_lyt>(network, gate_level_layout, &eq_stats);

@@ -16,6 +16,7 @@
 #include "fiction/utils/placement_utils.hpp"
 
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
 #include <cmath>
