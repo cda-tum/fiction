@@ -30,7 +30,7 @@ TEST_CASE("Operators", "[bdl-input-iterators]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
-    layout lyt{};
+    const layout lyt{};
 
     bdl_input_iterator<layout> bii{lyt};
 
@@ -105,7 +105,7 @@ TEST_CASE("Empty layout iteration", "[bdl-input-iterator]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
-    layout lyt{};
+    const layout lyt{};
 
     bdl_input_iterator<layout> bii{lyt};
 

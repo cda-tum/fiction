@@ -59,7 +59,7 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 
         for (std::string line{}; std::getline(is, line);)
         {
-            CHECK(expected.find(std::move(line)) != expected.end());
+            CHECK(expected.find(line) != expected.end());
         }
     }
 
@@ -76,7 +76,7 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 
         for (std::string line{}; std::getline(is, line);)
         {
-            CHECK(expected.find(std::move(line)) != expected.end());
+            CHECK(expected.find(line) != expected.end());
         }
     }
 }
@@ -94,10 +94,7 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
     SECTION("default operational tags")
     {
         std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,operational",
-                                       "0.3,0.4,non-operational",
-                                       "1.2,1.4,"
-                                       "operational",
-                                       "2.4,5.75,non-operational"};
+                                       "0.3,0.4,non-operational", "1.2,1.4,operational", "2.4,5.75,non-operational"};
 
         write_operational_domain(opdom, os);
         const auto os_str = os.str();
@@ -106,7 +103,7 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
 
         for (std::string line{}; std::getline(is, line);)
         {
-            CHECK(expected.find(std::move(line)) != expected.end());
+            CHECK(expected.find(line) != expected.end());
         }
     }
     SECTION("custom operational tags")
@@ -123,7 +120,7 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
 
         for (std::string line{}; std::getline(is, line);)
         {
-            CHECK(expected.find(std::move(line)) != expected.end());
+            CHECK(expected.find(line) != expected.end());
         }
     }
 }
