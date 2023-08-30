@@ -123,7 +123,7 @@ TEST_CASE("Optimization steps", "[optimization]")
 
     const coordinate<gate_layout>                   old_pos_1    = {2, 0};
     const coordinate<gate_layout>                   new_pos_1    = {1, 0};
-    const std::tuple<bool, coordinate<gate_layout>> moved_gate_1 = detail::improve_gate_location(old_pos_1, obstr_lyt);
+    const std::tuple<bool, coordinate<gate_layout>> moved_gate_1 = detail::improve_gate_location(obstr_lyt, old_pos_1);
     // I I→=
     // ↓   ↓
     // = ▢ =
@@ -141,7 +141,7 @@ TEST_CASE("Optimization steps", "[optimization]")
 
     const coordinate<gate_layout>                   old_pos_2    = {0, 2};
     const coordinate<gate_layout>                   new_pos_2    = {0, 1};
-    const std::tuple<bool, coordinate<gate_layout>> moved_gate_2 = detail::improve_gate_location(old_pos_2, obstr_lyt);
+    const std::tuple<bool, coordinate<gate_layout>> moved_gate_2 = detail::improve_gate_location(obstr_lyt, old_pos_2);
     // I I→=
     // ↓   ↓
     // F→= =
@@ -159,7 +159,7 @@ TEST_CASE("Optimization steps", "[optimization]")
 
     const coordinate<gate_layout>                   old_pos_3    = {2, 2};
     const coordinate<gate_layout>                   new_pos_3    = {1, 1};
-    const std::tuple<bool, coordinate<gate_layout>> moved_gate_3 = detail::improve_gate_location(old_pos_3, obstr_lyt);
+    const std::tuple<bool, coordinate<gate_layout>> moved_gate_3 = detail::improve_gate_location(obstr_lyt, old_pos_3);
     // I I ▢
     // ↓ ↓
     // F→&→=

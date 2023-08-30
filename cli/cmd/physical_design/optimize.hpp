@@ -74,8 +74,6 @@ class optimize_command : public command
             {
                 std::cout << "[e] layout has to be Cartesian" << std::endl;
             }
-
-            return std::nullopt;
         };
 
         try
