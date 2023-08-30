@@ -1989,21 +1989,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->update_local_potential();
         this->recompute_system_energy();
         this->validity_check();
-        if (three_state_simulation_detection)
-        {
-            this->assign_all_charge_states(sidb_charge_state::NEGATIVE);
-            this->update_after_charge_change();
-            this->is_three_state_simulation_required();
-            if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), strg->dependent_cell) !=
-                strg->three_state_cells.cend())
-            {
-                strg->dependent_cell_in_sub_layout = true;
-            }
-            else
-            {
-                strg->dependent_cell_in_sub_layout = false;
-            }
-        }
     };
 
     // This function is used when three state simulation is required (i.e. is_three_state_simulation_required = true) to
