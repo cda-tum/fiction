@@ -15,6 +15,16 @@ namespace fiction
 class gray_code_iterator
 {
   public:
+    /**
+     * Constructs a Gray Code Iterator with specified range.
+     *
+     * This constructor creates a Gray Code Iterator that iterates over a range of decimal numbers
+     * and their corresponding Gray code representations. The iterator will start from the given
+     * `start` number and continue up to the `end` number (inclusive) in Gray code order.
+     *
+     * @param start The starting decimal number for the iterator.
+     * @param end The ending decimal number for the iterator.
+     */
     explicit gray_code_iterator(const uint64_t start, const uint64_t end) noexcept :
             start_number{start},
             current_number{start},
@@ -23,7 +33,6 @@ class gray_code_iterator
     {
         binary_to_gray();
     };
-
     /**
      * Prefix increment operator. Sets the number and the corresponding Gray code.
      *
@@ -39,7 +48,6 @@ class gray_code_iterator
 
         return *this;
     }
-
     /**
      * Addition operator. Computes the Gray code of the current iterator plus the given integer.
      *
@@ -54,7 +62,6 @@ class gray_code_iterator
 
         return result;
     }
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
     /**
@@ -269,6 +276,7 @@ class gray_code_iterator
         current_gray_code = current_number ^ (current_number >> 1u);
     }
 };
+
 }  // namespace fiction
 
 #endif  // FICTION_GRAY_CODE_ITERATOR_HPP
