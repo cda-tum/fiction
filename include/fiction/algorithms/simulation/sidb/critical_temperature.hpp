@@ -181,10 +181,9 @@ class critical_temperature_impl
         sidb_simulation_result<Lyt> simulation_results{};
         if (parameter.engine == simulation_engine::EXACT)
         {
-            temperature_stats.algorithm_name = "ExGS";
-            // All physically valid charge configurations are determined for the given layout (exhaustive ground state
-            // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            // simulation_results = exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params);
+            temperature_stats.algorithm_name = "QuickExact";
+            // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
+            // is used to provide 100 % accuracy for the Critical Temperature).
             const quickexact_params<Lyt> params{parameter.simulation_params.phys_params,
                                                 automatic_base_number_detection::OFF};
             simulation_results = quickexact(layout, params);
@@ -226,49 +225,6 @@ class critical_temperature_impl
                     lyt_copy = charge_distribution_surface<Lyt>{lyt};
                 }
             }
-
-            // TODO This part is used for the gate generator. Something we have to discuss.
-            //            if (parameter.input_bit == 0)
-            //            {
-            //                if (lyt_copy.get_charge_state(all_cells[4]) != sidb_charge_state::NEUTRAL)
-            //                {
-            //                    temperature_stats.critical_temperature = 0.0;
-            //                    return true;
-            //                }
-            //                if (lyt_copy.get_charge_state(all_cells[5]) != sidb_charge_state::NEUTRAL)
-            //                {
-            //                    temperature_stats.critical_temperature = 0.0;
-            //                    return true;
-            //                }
-            //            }
-            //
-            //            else if (parameter.input_bit == 1)
-            //            {
-            //                if (lyt_copy.get_charge_state(all_cells[4]) != sidb_charge_state::NEUTRAL)
-            //                {
-            //                    temperature_stats.critical_temperature = 0.0;
-            //                    return true;
-            //                }
-            //                if (lyt_copy.get_charge_state(all_cells[3]) != sidb_charge_state::NEUTRAL)
-            //                {
-            //                    temperature_stats.critical_temperature = 0.0;
-            //                    return true;
-            //                }
-            //            }
-            //
-            //            else if (parameter.input_bit == 3)
-            //            {
-            //                if (lyt_copy.get_charge_state(all_cells[2]) != sidb_charge_state::NEUTRAL)
-            //                {
-            //                    temperature_stats.critical_temperature = 0.0;
-            //                    return true;
-            //                }
-            //                if (lyt_copy.get_charge_state(all_cells[3]) != sidb_charge_state::NEUTRAL)
-            //                {
-            //                    temperature_stats.critical_temperature = 0.0;
-            //                    return true;
-            //                }
-            //            }
 
             // The energy distribution of the physically valid charge configurations for the given layout is determined.
             const auto distribution = energy_distribution(simulation_results.charge_distributions);
@@ -354,10 +310,12 @@ class critical_temperature_impl
         sidb_simulation_result<Lyt> simulation_results{};
         if (parameter.engine == simulation_engine::EXACT)
         {
-            temperature_stats.algorithm_name = "exgs";
-            // All physically valid charge configurations are determined for the given layout (exhaustive ground state
-            // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            simulation_results = exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params);
+            temperature_stats.algorithm_name = "QuickExact";
+            // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
+            // is used to provide 100 % accuracy for the Critical Temperature).
+            const quickexact_params<Lyt> params{parameter.simulation_params.phys_params,
+                                                automatic_base_number_detection::OFF};
+            simulation_results = quickexact(layout, params);
         }
         else
         {
