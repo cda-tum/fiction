@@ -107,6 +107,6 @@ Time-to-Solution (TTS) Statistics
 Utils
 #####
 
-**Header:** ``fiction/algorithms/simulation/sidb/can_positive_charge_occur.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp``
 
-.. doxygenfunction:: fiction::can_positive_charge_occur
+.. doxygenfunction:: fiction::can_positive_charges_occur

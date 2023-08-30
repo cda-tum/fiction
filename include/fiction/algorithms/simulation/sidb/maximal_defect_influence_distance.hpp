@@ -12,9 +12,12 @@
 #include "fiction/technology/sidb_surface.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
+#include <algorithm>
+#include <limits>
 #include <mutex>
 #include <thread>
 #include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -35,7 +38,7 @@ struct maximal_defect_influence_distance_params
     /**
      * The coordinate describes the width and height of the area around the gate, which is
      * also used to place defects (given in siqad coordinates).
-     * */
+     */
     coordinate<Lyt> additional_scanning_area{50, 6};
     /**
      * Number of threads to spawn. By default the number of threads is set to the number of available hardware threads.
@@ -66,8 +69,8 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
     const quickexact_params<sidb_defect_layout> params_defect{sim_params.physical_params,
                                                               automatic_base_number_detection::OFF};
 
-    coordinate<Lyt> min_defect_position{};
-    double          avoidance_distance = 0;
+    std::atomic<double>          avoidance_distance{0};
+    std::atomic<coordinate<Lyt>> min_defect_position{};
 
     sidb_defect_layout              layout{lyt};
     std::vector<typename Lyt::cell> cells{};
@@ -75,8 +78,8 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
     lyt.foreach_cell([&cells](const auto& cell) { cells.push_back(cell); });
     std::sort(cells.begin(), cells.end());
 
-    const quickexact_params<Lyt> params{sim_params.physical_params, automatic_base_number_detection::OFF};
-    auto                         simulation_results = quickexact(lyt, params);
+    const auto simulation_results =
+        quickexact(lyt, quickexact_params<Lyt>{sim_params.physical_params, automatic_base_number_detection::OFF});
 
     const auto min_energy          = minimum_energy(simulation_results.charge_distributions);
     uint64_t   charge_index_layout = 0;
@@ -90,40 +93,47 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
         }
     }
 
-    const auto [nw, se] = bounding_box_siqad(layout);
+    // bounding box around the given layout to have north-west and south-east cells.
+    bounding_box_2d<Lyt> bb{layout};
 
-    auto north_west = coordinate<Lyt>{};
-    auto south_east = coordinate<Lyt>{};
+    auto nw = bb.get_min();  // north-west cell
+    auto se = bb.get_max();  // south-east cell
 
-    north_west.x = nw.x - sim_params.additional_scanning_area.x;
-    north_west.y = nw.y - sim_params.additional_scanning_area.y;
+    // shift nw and se cell by the additional scanning area to cover an area that is larger than the gate area.
+    nw.x = nw.x - sim_params.additional_scanning_area.x;
+    nw.y = nw.y - sim_params.additional_scanning_area.y;
 
-    south_east.x = se.x + sim_params.additional_scanning_area.x;
-    south_east.y = se.y + sim_params.additional_scanning_area.y;
+    se.x = se.x + sim_params.additional_scanning_area.x;
+    se.y = se.y + sim_params.additional_scanning_area.y;
 
-    auto                            defect_cell = north_west;
+    // start to place the defect at the north-west cell
+    auto defect_cell = nw;
+
     std::vector<typename Lyt::cell> defect_cells{};
 
-    while (defect_cell <= south_east)
+    const uint max_defect_positions = (se.x - nw.x + 2) * (se.y - nw.y + 2) * 2;
+    defect_cells.reserve(max_defect_positions);
+
+    // collect all cells in the bounding box area (spanned by the nw and se) going from top to down from left to right.
+    while (defect_cell <= se)
     {
+        // Defect cannot be where a SiDB is placed.
         if (lyt.get_cell_type(defect_cell) == sidb_technology::cell_type::EMPTY)
         {
             defect_cells.push_back(defect_cell);
         }
-
-        if (defect_cell.x < south_east.x)
+        if (defect_cell.x < se.x)
         {
             defect_cell.x += 1;
         }
-        else if ((defect_cell.x == south_east.x) && defect_cell.z == 0)
+        else if ((defect_cell.x == se.x) && defect_cell.z == 0)
         {
             defect_cell.z += 1;
-            defect_cell.x = north_west.x;
+            defect_cell.x = nw.x;
         }
-
-        else if ((defect_cell.x == south_east.x) && defect_cell.z == 1)
+        else if ((defect_cell.x == se.x) && defect_cell.z == 1)
         {
-            defect_cell.x = north_west.x;
+            defect_cell.x = nw.x;
             defect_cell.y += 1;
             defect_cell.z = 0;
         }
@@ -134,15 +144,16 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
 
     std::vector<std::thread> threads{};
     threads.reserve(num_threads);
-    std::mutex mutex{};  // used to control access to shared resources
+    std::mutex lock{};  // used to control access to shared resources
 
     const auto number_per_thread = (defect_cells.size() - (defect_cells.size() % num_threads)) / num_threads;
     const auto number_last       = defect_cells.size() % num_threads;
 
+    // all possible defect positions are simulated by using several threads.
     for (uint64_t z = 0u; z < num_threads; ++z)
     {
         threads.emplace_back(
-            [&, z, defect_cells]
+            [&, z]
             {
                 for (auto i = z * number_per_thread; i < (z + 1) * number_per_thread; i++)
                 {
@@ -150,19 +161,18 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
 
                     sidb_defect_layout lyt_defect{};
 
-                    if (layout.num_cells() != 0)
-                    {
-                        layout.foreach_cell([&layout, &lyt_defect](const auto& cell)
-                                            { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
-                    }
+                    layout.foreach_cell([&layout, &lyt_defect](const auto& cell)
+                                        { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
 
+                    // assign defect to layout
                     lyt_defect.assign_sidb_defect(defect, sim_params.defect);
-
+                    // conduct simulation with defect.
                     auto simulation_result_defect = quickexact(lyt_defect, params_defect);
 
                     const auto min_energy_defect = minimum_energy(simulation_result_defect.charge_distributions);
                     uint64_t   charge_index_defect_layout = 0;
 
+                    // get the charge index of the ground state
                     for (auto& lyt_simulation_with_defect : simulation_result_defect.charge_distributions)
                     {
                         if (round_to_n_decimal_places(lyt_simulation_with_defect.get_system_energy(), 6) ==
@@ -185,12 +195,17 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
                                 }
                             });
 
-                        const std::lock_guard lock{mutex};
                         {
-                            if (distance > avoidance_distance)
+                            //                            const std::lock_guard lock{lock};
+                            //                            if (distance > avoidance_distance)
+                            //                            {
+                            //                                min_defect_position = defect;
+                            //                                avoidance_distance  = distance;
+                            //                            }
+                            if (distance > avoidance_distance.load(std::memory_order_relaxed))
                             {
-                                min_defect_position = defect;
-                                avoidance_distance  = distance;
+                                avoidance_distance.store(distance, std::memory_order_relaxed);
+                                min_defect_position.store(defect, std::memory_order_relaxed);
                             }
                         }
                     }
@@ -209,11 +224,8 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
 
         sidb_defect_layout lyt_defect{};
 
-        if (layout.num_cells() != 0)
-        {
-            layout.foreach_cell([&layout, &lyt_defect](const auto& cell)
-                                { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
-        }
+        layout.foreach_cell([&layout, &lyt_defect](const auto& cell)
+                            { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
 
         lyt_defect.assign_sidb_defect(defect, sim_params.defect);
 
@@ -244,10 +256,10 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
                     }
                 });
 
-            if (distance > avoidance_distance)
+            if (distance > avoidance_distance.load(std::memory_order_relaxed))
             {
-                min_defect_position = defect;
-                avoidance_distance  = distance;
+                min_defect_position.store(defect, std::memory_order_relaxed);
+                avoidance_distance.store(distance, std::memory_order_relaxed);
             }
         }
     }

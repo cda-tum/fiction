@@ -277,15 +277,15 @@ class quickexact_impl
         charge_layout.assign_base_number(2);
         uint64_t previous_charge_index = 0;
 
-        gray_code_iterator bii{0, charge_layout.get_max_charge_index()};
+        gray_code_iterator bii{0};
 
-        while (bii <= bii.get_final_number())
+        while (bii <= charge_layout.get_max_charge_index())
         {
-            charge_layout.assign_charge_index_by_gray_code(
-                bii.get_current_gray_code(), previous_charge_index, dependent_cell_mode::VARIABLE,
-                energy_calculation::KEEP_OLD_ENERGY_VALUE, charge_distribution_history::CONSIDER);
+            charge_layout.assign_charge_index_by_gray_code(*bii, previous_charge_index, dependent_cell_mode::VARIABLE,
+                                                           energy_calculation::KEEP_OLD_ENERGY_VALUE,
+                                                           charge_distribution_history::CONSIDER);
 
-            previous_charge_index = bii.get_current_gray_code();
+            previous_charge_index = *bii;
 
             if (charge_layout.is_physically_valid())
             {
@@ -307,14 +307,7 @@ class quickexact_impl
                 }
                 result.charge_distributions.push_back(charge_lyt_copy);
             }
-            if (bii.has_next())
-            {
-                ++bii;
-            }
-            else
-            {
-                break;
-            }
+            ++bii;
         }
 
         // The cells of the previously detected negatively-charged SiDBs are added to the cell level layout.

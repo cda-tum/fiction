@@ -4,12 +4,12 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/can_positive_charge_occur.hpp>
+#include <fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("One BDL pair with one perturber", "[can_positive_charge_occur]",
+TEMPLATE_TEST_CASE("One BDL pair with one perturber", "[can_positive_charges_occur]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -21,23 +21,23 @@ TEMPLATE_TEST_CASE("One BDL pair with one perturber", "[can_positive_charge_occu
     SECTION("Default values")
     {
         const sidb_simulation_parameters params{2, -0.32};
-        CHECK(!can_positive_charge_occur<TestType>(lyt, params));
+        CHECK(!can_positive_charges_occur<TestType>(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 1")
     {
         const sidb_simulation_parameters params{2, -0.32, 1, 1};
-        CHECK(can_positive_charge_occur<TestType>(lyt, params));
+        CHECK(can_positive_charges_occur<TestType>(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 10")
     {
         const sidb_simulation_parameters params{2, -0.32, 1, 10};
-        CHECK(can_positive_charge_occur<TestType>(lyt, params));
+        CHECK(can_positive_charges_occur<TestType>(lyt, params));
     }
 }
 
-TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01", "[can_positive_charge_occur]",
+TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01", "[can_positive_charges_occur]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -56,18 +56,18 @@ TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01", "[can_positive_charge_o
     SECTION("Default values")
     {
         const sidb_simulation_parameters params{2, -0.32};
-        CHECK(!can_positive_charge_occur<TestType>(lyt, params));
+        CHECK(!can_positive_charges_occur<TestType>(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 1")
     {
         const sidb_simulation_parameters params{2, -0.32, 1, 1};
-        CHECK(can_positive_charge_occur<TestType>(lyt, params));
+        CHECK(can_positive_charges_occur<TestType>(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 10")
     {
         const sidb_simulation_parameters params{2, -0.32, 1, 10};
-        CHECK(can_positive_charge_occur<TestType>(lyt, params));
+        CHECK(can_positive_charges_occur<TestType>(lyt, params));
     }
 }

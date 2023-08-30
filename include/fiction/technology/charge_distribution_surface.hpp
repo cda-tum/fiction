@@ -83,7 +83,7 @@ enum class charge_distribution_history
  * A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
  * SiDBs' charge states.
  *
- * @tparam Lyt Cell-level layout based in SiQAD-coordinates.
+ * @tparam Lyt Cell-level layout based in SiQAD coordinates.
  * @tparam has_sidb_charge_distribution Automatically determines whether a charge distribution interface is already
  * present.
  */

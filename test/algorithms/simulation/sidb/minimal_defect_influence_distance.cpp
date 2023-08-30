@@ -21,8 +21,10 @@ TEST_CASE("Test influence distance function", "[maximal_defect_influence_distanc
             defect, sidb_simulation_parameters{}};
         sidb_cell_clk_lyt_siqad lyt{};
         const auto [distance, defect_pos] = maximal_defect_influence_distance(lyt, sim_params);
+        const auto dis                    = distance;
+        const auto cell                   = defect_pos;
         CHECK(distance == 0);
-        CHECK(defect_pos == coordinate<sidb_cell_clk_lyt_siqad>());
+        CHECK(defect_pos == coordinate<sidb_cell_clk_lyt_siqad>(0, 0, 0));
     }
 
     SECTION("layout with one SiDB")
