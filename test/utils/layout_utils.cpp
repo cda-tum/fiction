@@ -10,8 +10,6 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
-#include <cstdint>
-
 using namespace fiction;
 
 TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesian_layout<offset::ucoord_t>),
