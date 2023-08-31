@@ -894,10 +894,10 @@ class operational_domain_impl
     }
     /**
      * Finds a boundary starting point for the contour tracing algorithm. This function starts at the given starting
-     * point and moves towards the closest edge of the parameter range. It returns the last operational point it
-     * encounters before it reaches the edge. If no operational point is found, the operational area extends outside the
-     * parameter range and the function returns the last operational point that was investigated, i.e., a point at the
-     * border of the parameter range.
+     * point and moves towards the left edge of the parameter range. It returns the last operational point it
+     * encounters before it reaches the edge. If no non-operational point is found, the operational area extends outside
+     * the parameter range and the function returns the last operational point that was investigated, i.e., a point at
+     * the border of the parameter range.
      *
      * @param starting_point Starting step point for the boundary search.
      * @return An operational step point at the edge of the operational domain `starting_point` is located in.
@@ -906,89 +906,20 @@ class operational_domain_impl
     {
         auto latest_operational_point = starting_point;
 
-        // calculate the distances to each edge
-        const auto left_distance   = starting_point.x;
-        const auto right_distance  = x_indices.size() - starting_point.x;
-        const auto top_distance    = starting_point.y;
-        const auto bottom_distance = y_indices.size() - starting_point.y;
-
-        // find the minimum distance
-        const auto min_distance = std::min({left_distance, right_distance, top_distance, bottom_distance});
-
-        // going towards the left border of the parameter range
-        if (min_distance == left_distance)
+        // move towards the left border of the parameter range
+        for (std::size_t x = starting_point.x; x > 0; --x)
         {
-            for (std::size_t x = starting_point.x; x > 0; --x)
+            const auto left_step = step_point{x, starting_point.y};
+
+            const auto operational_status = is_operational(left_step);
+
+            if (operational_status == operational_domain::operational_status::OPERATIONAL)
             {
-                const auto left_step = step_point{x, starting_point.y};
-
-                const auto operational_status = is_operational(left_step);
-
-                if (operational_status == operational_domain::operational_status::OPERATIONAL)
-                {
-                    latest_operational_point = left_step;
-                }
-                else
-                {
-                    return latest_operational_point;
-                }
+                latest_operational_point = left_step;
             }
-        }
-        // going towards right border of the parameter range
-        else if (min_distance == right_distance)
-        {
-            for (std::size_t x = starting_point.x; x < x_indices.size(); ++x)
+            else
             {
-                const auto right_step = step_point{x, starting_point.y};
-
-                const auto operational_status = is_operational(right_step);
-
-                if (operational_status == operational_domain::operational_status::OPERATIONAL)
-                {
-                    latest_operational_point = right_step;
-                }
-                else
-                {
-                    return latest_operational_point;
-                }
-            }
-        }
-        // going towards the top border of the parameter range
-        else if (min_distance == top_distance)
-        {
-            for (std::size_t y = starting_point.y; y < y_indices.size(); ++y)
-            {
-                const auto top_step = step_point{starting_point.x, y};
-
-                const auto operational_status = is_operational(top_step);
-
-                if (operational_status == operational_domain::operational_status::OPERATIONAL)
-                {
-                    latest_operational_point = top_step;
-                }
-                else
-                {
-                    return latest_operational_point;
-                }
-            }
-        }
-        // going towards the bottom border of the parameter range
-        else
-        {
-            for (std::size_t y = starting_point.y; y > 0; --y)
-            {
-                const auto bottom_step = step_point{starting_point.x, y};
-
-                const auto operational_status = is_operational(bottom_step);
-
-                if (operational_status == operational_domain::operational_status::OPERATIONAL)
-                {
-                    latest_operational_point = bottom_step;
-                }
-                else
-                {
-                    return latest_operational_point;
-                }
+                return latest_operational_point;
             }
         }
 
