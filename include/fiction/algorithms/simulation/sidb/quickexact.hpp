@@ -119,7 +119,8 @@ class quickexact_impl
                     {
                         for (const auto& [cell, defect] : real_placed_defects)
                         {
-                            charge_lyt_with_assigned_dependent_cell.add_defect(cell, defect);
+                            charge_lyt_with_assigned_dependent_cell.add_sidb_defect_to_potential_landscape(cell,
+                                                                                                           defect);
                         }
                     }
 
@@ -129,7 +130,7 @@ class quickexact_impl
                     // charge, this way of implementation is chosen.
                     for (const auto& cell : detected_negative_sidbs)
                     {
-                        charge_lyt_with_assigned_dependent_cell.add_defect(
+                        charge_lyt_with_assigned_dependent_cell.add_sidb_defect_to_potential_landscape(
                             cell, sidb_defect{sidb_defect_type::UNKNOWN, -1,
                                               charge_lyt_with_assigned_dependent_cell.get_phys_params().epsilon_r,
                                               charge_lyt_with_assigned_dependent_cell.get_phys_params().lambda_tf});
@@ -484,7 +485,7 @@ class quickexact_impl
 
                     if (defect.type != sidb_defect_type::NONE)
                     {
-                        charge_lyt.add_defect(cell, layout.get_sidb_defect(cell));
+                        charge_lyt.add_sidb_defect_to_potential_landscape(cell, layout.get_sidb_defect(cell));
                     }
                 });
         }
