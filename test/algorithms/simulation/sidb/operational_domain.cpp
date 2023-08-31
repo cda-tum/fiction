@@ -11,6 +11,19 @@
 
 using namespace fiction;
 
+TEST_CASE("Structured binding support for parameter_points", "[operational-domain]")
+{
+    auto param_point = operational_domain::parameter_point{1.0, 2.0};
+
+    CHECK(param_point.x == 1.0);
+    CHECK(param_point.y == 2.0);
+
+    const auto& [x, y] = param_point;
+
+    CHECK(x == 1.0);
+    CHECK(y == 2.0);
+}
+
 TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
@@ -64,10 +77,10 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             // for the selected range, all samples should be within the parameters and operational
             for (const auto& [coord, op_value] : op_domain.operational_values)
             {
-                CHECK(coord.first >= 5.1);
-                CHECK(coord.first <= 6.1);
-                CHECK(coord.second >= 4.5);
-                CHECK(coord.second <= 5.5);
+                CHECK(coord.x >= 5.1);
+                CHECK(coord.x <= 6.1);
+                CHECK(coord.y >= 4.5);
+                CHECK(coord.y <= 5.5);
 
                 CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
             }
@@ -92,10 +105,10 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             // for the selected range, all samples should be within the parameters and operational
             for (const auto& [coord, op_value] : op_domain.operational_values)
             {
-                CHECK(coord.first >= 5.1);
-                CHECK(coord.first <= 6.1);
-                CHECK(coord.second >= 4.5);
-                CHECK(coord.second <= 5.5);
+                CHECK(coord.x >= 5.1);
+                CHECK(coord.x <= 6.1);
+                CHECK(coord.y >= 4.5);
+                CHECK(coord.y <= 5.5);
 
                 CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
             }
@@ -121,10 +134,10 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             // for the selected range, all samples should be within the parameters and operational
             for (const auto& [coord, op_value] : op_domain.operational_values)
             {
-                CHECK(coord.first >= 5.1);
-                CHECK(coord.first <= 6.1);
-                CHECK(coord.second >= 4.5);
-                CHECK(coord.second <= 5.5);
+                CHECK(coord.x >= 5.1);
+                CHECK(coord.x <= 6.1);
+                CHECK(coord.y >= 4.5);
+                CHECK(coord.y <= 5.5);
 
                 CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
             }
@@ -149,10 +162,10 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             // for the selected range, all samples should be within the parameters and operational
             for (const auto& [coord, op_value] : op_domain.operational_values)
             {
-                CHECK(coord.first >= 5.1);
-                CHECK(coord.first <= 6.1);
-                CHECK(coord.second >= 4.5);
-                CHECK(coord.second <= 5.5);
+                CHECK(coord.x >= 5.1);
+                CHECK(coord.x <= 6.1);
+                CHECK(coord.y >= 4.5);
+                CHECK(coord.y <= 5.5);
 
                 CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
             }
@@ -205,10 +218,10 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             // for the selected range, all samples should be within the parameters and non-operational
             for (const auto& [coord, op_value] : op_domain.operational_values)
             {
-                CHECK(coord.first >= 5.1);
-                CHECK(coord.first <= 6.1);
-                CHECK(coord.second >= 4.5);
-                CHECK(coord.second <= 5.5);
+                CHECK(coord.x >= 5.1);
+                CHECK(coord.x <= 6.1);
+                CHECK(coord.y >= 4.5);
+                CHECK(coord.y <= 5.5);
 
                 CHECK(op_value == operational_domain::operational_status::NON_OPERATIONAL);
             }
@@ -256,10 +269,10 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             // for the selected range, all samples should be within the parameters and non-operational
             for (const auto& [coord, op_value] : op_domain.operational_values)
             {
-                CHECK(coord.first >= 5.1);
-                CHECK(coord.first <= 6.1);
-                CHECK(coord.second >= 4.5);
-                CHECK(coord.second <= 5.5);
+                CHECK(coord.x >= 5.1);
+                CHECK(coord.x <= 6.1);
+                CHECK(coord.y >= 4.5);
+                CHECK(coord.y <= 5.5);
 
                 CHECK(op_value == operational_domain::operational_status::NON_OPERATIONAL);
             }
@@ -326,10 +339,10 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         // for the selected range, all samples should be within the parameters and operational
         for (const auto& [coord, op_value] : op_domain.operational_values)
         {
-            CHECK(coord.first >= 5.1);
-            CHECK(coord.first <= 6.1);
-            CHECK(coord.second >= 4.5);
-            CHECK(coord.second <= 5.5);
+            CHECK(coord.x >= 5.1);
+            CHECK(coord.x <= 6.1);
+            CHECK(coord.y >= 4.5);
+            CHECK(coord.y <= 5.5);
 
             CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
         }
@@ -354,10 +367,10 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         // for the selected range, all samples should be within the parameters and operational
         for (const auto& [coord, op_value] : op_domain.operational_values)
         {
-            CHECK(coord.first >= 5.1);
-            CHECK(coord.first <= 6.1);
-            CHECK(coord.second >= 4.5);
-            CHECK(coord.second <= 5.5);
+            CHECK(coord.x >= 5.1);
+            CHECK(coord.x <= 6.1);
+            CHECK(coord.y >= 4.5);
+            CHECK(coord.y <= 5.5);
 
             CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
         }
@@ -382,10 +395,10 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         // for the selected range, all samples should be within the parameters and operational
         for (const auto& [coord, op_value] : op_domain.operational_values)
         {
-            CHECK(coord.first >= 5.1);
-            CHECK(coord.first <= 6.1);
-            CHECK(coord.second >= 4.5);
-            CHECK(coord.second <= 5.5);
+            CHECK(coord.x >= 5.1);
+            CHECK(coord.x <= 6.1);
+            CHECK(coord.y >= 4.5);
+            CHECK(coord.y <= 5.5);
 
             CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
         }
@@ -410,10 +423,10 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         // for the selected range, all samples should be within the parameters and operational
         for (const auto& [coord, op_value] : op_domain.operational_values)
         {
-            CHECK(coord.first >= 5.1);
-            CHECK(coord.first <= 6.1);
-            CHECK(coord.second >= 4.5);
-            CHECK(coord.second <= 5.5);
+            CHECK(coord.x >= 5.1);
+            CHECK(coord.x <= 6.1);
+            CHECK(coord.y >= 4.5);
+            CHECK(coord.y <= 5.5);
 
             CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
         }

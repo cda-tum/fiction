@@ -13,6 +13,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/execution_utils.hpp"
+#include "fiction/utils/hash.hpp"
 #include "fiction/utils/phmap_utils.hpp"
 
 #include <kitty/bit_operations.hpp>
@@ -28,7 +29,7 @@
 #include <iterator>
 #include <optional>
 #include <queue>
-#include <utility>
+#include <tuple>
 #include <vector>
 
 namespace fiction
@@ -75,6 +76,71 @@ struct operational_domain
      */
     sweep_parameter y_dimension{operational_domain::sweep_parameter::LAMBDA_TF};
     /**
+     * The parameter point holds parameter values in the x and y dimension.
+     */
+    struct parameter_point
+    {
+        /**
+         * Standard default constructor.
+         */
+        parameter_point() = default;
+        /**
+         * Standard constructor.
+         *
+         * @param x_val X dimension parameter value.
+         * @param y_val Y dimension parameter value.
+         */
+        parameter_point(const double x_val, const double y_val) : x{x_val}, y{y_val} {}
+        /**
+         * X dimension parameter value.
+         */
+        double x;
+        /**
+         * Y dimension parameter value.
+         */
+        double y;
+        /**
+         * Equality operator.
+         *
+         * @param other Other parameter point to compare with.
+         * @return `true` iff the parameter points are equal.
+         */
+        [[nodiscard]] bool operator==(const parameter_point& other) const noexcept
+        {
+            return x == other.x && y == other.y;
+        }
+        /**
+         * Inequality operator.
+         *
+         * @param other Other parameter point to compare with.
+         * @return `true` iff the parameter points are not equal.
+         */
+        [[nodiscard]] bool operator!=(const parameter_point& other) const noexcept
+        {
+            return !(*this == other);
+        }
+        /**
+         * Support for structured bindings.
+         *
+         * @tparam I Index of the parameter value to be returned.
+         * @return The parameter value at the specified index.
+         */
+        template <std::size_t I>
+        auto get() const noexcept
+        {
+            static_assert(I < 2, "Index out of bounds for parameter_point");
+
+            if constexpr (I == 0)
+            {
+                return x;
+            }
+            else  // I == 1
+            {
+                return y;
+            }
+        }
+    };
+    /**
      * Possible operational status of a layout.
      */
     enum class operational_status
@@ -90,10 +156,10 @@ struct operational_domain
     };
     /**
      * The operational status of the layout for each specified parameter combination. This constitutes the operational
-     * domain. The first element of the pair is the x dimension value, the second element is the y dimension value.
+     * domain. The key of the map is the parameter point, which holds the parameter values in the x and y dimension.
      * The operational status is stored as the value of the map.
      */
-    locked_parallel_flat_hash_map<std::pair<double, double>, operational_status> operational_values{};
+    locked_parallel_flat_hash_map<parameter_point, operational_status> operational_values{};
 };
 
 /**
@@ -211,6 +277,8 @@ class operational_domain_impl
         op_domain.x_dimension = params.x_dimension;
         op_domain.y_dimension = params.y_dimension;
 
+        // TODO replace vectors with ranges for memory efficiency
+
         std::iota(x_indices.begin(), x_indices.end(), 0ul);
         std::iota(y_indices.begin(), y_indices.end(), 0ul);
 
@@ -242,15 +310,15 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        // TODO replace vectors with ranges for memory efficiency
-
         // for each x value in parallel
         std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ x_indices.cbegin(), x_indices.cend(),
                       [this](const auto x)
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) { is_operational(x, y); });
+                                        [this, x](const auto y) {
+                                            is_operational({x, y});
+                                        });
                       });
 
         log_stats();
@@ -275,18 +343,18 @@ class operational_domain_impl
         std::uniform_int_distribution<std::size_t> y_distribution{0, y_values.size() - 1};
 
         // container for the random samples
-        std::vector<std::pair<std::size_t, std::size_t>> xy_samples{};
-        xy_samples.reserve(samples);
+        std::vector<step_point> step_point_samples{};
+        step_point_samples.reserve(samples);
 
         for (std::size_t i = 0; i < samples; ++i)
         {
             // sample x and y dimension
-            xy_samples.emplace_back(x_distribution(generator), y_distribution(generator));
+            step_point_samples.emplace_back(x_distribution(generator), y_distribution(generator));
         }
 
         // for each sample point in parallel
-        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ xy_samples.cbegin(), xy_samples.cend(),
-                      [this](const auto xy) { is_operational(xy.first, xy.second); });
+        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ step_point_samples.cbegin(), step_point_samples.cend(),
+                      [this](const auto& sp) { is_operational(sp); });
 
         log_stats();
 
@@ -307,7 +375,7 @@ class operational_domain_impl
         mockturtle::stopwatch stop{stats.time_total};
 
         // first, perform random sampling to find an operational starting point
-        const auto starting_point = find_operational_parameters_via_random_sampling(samples);
+        const auto starting_point = find_operational_step_point_via_random_sampling(samples);
 
         // if no operational point was found within the specified number of samples, return
         if (!starting_point.has_value())
@@ -315,45 +383,45 @@ class operational_domain_impl
             return op_domain;
         }
 
-        // a queue of (x, y) dimension steps to be evaluated
-        using parameter_queue = std::queue<std::pair<std::size_t, std::size_t>>;
+        // a queue of (x, y) dimension step points to be evaluated
+        using parameter_queue = std::queue<step_point>;
         parameter_queue queue{};
 
         // a utility function that adds the adjacent points to the queue for further evaluation
-        const auto queue_next_points = [this, &queue](const auto x, const auto y)
+        const auto queue_next_points = [this, &queue](const step_point& sp)
         {
-            for (const auto& m : moore_neighborhood(x, y))
+            for (const auto& m : moore_neighborhood(sp))
             {
-                if (!has_already_been_sampled(m.first, m.second))
+                if (!has_already_been_sampled(m))
                 {
-                    queue.emplace(m.first, m.second);
+                    queue.push(m);
                 }
             }
         };
 
         // add the neighbors of the starting point to the queue
-        queue_next_points(starting_point->first, starting_point->second);
+        queue_next_points(*starting_point);
 
         // for each point in the queue
         while (!queue.empty())
         {
-            // get the parameter combination and remove it from the queue
-            const auto [x, y] = queue.front();
+            // fetch the step point and remove it from the queue
+            const auto sp = queue.front();
             queue.pop();
 
             // if the point has already been sampled, continue with the next
-            if (has_already_been_sampled(x, y))
+            if (has_already_been_sampled(sp))
             {
                 continue;
             }
 
             // check if the point is operational
-            const auto operational_status = is_operational(x, y);
+            const auto operational_status = is_operational(sp);
 
             // if the point is operational, add its four neighbors to the queue
             if (operational_status == operational_domain::operational_status::OPERATIONAL)
             {
-                queue_next_points(x, y);
+                queue_next_points(sp);
             }
         }
 
@@ -377,7 +445,7 @@ class operational_domain_impl
         mockturtle::stopwatch stop{stats.time_total};
 
         // first, perform random sampling to find an operational starting point
-        const auto starting_point = find_operational_parameters_via_random_sampling(samples);
+        const auto starting_point = find_operational_step_point_via_random_sampling(samples);
 
         // if no operational point was found within the specified number of samples, return
         if (!starting_point.has_value())
@@ -385,8 +453,8 @@ class operational_domain_impl
             return op_domain;
         }
 
-        const auto next_clockwise_point = [](auto&       neighborhood,
-                                             const auto& backtrack) noexcept -> std::pair<std::size_t, std::size_t>
+        const auto next_clockwise_point = [](std::vector<step_point>& neighborhood,
+                                             const step_point&        backtrack) noexcept -> step_point
         {
             assert(std::find(neighborhood.cbegin(), neighborhood.cend(), backtrack) != neighborhood.cend() &&
                    "The backtrack point must be part of the neighborhood");
@@ -400,19 +468,19 @@ class operational_domain_impl
         };
 
         // find an operational point on the contour starting from the randomly determined starting point
-        const auto contour_starting_point = find_operational_contour_point(*starting_point);
+        const auto contour_starting_point = find_operational_contour_step_point(*starting_point);
 
         auto current_contour_point = contour_starting_point;
-        auto backtrack_point       = current_contour_point.first == 0 ?
+        auto backtrack_point       = current_contour_point.x == 0 ?
                                          current_contour_point :
-                                         std::pair{current_contour_point.first - 1, current_contour_point.second};
+                                         step_point{current_contour_point.x - 1, current_contour_point.y};
 
-        auto current_neighborhood = moore_neighborhood(current_contour_point.first, current_contour_point.second);
+        auto current_neighborhood = moore_neighborhood(current_contour_point);
         auto next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
 
         while (next_point != contour_starting_point)
         {
-            const auto operational_status = is_operational(next_point.first, next_point.second);
+            const auto operational_status = is_operational(next_point);
 
             if (operational_status == operational_domain::operational_status::OPERATIONAL)
             {
@@ -424,7 +492,7 @@ class operational_domain_impl
                 backtrack_point = next_point;
             }
 
-            current_neighborhood = moore_neighborhood(current_contour_point.first, current_contour_point.second);
+            current_neighborhood = moore_neighborhood(current_contour_point);
             next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
         }
 
@@ -491,19 +559,76 @@ class operational_domain_impl
      */
     std::atomic<std::size_t> num_non_operational_parameter_combinations{0};
     /**
+     * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
+     * not hold the actual parameter values, but the step values in the x and y dimension, respectively.
+     *
+     * See `operational_domain::parameter_point` for a point that holds the actual parameter values.
+     */
+    struct step_point
+    {
+        /**
+         * Standard default constructor.
+         */
+        step_point() = default;
+        /**
+         * Standard constructor.
+         *
+         * @param x_step X dimension step value.
+         * @param y_step Y dimension step value.
+         */
+        step_point(const std::size_t x_step, const std::size_t y_step) : x{x_step}, y{y_step} {}
+        /**
+         * X dimension step value.
+         */
+        std::size_t x;
+        /**
+         * Y dimension step value.
+         */
+        std::size_t y;
+        /**
+         * Equality operator.
+         *
+         * @param other Other step point to compare with.
+         * @return `true` iff the step points are equal.
+         */
+        [[nodiscard]] bool operator==(const step_point& other) const noexcept
+        {
+            return x == other.x && y == other.y;
+        }
+        /**
+         * Inequality operator.
+         *
+         * @param other Other step point to compare with.
+         * @return `true` iff the step points are not equal.
+         */
+        [[nodiscard]] bool operator!=(const step_point& other) const noexcept
+        {
+            return !(*this == other);
+        }
+    };
+    /**
+     * Converts a step point to a parameter point.
+     *
+     * @param sp Step point to convert.
+     * @return The parameter point corresponding to the step point `sp`.
+     */
+    [[nodiscard]] operational_domain::parameter_point to_parameter_point(const step_point& sp) const noexcept
+    {
+        return {x_values[sp.x], y_values[sp.y]};
+    }
+    /**
      * Determines whether the point at step position `(x, y)` has already been sampled and returns the operational value
      * at `(x, y)` if it already exists. Here, `x` and `y` represent steps in the x and y dimension, respectively, not
      * the actual values of the parameters.
      *
-     * @param x X dimension step value.
-     * @param y Y dimension step value.
-     * @return The operational status of the point at step position `(x, y)` or `std::nullopt` if `(x, y)` has not been
-     * sampled yet.
+     * @param sp Step point to check.
+     * @return The operational status of the point at step position `sp = (x, y)` or `std::nullopt` if `(x, y)` has not
+     * been sampled yet.
      */
     [[nodiscard]] inline std::optional<operational_domain::operational_status>
-    has_already_been_sampled(const std::size_t x, const std::size_t y) const noexcept
+    has_already_been_sampled(const step_point& sp) const noexcept
     {
-        if (const auto it = op_domain.operational_values.find({x_values[x], y_values[y]});
+        if (const auto it = op_domain.operational_values.find(to_parameter_point(sp));
             it != op_domain.operational_values.cend())
         {
             return it->second;
@@ -605,39 +730,37 @@ class operational_domain_impl
      * terminates as soon as a non-operational state is found. In the worst case, the function performs \f$ 2^n \f$
      * simulations, where \f$ n \f$ is the number of inputs of the layout.
      *
-     * If the point `(x, y)` has already been investigated, the stored operational status is returned without conducting
-     * another simulation.
+     * If the point `sp = (x, y)` has already been investigated, the stored operational status is returned without
+     * conducting another simulation.
      *
-     * @param x X dimension step value.
-     * @param y Y dimension step value.
+     * @param sp Step point to be investigated.
      * @return The operational status of the layout under the given simulation parameters.
      */
-    operational_domain::operational_status is_operational(const std::size_t x, const std::size_t y) noexcept
+    operational_domain::operational_status is_operational(const step_point& sp) noexcept
     {
         // if the point has already been sampled, return the stored operational status
-        if (const auto op_value = has_already_been_sampled(x, y); op_value.has_value())
+        if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
         {
             return *op_value;
         }
 
         // fetch the x and y dimension values
-        const auto x_val = x_values[x];
-        const auto y_val = y_values[y];
+        const auto param_point = to_parameter_point(sp);
 
-        const auto operational = [this, x_val, y_val]()
+        const auto operational = [this, &param_point]()
         {
             ++num_operational_parameter_combinations;
 
-            op_domain.operational_values[{x_val, y_val}] = operational_domain::operational_status::OPERATIONAL;
+            op_domain.operational_values[param_point] = operational_domain::operational_status::OPERATIONAL;
 
             return operational_domain::operational_status::OPERATIONAL;
         };
 
-        const auto non_operational = [this, x_val, y_val]()
+        const auto non_operational = [this, &param_point]()
         {
             ++num_non_operational_parameter_combinations;
 
-            op_domain.operational_values[{x_val, y_val}] = operational_domain::operational_status::NON_OPERATIONAL;
+            op_domain.operational_values[param_point] = operational_domain::operational_status::NON_OPERATIONAL;
 
             return operational_domain::operational_status::NON_OPERATIONAL;
         };
@@ -652,8 +775,8 @@ class operational_domain_impl
         bdl_input_iterator<Lyt> bii{layout, params.bdl_params};
 
         sidb_simulation_parameters sim_params = params.sim_params;
-        set_x_dimension_value(sim_params, x_val);
-        set_y_dimension_value(sim_params, y_val);
+        set_x_dimension_value(sim_params, param_point.x);
+        set_y_dimension_value(sim_params, param_point.y);
 
         // for each input combination
         for (auto i = 0u; i < truth_table.num_bits(); ++i, ++bii)
@@ -741,11 +864,10 @@ class operational_domain_impl
      * // TODO This must be refactored.
      *
      * @param samples Maximum number of samples to take. Works as a timeout.
-     * @return The first pair of operational parameters given as x and y steps, if any could be found, `std::nullopt`
-     * otherwise.
+     * @return The first operational step point, if any could be found, `std::nullopt` otherwise.
      */
-    [[nodiscard]] std::optional<std::pair<std::size_t, std::size_t>>
-    find_operational_parameters_via_random_sampling(const std::size_t samples) noexcept
+    [[nodiscard]] std::optional<step_point>
+    find_operational_step_point_via_random_sampling(const std::size_t samples) noexcept
     {
         static std::mt19937_64 generator{std::random_device{}()};
 
@@ -756,16 +878,15 @@ class operational_domain_impl
         for (std::size_t i = 0; i < samples; ++i)
         {
             // sample x and y dimension
-            const auto x_sample = x_distribution(generator);
-            const auto y_sample = y_distribution(generator);
+            const step_point sample_step_point{x_distribution(generator), y_distribution(generator)};
 
             // determine the operational status
-            const auto operational_value = is_operational(x_sample, y_sample);
+            const auto operational_value = is_operational(sample_step_point);
 
             // if the parameter combination is operational, return its step values in x and y dimension
             if (operational_value == operational_domain::operational_status::OPERATIONAL)
             {
-                return std::make_pair(x_sample, y_sample);
+                return sample_step_point;
             }
         }
 
@@ -778,19 +899,18 @@ class operational_domain_impl
      * parameter range and the function returns the last operational point that was investigated, i.e., a point at the
      * border of the parameter range.
      *
-     * @param starting_point Starting point for the boundary search.
-     * @return An operational point at the edge of the operational domain `starting_point` is located in.
+     * @param starting_point Starting step point for the boundary search.
+     * @return An operational step point at the edge of the operational domain `starting_point` is located in.
      */
-    [[nodiscard]] std::pair<std::size_t, std::size_t>
-    find_operational_contour_point(const std::pair<std::size_t, std::size_t>& starting_point) noexcept
+    [[nodiscard]] step_point find_operational_contour_step_point(const step_point& starting_point) noexcept
     {
         auto latest_operational_point = starting_point;
 
         // calculate the distances to each edge
-        const auto left_distance   = starting_point.first;
-        const auto right_distance  = x_indices.size() - starting_point.first;
-        const auto top_distance    = starting_point.second;
-        const auto bottom_distance = y_indices.size() - starting_point.second;
+        const auto left_distance   = starting_point.x;
+        const auto right_distance  = x_indices.size() - starting_point.x;
+        const auto top_distance    = starting_point.y;
+        const auto bottom_distance = y_indices.size() - starting_point.y;
 
         // find the minimum distance
         const auto min_distance = std::min({left_distance, right_distance, top_distance, bottom_distance});
@@ -798,13 +918,15 @@ class operational_domain_impl
         // going towards the left border of the parameter range
         if (min_distance == left_distance)
         {
-            for (std::size_t x = starting_point.first; x > 0; --x)
+            for (std::size_t x = starting_point.x; x > 0; --x)
             {
-                const auto operational_status = is_operational(x, starting_point.second);
+                const auto left_step = step_point{x, starting_point.y};
+
+                const auto operational_status = is_operational(left_step);
 
                 if (operational_status == operational_domain::operational_status::OPERATIONAL)
                 {
-                    latest_operational_point = {x, starting_point.second};
+                    latest_operational_point = left_step;
                 }
                 else
                 {
@@ -815,13 +937,15 @@ class operational_domain_impl
         // going towards right border of the parameter range
         else if (min_distance == right_distance)
         {
-            for (std::size_t x = starting_point.first; x < x_indices.size(); ++x)
+            for (std::size_t x = starting_point.x; x < x_indices.size(); ++x)
             {
-                const auto operational_status = is_operational(x, starting_point.second);
+                const auto right_step = step_point{x, starting_point.y};
+
+                const auto operational_status = is_operational(right_step);
 
                 if (operational_status == operational_domain::operational_status::OPERATIONAL)
                 {
-                    latest_operational_point = {x, starting_point.second};
+                    latest_operational_point = right_step;
                 }
                 else
                 {
@@ -832,13 +956,15 @@ class operational_domain_impl
         // going towards the top border of the parameter range
         else if (min_distance == top_distance)
         {
-            for (std::size_t y = starting_point.second; y < y_indices.size(); ++y)
+            for (std::size_t y = starting_point.y; y < y_indices.size(); ++y)
             {
-                const auto operational_status = is_operational(y, starting_point.second);
+                const auto top_step = step_point{starting_point.x, y};
+
+                const auto operational_status = is_operational(top_step);
 
                 if (operational_status == operational_domain::operational_status::OPERATIONAL)
                 {
-                    latest_operational_point = {starting_point.first, y};
+                    latest_operational_point = top_step;
                 }
                 else
                 {
@@ -849,13 +975,15 @@ class operational_domain_impl
         // going towards the bottom border of the parameter range
         else
         {
-            for (std::size_t y = starting_point.second; y > 0; --y)
+            for (std::size_t y = starting_point.y; y > 0; --y)
             {
-                const auto operational_status = is_operational(y, starting_point.second);
+                const auto bottom_step = step_point{starting_point.x, y};
+
+                const auto operational_status = is_operational(bottom_step);
 
                 if (operational_status == operational_domain::operational_status::OPERATIONAL)
                 {
-                    latest_operational_point = {starting_point.first, y};
+                    latest_operational_point = bottom_step;
                 }
                 else
                 {
@@ -869,20 +997,20 @@ class operational_domain_impl
         return latest_operational_point;
     }
     /**
-     * Returns the Moore neighborhood of the step point at `(x, y)`. The Moore neighborhood is the set of all points
-     * that are adjacent to `(x, y)` including the diagonals. Thereby, the Moore neighborhood contains up to 8 points as
-     * points outside of the parameter range are not gathered. The points are returned in clockwise order starting from
-     * the right neighbor.
+     * Returns the Moore neighborhood of the step point at `sp = (x, y)`. The Moore neighborhood is the set of all
+     * points that are adjacent to `(x, y)` including the diagonals. Thereby, the Moore neighborhood contains up to 8
+     * points as points outside of the parameter range are not gathered. The points are returned in clockwise order
+     * starting from the right neighbor.
      *
-     * @param x X dimension step value.
-     * @param y Y dimension step value.
-     * @return The Moore neighborhood of the step point at `(x, y)`.
+     * @param sp Step point to get the Moore neighborhood of.
+     * @return The Moore neighborhood of the step point at `sp = (x, y)`.
      */
-    [[nodiscard]] std::vector<std::pair<std::size_t, std::size_t>>
-    moore_neighborhood(const std::size_t x, const std::size_t y) const noexcept
+    [[nodiscard]] std::vector<step_point> moore_neighborhood(const step_point& sp) const noexcept
     {
-        std::vector<std::pair<std::size_t, std::size_t>> neighbors{};
+        std::vector<step_point> neighbors{};
         neighbors.reserve(8);
+
+        const auto& [x, y] = sp;
 
         auto decr_x = (x > 0) ? x - 1 : x;
         auto incr_x = (x + 1 < x_values.size()) ? x + 1 : x;
@@ -1164,5 +1292,31 @@ operational_domain operational_domain_contour_tracing(const Lyt& lyt, const TT& 
 }
 
 }  // namespace fiction
+
+namespace std
+{
+// make `operational_domain::parameter_point` compatible with `std::integral_constant`
+template <>
+struct tuple_size<fiction::operational_domain::parameter_point> : std::integral_constant<size_t, 2>
+{};
+// make `operational_domain::parameter_point` compatible with `std::tuple_element`
+template <size_t I>
+struct tuple_element<I, fiction::operational_domain::parameter_point>
+{
+    using type = double;
+};
+// make `operational_domain::parameter_point` compatible with `std::hash`
+template <>
+struct hash<fiction::operational_domain::parameter_point>
+{
+    std::size_t operator()(const fiction::operational_domain::parameter_point& p) const noexcept
+    {
+        std::size_t h = 0;
+        fiction::hash_combine(h, p.x, p.y);
+
+        return h;
+    }
+};
+}  // namespace std
 
 #endif  // FICTION_OPERATIONAL_DOMAIN_HPP
