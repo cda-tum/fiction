@@ -13,7 +13,6 @@
 #include "fiction/utils/layout_utils.hpp"
 
 #include <algorithm>
-#include <atomic>
 #include <limits>
 #include <mutex>
 #include <thread>
@@ -70,8 +69,8 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
     const quickexact_params<sidb_defect_layout> params_defect{sim_params.physical_params,
                                                               automatic_base_number_detection::OFF};
 
-    std::atomic<double>          avoidance_distance{0};
-    std::atomic<coordinate<Lyt>> min_defect_position{};
+    double          avoidance_distance{0};
+    coordinate<Lyt> min_defect_position{};
 
     sidb_defect_layout              layout{lyt};
     std::vector<typename Lyt::cell> cells{};
@@ -145,7 +144,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
 
     std::vector<std::thread> threads{};
     threads.reserve(num_threads);
-    std::mutex lock{};  // used to control access to shared resources
+    std::mutex lock_shared_resources{};  // used to control access to shared resources
 
     const auto number_per_thread = (defect_cells.size() - (defect_cells.size() % num_threads)) / num_threads;
     const auto number_last       = defect_cells.size() % num_threads;
@@ -197,16 +196,13 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
                             });
 
                         {
-                            //                            const std::lock_guard lock{lock};
-                            //                            if (distance > avoidance_distance)
-                            //                            {
-                            //                                min_defect_position = defect;
-                            //                                avoidance_distance  = distance;
-                            //                            }
-                            if (distance > avoidance_distance.load(std::memory_order_relaxed))
                             {
-                                avoidance_distance.store(distance, std::memory_order_relaxed);
-                                min_defect_position.store(defect, std::memory_order_relaxed);
+                                const std::lock_guard lock{lock_shared_resources};
+                                if (distance > avoidance_distance)
+                                {
+                                    min_defect_position = defect;
+                                    avoidance_distance  = distance;
+                                }
                             }
                         }
                     }
@@ -257,10 +253,13 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
                     }
                 });
 
-            if (distance > avoidance_distance.load(std::memory_order_relaxed))
             {
-                min_defect_position.store(defect, std::memory_order_relaxed);
-                avoidance_distance.store(distance, std::memory_order_relaxed);
+                const std::lock_guard lock{lock_shared_resources};
+                if (distance > avoidance_distance)
+                {
+                    min_defect_position = defect;
+                    avoidance_distance  = distance;
+                }
             }
         }
     }

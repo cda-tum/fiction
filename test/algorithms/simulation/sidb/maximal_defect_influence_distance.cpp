@@ -23,22 +23,22 @@ TEST_CASE("Test influence distance function", "[maximal_defect_influence_distanc
 
         const auto [distance, defect_pos] = maximal_defect_influence_distance(lyt, sim_params);
         CHECK(distance == 0);
-        CHECK(defect_pos == coordinate<sidb_cell_clk_lyt_siqad>(0, 0, 0));
+        CHECK(defect_pos == coordinate<sidb_cell_clk_lyt_siqad>());
 
         sim_params.number_threads                               = 1;
         const auto [distance_one_thread, defect_pos_one_thread] = maximal_defect_influence_distance(lyt, sim_params);
         CHECK(distance_one_thread == 0);
-        CHECK(defect_pos_one_thread == coordinate<sidb_cell_clk_lyt_siqad>(0, 0, 0));
+        CHECK(defect_pos_one_thread == coordinate<sidb_cell_clk_lyt_siqad>());
 
         sim_params.number_threads                               = 2;
         const auto [distance_two_thread, defect_pos_two_thread] = maximal_defect_influence_distance(lyt, sim_params);
         CHECK(distance_two_thread == 0);
-        CHECK(defect_pos_two_thread == coordinate<sidb_cell_clk_lyt_siqad>(0, 0, 0));
+        CHECK(defect_pos_two_thread == coordinate<sidb_cell_clk_lyt_siqad>());
 
         sim_params.number_threads                                 = 5;
         const auto [distance_five_thread, defect_pos_five_thread] = maximal_defect_influence_distance(lyt, sim_params);
         CHECK(distance_five_thread == 0);
-        CHECK(defect_pos_five_thread == coordinate<sidb_cell_clk_lyt_siqad>(0, 0, 0));
+        CHECK(defect_pos_five_thread == coordinate<sidb_cell_clk_lyt_siqad>());
     }
 
     SECTION("layout with one SiDB")
