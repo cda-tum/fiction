@@ -111,7 +111,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
 
     std::vector<typename Lyt::cell> defect_cells{};
 
-    const uint max_defect_positions = (se.x - nw.x + 2) * (se.y - nw.y + 2) * 2;
+    const uint64_t max_defect_positions = (se.x - nw.x + 2) * (se.y - nw.y + 2) * 2;
     defect_cells.reserve(max_defect_positions);
 
     // collect all cells in the bounding box area (spanned by the nw and se) going from top to down from left to right.
