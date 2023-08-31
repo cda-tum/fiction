@@ -1180,7 +1180,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         // This scope is executed if the function is used in combination (i.e. used by) with `quickexact` simulation.
         if (engine == exhaustive_algorithm::EXGS)
         {
-            // Cell_history collects the cells (siDBs) that have changed their charge state.
+            // Cell_history collects the cells (SiDBs) that have changed their charge state.
             strg->cell_history = {};
             strg->cell_history.reserve(this->num_cells());
 
@@ -1244,7 +1244,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         // This scope is executed if the function is not used by `quickexact`.
         else
         {
-            // Cell_history collects the cells (siDBs) that have changed their charge state.
+            // Cell_history collects the cells (SiDBs) that have changed their charge state.
             strg->cell_history = {};
             strg->cell_history.reserve(this->num_cells());
 

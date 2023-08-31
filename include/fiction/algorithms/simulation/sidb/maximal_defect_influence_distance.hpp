@@ -111,7 +111,8 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
 
     std::vector<typename Lyt::cell> defect_cells{};
 
-    const uint64_t max_defect_positions = (se.x - nw.x + 2) * (se.y - nw.y + 2) * 2;
+    // maximal number of placable defects in the given bounding box
+    const uint64_t max_defect_positions = (se.x - nw.x + 1) * (se.y - nw.y + 1) * 2;
     defect_cells.reserve(max_defect_positions);
 
     // collect all cells in the bounding box area (spanned by the nw and se) going from top to down from left to right.
@@ -183,8 +184,11 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
                         }
                     }
 
+                    // defect changes the ground state, i.e., the charge index is changed compared to the charge
+                    // distribution without placed defect.
                     if (charge_index_defect_layout != charge_index_layout)
                     {
+                        // determine minimal distance of the defect to the layout
                         auto distance = std::numeric_limits<double>::max();
                         layout.foreach_cell(
                             [&layout, &defect, &distance](const auto& cell)
@@ -196,13 +200,13 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
                             });
 
                         {
+                            const std::lock_guard lock{lock_shared_resources};
+                            // the distance is larger than the current maximal one.
+                            if (distance > avoidance_distance)
                             {
-                                const std::lock_guard lock{lock_shared_resources};
-                                if (distance > avoidance_distance)
-                                {
-                                    min_defect_position = defect;
-                                    avoidance_distance  = distance;
-                                }
+                                min_defect_position =
+                                    defect;  // current placed defect that leads to a change of the ground state
+                                avoidance_distance = distance;  // new avoidance distance given by the current distance
                             }
                         }
                     }
@@ -210,11 +214,15 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
             });
     }
 
+    // threads are joined
     for (auto& thread : threads)
     {
         thread.join();
     }
 
+    // the remaining defect positions are analysed. As an example: Suppose we have 33 defect locations
+    // and three threads. Each thread considers ten defects. The last three defects are then analyzed by the following
+    // code.
     for (auto f = num_threads * number_per_thread; f < num_threads * number_per_thread + number_last; f++)
     {
         const auto defect = defect_cells[f];
@@ -253,13 +261,10 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
                     }
                 });
 
+            if (distance > avoidance_distance)
             {
-                const std::lock_guard lock{lock_shared_resources};
-                if (distance > avoidance_distance)
-                {
-                    min_defect_position = defect;
-                    avoidance_distance  = distance;
-                }
+                min_defect_position = defect;
+                avoidance_distance  = distance;
             }
         }
     }
