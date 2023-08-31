@@ -234,7 +234,7 @@ template <typename Lyt>
     lyt.foreach_fanin(lyt.get_node(op),
                       [&lyt, &fanins_set, &op, &fanin1, &fanin2, &ffd](const auto& fin)
                       {
-                          tile<Lyt> fanin = static_cast<tile<Lyt>>(fin);
+                          auto fanin = static_cast<tile<Lyt>>(fin);
                           if (fanins_set.find(fanin) == fanins_set.cend())
                           {
 
@@ -433,7 +433,7 @@ template <typename Lyt>
         lyt.foreach_fanin(lyt.get_node(fanout),
                           [&lyt, &fins, &old_pos](const auto& i)
                           {
-                              tile<Lyt> fout = static_cast<tile<Lyt>>(i);
+                              auto fout = static_cast<tile<Lyt>>(i);
                               if (fout != old_pos)
                               {
                                   fins.push_back(lyt.make_signal(lyt.get_node(fout)));
@@ -552,7 +552,7 @@ template <typename Lyt>
                             lyt.foreach_fanin(lyt.get_node(fanout),
                                               [&lyt, &signals](const auto& i)
                                               {
-                                                  tile<Lyt> fout = static_cast<tile<Lyt>>(i);
+                                                  auto fout = static_cast<tile<Lyt>>(i);
                                                   signals.push_back(lyt.make_signal(lyt.get_node(fout)));
                                               });
 
@@ -613,7 +613,7 @@ template <typename Lyt>
         lyt.foreach_fanin(lyt.get_node(old_pos),
                           [&lyt, &signals](const auto& i)
                           {
-                              tile<Lyt> fanin = static_cast<tile<Lyt>>(i);
+                              auto fanin = static_cast<tile<Lyt>>(i);
                               signals.push_back(lyt.make_signal(lyt.get_node(fanin)));
                           });
 
@@ -628,7 +628,7 @@ template <typename Lyt>
             lyt.foreach_fanin(lyt.get_node(fanout),
                               [&lyt, &fout_signals](const auto& i)
                               {
-                                  tile<Lyt> fout = static_cast<tile<Lyt>>(i);
+                                  auto fout = static_cast<tile<Lyt>>(i);
                                   fout_signals.push_back(lyt.make_signal(lyt.get_node(fout)));
                               });
 
@@ -974,7 +974,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
             lyt.foreach_fanin(lyt.get_node(po_tile),
                               [&lyt, &route, &po_tile](const auto& fin)
                               {
-                                  tile<Lyt> fanin = static_cast<tile<Lyt>>(fin);
+                                  auto fanin = static_cast<tile<Lyt>>(fin);
 
                                   route.insert(route.begin(), po_tile);
                                   route.insert(route.begin(), fanin);
@@ -1139,11 +1139,7 @@ void fix_dead_nodes(Lyt& lyt, std::vector<tile<Lyt>>& gt) noexcept
 template <typename Lyt>
 bool compare_gates(const tile<Lyt>& a, const tile<Lyt>& b)
 {
-    if (std::make_pair(a.x + a.y, a.x) < std::make_pair(b.x + b.y, b.x))
-    {
-        return true;
-    }
-    return false;
+    return static_cast<bool>(std::make_pair(a.x + a.y, a.x) < std::make_pair(b.x + b.y, b.x));
 }
 
 }  // namespace detail
@@ -1206,7 +1202,7 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* ps
     // sort gates based on diagonal line
     std::sort(gate_tiles.begin(), gate_tiles.end(), [](const auto& a, const auto& b) { return a.x + a.y < b.x + b.y; });
 
-    bool moved_at_least_one_gate;
+    bool moved_at_least_one_gate = false;
 
     do {
         moved_at_least_one_gate = false;

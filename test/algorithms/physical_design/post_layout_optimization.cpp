@@ -55,7 +55,7 @@ void check_mapping_equiv_all()
     check_mapping_equiv<Lyt>(blueprints::nand_xnor_network<technology_network>());
 }
 
-TEST_CASE("Layout equivalence", "[optimization]")
+TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 {
     SECTION("Cartesian layouts")
     {
@@ -80,7 +80,7 @@ TEST_CASE("Layout equivalence", "[optimization]")
     }
 }
 
-TEST_CASE("Optimization steps", "[optimization]")
+TEST_CASE("Optimization steps", "[post_layout_optimization]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
     using coord_path  = layout_coordinate_path<obstruction_layout<gate_layout>>;
@@ -218,5 +218,28 @@ TEST_CASE("Optimization steps", "[optimization]")
         CHECK(obstr_lyt.is_and(obstr_lyt.get_node(coordinate<gate_layout>{1, 1})) == true);
         CHECK(obstr_lyt.is_po_tile(coordinate<gate_layout>{0, 2}) == true);
         CHECK(obstr_lyt.is_po_tile(coordinate<gate_layout>{2, 1}) == true);
+    }
+}
+
+TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
+{
+    using gate_layout    = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    const auto layout    = blueprints::use_and_gate_layout<gate_layout>();
+    auto       obstr_lyt = obstruction_layout<gate_layout>(layout);
+
+    SECTION("Call functions")
+    {
+        const coordinate<gate_layout>                   old_pos_1 = {2, 0};
+        const std::tuple<bool, coordinate<gate_layout>> moved_gate_1 =
+            detail::improve_gate_location(obstr_lyt, old_pos_1);
+        CHECK_FALSE(std::get<0>(moved_gate_1));
+        CHECK(std::get<1>(moved_gate_1) == old_pos_1);
+        CHECK_NOTHROW(detail::delete_wires(obstr_lyt));
+        std::vector<uint64_t> rows_to_delete{};
+        std::vector<uint64_t> columns_to_delete{};
+        CHECK_NOTHROW(detail::delete_rows_and_columns(obstr_lyt, rows_to_delete, columns_to_delete));
+        CHECK_NOTHROW(detail::optimize_output_positions(obstr_lyt));
+        post_layout_optimization_stats stats_wrong_clocking_scheme{};
+        CHECK_NOTHROW(post_layout_optimization<gate_layout>(obstr_lyt, &stats_wrong_clocking_scheme));
     }
 }
