@@ -13,6 +13,7 @@
 #include "fiction/utils/layout_utils.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <limits>
 #include <mutex>
 #include <thread>
