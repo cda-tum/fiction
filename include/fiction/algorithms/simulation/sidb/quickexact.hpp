@@ -40,7 +40,7 @@ enum class automatic_base_number_detection
     OFF
 };
 /**
- * This struct stores the parameters for the `quickexact` algorithm.
+ * This struct stores the parameters for the `QuickExact` algorithm.
  */
 template <typename Lyt>
 struct quickexact_params
@@ -530,7 +530,7 @@ class quickexact_impl
 }  // namespace detail
 
 /**
- * *QuickExact* is a quick and exact physical simulation algorithm designed specifically for SiDB layouts.
+ * `QuickExact` is a quick and exact physical simulation algorithm designed specifically for SiDB layouts.
  * It determines all physically valid charge configurations of a given layout, providing a significant
  * performance advantage of more than three orders of magnitude over *ExGS* (exhaustive_ground_state_simulation.hpp).
  *

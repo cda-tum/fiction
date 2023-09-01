@@ -70,7 +70,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{{20, 10}};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
 
     lyt.assign_sidb_defect({1, 2, 0},
                            sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r, 2});
@@ -107,7 +107,7 @@ TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with one highly negatively
     TestType lyt{{20, 10}};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.1}};
+    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.1}};
 
     lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
@@ -612,7 +612,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
 
     lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});

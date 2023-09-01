@@ -111,7 +111,7 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to
     else
     {
         const quickexact_params<Lyt> params{quicksim_params.phys_params};
-        st.algorithm      = "quickexact";
+        st.algorithm      = "QuickExact";
         simulation_result = quickexact(lyt, params);
     }
 

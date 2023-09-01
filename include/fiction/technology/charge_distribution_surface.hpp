@@ -1057,8 +1057,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& cell : strg->sidb_order)
         {
-            chargeindex += static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1)) *
-                           static_cast<uint64_t>(std::pow(base, this->num_cells() - 1 - counter));
+            chargeindex += static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1u)) *
+                           static_cast<uint64_t>(std::pow(base, this->num_cells() - 1u - counter));
             counter += 1;
         }
 

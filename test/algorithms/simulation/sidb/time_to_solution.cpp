@@ -35,7 +35,7 @@ TEMPLATE_TEST_CASE(
         const time_to_solution_params    tts_params_quickexact{exhaustive_algorithm::QUICKEXACT};
         sim_acc_tts<TestType>(lyt, quicksim_params, tts_params_quickexact, &tts_stat_quickexact);
 
-        CHECK(tts_stat_quickexact.algorithm == "quickexact");
+        CHECK(tts_stat_quickexact.algorithm == "QuickExact");
         CHECK_THAT(tts_stat_quickexact.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat_quickexact.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
