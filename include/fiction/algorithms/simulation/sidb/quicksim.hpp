@@ -6,6 +6,7 @@
 #define FICTION_QUICKSIM_HPP
 
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
+#include "fiction/algorithms/simulation/sidb/enum_class_exhaustive_algorithm.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
@@ -83,10 +84,10 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_distribution_surface charge_lyt{lyt};
 
         // set the given physical parameters
-        charge_lyt.set_physical_parameters(ps.phys_params);
-
-        charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
-        charge_lyt.update_after_charge_change();
+        charge_lyt.assign_physical_parameters(ps.phys_params);
+        charge_lyt.assign_base_number(2);
+        charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
+        charge_lyt.update_after_charge_change(dependent_cell_mode::VARIABLE);
         const auto negative_sidb_indices = charge_lyt.negative_sidb_detection();
 
         // Check that the layout with all SiDBs negatively charged is physically valid.
@@ -96,7 +97,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         }
 
         // Check that the layout with all SiDBs neutrally charged is physically valid.
-        charge_lyt.set_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_lyt.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 
         if (!negative_sidb_indices.empty())
@@ -119,7 +120,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
             st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
         }
 
-        charge_lyt.set_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_lyt.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 
         // If the number of threads is initially set to zero, the simulation is run with one thread.
@@ -157,7 +158,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
                             std::vector<uint64_t> index_start{i};
 
-                            charge_lyt_copy.set_all_charge_states(sidb_charge_state::NEUTRAL);
+                            charge_lyt_copy.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
                             for (const auto& index : negative_sidb_indices)
                             {

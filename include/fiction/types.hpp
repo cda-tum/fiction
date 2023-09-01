@@ -15,6 +15,7 @@
 #include "fiction/layouts/tile_based_layout.hpp"
 #include "fiction/networks/technology_network.hpp"
 #include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/sidb_surface.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/io/write_dot.hpp>
@@ -153,6 +154,9 @@ using sidb_cell_clk_lyt_ptr = std::shared_ptr<sidb_cell_clk_lyt>;
 
 using sidb_cell_clk_lyt_siqad = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
 using sidb_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_cell_clk_lyt_siqad>;
+
+using sidb_defect_layout                 = sidb_surface<sidb_cell_clk_lyt_siqad>;
+using sidb_defect_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_defect_layout>;
 
 using cell_layout_t =
     std::variant<qca_cell_clk_lyt_ptr, stacked_qca_cell_clk_lyt_ptr, inml_cell_clk_lyt_ptr, sidb_cell_clk_lyt_ptr>;
