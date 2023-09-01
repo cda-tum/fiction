@@ -53,8 +53,8 @@ TEST_CASE("Test influence distance function", "[maximal_defect_influence_distanc
         const auto [distance, defect_pos] = maximal_defect_influence_distance(lyt, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 6),
                    Catch::Matchers::WithinAbs(0.665060, physical_constants::POP_STABILITY_ERR));
-        CHECK((defect_pos.x == -1 & defect_pos.y == -1 & defect_pos.z == 1) |
-              (defect_pos.x == 1 & defect_pos.y == -1 & defect_pos.z == 1));
+        CHECK((defect_pos.x == -1 && defect_pos.y == -1 && defect_pos.z == 1) |
+              (defect_pos.x == 1 && defect_pos.y == -1 && defect_pos.z == 1));
 
         sim_params.number_threads                               = 1;
         const auto [distance_one_thread, defect_pos_one_thread] = maximal_defect_influence_distance(lyt, sim_params);

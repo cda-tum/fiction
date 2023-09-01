@@ -39,7 +39,7 @@ struct maximal_defect_influence_distance_params
      * The pair describes the width and height of the area around the gate, which is
      * also used to place defects (given in siqad coordinates).
      */
-    std::pair<uint64_t, uint64_t> additional_scanning_area{50, 6};
+    std::pair<int32_t, int32_t> additional_scanning_area{50, 6};
     /**
      * Number of threads to spawn. By default the number of threads is set to the number of available hardware threads.
      */
@@ -112,7 +112,7 @@ maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_dista
     std::vector<typename Lyt::cell> defect_cells{};
 
     // maximal number of placable defects in the given bounding box
-    const uint64_t max_defect_positions = (se.x - nw.x + 1) * (se.y - nw.y + 1) * 2;
+    const uint64_t max_defect_positions = (std::abs(se.x - nw.x) + 1) * (std::abs(se.y - nw.y) + 1) * 2;
     defect_cells.reserve(max_defect_positions);
 
     // collect all cells in the bounding box area (spanned by the nw and se) going from top to down from left to right.

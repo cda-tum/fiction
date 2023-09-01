@@ -202,10 +202,11 @@ class gray_code_iterator
      *
      * @param m The number to set.
      */
-    void operator=(const uint64_t m) noexcept
+    gray_code_iterator& operator=(const uint64_t m) noexcept
     {
         current_iteration = m;
         binary_to_gray();
+        return *this;
     }
     /**
      * Equality operator. Compares the current number with the given integer.

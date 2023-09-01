@@ -165,7 +165,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 6}) == sidb_charge_state::NEGATIVE);
 
-        CHECK(charge_layout.get_system_energy() == system_energy_maximum);
+        CHECK_THAT(charge_layout.get_system_energy() - system_energy_maximum, Catch::Matchers::WithinAbs(0.0, 0.00001));
 
         // update energy and dependent cell is variable with respect to its charge state
         charge_layout.update_after_charge_change(dependent_cell_mode::VARIABLE, energy_calculation::UPDATE_ENERGY);
@@ -197,7 +197,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({5, 4}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_index_and_base().first == charge_layout.get_max_charge_index());
         charge_layout.update_after_charge_change();
-        CHECK(charge_layout.get_system_energy() == system_energy_maximum);
+        CHECK_THAT(charge_layout.get_system_energy() - system_energy_maximum, Catch::Matchers::WithinAbs(0.0, 0.00001));
 
         // change charge state of the dependent-cell and check if system energy is reduced
         charge_layout.assign_charge_state({5, 4}, sidb_charge_state::NEGATIVE);
