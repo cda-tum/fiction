@@ -118,6 +118,15 @@ class cell_level_layout : public ClockedLayout
     }
 
     explicit cell_level_layout(std::shared_ptr<cell_level_layout_storage<cell>> s) : strg{std::move(s)} {}
+    /**
+     * Clones the layout returning a deep copy.
+     *
+     * @return Deep copy of the layout.
+     */
+    cell_level_layout clone() const noexcept override
+    {
+        return cell_level_layout(std::make_shared<cell_level_layout_storage>(*strg));
+    }
 
 #pragma endregion
 

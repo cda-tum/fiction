@@ -93,6 +93,15 @@ class clocked_layout : public CoordinateLayout
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
     }
+    /**
+     * Clones the layout returning a deep copy.
+     *
+     * @return Deep copy of the layout.
+     */
+    clocked_layout clone() const noexcept override
+    {
+        return clocked_layout(std::make_shared<clocked_layout_storage>(*strg));
+    }
 
 #pragma endregion
 

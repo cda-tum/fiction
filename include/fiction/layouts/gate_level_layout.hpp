@@ -202,7 +202,7 @@ class gate_level_layout : public ClockedLayout
      *
      * @return Deep copy of the layout.
      */
-    gate_level_layout clone() const noexcept
+    gate_level_layout clone() const noexcept override
     {
         const auto copy_strg  = std::make_shared<gate_level_layout_storage>(*strg);
         const auto copy_evnts = std::make_shared<mockturtle::network_events<base_type>>(*evnts);

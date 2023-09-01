@@ -200,6 +200,15 @@ class hexagonal_layout
                       "HexagonalCoordinateSystem has to be one of the following: odd_row_hex, even_row_hex, "
                       "odd_column_hex, even_column_hex");
     }
+    /**
+     * Clones the layout returning a deep copy.
+     *
+     * @return Deep copy of the layout.
+     */
+    virtual hexagonal_layout clone() const noexcept
+    {
+        return hexagonal_layout(std::make_shared<hexagonal_layout_storage>(*strg));
+    }
 
 #pragma endregion
 
