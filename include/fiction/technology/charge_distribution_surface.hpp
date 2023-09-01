@@ -1090,7 +1090,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         {
                             chargeindex_sub_layout += static_cast<uint64_t>(
                                 (charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
-                                static_cast<uint64_t>(std::pow(3, this->num_cells() - 1 - counter - 1)));
+                                static_cast<uint64_t>(
+                                    std::pow(3, strg->three_state_cells.size() - counter_sub_layout - 1)));
                             counter_sub_layout += 1;
                         }
                     }
@@ -1106,10 +1107,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
                     for (const auto& cell : strg->three_state_cells)
                     {
-
                         chargeindex_sub_layout +=
                             static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
-                                                  std::pow(3, this->num_cells() - 1 - counter - 1));
+                                                  std::pow(3, strg->three_state_cells.size() - counter_sub_layout - 1));
                         counter_sub_layout += 1;
                     }
                     for (const auto& cell : strg->sidb_order_without_three_state_cells)
@@ -1147,7 +1147,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
                     chargeindex_sub_layout +=
                         static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
-                                              std::pow(3, this->num_cells() - 1 - counter));
+                                              std::pow(3, strg->three_state_cells.size() - 1 - counter_sub_layout));
                     counter_sub_layout += 1;
                 }
                 for (const auto& cell : strg->sidb_order_without_three_state_cells)
@@ -1524,6 +1524,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * This function determines if given layout has to be simulated with three states since positively charged SiDBs can
      * occur due to the local potential analysis.
      *
+     * @note All SiDBs have to be set to negatively charged.
+     *
      * @return return value is true when three state simulation is required.
      */
     bool is_three_state_simulation_required() noexcept
@@ -1532,6 +1534,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         strg->three_state_cells                    = {};
         strg->sidb_order_without_three_state_cells = {};
         bool required                              = false;
+        strg->dependent_cell_in_sub_layout         = false;
 
         this->foreach_cell(
             [&required, this](const auto& c)
@@ -1540,8 +1543,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
                     if ((-(*local_pot) + strg->phys_params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
                     {
-                        strg->three_state_cells.emplace_back(c);
-                        required = true;
+                        if (c == strg->dependent_cell)
+                        {
+                            strg->dependent_cell_in_sub_layout = true;
+                        }
+                        else
+                        {
+                            strg->three_state_cells.emplace_back(c);
+                            required = true;
+                        }
                     }
                 }
             });

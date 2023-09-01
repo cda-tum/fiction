@@ -205,6 +205,54 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_system_energy() < system_energy_maximum);
     }
 
+    SECTION("cover behavior of dependent_cell in and outside the sublayout (positively charged SiDBs)")
+    {
+        lyt.assign_cell_type({5, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 4}, TestType::cell_type::NORMAL);
+
+        // dependent-cell is within the sublayout
+        charge_distribution_surface charge_layout{lyt,
+                                                  sidb_simulation_parameters{},
+                                                  sidb_charge_state::NEGATIVE,
+                                                  {5, 5}};
+        CHECK(charge_layout.is_three_state_simulation_required());
+        charge_layout.assign_charge_state({6, 5}, sidb_charge_state::POSITIVE);
+        charge_layout.assign_charge_state({7, 5}, sidb_charge_state::POSITIVE);
+        charge_layout.charge_distribution_to_index();
+        CHECK(charge_layout.get_charge_index_of_sub_layout() == 8);
+
+        // dependent-cell is not within the submodule
+        charge_distribution_surface charge_layout_dependent_cell_not_in_sublayout{lyt,
+                                                                                  sidb_simulation_parameters{},
+                                                                                  sidb_charge_state::NEGATIVE,
+                                                                                  {10, 4}};
+        CHECK(charge_layout_dependent_cell_not_in_sublayout.is_three_state_simulation_required());
+        charge_layout_dependent_cell_not_in_sublayout.assign_charge_state({5, 5}, sidb_charge_state::POSITIVE);
+        charge_layout_dependent_cell_not_in_sublayout.assign_charge_state({6, 5}, sidb_charge_state::POSITIVE);
+        charge_layout_dependent_cell_not_in_sublayout.assign_charge_state({7, 5}, sidb_charge_state::POSITIVE);
+        charge_layout_dependent_cell_not_in_sublayout.charge_distribution_to_index();
+        CHECK(charge_layout_dependent_cell_not_in_sublayout.get_charge_index_of_sub_layout() == 26);
+    }
+
+    SECTION("charge index of layout and sublayout (positively charged SiDBs) without dependent-cell")
+    {
+        lyt.assign_cell_type({5, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 4}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}, sidb_charge_state::NEGATIVE};
+        CHECK(charge_layout.is_three_state_simulation_required());
+        charge_layout.assign_charge_state({5, 5}, sidb_charge_state::POSITIVE);
+        charge_layout.assign_charge_state({6, 5}, sidb_charge_state::POSITIVE);
+        charge_layout.assign_charge_state({7, 5}, sidb_charge_state::POSITIVE);
+        charge_layout.charge_distribution_to_index();
+        CHECK(charge_layout.get_charge_index_of_sub_layout() == 26);
+        CHECK(charge_layout.get_charge_index_and_base().first == 0);
+    }
+
     SECTION("assign and read out charge states")
     {
         // assign SiDBs and charge states to three different cells and read the charge state
@@ -485,7 +533,6 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Physical validity check, far distance of SIDBs, all NEGATIVE")
     {
-
         TestType layout{{11, 11}};
         layout.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
         layout.assign_cell_type({0, 2, 0}, TestType::cell_type::NORMAL);
