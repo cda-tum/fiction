@@ -7,6 +7,7 @@
 
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -67,13 +68,17 @@ class optimize_command : public command
             return;
         }
 
-        const auto apply_optimization = [this](auto&& lyt_ptr)
+        const auto apply_optimization = [&](auto&& lyt_ptr)
         {
-            using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
+            using Lyt               = typename std::decay_t<decltype(lyt_ptr)>::element_type;
+            auto       lyt_copy     = lyt_ptr->clone();
+            const auto lyt_copy_ptr = std::make_shared<Lyt>(lyt_copy);
 
             if constexpr (fiction::is_cartesian_layout_v<Lyt>)
             {
-                fiction::post_layout_optimization(*lyt_ptr, &st);
+                fiction::post_layout_optimization(*lyt_copy_ptr, &st);
+                fiction::restore_names(*lyt_ptr, *lyt_copy_ptr);
+                gls.extend() = lyt_copy_ptr;
             }
             else
             {

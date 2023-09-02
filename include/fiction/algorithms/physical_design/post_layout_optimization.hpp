@@ -51,7 +51,7 @@ namespace detail
  * @param lyt Gate-level layout.
  * @param deleted_coords Tiles that got deleted.
  *
- * @note This function requires the layout to be a gate-level layout and a Cartesian layout.
+ * @note This function requires the gate-level layout to be Cartesian.
  */
 template <typename Lyt>
 void fix_wires(Lyt& lyt, const std::vector<tile<Lyt>>& deleted_coords) noexcept
@@ -211,7 +211,7 @@ void add_fanout_to_route(const tile<Lyt>& fanout, bool is_first_fanout, fanin_fa
  * @param op coordinate of the gate to be moved.
  * @return fanin and fanout gates, wires to be deleted and old routing paths.
  *
- * @note This function requires the layout to be a gate-level layout and a Cartesian layout.
+ * @note This function requires the gate-level layout to be Cartesian.
  */
 template <typename Lyt>
 [[nodiscard]] fanin_fanout_data<Lyt> get_fanin_and_fanouts(const Lyt& lyt, const tile<Lyt>& op) noexcept
@@ -380,7 +380,7 @@ template <typename Lyt>
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave";
+        std::cout << "Clocking scheme is not 2DDWave" << std::endl;
         std::make_pair(false, old_pos);
     }
     static_assert(has_is_obstructed_coordinate_v<Lyt>, "Lyt is not an obstruction layout");
@@ -638,70 +638,6 @@ template <typename Lyt>
 
     return std::make_pair(improved_gate_location, new_pos);
 }
-/**
- * This struct stores the coordinates of incoming signals in a 3-dimensional layout, where each signal is associated
- * with a specific depth level, row index, and column index.
- *
- * @tparam Lyt Gate-level layout.
- */
-template <typename Lyt>
-struct incoming_signals_map
-{
-  private:
-    using coord_vec_t = std::vector<tile<Lyt>>;
-
-  public:
-    /**
-     * The 'depth_map' unordered map holds depth levels as keys (integer values) and maps them to vectors of layout
-     * coordinates. Each depth level represents a specific level in the layout, and the associated vector contains the
-     * coordinates of incoming signals located at that depth level.
-     */
-    std::unordered_map<uint64_t, coord_vec_t> depth{};
-};
-
-/**
- * This struct stores the coordinates of incoming signals in a row of a 3-dimensional layout, where each signal is
- * associated with a specific depth level and column index.
- *
- * @tparam Lyt Gate-level layout.
- */
-template <typename Lyt>
-struct row_incoming_signals_map
-{
-  private:
-    using depth_map_type = incoming_signals_map<Lyt>;
-    using inner_map_type = std::unordered_map<uint64_t, depth_map_type>;
-
-  public:
-    /**
-     * The 'row_map' unordered map holds row indices as keys (integer values) and maps them to DepthMapType data
-     * structures. Each row index represents a specific row in the layout, and the associated DepthMapType stores the
-     * coordinates of incoming signals at different depth levels within that row.
-     */
-    inner_map_type row{};
-};
-
-/**
- * This struct stores the coordinates of incoming signals in a column of a 3-dimensional layout, where each signal is
- * associated with a specific row index and depth level.
- *
- * @tparam Lyt Gate-level layout.
- */
-template <typename Lyt>
-struct column_incoming_signals_map
-{
-  private:
-    using row_incoming_signals_map_type = row_incoming_signals_map<Lyt>;
-
-  public:
-    /**
-     * The 'column_map' unordered map holds column indices as keys (integer values) and maps them to
-     * RowIncomingSignalsMapType data structures. Each column index represents a specific column in the layout, and the
-     * associated RowIncomingSignalsMapType stores the coordinates of incoming signals at different row and depth levels
-     * within that column.
-     */
-    std::unordered_map<uint64_t, row_incoming_signals_map_type> column{};
-};
 
 /**
  * Utility function that deletes all specified rows and columns.
@@ -710,7 +646,7 @@ struct column_incoming_signals_map
  * @param rows_to_delete Rows to be deleted.
  * @param columns_to_delete Columns to be deleted.
  *
- * @note This function requires the layout to be a gate-level layout, a Cartesian layout and 2DDWave-clocked.
+ * @note This function requires the gate-level layout to be 2DDWave-clocked and Cartesian.
  */
 template <typename Lyt>
 void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
@@ -720,30 +656,11 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave";
+        std::cout << "Clocking scheme is not 2DDWave" << std::endl;
         return;
     }
 
-    // get fanins for each coordinate
-    column_incoming_signals_map<Lyt> fanins{};
-    for (uint64_t x = 0; x <= lyt.x(); ++x)
-    {
-        for (uint64_t y = 0; y <= lyt.y(); ++y)
-        {
-            for (uint64_t z = 0; z <= lyt.z(); ++z)
-            {
-                if (const tile<Lyt> coord = {x, y, z}; !lyt.is_empty_tile(coord))
-                {
-                    const auto fins = lyt.incoming_data_flow(coord);
-
-                    for (const auto& fanin : fins)
-                    {
-                        fanins.column[coord.x].row[coord.y].depth[coord.z].push_back({fanin.x, fanin.y, fanin.z});
-                    }
-                }
-            }
-        }
-    }
+    auto layout_copy = lyt.clone();
 
     // delete all excess wiring in rows with only vertical wires
     for (uint64_t row : rows_to_delete)
@@ -797,7 +714,7 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
 
                     std::vector<mockturtle::signal<Lyt>> fins{};
 
-                    for (auto& fanin : fanins.column[old_pos.x].row[old_pos.y].depth[old_pos.z])
+                    for (auto& fanin : layout_copy.incoming_data_flow(old_pos))
                     {
                         // skip removed columns and decrease column offset
                         uint64_t excess_column_offset = 0;
@@ -806,7 +723,7 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
                             while (std::find(std::cbegin(columns_to_delete), std::cend(columns_to_delete), fanin.x) !=
                                    std::cend(columns_to_delete))
                             {
-                                fanin = fanins.column[fanin.x].row[fanin.y].depth[fanin.z][0];
+                                fanin = layout_copy.incoming_data_flow(fanin)[0];
                                 excess_column_offset++;
                             }
                         }
@@ -818,7 +735,7 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
                             while (std::find(std::begin(rows_to_delete), std::end(rows_to_delete), fanin.y) !=
                                    std::end(rows_to_delete))
                             {
-                                fanin = fanins.column[fanin.x].row[fanin.y].depth[fanin.z][0];
+                                fanin = layout_copy.incoming_data_flow(fanin)[0];
                                 excess_row_offset++;
                             }
                         }
@@ -839,7 +756,7 @@ void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
  *
  * @param lyt Gate-level layout.
  *
- * @note This function requires the layout to be a gate-level layout, a Cartesian layout and 2DDWave-clocked.
+ * @note This function requires the gate-level layout to be 2DDWave-clocked and Cartesian.
  */
 template <typename Lyt>
 void delete_wires(Lyt& lyt) noexcept
@@ -848,7 +765,7 @@ void delete_wires(Lyt& lyt) noexcept
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave";
+        std::cout << "Clocking scheme is not 2DDWave" << std::endl;
         return;
     }
 
@@ -947,7 +864,7 @@ struct output_update
  *
  * @param lyt Gate-level layout.
  *
- * @note This function requires the layout to be a gate-level layout, a Cartesian layout and 2DDWave-clocked.
+ * @note This function requires the gate-level layout to be 2DDWave-clocked and Cartesian.
  */
 template <typename Lyt>
 void optimize_output_positions(Lyt& lyt) noexcept
@@ -956,7 +873,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave";
+        std::cout << "Clocking scheme is not 2DDWave" << std::endl;
         return;
     }
 
@@ -1083,7 +1000,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
  * @param lyt Gate-level layout.
  * @param gt Vector containing the coordinates of all gates in the layout.
  *
- * @note This function requires the layout to be a gate-level layout and a Cartesian layout.
+ * @note This function requires the gate-level layout to be Cartesian.
  */
 template <typename Lyt>
 void fix_dead_nodes(Lyt& lyt, std::vector<tile<Lyt>>& gt) noexcept
@@ -1162,7 +1079,7 @@ bool compare_gates(const tile<Lyt>& a, const tile<Lyt>& b)
  *
  * @param lyt Gate-level layout.
  *
- * @note This function requires the layout to be a gate-level layout and a Cartesian layout.
+ * @note This function requires the gate-level layout to be 2DDWave-clocked and Cartesian.
  */
 template <typename Lyt>
 void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* pst = nullptr) noexcept
@@ -1172,7 +1089,7 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* ps
 
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave";
+        std::cout << "Clocking scheme is not 2DDWave" << std::endl;
         return;
     }
 
