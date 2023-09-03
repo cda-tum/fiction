@@ -30,7 +30,7 @@ bool can_positive_charges_occur(const Lyt& lyt, const sidb_simulation_parameters
     bool       result  = false;
     const auto mu_plus = sim_params.mu_plus();
 
-    // The charge layout is initialized with negatively charged SiDBs. Therefore the local electrostatic potentials are
+    // The charge layout is initialized with negatively charged SiDBs. Therefore, the local electrostatic potentials are
     // maximal. In this extreme case, if the banding is not sufficient for any SiDB to be positively charged, it will
     // not be for any other charge distribution. Therefore, no positively charged SiDBs can occur.
     const charge_distribution_surface charge_lyt{lyt, sim_params, sidb_charge_state::NEGATIVE};

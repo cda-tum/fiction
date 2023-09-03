@@ -223,7 +223,7 @@ TEMPLATE_TEST_CASE(
         charge_layout.charge_distribution_to_index();
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 8);
 
-        // dependent-cell is not within the submodule
+        // dependent-cell is not within the sublayout
         charge_distribution_surface charge_layout_dependent_cell_not_in_sublayout{lyt,
                                                                                   sidb_simulation_parameters{},
                                                                                   sidb_charge_state::NEGATIVE,
@@ -251,6 +251,80 @@ TEMPLATE_TEST_CASE(
         charge_layout.charge_distribution_to_index();
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 26);
         CHECK(charge_layout.get_charge_index_and_base().first == 0);
+    }
+
+    SECTION("charge index to charge distribution")
+    {
+        lyt.assign_cell_type({5, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 4}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}, sidb_charge_state::NEGATIVE};
+        charge_layout.is_three_state_simulation_required();
+        CHECK(charge_layout.get_max_charge_index_sub_layout() == 26);
+
+        CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({6, 5}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({7, 5}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({10, 4}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_index_of_sub_layout() == 0);
+        CHECK(charge_layout.get_charge_index_and_base().first == 0);
+
+        charge_layout.assign_charge_state({5, 5}, sidb_charge_state::POSITIVE);
+        charge_layout.assign_charge_state({10, 4}, sidb_charge_state::POSITIVE);
+        CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_layout.get_charge_state({10, 4}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_layout.get_charge_index_of_sub_layout() == 18);
+        CHECK(charge_layout.get_charge_index_and_base().first == 16);
+
+        charge_layout.assign_charge_index(0);
+
+        CHECK(charge_layout.get_charge_index_of_sub_layout() == 0);
+        CHECK(charge_layout.get_charge_index_and_base().first == 0);
+
+        CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({10, 4}) == sidb_charge_state::NEGATIVE);
+
+        charge_layout.increase_charge_index_of_sub_layout_by_one();
+        CHECK(charge_layout.get_charge_index_of_sub_layout() == 1);
+        charge_layout.assign_charge_index(1);
+        CHECK(charge_layout.get_charge_index_and_base().first == 1);
+
+        // set the charge index to zero and thereby, all siDBs to negatively charged.
+        charge_layout.assign_charge_index(0);
+        CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({6, 5}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({7, 5}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({10, 4}) == sidb_charge_state::NEGATIVE);
+
+        charge_layout.assign_charge_index(charge_layout.get_max_charge_index());
+        CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_layout.get_charge_state({6, 5}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_layout.get_charge_state({7, 5}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_layout.get_charge_state({10, 4}) == sidb_charge_state::POSITIVE);
+    }
+
+    SECTION("positive_cell_to_index, two_state_cell_to_index")
+    {
+        lyt.assign_cell_type({5, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 4}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}, sidb_charge_state::NEGATIVE};
+        charge_layout.is_three_state_simulation_required();
+
+        CHECK(charge_layout.positive_cell_to_index({5, 5}) == 0);
+        CHECK(charge_layout.positive_cell_to_index({6, 5}) == 1);
+        CHECK(charge_layout.positive_cell_to_index({7, 5}) == 2);
+        CHECK(charge_layout.index_to_three_state_cell(1) == cell<TestType>(6, 5));
+        CHECK(charge_layout.index_to_three_state_cell(4) == cell<TestType>());
+
+        CHECK(charge_layout.two_state_cell_to_index({10, 4}) == 0);
+        CHECK(charge_layout.two_state_cell_to_index({10, 5}) == -1);
+        CHECK(charge_layout.index_to_two_state_cell(0) == cell<TestType>(10, 4));
+        CHECK(charge_layout.index_to_two_state_cell(1) == cell<TestType>());
     }
 
     SECTION("assign and read out charge states")

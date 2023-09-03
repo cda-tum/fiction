@@ -1209,7 +1209,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 }
             }
             // If the charge index of the sublayout is zero, the charge states are updated.
-
             if (strg->charge_index_sublayout == 0)
             {
                 for (const auto& cell : strg->three_state_cells)
@@ -1236,7 +1235,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             auto       charge_quot_positive = strg->charge_index_sublayout;
             const auto base_positive        = 3;
             auto       counter              = strg->three_state_cells.size() - 1;
-            // Firstly, the charge distribution of the sublayout (i.e. collection of SiDBs that can be positively
+            // Firstly, the charge distribution of the sublayout (i.e., collection of SiDBs that can be positively
             // charged) is updated.
             while (charge_quot_positive > 0)
             {
@@ -1284,7 +1283,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             const auto base                          = strg->charge_index_and_base.second;
             auto       counter_negative              = strg->sidb_order_without_three_state_cells.size() - 1;
 
-            // Secondly, the charge distribution of the layout (onyl SiDBs which can be either neutrally or negatively
+            // Secondly, the charge distribution of the layout (only SiDBs which can be either neutrally or negatively
             // charged) is updated.
             while (charge_quot > 0)
             {
@@ -1355,7 +1354,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     if (counter != dependent_cell_index)
                     {
                         const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                        // The charge state is only changed (i.e. the function assign_charge_state_by_cell_index is c
+                        // The charge state is only changed (i.e., the function assign_charge_state_by_cell_index is ca
                         // lled), if the nw charge state differs to the previous one. Only then will the cell be added
                         // to the charge_distribution_history.
                         if (const auto new_chargesign = this->get_charge_state_by_index(counter);
@@ -1522,7 +1521,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
     /**
      * This function determines if given layout has to be simulated with three states since positively charged SiDBs can
-     * occur due to the local potential analysis.
+     * occur due to the local potential analysis. In addition, all SiDBs that can be positively charged are collected.
      *
      * @note All SiDBs have to be set to negatively charged.
      *
@@ -1556,6 +1555,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 }
             });
 
+        std::sort(strg->three_state_cells.begin(), strg->three_state_cells.end());
+
         for (const auto& cell : strg->sidb_order)
         {
             if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), cell) ==
@@ -1565,10 +1566,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
         }
 
+        std::sort(strg->sidb_order_without_three_state_cells.begin(), strg->sidb_order_without_three_state_cells.end());
+
         if (required)
         {
             this->assign_base_number_to_three();
         }
+
+        this->charge_distribution_to_index();
 
         return required;
     }
@@ -1998,9 +2003,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->validity_check();
     };
 
-    // This function is used when three state simulation is required (i.e. is_three_state_simulation_required = true) to
-    // set the base number to three. However, it is distinguished between the cells that can be positively charged and
-    // the ones that cannot.
+    // This function is used when three state simulations are required (i.e., is_three_state_simulation_required = true)
+    // to set the base number to three. However, it is distinguished between the cells that can be positively charged
+    // and// the ones that cannot.
     void assign_base_number_to_three() noexcept
     {
         strg->phys_params.base             = 3;
@@ -2032,7 +2037,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
         else
         {
-            strg->max_charge_index = static_cast<uint64_t>(std::pow(3, this->num_cells()) - 1);
+            strg->max_charge_index          = static_cast<uint64_t>(std::pow(3, this->num_cells()) - 1);
+            strg->max_charge_index_sulayout = static_cast<uint64_t>(std::pow(3, strg->three_state_cells.size()) - 1);
         }
     }
 
