@@ -1573,8 +1573,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             this->assign_base_number_to_three();
         }
 
-        this->charge_distribution_to_index();
-
         return required;
     }
     /**

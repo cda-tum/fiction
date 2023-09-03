@@ -88,14 +88,14 @@ class quickexact_impl
 
             initialize_charge_layout();
 
-            //  Determine if three state simulation (i.e. positively charged SiDBs can occur) is required.
+            //  Determine if three state simulation (i.e., positively charged SiDBs can occur) is required.
             const bool three_state_simulation_required =
                 (params.base_number_detection == automatic_base_number_detection::ON &&
                  charge_lyt.is_three_state_simulation_required()) ||
                 (params.base_number_detection == automatic_base_number_detection::OFF &&
                  params.physical_parameters.base == 3);
 
-            // If layout has at least two SiDBs, all SiDBs that have to be negatively charged, are erased from the
+            // If layout has at least two SiDBs, all SiDBs that have to be negatively charged are erased from the
             // layout.
             if (number_of_sidbs > 1)
             {
@@ -136,8 +136,8 @@ class quickexact_impl
                                               charge_lyt_with_assigned_dependent_cell.get_phys_params().lambda_tf});
                     }
 
-                    // Update all local potentials, system energy and physically validity. Flag is set to "Variable" to
-                    // allow dependent cell to change its charge state based on the N-1 SiDBs to fulfill the local
+                    // Update all local potentials, system energy and physically validity. The Flag is set to "Variable"
+                    // to allow dependent cell to change its charge state based on the N-1 SiDBs to fulfill the local
                     // population stability at its position.
                     charge_lyt_with_assigned_dependent_cell.update_after_charge_change(dependent_cell_mode::VARIABLE);
 
