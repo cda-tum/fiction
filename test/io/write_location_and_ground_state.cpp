@@ -6,12 +6,14 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/io/write_loc_sim_result.hpp>
+#include <fiction/io/write_location_and_ground_state.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 
+#include <algorithm>
 #include <sstream>
+#include <string>
 
 using namespace fiction;
 
@@ -42,7 +44,7 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
         const auto simulation_results = exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
 
         std::stringstream ss;
-        write_loc_sim_result(simulation_results, ss);
+        write_location_and_ground_state(simulation_results, ss);
 
         const std::string expected_output = R"(x [nm];y [nm];GS_0;GS_1;
                                                 0.000;0.000;-1;-1;
@@ -63,7 +65,7 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
         const auto simulation_results = exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
 
         std::stringstream ss;
-        write_loc_sim_result(simulation_results, ss);
+        write_location_and_ground_state(simulation_results, ss);
 
         const std::string expected_output = R"(x [nm];y [nm];GS_0;
                                                 0.000;0.000;-1;

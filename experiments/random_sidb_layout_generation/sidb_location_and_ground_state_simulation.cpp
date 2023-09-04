@@ -4,7 +4,7 @@
 
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
-#include "fiction/io/write_loc_sim_result.hpp"
+#include "fiction/io/write_location_and_ground_state.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/types.hpp"
 
@@ -14,17 +14,35 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 
 using namespace fiction;
 
+/**
+ * Simulates randomly generated layouts and collects simulation results.
+ *
+ * This program reads randomly generated layouts from a specified folder, simulates them, and collects the simulation
+ * results in text files. The simulation results include the x and y coordinates of SiDBs and their charge state
+ * (as an integer) in the ground state. The simulation is parameterized by the µ-value, which influences the
+ * charge distribution.
+ *
+ * @param argc The number of command-line arguments.
+ * @param argv An array of C-style strings containing the command-line arguments.
+ * @return Returns 0 on successful execution, or EXIT_FAILURE if an error occurs.
+ *
+ * Command-line Options:
+ *   --folder_name <name>  Specifies the name of the folder containing randomly generated layouts.
+ *   --mu_minus <value>    Sets the µ-value used for the simulation, which affects the charge distribution.
+ *
+ * Example Usage:
+ *   To simulate layouts from the "layout_random_cli/" folder with a µ (mu) value of -0.32:
+ *   ./sidb_location_and_ground_state --folder_name layout_random_cli/ --mu_minus -0.32
+ */
 int main(int argc, const char* argv[])  // NOLINT
 {
-    // This script uses the randomly generated layouts (hence, random_layout_generation.cpp should be executed first),
-    // simulates them, and collects the simulation results as a text file. The text file has three columns: x,y, charge
-    // state (as integer) of the ground state.
 
-    std::unordered_map<std::string, std::variant<std::string>> options{{"--folder_name", "layout_random_cli/"},
-                                                                       {"--mu_minus", "-0.32"}};
+    std::unordered_map<std::string, std::string> options{{"--folder_name", "layout_random_cli/"},
+                                                         {"--mu_minus", "-0.32"}};
 
     // Parse command-line arguments
     for (auto i = 1u; i < argc; ++i)
@@ -40,15 +58,15 @@ int main(int argc, const char* argv[])  // NOLINT
             else
             {
                 std::cerr << "Error: Argument " << arg << " is missing a value." << std::endl;
-                return 1;
+                return EXIT_FAILURE;
             }
         }
     }
 
     // Folder name where the randomly generated layouts are located.
-    const std::string folder_name = std::get<std::string>(options["--folder_name"]);
+    const std::string folder_name = options["--folder_name"];
     // µ-value used for the simulation.
-    const double mu = std::stod(std::get<std::string>(options["--mu_minus"]));
+    const double mu = std::stod(options["--mu_minus"]);
 
     // Print the parsed values
     std::cout << "Folder name: " << folder_name << std::endl;
@@ -69,9 +87,9 @@ int main(int argc, const char* argv[])  // NOLINT
                     {
                         const auto& benchmark = file.path();
 
-                        // When random layouts are generated with the script random_layout_generation.cpp, they have the
-                        // following file name format: layout_xxx (xxx is the numbering). In the following code lines,
-                        // the file name of the current file is extracted from the file path.
+                        // When random layouts are generated with the script random_sidb_layout_generation.cpp, they
+                        // have the following file name format: layout_xxx (xxx is the numbering). In the following code
+                        // lines,// the file name of the current file is extracted from the file path.
                         const std::string path  = benchmark.string();
                         const uint64_t    start = path.rfind("layout") + 7;
                         const uint64_t    end   = path.rfind(".sqd") - 1;
@@ -93,7 +111,7 @@ int main(int argc, const char* argv[])  // NOLINT
                         // reliably for layouts with neutrally and negatively charged SiDBs.
                         if (!simulation_results.charge_distributions.empty())
                         {
-                            write_loc_sim_result(simulation_results, file_path);
+                            write_location_and_ground_state(simulation_results, file_path);
                         }
                     }
                 }

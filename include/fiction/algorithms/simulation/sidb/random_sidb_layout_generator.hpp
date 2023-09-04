@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 05.04.23.
 //
 
-#ifndef FICTION_RANDOM_LAYOUT_GENERATOR_HPP
-#define FICTION_RANDOM_LAYOUT_GENERATOR_HPP
+#ifndef FICTION_RANDOM_SIDB_LAYOUT_GENERATOR_HPP
+#define FICTION_RANDOM_SIDB_LAYOUT_GENERATOR_HPP
 
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/io/write_sqd_layout.hpp"
@@ -44,13 +44,14 @@ enum class positive_charges
 };
 
 /**
- * This struct stores the parameters for the *generate_random_layout* algorithm.
+ * This struct stores the parameters for the `generate_random_sidb_layout` algorithm.
  */
 template <typename Lyt>
-struct generate_random_layout_params
+struct generate_random_sidb_layout_params
 {
     /**
-     * Two coordinates that span the region where SiDBs may be placed (order is not important).
+     * Two coordinates that span the region where SiDBs may be placed (order is not important). The first coordinate is
+     * the upper left corner and the second coordinate is the lower right corner of the area.
      */
     std::pair<typename Lyt::cell, typename Lyt::cell> coordinate_pair;
     /**
@@ -65,9 +66,11 @@ struct generate_random_layout_params
      * If positively charged SiDBs should be prevented, SiDBs are not placed closer than this value (Euclidean distance
      * of two cells).
      */
-    double minimal_spacing = 2;
+    double minimal_spacing = 2.0;
     /**
-     * Maximal number of steps to place the given number of SiDBs.
+     * Maximum number of steps to place the specified number of SiDBs. Example: If the area, where SiDBs can be placed,
+     * is small and many SiDBs are to be placed, several tries are required to generate a layout with no positively
+     * charged SiDBs.
      */
     uint64_t maximal_attempts = 10E6;
     /**
@@ -76,23 +79,27 @@ struct generate_random_layout_params
     uint64_t number_of_unique_generated_layouts = 1;
     /**
      * The maximum number of attempts allowed to generate the given number of unique layouts (default: \f$ 10^{6} \f$).
+     * Example: If the area, where SiDBs can be placed, is small and many SiDBs are to be placed, it may be difficult or
+     * even impossible to find several unique (given by number_of_unique_generated_layouts) layouts. Therefore, this
+     * parameter sets a limit for the maximum number of tries.
      */
     uint64_t maximal_attempts_for_multiple_layouts = 10E6;
 };
 
 /**
- * Generates a random layout of SiDBs based on the provided parameters.
+ * Generates a random layout of SiDBs by adding them to the provided layout skeleton.
+ * The layout skeleton serves as the starting layout to which SiDBs are added to create the final layout.
  *
  * @tparam Lyt The layout type.
+ * @param lyt_skeleton A layout to which random cells are added to create the final layout.
  * @param params The parameters for generating the random layout.
- * @param lyt_skeleton A layout to which random cells are added (useful if you need to add random cells to a given
- * layout).
  * @return A randomly-generated layout of SiDBs.
  */
 template <typename Lyt>
-Lyt generate_random_layout(const Lyt& lyt_skeleton, const generate_random_layout_params<Lyt>& params)
+Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_sidb_layout_params<Lyt>& params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
     const uint64_t number_of_sidbs_of_final_layout = lyt_skeleton.num_cells() + params.number_of_sidbs;
 
@@ -138,32 +145,33 @@ Lyt generate_random_layout(const Lyt& lyt_skeleton, const generate_random_layout
 }
 
 /**
- * Generates multiple unique random layouts of SiDBs based on the provided parameters.
+ * Generates multiple unique random layouts of SiDBs by adding them to the provided layout skeleton.
+ * The layout skeleton serves as the starting layout to which SiDBs are added to create unique layouts.
  *
  * @tparam Lyt The layout type.
- * @param lyt_skeleton A layout to which random cells are added (useful if you need to add random cells to a given
- * layout).
+ * @param lyt_skeleton A layout to which random cells are added to create unique layouts.
  * @param params The parameters for generating the random layouts.
  * @return A vector containing the unique randomly generated layouts.
  */
 template <typename Lyt>
-std::vector<Lyt> generate_multiple_random_layouts(const Lyt&                                lyt_skeleton,
-                                                  const generate_random_layout_params<Lyt>& params)
+std::vector<Lyt> generate_multiple_random_sidb_layouts(const Lyt&                                     lyt_skeleton,
+                                                       const generate_random_sidb_layout_params<Lyt>& params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
     std::vector<Lyt> unique_lyts{};
     unique_lyts.reserve(params.number_of_unique_generated_layouts);
-    uint64_t counter = 0;
+    uint64_t layout_generation_attempts = 0;
     while (unique_lyts.size() < params.number_of_unique_generated_layouts &&
-           counter < params.maximal_attempts_for_multiple_layouts)
+           layout_generation_attempts < params.maximal_attempts_for_multiple_layouts)
     {
-        const auto random_lyt = generate_random_layout(lyt_skeleton, params);
+        const auto random_lyt = generate_random_sidb_layout(lyt_skeleton, params);
 
         uint64_t identical_layout_counter = 0;
         for (const auto& old_lyt : unique_lyts)
         {
-            // Checks if two layouts have the same cell.
+            // checks if two layouts have an SiDB at the same position
             uint64_t identical_cell_counter = 0;
             old_lyt.foreach_cell(
                 [&identical_cell_counter, random_lyt](const auto& cell_old)
@@ -190,12 +198,11 @@ std::vector<Lyt> generate_multiple_random_layouts(const Lyt&                    
             unique_lyts.push_back(random_lyt);
         }
 
-        counter += 1;
+        layout_generation_attempts += 1;
     }
-
     return unique_lyts;
 }
 
 }  // namespace fiction
 
-#endif  // FICTION_RANDOM_LAYOUT_GENERATOR_HPP
+#endif  // FICTION_RANDOM_SIDB_LAYOUT_GENERATOR_HPP

@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 09.06.23.
 //
 
-#ifndef FICTION_WRITE_LOC_SIM_RESULT_HPP
-#define FICTION_WRITE_LOC_SIM_RESULT_HPP
+#ifndef FICTION_WRITE_LOCATION_AND_GROUND_STATE_HPP
+#define FICTION_WRITE_LOCATION_AND_GROUND_STATE_HPP
 
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
@@ -14,9 +14,8 @@
 #include "fiction/utils/math_utils.hpp"
 
 #include <algorithm>
-#include <cmath>
 #include <fstream>
-#include <iomanip>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -27,10 +26,13 @@ namespace detail
 {
 
 template <typename Lyt>
-class write_txt_sim_result_impl
+class write_location_and_ground_state_impl
 {
   public:
-    write_txt_sim_result_impl(const sidb_simulation_result<Lyt>& result, std::ostream& s) : sim_result{result}, os{s} {}
+    write_location_and_ground_state_impl(const sidb_simulation_result<Lyt>& result, std::ostream& s) :
+            sim_result{result},
+            os{s}
+    {}
 
     void run()
     {
@@ -99,26 +101,28 @@ class write_txt_sim_result_impl
  * @param os The output stream to write into.
  */
 template <typename Lyt>
-void write_loc_sim_result(const sidb_simulation_result<Lyt>& sim_result, std::ostream& os)
+void write_location_and_ground_state(const sidb_simulation_result<Lyt>& sim_result, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
-    detail::write_txt_sim_result_impl p{sim_result, os};
+    detail::write_location_and_ground_state_impl p{sim_result, os};
 
     p.run();
 }
+
 /**
  * Writes the coordinates of all SiDBs of a layout together with the charge distribution of the ground state(s) to a
  * file.
  *
  * This overload uses a file name to create and write into.
  *
- * @tparam sim_result Simulation result of physical simulation.
+ * @tparam Lyt Cell-level SiDB layout type.
+ * @tparam sim_result The simulation result to write.
  * @param filename The file name to create and write into.
  */
 template <typename Lyt>
-void write_loc_sim_result(const sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
+void write_location_and_ground_state(const sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 
@@ -127,10 +131,10 @@ void write_loc_sim_result(const sidb_simulation_result<Lyt>& sim_result, const s
         throw std::ofstream::failure("could not open file");
     }
 
-    write_loc_sim_result(sim_result, os);
+    write_location_and_ground_state(sim_result, os);
     os.close();
 }
 
 }  // namespace fiction
 
-#endif  // FICTION_WRITE_LOC_SIM_RESULT_HPP
+#endif  // FICTION_WRITE_LOCATION_AND_GROUND_STATE_HPP
