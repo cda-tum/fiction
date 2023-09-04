@@ -29,7 +29,9 @@
 #include <iterator>
 #include <optional>
 #include <queue>
+#include <random>
 #include <tuple>
+#include <type_traits>
 #include <vector>
 
 namespace fiction
@@ -277,8 +279,6 @@ class operational_domain_impl
         op_domain.x_dimension = params.x_dimension;
         op_domain.y_dimension = params.y_dimension;
 
-        // TODO replace vectors with ranges for memory efficiency
-
         std::iota(x_indices.begin(), x_indices.end(), 0ul);
         std::iota(y_indices.begin(), y_indices.end(), 0ul);
 
@@ -336,21 +336,7 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        static std::mt19937_64 generator{std::random_device{}()};
-
-        // instantiate distributions
-        std::uniform_int_distribution<std::size_t> x_distribution{0, x_values.size() - 1};
-        std::uniform_int_distribution<std::size_t> y_distribution{0, y_values.size() - 1};
-
-        // container for the random samples
-        std::vector<step_point> step_point_samples{};
-        step_point_samples.reserve(samples);
-
-        for (std::size_t i = 0; i < samples; ++i)
-        {
-            // sample x and y dimension
-            step_point_samples.emplace_back(x_distribution(generator), y_distribution(generator));
-        }
+        const auto step_point_samples = generate_random_step_points(samples);
 
         // for each sample point in parallel
         std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ step_point_samples.cbegin(), step_point_samples.cend(),
@@ -725,13 +711,13 @@ class operational_domain_impl
         return std::nullopt;
     }
     /**
-     * Performs an exhaustive ground state simulation for all input combinations of the stored layout using the given
-     * simulation parameters. This function is used by all operational domain computation techniques. The function
-     * terminates as soon as a non-operational state is found. In the worst case, the function performs \f$ 2^n \f$
-     * simulations, where \f$ n \f$ is the number of inputs of the layout.
+     * Logs and returns the operational status at the given point `sp = (x, y)`. If the point has already been sampled,
+     * it returns the cached value. Otherwise, a ground state simulation is performed for all input combinations of the
+     * stored layout using the given simulation parameters. It terminates as soon as a non-operational state is found.
+     * In the worst case, the function performs \f$ 2^n \f$ simulations, where \f$ n \f$ is the number of inputs of the
+     * layout. This function is used by all operational domain computation techniques.
      *
-     * If the point `sp = (x, y)` has already been investigated, the stored operational status is returned without
-     * conducting another simulation.
+     * Any investigated point is added to the stored `op_domain`, regardless of its operational status.
      *
      * @param sp Step point to be investigated.
      * @return The operational status of the layout under the given simulation parameters.
@@ -853,20 +839,13 @@ class operational_domain_impl
         return operational();
     }
     /**
-     * Performs random sampling to find any operational parameter combination. This function is useful if a single
-     * starting point is required within the domain to expand from. This function returns the step in x and y dimension
-     * of the first operational point found. If no operational parameter combination can be found within the given
-     * number of samples, the function returns `std::nullopt`.
+     * Generates (potentially repeating) random `step_points` in the stored parameter range. The number of generated
+     * points is exactly equal to `samples`.
      *
-     * This function adds any sampled points to the `op_domain` member variables.
-     *
-     * // TODO this function contains code duplication from `random_sampling` as of right now. This must be refactored.
-     *
-     * @param samples Maximum number of samples to take. Works as a timeout.
-     * @return The first operational step point, if any could be found, `std::nullopt` otherwise.
+     * @param samples Number of random `step_point`s to generate.
+     * @return A vector of random `step_point`s in the stored parameter range.
      */
-    [[nodiscard]] std::optional<step_point>
-    find_operational_step_point_via_random_sampling(const std::size_t samples) noexcept
+    [[nodiscard]] std::vector<step_point> generate_random_step_points(const std::size_t samples) noexcept
     {
         static std::mt19937_64 generator{std::random_device{}()};
 
@@ -874,11 +853,34 @@ class operational_domain_impl
         std::uniform_int_distribution<std::size_t> x_distribution{0, x_values.size() - 1};
         std::uniform_int_distribution<std::size_t> y_distribution{0, y_values.size() - 1};
 
+        // container for the random samples
+        std::vector<step_point> step_point_samples{};
+        step_point_samples.reserve(samples);
+
         for (std::size_t i = 0; i < samples; ++i)
         {
             // sample x and y dimension
-            const step_point sample_step_point{x_distribution(generator), y_distribution(generator)};
+            step_point_samples.emplace_back(x_distribution(generator), y_distribution(generator));
+        }
 
+        return step_point_samples;
+    }
+    /**
+     * Performs random sampling to find any operational parameter combination. This function is useful if a single
+     * starting point is required within the domain to expand from. This function returns the step in x and y dimension
+     * of the first operational point found. If no operational parameter combination can be found within the given
+     * number of samples, the function returns `std::nullopt`.
+     *
+     * This function adds any sampled points to the `op_domain` member variables.
+     *
+     * @param samples Maximum number of samples to take. Works as a timeout.
+     * @return The first operational step point, if any could be found, `std::nullopt` otherwise.
+     */
+    [[nodiscard]] std::optional<step_point>
+    find_operational_step_point_via_random_sampling(const std::size_t samples) noexcept
+    {
+        for (const auto& sample_step_point : generate_random_step_points(samples))
+        {
             // determine the operational status
             const auto operational_value = is_operational(sample_step_point);
 
@@ -1239,9 +1241,9 @@ struct tuple_element<I, fiction::operational_domain::parameter_point>
 template <>
 struct hash<fiction::operational_domain::parameter_point>
 {
-    std::size_t operator()(const fiction::operational_domain::parameter_point& p) const noexcept
+    size_t operator()(const fiction::operational_domain::parameter_point& p) const noexcept
     {
-        std::size_t h = 0;
+        size_t h = 0;
         fiction::hash_combine(h, p.x, p.y);
 
         return h;
