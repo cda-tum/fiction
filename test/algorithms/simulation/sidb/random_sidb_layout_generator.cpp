@@ -99,8 +99,8 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate_random_sidb_layou
     SECTION("given corner coordinates and number of placed SiDBs, and forbid positive charges")
     {
         const generate_random_sidb_layout_params<cube_layout> params{{{0, 0, 0}, {90, 90, 0}},
-                                                                100,
-                                                                positive_charges::ALLOWED};
+                                                                     100,
+                                                                     positive_charges::ALLOWED};
 
         const auto result_lyt = generate_random_sidb_layout<cube_layout>(cube_layout{}, params);
 
@@ -116,8 +116,8 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate_random_sidb_layou
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
         const generate_random_sidb_layout_params<cube_layout> params{{{0, 0, 0}, {90, 90, 0}},
-                                                                100,
-                                                                positive_charges::FORBIDDEN};
+                                                                     100,
+                                                                     positive_charges::FORBIDDEN};
 
         const auto result_lyt = generate_random_sidb_layout<cube_layout>(cube_layout{}, params);
 
@@ -257,8 +257,8 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate_random_sidb_la
     SECTION("given corner coordinates and number of placed SiDBs, and forbid positive charges")
     {
         const generate_random_sidb_layout_params<sidb_cell_clk_lyt> params{{{0, 0, 0}, {90, 90, 0}},
-                                                                      100,
-                                                                      positive_charges::ALLOWED};
+                                                                           100,
+                                                                           positive_charges::ALLOWED};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
 
@@ -274,8 +274,8 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate_random_sidb_la
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
         const generate_random_sidb_layout_params<sidb_cell_clk_lyt> params{{{0, 0, 0}, {90, 90, 0}},
-                                                                      100,
-                                                                      positive_charges::FORBIDDEN};
+                                                                           100,
+                                                                           positive_charges::FORBIDDEN};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
 
@@ -348,7 +348,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate_random_sidb_la
     SECTION("Check correct use of skeleton layout when generating only one random layout")
     {
         const generate_random_sidb_layout_params<sidb_cell_clk_lyt> params{{{0, 0}, {9, 9}}, 10};
-        sidb_cell_clk_lyt                                      skeleton_layout{};
+        sidb_cell_clk_lyt                                           skeleton_layout{};
         skeleton_layout.assign_cell_type({0, 0}, sidb_cell_clk_lyt::technology::NORMAL);
         skeleton_layout.assign_cell_type({9, 1}, sidb_cell_clk_lyt::technology::NORMAL);
         skeleton_layout.assign_cell_type({5, 0}, sidb_cell_clk_lyt::technology::NORMAL);
@@ -439,8 +439,8 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate_random_sidb_layo
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
         const generate_random_sidb_layout_params<sidb_cell_clk_lyt> params{{{0, 0, 0}, {90, 90, 0}},
-                                                                      100,
-                                                                      positive_charges::ALLOWED};
+                                                                           100,
+                                                                           positive_charges::ALLOWED};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
 
@@ -456,8 +456,8 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate_random_sidb_layo
     SECTION("given corner coordinates and number of placed SiDBs, and forbid positive charges")
     {
         const generate_random_sidb_layout_params<sidb_cell_clk_lyt> params{{{0, 0, 0}, {90, 90, 0}},
-                                                                      10,
-                                                                      positive_charges::FORBIDDEN};
+                                                                           10,
+                                                                           positive_charges::FORBIDDEN};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
 
