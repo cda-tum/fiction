@@ -81,12 +81,12 @@ int main(int argc, const char* argv[])  // NOLINT
 
                         auto lyt = read_sqd_layout<sidb_cell_clk_lyt_siqad>(benchmark.string());
 
-                        const sidb_simulation_parameters params{2, units::energy::electron_volt_t{mu}};
+                        const sidb_simulation_parameters params{2, mu};
                         const auto                       simulation_results =
                             exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
                         std::stringstream ss;
                         const std::string file_path = fmt::format("{}/loc/{}_sim_µ_minus_{:.3f}.txt",
-                                                                  folder.path().string(), name, -params.mu.value());
+                                                                  folder.path().string(), name, -params.mu_minus);
 
                         // Some layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
                         // physically valid charge distribution is found) because the physical model currently works
