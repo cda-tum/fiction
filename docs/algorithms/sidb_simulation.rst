@@ -96,8 +96,8 @@ Time-to-Solution (TTS) Statistics
 .. doxygenfunction:: fiction::sim_acc_tts
 
 
-Random Layout Generator
-#######################
+Random SiDB Layout Generator
+#############################
 
 **Header:** ``fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp``
 
