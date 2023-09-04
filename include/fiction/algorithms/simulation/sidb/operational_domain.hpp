@@ -347,11 +347,11 @@ class operational_domain_impl
         return op_domain;
     }
     /**
-     * Performs flood fill to determine the operational domain. The algorithm first performs a random sampling of up to
-     * the specified number of samples. It stops random sampling once it finds a single operational point, from which it
-     * starts the flood fill. The operational domain will finally only contain up to `samples` random non-operational
-     * points as well as all operational points that are reachable via flood fill from the first found operational
-     * point plus a one pixel wide border around the domain.
+     * Performs flood fill to determine the operational domain. The algorithm first performs a random sampling of the
+     * specified number of samples. From each operational point found in this way, it starts the flood fill. The
+     * operational domain will finally only contain up to `samples` random non-operational points as well as all
+     * operational points that are reachable via flood fill from the found operational points plus a one pixel wide
+     * border around the domain.
      *
      * @param samples Maximum number of random samples to be taken before flood fill.
      * @return The (partial) operational domain of the layout.
@@ -1140,17 +1140,17 @@ operational_domain operational_domain_random_sampling(const Lyt& lyt, const TT& 
  * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
  * inputs of the truth table. // TODO implement the matching of truth table inputs and BDL pair ordering
  *
- * This algorithm first uses random sampling to find a single operational point within the parameter range. From there,
- * it employs the "flood fill" algorithm to explore the operational domain. If the operational domain is connected, the
- * algorithm is guaranteed to find the entire operational domain within the parameter range if the initial random
- * sampling found an operational point.
+ * This algorithm first uses random sampling to find several operational points within the parameter range. From there,
+ * it employs the "flood fill" algorithm to explore the operational domain. The algorithm is guaranteed to find all
+ * operational areas in their entirety if the initial random sampling found at least one operational point within them.
+ * Thereby, this algorithm works for disconnected operational domains.
  *
- * It performs up to `samples` uniformly-distributed random samples within the parameter range until an operational
- * point is found. From there, it performs another number of samples equal to the number of points within the
- * operational domain plus the first non-operational point in each direction. For each sample, the algorithm performs
- * one operational check on the layout, where each operational check consists of up to \f$ 2^n \f$ exact ground state
- * simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact ground state simulation has
- * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
+ * It performs `samples` uniformly-distributed random samples within the parameter range. From there, it performs
+ * another number of samples equal to the number of points within the operational domain plus the first non-operational
+ * point in each direction. For each sample, the algorithm performs one operational check on the layout, where each
+ * operational check consists of up to \f$ 2^n \f$ exact ground state simulations, where \f$ n \f$ is the number of
+ * inputs of the layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the
+ * algorithm is only feasible for small layouts with few inputs.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
