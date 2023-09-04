@@ -367,8 +367,7 @@ class operational_domain_impl
                       [this](const auto& sp) { is_operational(sp); });
 
         // a queue of (x, y) dimension step points to be evaluated
-        using parameter_queue = std::queue<step_point>;
-        parameter_queue queue{};
+        std::queue<step_point> queue{};
 
         // a utility function that adds the adjacent points to the queue for further evaluation
         const auto queue_next_points = [this, &queue](const step_point& sp)
@@ -407,7 +406,7 @@ class operational_domain_impl
             // check if the point is operational
             const auto operational_status = is_operational(sp);
 
-            // if the point is operational, add its four neighbors to the queue
+            // if the point is operational, add its eight neighbors to the queue
             if (operational_status == operational_domain::operational_status::OPERATIONAL)
             {
                 queue_next_points(sp);
