@@ -205,7 +205,7 @@ class hexagonal_layout
      *
      * @return Deep copy of the layout.
      */
-    virtual hexagonal_layout clone() const noexcept
+    [[nodiscard]] hexagonal_layout clone() const noexcept
     {
         return hexagonal_layout(std::make_shared<hexagonal_layout_storage>(*strg));
     }

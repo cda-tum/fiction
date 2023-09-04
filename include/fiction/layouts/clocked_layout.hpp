@@ -94,13 +94,28 @@ class clocked_layout : public CoordinateLayout
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
     }
     /**
+     * Copy constructor from another `CoordinateLayout`.
+     *
+     * @param lyt Coordinate layout.
+     */
+    explicit clocked_layout(const CoordinateLayout& lyt) :
+            CoordinateLayout(lyt),
+            strg{std::make_shared<clocked_layout_storage>(
+                open_clocking<clocked_layout<CoordinateLayout>>(num_clks::FOUR))}
+    {
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+    }
+    /**
      * Clones the layout returning a deep copy.
      *
      * @return Deep copy of the layout.
      */
-    clocked_layout clone() const noexcept override
+    [[nodiscard]] clocked_layout clone() const noexcept
     {
-        return clocked_layout(std::make_shared<clocked_layout_storage>(*strg));
+       auto copy = clocked_layout(CoordinateLayout::clone());
+       copy.strg = std::make_shared<clocked_layout_storage>(*strg);
+
+       return copy;
     }
 
 #pragma endregion

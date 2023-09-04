@@ -33,12 +33,25 @@ class tile_based_layout : public CoordinateLayout
     explicit tile_based_layout(const typename CoordinateLayout::aspect_ratio& ar = {}) : CoordinateLayout(ar)
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+        static_assert(!is_clocked_layout_v<CoordinateLayout>, "CoordinateLayout cannot be a clocked layout type");
     }
 
     template <typename Storage>
     explicit tile_based_layout(std::shared_ptr<Storage> s) : CoordinateLayout(s)
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+        static_assert(!is_clocked_layout_v<CoordinateLayout>, "CoordinateLayout cannot be a clocked layout type");
+    }
+
+    explicit tile_based_layout(const CoordinateLayout& lyt) : CoordinateLayout(lyt)
+    {
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+        static_assert(!is_clocked_layout_v<CoordinateLayout>, "CoordinateLayout cannot be a clocked layout type");
+    }
+
+    [[nodiscard]] tile_based_layout clone() const noexcept
+    {
+        return tile_based_layout(CoordinateLayout::clone());
     }
 
 #pragma endregion

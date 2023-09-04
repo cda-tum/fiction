@@ -86,7 +86,7 @@ class cartesian_layout
      *
      * @return Deep copy of the layout.
      */
-    virtual cartesian_layout clone() const noexcept
+    [[nodiscard]] cartesian_layout clone() const noexcept
     {
         return cartesian_layout(std::make_shared<cartesian_layout_storage>(*strg));
     }
