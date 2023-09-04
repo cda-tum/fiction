@@ -230,6 +230,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({6, 5}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({7, 5}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({10, 4}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 8}, TestType::cell_type::NORMAL);
 
         // dependent-cell is within the sublayout
         charge_distribution_surface charge_layout{lyt,
@@ -251,7 +252,9 @@ TEMPLATE_TEST_CASE(
         charge_layout_dependent_cell_not_in_sublayout.assign_charge_state({5, 5}, sidb_charge_state::POSITIVE);
         charge_layout_dependent_cell_not_in_sublayout.assign_charge_state({6, 5}, sidb_charge_state::POSITIVE);
         charge_layout_dependent_cell_not_in_sublayout.assign_charge_state({7, 5}, sidb_charge_state::POSITIVE);
+        charge_layout_dependent_cell_not_in_sublayout.assign_charge_state({10, 8}, sidb_charge_state::NEUTRAL);
         charge_layout_dependent_cell_not_in_sublayout.charge_distribution_to_index();
+        CHECK(charge_layout_dependent_cell_not_in_sublayout.get_charge_index_and_base().first == 8);
         CHECK(charge_layout_dependent_cell_not_in_sublayout.get_charge_index_of_sub_layout() == 26);
     }
 
