@@ -360,14 +360,11 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        // first, perform random sampling to find an operational starting point
-        const auto starting_point = find_operational_step_point_via_random_sampling(samples);
+        const auto step_point_samples = generate_random_step_points(samples);
 
-        // if no operational point was found within the specified number of samples, return
-        if (!starting_point.has_value())
-        {
-            return op_domain;
-        }
+        // for each sample point in parallel
+        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ step_point_samples.cbegin(), step_point_samples.cend(),
+                      [this](const auto& sp) { is_operational(sp); });
 
         // a queue of (x, y) dimension step points to be evaluated
         using parameter_queue = std::queue<step_point>;
@@ -385,8 +382,14 @@ class operational_domain_impl
             }
         };
 
-        // add the neighbors of the starting point to the queue
-        queue_next_points(*starting_point);
+        // add the neighbors of each operational point to the queue
+        for (const auto& [param_point, status] : op_domain.operational_values)
+        {
+            if (status == operational_domain::operational_status::OPERATIONAL)
+            {
+                queue_next_points(to_step_point(param_point));
+            }
+        }
 
         // for each point in the queue
         while (!queue.empty())
@@ -537,14 +540,6 @@ class operational_domain_impl
      */
     std::atomic<std::size_t> num_evaluated_parameter_combinations{0};
     /**
-     * Number of parameter combinations, for which the layout is operational.
-     */
-    std::atomic<std::size_t> num_operational_parameter_combinations{0};
-    /**
-     * Number of parameter combinations, for which the layout is non-operational.
-     */
-    std::atomic<std::size_t> num_non_operational_parameter_combinations{0};
-    /**
      * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
      * not hold the actual parameter values, but the step values in the x and y dimension, respectively.
      *
@@ -601,6 +596,17 @@ class operational_domain_impl
     [[nodiscard]] operational_domain::parameter_point to_parameter_point(const step_point& sp) const noexcept
     {
         return {x_values[sp.x], y_values[sp.y]};
+    }
+    /**
+     * Converts a parameter point to a step point.
+     *
+     * @param pp Parameter point to convert.
+     * @return The step point corresponding to the parameter point `pp`.
+     */
+    [[nodiscard]] step_point to_step_point(const operational_domain::parameter_point& pp) const noexcept
+    {
+        return {static_cast<std::size_t>((pp.x - params.x_min) / params.x_step),
+                static_cast<std::size_t>((pp.y - params.y_min) / params.y_step)};
     }
     /**
      * Calculates the number of steps in the x dimension based on the provided parameters.
@@ -735,8 +741,6 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]()
         {
-            ++num_operational_parameter_combinations;
-
             op_domain.operational_values[param_point] = operational_domain::operational_status::OPERATIONAL;
 
             return operational_domain::operational_status::OPERATIONAL;
@@ -744,8 +748,6 @@ class operational_domain_impl
 
         const auto non_operational = [this, &param_point]()
         {
-            ++num_non_operational_parameter_combinations;
-
             op_domain.operational_values[param_point] = operational_domain::operational_status::NON_OPERATIONAL;
 
             return operational_domain::operational_status::NON_OPERATIONAL;
@@ -850,8 +852,8 @@ class operational_domain_impl
         static std::mt19937_64 generator{std::random_device{}()};
 
         // instantiate distributions
-        std::uniform_int_distribution<std::size_t> x_distribution{0, x_values.size() - 1};
-        std::uniform_int_distribution<std::size_t> y_distribution{0, y_values.size() - 1};
+        std::uniform_int_distribution<std::size_t> x_distribution{0, x_indices.size() - 1};
+        std::uniform_int_distribution<std::size_t> y_distribution{0, y_indices.size() - 1};
 
         // container for the random samples
         std::vector<step_point> step_point_samples{};
@@ -945,9 +947,9 @@ class operational_domain_impl
         const auto& [x, y] = sp;
 
         auto decr_x = (x > 0) ? x - 1 : x;
-        auto incr_x = (x + 1 < x_values.size()) ? x + 1 : x;
+        auto incr_x = (x + 1 < x_indices.size()) ? x + 1 : x;
         auto decr_y = (y > 0) ? y - 1 : y;
-        auto incr_y = (y + 1 < x_values.size()) ? y + 1 : y;
+        auto incr_y = (y + 1 < x_indices.size()) ? y + 1 : y;
 
         // add neighbors in clockwise direction
 
@@ -1001,10 +1003,20 @@ class operational_domain_impl
      */
     void log_stats() const noexcept
     {
-        stats.num_simulator_invocations                  = num_simulator_invocations;
-        stats.num_evaluated_parameter_combinations       = num_evaluated_parameter_combinations;
-        stats.num_operational_parameter_combinations     = num_operational_parameter_combinations;
-        stats.num_non_operational_parameter_combinations = num_non_operational_parameter_combinations;
+        stats.num_simulator_invocations            = num_simulator_invocations;
+        stats.num_evaluated_parameter_combinations = num_evaluated_parameter_combinations;
+
+        for (const auto& [param_point, status] : op_domain.operational_values)
+        {
+            if (status == operational_domain::operational_status::OPERATIONAL)
+            {
+                ++stats.num_operational_parameter_combinations;
+            }
+            else
+            {
+                ++stats.num_non_operational_parameter_combinations;
+            }
+        }
     }
 
     [[nodiscard]] bool can_positive_charges_occur(const Lyt&                        lyt,

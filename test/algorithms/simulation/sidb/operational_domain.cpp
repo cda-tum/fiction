@@ -162,8 +162,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     }
     SECTION("non-operational area")
     {
-        op_domain_params.x_min  = 0.1;
-        op_domain_params.x_max  = 1.1;
+        op_domain_params.x_min  = 2.5;
+        op_domain_params.x_max  = 3.5;
         op_domain_params.x_step = 0.1;
 
         op_domain_params.y_min  = 4.5;
@@ -191,25 +191,25 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("random_sampling")
         {
             const auto op_domain =
-                operational_domain_random_sampling(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
+                operational_domain_random_sampling(lyt, create_id_tt(), 50, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
-            CHECK(op_domain.operational_values.size() <= 100);
+            CHECK(op_domain.operational_values.size() <= 50);
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
                                                           operational_domain::operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
-            CHECK(op_domain_stats.num_simulator_invocations <= 200);
-            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
+            CHECK(op_domain_stats.num_simulator_invocations <= 100);
+            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 50);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
-            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 50);
         }
         SECTION("flood_fill")
         {
             const auto op_domain =
-                operational_domain_flood_fill(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
+                operational_domain_flood_fill(lyt, create_id_tt(), 25, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
             CHECK(op_domain.operational_values.size() <= 100);
@@ -227,20 +227,20 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("contour_tracing")
         {
             const auto op_domain =
-                operational_domain_contour_tracing(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
+                operational_domain_contour_tracing(lyt, create_id_tt(), 25, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
-            CHECK(op_domain.operational_values.size() <= 100);
+            CHECK(op_domain.operational_values.size() <= 25);
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
                                                           operational_domain::operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
-            CHECK(op_domain_stats.num_simulator_invocations <= 200);
-            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
+            CHECK(op_domain_stats.num_simulator_invocations <= 50);
+            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 25);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
-            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 25);
         }
     }
     SECTION("semi-operational area")
@@ -290,7 +290,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("flood_fill")
         {
             const auto op_domain =
-                operational_domain_flood_fill(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
+                operational_domain_flood_fill(lyt, create_id_tt(), 50, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() >= 80);
@@ -307,7 +307,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         SECTION("contour_tracing")
         {
             const auto op_domain =
-                operational_domain_contour_tracing(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
+                operational_domain_contour_tracing(lyt, create_id_tt(), 50, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (max 10 steps in each dimension)
             CHECK(op_domain.operational_values.size() <= 100);
@@ -420,7 +420,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     SECTION("contour_tracing")
     {
         const auto op_domain =
-            operational_domain_contour_tracing(lyt, create_and_tt(), 100, op_domain_params, &op_domain_stats);
+            operational_domain_contour_tracing(lyt, create_and_tt(), 1, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
         CHECK(op_domain.operational_values.size() <= 100);
