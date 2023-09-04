@@ -124,23 +124,6 @@ Array Utils
 .. doxygenfunction:: fiction::convert_array
 .. doxygenfunction:: fiction::convert_array_of_arrays
 
-Unit Utils
------------
-
-**Header:** ``fiction/utils/unit_utils.hpp``
-
-.. doxygentypedef:: coulomb_constant_unit
-.. doxygenvariable:: POP_STABILITY_ERR
-
-There are several suffix operators exposed in this file for convenient use of units, namely
-* ``_angstrom``
-* ``_eV``
-* ``_K``
-* ``_nm``
-* ``_s``
-* ``_V``
-
-This enables the use of units as follows: e.g., ``40_K``, ``40.1_nm``.
 
 STL Extensions
 --------------

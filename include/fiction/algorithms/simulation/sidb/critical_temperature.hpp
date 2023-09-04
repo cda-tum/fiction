@@ -19,12 +19,10 @@
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/math_utils.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
-#include "fiction/utils/units_utils.hpp"
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
 #include <kitty/dynamic_truth_table.hpp>
-#include <units.h>
 
 #include <algorithm>
 #include <cassert>
@@ -97,9 +95,9 @@ struct critical_temperature_params
      */
     double confidence_level{0.99};
     /**
-     * Simulation stops at max_temperature (~ 126 °C by default).
+     * Simulation stops at max_temperature (~ 126 °C by default) (unit: K).
      */
-    units::temperature::kelvin_t max_temperature{400_K};
+    double max_temperature{400};
     /**
      * Truth table of the given gate (if layout is simulated in `gate-based` mode).
      */
@@ -123,18 +121,17 @@ struct critical_temperature_stats
      */
     std::string algorithm_name{};
     /**
-     * Critical Temperature of the given layout.
+     * Critical Temperature of the given layout (unit: K).
      */
-    units::temperature::kelvin_t critical_temperature{0_K};
+    double critical_temperature{0};
     /**
      * Number of physically valid charge configurations.
      */
     uint64_t num_valid_lyt{};
     /**
-     * Energy difference between the ground state and the first (erroneous) excited state.
+     * Energy difference between the ground state and the first (erroneous) excited state (unit: eV).
      */
-    units::energy::electron_volt_t energy_between_ground_state_and_first_erroneous =
-        units::energy::electron_volt_t(std::numeric_limits<double>::infinity());
+    double energy_between_ground_state_and_first_erroneous = std::numeric_limits<double>::infinity();
     /**
      * Prints the simulation results to the given output stream.
      *
@@ -142,13 +139,13 @@ struct critical_temperature_stats
      */
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("Critical Temperature  = {:.2f} K\n", critical_temperature.value());
+        out << fmt::format("Critical Temperature  = {:.2f} K\n", critical_temperature);
 
         if (num_valid_lyt != 0)
         {
             out << fmt::format("'# of physically valid charge configurations': {} | Energy between ground state and "
                                "first erroneous: {}\n",
-                               num_valid_lyt, energy_between_ground_state_and_first_erroneous.value());
+                               num_valid_lyt, energy_between_ground_state_and_first_erroneous);
         }
         else
         {
@@ -287,8 +284,8 @@ class critical_temperature_impl
 
             else
             {
-                temperature_stats.critical_temperature = 0.0_K;  // If no ground state fulfills the logic, the Critical
-                                                                 // Temperature is zero. May be worth it to change µ_.
+                temperature_stats.critical_temperature = 0.0;  // If no ground state fulfills the logic, the Critical
+                                                               // Temperature is zero. May be worth it to change µ_.
             }
         }
 
@@ -329,10 +326,10 @@ class critical_temperature_impl
                 (first_excited_state_energy - ground_state_energy) * 1000;
         }
 
-        std::vector<units::temperature::kelvin_t> temp_values{};
-        temp_values.reserve(static_cast<uint64_t>(parameter.max_temperature.value() * 100));
+        std::vector<double> temp_values{};  // unit: K
+        temp_values.reserve(static_cast<uint64_t>(parameter.max_temperature * 100));
 
-        for (uint64_t i = 1; i <= static_cast<uint64_t>(parameter.max_temperature.value() * 100); i++)
+        for (uint64_t i = 1; i <= static_cast<uint64_t>(parameter.max_temperature * 100); i++)
         {
             temp_values.emplace_back(static_cast<double>(i) / 100.0);
         }
@@ -349,7 +346,7 @@ class critical_temperature_impl
                 break;
             }
 
-            if (units::math::abs(temp - parameter.max_temperature) < 0.001_K)
+            if (std::abs(temp - parameter.max_temperature) < 0.001)
             {
                 // Maximal temperature is stored as the Critical Temperature.
                 temperature_stats.critical_temperature = parameter.max_temperature;
@@ -366,11 +363,11 @@ class critical_temperature_impl
      *
      * @param energy_and_state_type All energies of all physically valid charge distributions with the corresponding
      * state type (i.e. transparent, erroneous).
-     * @param min_energy Minimal energy of all physically valid charge distributions of a given layout.
+     * @param min_energy Minimal energy of all physically valid charge distributions of a given layout (unit: eV).
      * @return State type (i.e. transparent, erroneous) of the ground state is returned.
      */
-    bool energy_between_ground_state_and_first_erroneous(const sidb_energy_and_state_type&    energy_and_state_type,
-                                                         const units::energy::electron_volt_t min_energy)
+    bool energy_between_ground_state_and_first_erroneous(const sidb_energy_and_state_type& energy_and_state_type,
+                                                         const double                      min_energy)
     {
         bool ground_state_is_transparent = false;
         for (const auto& [energy, state_type] : energy_and_state_type)
@@ -401,10 +398,10 @@ class critical_temperature_impl
     void determine_critical_temperature(const sidb_energy_and_state_type& energy_state_type)
     {
         // Vector with temperature values from 0.01 to max_temperature * 100 K in 0.01 K steps is generated.
-        std::vector<units::temperature::kelvin_t> temp_values{};
-        temp_values.reserve(static_cast<uint64_t>(parameter.max_temperature.value() * 100));
+        std::vector<double> temp_values{};
+        temp_values.reserve(static_cast<uint64_t>(parameter.max_temperature * 100));
 
-        for (uint64_t i = 1; i <= static_cast<uint64_t>(parameter.max_temperature.value() * 100); i++)
+        for (uint64_t i = 1; i <= static_cast<uint64_t>(parameter.max_temperature * 100); i++)
         {
             temp_values.emplace_back(static_cast<double>(i) / 100.0);
         }
@@ -420,7 +417,7 @@ class critical_temperature_impl
                 break;
             }
 
-            if (units::math::abs(temp - parameter.max_temperature) < 0.001_K)
+            if (std::abs(temp - parameter.max_temperature) < 0.001)
             {
                 // Maximal temperature is stored as Critical Temperature.
                 temperature_stats.critical_temperature = parameter.max_temperature;

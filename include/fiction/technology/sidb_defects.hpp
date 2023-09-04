@@ -5,6 +5,8 @@
 #ifndef FICTION_SIDB_DEFECTS_HPP
 #define FICTION_SIDB_DEFECTS_HPP
 
+#include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <utility>
 
@@ -47,30 +49,49 @@ struct sidb_defect
     /**
      * Standard constructor.
      */
-    constexpr explicit sidb_defect(const sidb_defect_type defect_type = sidb_defect_type::UNKNOWN,
-                                   const double electric_charge = 0.0, const double relative_permittivity = 0.0,
-                                   const double screening_distance = 0.0) noexcept :
+    explicit sidb_defect(const sidb_defect_type defect_type = sidb_defect_type::UNKNOWN,
+                         const int64_t electric_charge = 0.0, const double relative_permittivity = 0.0,
+                         const double screening_distance = 0.0) noexcept :
             type{defect_type},
             charge{electric_charge},
             epsilon_r{relative_permittivity},
             lambda_tf{screening_distance}
-    {}
-    /**
+    {
+        assert((epsilon_r >= 0) && "epsilon_r has to be >= 0.0");
+        assert((lambda_tf >= 0.0) && "lambda_tf has to be >= 0.0 nanometer");
+    }
+    /**s
      * Type of defect.
      */
     const sidb_defect_type type;
     /**
-     * Electrical charge.
+     * Electrical charge in units of the elementary charge e (e.g., 1 ^= 1*e, -2 ^= -2*e).
      */
-    const double charge;
+    const int64_t charge;
     /**
-     * Electric permittivity.
+     * Electric permittivity (unitless).
      */
     const double epsilon_r;
     /**
      * Thomas-Fermi screening distance in nm.
      */
     const double lambda_tf;
+    /**
+     * This operator compares two sidb_defect instances for equality. It checks if the type, charge,
+     * epsilon_r, and lambda_tf members of the two instances are equal.
+     */
+    constexpr bool operator==(const sidb_defect& rhs) const noexcept
+    {
+        return type == rhs.type && charge == rhs.charge && epsilon_r == rhs.epsilon_r && lambda_tf == rhs.lambda_tf;
+    }
+    /**
+     * This operator compares two sidb_defect instances for inequality. It uses the operator== to check
+     * if the two instances are equal and returns the negation of the result.
+     */
+    constexpr bool operator!=(const sidb_defect& rhs) const noexcept
+    {
+        return !(*this == rhs);
+    }
 };
 /**
  * Checks whether the given defect is charged. Charged defects are to be avoided by a larger distance.
@@ -81,6 +102,36 @@ struct sidb_defect
 [[nodiscard]] static constexpr bool is_charged_defect(const sidb_defect& defect) noexcept
 {
     return defect.type == sidb_defect_type::DB || defect.type == sidb_defect_type::SI_VACANCY;
+}
+/**
+ * Checks whether the given defect is positively charged.
+ *
+ * @param defect Defect to check.
+ * @return `true` iff defect is positively charged.
+ */
+[[nodiscard]] static constexpr bool is_positively_charged_defect(const sidb_defect& defect) noexcept
+{
+    return defect.charge > 0;
+}
+/**
+ * Checks whether the given defect is negatively charged.
+ *
+ * @param defect Defect to check.
+ * @return `true` iff defect is negatively charged.
+ */
+[[nodiscard]] static constexpr bool is_negatively_charged_defect(const sidb_defect& defect) noexcept
+{
+    return defect.charge < 0;
+}
+/**
+ * Checks whether the given defect is neutrally charged.
+ *
+ * @param defect Defect to check.
+ * @return `true` iff defect is neutrally charged.
+ */
+[[nodiscard]] static constexpr bool is_neutrally_charged_defect(const sidb_defect& defect) noexcept
+{
+    return defect.charge == 0;
 }
 /**
  * Checks whether the given defect is not charged. Neutral defects are to be avoided but not by such a large distance.
