@@ -19,10 +19,10 @@
 using namespace fiction;
 
 /**
- * This program generates random layouts and saves them as .sqd files (provide SiQAD compatibility) in specified folder.
- * It allows configuring various layout parameters through command-line arguments, including the folder name, layout
- * dimensions, allowed charges (2- or 3-states), number of layouts for each SiDB count, and step size for SiDB count
- * increments.
+ * This program generates random SiDB layouts and saves them as .sqd files (provide SiQAD compatibility) in a specified
+ * folder. It allows configuring various layout parameters through command-line arguments, including the folder name,
+ * layout dimensions, allowed charges (2- or 3-states), number of layouts for each SiDB count, and step size for SiDB
+ * count increments.
  *
  * @param argc The number of command-line arguments.
  * @param argv An array of C-style strings containing the command-line arguments.
