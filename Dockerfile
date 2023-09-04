@@ -11,7 +11,7 @@ RUN apt-get -y update && apt-get -y upgrade && apt-get -y install \
 RUN pip3 install z3-solver==4.10.0
 
 # Clone fiction's repository including submodules
-RUN git clone --recursive https://github.com/marcelwa/fiction.git
+RUN git clone --recursive https://github.com/cda-tum/fiction.git
 
 # Build fiction
 RUN cmake -S fiction -B fiction/build \

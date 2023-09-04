@@ -19,8 +19,8 @@ namespace fiction
 {
 
 /**
- *  Data type to collect electrostatic potential energies of charge distributions with corresponding state types (i.e.,
- * true = transparent, false = erroneous).
+ *  Data type to collect electrostatic potential energies (in eV) of charge distributions with corresponding state types
+ * (i.e., true = transparent, false = erroneous).
  */
 using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
 

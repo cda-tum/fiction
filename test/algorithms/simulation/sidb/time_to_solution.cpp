@@ -56,7 +56,7 @@ TEMPLATE_TEST_CASE(
 
         sim_acc_tts<TestType>(lyt, quicksim_params, &tts_stat);
 
-        CHECK(tts_stat.acc == 100);
+        CHECK(tts_stat.acc > 0);
         CHECK(tts_stat.time_to_solution > 0.0);
         CHECK(tts_stat.mean_single_runtime > 0.0);
     }

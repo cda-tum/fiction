@@ -269,14 +269,23 @@ class read_sqd_layout_impl
         {
             std::vector<cell<Lyt>> incl_cells{};
             sidb_defect_type       defect_type{sidb_defect_type::UNKNOWN};
-            double                 charge{0.0}, eps_r{0.0}, lambda_tf{0.0};
+            int64_t                charge{0};
+            double                 eps_r{0.0};
+            double                 lambda_tf{0.0};
 
             if (const auto* const incl_coords = defect->FirstChildElement("incl_coords"); incl_coords != nullptr)
             {
                 for (const auto* latcoord = incl_coords->FirstChildElement("latcoord"); latcoord != nullptr;
                      latcoord             = latcoord->NextSiblingElement("latcoord"))
                 {
-                    incl_cells.push_back(parse_latcoord(latcoord));
+                    if constexpr (has_siqad_coord_v<Lyt>)
+                    {
+                        incl_cells.push_back(parse_latcoord_siqad(latcoord));
+                    }
+                    else
+                    {
+                        incl_cells.push_back(parse_latcoord(latcoord));
+                    }
                 }
                 if (incl_cells.empty())
                 {
@@ -308,7 +317,7 @@ class read_sqd_layout_impl
                         "Error parsing SQD file: no attribute 'charge', 'eps_r', or 'lambda_tf' in element 'coulomb'");
                 }
 
-                charge    = std::stod(charge_string);
+                charge    = std::stoll(charge_string);
                 eps_r     = std::stod(eps_r_string);
                 lambda_tf = std::stod(lambda_tf_string);
             }

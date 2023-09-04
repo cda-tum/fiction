@@ -15,7 +15,7 @@ namespace fiction
 {
 
 /**
- * Computes the position of a cell in nanometers from the layout origin.
+ * Computes the position of a cell in nanometers from the layout origin (unit: nm).
  *
  * @tparam Lyt The layout type.
  * @param sp The simulation parameters (required for the lattice constants).
@@ -27,12 +27,11 @@ constexpr std::pair<double, double> sidb_nm_position(const sidb_simulation_param
 {
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
-    const auto x = static_cast<double>(c.x * sp.lat_a * 0.1);
-    const auto y = static_cast<double>(c.y * sp.lat_b * 0.1 + c.z * sp.lat_c * 0.1);
+    const auto x = (c.x * sp.lat_a) * 0.1;
+    const auto y = (c.y * sp.lat_b + c.z * sp.lat_c) * .1;
 
     return std::make_pair(x, y);
 }
-
 }  // namespace fiction
 
 #endif  // FICTION_NM_POSITION_HPP

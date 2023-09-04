@@ -83,6 +83,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
+          -DFICTION_BENCHMARK=ON
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_Z3=ON
           -DMOCKTURTLE_EXAMPLES=OFF

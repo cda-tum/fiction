@@ -10,6 +10,7 @@
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/math_utils.hpp"
 
 #include <cmath>
 
@@ -41,7 +42,7 @@ template <typename Lyt>
     const auto min_energy_exact  = minimum_energy(exhaustive_results.charge_distributions);
     const auto min_energy_new_ap = minimum_energy(quicksim_results.charge_distributions);
 
-    return std::abs(min_energy_exact - min_energy_new_ap) / min_energy_exact < physical_constants::POP_STABILITY_ERR;
+    return round_to_n_decimal_places(std::abs(min_energy_exact - min_energy_new_ap), 6) == 0;
 }
 
 }  // namespace fiction

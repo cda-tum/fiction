@@ -34,7 +34,7 @@ struct time_to_solution_stats
     /**
      * Time-to-solution in seconds.
      */
-    double time_to_solution{};
+    double time_to_solution{0};
     /**
      * Accuracy of the simulation.
      */
@@ -45,7 +45,7 @@ struct time_to_solution_stats
     double mean_single_runtime{};
 
     /**
-     * Single simulation runtime of the exhaustive ground state searcher.
+     * Single simulation runtime of the exhaustive ground state searcher in seconds.
      */
     double single_runtime_exhaustive{};
 

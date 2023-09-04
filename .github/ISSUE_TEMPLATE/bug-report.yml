@@ -11,9 +11,9 @@ body:
         **Thank you for wanting to report a bug for this project!**
 
         ⚠
-        Verify first that your issue is not [already reported on GitHub](https://github.com/marcelwa/fiction/search?q=is%3Aissue&type=issues).
+        Verify first that your issue is not [already reported on GitHub](https://github.com/cda-tum/fiction/search?q=is%3Aissue&type=issues).
 
-        If you are having general questions, please consider [starting a discussion](https://github.com/marcelwa/fiction/discussions).
+        If you are having general questions, please consider [starting a discussion](https://github.com/cda-tum/fiction/discussions).
   - type: markdown
     attributes:
       value: >-
