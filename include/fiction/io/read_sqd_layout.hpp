@@ -295,14 +295,7 @@ class read_sqd_layout_impl
                 for (const auto* latcoord = incl_coords->FirstChildElement("latcoord"); latcoord != nullptr;
                      latcoord             = latcoord->NextSiblingElement("latcoord"))
                 {
-                    if constexpr (has_siqad_coord_v<Lyt>)
-                    {
-                        incl_cells.push_back(parse_latcoord_siqad(latcoord));
-                    }
-                    else
-                    {
-                        incl_cells.push_back(parse_latcoord(latcoord));
-                    }
+                    incl_cells.push_back(parse_latcoord(latcoord));
                 }
                 if (incl_cells.empty())
                 {
