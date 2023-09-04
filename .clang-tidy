@@ -23,6 +23,7 @@ Checks: |
   misc-*,
   -misc-no-recursion,
   -misc-non-private-member-variables-in-classes,
+  -misc-use-anonymous-namespace,
   modernize-*,
   -modernize-use-trailing-return-type,
   performance-*,
@@ -36,6 +37,8 @@ Checks: |
   -readability-uppercase-literal-suffix
 
 CheckOptions:
+  - key: cppcoreguidelines-avoid-do-while.IgnoreMacros
+    value: "true"
   - key: readability-identifier-naming.NamespaceCase
     value: lower_case
   - key: readability-identifier-naming.ClassCase
