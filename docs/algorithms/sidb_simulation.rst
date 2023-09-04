@@ -99,7 +99,7 @@ Time-to-Solution (TTS) Statistics
 Random Layout Generator
 #######################
 
-**Header:** ``fiction/algorithms/simulation/sidb/random_layout_generator.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp``
 
 .. doxygenenum:: fiction::positive_charges
 .. doxygenstruct:: fiction::generate_random_sidb_layout_params
