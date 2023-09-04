@@ -62,15 +62,17 @@ int main(int argc, const char* argv[])  // NOLINT
                                                          {"--num_layouts", "10"},
                                                          {"--step", "1"}};
 
+    std::vector<std::string> arguments(argv + 1, argv + argc);  // Convert argv to a vector of strings
+
     // Parse command-line arguments
-    for (auto i = 1u; i < argc; ++i)
+    for (size_t i = 0; i < arguments.size(); ++i)
     {
-        const std::string arg = argv[i];
+        const std::string& arg = arguments[i];
         if (options.count(arg) > 0)
         {
-            if (i + 1 < argc)
+            if (i + 1 < arguments.size())
             {
-                options[arg] = argv[i + 1];
+                options[arg] = arguments[i + 1];
                 ++i;  // Skip the next argument
             }
             else
@@ -162,7 +164,8 @@ int main(int argc, const char* argv[])  // NOLINT
                 }
 
                 const generate_random_sidb_layout_params<cell_level_layout> params{
-                    {{nw_x, nw_y}, {se_x, se_y}}, place_sidbs, charges, 2, uint64_t(10E6), number_of_layouts};
+                    {{nw_x, nw_y}, {se_x, se_y}}, place_sidbs,      charges, 2,
+                    static_cast<uint64_t>(10E6),  number_of_layouts};
                 const auto unique_lyts =
                     generate_multiple_random_sidb_layouts<cell_level_layout>(cell_level_layout{}, params);
                 for (auto i = 0u; i < unique_lyts.size(); i++)

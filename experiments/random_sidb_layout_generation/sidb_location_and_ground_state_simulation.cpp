@@ -12,7 +12,6 @@
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 
@@ -34,7 +33,7 @@ using namespace fiction;
  *
  * Example Usage:
  *   To simulate layouts from the "layout_random_cli/" folder with a µ (mu) value of -0.32:
- *   ./sidb_location_and_ground_state --folder_name layout_random_cli/ --mu_minus -0.32
+ *   ./sidb_location_and_ground_state_state_simulation --folder_name layout_random_cli/ --mu_minus -0.32
  */
 int main(int argc, const char* argv[])  // NOLINT
 {
@@ -42,15 +41,17 @@ int main(int argc, const char* argv[])  // NOLINT
     std::unordered_map<std::string, std::string> options{{"--folder_name", "layout_random_cli/"},
                                                          {"--mu_minus", "-0.32"}};
 
+    std::vector<std::string> arguments(argv + 1, argv + argc);  // Convert argv to a vector of strings
+
     // Parse command-line arguments
-    for (auto i = 1u; i < argc; ++i)
+    for (size_t i = 0; i < arguments.size(); ++i)
     {
-        const std::string arg = argv[i];
+        const std::string& arg = arguments[i];
         if (options.count(arg) > 0)
         {
-            if (i + 1 < argc)
+            if (i + 1 < arguments.size())
             {
-                options[arg] = argv[i + 1];
+                options[arg] = arguments[i + 1];
                 ++i;  // Skip the next argument
             }
             else
@@ -100,13 +101,12 @@ int main(int argc, const char* argv[])  // NOLINT
                         const sidb_simulation_parameters params{2, mu};
                         const auto                       simulation_results =
                             exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
-                        std::stringstream ss;
                         const std::string file_path = fmt::format("{}/loc/{}_sim_µ_minus_{:.3f}.txt",
                                                                   folder.path().string(), name, -params.mu_minus);
 
                         // Some layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
                         // physically valid charge distribution is found) because the physical model currently works
-                        // reliably for layouts with neutrally and negatively charged SiDBs.
+                        // reliably only for layouts with neutrally and negatively charged SiDBs.
                         if (!simulation_results.charge_distributions.empty())
                         {
                             write_location_and_ground_state(simulation_results, file_path);
