@@ -1372,8 +1372,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     {
                         counter -= 1;
                         const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                        // The charge state is only changed (i.e. the function assign_charge_state_by_cell_index is c
-                        // lled), if the nw charge state differs to the previous one. Only then will the cell be added
+                        // The charge state is only changed (i.e., the function assign_charge_state_by_cell_index is
+                        // called), if the nw charge state differs to the previous one. Only then will the cell be added
                         // to the charge_distribution_history.
                         if (const auto old_chargesign = this->get_charge_state_by_index(counter);
                             old_chargesign != sign)
@@ -1425,14 +1425,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return strg->max_charge_index;
     }
     /**
-     * This function assigns a given charge index to the charge distribution layout. Charge distribution is updated
+     * Assigns a given charge index to the charge distribution layout. Charge distribution is updated
      * according to the set charge index.
      *
      * @param charge_index charge index of the new charge distribution.
      */
     void assign_charge_index(const uint64_t charge_index) noexcept
     {
-        assert((charge_index <= strg->max_charge_index) && "number of SiDBs is too large");
+        assert((charge_index <= strg->max_charge_index) && "charge index is to large");
         strg->charge_index_and_base.first = charge_index;
         this->index_to_charge_distribution();
     }
@@ -1560,7 +1560,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         for (const auto& cell : strg->sidb_order)
         {
             if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), cell) ==
-                strg->three_state_cells.end())
+                    strg->three_state_cells.end() &&
+                cell != strg->dependent_cell)
             {
                 strg->sidb_order_without_three_state_cells.push_back(cell);
             }
@@ -2001,9 +2002,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->validity_check();
     };
 
-    // This function is used when three state simulations are required (i.e., is_three_state_simulation_required = true)
-    // to set the base number to three. However, it is distinguished between the cells that can be positively charged
-    // and// the ones that cannot.
+    /**
+     * This function is used when three state simulations are required (i.e., is_three_state_simulation_required = true)
+     * to set the base number to three. However, it is distinguished between the cells that can be positively charged an
+     * the ones that cannot.
+     *
+     * @note is_three_state_simulation_required() has to be executed first.
+     *
+     */
     void assign_base_number_to_three() noexcept
     {
         strg->phys_params.base             = 3;
@@ -2028,15 +2034,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         static_cast<uint64_t>(std::pow(3, strg->three_state_cells.size()) - 1);
                 }
             }
-            else
-            {
-                strg->max_charge_index = static_cast<uint64_t>(std::pow(3, this->num_cells() - 1) - 1);
-            }
         }
         else
         {
             strg->max_charge_index          = static_cast<uint64_t>(std::pow(3, this->num_cells()) - 1);
             strg->max_charge_index_sulayout = static_cast<uint64_t>(std::pow(3, strg->three_state_cells.size()) - 1);
+        }
+        if (strg->max_charge_index == 0)
+        {
+            this->assign_charge_index(0);
         }
     }
 
