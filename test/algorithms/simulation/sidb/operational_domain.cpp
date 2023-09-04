@@ -24,6 +24,27 @@ TEST_CASE("Structured binding support for parameter_points", "[operational-domai
     CHECK(y == 2.0);
 }
 
+void check_op_domain_params_and_operational_status(
+    const operational_domain& op_domain, const operational_domain_params& params,
+    const std::optional<operational_domain::operational_status>& status) noexcept
+{
+    CHECK(op_domain.x_dimension == params.x_dimension);
+    CHECK(op_domain.y_dimension == params.y_dimension);
+
+    for (const auto& [coord, op_value] : op_domain.operational_values)
+    {
+        CHECK(coord.x >= params.x_min);
+        CHECK(coord.x <= params.x_max);
+        CHECK(coord.y >= params.y_min);
+        CHECK(coord.y <= params.y_max);
+
+        if (status)
+        {
+            CHECK(op_value == *status);
+        }
+    }
+}
+
 TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
@@ -51,39 +72,31 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     operational_domain_params op_domain_params{};
     op_domain_params.sim_params  = sim_params;
     op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min       = 5.1;
-    op_domain_params.x_max       = 6.1;
-    op_domain_params.x_step      = 0.1;
     op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min       = 4.5;
-    op_domain_params.y_max       = 5.5;
-    op_domain_params.y_step      = 0.1;
 
     operational_domain_stats op_domain_stats{};
 
     SECTION("operational area")
     {
+        op_domain_params.x_min  = 5.1;
+        op_domain_params.x_max  = 6.1;
+        op_domain_params.x_step = 0.1;
+
+        op_domain_params.y_min  = 4.5;
+        op_domain_params.y_max  = 5.5;
+        op_domain_params.y_step = 0.1;
+
         SECTION("grid_search")
         {
             const auto op_domain =
                 operational_domain_grid_search(lyt, create_id_tt(), op_domain_params, &op_domain_stats);
 
-            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
             // check if the operational domain has the correct size (10 steps in each dimension)
             CHECK(op_domain.operational_values.size() == 100);
 
             // for the selected range, all samples should be within the parameters and operational
-            for (const auto& [coord, op_value] : op_domain.operational_values)
-            {
-                CHECK(coord.x >= 5.1);
-                CHECK(coord.x <= 6.1);
-                CHECK(coord.y >= 4.5);
-                CHECK(coord.y <= 5.5);
-
-                CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
-            }
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
+                                                          operational_domain::operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations == 200);
@@ -96,22 +109,12 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain =
                 operational_domain_random_sampling(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
 
-            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
             // check if the operational domain has the correct size (max 10 steps in each dimension)
             CHECK(op_domain.operational_values.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and operational
-            for (const auto& [coord, op_value] : op_domain.operational_values)
-            {
-                CHECK(coord.x >= 5.1);
-                CHECK(coord.x <= 6.1);
-                CHECK(coord.y >= 4.5);
-                CHECK(coord.y <= 5.5);
-
-                CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
-            }
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
+                                                          operational_domain::operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -125,22 +128,12 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain =
                 operational_domain_flood_fill(lyt, create_id_tt(), 1, op_domain_params, &op_domain_stats);
 
-            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
             // check if the operational domain has the correct size (max 10 steps in each dimension)
             CHECK(op_domain.operational_values.size() == 100);
 
             // for the selected range, all samples should be within the parameters and operational
-            for (const auto& [coord, op_value] : op_domain.operational_values)
-            {
-                CHECK(coord.x >= 5.1);
-                CHECK(coord.x <= 6.1);
-                CHECK(coord.y >= 4.5);
-                CHECK(coord.y <= 5.5);
-
-                CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
-            }
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
+                                                          operational_domain::operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations == 200);
@@ -153,22 +146,12 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain =
                 operational_domain_contour_tracing(lyt, create_id_tt(), 1, op_domain_params, &op_domain_stats);
 
-            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
             // check if the operational domain has the correct size (max 10 steps in each dimension)
             CHECK(op_domain.operational_values.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and operational
-            for (const auto& [coord, op_value] : op_domain.operational_values)
-            {
-                CHECK(coord.x >= 5.1);
-                CHECK(coord.x <= 6.1);
-                CHECK(coord.y >= 4.5);
-                CHECK(coord.y <= 5.5);
-
-                CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
-            }
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
+                                                          operational_domain::operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -179,29 +162,25 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     }
     SECTION("non-operational area")
     {
-        op_domain_params.sim_params.mu_minus = -0.15;
+        op_domain_params.x_min  = 0.1;
+        op_domain_params.x_max  = 1.1;
+        op_domain_params.x_step = 0.1;
+
+        op_domain_params.y_min  = 4.5;
+        op_domain_params.y_max  = 5.5;
+        op_domain_params.y_step = 0.1;
 
         SECTION("grid_search")
         {
             const auto op_domain =
                 operational_domain_grid_search(lyt, create_id_tt(), op_domain_params, &op_domain_stats);
 
-            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
             // check if the operational domain has the correct size (10 steps in each dimension)
             CHECK(op_domain.operational_values.size() == 100);
 
             // for the selected range, all samples should be within the parameters and non-operational
-            for (const auto& [coord, op_value] : op_domain.operational_values)
-            {
-                CHECK(coord.x >= 5.1);
-                CHECK(coord.x <= 6.1);
-                CHECK(coord.y >= 4.5);
-                CHECK(coord.y <= 5.5);
-
-                CHECK(op_value == operational_domain::operational_status::NON_OPERATIONAL);
-            }
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
+                                                          operational_domain::operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -214,22 +193,12 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain =
                 operational_domain_random_sampling(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
 
-            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
             // check if the operational domain has the correct maximum size
             CHECK(op_domain.operational_values.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and non-operational
-            for (const auto& [coord, op_value] : op_domain.operational_values)
-            {
-                CHECK(coord.x >= 5.1);
-                CHECK(coord.x <= 6.1);
-                CHECK(coord.y >= 4.5);
-                CHECK(coord.y <= 5.5);
-
-                CHECK(op_value == operational_domain::operational_status::NON_OPERATIONAL);
-            }
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
+                                                          operational_domain::operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -242,22 +211,12 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain =
                 operational_domain_flood_fill(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
 
-            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
             // check if the operational domain has the correct maximum size
             CHECK(op_domain.operational_values.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and non-operational
-            for (const auto& [coord, op_value] : op_domain.operational_values)
-            {
-                CHECK(coord.x >= 5.1);
-                CHECK(coord.x <= 6.1);
-                CHECK(coord.y >= 4.5);
-                CHECK(coord.y <= 5.5);
-
-                CHECK(op_value == operational_domain::operational_status::NON_OPERATIONAL);
-            }
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
+                                                          operational_domain::operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -270,22 +229,12 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain =
                 operational_domain_contour_tracing(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
 
-            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
             // check if the operational domain has the correct maximum size
             CHECK(op_domain.operational_values.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and non-operational
-            for (const auto& [coord, op_value] : op_domain.operational_values)
-            {
-                CHECK(coord.x >= 5.1);
-                CHECK(coord.x <= 6.1);
-                CHECK(coord.y >= 4.5);
-                CHECK(coord.y <= 5.5);
-
-                CHECK(op_value == operational_domain::operational_status::NON_OPERATIONAL);
-            }
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
+                                                          operational_domain::operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -309,20 +258,11 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain =
                 operational_domain_grid_search(lyt, create_id_tt(), op_domain_params, &op_domain_stats);
 
-            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
             // check if the operational domain has the correct size (16 steps in each dimension)
             CHECK(op_domain.operational_values.size() == 256);
 
             // for the selected range, all samples should be within the parameters
-            for (const auto& [coord, op_value] : op_domain.operational_values)
-            {
-                CHECK(coord.x >= 0.5);
-                CHECK(coord.x <= 4.5);
-                CHECK(coord.y >= 0.5);
-                CHECK(coord.y <= 4.5);
-            }
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, std::nullopt);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 512);
@@ -335,20 +275,11 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain =
                 operational_domain_random_sampling(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
 
-            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
             // check if the operational domain has the correct maximum size
             CHECK(op_domain.operational_values.size() <= 100);
 
             // for the selected range, all samples should be within the parameters
-            for (const auto& [coord, op_value] : op_domain.operational_values)
-            {
-                CHECK(coord.x >= 0.5);
-                CHECK(coord.x <= 4.5);
-                CHECK(coord.y >= 0.5);
-                CHECK(coord.y <= 4.5);
-            }
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, std::nullopt);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -361,20 +292,11 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain =
                 operational_domain_flood_fill(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
 
-            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
             // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() >= 80);
 
             // for the selected range, all samples should be within the parameters
-            for (const auto& [coord, op_value] : op_domain.operational_values)
-            {
-                CHECK(coord.x >= 0.5);
-                CHECK(coord.x <= 4.5);
-                CHECK(coord.y >= 0.5);
-                CHECK(coord.y <= 4.5);
-            }
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, std::nullopt);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 512);
@@ -387,20 +309,11 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain =
                 operational_domain_contour_tracing(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
 
-            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
             // check if the operational domain has the correct size (max 10 steps in each dimension)
             CHECK(op_domain.operational_values.size() <= 100);
 
             // for the selected range, all samples should be within the parameters
-            for (const auto& [coord, op_value] : op_domain.operational_values)
-            {
-                CHECK(coord.x >= 0.5);
-                CHECK(coord.x <= 4.5);
-                CHECK(coord.y >= 0.5);
-                CHECK(coord.y <= 4.5);
-            }
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, std::nullopt);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -455,22 +368,12 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     {
         const auto op_domain = operational_domain_grid_search(lyt, create_and_tt(), op_domain_params, &op_domain_stats);
 
-        CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-        CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.operational_values.size() == 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        for (const auto& [coord, op_value] : op_domain.operational_values)
-        {
-            CHECK(coord.x >= 5.1);
-            CHECK(coord.x <= 6.1);
-            CHECK(coord.y >= 4.5);
-            CHECK(coord.y <= 5.5);
-
-            CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
-        }
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
+                                                      operational_domain::operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations == 400);
@@ -483,22 +386,12 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         const auto op_domain =
             operational_domain_random_sampling(lyt, create_and_tt(), 100, op_domain_params, &op_domain_stats);
 
-        CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-        CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
         // check if the operational domain has the correct size (max 10 steps in each dimension)
         CHECK(op_domain.operational_values.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        for (const auto& [coord, op_value] : op_domain.operational_values)
-        {
-            CHECK(coord.x >= 5.1);
-            CHECK(coord.x <= 6.1);
-            CHECK(coord.y >= 4.5);
-            CHECK(coord.y <= 5.5);
-
-            CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
-        }
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
+                                                      operational_domain::operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations <= 400);
@@ -511,22 +404,12 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         const auto op_domain =
             operational_domain_flood_fill(lyt, create_and_tt(), 1, op_domain_params, &op_domain_stats);
 
-        CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-        CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.operational_values.size() == 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        for (const auto& [coord, op_value] : op_domain.operational_values)
-        {
-            CHECK(coord.x >= 5.1);
-            CHECK(coord.x <= 6.1);
-            CHECK(coord.y >= 4.5);
-            CHECK(coord.y <= 5.5);
-
-            CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
-        }
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
+                                                      operational_domain::operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations == 400);
@@ -539,22 +422,12 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         const auto op_domain =
             operational_domain_contour_tracing(lyt, create_and_tt(), 100, op_domain_params, &op_domain_stats);
 
-        CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-        CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
         // check if the operational domain has the correct size (max 10 steps in each dimension)
         CHECK(op_domain.operational_values.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        for (const auto& [coord, op_value] : op_domain.operational_values)
-        {
-            CHECK(coord.x >= 5.1);
-            CHECK(coord.x <= 6.1);
-            CHECK(coord.y >= 4.5);
-            CHECK(coord.y <= 5.5);
-
-            CHECK(op_value == operational_domain::operational_status::OPERATIONAL);
-        }
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
+                                                      operational_domain::operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations <= 400);
