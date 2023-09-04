@@ -65,7 +65,7 @@ class write_txt_sim_result_impl
             for (const auto& sidb : sidbs)
             {
                 const auto pos = sidb_nm_position<sidb_cell_clk_lyt_siqad>(physical_parameter, sidb);
-                os << fmt::format("{:.3f};{:.3f};", pos.first.value(), pos.second.value());
+                os << fmt::format("{:.3f};{:.3f};", pos.first, pos.second);
                 for (const auto& valid_layout : ground_state_layouts)
                 {
                     os << fmt::format("{};", charge_state_to_sign(valid_layout.get_charge_state(sidb)));

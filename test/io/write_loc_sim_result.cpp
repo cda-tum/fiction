@@ -38,7 +38,7 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
         lyt.assign_cell_type({5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({8, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{2, -0.32_eV};
+        const sidb_simulation_parameters params{2, -0.32};
         const auto simulation_results = exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
 
         std::stringstream ss;
@@ -59,7 +59,7 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
         lyt.assign_cell_type({3, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{2, -0.32_eV};
+        const sidb_simulation_parameters params{2, -0.32};
         const auto simulation_results = exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
 
         std::stringstream ss;
