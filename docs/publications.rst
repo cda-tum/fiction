@@ -115,7 +115,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
         @inproceedings{hofmann2023hexagonalization,
           title={{Scalable Physical Design for Silicon Dangling Bond Logic: How a 45\textdegree~Turn Prevents the Reinvention of the Wheel}},
           author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
-          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          booktitle={2023 IEEE 23rd International Conference on Nanotechnology (NANO)},
+          pages={872-877},
           year={2023}
         }
 
