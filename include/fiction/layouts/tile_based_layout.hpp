@@ -51,7 +51,7 @@ class tile_based_layout : public CoordinateLayout
 
     [[nodiscard]] tile_based_layout clone() const noexcept
     {
-        return tile_based_layout(CoordinateLayout::clone());
+        return tile_based_layout{CoordinateLayout::clone()};
     }
 
 #pragma endregion
@@ -66,7 +66,7 @@ class tile_based_layout : public CoordinateLayout
     template <typename Fn>
     void foreach_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
     {
-        CoordinateLayout::foreach_coordinate(fn, start, stop);
+        CoordinateLayout::foreach_coordinate(std::forward<Fn>(fn), start, stop);
     }
 
     [[nodiscard]] auto ground_tiles(const tile& start = {}, const tile& stop = {}) const
@@ -77,7 +77,7 @@ class tile_based_layout : public CoordinateLayout
     template <typename Fn>
     void foreach_ground_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
     {
-        CoordinateLayout::foreach_ground_coordinate(fn, start, stop);
+        CoordinateLayout::foreach_ground_coordinate(std::forward<Fn>(fn), start, stop);
     }
 
     std::vector<tile> adjacent_tiles(const tile& t) const noexcept
