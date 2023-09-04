@@ -49,7 +49,7 @@ struct bdl_pair
      * @param u The upper SiDB of the pair.
      * @param l The lower SiDB of the pair.
      */
-    bdl_pair(const sidb_technology::cell_type t, const cell<Lyt> u, const cell<Lyt> l) noexcept :
+    bdl_pair(const sidb_technology::cell_type t, const cell<Lyt>& u, const cell<Lyt>& l) noexcept :
             type{t},
             upper{u},
             lower{l}
@@ -92,7 +92,7 @@ struct detect_bdl_pairs_params
  */
 template <typename Lyt>
 std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename technology<Lyt>::cell_type type,
-                                            const detect_bdl_pairs_params params = {}) noexcept
+                                            const detect_bdl_pairs_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -137,7 +137,7 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
              * @param s2 The second dot.
              * @param d The distance between the two dots. (unit: nm).
              */
-            pairwise_dot_distance(const cell<Lyt> s1, const cell<Lyt> s2, const double d) noexcept :
+            pairwise_dot_distance(const cell<Lyt>& s1, const cell<Lyt>& s2, const double d) noexcept :
                     sidb1{s1},
                     sidb2{s2},
                     distance{d}

@@ -788,7 +788,7 @@ class operational_domain_impl
             else if (params.sim_engine == sidb_simulation_engine::QUICKSIM)
             {
                 // perform a heuristic simulation
-                const quicksim_params qs_params{sim_params, 500, 0.6, 1};
+                const quicksim_params qs_params{sim_params, 500, 0.6};
                 sim_result = quicksim(*bii, qs_params);
             }
             else
@@ -945,10 +945,10 @@ class operational_domain_impl
 
         const auto& [x, y] = sp;
 
-        auto decr_x = (x > 0) ? x - 1 : x;
-        auto incr_x = (x + 1 < x_indices.size()) ? x + 1 : x;
-        auto decr_y = (y > 0) ? y - 1 : y;
-        auto incr_y = (y + 1 < x_indices.size()) ? y + 1 : y;
+        const auto decr_x = (x > 0) ? x - 1 : x;
+        const auto incr_x = (x + 1 < x_indices.size()) ? x + 1 : x;
+        const auto decr_y = (y > 0) ? y - 1 : y;
+        const auto incr_y = (y + 1 < x_indices.size()) ? y + 1 : y;
 
         // add neighbors in clockwise direction
 
