@@ -617,26 +617,6 @@ class operational_domain_impl
         return {x_values[sp.x], y_values[sp.y]};
     }
     /**
-     * Determines whether the point at step position `(x, y)` has already been sampled and returns the operational value
-     * at `(x, y)` if it already exists. Here, `x` and `y` represent steps in the x and y dimension, respectively, not
-     * the actual values of the parameters.
-     *
-     * @param sp Step point to check.
-     * @return The operational status of the point at step position `sp = (x, y)` or `std::nullopt` if `(x, y)` has not
-     * been sampled yet.
-     */
-    [[nodiscard]] inline std::optional<operational_domain::operational_status>
-    has_already_been_sampled(const step_point& sp) const noexcept
-    {
-        if (const auto it = op_domain.operational_values.find(to_parameter_point(sp));
-            it != op_domain.operational_values.cend())
-        {
-            return it->second;
-        }
-
-        return std::nullopt;
-    }
-    /**
      * Calculates the number of steps in the x dimension based on the provided parameters.
      *
      * @return The number of steps in the x dimension.
@@ -723,6 +703,26 @@ class operational_domain_impl
     inline void set_y_dimension_value(sidb_simulation_parameters& sim_params, const double val) const noexcept
     {
         set_dimension_value(sim_params, val, sweep_dimension::Y);
+    }
+    /**
+     * Determines whether the point at step position `(x, y)` has already been sampled and returns the operational value
+     * at `(x, y)` if it already exists. Here, `x` and `y` represent steps in the x and y dimension, respectively, not
+     * the actual values of the parameters.
+     *
+     * @param sp Step point to check.
+     * @return The operational status of the point at step position `sp = (x, y)` or `std::nullopt` if `(x, y)` has not
+     * been sampled yet.
+     */
+    [[nodiscard]] inline std::optional<operational_domain::operational_status>
+    has_already_been_sampled(const step_point& sp) const noexcept
+    {
+        if (const auto it = op_domain.operational_values.find(to_parameter_point(sp));
+            it != op_domain.operational_values.cend())
+        {
+            return it->second;
+        }
+
+        return std::nullopt;
     }
     /**
      * Performs an exhaustive ground state simulation for all input combinations of the stored layout using the given
@@ -856,12 +856,11 @@ class operational_domain_impl
      * Performs random sampling to find any operational parameter combination. This function is useful if a single
      * starting point is required within the domain to expand from. This function returns the step in x and y dimension
      * of the first operational point found. If no operational parameter combination can be found within the given
-     * number of samples, the function returns std::nullopt.
+     * number of samples, the function returns `std::nullopt`.
      *
      * This function adds any sampled points to the `op_domain` member variables.
      *
-     * // TODO this function contains a lot of code duplication from `random_sampling` as of right now.
-     * // TODO This must be refactored.
+     * // TODO this function contains code duplication from `random_sampling` as of right now. This must be refactored.
      *
      * @param samples Maximum number of samples to take. Works as a timeout.
      * @return The first operational step point, if any could be found, `std::nullopt` otherwise.

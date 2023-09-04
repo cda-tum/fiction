@@ -195,6 +195,11 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             // for the selected range, all samples should be within the parameters and non-operational
             for (const auto& [coord, op_value] : op_domain.operational_values)
             {
+                CHECK(coord.x >= 5.1);
+                CHECK(coord.x <= 6.1);
+                CHECK(coord.y >= 4.5);
+                CHECK(coord.y <= 5.5);
+
                 CHECK(op_value == operational_domain::operational_status::NON_OPERATIONAL);
             }
 
@@ -212,7 +217,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
             CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
 
-            // check if the operational domain has the correct size (max 10 steps in each dimension)
+            // check if the operational domain has the correct maximum size
             CHECK(op_domain.operational_values.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and non-operational
@@ -240,30 +245,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
             CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
 
-            // check if the operational domain has the correct size (10 steps in each dimension)
-            CHECK(op_domain.operational_values.size() <= 100);
-
-            // for the selected range, all samples should be within the parameters and non-operational
-            for (const auto& [coord, op_value] : op_domain.operational_values)
-            {
-                CHECK(op_value == operational_domain::operational_status::NON_OPERATIONAL);
-            }
-
-            CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
-            CHECK(op_domain_stats.num_simulator_invocations <= 200);
-            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
-            CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
-            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
-        }
-        SECTION("contour_tracing")
-        {
-            const auto op_domain =
-                operational_domain_contour_tracing(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
-
-            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
-            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
-
-            // check if the operational domain has the correct size (max 10 steps in each dimension)
+            // check if the operational domain has the correct maximum size
             CHECK(op_domain.operational_values.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and non-operational
@@ -281,6 +263,149 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
             CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
+        }
+        SECTION("contour_tracing")
+        {
+            const auto op_domain =
+                operational_domain_contour_tracing(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
+
+            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
+            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
+
+            // check if the operational domain has the correct maximum size
+            CHECK(op_domain.operational_values.size() <= 100);
+
+            // for the selected range, all samples should be within the parameters and non-operational
+            for (const auto& [coord, op_value] : op_domain.operational_values)
+            {
+                CHECK(coord.x >= 5.1);
+                CHECK(coord.x <= 6.1);
+                CHECK(coord.y >= 4.5);
+                CHECK(coord.y <= 5.5);
+
+                CHECK(op_value == operational_domain::operational_status::NON_OPERATIONAL);
+            }
+
+            CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+            CHECK(op_domain_stats.num_simulator_invocations <= 200);
+            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
+            CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
+        }
+    }
+    SECTION("semi-operational area")
+    {
+        op_domain_params.x_min  = 0.5;
+        op_domain_params.x_max  = 4.5;
+        op_domain_params.x_step = 0.25;
+
+        op_domain_params.y_min  = 0.5;
+        op_domain_params.y_max  = 4.5;
+        op_domain_params.y_step = 0.25;
+
+        SECTION("grid_search")
+        {
+            const auto op_domain =
+                operational_domain_grid_search(lyt, create_id_tt(), op_domain_params, &op_domain_stats);
+
+            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
+            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
+
+            // check if the operational domain has the correct size (16 steps in each dimension)
+            CHECK(op_domain.operational_values.size() == 256);
+
+            // for the selected range, all samples should be within the parameters
+            for (const auto& [coord, op_value] : op_domain.operational_values)
+            {
+                CHECK(coord.x >= 0.5);
+                CHECK(coord.x <= 4.5);
+                CHECK(coord.y >= 0.5);
+                CHECK(coord.y <= 4.5);
+            }
+
+            CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+            CHECK(op_domain_stats.num_simulator_invocations <= 512);
+            CHECK(op_domain_stats.num_evaluated_parameter_combinations == 256);
+            CHECK(op_domain_stats.num_operational_parameter_combinations == 80);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations == 176);
+        }
+        SECTION("random_sampling")
+        {
+            const auto op_domain =
+                operational_domain_random_sampling(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
+
+            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
+            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
+
+            // check if the operational domain has the correct maximum size
+            CHECK(op_domain.operational_values.size() <= 100);
+
+            // for the selected range, all samples should be within the parameters
+            for (const auto& [coord, op_value] : op_domain.operational_values)
+            {
+                CHECK(coord.x >= 0.5);
+                CHECK(coord.x <= 4.5);
+                CHECK(coord.y >= 0.5);
+                CHECK(coord.y <= 4.5);
+            }
+
+            CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+            CHECK(op_domain_stats.num_simulator_invocations <= 200);
+            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
+            CHECK(op_domain_stats.num_operational_parameter_combinations <= 100);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
+        }
+        SECTION("flood_fill")
+        {
+            const auto op_domain =
+                operational_domain_flood_fill(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
+
+            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
+            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
+
+            // check if the operational domain has the correct size
+            CHECK(op_domain.operational_values.size() >= 80);
+
+            // for the selected range, all samples should be within the parameters
+            for (const auto& [coord, op_value] : op_domain.operational_values)
+            {
+                CHECK(coord.x >= 0.5);
+                CHECK(coord.x <= 4.5);
+                CHECK(coord.y >= 0.5);
+                CHECK(coord.y <= 4.5);
+            }
+
+            CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+            CHECK(op_domain_stats.num_simulator_invocations <= 512);
+            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 512);
+            CHECK(op_domain_stats.num_operational_parameter_combinations == 80);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
+        }
+        SECTION("contour_tracing")
+        {
+            const auto op_domain =
+                operational_domain_contour_tracing(lyt, create_id_tt(), 100, op_domain_params, &op_domain_stats);
+
+            CHECK(op_domain.x_dimension == operational_domain::sweep_parameter::EPSILON_R);
+            CHECK(op_domain.y_dimension == operational_domain::sweep_parameter::LAMBDA_TF);
+
+            // check if the operational domain has the correct size (max 10 steps in each dimension)
+            CHECK(op_domain.operational_values.size() <= 100);
+
+            // for the selected range, all samples should be within the parameters
+            for (const auto& [coord, op_value] : op_domain.operational_values)
+            {
+                CHECK(coord.x >= 0.5);
+                CHECK(coord.x <= 4.5);
+                CHECK(coord.y >= 0.5);
+                CHECK(coord.y <= 4.5);
+            }
+
+            CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+            CHECK(op_domain_stats.num_simulator_invocations <= 200);
+            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 512);
+            CHECK(op_domain_stats.num_operational_parameter_combinations <= 80);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
         }
     }
