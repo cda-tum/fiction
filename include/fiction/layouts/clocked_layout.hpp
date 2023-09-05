@@ -112,10 +112,10 @@ class clocked_layout : public CoordinateLayout
      */
     [[nodiscard]] clocked_layout clone() const noexcept
     {
-       auto copy = clocked_layout(CoordinateLayout::clone());
-       copy.strg = std::make_shared<clocked_layout_storage>(*strg);
+        auto copy = clocked_layout(CoordinateLayout::clone());
+        copy.strg = std::make_shared<clocked_layout_storage>(*strg);
 
-       return copy;
+        return copy;
     }
 
 #pragma endregion
