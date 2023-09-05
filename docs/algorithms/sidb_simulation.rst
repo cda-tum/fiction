@@ -94,3 +94,14 @@ Time-to-Solution (TTS) Statistics
 **Header:** ``fiction/algorithms/simulation/sidb/time_to_solution.hpp``
 
 .. doxygenfunction:: fiction::sim_acc_tts
+
+
+Random SiDB Layout Generator
+############################
+
+**Header:** ``fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp``
+
+.. doxygenenum:: fiction::positive_charges
+.. doxygenstruct:: fiction::generate_random_sidb_layout_params
+.. doxygenfunction:: fiction::generate_random_sidb_layout
+.. doxygenfunction:: fiction::generate_multiple_random_sidb_layouts
