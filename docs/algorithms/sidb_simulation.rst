@@ -93,6 +93,16 @@ Temperature Behavior
 .. doxygenfunction:: fiction::calculate_energy_and_state_type
 
 
+Maximal Defect Influence Distance
+#################################
+
+**Header:** ``fiction/algorithms/simulation/sidb/maximal_defect_influence_distance.hpp``
+
+.. doxygenstruct:: fiction::maximal_defect_influence_distance_params
+   :members:
+.. doxygenfunction:: fiction::maximal_defect_influence_distance
+
+
 Time-to-Solution (TTS) Statistics
 #################################
 
@@ -113,11 +123,3 @@ Random SiDB Layout Generator
 .. doxygenstruct:: fiction::generate_random_sidb_layout_params
 .. doxygenfunction:: fiction::generate_random_sidb_layout
 .. doxygenfunction:: fiction::generate_multiple_random_sidb_layouts
-
-
-Utils
-#####
-
-**Header:** ``fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp``
-
-.. doxygenfunction:: fiction::can_positive_charges_occur
