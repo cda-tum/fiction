@@ -14,7 +14,9 @@
 #include "fiction/utils/math_utils.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
+#include <limits>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -43,7 +45,8 @@ class write_location_and_ground_state_impl
         std::vector<charge_distribution_surface<sidb_cell_clk_lyt_siqad>> ground_state_layouts{};
         for (const auto& valid_layout : sim_result.charge_distributions)
         {
-            if (round_to_n_decimal_places(valid_layout.get_system_energy(), 6) == min_energy)
+            if (std::fabs(round_to_n_decimal_places(valid_layout.get_system_energy(), 6) - min_energy) <
+                std::numeric_limits<double>::epsilon())
             {
                 ground_state_layouts.emplace_back(charge_distribution_surface<sidb_cell_clk_lyt_siqad>{valid_layout});
             }
