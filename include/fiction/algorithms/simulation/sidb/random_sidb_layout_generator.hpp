@@ -100,7 +100,6 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     const uint64_t number_of_sidbs_of_final_layout = lyt_skeleton.num_cells() + params.number_of_sidbs;
 
@@ -162,7 +161,6 @@ std::vector<Lyt> generate_multiple_random_sidb_layouts(const Lyt&               
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     // this vector collects all unique SiDB layouts
     std::vector<Lyt> unique_lyts{};
