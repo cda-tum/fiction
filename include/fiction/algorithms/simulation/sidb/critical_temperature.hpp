@@ -237,7 +237,7 @@ class critical_temperature_impl
             {
                 if (parameter.truth_table.num_bits() == 8)  // number of bits of truth table.
                 {
-                    output_bits_index = {-4, -3};           // double wire, cx, etc.
+                    output_bits_index = {-4, -3};  // double wire, cx, etc.
                     // Truth table entries for given inputs are collected.
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2 + 1) != 0u);
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2) != 0u);
@@ -256,7 +256,7 @@ class critical_temperature_impl
                 if (parameter.truth_table.num_bits() == 4 &&
                     parameter.truth_table != create_fan_out_tt())  // and, or, nand, etc.
                 {
-                    output_bits_index = {-2};                      // One output SiDB. -2 due to placed perturber.
+                    output_bits_index = {-2};  // One output SiDB. -2 due to placed perturber.
                     // Truth table entry for given inputs is collected.
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit) != 0u);
                 }
@@ -459,8 +459,9 @@ class critical_temperature_impl
 /**
  *
  * This algorithm performs temperature-aware SiDB simulation as proposed in \"Temperature Behavior of Silicon Dangling
- * Bond Logic\" by J. Drewniok, M. Walter, and R. Wille in IEEE NANO 2023. It comes in two flavors: gate-based and
- * non-gate based, which can be specified using the `critical_temperature_mode` parameter.
+ * Bond Logic\" by J. Drewniok, M. Walter, and R. Wille in IEEE NANO 2023
+ * (https://ieeexplore.ieee.org/document/10231259). It comes in two flavors: gate-based and non-gate based, which can be
+ * specified using the `critical_temperature_mode` parameter.
  *
  * For gate-based simulation, the Critical Temperature is defined as follows: The temperature at which the excited
  * charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$ \eta \in [0,1] \f$.

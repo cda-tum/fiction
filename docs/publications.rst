@@ -93,7 +93,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
         @inproceedings{drewniok2023quicksimIEEE,
           title={{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
           author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
-          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          booktitle={2023 IEEE 23rd International Conference on Nanotechnology (NANO)},
+          pages={817-822},
           year={2023}
         }
 
@@ -104,7 +105,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
         @inproceedings{drewniok2023temperatureIEEE,
           title={{Temperature Behavior of Silicon Dangling Bond Logic}},
           author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
-          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          booktitle={2023 IEEE 23rd International Conference on Nanotechnology (NANO)},
+          pages={925-930},
           year={2023}
         }
 
