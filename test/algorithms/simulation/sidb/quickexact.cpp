@@ -90,7 +90,7 @@ TEMPLATE_TEST_CASE(
 
     const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
 
-    lyt.assign_sidb_defect({1, 2, 0},
+    lyt.assign_sidb_defect({1, 6, 0},
                            sidb_defect{sidb_defect_type::UNKNOWN, -1, 0.3, params.physical_parameters.lambda_tf});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -98,6 +98,32 @@ TEMPLATE_TEST_CASE(
     REQUIRE(simulation_results.charge_distributions.size() == 1);
     CHECK(simulation_results.charge_distributions.front().num_defects() == 1);
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::POSITIVE);
+}
+
+TEMPLATE_TEST_CASE(
+    "four SiDBs QuickExact simulation with one negatively charge defect (changed epsilon_r) in proximity",
+    "[quickexact]",
+    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+{
+    TestType lyt{{20, 10}};
+    lyt.assign_cell_type({-2, 0, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 0, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 1, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 1, 0}, TestType::cell_type::NORMAL);
+
+    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.15}};
+
+    lyt.assign_sidb_defect({0, 0, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
+                                                  params.physical_parameters.lambda_tf});
+
+    const auto simulation_results = quickexact<TestType>(lyt, params);
+
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
+    CHECK(simulation_results.charge_distributions.front().num_defects() == 1);
+    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
+    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(1) == sidb_charge_state::NEUTRAL);
+    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(2) == sidb_charge_state::NEUTRAL);
+    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(3) == sidb_charge_state::NEUTRAL);
 }
 
 TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation with one highly negatively charge defect in proximity",

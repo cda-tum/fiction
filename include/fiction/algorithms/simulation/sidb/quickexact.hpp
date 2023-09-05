@@ -25,7 +25,7 @@ namespace fiction
 {
 
 /**
- * An enumeration of modes to use for the QuickExact algorithm.
+ * An enumeration of modes to use for the `QuickExact` algorithm.
  */
 enum class automatic_base_number_detection
 {
@@ -50,7 +50,7 @@ struct quickexact_params
      */
     sidb_simulation_parameters physical_parameters{};
     /**
-     * If ON, QuickExact checks before which base number is required for the simulation, i.e., whether 3-state is
+     * If ON, `QuickExact` checks before which base number is required for the simulation, i.e., whether 3-state is
      * necessary or 2-state simulation is sufficient.
      */
     automatic_base_number_detection base_number_detection = automatic_base_number_detection::ON;
@@ -88,7 +88,7 @@ class quickexact_impl
 
             initialize_charge_layout();
 
-            //  Determine if three state simulation (i.e., positively charged SiDBs can occur) is required.
+            // Determine if three state simulation (i.e., positively charged SiDBs can occur) is required.
             const bool three_state_simulation_required =
                 (params.base_number_detection == automatic_base_number_detection::ON &&
                  charge_lyt.is_three_state_simulation_required()) ||
@@ -101,11 +101,11 @@ class quickexact_impl
             {
                 generate_layout_without_negative_sidbs();
 
-                // if the layout consists of SiDBs that do not need to be negatively charged.
+                // If the layout consists of SiDBs that do not need to be negatively charged.
                 if (!all_sidbs_in_lyt_without_negative_detected_ones.empty())
                 {
-                    // The first cell from all_sidbs_in_lyt_without_negative_detected_ones is chosen as the dependent
-                    // cell to initialize the layout (detected negatively-charged SiDBs were erased with
+                    // The first cell from all_sidbs_in_lyt_without_negative_detected_ones is chosen as the
+                    // dependent-cell to initialize the layout (detected negatively-charged SiDBs were erased with
                     // generate_layout_without_negative_sidbs).
                     charge_distribution_surface charge_lyt_with_assigned_dependent_cell{
                         layout, params.physical_parameters, sidb_charge_state::NEUTRAL,
@@ -138,7 +138,7 @@ class quickexact_impl
 
                     // Update all local potentials, system energy and physically validity. The Flag is set to "Variable"
                     // to allow dependent cell to change its charge state based on the N-1 SiDBs to fulfill the local
-                    // population stability at its position.
+                    // population stability in its position.
                     charge_lyt_with_assigned_dependent_cell.update_after_charge_change(dependent_cell_mode::VARIABLE);
 
                     // If no positively charged SiDB can occur in the layout.
@@ -155,7 +155,8 @@ class quickexact_impl
                     }
                 }
 
-                // If the layout consists of only detected negatively-charged SiDBs.
+                // If the layout consists of only detected negatively-charged SiDBs
+                // (i.e., only SiDBs that are far away from each other).
                 else if (all_sidbs_in_lyt_without_negative_detected_ones.empty())
                 {
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
@@ -169,8 +170,8 @@ class quickexact_impl
                     result.charge_distributions.push_back(charge_lyt_copy);
                 }
             }
-            // if there is only one SiDB in the layout, this single SiDB can be neutrally or even positively charged due
-            // to external potentials or defects
+            // If there is only one SiDB in the layout, this single SiDB can be neutrally or even positively charged due
+            // to external potentials or defects.
             else if (number_of_sidbs == 1)
             {
                 if (three_state_simulation_required)
@@ -416,7 +417,7 @@ class quickexact_impl
                                                     // automatically changed based on the new charge distribution.
         }
 
-        // Charge configurations of the sub-layout are iterated
+        // charge configurations of the sublayout are iterated
         while (charge_layout.get_charge_index_of_sub_layout() < charge_layout.get_max_charge_index_sub_layout())
         {
             if (charge_layout.is_physically_valid())
@@ -532,26 +533,26 @@ class quickexact_impl
 /**
  * `QuickExact` is a quick and exact physical simulation algorithm designed specifically for SiDB layouts.
  * It determines all physically valid charge configurations of a given layout, providing a significant
- * performance advantage of more than three orders of magnitude over *ExGS* (exhaustive_ground_state_simulation.hpp).
+ * performance advantage of more than three orders of magnitude over `ExGS` (exhaustive_ground_state_simulation.hpp).
  *
- * The performance improvement of QuickExact can be attributed to the incorporation of three key ideas:
+ * The performance improvement of `QuickExact` can be attributed to the incorporation of three key ideas:
  *
- * 1. Advanced Negative SiDB Detection: QuickExact efficiently identifies SiDBs that require negative charges
+ * 1. Advanced Negative SiDB Detection: `QuickExact` efficiently identifies SiDBs that require negative charges
  *    in a physically valid charge distribution. By detecting them in advance, the search space is pruned
  *    by a factor of \f$2^k\f$, where k is the number of found SiDBs.
  *
  * 2. Dependent SiDB Selection: The algorithm selects a dependent SiDB, whose charge state is always derived
  *    from its n-1 neighbors. This dependency simplifies the computation process and contributes to the overall
- *    efficiency of QuickExact.
+ *    efficiency of `QuickExact`.
  *
- * 3. Gray Code Representation: QuickExact employs Gray code to represent and traverse through all charge
+ * 3. Gray Code Representation: `QuickExact` employs Gray code to represent and traverse through all charge
  *    configurations. By using Gray code, only one charge state changes at a time, making the computation
  *    of the local electrostatic potential easier.
  *
- * Additionally, QuickExact also considers global and local electrostatic potentials, as well as existing defects. This
+ * Additionally, `QuickExact also considers global and local electrostatic potentials, as well as existing defects. This
  * holistic approach ensures an accurate representation of the physical behavior of the SiDB layout.
  *
- * In summary, QuickExact combines advanced SiDB charge detection, dependent SiDB selection, and the use of Gray code
+ * In summary, `QuickExact` combines advanced SiDB charge detection, dependent SiDB selection, and the use of Gray code
  * to achieve outstanding performance and enable efficient simulations of SiDB layouts, even in scenarios where
  * positively-charged SiDBs occur due to small spacing.
  *
