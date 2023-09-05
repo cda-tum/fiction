@@ -32,8 +32,8 @@ using namespace fiction;
  *   --mu_minus <value>    Sets the µ-value used for the simulation, which affects the charge distribution.
  *
  * Example Usage:
- *   To simulate layouts from the "layout_random_cli/" folder with a µ (mu) value of -0.32:
- *   ./sidb_location_and_ground_state_state_simulation --folder_name layout_random_cli/ --mu_minus -0.32
+ *   To simulate layouts from the "random_sidb_layouts/" folder with a µ (mu) value of -0.32:
+ *   ./sidb_location_and_ground_state_state_simulation --folder_name random_sidb_layouts/ --mu_minus -0.32
  */
 int main(int argc, const char* argv[])  // NOLINT
 {
@@ -104,7 +104,7 @@ int main(int argc, const char* argv[])  // NOLINT
                         const std::string file_path = fmt::format("{}/loc/{}_sim_µ_minus_{:.3f}.txt",
                                                                   folder.path().string(), name, -params.mu_minus);
 
-                        // Some layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
+                        // Some SiDB layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
                         // physically valid charge distribution is found) because the physical model currently works
                         // reliably only for layouts with neutrally and negatively charged SiDBs.
                         if (!simulation_results.charge_distributions.empty())

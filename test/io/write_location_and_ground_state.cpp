@@ -3,7 +3,6 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/io/write_location_and_ground_state.hpp>

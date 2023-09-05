@@ -98,7 +98,7 @@ TEST_CASE("Write single-dot SQD layout", "[sqd]")
     compare_written_and_read_layout(layout, read_layout);
 }
 
-TEST_CASE("Write single-dot SQD layout with siqad coordinates", "[sqd]")
+TEST_CASE("Write single-dot SQD layout with SiQAD coordinates", "[sqd]")
 {
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 

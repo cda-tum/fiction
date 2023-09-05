@@ -19,10 +19,10 @@
 using namespace fiction;
 
 /**
- * This program generates random SiDB layouts and saves them as .sqd files (provide SiQAD compatibility) in a specified
- * folder. It allows configuring various layout parameters through command-line arguments, including the folder name,
- * layout dimensions, allowed charges (2- or 3-states), number of layouts for each SiDB count, and step size for SiDB
- * count increments.
+ * This program generates random SiDB layouts and saves them as .sqd files (provide SiQAD
+ * (https://github.com/siqad/siqad) compatibility) in a specified folder. It allows configuring various layout
+ * parameters through command-line arguments, including the folder name, layout dimensions, allowed charges (2- or
+ * 3-states), number of layouts for each SiDB count, and step size for SiDB count increments.
  *
  * @param argc The number of command-line arguments.
  * @param argv An array of C-style strings containing the command-line arguments.
@@ -30,10 +30,10 @@ using namespace fiction;
  *
  * Command-line Options:
  *   --folder_name <name>       Specifies the name of the folder to store generated layouts.
- *   --NW_x <value>             Sets the x-coordinate of the north-west cell corner.
- *   --NW_y <value>             Sets the y-coordinate of the north-west cell corner.
- *   --SE_x <value>             Sets the x-coordinate of the south-east cell corner.
- *   --SE_y <value>             Sets the y-coordinate of the south-east cell corner.
+ *   --NW_x <value>             Sets the x coordinate of the north-west cell corner in SiQAD coordinates.
+ *   --NW_y <value>             Sets the y coordinate of the north-west cell corner in SiQAD coordinates.
+ *   --SE_x <value>             Sets the x coordinate of the south-east cell corner in SiQAD coordinates.
+ *   --SE_y <value>             Sets the y coordinate of the south-east cell corner in SiQAD coordinates.
  *   --positive_charges <type>  Specifies whether positively charged SiDBs are allowed ("ALLOWED") or forbidden
  * ("FORBIDDEN").
  *   --lower <value>            Sets the number of SiDBs for the first bunch of layouts.
@@ -51,7 +51,7 @@ using namespace fiction;
  */
 int main(int argc, const char* argv[])  // NOLINT
 {
-    std::unordered_map<std::string, std::string> options{{"--folder_name", "layout_random_cli/"},
+    std::unordered_map<std::string, std::string> options{{"--folder_name", "random_sidb_layouts/"},
                                                          {"--NW_x", "0"},
                                                          {"--NW_y", "0"},
                                                          {"--SE_x", "20"},
@@ -85,13 +85,13 @@ int main(int argc, const char* argv[])  // NOLINT
 
     // specifies the name of the folder to store generated layouts
     const std::string folder_name = options["--folder_name"];
-    // sets the x-coordinate of the north-west cell corner
+    // sets the x coordinate of the north-west cell corner in SiQAD coordinates
     const int32_t nw_x = std::stoi(options["--NW_x"]);
-    // sets the y-coordinate of the north-west cell corner
+    // sets the y-coordinate of the north-west cell corner in SiQAD coordinates
     const int32_t nw_y = std::stoi(options["--NW_y"]);
-    // sets the x-coordinate of the south-east cell corner
+    // sets the x-coordinate of the south-east cell corner in SiQAD coordinates
     const int32_t se_x = std::stoi(options["--SE_x"]);
-    // sets the y-coordinate of the south-east cell corner
+    // sets the y-coordinate of the south-east cell corner in SiQAD coordinates
     const int32_t se_y = std::stoi(options["--SE_y"]);
     // specifies whether positively charged SiDBs are allowed ("ALLOWED") or forbidden ("FORBIDDEN")
     const std::string charges_str = options["--positive_charges"];
@@ -117,8 +117,8 @@ int main(int argc, const char* argv[])  // NOLINT
     std::cout << "number_of_layouts: " << number_of_layouts << std::endl;
     std::cout << "step: " << step << std::endl;
 
-    // generates random layouts as .sqd file
-    using cell_level_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+    // generates random SiDB layouts as .sqd file
+    using cell_level_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
 
     try
     {
@@ -134,7 +134,7 @@ int main(int argc, const char* argv[])  // NOLINT
         {
             if (std::filesystem::create_directory(folder_path))
             {
-                std::cout << "Folder *random_layouts* created successfully" << std::endl;
+                std::cout << fmt::format("Folder {} created successfully", folder_name) << std::endl;
             }
             else
             {
@@ -142,13 +142,15 @@ int main(int argc, const char* argv[])  // NOLINT
             }
         }
 
-        for (uint64_t place_sidbs = lower_limit; place_sidbs <= upper_limit; place_sidbs += step)
+        for (uint64_t number_of_placed_sidbs = lower_limit; number_of_placed_sidbs <= upper_limit;
+             number_of_placed_sidbs += step)
         {
-            const std::filesystem::path dir_path = folder_path.string() + "number_sidbs_" + std::to_string(place_sidbs);
+            const std::filesystem::path dir_path =
+                folder_path.string() + "number_sidbs_" + std::to_string(number_of_placed_sidbs);
             const std::filesystem::path dir_path_sqd =
-                folder_path.string() + "number_sidbs_" + std::to_string(place_sidbs) + "/sqd";
+                folder_path.string() + "number_sidbs_" + std::to_string(number_of_placed_sidbs) + "/sqd";
             const std::filesystem::path dir_path_loc =
-                folder_path.string() + "number_sidbs_" + std::to_string(place_sidbs) + "/loc";
+                folder_path.string() + "number_sidbs_" + std::to_string(number_of_placed_sidbs) + "/loc";
             try
             {
                 if (!std::filesystem::exists(dir_path))
@@ -164,7 +166,7 @@ int main(int argc, const char* argv[])  // NOLINT
                 }
 
                 const generate_random_sidb_layout_params<cell_level_layout> params{
-                    {{nw_x, nw_y}, {se_x, se_y}}, place_sidbs,      charges, 2,
+                    {{nw_x, nw_y}, {se_x, se_y}}, number_of_placed_sidbs, charges, 2,
                     static_cast<uint64_t>(10E6),  number_of_layouts};
                 const auto unique_lyts =
                     generate_multiple_random_sidb_layouts<cell_level_layout>(cell_level_layout{}, params);

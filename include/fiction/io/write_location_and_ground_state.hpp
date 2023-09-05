@@ -36,7 +36,7 @@ class write_location_and_ground_state_impl
 
     void run()
     {
-        // This part searches for the ground state(s) among all physically valid charge distributions.
+        // this part searches for the ground state(s) among all physically valid charge distributions
         const auto min_energy =
             round_to_n_decimal_places(minimum_energy<sidb_cell_clk_lyt_siqad>(sim_result.charge_distributions), 6);
 
@@ -51,7 +51,7 @@ class write_location_and_ground_state_impl
 
         if (!ground_state_layouts.empty())
         {
-            // Write the column headers
+            // write the column headers
             os << "x [nm]; y [nm];";
 
             for (uint64_t i = 0; i < ground_state_layouts.size(); i++)
@@ -104,7 +104,8 @@ template <typename Lyt>
 void write_location_and_ground_state(const sidb_simulation_result<Lyt>& sim_result, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     detail::write_location_and_ground_state_impl p{sim_result, os};
 

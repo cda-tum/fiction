@@ -28,8 +28,8 @@ namespace fiction
 {
 
 /**
- * An enumeration of modes to use for the generation of random layout to control control the appearance of positive
- * charges.
+ * An enumeration of modes to use for the generation of random SiDB layouts to control control the appearance of
+ * positive charges.
  */
 enum class positive_charges
 {
@@ -90,7 +90,7 @@ struct generate_random_sidb_layout_params
  * Generates a random layout of SiDBs by adding them to the provided layout skeleton.
  * The layout skeleton serves as the starting layout to which SiDBs are added to create the final layout.
  *
- * @tparam Lyt The layout type.
+ * @tparam Lyt Cell-level SiDB layout type.
  * @param lyt_skeleton A layout to which random cells are added to create the final layout.
  * @param params The parameters for generating the random layout.
  * @return A randomly-generated layout of SiDBs.
@@ -99,7 +99,8 @@ template <typename Lyt>
 Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_sidb_layout_params<Lyt>& params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     const uint64_t number_of_sidbs_of_final_layout = lyt_skeleton.num_cells() + params.number_of_sidbs;
 
@@ -111,19 +112,21 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
                                   { lyt.assign_cell_type(cell, lyt_skeleton.get_cell_type(cell)); });
     }
 
+    // counts the attempts to place the given number of SiDBs
     uint64_t attempt_counter = 0;
 
-    // Stops if either all SiDBs are placed or the maximum number of attempts were performed.
+    // stops if either all SiDBs are placed or the maximum number of attempts was performed
     while (lyt.num_cells() < number_of_sidbs_of_final_layout && attempt_counter < params.maximal_attempts)
     {
+        // random coordinate within given area
         const auto random_coord = random_coordinate(params.coordinate_pair.first, params.coordinate_pair.second);
 
         bool constraint_violation_positive_sidbs = false;
 
         if (params.positive_sidbs == positive_charges::FORBIDDEN)
         {
-            // Checks if the new coordinate is not closer than 2 cells (Euclidean distance) from an already
-            // placed SiDB.
+            // checks if the new coordinate is not closer than 2 cells (Euclidean distance) from an already
+            // placed SiDB
             lyt.foreach_cell(
                 [&lyt, &random_coord, &constraint_violation_positive_sidbs, &params](const auto& c1)
                 {
@@ -133,7 +136,7 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
                     }
                 });
         }
-        // If the constraint that no positive SiDBs occur is satisfied, the SiDB is added to the layout.
+        // if the constraint that no positive SiDBs occur is satisfied, the SiDB is added to the layout
         if (!constraint_violation_positive_sidbs)
         {
             lyt.assign_cell_type(random_coord, Lyt::cell_type::NORMAL);
@@ -145,30 +148,36 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
 }
 
 /**
- * Generates multiple unique random layouts of SiDBs by adding them to the provided layout skeleton.
- * The layout skeleton serves as the starting layout to which SiDBs are added to create unique layouts.
+ * Generates multiple unique random SiDB layouts by adding them to the provided layout skeleton.
+ * The layout skeleton serves as the starting layout to which SiDBs are added to create unique SiDB layouts.
  *
- * @tparam Lyt The layout type.
- * @param lyt_skeleton A layout to which random cells are added to create unique layouts.
- * @param params The parameters for generating the random layouts.
- * @return A vector containing the unique randomly generated layouts.
+ * @tparam Lyt Cell-level SiDB layout type.
+ * @param lyt_skeleton A layout to which random SiDBs are added to create unique layouts.
+ * @param params The parameters for generating the random SiDB layouts.
+ * @return A vector containing the unique randomly generated SiDB layouts.
  */
 template <typename Lyt>
 std::vector<Lyt> generate_multiple_random_sidb_layouts(const Lyt&                                     lyt_skeleton,
                                                        const generate_random_sidb_layout_params<Lyt>& params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
+    // this vector collects all unique SiDB layouts
     std::vector<Lyt> unique_lyts{};
     unique_lyts.reserve(params.number_of_unique_generated_layouts);
-    uint64_t layout_generation_attempts = 0;
+
+    // counts the attempts of unsuccessful generations of an SiDB layout
+    uint64_t unsuccessful_generation_attempt_counter = 0;
+
     while (unique_lyts.size() < params.number_of_unique_generated_layouts &&
-           layout_generation_attempts < params.maximal_attempts_for_multiple_layouts)
+           unsuccessful_generation_attempt_counter < params.maximal_attempts_for_multiple_layouts)
     {
         const auto random_lyt = generate_random_sidb_layout(lyt_skeleton, params);
 
-        uint64_t identical_layout_counter = 0;
+        // indicates if a found SiDB layout is identical to an already found one.
+        bool identical_layout = false;
         for (const auto& old_lyt : unique_lyts)
         {
             // checks if two layouts have an SiDB at the same position
@@ -186,19 +195,20 @@ std::vector<Lyt> generate_multiple_random_sidb_layouts(const Lyt&               
                         });
                 });
 
-            // all cells are identical, so the new layout is a duplicate.
+            // all cells are identical, so the new layout is a duplicate
             if (identical_cell_counter == random_lyt.num_cells())
             {
-                identical_layout_counter += 1;
+                identical_layout = true;
             }
         }
 
-        if (identical_layout_counter == 0)
+        // if the randomly generated SiDB layout is not identical to a previously generated one, it is added to the
+        // collection of all unique SiDB layouts (unique_lyts)
+        if (!identical_layout)
         {
             unique_lyts.push_back(random_lyt);
+            unsuccessful_generation_attempt_counter += 1;
         }
-
-        layout_generation_attempts += 1;
     }
     return unique_lyts;
 }
