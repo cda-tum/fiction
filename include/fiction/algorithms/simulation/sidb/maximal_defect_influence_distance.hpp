@@ -38,7 +38,7 @@ struct maximal_defect_influence_distance_params
     sidb_simulation_parameters physical_params{};
     /**
      * The pair describes the width and height of the area around the gate, which is
-     * also used to place defects (given in siqad coordinates).
+     * also used to place defects (given in SiQAD coordinates).
      */
     std::pair<int32_t, int32_t> additional_scanning_area{50, 6};
     /**
@@ -307,16 +307,18 @@ class maximal_defect_influence_distance_impl
 }  // namespace detail
 
 /**
- * This function determines the maximum distance at which a placed defect can still affect the layout (i.e. different
- * ground state). This means that a defect must be placed further away from the layout than the given distance in order
- * not to change the layout's ground state.
+ * Calculates the maximum distance at which a placed defect can influence the layout's ground state.
  *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout for which the influence distance is simulated.
- * @param sim_params Parameters which are used to determine the defect influence distance.
- * @return Pair of the maximum influence distance (i.e. the defect should be placed further away than this value to
- * ensure correct behavior of e.g. a gate) with the corresponding position of the defect (helps to identify the
- * sensitive part of the layout).
+ * This function simulates the influence of defects on a SiDB cell-level layout. It computes the
+ * maximum influence distance, defined as the minimum distance between any SiDB cell and the defect, at which the
+ * defect can still affect the layout's ground state, potentially altering its behavior, such as gate functionality.
+ *
+ * @tparam Lyt The type representing the SiDB cell-level layout.
+ * @param lyt The layout for which the influence distance is being determined.
+ * @param sim_params Parameters used to calculate the defect's influence distance.
+ * @return A pair consisting of the maximum influence distance (indicating that the defect should be placed farther
+ * away to avoid impact) and the position of the defect within the layout, aiding in identifying sensitive regions
+ * of the layout.
  */
 template <typename Lyt>
 std::pair<double, typename Lyt::cell>
