@@ -25,6 +25,10 @@ on:
   schedule:
     - cron: '30 5 * * 6'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 env:
   Z3_VERSION: 4.10.0
 
