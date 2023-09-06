@@ -22,3 +22,19 @@ Fanout Substitution
 .. doxygenstruct:: fiction::fanout_substitution_params
    :members:
 .. doxygenfunction:: fiction::fanout_substitution
+
+Technology Mapping
+------------------
+
+**Header:** ``fiction/algorithms/network_transformation/technology_mapping.hpp``
+
+.. doxygenstruct:: fiction::technology_mapping_params
+   :members:
+.. doxygenfunction:: fiction::and_or_not
+.. doxygenfunction:: fiction::and_or_not_maj
+.. doxygenfunction:: fiction::all_standard_2_input_functions
+.. doxygenfunction:: fiction::all_standard_3_input_functions
+.. doxygenfunction:: fiction::all_supported_standard_functions
+.. doxygenstruct:: fiction::technology_mapping_stats
+   :members:
+.. doxygenfunction:: fiction::technology_mapping
