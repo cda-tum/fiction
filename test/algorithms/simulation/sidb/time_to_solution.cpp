@@ -14,6 +14,8 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 
+#include <cmath>
+
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(
@@ -45,7 +47,7 @@ TEMPLATE_TEST_CASE(
         const time_to_solution_params tts_params_exgs{exhaustive_algorithm::EXGS};
         sim_acc_tts<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
-        CHECK(tts_stat_exgs.algorithm == "exgs");
+        CHECK(tts_stat_exgs.algorithm == "ExGS");
         CHECK_THAT(tts_stat_exgs.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat_exgs.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
@@ -77,8 +79,23 @@ TEMPLATE_TEST_CASE(
         const time_to_solution_params tts_params{exhaustive_algorithm::QUICKEXACT};
         sim_acc_tts<TestType>(lyt, quicksim_params, tts_params, &tts_stat_quickexact);
 
-        CHECK(tts_stat_quickexact.acc > 0);
+        REQUIRE(tts_stat_quickexact.acc == 100);
         CHECK(tts_stat_quickexact.time_to_solution > 0.0);
         CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
+
+        // calculate tts manually.
+        double tts_calculated = 0.0;
+
+        if (tts_stat_quickexact.acc == 100)
+        {
+            tts_calculated = tts_stat_quickexact.mean_single_runtime;
+        }
+        else
+        {
+            tts_calculated = (tts_stat_quickexact.mean_single_runtime * std::log(1.0 - tts_params.confidence_level) /
+                              std::log(1.0 - tts_stat_quickexact.acc));
+        }
+        CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
+                   Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
     }
 }

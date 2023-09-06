@@ -940,18 +940,26 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
     /**
      * The function updates the local potential (unit: Volt) and the system energy (unit: eV) after a charge change.
+     *
+     * @param dependent_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
+     * dependent_cell_mode::VARIABLE if it should.
+     * @param energy_calculation_mode energy_calculation::UPDATE_ENERGY if the electrostatic potential energy should be
+     * updated, energy_calculation::KEEP_ENERGY otherwise.
+     * @param history_mode charge_distribution_history::NEGLECT if the information (local electrostatic energy) of the
+     * previous charge distribution is used to make the update more efficient, charge_distribution_history::CONSIDER
+     * otherwise.
      */
     void update_after_charge_change(
-        const dependent_cell_mode&         dependent_cell   = dependent_cell_mode::FIXED,
-        const energy_calculation&          energy_calc_mode = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history& history_mode     = charge_distribution_history::NEGLECT) noexcept
+        const dependent_cell_mode&         dependent_cell          = dependent_cell_mode::FIXED,
+        const energy_calculation&          energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
+        const charge_distribution_history& history_mode            = charge_distribution_history::NEGLECT) noexcept
     {
         this->update_local_potential(history_mode);
         if (dependent_cell == dependent_cell_mode::VARIABLE)
         {
             this->update_charge_state_of_dependent_cell();
         }
-        if (energy_calc_mode == energy_calculation::UPDATE_ENERGY)
+        if (energy_calculation_mode == energy_calculation::UPDATE_ENERGY)
         {
             this->recompute_system_energy();
         }
@@ -1195,6 +1203,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * The charge index is increased by one, but only if it is less than the maximum charge index for the given layout.
      * If that's the case, it is increased by one and afterward, the charge configuration is updated by invoking the
      * `index_to_charge_distribution()` function.
+     *
+     * @param dependent_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
+     * dependent_cell_mode::VARIABLE if it should.
+     * @param energy_calculation_mode energy_calculation::UPDATE_ENERGY if the electrostatic potential energy should be
+     * updated, energy_calculation::KEEP_ENERGY otherwise.
+     * @param history_mode charge_distribution_history::NEGLECT if the information (local electrostatic energy) of the
+     * previous charge distribution is used to make the update more efficient, charge_distribution_history::CONSIDER
+     * otherwise.
+     * @param engine exhaustive_algorithm::EXGS if `ExGS``should be used, exhaustive_algorithm::QUICKEXACT for
+     * `QuickExact`.
      */
     void increase_charge_index_by_one(
         const dependent_cell_mode&         dependent_cell_fixed    = dependent_cell_mode::FIXED,
@@ -1303,6 +1321,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param potential_value Value of the global external electrostatic potential in Volt (e.g. -0.3).
      * Charge-transition levels are shifted by this value.
+     * @param dependent_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
+     * dependent_cell_mode::VARIABLE if it should.
      */
     void assign_global_external_potential(const double        potential_value,
                                           dependent_cell_mode dependent_cell = dependent_cell_mode::FIXED) noexcept
@@ -1447,7 +1467,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * This function finds the cell for a given index which is a candidate to be positively charged of a given index.
      *
-     * @param c The index to find the cell of (cell is candidate to be positively charged).
+     * @param index The index to find the cell of (cell is candidate to be positively charged).
      * @return Positive cell candidate. Dead-coordinate is returned if the index is not assigned to a not
      * empty cell in the layout.
      */
@@ -1460,11 +1480,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         return {};
     }
-
     /**
      * This function finds the cell which can only be neutrally or negatively charged of a given index.
      *
-     * @param c The index to find the cell of.
+     * @param index The index to find the cell of.
      * @return The cell (which cannot be positively charged) in the layout for the given index. Dead-coordinate is
      * returned if the index is not assigned to a not empty cell in the layout.
      */
@@ -1517,6 +1536,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * This function can be used to assign an external local electrostatic potential in Volt to the layout. All
      * important attributes of the charge layout are updated automatically.
      *
+     * @param cell Cell to which the local external potential is applied.
      * @param external_voltage External electrostatic potential in Volt applied to different cells.
      */
     void
@@ -1675,11 +1695,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * The charge index of the sublayout is increased by one and the charge distribution is updated correspondingly.
      *
-     * @param dependent_cell_fixed If set to FIXED, the dependent cell's charge state is fixed and does not change if
-     * the local electrostatic potential requires.
-     * @param recompute_system_energy If set to UPDATE_ENERGY, the total electrostatic potential energy is computed.
-     * @param consider_history If set to NEGLECT, the previous charge distribution is calculated from scratch.
-     * @param engine Set to QUICKEXACT by default, since this function is only used for `quickexact` anyway.
+     * @param dependent_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
+     * dependent_cell_mode::VARIABLE if it should.
+     * @param energy_calculation_mode energy_calculation::UPDATE_ENERGY if the electrostatic potential energy should be
+     * updated, energy_calculation::KEEP_ENERGY otherwise.
+     * @param history_mode charge_distribution_history::NEGLECT if the information (local electrostatic energy) of the
+     * previous charge distribution is used to make the update more efficient, charge_distribution_history::CONSIDER
+     * otherwise.
+     * @param engine exhaustive_algorithm::EXGS if `ExGS``should be used, exhaustive_algorithm::QUICKEXACT for
+     * `QuickExact`.
      */
     void increase_charge_index_of_sub_layout_by_one(
         const dependent_cell_mode&         dependent_cell_fixed    = dependent_cell_mode::FIXED,
@@ -1699,11 +1723,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param current_gray_code Gray code in decimal representing the new charge distribution.
      * @param previous_gray_code Gray code in decimal representing the old charge distribution.
-     * @param dependent_cell if set to VARIABLE, the dependent cell's charge state is changed based on the local
-     * potential at its position.
-     * @param energy_calc_mode if set to UPDATE_ENERGY, the system energy is calculated for the new charge distribution.
-     * @param history_mode if set to NEGLECT, the values of the previous charge distribution are not used to speed up
-     * the calculation.
+     * @param dependent_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
+     * dependent_cell_mode::VARIABLE if it should.
+     * @param energy_calculation_mode energy_calculation::UPDATE_ENERGY if the electrostatic potential energy should be
+     * updated, energy_calculation::KEEP_ENERGY otherwise.
+     * @param history_mode charge_distribution_history::NEGLECT if the information (local electrostatic energy) of the
+     * previous charge distribution is used to make the update more efficient, charge_distribution_history::CONSIDER
+     * otherwise.
      */
     void assign_charge_index_by_gray_code(
         const uint64_t current_gray_code, const uint64_t previous_gray_code,
@@ -1808,7 +1834,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->recompute_system_energy();
         this->validity_check();
     };
-
     /**
      * This function is used when three state simulations are required (i.e., is_three_state_simulation_required = true)
      * to set the base number to three. However, it is distinguished between the cells that can be positively charged an
@@ -1888,7 +1913,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
     /**
      *  The stored unique index is converted to a charge distribution.
-     *  @param quickexact False by default, but set to true if used in `quickexact` simulation.
+     *
+     *  @param engine exhaustive_algorithm::EXGS if `ExGS``should be used, exhaustive_algorithm::QUICKEXACT for
+     * `QuickExact`.
      */
     void index_to_charge_distribution(const exhaustive_algorithm& engine = exhaustive_algorithm::EXGS) noexcept
     {
