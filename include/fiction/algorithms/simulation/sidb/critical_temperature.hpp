@@ -263,7 +263,7 @@ class critical_temperature_impl
                 else
                 {
                     output_bits_index = {-4, -3};  // fo2.
-                    // Truth table entries for given input is collected.
+                    // Truth table entries for given input are collected.
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2 + 1) != 0u);
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2) != 0u);
                 }

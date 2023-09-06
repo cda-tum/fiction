@@ -42,6 +42,7 @@ TEMPLATE_TEST_CASE(
         TestType lyt{{10, 10}};
         lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
 
+        // gate-based simulation
         critical_temperature_stats<TestType> criticalstats{};
         const critical_temperature_params    params{simulation_engine::EXACT,
                                                  critical_temperature_mode::GATE_BASED_SIMULATION,
@@ -54,10 +55,18 @@ TEMPLATE_TEST_CASE(
         CHECK(criticalstats.num_valid_lyt == 1);
         CHECK(criticalstats.critical_temperature == 350);
 
-        critical_temperature_stats<TestType> criticalstats_new{};
-        critical_temperature(lyt, params, &criticalstats_new);
-        CHECK(criticalstats_new.num_valid_lyt == 1);
-        CHECK(criticalstats_new.critical_temperature == 350);
+        // non-gate-based simulation
+        critical_temperature_stats<TestType> criticalstats_non_gate_based{};
+        const critical_temperature_params    params_non_gate_based{simulation_engine::EXACT,
+                                                                critical_temperature_mode::NON_GATE_BASED_SIMULATION,
+                                                                quicksim_params{sidb_simulation_parameters{2, -0.32}},
+                                                                0.99,
+                                                                350,
+                                                                create_or_tt(),
+                                                                2};
+        critical_temperature(lyt, params, &criticalstats_non_gate_based);
+        CHECK(criticalstats_non_gate_based.num_valid_lyt == 1);
+        CHECK(criticalstats_non_gate_based.critical_temperature == 350);
     }
 
     SECTION("several SiDBs placed")

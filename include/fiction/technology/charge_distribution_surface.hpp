@@ -1065,8 +1065,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& cell : strg->sidb_order)
         {
-            chargeindex += static_cast<uint64_t>(charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) +
-                                                 static_cast<int8_t>(1)) *
+            chargeindex += static_cast<uint64_t>(
+                               charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(cell))]) +
+                               static_cast<int8_t>(1)) *
                            static_cast<uint64_t>(std::pow(base, this->num_cells() - 1u - counter));
             counter += 1;
         }
@@ -1099,7 +1100,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         if (cell != strg->dependent_cell)
                         {
                             chargeindex_sub_layout += static_cast<uint64_t>(
-                                (charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
+                                (charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(cell))]) +
+                                 1) *
                                 static_cast<uint64_t>(
                                     std::pow(3, strg->three_state_cells.size() - counter_sub_layout - 1)));
                             counter_sub_layout += 1;
@@ -1108,9 +1110,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     // iterate through all cells that cannot be positively charged
                     for (const auto& cell : strg->sidb_order_without_three_state_cells)
                     {
-                        chargeindex +=
-                            static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
-                                                  std::pow(2, this->num_cells() - 1 - counter - 1));
+                        chargeindex += static_cast<uint64_t>(
+                            (charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(cell))]) + 1) *
+                            std::pow(2, this->num_cells() - 1 - counter - 1));
                         counter += 1;
                     }
                 }
