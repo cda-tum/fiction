@@ -534,7 +534,8 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
         // Take cells that are not part of the layout
-        CHECK(charge_layout.get_nm_distance_between_cells({3, 0, 0}, {3, 0, 0}) == 0.0);
+        CHECK_THAT(charge_layout.get_nm_distance_between_cells({3, 0, 0}, {3, 0, 0}),
+                   Catch::Matchers::WithinAbs(0.0, 0.00001));
 
         CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {0, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -1086,12 +1087,12 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(charge_layout.is_physically_valid() == 0);
+        CHECK(!charge_layout.is_physically_valid());
 
         charge_layout.update_charge_state_of_dependent_cell();
         charge_layout.update_after_charge_change(dependent_cell_mode::VARIABLE);
         charge_layout.validity_check();
-        CHECK(charge_layout.is_physically_valid() == 1);
+        CHECK(charge_layout.is_physically_valid());
     }
 
     SECTION("check charge index")
@@ -1133,12 +1134,12 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
-        CHECK(charge_layout.is_physically_valid() == 0);
+        CHECK(!charge_layout.is_physically_valid());
 
         charge_layout.update_charge_state_of_dependent_cell();
         charge_layout.update_after_charge_change(dependent_cell_mode::VARIABLE);
         charge_layout.validity_check();
-        CHECK(charge_layout.is_physically_valid() == 1);
+        CHECK(charge_layout.is_physically_valid());
     }
 
     SECTION("check charge index")
@@ -1285,7 +1286,8 @@ TEMPLATE_TEST_CASE(
         charge_layout_new.add_sidb_defect_to_potential_landscape(
             {5, 6}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout_new.get_phys_params().epsilon_r,
                                 charge_layout_new.get_phys_params().lambda_tf});
-        CHECK(charge_layout_new.chargeless_potential_generated_by_defect_at_given_distance(0.0) == 0.0);
+        CHECK_THAT(charge_layout_new.chargeless_potential_generated_by_defect_at_given_distance(0.0),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
         charge_layout_new.update_after_charge_change();
         CHECK_THAT(charge_layout.get_system_energy() - charge_layout_new.get_system_energy(),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
