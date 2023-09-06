@@ -206,7 +206,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          * This pair stores the cell index and its previously charge state (important when all possible charge
          * distributions are enumerated and checked for physical validity).
          */
-        std::pair<int64_t, int8_t> cell_history_gray_code{};
+        std::pair<uint64_t, int8_t> cell_history_gray_code{};
         /**
          * This vector stores the cells and its previously charge states of the charge distribution before the charge
          * index was changed.
@@ -513,7 +513,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             this->foreach_cell(
                 [this, &c](const auto& c1)
                 {
-                    strg->local_pot[static_cast<int64_t>(cell_to_index(c1))] -=
+                    strg->local_pot[static_cast<uint64_t>(cell_to_index(c1))] -=
                         chargeless_potential_generated_by_defect_at_given_distance(
                             sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params), strg->defects[c]) *
                         static_cast<double>(strg->defects[c].charge);
@@ -1672,8 +1672,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 index_changed++;
             }
 
-            const int8_t sign_old = -static_cast<int8_t>(r_old[index_changed]);
-            const int8_t sign_new = -static_cast<int8_t>(r_new[index_changed]);
+            const int8_t sign_old = static_cast<int8_t>(-r_old[index_changed]);
+            const int8_t sign_new = static_cast<int8_t>(-r_new[index_changed]);
 
             if (index_changed < strg->dependent_cell_index)
             {
