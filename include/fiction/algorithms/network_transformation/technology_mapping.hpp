@@ -109,7 +109,7 @@ struct technology_mapping_params
  *
  * @return Technology mapping parameters.
  */
-[[nodiscard]] technology_mapping_params and_or_not() noexcept
+[[nodiscard]] inline technology_mapping_params and_or_not() noexcept
 {
     technology_mapping_params params{};
 
@@ -124,7 +124,7 @@ struct technology_mapping_params
  *
  * @return Technology mapping parameters.
  */
-[[nodiscard]] technology_mapping_params and_or_not_maj() noexcept
+[[nodiscard]] inline technology_mapping_params and_or_not_maj() noexcept
 {
     technology_mapping_params params{};
 
@@ -140,7 +140,7 @@ struct technology_mapping_params
  *
  * @return Technology mapping parameters.
  */
-[[nodiscard]] technology_mapping_params all_standard_2_input_functions() noexcept
+[[nodiscard]] inline technology_mapping_params all_standard_2_input_functions() noexcept
 {
     technology_mapping_params params{};
 
@@ -161,7 +161,7 @@ struct technology_mapping_params
  *
  * @return Technology mapping parameters.
  */
-[[nodiscard]] technology_mapping_params all_standard_3_input_functions() noexcept
+[[nodiscard]] inline technology_mapping_params all_standard_3_input_functions() noexcept
 {
     technology_mapping_params params{};
 
@@ -184,7 +184,7 @@ struct technology_mapping_params
  *
  * @return Technology mapping parameters.
  */
-[[nodiscard]] technology_mapping_params all_supported_standard_functions() noexcept
+[[nodiscard]] inline technology_mapping_params all_supported_standard_functions() noexcept
 {
     technology_mapping_params params{};
 

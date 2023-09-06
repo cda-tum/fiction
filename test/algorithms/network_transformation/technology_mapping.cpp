@@ -18,7 +18,7 @@
 using namespace fiction;
 
 template <typename Ntk>
-void map_and_check_aoim(const Ntk& ntk) noexcept
+void map_and_check_aoim(const Ntk& ntk)
 {
     technology_mapping_stats stats{};
 
@@ -43,7 +43,7 @@ void map_and_check_aoim(const Ntk& ntk) noexcept
 }
 
 template <typename Ntk>
-void map_and_check_all_3_inp(const Ntk& ntk) noexcept
+void map_and_check_all_3_inp(const Ntk& ntk)
 {
     technology_mapping_stats stats{};
 
