@@ -57,7 +57,7 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
                                                 1.920;0.000;0;-1;
                                                 3.072;0.000;-1;-1;)";
 
-        REQUIRE(compare_output(ss.str(), expected_output) | compare_output(ss.str(), expected_output_second));
+        REQUIRE((compare_output(ss.str(), expected_output) || compare_output(ss.str(), expected_output_second)));
     }
 
     SECTION("Output is written to ostream correctly, unique GS")
