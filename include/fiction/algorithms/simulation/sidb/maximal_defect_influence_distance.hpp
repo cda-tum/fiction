@@ -131,8 +131,9 @@ class maximal_defect_influence_distance_impl
                         // get the charge index of the ground state
                         for (auto& lyt_simulation_with_defect : simulation_result_defect.charge_distributions)
                         {
-                            if (round_to_n_decimal_places(lyt_simulation_with_defect.get_system_energy(), 6) ==
-                                round_to_n_decimal_places(min_energy_defect, 6))
+                            if (std::fabs(round_to_n_decimal_places(lyt_simulation_with_defect.get_system_energy(), 6) -
+                                          round_to_n_decimal_places(min_energy_defect, 6)) <
+                                std::numeric_limits<double>::epsilon())
                             {
                                 lyt_simulation_with_defect.charge_distribution_to_index_general();
                                 charge_index_defect_layout =

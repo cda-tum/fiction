@@ -1057,7 +1057,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& cell : strg->sidb_order)
         {
-            chargeindex += static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1u)) *
+            chargeindex += static_cast<uint64_t>(charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) +
+                                                 static_cast<int8_t>(1)) *
                            static_cast<uint64_t>(std::pow(base, this->num_cells() - 1u - counter));
             counter += 1;
         }
@@ -1084,6 +1085,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 if (strg->dependent_cell_in_sub_layout)
                 {
+                    // iterate through all cells that can be positively charged
                     for (const auto& cell : strg->three_state_cells)
                     {
                         if (cell != strg->dependent_cell)
@@ -1095,6 +1097,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                             counter_sub_layout += 1;
                         }
                     }
+                    // iterate through all cells that cannot be positively charged
                     for (const auto& cell : strg->sidb_order_without_three_state_cells)
                     {
                         chargeindex +=
@@ -1103,6 +1106,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         counter += 1;
                     }
                 }
+                // dependent-cell is not among the SiDBs that can be positively charged
                 else
                 {
                     for (const auto& cell : strg->three_state_cells)
@@ -1124,6 +1128,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     }
                 }
             }
+            // there are no positively charged SiDBs
             else
             {
                 for (uint64_t c = 0; c < strg->cell_charge.size(); c++)
@@ -1137,11 +1142,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 }
             }
         }
-
+        // there is no dependent-cell chosen
         else
         {
+            // there are SiDBs that can be positively charged
             if (!strg->three_state_cells.empty())
             {
+                // iterate through SiDBs that can be positively charged
                 for (const auto& cell : strg->three_state_cells)
                 {
 
@@ -1150,15 +1157,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                                               std::pow(3, strg->three_state_cells.size() - 1 - counter_sub_layout));
                     counter_sub_layout += 1;
                 }
+                // iterate through SiDBs that cannot be positively charged
                 for (const auto& cell : strg->sidb_order_without_three_state_cells)
                 {
-
                     chargeindex +=
                         static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
                                               std::pow(2, this->num_cells() - 1 - counter));
                     counter += 1;
                 }
             }
+            // there are no SiDBs that can be positively charged
             else
             {
                 for (const auto& cell : strg->sidb_order)
@@ -1173,220 +1181,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         strg->charge_index_and_base  = {chargeindex, base};
         strg->charge_index_sublayout = chargeindex_sub_layout;
-    }
-    /**
-     *  The stored unique index is converted to a charge distribution.
-     *  @param quickexact False by default, but set to true if used in `quickexact` simulation.
-     */
-    void index_to_charge_distribution(const exhaustive_algorithm& engine = exhaustive_algorithm::EXGS) noexcept
-    {
-        // This scope is executed if the function is not used by `quickexact`.
-        if (engine == exhaustive_algorithm::QUICKEXACT)
-        {
-            // Cell_history collects the cells (SiDBs) that have changed their charge state.
-            strg->cell_history = {};
-            strg->cell_history.reserve(this->num_cells());
-
-            // If the charge index is set to zero, first, all SiDBs that are not among the "positive candidates" (sub
-            // layout) are updated.
-            if (strg->charge_index_and_base.first == 0)
-            {
-                for (const auto& cell : strg->sidb_order_without_three_state_cells)
-                {
-                    if (this->get_charge_state(cell) != sidb_charge_state::NEGATIVE && cell != strg->dependent_cell)
-                    {
-                        strg->cell_history.emplace_back(cell_to_index(cell),
-                                                        charge_state_to_sign(get_charge_state(cell)));
-                        if (engine == exhaustive_algorithm::EXGS)
-                        {
-                            this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, true);
-                        }
-                        else
-                        {
-                            this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, false);
-                        }
-                    }
-                }
-            }
-            // If the charge index of the sublayout is zero, the charge states are updated.
-            if (strg->charge_index_sublayout == 0)
-            {
-                for (const auto& cell : strg->three_state_cells)
-                {
-                    if (this->get_charge_state(cell) != sidb_charge_state::NEGATIVE && cell != strg->dependent_cell)
-                    {
-                        strg->cell_history.emplace_back(cell_to_index(cell),
-                                                        charge_state_to_sign(get_charge_state(cell)));
-                        if (engine == exhaustive_algorithm::EXGS)
-                        {
-                            this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, true);
-                        }
-                        else
-                        {
-                            this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, false);
-                        }
-                    }
-                }
-            }
-
-            // Get the index of the depedent-cell. If it is not part of the sublayout, -1 is returned.
-            const auto dependent_cell_index = positive_cell_to_index(strg->dependent_cell);
-
-            auto       charge_quot_positive = strg->charge_index_sublayout;
-            const auto base_positive        = 3;
-            auto       counter              = strg->three_state_cells.size() - 1;
-            // Firstly, the charge distribution of the sublayout (i.e., collection of SiDBs that can be positively
-            // charged) is updated.
-            while (charge_quot_positive > 0)
-            {
-                const auto    charge_quot_int = static_cast<int64_t>(charge_quot_positive);
-                const auto    base_int        = static_cast<int64_t>(base_positive);
-                const int64_t quotient_int    = charge_quot_int / base_int;
-                const int64_t remainder_int   = charge_quot_int % base_int;
-                charge_quot_positive          = static_cast<uint64_t>(quotient_int);
-
-                if (counter != dependent_cell_index)
-                {
-                    const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                    if (const auto new_chargesign = this->get_charge_state_by_index(
-                            static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))));
-                        new_chargesign != sign)
-                    {
-                        strg->cell_history.emplace_back(
-                            static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))),
-                            charge_state_to_sign(new_chargesign));
-                        this->assign_charge_state_by_cell_index(cell_to_index(index_to_three_state_cell(counter)), sign,
-                                                                false);
-                    }
-                    counter -= 1;
-                }
-                else
-                {
-                    counter -= 1;
-                    const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                    if (const auto old_chargesign =
-                            this->get_charge_state_by_index(cell_to_index(index_to_three_state_cell(counter)));
-                        old_chargesign != sign)
-                    {
-                        strg->cell_history.emplace_back(
-                            static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))),
-                            charge_state_to_sign(old_chargesign));
-                        this->assign_charge_state_by_cell_index(cell_to_index(index_to_three_state_cell(counter)), sign,
-                                                                false);
-                    }
-                    counter -= 1;
-                }
-            }
-
-            const auto dependent_cell_index_negative = two_state_cell_to_index(strg->dependent_cell);
-            auto       charge_quot                   = strg->charge_index_and_base.first;
-            const auto base                          = strg->charge_index_and_base.second;
-            auto       counter_negative              = strg->sidb_order_without_three_state_cells.size() - 1;
-
-            // Secondly, the charge distribution of the layout (only SiDBs which can be either neutrally or negatively
-            // charged) is updated.
-            while (charge_quot > 0)
-            {
-                const auto    charge_quot_int = static_cast<int64_t>(charge_quot);
-                const auto    base_int        = static_cast<int64_t>(base);
-                const int64_t quotient_int    = charge_quot_int / base_int;
-                const int64_t remainder_int   = charge_quot_int % base_int;
-                charge_quot                   = static_cast<uint64_t>(quotient_int);
-                // If the current position is not the dependent-cell position, the charge state is updated.
-                if (counter_negative != dependent_cell_index_negative)
-                {
-                    const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                    if (const auto new_chargesign =
-                            this->get_charge_state_by_index(cell_to_index(index_to_two_state_cell(counter_negative)));
-                        new_chargesign != sign)
-                    {
-                        strg->cell_history.emplace_back(
-                            static_cast<uint64_t>(cell_to_index(index_to_two_state_cell(counter_negative))),
-                            charge_state_to_sign(new_chargesign));
-                        this->assign_charge_state_by_cell_index(
-                            cell_to_index(index_to_two_state_cell(counter_negative)), sign, false);
-                    }
-                    counter_negative -= 1;
-                }
-                // If the current position is the dependent cell position, first the counter_negative is decremented by
-                // one to get to the next cell position to update its charge state.
-                else
-                {
-                    counter_negative -= 1;
-                    const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                    if (const auto old_chargesign =
-                            this->get_charge_state_by_index(cell_to_index(index_to_two_state_cell(counter_negative)));
-                        old_chargesign != sign)
-                    {
-                        strg->cell_history.emplace_back(
-                            static_cast<uint64_t>(cell_to_index(index_to_two_state_cell(counter_negative))),
-                            charge_state_to_sign(old_chargesign));
-                        this->assign_charge_state_by_cell_index(
-                            cell_to_index(index_to_two_state_cell(counter_negative)), sign, false);
-                    }
-                    counter_negative -= 1;
-                }
-            }
-        }
-        else
-        {
-            auto       charge_quot          = strg->charge_index_and_base.first;
-            const auto base                 = strg->charge_index_and_base.second;
-            const auto num_charges          = this->num_cells();
-            auto       counter              = num_charges - 1;
-            const auto dependent_cell_index = cell_to_index(strg->dependent_cell);
-
-            // A charge index of zero corresponds to a layout with all SiDBs set to negative.
-            if (charge_quot == 0)
-            {
-                this->assign_all_charge_states(sidb_charge_state::NEGATIVE);
-            }
-            else
-            {
-                while (charge_quot > 0)
-                {
-                    const auto    charge_quot_int = static_cast<int64_t>(charge_quot);
-                    const auto    base_int        = static_cast<int64_t>(base);
-                    const int64_t quotient_int    = charge_quot_int / base_int;
-                    const int64_t remainder_int   = charge_quot_int % base_int;
-                    charge_quot                   = static_cast<uint64_t>(quotient_int);
-                    // Dependent-SiDB is skipped since its charge state is not changed based on the charge index.
-                    if (counter != dependent_cell_index)
-                    {
-                        const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                        // The charge state is only changed (i.e., the function assign_charge_state_by_cell_index is ca
-                        // lled), if the nw charge state differs to the previous one. Only then will the cell be added
-                        // to the charge_distribution_history.
-                        if (const auto new_chargesign = this->get_charge_state_by_index(counter);
-                            new_chargesign != sign)
-                        {
-                            strg->cell_history.emplace_back(static_cast<uint64_t>(counter),
-                                                            charge_state_to_sign(new_chargesign));
-                            this->assign_charge_state_by_cell_index(counter, sign, false);
-                        }
-                        counter -= 1;
-                    }
-                    // If the counter is at the dependent-cell location, it is reduced by one to get to next cell
-                    // position.
-                    else
-                    {
-                        counter -= 1;
-                        const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                        // The charge state is only changed (i.e., the function assign_charge_state_by_cell_index is
-                        // called), if the nw charge state differs to the previous one. Only then will the cell be added
-                        // to the charge_distribution_history.
-                        if (const auto old_chargesign = this->get_charge_state_by_index(counter);
-                            old_chargesign != sign)
-                        {
-                            strg->cell_history.emplace_back(static_cast<uint64_t>(counter),
-                                                            charge_state_to_sign(old_chargesign));
-                            this->assign_charge_state_by_cell_index(counter, sign, false);
-                        }
-                        counter -= 1;
-                    }
-                }
-            }
-        }
     }
     /**
      * The charge index of the current charge distribution is returned.
@@ -1535,6 +1329,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         bool required                              = false;
         strg->dependent_cell_in_sub_layout         = false;
 
+        // check if all SiDBs are negatively charged
+        this->foreach_cell(
+            [this](const auto& c) {
+                assert(this->get_charge_state(c) == sidb_charge_state::NEGATIVE &&
+                       "All SiDBs have to be negatively charged");
+            });
+
+        // Each SiDB is checked to see if the local electrostatic potential is high enough
+        // to cause a positively charged SiDB
         this->foreach_cell(
             [&required, this](const auto& c)
             {
@@ -1555,8 +1358,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 }
             });
 
+        // sort all SiDBs that can be positively charged by the defined < relation
         std::sort(strg->three_state_cells.begin(), strg->three_state_cells.end());
 
+        // collect all SiDBs that are not among the SiDBs that can be positively charged
         for (const auto& cell : strg->sidb_order)
         {
             if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), cell) ==
@@ -1567,8 +1372,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
         }
 
+        // sort all SiDBs that cannot be positively charged by the defined < relation
         std::sort(strg->sidb_order_without_three_state_cells.begin(), strg->sidb_order_without_three_state_cells.end());
 
+        // if SiDBs exist that can be positively charged, 3-state simulation is required
         if (required)
         {
             this->assign_base_number_to_three();
@@ -2076,6 +1883,201 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
             {
                 strg->pot_mat[i][j] = calculate_chargeless_potential_between_sidbs_by_index(i, j);
+            }
+        }
+    }
+    /**
+     *  The stored unique index is converted to a charge distribution.
+     *  @param quickexact False by default, but set to true if used in `quickexact` simulation.
+     */
+    void index_to_charge_distribution(const exhaustive_algorithm& engine = exhaustive_algorithm::EXGS) noexcept
+    {
+        // This scope is executed if the function is used by `quickexact`.
+        if (engine == exhaustive_algorithm::QUICKEXACT)
+        {
+            // Cell_history collects the cells (SiDBs) that have changed their charge state.
+            strg->cell_history = {};
+            strg->cell_history.reserve(this->num_cells());
+
+            // If the charge index is set to zero, first, all SiDBs that are not among the "positive candidates" (sub
+            // layout) are updated.
+            if (strg->charge_index_and_base.first == 0)
+            {
+                for (const auto& cell : strg->sidb_order_without_three_state_cells)
+                {
+                    if (this->get_charge_state(cell) != sidb_charge_state::NEGATIVE && cell != strg->dependent_cell)
+                    {
+                        strg->cell_history.emplace_back(cell_to_index(cell),
+                                                        charge_state_to_sign(get_charge_state(cell)));
+                        this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, false);
+                    }
+                }
+            }
+            // If the charge index of the sublayout is zero, the charge states are updated.
+            if (strg->charge_index_sublayout == 0)
+            {
+                for (const auto& cell : strg->three_state_cells)
+                {
+                    if (this->get_charge_state(cell) != sidb_charge_state::NEGATIVE && cell != strg->dependent_cell)
+                    {
+                        strg->cell_history.emplace_back(cell_to_index(cell),
+                                                        charge_state_to_sign(get_charge_state(cell)));
+                        this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, false);
+                    }
+                }
+            }
+
+            // Get the index of the dependent-cell. If it is not part of the sublayout, -1 is returned.
+            const auto dependent_cell_index = positive_cell_to_index(strg->dependent_cell);
+
+            auto       charge_quot_positive = strg->charge_index_sublayout;
+            const auto base_positive        = 3;
+            auto       counter              = strg->three_state_cells.size() - 1;
+            // Firstly, the charge distribution of the sublayout (i.e., collection of SiDBs that can be positively
+            // charged) is updated.
+            while (charge_quot_positive > 0)
+            {
+                const auto    charge_quot_int = static_cast<int64_t>(charge_quot_positive);
+                const auto    base_int        = static_cast<int64_t>(base_positive);
+                const int64_t quotient_int    = charge_quot_int / base_int;
+                const int64_t remainder_int   = charge_quot_int % base_int;
+                charge_quot_positive          = static_cast<uint64_t>(quotient_int);
+
+                if (counter != dependent_cell_index)
+                {
+                    const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
+                    if (const auto new_chargesign = this->get_charge_state_by_index(
+                            static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))));
+                        new_chargesign != sign)
+                    {
+                        strg->cell_history.emplace_back(
+                            static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))),
+                            charge_state_to_sign(new_chargesign));
+                        this->assign_charge_state_by_cell_index(cell_to_index(index_to_three_state_cell(counter)), sign,
+                                                                false);
+                    }
+                    counter -= 1;
+                }
+                else
+                {
+                    counter -= 1;
+                    const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
+                    if (const auto old_chargesign =
+                            this->get_charge_state_by_index(cell_to_index(index_to_three_state_cell(counter)));
+                        old_chargesign != sign)
+                    {
+                        strg->cell_history.emplace_back(
+                            static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))),
+                            charge_state_to_sign(old_chargesign));
+                        this->assign_charge_state_by_cell_index(cell_to_index(index_to_three_state_cell(counter)), sign,
+                                                                false);
+                    }
+                    counter -= 1;
+                }
+            }
+
+            const auto dependent_cell_index_negative = two_state_cell_to_index(strg->dependent_cell);
+            auto       charge_quot                   = strg->charge_index_and_base.first;
+            const auto base                          = strg->charge_index_and_base.second;
+            auto       counter_negative              = strg->sidb_order_without_three_state_cells.size() - 1;
+
+            // Secondly, the charge distribution of the layout (only SiDBs which can be either neutrally or negatively
+            // charged) is updated.
+            while (charge_quot > 0)
+            {
+                const auto    charge_quot_int = static_cast<int64_t>(charge_quot);
+                const auto    base_int        = static_cast<int64_t>(base);
+                const int64_t quotient_int    = charge_quot_int / base_int;
+                const int64_t remainder_int   = charge_quot_int % base_int;
+                charge_quot                   = static_cast<uint64_t>(quotient_int);
+                // If the current position is not the dependent-cell position, the charge state is updated.
+                if (counter_negative != dependent_cell_index_negative)
+                {
+                    const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
+                    if (const auto new_chargesign =
+                            this->get_charge_state_by_index(cell_to_index(index_to_two_state_cell(counter_negative)));
+                        new_chargesign != sign)
+                    {
+                        strg->cell_history.emplace_back(
+                            static_cast<uint64_t>(cell_to_index(index_to_two_state_cell(counter_negative))),
+                            charge_state_to_sign(new_chargesign));
+                        this->assign_charge_state_by_cell_index(
+                            cell_to_index(index_to_two_state_cell(counter_negative)), sign, false);
+                    }
+                    counter_negative -= 1;
+                }
+                // If the current position is the dependent cell position, first the counter_negative is decremented by
+                // one to get to the next cell position to update its charge state.
+                else
+                {
+                    counter_negative -= 1;
+                    const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
+                    if (const auto old_chargesign =
+                            this->get_charge_state_by_index(cell_to_index(index_to_two_state_cell(counter_negative)));
+                        old_chargesign != sign)
+                    {
+                        strg->cell_history.emplace_back(
+                            static_cast<uint64_t>(cell_to_index(index_to_two_state_cell(counter_negative))),
+                            charge_state_to_sign(old_chargesign));
+                        this->assign_charge_state_by_cell_index(
+                            cell_to_index(index_to_two_state_cell(counter_negative)), sign, false);
+                    }
+                    counter_negative -= 1;
+                }
+            }
+        }
+        else
+        {
+            auto       charge_quot          = strg->charge_index_and_base.first;
+            const auto base                 = strg->charge_index_and_base.second;
+            const auto num_charges          = this->num_cells();
+            auto       counter              = num_charges - 1;
+            const auto dependent_cell_index = cell_to_index(strg->dependent_cell);
+
+            // A charge index of zero corresponds to a layout with all SiDBs set to negative.
+            if (charge_quot == 0)
+            {
+                this->assign_all_charge_states(sidb_charge_state::NEGATIVE);
+            }
+            else
+            {
+                while (charge_quot > 0)
+                {
+                    const auto    charge_quot_int = static_cast<int64_t>(charge_quot);
+                    const auto    base_int        = static_cast<int64_t>(base);
+                    const int64_t quotient_int    = charge_quot_int / base_int;
+                    const int64_t remainder_int   = charge_quot_int % base_int;
+                    charge_quot                   = static_cast<uint64_t>(quotient_int);
+                    // Dependent-SiDB is skipped since its charge state is not changed based on the charge index.
+
+                    if (dependent_cell_index >= 0)
+                    {
+                        if (counter != dependent_cell_index)
+                        {
+                            const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
+                            this->assign_charge_state_by_cell_index(counter, sign, false);
+                            counter -= 1;
+                        }
+                        // If the counter is at the dependent-cell location, it is reduced by one to get to the next
+                        // cell position.
+                        else
+                        {
+                            counter -= 1;
+                            const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
+                            // The charge state is only changed (i.e., the function assign_charge_state_by_cell_index is
+                            // called), if the nw charge state differs to the previous one. Only then will the cell be
+                            // added to the charge_distribution_history.
+                            this->assign_charge_state_by_cell_index(counter, sign, false);
+                            counter -= 1;
+                        }
+                    }
+                    else
+                    {
+                        const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
+                        this->assign_charge_state_by_cell_index(counter, sign, false);
+                        counter -= 1;
+                    }
+                }
             }
         }
     }

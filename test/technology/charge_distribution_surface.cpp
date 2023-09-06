@@ -137,6 +137,39 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({5, 6}) == sidb_charge_state::NEGATIVE);
     }
 
+    SECTION("increase charge index of layout")
+    {
+        lyt.assign_cell_type({5, 4}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 5}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 6}, TestType::cell_type::NORMAL);
+        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{2}};
+        CHECK(charge_layout.get_charge_index_and_base().first == 0);
+        charge_layout.increase_charge_index_by_one(dependent_cell_mode::FIXED, energy_calculation::UPDATE_ENERGY,
+                                                   charge_distribution_history::NEGLECT, exhaustive_algorithm::EXGS);
+        CHECK(charge_layout.get_charge_index_and_base().first == 1);
+        CHECK(charge_layout.get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state_by_index(1) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state_by_index(2) == sidb_charge_state::NEUTRAL);
+        charge_layout.assign_charge_index(0);
+        CHECK(charge_layout.get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state_by_index(1) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state_by_index(2) == sidb_charge_state::NEGATIVE);
+
+        charge_distribution_surface charge_layout_quickexact{lyt,
+                                                             sidb_simulation_parameters{2},
+                                                             sidb_charge_state::NEGATIVE,
+                                                             {5, 4}};
+        charge_layout_quickexact.is_three_state_simulation_required();
+        CHECK(charge_layout_quickexact.get_charge_index_and_base().first == 0);
+        charge_layout_quickexact.increase_charge_index_by_one(
+            dependent_cell_mode::FIXED, energy_calculation::UPDATE_ENERGY, charge_distribution_history::NEGLECT,
+            exhaustive_algorithm::QUICKEXACT);
+        CHECK(charge_layout_quickexact.get_charge_index_and_base().first == 1);
+        CHECK(charge_layout_quickexact.get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout_quickexact.get_charge_state_by_index(1) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout_quickexact.get_charge_state_by_index(2) == sidb_charge_state::NEUTRAL);
+    }
+
     SECTION("charge distribution defined by a given charge index and vs and dependent-cell")
     {
         lyt.assign_cell_type({5, 5}, TestType::cell_type::NORMAL);
@@ -153,7 +186,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_index_and_base().first == 0);
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 0);
 
-        // check if three state simulation is required.
+        // check if three state simulations are required.
         charge_layout.is_three_state_simulation_required();
 
         // all SiDBs of the layout can be positively charged.
