@@ -182,7 +182,8 @@ class shifted_cartesian_layout
             "odd_column_cartesian, even_column_cartesian");
     }
 
-    shifted_cartesian_layout(const HexagonalLayout& lyt) : HexagonalLayout(lyt) {}  // NOLINT(*-explicit-constructor)
+    // NOLINTNEXTLINE(*-explicit-constructor, *-explicit-conversions)
+    shifted_cartesian_layout(const HexagonalLayout& lyt) : HexagonalLayout(lyt) {}
 
   private:
     // intentionally hide members of HexagonalLayout
