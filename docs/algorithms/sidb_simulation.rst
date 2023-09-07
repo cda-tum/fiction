@@ -96,13 +96,13 @@ Temperature Behavior
 Maximal Defect Influence Distance
 #################################
 
-**Header:** ``fiction/algorithms/simulation/sidb/maximal_defect_influence_distance.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/maximum_defect_influence_distance.hpp``
 
-.. doxygenstruct:: fiction::maximal_defect_influence_distance_params
+.. doxygenstruct:: fiction::maximum_defect_influence_distance_params
    :members:
-.. doxygenstruct:: fiction::maximal_defect_influence_distance_stats
+.. doxygenstruct:: fiction::maximum_defect_influence_distance_stats
    :members:
-.. doxygenfunction:: fiction::maximal_defect_influence_distance
+.. doxygenfunction:: fiction::maximum_defect_influence_distance
 
 
 Time-to-Solution (TTS) Statistics
