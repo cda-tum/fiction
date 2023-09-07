@@ -34,10 +34,10 @@ TEST_CASE("Test influence distance function", "[maximum_defect_influence_distanc
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
         const maximum_defect_influence_distance_params<sidb_cell_clk_lyt_siqad> sim_params{defect,
-                                                                                     sidb_simulation_parameters{},
-                                                                                     {50, 6}};
+                                                                                           sidb_simulation_parameters{},
+                                                                                           {50, 6}};
 
-        sidb_cell_clk_lyt_siqad                                           lyt{};
+        sidb_cell_clk_lyt_siqad lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
         maximum_defect_influence_distance_stats<sidb_cell_clk_lyt_siqad> defect_stats{};
@@ -102,9 +102,9 @@ TEST_CASE("Test influence distance function", "[maximum_defect_influence_distanc
     {
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
-        const maximum_defect_influence_distance_params<sidb_cell_clk_lyt_siqad> sim_params{defect,
-                                                                                     sidb_simulation_parameters{}};
-        sidb_cell_clk_lyt_siqad                                           lyt{};
+        const maximum_defect_influence_distance_params<sidb_cell_clk_lyt_siqad> sim_params{
+            defect, sidb_simulation_parameters{}};
+        sidb_cell_clk_lyt_siqad lyt{};
 
         lyt.assign_cell_type({10, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({0, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
