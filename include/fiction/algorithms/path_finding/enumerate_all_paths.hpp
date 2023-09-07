@@ -31,10 +31,10 @@ template <typename Path, typename Lyt>
 class enumerate_all_paths_impl
 {
   public:
-    enumerate_all_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const enumerate_all_paths_params p) :
+    enumerate_all_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const enumerate_all_paths_params& p) :
             layout{lyt},
             objective{obj},
-            ps{p}
+            params{p}
     {}
 
     /**
@@ -67,7 +67,7 @@ class enumerate_all_paths_impl
     /**
      * Routing parameters.
      */
-    enumerate_all_paths_params ps;
+    const enumerate_all_paths_params params;
     /**
      * Set of visited coordinates.
      */
@@ -143,7 +143,7 @@ class enumerate_all_paths_impl
                     if (layout.is_obstructed_coordinate(successor) && successor != tgt)
                     {
                         // if crossings are enabled, check if it is possible to switch to the crossing layer
-                        if (ps.crossings && is_crossable_wire(layout, src, successor))
+                        if (params.crossings && is_crossable_wire(layout, src, successor))
                         {
                             // if the crossing layer is not obstructed
                             if (const auto above_successor = layout.above(successor);
@@ -232,16 +232,16 @@ class enumerate_all_paths_impl
  * @tparam Lyt Type of the layout to perform path finding on.
  * @param layout The layout whose paths are to be enumerated.
  * @param objective Source-target coordinate pair.
- * @param ps Parameters.
+ * @param params Parameters.
  * @return A collection of all unique paths in `layout` from `source` to `target`.
  */
 template <typename Path, typename Lyt>
 [[nodiscard]] path_collection<Path> enumerate_all_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
-                                                        enumerate_all_paths_params ps = {}) noexcept
+                                                        const enumerate_all_paths_params& params = {}) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
-    return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, ps}.run();
+    return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, params}.run();
 }
 
 }  // namespace fiction
