@@ -84,6 +84,7 @@ Enumerate All Paths
 
 **Header:** ``fiction/algorithms/path_finding/enumerate_all_paths.hpp``
 
-.. doxygenstruct:: fiction::enumerate_all_clocking_paths_params
+.. doxygenstruct:: fiction::enumerate_all_paths_params
    :members:
+.. doxygenfunction:: fiction::enumerate_all_coordinate_paths
 .. doxygenfunction:: fiction::enumerate_all_clocking_paths
