@@ -220,7 +220,8 @@ class critical_temperature_impl
             charge_distribution_surface<Lyt> lyt_copy{};
             for (const auto& lyt : simulation_results.charge_distributions)
             {
-                if (round_to_n_decimal_places(lyt.get_system_energy(), 6) == lowest_energy)
+                if (std::fabs(round_to_n_decimal_places(lyt.get_system_energy(), 6) - lowest_energy) <
+                    std::numeric_limits<double>::epsilon())
                 {
                     lyt_copy = charge_distribution_surface<Lyt>{lyt};
                 }
@@ -237,11 +238,9 @@ class critical_temperature_impl
             {
                 if (parameter.truth_table.num_bits() == 8)  // number of bits of truth table.
                 {
-                    output_bits_index = {-4, -3};
-                    / double wire, cx,
-                        etc.
-                        // Truth table entries for given inputs are collected.
-                        output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2 + 1) != 0u);
+                    output_bits_index = {-4, -3};           // double wire, cx, etc.
+                    // Truth table entries for given inputs are collected.
+                    output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2 + 1) != 0u);
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2) != 0u);
                 }
             }
@@ -258,9 +257,8 @@ class critical_temperature_impl
                 if (parameter.truth_table.num_bits() == 4 &&
                     parameter.truth_table != create_fan_out_tt())  // and, or, nand, etc.
                 {
-                    output_bits_index = {-2};   / One output SiDB. -2 due to placed perturber.
-
-                                               / Truth table entry for given inputs is collected.
+                    output_bits_index = {-2};                      // One output SiDB. -2 due to placed perturber.
+                                                                   // Truth table entry for given inputs is collected.
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit) != 0u);
                 }
                 else
