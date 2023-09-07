@@ -1664,9 +1664,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         uint64_t index_changed = 0;
 
+        // Check if there are differing bits (if 'diff' is not equal to 0).
         if (diff != 0)
         {
-
+            // Find the bit position of the first difference. This position then describes the cell index of the SiDB
+            // that has changed its charge state.
             while (index_changed < diff.size() && !diff.test(index_changed))
             {
                 index_changed++;
@@ -1990,8 +1992,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
                     counter -= 1;
                     const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                    if (const auto old_chargesign =
-                            this->get_charge_state_by_index(cell_to_index(index_to_three_state_cell(counter)));
+                    if (const auto old_chargesign = this->get_charge_state_by_index(
+                            static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))));
                         old_chargesign != sign)
                     {
                         strg->cell_history.emplace_back(

@@ -319,7 +319,7 @@ class critical_temperature_impl
         }
         else
         {
-            temperature_stats.algorithm_name = "quicksim";
+            temperature_stats.algorithm_name = "QuickSim";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = quicksim(layout, parameter.simulation_params);

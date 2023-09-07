@@ -47,6 +47,36 @@ struct maximal_defect_influence_distance_params
     uint64_t number_threads{std::thread::hardware_concurrency()};
 };
 
+/**
+ * This struct stores the `Maximal defect influence distance` and the corresponding `Maximal defect position` found by
+ * the algorithm.
+ */
+template <typename Lyt>
+struct maximal_defect_influence_distance_stats
+{
+    /**
+     * Maximal defect position at which the
+     * defect can still affect the layout's ground state.
+     */
+    typename Lyt::cell maximal_influence_defect_position{};
+    /**
+     * Maximal defect influence distance, defined as the minimum distance between any SiDB cell and the defect, at which
+     * the defect can still affect the layout's ground state.
+     */
+    double maximal_defect_influence_distance{};
+    /**
+     * Print the results to the given output stream.
+     *
+     * @param out Output stream.
+     */
+    void report(std::ostream& out = std::cout)
+    {
+        out << fmt::format("Maximal influence distance: {} \n Defect position: {}, {}, {} \n",
+                           maximal_defect_influence_distance, maximal_influence_defect_position.x,
+                           maximal_influence_defect_position.y, std::to_string(maximal_influence_defect_position.z));
+    }
+};
+
 namespace detail
 {
 /**
@@ -65,20 +95,22 @@ class maximal_defect_influence_distance_impl
 {
   public:
     maximal_defect_influence_distance_impl(const Lyt&                                           lyt,
-                                           const maximal_defect_influence_distance_params<Lyt>& sim_params) :
+                                           const maximal_defect_influence_distance_params<Lyt>& sim_params,
+                                           maximal_defect_influence_distance_stats<Lyt>&        st) :
             layout{lyt},
-            params{sim_params}
+            params{sim_params},
+            defect_distance_stats{st}
     {
         collect_all_defect_cells();
     }
 
-    std::pair<double, typename Lyt::cell> run()
+    bool run()
     {
         const quickexact_params<sidb_defect_cell_clk_lyt_siqad> params_defect{params.physical_params,
                                                                               automatic_base_number_detection::OFF};
 
         double          avoidance_distance{0};
-        coordinate<Lyt> min_defect_position{};
+        coordinate<Lyt> max_defect_position{};
 
         const auto simulation_results =
             quickexact(layout, quickexact_params<Lyt>{params.physical_params, automatic_base_number_detection::OFF});
@@ -151,7 +183,6 @@ class maximal_defect_influence_distance_impl
                         {
                             // determine minimal distance of the defect to the layout
                             auto distance = std::numeric_limits<double>::infinity();
-                            ;
                             layout.foreach_cell(
                                 [this, &defect, &distance](const auto& cell)
                                 {
@@ -166,7 +197,7 @@ class maximal_defect_influence_distance_impl
                                 // the distance is larger than the current maximal one.
                                 if (distance > avoidance_distance)
                                 {
-                                    min_defect_position =
+                                    max_defect_position =
                                         defect;    // current placed defect that leads to a change of the ground state
                                     avoidance_distance =
                                         distance;  // new avoidance distance given by the current distance
@@ -229,13 +260,13 @@ class maximal_defect_influence_distance_impl
                 // the distance is larger than the current maximal one.
                 if (distance > avoidance_distance)
                 {
-                    min_defect_position = defect;
+                    max_defect_position = defect;
                     avoidance_distance  = distance;
                 }
             }
         }
-
-        return {avoidance_distance, min_defect_position};
+        defect_distance_stats.maximal_influence_defect_position = max_defect_position;
+        defect_distance_stats.maximal_defect_influence_distance = avoidance_distance;
     }
 
   private:
@@ -251,6 +282,10 @@ class maximal_defect_influence_distance_impl
      * All allowed defect positions.
      */
     std::vector<typename Lyt::cell> defect_cells{};
+    /**
+     * Statistics.
+     */
+    maximal_defect_influence_distance_stats<Lyt>& defect_distance_stats;
     /**
      * Collects all possible defect cell positions within a given layout while avoiding SiDB cells.
      *
@@ -321,22 +356,30 @@ class maximal_defect_influence_distance_impl
  *
  * @tparam Lyt The type representing the SiDB cell-level layout.
  * @param lyt The layout for which the influence distance is being determined.
- * @param sim_params Parameters used to calculate the defect's influence distance.
- * @return A pair consisting of the maximum influence distance (indicating that the defect should be placed farther
- * away to avoid impact) and the position of the defect within the layout, aiding in identifying sensitive regions
- * of the layout.
+ * @param sim_params Parameters used to calculate the defect's maximal influence distance.
+ * @return pst Statistics.
  */
 template <typename Lyt>
-std::pair<double, typename Lyt::cell>
-maximal_defect_influence_distance(const Lyt& lyt, const maximal_defect_influence_distance_params<Lyt>& sim_params = {})
+bool maximal_defect_influence_distance(const Lyt&                                           lyt,
+                                       const maximal_defect_influence_distance_params<Lyt>& sim_params = {},
+                                       maximal_defect_influence_distance_stats<Lyt>*        pst        = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
-    detail::maximal_defect_influence_distance_impl<Lyt> p{lyt, sim_params};
+    maximal_defect_influence_distance_stats<Lyt> st{};
 
-    return p.run();
+    detail::maximal_defect_influence_distance_impl<Lyt> p{lyt, sim_params, st};
+
+    const auto result = p.run();
+
+    if (pst)
+    {
+        *pst = st;
+    }
+
+    return result;
 }
 
 }  // namespace fiction

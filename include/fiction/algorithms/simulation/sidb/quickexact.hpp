@@ -543,8 +543,8 @@ class quickexact_impl
  *    configurations. By using Gray code, only one charge state changes at a time, making the computation
  *    of the local electrostatic potential easier.
  *
- * Additionally, `QuickExact also considers global and local electrostatic potentials, as well as existing defects. This
- * holistic approach ensures an accurate representation of the physical behavior of the SiDB layout.
+ * Additionally, `QuickExact` also considers global and local electrostatic potentials, as well as existing defects.
+ * This holistic approach ensures an accurate representation of the physical behavior of the SiDB layout.
  *
  * In summary, `QuickExact` combines advanced SiDB charge detection, dependent SiDB selection, and the use of Gray code
  * to achieve outstanding performance and enable efficient simulations of SiDB layouts, even in scenarios where

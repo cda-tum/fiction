@@ -26,7 +26,7 @@ namespace fiction
  * the number of SiDBs per layout. Therefore, only layouts with up to 30 DBs can be simulated in a reasonable time.
  * However, since all charge configurations are checked for validity, 100 % simulation accuracy is guaranteed.
  *
- * @note This was the first exact simulation approach. However, `QuickExact` replaces it because it provides much
+ * @note This was the first exact simulation approach. However, it is replaced by `QuickExact` due to the much
  * better runtimes and more functionality.
  *
  * @tparam Lyt Cell-level layout type.

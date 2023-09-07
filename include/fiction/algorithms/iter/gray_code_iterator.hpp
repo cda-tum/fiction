@@ -209,6 +209,19 @@ class gray_code_iterator
         return *this;
     }
     /**
+     * Subscript operator. Returns the Gray code at a specific position in the iteration range.
+     *
+     * @param index The position in the iteration range.
+     * @return The Gray code at the specified position.
+     */
+    uint64_t operator[](size_t index) const
+    {
+        // Calculate the Gray code at the specified position
+        uint64_t result = start_number + static_cast<uint64_t>(index);
+        result ^= (result >> 1u);
+        return result;
+    }
+    /**
      * Equality operator. Compares the current number with the given integer.
      *
      * @param m Integer to compare with.
@@ -305,7 +318,7 @@ namespace std
 template <>
 struct iterator_traits<fiction::gray_code_iterator>
 {
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_category = std::random_access_iterator_tag;
     using value_type        = uint64_t;
 };
 }  // namespace std

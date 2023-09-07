@@ -238,7 +238,37 @@ TEMPLATE_TEST_CASE(
                                                  critical_temperature_mode::NON_GATE_BASED_SIMULATION,
                                                  quicksim_params{sidb_simulation_parameters{2, -0.15}}, 0.99, 350};
         critical_temperature(lyt, params, &criticalstats);
-        CHECK(criticalstats.algorithm_name == "quicksim");
+        CHECK(criticalstats.algorithm_name == "QuickSim");
+        CHECK(criticalstats.critical_temperature < 200);
+        CHECK(criticalstats.critical_temperature > 0);
+    }
+
+    SECTION("small fo2 for testing")
+    {
+        TestType lyt{{20, 10}};
+
+        lyt.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 3, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({-2, 5, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({-3, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({-3, 8, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({2, 5, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 8, 0}, TestType::cell_type::NORMAL);
+
+        critical_temperature_stats<TestType> criticalstats{};
+        const critical_temperature_params    params{simulation_engine::APPROXIMATE,
+                                                 critical_temperature_mode::GATE_BASED_SIMULATION,
+                                                 quicksim_params{sidb_simulation_parameters{2, -0.35}},
+                                                 0.99,
+                                                 350,
+                                                 create_fan_out_tt(),
+                                                 1};
+        critical_temperature(lyt, params, &criticalstats);
+        CHECK(criticalstats.algorithm_name == "QuickSim");
         CHECK(criticalstats.critical_temperature < 200);
         CHECK(criticalstats.critical_temperature > 0);
     }

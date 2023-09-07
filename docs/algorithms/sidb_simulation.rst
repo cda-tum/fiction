@@ -100,6 +100,8 @@ Maximal Defect Influence Distance
 
 .. doxygenstruct:: fiction::maximal_defect_influence_distance_params
    :members:
+.. doxygenstruct:: fiction::maximal_defect_influence_distance_stats
+   :members:
 .. doxygenfunction:: fiction::maximal_defect_influence_distance
 
 
