@@ -245,12 +245,12 @@ class yen_k_shortest_paths_impl
  *
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
- * \code{.cpp}
+ * @code{.cpp}
  * using clk_lyt = clocked_layout<cartesian_layout<>>;
  * using path = layout_coordinate_path<cartesian_layout<>>;
  * clk_lyt layout = ...;
  * auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target}, k);
- * \endcode
+ * @endcode
  *
  * The algorithm was originally described in \"An algorithm for finding shortest routes from all source nodes to a given
  * destination in general networks\" by Jin Y. Yen in Quarterly of Applied Mathematics, 1970.

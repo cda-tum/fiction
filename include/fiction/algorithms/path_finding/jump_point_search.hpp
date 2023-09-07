@@ -500,12 +500,12 @@ class jump_point_search_impl
  *
  * In certain cases it might be desirable to determine regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
- * \code{.cpp}
+ * @code{.cpp}
  * using clk_lyt = clocked_layout<cartesian_layout<>>;
  * using path = layout_coordinate_path<cartesian_layout<>>;
  * clk_lyt layout = ...;
  * auto shortest_path = jump_point_search<path>(static_cast<cartesian_layout<>>(layout), {source, target});
- * \endcode
+ * @endcode
  *
  * JPS was introduced in \"Online Graph Pruning for Pathfinding on Grid Maps\" by Daniel Harabor and Alban Grastien in
  * AAAI 2011.

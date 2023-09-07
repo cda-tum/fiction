@@ -370,12 +370,12 @@ class a_star_impl
  *
  * In certain cases it might be desirable to determine regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
- * \code{.cpp}
+ * @code{.cpp}
  * using clk_lyt = clocked_layout<cartesian_layout<>>;
  * using path = layout_coordinate_path<cartesian_layout<>>;
  * clk_lyt layout = ...;
  * auto shortest_path = a_star<path>(static_cast<cartesian_layout<>>(layout), {source, target});
- * \endcode
+ * @endcode
  *
  * A* was introduced in \"A Formal Basis for the Heuristic Determination of Minimum Cost Paths\" by Peter E. Hart, Nils
  * J. Nilsson, and Bertram Raphael in IEEE Transactions on Systems Science and Cybernetics 1968, Volume 4, Issue 2.
@@ -405,7 +405,8 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
 }
 /**
  * A distance function that does not approximate but compute the actual minimum path length on the given layout via A*
- * traversal. Naturally, this function cannot be evaluated in \f$ O(1) \f$, but has the polynomial complexity of A*.
+ * traversal. Naturally, this function cannot be evaluated in \f$ \mathcal(O)(1) \f$, but has the polynomial complexity
+ * of A*.
  *
  * If no path between `source` and `target` exists in `layout`, the returned distance is
  * `std::numeric_limits<Dist>::infinity()` if that value is supported by `Dist`, or `std::numeric_limits<Dist>::max()`,

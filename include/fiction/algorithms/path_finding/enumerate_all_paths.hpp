@@ -221,12 +221,12 @@ class enumerate_all_paths_impl
  *
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
- * \code{.cpp}
+ * @code{.cpp}
  * using clk_lyt = clocked_layout<cartesian_layout<>>;
  * using path = layout_coordinate_path<cartesian_layout<>>;
  * clk_lyt layout = ...;
  * auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target});
- * \endcode
+ * @endcode
  *
  * @tparam Path Type of the returned individual paths.
  * @tparam Lyt Type of the layout to perform path finding on.
