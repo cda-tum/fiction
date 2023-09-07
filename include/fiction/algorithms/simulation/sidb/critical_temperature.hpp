@@ -238,8 +238,8 @@ class critical_temperature_impl
             {
                 if (parameter.truth_table.num_bits() == 8)  // number of bits of truth table.
                 {
-                    output_bits_index = {-4, -3};           // double wire, cx, etc.
-                    // Truth table entries for given inputs are collected.
+                    output_bits_index = {-4, -3};
+                    // double-wire, cx, etc Truth table entries for given inputs are collected.
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2 + 1) != 0u);
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2) != 0u);
                 }
@@ -247,8 +247,8 @@ class critical_temperature_impl
 
             else if (parameter.truth_table.num_vars() == 1 && parameter.truth_table.num_bits() == 2)
             {
-                output_bits_index = {-2};  // Wire, inverter, etc. -2 due to placed perturber.
-                // Truth table entry for given input is collected.
+                output_bits_index = {-2};
+                // Wire, inverter, etc. -2 due to placed perturber. Truth table entry for given input is collected.
                 output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit) != 0u);
             }
 
@@ -257,8 +257,8 @@ class critical_temperature_impl
                 if (parameter.truth_table.num_bits() == 4 &&
                     parameter.truth_table != create_fan_out_tt())  // and, or, nand, etc.
                 {
-                    output_bits_index = {-2};                      // One output SiDB. -2 due to placed perturber.
-                                                                   // Truth table entry for given inputs is collected.
+                    output_bits_index = {-2};
+                    // One output SiDB. -2 due to placed perturber. Truth table entry for given inputs is collected.
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit) != 0u);
                 }
                 else

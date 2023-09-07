@@ -198,7 +198,7 @@ class maximal_defect_influence_distance_impl
                                 if (distance > avoidance_distance)
                                 {
                                     max_defect_position =
-                                        defect;    // current placed defect that leads to a change of the ground state
+                                        defect;  // current placed defect that leads to a change of the ground state
                                     avoidance_distance =
                                         distance;  // new avoidance distance given by the current distance
                                 }
