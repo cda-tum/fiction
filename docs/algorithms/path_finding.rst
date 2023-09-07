@@ -86,5 +86,4 @@ Enumerate All Paths
 
 .. doxygenstruct:: fiction::enumerate_all_paths_params
    :members:
-.. doxygenfunction:: fiction::enumerate_all_coordinate_paths
-.. doxygenfunction:: fiction::enumerate_all_clocking_paths
+.. doxygenfunction:: fiction::enumerate_all_paths

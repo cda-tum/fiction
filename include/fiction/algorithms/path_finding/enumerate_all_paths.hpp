@@ -240,37 +240,9 @@ class enumerate_all_paths_impl
 }  // namespace detail
 
 /**
- * Enumerates all possible paths in a coordinate layout that start at coordinate `source` and lead to coordinate
- * `target`. This algorithm does neither generate duplicate nor looping paths. That is, along each path, each coordinate
- * can occur at maximum once.
- *
- * If the given layout implements the obstruction interface (see `obstruction_layout`), paths will not be routed via
- * obstructed coordinates or connections.
- *
- * If the given layout is a gate-level layout and implements the obstruction interface (see `obstruction_layout`), paths
- * may contain wire crossings if specified in the parameters. Wire crossings are only allowed over other wires and only
- * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
- * cross only in a single point (orthogonal crossings + knock-knees/double wires).
- *
- * @tparam Path Type of the returned individual paths.
- * @tparam Lyt Type of the coordinate layout to perform path finding on.
- * @param layout The coordinate layout whose paths are to be enumerated.
- * @param objective Source-target coordinate pair.
- * @param ps Parameters.
- * @return A collection of all unique paths in `layout` from `source` to `target`.
- */
-template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path> enumerate_all_coordinate_paths(const Lyt&                    layout,
-                                                                   const routing_objective<Lyt>& objective,
-                                                                   enumerate_all_paths_params    params = {}) noexcept
-{
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-
-    return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, params}.coordinate_paths();
-}
-/**
- * Enumerates all possible paths in a clocked layout that start at coordinate `source` and lead to coordinate `target`
- * while respecting the information flow imposed by `layout`'s clocking scheme. This algorithm does neither generate
+ * Enumerates all possible paths in a layout that start at coordinate `source` and lead to coordinate `target`. This
+ * function automatically detects whether the given layout implements a clocking interface (see `clocked_layout`) and
+ * respects the underlying information flow imposed by `layout`'s clocking scheme. This algorithm does neither generate
  * duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each path, each coordinate can occur at
  * maximum once.
  *
@@ -282,21 +254,36 @@ template <typename Path, typename Lyt>
  * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
  * cross only in a single point (orthogonal crossings + knock-knees/double wires).
  *
+ * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
+ * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
+ * \code{.cpp}
+ * using clk_lyt = clocked_layout<cartesian_layout<>>;
+ * using path = layout_coordinate_path<cartesian_layout<>>;
+ * clk_lyt layout = ...;
+ * auto paths = enumerate_all_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target});
+ * \endcode
+ *
  * @tparam Path Type of the returned individual paths.
- * @tparam Lyt Type of the clocked layout to perform path finding on.
- * @param layout The clocked layout whose paths are to be enumerated.
+ * @tparam Lyt Type of the layout to perform path finding on.
+ * @param layout The layout whose paths are to be enumerated.
  * @param objective Source-target coordinate pair.
  * @param ps Parameters.
  * @return A collection of all unique paths in `layout` from `source` to `target`.
  */
 template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path> enumerate_all_clocking_paths(const Lyt&                    layout,
-                                                                 const routing_objective<Lyt>& objective,
-                                                                 enumerate_all_paths_params    ps = {}) noexcept
+[[nodiscard]] path_collection<Path> enumerate_all_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
+                                                        enumerate_all_paths_params ps = {}) noexcept
 {
-    static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
+    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
-    return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, ps}.clocking_paths();
+    if constexpr (is_clocked_layout_v<Lyt>)
+    {
+        return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, ps}.clocking_paths();
+    }
+    else
+    {
+        return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, ps}.coordinate_paths();
+    }
 }
 
 }  // namespace fiction
