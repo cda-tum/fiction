@@ -93,7 +93,7 @@ Temperature Behavior
 .. doxygenfunction:: fiction::calculate_energy_and_state_type
 
 
-Maximal Defect Influence Distance
+Maximum Defect Influence Distance
 #################################
 
 **Header:** ``fiction/algorithms/simulation/sidb/maximum_defect_influence_distance.hpp``
