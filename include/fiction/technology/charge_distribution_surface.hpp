@@ -1065,10 +1065,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& cell : strg->sidb_order)
         {
-            chargeindex += static_cast<uint64_t>(
-                               charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(cell))]) +
-                               static_cast<int8_t>(1)) *
-                           static_cast<uint64_t>(std::pow(base, this->num_cells() - 1u - counter));
+            chargeindex +=
+                static_cast<uint64_t>(
+                    charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(cell))]) + int8_t{1}) *
+                static_cast<uint64_t>(std::pow(base, this->num_cells() - 1u - counter));
             counter += 1;
         }
 
@@ -1099,11 +1099,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     {
                         if (cell != strg->dependent_cell)
                         {
-                            chargeindex_sub_layout += static_cast<uint64_t>(
-                                (charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(cell))]) +
-                                 1u) *
+                            chargeindex_sub_layout +=
                                 static_cast<uint64_t>(
-                                    std::pow(3, strg->three_state_cells.size() - counter_sub_layout - 1)));
+                                    (charge_state_to_sign(
+                                         strg->cell_charge[static_cast<uint64_t>(cell_to_index(cell))]) +
+                                     int8_t{1})) *
+                                static_cast<uint64_t>(
+                                    std::pow(3, strg->three_state_cells.size() - counter_sub_layout - 1));
                             counter_sub_layout += 1u;
                         }
                     }
@@ -1122,8 +1124,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     for (const auto& cell : strg->three_state_cells)
                     {
                         chargeindex_sub_layout +=
-                            static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
-                                                  std::pow(3, strg->three_state_cells.size() - counter_sub_layout - 1));
+                            static_cast<uint64_t>(
+                                charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(cell))]) +
+                                int8_t{1}) *
+                            static_cast<uint64_t>(std::pow(3, strg->three_state_cells.size() - counter_sub_layout - 1));
                         counter_sub_layout += 1;
                     }
                     for (const auto& cell : strg->sidb_order_without_three_state_cells)
@@ -1131,8 +1135,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         if (cell != strg->dependent_cell)
                         {
                             chargeindex += static_cast<uint64_t>(
-                                (charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
-                                std::pow(2, this->num_cells() - 1 - counter - 1));
+                                               (charge_state_to_sign(
+                                                    strg->cell_charge[static_cast<uint64_t>(cell_to_index(cell))]) +
+                                                int8_t{1})) *
+                                           static_cast<uint64_t>(std::pow(2, this->num_cells() - 1 - counter - 1));
                             counter += 1;
                         }
                     }
@@ -1674,8 +1680,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 index_changed++;
             }
 
-            const auto sign_old = static_cast<int8_t>(-1) * static_cast<int8_t>(r_old[index_changed]);
-            const auto sign_new = static_cast<int8_t>(-1) * static_cast<int8_t>(r_new[index_changed]);
+            const auto sign_old = int8_t{-1} * static_cast<int8_t>(r_old[index_changed]);
+            const auto sign_new = int8_t{-1} * static_cast<int8_t>(r_new[index_changed]);
 
             if (index_changed < strg->dependent_cell_index)
             {

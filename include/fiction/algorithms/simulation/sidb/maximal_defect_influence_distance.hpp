@@ -267,6 +267,8 @@ class maximal_defect_influence_distance_impl
         }
         defect_distance_stats.maximal_influence_defect_position = max_defect_position;
         defect_distance_stats.maximal_defect_influence_distance = avoidance_distance;
+
+        return EXIT_SUCCESS;
     }
 
   private:
