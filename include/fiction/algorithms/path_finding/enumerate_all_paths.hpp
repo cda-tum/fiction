@@ -38,9 +38,9 @@ class enumerate_all_paths_impl
     {}
 
     /**
-     * Enumerate all possible paths in a layout that start at `source` and lead to `target`.
+     * Enumerate all possible paths in a layout that start at `objective.source` and lead to `objective.target`.
      *
-     * @return A collection of all unique paths in `layout` from `source` to `target`.
+     * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
      */
     [[nodiscard]] path_collection<Path> run()
     {
@@ -205,11 +205,11 @@ class enumerate_all_paths_impl
 }  // namespace detail
 
 /**
- * Enumerates all possible paths in a layout that start at coordinate `source` and lead to coordinate `target`. This
- * function automatically detects whether the given layout implements a clocking interface (see `clocked_layout`) and
- * respects the underlying information flow imposed by `layout`'s clocking scheme. This algorithm does neither generate
- * duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each path, each coordinate can occur at
- * maximum once.
+ * Enumerates all possible paths in a layout that start at a given source coordinate and lead to given target
+ * coordinate. This function automatically detects whether the given layout implements a clocking interface (see
+ * `clocked_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This algorithm
+ * does neither generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each path, each
+ * coordinate can occur at maximum once.
  *
  * If the given layout implements the obstruction interface (see `obstruction_layout`), paths will not be routed via
  * obstructed coordinates or connections.
@@ -233,7 +233,7 @@ class enumerate_all_paths_impl
  * @param layout The layout whose paths are to be enumerated.
  * @param objective Source-target coordinate pair.
  * @param params Parameters.
- * @return A collection of all unique paths in `layout` from `source` to `target`.
+ * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
  */
 template <typename Path, typename Lyt>
 [[nodiscard]] path_collection<Path> enumerate_all_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
