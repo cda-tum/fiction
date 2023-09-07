@@ -1168,17 +1168,17 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 for (const auto& cell : strg->three_state_cells)
                 {
 
-                    chargeindex_sub_layout +=
-                        static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
-                                              std::pow(3, strg->three_state_cells.size() - 1 - counter_sub_layout));
+                    chargeindex_sub_layout += static_cast<uint64_t>(
+                        (charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(cell))]) + 1) *
+                        std::pow(3, strg->three_state_cells.size() - 1 - counter_sub_layout));
                     counter_sub_layout += 1;
                 }
                 // iterate through SiDBs that cannot be positively charged
                 for (const auto& cell : strg->sidb_order_without_three_state_cells)
                 {
-                    chargeindex +=
-                        static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
-                                              std::pow(2, this->num_cells() - 1 - counter));
+                    chargeindex += static_cast<uint64_t>(
+                        (charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(cell))]) + 1) *
+                        std::pow(2, this->num_cells() - 1 - counter));
                     counter += 1;
                 }
             }
@@ -2005,8 +2005,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         strg->cell_history.emplace_back(
                             static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))),
                             charge_state_to_sign(old_chargesign));
-                        this->assign_charge_state_by_cell_index(cell_to_index(index_to_three_state_cell(counter)), sign,
-                                                                false);
+                        this->assign_charge_state_by_cell_index(
+                            static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))), sign, false);
                     }
                     counter -= 1;
                 }

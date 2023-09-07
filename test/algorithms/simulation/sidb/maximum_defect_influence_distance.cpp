@@ -27,34 +27,16 @@ TEST_CASE("Test influence distance function", "[maximum_defect_influence_distanc
         maximum_defect_influence_distance<sidb_cell_clk_lyt_siqad>(lyt, sim_params, &defect_stats);
         CHECK(defect_stats.maximum_defect_influence_distance == 0);
         CHECK(defect_stats.maximum_influence_defect_position == coordinate<sidb_cell_clk_lyt_siqad>());
-
-        sim_params.number_threads = 1;
-        maximum_defect_influence_distance_stats<sidb_cell_clk_lyt_siqad> defect_stats_one_thread{};
-        maximum_defect_influence_distance(lyt, sim_params, &defect_stats_one_thread);
-        CHECK(defect_stats_one_thread.maximum_defect_influence_distance == 0);
-        CHECK(defect_stats_one_thread.maximum_influence_defect_position == coordinate<sidb_cell_clk_lyt_siqad>());
-
-        sim_params.number_threads = 2;
-        maximum_defect_influence_distance_stats<sidb_cell_clk_lyt_siqad> defect_stats_two_thread{};
-        maximum_defect_influence_distance(lyt, sim_params, &defect_stats_two_thread);
-        CHECK(defect_stats_two_thread.maximum_defect_influence_distance == 0);
-        CHECK(defect_stats_two_thread.maximum_influence_defect_position == coordinate<sidb_cell_clk_lyt_siqad>());
-
-        sim_params.number_threads = 5;
-        maximum_defect_influence_distance_stats<sidb_cell_clk_lyt_siqad> defect_stats_five_thread{};
-        maximum_defect_influence_distance(lyt, sim_params, &defect_stats_five_thread);
-        CHECK(defect_stats_five_thread.maximum_defect_influence_distance == 0);
-        CHECK(defect_stats_five_thread.maximum_influence_defect_position == coordinate<sidb_cell_clk_lyt_siqad>());
     }
 
     SECTION("layout with one SiDB")
     {
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
-        maximum_defect_influence_distance_params<sidb_cell_clk_lyt_siqad> sim_params{defect,
+        const maximum_defect_influence_distance_params<sidb_cell_clk_lyt_siqad> sim_params{defect,
                                                                                      sidb_simulation_parameters{},
-                                                                                     {50, 6},
-                                                                                     0};
+                                                                                     {50, 6}};
+
         sidb_cell_clk_lyt_siqad                                           lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
@@ -68,42 +50,6 @@ TEST_CASE("Test influence distance function", "[maximum_defect_influence_distanc
                ((defect_stats.maximum_influence_defect_position.x == 1) &&
                 (defect_stats.maximum_influence_defect_position.y == -1) &&
                 (defect_stats.maximum_influence_defect_position.z == 1))));
-
-        sim_params.number_threads = 1;
-        maximum_defect_influence_distance_stats<sidb_cell_clk_lyt_siqad> defect_stats_one_thread{};
-        maximum_defect_influence_distance(lyt, sim_params, &defect_stats_one_thread);
-        CHECK_THAT(round_to_n_decimal_places(defect_stats_one_thread.maximum_defect_influence_distance, 6),
-                   Catch::Matchers::WithinAbs(0.665060, physical_constants::POP_STABILITY_ERR));
-        CHECK((((defect_stats_one_thread.maximum_influence_defect_position.x == -1) &&
-                (defect_stats_one_thread.maximum_influence_defect_position.y == -1) &&
-                (defect_stats_one_thread.maximum_influence_defect_position.z == 1)) ||
-               ((defect_stats_one_thread.maximum_influence_defect_position.x == 1) &&
-                (defect_stats_one_thread.maximum_influence_defect_position.y == -1) &&
-                (defect_stats_one_thread.maximum_influence_defect_position.z == 1))));
-
-        sim_params.number_threads = 2;
-        maximum_defect_influence_distance_stats<sidb_cell_clk_lyt_siqad> defect_stats_two_thread{};
-        maximum_defect_influence_distance(lyt, sim_params, &defect_stats_two_thread);
-        CHECK_THAT(round_to_n_decimal_places(defect_stats_two_thread.maximum_defect_influence_distance, 6),
-                   Catch::Matchers::WithinAbs(0.665060, physical_constants::POP_STABILITY_ERR));
-        CHECK((((defect_stats_two_thread.maximum_influence_defect_position.x == -1) &&
-                (defect_stats_two_thread.maximum_influence_defect_position.y == -1) &&
-                (defect_stats_two_thread.maximum_influence_defect_position.z == 1)) ||
-               ((defect_stats_two_thread.maximum_influence_defect_position.x == 1) &&
-                (defect_stats_two_thread.maximum_influence_defect_position.y == -1) &&
-                (defect_stats_two_thread.maximum_influence_defect_position.z == 1))));
-
-        sim_params.number_threads = 5;
-        maximum_defect_influence_distance_stats<sidb_cell_clk_lyt_siqad> defect_stats_five_thread{};
-        maximum_defect_influence_distance(lyt, sim_params, &defect_stats_five_thread);
-        CHECK_THAT(round_to_n_decimal_places(defect_stats_five_thread.maximum_defect_influence_distance, 6),
-                   Catch::Matchers::WithinAbs(0.665060, physical_constants::POP_STABILITY_ERR));
-        CHECK((((defect_stats_five_thread.maximum_influence_defect_position.x == -1) &&
-                (defect_stats_five_thread.maximum_influence_defect_position.y == -1) &&
-                (defect_stats_five_thread.maximum_influence_defect_position.z == 1)) ||
-               ((defect_stats_five_thread.maximum_influence_defect_position.x == 1) &&
-                (defect_stats_five_thread.maximum_influence_defect_position.y == -1) &&
-                (defect_stats_five_thread.maximum_influence_defect_position.z == 1))));
     }
 
     SECTION("layout with one SiDB, negative defect, smaller lambda_tf")
@@ -125,8 +71,7 @@ TEST_CASE("Test influence distance function", "[maximum_defect_influence_distanc
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r, 20};
         const maximum_defect_influence_distance_params<sidb_cell_clk_lyt_siqad> sim_params{defect,
                                                                                            sidb_simulation_parameters{},
-                                                                                           {2, 2},
-                                                                                           1};
+                                                                                           {2, 2}};
         sidb_cell_clk_lyt_siqad                                                 lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         maximum_defect_influence_distance_stats<sidb_cell_clk_lyt_siqad> defect_stats{};
@@ -157,7 +102,7 @@ TEST_CASE("Test influence distance function", "[maximum_defect_influence_distanc
     {
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
-        maximum_defect_influence_distance_params<sidb_cell_clk_lyt_siqad> sim_params{defect,
+        const maximum_defect_influence_distance_params<sidb_cell_clk_lyt_siqad> sim_params{defect,
                                                                                      sidb_simulation_parameters{}};
         sidb_cell_clk_lyt_siqad                                           lyt{};
 

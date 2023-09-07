@@ -10,13 +10,12 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_surface.hpp"
+#include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <algorithm>
 #include <cmath>
 #include <limits>
-#include <mutex>
-#include <thread>
 #include <utility>
 #include <vector>
 
@@ -41,10 +40,6 @@ struct maximum_defect_influence_distance_params
      * also used to place defects (given in SiQAD coordinates).
      */
     std::pair<int32_t, int32_t> additional_scanning_area{50, 6};
-    /**
-     * Number of threads to spawn. By default the number of threads is set to the number of available hardware threads.
-     */
-    uint64_t number_threads{std::thread::hardware_concurrency()};
 };
 
 /**
@@ -128,106 +123,17 @@ class maximum_defect_influence_distance_impl
             }
         }
 
-        std::thread::hardware_concurrency();
-
-        // Determine the number of threads to use. Use hardware concurrency by default.
-        const uint64_t num_threads =
-            (params.number_threads == 0) ? std::thread::hardware_concurrency() : params.number_threads;
-
-        std::vector<std::thread> threads{};
-        threads.reserve(num_threads);
-        std::mutex lock_shared_resources{};  // used to control access to shared resources
-
-        const auto number_per_thread = (defect_cells.size() - (defect_cells.size() % num_threads)) / num_threads;
-        const auto number_last       = defect_cells.size() % num_threads;
-
-        // all possible defect positions are simulated by using several threads.
-        for (uint64_t z = 0u; z < num_threads; ++z)
+        // simulate the impact of the defect at a given position on the ground state of the SiDB layout
+        auto process_defect = [&](const auto& defect)
         {
-            threads.emplace_back(
-                [&, z]
-                {
-                    for (auto i = z * number_per_thread; i < (z + 1) * number_per_thread; i++)
-                    {
-                        const auto defect = defect_cells[i];
-
-                        sidb_defect_cell_clk_lyt_siqad lyt_defect{};
-
-                        layout.foreach_cell([this, &lyt_defect](const auto& cell)
-                                            { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
-
-                        // assign defect to layout
-                        lyt_defect.assign_sidb_defect(defect, params.defect);
-                        // conduct simulation with defect.
-                        auto simulation_result_defect = quickexact(lyt_defect, params_defect);
-
-                        const auto min_energy_defect = minimum_energy(simulation_result_defect.charge_distributions);
-                        uint64_t   charge_index_defect_layout = 0;
-
-                        // get the charge index of the ground state
-                        for (auto& lyt_simulation_with_defect : simulation_result_defect.charge_distributions)
-                        {
-                            if (std::fabs(round_to_n_decimal_places(lyt_simulation_with_defect.get_system_energy(), 6) -
-                                          round_to_n_decimal_places(min_energy_defect, 6)) <
-                                std::numeric_limits<double>::epsilon())
-                            {
-                                lyt_simulation_with_defect.charge_distribution_to_index_general();
-                                charge_index_defect_layout =
-                                    lyt_simulation_with_defect.get_charge_index_and_base().first;
-                            }
-                        }
-
-                        // defect changes the ground state, i.e., the charge index is changed compared to the charge
-                        // distribution without placed defect.
-                        if (charge_index_defect_layout != charge_index_layout)
-                        {
-                            // determine minimal distance of the defect to the layout
-                            auto distance = std::numeric_limits<double>::infinity();
-                            layout.foreach_cell(
-                                [this, &defect, &distance](const auto& cell)
-                                {
-                                    if (sidb_nanometer_distance<Lyt>(layout, cell, defect) < distance)
-                                    {
-                                        distance = sidb_nanometer_distance<Lyt>(layout, cell, defect);
-                                    }
-                                });
-
-                            {
-                                const std::lock_guard lock{lock_shared_resources};
-                                // the distance is larger than the current maximum one.
-                                if (distance > avoidance_distance)
-                                {
-                                    max_defect_position =
-                                        defect;  // current placed defect that leads to a change of the ground state
-                                    avoidance_distance =
-                                        distance;  // new avoidance distance given by the current distance
-                                }
-                            }
-                        }
-                    }
-                });
-        }
-
-        // threads are joined
-        for (auto& thread : threads)
-        {
-            thread.join();
-        }
-
-        // the remaining defect positions are analyzed. As an example: Suppose we have 33 defect locations
-        // and three threads. Each thread considers ten defects. The following code then analyzes the last three
-        // defects.
-        for (auto f = num_threads * number_per_thread; f < num_threads * number_per_thread + number_last; f++)
-        {
-            const auto defect = defect_cells[f];
-
             sidb_defect_cell_clk_lyt_siqad lyt_defect{};
 
             layout.foreach_cell([this, &lyt_defect](const auto& cell)
                                 { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
 
+            // assign defect to layout
             lyt_defect.assign_sidb_defect(defect, params.defect);
-
+            // conduct simulation with defect
             auto simulation_result_defect = quickexact(lyt_defect, params_defect);
 
             const auto min_energy_defect          = minimum_energy(simulation_result_defect.charge_distributions);
@@ -243,6 +149,7 @@ class maximum_defect_influence_distance_impl
                     charge_index_defect_layout = lyt_simulation_with_defect.get_charge_index_and_base().first;
                 }
             }
+
             // defect changes the ground state, i.e., the charge index is changed compared to the charge
             // distribution without placed defect.
             if (charge_index_defect_layout != charge_index_layout)
@@ -264,7 +171,11 @@ class maximum_defect_influence_distance_impl
                     avoidance_distance  = distance;
                 }
             }
-        }
+        };
+
+        // Apply the process_defect function to each defect using std::for_each
+        std::for_each(FICTION_EXECUTION_POLICY_PAR defect_cells.begin(), defect_cells.end(), process_defect);
+
         defect_distance_stats.maximum_influence_defect_position = max_defect_position;
         defect_distance_stats.maximum_defect_influence_distance = avoidance_distance;
 
