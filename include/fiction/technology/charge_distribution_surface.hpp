@@ -206,7 +206,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          * This pair stores the cell index and its previously charge state (important when all possible charge
          * distributions are enumerated and checked for physical validity).
          */
-        std::pair<uint64_t, int8_t> cell_history_gray_code{};
+        std::pair<int64_t, int8_t> cell_history_gray_code{};
         /**
          * This vector stores the cells and its previously charge states of the charge distribution before the charge
          * index was changed.
@@ -1101,10 +1101,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         {
                             chargeindex_sub_layout += static_cast<uint64_t>(
                                 (charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(cell))]) +
-                                 1) *
+                                 1u) *
                                 static_cast<uint64_t>(
                                     std::pow(3, strg->three_state_cells.size() - counter_sub_layout - 1)));
-                            counter_sub_layout += 1;
+                            counter_sub_layout += 1u;
                         }
                     }
                     // iterate through all cells that cannot be positively charged
@@ -1246,7 +1246,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_charge_index(const uint64_t charge_index) noexcept
     {
-        assert((charge_index <= strg->max_charge_index) && "charge index is to large");
+        assert((charge_index <= strg->max_charge_index) && "charge index is too large");
         strg->charge_index_and_base.first = charge_index;
         this->index_to_charge_distribution();
     }
@@ -1672,8 +1672,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 index_changed++;
             }
 
-            const int8_t sign_old = static_cast<int8_t>(-r_old[index_changed]);
-            const int8_t sign_new = static_cast<int8_t>(-r_new[index_changed]);
+            const auto sign_old = static_cast<int8_t>(-1) * static_cast<int8_t>(r_old[index_changed]);
+            const auto sign_new = static_cast<int8_t>(-1) * static_cast<int8_t>(r_new[index_changed]);
 
             if (index_changed < strg->dependent_cell_index)
             {
@@ -1842,7 +1842,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * the ones that cannot.
      *
      * @note is_three_state_simulation_required() has to be executed first.
-     *
      */
     void assign_base_number_to_three() noexcept
     {
@@ -1853,7 +1852,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             if (!strg->three_state_cells.empty())
             {
                 if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), strg->dependent_cell) !=
-                    strg->three_state_cells.end())
+                    strg->three_state_cells.cend())
                 {
                     strg->max_charge_index =
                         static_cast<uint64_t>(std::pow(2, this->num_cells() - strg->three_state_cells.size()) - 1);
@@ -1982,8 +1981,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         strg->cell_history.emplace_back(
                             static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))),
                             charge_state_to_sign(new_chargesign));
-                        this->assign_charge_state_by_cell_index(cell_to_index(index_to_three_state_cell(counter)), sign,
-                                                                false);
+                        this->assign_charge_state_by_cell_index(
+                            static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))), sign, false);
                     }
                     counter -= 1;
                 }

@@ -122,7 +122,6 @@ class sidb_surface<Lyt, false> : public Lyt
             strg->defective_coordinates.insert({c, d});
         }
     }
-
     /**
      * Returns the given coordinate's assigned defect type. If no defect type has been assigned, NONE is returned.
      *

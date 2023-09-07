@@ -10,6 +10,8 @@
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/utils/math_utils.hpp>
 
+#include <thread>
+
 using namespace fiction;
 
 TEST_CASE("Test influence distance function", "[maximal_defect_influence_distance]")
@@ -46,36 +48,39 @@ TEST_CASE("Test influence distance function", "[maximal_defect_influence_distanc
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
         maximal_defect_influence_distance_params<sidb_cell_clk_lyt_siqad> sim_params{defect,
-                                                                                     sidb_simulation_parameters{}};
+                                                                                     sidb_simulation_parameters{},
+                                                                                     {50, 6},
+                                                                                     0};
         sidb_cell_clk_lyt_siqad                                           lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
         const auto [distance, defect_pos] = maximal_defect_influence_distance(lyt, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 6),
                    Catch::Matchers::WithinAbs(0.665060, physical_constants::POP_STABILITY_ERR));
-        CHECK((defect_pos.x == -1 && defect_pos.y == -1 && defect_pos.z == 1) |
-              (defect_pos.x == 1 && defect_pos.y == -1 && defect_pos.z == 1));
+        CHECK((((defect_pos.x == -1) && (defect_pos.y == -1) && (defect_pos.z == 1)) ||
+               ((defect_pos.x == 1) && (defect_pos.y == -1) && (defect_pos.z == 1))));
 
         sim_params.number_threads                               = 1;
         const auto [distance_one_thread, defect_pos_one_thread] = maximal_defect_influence_distance(lyt, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance_one_thread, 6),
                    Catch::Matchers::WithinAbs(0.665060, physical_constants::POP_STABILITY_ERR));
-        CHECK((((defect_pos_one_thread.x == -1) & (defect_pos_one_thread.y == -1) & (defect_pos_one_thread.z == 1)) ||
-               ((defect_pos_one_thread.x == 1) & (defect_pos_one_thread.y == -1) & (defect_pos_one_thread.z == 1))));
+        CHECK((((defect_pos_one_thread.x == -1) && (defect_pos_one_thread.y == -1) && (defect_pos_one_thread.z == 1)) ||
+               ((defect_pos_one_thread.x == 1) && (defect_pos_one_thread.y == -1) && (defect_pos_one_thread.z == 1))));
 
         sim_params.number_threads                               = 2;
         const auto [distance_two_thread, defect_pos_two_thread] = maximal_defect_influence_distance(lyt, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance_two_thread, 6),
                    Catch::Matchers::WithinAbs(0.665060, physical_constants::POP_STABILITY_ERR));
-        CHECK((((defect_pos_two_thread.x == -1) & (defect_pos_two_thread.y == -1) & (defect_pos_two_thread.z == 1)) ||
-               ((defect_pos_two_thread.x == 1) & (defect_pos_two_thread.y == -1) & (defect_pos_two_thread.z == 1))));
+        CHECK((((defect_pos_two_thread.x == -1) && (defect_pos_two_thread.y == -1) && (defect_pos_two_thread.z == 1)) ||
+               ((defect_pos_two_thread.x == 1) && (defect_pos_two_thread.y == -1) && (defect_pos_two_thread.z == 1))));
 
         sim_params.number_threads                                 = 5;
         const auto [distance_five_thread, defect_pos_five_thread] = maximal_defect_influence_distance(lyt, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance_five_thread, 6),
                    Catch::Matchers::WithinAbs(0.665060, physical_constants::POP_STABILITY_ERR));
-        CHECK(((defect_pos_five_thread.x == -1) & (defect_pos_five_thread.y == -1) & (defect_pos_five_thread.z == 1)) |
-              ((defect_pos_five_thread.x == 1) & (defect_pos_five_thread.y == -1) & (defect_pos_five_thread.z == 1)));
+        CHECK((
+            ((defect_pos_five_thread.x == -1) && (defect_pos_five_thread.y == -1) && (defect_pos_five_thread.z == 1)) ||
+            ((defect_pos_five_thread.x == 1) && (defect_pos_five_thread.y == -1) && (defect_pos_five_thread.z == 1))));
     }
 
     SECTION("layout with one SiDB, negative defect, smaller lambda_tf")

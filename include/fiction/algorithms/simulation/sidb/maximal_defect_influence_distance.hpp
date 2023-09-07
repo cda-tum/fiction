@@ -64,7 +64,8 @@ template <typename Lyt>
 class maximal_defect_influence_distance_impl
 {
   public:
-    maximal_defect_influence_distance_impl(Lyt& lyt, const maximal_defect_influence_distance_params<Lyt>& sim_params) :
+    maximal_defect_influence_distance_impl(const Lyt&                                           lyt,
+                                           const maximal_defect_influence_distance_params<Lyt>& sim_params) :
             layout{lyt},
             params{sim_params}
     {
@@ -73,8 +74,8 @@ class maximal_defect_influence_distance_impl
 
     std::pair<double, typename Lyt::cell> run()
     {
-        const quickexact_params<sidb_defect_layout> params_defect{params.physical_params,
-                                                                  automatic_base_number_detection::OFF};
+        const quickexact_params<sidb_defect_cell_clk_lyt_siqad> params_defect{params.physical_params,
+                                                                              automatic_base_number_detection::OFF};
 
         double          avoidance_distance{0};
         coordinate<Lyt> min_defect_position{};
@@ -95,8 +96,11 @@ class maximal_defect_influence_distance_impl
             }
         }
 
-        // If the number of threads is initially set to zero, the simulation is run with one thread.
-        const uint64_t num_threads = std::max(params.number_threads, uint64_t{1});
+        std::thread::hardware_concurrency();
+
+        // Determine the number of threads to use. Use hardware concurrency by default.
+        const uint64_t num_threads =
+            (params.number_threads == 0) ? std::thread::hardware_concurrency() : params.number_threads;
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
@@ -115,7 +119,7 @@ class maximal_defect_influence_distance_impl
                     {
                         const auto defect = defect_cells[i];
 
-                        sidb_defect_layout lyt_defect{};
+                        sidb_defect_cell_clk_lyt_siqad lyt_defect{};
 
                         layout.foreach_cell([this, &lyt_defect](const auto& cell)
                                             { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
@@ -146,7 +150,8 @@ class maximal_defect_influence_distance_impl
                         if (charge_index_defect_layout != charge_index_layout)
                         {
                             // determine minimal distance of the defect to the layout
-                            auto distance = std::numeric_limits<double>::max();
+                            auto distance = std::numeric_limits<double>::infinity();
+                            ;
                             layout.foreach_cell(
                                 [this, &defect, &distance](const auto& cell)
                                 {
@@ -178,14 +183,14 @@ class maximal_defect_influence_distance_impl
             thread.join();
         }
 
-        // the remaining defect positions are analysed. As an example: Suppose we have 33 defect locations
-        // and three threads. Each thread considers ten defects. The last three defects are then analyzed by the
-        // following code.
+        // the remaining defect positions are analyzed. As an example: Suppose we have 33 defect locations
+        // and three threads. Each thread considers ten defects. The following code then analyzes the last three
+        // defects.
         for (auto f = num_threads * number_per_thread; f < num_threads * number_per_thread + number_last; f++)
         {
             const auto defect = defect_cells[f];
 
-            sidb_defect_layout lyt_defect{};
+            sidb_defect_cell_clk_lyt_siqad lyt_defect{};
 
             layout.foreach_cell([this, &lyt_defect](const auto& cell)
                                 { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
@@ -252,7 +257,7 @@ class maximal_defect_influence_distance_impl
      * This function calculates a bounding box around the provided layout, encompassing the area
      * where defect cells can be placed. It then iterates through this bounding box, scanning from
      * top to bottom and left to right, and identifies all valid positions for defect cells. A defect
-     * cell can only be placed in locations where there are no SiDB (Silicon Debug) cells.
+     * cell can only be placed in locations where there are no SiDB cells.
      */
     void collect_all_defect_cells()
     {
@@ -323,7 +328,7 @@ class maximal_defect_influence_distance_impl
  */
 template <typename Lyt>
 std::pair<double, typename Lyt::cell>
-maximal_defect_influence_distance(Lyt& lyt, const maximal_defect_influence_distance_params<Lyt>& sim_params = {})
+maximal_defect_influence_distance(const Lyt& lyt, const maximal_defect_influence_distance_params<Lyt>& sim_params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

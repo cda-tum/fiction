@@ -77,7 +77,7 @@ class quickexact_impl
             params{parameter}
     {}
 
-    sidb_simulation_result<Lyt> run()
+    sidb_simulation_result<Lyt> run() noexcept
     {
         result.algorithm_name      = "QuickExact";
         result.physical_parameters = params.physical_parameters;
@@ -274,20 +274,20 @@ class quickexact_impl
      *
      * @param charge_layout Initialized charge layout.
      */
-    void two_state_simulation(charge_distribution_surface<Lyt>& charge_layout)
+    void two_state_simulation(charge_distribution_surface<Lyt>& charge_layout) noexcept
     {
         charge_layout.assign_base_number(2);
         uint64_t previous_charge_index = 0;
 
-        gray_code_iterator bii{0};
+        gray_code_iterator gci{0};
 
-        while (bii <= charge_layout.get_max_charge_index())
+        for (gci = 0; gci <= charge_layout.get_max_charge_index(); ++gci)
         {
-            charge_layout.assign_charge_index_by_gray_code(*bii, previous_charge_index, dependent_cell_mode::VARIABLE,
+            charge_layout.assign_charge_index_by_gray_code(*gci, previous_charge_index, dependent_cell_mode::VARIABLE,
                                                            energy_calculation::KEEP_OLD_ENERGY_VALUE,
                                                            charge_distribution_history::CONSIDER);
 
-            previous_charge_index = *bii;
+            previous_charge_index = *gci;
 
             if (charge_layout.is_physically_valid())
             {
@@ -309,7 +309,6 @@ class quickexact_impl
                 }
                 result.charge_distributions.push_back(charge_lyt_copy);
             }
-            ++bii;
         }
 
         // The cells of the pre-assigned negatively-charged SiDBs are added to the cell level layout.
@@ -323,7 +322,7 @@ class quickexact_impl
      *
      * @param charge_layout Initialized charge layout.
      */
-    void three_state_simulation(charge_distribution_surface<Lyt>& charge_layout)
+    void three_state_simulation(charge_distribution_surface<Lyt>& charge_layout) noexcept
     {
         charge_layout.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_layout.update_after_charge_change();
@@ -334,28 +333,6 @@ class quickexact_impl
 
         while (charge_layout.get_charge_index_and_base().first < charge_layout.get_max_charge_index())
         {
-            if (charge_layout.is_physically_valid())
-            {
-                charge_distribution_surface<Lyt> charge_lyt_copy{charge_layout};
-                charge_lyt_copy.recompute_system_energy();
-
-                // The pre-assigned negatively-charged SiDBs are added to the final layout.
-                for (const auto& cell : preassigned_negative_sidbs)
-                {
-                    charge_lyt_copy.add_sidb(cell, sidb_charge_state::NEGATIVE);
-                }
-
-                if constexpr (has_get_sidb_defect_v<Lyt>)
-                {
-                    for (const auto& [cell, defect] : real_placed_defects)
-                    {
-                        charge_lyt_copy.assign_sidb_defect(cell, defect);
-                    }
-                }
-
-                result.charge_distributions.push_back(charge_lyt_copy);
-            }
-
             while (charge_layout.get_charge_index_of_sub_layout() < charge_layout.get_max_charge_index_sub_layout())
             {
                 if (charge_layout.is_physically_valid())
@@ -408,7 +385,10 @@ class quickexact_impl
                 result.charge_distributions.push_back(charge_lyt_copy);
             }
 
-            charge_layout.reset_charge_index_sub_layout();
+            if (charge_layout.get_max_charge_index_sub_layout() != 0)
+            {
+                charge_layout.reset_charge_index_sub_layout();
+            }
 
             charge_layout.increase_charge_index_by_one(
                 dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
@@ -481,13 +461,12 @@ class quickexact_impl
      * - If the provided layout type `Lyt` supports a `foreach_sidb_defect` method, it iterates through each
      *   defect in the layout.
      *   - If a defect is found, it adds the SiDB defect to the potential landscape.
-     *
      * - It assigns the local external potential from the `params.local_external_potential` configuration to the charge
      * layout.
      * - It assigns the global external potential from `params.global_potential` to the charge layout.
      *
      */
-    void initialize_charge_layout()
+    void initialize_charge_layout() noexcept
     {
         if constexpr (has_foreach_sidb_defect_v<Lyt>)
         {
@@ -518,7 +497,7 @@ class quickexact_impl
      * This function is used to generate a layout without the SiDBs that are pre-assigned to be negatively charged in a
      * physically-valid layout.
      */
-    void generate_layout_without_negative_sidbs()
+    void generate_layout_without_negative_sidbs() noexcept
     {
         for (const auto& index : preassigned_negative_sidb_indices)
         {
@@ -544,9 +523,11 @@ class quickexact_impl
 }  // namespace detail
 
 /**
- * `QuickExact` is a quick and exact physical simulation algorithm designed specifically for SiDB layouts.
- * It determines all physically valid charge configurations of a given layout, providing a significant
- * performance advantage of more than three orders of magnitude over `ExGS` (exhaustive_ground_state_simulation.hpp).
+ * `QuickExact` is a quick and exact physical simulation algorithm designed specifically for SiDB layouts. It is
+ * proposed in \"The Need for Speed: Efficient Exact Simulation of Silicon Dangling Bond Logic\" by J. Drewniok, M.
+ * Walter, and R. Wille (https://arxiv.org/abs/2308.04487). It determines all physically valid charge configurations of
+ * a given layout, providing a significant performance advantage of more than three orders of magnitude over `ExGS`
+ * (exhaustive_ground_state_simulation.hpp).
  *
  * The performance improvement of `QuickExact` can be attributed to the incorporation of three key ideas:
  *
