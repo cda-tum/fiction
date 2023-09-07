@@ -38,11 +38,11 @@ class enumerate_all_paths_impl
     {}
 
     /**
-     * Enumerate all possible coordinate paths in a layout that start at `source` and lead to `target`.
+     * Enumerate all possible paths in a layout that start at `source` and lead to `target`.
      *
      * @return A collection of all unique paths in `layout` from `source` to `target`.
      */
-    [[nodiscard]] path_collection<Path> coordinate_paths()
+    [[nodiscard]] path_collection<Path> run()
     {
         assert(!objective.source.is_dead() && !objective.target.is_dead() &&
                "Neither source nor target coordinate can be dead");
@@ -50,24 +50,7 @@ class enumerate_all_paths_impl
         assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
                "Both source and target coordinate have to be within the layout bounds");
 
-        recursively_enumerate_all_paths<path_level::COORDINATES>(objective.source, objective.target, Path{});
-
-        return collection;
-    }
-    /**
-     * Enumerate all possible clocking paths in a layout that start at `source` and lead to `target`.
-     *
-     * @return A collection of all unique paths in `layout` from `source` to `target`.
-     */
-    [[nodiscard]] path_collection<Path> clocking_paths()
-    {
-        assert(!objective.source.is_dead() && !objective.target.is_dead() &&
-               "Neither source nor target coordinate can be dead");
-
-        assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
-               "Both source and target coordinate have to be within the layout bounds");
-
-        recursively_enumerate_all_paths<path_level::CLOCKING>(objective.source, objective.target, Path{});
+        recursively_enumerate_all_paths(objective.source, objective.target, Path{});
 
         return collection;
     }
@@ -93,21 +76,6 @@ class enumerate_all_paths_impl
      * Collection of all enumerated paths.
      */
     path_collection<Path> collection{};
-    /**
-     * Abstraction levels on which paths can be enumerated.
-     */
-    enum class path_level
-    {
-        /**
-         * Enumerate paths on the coordinate level.
-         */
-        COORDINATES,
-        /**
-         * Enumerate paths on the clocking level.
-         */
-        CLOCKING
-        // more path levels go here
-    };
     /**
      * Mark a coordinate as visited.
      *
@@ -146,12 +114,10 @@ class enumerate_all_paths_impl
      * crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
      * cross only in a single point (orthogonal crossings + knock-knees/double wires).
      *
-     * @tparam PathLevel Abstraction level on which to enumerate paths.
      * @param src Source coordinate.
      * @param tgt Target coordinate.
      * @param p Current path to extend.
      */
-    template <path_level PathLevel>
     void recursively_enumerate_all_paths(const coordinate<Lyt>& src, const coordinate<Lyt>& tgt, Path p) noexcept
     {
         // mark source coordinate as visited and append it to the path
@@ -212,23 +178,22 @@ class enumerate_all_paths_impl
                 if (!is_visited(successor))
                 {
                     // recurse
-                    recursively_enumerate_all_paths<PathLevel>(successor, tgt, p);
+                    recursively_enumerate_all_paths(successor, tgt, p);
                 }
 
                 return;  // keep looping
             };
 
-            if constexpr (PathLevel == path_level::COORDINATES)
-            {
-                // recurse for all adjacent coordinates
-                layout.foreach_adjacent_coordinate(src, explore_successor);
-            }
-            else if constexpr (PathLevel == path_level::CLOCKING)
+            if constexpr (is_clocked_layout_v<Lyt>)
             {
                 // recurse for all outgoing clock zones
                 layout.foreach_outgoing_clocked_zone(src, explore_successor);
             }
-            // else if constexpr ...  // more path levels go here
+            else
+            {
+                // recurse for all adjacent coordinates
+                layout.foreach_adjacent_coordinate(src, explore_successor);
+            }
         }
 
         // after recursion, remove current coordinate from path and mark it as unvisited to allow it in other paths
@@ -276,14 +241,7 @@ template <typename Path, typename Lyt>
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
-    if constexpr (is_clocked_layout_v<Lyt>)
-    {
-        return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, ps}.clocking_paths();
-    }
-    else
-    {
-        return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, ps}.coordinate_paths();
-    }
+    return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, ps}.run();
 }
 
 }  // namespace fiction
