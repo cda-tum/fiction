@@ -58,7 +58,7 @@ class a_star_impl
      *
      * @return The shortest path in `layout` from `objective.source` to `objective.target`.
      */
-    Path run()
+    [[nodiscard]] Path run() noexcept
     {
         assert(!objective.source.is_dead() && !objective.target.is_dead() &&
                "Neither source nor target coordinate can be dead");
@@ -381,7 +381,7 @@ class a_star_impl
  *
  * This implementation is based on the pseudocode from https://en.wikipedia.org/wiki/A_star_search_algorithm.
  *
- * @tparam Path Path type to create.
+ * @tparam Path Type of the returned path.
  * @tparam Lyt Type of the layout to perform path finding on.
  * @tparam Dist Distance value type to be used in the heuristic estimation function.
  * @tparam Cost Cost value type to be used when determining moving cost between coordinates.

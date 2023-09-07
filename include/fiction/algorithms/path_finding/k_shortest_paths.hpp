@@ -40,19 +40,24 @@ class yen_k_shortest_paths_impl
 {
   public:
     yen_k_shortest_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const uint32_t k,
-                              const yen_k_shortest_paths_params p) :
+                              const yen_k_shortest_paths_params& p) :
             layout{lyt},
-            objective{obj.source, obj.target},
+            objective{obj.source, obj.target},  // create a new objective due to potentially differing types
             num_shortest_paths{k},
-            ps{p}
+            params{p}
     {
         // start by determining the shortest path between source and target
         k_shortest_paths.push_back(
             a_star<Path>(layout, objective, manhattan_distance_functor<obstruction_layout<Lyt>, uint64_t>(),
-                         unit_cost_functor<obstruction_layout<Lyt>, uint8_t>(), ps.astar_params));
+                         unit_cost_functor<obstruction_layout<Lyt>, uint8_t>(), params.astar_params));
     }
 
-    path_collection<Path> run() noexcept
+    /**
+     * Enumerate up to k shortest paths in a layout that start at `objective.source` and lead to `objective.target`.
+     *
+     * @return A collection of up to k shortest paths in `layout` from `objective.source` to `objective.target`.
+     */
+    [[nodiscard]] path_collection<Path> run() noexcept
     {
         assert(!objective.source.is_dead() && !objective.target.is_dead() &&
                "Neither source nor target coordinate can be dead");
@@ -60,7 +65,7 @@ class yen_k_shortest_paths_impl
         assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
                "Both source and target coordinate have to be within the layout bounds");
 
-        // if there was no path to begin with
+        // if there was no path to begin with, abort
         if (k_shortest_paths.back().empty())
         {
             return {};
@@ -110,7 +115,7 @@ class yen_k_shortest_paths_impl
                 if (const auto spur_path =
                         a_star<Path>(layout, {spur, objective.target},
                                      manhattan_distance_functor<obstruction_layout<Lyt>, uint64_t>(),
-                                     unit_cost_functor<obstruction_layout<Lyt>, uint8_t>(), ps.astar_params);
+                                     unit_cost_functor<obstruction_layout<Lyt>, uint8_t>(), params.astar_params);
                     !spur_path.empty())
                 {
                     // the final path will be a concatenation of the root path and the spur path
@@ -166,9 +171,9 @@ class yen_k_shortest_paths_impl
      */
     const uint32_t num_shortest_paths;
     /**
-     * Parameters.
+     * Routing parameters.
      */
-    yen_k_shortest_paths_params ps;
+    const yen_k_shortest_paths_params params;
     /**
      * The list of k shortest paths that is created during the algorithm.
      */
@@ -219,34 +224,54 @@ class yen_k_shortest_paths_impl
 }  // namespace detail
 
 /**
- * Yen's algorithm for finding up to \f$ k \f$ shortest paths without loops from source to target. This implementation
- * works on clocked layouts and uses the A* algorithm with the Manhattan distance function internally. The algorithm was
- * originally described in \"An algorithm for finding shortest routes from all source nodes to a given destination in
- * general networks\" by Jin Y. Yen in Quarterly of Applied Mathematics, 1970.
+ * Yen's algorithm for finding up to \f$ k \f$ shortest paths without loops from a source to a target coordinate. If
+ * \f$k\f$ is larger than the number of possible paths from source to target, the size of the returned path collection
+ * will be smaller than \f$ k \f$.
  *
- * If \f$ k \f$ is larger than the number of possible paths from source to target, the size of the returned path
- * collection will be smaller than \f$ k \f$.
+ * This implementation uses the A* algorithm with the Manhattan distance function internally.
+ *
+ * This function automatically detects whether the given layout implements a clocking interface (see `clocked_layout`)
+ * and respects the underlying information flow imposed by `layout`'s clocking scheme. This algorithm does neither
+ * generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each path, each coordinate can
+ * occur at maximum once.
+ *
+ * If the given layout implements the obstruction interface (see `obstruction_layout`), paths will not be routed via
+ * obstructed coordinates or connections.
  *
  * If the given layout is a gate-level layout and implements the obstruction interface (see obstruction_layout), paths
  * may contain wire crossings if specified in the parameters. Wire crossings are only allowed over other wires and only
  * if the crossing layer is not obstructed. Furthermore, it is ensured that crossings do not run along another wire but
  * cross only in a single point (orthogonal crossings + knock-knees/double wires).
  *
- * @tparam Path Path type to create.
- * @tparam Lyt Clocked layout type.
- * @param layout The clocked layout in which the \f$ k \f$ shortest paths between `source` and `target` are to be found.
+ * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
+ * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
+ * \code{.cpp}
+ * using clk_lyt = clocked_layout<cartesian_layout<>>;
+ * using path = layout_coordinate_path<cartesian_layout<>>;
+ * clk_lyt layout = ...;
+ * auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target}, k);
+ * \endcode
+ *
+ * The algorithm was originally described in \"An algorithm for finding shortest routes from all source nodes to a given
+ * destination in general networks\" by Jin Y. Yen in Quarterly of Applied Mathematics, 1970.
+ *
+ * @tparam Path Type of the returned individual paths.
+ * @tparam Lyt Type of the layout to perform path finding on.
+ * @param layout The layout in which the \f$ k \f$ shortest paths are to be found.
  * @param objective Source-target coordinate pair.
  * @param k Maximum number of shortest paths to find.
- * @param ps Parameters.
- * @return A collection of up to \f$ k \f$ shortest loopless paths in `layout` from `source` to `target`.
+ * @param params Parameters.
+ * @return A collection of up to \f$ k \f$ shortest loop-less paths in `layout` from `objective.source` to
+ * `objective.target`.
  */
 template <typename Path, typename Lyt>
 [[nodiscard]] path_collection<Path> yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
-                                                         const uint32_t k, yen_k_shortest_paths_params ps = {}) noexcept
+                                                         const uint32_t                     k,
+                                                         const yen_k_shortest_paths_params& params = {}) noexcept
 {
-    static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
+    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
-    return detail::yen_k_shortest_paths_impl<Path, Lyt>{layout, objective, k, ps}.run();
+    return detail::yen_k_shortest_paths_impl<Path, Lyt>{layout, objective, k, params}.run();
 }
 
 }  // namespace fiction

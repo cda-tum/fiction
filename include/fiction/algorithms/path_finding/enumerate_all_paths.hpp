@@ -42,7 +42,7 @@ class enumerate_all_paths_impl
      *
      * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
      */
-    [[nodiscard]] path_collection<Path> run()
+    [[nodiscard]] path_collection<Path> run() noexcept
     {
         assert(!objective.source.is_dead() && !objective.target.is_dead() &&
                "Neither source nor target coordinate can be dead");
@@ -225,7 +225,7 @@ class enumerate_all_paths_impl
  * using clk_lyt = clocked_layout<cartesian_layout<>>;
  * using path = layout_coordinate_path<cartesian_layout<>>;
  * clk_lyt layout = ...;
- * auto paths = enumerate_all_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target});
+ * auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target});
  * \endcode
  *
  * @tparam Path Type of the returned individual paths.

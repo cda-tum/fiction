@@ -20,7 +20,7 @@
 
 using namespace fiction;
 
-TEST_CASE("A* on 2x2 clocked layouts", "[A*]")
+TEST_CASE("A* on 2x2 layouts", "[A*]")
 {
     using lyt        = cartesian_layout<offset::ucoord_t>;
     using coord_path = layout_coordinate_path<lyt>;
@@ -133,7 +133,7 @@ TEST_CASE("A* on 2x2 clocked layouts", "[A*]")
     }
 }
 
-TEST_CASE("A* on 4x4 clocked layouts", "[A*]")
+TEST_CASE("A* on 4x4 layouts", "[A*]")
 {
     using lyt        = cartesian_layout<offset::ucoord_t>;
     using coord_path = layout_coordinate_path<lyt>;
@@ -484,7 +484,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
     }
 }
 
-TEST_CASE("A* on 10x10 clocked layouts with varying distance functions", "[A*]")
+TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 {
     using lyt        = cartesian_layout<offset::ucoord_t>;
     using clk_lyt    = clocked_layout<lyt>;
@@ -586,7 +586,7 @@ TEST_CASE("A* on 10x10 clocked layouts with varying distance functions", "[A*]")
     }
 }
 
-TEST_CASE("A* on 4x4 clocked layouts with varying cost functions", "[A*]")
+TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
 {
     using clk_lyt    = clocked_layout<cartesian_layout<offset::ucoord_t>>;
     using coord_path = layout_coordinate_path<clk_lyt>;
