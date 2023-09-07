@@ -353,11 +353,12 @@ class a_star_impl
 /**
  * The A* path finding algorithm for shortest loop-less paths between a given source and target coordinate in a layout.
  * This function automatically detects whether the given layout implements a clocking interface (see `clocked_layout`)
- * and respects the underlying information flow imposed by `layout`'s clocking scheme. A* is an extension of Dijkstra's
- * algorithm for shortest paths but offers better average complexity. It uses a heuristic distance function that
- * estimates the remaining costs towards the target in every step. Thus, this heuristic function should neither be
- * complex to calculate nor overestimating the remaining costs. Common heuristics to be used are the Manhattan and the
- * Euclidean distance functions. See `distance_functor` for implementations.
+ * and respects the underlying information flow imposed by `layout`'s clocking scheme.
+ *
+ * A* is an extension of Dijkstra's algorithm for shortest paths but offers better average complexity. It uses a
+ * heuristic distance function that estimates the remaining costs towards the target in every step. Thus, this heuristic
+ * function should neither be complex to calculate nor overestimating the remaining costs. Common heuristics to be used
+ * are the Manhattan and the Euclidean distance functions. See `distance_functor` for implementations.
  *
  * If the given layout implements the obstruction interface (see `obstruction_layout`), paths will not be routed via
  * obstructed coordinates and connections.
