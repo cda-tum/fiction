@@ -336,3 +336,22 @@ TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]")
         CHECK(randomly_generated_coordinate.z <= 1);
     }
 }
+
+TEST_CASE("Generate all cells in area spanned by two cells", "[layout-utils]")
+{
+    SECTION("two identical cells as input")
+    {
+        const auto all_area_cells = all_sidbs_in_spanned_area({-10, -5, 0}, {10, -5, 0});
+        REQUIRE(all_area_cells.size() == 21);
+        const auto first_cell = *all_area_cells.begin();
+        CHECK(first_cell.x == -10);
+        CHECK(first_cell.y == -5);
+        CHECK(first_cell.z == 0);
+
+        const auto final_cell = *all_area_cells.end();
+        CHECK(final_cell.x == 10);
+        CHECK(final_cell.y == -5);
+        CHECK(final_cell.z == 0);
+    }
+}
+

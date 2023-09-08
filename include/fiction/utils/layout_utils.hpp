@@ -397,6 +397,54 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
         return {dist_x(generator), dist_y(generator), dist_z(generator)};
     }
 }
+/**
+ * Generates a vector of SiQAD cells within an area given by two SiQAD coordinates.
+ *
+ * This function calculates and returns a vector of cells that span the area
+ * between the northwest (cell_nw) and southeast (cell_se) cells, inclusive.
+ * The cells are generated in a top-down, left-to-right fashion within the specified area.
+ *
+ * @tparam Lyt SiDB cell-level layout.
+ * @param cell_nw The northwest cell defining the starting point of the area.
+ * @param cell_se The southeast cell defining the ending point of the area.
+ * @return A vector containing all cells within the specified area.
+ */
+std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_t &cell_nw,
+                                                      const siqad::coord_t &cell_se) noexcept
+{
+    std::vector<siqad::coord_t> all_cells{};
+    const auto                      c1_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_nw);
+    const auto                      c2_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_se);
+    const uint64_t                  total_cell_count = static_cast<uint64_t>(std::abs(c1_cube.x - c2_cube.x) + 1) *
+                                      static_cast<uint64_t>(std::abs(c1_cube.y - c2_cube.y) + 1);
+    all_cells.reserve(total_cell_count);
+
+    auto current_cell = cell_nw;
+
+    // collect all cells in the area (spanned by the nw `north-west` and se `south-east` cell) going from top to down
+    // from left to right.
+    while (current_cell <= cell_se)
+    {
+        all_cells.push_back(current_cell);
+        if (current_cell.x < cell_se.x)
+        {
+            current_cell.x += 1;
+        }
+        else if ((current_cell.x == cell_se.x) && current_cell.z == 0)
+        {
+            current_cell.z += 1;
+            current_cell.x = cell_se.x;
+        }
+        else
+        {
+            current_cell.x = cell_se.x;
+            current_cell.y += 1;
+            current_cell.z = 0;
+        }
+    }
+
+    return all_cells;
+}
 
 }  // namespace fiction
 
