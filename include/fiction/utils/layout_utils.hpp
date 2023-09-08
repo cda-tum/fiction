@@ -409,13 +409,13 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
  * @param cell_se The southeast cell defining the ending point of the area.
  * @return A vector containing all cells within the specified area.
  */
-std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_t &cell_nw,
-                                                      const siqad::coord_t &cell_se) noexcept
+std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_t& cell_nw,
+                                                      const siqad::coord_t& cell_se) noexcept
 {
     std::vector<siqad::coord_t> all_cells{};
-    const auto                      c1_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_nw);
-    const auto                      c2_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_se);
-    const uint64_t                  total_cell_count = static_cast<uint64_t>(std::abs(c1_cube.x - c2_cube.x) + 1) *
+    const auto                  c1_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_nw);
+    const auto                  c2_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_se);
+    const uint64_t              total_cell_count = static_cast<uint64_t>(std::abs(c1_cube.x - c2_cube.x) + 1) *
                                       static_cast<uint64_t>(std::abs(c1_cube.y - c2_cube.y) + 1);
     all_cells.reserve(total_cell_count);
 
@@ -433,11 +433,11 @@ std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_t &cell
         else if ((current_cell.x == cell_se.x) && current_cell.z == 0)
         {
             current_cell.z += 1;
-            current_cell.x = cell_se.x;
+            current_cell.x = cell_nw.x;
         }
         else
         {
-            current_cell.x = cell_se.x;
+            current_cell.x = cell_nw.x;
             current_cell.y += 1;
             current_cell.z = 0;
         }
