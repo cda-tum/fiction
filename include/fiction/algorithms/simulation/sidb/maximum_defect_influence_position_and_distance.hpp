@@ -58,10 +58,11 @@ namespace detail
  * distance and corresponding defect position. It utilizes multithreading for efficient defect
  * position simulations.
  */
+template <typename Lyt>
 class maximum_defect_influence_position_and_distance_impl
 {
   public:
-    maximum_defect_influence_position_and_distance_impl(const sidb_cell_clk_lyt_siqad&                  lyt,
+    maximum_defect_influence_position_and_distance_impl(const Lyt&                                      lyt,
                                                         const maximum_defect_influence_distance_params& sim_params) :
             layout{lyt},
             params{sim_params}
@@ -69,17 +70,16 @@ class maximum_defect_influence_position_and_distance_impl
         collect_all_defect_cells();
     }
 
-    std::pair<sidb_cell_clk_lyt_siqad::cell, double> run() noexcept
+    std::pair<typename Lyt::cell, double> run() noexcept
     {
-        const quickexact_params<sidb_defect_cell_clk_lyt_siqad> params_defect{params.physical_params,
-                                                                              automatic_base_number_detection::OFF};
+        const quickexact_params<sidb_surface<Lyt>> params_defect{params.physical_params,
+                                                                 automatic_base_number_detection::OFF};
 
-        double                        avoidance_distance{0};
-        sidb_cell_clk_lyt_siqad::cell max_defect_position{};
+        double          avoidance_distance{0};
+        coordinate<Lyt> max_defect_position{};
 
         const auto simulation_results =
-            quickexact(layout, quickexact_params<sidb_cell_clk_lyt_siqad>{params.physical_params,
-                                                                          automatic_base_number_detection::OFF});
+            quickexact(layout, quickexact_params<Lyt>{params.physical_params, automatic_base_number_detection::OFF});
 
         const auto min_energy          = minimum_energy(simulation_results.charge_distributions);
         uint64_t   charge_index_layout = 0;
@@ -97,7 +97,7 @@ class maximum_defect_influence_position_and_distance_impl
         // simulate the impact of the defect at a given position on the ground state of the SiDB layout
         const auto process_defect = [&](const auto& defect) noexcept
         {
-            sidb_defect_cell_clk_lyt_siqad lyt_defect{};
+            sidb_surface<Lyt> lyt_defect{};
 
             layout.foreach_cell([this, &lyt_defect](const auto& cell)
                                 { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
@@ -129,9 +129,9 @@ class maximum_defect_influence_position_and_distance_impl
                 layout.foreach_cell(
                     [this, &defect, &distance](const auto& cell)
                     {
-                        if (sidb_nanometer_distance(layout, cell, defect) < distance)
+                        if (sidb_nanometer_distance<Lyt>(layout, cell, defect) < distance)
                         {
-                            distance = sidb_nanometer_distance(layout, cell, defect);
+                            distance = sidb_nanometer_distance<Lyt>(layout, cell, defect);
                         }
                     });
 
@@ -154,7 +154,7 @@ class maximum_defect_influence_position_and_distance_impl
     /**
      * SiDB cell-level layout to simulate.
      */
-    sidb_cell_clk_lyt_siqad layout;
+    Lyt layout;
     /**
      * Parameters used for the simulation.
      */
@@ -162,7 +162,7 @@ class maximum_defect_influence_position_and_distance_impl
     /**
      * All allowed defect positions.
      */
-    std::vector<sidb_cell_clk_lyt_siqad::cell> defect_cells{};
+    std::vector<typename Lyt::cell> defect_cells{};
     /**
      * Collects all possible defect cell positions within a given layout while avoiding SiDB cells.
      *
@@ -174,7 +174,7 @@ class maximum_defect_influence_position_and_distance_impl
     void collect_all_defect_cells() noexcept
     {
         // bounding box around the given layout to have north-west and south-east cells.
-        bounding_box_2d bb{layout};
+        bounding_box_2d<Lyt> bb{layout};
 
         auto nw = bb.get_min();  // north-west cell
         auto se = bb.get_max();  // south-east cell
@@ -241,11 +241,16 @@ class maximum_defect_influence_position_and_distance_impl
  * can still affect the ground state of the layout. The second entry describes the distance of the defect from the
  * layout.
  */
-std::pair<sidb_cell_clk_lyt_siqad::cell, double>
-maximum_defect_influence_position_and_distance(const sidb_cell_clk_lyt_siqad&                  lyt,
-                                               const maximum_defect_influence_distance_params& params = {})
+template <typename Lyt>
+std::pair<typename Lyt::cell, double>
+maximum_defect_influence_position_and_distance(const Lyt&                                      lyt,
+                                               const maximum_defect_influence_distance_params& sim_params = {})
 {
-    detail::maximum_defect_influence_position_and_distance_impl p{lyt, params};
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
+    detail::maximum_defect_influence_position_and_distance_impl<Lyt> p{lyt, sim_params};
 
     return p.run();
 }
