@@ -180,3 +180,14 @@ Hashing
 This header defines implementations for ``std::hash`` for several data types.
 
 .. doxygenfunction:: fiction::hash_combine
+
+
+Math Utils
+----------
+
+**Header:** ``fiction/utils/math_utils.hpp``
+
+.. doxygenfunction:: fiction::round_to_n_decimal_places
+.. doxygenfunction:: fiction::integral_abs
+.. doxygenfunction:: fiction::binomial_coefficient
+.. doxygenfunction:: fiction::generate_unsigned_integer_combinations
