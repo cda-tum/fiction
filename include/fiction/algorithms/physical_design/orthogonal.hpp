@@ -628,7 +628,7 @@ class orthogonal_impl
  * network directly used instead of relabeling the edges according to its DFS tree, ordering the vertices using
  * topological sorting instead of DFS, and adding an extra placement rule for nodes without predecessors.
  *
- * The algorithm works in polynomial time \f$ \mathcal(O)(3|N| + |L|) \f$ where \f$ |N| \f$ is the number of nodes in
+ * The algorithm works in polynomial time \f$ \mathcal{O}(3|N| + |L|) \f$ where \f$ |N| \f$ is the number of nodes in
  * the given network and \f$ |L| \f$ is the resulting layout size given by \f$ x \cdot y \f$, which approaches \f$
  * (\frac{|N|}{2})^2 \f$ asymptotically.
  *
