@@ -5,3 +5,12 @@ Aspect Ratio Iterator
 
 .. doxygenclass:: fiction::aspect_ratio_iterator
    :members:
+
+
+Gray Code Iterator
+------------------
+
+**Header:** ``fiction/algorithms/iter/gray_code_iterator.hpp``
+
+.. doxygenclass:: fiction::gray_code_iterator
+   :members:

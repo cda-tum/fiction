@@ -29,7 +29,7 @@ class gray_code_iterator
      *
      * @param start The starting decimal number for the iterator.
      */
-    explicit gray_code_iterator(const uint64_t start) noexcept :
+    explicit constexpr gray_code_iterator(const uint64_t start) noexcept :
             start_number{start},
             current_iteration{start},
             current_gray_code{start}
@@ -41,7 +41,7 @@ class gray_code_iterator
      *
      * @return Reference to the current Gray code.
      */
-    [[nodiscard]] const uint64_t& operator*() const
+    [[nodiscard]] constexpr const uint64_t& operator*() const noexcept
     {
         return current_gray_code;
     }
@@ -50,7 +50,7 @@ class gray_code_iterator
      *
      * @return Reference to `this`.
      */
-    gray_code_iterator& operator++() noexcept
+    constexpr gray_code_iterator& operator++() noexcept
     {
         ++current_iteration;
         binary_to_gray();
@@ -63,7 +63,7 @@ class gray_code_iterator
      * @param other The iterator to compare with.
      * @return `true` if the current iterator is equal to the other iterator, `false` otherwise.
      */
-    [[nodiscard]] bool operator==(const gray_code_iterator& other) const
+    [[nodiscard]] constexpr bool operator==(const gray_code_iterator& other) const noexcept
     {
         return (current_gray_code == other.current_gray_code);
     }
@@ -73,7 +73,7 @@ class gray_code_iterator
      * @param other The iterator to compare with.
      * @return `true` if the current iterator is not equal to the other iterator, `false` otherwise.
      */
-    [[nodiscard]] bool operator!=(const gray_code_iterator& other) const
+    [[nodiscard]] constexpr bool operator!=(const gray_code_iterator& other) const noexcept
     {
         return !(*this == other);
     }
@@ -83,7 +83,7 @@ class gray_code_iterator
      * @param other The iterator to compare with.
      * @return `true` if the current iterator is less than the other iterator, `false` otherwise.
      */
-    [[nodiscard]] bool operator<(const gray_code_iterator& other) const
+    [[nodiscard]] constexpr bool operator<(const gray_code_iterator& other) const noexcept
     {
         return current_gray_code < other.current_gray_code;
     }
@@ -93,16 +93,30 @@ class gray_code_iterator
      * @param other The iterator to compare with.
      * @return `true` if the current iterator is less than or equal to the other iterator, `false` otherwise.
      */
-    [[nodiscard]] bool operator<=(const gray_code_iterator& other) const
+    [[nodiscard]] constexpr bool operator<=(const gray_code_iterator& other) const noexcept
     {
         return current_gray_code <= other.current_gray_code;
+    }
+    /**
+     * Subtraction operator to calculate the difference between two gray_code_iterators.
+     *
+     * This operator calculates the difference between the current iterator and another
+     * gray_code_iterator provided as input. The result is returned as an int64_t representing
+     * the number of positions between the iterators.
+     *
+     * @param other The gray_code_iterator to subtract from the current iterator.
+     * @return The difference between the current iterator and the input iterator as int64_t.
+     */
+    constexpr int64_t operator-(const gray_code_iterator& other) const noexcept
+    {
+        return static_cast<int64_t>(current_iteration) - static_cast<int64_t>(other.current_iteration);
     }
     /**
      * Postfix increment operator. Sets the next Gray Code.
      *
      * @return Copy of `this` before incrementing.
      */
-    gray_code_iterator operator++(int) noexcept
+    constexpr gray_code_iterator operator++(int) noexcept
     {
         auto result{*this};
 
@@ -116,7 +130,7 @@ class gray_code_iterator
      * @param m The amount of Gray codes to skip.
      * @return Iterator of the current iterator plus the given integer.
      */
-    [[nodiscard]] gray_code_iterator operator+(const int m) const noexcept
+    [[nodiscard]] constexpr gray_code_iterator operator+(const int m) const noexcept
     {
         auto result{*this};
 
@@ -132,7 +146,7 @@ class gray_code_iterator
      * @param m The amount of Gray codes to skip.
      * @return Reference to `this`.
      */
-    gray_code_iterator& operator+=(const int m) noexcept
+    constexpr gray_code_iterator& operator+=(const int m) noexcept
     {
         current_iteration += m;
         binary_to_gray();
@@ -146,7 +160,7 @@ class gray_code_iterator
      * @param m The amount of Gray codes to skip.
      * @return Iterator of the current iterator minus the given integer.
      */
-    [[nodiscard]] gray_code_iterator operator-(const int m) const noexcept
+    [[nodiscard]] constexpr gray_code_iterator operator-(const int m) const noexcept
     {
         auto result{*this};
 
@@ -159,7 +173,7 @@ class gray_code_iterator
      *
      * @return Reference to `this`.
      */
-    gray_code_iterator& operator--() noexcept
+    constexpr gray_code_iterator& operator--() noexcept
     {
         --current_iteration;
 
@@ -172,7 +186,7 @@ class gray_code_iterator
      *
      * @return Copy of `this` before decrementing.
      */
-    gray_code_iterator operator--(int) noexcept
+    constexpr gray_code_iterator operator--(int) noexcept
     {
         auto result{*this};
 
@@ -188,7 +202,7 @@ class gray_code_iterator
      * @param m The amount of Gray codes to skip.
      * @return Reference to `this`.
      */
-    gray_code_iterator& operator-=(const int m) noexcept
+    constexpr gray_code_iterator& operator-=(const int m) noexcept
     {
         current_iteration -= m;
 
@@ -202,7 +216,7 @@ class gray_code_iterator
      *
      * @param m The number to set.
      */
-    gray_code_iterator& operator=(const uint64_t m) noexcept
+    constexpr gray_code_iterator& operator=(const uint64_t m) noexcept
     {
         current_iteration = m;
         binary_to_gray();
@@ -214,7 +228,7 @@ class gray_code_iterator
      * @param index The position in the iteration range.
      * @return The Gray code at the specified position.
      */
-    uint64_t operator[](size_t index) const
+    constexpr uint64_t operator[](size_t index) const noexcept
     {
         // Calculate the Gray code at the specified position
         uint64_t result = start_number + static_cast<uint64_t>(index);
@@ -227,7 +241,7 @@ class gray_code_iterator
      * @param m Integer to compare with.
      * @return `true` if the current number is equal to `m`, `false` otherwise.
      */
-    [[nodiscard]] bool operator==(const uint64_t m) const noexcept
+    [[nodiscard]] constexpr bool operator==(const uint64_t m) const noexcept
     {
         return current_iteration == m;
     }
@@ -237,7 +251,7 @@ class gray_code_iterator
      * @param m Integer to compare with.
      * @return `true` if the current number is not equal to `m`, `false` otherwise.
      */
-    [[nodiscard]] bool operator!=(const uint64_t m) const noexcept
+    [[nodiscard]] constexpr bool operator!=(const uint64_t m) const noexcept
     {
         return current_iteration != m;
     }
@@ -247,7 +261,7 @@ class gray_code_iterator
      * @param m Integer to compare with.
      * @return `true` if the current number is less than `m`, `false` otherwise.
      */
-    [[nodiscard]] bool operator<(const uint64_t m) const noexcept
+    [[nodiscard]] constexpr bool operator<(const uint64_t m) const noexcept
     {
         return current_iteration < m;
     }
@@ -257,7 +271,7 @@ class gray_code_iterator
      * @param m Integer to compare with.
      * @return `true` if the current number is less than or equal to `m`, `false` otherwise.
      */
-    [[nodiscard]] bool operator<=(const uint64_t m) const noexcept
+    [[nodiscard]] constexpr bool operator<=(const uint64_t m) const noexcept
     {
         return current_iteration <= m;
     }
@@ -267,7 +281,7 @@ class gray_code_iterator
      * @param m Integer to compare with.
      * @return `true` if the current number is greater than `m`, `false` otherwise.
      */
-    [[nodiscard]] bool operator>(const uint64_t m) const noexcept
+    [[nodiscard]] constexpr bool operator>(const uint64_t m) const noexcept
     {
         return current_iteration > m;
     }
@@ -277,7 +291,7 @@ class gray_code_iterator
      * @param m Integer to compare with.
      * @return `true` if the current number is greater than or equal to `m`, `false` otherwise.
      */
-    [[nodiscard]] bool operator>=(const uint64_t m) const noexcept
+    [[nodiscard]] constexpr bool operator>=(const uint64_t m) const noexcept
     {
         return current_iteration >= m;
     }
@@ -304,7 +318,7 @@ class gray_code_iterator
      *
      * The result is stored in the 'current_gray_code' variable.
      */
-    void binary_to_gray()
+    constexpr void binary_to_gray() noexcept
     {
         current_gray_code = current_iteration ^ (current_iteration >> 1u);
     }
@@ -320,6 +334,7 @@ struct iterator_traits<fiction::gray_code_iterator>
 {
     using iterator_category = std::random_access_iterator_tag;
     using value_type        = uint64_t;
+    using difference_type   = int64_t;
 };
 }  // namespace std
 
