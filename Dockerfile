@@ -18,6 +18,7 @@ RUN cmake -S fiction -B fiction/build \
     -DCMAKE_BUILD_TYPE=Release \
     -DFICTION_CLI=ON \
     -DFICTION_TEST=OFF \
+    -DFICTION_BENCHMARK=OFF \
     -DFICTION_EXPERIMENTS=OFF \
     -DFICTION_Z3=ON \
     -DFICTION_ENABLE_MUGEN=OFF \
