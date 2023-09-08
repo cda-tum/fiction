@@ -232,9 +232,9 @@ class maximum_defect_influence_distance_impl
 
         // collect all cells in the bounding box area (spanned by the nw and se) going from top to down from left to
         // right.
-        while (se >= defect_cell)
+        while (defect_cell <= se)
         {
-            // Defect cannot be where a SiDB is placed.
+            // Defect can only be placed at free locations.
             if (layout.get_cell_type(defect_cell) == sidb_technology::cell_type::EMPTY)
             {
                 defect_cells.push_back(defect_cell);
@@ -253,6 +253,10 @@ class maximum_defect_influence_distance_impl
                 defect_cell.x = nw.x;
                 defect_cell.y += 1;
                 defect_cell.z = 0;
+            }
+            else
+            {
+                break;
             }
         }
     }

@@ -39,12 +39,10 @@ namespace fiction
         return 0.0;
     }
 
-    auto min_energy = std::numeric_limits<double>::infinity();  // unit: eV
-
     // Determine the minimal energy.
     const auto [energy, state_type] = *std::min_element(energy_and_state_type.cbegin(), energy_and_state_type.cend(),
                                                         [](const auto& a, const auto& b) { return a.first < b.first; });
-    min_energy                      = energy;
+    const auto min_energy           = energy;
 
     // The partition function is obtained by summing up all the Boltzmann factors.
     const double partition_function =
@@ -85,10 +83,8 @@ namespace fiction
         return 0.0;
     }
 
-    auto min_energy = std::numeric_limits<double>::infinity();
-
     const auto& [energy, degeneracy] = *(energy_distribution.begin());
-    min_energy                       = energy;  // unit: eV
+    const auto min_energy            = energy;  // unit: eV
 
     // The partition function is obtained by summing up all the Boltzmann factors.
     const double partition_function =

@@ -105,7 +105,7 @@ class quickexact_impl
                 if (!all_sidbs_in_lyt_without_negative_preassigned_ones.empty())
                 {
                     // The first cell from all_sidbs_in_lyt_without_negative_preassigned_ones is chosen as the
-                    // dependent-cell to initialize the layout (pre-assigned negatively-charged SiDBs were erased with
+                    // dependent-cell to initialize the layout (pre-assigned negatively charged SiDBs were erased with
                     // generate_layout_without_negative_sidbs). All SiDBs are set to neutrally charged.
                     charge_distribution_surface charge_lyt_with_assigned_dependent_cell{
                         layout, params.physical_parameters, sidb_charge_state::NEUTRAL,
@@ -124,8 +124,8 @@ class quickexact_impl
                         }
                     }
 
-                    // IMPORTANT: The pre-assigned negatively-charged SiDBs (they have to be negatively charged to
-                    // fulfill the population stability) are considered as negatively-charged defects in the layout.
+                    // IMPORTANT: The pre-assigned negatively charged SiDBs (they have to be negatively charged to
+                    // fulfill the population stability) are considered as negatively charged defects in the layout.
                     // Hence, there are no "real" defects assigned, but in order to set some SiDBs with a fixed negative
                     // charge, this way of implementation is chosen.
                     for (const auto& cell : preassigned_negative_sidbs)

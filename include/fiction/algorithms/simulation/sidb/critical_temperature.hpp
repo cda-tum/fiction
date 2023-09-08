@@ -488,7 +488,7 @@ bool critical_temperature(const Lyt& lyt, const critical_temperature_params& par
 
     detail::critical_temperature_impl<Lyt> p{lyt, params, st};
 
-    bool result = false;
+    bool result;
 
     if (params.temperature_mode == critical_temperature_mode::GATE_BASED_SIMULATION)
     {
