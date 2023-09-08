@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <type_traits>
+#include <vector>
 
 namespace fiction
 {
