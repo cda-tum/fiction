@@ -8,6 +8,7 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
 using namespace fiction;
@@ -392,5 +393,34 @@ TEST_CASE("Generate all cells in area spanned by two cells", "[layout-utils]")
         CHECK(final_cell.x == 10);
         CHECK(final_cell.y == 5);
         CHECK(final_cell.z == 1);
+    }
+}
+
+TEST_CASE("Add certain cells to layout by given indices", "[layout-utils]")
+{
+    sidb_cell_clk_lyt_siqad lyt{};
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 5, 0}, sidb_technology::cell_type::NORMAL);
+    const auto all_cells =
+        std::vector<sidb_cell_clk_lyt_siqad::cell>{{0, 0, 1}, {10, 0, 1}, {0, 2, 1},   {0, 3, 1},    {3, 0, 0},
+                                                   {7, 0, 0}, {0, 40, 1}, {-10, 0, 1}, {-10, 10, 1}, {0, 7, 1}};
+    SECTION("add cells which are already part ")
+    {
+        const auto modified_layout = add_cells_to_layout_based_on_indices(lyt, all_cells, {0, 1, 4, 5});
+        CHECK(modified_layout.num_cells() == 6);
+        CHECK(modified_layout.get_cell_type({10, 0, 1}) == sidb_technology::cell_type::NORMAL);
+        CHECK(modified_layout.get_cell_type({3, 0, 0}) == sidb_technology::cell_type::NORMAL);
+        CHECK(modified_layout.get_cell_type({7, 0, 0}) == sidb_technology::cell_type::NORMAL);
+    }
+
+    SECTION("add cells which are not part yet")
+    {
+        const auto modified_layout = add_cells_to_layout_based_on_indices(lyt, all_cells, {1, 2, 7});
+        CHECK(modified_layout.num_cells() == 7);
+        CHECK(modified_layout.get_cell_type({10, 0, 1}) == sidb_technology::cell_type::NORMAL);
+        CHECK(modified_layout.get_cell_type({0, 2, 1}) == sidb_technology::cell_type::NORMAL);
+        CHECK(modified_layout.get_cell_type({-10, 0, 1}) == sidb_technology::cell_type::NORMAL);
     }
 }

@@ -58,6 +58,8 @@ Layout Utils
 .. doxygenfunction:: fiction::convert_to_siqad_coordinates
 .. doxygenfunction:: fiction::convert_to_fiction_coordinates
 .. doxygenfunction:: fiction::random_coordinate
+.. doxygenfunction:: fiction::all_sidbs_in_spanned_area
+.. doxygenfunction:: fiction::add_cells_to_layout_based_on_indices
 
 Placement Utils
 ---------------
