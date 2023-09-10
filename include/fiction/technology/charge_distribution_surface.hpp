@@ -1187,9 +1187,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 for (const auto& cell : strg->sidb_order)
                 {
-                    chargeindex +=
-                        static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[cell_to_index(cell)]) + 1) *
-                                              std::pow(base, this->num_cells() - 1 - counter));
+                    chargeindex += static_cast<uint64_t>(
+                        (charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(cell))]) + 1) *
+                        std::pow(base, this->num_cells() - 1 - counter));
                     counter += 1;
                 }
             }
@@ -2030,8 +2030,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 if (counter_negative != dependent_cell_index_negative)
                 {
                     const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                    if (const auto new_chargesign =
-                            this->get_charge_state_by_index(cell_to_index(index_to_two_state_cell(counter_negative)));
+                    if (const auto new_chargesign = this->get_charge_state_by_index(
+                            static_cast<uint64_t>(cell_to_index(index_to_two_state_cell(counter_negative))));
                         new_chargesign != sign)
                     {
                         strg->cell_history.emplace_back(

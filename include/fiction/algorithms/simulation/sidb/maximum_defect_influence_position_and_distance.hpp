@@ -62,10 +62,10 @@ template <typename Lyt>
 class maximum_defect_influence_position_and_distance_impl
 {
   public:
-    maximum_defect_influence_position_and_distance_impl(const Lyt&                                      lyt,
-                                                        const maximum_defect_influence_distance_params& sim_params) :
+    maximum_defect_influence_position_and_distance_impl(const Lyt&                                     lyt,
+                                                        const maximum_defect_influence_distance_params sim_params) :
             layout{lyt},
-            params{sim_params}
+            params{std::move(sim_params)}
     {
         collect_all_defect_cells();
     }

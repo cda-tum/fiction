@@ -145,7 +145,7 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to
         std::accumulate(time.cbegin(), time.cend(), 0.0) / static_cast<double>(tts_params.repetitions);
     const auto acc = static_cast<double>(gs_count) / static_cast<double>(tts_params.repetitions);
 
-    double tts;
+    double tts = 0.0;
 
     if (acc == 1)
     {
