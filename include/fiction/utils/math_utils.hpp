@@ -102,10 +102,10 @@ void generate_unsigned_integer_combinations_helper(std::vector<std::vector<uint6
         current_combination.pop_back();  // Remove the last added element for backtracking.
     }
 }
-
 /**
- * Generates all combinations of 'k' unique elements of {0,1,2,...,n-1}. For example: n = 3 and k = 2, the combinations
- * would be {0,1}, {0,2}, {1,2}.
+ * Generate all unique combinations of `k` elements from the range [0, n-1].
+ *
+ * For example, when n = 3 and k = 2, the combinations would be {0, 1}, {0, 2}, {1, 2}.
  *
  * @param n The total number of elements.
  * @param k The number of elements in each combination.
