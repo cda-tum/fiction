@@ -57,7 +57,7 @@ T integral_abs(const T n) noexcept
  * @param k The number of items to choose from n.
  * @return The binomial coefficient C(n, k).
  */
-uint64_t binomial_coefficient(uint64_t n, uint64_t k)
+inline uint64_t binomial_coefficient(uint64_t n, uint64_t k) noexcept
 {
     if (k > n)
     {
@@ -75,16 +75,18 @@ uint64_t binomial_coefficient(uint64_t n, uint64_t k)
     return result;
 }
 /**
- * This function generates all combinations of 'k' unique elements of {0,1,2,...,n-1}.
+ * This function generates all combinations of `k` unique unsigned integers within the specified range [0, n-1].
  *
- * @param n The total number of elements.
- * @param k The number of elements in each combination.
- * @return A vector of vectors representing all combinations.
+ * @param combinations Vector to store the generated combinations.
+ * @param current_combination Current combination being constructed.
+ * @param total_elements The total number of elements (maximum value).
+ * @param current_index Current index in the iteration.
+ * @param remaining_elements Number of elements remaining to be added to the combination.
  */
-void generate_unsigned_integer_combinations_helper(std::vector<std::vector<uint64_t>>& combinations,
-                                                   std::vector<uint64_t>&              current_combination,
-                                                   const uint64_t total_elements, const uint64_t current_index,
-                                                   const uint64_t remaining_elements)
+inline void generate_unsigned_integer_combinations_helper(std::vector<std::vector<uint64_t>>& combinations,
+                                                          std::vector<uint64_t>&              current_combination,
+                                                          const uint64_t total_elements, const uint64_t current_index,
+                                                          const uint64_t remaining_elements) noexcept
 {
     // If we have selected 'k' elements, add the current combination to the result.
     if (remaining_elements == 0)
@@ -103,7 +105,7 @@ void generate_unsigned_integer_combinations_helper(std::vector<std::vector<uint6
     }
 }
 /**
- * Generate all unique combinations of `k` elements from the range [0, n-1].
+ * This function generates all combinations of `k` unique unsigned integers within the specified range [0, n-1].
  *
  * For example, when n = 3 and k = 2, the combinations would be {0, 1}, {0, 2}, {1, 2}.
  *
@@ -111,7 +113,8 @@ void generate_unsigned_integer_combinations_helper(std::vector<std::vector<uint6
  * @param k The number of elements in each combination.
  * @return A vector of vectors representing all combinations.
  */
-std::vector<std::vector<uint64_t>> generate_unsigned_integer_combinations(const uint64_t k, const uint64_t n)
+inline std::vector<std::vector<uint64_t>> generate_unsigned_integer_combinations(const uint64_t k,
+                                                                                 const uint64_t n) noexcept
 {
     std::vector<std::vector<uint64_t>> combinations;
     combinations.reserve(binomial_coefficient(n, k));
