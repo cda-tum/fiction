@@ -11,6 +11,7 @@
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
+#include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/hash.hpp"
@@ -37,6 +38,20 @@
 namespace fiction
 {
 
+/**
+ * Possible operational status of a layout.
+ */
+enum class operational_status
+{
+    /**
+     * The layout is operational.
+     */
+    OPERATIONAL,
+    /**
+     * The layout is non-operational.
+     */
+    NON_OPERATIONAL
+};
 /**
  * An operational domain is a set of simulation parameter values for which a given SiDB layout is logically operational.
  * This means that a layout is deemed operational if the layout's ground state corresponds with a given Boolean function
@@ -141,20 +156,6 @@ struct operational_domain
                 return y;
             }
         }
-    };
-    /**
-     * Possible operational status of a layout.
-     */
-    enum class operational_status
-    {
-        /**
-         * The layout is operational.
-         */
-        OPERATIONAL,
-        /**
-         * The layout is non-operational.
-         */
-        NON_OPERATIONAL
     };
     /**
      * The operational status of the layout for each specified parameter combination. This constitutes the operational
@@ -384,7 +385,7 @@ class operational_domain_impl
         // add the neighbors of each operational point to the queue
         for (const auto& [param_point, status] : op_domain.operational_values)
         {
-            if (status == operational_domain::operational_status::OPERATIONAL)
+            if (status == operational_status::OPERATIONAL)
             {
                 queue_next_points(to_step_point(param_point));
             }
@@ -407,7 +408,7 @@ class operational_domain_impl
             const auto operational_status = is_operational(sp);
 
             // if the point is operational, add its eight neighbors to the queue
-            if (operational_status == operational_domain::operational_status::OPERATIONAL)
+            if (operational_status == operational_status::OPERATIONAL)
             {
                 queue_next_points(sp);
             }
@@ -472,7 +473,7 @@ class operational_domain_impl
         {
             const auto operational_status = is_operational(next_point);
 
-            if (operational_status == operational_domain::operational_status::OPERATIONAL)
+            if (operational_status == operational_status::OPERATIONAL)
             {
                 backtrack_point       = current_contour_point;
                 current_contour_point = next_point;
@@ -706,8 +707,7 @@ class operational_domain_impl
      * @return The operational status of the point at step position `sp = (x, y)` or `std::nullopt` if `(x, y)` has not
      * been sampled yet.
      */
-    [[nodiscard]] inline std::optional<operational_domain::operational_status>
-    has_already_been_sampled(const step_point& sp) const noexcept
+    [[nodiscard]] inline std::optional<operational_status> has_already_been_sampled(const step_point& sp) const noexcept
     {
         if (const auto it = op_domain.operational_values.find(to_parameter_point(sp));
             it != op_domain.operational_values.cend())
@@ -729,7 +729,7 @@ class operational_domain_impl
      * @param sp Step point to be investigated.
      * @return The operational status of the layout under the given simulation parameters.
      */
-    operational_domain::operational_status is_operational(const step_point& sp) noexcept
+    operational_status is_operational(const step_point& sp) noexcept
     {
         // if the point has already been sampled, return the stored operational status
         if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
@@ -742,16 +742,16 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]()
         {
-            op_domain.operational_values[param_point] = operational_domain::operational_status::OPERATIONAL;
+            op_domain.operational_values[param_point] = operational_status::OPERATIONAL;
 
-            return operational_domain::operational_status::OPERATIONAL;
+            return operational_status::OPERATIONAL;
         };
 
         const auto non_operational = [this, &param_point]()
         {
-            op_domain.operational_values[param_point] = operational_domain::operational_status::NON_OPERATIONAL;
+            op_domain.operational_values[param_point] = operational_status::NON_OPERATIONAL;
 
-            return operational_domain::operational_status::NON_OPERATIONAL;
+            return operational_status::NON_OPERATIONAL;
         };
 
         // increment the number of evaluated parameter combinations
@@ -888,7 +888,7 @@ class operational_domain_impl
             const auto operational_value = is_operational(sample_step_point);
 
             // if the parameter combination is operational, return its step values in x and y dimension
-            if (operational_value == operational_domain::operational_status::OPERATIONAL)
+            if (operational_value == operational_status::OPERATIONAL)
             {
                 return sample_step_point;
             }
@@ -917,7 +917,7 @@ class operational_domain_impl
 
             const auto operational_status = is_operational(left_step);
 
-            if (operational_status == operational_domain::operational_status::OPERATIONAL)
+            if (operational_status == operational_status::OPERATIONAL)
             {
                 latest_operational_point = left_step;
             }
@@ -1009,7 +1009,7 @@ class operational_domain_impl
 
         for (const auto& [param_point, status] : op_domain.operational_values)
         {
-            if (status == operational_domain::operational_status::OPERATIONAL)
+            if (status == operational_status::OPERATIONAL)
             {
                 ++stats.num_operational_parameter_combinations;
             }

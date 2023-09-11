@@ -42,8 +42,8 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 {
     operational_domain opdom{};
-    opdom.operational_values = {{{0, 0}, operational_domain::operational_status::OPERATIONAL},
-                                {{0, 1}, operational_domain::operational_status::NON_OPERATIONAL}};
+    opdom.operational_values = {{{0, 0}, operational_status::OPERATIONAL},
+                                {{0, 1}, operational_status::NON_OPERATIONAL}};
 
     std::ostringstream os{};
 
@@ -84,10 +84,10 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 TEST_CASE("Write operational domain with floating-point parameter values", "[write-operational-domain]")
 {
     operational_domain opdom{};
-    opdom.operational_values = {{{0.1, 0.2}, operational_domain::operational_status::OPERATIONAL},
-                                {{0.3, 0.4}, operational_domain::operational_status::NON_OPERATIONAL},
-                                {{1.2, 1.4}, operational_domain::operational_status::OPERATIONAL},
-                                {{2.4, 5.75}, operational_domain::operational_status::NON_OPERATIONAL}};
+    opdom.operational_values = {{{0.1, 0.2}, operational_status::OPERATIONAL},
+                                {{0.3, 0.4}, operational_status::NON_OPERATIONAL},
+                                {{1.2, 1.4}, operational_status::OPERATIONAL},
+                                {{2.4, 5.75}, operational_status::NON_OPERATIONAL}};
 
     std::ostringstream os{};
 

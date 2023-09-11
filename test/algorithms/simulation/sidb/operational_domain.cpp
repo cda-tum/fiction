@@ -24,9 +24,9 @@ TEST_CASE("Structured binding support for parameter_points", "[operational-domai
     CHECK(y == 2.0);
 }
 
-void check_op_domain_params_and_operational_status(
-    const operational_domain& op_domain, const operational_domain_params& params,
-    const std::optional<operational_domain::operational_status>& status) noexcept
+void check_op_domain_params_and_operational_status(const operational_domain&                op_domain,
+                                                   const operational_domain_params&         params,
+                                                   const std::optional<operational_status>& status) noexcept
 {
     CHECK(op_domain.x_dimension == params.x_dimension);
     CHECK(op_domain.y_dimension == params.y_dimension);
@@ -95,8 +95,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain.operational_values.size() == 100);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          operational_domain::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations == 200);
@@ -113,8 +112,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain.operational_values.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          operational_domain::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -132,8 +130,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain.operational_values.size() == 100);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          operational_domain::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations == 200);
@@ -150,8 +147,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain.operational_values.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          operational_domain::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -180,7 +176,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          operational_domain::operational_status::NON_OPERATIONAL);
+                                                          operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -198,7 +194,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          operational_domain::operational_status::NON_OPERATIONAL);
+                                                          operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 100);
@@ -216,7 +212,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          operational_domain::operational_status::NON_OPERATIONAL);
+                                                          operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -234,7 +230,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          operational_domain::operational_status::NON_OPERATIONAL);
+                                                          operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 50);
@@ -372,8 +368,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         CHECK(op_domain.operational_values.size() == 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      operational_domain::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations == 400);
@@ -390,8 +385,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         CHECK(op_domain.operational_values.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      operational_domain::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations <= 400);
@@ -408,8 +402,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         CHECK(op_domain.operational_values.size() == 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      operational_domain::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations == 400);
@@ -426,8 +419,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
         CHECK(op_domain.operational_values.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      operational_domain::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations <= 400);

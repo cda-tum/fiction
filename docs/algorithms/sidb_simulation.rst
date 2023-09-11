@@ -98,8 +98,16 @@ Time-to-Solution (TTS) Statistics
 Operational Domain Computation
 ##############################
 
+**Header:** ``fiction/algorithms/simulation/sidb/is_gate_layout_operational.hpp``
+
+.. doxygenstruct:: fiction::is_gate_layout_operational_params
+   :members:
+
+.. doxygenfunction:: fiction::is_gate_layout_operational
+
 **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 
+.. doxygenenum:: fiction::operational_status
 .. doxygenstruct:: fiction::operational_domain
    :members:
 
