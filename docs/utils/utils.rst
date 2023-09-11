@@ -191,5 +191,3 @@ Math Utils
 
 .. doxygenfunction:: fiction::round_to_n_decimal_places
 .. doxygenfunction:: fiction::integral_abs
-.. doxygenfunction:: fiction::binomial_coefficient
-.. doxygenfunction:: fiction::generate_unsigned_integer_combinations
