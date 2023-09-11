@@ -1149,7 +1149,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 for (uint64_t c = 0; c < strg->cell_charge.size(); c++)
                 {
-                    if (c != cell_to_index(strg->dependent_cell))
+                    if (c != static_cast<uint64_t>(cell_to_index(strg->dependent_cell)))
                     {
                         chargeindex += static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[c]) + 1) *
                                                              std::pow(base, this->num_cells() - 1 - counter - 1));
@@ -2038,7 +2038,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                             static_cast<uint64_t>(cell_to_index(index_to_two_state_cell(counter_negative))),
                             charge_state_to_sign(new_chargesign));
                         this->assign_charge_state_by_cell_index(
-                            cell_to_index(index_to_two_state_cell(counter_negative)), sign, false);
+                            static_cast<uint64_t>(cell_to_index(index_to_two_state_cell(counter_negative))), sign,
+                            false);
                     }
                     counter_negative -= 1;
                 }
