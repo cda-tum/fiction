@@ -11,7 +11,6 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/placement_utils.hpp"
 
@@ -29,10 +28,20 @@
 namespace fiction
 {
 
+/**
+ * This struct stores statistics about the post-layout optimization process.
+ */
 struct post_layout_optimization_stats
 {
+    /**
+     * Runtime of the post-layout optimization process.
+     */
     mockturtle::stopwatch<>::duration time_total{0};
-
+    /**
+     * Reports the statistics to the given output stream.
+     *
+     * @param out Output stream.
+     */
     void report(std::ostream& out = std::cout) const
     {
         out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
@@ -1094,7 +1103,7 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* ps
     }
 
     // measure run time
-    mockturtle::stopwatch stop{pst->time_total};
+    const mockturtle::stopwatch stop{pst->time_total};
 
     // Optimization
     auto layout = obstruction_layout<Lyt>(lyt);

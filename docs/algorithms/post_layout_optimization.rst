@@ -10,4 +10,6 @@ generated using either heuristic methods or machine learning techniques. It achi
 repositioning gates within the layout, removing excess wiring, and effectively relocating outputs to more favorable
 positions.
 
+.. doxygenstruct:: fiction::post_layout_optimization_stats
+   :members:
 .. doxygenfunction:: fiction::post_layout_optimization

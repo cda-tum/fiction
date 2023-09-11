@@ -28,7 +28,8 @@ using namespace fiction;
 template <typename Lyt, typename Ntk>
 void check_mapping_equiv(const Ntk& ntk)
 {
-    auto                           layout = orthogonal<Lyt>(ntk, {});
+    const auto layout = orthogonal<Lyt>(ntk, {});
+
     post_layout_optimization_stats stats{};
     post_layout_optimization<Lyt>(layout, &stats);
 
@@ -96,7 +97,8 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     // O ▢ O
     SECTION("Get fanin and fanouts 1")
     {
-        const coordinate<gate_layout> old_pos                   = {0, 2};
+        const coordinate<gate_layout> old_pos = {0, 2};
+
         const auto& [fanins, fanouts, to_clear, r1, r2, r3, r4] = detail::get_fanin_and_fanouts(obstr_lyt, old_pos);
 
         CHECK(fanins == std::vector<coordinate<gate_layout>>{{0, 0}});
@@ -111,7 +113,8 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
 
     SECTION("Get fanin and fanouts 2")
     {
-        const coordinate<gate_layout> old_pos                  = {2, 2};
+        const coordinate<gate_layout> old_pos = {2, 2};
+
         const auto [fanins, fanouts, to_clear, r1, r2, r3, r4] = detail::get_fanin_and_fanouts(obstr_lyt, old_pos);
 
         CHECK(fanins == std::vector<coordinate<gate_layout>>{{0, 2}, {2, 0}});
@@ -124,9 +127,10 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
         CHECK(r4.empty());
     }
 
-    const coordinate<gate_layout>                   old_pos_1    = {2, 0};
-    const coordinate<gate_layout>                   new_pos_1    = {1, 0};
-    const std::tuple<bool, coordinate<gate_layout>> moved_gate_1 = detail::improve_gate_location(obstr_lyt, old_pos_1);
+    const coordinate<gate_layout> old_pos_1 = {2, 0};
+    const coordinate<gate_layout> new_pos_1 = {1, 0};
+
+    const auto moved_gate_1 = detail::improve_gate_location(obstr_lyt, old_pos_1);
     // I I→=
     // ↓   ↓
     // = ▢ =
@@ -142,9 +146,10 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
         CHECK(obstr_lyt.is_pi_tile(old_pos_1) == false);
     }
 
-    const coordinate<gate_layout>                   old_pos_2    = {0, 2};
-    const coordinate<gate_layout>                   new_pos_2    = {0, 1};
-    const std::tuple<bool, coordinate<gate_layout>> moved_gate_2 = detail::improve_gate_location(obstr_lyt, old_pos_2);
+    const coordinate<gate_layout> old_pos_2 = {0, 2};
+    const coordinate<gate_layout> new_pos_2 = {0, 1};
+
+    const auto moved_gate_2 = detail::improve_gate_location(obstr_lyt, old_pos_2);
     // I I→=
     // ↓   ↓
     // F→= =
@@ -160,9 +165,10 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
         CHECK(obstr_lyt.fanout_size(obstr_lyt.get_node(new_pos_2)) == 2);
     }
 
-    const coordinate<gate_layout>                   old_pos_3    = {2, 2};
-    const coordinate<gate_layout>                   new_pos_3    = {1, 1};
-    const std::tuple<bool, coordinate<gate_layout>> moved_gate_3 = detail::improve_gate_location(obstr_lyt, old_pos_3);
+    const coordinate<gate_layout> old_pos_3 = {2, 2};
+    const coordinate<gate_layout> new_pos_3 = {1, 1};
+
+    const auto moved_gate_3 = detail::improve_gate_location(obstr_lyt, old_pos_3);
     // I I ▢
     // ↓ ↓
     // F→&→=
@@ -229,17 +235,22 @@ TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
 
     SECTION("Call functions")
     {
-        const coordinate<gate_layout>                   old_pos_1 = {2, 0};
-        const std::tuple<bool, coordinate<gate_layout>> moved_gate_1 =
-            detail::improve_gate_location(obstr_lyt, old_pos_1);
+        const coordinate<gate_layout> old_pos_1 = {2, 0};
+
+        const auto moved_gate_1 = detail::improve_gate_location(obstr_lyt, old_pos_1);
+
         CHECK_FALSE(std::get<0>(moved_gate_1));
         CHECK(std::get<1>(moved_gate_1) == old_pos_1);
         CHECK_NOTHROW(detail::delete_wires(obstr_lyt));
+
         std::vector<uint64_t> rows_to_delete{};
         std::vector<uint64_t> columns_to_delete{};
+
         CHECK_NOTHROW(detail::delete_rows_and_columns(obstr_lyt, rows_to_delete, columns_to_delete));
         CHECK_NOTHROW(detail::optimize_output_positions(obstr_lyt));
+
         post_layout_optimization_stats stats_wrong_clocking_scheme{};
+
         CHECK_NOTHROW(post_layout_optimization<gate_layout>(obstr_lyt, &stats_wrong_clocking_scheme));
     }
 }
