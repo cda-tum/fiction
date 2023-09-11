@@ -51,14 +51,20 @@ T integral_abs(const T n) noexcept
     return static_cast<T>(std::abs(static_cast<int64_t>(n)));  // needed to solve ambiguity of std::abs
 }
 /**
- * Calculates the binomial coefficient C(n, k).
+ * Calculates the binomial coefficient \(\binom{n}{k}\).
  *
  * @param n The total number of items.
  * @param k The number of items to choose from n.
- * @return The binomial coefficient C(n, k).
+ * @return The binomial coefficient \(\binom{n}{k}\).
  */
-inline uint64_t binomial_coefficient(uint64_t n, uint64_t k) noexcept
+[[nodiscard]] inline uint64_t binomial_coefficient(uint64_t n, uint64_t k) noexcept
 {
+    assert(n >= k && "n has to be >= k");
+
+    if (k == 0)
+    {
+        return 1;
+    }
     if (k > n)
     {
         return 0;

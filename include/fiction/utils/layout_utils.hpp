@@ -408,7 +408,7 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
  * @param cell_se The southeast SiQAD cell defining the ending point of the area.
  * @return A vector containing all cells within the specified area.
  */
-std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_t& cell_nw,
+inline std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_t& cell_nw,
                                                       const siqad::coord_t& cell_se) noexcept
 {
     std::vector<siqad::coord_t> all_cells{};
@@ -445,7 +445,7 @@ std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_t& cell
     return all_cells;
 }
 /**
- * Modify a SiDB cell-level layout by adding cells based on specified indices.
+ * Modify an SiDB cell-level layout by adding cells based on specified indices.
  *
  * This function takes a cell-level SiDB layout, a list of all available cells, and a list of cell indices
  * to add to the layout. It iterates through the provided indices, assigns NORMAL cell type to non-empty cells,
@@ -458,7 +458,7 @@ std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_t& cell
  * @return The modified layout with added cells.
  */
 template <typename Lyt>
-Lyt add_cells_to_layout_based_on_indices(Lyt& lyt, const std::vector<typename Lyt::cell>& all_cells,
+inline Lyt add_cells_to_layout_based_on_indices(Lyt& lyt, const std::vector<typename Lyt::cell>& all_cells,
                                          const std::vector<uint64_t>& cell_indices) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
