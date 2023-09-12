@@ -191,3 +191,11 @@ Math Utils
 
 .. doxygenfunction:: fiction::round_to_n_decimal_places
 .. doxygenfunction:: fiction::integral_abs
+
+
+`phmap`
+-------
+
+**Header:** ``fiction/utils/phmap_utils.hpp``
+
+.. doxygentypedef:: fiction::locked_parallel_flat_hash_map

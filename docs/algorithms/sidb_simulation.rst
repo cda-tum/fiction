@@ -87,7 +87,6 @@ Temperature Behavior
 .. doxygenfunction:: fiction::calculate_energy_and_state_type
 
 
-
 Time-to-Solution (TTS) Statistics
 #################################
 
@@ -105,3 +104,45 @@ Random SiDB Layout Generator
 .. doxygenstruct:: fiction::generate_random_sidb_layout_params
 .. doxygenfunction:: fiction::generate_random_sidb_layout
 .. doxygenfunction:: fiction::generate_multiple_random_sidb_layouts
+
+
+Operational Domain Computation
+##############################
+
+**Header:** ``fiction/algorithms/simulation/sidb/is_gate_layout_operational.hpp``
+
+.. doxygenstruct:: fiction::is_gate_layout_operational_params
+   :members:
+
+.. doxygenfunction:: fiction::is_gate_layout_operational
+
+**Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
+
+.. doxygenenum:: fiction::operational_status
+.. doxygenstruct:: fiction::operational_domain
+   :members:
+
+.. doxygenstruct:: fiction::operational_domain_params
+   :members:
+.. doxygenstruct:: fiction::operational_domain_stats
+   :members:
+
+.. doxygenfunction:: fiction::operational_domain_grid_search
+.. doxygenfunction:: fiction::operational_domain_random_sampling
+.. doxygenfunction:: fiction::operational_domain_flood_fill
+
+
+Utility Functions
+#################
+
+
+Binary-dot Logic (BDL) Pair Detection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp``
+
+.. doxygenstruct:: fiction::bdl_pair
+   :members:
+.. doxygenstruct:: fiction::detect_bdl_pairs_params
+   :members:
+.. doxygenfunction:: fiction::detect_bdl_pairs

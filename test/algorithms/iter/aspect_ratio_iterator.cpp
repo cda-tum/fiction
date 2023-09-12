@@ -7,7 +7,18 @@
 #include <fiction/algorithms/iter/aspect_ratio_iterator.hpp>
 #include <fiction/layouts/coordinates.hpp>
 
+#include <iterator>
+#include <type_traits>
+
 using namespace fiction;
+
+TEST_CASE("Traits", "[bdl-input-iterator]")
+{
+    CHECK(std::is_same_v<std::iterator_traits<aspect_ratio_iterator<offset::ucoord_t>>::iterator_category,
+                         std::forward_iterator_tag>);
+
+    CHECK(std::is_same_v<std::iterator_traits<aspect_ratio_iterator<offset::ucoord_t>>::value_type, offset::ucoord_t>);
+}
 
 TEST_CASE("Aspect ratio iteration", "[aspect-ratio-iterator]")
 {
