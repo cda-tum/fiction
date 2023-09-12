@@ -501,7 +501,7 @@ class operational_domain_impl
     /**
      * The specification of the layout.
      */
-    const TT& truth_table;
+    const TT& truth_table;  // TODO implement the matching of multi-input truth table inputs and BDL pair ordering
     /**
      * The parameters for the operational domain computation.
      */
@@ -1035,7 +1035,7 @@ class operational_domain_impl
  * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
  * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
  * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
- * inputs of the truth table. // TODO implement the matching of truth table inputs and BDL pair ordering
+ * inputs of the truth table.
  *
  * This algorithm uses a grid search to find the operational domain. The grid search is performed by exhaustively
  * sweeping the parameter space in the x and y dimensions. Since grid search is exhaustive, the algorithm is guaranteed
@@ -1078,7 +1078,7 @@ operational_domain operational_domain_grid_search(const Lyt& lyt, const TT& spec
  * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
  * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
  * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
- * inputs of the truth table. // TODO implement the matching of truth table inputs and BDL pair ordering
+ * inputs of the truth table.
  *
  * This algorithm uses random sampling to find a part of the operational domain that might not be complete. It performs
  * a total of `samples` uniformly-distributed random samples within the parameter range. For each sample, the algorithm
@@ -1121,7 +1121,7 @@ operational_domain operational_domain_random_sampling(const Lyt& lyt, const TT& 
  * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
  * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
  * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
- * inputs of the truth table. // TODO implement the matching of truth table inputs and BDL pair ordering
+ * inputs of the truth table.
  *
  * This algorithm first uses random sampling to find several operational points within the parameter range. From there,
  * it employs the "flood fill" algorithm to explore the operational domain. The algorithm is guaranteed to find all
@@ -1170,7 +1170,7 @@ operational_domain operational_domain_flood_fill(const Lyt& lyt, const TT& spec,
  * Computes the operational domain of the given SiDB cell-level layout. The operational domain is the set of all
  * parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
  * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
- * inputs of the truth table. // TODO implement the matching of truth table inputs and BDL pair ordering
+ * inputs of the truth table.
  *
  * This algorithm first uses random sampling to find a single operational point within the parameter range. From there,
  * it traverses outwards to find the edge of the operational area and performs Moore neighborhood contour tracing to
