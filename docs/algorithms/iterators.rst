@@ -7,6 +7,15 @@ Aspect Ratio Iterator
    :members:
 
 
+Gray Code Iterator
+------------------
+
+**Header:** ``fiction/algorithms/iter/gray_code_iterator.hpp``
+
+.. doxygenclass:: fiction::gray_code_iterator
+   :members:
+
+
 BDL Input Iterator
 ------------------
 
