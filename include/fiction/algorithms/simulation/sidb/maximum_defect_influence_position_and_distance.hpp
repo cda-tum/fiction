@@ -23,7 +23,7 @@
 namespace fiction
 {
 /**
- * This struct stores the parameters for the `maximum_defect_influence_position_and_distance` algorithm.
+ * This struct stores the parameters for the maximum_defect_influence_position_and_distance algorithm.
  */
 struct maximum_defect_influence_distance_params
 {
@@ -39,7 +39,7 @@ struct maximum_defect_influence_distance_params
      * The pair describes the width and height of the area around the gate, which is
      * also used to place defects.
      *
-     * @note The height (second entry of the pair) of the area is given in the y coordinate of the SiQAD coordinates.
+     * @note The height of the area (second entry of the pair) is given in the y coordinate of the SiQAD coordinates.
      * This means that it describes the number of dimer rows.
      */
     std::pair<int32_t, int32_t> additional_scanning_area{50, 6};

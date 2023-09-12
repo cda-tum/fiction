@@ -14,11 +14,11 @@ namespace fiction
 enum class exhaustive_algorithm
 {
     /**
-     * ExGS
+     * *ExGS*
      */
     EXGS,
     /**
-     * QuickExact
+     * *QuickExact*
      */
     QUICKEXACT
 };

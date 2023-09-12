@@ -74,7 +74,7 @@ enum class simulation_engine
 };
 
 /**
- * This struct stores the parameters for the `critical_temperature` algorithm.
+ * This struct stores the parameters for the Critical Temperature algorithm.
  */
 struct critical_temperature_params
 {
@@ -462,7 +462,7 @@ class critical_temperature_impl
  * This algorithm performs temperature-aware SiDB simulation as proposed in \"Temperature Behavior of Silicon Dangling
  * Bond Logic\" by J. Drewniok, M. Walter, and R. Wille in IEEE NANO 2023
  * (https://ieeexplore.ieee.org/document/10231259). It comes in two flavors: gate-based and non-gate based, which can be
- * specified using the `critical_temperature_mode` parameter.
+ * specified using the critical_temperature_mode parameter.
  *
  * For gate-based simulation, the Critical Temperature is defined as follows: The temperature at which the excited
  * charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$ \eta \in [0,1] \f$.
