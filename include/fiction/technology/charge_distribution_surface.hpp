@@ -6,7 +6,7 @@
 #define FICTION_CHARGE_DISTRIBUTION_SURFACE_HPP
 
 #include "fiction/algorithms/path_finding/distance.hpp"
-#include "fiction/algorithms/simulation/sidb/enum_class_exhaustive_algorithm.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/technology/physical_constants.hpp"
@@ -244,7 +244,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param cs The charge state used for the initialization of all SiDBs, default is a negative charge.
      */
     explicit charge_distribution_surface(const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-                                         const sidb_charge_state&          cs     = sidb_charge_state::NEGATIVE) :
+                                         const sidb_charge_state           cs     = sidb_charge_state::NEGATIVE) :
             Lyt(),
             strg{std::make_shared<charge_distribution_storage>(params)}
     {
@@ -265,7 +265,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     explicit charge_distribution_surface(
         const Lyt& lyt, const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-        const sidb_charge_state& cs = sidb_charge_state::NEGATIVE, const typename Lyt::cell& variable_cells = {},
+        const sidb_charge_state cs = sidb_charge_state::NEGATIVE, const typename Lyt::cell& variable_cells = {},
         const std::unordered_map<typename Lyt::cell, double>& external_potential = {}) :
             Lyt(lyt),
             strg{std::make_shared<charge_distribution_storage>(params, external_potential, variable_cells)}
@@ -362,10 +362,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param cs Charge state.
      */
-    [[nodiscard]] bool charge_exists(const sidb_charge_state& cs) const noexcept
+    [[nodiscard]] bool charge_exists(const sidb_charge_state cs) const noexcept
     {
         return std::any_of(strg->cell_charge.cbegin(), strg->cell_charge.cend(),
-                           [&cs](const sidb_charge_state& c) { return c == cs; });
+                           [&cs](const sidb_charge_state c) { return c == cs; });
     }
     /**
      * This function searches the index of an SiDB.
@@ -390,7 +390,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param cs The charge state to be assigned to the cell.
      * @param update_charge_index `true` if the charge index should be changed, `false` otherwise.
      */
-    void assign_charge_state(const typename Lyt::cell& c, const sidb_charge_state& cs,
+    void assign_charge_state(const typename Lyt::cell& c, const sidb_charge_state cs,
                              const bool update_charge_index = true) const noexcept
     {
         if (auto index = cell_to_index(c); index != -1)
@@ -409,7 +409,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param i The index of the cell.
      * @param cs The charge state to be assign to the cell.
      */
-    void assign_charge_by_cell_index(const uint64_t i, const sidb_charge_state& cs) const noexcept
+    void assign_charge_by_cell_index(const uint64_t i, const sidb_charge_state cs) const noexcept
     {
         strg->cell_charge[i] = cs;
         this->charge_distribution_to_index();
@@ -419,7 +419,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param cs The charge state to be assigned to all the SiDBs.
      */
-    void assign_all_charge_states(const sidb_charge_state& cs) noexcept
+    void assign_all_charge_states(const sidb_charge_state cs) noexcept
     {
         for (uint64_t i = 0u; i < strg->cell_charge.size(); ++i)
         {
@@ -533,7 +533,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param update_charge_configuration if set to `true`, the charge distribution index is updated after the charge
      * distribution is changed.
      */
-    void assign_charge_state_by_cell_index(const uint64_t index, const sidb_charge_state& cs,
+    void assign_charge_state_by_cell_index(const uint64_t index, const sidb_charge_state cs,
                                            const bool update_charge_configuration = true) noexcept
     {
         strg->cell_charge[index] = cs;
@@ -803,7 +803,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * results of the previous charge distribution.
      */
     void update_local_potential(
-        const charge_distribution_history& history_mode = charge_distribution_history::NEGLECT) noexcept
+        const charge_distribution_history history_mode = charge_distribution_history::NEGLECT) noexcept
     {
         if (history_mode == charge_distribution_history::NEGLECT)
         {
@@ -951,9 +951,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * otherwise.
      */
     void update_after_charge_change(
-        const dependent_cell_mode&         dependent_cell          = dependent_cell_mode::FIXED,
-        const energy_calculation&          energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history& history_mode            = charge_distribution_history::NEGLECT) noexcept
+        const dependent_cell_mode         dependent_cell          = dependent_cell_mode::FIXED,
+        const energy_calculation          energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
+        const charge_distribution_history history_mode            = charge_distribution_history::NEGLECT) noexcept
     {
         this->update_local_potential(history_mode);
         if (dependent_cell == dependent_cell_mode::VARIABLE)
@@ -1220,14 +1220,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param history_mode charge_distribution_history::NEGLECT if the information (local electrostatic energy) of the
      * previous charge distribution is used to make the update more efficient, charge_distribution_history::CONSIDER
      * otherwise.
-     * @param engine exhaustive_algorithm::EXGS if `ExGS``should be used, exhaustive_algorithm::QUICKEXACT for
-     * `QuickExact`.
+     * @param engine exhaustive_sidb_simulation_engine::EXGS if `ExGS``should be used,
+     * exhaustive_sidb_simulation_engine::QUICKEXACT for `QuickExact`.
      */
     void increase_charge_index_by_one(
-        const dependent_cell_mode&         dependent_cell_fixed    = dependent_cell_mode::FIXED,
-        const energy_calculation&          recompute_system_energy = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history& consider_history        = charge_distribution_history::NEGLECT,
-        const exhaustive_algorithm&        engine                  = exhaustive_algorithm::EXGS) noexcept
+        const dependent_cell_mode               dependent_cell_fixed    = dependent_cell_mode::FIXED,
+        const energy_calculation                recompute_system_energy = energy_calculation::UPDATE_ENERGY,
+        const charge_distribution_history       consider_history        = charge_distribution_history::NEGLECT,
+        const exhaustive_sidb_simulation_engine engine = exhaustive_sidb_simulation_engine::EXGS) noexcept
     {
         if (strg->charge_index_and_base.first < strg->max_charge_index)
         {
@@ -1661,7 +1661,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param new_gray_code Gray code as uint64_t of the new charge distribution.
      * @param old_gray_code Gray code as uint64_t of the previous charge distribution layout.
      */
-    void charge_index_gray_code_to_charge_distribution(uint64_t new_gray_code, uint64_t old_gray_code) noexcept
+    void charge_index_gray_code_to_charge_distribution(const uint64_t new_gray_code,
+                                                       const uint64_t old_gray_code) noexcept
     {
         strg->cell_history_gray_code = {};
 
@@ -1713,14 +1714,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param history_mode charge_distribution_history::NEGLECT if the information (local electrostatic energy) of the
      * previous charge distribution is used to make the update more efficient, charge_distribution_history::CONSIDER
      * otherwise.
-     * @param engine exhaustive_algorithm::EXGS if `ExGS``should be used, exhaustive_algorithm::QUICKEXACT for
-     * `QuickExact`.
+     * @param engine exhaustive_sidb_simulation_engine::EXGS if `ExGS``should be used,
+     * exhaustive_sidb_simulation_engine::QUICKEXACT for `QuickExact`.
      */
     void increase_charge_index_of_sub_layout_by_one(
-        const dependent_cell_mode&         dependent_cell_fixed    = dependent_cell_mode::FIXED,
-        const energy_calculation&          recompute_system_energy = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history& consider_history        = charge_distribution_history::NEGLECT,
-        const exhaustive_algorithm&        engine                  = exhaustive_algorithm::QUICKEXACT) noexcept
+        const dependent_cell_mode               dependent_cell_fixed    = dependent_cell_mode::FIXED,
+        const energy_calculation                recompute_system_energy = energy_calculation::UPDATE_ENERGY,
+        const charge_distribution_history       consider_history        = charge_distribution_history::NEGLECT,
+        const exhaustive_sidb_simulation_engine engine = exhaustive_sidb_simulation_engine::QUICKEXACT) noexcept
     {
         if (strg->charge_index_sublayout < strg->max_charge_index_sulayout)
         {
@@ -1744,9 +1745,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_charge_index_by_gray_code(
         const uint64_t current_gray_code, const uint64_t previous_gray_code,
-        const dependent_cell_mode&         dependent_cell   = dependent_cell_mode::FIXED,
-        const energy_calculation&          energy_calc_mode = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history& history_mode     = charge_distribution_history::NEGLECT) noexcept
+        const dependent_cell_mode         dependent_cell   = dependent_cell_mode::FIXED,
+        const energy_calculation          energy_calc_mode = energy_calculation::UPDATE_ENERGY,
+        const charge_distribution_history history_mode     = charge_distribution_history::NEGLECT) noexcept
     {
         if (current_gray_code <= strg->max_charge_index)
         {
@@ -1760,7 +1761,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void reset_charge_index_sub_layout() noexcept
     {
         strg->charge_index_sublayout = 0;
-        this->index_to_charge_distribution(exhaustive_algorithm::QUICKEXACT);
+        this->index_to_charge_distribution(exhaustive_sidb_simulation_engine::QUICKEXACT);
         this->update_after_charge_change(dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
                                          charge_distribution_history::CONSIDER);
     }
@@ -1801,7 +1802,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param cell Cell which is added to the layout.
      * @param charge Charge state of the added cell.
      */
-    void add_sidb(const typename Lyt::cell& cell, const sidb_charge_state& charge) noexcept
+    void add_sidb(const typename Lyt::cell& cell, const sidb_charge_state charge) noexcept
     {
         strg->cell_charge.push_back(charge);
         strg->sidb_order.push_back(cell);
@@ -1815,7 +1816,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param cs The charge state assigned to all SiDBs.
      */
-    void initialize(const sidb_charge_state& cs = sidb_charge_state::NEGATIVE) noexcept
+    void initialize(const sidb_charge_state cs = sidb_charge_state::NEGATIVE) noexcept
     {
         strg->sidb_order.reserve(this->num_cells());
         strg->cell_charge.reserve(this->num_cells());
@@ -1924,13 +1925,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      *  The stored unique index is converted to a charge distribution.
      *
-     *  @param engine exhaustive_algorithm::EXGS if `ExGS``should be used, exhaustive_algorithm::QUICKEXACT for
-     * `QuickExact`.
+     *  @param engine exhaustive_sidb_simulation_engine::EXGS if `ExGS``should be used,
+     * exhaustive_sidb_simulation_engine::QUICKEXACT for `QuickExact`.
      */
-    void index_to_charge_distribution(const exhaustive_algorithm& engine = exhaustive_algorithm::EXGS) noexcept
+    void index_to_charge_distribution(
+        const exhaustive_sidb_simulation_engine engine = exhaustive_sidb_simulation_engine::EXGS) noexcept
     {
         // This scope is executed if the function is used by `quickexact`.
-        if (engine == exhaustive_algorithm::QUICKEXACT)
+        if (engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
         {
             // Cell_history collects the cells (SiDBs) that have changed their charge state.
             strg->cell_history = {};
@@ -2130,15 +2132,15 @@ template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state& cs)
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state cs)
     -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state& cs,
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state cs,
                             const typename T::cell& variable_cells) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state& cs,
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state cs,
                             const typename T::cell&                             variable_cells,
                             const std::unordered_map<typename T::cell, double>& external_pot)
     -> charge_distribution_surface<T>;

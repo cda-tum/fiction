@@ -5,7 +5,7 @@
 #ifndef FICTION_TIME_TO_SOLUTION_HPP
 #define FICTION_TIME_TO_SOLUTION_HPP
 
-#include "fiction/algorithms/simulation/sidb/enum_class_exhaustive_algorithm.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
@@ -32,7 +32,7 @@ struct time_to_solution_params
     /**
      * Exhaustive simulation algorithm used to simulate the ground state as reference.
      */
-    exhaustive_algorithm engine = exhaustive_algorithm::QUICKEXACT;
+    exhaustive_sidb_simulation_engine engine = exhaustive_sidb_simulation_engine::QUICKEXACT;
     /**
      * Number of iterations of the heuristic algorithm used to determine the simulation accuracy (`repetitions = 100`
      * means that accuracy is precise to 1%).
@@ -103,7 +103,7 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to
     time_to_solution_stats st{};
 
     sidb_simulation_result<Lyt> simulation_result{};
-    if (tts_params.engine == exhaustive_algorithm::EXGS)
+    if (tts_params.engine == exhaustive_sidb_simulation_engine::EXGS)
     {
         st.algorithm      = "ExGS";
         simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);

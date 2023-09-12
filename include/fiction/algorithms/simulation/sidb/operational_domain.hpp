@@ -6,8 +6,10 @@
 #define FICTION_OPERATIONAL_DOMAIN_HPP
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
+#include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
+#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
@@ -178,7 +180,7 @@ struct operational_domain_params
     /**
      * The simulation engine to be used for the operational domain computation.
      */
-    sidb_simulation_engine sim_engine{sidb_simulation_engine::EXGS};
+    sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
     /**
      * The sweep parameter for the x dimension.
      */
@@ -793,6 +795,12 @@ class operational_domain_impl
                 const quicksim_params qs_params{sim_params, 500, 0.6};
                 sim_result = quicksim(*bii, qs_params);
             }
+            else if (params.sim_engine == sidb_simulation_engine::QUICKEXACT)
+            {
+                // perform fast exact ground state simulation
+                const quickexact_params<Lyt> qe_params{sim_params};
+                sim_result = quickexact<Lyt>(*bii, qe_params);
+            }
             else
             {
                 assert(false && "unsupported simulation engine");
@@ -1018,32 +1026,6 @@ class operational_domain_impl
                 ++stats.num_non_operational_parameter_combinations;
             }
         }
-    }
-
-    [[nodiscard]] bool can_positive_charges_occur(const Lyt&                        lyt,
-                                                  const sidb_simulation_parameters& sim_params) const noexcept
-    {
-        const charge_distribution_surface charge_lyt{lyt, sim_params, sidb_charge_state::NEGATIVE};
-
-        bool result = false;
-
-        charge_lyt.foreach_cell(
-            [&result, &sim_params, charge_lyt](const auto& c)
-            {
-                if (const auto local_pot = charge_lyt.get_local_potential(c); local_pot.has_value())
-                {
-                    if ((-(*local_pot) + sim_params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
-                    {
-                        result = true;
-
-                        return false;  // break
-                    }
-                }
-
-                return true;  // continue
-            });
-
-        return result;
     }
 };
 
