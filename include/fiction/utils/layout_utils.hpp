@@ -444,37 +444,6 @@ inline std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_
 
     return all_cells;
 }
-/**
- * Modify an SiDB cell-level layout by adding cells based on specified indices.
- *
- * This function takes a cell-level SiDB layout, a list of all available cells, and a list of cell indices
- * to add to the layout. It iterates through the provided indices, assigns NORMAL cell type to non-empty cells,
- * and returns the modified layout.
- *
- * @tparam Lyt The cell-level SiDB layout type.
- * @param lyt The SiDB cell-level layout to be modified.
- * @param all_cells A vector containing all available cells.
- * @param cell_indices A vector of indices indicating which cells to add.
- * @return The modified layout with added cells.
- */
-template <typename Lyt>
-inline Lyt add_cells_to_layout_based_on_indices(Lyt& lyt, const std::vector<typename Lyt::cell>& all_cells,
-                                         const std::vector<uint64_t>& cell_indices) noexcept
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-
-    for (const auto i : cell_indices)
-    {
-        assert(i < all_cells.size() && "cell indices are out-of-range");
-        if (lyt.get_cell_type(all_cells[i]) == sidb_technology::cell_type::EMPTY)
-        {
-            lyt.assign_cell_type(all_cells[i], sidb_technology::cell_type::NORMAL);
-        }
-    }
-    return lyt;
-}
 
 }  // namespace fiction
 
