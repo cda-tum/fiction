@@ -8,6 +8,7 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
@@ -810,6 +811,16 @@ class operational_domain_impl
             if (sim_result.charge_distributions.empty())
             {
                 return non_operational();
+            }
+
+            // if the ground state is degenerate, the layout is non-operational
+            if (const auto energy_distr = energy_distribution(sim_result.charge_distributions);
+                energy_distr.count(0.0) > 0)
+            {
+                if (energy_distr.at(0.0) > 1)
+                {
+                    return non_operational();
+                }
             }
 
             // find the ground state, which is the charge distribution with the lowest energy
