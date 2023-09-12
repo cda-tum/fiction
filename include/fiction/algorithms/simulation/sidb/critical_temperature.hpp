@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
+#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
@@ -180,10 +181,12 @@ class critical_temperature_impl
         sidb_simulation_result<Lyt> simulation_results{};
         if (parameter.engine == simulation_engine::EXACT)
         {
-            temperature_stats.algorithm_name = "ExGS";
-            // All physically valid charge configurations are determined for the given layout (exhaustive ground state
-            // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            simulation_results = exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params);
+            temperature_stats.algorithm_name = "QuickExact";
+            // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
+            // is used to provide 100 % accuracy for the Critical Temperature).
+            const quickexact_params<Lyt> params{parameter.simulation_params.phys_params,
+                                                automatic_base_number_detection::OFF};
+            simulation_results = quickexact(layout, params);
         }
         else
         {
@@ -213,6 +216,17 @@ class critical_temperature_impl
             // The goal is to sort the cells from left to right and top to bottom.
             std::sort(all_cells.begin(), all_cells.end());
 
+            auto lowest_energy = round_to_n_decimal_places(minimum_energy(simulation_results.charge_distributions), 6);
+            charge_distribution_surface<Lyt> lyt_copy{};
+            for (const auto& lyt : simulation_results.charge_distributions)
+            {
+                if (std::fabs(round_to_n_decimal_places(lyt.get_system_energy(), 6) - lowest_energy) <
+                    std::numeric_limits<double>::epsilon())
+                {
+                    lyt_copy = charge_distribution_surface<Lyt>{lyt};
+                }
+            }
+
             // The energy distribution of the physically valid charge configurations for the given layout is determined.
             const auto distribution = energy_distribution(simulation_results.charge_distributions);
 
@@ -224,8 +238,8 @@ class critical_temperature_impl
             {
                 if (parameter.truth_table.num_bits() == 8)  // number of bits of truth table.
                 {
-                    output_bits_index = {-4, -3};  // double wire, cx, etc.
-                    // Truth table entries for given inputs are collected.
+                    output_bits_index = {-4, -3};
+                    // double-wire, cx, etc Truth table entries for given inputs are collected.
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2 + 1) != 0u);
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2) != 0u);
                 }
@@ -233,8 +247,8 @@ class critical_temperature_impl
 
             else if (parameter.truth_table.num_vars() == 1 && parameter.truth_table.num_bits() == 2)
             {
-                output_bits_index = {-2};  // Wire, inverter, etc. -2 due to placed perturber.
-                // Truth table entry for given input is collected.
+                output_bits_index = {-2};
+                // Wire, inverter, etc. -2 due to placed perturber. Truth table entry for given input is collected.
                 output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit) != 0u);
             }
 
@@ -243,14 +257,14 @@ class critical_temperature_impl
                 if (parameter.truth_table.num_bits() == 4 &&
                     parameter.truth_table != create_fan_out_tt())  // and, or, nand, etc.
                 {
-                    output_bits_index = {-2};  // One output SiDB. -2 due to placed perturber.
-                    // Truth table entry for given inputs is collected.
+                    output_bits_index = {-2};
+                    // One output SiDB. -2 due to placed perturber. Truth table entry for given inputs is collected.
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit) != 0u);
                 }
                 else
                 {
                     output_bits_index = {-4, -3};  // fo2.
-                    // Truth table entries for given input is collected.
+                    // Truth table entries for given input are collected.
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2 + 1) != 0u);
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2) != 0u);
                 }
@@ -297,14 +311,16 @@ class critical_temperature_impl
         sidb_simulation_result<Lyt> simulation_results{};
         if (parameter.engine == simulation_engine::EXACT)
         {
-            temperature_stats.algorithm_name = "exgs";
-            // All physically valid charge configurations are determined for the given layout (exhaustive ground state
-            // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            simulation_results = exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params);
+            temperature_stats.algorithm_name = "QuickExact";
+            // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
+            // is used to provide 100 % accuracy for the Critical Temperature).
+            const quickexact_params<Lyt> params{parameter.simulation_params.phys_params,
+                                                automatic_base_number_detection::OFF};
+            simulation_results = quickexact(layout, params);
         }
         else
         {
-            temperature_stats.algorithm_name = "quicksim";
+            temperature_stats.algorithm_name = "QuickSim";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = quicksim(layout, parameter.simulation_params);
@@ -428,7 +444,7 @@ class critical_temperature_impl
     /**
      * SiDB cell-level layout.
      */
-    const Lyt& layout{};
+    Lyt layout{};
     /**
      * Parameters for the `critical_temperature` algorithm.
      */

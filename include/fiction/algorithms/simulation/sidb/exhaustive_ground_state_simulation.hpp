@@ -21,7 +21,13 @@ namespace fiction
 {
 
 /**
- *  All metastable and physically valid charge distribution layouts are computed, stored in a vector and returned.
+ * This algorithm computes all physically valid charge configurations of a given SiDB layout. All possible charge
+ * configurations are passed and checked for physical validity. As a consequence, its runtime grows exponentially with
+ * the number of SiDBs per layout. Therefore, only layouts with up to 30 DBs can be simulated in a reasonable time.
+ * However, since all charge configurations are checked for validity, 100 % simulation accuracy is guaranteed.
+ *
+ * @note This was the first exact simulation approach. However, it is replaced by `QuickExact` due to the much
+ * better runtimes and more functionality.
  *
  * @tparam Lyt Cell-level layout type.
  * @param lyt The layout to simulate.
@@ -46,11 +52,11 @@ exhaustive_ground_state_simulation(const Lyt&                        lyt,
 
         charge_distribution_surface charge_lyt{lyt};
 
-        charge_lyt.set_physical_parameters(params);
-        charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
+        charge_lyt.assign_physical_parameters(params);
+        charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change();
 
-        while (charge_lyt.get_charge_index().first < charge_lyt.get_max_charge_index())
+        while (charge_lyt.get_charge_index_and_base().first < charge_lyt.get_max_charge_index())
         {
 
             if (charge_lyt.is_physically_valid())
