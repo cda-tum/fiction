@@ -103,8 +103,8 @@ class generate_edge_intersection_graph_impl
                           if (!ps.path_limit.has_value())
                           {
                               // enumerate all paths for the current objective
-                              obj_paths = enumerate_all_clocking_paths<clk_path>(
-                                  obstruction_layout{layout}, {obj.source, obj.target}, {ps.crossings});
+                              obj_paths = enumerate_all_paths<clk_path>(obstruction_layout{layout},
+                                                                        {obj.source, obj.target}, {ps.crossings});
                           }
                           else
                           {
