@@ -14,6 +14,7 @@
 
 #include <array>
 #include <cstdint>
+#include <cstdlib>
 #include <filesystem>
 #include <iostream>
 #include <string>
@@ -127,16 +128,16 @@ int main()  // NOLINT
             // compute the operational percentages
             const auto operational_percentage_gs =
                 static_cast<double>(op_domain_stats_gs.num_operational_parameter_combinations) /
-                op_domain_stats_gs.num_evaluated_parameter_combinations;
+                static_cast<double>(op_domain_stats_gs.num_evaluated_parameter_combinations);
             const auto operational_percentage_rs =
                 static_cast<double>(op_domain_stats_rs.num_operational_parameter_combinations) /
-                op_domain_stats_rs.num_evaluated_parameter_combinations;
+                static_cast<double>(op_domain_stats_rs.num_evaluated_parameter_combinations);
             const auto operational_percentage_ff =
                 static_cast<double>(op_domain_stats_ff.num_operational_parameter_combinations) /
-                op_domain_stats_ff.num_evaluated_parameter_combinations;
+                static_cast<double>(op_domain_stats_ff.num_evaluated_parameter_combinations);
             const auto operational_percentage_ct =
                 static_cast<double>(op_domain_stats_ct.num_operational_parameter_combinations) /
-                op_domain_stats_ct.num_evaluated_parameter_combinations;
+                static_cast<double>(op_domain_stats_ct.num_evaluated_parameter_combinations);
 
             opdomain_exp(
                 // Benchmark
