@@ -1360,7 +1360,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         // check if all SiDBs are negatively charged
         this->foreach_cell(
-            [this](const auto& c) {
+            [this]([[maybe_unused]] const auto& c) {
                 assert(this->get_charge_state(c) == sidb_charge_state::NEGATIVE &&
                        "All SiDBs have to be negatively charged");
             });
@@ -1682,8 +1682,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 index_changed++;
             }
 
-            const auto sign_old = int8_t{-1} * static_cast<int8_t>(r_old[index_changed]);
-            const auto sign_new = int8_t{-1} * static_cast<int8_t>(r_new[index_changed]);
+            const int8_t sign_old = int8_t{-1} * static_cast<int8_t>(r_old[index_changed]);
+            const int8_t sign_new = int8_t{-1} * static_cast<int8_t>(r_new[index_changed]);
 
             if (index_changed < strg->dependent_cell_index)
             {
@@ -2132,15 +2132,15 @@ template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state cs)
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs)
     -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state cs,
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs,
                             const typename T::cell& variable_cells) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state cs,
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs,
                             const typename T::cell&                             variable_cells,
                             const std::unordered_map<typename T::cell, double>& external_pot)
     -> charge_distribution_surface<T>;
