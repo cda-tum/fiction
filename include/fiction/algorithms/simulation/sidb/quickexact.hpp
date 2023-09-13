@@ -7,11 +7,12 @@
 
 #include "fiction/algorithms/iter/gray_code_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
-#include "fiction/algorithms/simulation/sidb/enum_class_exhaustive_algorithm.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/traits.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -23,28 +24,28 @@
 
 namespace fiction
 {
-
-/**
- * Modes to use for the `QuickExact` algorithm.
- */
-enum class automatic_base_number_detection
-{
-    /**
-     * Simulation is conducted with the required base number (i.e, if positively charged SiDBs can occur, three state
-     * simulation is conducted).
-     */
-    ON,
-    /**
-     * The base number from the physical parameter is used for the simulation.
-     */
-    OFF
-};
 /**
  * This struct stores the parameters for the `QuickExact` algorithm.
  */
 template <typename Lyt>
 struct quickexact_params
 {
+    /**
+     * Modes to use for the `QuickExact` algorithm.
+     */
+    enum class automatic_base_number_detection
+    {
+        /**
+         * Simulation is conducted with the required base number (i.e, if positively charged SiDBs can occur, three
+         * state simulation is conducted).
+         */
+        ON,
+        /**
+         * The base number from the physical parameter is used for the simulation.
+         */
+        OFF
+    };
+
     /**
      * All parameters for physical SiDB simulations.
      */
@@ -57,7 +58,7 @@ struct quickexact_params
     /**
      * Local external electrostatic potentials (e.g locally applied electrodes).
      */
-    std::unordered_map<typename Lyt::cell, double> local_external_potential = {};
+    std::unordered_map<cell<Lyt>, double> local_external_potential = {};
     /**
      * Global external electrostatic potential. Value is applied on each cell in the layout.
      */
@@ -90,9 +91,9 @@ class quickexact_impl
 
             // Determine if three state simulation (i.e., positively charged SiDBs can occur) is required.
             const bool three_state_simulation_required =
-                (params.base_number_detection == automatic_base_number_detection::ON &&
+                (params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::ON &&
                  charge_lyt.is_three_state_simulation_required()) ||
-                (params.base_number_detection == automatic_base_number_detection::OFF &&
+                (params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::OFF &&
                  params.physical_parameters.base == 3);
 
             // If layout has at least two SiDBs, all SiDBs that have to be negatively charged are erased from the
@@ -360,8 +361,9 @@ class quickexact_impl
                 charge_layout.increase_charge_index_of_sub_layout_by_one(
                     dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
                     charge_distribution_history::CONSIDER,
-                    exhaustive_algorithm::QUICKEXACT);  // "false" allows that the charge state of the dependent cell is
-                                                        // automatically changed based on the new charge distribution.
+                    exhaustive_sidb_simulation_engine::QUICKEXACT);  // "false" allows that the charge state of the
+                                                                     // dependent cell is automatically changed based on
+                                                                     // the new charge distribution.
             }
 
             if (charge_layout.is_physically_valid())
@@ -393,8 +395,9 @@ class quickexact_impl
             charge_layout.increase_charge_index_by_one(
                 dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
                 charge_distribution_history::CONSIDER,
-                exhaustive_algorithm::QUICKEXACT);  // "false" allows that the charge state of the dependent cell is
-                                                    // automatically changed based on the new charge distribution.
+                exhaustive_sidb_simulation_engine::QUICKEXACT);  // "false" allows that the charge state of the
+                                                                 // dependent cell is automatically changed based on the
+                                                                 // new charge distribution.
         }
 
         // charge configurations of the sublayout are iterated
@@ -424,7 +427,7 @@ class quickexact_impl
 
             charge_layout.increase_charge_index_of_sub_layout_by_one(
                 dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
-                charge_distribution_history::CONSIDER, exhaustive_algorithm::QUICKEXACT);
+                charge_distribution_history::CONSIDER, exhaustive_sidb_simulation_engine::QUICKEXACT);
         }
 
         if (charge_layout.is_physically_valid())
