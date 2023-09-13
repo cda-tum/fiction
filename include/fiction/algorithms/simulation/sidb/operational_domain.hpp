@@ -10,7 +10,7 @@
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
-#include "fiction/algorithms/simulation/sidb/is_gate_layout_operational.hpp"
+#include "fiction/algorithms/simulation/sidb/is_cell_level_layout_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"

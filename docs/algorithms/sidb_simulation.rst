@@ -129,6 +129,15 @@ Random SiDB Layout Generator
 .. doxygenfunction:: fiction::generate_multiple_random_sidb_layouts
 
 
+Automatic Exhaustive Gate Generator
+###################################
+
+**Header:** ``fiction/algorithms/simulation/sidb/automatic_exhaustive_gate_generator.hpp``
+
+.. doxygenstruct:: fiction::automatic_exhaustive_gate_designer_params
+.. doxygenfunction:: fiction::automatic_exhaustive_gate_designer
+
+
 Operational Domain Computation
 ##############################
 

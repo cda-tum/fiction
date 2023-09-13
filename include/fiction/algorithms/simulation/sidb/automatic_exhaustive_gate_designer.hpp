@@ -6,13 +6,12 @@
 #define FICTION_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER_HPP
 
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
-#include "fiction/algorithms/simulation/sidb/is_gate_layout_operational.hpp"
+#include "fiction/algorithms/simulation/sidb/is_cell_level_layout_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/execution_utils.hpp"
-#include "fiction/utils/hash.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
@@ -31,7 +30,10 @@
 
 namespace fiction
 {
-
+/**
+ * This struct contains parameters and settings used by the *Automatic Exhaustive
+ * Gate Designer*. It is used to configure the simulation and design of SiDB gates.
+ */
 struct automatic_exhaustive_gate_designer_params
 {
     /**
@@ -62,10 +64,16 @@ template <typename Lyt>
 class automatic_exhaustive_gate_designer_impl
 {
   public:
-    automatic_exhaustive_gate_designer_impl(const Lyt&                                       skeleton,
-                                            const automatic_exhaustive_gate_designer_params& params) :
+    /**
+     * This constructor initializes an instance of the *Automatic Exhaustive Gate Designer*
+     * implementation with the provided skeleton layout and configuration parameters.
+     *
+     * @param skeleton The skeleton layout used as a basis for gate design.
+     * @param params   Parameters and settings for the gate designer.
+     */
+    automatic_exhaustive_gate_designer_impl(const Lyt& skeleton, automatic_exhaustive_gate_designer_params params) :
             skeleton_layout{skeleton},
-            parameter{params}
+            parameter{std::move(params)}
     {
         initialize();
     }
@@ -73,7 +81,7 @@ class automatic_exhaustive_gate_designer_impl
     std::vector<Lyt> run()
     {
         const is_gate_layout_operational_params params_is_operational{parameter.phys_params, parameter.sim_engine};
-        determine_all_combinations_of_k_cells();
+        determine_all_combinations_of_given_sidbs_in_canvas();
 
         const auto add_combination_to_layout_and_check_operation =
             [this, &params_is_operational](const auto& combination) noexcept
@@ -86,7 +94,7 @@ class automatic_exhaustive_gate_designer_impl
             if (is_gate_layout_operational(layout_with_added_cells, parameter.truth_table, params_is_operational)
                     .first == operational_status::OPERATIONAL)
             {
-                all_found_layouts.push_back(layout_with_added_cells);
+                all_found_gate_layouts.push_back(layout_with_added_cells);
             }
         };
 
@@ -94,29 +102,62 @@ class automatic_exhaustive_gate_designer_impl
         std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ all_combinations.cbegin(), all_combinations.cend(),
                       add_combination_to_layout_and_check_operation);
 
-        return all_found_layouts;
+        return all_found_gate_layouts;
     }
 
   private:
-    const Lyt skeleton_layout;
-
-    const automatic_exhaustive_gate_designer_params parameter;
-
+    /**
+     * The skeleton layout serves as a starting layout to which SiDBs are added to create unique SiDB layouts and, if
+     * possible, working gates. It defines input and output wires.
+     */
+    Lyt skeleton_layout;
+    /**
+     * Parameters for the *Automatic Exhaustive Gate Designer*.
+     */
+    automatic_exhaustive_gate_designer_params parameter;
+    /**
+     * All cells within the canvas.
+     */
     std::vector<siqad::coord_t> all_sidbs_in_cavas{};
-
-    uint64_t number_of_canvas_cells{};
-
-    std::vector<Lyt> all_found_layouts{};
-
+    /**
+     * Stores various combinations of SiDB indices, representing the cell positions
+     * within the canvas. These combinations are used to distribute a specified number of SiDBs
+     * across the canvas (all possible distributions are covered), typically from top to bottom and left to right.
+     */
     std::vector<std::vector<uint64_t>> all_combinations{};
+    /**
+     * Number of canvas cells.
+     */
+    std::size_t number_of_canvas_cells{};
+    /**
+     * All found SiDB cell-level layouts that fulfill the given truth table.
+     */
+    std::vector<Lyt> all_found_gate_layouts{};
 
+    /**
+     * Initialize the *Automatic Exhaustive Gate Designer*.
+     *
+     * This function initializes various internal data structures and parameters required for
+     * the automatic exhaustive gate designer. It calculates the set of SiDBs within the specified
+     * canvas area, determines the total number of canvas cells, and prepares containers for
+     * storing combinations and found layouts.
+     */
     void initialize() noexcept
     {
         all_sidbs_in_cavas     = all_sidbs_in_spanned_area(parameter.canvas.first, parameter.canvas.second);
         number_of_canvas_cells = all_sidbs_in_cavas.size();
     }
 
-    void determine_all_combinations_of_k_cells()
+    /**
+     * Calculates all possible combinations of distributing the given number of SiDBs within a canvas
+     * based on the provided parameters. It generates combinations of SiDB indices (representing the cell position in
+     * the canvas from top to bottom and left to right) and stores them in the `all_combinations` vector. The number of
+     * SiDBs in each combination is determined by `parameter.number_of_sidbs`.
+     *
+     * @note The function uses a combinatorial algorithm to generate the combinations.
+     *
+     */
+    void determine_all_combinations_of_given_sidbs_in_canvas()
     {
         all_combinations = {};
         all_combinations.reserve(binomial_coefficient(number_of_canvas_cells, parameter.number_of_sidbs));
@@ -135,7 +176,17 @@ class automatic_exhaustive_gate_designer_impl
                                                return false;  // keep looping
                                            });
     }
-
+    /**
+     * Add SiDB cells to a SiDB cell-level layout based on a vector of cell indices.
+     *
+     * This function creates a copy of the provided layout (`skeleton_layout`) and adds SiDB cells to it
+     * based on the cell indices provided in the `cell_indices` vector. If a cell at a specified index
+     * is of type `sidb_technology::cell_type::EMPTY`, it is replaced with `sidb_technology::cell_type::NORMAL`
+     * to represent the addition of SiDB cells.
+     *
+     * @param cell_indices A vector containing indices of cells in the layout to be added or modified.
+     * @return A copy of the original layout (`skeleton_layout`) with SiDB cells added at specified indices.
+     */
     Lyt add_cells_to_layout_based_on_indices(const std::vector<uint64_t>& cell_indices)
     {
         Lyt lyt_copy{skeleton_layout.clone()};
@@ -155,7 +206,7 @@ class automatic_exhaustive_gate_designer_impl
 }  // namespace detail
 
 /**
- * This *Automatic_Exhaustive_Gate_Designer* designs SiDB gate implementations for a given Boolean function, a given
+ * The *Automatic Exhaustive Gate Designer* designs SiDB gate implementations for a given Boolean function, a given
  * canvas size, a given number of canvas SiDBs, and a given skeleton.
  *
  * It is composed of three steps:
@@ -179,6 +230,9 @@ std::vector<Lyt> automatic_exhaustive_gate_designer(const Lyt&                  
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
+    assert(skeleton.num_pis() > 0 && "skeleton needs input cells");
+    assert(skeleton.num_pos() > 0 && "skeleton needs output cells");
 
     detail::automatic_exhaustive_gate_designer_impl<Lyt> p{skeleton, params};
 

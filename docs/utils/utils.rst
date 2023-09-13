@@ -59,7 +59,7 @@ Layout Utils
 .. doxygenfunction:: fiction::convert_to_fiction_coordinates
 .. doxygenfunction:: fiction::random_coordinate
 .. doxygenfunction:: fiction::all_sidbs_in_spanned_area
-.. doxygenfunction:: fiction::add_cells_to_layout_based_on_indices
+
 
 Placement Utils
 ---------------
@@ -191,6 +191,7 @@ Math Utils
 
 .. doxygenfunction:: fiction::round_to_n_decimal_places
 .. doxygenfunction:: fiction::integral_abs
+.. doxygenfunction:: fiction::binomial_coefficient
 
 
 `phmap`

@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 11.09.23.
 //
 
-#ifndef FICTION_IS_GATE_LAYOUT_OPERATIONAL_HPP
-#define FICTION_IS_GATE_LAYOUT_OPERATIONAL_HPP
+#ifndef FICTION_IS_CELL_LEVEL_LAYOUT_OPERATIONAL_HPP
+#define FICTION_IS_CELL_LEVEL_LAYOUT_OPERATIONAL_HPP
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <utility>
@@ -84,7 +85,7 @@ class is_gate_layout_operational_impl
      * @param params Parameters for the `is_gate_layout_operational` algorithm.
      */
     is_gate_layout_operational_impl(const Lyt& lyt, const TT& tt, const is_gate_layout_operational_params& params) :
-            layout{lyt.clone()},
+            layout{lyt},
             truth_table{tt},
             parameter{params}
     {}
@@ -109,8 +110,9 @@ class is_gate_layout_operational_impl
         // number of output BDL pairs are stored
         number_of_output_bdls = output_bdl_pairs.size();
 
-        // for each input combination
-        for (auto i = 0u; i < number_of_input_bdls * 2; ++i, ++bii)
+        // number of different input combinations
+        const auto number_of_combinations = static_cast<uint64_t>(truth_table.num_bits() / number_of_output_bdls);
+        for (auto i = 0u; i < number_of_combinations; ++i, ++bii)
         {
             ++simulator_invocations;
             // collects expected output values for a given input configuration.
@@ -178,8 +180,12 @@ class is_gate_layout_operational_impl
         // if we made it here, the layout is operational
         return operational_status::OPERATIONAL;
     }
-
-    [[nodiscard]] std::size_t get_counter() const noexcept
+    /**
+     * Returns the total number of simulator invocations.
+     *
+     * @return The number of simulator invocations.
+     */
+    [[nodiscard]] std::size_t get_number_of_simulator_invocations() const noexcept
     {
         return simulator_invocations;
     }
@@ -188,7 +194,7 @@ class is_gate_layout_operational_impl
     /**
      * SiDB cell-level layout.
      */
-    Lyt layout{};
+    const Lyt& layout{};
     /**
      * The specification of the layout.
      */
@@ -244,7 +250,8 @@ class is_gate_layout_operational_impl
         else if (parameter.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
             // perform exact simulation
-            const quickexact_params<Lyt> quickexact_params{parameter.sim_params, automatic_base_number_detection::OFF};
+            const quickexact_params<Lyt> quickexact_params{
+                parameter.sim_params, fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
             sim_result = quickexact((*bdl_iterator), quickexact_params);
         }
         else
@@ -335,11 +342,14 @@ is_gate_layout_operational(const Lyt& lyt, const TT& spec, const is_gate_layout_
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
+    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
+    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
+
     detail::is_gate_layout_operational_impl<Lyt, TT> p{lyt, spec, parameter};
 
-    return {p.run(), p.get_counter()};
+    return {p.run(), p.get_number_of_simulator_invocations()};
 }
 
 }  // namespace fiction
 
-#endif  // FICTION_IS_GATE_LAYOUT_OPERATIONAL_HPP
+#endif  // FICTION_IS_CELL_LEVEL_LAYOUT_OPERATIONAL_HPP

@@ -4,7 +4,7 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/is_gate_layout_operational.hpp>
+#include <fiction/algorithms/simulation/sidb/is_cell_level_layout_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/traits.hpp>
