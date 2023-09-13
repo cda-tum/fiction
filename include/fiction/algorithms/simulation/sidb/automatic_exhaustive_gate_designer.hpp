@@ -5,11 +5,14 @@
 #ifndef FICTION_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER_HPP
 #define FICTION_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER_HPP
 
-#include "fiction/algorithms/simulation/sidb/critical_temperature.hpp"
+#include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
+#include "fiction/algorithms/simulation/sidb/is_gate_layout_operational.hpp"
+#include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/execution_utils.hpp"
+#include "fiction/utils/hash.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
@@ -17,14 +20,10 @@
 #include <kitty/dynamic_truth_table.hpp>
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <iostream>
-#include <mutex>
 #include <numeric>
-#include <random>
-#include <string_view>
-#include <thread>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -39,7 +38,6 @@ struct automatic_exhaustive_gate_designer_params
      * All Parameters for physical SiDB simulations.
      */
     sidb_simulation_parameters phys_params{};
-    ;
     /**
      * Canvas spanned by the northwest and southeast cell.
      */
@@ -52,6 +50,10 @@ struct automatic_exhaustive_gate_designer_params
      * Number of SiDBs placed in the canvas to create a working gate.
      */
     uint64_t number_of_sidbs = 0;
+    /**
+     * The simulation engine to be used for the operational domain computation.
+     */
+    sidb_simulation_engine sim_engine{sidb_simulation_engine::EXGS};
 };
 
 namespace detail
@@ -68,37 +70,45 @@ class automatic_exhaustive_gate_designer_impl
         initialize();
     }
 
-    void run() noexcept
+    std::vector<Lyt> run()
     {
-        Lyt                   skeleton_copy{skeleton_layout};
-        std::vector<uint64_t> numbers(number_of_canvas_cells);
-        std::iota(numbers.begin(), numbers.end(), 0);
-        combinations::for_each_combination(numbers.begin(), numbers.begin() + parameter.number_of_sidbs, numbers.end(),
-                                           [this, skeleton_copy](const auto begin, [[maybe_unused]] const auto end)
-                                           {
-                                               for (auto i = 0u; i < parameter.number_of_sidbs; ++i)
-                                               {
-                                                   add_cells_to_layout_based_on_indices(skeleton_copy, *(begin + i));
-                                               }
-                                               if (skeleton_copy.is_gate_layout_operational(
-                                                       skeleton_copy, parameter.phys_params, parameter.truth_table))
-                                               {
-                                                   all_found_layouts.insert(skeleton_copy);
-                                               };
-                                               return false;  // keep looping
-                                           });
+        const is_gate_layout_operational_params params_is_operational{parameter.phys_params, parameter.sim_engine};
+        determine_all_combinations_of_k_cells();
+
+        const auto add_combination_to_layout_and_check_operation =
+            [this, &params_is_operational](const auto& combination) noexcept
+        {
+            auto layout_with_added_cells = add_cells_to_layout_based_on_indices(combination);
+            if (can_positive_charges_occur(layout_with_added_cells, parameter.phys_params))
+            {
+                return false;
+            }
+            if (is_gate_layout_operational(layout_with_added_cells, parameter.truth_table, params_is_operational)
+                    .first == operational_status::OPERATIONAL)
+            {
+                all_found_layouts.push_back(layout_with_added_cells);
+            }
+        };
+
+        // Apply the add_combination_to_layout_and_check_operation function to each combination using std::for_each
+        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ all_combinations.cbegin(), all_combinations.cend(),
+                      add_combination_to_layout_and_check_operation);
+
+        return all_found_layouts;
     }
 
   private:
-    Lyt skeleton_layout;
+    const Lyt skeleton_layout;
 
-    const automatic_exhaustive_gate_designer_params& parameter;
+    const automatic_exhaustive_gate_designer_params parameter;
 
     std::vector<siqad::coord_t> all_sidbs_in_cavas{};
 
     uint64_t number_of_canvas_cells{};
 
-    std::set<Lyt> all_found_layouts{};
+    std::vector<Lyt> all_found_layouts{};
+
+    std::vector<std::vector<uint64_t>> all_combinations{};
 
     void initialize() noexcept
     {
@@ -106,33 +116,65 @@ class automatic_exhaustive_gate_designer_impl
         number_of_canvas_cells = all_sidbs_in_cavas.size();
     }
 
-    /**
-     * Modify an SiDB cell-level layout by adding cells based on specified indices.
-     *
-     * This function takes a cell-level SiDB layout, a list of all available cells, and a list of cell indices
-     * to add to the layout. It iterates through the provided indices, assigns NORMAL cell type to non-empty cells,
-     * and returns the modified layout.
-     *
-     * @tparam Lyt The cell-level SiDB layout type.
-     * @param lyt The SiDB cell-level layout to be modified.
-     * @param all_cells A vector containing all available cells.
-     * @param cell_indices A vector of indices indicating which cells to add.
-     * @return The modified layout with added cells.
-     */
-    void add_cells_to_layout_based_on_indices(Lyt& lyt, const uint64_t cell_indices) noexcept
+    void determine_all_combinations_of_k_cells()
     {
-        assert(cell_indices < all_cells.size() && "cell indices are out-of-range");
-        if (lyt.get_cell_type(all_sidbs_in_cavas[cell_indices]) == sidb_technology::cell_type::EMPTY)
+        all_combinations = {};
+        all_combinations.reserve(binomial_coefficient(number_of_canvas_cells, parameter.number_of_sidbs));
+        std::vector<uint64_t> numbers(number_of_canvas_cells);
+        std::iota(numbers.begin(), numbers.end(), 0);
+        combinations::for_each_combination(numbers.begin(), numbers.begin() + parameter.number_of_sidbs, numbers.end(),
+                                           [this](const auto begin, [[maybe_unused]] const auto end)
+                                           {
+                                               std::vector<uint64_t> combination{};
+                                               combination.reserve(parameter.number_of_sidbs);
+                                               for (auto i = 0u; i < parameter.number_of_sidbs; ++i)
+                                               {
+                                                   combination.push_back(*(begin + i));
+                                               }
+                                               all_combinations.push_back(combination);
+                                               return false;  // keep looping
+                                           });
+    }
+
+    Lyt add_cells_to_layout_based_on_indices(const std::vector<uint64_t>& cell_indices)
+    {
+        Lyt lyt_copy{skeleton_layout.clone()};
+
+        for (const auto i : cell_indices)
         {
-            lyt.assign_cell_type(all_sidbs_in_cavas[cell_indices], sidb_technology::cell_type::NORMAL);
+            assert(i < all_sidbs_in_cavas.size() && "cell indices are out-of-range");
+            if (lyt_copy.get_cell_type(all_sidbs_in_cavas[i]) == sidb_technology::cell_type::EMPTY)
+            {
+                lyt_copy.assign_cell_type(all_sidbs_in_cavas[i], sidb_technology::cell_type::NORMAL);
+            }
         }
+
+        return lyt_copy;
     }
 };
 }  // namespace detail
 
+/**
+ * This *Automatic_Exhaustive_Gate_Designer* designs SiDB gate implementations for a given Boolean function, a given
+ * canvas size, a given number of canvas SiDBs, and a given skeleton.
+ *
+ * It is composed of three steps:
+ * 1. In the initial step, all possible distributions of ``number_of_sidbs`` SiDBs within a given canvas are
+ * exhaustively determined. This ensures exhaustive coverage of every potential arrangement of ``number_of_sidbs`` SiDBs
+ * across the canvas.
+ * 2. The calculated SiDB distributions are then incorporated into the skeleton, resulting in the generation of distinct
+ * SiDB layouts.
+ * 3. The generated SiDB layouts then undergo an extensive simulation process. All input combinations possible for the
+ * given Boolean function are used to verify if the logic is fulfilled.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param skeleton The skeleton layout used as a starting point for gate design.
+ * @param params Parameters for the *Automatic Exhaustive Gate Designer*.
+ * @return A vector of SiDB layouts that fulfill the given Boolean function (truth table).
+ */
 template <typename Lyt>
-bool automatic_exhaustive_gate_designer(const Lyt&                                       skeleton,
-                                        const automatic_exhaustive_gate_designer_params& params = {})
+std::vector<Lyt> automatic_exhaustive_gate_designer(const Lyt&                                       skeleton,
+                                                    const automatic_exhaustive_gate_designer_params& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

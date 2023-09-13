@@ -979,7 +979,23 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shape SiDB OR gate with input 0
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}, automatic_base_number_detection::OFF};
+    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}, automatic_base_number_detection::ON};
+
+    SECTION("Check if QuickExact is deterministic")
+    {
+        std::set<double>   ground_state{};
+        std::set<uint64_t> charge_index{};
+        for (auto i = 0; i < 100000; i++)
+        {
+            const auto simulation_results = quickexact<TestType>(lyt, params);
+            auto&      charge_lyt_first   = simulation_results.charge_distributions.front();
+            ground_state.insert(charge_lyt_first.get_system_energy());
+            charge_lyt_first.charge_distribution_to_index_general();
+            charge_index.insert(charge_lyt_first.get_charge_index_and_base().first);
+        }
+        CHECK(ground_state.size() == 1);
+        CHECK(charge_index.size() == 1);
+    }
 
     SECTION("Standard Physical Parameters")
     {

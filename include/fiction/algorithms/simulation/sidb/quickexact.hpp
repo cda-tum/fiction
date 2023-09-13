@@ -71,7 +71,7 @@ template <typename Lyt>
 class quickexact_impl
 {
   public:
-    quickexact_impl(Lyt& lyt, const quickexact_params<Lyt>& parameter) :
+    quickexact_impl(const Lyt& lyt, const quickexact_params<Lyt>& parameter) :
             layout{lyt},
             charge_lyt{lyt, parameter.physical_parameters, sidb_charge_state::NEGATIVE},
             params{parameter}
@@ -556,7 +556,7 @@ class quickexact_impl
  * @return Simulation result.
  */
 template <typename Lyt>
-[[nodiscard]] sidb_simulation_result<Lyt> quickexact(Lyt& lyt, const quickexact_params<Lyt>& params = {}) noexcept
+[[nodiscard]] sidb_simulation_result<Lyt> quickexact(const Lyt& lyt, const quickexact_params<Lyt>& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

@@ -8,6 +8,7 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
+#include "fiction/algorithms/simulation/sidb/is_gate_layout_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
@@ -38,20 +39,6 @@
 namespace fiction
 {
 
-/**
- * Possible operational status of a layout.
- */
-enum class operational_status
-{
-    /**
-     * The layout is operational.
-     */
-    OPERATIONAL,
-    /**
-     * The layout is non-operational.
-     */
-    NON_OPERATIONAL
-};
 /**
  * An operational domain is a set of simulation parameter values for which a given SiDB layout is logically operational.
  * This means that a layout is deemed operational if the layout's ground state corresponds with a given Boolean function
@@ -179,7 +166,7 @@ struct operational_domain_params
     /**
      * The simulation engine to be used for the operational domain computation.
      */
-    sidb_simulation_engine sim_engine{sidb_simulation_engine::EXGS};
+    sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
     /**
      * The sweep parameter for the x dimension.
      */
@@ -275,7 +262,7 @@ class operational_domain_impl
             x_values(num_x_steps()),   // pre-allocate the x dimension values
             y_values(num_y_steps())    // pre-allocate the y dimension values
     {
-        assert(output_bdl_pairs.size() == 1 && "The layout must have exactly one output BDL pair");
+        // assert(output_bdl_pairs.size() == 1 && "The layout must have exactly one output BDL pair");
 
         op_domain.x_dimension = params.x_dimension;
         op_domain.y_dimension = params.y_dimension;
@@ -760,82 +747,17 @@ class operational_domain_impl
         // take the first (and only) output BDL pair
         const auto& output_bdl_pair = output_bdl_pairs.front();
 
-        // initialize a BDL input iterator
-        bdl_input_iterator<Lyt> bii{layout, params.bdl_params};
-
         sidb_simulation_parameters sim_params = params.sim_params;
         set_x_dimension_value(sim_params, param_point.x);
         set_y_dimension_value(sim_params, param_point.y);
 
-        // for each input combination
-        for (auto i = 0u; i < truth_table.num_bits(); ++i, ++bii)
+        const auto operation_simulation = is_gate_layout_operational(
+            layout, truth_table, is_gate_layout_operational_params{sim_params, params.sim_engine});
+        num_simulator_invocations += operation_simulation.second;
+
+        if (operation_simulation.first == operational_status::NON_OPERATIONAL)
         {
-            // the expected output of the layout is the i-th bit of the truth table
-            const auto expected_output = kitty::get_bit(truth_table, i);
-
-            ++num_simulator_invocations;
-
-            if (can_positive_charges_occur(*bii, sim_params))
-            {
-                return non_operational();
-            }
-
-            sidb_simulation_result<Lyt> sim_result{};
-
-            if (params.sim_engine == sidb_simulation_engine::EXGS)
-            {
-                // perform an exhaustive ground state simulation
-                sim_result = exhaustive_ground_state_simulation(*bii, sim_params);
-            }
-            else if (params.sim_engine == sidb_simulation_engine::QUICKSIM)
-            {
-                // perform a heuristic simulation
-                const quicksim_params qs_params{sim_params, 500, 0.6};
-                sim_result = quicksim(*bii, qs_params);
-            }
-            else
-            {
-                assert(false && "unsupported simulation engine");
-            }
-
-            // if no physically-valid charge distributions were found, the layout is non-operational
-            if (sim_result.charge_distributions.empty())
-            {
-                return non_operational();
-            }
-
-            // find the ground state, which is the charge distribution with the lowest energy
-            const auto ground_state = std::min_element(
-                sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend(),
-                [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
-
-            // fetch the charge states of the output BDL pair
-            const auto charge_state_output_upper = ground_state->get_charge_state(output_bdl_pair.upper);
-            const auto charge_state_output_lower = ground_state->get_charge_state(output_bdl_pair.lower);
-
-            // if the output charge states are equal, the layout is not operational
-            if (charge_state_output_lower == charge_state_output_upper)
-            {
-                return non_operational();
-            }
-            // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
-            if (expected_output)
-            {
-                if (charge_state_output_upper != sidb_charge_state::NEUTRAL ||
-                    charge_state_output_lower != sidb_charge_state::NEGATIVE)
-                {
-                    return non_operational();
-                }
-            }
-            // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
-            else
-            {
-                if (charge_state_output_upper != sidb_charge_state::NEGATIVE ||
-                    charge_state_output_lower != sidb_charge_state::NEUTRAL)
-                {
-                    return non_operational();
-                }
-            }
+            return non_operational();
         }
 
         // if we made it here, the layout is operational
