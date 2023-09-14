@@ -29,9 +29,10 @@ TEMPLATE_TEST_CASE(
         TestType lyt{{10, 10}};
 
         critical_temperature_stats<TestType> criticalstats{};
-        const critical_temperature_params    params{simulation_engine::EXACT,
-                                                 critical_temperature_mode::GATE_BASED_SIMULATION,
-                                                 quicksim_params{sidb_simulation_parameters{2, -0.32}}, 0.99, 350};
+        const critical_temperature_params    params{
+            critical_temperature_params::simulation_engine::EXACT,
+            critical_temperature_params::critical_temperature_mode::GATE_BASED_SIMULATION,
+            quicksim_params{sidb_simulation_parameters{2, -0.32}}, 0.99, 350};
         critical_temperature<TestType>(lyt, params, &criticalstats);
         CHECK(criticalstats.num_valid_lyt == 0);
         CHECK(criticalstats.critical_temperature == 0);
@@ -42,22 +43,33 @@ TEMPLATE_TEST_CASE(
         TestType lyt{{10, 10}};
         lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
 
+        // gate-based simulation
         critical_temperature_stats<TestType> criticalstats{};
-        const critical_temperature_params    params{simulation_engine::EXACT,
-                                                 critical_temperature_mode::GATE_BASED_SIMULATION,
-                                                 quicksim_params{sidb_simulation_parameters{2, -0.32}},
-                                                 0.99,
-                                                 350,
-                                                 create_or_tt(),
-                                                 2};
+        const critical_temperature_params    params{
+            critical_temperature_params::simulation_engine::EXACT,
+            critical_temperature_params::critical_temperature_mode::GATE_BASED_SIMULATION,
+            quicksim_params{sidb_simulation_parameters{2, -0.32}},
+            0.99,
+            350,
+            create_or_tt(),
+            2};
         critical_temperature(lyt, params, &criticalstats);
         CHECK(criticalstats.num_valid_lyt == 1);
         CHECK(criticalstats.critical_temperature == 350);
 
-        critical_temperature_stats<TestType> criticalstats_new{};
-        critical_temperature(lyt, params, &criticalstats_new);
-        CHECK(criticalstats_new.num_valid_lyt == 1);
-        CHECK(criticalstats_new.critical_temperature == 350);
+        // non-gate-based simulation
+        critical_temperature_stats<TestType> criticalstats_non_gate_based{};
+        const critical_temperature_params    params_non_gate_based{
+            critical_temperature_params::simulation_engine::EXACT,
+            critical_temperature_params::critical_temperature_mode::NON_GATE_BASED_SIMULATION,
+            quicksim_params{sidb_simulation_parameters{2, -0.32}},
+            0.99,
+            350,
+            create_or_tt(),
+            2};
+        critical_temperature(lyt, params, &criticalstats_non_gate_based);
+        CHECK(criticalstats_non_gate_based.num_valid_lyt == 1);
+        CHECK(criticalstats_non_gate_based.critical_temperature == 350);
     }
 
     SECTION("several SiDBs placed")
@@ -72,24 +84,26 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({20, 3, 0}, TestType::cell_type::NORMAL);
 
         critical_temperature_stats<TestType> criticalstats{};
-        const critical_temperature_params    params{simulation_engine::EXACT,
-                                                 critical_temperature_mode::GATE_BASED_SIMULATION,
-                                                 quicksim_params{sidb_simulation_parameters{2, -0.23}},
-                                                 0.99,
-                                                 350,
-                                                 create_or_tt(),
-                                                 2};
+        const critical_temperature_params    params{
+            critical_temperature_params::simulation_engine::EXACT,
+            critical_temperature_params::critical_temperature_mode::GATE_BASED_SIMULATION,
+            quicksim_params{sidb_simulation_parameters{2, -0.23}},
+            0.99,
+            350,
+            create_or_tt(),
+            2};
         critical_temperature(lyt, params, &criticalstats);
         CHECK(criticalstats.critical_temperature == 350);
 
         critical_temperature_stats<TestType> criticalstats_one{};
-        const critical_temperature_params    params_one{simulation_engine::EXACT,
-                                                     critical_temperature_mode::GATE_BASED_SIMULATION,
-                                                     quicksim_params{sidb_simulation_parameters{2, -0.23}},
-                                                     0.99,
-                                                     350,
-                                                     create_and_tt(),
-                                                     3};
+        const critical_temperature_params    params_one{
+            critical_temperature_params::simulation_engine::EXACT,
+            critical_temperature_params::critical_temperature_mode::GATE_BASED_SIMULATION,
+            quicksim_params{sidb_simulation_parameters{2, -0.23}},
+            0.99,
+            350,
+            create_and_tt(),
+            3};
 
         critical_temperature(lyt, params_one, &criticalstats_one);
         CHECK(criticalstats_one.critical_temperature == 350);
@@ -98,13 +112,14 @@ TEMPLATE_TEST_CASE(
         critical_temperature(lyt, params_one, &criticalstats_second);
         CHECK(criticalstats_second.critical_temperature == 350);
 
-        const critical_temperature_params    params_two{simulation_engine::EXACT,
-                                                     critical_temperature_mode::NON_GATE_BASED_SIMULATION,
-                                                     quicksim_params{sidb_simulation_parameters{2, -0.23}},
-                                                     0.999,
-                                                     450,
-                                                     create_and_tt(),
-                                                     3};
+        const critical_temperature_params params_two{
+            critical_temperature_params::simulation_engine::EXACT,
+            critical_temperature_params::critical_temperature_mode::NON_GATE_BASED_SIMULATION,
+            quicksim_params{sidb_simulation_parameters{2, -0.23}},
+            0.999,
+            450,
+            create_and_tt(),
+            3};
         critical_temperature_stats<TestType> criticalstats_no_logic{};
         critical_temperature(lyt, params_two, &criticalstats_no_logic);
         CHECK(criticalstats_no_logic.critical_temperature < 40);
@@ -131,13 +146,14 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({37, 3, 0}, TestType::cell_type::NORMAL);
 
         critical_temperature_stats<TestType> criticalstats{};
-        const critical_temperature_params    params{simulation_engine::EXACT,
-                                                 critical_temperature_mode::GATE_BASED_SIMULATION,
-                                                 quicksim_params{sidb_simulation_parameters{2, -0.28}},
-                                                 0.99,
-                                                 350,
-                                                 create_xnor_tt(),
-                                                 3};
+        const critical_temperature_params    params{
+            critical_temperature_params::simulation_engine::EXACT,
+            critical_temperature_params::critical_temperature_mode::GATE_BASED_SIMULATION,
+            quicksim_params{sidb_simulation_parameters{2, -0.28}},
+            0.99,
+            350,
+            create_xnor_tt(),
+            3};
         critical_temperature(lyt, params, &criticalstats);
         CHECK(criticalstats.critical_temperature < 13);
     }
@@ -163,13 +179,14 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({37, 3, 0}, TestType::cell_type::NORMAL);
 
         critical_temperature_stats<TestType> criticalstats{};
-        const critical_temperature_params    params{simulation_engine::EXACT,
-                                                 critical_temperature_mode::GATE_BASED_SIMULATION,
-                                                 quicksim_params{sidb_simulation_parameters{2, -0.15}},
-                                                 0.99,
-                                                 350,
-                                                 create_xnor_tt(),
-                                                 3};
+        const critical_temperature_params    params{
+            critical_temperature_params::simulation_engine::EXACT,
+            critical_temperature_params::critical_temperature_mode::GATE_BASED_SIMULATION,
+            quicksim_params{sidb_simulation_parameters{2, -0.15}},
+            0.99,
+            350,
+            create_xnor_tt(),
+            3};
         critical_temperature(lyt, params, &criticalstats);
         CHECK(criticalstats.critical_temperature == 0);
     }
@@ -195,11 +212,12 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({37, 3, 0}, TestType::cell_type::NORMAL);
 
         critical_temperature_stats<TestType> criticalstats{};
-        const critical_temperature_params    params{simulation_engine::EXACT,
-                                                 critical_temperature_mode::NON_GATE_BASED_SIMULATION,
-                                                 quicksim_params{sidb_simulation_parameters{2, -0.15}}, 0.99, 350};
+        const critical_temperature_params    params{
+            critical_temperature_params::simulation_engine::EXACT,
+            critical_temperature_params::critical_temperature_mode::NON_GATE_BASED_SIMULATION,
+            quicksim_params{sidb_simulation_parameters{2, -0.15}}, 0.99, 350};
         critical_temperature(lyt, params, &criticalstats);
-        CHECK(criticalstats.algorithm_name == "exgs");
+        CHECK(criticalstats.algorithm_name == "QuickExact");
         CHECK(criticalstats.critical_temperature < 200);
         CHECK(criticalstats.critical_temperature > 0);
     }
@@ -225,11 +243,43 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({37, 3, 0}, TestType::cell_type::NORMAL);
 
         critical_temperature_stats<TestType> criticalstats{};
-        const critical_temperature_params    params{simulation_engine::APPROXIMATE,
-                                                 critical_temperature_mode::NON_GATE_BASED_SIMULATION,
-                                                 quicksim_params{sidb_simulation_parameters{2, -0.15}}, 0.99, 350};
+        const critical_temperature_params    params{
+            critical_temperature_params::simulation_engine::APPROXIMATE,
+            critical_temperature_params::critical_temperature_mode::NON_GATE_BASED_SIMULATION,
+            quicksim_params{sidb_simulation_parameters{2, -0.15}}, 0.99, 350};
         critical_temperature(lyt, params, &criticalstats);
-        CHECK(criticalstats.algorithm_name == "quicksim");
+        CHECK(criticalstats.algorithm_name == "QuickSim");
+        CHECK(criticalstats.critical_temperature < 200);
+        CHECK(criticalstats.critical_temperature > 0);
+    }
+
+    SECTION("small fo2 for testing")
+    {
+        TestType lyt{{20, 10}};
+
+        lyt.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 3, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({-2, 5, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({-3, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({-3, 8, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({2, 5, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 8, 0}, TestType::cell_type::NORMAL);
+
+        critical_temperature_stats<TestType> criticalstats{};
+        const critical_temperature_params    params{
+            critical_temperature_params::simulation_engine::APPROXIMATE,
+            critical_temperature_params::critical_temperature_mode::GATE_BASED_SIMULATION,
+            quicksim_params{sidb_simulation_parameters{2, -0.35}},
+            0.99,
+            350,
+            create_fan_out_tt(),
+            1};
+        critical_temperature(lyt, params, &criticalstats);
+        CHECK(criticalstats.algorithm_name == "QuickSim");
         CHECK(criticalstats.critical_temperature < 200);
         CHECK(criticalstats.critical_temperature > 0);
     }

@@ -5,9 +5,9 @@
 #ifndef FICTION_ASPECT_RATIO_ITERATOR_HPP
 #define FICTION_ASPECT_RATIO_ITERATOR_HPP
 
-#include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <iterator>
 #include <vector>
 
 namespace fiction
@@ -75,47 +75,47 @@ class aspect_ratio_iterator
         return result;
     }
 
-    AspectRatio operator*() const
+    [[nodiscard]] AspectRatio operator*() const
     {
         return *it;
     }
 
-    bool operator==(const uint64_t m) const noexcept
+    [[nodiscard]] bool operator==(const uint64_t m) const noexcept
     {
         return num == m;
     }
 
-    bool operator==(const aspect_ratio_iterator& other) const
+    [[nodiscard]] bool operator==(const aspect_ratio_iterator& other) const
     {
         return (num == other.num) && (*it == *(other.it));
     }
 
-    bool operator!=(const uint64_t m) const noexcept
+    [[nodiscard]] bool operator!=(const uint64_t m) const noexcept
     {
         return num != m;
     }
 
-    bool operator!=(const aspect_ratio_iterator& other) const
+    [[nodiscard]] bool operator!=(const aspect_ratio_iterator& other) const
     {
         return !(*this == other);
     }
 
-    bool operator<(const uint64_t m) const noexcept
+    [[nodiscard]] bool operator<(const uint64_t m) const noexcept
     {
         return num < m;
     }
 
-    bool operator<(const aspect_ratio_iterator& other) const
+    [[nodiscard]] bool operator<(const aspect_ratio_iterator& other) const
     {
         return (num < other.num) || (num == other.num && *it < *(other.it));
     }
 
-    bool operator<=(const uint64_t m) const noexcept
+    [[nodiscard]] bool operator<=(const uint64_t m) const noexcept
     {
         return num <= m;
     }
 
-    bool operator<=(const aspect_ratio_iterator& other) const
+    [[nodiscard]] bool operator<=(const aspect_ratio_iterator& other) const
     {
         return (num <= other.num) || (num == other.num && *it <= *(other.it));
     }
