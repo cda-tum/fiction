@@ -78,6 +78,12 @@ class automatic_exhaustive_gate_designer_impl
         initialize();
     }
 
+    /**
+     * Run the exhaustive designing process of gate layouts.
+     *
+     * It adds each cell combination to the given skeleton, checks if positive charges can occur
+     * in the layout, and determines if the layout is operationally valid based on specified parameters.
+     */
     std::vector<Lyt> run()
     {
         const is_gate_layout_operational_params params_is_operational{parameter.phys_params, parameter.sim_engine};
@@ -103,7 +109,6 @@ class automatic_exhaustive_gate_designer_impl
 
         return all_found_gate_layouts;
     }
-
 
   private:
     /**
@@ -167,13 +172,13 @@ class automatic_exhaustive_gate_designer_impl
             numbers.begin(),
             numbers.begin() + static_cast<std::vector<std::size_t>::difference_type>(parameter.number_of_sidbs),
             numbers.end(),
-            [this](const auto begin, [[maybe_unused]] const auto end)
+            [this](const auto begin, const auto end)
             {
                 std::vector<std::size_t> combination{};
                 combination.reserve(parameter.number_of_sidbs);
-                for (std::size_t i = 0; i < parameter.number_of_sidbs; ++i)
+                for (auto it = begin; it != end; ++it)
                 {
-                    combination.push_back(static_cast<std::size_t>(*begin) + i);
+                    combination.push_back(static_cast<std::size_t>(*it));
                 }
                 all_combinations.push_back(combination);
                 return false;  // keep looping
