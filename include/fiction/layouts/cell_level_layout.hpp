@@ -119,6 +119,18 @@ class cell_level_layout : public ClockedLayout
 
     explicit cell_level_layout(std::shared_ptr<cell_level_layout_storage<cell>> s) : strg{std::move(s)} {}
 
+    /**
+     * Clones the layout returning a deep copy.
+     *
+     * @return Deep copy of the layout.
+     */
+    cell_level_layout clone() const
+    {
+        auto cl = cell_level_layout{strg};
+        cl.strg = std::make_shared<cell_level_layout_storage<cell>>(*strg);
+        return cl;
+    }
+
 #pragma endregion
 
 #pragma region Cell types

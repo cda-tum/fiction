@@ -180,3 +180,11 @@ Hashing
 This header defines implementations for ``std::hash`` for several data types.
 
 .. doxygenfunction:: fiction::hash_combine
+
+
+`phmap`
+-------
+
+**Header:** ``fiction/utils/phmap_utils.hpp``
+
+.. doxygentypedef:: fiction::locked_parallel_flat_hash_map

@@ -14,3 +14,12 @@ Gray Code Iterator
 
 .. doxygenclass:: fiction::gray_code_iterator
    :members:
+
+
+BDL Input Iterator
+------------------
+
+**Header:** ``fiction/algorithms/iter/bdl_input_iterator.hpp``
+
+.. doxygenclass:: fiction::bdl_input_iterator
+   :members:

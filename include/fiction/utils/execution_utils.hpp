@@ -15,21 +15,21 @@
 /**
  * Sequential execution policy for STL algorithms.
  *
- * @note This macro automatically detetcs whether the C++ library supports execution policies and whether the compiler
+ * @note This macro automatically detects whether the C++ library supports execution policies and whether the compiler
  * is able to compile them. If not, the macro defaults to nothing.
  */
 #define FICTION_EXECUTION_POLICY_SEQ std::execution::seq,
 /**
  * Parallel execution policy for STL algorithms.
  *
- * @note This macro automatically detetcs whether the C++ library supports execution policies and whether the compiler
+ * @note This macro automatically detects whether the C++ library supports execution policies and whether the compiler
  * is able to compile them. If not, the macro defaults to nothing.
  */
 #define FICTION_EXECUTION_POLICY_PAR std::execution::par,
 /**
  * Parallel unsequenced execution policy for STL algorithms.
  *
- * @note This macro automatically detetcs whether the C++ library supports execution policies and whether the compiler
+ * @note This macro automatically detects whether the C++ library supports execution policies and whether the compiler
  * is able to compile them. If not, the macro defaults to nothing.
  */
 #define FICTION_EXECUTION_POLICY_PAR_UNSEQ std::execution::par_unseq,

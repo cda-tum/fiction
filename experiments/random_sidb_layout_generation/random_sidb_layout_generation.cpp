@@ -96,8 +96,9 @@ int main(int argc, const char* argv[])  // NOLINT
     // specifies whether positively charged SiDBs are allowed ("ALLOWED") or forbidden ("FORBIDDEN")
     const std::string charges_str = options["--positive_charges"];
     // specifies whether positively charged SiDBs are allowed ("ALLOWED") or forbidden ("FORBIDDEN")
-    const positive_charges charges =
-        (charges_str == "ALLOWED") ? positive_charges::ALLOWED : positive_charges::FORBIDDEN;
+    const generate_random_sidb_layout_params<sidb_cell_clk_lyt>::positive_charges charges =
+        (charges_str == "ALLOWED") ? generate_random_sidb_layout_params<sidb_cell_clk_lyt>::positive_charges::ALLOWED :
+                                     generate_random_sidb_layout_params<sidb_cell_clk_lyt>::positive_charges::FORBIDDEN;
     // sets the number of SiDBs for the first bunch of layouts
     const uint64_t lower_limit = std::stoull(options["--lower"]);
     // sets the number of SiDBs for the last bunch of layouts
@@ -118,8 +119,6 @@ int main(int argc, const char* argv[])  // NOLINT
     std::cout << "step: " << step << std::endl;
 
     // generates random SiDB layouts as .sqd file
-    using cell_level_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
-
     try
     {
         std::filesystem::path folder_path(EXPERIMENTS_PATH);
@@ -165,11 +164,11 @@ int main(int argc, const char* argv[])  // NOLINT
                     std::cout << "Folder already exists." << std::endl;
                 }
 
-                const generate_random_sidb_layout_params<cell_level_layout> params{
+                const generate_random_sidb_layout_params<sidb_cell_clk_lyt> params{
                     {{nw_x, nw_y}, {se_x, se_y}}, number_of_placed_sidbs, charges, 2,
                     static_cast<uint64_t>(10E6),  number_of_layouts};
                 const auto unique_lyts =
-                    generate_multiple_random_sidb_layouts<cell_level_layout>(cell_level_layout{}, params);
+                    generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
                 for (auto i = 0u; i < unique_lyts.size(); i++)
                 {
                     write_sqd_layout(unique_lyts[i], fmt::format("{}/layout_{}.sqd", dir_path_sqd.string(), i));
