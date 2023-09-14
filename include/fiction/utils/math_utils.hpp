@@ -52,11 +52,11 @@ T integral_abs(const T n) noexcept
 }
 
 /**
- * Calculates the binomial coefficient \(\binom{n}{k}\).
+ * Calculates the binomial coefficient \f$ \binom{n}{k} \f$.
  *
  * @param n The total number of items.
  * @param k The number of items to choose from n.
- * @return The binomial coefficient \(\binom{n}{k}\).
+ * @return The binomial coefficient \f$ \binom{n}{k} \f$.
  */
 inline uint64_t binomial_coefficient(uint64_t n, uint64_t k) noexcept
 {

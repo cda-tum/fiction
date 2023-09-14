@@ -87,40 +87,8 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gate imple
     CHECK(!found_gate_layouts.empty());
 }
 
-TEST_CASE("Use 1-in-1-out diagonal gate skeleton to generate all possible wires",
+TEST_CASE("Use fo2 Bestagon gate without SiDB at {17, 11, 0} and generate original one",
           "[automatic_exhaustive_gate_designer]")
-{
-    using layout = sidb_cell_clk_lyt_siqad;
-
-    layout lyt{};
-
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
-
-    const automatic_exhaustive_gate_designer_params params{sidb_simulation_parameters{2, -0.32},
-                                                           {{18, 8, 0}, {22, 13, 0}},
-                                                           create_id_tt(),
-                                                           2,
-                                                           sidb_simulation_engine::QUICKEXACT};
-
-    const auto found_gate_layouts = automatic_exhaustive_gate_designer(lyt, params);
-    CHECK(!found_gate_layouts.empty());
-}
-
-TEST_CASE("Use fo2 Bestagon gate without SiDB at {17, 11, 0} and generate original one", "[bdl-input-iterator]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 

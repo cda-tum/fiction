@@ -358,7 +358,7 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
  * Generates a random coordinate within the region spanned by two given coordinates. The two given coordinates form the
  * top left corner and the bottom right corner of the spanned region.
  *
- * @OffsetCoordinateType The coordinate implementation to be used.
+ * @tparam The coordinate implementation to be used.
  * @param coordinate1 Top left Coordinate.
  * @param coordinate2 Bottom right Coordinate (coordinate order is not important, automatically swapped if
  * necessary).
