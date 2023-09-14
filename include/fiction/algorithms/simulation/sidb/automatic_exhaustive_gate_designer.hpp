@@ -92,19 +92,23 @@ class automatic_exhaustive_gate_designer_impl
         const auto add_combination_to_layout_and_check_operation =
             [this, &params_is_operational](const auto& combination) noexcept
         {
-            auto layout_with_added_cells = add_cells_to_layout_based_on_indices(combination);
-            if (!can_positive_charges_occur(layout_with_added_cells, parameter.phys_params))
+            if (!are_sidbs_to_close(combination))
             {
-                if (is_gate_layout_operational(layout_with_added_cells, parameter.truth_table, params_is_operational)
-                        .first == operational_status::OPERATIONAL)
+                auto layout_with_added_cells = add_cells_to_layout_based_on_indices(combination);
+                if (!can_positive_charges_occur(layout_with_added_cells, parameter.phys_params))
                 {
-                    all_found_gate_layouts.push_back(layout_with_added_cells);
+                    if (is_gate_layout_operational(layout_with_added_cells, parameter.truth_table,
+                                                   params_is_operational)
+                            .first == operational_status::OPERATIONAL)
+                    {
+                        all_found_gate_layouts.push_back(layout_with_added_cells);
+                    }
                 }
             }
         };
 
         // Apply the add_combination_to_layout_and_check_operation function to each combination using std::for_each
-        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ all_combinations.cbegin(), all_combinations.cend(),
+        std::for_each(FICTION_EXECUTION_POLICY_PAR all_combinations.cbegin(), all_combinations.cend(),
                       add_combination_to_layout_and_check_operation);
 
         return all_found_gate_layouts;
@@ -183,6 +187,23 @@ class automatic_exhaustive_gate_designer_impl
                 all_combinations.push_back(combination);
                 return false;  // keep looping
             });
+    }
+
+    [[maybe_unused]] bool are_sidbs_to_close(const std::vector<std::size_t>& cell_indices) noexcept
+    {
+        for (std::size_t i = 0; i < cell_indices.size(); i++)
+        {
+            for (std::size_t j = i + 1; j < cell_indices.size(); j++)
+            {
+                if (sidb_nanometer_distance<sidb_cell_clk_lyt_siqad>(skeleton_layout,
+                                                                     all_sidbs_in_cavas[cell_indices[i]],
+                                                                     all_sidbs_in_cavas[cell_indices[j]]) < 0.5)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     /**
      * Add SiDB cells to a SiDB cell-level layout based on a vector of cell indices.
