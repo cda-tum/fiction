@@ -178,3 +178,38 @@ Binary-dot Logic (BDL) Pair Detection
 .. doxygenstruct:: fiction::detect_bdl_pairs_params
    :members:
 .. doxygenfunction:: fiction::detect_bdl_pairs
+
+
+Operational Domain Computation
+##############################
+
+**Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
+
+.. doxygenstruct:: fiction::operational_domain
+   :members:
+
+.. doxygenstruct:: fiction::operational_domain_params
+   :members:
+.. doxygenstruct:: fiction::operational_domain_stats
+   :members:
+
+.. doxygenfunction:: fiction::operational_domain_grid_search
+.. doxygenfunction:: fiction::operational_domain_random_sampling
+.. doxygenfunction:: fiction::operational_domain_flood_fill
+.. doxygenfunction:: fiction::operational_domain_contour_tracing
+
+
+Utility Functions
+#################
+
+
+Binary-dot Logic (BDL) Pair Detection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp``
+
+.. doxygenstruct:: fiction::bdl_pair
+   :members:
+.. doxygenstruct:: fiction::detect_bdl_pairs_params
+   :members:
+.. doxygenfunction:: fiction::detect_bdl_pairs

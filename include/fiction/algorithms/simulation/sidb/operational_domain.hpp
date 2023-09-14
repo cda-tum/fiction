@@ -31,6 +31,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <iterator>
 #include <optional>
 #include <queue>
