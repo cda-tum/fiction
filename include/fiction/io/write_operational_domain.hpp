@@ -91,7 +91,7 @@ inline void write_operational_domain(const operational_domain& opdom, std::ostre
     {
         writer.write_line(sim_param.x, sim_param.y,
                           op_val == operational_status::OPERATIONAL ? params.operational_tag :
-                                                                                          params.non_operational_tag);
+                                                                      params.non_operational_tag);
     }
 }
 /**

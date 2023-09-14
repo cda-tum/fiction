@@ -409,7 +409,7 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
  * @return A vector containing all cells within the specified area.
  */
 inline std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_t& cell_nw,
-                                                      const siqad::coord_t& cell_se) noexcept
+                                                             const siqad::coord_t& cell_se) noexcept
 {
     std::vector<siqad::coord_t> all_cells{};
     const auto                  c1_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_nw);
