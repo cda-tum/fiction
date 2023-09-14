@@ -747,9 +747,6 @@ class operational_domain_impl
         // increment the number of evaluated parameter combinations
         ++num_evaluated_parameter_combinations;
 
-        // take the first (and only) output BDL pair
-        const auto& output_bdl_pair = output_bdl_pairs.front();
-
         sidb_simulation_parameters sim_params = params.sim_params;
         set_x_dimension_value(sim_params, param_point.x);
         set_y_dimension_value(sim_params, param_point.y);

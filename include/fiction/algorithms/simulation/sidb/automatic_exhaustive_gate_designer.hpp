@@ -51,7 +51,7 @@ struct automatic_exhaustive_gate_designer_params
     /**
      * Number of SiDBs placed in the canvas to create a working gate.
      */
-    uint64_t number_of_sidbs = 0;
+    std::size_t number_of_sidbs = 0;
     /**
      * The simulation engine to be used for the operational domain computation.
      */
@@ -87,14 +87,13 @@ class automatic_exhaustive_gate_designer_impl
             [this, &params_is_operational](const auto& combination) noexcept
         {
             auto layout_with_added_cells = add_cells_to_layout_based_on_indices(combination);
-            if (can_positive_charges_occur(layout_with_added_cells, parameter.phys_params))
+            if (!can_positive_charges_occur(layout_with_added_cells, parameter.phys_params))
             {
-                return false;
-            }
-            if (is_gate_layout_operational(layout_with_added_cells, parameter.truth_table, params_is_operational)
-                    .first == operational_status::OPERATIONAL)
-            {
-                all_found_gate_layouts.push_back(layout_with_added_cells);
+                if (is_gate_layout_operational(layout_with_added_cells, parameter.truth_table, params_is_operational)
+                        .first == operational_status::OPERATIONAL)
+                {
+                    all_found_gate_layouts.push_back(layout_with_added_cells);
+                }
             }
         };
 
@@ -104,6 +103,7 @@ class automatic_exhaustive_gate_designer_impl
 
         return all_found_gate_layouts;
     }
+
 
   private:
     /**
@@ -124,7 +124,7 @@ class automatic_exhaustive_gate_designer_impl
      * within the canvas. These combinations are used to distribute a specified number of SiDBs
      * across the canvas (all possible distributions are covered), typically from top to bottom and left to right.
      */
-    std::vector<std::vector<uint64_t>> all_combinations{};
+    std::vector<std::vector<std::size_t>> all_combinations{};
     /**
      * Number of canvas cells.
      */
@@ -161,20 +161,23 @@ class automatic_exhaustive_gate_designer_impl
     {
         all_combinations = {};
         all_combinations.reserve(binomial_coefficient(number_of_canvas_cells, parameter.number_of_sidbs));
-        std::vector<uint64_t> numbers(number_of_canvas_cells);
+        std::vector<std::size_t> numbers(number_of_canvas_cells);
         std::iota(numbers.begin(), numbers.end(), 0);
-        combinations::for_each_combination(numbers.begin(), numbers.begin() + parameter.number_of_sidbs, numbers.end(),
-                                           [this](const auto begin, [[maybe_unused]] const auto end)
-                                           {
-                                               std::vector<uint64_t> combination{};
-                                               combination.reserve(parameter.number_of_sidbs);
-                                               for (auto i = 0u; i < parameter.number_of_sidbs; ++i)
-                                               {
-                                                   combination.push_back(*(begin + i));
-                                               }
-                                               all_combinations.push_back(combination);
-                                               return false;  // keep looping
-                                           });
+        combinations::for_each_combination(
+            numbers.begin(),
+            numbers.begin() + static_cast<std::vector<std::size_t>::difference_type>(parameter.number_of_sidbs),
+            numbers.end(),
+            [this](const auto begin, [[maybe_unused]] const auto end)
+            {
+                std::vector<std::size_t> combination{};
+                combination.reserve(parameter.number_of_sidbs);
+                for (std::size_t i = 0; i < parameter.number_of_sidbs; ++i)
+                {
+                    combination.push_back(static_cast<std::size_t>(*begin) + i);
+                }
+                all_combinations.push_back(combination);
+                return false;  // keep looping
+            });
     }
     /**
      * Add SiDB cells to a SiDB cell-level layout based on a vector of cell indices.
@@ -187,7 +190,7 @@ class automatic_exhaustive_gate_designer_impl
      * @param cell_indices A vector containing indices of cells in the layout to be added or modified.
      * @return A copy of the original layout (`skeleton_layout`) with SiDB cells added at specified indices.
      */
-    Lyt add_cells_to_layout_based_on_indices(const std::vector<uint64_t>& cell_indices)
+    Lyt add_cells_to_layout_based_on_indices(const std::vector<std::size_t>& cell_indices)
     {
         Lyt lyt_copy{skeleton_layout.clone()};
 
