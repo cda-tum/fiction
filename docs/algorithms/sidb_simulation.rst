@@ -21,6 +21,7 @@ These headers provide functions for physically simulating an SiDB layout, which 
 [Jump to Utility Functions](#utility-functions)
   [Jump to Binary-dot Logic (BDL) Pair Detection](#binary-dot-logic-bdl-pair-detection)
 
+.. _physical-parameters:
 
 Physical Parameters
 ###################
