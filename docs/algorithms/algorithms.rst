@@ -53,6 +53,7 @@ Physical Design
    color_routing.rst
    apply_gate_library.rst
    hexagonalization.rst
+   post_layout_optimization.rst
 
 
 Verification
