@@ -83,7 +83,7 @@ int main()  // NOLINT
     mockturtle::cut_rewriting_params cut_params{};
     cut_params.cut_enumeration_ps.cut_size = 4;
 
-    const fiction::technology_mapping_params tech_map_params = fiction::all_standard_2_input_functions();
+    const fiction::technology_mapping_params tech_map_params = fiction::all_2_input_functions();
 
     // parameters for SMT-based physical design
     fiction::exact_physical_design_params<gate_lyt> exact_params{};
