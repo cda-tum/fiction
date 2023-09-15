@@ -103,9 +103,9 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to
     time_to_solution_stats st{};
 
     sidb_simulation_result<Lyt> simulation_result{};
-    if (tts_params.engine == exhaustive_sidb_simulation_engine::EXGS)
+    if (tts_params.engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
     {
-        st.algorithm      = "ExGS";
+        st.algorithm      = "QuickExact";
         simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
     }
     else

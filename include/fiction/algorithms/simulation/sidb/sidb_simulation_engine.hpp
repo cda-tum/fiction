@@ -14,16 +14,16 @@ namespace fiction
 enum class sidb_simulation_engine
 {
     /**
-     * Exhaustive Ground State Search (EXGS) is an exact simulation engine that always has exponential runtime.
+     * *Exhaustive Ground State Search (EXGS)* is an exact simulation engine that always has exponential runtime.
      */
     EXGS,
     /**
-     * QuickSim is a heuristic simulation engine that only requires polynomial runtime.
+     * *QuickSim* is a heuristic simulation engine that only requires polynomial runtime.
      */
     QUICKSIM,
     /**
-     * QuickExact is also an exact simulation engine that requires exponential runtime, but it scales a lot better than
-     * ExGS due to its effective search-space pruning.
+     * *QuickExact* is also an exact simulation engine that requires exponential runtime, but it scales a lot better
+     * than *ExGS* due to its effective search-space pruning.
      */
     QUICKEXACT
 };
@@ -34,12 +34,12 @@ enum class sidb_simulation_engine
 enum class exhaustive_sidb_simulation_engine
 {
     /**
-     * Exhaustive Ground State Search (EXGS) is an exact simulation engine that always has exponential runtime.
+     * *Exhaustive Ground State Search (EXGS)* is an exact simulation engine that always has exponential runtime.
      */
     EXGS,
     /**
-     * QuickExact is also an exact simulation engine that requires exponential runtime, but it scales a lot better than
-     * ExGS due to its effective search-space pruning.
+     * *QuickExact* is also an exact simulation engine that requires exponential runtime, but it scales a lot better
+     * than ExGS due to its effective search-space pruning.
      */
     QUICKEXACT
 };

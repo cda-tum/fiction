@@ -31,7 +31,7 @@ template <typename Lyt>
 struct quickexact_params
 {
     /**
-     * Modes to use for the `QuickExact` algorithm.
+     * Modes to use for the *QuickExact* algorithm.
      */
     enum class automatic_base_number_detection
     {

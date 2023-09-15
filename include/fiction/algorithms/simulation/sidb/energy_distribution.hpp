@@ -23,11 +23,11 @@ namespace fiction
 using sidb_energy_distribution = std::map<double, uint64_t>;  // unit: (eV, unit-less)
 
 /**
- * This function takes in a vector of `charge_distribution_surface` objects and returns a map containing the system
+ * This function takes in a vector of charge_distribution_surface objects and returns a map containing the system
  * energy and the number of occurrences of that energy in the input vector.
  *
  * @tparam Lyt Cell-level layout type.
- * @param input_vec A vector of `charge_distribution_surface` objects for which statistics are to be computed.
+ * @param input_vec A vector of charge_distribution_surface objects for which statistics are to be computed.
  * @return A map containing the system energy as the key and the number of occurrences of that energy in the input
  * vector as the value.
  */

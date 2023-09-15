@@ -40,23 +40,23 @@ namespace fiction
 {
 
 /**
- * This struct stores the parameters for the Critical Temperature algorithm.
+ * This struct stores the parameters for the *Critical Temperature*` algorithm.
  */
 struct critical_temperature_params
 {
     /**
-     * An enumeration of modes to use for the Critical Temperature Simulation.
+     * An enumeration of modes to use for the *Critical Temperature* Simulation.
      */
     enum class critical_temperature_mode
     {
         /**
-         * The Critical Temperature is determined by considering the gate logic of the given layout. In this mode, it is
-         * distinguished between excited charge distributions that produce the correct output (with respect to a truth
-         * table) and those that do not.
+         * The *Critical Temperature* is determined by considering the gate logic of the given layout. In this mode, it
+         * is distinguished between excited charge distributions that produce the correct output (with respect to a
+         * truth table) and those that do not.
          */
         GATE_BASED_SIMULATION,
         /**
-         * The Critical Temperature is determined by ignoring the gate logic of the given layout. This mode does not
+         * The *Critical Temperature* is determined by ignoring the gate logic of the given layout. This mode does not
          * distinguish between excited charge distributions that produce the correct output (with respect to a truth
          * table) and those that do not.
          */
@@ -64,23 +64,23 @@ struct critical_temperature_params
     };
 
     /**
-     * An enumeration of simulation modes (exact vs. approximate) to use for the Critical Temperature Simulation.
+     * An enumeration of simulation modes (exact vs. approximate) to use for the *Critical Temperature* Simulation.
      */
     enum class simulation_engine
     {
         /**
-         * This simulation engine computes Critical Temperature values with 100 % accuracy.
+         * This simulation engine computes *Critical Temperature* values with 100 % accuracy.
          */
         EXACT,
         /**
-         * This simulation engine quickly calculates the Critical Temperature. However, there may be deviations from the
-         * exact Critical Temperature. This mode is recommended for larger layouts (> 40 SiDBs).
+         * This simulation engine quickly calculates the *Critical Temperature*. However, there may be deviations from
+         * the exact *Critical Temperature*. This mode is recommended for larger layouts (> 40 SiDBs).
          */
         APPROXIMATE
     };
 
     /**
-     * Simulation mode to determine the Critical Temperature.
+     * Simulation mode to determine the *Critical Temperature*.
      */
     simulation_engine engine = simulation_engine::EXACT;
     /**
@@ -123,7 +123,7 @@ struct critical_temperature_stats
      */
     std::string algorithm_name{};
     /**
-     * Critical Temperature of the given layout (unit: K).
+     * *Critical Temperature* of the given layout (unit: K).
      */
     double critical_temperature{0};
     /**
@@ -351,7 +351,7 @@ class critical_temperature_impl
             temp_values.emplace_back(static_cast<double>(i) / 100.0);
         }
 
-        // This function determines the Critical Temperature (CT) for a given confidence level.
+        // This function determines the `Critical Temperature` for a given confidence level.
         for (const auto& temp : temp_values)
         {
             // If the occupation probability of excited states exceeds the given threshold.
@@ -407,7 +407,7 @@ class critical_temperature_impl
         return ground_state_is_transparent;
     };
     /**
-     * The Critical Temperature is determined.
+     * The *Critical Temperature* is determined.
      *
      * @param energy_state_type All energies of all physically valid charge distributions with the corresponding state
      * type (i.e. transparent, erroneous).
@@ -447,7 +447,7 @@ class critical_temperature_impl
      */
     Lyt layout{};
     /**
-     * Parameters for the `critical_temperature` algorithm.
+     * Parameters for the critical_temperature algorithm.
      */
     const critical_temperature_params& parameter;
     /**
@@ -465,10 +465,10 @@ class critical_temperature_impl
  * (https://ieeexplore.ieee.org/document/10231259). It comes in two flavors: gate-based and non-gate based, which can be
  * specified using the critical_temperature_mode parameter.
  *
- * For gate-based simulation, the Critical Temperature is defined as follows: The temperature at which the excited
+ * For gate-based simulation, the *Critical Temperature* is defined as follows: The temperature at which the excited
  * charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$ \eta \in [0,1] \f$.
  *
- * For non-gate-based simulation, the Critical Temperature is defined as follows: The temperature at which the
+ * For non-gate-based simulation, the *Critical Temperature* is defined as follows: The temperature at which the
  * erroneous charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$ \eta \in [0,1] \f$ is the
  * confidence level for the presence of a working gate.
  *
