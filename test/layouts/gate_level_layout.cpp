@@ -32,6 +32,39 @@ TEST_CASE("Gate-level layout traits", "[gate-level-layout]")
     CHECK(fiction::has_is_empty_v<gate_layout>);
 }
 
+TEST_CASE("Deep copy gate-level layout", "[gate-level-layout]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    gate_layout original{gate_layout::aspect_ratio{5, 5, 0}, twoddwave_clocking<gate_layout>(), "Original"};
+    original.create_pi("x1", {0, 2});
+    original.create_pi("x2", {2, 4});
+
+    auto copy = original.clone();
+
+    copy.resize({10, 10, 1});
+    copy.replace_clocking_scheme(use_clocking<gate_layout>());
+    copy.set_layout_name("Copy");
+    copy.move_node(copy.get_node({0, 2}), {0, 0});
+    copy.move_node(copy.get_node({2, 4}), {2, 0});
+
+    CHECK(original.x() == 5);
+    CHECK(original.y() == 5);
+    CHECK(original.z() == 0);
+    CHECK(original.is_clocking_scheme(clock_name::TWODDWAVE));
+    CHECK(original.get_layout_name() == "Original");
+    CHECK(original.is_pi_tile({0, 2}));
+    CHECK(original.is_pi_tile({2, 4}));
+
+    CHECK(copy.x() == 10);
+    CHECK(copy.y() == 10);
+    CHECK(copy.z() == 1);
+    CHECK(copy.is_clocking_scheme(clock_name::USE));
+    CHECK(copy.get_layout_name() == "Copy");
+    CHECK(copy.is_pi_tile({0, 0}));
+    CHECK(copy.is_pi_tile({2, 0}));
+}
+
 TEST_CASE("Creation and usage of constants", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
@@ -45,7 +78,7 @@ TEST_CASE("Creation and usage of constants", "[gate-level-layout]")
     REQUIRE(mockturtle::has_get_node_v<gate_layout>);
     REQUIRE(mockturtle::has_is_complemented_v<gate_layout>);
 
-    gate_layout layout{gate_layout::aspect_ratio{2, 2, 1}};
+    const gate_layout layout{gate_layout::aspect_ratio{2, 2, 1}};
 
     CHECK(layout.size() == 2);
 

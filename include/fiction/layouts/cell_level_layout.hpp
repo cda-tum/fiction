@@ -116,19 +116,34 @@ class cell_level_layout : public ClockedLayout
     {
         static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
     }
-
+    /**
+     * Copy constructor from another layout's storage.
+     *
+     * @param s Storage of another cell_level_layout.
+     */
     explicit cell_level_layout(std::shared_ptr<cell_level_layout_storage<cell>> s) : strg{std::move(s)} {}
-
+    /**
+     * Copy constructor from another `ClockedLayout`.
+     *
+     * @param lyt Clocked layout.
+     */
+    explicit cell_level_layout(const ClockedLayout& lyt) :
+            ClockedLayout(lyt),
+            strg{std::make_shared<cell_level_layout_storage<cell>>("", 1, 1)}
+    {
+        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+    }
     /**
      * Clones the layout returning a deep copy.
      *
      * @return Deep copy of the layout.
      */
-    cell_level_layout clone() const
+    [[nodiscard]] cell_level_layout clone() const noexcept
     {
-        auto cl = cell_level_layout{strg};
-        cl.strg = std::make_shared<cell_level_layout_storage<cell>>(*strg);
-        return cl;
+        cell_level_layout copy{ClockedLayout::clone()};
+        copy.strg = std::make_shared<cell_level_layout_storage<cell>>(*strg);
+
+        return copy;
     }
 
 #pragma endregion

@@ -27,10 +27,41 @@ TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", qca_cell_c
     CHECK(has_set_layout_name_v<TestType>);
 }
 
+TEST_CASE("Deep copy cell-level layout", "[cell-level-layout]")
+{
+    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+
+    cell_layout original{{5, 5, 0}, twoddwave_clocking<cell_layout>(), "Original", 2, 2};
+    original.assign_cell_type({0, 2}, qca_technology::cell_type::NORMAL);
+    original.assign_cell_type({2, 4}, qca_technology::cell_type::NORMAL);
+
+    auto copy = original.clone();
+
+    copy.resize({10, 10, 1});
+    copy.replace_clocking_scheme(use_clocking<cell_layout>());
+    copy.set_layout_name("Copy");
+    copy.assign_cell_type({0, 2}, qca_technology::cell_type::INPUT);
+    copy.assign_cell_type({2, 4}, qca_technology::cell_type::INPUT);
+
+    CHECK(original.x() == 5);
+    CHECK(original.y() == 5);
+    CHECK(original.z() == 0);
+    CHECK(original.is_clocking_scheme(clock_name::TWODDWAVE));
+    CHECK(original.get_layout_name() == "Original");
+    CHECK(original.get_cell_type({0, 2}) == qca_technology::cell_type::NORMAL);
+    CHECK(original.get_cell_type({2, 4}) == qca_technology::cell_type::NORMAL);
+
+    CHECK(copy.x() == 10);
+    CHECK(copy.y() == 10);
+    CHECK(copy.z() == 1);
+    CHECK(copy.is_clocking_scheme(clock_name::USE));
+    CHECK(copy.get_layout_name() == "Copy");
+    CHECK(copy.get_cell_type({0, 2}) == qca_technology::cell_type::INPUT);
+    CHECK(copy.get_cell_type({2, 4}) == qca_technology::cell_type::INPUT);
+}
+
 TEST_CASE("Cell technology", "[cell-level-layout]")
 {
-    std::stringstream s{};
-
     SECTION("QCA")
     {
         CHECK(qca_technology::is_empty_cell(qca_technology::cell_type::EMPTY));

@@ -91,6 +91,29 @@ class synchronization_element_layout : public ClockedLayout
     {
         static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
     }
+    /**
+     * Copy constructor from another `ClockedLayout`.
+     *
+     * @param lyt Clocked layout.
+     */
+    explicit synchronization_element_layout(const ClockedLayout& lyt) :
+            ClockedLayout(lyt),
+            strg{std::make_shared<synchronization_element_layout_storage>()}
+    {
+        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+    }
+    /**
+     * Clones the layout returning a deep copy.
+     *
+     * @return Deep copy of the layout.
+     */
+    [[nodiscard]] synchronization_element_layout clone() const noexcept
+    {
+        auto copy = synchronization_element_layout(ClockedLayout::clone());
+        copy.strg = std::make_shared<synchronization_element_layout_storage>(*strg);
+
+        return copy;
+    }
 
 #pragma endregion
 
