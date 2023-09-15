@@ -20,7 +20,7 @@ namespace fiction
  *
  * @return Identity function in one variable.
  */
-inline kitty::dynamic_truth_table create_id_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_id_tt() noexcept
 {
     constexpr const uint64_t lit = 0x2;
 
@@ -34,7 +34,7 @@ inline kitty::dynamic_truth_table create_id_tt() noexcept
  *
  * @return Negation in one variable.
  */
-inline kitty::dynamic_truth_table create_not_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_not_tt() noexcept
 {
     constexpr const uint64_t lit = 0x1;
 
@@ -48,7 +48,7 @@ inline kitty::dynamic_truth_table create_not_tt() noexcept
  *
  * @return Conjunction in two variables.
  */
-inline kitty::dynamic_truth_table create_and_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_and_tt() noexcept
 {
     constexpr const uint64_t lit = 0x8;
 
@@ -62,7 +62,7 @@ inline kitty::dynamic_truth_table create_and_tt() noexcept
  *
  * @return Disjunction in two variables.
  */
-inline kitty::dynamic_truth_table create_or_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_or_tt() noexcept
 {
     constexpr const uint64_t lit = 0xe;
 
@@ -76,7 +76,7 @@ inline kitty::dynamic_truth_table create_or_tt() noexcept
  *
  * @return Negated conjunction in two variables.
  */
-inline kitty::dynamic_truth_table create_nand_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_nand_tt() noexcept
 {
     constexpr const uint64_t lit = 0x7;
 
@@ -90,7 +90,7 @@ inline kitty::dynamic_truth_table create_nand_tt() noexcept
  *
  * @return Negated disjunction in two variables.
  */
-inline kitty::dynamic_truth_table create_nor_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_nor_tt() noexcept
 {
     constexpr const uint64_t lit = 0x1;
 
@@ -104,7 +104,7 @@ inline kitty::dynamic_truth_table create_nor_tt() noexcept
  *
  * @return Exclusive disjunction in two variables.
  */
-inline kitty::dynamic_truth_table create_xor_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_xor_tt() noexcept
 {
     constexpr const uint64_t lit = 0x6;
 
@@ -118,9 +118,65 @@ inline kitty::dynamic_truth_table create_xor_tt() noexcept
  *
  * @return Negated exclusive disjunction in two variables.
  */
-inline kitty::dynamic_truth_table create_xnor_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_xnor_tt() noexcept
 {
     constexpr const uint64_t lit = 0x9;
+
+    kitty::dynamic_truth_table table{2};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the less-than function in two variables.
+ *
+ * @return Less-than function in two variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_lt_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x2;
+
+    kitty::dynamic_truth_table table{2};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the greater-than function in two variables.
+ *
+ * @return Greater-than function in two variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_gt_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x4;
+
+    kitty::dynamic_truth_table table{2};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the less-than-or-equal function in two variables.
+ *
+ * @return Less-than-or-equal function in two variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_le_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x11;
+
+    kitty::dynamic_truth_table table{2};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the greater-than-or-equal function in two variables.
+ *
+ * @return Greater-than-or-equal function in two variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_ge_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x13;
 
     kitty::dynamic_truth_table table{2};
     kitty::create_from_words(table, &lit, &lit + 1);
@@ -132,7 +188,7 @@ inline kitty::dynamic_truth_table create_xnor_tt() noexcept
  *
  * @return identity function in two variables.
  */
-inline kitty::dynamic_truth_table create_double_wire_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_double_wire_tt() noexcept
 {
     static constexpr const char* truth_table_string = "11100100";
 
@@ -146,7 +202,7 @@ inline kitty::dynamic_truth_table create_double_wire_tt() noexcept
  *
  * @return crossing in two variables.
  */
-inline kitty::dynamic_truth_table create_crossing_wire_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_crossing_wire_tt() noexcept
 {
     static constexpr const char* truth_table_string = "11011000";
 
@@ -160,7 +216,7 @@ inline kitty::dynamic_truth_table create_crossing_wire_tt() noexcept
  *
  * @return fan-out in one variable.
  */
-inline kitty::dynamic_truth_table create_fan_out_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_fan_out_tt() noexcept
 {
     static constexpr const char* truth_table_string = "1100";
 
@@ -174,7 +230,7 @@ inline kitty::dynamic_truth_table create_fan_out_tt() noexcept
  *
  * @return half-adder in two variables.
  */
-inline kitty::dynamic_truth_table create_half_adder_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_half_adder_tt() noexcept
 {
     static constexpr const char* truth_table_string = "01101000";
 
@@ -189,7 +245,7 @@ inline kitty::dynamic_truth_table create_half_adder_tt() noexcept
  *
  * @return Majority function in three variables.
  */
-inline kitty::dynamic_truth_table create_maj_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_maj_tt() noexcept
 {
     constexpr const uint64_t lit = 0xe8;
 
