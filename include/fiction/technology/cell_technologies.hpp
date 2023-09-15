@@ -357,7 +357,7 @@ struct sidb_technology
     static constexpr double CELL_HSPACE = 0.384;
     /**
      * Default average vertical spacing between two SiDBs in SiQAD.
-     * Depending on their lattice, they can be closer together or further apart.
+     * Depending on whether they are on the same or different dimer rows, SiDBs can be closer together or further apart.
      */
     static constexpr double CELL_VSPACE = 0.384;
 };

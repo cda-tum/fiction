@@ -913,7 +913,7 @@ TEMPLATE_TEST_CASE("3 DBs next to each other with automatic base number detectio
     CHECK(std::any_cast<uint64_t>(simulation_results.additional_simulation_parameters[0].second) == 3);
 
     const quickexact_params<TestType> params_new{sidb_simulation_parameters{2, -0.32},
-                                                 automatic_base_number_detection::OFF};
+                                                 quickexact_params<TestType>::automatic_base_number_detection::OFF};
 
     const auto simulation_results_new = quickexact<TestType>(lyt, params_new);
 
@@ -925,9 +925,7 @@ TEMPLATE_TEST_CASE("3 DBs next to each other with automatic base number detectio
 TEMPLATE_TEST_CASE("13 DBs which are all negatively charged", "[quickexact]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
-    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
-
-    sidb_layout lyt{{20, 10}};
+    TestType lyt{{20, 10}};
 
     lyt.assign_cell_type({26, 10, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({23, 19, 1}, TestType::cell_type::NORMAL);
@@ -979,7 +977,8 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shape SiDB OR gate with input 0
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}, automatic_base_number_detection::OFF};
+    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28},
+                                       quickexact_params<TestType>::automatic_base_number_detection::OFF};
 
     SECTION("Standard Physical Parameters")
     {
@@ -1131,7 +1130,8 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a 3 DB Wire", "[ExGS]",
     lyt.assign_cell_type({26, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({29, 0, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}, automatic_base_number_detection::OFF};
+    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28},
+                                       quickexact_params<TestType>::automatic_base_number_detection::OFF};
 
     SECTION("Standard Physical Parameters")
     {

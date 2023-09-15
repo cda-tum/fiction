@@ -145,7 +145,8 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{2}};
         CHECK(charge_layout.get_charge_index_and_base().first == 0);
         charge_layout.increase_charge_index_by_one(dependent_cell_mode::FIXED, energy_calculation::UPDATE_ENERGY,
-                                                   charge_distribution_history::NEGLECT, exhaustive_algorithm::EXGS);
+                                                   charge_distribution_history::NEGLECT,
+                                                   exhaustive_sidb_simulation_engine::EXGS);
         CHECK(charge_layout.get_charge_index_and_base().first == 1);
         CHECK(charge_layout.get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state_by_index(1) == sidb_charge_state::NEGATIVE);
@@ -163,7 +164,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout_quickexact.get_charge_index_and_base().first == 0);
         charge_layout_quickexact.increase_charge_index_by_one(
             dependent_cell_mode::FIXED, energy_calculation::UPDATE_ENERGY, charge_distribution_history::NEGLECT,
-            exhaustive_algorithm::QUICKEXACT);
+            exhaustive_sidb_simulation_engine::QUICKEXACT);
         CHECK(charge_layout_quickexact.get_charge_index_and_base().first == 1);
         CHECK(charge_layout_quickexact.get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout_quickexact.get_charge_state_by_index(1) == sidb_charge_state::NEGATIVE);

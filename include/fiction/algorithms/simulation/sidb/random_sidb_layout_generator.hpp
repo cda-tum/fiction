@@ -28,27 +28,28 @@ namespace fiction
 {
 
 /**
- * An enumeration of modes to use for the generation of random SiDB layouts to control control the appearance of
- * positive charges.
- */
-enum class positive_charges
-{
-    /**
-     * Positive charges can occur (i.e. SiDBs can be placed right next to each other).
-     */
-    ALLOWED,
-    /**
-     * Positive charges are not allowed to occur (i.e. SiDBs need to be seperated by a few lattice points).
-     */
-    FORBIDDEN
-};
-
-/**
  * This struct stores the parameters for the `generate_random_sidb_layout` algorithm.
  */
 template <typename Lyt>
 struct generate_random_sidb_layout_params
 {
+
+    /**
+     * An enumeration of modes to use for the generation of random SiDB layouts to control control the appearance of
+     * positive charges.
+     */
+    enum class positive_charges
+    {
+        /**
+         * Positive charges can occur (i.e. SiDBs can be placed right next to each other).
+         */
+        ALLOWED,
+        /**
+         * Positive charges are not allowed to occur (i.e. SiDBs need to be seperated by a few lattice points).
+         */
+        FORBIDDEN
+    };
+
     /**
      * Two coordinates that span the region where SiDBs may be placed (order is not important). The first coordinate is
      * the upper left corner and the second coordinate is the lower right corner of the area.
@@ -122,7 +123,7 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
 
         bool constraint_violation_positive_sidbs = false;
 
-        if (params.positive_sidbs == positive_charges::FORBIDDEN)
+        if (params.positive_sidbs == generate_random_sidb_layout_params<Lyt>::positive_charges::FORBIDDEN)
         {
             // checks if the new coordinate is not closer than 2 cells (Euclidean distance) from an already
             // placed SiDB

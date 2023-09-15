@@ -38,46 +38,47 @@
 
 namespace fiction
 {
-/**
- * An enumeration of modes to use for the Critical Temperature Simulation.
- */
-enum class critical_temperature_mode
-{
-    /**
-     * The Critical Temperature is determined by considering the gate logic of the given layout. In this mode, it is
-     * distinguished between excited charge distributions that produce the correct output (with respect to a truth
-     * table) and those that do not.
-     */
-    GATE_BASED_SIMULATION,
-    /**
-     * The Critical Temperature is determined by ignoring the gate logic of the given layout. This mode does not
-     * distinguish between excited charge distributions that produce the correct output (with respect to a truth table)
-     * and those that do not.
-     */
-    NON_GATE_BASED_SIMULATION
-};
-
-/**
- * An enumeration of simulation modes (exact vs. approximate) to use for the Critical Temperature Simulation.
- */
-enum class simulation_engine
-{
-    /**
-     * This simulation engine computes Critical Temperature values with 100 % accuracy.
-     */
-    EXACT,
-    /**
-     * This simulation engine quickly calculates the Critical Temperature. However, there may be deviations from the
-     * exact Critical Temperature. This mode is recommended for larger layouts (> 40 SiDBs).
-     */
-    APPROXIMATE
-};
 
 /**
  * This struct stores the parameters for the Critical Temperature algorithm.
  */
 struct critical_temperature_params
 {
+    /**
+     * An enumeration of modes to use for the Critical Temperature Simulation.
+     */
+    enum class critical_temperature_mode
+    {
+        /**
+         * The Critical Temperature is determined by considering the gate logic of the given layout. In this mode, it is
+         * distinguished between excited charge distributions that produce the correct output (with respect to a truth
+         * table) and those that do not.
+         */
+        GATE_BASED_SIMULATION,
+        /**
+         * The Critical Temperature is determined by ignoring the gate logic of the given layout. This mode does not
+         * distinguish between excited charge distributions that produce the correct output (with respect to a truth
+         * table) and those that do not.
+         */
+        NON_GATE_BASED_SIMULATION
+    };
+
+    /**
+     * An enumeration of simulation modes (exact vs. approximate) to use for the Critical Temperature Simulation.
+     */
+    enum class simulation_engine
+    {
+        /**
+         * This simulation engine computes Critical Temperature values with 100 % accuracy.
+         */
+        EXACT,
+        /**
+         * This simulation engine quickly calculates the Critical Temperature. However, there may be deviations from the
+         * exact Critical Temperature. This mode is recommended for larger layouts (> 40 SiDBs).
+         */
+        APPROXIMATE
+    };
+
     /**
      * Simulation mode to determine the Critical Temperature.
      */
@@ -179,13 +180,13 @@ class critical_temperature_impl
         }
 
         sidb_simulation_result<Lyt> simulation_results{};
-        if (parameter.engine == simulation_engine::EXACT)
+        if (parameter.engine == critical_temperature_params::simulation_engine::EXACT)
         {
             temperature_stats.algorithm_name = "QuickExact";
             // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
             // is used to provide 100 % accuracy for the Critical Temperature).
             const quickexact_params<Lyt> params{parameter.simulation_params.phys_params,
-                                                automatic_base_number_detection::OFF};
+                                                quickexact_params<Lyt>::automatic_base_number_detection::OFF};
             simulation_results = quickexact(layout, params);
         }
         else
@@ -309,13 +310,13 @@ class critical_temperature_impl
     bool non_gate_based_simulation()
     {
         sidb_simulation_result<Lyt> simulation_results{};
-        if (parameter.engine == simulation_engine::EXACT)
+        if (parameter.engine == critical_temperature_params::simulation_engine::EXACT)
         {
             temperature_stats.algorithm_name = "QuickExact";
             // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
             // is used to provide 100 % accuracy for the Critical Temperature).
             const quickexact_params<Lyt> params{parameter.simulation_params.phys_params,
-                                                automatic_base_number_detection::OFF};
+                                                quickexact_params<Lyt>::automatic_base_number_detection::OFF};
             simulation_results = quickexact(layout, params);
         }
         else
@@ -490,7 +491,7 @@ bool critical_temperature(const Lyt& lyt, const critical_temperature_params& par
 
     bool result = false;
 
-    if (params.temperature_mode == critical_temperature_mode::GATE_BASED_SIMULATION)
+    if (params.temperature_mode == critical_temperature_params::critical_temperature_mode::GATE_BASED_SIMULATION)
     {
         result = p.gate_based_simulation();
     }
