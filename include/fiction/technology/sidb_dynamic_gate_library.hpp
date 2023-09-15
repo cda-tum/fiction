@@ -12,21 +12,22 @@
 namespace fiction
 {
 
-class sidb_dynamic_gate_library : fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
+class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
 {
   public:
     explicit sidb_dynamic_gate_library() = delete;
 
     template <typename GateLyt>
-    [[nodiscard]] fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
+    [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate level layout.");
 
         const auto n = lyt.get_node(t);
         const auto f = lyt.node_function(n);
-        const auto p = determine_port_routing(lyt, n);
+        const auto p = determine_port_routing(lyt, t);
 
         // TODO implement on-the-fly gate design here and return an fcn_gate object
+        return fcn_gate{};
 
         // if the gate type is unknown, throw an exception
         throw unsupported_gate_type_exception(t);
