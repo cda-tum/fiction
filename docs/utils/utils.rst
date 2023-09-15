@@ -200,10 +200,3 @@ Math Utils
 **Header:** ``fiction/utils/phmap_utils.hpp``
 
 .. doxygentypedef:: fiction::locked_parallel_flat_hash_map
-
-`phmap`
--------
-
-**Header:** ``fiction/utils/phmap_utils.hpp``
-
-.. doxygentypedef:: fiction::locked_parallel_flat_hash_map
