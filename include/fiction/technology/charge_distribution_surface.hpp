@@ -1972,7 +1972,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
             auto       charge_quot_positive = strg->charge_index_sublayout;
             const auto base_positive        = 3;
-            int64_t    counter              = static_cast<int64_t>(strg->three_state_cells.size() - 1);
+            auto       counter              = static_cast<int64_t>(strg->three_state_cells.size() - 1);
             // Firstly, the charge distribution of the sublayout (i.e., collection of SiDBs that can be positively
             // charged) is updated.
             while (charge_quot_positive > 0)
@@ -2023,7 +2023,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             const auto dependent_cell_index_negative = two_state_cell_to_index(strg->dependent_cell);
             auto       charge_quot                   = strg->charge_index_and_base.first;
             const auto base                          = strg->charge_index_and_base.second;
-            int64_t    counter_negative = static_cast<int64_t>(strg->sidb_order_without_three_state_cells.size() - 1);
+            auto       counter_negative = static_cast<int64_t>(strg->sidb_order_without_three_state_cells.size() - 1);
 
             // Secondly, the charge distribution of the layout (only SiDBs which can be either neutrally or negatively
             // charged) is updated.
@@ -2079,7 +2079,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             auto           charge_quot          = strg->charge_index_and_base.first;
             const auto     base                 = strg->charge_index_and_base.second;
             const uint64_t num_charges          = this->num_cells();
-            int64_t        counter              = static_cast<int64_t>(num_charges - 1);
+            auto           counter              = static_cast<int64_t>(num_charges - 1);
             const auto     dependent_cell_index = cell_to_index(strg->dependent_cell);
 
             // A charge index of zero corresponds to a layout with all SiDBs set to negative.
