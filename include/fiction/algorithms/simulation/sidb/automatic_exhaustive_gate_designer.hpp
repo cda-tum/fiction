@@ -235,8 +235,8 @@ class automatic_exhaustive_gate_designer_impl
 }  // namespace detail
 
 /**
- * The *Automatic Exhaustive Gate Designer* designs SiDB gate implementations for a given Boolean function, a given
- * canvas size, a given number of canvas SiDBs, and a given skeleton.
+ * The *Automatic Exhaustive Gate Designer* designs SiDB gate implementations based on a specified Boolean
+ * function, a skeleton structure, canvas size, and a predetermined number of canvas SiDBs.
  *
  * It is composed of three steps:
  * 1. In the initial step, all possible distributions of ``number_of_sidbs`` SiDBs within a given canvas are

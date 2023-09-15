@@ -3,6 +3,24 @@ Physical Simulation of Silicon Dangling Bond Logic
 
 These headers provide functions for physically simulating an SiDB layout, which is a crucial step in the physical design flow of SiDB layouts, as they are used to validate their functionality.
 
+[Jump to Physical Parameters](#physical-parameters)
+[Jump to Simulation Result](#simulation-result)
+[Jump to Heuristic Ground State Simulation](#heuristic-ground-state-simulation)
+[Jump to Exhaustive Ground State Simulation](#exhaustive-ground-state-simulation)
+[Jump to Engine Selectors](#engine-selectors)
+[Jump to Energy Calculation](#energy-calculation)
+[Jump to Temperature Behavior](#temperature-behavior)
+[Jump to Maximum Defect Influence Distance](#maximum-defect-influence-distance)
+[Jump to Time-to-Solution (TTS) Statistics](#time-to-solution-tts-statistics)
+[Jump to Random SiDB Layout Generator](#random-sidb-layout-generator)
+[Jump to Automatic Exhaustive Gate Designer](#automatic-exhaustive-gate-designer)
+[Jump to Operational Domain Computation](#operational-domain-computation)
+[Jump to Utility Functions](#utility-functions)
+  [Jump to Binary-dot Logic (BDL) Pair Detection](#binary-dot-logic-bdl-pair-detection)
+[Jump to Operational Domain Computation](#operational-domain-computation)
+[Jump to Utility Functions](#utility-functions)
+  [Jump to Binary-dot Logic (BDL) Pair Detection](#binary-dot-logic-bdl-pair-detection)
+
 
 Physical Parameters
 ###################
@@ -135,6 +153,7 @@ Automatic Exhaustive Gate Designer
 **Header:** ``fiction/algorithms/simulation/sidb/automatic_exhaustive_gate_generator.hpp``
 
 .. doxygenstruct:: fiction::automatic_exhaustive_gate_designer_params
+    :members:
 .. doxygenfunction:: fiction::automatic_exhaustive_gate_designer
 
 
@@ -197,19 +216,3 @@ Operational Domain Computation
 .. doxygenfunction:: fiction::operational_domain_random_sampling
 .. doxygenfunction:: fiction::operational_domain_flood_fill
 .. doxygenfunction:: fiction::operational_domain_contour_tracing
-
-
-Utility Functions
-#################
-
-
-Binary-dot Logic (BDL) Pair Detection
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-**Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp``
-
-.. doxygenstruct:: fiction::bdl_pair
-   :members:
-.. doxygenstruct:: fiction::detect_bdl_pairs_params
-   :members:
-.. doxygenfunction:: fiction::detect_bdl_pairs
