@@ -51,7 +51,7 @@ struct quickexact_params
      */
     sidb_simulation_parameters physical_parameters{};
     /**
-     * If `ON`, *QuickExact* checks before which base number is required for the simulation, i.e., whether 3-state is
+     * If `ON`, *QuickExact* checks which base number is required for the simulation, i.e., whether 3-state is
      * necessary or 2-state simulation is sufficient.
      */
     automatic_base_number_detection base_number_detection = automatic_base_number_detection::ON;

@@ -351,13 +351,13 @@ class critical_temperature_impl
             temp_values.emplace_back(static_cast<double>(i) / 100.0);
         }
 
-        // This function determines the `Critical Temperature` for a given confidence level.
+        // This function determines the critical temperature for a given confidence level.
         for (const auto& temp : temp_values)
         {
             // If the occupation probability of excited states exceeds the given threshold.
             if (occupation_probability_non_gate_based(distribution, temp) > (1 - parameter.confidence_level))
             {
-                // The current temperature is stored as the Critical Temperature.
+                // The current temperature is stored as the critical temperature.
                 temperature_stats.critical_temperature = temp;
 
                 break;
