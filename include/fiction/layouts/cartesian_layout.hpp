@@ -81,6 +81,15 @@ class cartesian_layout
      * @param s Storage of another cartesian_layout.
      */
     explicit cartesian_layout(std::shared_ptr<cartesian_layout_storage> s) : strg{std::move(s)} {}
+    /**
+     * Clones the layout returning a deep copy.
+     *
+     * @return Deep copy of the layout.
+     */
+    [[nodiscard]] cartesian_layout clone() const noexcept
+    {
+        return cartesian_layout(std::make_shared<cartesian_layout_storage>(*strg));
+    }
 
 #pragma endregion
 
