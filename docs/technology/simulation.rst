@@ -45,3 +45,15 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
     .. tab:: Python
         .. autoclass:: fiction.pyfiction.charge_distribution_surface
             :members:
+
+
+Physical Constants
+------------------
+
+**Header:** ``fiction/technology/physical_constants.hpp``
+
+.. doxygenvariable:: EPSILON
+.. doxygenvariable:: ELEMENTARY_CHARGE
+.. doxygenvariable:: K_E
+.. doxygenvariable:: POP_STABILITY_ERR
+.. doxygenvariable:: PI

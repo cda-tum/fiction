@@ -21,6 +21,10 @@ on:
       - '.github/workflows/coverage.yml'
   merge_group:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 defaults:
   run:
     shell: bash
@@ -44,7 +48,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}}
 
       - name: Clone Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -120,3 +124,4 @@ jobs:
           files: ${{github.workspace}}/lcov_filtered.info
           fail_ci_if_error: true
           verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}

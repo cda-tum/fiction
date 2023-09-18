@@ -21,6 +21,10 @@ on:
       - '.github/workflows/macos.yml'
   merge_group:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 defaults:
   run:
     shell: bash
@@ -56,7 +60,7 @@ jobs:
 
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -99,6 +103,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
+          -DFICTION_BENCHMARK=ON
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_Z3=ON
           -DFICTION_PROGRESS_BARS=OFF

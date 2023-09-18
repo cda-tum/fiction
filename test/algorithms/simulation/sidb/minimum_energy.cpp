@@ -13,6 +13,8 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 
+#include <cmath>
+
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(

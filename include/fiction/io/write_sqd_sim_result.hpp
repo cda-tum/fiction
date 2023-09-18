@@ -193,7 +193,7 @@ class write_sqd_sim_result_impl
 
         // physical parameters
         os << fmt::format(siqad::PHYS_SIM_PARAMS, sim_result.physical_parameters.lambda_tf,
-                          sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu);
+                          sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu_minus);
 
         // additional simulation parameters
         std::for_each(sim_result.additional_simulation_parameters.cbegin(),
@@ -223,7 +223,8 @@ class write_sqd_sim_result_impl
                       {
                           const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(sim_result.physical_parameters, c);
 
-                          os << fmt::format(siqad::DBDOT, nm_x * 10, nm_y * 10);  // convert nm to Angstrom
+                          os << fmt::format(siqad::DBDOT, nm_x * 10,
+                                            nm_y * 10);  // convert nm to Angstrom
                       });
 
         os << siqad::CLOSE_PHYSLOC;

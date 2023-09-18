@@ -6,12 +6,12 @@
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/layouts/bounding_box.hpp>  // computes a minimum-sized box around all non-empty coordinates in a given layout
-#include <fiction/technology/area.hpp>                         // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>            // cell implementations
-#include <fiction/technology/sidb_bestagon_library.hpp>        // a pre-defined SiDB gate library
-#include <fiction/technology/technology_mapping_library.hpp>   // pre-defined gate types for technology mapping
-#include <fiction/traits.hpp>                                  // traits for type-checking
-#include <fiction/types.hpp>                                   // pre-defined types suitable for the FCN domain
+#include <fiction/technology/area.hpp>                        // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>           // cell implementations
+#include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
+#include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
+#include <fiction/traits.hpp>                                 // traits for type-checking
+#include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/genlib.hpp>                                   // Genlib file parsing

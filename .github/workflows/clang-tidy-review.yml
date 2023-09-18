@@ -8,6 +8,10 @@ on:
       - 'libs/**'
       - '.github/workflows/clang-tidy-review.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   clangtidy:
     runs-on: ubuntu-latest
@@ -15,12 +19,12 @@ jobs:
 
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Review code with Clang-Tidy
-        uses: ZedThree/clang-tidy-review@v0.13.1
+        uses: ZedThree/clang-tidy-review@v0.13.4
         id: review
         with:
           cmake_command: >

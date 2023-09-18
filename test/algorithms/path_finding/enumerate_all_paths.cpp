@@ -14,91 +14,142 @@
 
 using namespace fiction;
 
-TEST_CASE("Enumerate all paths on 2x2 clocked layouts", "[enumerate-all-paths]")
+TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
-    using path    = layout_coordinate_path<clk_lyt>;
+    using lyt  = cartesian_layout<offset::ucoord_t>;
+    using path = layout_coordinate_path<lyt>;
 
-    SECTION("2DDWave")
+    SECTION("coordinate paths")
     {
-        const clk_lyt layout{{1, 1}, twoddwave_clocking<clk_lyt>()};
+        const lyt layout{{1, 1}};
 
         SECTION("(0,0) to (1,1)")  // two valid paths
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {{0, 0}, {1, 1}});
+            const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {1, 1}});
 
             CHECK(collection.size() == 2);
             CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1}}}));
             CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}}}));
         }
-        SECTION("(1,1) to (0,0)")  // no valid paths
+        SECTION("(1,1) to (0,0)")  // two valid paths
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {{1, 1}, {0, 0}});
+            const auto collection = enumerate_all_paths<path>(layout, {{1, 1}, {0, 0}});
 
-            CHECK(collection.empty());
-            CHECK(!collection.contains({{{0, 0}, {0, 1}, {1, 1}}}));
-            CHECK(!collection.contains({{{0, 0}, {1, 0}, {1, 1}}}));
+            CHECK(collection.size() == 2);
+            CHECK(collection.contains({{{1, 1}, {0, 1}, {0, 0}}}));
+            CHECK(collection.contains({{{1, 1}, {1, 0}, {0, 0}}}));
         }
         SECTION("(0,0) to (0,0)")  // source and target are identical
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {{0, 0}, {0, 0}});
+            const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {0, 0}});
 
             CHECK(collection.size() == 1);
             CHECK(collection.contains({{{0, 0}}}));
-            CHECK(collection[0].source() == coordinate<clk_lyt>{0, 0});
-            CHECK(collection[0].target() == coordinate<clk_lyt>{0, 0});
+            CHECK(collection[0].source() == coordinate<lyt>{0, 0});
+            CHECK(collection[0].target() == coordinate<lyt>{0, 0});
         }
     }
-    SECTION("USE")
+    SECTION("clocking paths")
     {
-        const clk_lyt layout{{1, 1}, use_clocking<clk_lyt>()};
+        using clk_lyt = clocked_layout<lyt>;
 
-        SECTION("(0,0) to (0,1)")  // one valid path
+        SECTION("2DDWave")
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {{0, 0}, {0, 1}});
+            const clk_lyt layout{{1, 1}, twoddwave_clocking<clk_lyt>()};
 
-            CHECK(collection.size() == 1);
-            CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}));
-            CHECK(collection[0].source() == coordinate<clk_lyt>{0, 0});
-            CHECK(collection[0].target() == coordinate<clk_lyt>{0, 1});
+            SECTION("(0,0) to (1,1)")  // two valid paths
+            {
+                const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {1, 1}});
+
+                CHECK(collection.size() == 2);
+                CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1}}}));
+                CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}}}));
+            }
+            SECTION("(1,1) to (0,0)")  // no valid paths
+            {
+                const auto collection = enumerate_all_paths<path>(layout, {{1, 1}, {0, 0}});
+
+                CHECK(collection.empty());
+                CHECK(!collection.contains({{{0, 0}, {0, 1}, {1, 1}}}));
+                CHECK(!collection.contains({{{0, 0}, {1, 0}, {1, 1}}}));
+            }
+            SECTION("(0,0) to (0,0)")  // source and target are identical
+            {
+                const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {0, 0}});
+
+                CHECK(collection.size() == 1);
+                CHECK(collection.contains({{{0, 0}}}));
+                CHECK(collection[0].source() == coordinate<clk_lyt>{0, 0});
+                CHECK(collection[0].target() == coordinate<clk_lyt>{0, 0});
+            }
         }
-        SECTION("(0,0) to (0,0)")  // source and target are identical
+        SECTION("USE")
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {{0, 0}, {0, 0}});
+            const clk_lyt layout{{1, 1}, use_clocking<clk_lyt>()};
 
-            CHECK(collection.size() == 1);
-            CHECK(collection.contains({{{0, 0}}}));
-            CHECK(collection[0].source() == coordinate<clk_lyt>{0, 0});
-            CHECK(collection[0].target() == coordinate<clk_lyt>{0, 0});
+            SECTION("(0,0) to (0,1)")  // one valid path
+            {
+                const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {0, 1}});
+
+                CHECK(collection.size() == 1);
+                CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}));
+                CHECK(collection[0].source() == coordinate<clk_lyt>{0, 0});
+                CHECK(collection[0].target() == coordinate<clk_lyt>{0, 1});
+            }
+            SECTION("(0,0) to (0,0)")  // source and target are identical
+            {
+                const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {0, 0}});
+
+                CHECK(collection.size() == 1);
+                CHECK(collection.contains({{{0, 0}}}));
+                CHECK(collection[0].source() == coordinate<clk_lyt>{0, 0});
+                CHECK(collection[0].target() == coordinate<clk_lyt>{0, 0});
+            }
         }
     }
 }
 
-TEST_CASE("Enumerate all paths on 4x4 clocked layouts", "[enumerate-all-paths]")
+TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
-    using path    = layout_coordinate_path<clk_lyt>;
+    using lyt  = cartesian_layout<offset::ucoord_t>;
+    using path = layout_coordinate_path<lyt>;
 
-    SECTION("2DDWave")
+    SECTION("coordinate paths")
     {
-        const clk_lyt layout{{3, 3}, twoddwave_clocking<clk_lyt>()};
+        const lyt layout{{3, 3}};
 
-        SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
+        SECTION("(0,0) to (3,3) without obstruction")  // 184 valid paths
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {{0, 0}, {3, 3}});
+            const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {3, 3}});
 
-            CHECK(collection.size() == 20);
+            CHECK(collection.size() == 184);
         }
     }
-    SECTION("USE")
+    SECTION("clocking paths")
     {
-        const clk_lyt layout{{3, 3}, use_clocking<clk_lyt>()};
+        using clk_lyt = clocked_layout<lyt>;
 
-        SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
+        SECTION("2DDWave")
         {
-            const auto collection = enumerate_all_clocking_paths<path>(layout, {{0, 0}, {3, 3}});
+            const clk_lyt layout{{3, 3}, twoddwave_clocking<clk_lyt>()};
 
-            CHECK(collection.size() == 4);
+            SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
+            {
+                const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {3, 3}});
+
+                CHECK(collection.size() == 20);
+            }
+        }
+        SECTION("USE")
+        {
+            const clk_lyt layout{{3, 3}, use_clocking<clk_lyt>()};
+
+            SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
+            {
+                const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {3, 3}});
+
+                CHECK(collection.size() == 4);
+            }
         }
     }
 }
@@ -108,36 +159,55 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
     using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     using path     = layout_coordinate_path<gate_lyt>;
 
-    SECTION("2DDWave")
+    SECTION("coordinate paths")
     {
-        const gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
+        const gate_lyt layout{{3, 3}};
 
-        SECTION("(0,0) to (3,3) with coordinate obstruction")  // 19 valid paths
+        SECTION("(0,0) to (3,3) with coordinate obstruction")  // 108 valid paths
         {
-            obstruction_layout obstr_lyt{layout};
+            obstruction_layout obstr_lyt{static_cast<cartesian_layout<>>(layout)};
 
-            // create a PI as obstruction
-            obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 1 path
+            // mark coordinate as obstructed
+            obstr_lyt.obstruct_coordinate({3, 0});  // blocks 75 paths
 
-            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+            const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
 
-            CHECK(collection.size() == 19);
+            CHECK(collection.size() == 108);
         }
     }
-    SECTION("USE")
+    SECTION("clocking paths")
     {
-        const gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
-
-        SECTION("(0,0) to (3,3) with coordinate obstruction")  // 1 valid path
+        SECTION("2DDWave")
         {
-            obstruction_layout obstr_lyt{layout};
+            const gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
 
-            // create a PI as obstruction
-            obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
+            SECTION("(0,0) to (3,3) with coordinate obstruction")  // 19 valid paths
+            {
+                obstruction_layout obstr_lyt{layout};
 
-            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+                // create a PI as obstruction
+                obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 1 path
 
-            CHECK(collection.size() == 1);
+                const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+
+                CHECK(collection.size() == 19);
+            }
+        }
+        SECTION("USE")
+        {
+            const gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
+
+            SECTION("(0,0) to (3,3) with coordinate obstruction")  // 1 valid path
+            {
+                obstruction_layout obstr_lyt{layout};
+
+                // create a PI as obstruction
+                obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
+
+                const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+
+                CHECK(collection.size() == 1);
+            }
         }
     }
 }
@@ -148,7 +218,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
     using path     = layout_coordinate_path<gate_lyt>;
 
     // enable crossings
-    const enumerate_all_clocking_paths_params params{true};
+    const enumerate_all_paths_params params{true};
 
     SECTION("Single crossing")
     {
@@ -158,7 +228,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
             {
                 const gate_lyt layout{{2, 2, 1}, twoddwave_clocking<gate_lyt>()};  // create a crossing layer
 
-                SECTION("(0,0) to (2,2) with obstruction and crossings")           // 1 valid path
+                SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
                     obstruction_layout obstr_lyt{layout};
 
@@ -167,7 +237,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto w  = obstr_lyt.create_buf(pi, {1, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w, "obstruction PO", {1, 2});  // obstructs 1 coordinate
 
-                    const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {2, 2}}, params);
+                    const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {2, 2}}, params);
 
                     CHECK(collection.size() == 1);
                     CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1}, {2, 2}}}));
@@ -177,7 +247,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
             {
                 const gate_lyt layout{{2, 2, 1}, use_clocking<gate_lyt>()};  // create a crossing layer
 
-                SECTION("(0,0) to (2,2) with obstruction and crossings")     // 1 valid path
+                SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
                     obstruction_layout obstr_lyt{layout};
 
@@ -186,7 +256,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto w  = obstr_lyt.create_buf(pi, {1, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w, "obstruction PO", {0, 1});  // obstructs 1 coordinate
 
-                    const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {2, 2}}, params);
+                    const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {2, 2}}, params);
 
                     CHECK(collection.size() == 1);
                     CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1, 1}, {1, 2}, {2, 2}}}));
@@ -202,7 +272,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
             {
                 const gate_lyt layout{{3, 3, 1}, twoddwave_clocking<gate_lyt>()};  // create a crossing layer
 
-                SECTION("(0,0) to (3,3) with obstruction and crossings")           // 2 valid paths
+                SECTION("(0,0) to (3,3) with obstruction and crossings")  // 2 valid paths
                 {
                     obstruction_layout obstr_lyt{layout};
 
@@ -217,7 +287,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto w22 = obstr_lyt.create_buf(w21, {2, 2});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w22, "obstruction PO", {2, 3});  // obstructs 1 coordinate
 
-                    const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {3, 3}}, params);
+                    const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}}, params);
 
                     CHECK(collection.size() == 2);
                     CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {3, 1}, {3, 2}, {3, 3}}}));
@@ -234,7 +304,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
             {
                 const gate_lyt layout{{3, 2, 1}, twoddwave_clocking<gate_lyt>()};  // create a crossing layer
 
-                SECTION("(0,0) to (3,2) with obstruction and crossings")           // 1 valid paths
+                SECTION("(0,0) to (3,2) with obstruction and crossings")  // 1 valid paths
                 {
                     obstruction_layout obstr_lyt{layout};
 
@@ -247,7 +317,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto w2  = obstr_lyt.create_buf(pi2, {2, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w2, "obstruction PO", {3, 1});   // obstructs 1 coordinate
 
-                    const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {3, 2}}, params);
+                    const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 2}}, params);
 
                     CHECK(collection.size() == 1);
                     CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {2, 2}, {3, 2}}}));
@@ -262,36 +332,55 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
     using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     using path     = layout_coordinate_path<gate_lyt>;
 
-    SECTION("2DDWave")
+    SECTION("coordinate paths")
     {
-        const gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
+        const gate_lyt layout{{3, 3}};
 
-        SECTION("(0,0) to (3,3) with connection obstruction")  // 19 valid paths
+        SECTION("(0,0) to (3,3) with connection obstruction")  // 108 valid paths
         {
-            obstruction_layout obstr_lyt{layout};
+            obstruction_layout obstr_lyt{static_cast<cartesian_layout<>>(layout)};
 
             // create a connection obstruction
-            obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 1 path
+            obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 75 paths
 
-            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+            const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
 
-            CHECK(collection.size() == 19);
+            CHECK(collection.size() == 108);
         }
     }
-    SECTION("USE")
+    SECTION("clocking paths")
     {
-        const gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
-
-        SECTION("(0,0) to (3,3) with connection obstruction")  // 1 valid path
+        SECTION("2DDWave")
         {
-            obstruction_layout obstr_lyt{layout};
+            const gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
 
-            // create a PI as obstruction
-            obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
+            SECTION("(0,0) to (3,3) with connection obstruction")  // 19 valid paths
+            {
+                obstruction_layout obstr_lyt{layout};
 
-            const auto collection = enumerate_all_clocking_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+                // create a connection obstruction
+                obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 1 path
 
-            CHECK(collection.size() == 1);
+                const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+
+                CHECK(collection.size() == 19);
+            }
+        }
+        SECTION("USE")
+        {
+            const gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
+
+            SECTION("(0,0) to (3,3) with connection obstruction")  // 1 valid path
+            {
+                obstruction_layout obstr_lyt{layout};
+
+                // create a PI as obstruction
+                obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
+
+                const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+
+                CHECK(collection.size() == 1);
+            }
         }
     }
 }

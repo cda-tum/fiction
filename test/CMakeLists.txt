@@ -1,6 +1,14 @@
+# Benchmarking (depends on Catch2)
+option(FICTION_BENCHMARK "Build fiction benchmarks, which can evaluate the performance of certain code fragments" OFF)
+if (FICTION_BENCHMARK)
+    message(STATUS "Building fiction benchmarks")
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/benchmark)
+endif ()
+
 include_directories(.)
 
 file(GLOB_RECURSE FILENAMES */*.cpp)
+list(FILTER FILENAMES EXCLUDE REGEX "benchmark/.*$")
 
 foreach (FILE IN LISTS FILENAMES)
     get_filename_component(NAME ${FILE} NAME_WE)
