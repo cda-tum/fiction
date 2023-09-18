@@ -440,16 +440,16 @@ class critical_temperature_impl
                 fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, quickexact_params);
         }
-        else if (parameter.engine == critical_temperature_params<TT>::simulation_engine::APPROXIMATE)
+        if (parameter.engine == critical_temperature_params<TT>::simulation_engine::APPROXIMATE)
         {
             // perform a heuristic simulation
             const quicksim_params qs_params{parameter.simulation_params.phys_params, 500, 0.6};
             return quicksim(*bdl_iterator, qs_params);
         }
-        else
-        {
-            assert(false && "unsupported simulation engine");
-        }
+
+        assert(false && "unsupported simulation engine");
+
+        return sidb_simulation_result<Lyt>{};
     }
 };
 

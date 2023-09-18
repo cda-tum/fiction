@@ -132,12 +132,11 @@ Random SiDB Layout Generator
 Operational Domain Computation
 ##############################
 
-**Header:** ``fiction/algorithms/simulation/sidb/is_sp_operational.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
 
-.. doxygenenum:: fiction::operational_status
 .. doxygenstruct:: fiction::is_operational_params
    :members:
-.. doxygenfunction:: fiction::is_sp_operational
+.. doxygenfunction:: fiction::is_operational
 
 **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 
@@ -159,13 +158,12 @@ Utility Functions
 #################
 
 
-Binary-dot Logic (BDL)
-Pair Detection ^ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Binary-dot Logic (BDL) Pair Detection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-                                                    **Header : ** ``fiction /
-                     algorithms / simulation / sidb /
-                     detect_bdl_pairs
-                         .hpp``
+**Header : ** ``fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp``
 
-                         ..doxygenstruct::fiction::bdl_pair : members
-        :..doxygenstruct::fiction::detect_bdl_pairs_params : members :..doxygenfunction::fiction::detect_bdl_pairs
+.. doxygenstruct:: fiction::bdl_pair : members
+.. doxygenstruct:: fiction::detect_bdl_pairs_params
+   :members:
+.. doxygenfunction:: fiction::detect_bdl_pairs

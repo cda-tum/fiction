@@ -223,23 +223,22 @@ class is_operational_impl
             // perform an exhaustive ground state simulation
             return exhaustive_ground_state_simulation(*bdl_iterator, parameter.simulation_parameter);
         }
-        else if (parameter.sim_engine == sidb_simulation_engine::QUICKSIM)
+        if (parameter.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
             // perform a heuristic simulation
             const quicksim_params qs_params{parameter.simulation_parameter, 500, 0.6};
             return quicksim(*bdl_iterator, qs_params);
         }
-        else if (parameter.sim_engine == sidb_simulation_engine::QUICKEXACT)
+        if (parameter.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
             // perform exact simulation
             const quickexact_params<Lyt> quickexact_params{
                 parameter.simulation_parameter, fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, quickexact_params);
         }
-        else
-        {
-            assert(false && "unsupported simulation engine");
-        }
+
+        assert(false && "unsupported simulation engine");
+
         return sidb_simulation_result<Lyt>{};
     }
     /**

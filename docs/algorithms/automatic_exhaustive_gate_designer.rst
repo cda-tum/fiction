@@ -1,7 +1,7 @@
 Automatic Exhaustive Gate Designer
 ----------------------------------
 
-**Header:** ``fiction/algorithms/simulation/sidb/automatic_exhaustive_gate_generator.hpp``
+**Header:** ``fiction/algorithms/physical_design/automatic_exhaustive_gate_designer.hpp``
 
 .. doxygenstruct:: fiction::automatic_exhaustive_gate_designer_params
     :members:
