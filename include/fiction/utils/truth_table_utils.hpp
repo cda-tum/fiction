@@ -128,9 +128,13 @@ namespace fiction
     return table;
 }
 /**
- * Creates and returns a vector of truth tables that implements an identity a multi-output function in two variables.
+ * Creates and returns a vector of truth tables for a double wire multi-output function.
  *
- * @return Vector of truth tables. Each one represents an output.
+ * This function generates a vector of truth tables, each representing one of the outputs
+ * of a double wire multi-output function in two variables. The function returns a vector containing
+ * two truth tables.
+ *
+ * @return Vector of truth tables, each representing an output of the double wire function.
  */
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_double_wire_tt() noexcept
 {
@@ -146,9 +150,13 @@ namespace fiction
     return std::vector<kitty::dynamic_truth_table>{table1, table2};
 }
 /**
- * Creates and returns a vector of truth tables that implements an identity a multi-output function in two variables.
+ * Creates and returns a vector of truth tables for a crossing wire multi-output function.
  *
- * @return Vector of truth tables. Each one represents an output.
+ * This function generates a vector of truth tables, each representing one of the outputs
+ * of a crossing wire multi-output function in two variables. The function returns a vector containing
+ * two truth tables.
+ *
+ * @return Vector of truth tables, each representing an output of the crossing wire function.
  */
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_crossing_wire_tt() noexcept
 {
@@ -164,9 +172,12 @@ namespace fiction
     return std::vector<kitty::dynamic_truth_table>{table1, table2};
 }
 /**
- * Creates and returns a vector of truth tables that implements an identity a multi-output function in two variables.
+ * Creates and returns a vector of truth tables for a multi-output function with two variables.
  *
- * @return Vector of truth tables. Each one represents an output.
+ * This function generates a vector of truth tables, each representing one of the outputs
+ * of a multi-output function in two variables.
+ *
+ * @return Vector of truth tables, each representing an output of the identity function.
  */
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_fan_out_tt() noexcept
 {
@@ -179,9 +190,13 @@ namespace fiction
     return std::vector<kitty::dynamic_truth_table>{table, table};
 }
 /**
- * Creates and returns a vector of truth tables that implements an identity a multi-output function in two variables.
+ * Creates and returns a vector of truth tables for a half adder multi-output function.
  *
- * @return Vector of truth tables. Each one represents an output.
+ * This function generates a vector of truth tables, each representing one of the outputs
+ * of a half adder multi-output function in two variables. The function returns a vector containing
+ * two truth tables.
+ *
+ * @return Vector of truth tables, each representing an output of the half adder function.
  */
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_half_adder_tt() noexcept
 {
