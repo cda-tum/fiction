@@ -44,7 +44,6 @@ namespace fiction
 
 /**
  * This struct stores the parameters for the `critical_temperature` algorithm.
- * @tparam TT The type of the truth table specifying the gate behavior.
  */
 template <typename TT>
 struct critical_temperature_params

@@ -35,7 +35,6 @@ namespace fiction
  * This struct contains parameters and settings used by the *Automatic Exhaustive
  * Gate Designer*. It is used to configure the simulation and design of SiDB gates.
  *
- * @tparam TT The type of the truth table specifying the gate behavior.
  */
 template <typename TT>
 struct automatic_exhaustive_gate_designer_params

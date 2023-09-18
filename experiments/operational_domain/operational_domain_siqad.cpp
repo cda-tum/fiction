@@ -56,10 +56,11 @@ int main()  // NOLINT
 
     static const std::string folder = fmt::format("{}siqad_gates_type_tags/", EXPERIMENTS_PATH);
 
-    static const std::array<std::pair<std::string, kitty::dynamic_truth_table>, 5> gates = {
-        std::make_pair("and", create_and_tt()), std::make_pair("nand", create_nand_tt()),
-        std::make_pair("xnor", create_xnor_tt()), std::make_pair("xor", create_xor_tt()),
-        std::make_pair("or", create_or_tt())};
+    static const std::array<std::pair<std::string, std::vector<kitty::dynamic_truth_table>>, 5> gates = {
+        std::make_pair("and", std::vector<tt>{create_and_tt()}),
+        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
+        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
+        std::make_pair("xor", std::vector<tt>{create_xor_tt()}), std::make_pair("or", std::vector<tt>{create_or_tt()})};
 
     // total number of samples
     static std::size_t total_samples_gs = 0;
