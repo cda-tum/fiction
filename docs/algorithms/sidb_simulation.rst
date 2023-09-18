@@ -128,25 +128,15 @@ Random SiDB Layout Generator
 .. doxygenfunction:: fiction::generate_multiple_random_sidb_layouts
 
 
-Automatic Exhaustive Gate Designer
-##################################
-
-**Header:** ``fiction/algorithms/simulation/sidb/automatic_exhaustive_gate_generator.hpp``
-
-.. doxygenstruct:: fiction::automatic_exhaustive_gate_designer_params
-    :members:
-.. doxygenfunction:: fiction::automatic_exhaustive_gate_designer
-
-
 Operational Domain Computation
 ##############################
 
-**Header:** ``fiction/algorithms/simulation/sidb/is_gate_layout_operational.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/is_sp_operational.hpp``
 
 .. doxygenenum:: fiction::operational_status
-.. doxygenstruct:: fiction::is_gate_layout_operational_params
+.. doxygenstruct:: fiction::is_operational_params
    :members:
-.. doxygenfunction:: fiction::is_gate_layout_operational
+.. doxygenfunction:: fiction::is_sp_operational
 
 **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 
@@ -168,13 +158,13 @@ Utility Functions
 #################
 
 
-Binary-dot Logic (BDL) Pair Detection
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Binary-dot Logic (BDL)
+Pair Detection ^ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp``
+                                                    **Header : ** ``fiction /
+                     algorithms / simulation / sidb /
+                     detect_bdl_pairs
+                         .hpp``
 
-.. doxygenstruct:: fiction::bdl_pair
-   :members:
-.. doxygenstruct:: fiction::detect_bdl_pairs_params
-   :members:
-.. doxygenfunction:: fiction::detect_bdl_pairs
+                         ..doxygenstruct::fiction::bdl_pair : members
+        :..doxygenstruct::fiction::detect_bdl_pairs_params : members :..doxygenfunction::fiction::detect_bdl_pairs

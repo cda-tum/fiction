@@ -358,7 +358,7 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
  * Generates a random coordinate within the region spanned by two given coordinates. The two given coordinates form the
  * top left corner and the bottom right corner of the spanned region.
  *
- * @tparam The coordinate implementation to be used.
+ * @tparam CoordinateType The coordinate implementation to be used.
  * @param coordinate1 Top left Coordinate.
  * @param coordinate2 Bottom right Coordinate (coordinate order is not important, automatically swapped if
  * necessary).
@@ -408,14 +408,15 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
  * @param cell_se The southeast SiQAD cell defining the ending point of the area.
  * @return A vector containing all cells within the specified area.
  */
-inline std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_t& cell_nw,
-                                                             const siqad::coord_t& cell_se) noexcept
+[[nodiscard]] inline std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_t& cell_nw,
+                                                                           const siqad::coord_t& cell_se) noexcept
 {
+    const auto c1_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_nw);
+    const auto c2_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_se);
+    const auto total_cell_count = static_cast<uint64_t>(std::abs(c1_cube.x - c2_cube.x) + 1) *
+                                  static_cast<uint64_t>(std::abs(c1_cube.y - c2_cube.y) + 1);
+
     std::vector<siqad::coord_t> all_cells{};
-    const auto                  c1_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_nw);
-    const auto                  c2_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_se);
-    const uint64_t              total_cell_count = static_cast<uint64_t>(std::abs(c1_cube.x - c2_cube.x) + 1) *
-                                      static_cast<uint64_t>(std::abs(c1_cube.y - c2_cube.y) + 1);
     all_cells.reserve(total_cell_count);
 
     auto current_cell = cell_nw;

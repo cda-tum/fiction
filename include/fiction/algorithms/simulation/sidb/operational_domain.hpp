@@ -10,7 +10,7 @@
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
-#include "fiction/algorithms/simulation/sidb/is_cell_level_layout_operational.hpp"
+#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
@@ -153,7 +153,7 @@ struct operational_domain
      * domain. The key of the map is the parameter point, which holds the parameter values in the x and y dimension.
      * The operational status is stored as the value of the map.
      */
-    locked_parallel_flat_hash_map<parameter_point, operational_status> operational_values{};
+    locked_parallel_flat_hash_map<parameter_point, is_operational_params::operational_status> operational_values{};
 };
 
 /**
@@ -254,7 +254,7 @@ class operational_domain_impl
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
-    operational_domain_impl(const Lyt& lyt, const TT& tt, const operational_domain_params& ps,
+    operational_domain_impl(const Lyt& lyt, const std::vector<TT>& tt, const operational_domain_params& ps,
                             operational_domain_stats& st) noexcept :
             layout{lyt},
             truth_table{tt},
@@ -266,8 +266,6 @@ class operational_domain_impl
             x_values(num_x_steps()),   // pre-allocate the x dimension values
             y_values(num_y_steps())    // pre-allocate the y dimension values
     {
-        // assert(output_bdl_pairs.size() == 1 && "The layout must have exactly one output BDL pair");
-
         op_domain.x_dimension = params.x_dimension;
         op_domain.y_dimension = params.y_dimension;
 
@@ -309,7 +307,7 @@ class operational_domain_impl
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
                                         [this, x](const auto y) {
-                                            is_operational({x, y});
+                                            is_sp_operational({x, y});
                                         });
                       });
 
@@ -332,7 +330,7 @@ class operational_domain_impl
 
         // for each sample point in parallel
         std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ step_point_samples.cbegin(), step_point_samples.cend(),
-                      [this](const auto& sp) { is_operational(sp); });
+                      [this](const auto& sp) { is_sp_operational(sp); });
 
         log_stats();
 
@@ -356,7 +354,7 @@ class operational_domain_impl
 
         // for each sample point in parallel
         std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ step_point_samples.cbegin(), step_point_samples.cend(),
-                      [this](const auto& sp) { is_operational(sp); });
+                      [this](const auto& sp) { is_sp_operational(sp); });
 
         // a queue of (x, y) dimension step points to be evaluated
         std::queue<step_point> queue{};
@@ -376,7 +374,7 @@ class operational_domain_impl
         // add the neighbors of each operational point to the queue
         for (const auto& [param_point, status] : op_domain.operational_values)
         {
-            if (status == operational_status::OPERATIONAL)
+            if (status == is_operational_params::operational_status::OPERATIONAL)
             {
                 queue_next_points(to_step_point(param_point));
             }
@@ -396,10 +394,10 @@ class operational_domain_impl
             }
 
             // check if the point is operational
-            const auto operational_status = is_operational(sp);
+            const auto operational_status = is_sp_operational(sp);
 
             // if the point is operational, add its eight neighbors to the queue
-            if (operational_status == operational_status::OPERATIONAL)
+            if (operational_status == is_operational_params::operational_status::OPERATIONAL)
             {
                 queue_next_points(sp);
             }
@@ -462,9 +460,9 @@ class operational_domain_impl
 
         while (next_point != contour_starting_point)
         {
-            const auto operational_status = is_operational(next_point);
+            const auto operational_status = is_sp_operational(next_point);
 
-            if (operational_status == operational_status::OPERATIONAL)
+            if (operational_status == is_operational_params::operational_status::OPERATIONAL)
             {
                 backtrack_point       = current_contour_point;
                 current_contour_point = next_point;
@@ -491,7 +489,7 @@ class operational_domain_impl
     /**
      * The specification of the layout.
      */
-    const TT& truth_table;  // TODO implement the matching of multi-input truth table inputs and BDL pair ordering
+    const std::vector<TT>& truth_table;
     /**
      * The parameters for the operational domain computation.
      */
@@ -698,7 +696,8 @@ class operational_domain_impl
      * @return The operational status of the point at step position `sp = (x, y)` or `std::nullopt` if `(x, y)` has not
      * been sampled yet.
      */
-    [[nodiscard]] inline std::optional<operational_status> has_already_been_sampled(const step_point& sp) const noexcept
+    [[nodiscard]] inline std::optional<is_operational_params::operational_status>
+    has_already_been_sampled(const step_point& sp) const noexcept
     {
         if (const auto it = op_domain.operational_values.find(to_parameter_point(sp));
             it != op_domain.operational_values.cend())
@@ -720,7 +719,7 @@ class operational_domain_impl
      * @param sp Step point to be investigated.
      * @return The operational status of the layout under the given simulation parameters.
      */
-    operational_status is_operational(const step_point& sp) noexcept
+    is_operational_params::operational_status is_sp_operational(const step_point& sp) noexcept
     {
         // if the point has already been sampled, return the stored operational status
         if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
@@ -733,16 +732,16 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]()
         {
-            op_domain.operational_values[param_point] = operational_status::OPERATIONAL;
+            op_domain.operational_values[param_point] = is_operational_params::operational_status::OPERATIONAL;
 
-            return operational_status::OPERATIONAL;
+            return is_operational_params::operational_status::OPERATIONAL;
         };
 
         const auto non_operational = [this, &param_point]()
         {
-            op_domain.operational_values[param_point] = operational_status::NON_OPERATIONAL;
+            op_domain.operational_values[param_point] = is_operational_params::operational_status::NON_OPERATIONAL;
 
-            return operational_status::NON_OPERATIONAL;
+            return is_operational_params::operational_status::NON_OPERATIONAL;
         };
 
         // increment the number of evaluated parameter combinations
@@ -752,11 +751,11 @@ class operational_domain_impl
         set_x_dimension_value(sim_params, param_point.x);
         set_y_dimension_value(sim_params, param_point.y);
 
-        const auto& [operation_status, number_of_simulations] = is_gate_layout_operational(
-            layout, truth_table, is_gate_layout_operational_params{sim_params, params.sim_engine});
+        const auto& [operation_status, number_of_simulations] =
+            is_operational(layout, truth_table, is_operational_params{sim_params, params.sim_engine});
         num_simulator_invocations += number_of_simulations;
 
-        if (operation_status == operational_status::NON_OPERATIONAL)
+        if (operation_status == is_operational_params::operational_status::NON_OPERATIONAL)
         {
             return non_operational();
         }
@@ -808,10 +807,10 @@ class operational_domain_impl
         for (const auto& sample_step_point : generate_random_step_points(samples))
         {
             // determine the operational status
-            const auto operational_value = is_operational(sample_step_point);
+            const auto operational_value = is_sp_operational(sample_step_point);
 
             // if the parameter combination is operational, return its step values in x and y dimension
-            if (operational_value == operational_status::OPERATIONAL)
+            if (operational_value == is_operational_params::operational_status::OPERATIONAL)
             {
                 return sample_step_point;
             }
@@ -838,9 +837,9 @@ class operational_domain_impl
         {
             const auto left_step = step_point{x, starting_point.y};
 
-            const auto operational_status = is_operational(left_step);
+            const auto operational_status = is_sp_operational(left_step);
 
-            if (operational_status == operational_status::OPERATIONAL)
+            if (operational_status == is_operational_params::operational_status::OPERATIONAL)
             {
                 latest_operational_point = left_step;
             }
@@ -932,7 +931,7 @@ class operational_domain_impl
 
         for (const auto& [param_point, status] : op_domain.operational_values)
         {
-            if (status == operational_status::OPERATIONAL)
+            if (status == is_operational_params::operational_status::OPERATIONAL)
             {
                 ++stats.num_operational_parameter_combinations;
             }
@@ -962,13 +961,14 @@ class operational_domain_impl
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
- * @param spec Expected truth table of the layout.
+ * @param spec Expected vector of truth tables of the layout. Each truth table represents an output of
+ * the Boolean function.
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_grid_search(const Lyt& lyt, const TT& spec,
+operational_domain operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
                                                   const operational_domain_params& params = {},
                                                   operational_domain_stats*        stats  = nullptr)
 {
@@ -1004,14 +1004,16 @@ operational_domain operational_domain_grid_search(const Lyt& lyt, const TT& spec
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
- * @param spec Expected truth table of the layout.
+ * @param spec Expected vector of truth tables of the layout. Each truth table represents an output of
+ * the Boolean function.
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_random_sampling(const Lyt& lyt, const TT& spec, const std::size_t samples,
+operational_domain operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec,
+                                                      const std::size_t                samples,
                                                       const operational_domain_params& params = {},
                                                       operational_domain_stats*        stats  = nullptr)
 {
@@ -1053,14 +1055,15 @@ operational_domain operational_domain_random_sampling(const Lyt& lyt, const TT& 
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
- * @param spec Expected truth table of the layout.
+ * @param spec Expected vector of truth tables of the layout. Each truth table represents an output of
+ * the Boolean function.
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_flood_fill(const Lyt& lyt, const TT& spec, const std::size_t samples,
+operational_domain operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
                                                  const operational_domain_params& params = {},
                                                  operational_domain_stats*        stats  = nullptr)
 {
@@ -1104,14 +1107,16 @@ operational_domain operational_domain_flood_fill(const Lyt& lyt, const TT& spec,
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
- * @param spec Expected truth table of the layout.
+ * @param spec Expected vector of truth tables of the layout. Each truth table represents an output of
+ * the Boolean function.
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_contour_tracing(const Lyt& lyt, const TT& spec, const std::size_t samples,
+operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec,
+                                                      const std::size_t                samples,
                                                       const operational_domain_params& params = {},
                                                       operational_domain_stats*        stats  = nullptr)
 {

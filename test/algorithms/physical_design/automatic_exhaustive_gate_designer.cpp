@@ -4,11 +4,12 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/automatic_exhaustive_gate_designer.hpp>
+#include <fiction/algorithms/physical_design/automatic_exhaustive_gate_designer.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
 using namespace fiction;
@@ -41,11 +42,11 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate", "[automatic_ex
 
     CHECK(lyt.num_cells() == 13);
 
-    const automatic_exhaustive_gate_designer_params params{sidb_simulation_parameters{2, -0.32},
-                                                           {{10, 4, 0}, {10, 5, 1}},
-                                                           create_xnor_tt(),
-                                                           1,
-                                                           sidb_simulation_engine::QUICKEXACT};
+    const automatic_exhaustive_gate_designer_params<tt> params{sidb_simulation_parameters{2, -0.32},
+                                                               {{10, 4, 0}, {10, 5, 1}},
+                                                               {create_xnor_tt()},
+                                                               1,
+                                                               sidb_simulation_engine::QUICKEXACT};
 
     const auto found_gate_layouts = automatic_exhaustive_gate_designer(lyt, params);
     REQUIRE(found_gate_layouts.size() == 1);
@@ -77,11 +78,11 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gate imple
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const automatic_exhaustive_gate_designer_params params{sidb_simulation_parameters{2, -0.28},
-                                                           {{4, 4, 0}, {14, 5, 1}},
-                                                           create_and_tt(),
-                                                           1,
-                                                           sidb_simulation_engine::EXGS};
+    const automatic_exhaustive_gate_designer_params<tt> params{sidb_simulation_parameters{2, -0.28},
+                                                               {{4, 4, 0}, {14, 5, 1}},
+                                                               {create_and_tt()},
+                                                               1,
+                                                               sidb_simulation_engine::EXGS};
 
     const auto found_gate_layouts = automatic_exhaustive_gate_designer(lyt, params);
     CHECK(!found_gate_layouts.empty());
@@ -127,11 +128,11 @@ TEST_CASE("Use fo2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
     CHECK(lyt.get_cell_type({17, 11, 0}) == layout::technology::EMPTY);
 
     // generate gate by placing one SiDB
-    const automatic_exhaustive_gate_designer_params params{sidb_simulation_parameters{2, -0.32},
-                                                           {{17, 11, 0}, {17, 11, 0}},
-                                                           create_fan_out_tt(),
-                                                           1,
-                                                           sidb_simulation_engine::QUICKEXACT};
+    const automatic_exhaustive_gate_designer_params<tt> params{sidb_simulation_parameters{2, -0.32},
+                                                               {{17, 11, 0}, {17, 11, 0}},
+                                                               create_fan_out_tt(),
+                                                               1,
+                                                               sidb_simulation_engine::QUICKEXACT};
 
     const auto found_gate_layouts = automatic_exhaustive_gate_designer(lyt, params);
     REQUIRE(found_gate_layouts.size() == 1);

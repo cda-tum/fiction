@@ -5,13 +5,12 @@
 #ifndef FICTION_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER_HPP
 #define FICTION_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER_HPP
 
-#include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
-#include "fiction/algorithms/simulation/sidb/is_cell_level_layout_operational.hpp"
+#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
@@ -21,8 +20,10 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
-#include <iostream>
+#include <cstdlib>
+#include <future>
 #include <numeric>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -33,7 +34,10 @@ namespace fiction
 /**
  * This struct contains parameters and settings used by the *Automatic Exhaustive
  * Gate Designer*. It is used to configure the simulation and design of SiDB gates.
+ *
+ * @tparam TT The type of the truth table specifying the gate behavior.
  */
+template <typename TT>
 struct automatic_exhaustive_gate_designer_params
 {
     /**
@@ -47,7 +51,7 @@ struct automatic_exhaustive_gate_designer_params
     /**
      * Truth table of the given gate (if layout is simulated in `gate-based` mode).
      */
-    tt truth_table{};
+    std::vector<TT> truth_table{};
     /**
      * Number of SiDBs placed in the canvas to create a working gate.
      */
@@ -55,12 +59,12 @@ struct automatic_exhaustive_gate_designer_params
     /**
      * The simulation engine to be used for the operational domain computation.
      */
-    sidb_simulation_engine sim_engine{sidb_simulation_engine::EXGS};
+    sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
 };
 
 namespace detail
 {
-template <typename Lyt>
+template <typename Lyt, typename TT>
 class automatic_exhaustive_gate_designer_impl
 {
   public:
@@ -71,45 +75,61 @@ class automatic_exhaustive_gate_designer_impl
      * @param skeleton The skeleton layout used as a basis for gate design.
      * @param params   Parameters and settings for the gate designer.
      */
-    automatic_exhaustive_gate_designer_impl(const Lyt& skeleton, automatic_exhaustive_gate_designer_params params) :
+    automatic_exhaustive_gate_designer_impl(const Lyt& skeleton, automatic_exhaustive_gate_designer_params<TT> params) :
             skeleton_layout{skeleton},
             parameter{std::move(params)}
-    {
-        initialize();
-    }
-
+    {}
     /**
-     * Run the exhaustive designing process of gate layouts.
+     * Run the exhaustive gate layout design process in parallel.
      *
-     * It adds each cell combination to the given skeleton, checks if positive charges can occur
-     * in the layout, and determines if the layout is operationally valid based on specified parameters.
+     * This function adds each cell combination to the given skeleton, and determines whether the layout is operational
+     * based on the specified parameters. The design process is parallelized to improve performance.
+     *
+     * @return A vector of found SiDB gate layouts that meet the operational criteria.
      */
     std::vector<Lyt> run()
     {
-        const is_gate_layout_operational_params params_is_operational{parameter.phys_params, parameter.sim_engine};
-        determine_all_combinations_of_given_sidbs_in_canvas();
+        const is_operational_params params_is_operational{parameter.phys_params, parameter.sim_engine};
+        all_sidbs_in_cavas          = all_sidbs_in_spanned_area(parameter.canvas.first, parameter.canvas.second);
+        const auto all_combinations = determine_all_combinations_of_given_sidbs_in_canvas();
+
+        std::vector<Lyt> all_found_gate_layouts = {};
+        all_found_gate_layouts.reserve(all_combinations.size());
+
+        std::mutex mutex_to_protect_shared_resource;  // Mutex for protecting shared resources
 
         const auto add_combination_to_layout_and_check_operation =
-            [this, &params_is_operational](const auto& combination) noexcept
+            [this, &mutex_to_protect_shared_resource, &params_is_operational,
+             &all_found_gate_layouts](const auto& combination) noexcept
         {
-            if (!are_sidbs_to_close(combination))
+            if (!are_sidbs_too_close(combination))
             {
                 auto layout_with_added_cells = add_cells_to_layout_based_on_indices(combination);
-                if (!can_positive_charges_occur(layout_with_added_cells, parameter.phys_params))
+
+                if (is_operational(layout_with_added_cells, parameter.truth_table, params_is_operational).first ==
+                    is_operational_params::operational_status::OPERATIONAL)
                 {
-                    if (is_gate_layout_operational(layout_with_added_cells, parameter.truth_table,
-                                                   params_is_operational)
-                            .first == operational_status::OPERATIONAL)
-                    {
-                        all_found_gate_layouts.push_back(layout_with_added_cells);
-                    }
+                    const std::lock_guard lock_vector(mutex_to_protect_shared_resource);  // Lock the mutex
+                    all_found_gate_layouts.push_back(layout_with_added_cells);
                 }
             }
         };
 
-        // Apply the add_combination_to_layout_and_check_operation function to each combination using std::for_each
-        std::for_each(FICTION_EXECUTION_POLICY_PAR all_combinations.cbegin(), all_combinations.cend(),
-                      add_combination_to_layout_and_check_operation);
+        std::vector<std::future<void>> futures;
+        futures.reserve(all_combinations.size());
+
+        // Start asynchronous tasks to process combinations in parallel
+        for (const auto& combination : all_combinations)
+        {
+            futures.emplace_back(
+                std::async(std::launch::async, add_combination_to_layout_and_check_operation, combination));
+        }
+
+        // Wait for all tasks to finish
+        for (auto& future : futures)
+        {
+            future.wait();
+        }
 
         return all_found_gate_layouts;
     }
@@ -123,60 +143,30 @@ class automatic_exhaustive_gate_designer_impl
     /**
      * Parameters for the *Automatic Exhaustive Gate Designer*.
      */
-    automatic_exhaustive_gate_designer_params parameter;
+    automatic_exhaustive_gate_designer_params<TT> parameter;
     /**
      * All cells within the canvas.
      */
     std::vector<siqad::coord_t> all_sidbs_in_cavas{};
-    /**
-     * Stores various combinations of SiDB indices, representing the cell positions
-     * within the canvas. These combinations are used to distribute a specified number of SiDBs
-     * across the canvas (all possible distributions are covered), typically from top to bottom and left to right.
-     */
-    std::vector<std::vector<std::size_t>> all_combinations{};
-    /**
-     * Number of canvas cells.
-     */
-    std::size_t number_of_canvas_cells{};
-    /**
-     * All found SiDB cell-level layouts that fulfill the given truth table.
-     */
-    std::vector<Lyt> all_found_gate_layouts{};
-
-    /**
-     * Initialize the *Automatic Exhaustive Gate Designer*.
-     *
-     * This function initializes various internal data structures and parameters required for
-     * the automatic exhaustive gate designer. It calculates the set of SiDBs within the specified
-     * canvas area, determines the total number of canvas cells, and prepares containers for
-     * storing combinations and found layouts.
-     */
-    void initialize() noexcept
-    {
-        all_sidbs_in_cavas     = all_sidbs_in_spanned_area(parameter.canvas.first, parameter.canvas.second);
-        number_of_canvas_cells = all_sidbs_in_cavas.size();
-    }
-
     /**
      * Calculates all possible combinations of distributing the given number of SiDBs within a canvas
      * based on the provided parameters. It generates combinations of SiDB indices (representing the cell position in
      * the canvas from top to bottom and left to right) and stores them in the `all_combinations` vector. The number of
      * SiDBs in each combination is determined by `parameter.number_of_sidbs`.
      *
-     * @note The function uses a combinatorial algorithm to generate the combinations.
-     *
+     * @return All possible combinations as a vector of vectors of indices.
      */
-    void determine_all_combinations_of_given_sidbs_in_canvas()
+    [[nodiscard]] std::vector<std::vector<std::size_t>> determine_all_combinations_of_given_sidbs_in_canvas() noexcept
     {
-        all_combinations = {};
-        all_combinations.reserve(binomial_coefficient(number_of_canvas_cells, parameter.number_of_sidbs));
-        std::vector<std::size_t> numbers(number_of_canvas_cells);
+        std::vector<std::vector<std::size_t>> all_combinations{};
+        all_combinations.reserve(binomial_coefficient(all_sidbs_in_cavas.size(), parameter.number_of_sidbs));
+        std::vector<std::size_t> numbers(all_sidbs_in_cavas.size());
         std::iota(numbers.begin(), numbers.end(), 0);
         combinations::for_each_combination(
             numbers.begin(),
             numbers.begin() + static_cast<std::vector<std::size_t>::difference_type>(parameter.number_of_sidbs),
             numbers.end(),
-            [this](const auto begin, const auto end)
+            [this, &all_combinations](const auto begin, const auto end)
             {
                 std::vector<std::size_t> combination{};
                 combination.reserve(parameter.number_of_sidbs);
@@ -187,9 +177,20 @@ class automatic_exhaustive_gate_designer_impl
                 all_combinations.push_back(combination);
                 return false;  // keep looping
             });
+        return all_combinations;
     }
-
-    [[maybe_unused]] bool are_sidbs_to_close(const std::vector<std::size_t>& cell_indices) noexcept
+    /**
+     * Checks if any SiDBs within the specified cell indices
+     * are located too closely together, with a distance of less than 0.5 nanometers.
+     *
+     * This function iterates through the provided cell indices and compares the distance
+     * between SiDBs. If it finds any pair of SiDBs within a distance of 0.5 nanometers,
+     * it returns true to indicate that SiDBs are too close; otherwise, it returns false.
+     *
+     * @param cell_indices A vector of cell indices to check for SiDB proximity.
+     * @return `true` if any SiDBs are too close; otherwise, `false`.
+     */
+    [[maybe_unused]] bool are_sidbs_too_close(const std::vector<std::size_t>& cell_indices) noexcept
     {
         for (std::size_t i = 0; i < cell_indices.size(); i++)
         {
@@ -216,7 +217,7 @@ class automatic_exhaustive_gate_designer_impl
      * @param cell_indices A vector containing indices of cells in the layout to be added or modified.
      * @return A copy of the original layout (`skeleton_layout`) with SiDB cells added at specified indices.
      */
-    Lyt add_cells_to_layout_based_on_indices(const std::vector<std::size_t>& cell_indices)
+    [[nodiscard]] Lyt add_cells_to_layout_based_on_indices(const std::vector<std::size_t>& cell_indices)
     {
         Lyt lyt_copy{skeleton_layout.clone()};
 
@@ -239,7 +240,7 @@ class automatic_exhaustive_gate_designer_impl
  * function, a skeleton structure, canvas size, and a predetermined number of canvas SiDBs.
  *
  * It is composed of three steps:
- * 1. In the initial step, all possible distributions of ``number_of_sidbs`` SiDBs within a given canvas are
+ * 1. In the initial step, all possible distributions of `number_of_sidbs` SiDBs within a given canvas are
  * exhaustively determined. This ensures exhaustive coverage of every potential arrangement of ``number_of_sidbs`` SiDBs
  * across the canvas.
  * 2. The calculated SiDB distributions are then incorporated into the skeleton, resulting in the generation of distinct
@@ -248,22 +249,25 @@ class automatic_exhaustive_gate_designer_impl
  * given Boolean function are used to verify if the logic is fulfilled.
  *
  * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT The type of the truth table specifying the gate behavior.
  * @param skeleton The skeleton layout used as a starting point for gate design.
  * @param params Parameters for the *Automatic Exhaustive Gate Designer*.
  * @return A vector of SiDB layouts that fulfill the given Boolean function (truth table).
  */
-template <typename Lyt>
-std::vector<Lyt> automatic_exhaustive_gate_designer(const Lyt&                                       skeleton,
-                                                    const automatic_exhaustive_gate_designer_params& params = {})
+template <typename Lyt, typename TT>
+[[nodiscard]] std::vector<Lyt>
+automatic_exhaustive_gate_designer(const Lyt&                                           skeleton,
+                                   const automatic_exhaustive_gate_designer_params<TT>& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     assert(skeleton.num_pis() > 0 && "skeleton needs input cells");
     assert(skeleton.num_pos() > 0 && "skeleton needs output cells");
 
-    detail::automatic_exhaustive_gate_designer_impl<Lyt> p{skeleton, params};
+    detail::automatic_exhaustive_gate_designer_impl<Lyt, TT> p{skeleton, params};
 
     return p.run();
 }

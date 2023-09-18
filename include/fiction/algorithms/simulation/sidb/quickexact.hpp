@@ -556,7 +556,7 @@ class quickexact_impl
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to simulate.
  * @param params Parameter required for the simulation.
- * @return sidb_simulation_result is returned with all results.
+ * @return Simulation Results.
  */
 template <typename Lyt>
 [[nodiscard]] sidb_simulation_result<Lyt> quickexact(const Lyt& lyt, const quickexact_params<Lyt>& params = {}) noexcept

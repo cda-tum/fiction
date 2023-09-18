@@ -20,7 +20,7 @@ namespace fiction
  *
  * @return Identity function in one variable.
  */
-inline kitty::dynamic_truth_table create_id_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_id_tt() noexcept
 {
     constexpr const uint64_t lit = 0x2;
 
@@ -34,7 +34,7 @@ inline kitty::dynamic_truth_table create_id_tt() noexcept
  *
  * @return Negation in one variable.
  */
-inline kitty::dynamic_truth_table create_not_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_not_tt() noexcept
 {
     constexpr const uint64_t lit = 0x1;
 
@@ -48,7 +48,7 @@ inline kitty::dynamic_truth_table create_not_tt() noexcept
  *
  * @return Conjunction in two variables.
  */
-inline kitty::dynamic_truth_table create_and_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_and_tt() noexcept
 {
     constexpr const uint64_t lit = 0x8;
 
@@ -62,7 +62,7 @@ inline kitty::dynamic_truth_table create_and_tt() noexcept
  *
  * @return Disjunction in two variables.
  */
-inline kitty::dynamic_truth_table create_or_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_or_tt() noexcept
 {
     constexpr const uint64_t lit = 0xe;
 
@@ -76,7 +76,7 @@ inline kitty::dynamic_truth_table create_or_tt() noexcept
  *
  * @return Negated conjunction in two variables.
  */
-inline kitty::dynamic_truth_table create_nand_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_nand_tt() noexcept
 {
     constexpr const uint64_t lit = 0x7;
 
@@ -90,7 +90,7 @@ inline kitty::dynamic_truth_table create_nand_tt() noexcept
  *
  * @return Negated disjunction in two variables.
  */
-inline kitty::dynamic_truth_table create_nor_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_nor_tt() noexcept
 {
     constexpr const uint64_t lit = 0x1;
 
@@ -104,7 +104,7 @@ inline kitty::dynamic_truth_table create_nor_tt() noexcept
  *
  * @return Exclusive disjunction in two variables.
  */
-inline kitty::dynamic_truth_table create_xor_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_xor_tt() noexcept
 {
     constexpr const uint64_t lit = 0x6;
 
@@ -118,7 +118,7 @@ inline kitty::dynamic_truth_table create_xor_tt() noexcept
  *
  * @return Negated exclusive disjunction in two variables.
  */
-inline kitty::dynamic_truth_table create_xnor_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_xnor_tt() noexcept
 {
     constexpr const uint64_t lit = 0x9;
 
@@ -128,60 +128,73 @@ inline kitty::dynamic_truth_table create_xnor_tt() noexcept
     return table;
 }
 /**
- * Creates and returns a truth table that implements an identity function in two variables.
+ * Creates and returns a vector of truth tables that implements an identity a multi-output function in two variables.
  *
- * @return identity function in two variables.
+ * @return Vector of truth tables. Each one represents an output.
  */
-inline kitty::dynamic_truth_table create_double_wire_tt() noexcept
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_double_wire_tt() noexcept
 {
-    static constexpr const char* truth_table_string = "11100100";
+    static constexpr const char* truth_table_string1 = "1100";  // Output 1
+    static constexpr const char* truth_table_string2 = "1010";  // Output 2
 
-    kitty::dynamic_truth_table table{3};
-    kitty::create_from_binary_string(table, truth_table_string);
+    kitty::dynamic_truth_table table1{2};  // 2 input variables for Output 1
+    kitty::dynamic_truth_table table2{2};  // 2 input variables for Output 2
 
-    return table;
+    kitty::create_from_binary_string(table1, truth_table_string1);
+    kitty::create_from_binary_string(table2, truth_table_string2);
+
+    return std::vector<kitty::dynamic_truth_table>{table1, table2};
 }
 /**
- * Creates and returns a truth table that implements a crossing in two variables.
+ * Creates and returns a vector of truth tables that implements an identity a multi-output function in two variables.
  *
- * @return crossing in two variables.
+ * @return Vector of truth tables. Each one represents an output.
  */
-inline kitty::dynamic_truth_table create_crossing_wire_tt() noexcept
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_crossing_wire_tt() noexcept
 {
-    static constexpr const char* truth_table_string = "11011000";
+    static constexpr const char* truth_table_string1 = "1010";  // Output 1
+    static constexpr const char* truth_table_string2 = "1100";  // Output 2
 
-    kitty::dynamic_truth_table table{3};
-    kitty::create_from_binary_string(table, truth_table_string);
+    kitty::dynamic_truth_table table1{2};  // 2 input variables for Output 1
+    kitty::dynamic_truth_table table2{2};  // 2 input variables for Output 2
 
-    return table;
+    kitty::create_from_binary_string(table1, truth_table_string1);
+    kitty::create_from_binary_string(table2, truth_table_string2);
+
+    return std::vector<kitty::dynamic_truth_table>{table1, table2};
 }
 /**
- * Creates and returns a truth table that implements a fan-out in one variable.
+ * Creates and returns a vector of truth tables that implements an identity a multi-output function in two variables.
  *
- * @return fan-out in one variable.
+ * @return Vector of truth tables. Each one represents an output.
  */
-inline kitty::dynamic_truth_table create_fan_out_tt() noexcept
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_fan_out_tt() noexcept
 {
-    static constexpr const char* truth_table_string = "1100";
+    static constexpr const char* truth_table_string = "10";  // Output 1
 
-    kitty::dynamic_truth_table table{2};
+    kitty::dynamic_truth_table table{1};
+
     kitty::create_from_binary_string(table, truth_table_string);
 
-    return table;
+    return std::vector<kitty::dynamic_truth_table>{table, table};
 }
 /**
- * Creates and returns a truth table that implements a half-adder in two variables.
+ * Creates and returns a vector of truth tables that implements an identity a multi-output function in two variables.
  *
- * @return half-adder in two variables.
+ * @return Vector of truth tables. Each one represents an output.
  */
-inline kitty::dynamic_truth_table create_half_adder_tt() noexcept
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_half_adder_tt() noexcept
 {
-    static constexpr const char* truth_table_string = "01101000";
+    static constexpr const char* truth_table_string1 = "1000";  // Output 1
+    static constexpr const char* truth_table_string2 = "0110";  // Output 2
 
-    kitty::dynamic_truth_table table{3};
-    kitty::create_from_binary_string(table, truth_table_string);
+    kitty::dynamic_truth_table table1{2};  // 2 input variables for Output 1
+    kitty::dynamic_truth_table table2{2};  // 2 input variables for Output 2
 
-    return table;
+    kitty::create_from_binary_string(table1, truth_table_string1);
+    kitty::create_from_binary_string(table2, truth_table_string2);
+
+    return std::vector<kitty::dynamic_truth_table>{table1, table2};
 }
 
 /**
@@ -189,7 +202,7 @@ inline kitty::dynamic_truth_table create_half_adder_tt() noexcept
  *
  * @return Majority function in three variables.
  */
-inline kitty::dynamic_truth_table create_maj_tt() noexcept
+[[nodiscard]] inline kitty::dynamic_truth_table create_maj_tt() noexcept
 {
     constexpr const uint64_t lit = 0xe8;
 

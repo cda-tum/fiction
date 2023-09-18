@@ -4,15 +4,14 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/is_cell_level_layout_operational.hpp>
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
 using namespace fiction;
 
-TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[bdl-input-iterator]")
+TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is_operational]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -35,15 +34,15 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[bdl-input
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    CHECK(is_gate_layout_operational(lyt, create_and_tt(),
-                                     is_gate_layout_operational_params{sidb_simulation_parameters{2, -0.28}})
-              .first == operational_status::OPERATIONAL);
-    CHECK(is_gate_layout_operational(lyt, create_and_tt(),
-                                     is_gate_layout_operational_params{sidb_simulation_parameters{2, -0.1}})
-              .first == operational_status::NON_OPERATIONAL);
+    CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
+                         is_operational_params{sidb_simulation_parameters{2, -0.28}})
+              .first == is_operational_params::operational_status::OPERATIONAL);
+    CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
+                         is_operational_params{sidb_simulation_parameters{2, -0.1}})
+              .first == is_operational_params::operational_status::NON_OPERATIONAL);
 }
 
-TEST_CASE("Bestagon fo2 gate", "[bdl-input-iterator]")
+TEST_CASE("Bestagon FO2 gate", "[is_operational]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -77,17 +76,17 @@ TEST_CASE("Bestagon fo2 gate", "[bdl-input-iterator]")
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    CHECK(is_gate_layout_operational(lyt, create_fan_out_tt(),
-                                     is_gate_layout_operational_params{sidb_simulation_parameters{2, -0.32},
-                                                                       sidb_simulation_engine::QUICKEXACT})
-              .first == operational_status::OPERATIONAL);
-    CHECK(is_gate_layout_operational(lyt, create_fan_out_tt(),
-                                     is_gate_layout_operational_params{sidb_simulation_parameters{2, -0.30},
-                                                                       sidb_simulation_engine::QUICKEXACT})
-              .first == operational_status::NON_OPERATIONAL);
+    CHECK(
+        is_operational(lyt, std::vector<tt>{create_fan_out_tt()},
+                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+            .first == is_operational_params::operational_status::OPERATIONAL);
+    CHECK(
+        is_operational(lyt, std::vector<tt>{create_fan_out_tt()},
+                       is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+            .first == is_operational_params::operational_status::NON_OPERATIONAL);
 }
 
-TEST_CASE("Bestagon CROSSING gate", "[bdl-input-iterator]")
+TEST_CASE("Bestagon CROSSING gate", "[is_operational]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -135,17 +134,17 @@ TEST_CASE("Bestagon CROSSING gate", "[bdl-input-iterator]")
 
     CHECK(lyt.num_cells() == 29);
 
-    CHECK(is_gate_layout_operational(lyt, create_crossing_wire_tt(),
-                                     is_gate_layout_operational_params{sidb_simulation_parameters{2, -0.32},
-                                                                       sidb_simulation_engine::QUICKEXACT})
-              .first == operational_status::OPERATIONAL);
-    CHECK(is_gate_layout_operational(lyt, create_crossing_wire_tt(),
-                                     is_gate_layout_operational_params{sidb_simulation_parameters{2, -0.30},
-                                                                       sidb_simulation_engine::QUICKEXACT})
-              .first == operational_status::NON_OPERATIONAL);
+    CHECK(
+        is_operational(lyt, create_crossing_wire_tt(),
+                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+            .first == is_operational_params::operational_status::OPERATIONAL);
+    CHECK(
+        is_operational(lyt, create_crossing_wire_tt(),
+                       is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+            .first == is_operational_params::operational_status::NON_OPERATIONAL);
 }
 
-TEST_CASE("Bestagon AND gate", "[bdl-input-iterator]")
+TEST_CASE("Bestagon AND gate", "[is_operational]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -182,17 +181,17 @@ TEST_CASE("Bestagon AND gate", "[bdl-input-iterator]")
 
     CHECK(lyt.num_cells() == 23);
 
-    CHECK(is_gate_layout_operational(lyt, create_and_tt(),
-                                     is_gate_layout_operational_params{sidb_simulation_parameters{2, -0.32},
-                                                                       sidb_simulation_engine::QUICKEXACT})
-              .first == operational_status::OPERATIONAL);
-    CHECK(is_gate_layout_operational(lyt, create_and_tt(),
-                                     is_gate_layout_operational_params{sidb_simulation_parameters{2, -0.30},
-                                                                       sidb_simulation_engine::QUICKEXACT})
-              .first == operational_status::NON_OPERATIONAL);
+    CHECK(
+        is_operational(lyt, std::vector<tt>{create_and_tt()},
+                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+            .first == is_operational_params::operational_status::OPERATIONAL);
+    CHECK(
+        is_operational(lyt, std::vector<tt>{create_and_tt()},
+                       is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+            .first == is_operational_params::operational_status::NON_OPERATIONAL);
 }
 
-TEST_CASE("Not working diagonal Wire", "[bdl-input-iterator]")
+TEST_CASE("Not working diagonal Wire", "[is_operational]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -217,8 +216,8 @@ TEST_CASE("Not working diagonal Wire", "[bdl-input-iterator]")
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    CHECK(is_gate_layout_operational(lyt, create_id_tt(),
-                                     is_gate_layout_operational_params{sidb_simulation_parameters{2, -0.32},
-                                                                       sidb_simulation_engine::QUICKEXACT})
-              .first == operational_status::NON_OPERATIONAL);
+    CHECK(
+        is_operational(lyt, std::vector<tt>{create_id_tt()},
+                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+            .first == is_operational_params::operational_status::NON_OPERATIONAL);
 }
