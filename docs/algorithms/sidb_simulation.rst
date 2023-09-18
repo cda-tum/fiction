@@ -161,9 +161,10 @@ Utility Functions
 Binary-dot Logic (BDL) Pair Detection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Header : ** ``fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp``
 
-.. doxygenstruct:: fiction::bdl_pair : members
+.. doxygenstruct:: fiction::bdl_pair
+   :members:
 .. doxygenstruct:: fiction::detect_bdl_pairs_params
    :members:
 .. doxygenfunction:: fiction::detect_bdl_pairs
