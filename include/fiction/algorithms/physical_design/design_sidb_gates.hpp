@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 11.09.23.
 //
 
-#ifndef FICTION_DESIGN_GATES_EXHAUSTIVELY_HPP
-#define FICTION_DESIGN_GATES_EXHAUSTIVELY_HPP
+#ifndef FICTION_DESIGN_SIDB_GATES_HPP
+#define FICTION_DESIGN_SIDB_GATES_HPP
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
@@ -36,7 +36,7 @@ namespace fiction
  * Gate Designer*. It is used to configure the simulation and design of SiDB gates.
  *
  */
-struct design_gates_exhaustively_params
+struct design_sidb_gates
 {
     /**
      * All Parameters for physical SiDB simulations.
@@ -59,7 +59,7 @@ struct design_gates_exhaustively_params
 namespace detail
 {
 template <typename Lyt, typename TT>
-class design_gate_exhaustively_impl
+class design_sidb_gates_impl
 {
   public:
     /**
@@ -70,8 +70,7 @@ class design_gate_exhaustively_impl
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param params   Parameters and settings for the gate designer.
      */
-    design_gate_exhaustively_impl(const Lyt& skeleton, const std::vector<TT>& tt,
-                                  design_gates_exhaustively_params params) :
+    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& tt, design_sidb_gates params) :
             skeleton_layout{skeleton},
             truth_table{tt},
             parameter{std::move(params)}
@@ -90,13 +89,13 @@ class design_gate_exhaustively_impl
         all_sidbs_in_cavas          = all_sidbs_in_spanned_area(parameter.canvas.first, parameter.canvas.second);
         const auto all_combinations = determine_all_combinations_of_given_sidbs_in_canvas();
 
-        std::vector<Lyt> all_found_gate_layouts = {};
+        std::vector<Lyt> designed_gate_layouts = {};
 
-        std::mutex mutex_to_protect_found_gate_layouts;  // Mutex for protecting shared resources
+        std::mutex mutex_to_protect_designer_gate_layouts;  // Mutex for protecting shared resources
 
         const auto add_combination_to_layout_and_check_operation =
-            [this, &mutex_to_protect_found_gate_layouts, &params_is_operational,
-             &all_found_gate_layouts](const auto& combination) noexcept
+            [this, &mutex_to_protect_designer_gate_layouts, &params_is_operational,
+             &designed_gate_layouts](const auto& combination) noexcept
         {
             if (!are_sidbs_too_close(combination))
             {
@@ -105,8 +104,8 @@ class design_gate_exhaustively_impl
                 if (is_operational(layout_with_added_cells, truth_table, params_is_operational).first ==
                     operational_status::OPERATIONAL)
                 {
-                    const std::lock_guard lock_vector(mutex_to_protect_found_gate_layouts);  // Lock the mutex
-                    all_found_gate_layouts.push_back(layout_with_added_cells);
+                    const std::lock_guard lock_vector(mutex_to_protect_designer_gate_layouts);  // Lock the mutex
+                    designed_gate_layouts.push_back(layout_with_added_cells);
                 }
             }
         };
@@ -127,7 +126,7 @@ class design_gate_exhaustively_impl
             future.wait();
         }
 
-        return all_found_gate_layouts;
+        return designed_gate_layouts;
     }
 
   private:
@@ -137,13 +136,13 @@ class design_gate_exhaustively_impl
      */
     Lyt skeleton_layout;
     /**
-     * Truth table of the given gate (if layout is simulated in `gate-based` mode).
+     * Truth table of the given gate.
      */
     std::vector<TT> truth_table{};
     /**
      * Parameters for the *Automatic Exhaustive Gate Designer*.
      */
-    design_gates_exhaustively_params parameter;
+    design_sidb_gates parameter;
     /**
      * All cells within the canvas.
      */
@@ -256,8 +255,8 @@ class design_gate_exhaustively_impl
  * @return A vector of SiDB layouts that fulfill the given Boolean function (truth table).
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::vector<Lyt> design_gates_exhaustively(const Lyt& skeleton, const std::vector<TT>& spec,
-                                                         const design_gates_exhaustively_params& params = {})
+[[nodiscard]] std::vector<Lyt> design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec,
+                                                 const design_sidb_gates& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -267,11 +266,16 @@ template <typename Lyt, typename TT>
     assert(skeleton.num_pis() > 0 && "skeleton needs input cells");
     assert(skeleton.num_pos() > 0 && "skeleton needs output cells");
 
-    detail::design_gate_exhaustively_impl<Lyt, TT> p{skeleton, spec, params};
+    assert(!spec.empty());
+    // all elements in tts must have the same number of variables
+    assert(std::adjacent_find(spec.begin(), spec.end(),
+                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+
+    detail::design_sidb_gates_impl<Lyt, TT> p{skeleton, spec, params};
 
     return p.run();
 }
 
 }  // namespace fiction
 
-#endif  // FICTION_DESIGN_GATES_EXHAUSTIVELY_HPP
+#endif  // FICTION_DESIGN_SIDB_GATES_HPP

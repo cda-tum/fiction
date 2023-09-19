@@ -275,6 +275,11 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     assert(lyt.num_pis() > 0 && "skeleton needs input cells");
     assert(lyt.num_pos() > 0 && "skeleton needs output cells");
 
+    assert(!spec.empty());
+    // all elements in tts must have the same number of variables
+    assert(std::adjacent_find(spec.begin(), spec.end(),
+                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
     return {p.run(), p.get_number_of_simulator_invocations()};

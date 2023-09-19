@@ -86,7 +86,8 @@ Temperature Behavior
 
 .. doxygenstruct:: fiction::critical_temperature_params
    :members:
-.. doxygenfunction:: fiction::critical_temperature
+.. doxygenfunction:: fiction::critical_temperature_gate_based
+.. doxygenfunction:: fiction::critical_temperature_non_gate_based
 
 **Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_excited_states.hpp``
 
