@@ -28,7 +28,6 @@ TEMPLATE_TEST_CASE(
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_column_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_column_hex>>>))
 {
-
     SECTION("empty layout")
     {
         TestType lyt{{10, 10}};
@@ -207,7 +206,7 @@ TEMPLATE_TEST_CASE(
         CHECK(criticalstats.critical_temperature > 0);
     }
 
-    SECTION("Bestagon fo2 gate")
+    SECTION("Bestagon FO2 gate")
     {
         TestType lyt{};
 
@@ -249,7 +248,7 @@ TEMPLATE_TEST_CASE(
         CHECK_THAT(std::abs(criticalstats.critical_temperature - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
     }
 
-    SECTION("Bestagon cx gate")
+    SECTION("Bestagon CX gate")
     {
         TestType lyt{};
 
