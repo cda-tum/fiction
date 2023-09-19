@@ -70,3 +70,7 @@ class TestExactHexagonalPhysicalDesign(unittest.TestCase):
         layout = exact_hexagonal(network, statistics=stats)
 
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
+
+
+if __name__ == '__main__':
+    unittest.main()

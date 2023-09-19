@@ -42,3 +42,7 @@ class TestApplyGateLibrary(unittest.TestCase):
         layout = exact_shifted_cartesian(network, params)
 
         cell_layout = apply_topolinano_library(layout)
+
+
+if __name__ == '__main__':
+    unittest.main()

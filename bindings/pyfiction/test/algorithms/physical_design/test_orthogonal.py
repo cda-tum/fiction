@@ -29,3 +29,7 @@ class TestOrthogonalPhysicalDesign(unittest.TestCase):
         layout = orthogonal(network, statistics=stats)
 
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
+
+
+if __name__ == '__main__':
+    unittest.main()

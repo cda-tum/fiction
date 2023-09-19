@@ -123,5 +123,6 @@ class TestQCACellLevelLayout(unittest.TestCase):
         self.assertFalse(layout.is_empty_cell((3, 2)))
         self.assertFalse(layout.is_empty_cell((4, 2)))
 
-    if __name__ == '__main__':
-        unittest.main()
+
+if __name__ == '__main__':
+    unittest.main()

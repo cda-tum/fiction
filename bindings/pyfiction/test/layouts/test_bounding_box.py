@@ -12,7 +12,8 @@ class TestBoundingBox(unittest.TestCase):
                        shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
                        hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"),
                        cartesian_obstruction_layout(cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-                       shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+                       shifted_cartesian_obstruction_layout(
+                           shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
                        hexagonal_obstruction_layout(hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"))]:
             min_coord, max_coord = layout.bounding_box_2d()
             self.assertEqual(min_coord, layout.coord(0, 0))
@@ -95,3 +96,7 @@ class TestBoundingBox(unittest.TestCase):
             self.assertEqual(max_coord, layout.coord(0, 0))
             self.assertEqual(max_coord.x - min_coord.x, 0)
             self.assertEqual(max_coord.y - min_coord.y, 0)
+
+
+if __name__ == '__main__':
+    unittest.main()
