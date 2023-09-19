@@ -1873,38 +1873,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         strg->cell_history = {};
         strg->cell_history.reserve(this->num_cells());
 
-        // If the charge index is set to zero, first, all SiDBs that are not among the "positive candidates" (sub
-        // layout) are updated.
-        if (strg->charge_index_and_base.first == 0)
-        {
-            for (const auto& cell : strg->sidb_order_without_three_state_cells)
-            {
-                if (this->get_charge_state(cell) != sidb_charge_state::NEGATIVE && cell != strg->dependent_cell)
-                {
-                    strg->cell_history.emplace_back(cell_to_index(cell), charge_state_to_sign(get_charge_state(cell)));
-                    this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, false);
-                }
-            }
-        }
-        // If the charge index of the sublayout is zero, the charge states are updated.
-        if (strg->charge_index_sublayout == 0)
-        {
-            for (const auto& cell : strg->three_state_cells)
-            {
-                if (this->get_charge_state(cell) != sidb_charge_state::NEGATIVE && cell != strg->dependent_cell)
-                {
-                    strg->cell_history.emplace_back(cell_to_index(cell), charge_state_to_sign(get_charge_state(cell)));
-                    this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, false);
-                }
-            }
-        }
-
         auto       charge_quot_positive = strg->charge_index_sublayout;
         const auto base_positive        = 3;
         auto       counter              = strg->three_state_cells.size() - 1;
         // Firstly, the charge distribution of the sublayout (i.e., collection of SiDBs that can be positively
         // charged) is updated.
-
         while (charge_quot_positive > 0)
         {
             const auto    charge_quot_int = static_cast<int64_t>(charge_quot_positive);
@@ -1934,7 +1907,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         // Secondly, the charge distribution of the layout (only SiDBs which can be either neutrally or negatively
         // charged) is updated.
-
         while (charge_quot > 0)
         {
             const auto    charge_quot_int = static_cast<int64_t>(charge_quot);
@@ -1980,10 +1952,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
         }
     }
-
     /**
      *  The stored unique index is converted to a charge distribution.
-     *
      */
     void index_to_charge_distribution() noexcept
     {
