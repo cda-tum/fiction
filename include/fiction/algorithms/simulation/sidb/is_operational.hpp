@@ -44,6 +44,9 @@ enum class operational_status
      */
     NON_OPERATIONAL
 };
+/**
+ * Parameters for the `is_operational` algorithm.
+ */
 struct is_operational_params
 {
     /**
@@ -187,7 +190,7 @@ class is_operational_impl
     /**
      * SiDB cell-level layout.
      */
-    const Lyt& layout{};
+    const Lyt& layout;
     /**
      * The specification of the layout.
      */
@@ -196,19 +199,19 @@ class is_operational_impl
     /**
      * Parameters for the `is_operational` algorithm.
      */
-    is_operational_params parameters{};
+    is_operational_params parameters;
+    /**
+     * Output BDL pairs.
+     */
+    std::vector<bdl_pair<Lyt>> output_bdl_pairs;
+    /**
+     * Iterator that iterates over all possible input states.
+     */
+    bdl_input_iterator<Lyt> bii;
     /**
      * Number of simulator invocations.
      */
     std::size_t simulator_invocations{0};
-    /**
-     * Output BDL pairs.
-     */
-    std::vector<bdl_pair<Lyt>> output_bdl_pairs{};
-    /**
-     * Iterator that iterates over all possible input states.
-     */
-    bdl_input_iterator<Lyt> bii{};
     /**
      * This function conducts physical simulation of the given layout (gate layout with certain input combination). The
      * simulation results are stored in the `sim_result` variable.
@@ -249,19 +252,19 @@ class is_operational_impl
 }  // namespace detail
 
 /**
- * Check the Operational Status of an SiDB gate layout.
+ * Determine the operational status of an SiDB layout.
  *
- * This function checks the operational status of a given gate layout using the
- * `is_operational` algorithm. It determines whether the gate layout
- * is operational and returns the correct result for all \f$ 2^n \f$ input combinations.
+ * This function checks the operational status of a given gate layout using the `is_operational` algorithm. It
+ * determines whether the gate layout is operational and returns the correct result for all \f$ 2^n \f$ input
+ * combinations.
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT The type of the truth table specifying the gate behavior.
+ * @tparam TT The type of the truth table specifying the layout behavior.
  * @param lyt The SiDB cell-level layout to be checked.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param parameter Parameters for the `is_operational` algorithm.
- * @return A pair containing the operational status of the gate layout
- *         (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of input combinations tested.
+ * @param params Parameters for the `is_operational` algorithm.
+ * @return A pair containing the operational status of the gate layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
+ * the number of input combinations tested.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::pair<operational_status, std::size_t>

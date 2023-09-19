@@ -68,8 +68,8 @@ class design_sidb_gates_impl
      * implementation with the provided skeleton layout and configuration parameters.
      *
      * @param skeleton The skeleton layout used as a basis for gate design.
-     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
-     * @param params   Parameters and settings for the gate designer.
+     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
+     * @param ps Parameters and settings for the gate designer.
      */
     design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& tt, const design_sidb_gates_params& ps) :
             skeleton_layout{skeleton},
@@ -103,8 +103,9 @@ class design_sidb_gates_impl
             {
                 auto layout_with_added_cells = add_cells_to_layout_based_on_indices(combination);
 
-                if (is_operational(layout_with_added_cells, truth_table, params_is_operational).first ==
-                    operational_status::OPERATIONAL)
+                if (const auto [status, sim_calls] =
+                        is_operational(layout_with_added_cells, truth_table, params_is_operational);
+                    status == operational_status::OPERATIONAL)
                 {
                     const std::lock_guard lock_vector{mutex_to_protect_designer_gate_layouts};  // Lock the mutex
                     designed_gate_layouts.push_back(layout_with_added_cells);

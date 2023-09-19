@@ -750,11 +750,11 @@ class operational_domain_impl
         set_x_dimension_value(sim_params, param_point.x);
         set_y_dimension_value(sim_params, param_point.y);
 
-        const auto& [operation_status, number_of_simulations] =
+        const auto& [status, sim_calls] =
             is_operational(layout, truth_table, is_operational_params{sim_params, params.sim_engine});
-        num_simulator_invocations += number_of_simulations;
+        num_simulator_invocations += sim_calls;
 
-        if (operation_status == operational_status::NON_OPERATIONAL)
+        if (status == operational_status::NON_OPERATIONAL)
         {
             return non_operational();
         }
