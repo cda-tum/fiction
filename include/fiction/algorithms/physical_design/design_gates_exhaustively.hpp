@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 11.09.23.
 //
 
-#ifndef FICTION_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER_HPP
-#define FICTION_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER_HPP
+#ifndef FICTION_DESIGN_GATES_EXHAUSTIVELY_HPP
+#define FICTION_DESIGN_GATES_EXHAUSTIVELY_HPP
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
@@ -36,7 +36,7 @@ namespace fiction
  * Gate Designer*. It is used to configure the simulation and design of SiDB gates.
  *
  */
-struct automatic_exhaustive_gate_designer_params
+struct design_gates_exhaustively_params
 {
     /**
      * All Parameters for physical SiDB simulations.
@@ -59,7 +59,7 @@ struct automatic_exhaustive_gate_designer_params
 namespace detail
 {
 template <typename Lyt, typename TT>
-class automatic_exhaustive_gate_designer_impl
+class design_gate_exhaustively_impl
 {
   public:
     /**
@@ -70,11 +70,11 @@ class automatic_exhaustive_gate_designer_impl
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param params   Parameters and settings for the gate designer.
      */
-    automatic_exhaustive_gate_designer_impl(const Lyt& skeleton, const std::vector<TT>& tt,
-                                            const automatic_exhaustive_gate_designer_params& params) :
+    design_gate_exhaustively_impl(const Lyt& skeleton, const std::vector<TT>& tt,
+                                  design_gates_exhaustively_params params) :
             skeleton_layout{skeleton},
             truth_table{tt},
-            parameter{params}
+            parameter{std::move(params)}
     {}
     /**
      * Run the exhaustive gate layout design process in parallel.
@@ -143,7 +143,7 @@ class automatic_exhaustive_gate_designer_impl
     /**
      * Parameters for the *Automatic Exhaustive Gate Designer*.
      */
-    automatic_exhaustive_gate_designer_params parameter;
+    design_gates_exhaustively_params parameter;
     /**
      * All cells within the canvas.
      */
@@ -257,7 +257,7 @@ class automatic_exhaustive_gate_designer_impl
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::vector<Lyt> design_gates_exhaustively(const Lyt& skeleton, const std::vector<TT>& spec,
-                                                         const automatic_exhaustive_gate_designer_params& params = {})
+                                                         const design_gates_exhaustively_params& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -267,11 +267,11 @@ template <typename Lyt, typename TT>
     assert(skeleton.num_pis() > 0 && "skeleton needs input cells");
     assert(skeleton.num_pos() > 0 && "skeleton needs output cells");
 
-    detail::automatic_exhaustive_gate_designer_impl<Lyt, TT> p{skeleton, spec, params};
+    detail::design_gate_exhaustively_impl<Lyt, TT> p{skeleton, spec, params};
 
     return p.run();
 }
 
 }  // namespace fiction
 
-#endif  // FICTION_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER_HPP
+#endif  // FICTION_DESIGN_GATES_EXHAUSTIVELY_HPP

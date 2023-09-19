@@ -52,31 +52,42 @@ TEMPLATE_TEST_CASE(
     SECTION("several layouts")
     {
         TestType lyt{{10, 10}};
-        lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({10, 10}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({9, 9}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({11, 10}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 10}, TestType::cell_type::NORMAL);
 
         const auto                                         sim_param = sidb_simulation_parameters{};
         std::vector<charge_distribution_surface<TestType>> all_lyts{};
         charge_distribution_surface                        charge_layout_first{lyt, sim_param};
 
-        charge_layout_first.assign_charge_state({0, 0}, sidb_charge_state::NEUTRAL);
+        charge_layout_first.assign_charge_state({10, 10}, sidb_charge_state::NEUTRAL);
+        charge_layout_first.assign_charge_state({11, 10}, sidb_charge_state::NEUTRAL);
+        charge_layout_first.assign_charge_state({12, 10}, sidb_charge_state::NEUTRAL);
         charge_layout_first.update_local_potential();
         charge_layout_first.recompute_system_energy();
+        all_lyts.push_back(charge_layout_first);
+        all_lyts.push_back(charge_layout_first);
         all_lyts.push_back(charge_layout_first);
 
         charge_distribution_surface charge_layout_second{lyt};
         charge_layout_second.assign_charge_state({10, 10}, sidb_charge_state::NEUTRAL);
-        charge_layout_second.assign_charge_state({9, 9}, sidb_charge_state::NEUTRAL);
+        charge_layout_second.assign_charge_state({11, 10}, sidb_charge_state::NEGATIVE);
+        charge_layout_second.assign_charge_state({12, 10}, sidb_charge_state::NEUTRAL);
         charge_layout_second.update_local_potential();
         charge_layout_second.recompute_system_energy();
         all_lyts.push_back(charge_layout_second);
+        all_lyts.push_back(charge_layout_second);
+        all_lyts.push_back(charge_layout_second);
+        all_lyts.push_back(charge_layout_second);
 
         charge_distribution_surface charge_layout_third{lyt};
-        charge_layout_third.assign_charge_state({10, 10}, sidb_charge_state::NEUTRAL);
-        charge_layout_third.assign_charge_state({9, 9}, sidb_charge_state::NEUTRAL);
+        charge_layout_third.assign_charge_state({10, 10}, sidb_charge_state::NEGATIVE);
+        charge_layout_third.assign_charge_state({11, 10}, sidb_charge_state::NEGATIVE);
+        charge_layout_third.assign_charge_state({12, 10}, sidb_charge_state::NEGATIVE);
         charge_layout_third.update_local_potential();
         charge_layout_third.recompute_system_energy();
+        all_lyts.push_back(charge_layout_third);
+        all_lyts.push_back(charge_layout_third);
         all_lyts.push_back(charge_layout_third);
 
         auto result = energy_distribution(all_lyts);

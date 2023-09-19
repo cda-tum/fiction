@@ -178,7 +178,9 @@ class critical_temperature_impl
             temperature_stats{st},
             bii(bdl_input_iterator<Lyt>{layout, parameter.bdl_params})
 
-    {}
+    {
+        temperature_stats.critical_temperature = parameter.max_temperature;
+    }
 
     bool gate_based_simulation() noexcept
     {
@@ -299,10 +301,8 @@ class critical_temperature_impl
             {
                 // The current temperature is stored as the Critical Temperature.
                 temperature_stats.critical_temperature = temp;
-
                 break;
             }
-
             if (std::abs(temp - parameter.max_temperature) < 0.001)
             {
                 // Maximal temperature is stored as the Critical Temperature.
@@ -371,10 +371,8 @@ class critical_temperature_impl
             {
                 // The current temperature is stored as Critical Temperature.
                 temperature_stats.critical_temperature = temp;
-
                 break;
             }
-
             if (std::abs(temp - parameter.max_temperature) < 0.001)
             {
                 // Maximal temperature is stored as Critical Temperature.

@@ -307,7 +307,7 @@ class operational_domain_impl
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
                                         [this, x](const auto y) {
-                                            is_sp_operational({x, y});
+                                            is_step_point_operational({x, y});
                                         });
                       });
 
@@ -330,7 +330,7 @@ class operational_domain_impl
 
         // for each sample point in parallel
         std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ step_point_samples.cbegin(), step_point_samples.cend(),
-                      [this](const auto& sp) { is_sp_operational(sp); });
+                      [this](const auto& sp) { is_step_point_operational(sp); });
 
         log_stats();
 
@@ -354,7 +354,7 @@ class operational_domain_impl
 
         // for each sample point in parallel
         std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ step_point_samples.cbegin(), step_point_samples.cend(),
-                      [this](const auto& sp) { is_sp_operational(sp); });
+                      [this](const auto& sp) { is_step_point_operational(sp); });
 
         // a queue of (x, y) dimension step points to be evaluated
         std::queue<step_point> queue{};
@@ -394,7 +394,7 @@ class operational_domain_impl
             }
 
             // check if the point is operational
-            const auto operational_status = is_sp_operational(sp);
+            const auto operational_status = is_step_point_operational(sp);
 
             // if the point is operational, add its eight neighbors to the queue
             if (operational_status == operational_status::OPERATIONAL)
@@ -460,7 +460,7 @@ class operational_domain_impl
 
         while (next_point != contour_starting_point)
         {
-            const auto operational_status = is_sp_operational(next_point);
+            const auto operational_status = is_step_point_operational(next_point);
 
             if (operational_status == operational_status::OPERATIONAL)
             {
@@ -696,8 +696,7 @@ class operational_domain_impl
      * @return The operational status of the point at step position `sp = (x, y)` or `std::nullopt` if `(x, y)` has not
      * been sampled yet.
      */
-    [[nodiscard]] inline std::optional<operational_status>
-    has_already_been_sampled(const step_point& sp) const noexcept
+    [[nodiscard]] inline std::optional<operational_status> has_already_been_sampled(const step_point& sp) const noexcept
     {
         if (const auto it = op_domain.operational_values.find(to_parameter_point(sp));
             it != op_domain.operational_values.cend())
@@ -719,7 +718,7 @@ class operational_domain_impl
      * @param sp Step point to be investigated.
      * @return The operational status of the layout under the given simulation parameters.
      */
-    operational_status is_sp_operational(const step_point& sp) noexcept
+    operational_status is_step_point_operational(const step_point& sp) noexcept
     {
         // if the point has already been sampled, return the stored operational status
         if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
@@ -807,7 +806,7 @@ class operational_domain_impl
         for (const auto& sample_step_point : generate_random_step_points(samples))
         {
             // determine the operational status
-            const auto operational_value = is_sp_operational(sample_step_point);
+            const auto operational_value = is_step_point_operational(sample_step_point);
 
             // if the parameter combination is operational, return its step values in x and y dimension
             if (operational_value == operational_status::OPERATIONAL)
@@ -837,7 +836,7 @@ class operational_domain_impl
         {
             const auto left_step = step_point{x, starting_point.y};
 
-            const auto operational_status = is_sp_operational(left_step);
+            const auto operational_status = is_step_point_operational(left_step);
 
             if (operational_status == operational_status::OPERATIONAL)
             {

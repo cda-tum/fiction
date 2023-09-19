@@ -40,7 +40,7 @@ TEMPLATE_TEST_CASE(
             quicksim_params{sidb_simulation_parameters{2, -0.32}}, 0.99, 350};
         critical_temperature<TestType>(lyt, params, &criticalstats);
         CHECK(criticalstats.num_valid_lyt == 0);
-        CHECK(criticalstats.critical_temperature == 0);
+        CHECK(criticalstats.critical_temperature == 350);
     }
 
     SECTION("Not working diagonal Wire where positively charged SiDBs can occur")
@@ -374,5 +374,33 @@ TEMPLATE_TEST_CASE(
         CHECK_THAT(std::abs(criticalstats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(305.95, 0.01));
         CHECK_THAT(std::abs(criticalstats.critical_temperature), Catch::Matchers::WithinAbs(0.00, 0.01));
+    }
+
+    SECTION("nine SiDBs, QuickSim, non-gate-based")
+    {
+        TestType lyt{};
+
+        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({9, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+        lyt.assign_cell_type({3, 1, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 1, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({9, 1, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 1, 1}, sidb_technology::cell_type::NORMAL);
+
+        critical_temperature_stats<TestType>  criticalstats{};
+        const critical_temperature_params<tt> params{
+            critical_temperature_params<tt>::simulation_engine::APPROXIMATE,
+            critical_temperature_params<tt>::critical_temperature_mode::NON_GATE_BASED_SIMULATION,
+            quicksim_params{sidb_simulation_parameters{2, -0.32}, 500, 0.6},
+            0.99,
+            750,
+            std::vector<tt>{create_id_tt()}};
+        critical_temperature(lyt, params, &criticalstats);
+
+        CHECK_THAT(std::abs(criticalstats.critical_temperature), Catch::Matchers::WithinAbs(11.55, 0.01));
     }
 }

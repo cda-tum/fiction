@@ -40,11 +40,27 @@ energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_v
 
     sidb_energy_distribution distribution{};
 
-    for (const auto& lyt : input_vec)
+    // collect all unique charge indices
+    std::set<uint64_t> unique_charge_index{};
+    for (auto& lyt : input_vec)
     {
-        const auto energy = round_to_n_decimal_places(lyt.get_system_energy(), 6);  // rounding to 6 decimal places
+        lyt.charge_distribution_to_index_general();
+        unique_charge_index.insert(lyt.get_charge_index_and_base().first);
+    }
 
-        distribution[energy]++;
+    for (const auto& charge_index : unique_charge_index)
+    {
+        for (auto& lyt : input_vec)
+        {
+            lyt.charge_distribution_to_index_general();
+            if (lyt.get_charge_index_and_base().first == charge_index)
+            {
+                const auto energy =
+                    round_to_n_decimal_places(lyt.get_system_energy(), 6);  // rounding to 6 decimal places
+                distribution[energy]++;
+                break;
+            }
+        }
     }
 
     return distribution;
