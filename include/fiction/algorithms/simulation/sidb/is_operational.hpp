@@ -261,7 +261,7 @@ class is_operational_impl
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param parameter Parameters for the `is_operational` algorithm.
  * @return A pair containing the operational status of the gate layout
- *         (either `OPERATIONAL` or `NON_OPERATIONAL) and the number of input combinations tested.
+ *         (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of input combinations tested.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::pair<operational_status, std::size_t>
