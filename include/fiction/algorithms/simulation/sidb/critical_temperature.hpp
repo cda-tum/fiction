@@ -205,6 +205,7 @@ class critical_temperature_impl
                 if (can_positive_charges_occur(*bii, parameter.simulation_params.phys_params))
                 {
                     temperature_stats.critical_temperature = 0.0;
+                    return true;
                 }
 
                 // performs physical simulation of a given SiDB layout at a given input combination
