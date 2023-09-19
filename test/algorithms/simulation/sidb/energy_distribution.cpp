@@ -14,7 +14,7 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(
-    "Test energy_distribution function", "[energy_distribution]",
+    "Test energy_distribution function", "[energy-distribution]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),
@@ -25,7 +25,7 @@ TEMPLATE_TEST_CASE(
     {
         TestType                                           lyt{{10, 10}};
         std::vector<charge_distribution_surface<TestType>> all_lyts{};
-        charge_distribution_surface                        charge_layout{lyt};
+        const charge_distribution_surface                        charge_layout{lyt};
         all_lyts.push_back(charge_layout);
         auto result = energy_distribution(all_lyts);
         CHECK(result.size() == 1);

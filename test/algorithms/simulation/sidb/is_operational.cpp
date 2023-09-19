@@ -11,7 +11,7 @@
 
 using namespace fiction;
 
-TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is_operational]")
+TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operational]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -42,7 +42,7 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is_operat
               .first == operational_status::NON_OPERATIONAL);
 }
 
-TEST_CASE("Bestagon FO2 gate", "[is_operational]")
+TEST_CASE("Bestagon FO2 gate", "[is-operational]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -101,7 +101,7 @@ TEST_CASE("Bestagon FO2 gate", "[is_operational]")
     }
 }
 
-TEST_CASE("Bestagon CROSSING gate", "[is_operational]")
+TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -159,7 +159,7 @@ TEST_CASE("Bestagon CROSSING gate", "[is_operational]")
             .first == operational_status::NON_OPERATIONAL);
 }
 
-TEST_CASE("Bestagon AND gate", "[is_operational]")
+TEST_CASE("Bestagon AND gate", "[is-operational]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -206,7 +206,7 @@ TEST_CASE("Bestagon AND gate", "[is_operational]")
             .first == operational_status::NON_OPERATIONAL);
 }
 
-TEST_CASE("Not working diagonal Wire", "[is_operational]")
+TEST_CASE("Not working diagonal Wire", "[is-operational]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 

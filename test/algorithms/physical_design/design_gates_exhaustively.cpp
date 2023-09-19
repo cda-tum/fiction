@@ -14,7 +14,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate", "[design_gates_exhaustively]")
+TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate", "[design-gates-exhaustively]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -54,7 +54,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate", "[design_gates
 }
 
 TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gate implementations",
-          "[design_gates_exhaustively]")
+          "[design-gates-exhaustively]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -86,7 +86,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gate imple
     CHECK(!found_gate_layouts.empty());
 }
 
-TEST_CASE("Use fo2 Bestagon gate without SiDB at {17, 11, 0} and generate original one", "[design_gates_exhaustively]")
+TEST_CASE("Use fo2 Bestagon gate without SiDB at {17, 11, 0} and generate original one", "[design-gates-exhaustively]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 

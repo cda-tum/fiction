@@ -19,7 +19,7 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(
-    "time to solution test", "[sim_acc_tss]",
+    "time to solution test", "[time-to-solution]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),

@@ -18,7 +18,7 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(
-    "Test minimum energy function", "[minimum energy]",
+    "Test minimum energy function", "[minimum-energy]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),
