@@ -1,5 +1,5 @@
-Automatic Exhaustive Gate Designer
-----------------------------------
+SiDB Gate Designer
+------------------
 
 **Header:** ``fiction/algorithms/physical_design/design_sidb_gates.hpp``
 
