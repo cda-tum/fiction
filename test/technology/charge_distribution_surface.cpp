@@ -5,6 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -256,6 +257,12 @@ TEMPLATE_TEST_CASE(
         charge_layout.assign_charge_state({5, 5}, sidb_charge_state::NEGATIVE);
         charge_layout.update_after_charge_change();
         CHECK(charge_layout.get_system_energy() < system_energy_maximum);
+
+        CHECK(charge_layout.get_charge_index_of_sub_layout() == 8);
+        charge_layout.reset_charge_index_sub_layout(exhaustive_sidb_simulation_engine::EXGS);
+        CHECK(charge_layout.get_charge_index_of_sub_layout() == 0);
+        CHECK(charge_layout.get_charge_state({6, 5}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state({7, 5}) == sidb_charge_state::NEGATIVE);
     }
 
     SECTION("cover behavior of dependent_cell in and outside the sublayout (positively charged SiDBs)")
