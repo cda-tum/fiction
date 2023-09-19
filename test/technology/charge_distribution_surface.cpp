@@ -361,7 +361,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({10, 4}) == sidb_charge_state::POSITIVE);
     }
 
-    SECTION("positive_cell_to_index, two_state_cell_to_index")
+    SECTION("three_state_cell_to_index, two_state_cell_to_index")
     {
         lyt.assign_cell_type({5, 5}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({6, 5}, TestType::cell_type::NORMAL);
@@ -371,9 +371,9 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}, sidb_charge_state::NEGATIVE};
         charge_layout.is_three_state_simulation_required();
 
-        CHECK(charge_layout.positive_cell_to_index({5, 5}) == 0);
-        CHECK(charge_layout.positive_cell_to_index({6, 5}) == 1);
-        CHECK(charge_layout.positive_cell_to_index({7, 5}) == 2);
+        CHECK(charge_layout.three_state_cell_to_index({5, 5}) == 0);
+        CHECK(charge_layout.three_state_cell_to_index({6, 5}) == 1);
+        CHECK(charge_layout.three_state_cell_to_index({7, 5}) == 2);
         CHECK(charge_layout.index_to_three_state_cell(1) == cell<TestType>(6, 5));
         CHECK(charge_layout.index_to_three_state_cell(4) == cell<TestType>());
 
@@ -535,23 +535,23 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
         // Take cells that are not part of the layout
-        CHECK_THAT(charge_layout.get_nm_distance_between_cells({3, 0, 0}, {3, 0, 0}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({3, 0, 0}, {3, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
 
-        CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {0, 0, 0}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {0, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {1, 0, 0}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {1, 0, 0}),
                    Catch::Matchers::WithinAbs((sidb_simulation_parameters{}.lat_a * 0.1), 0.00001));
-        CHECK_THAT(charge_layout.get_nm_distance_between_cells({1, 0, 0}, {0, 0, 0}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 0, 0}, {0, 0, 0}),
                    Catch::Matchers::WithinAbs((sidb_simulation_parameters{}.lat_a * 0.1), 0.00001));
-        CHECK_THAT(charge_layout.get_nm_distance_between_cells({1, 0, 0}, {1, 0, 0}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 0, 0}, {1, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {1, 1, 1}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {1, 1, 1}),
                    Catch::Matchers::WithinAbs(
                        std::hypot(sidb_simulation_parameters{}.lat_a * 0.1,
                                   sidb_simulation_parameters{}.lat_b * 0.1 + sidb_simulation_parameters{}.lat_c * 0.1),
                        0.00001));
-        CHECK_THAT(charge_layout.get_nm_distance_between_cells({1, 1, 1}, {1, 1, 1}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 1, 1}, {1, 1, 1}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
 
@@ -736,9 +736,9 @@ TEMPLATE_TEST_CASE(
                                                       sidb_charge_state::NEUTRAL,
                                                       {},
                                                       {{{0, 0, 1}, -0.5}}};
-        REQUIRE(!charge_layout_new.get_external_potentials().empty());
-        CHECK(charge_layout_new.get_external_potentials().size() == 1);
-        CHECK(charge_layout_new.get_external_potentials().size() == 1);
+        REQUIRE(!charge_layout_new.get_local_external_potentials().empty());
+        CHECK(charge_layout_new.get_local_external_potentials().size() == 1);
+        CHECK(charge_layout_new.get_local_external_potentials().size() == 1);
 
         REQUIRE(charge_layout_new.get_local_potential({0, 0, 1}).has_value());
         CHECK_THAT(charge_layout_new.get_local_potential({0, 0, 1}).value() + 0.5,
@@ -787,9 +787,9 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL};
-        CHECK(charge_layout.get_external_potentials().empty());
+        CHECK(charge_layout.get_local_external_potentials().empty());
         charge_layout.assign_global_external_potential(-0.1);
-        CHECK(!charge_layout.get_external_potentials().empty());
+        CHECK(!charge_layout.get_local_external_potentials().empty());
 
         REQUIRE(charge_layout.get_local_potential({0, 0, 1}).has_value());
         CHECK_THAT(charge_layout.get_local_potential({0, 0, 1}).value() + 0.1,
@@ -1407,22 +1407,22 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
         // Take cells that are not part of the layout
-        CHECK(charge_layout.get_nm_distance_between_cells({3, 0, 0}, {3, 0, 0}) == 0.0);
+        CHECK(charge_layout.get_nm_distance_between_sidbs({3, 0, 0}, {3, 0, 0}) == 0.0);
 
-        CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {0, 0, 0}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {0, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {1, 0, 0}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {1, 0, 0}),
                    Catch::Matchers::WithinAbs((sidb_simulation_parameters{}.lat_a * 0.1), 0.00001));
-        CHECK_THAT(charge_layout.get_nm_distance_between_cells({1, 0, 0}, {0, 0, 0}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 0, 0}, {0, 0, 0}),
                    Catch::Matchers::WithinAbs((sidb_simulation_parameters{}.lat_a * 0.1), 0.00001));
-        CHECK_THAT(charge_layout.get_nm_distance_between_cells({1, 0, 0}, {1, 0, 0}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 0, 0}, {1, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK_THAT(charge_layout.get_nm_distance_between_cells({0, 0, 0}, {1, 1, 1}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {1, 1, 1}),
                    Catch::Matchers::WithinAbs(
                        std::hypot(sidb_simulation_parameters{}.lat_a * 0.1,
                                   sidb_simulation_parameters{}.lat_b * 0.1 + sidb_simulation_parameters{}.lat_c * 0.1),
                        0.00001));
-        CHECK_THAT(charge_layout.get_nm_distance_between_cells({1, 1, 1}, {1, 1, 1}),
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 1, 1}, {1, 1, 1}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
 
@@ -1626,9 +1626,9 @@ TEMPLATE_TEST_CASE(
                                                       sidb_charge_state::NEUTRAL,
                                                       {},
                                                       {{{0, 0, 1}, -0.5}}};
-        REQUIRE(!charge_layout_new.get_external_potentials().empty());
-        CHECK(charge_layout_new.get_external_potentials().size() == 1);
-        CHECK(charge_layout_new.get_external_potentials().size() == 1);
+        REQUIRE(!charge_layout_new.get_local_external_potentials().empty());
+        CHECK(charge_layout_new.get_local_external_potentials().size() == 1);
+        CHECK(charge_layout_new.get_local_external_potentials().size() == 1);
 
         REQUIRE(charge_layout_new.get_local_potential({0, 0, 1}).has_value());
         REQUIRE(charge_layout_new.get_local_potential({1, 3, 0}).has_value());
@@ -1677,9 +1677,9 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL};
-        CHECK(charge_layout.get_external_potentials().empty());
+        CHECK(charge_layout.get_local_external_potentials().empty());
         charge_layout.assign_global_external_potential(-0.1);
-        CHECK(!charge_layout.get_external_potentials().empty());
+        CHECK(!charge_layout.get_local_external_potentials().empty());
 
         REQUIRE(charge_layout.get_local_potential({0, 0, 1}).has_value());
         REQUIRE(charge_layout.get_local_potential({1, 3, 0}).has_value());
@@ -1885,7 +1885,7 @@ TEMPLATE_TEST_CASE(
         auto loc_one_w_negative_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
         auto loc_two_w_negative_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
         auto loc_three_w_negative_defect = charge_layout.get_local_potential({5, 0, 0}).value();
-        auto defect_potentials_negative  = charge_layout.get_defect_potentials();
+        auto defect_potentials_negative  = charge_layout.get_local_defect_potentials();
         REQUIRE(!defect_potentials_negative.empty());
 
         CHECK(loc_one_wo_defect > loc_one_w_negative_defect);
@@ -1911,7 +1911,7 @@ TEMPLATE_TEST_CASE(
         auto loc_one_w_positive_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
         auto loc_two_w_positive_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
         auto loc_three_w_positive_defect = charge_layout.get_local_potential({5, 0, 0}).value();
-        auto defect_potentials_positive  = charge_layout.get_defect_potentials();
+        auto defect_potentials_positive  = charge_layout.get_local_defect_potentials();
         REQUIRE(!defect_potentials_positive.empty());
 
         CHECK(loc_one_w_positive_defect > loc_one_w_neutral_defect);
@@ -1953,7 +1953,7 @@ TEMPLATE_TEST_CASE(
         auto loc_one_w_negative_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
         auto loc_two_w_negative_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
         auto loc_three_w_negative_defect = charge_layout.get_local_potential({5, 0, 0}).value();
-        auto defect_potentials_negative  = charge_layout.get_defect_potentials();
+        auto defect_potentials_negative  = charge_layout.get_local_defect_potentials();
         REQUIRE(!defect_potentials_negative.empty());
 
         CHECK(loc_one_wo_defect > loc_one_w_negative_defect);
@@ -1980,7 +1980,7 @@ TEMPLATE_TEST_CASE(
         auto loc_one_w_positive_defect   = charge_layout.get_local_potential({0, 0, 0}).value();
         auto loc_two_w_positive_defect   = charge_layout.get_local_potential({3, 0, 0}).value();
         auto loc_three_w_positive_defect = charge_layout.get_local_potential({5, 0, 0}).value();
-        auto defect_potentials_positive  = charge_layout.get_defect_potentials();
+        auto defect_potentials_positive  = charge_layout.get_local_defect_potentials();
         REQUIRE(!defect_potentials_positive.empty());
 
         CHECK(loc_one_w_positive_defect > loc_one_w_neutral_defect);
@@ -2027,7 +2027,7 @@ TEMPLATE_TEST_CASE(
         CHECK_THAT(loc_three_wo_defect - (charge_layout.get_local_potential({5, 0, 0}).value()),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
 
-        auto defect_potentials_negative = charge_layout.get_defect_potentials();
+        auto defect_potentials_negative = charge_layout.get_local_defect_potentials();
         CHECK(defect_potentials_negative.empty());
     }
 
@@ -2065,7 +2065,7 @@ TEMPLATE_TEST_CASE(
         auto loc_two_w_defect_strong_screening   = charge_layout.get_local_potential({3, 0, 0}).value();
         auto loc_three_w_defect_strong_screening = charge_layout.get_local_potential({5, 0, 0}).value();
 
-        auto defect_potentials_negative = charge_layout.get_defect_potentials();
+        auto defect_potentials_negative = charge_layout.get_local_defect_potentials();
         CHECK(!defect_potentials_negative.empty());
 
         CHECK(loc_one_w_defect_normal_screening > loc_one_w_defec_strong_screening);
