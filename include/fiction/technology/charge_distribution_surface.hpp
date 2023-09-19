@@ -1137,8 +1137,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param history_mode charge_distribution_history::NEGLECT if the information (local electrostatic energy) of the
      * previous charge distribution is used to make the update more efficient, charge_distribution_history::CONSIDER
      * otherwise.
-     * @param engine exhaustive_sidb_simulation_engine::EXGS if `ExGS``should be used,
-     * exhaustive_sidb_simulation_engine::QUICKEXACT for `QuickExact`.
+     * @param engine exhaustive_sidb_simulation_engine::EXGS if *ExGS* should be used,
+     * exhaustive_sidb_simulation_engine::QUICKEXACT for *QuickExact*.
      */
     void increase_charge_index_by_one(
         const dependent_cell_mode               dependent_cell          = dependent_cell_mode::FIXED,
@@ -1157,7 +1157,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 this->index_to_charge_distribution();
             }
-            // this->index_to_charge_distribution(engine);
             this->update_after_charge_change(dependent_cell, energy_calculation_mode, history_mode);
         }
     }
@@ -1656,7 +1655,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 this->index_to_charge_distribution();
             }
-            // this->index_to_charge_distribution(engine);
             this->update_after_charge_change(dependent_cell_fixed, recompute_system_energy, consider_history);
         }
     }

@@ -354,6 +354,14 @@ TEMPLATE_TEST_CASE(
         charge_layout.assign_charge_index(1);
         CHECK(charge_layout.get_charge_index_and_base().first == 1);
 
+        charge_layout.increase_charge_index_of_sub_layout_by_one();
+        CHECK(charge_layout.get_charge_index_of_sub_layout() == 2);
+
+        charge_layout.increase_charge_index_of_sub_layout_by_one(
+            dependent_cell_mode::FIXED, energy_calculation::UPDATE_ENERGY, charge_distribution_history::NEGLECT,
+            exhaustive_sidb_simulation_engine::EXGS);
+        CHECK(charge_layout.get_charge_index_of_sub_layout() == 3);
+
         // set the charge index to zero and thereby, all siDBs to negatively charged.
         charge_layout.assign_charge_index(0);
         CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::NEGATIVE);
@@ -403,6 +411,13 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state({5, 4}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_state({5, 5}) == sidb_charge_state::NEUTRAL);
         CHECK(charge_layout.get_charge_state({5, 6}) == sidb_charge_state::NEGATIVE);
+
+        charge_layout.assign_charge_by_cell_index(0, sidb_charge_state::NEUTRAL);
+        charge_layout.assign_charge_by_cell_index(1, sidb_charge_state::NEUTRAL);
+        charge_layout.assign_charge_by_cell_index(2, sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout.get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_layout.get_charge_state_by_index(1) == sidb_charge_state::NEUTRAL);
+        CHECK(charge_layout.get_charge_state_by_index(2) == sidb_charge_state::NEGATIVE);
 
         CHECK(charge_layout.get_charge_state({7, 6}) == sidb_charge_state::NONE);
 
@@ -923,6 +938,30 @@ TEMPLATE_TEST_CASE(
         charge_layout_new.update_after_charge_change();
 
         REQUIRE(charge_layout_new.is_physically_valid());
+    }
+
+    SECTION("Test several getters")
+    {
+        TestType lyt_new{{11, 11}};
+        lyt.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
+        const sidb_simulation_parameters params{2, -0.28};
+        charge_distribution_surface      charge_layout{lyt, params};
+        const auto                       location_in_nm = charge_layout.get_all_sidb_locations_in_nm();
+        REQUIRE(location_in_nm.size() == charge_layout.num_cells());
+
+        const auto all_charges = charge_layout.get_all_sidb_charges();
+        REQUIRE(all_charges.size() == charge_layout.num_cells());
+
+        charge_layout.assign_system_energy_to_zero();
+        CHECK(charge_layout.get_system_energy() == 0.0);
+
+        CHECK(charge_layout.three_state_cell_to_index({0, 0, 0}) == -1);
     }
 
     SECTION("using chargeless and normal potential function")
