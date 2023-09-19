@@ -32,23 +32,26 @@ using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
  * @tparam Lyt SiDB cell-level layout type (representing a gate).
  * @param energy_distribution Energy distribution.
  * @param output_bdl_pairs Vector of BDL pairs from which the output is read.
- * @param output_bits Truth table entry for a given input (e.g. 0 for AND (00 as input) or 1 for a wire (input 1)).
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param input_bit The index of the current input configuration.
  * @return sidb_energy_and_state_type Electrostatic potential energy of all charge distributions with state type.
  */
-template <typename Lyt>
+template <typename Lyt, typename TT>
 [[nodiscard]] sidb_energy_and_state_type
 calculate_energy_and_state_type(const sidb_energy_distribution&                      energy_distribution,
                                 const std::vector<charge_distribution_surface<Lyt>>& valid_lyts,
-                                const std::vector<bdl_pair<Lyt>>&                    output_bdl_pairs,
-                                const std::vector<bool>&                             output_bits) noexcept
+                                const std::vector<bdl_pair<Lyt>>& output_bdl_pairs, const std::vector<TT>& truth_table,
+                                const uint64_t input_index) noexcept
 
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     assert(!output_bdl_pairs.empty() && "No output cell provided.");
-    assert(!output_bits.empty() && "No output bits provided.");
+    assert((truth_table.size() == output_bdl_pairs.size()) &&
+           "Number of truth tables and output BDL pairs does not match");
 
     sidb_energy_and_state_type energy_and_state_type{};
 
@@ -62,25 +65,17 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
             // errors and to provide comparability with the energy_value from before.
             if (round_to_n_decimal_places(valid_layout.get_system_energy(), 6) == energy_value)
             {
-                // collect the charge state of the output SiDBs.
-                std::vector<sidb_charge_state> charge_states(output_bdl_pairs.size());
-                std::transform(output_bdl_pairs.cbegin(), output_bdl_pairs.cend(), charge_states.begin(),
-                               [&](const auto& bdl) { return valid_layout.get_charge_state(bdl.lower); });
-
-                // Convert the charge states of the output SiDBs to bits (-1 -> 1, 0 -> 0).
-                std::vector<bool> charge(charge_states.size());
-                std::transform(charge_states.cbegin(), charge_states.cend(), charge.begin(),
-                               [](const auto& state) { return static_cast<bool>(-charge_state_to_sign(state)); });
-
-                if (charge == output_bits)
+                bool correct_output = true;
+                for (auto i = 0u; i < output_bdl_pairs.size(); i++)
                 {
-                    // The output SiDB matches the truth table entry. Hence, state is called transparent.
-                    energy_and_state_type.emplace_back(energy, true);
+                    if (static_cast<bool>(-charge_state_to_sign(valid_layout.get_charge_state(
+                            output_bdl_pairs[i].lower))) != kitty::get_bit(truth_table[i], input_index))
+                    {
+                        correct_output = false;
+                    }
                 }
-                else
-                {
-                    energy_and_state_type.emplace_back(energy, false);
-                }
+                // The output SiDB matches the truth table entry. Hence, state is called transparent.
+                energy_and_state_type.emplace_back(energy, correct_output);
             }
         }
     }

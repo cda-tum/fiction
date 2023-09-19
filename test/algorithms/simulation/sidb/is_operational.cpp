@@ -36,10 +36,10 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is_operat
 
     CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
                          is_operational_params{sidb_simulation_parameters{2, -0.28}})
-              .first == is_operational_params::operational_status::OPERATIONAL);
+              .first == operational_status::OPERATIONAL);
     CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
                          is_operational_params{sidb_simulation_parameters{2, -0.1}})
-              .first == is_operational_params::operational_status::NON_OPERATIONAL);
+              .first == operational_status::NON_OPERATIONAL);
 }
 
 TEST_CASE("Bestagon FO2 gate", "[is_operational]")
@@ -79,11 +79,11 @@ TEST_CASE("Bestagon FO2 gate", "[is_operational]")
     CHECK(
         is_operational(lyt, std::vector<tt>{create_fan_out_tt()},
                        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
-            .first == is_operational_params::operational_status::OPERATIONAL);
+            .first == operational_status::OPERATIONAL);
     CHECK(
         is_operational(lyt, std::vector<tt>{create_fan_out_tt()},
                        is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
-            .first == is_operational_params::operational_status::NON_OPERATIONAL);
+            .first == operational_status::NON_OPERATIONAL);
 }
 
 TEST_CASE("Bestagon CROSSING gate", "[is_operational]")
@@ -137,11 +137,11 @@ TEST_CASE("Bestagon CROSSING gate", "[is_operational]")
     CHECK(
         is_operational(lyt, create_crossing_wire_tt(),
                        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
-            .first == is_operational_params::operational_status::OPERATIONAL);
+            .first == operational_status::OPERATIONAL);
     CHECK(
         is_operational(lyt, create_crossing_wire_tt(),
                        is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
-            .first == is_operational_params::operational_status::NON_OPERATIONAL);
+            .first == operational_status::NON_OPERATIONAL);
 }
 
 TEST_CASE("Bestagon AND gate", "[is_operational]")
@@ -184,11 +184,11 @@ TEST_CASE("Bestagon AND gate", "[is_operational]")
     CHECK(
         is_operational(lyt, std::vector<tt>{create_and_tt()},
                        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
-            .first == is_operational_params::operational_status::OPERATIONAL);
+            .first == operational_status::OPERATIONAL);
     CHECK(
         is_operational(lyt, std::vector<tt>{create_and_tt()},
                        is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
-            .first == is_operational_params::operational_status::NON_OPERATIONAL);
+            .first == operational_status::NON_OPERATIONAL);
 }
 
 TEST_CASE("Not working diagonal Wire", "[is_operational]")
@@ -219,5 +219,5 @@ TEST_CASE("Not working diagonal Wire", "[is_operational]")
     CHECK(
         is_operational(lyt, std::vector<tt>{create_id_tt()},
                        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
-            .first == is_operational_params::operational_status::NON_OPERATIONAL);
+            .first == operational_status::NON_OPERATIONAL);
 }

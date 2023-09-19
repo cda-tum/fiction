@@ -44,6 +44,8 @@ namespace fiction
 
 /**
  * This struct stores the parameters for the `critical_temperature` algorithm.
+ *
+ * @tparam TT The type of the truth table specifying the gate behavior.
  */
 template <typename TT>
 struct critical_temperature_params
@@ -199,8 +201,6 @@ class critical_temperature_impl
             // number of different input combinations
             for (auto i = 0u; i < parameter.truth_table.front().num_bits(); ++i, ++bii)
             {
-                // collects expected output values for a given input configuration.
-                const auto expected_outputs = outputs_for_given_input(i);
                 // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
                 if (can_positive_charges_occur(*bii, parameter.simulation_params.phys_params))
                 {
@@ -217,7 +217,7 @@ class critical_temperature_impl
                 // A label that indicates whether the state still fulfills the logic.
                 sidb_energy_and_state_type energy_state_type{};
                 energy_state_type = calculate_energy_and_state_type(distribution, sim_result.charge_distributions,
-                                                                    output_bdl_pairs, expected_outputs);
+                                                                    output_bdl_pairs, parameter.truth_table, i);
 
                 const auto min_energy = energy_state_type.cbegin()->first;
 
@@ -399,27 +399,6 @@ class critical_temperature_impl
      * Iterator that iterates over all possible input states.
      */
     bdl_input_iterator<Lyt> bii{};
-    /**
-     * Collects expected output values for a given input configuration.
-     *
-     * This function determines the expected output values for a specific input configuration
-     * based on the provided truth table and stores them in the `expected_outputs` vector.
-     * The function takes into account the number of variables and bits in the truth table
-     * to correctly extract the expected output values for different gate types.
-     *
-     * @param input_bit The index of the current input configuration.
-     * @return Vector representing the expected output for the given input.
-     */
-    [[nodiscard]] std::vector<bool> outputs_for_given_input(const uint64_t input_bit)
-    {
-        std::vector<bool> expected_outputs;
-        expected_outputs.reserve(parameter.truth_table.size());
-
-        std::transform(parameter.truth_table.begin(), parameter.truth_table.end(), std::back_inserter(expected_outputs),
-                       [input_bit](const auto& output) { return kitty::get_bit(output, input_bit) != 0u; });
-
-        return expected_outputs;
-    }
     /**
      * This function conducts physical simulation of the given layout (gate layout with certain input combination). The
      * simulation results are stored in the `sim_result` variable.

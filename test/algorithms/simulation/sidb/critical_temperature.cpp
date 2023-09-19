@@ -306,11 +306,11 @@ TEMPLATE_TEST_CASE(
             quicksim_params{sidb_simulation_parameters{2, -0.32}},
             0.99,
             350,
-            std::vector<tt>{create_crossing_wire_tt()}};
+            std::vector<tt>{create_id_tt()}};
         critical_temperature(lyt, params, &criticalstats);
 
         CHECK_THAT(std::abs(criticalstats.energy_between_ground_state_and_first_erroneous),
-                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.01));
+                   Catch::Matchers::WithinAbs(305.95, 0.01));
         CHECK_THAT(std::abs(criticalstats.critical_temperature), Catch::Matchers::WithinAbs(0.00, 0.01));
     }
 }

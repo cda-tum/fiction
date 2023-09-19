@@ -54,7 +54,7 @@ Physical Design
    apply_gate_library.rst
    hexagonalization.rst
    post_layout_optimization.rst
-   automatic_exhaustive_gate_designer.rst
+   design_gates_exhaustively.rst
 
 
 Verification

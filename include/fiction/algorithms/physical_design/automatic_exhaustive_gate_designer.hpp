@@ -36,7 +36,6 @@ namespace fiction
  * Gate Designer*. It is used to configure the simulation and design of SiDB gates.
  *
  */
-template <typename TT>
 struct automatic_exhaustive_gate_designer_params
 {
     /**
@@ -47,10 +46,6 @@ struct automatic_exhaustive_gate_designer_params
      * Canvas spanned by the northwest and southeast cell.
      */
     std::pair<siqad::coord_t, siqad::coord_t> canvas{};
-    /**
-     * Truth table of the given gate (if layout is simulated in `gate-based` mode).
-     */
-    std::vector<TT> truth_table{};
     /**
      * Number of SiDBs placed in the canvas to create a working gate.
      */
@@ -72,11 +67,14 @@ class automatic_exhaustive_gate_designer_impl
      * implementation with the provided skeleton layout and configuration parameters.
      *
      * @param skeleton The skeleton layout used as a basis for gate design.
+     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param params   Parameters and settings for the gate designer.
      */
-    automatic_exhaustive_gate_designer_impl(const Lyt& skeleton, automatic_exhaustive_gate_designer_params<TT> params) :
+    automatic_exhaustive_gate_designer_impl(const Lyt& skeleton, const std::vector<TT>& tt,
+                                            const automatic_exhaustive_gate_designer_params& params) :
             skeleton_layout{skeleton},
-            parameter{std::move(params)}
+            truth_table{tt},
+            parameter{params}
     {}
     /**
      * Run the exhaustive gate layout design process in parallel.
@@ -93,22 +91,21 @@ class automatic_exhaustive_gate_designer_impl
         const auto all_combinations = determine_all_combinations_of_given_sidbs_in_canvas();
 
         std::vector<Lyt> all_found_gate_layouts = {};
-        all_found_gate_layouts.reserve(all_combinations.size());
 
-        std::mutex mutex_to_protect_shared_resource;  // Mutex for protecting shared resources
+        std::mutex mutex_to_protect_found_gate_layouts;  // Mutex for protecting shared resources
 
         const auto add_combination_to_layout_and_check_operation =
-            [this, &mutex_to_protect_shared_resource, &params_is_operational,
+            [this, &mutex_to_protect_found_gate_layouts, &params_is_operational,
              &all_found_gate_layouts](const auto& combination) noexcept
         {
             if (!are_sidbs_too_close(combination))
             {
                 auto layout_with_added_cells = add_cells_to_layout_based_on_indices(combination);
 
-                if (is_operational(layout_with_added_cells, parameter.truth_table, params_is_operational).first ==
-                    is_operational_params::operational_status::OPERATIONAL)
+                if (is_operational(layout_with_added_cells, truth_table, params_is_operational).first ==
+                    operational_status::OPERATIONAL)
                 {
-                    const std::lock_guard lock_vector(mutex_to_protect_shared_resource);  // Lock the mutex
+                    const std::lock_guard lock_vector(mutex_to_protect_found_gate_layouts);  // Lock the mutex
                     all_found_gate_layouts.push_back(layout_with_added_cells);
                 }
             }
@@ -140,9 +137,13 @@ class automatic_exhaustive_gate_designer_impl
      */
     Lyt skeleton_layout;
     /**
+     * Truth table of the given gate (if layout is simulated in `gate-based` mode).
+     */
+    std::vector<TT> truth_table{};
+    /**
      * Parameters for the *Automatic Exhaustive Gate Designer*.
      */
-    automatic_exhaustive_gate_designer_params<TT> parameter;
+    automatic_exhaustive_gate_designer_params parameter;
     /**
      * All cells within the canvas.
      */
@@ -250,13 +251,13 @@ class automatic_exhaustive_gate_designer_impl
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT The type of the truth table specifying the gate behavior.
  * @param skeleton The skeleton layout used as a starting point for gate design.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the *Automatic Exhaustive Gate Designer*.
  * @return A vector of SiDB layouts that fulfill the given Boolean function (truth table).
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::vector<Lyt>
-automatic_exhaustive_gate_designer(const Lyt&                                           skeleton,
-                                   const automatic_exhaustive_gate_designer_params<TT>& params = {})
+[[nodiscard]] std::vector<Lyt> design_gates_exhaustively(const Lyt& skeleton, const std::vector<TT>& spec,
+                                                         const automatic_exhaustive_gate_designer_params& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -266,7 +267,7 @@ automatic_exhaustive_gate_designer(const Lyt&                                   
     assert(skeleton.num_pis() > 0 && "skeleton needs input cells");
     assert(skeleton.num_pos() > 0 && "skeleton needs output cells");
 
-    detail::automatic_exhaustive_gate_designer_impl<Lyt, TT> p{skeleton, params};
+    detail::automatic_exhaustive_gate_designer_impl<Lyt, TT> p{skeleton, spec, params};
 
     return p.run();
 }

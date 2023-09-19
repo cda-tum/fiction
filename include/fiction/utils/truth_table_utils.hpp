@@ -128,6 +128,20 @@ namespace fiction
     return table;
 }
 /**
+ * Creates and returns a truth table that implements the majority function in three variables.
+ *
+ * @return Majority function in three variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_maj_tt() noexcept
+{
+    constexpr const uint64_t lit = 0xe8;
+
+    kitty::dynamic_truth_table table{3};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
  * Creates and returns a vector of truth tables for a double wire multi-output function.
  *
  * This function generates a vector of truth tables, each representing one of the outputs
@@ -210,21 +224,6 @@ namespace fiction
     kitty::create_from_binary_string(table2, truth_table_string2);
 
     return std::vector<kitty::dynamic_truth_table>{table1, table2};
-}
-
-/**
- * Creates and returns a truth table that implements the majority function in three variables.
- *
- * @return Majority function in three variables.
- */
-[[nodiscard]] inline kitty::dynamic_truth_table create_maj_tt() noexcept
-{
-    constexpr const uint64_t lit = 0xe8;
-
-    kitty::dynamic_truth_table table{3};
-    kitty::create_from_words(table, &lit, &lit + 1);
-
-    return table;
 }
 
 // NOLINTEND(*-pointer-arithmetic)
