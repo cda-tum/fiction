@@ -255,25 +255,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         initialize(cs);
     }
     /**
-     * Standard constructor for empty layouts.
-     *
-     * @param ar Aspect ratio of the layout.
-     * @param params Physical parameters used for the simulation (µ_minus, base number, ...).
-     * @param cs The charge state used for the initialization of all SiDBs, default is a negative charge.
-     */
-    explicit charge_distribution_surface(const typename Lyt::aspect_ratio& ar,
-                                         const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-                                         const sidb_charge_state&          cs     = sidb_charge_state::NEGATIVE) :
-            Lyt(ar),
-            strg{std::make_shared<charge_distribution_storage>(params)}
-    {
-        static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-
-        initialize(cs);
-    }
-    /**
      * Standard constructor for existing layouts.
      *
      * @param lyt Cell-level layout.
@@ -283,8 +264,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param external_potential Externally applied local electrostatic potential.
      */
     explicit charge_distribution_surface(
-        const Lyt& lyt, const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-        const sidb_charge_state cs = sidb_charge_state::NEGATIVE, const typename Lyt::cell& variable_cells = {},
+        const Lyt& lyt,
+        const sidb_simulation_parameters& params = sidb_simulation_parameters{},
+        const sidb_charge_state cs = sidb_charge_state::NEGATIVE,
+        const typename Lyt::cell& variable_cells = {},
         const std::unordered_map<typename Lyt::cell, double>& external_potential = {}) :
             Lyt(lyt),
             strg{std::make_shared<charge_distribution_storage>(params, external_potential, variable_cells)}
@@ -422,20 +405,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
     }
     /**
-     * Returns the index of an SiDB.
+     * This function assigns the given charge state to the cell of the layout at the specified index. It updates the
+     * `cell_charge` member of `strg` object with the new charge state of the specified cell.
      *
      * @param i The index of the cell.
      * @param cs The charge state to be assign to the cell.
      */
     void assign_charge_by_cell_index(const uint64_t i, const sidb_charge_state cs) const noexcept
     {
-        if (const auto it = std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c);
-            it != strg->sidb_order.cend())
-        {
-            return static_cast<int64_t>(std::distance(strg->sidb_order.cbegin(), it));
-        }
-
-        return -1;
+        strg->cell_charge[i] = cs;
+        this->charge_distribution_to_index();
     }
     /**
      * This function assigns the charge state of all SiDBs in the layout to a given charge state.
@@ -606,45 +585,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return strg->cell_charge;
     }
     /**
-     * Returns the charge state of a given cell.
-     *
-     * @param c The cell.
-     * @return The charge state of the given cell.
-     */
-    [[nodiscard]] sidb_charge_state get_charge_state(const typename Lyt::cell& c) const noexcept
-    {
-        if (const auto index = cell_to_index(c); index != -1)
-        {
-            return strg->cell_charge[static_cast<uint64_t>(index)];
-        }
-
-        return sidb_charge_state::NONE;
-    }
-    /**
-     * Returns the charge state of a cell of the layout at a given index.
-     *
-     * @param index The index of the cell.
-     * @return The charge state of the cell at the given index.
-     */
-    [[nodiscard]] sidb_charge_state get_charge_state_by_index(const uint64_t index) const noexcept
-    {
-        if (index < (strg->cell_charge.size()))
-        {
-            return strg->cell_charge[index];
-        }
-
-        return sidb_charge_state::NONE;
-    }
-    /**
-     * Returns all SiDB charges of the placed SiDBs as a vector.
-     *
-     * @return Vector of SiDB charges.
-     */
-    [[nodiscard]] std::vector<sidb_charge_state> get_all_sidb_charges() const noexcept
-    {
-        return strg->cell_charge;
-    }
-    /**
      * This function can be used to detect which SiDBs must be negatively charged due to their location. Important:
      * This function must be applied to a charge layout where all SiDBs are negatively initialized.
      *
@@ -740,7 +680,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * This function returns the chargeless electrostatic potential between two cells in V (unit: V).
      *
-     * @note If the signed electrostatic potential \f$V_{i,j}\f$ is required, use the `get_potential_between_sidbs`
+     * @note If the signed electrostatic potential \f$ V_{i,j} \f$ is required, use the `get_potential_between_sidbs`
      * function.
      *
      * @param c1 The first cell.
@@ -773,7 +713,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * This function calculates and returns the electrostatic potential at one cell (`c1`) generated by another cell
      * (`c2`) in Volt (unit: V).
      *
-     * @note If the chargeless electrostatic potential \f$\frac{V_{i,j}}{n_j}\f$ is required, use the
+     * @note If the chargeless electrostatic potential \f$ \frac{V_{i,j}}{n_j} \f$ is required, use the
      * `get_chargeless_potential_between_sidbs` function.
      *
      * @param c1 The first cell.
@@ -1269,15 +1209,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     [[nodiscard]] charge_index_base get_charge_index_and_base() const noexcept
     {
         return strg->charge_index_and_base;
-    }
-    /**
-     * The charge index of the current charge distribution is returned.
-     *
-     * @return A pair with the charge index and the used base is returned.
-     */
-    [[nodiscard]] charge_index_base get_charge_index() const noexcept
-    {
-        return strg->charge_index;
     }
     /**
      * The charge index is increased by one, but only if it is less than the maximum charge index for the given layout.

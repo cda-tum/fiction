@@ -10,10 +10,11 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 
 #include <fmt/format.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <cstdint>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace pyfiction
 {
@@ -39,12 +40,14 @@ inline void sidb_simulation_parameters(pybind11::module& m)
                        DOC(fiction_sidb_simulation_parameters_lat_c))
         .def_readwrite("epsilon_r", &fiction::sidb_simulation_parameters::epsilon_r,
                        DOC(fiction_sidb_simulation_parameters_epsilon_r))
-        .def_readwrite("k", &fiction::sidb_simulation_parameters::k, DOC(fiction_sidb_simulation_parameters_k))
         .def_readwrite("lambda_tf", &fiction::sidb_simulation_parameters::lambda_tf,
                        DOC(fiction_sidb_simulation_parameters_lambda_tf))
-        .def_readwrite("mu", &fiction::sidb_simulation_parameters::mu, DOC(fiction_sidb_simulation_parameters_mu))
-        .def_readwrite("mu_p", &fiction::sidb_simulation_parameters::mu_p, DOC(fiction_sidb_simulation_parameters_mu_p))
+        .def_readwrite("mu_minus", &fiction::sidb_simulation_parameters::mu_minus)
+        // , DOC(fiction_sidb_simulation_parameters_mu_minus))
         .def_readwrite("base", &fiction::sidb_simulation_parameters::base, DOC(fiction_sidb_simulation_parameters_base))
+        .def("k", &fiction::sidb_simulation_parameters::k, DOC(fiction_sidb_simulation_parameters_k))
+        .def("mu_plus", &fiction::sidb_simulation_parameters::mu_plus)
+        // , DOC(fiction_sidb_simulation_parameters_mu_plus))
 
         ;
 }

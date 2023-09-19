@@ -78,15 +78,14 @@ struct sidb_simulation_parameters
      */
     uint8_t base;
     /**
-     * k is the Coulomb constant K_E divided by epsilon_r (unit: \f$ N \cdot m^{2}
-     * \cdot C^{-2} \f$).
+     * `k` is the Coulomb constant `K_E` divided by `epsilon_r` (unit: \f$N \cdot m^{2} \cdot C^{-2}\f$).
      */
     [[nodiscard]] double k() const noexcept
     {
         return physical_constants::K_E / epsilon_r;
     }
     /**
-     * mu_plus (µ+) is the energy transition level (+/0) (unit: eV).
+     * `mu_plus` (µ+) is the energy transition level (+/0) (unit: eV).
      */
     [[nodiscard]] double mu_plus() const noexcept
     {

@@ -24,8 +24,8 @@ void time_to_solution(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def("sim_acc_tts", &fiction::sim_acc_tts<Lyt>, "lyt"_a, "quickim_params"_a, "ps"_a = nullptr,
-          "repetitions"_a = 100, "confidence_level"_a = 0.997, DOC(fiction_sim_acc_tts));
+    m.def("sim_acc_tts", &fiction::sim_acc_tts<Lyt>, "lyt"_a, "quickim_params"_a,
+          "tts_params"_a = fiction::time_to_solution_params{}, "ps"_a = nullptr, DOC(fiction_sim_acc_tts));
 }
 
 }  // namespace detail
@@ -46,6 +46,9 @@ inline void time_to_solution(pybind11::module& m)
                        DOC(fiction_time_to_solution_stats_mean_single_runtime))
         .def_readwrite("single_runtime_exhaustive", &fiction::time_to_solution_stats::single_runtime_exhaustive,
                        DOC(fiction_time_to_solution_stats_single_runtime_exhaustive))
+        .def_readwrite("algorithm", &fiction::time_to_solution_stats::algorithm)
+        // , DOC(fiction_time_to_solution_stats_algorithm))")
+        .def("report", &fiction::time_to_solution_stats::report, DOC(fiction_time_to_solution_stats_report))
 
         ;
 

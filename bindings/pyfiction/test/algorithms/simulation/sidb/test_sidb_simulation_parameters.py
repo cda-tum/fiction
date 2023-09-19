@@ -14,7 +14,7 @@ class SIDBSimulationParametersTest(unittest.TestCase):
         self.assertEqual(params.lat_c, 2.25)
         self.assertEqual(params.epsilon_r, 5.6)
         self.assertEqual(params.lambda_tf, 5)
-        self.assertEqual(params.mu, -0.32)
+        self.assertEqual(params.mu_minus, -0.32)
         self.assertEqual(params.base, 3)
 
     def test_custom_initialization(self):
@@ -27,7 +27,7 @@ class SIDBSimulationParametersTest(unittest.TestCase):
         self.assertEqual(params.lat_c, 2.8)
         self.assertEqual(params.epsilon_r, 7.1)
         self.assertEqual(params.lambda_tf, 10.0)
-        self.assertEqual(params.mu, -0.4)
+        self.assertEqual(params.mu_minus, -0.4)
         self.assertEqual(params.base, 2)
 
 

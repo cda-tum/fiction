@@ -34,7 +34,7 @@ class TestChargeDistributionSurface(unittest.TestCase):
 
         self.assertNotEqual(charge_lyt.get_system_energy(), 0)
 
-        charge_lyt.set_system_energy_to_zero()
+        charge_lyt.assign_system_energy_to_zero()
 
         self.assertEqual(charge_lyt.get_system_energy(), 0)
 
