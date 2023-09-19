@@ -32,8 +32,7 @@
 namespace fiction
 {
 /**
- * This struct contains parameters and settings used by the *Automatic Exhaustive
- * Gate Designer*. It is used to configure the simulation and design of SiDB gates.
+ * This struct contains parameters and settings to design SiDB gates.
  *
  */
 struct design_sidb_gates
