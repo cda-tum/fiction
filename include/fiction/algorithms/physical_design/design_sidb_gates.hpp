@@ -316,8 +316,8 @@ class design_sidb_gates_impl
 
 /**
  * The *SiDB Gate Designer* designs SiDB gate implementations based on a specified Boolean function, a
- * skeleton structure, canvas size, and a predetermined number of canvas SiDBs. It comes in two flavors:
- * `exhaustive` and `random` design.
+ * skeleton structure, canvas size, and a predetermined number of canvas SiDBs. Two different design modes are
+ * implemented: `exhaustive` and `random design.
  *
  * The `exhaustive design` is composed of three steps:
  * 1. In the initial step, all possible distributions of `number_of_sidbs` SiDBs within a given canvas are
