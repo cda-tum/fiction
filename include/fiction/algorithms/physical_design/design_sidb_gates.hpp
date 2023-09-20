@@ -338,7 +338,7 @@ class design_sidb_gates_impl
  * @tparam TT The type of the truth table specifying the gate behavior.
  * @param skeleton The skeleton layout used as a starting point for gate design.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param params Parameters for the *Automatic Exhaustive Gate Designer*.
+ * @param params Parameters for the *SiDB Gate Designer*.
  * @return A vector of designed SiDB gate layouts.
  */
 template <typename Lyt, typename TT>

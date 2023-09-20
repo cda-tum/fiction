@@ -192,7 +192,7 @@ class critical_temperature_impl
                 detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params);
 
             // number of different input combinations
-            for (auto i = 0u; i < tt.front().num_bits(); ++i, ++bii)
+            for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
             {
                 // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
                 if (can_positive_charges_occur(*bii, params.simulation_params.phys_params))
@@ -216,7 +216,7 @@ class critical_temperature_impl
                 // A label that indicates whether the state still fulfills the logic.
                 sidb_energy_and_state_type energy_state_type{};
                 energy_state_type = calculate_energy_and_state_type(distribution, sim_result.charge_distributions,
-                                                                    output_bdl_pairs, tt, i);
+                                                                    output_bdl_pairs, spec, i);
 
                 const auto min_energy = energy_state_type.cbegin()->first;
 

@@ -52,7 +52,7 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     assert(!output_bdl_pairs.empty() && "No output cell provided.");
-    assert((truth_table.size() == output_bdl_pairs.size()) &&
+    assert((spec.size() == output_bdl_pairs.size()) &&
            "Number of truth tables and output BDL pairs does not match");
 
     sidb_energy_and_state_type energy_and_state_type{};
@@ -71,7 +71,7 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
                 for (auto i = 0u; i < output_bdl_pairs.size(); i++)
                 {
                     if (static_cast<bool>(-charge_state_to_sign(valid_layout.get_charge_state(
-                            output_bdl_pairs[i].lower))) != kitty::get_bit(truth_table[i], input_index))
+                            output_bdl_pairs[i].lower))) != kitty::get_bit(spec[i], input_index))
                     {
                         correct_output = false;
                     }
