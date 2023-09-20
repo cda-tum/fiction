@@ -52,8 +52,7 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     assert(!output_bdl_pairs.empty() && "No output cell provided.");
-    assert((spec.size() == output_bdl_pairs.size()) &&
-           "Number of truth tables and output BDL pairs does not match");
+    assert((spec.size() == output_bdl_pairs.size()) && "Number of truth tables and output BDL pairs does not match");
 
     sidb_energy_and_state_type energy_and_state_type{};
 
