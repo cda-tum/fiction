@@ -44,6 +44,10 @@ Truth Table Utils
 .. doxygenfunction:: fiction::create_xor_tt
 .. doxygenfunction:: fiction::create_xnor_tt
 .. doxygenfunction:: fiction::create_maj_tt
+.. doxygenfunction:: fiction::create_double_wire_tt
+.. doxygenfunction:: fiction::create_crossing_wire_tt
+.. doxygenfunction:: fiction::create_fan_out_tt
+.. doxygenfunction:: fiction::create_half_adder_tt
 
 
 Layout Utils
@@ -58,6 +62,8 @@ Layout Utils
 .. doxygenfunction:: fiction::convert_to_siqad_coordinates
 .. doxygenfunction:: fiction::convert_to_fiction_coordinates
 .. doxygenfunction:: fiction::random_coordinate
+.. doxygenfunction:: fiction::all_sidbs_in_spanned_area
+
 
 Placement Utils
 ---------------
@@ -180,6 +186,16 @@ Hashing
 This header defines implementations for ``std::hash`` for several data types.
 
 .. doxygenfunction:: fiction::hash_combine
+
+
+Math Utils
+----------
+
+**Header:** ``fiction/utils/math_utils.hpp``
+
+.. doxygenfunction:: fiction::round_to_n_decimal_places
+.. doxygenfunction:: fiction::integral_abs
+.. doxygenfunction:: fiction::binomial_coefficient
 
 
 `phmap`

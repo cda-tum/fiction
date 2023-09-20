@@ -9,7 +9,7 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("One BDL pair with one perturber", "[can_positive_charges_occur]",
+TEMPLATE_TEST_CASE("One BDL pair with one perturber", "[can-positive-charges-occur]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -37,7 +37,7 @@ TEMPLATE_TEST_CASE("One BDL pair with one perturber", "[can_positive_charges_occ
     }
 }
 
-TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01", "[can_positive_charges_occur]",
+TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01", "[can-positive-charges-occur]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};

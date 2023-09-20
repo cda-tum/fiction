@@ -10,7 +10,7 @@
 
 using namespace fiction;
 
-TEST_CASE("occupation probability of all erroneous charge distribution states", "[occupation_probability_erroneous]")
+TEST_CASE("occupation probability of all erroneous charge distribution states", "[occupation-probability-erroneous]")
 {
     SECTION("empty energy distribution")
     {

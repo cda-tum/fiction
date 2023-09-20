@@ -8,6 +8,7 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
 using namespace fiction;
@@ -334,5 +335,63 @@ TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]")
         CHECK(randomly_generated_coordinate.y == -1);
         CHECK(randomly_generated_coordinate.z >= 0);
         CHECK(randomly_generated_coordinate.z <= 1);
+    }
+}
+
+TEST_CASE("Generate all cells in area spanned by two cells", "[layout-utils]")
+{
+    SECTION("two identical cells")
+    {
+        const auto all_area_cells = all_sidbs_in_spanned_area({-10, -5, 0}, {-10, -5, 0});
+        REQUIRE(all_area_cells.size() == 1);
+        const auto first_cell = all_area_cells.front();
+        CHECK(first_cell.x == -10);
+        CHECK(first_cell.y == -5);
+        CHECK(first_cell.z == 0);
+    }
+
+    SECTION("two cells at the same y and z coordinate ")
+    {
+        const auto all_area_cells = all_sidbs_in_spanned_area({-10, -5, 0}, {10, -5, 0});
+        REQUIRE(all_area_cells.size() == 21);
+        const auto first_cell = all_area_cells.front();
+        CHECK(first_cell.x == -10);
+        CHECK(first_cell.y == -5);
+        CHECK(first_cell.z == 0);
+
+        const auto final_cell = all_area_cells.back();
+        CHECK(final_cell.x == 10);
+        CHECK(final_cell.y == -5);
+        CHECK(final_cell.z == 0);
+    }
+
+    SECTION("two cells at the same y coordinate ")
+    {
+        const auto all_area_cells = all_sidbs_in_spanned_area({-10, 5, 0}, {10, 5, 1});
+        REQUIRE(all_area_cells.size() == 42);
+        const auto first_cell = all_area_cells.front();
+        CHECK(first_cell.x == -10);
+        CHECK(first_cell.y == 5);
+        CHECK(first_cell.z == 0);
+
+        const auto final_cell = all_area_cells.back();
+        CHECK(final_cell.x == 10);
+        CHECK(final_cell.y == 5);
+        CHECK(final_cell.z == 1);
+    }
+
+    SECTION("two cells at the same x coordinate ")
+    {
+        const auto all_area_cells = all_sidbs_in_spanned_area({10, 2, 0}, {10, 5, 1});
+        REQUIRE(all_area_cells.size() == 8);
+        const auto first_cell = all_area_cells.front();
+        CHECK(first_cell.x == 10);
+        CHECK(first_cell.y == 2);
+        CHECK(first_cell.z == 0);
+
+        const auto final_cell = all_area_cells.back();
+        CHECK(final_cell.x == 10);
+        CHECK(final_cell.y == 5);
+        CHECK(final_cell.z == 1);
     }
 }

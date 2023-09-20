@@ -14,7 +14,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Random cube::coord_t layout generation", "[generate_random_sidb_layout]")
+TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layout]")
 {
     using cube_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
 
@@ -202,7 +202,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate_random_sidb_layou
     }
 }
 
-TEST_CASE("Random offset::ucoord_t layout generation", "[generate_random_sidb_layout]")
+TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-layout]")
 {
     SECTION("empty parameters")
     {
