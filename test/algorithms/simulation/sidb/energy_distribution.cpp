@@ -25,7 +25,7 @@ TEMPLATE_TEST_CASE(
     {
         TestType                                           lyt{{10, 10}};
         std::vector<charge_distribution_surface<TestType>> all_lyts{};
-        const charge_distribution_surface                        charge_layout{lyt};
+        const charge_distribution_surface                  charge_layout{lyt};
         all_lyts.push_back(charge_layout);
         auto result = energy_distribution(all_lyts);
         CHECK(result.size() == 1);
