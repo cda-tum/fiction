@@ -29,12 +29,12 @@ using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
  * This function takes in an SiDB energy distribution. For each charge distribution, the state type is determined (i.e.
  * erroneous, transparent).
  *
- * @tparam Lyt SiDB cell-level layout type (representing a gate).
+ * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT The type of the truth table specifying the gate behavior.
  * @param energy_distribution Energy distribution.
  * @param valid_charge_distributions Physically valid charge distributions.
  * @param output_bdl_pairs Output BDL pairs.
- * @param truth_table Expected Boolean function of the layout given as a multi-output truth table.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param input_index The index of the current input configuration.
  * @return Electrostatic potential energy of all charge distributions with state type.
  */
@@ -42,7 +42,7 @@ template <typename Lyt, typename TT>
 [[nodiscard]] sidb_energy_and_state_type
 calculate_energy_and_state_type(const sidb_energy_distribution&                      energy_distribution,
                                 const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions,
-                                const std::vector<bdl_pair<Lyt>>& output_bdl_pairs, const std::vector<TT>& truth_table,
+                                const std::vector<bdl_pair<Lyt>>& output_bdl_pairs, const std::vector<TT>& spec,
                                 const uint64_t input_index) noexcept
 
 {

@@ -117,6 +117,8 @@ Time-to-Solution (TTS) Statistics
 
 .. doxygenstruct:: fiction::time_to_solution_params
    :members:
+.. doxygenstruct:: fiction::time_to_solution_stats
+   :members:
 .. doxygenfunction:: fiction::time_to_solution
 
 

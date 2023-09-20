@@ -174,11 +174,11 @@ class critical_temperature_impl
      * *Gate-based Critical Temperature* Simulation of a SiDB layout for a given Boolean function.
      *
      * @tparam TT The type of the truth table specifying the gate behavior.
-     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
-     * @return `True` if the simulation succeeds and *Gate-based Critical Temperature* is determined, `false` otherwise.
+     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+     * @return `true` if the simulation succeeds and *Gate-based Critical Temperature* is determined, `false` otherwise.
      */
     template <typename TT>
-    bool gate_based_simulation(const std::vector<TT>& tt) noexcept
+    [[nodiscard]] bool gate_based_simulation(const std::vector<TT>& spec) noexcept
     {
         if (layout.is_empty())
         {
@@ -242,9 +242,7 @@ class critical_temperature_impl
     /**
      * *Gate-based Critical Temperature* Simulation of a SiDB layout for a given Boolean function.
      *
-     * @tparam TT The type of the truth table specifying the gate behavior.
-     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
-     * @return True if the simulation succeeds and *Critical Temperature* is determined, false otherwise.
+     * @return `true` if the simulation succeeds and the *Critical Temperature* is determined, `false` otherwise.
      */
     bool non_gate_based_simulation() noexcept
     {
