@@ -7,10 +7,12 @@
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
+#include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
+#include "fiction/types.hpp" /**/
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
@@ -18,6 +20,7 @@
 #include <kitty/dynamic_truth_table.hpp>
 
 #include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -38,6 +41,21 @@ namespace fiction
  */
 struct design_sidb_gates_params
 {
+    /**
+     * Selector for the available design approaches.
+     */
+    enum class design_mode
+    {
+        /**
+         * All (exhaustive) gate layouts are designed.
+         */
+        EXHAUSTIVE,
+        /**
+         * Gate layouts designed randomly.
+         */
+        RANDOM
+    };
+    design_mode design_mode = design_mode::EXHAUSTIVE;
     /**
      * All Parameters for physical SiDB simulations.
      */
@@ -64,7 +82,7 @@ class design_sidb_gates_impl
 {
   public:
     /**
-     * This constructor initializes an instance of the *Automatic Exhaustive Gate Designer*
+     * This constructor initializes an instance of the *SiDB Gate Designer*
      * implementation with the provided skeleton layout and configuration parameters.
      *
      * @param skeleton The skeleton layout used as a basis for gate design.
@@ -78,14 +96,14 @@ class design_sidb_gates_impl
             all_sidbs_in_cavas{all_sidbs_in_spanned_area(params.canvas.first, params.canvas.second)}
     {}
     /**
-     * Run the exhaustive gate layout design process in parallel.
+     * Design gates exhaustively and in parallel.
      *
      * This function adds each cell combination to the given skeleton, and determines whether the layout is operational
      * based on the specified parameters. The design process is parallelized to improve performance.
      *
-     * @return A vector of found SiDB gate layouts that meet the operational criteria.
+     * @return A vector of designed SiDB gate layouts.
      */
-    [[nodiscard]] std::vector<Lyt> run() noexcept
+    [[nodiscard]] std::vector<Lyt> run_exhaustive_design() noexcept
     {
         const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
 
@@ -132,6 +150,62 @@ class design_sidb_gates_impl
         return designed_gate_layouts;
     }
 
+    /**
+     * Design gates randomly and in parallel.
+     *
+     * This function adds cells randomly to the given skeleton, and determines whether the layout is operational
+     * based on the specified parameters. The design process is parallelized to improve performance.
+     *
+     * @return A vector of designed SiDB gate layouts.
+     */
+    [[nodiscard]] std::vector<Lyt> run_random_design() noexcept
+    {
+        std::vector<Lyt>            randomly_designed_gate_layouts = {};
+        const std::size_t           num_threads                    = std::thread::hardware_concurrency();
+        const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
+
+        const generate_random_sidb_layout_params<Lyt> parameter{
+            params.canvas, params.number_of_sidbs,
+            generate_random_sidb_layout_params<Lyt>::positive_charges::FORBIDDEN};
+
+        std::vector<std::thread> threads{};
+        threads.reserve(num_threads);
+        std::mutex mutex_to_protect_designed_gate_layouts{};  // used to control access to shared resources
+
+        std::atomic<bool> found(false);
+
+        for (uint64_t z = 0u; z < num_threads; z++)
+        {
+            threads.emplace_back(
+                [this, &found, &mutex_to_protect_designed_gate_layouts, &parameter, &params_is_operational,
+                 &randomly_designed_gate_layouts]
+                {
+                    while (!found)
+                    {
+                        const auto result_lyt = generate_random_sidb_layout<Lyt>(skeleton_layout, parameter);
+                        if (const auto [status, sim_calls] =
+                                is_operational(result_lyt, truth_table, params_is_operational);
+                            status == operational_status::OPERATIONAL)
+                        {
+                            {
+                                const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
+                                randomly_designed_gate_layouts.push_back(result_lyt);
+                            }
+                            found = true;
+                            break;
+                        }
+                    }
+                });
+        }
+
+        for (auto& thread : threads)
+        {
+            thread.join();
+        }
+
+        return randomly_designed_gate_layouts;
+    }
+
   private:
     /**
      * The skeleton layout serves as a starting layout to which SiDBs are added to create unique SiDB layouts and, if
@@ -143,13 +217,13 @@ class design_sidb_gates_impl
      */
     std::vector<TT> truth_table;
     /**
-     * Parameters for the *Automatic Exhaustive Gate Designer*.
+     * Parameters for the *SiDB Gate Designer*.
      */
     const design_sidb_gates_params& params;
     /**
      * All cells within the canvas.
      */
-    const std::vector<siqad::coord_t> all_sidbs_in_cavas;
+    const std::vector<fiction::siqad::coord_t> all_sidbs_in_cavas;
     /**
      * Calculates all possible combinations of distributing the given number of SiDBs within a canvas
      * based on the provided parameters. It generates combinations of SiDB indices (representing the cell position in
@@ -240,10 +314,11 @@ class design_sidb_gates_impl
 }  // namespace detail
 
 /**
- * The *Automatic Exhaustive Gate Designer* designs SiDB gate implementations based on a specified Boolean function, a
- * skeleton structure, canvas size, and a predetermined number of canvas SiDBs.
+ * The *SiDB Gate Designer* designs SiDB gate implementations based on a specified Boolean function, a
+ * skeleton structure, canvas size, and a predetermined number of canvas SiDBs. It comes in two flavors:
+ * `exhaustive` and `random` design.
  *
- * It is composed of three steps:
+ * The `exhaustive design` is composed of three steps:
  * 1. In the initial step, all possible distributions of `number_of_sidbs` SiDBs within a given canvas are
  * exhaustively determined. This ensures exhaustive coverage of every potential arrangement of ``number_of_sidbs`` SiDBs
  * across the canvas.
@@ -252,12 +327,18 @@ class design_sidb_gates_impl
  * 3. The generated SiDB layouts then undergo an extensive simulation process. All input combinations possible for the
  * given Boolean function are used to verify if the logic is fulfilled.
  *
+ * The `random design` is composed of four steps:
+ * 1. A specified number of canvas SiDBs (`number_of_sidbs`) are randomly added to the skeleton layout.
+ * 2. The operation status of the layout is simulated based on a given Boolean function (gate logic).
+ * 3. If the layout is `operational`, it is returned as the result, and the process terminates successfully.
+ * 4. If the layout is `non-operational`, the process is repeated from step 1 until an operational layout is found.
+ *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT The type of the truth table specifying the gate behavior.
  * @param skeleton The skeleton layout used as a starting point for gate design.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the *Automatic Exhaustive Gate Designer*.
- * @return A vector of SiDB layouts that fulfill the given Boolean function (truth table).
+ * @return A vector of designed SiDB gate layouts.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::vector<Lyt> design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec,
@@ -278,7 +359,12 @@ template <typename Lyt, typename TT>
 
     detail::design_sidb_gates_impl<Lyt, TT> p{skeleton, spec, params};
 
-    return p.run();
+    if (params.design_mode == design_sidb_gates_params::design_mode::EXHAUSTIVE)
+    {
+        return p.run_exhaustive_design();
+    }
+
+    return p.run_random_design();
 }
 
 }  // namespace fiction

@@ -104,14 +104,7 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
 
     const uint64_t number_of_sidbs_of_final_layout = lyt_skeleton.num_cells() + params.number_of_sidbs;
 
-    Lyt lyt{};
-
-    if (lyt_skeleton.num_cells() != 0)
-    {
-        lyt_skeleton.foreach_cell([&lyt, &lyt_skeleton](const auto& cell)
-                                  { lyt.assign_cell_type(cell, lyt_skeleton.get_cell_type(cell)); });
-    }
-
+    Lyt lyt{lyt_skeleton.clone()};
     // counts the attempts to place the given number of SiDBs
     uint64_t attempt_counter = 0;
 
@@ -133,6 +126,7 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
                     if (euclidean_distance<Lyt>(lyt, c1, random_coord) < params.minimal_spacing)
                     {
                         constraint_violation_positive_sidbs = true;
+                        return false;  // break
                     }
                 });
         }
