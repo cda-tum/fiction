@@ -28,16 +28,34 @@ TEMPLATE_TEST_CASE(
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_column_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_column_hex>>>))
 {
-    SECTION("empty layout")
+    SECTION("No physically valid charge distribution could be found")
     {
         TestType lyt{{10, 10}};
 
+        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_cell_type({6, 1, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_cell_type({8, 1, 0}, sidb_technology::cell_type::OUTPUT);
+
+        critical_temperature_stats<TestType> criticalstats{};
+        const critical_temperature_params    params{critical_temperature_params::simulation_engine::APPROXIMATE,
+                                                 quicksim_params{sidb_simulation_parameters{2, -0.32}, 0, 0.0}, 0.99,
+                                                 350};
+        critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{create_id_tt()}, params, &criticalstats);
+        CHECK(criticalstats.num_valid_lyt == 0);
+        CHECK(criticalstats.critical_temperature == 0.0);
+    }
+
+    SECTION("One SiDB")
+    {
+        TestType lyt{};
+
         critical_temperature_stats<TestType> criticalstats{};
         const critical_temperature_params    params{critical_temperature_params::simulation_engine::EXACT,
-                                                 quicksim_params{sidb_simulation_parameters{2, -0.32}}, 0.99, 350};
-        critical_temperature_non_gate_based<TestType>(lyt, params, &criticalstats);
+                                                 quicksim_params{sidb_simulation_parameters{}}, 0.99, 350};
+        critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{tt{}}, params, &criticalstats);
         CHECK(criticalstats.num_valid_lyt == 0);
-        CHECK(criticalstats.critical_temperature == 350);
+        CHECK(criticalstats.critical_temperature == 0.0);
     }
 
     SECTION("Not working diagonal Wire where positively charged SiDBs can occur")

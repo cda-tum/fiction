@@ -101,7 +101,7 @@ class design_sidb_gates_impl
         {
             if (!are_sidbs_too_close(combination))
             {
-                auto layout_with_added_cells = add_cells_to_layout_based_on_indices(combination);
+                auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
 
                 if (const auto [status, sim_calls] =
                         is_operational(layout_with_added_cells, truth_table, params_is_operational);
@@ -215,17 +215,12 @@ class design_sidb_gates_impl
         return false;
     }
     /**
-     * Add SiDB cells to a SiDB cell-level layout based on a vector of cell indices.
+     * This function adds SiDBs (given by indices) to the skeleton layout that is returned afterwards.
      *
-     * This function creates a copy of the provided layout (`skeleton_layout`) and adds SiDB cells to it based on the
-     * cell indices provided in the `cell_indices` vector. If a cell at a specified index is of type
-     * `sidb_technology::cell_type::EMPTY`, it is replaced with `sidb_technology::cell_type::NORMAL` to represent the
-     * addition of SiDB cells.
-     *
-     * @param cell_indices A vector containing indices of cells in the layout to be added or modified.
+     * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return A copy of the original layout (`skeleton_layout`) with SiDB cells added at specified indices.
      */
-    [[nodiscard]] Lyt add_cells_to_layout_based_on_indices(const std::vector<std::size_t>& cell_indices) noexcept
+    [[nodiscard]] Lyt skeleton_layout_with_canvas_sidbs(const std::vector<std::size_t>& cell_indices) noexcept
     {
         Lyt lyt_copy{skeleton_layout.clone()};
 
