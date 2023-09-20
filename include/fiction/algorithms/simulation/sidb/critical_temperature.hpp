@@ -425,6 +425,7 @@ class critical_temperature_impl
  * \eta \in [0,1] \f$.
  *
  * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT The type of the truth table specifying the gate behavior.
  * @param lyt The layout to simulate.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Simulation and physical parameters.

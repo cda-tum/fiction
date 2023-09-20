@@ -89,11 +89,11 @@ struct time_to_solution_stats
  * @tparam Lyt Cell-level layout type.
  * @param lyt Layout that is used for the simulation.
  * @param quicksim_params Parameters required for the QuickSim algorithm.
- * @param ps Pointer to a struct where the results (time_to_solution, acc, single runtime) are stored.
  * @param tts_params Parameters used for the time-to-solution calculation.
+ * @param ps Pointer to a struct where the results (time_to_solution, acc, single runtime) are stored.
  */
 template <typename Lyt>
-void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to_solution_params& tts_params = {},
+void time_to_solution(Lyt& lyt, const quicksim_params& quicksim_params, const time_to_solution_params& tts_params = {},
                  time_to_solution_stats* ps = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");

@@ -237,7 +237,7 @@ class maximum_defect_influence_position_and_distance_impl
  * defect can still affect the layout's ground state, potentially altering its behavior, such as gate functionality.
  *
  * @param lyt The SiDB cell-level layout for which the influence distance is being determined.
- * @param params Parameters used to calculate the defect's maximum influence distance.
+ * @param sim_params Parameters used to calculate the defect's maximum influence distance.
  * @return Pair with the first element describing the position with maximum distance to the layout where a placed defect
  * can still affect the ground state of the layout. The second entry describes the distance of the defect from the
  * layout.

@@ -30,16 +30,18 @@ using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
  * erroneous, transparent).
  *
  * @tparam Lyt SiDB cell-level layout type (representing a gate).
+ * @tparam TT The type of the truth table specifying the gate behavior.
  * @param energy_distribution Energy distribution.
- * @param output_bdl_pairs Vector of BDL pairs from which the output is read.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param input_bit The index of the current input configuration.
- * @return sidb_energy_and_state_type Electrostatic potential energy of all charge distributions with state type.
+ * @param valid_charge_distributions Physically valid charge distributions.
+ * @param output_bdl_pairs Output BDL pairs.
+ * @param truth_table Expected Boolean function of the layout given as a multi-output truth table.
+ * @param input_index The index of the current input configuration.
+ * @return Electrostatic potential energy of all charge distributions with state type.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] sidb_energy_and_state_type
 calculate_energy_and_state_type(const sidb_energy_distribution&                      energy_distribution,
-                                const std::vector<charge_distribution_surface<Lyt>>& valid_lyts,
+                                const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions,
                                 const std::vector<bdl_pair<Lyt>>& output_bdl_pairs, const std::vector<TT>& truth_table,
                                 const uint64_t input_index) noexcept
 
@@ -59,7 +61,7 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
     {
         // round the energy value to six decimal places to overcome potential rounding errors.
         const auto energy_value = round_to_n_decimal_places(energy, 6);
-        for (const auto& valid_layout : valid_lyts)
+        for (const auto& valid_layout : valid_charge_distributions)
         {
             // round the energy value of the given valid_layout to six decimal places to overcome possible rounding
             // errors and to provide comparability with the energy_value from before.

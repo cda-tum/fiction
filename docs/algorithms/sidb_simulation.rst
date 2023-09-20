@@ -117,7 +117,7 @@ Time-to-Solution (TTS) Statistics
 
 .. doxygenstruct:: fiction::time_to_solution_params
    :members:
-.. doxygenfunction:: fiction::sim_acc_tts
+.. doxygenfunction:: fiction::time_to_solution
 
 
 Random SiDB Layout Generator
