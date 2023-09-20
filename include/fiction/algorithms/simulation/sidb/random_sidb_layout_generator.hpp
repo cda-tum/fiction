@@ -125,7 +125,7 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
 
         if (params.positive_sidbs == generate_random_sidb_layout_params<Lyt>::positive_charges::FORBIDDEN)
         {
-            // checks if the new coordinate is not closer than 2 cells (Euclidean distance) from an already
+            // checks if the new coordinate is not closer than 2 cells (Euclidean distance) to an already
             // placed SiDB
             lyt.foreach_cell(
                 [&lyt, &random_coord, &constraint_violation_positive_sidbs, &params](const auto& c1)

@@ -46,7 +46,7 @@ struct time_to_solution_params
 
 /**
  * This struct stores the time-to-solution, the simulation accuracy and the average single simulation runtime of
- * *QuickSim* (see quicksim.hpp), the single runtime of the exact simulator used, and the number of valid charge
+ * *QuickSim* quicksim, the single runtime of the exact simulator used, and the number of valid charge
  * configurations found by the exact algorithm.
  *
  */
@@ -88,7 +88,7 @@ struct time_to_solution_stats
  *
  * @tparam Lyt Cell-level layout type.
  * @param lyt Layout that is used for the simulation.
- * @param quicksim_params Parameters required for the QuickSim algorithm.
+ * @param quicksim_params Parameters required for the *QuickSim* algorithm.
  * @param ps Pointer to a struct where the results (time_to_solution, acc, single runtime) are stored.
  * @param tts_params Parameters used for the time-to-solution calculation.
  */
@@ -103,9 +103,9 @@ void sim_acc_tts(Lyt& lyt, const quicksim_params& quicksim_params, const time_to
     time_to_solution_stats st{};
 
     sidb_simulation_result<Lyt> simulation_result{};
-    if (tts_params.engine == exhaustive_sidb_simulation_engine::EXGS)
+    if (tts_params.engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
     {
-        st.algorithm      = "ExGS";
+        st.algorithm      = "QuickExact";
         simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
     }
     else

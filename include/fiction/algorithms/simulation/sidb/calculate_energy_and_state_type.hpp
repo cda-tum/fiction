@@ -20,7 +20,7 @@ namespace fiction
 
 /**
  *  Data type to collect electrostatic potential energies (in eV) of charge distributions with corresponding state types
- * (i.e., true = transparent, false = erroneous).
+ * (i.e., `true` = transparent, `false` = erroneous).
  */
 using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
 
@@ -31,7 +31,8 @@ using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
  * @tparam Lyt SiDB cell-level layout type (representing a gate).
  * @param energy_distribution Energy distribution.
  * @param output_cells SiDBs in the layout from which the output is read.
- * @param output_bits Truth table entry for a given input (e.g. 0 for AND (00 as input) or 1 for a wire (input 1)).
+ * @param output_bits Truth table entry for a given input (e.g. `0` for AND (`00` as input) or `1` for a wire (input
+ * `1`)).
  * @return sidb_energy_and_state_type Electrostatic potential energy of all charge distributions with state type.
  */
 template <typename Lyt>
