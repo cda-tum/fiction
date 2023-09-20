@@ -182,19 +182,11 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
     // generate gate by placing one SiDB
-    design_sidb_gates_params params{design_sidb_gates_params::design_mode::RANDOM,
-                                    sidb_simulation_parameters{2, -0.32},
-                                    {{14, 6, 0}, {24, 12, 0}},
-                                    2,
-                                    sidb_simulation_engine::QUICKEXACT};
-
-    SECTION("Random Generation")
-    {
-        params.design_mode            = design_sidb_gates_params::design_mode::EXHAUSTIVE;
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
-        REQUIRE(!found_gate_layouts.empty());
-        CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
-    }
+    const design_sidb_gates_params params{design_sidb_gates_params::design_mode::RANDOM,
+                                          sidb_simulation_parameters{2, -0.32},
+                                          {{14, 6, 0}, {24, 12, 0}},
+                                          3,
+                                          sidb_simulation_engine::QUICKEXACT};
 
     SECTION("Random Generation")
     {

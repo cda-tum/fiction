@@ -126,7 +126,6 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
                     if (euclidean_distance<Lyt>(lyt, c1, random_coord) < params.minimal_spacing)
                     {
                         constraint_violation_positive_sidbs = true;
-                        return false;  // break
                     }
                 });
         }

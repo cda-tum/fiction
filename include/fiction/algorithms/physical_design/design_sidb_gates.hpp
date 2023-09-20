@@ -160,14 +160,15 @@ class design_sidb_gates_impl
      */
     [[nodiscard]] std::vector<Lyt> run_random_design() noexcept
     {
-        std::vector<Lyt>            randomly_designed_gate_layouts = {};
-        const std::size_t           num_threads                    = std::thread::hardware_concurrency();
+        std::vector<Lyt> randomly_designed_gate_layouts = {};
+
         const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
 
         const generate_random_sidb_layout_params<Lyt> parameter{
             params.canvas, params.number_of_sidbs,
             generate_random_sidb_layout_params<Lyt>::positive_charges::FORBIDDEN};
 
+        const std::size_t        num_threads = std::thread::hardware_concurrency();
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
         std::mutex mutex_to_protect_designed_gate_layouts{};  // used to control access to shared resources
