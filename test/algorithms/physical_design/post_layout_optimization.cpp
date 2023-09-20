@@ -34,6 +34,8 @@ void check_mapping_equiv(const Ntk& ntk)
     post_layout_optimization<Lyt>(layout, &stats);
 
     check_eq(ntk, layout);
+
+    CHECK(mockturtle::to_seconds(stats.time_total) > 0);
 }
 
 template <typename Lyt>

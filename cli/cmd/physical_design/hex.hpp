@@ -62,7 +62,7 @@ class hex_command : public command
 
             if constexpr (fiction::is_cartesian_layout_v<Lyt>)
             {
-                return fiction::hexagonalization(*lyt_ptr);
+                return fiction::hexagonalization<fiction::hex_even_row_gate_clk_lyt>(*lyt_ptr);
             }
             else
             {
