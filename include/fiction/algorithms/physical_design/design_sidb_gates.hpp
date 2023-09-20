@@ -12,7 +12,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp" /**/
+#include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
@@ -44,18 +44,18 @@ struct design_sidb_gates_params
     /**
      * Selector for the available design approaches.
      */
-    enum class design_mode
+    enum class design_sidb_gates_mode
     {
         /**
          * All (exhaustive) gate layouts are designed.
          */
         EXHAUSTIVE,
         /**
-         * Gate layouts designed randomly.
+         * Gate layouts are designed randomly.
          */
         RANDOM
     };
-    design_mode design_mode = design_mode::EXHAUSTIVE;
+    design_sidb_gates_mode design_mode = design_sidb_gates_mode::EXHAUSTIVE;
     /**
      * All Parameters for physical SiDB simulations.
      */
@@ -173,26 +173,24 @@ class design_sidb_gates_impl
         threads.reserve(num_threads);
         std::mutex mutex_to_protect_designed_gate_layouts{};  // used to control access to shared resources
 
-        std::atomic<bool> found(false);
+        std::atomic<bool> gate_layout_is_found(false);
 
         for (uint64_t z = 0u; z < num_threads; z++)
         {
             threads.emplace_back(
-                [this, &found, &mutex_to_protect_designed_gate_layouts, &parameter, &params_is_operational,
-                 &randomly_designed_gate_layouts]
+                [this, &gate_layout_is_found, &mutex_to_protect_designed_gate_layouts, &parameter,
+                 &params_is_operational, &randomly_designed_gate_layouts]
                 {
-                    while (!found)
+                    while (!gate_layout_is_found)
                     {
                         const auto result_lyt = generate_random_sidb_layout<Lyt>(skeleton_layout, parameter);
                         if (const auto [status, sim_calls] =
                                 is_operational(result_lyt, truth_table, params_is_operational);
                             status == operational_status::OPERATIONAL)
                         {
-                            {
-                                const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
-                                randomly_designed_gate_layouts.push_back(result_lyt);
-                            }
-                            found = true;
+                            const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
+                            randomly_designed_gate_layouts.push_back(result_lyt);
+                            gate_layout_is_found = true;
                             break;
                         }
                     }
@@ -317,7 +315,7 @@ class design_sidb_gates_impl
 /**
  * The *SiDB Gate Designer* designs SiDB gate implementations based on a specified Boolean function, a
  * skeleton structure, canvas size, and a predetermined number of canvas SiDBs. Two different design modes are
- * implemented: `exhaustive` and `random design.
+ * implemented: `exhaustive` and `random design`.
  *
  * The `exhaustive design` is composed of three steps:
  * 1. In the initial step, all possible distributions of `number_of_sidbs` SiDBs within a given canvas are
@@ -330,9 +328,9 @@ class design_sidb_gates_impl
  *
  * The `random design` is composed of four steps:
  * 1. A specified number of canvas SiDBs (`number_of_sidbs`) are randomly added to the skeleton layout.
- * 2. The operation status of the layout is simulated based on a given Boolean function (gate logic).
+ * 2. The operation status of the layout is simulated based on a given Boolean function.
  * 3. If the layout is `operational`, it is returned as the result, and the process terminates successfully.
- * 4. If the layout is `non-operational`, the process is repeated from step 1 until an operational layout is found.
+ * 4. If the layout is `non-operational`, the process is repeated from step a.) until an operational layout is found.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT The type of the truth table specifying the gate behavior.
@@ -360,7 +358,7 @@ template <typename Lyt, typename TT>
 
     detail::design_sidb_gates_impl<Lyt, TT> p{skeleton, spec, params};
 
-    if (params.design_mode == design_sidb_gates_params::design_mode::EXHAUSTIVE)
+    if (params.design_sidb_gates_mode == design_sidb_gates_params::design_sidb_gates_mode::EXHAUSTIVE)
     {
         return p.run_exhaustive_design();
     }
