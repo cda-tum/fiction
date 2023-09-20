@@ -47,7 +47,7 @@ struct design_sidb_gates_params
     enum class design_sidb_gates_mode
     {
         /**
-         * All (exhaustive) gate layouts are designed.
+         * All gate layouts are designed exhaustively.
          */
         EXHAUSTIVE,
         /**
@@ -56,13 +56,13 @@ struct design_sidb_gates_params
         RANDOM
     };
     /**
-     * Selected design mode.
-     */
-    design_sidb_gates_mode design_mode = design_sidb_gates_mode::EXHAUSTIVE;
-    /**
      * All Parameters for physical SiDB simulations.
      */
     sidb_simulation_parameters phys_params{};
+    /**
+     * Gate design mode.
+     */
+    design_sidb_gates_mode design_mode = design_sidb_gates_mode::EXHAUSTIVE;
     /**
      * Canvas spanned by the northwest and southeast cell.
      */
@@ -70,7 +70,7 @@ struct design_sidb_gates_params
     /**
      * Number of SiDBs placed in the canvas to create a working gate.
      */
-    std::size_t number_of_sidbs = 0;
+    std::size_t number_of_sidbs = 1;
     /**
      * The simulation engine to be used for the operational domain computation.
      */
@@ -333,7 +333,8 @@ class design_sidb_gates_impl
  * 1. A specified number of canvas SiDBs (`number_of_sidbs`) are randomly added to the skeleton layout.
  * 2. The operation status of the layout is simulated based on a given Boolean function.
  * 3. If the layout is `operational`, it is returned as the result, and the process terminates successfully.
- * 4. If the layout is `non-operational`, the process is repeated from step a.) until an operational layout is found.
+ * 4. If the layout is `non-operational`, the process is repeated from the first step until an operational layout is
+ * found.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT The type of the truth table specifying the gate behavior.

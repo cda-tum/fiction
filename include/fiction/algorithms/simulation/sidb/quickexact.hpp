@@ -45,7 +45,6 @@ struct quickexact_params
          */
         OFF
     };
-
     /**
      * All parameters for physical SiDB simulations.
      */

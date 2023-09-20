@@ -82,13 +82,13 @@ struct critical_temperature_params
         APPROXIMATE
     };
     /**
-     * Simulation mode to determine the *Critical Temperature*.
-     */
-    simulation_engine engine = simulation_engine::EXACT;
-    /**
      * All Parameters for physical SiDB simulations.
      */
     quicksim_params simulation_params{};
+    /**
+     * Simulation mode to determine the *Critical Temperature*.
+     */
+    simulation_engine engine = simulation_engine::EXACT;
     /**
      * Probability that the ground state is less populated due to temperature. For gate-based simulation, this is the
      * probability of erroneous calculations of the gate.
