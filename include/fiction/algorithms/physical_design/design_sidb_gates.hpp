@@ -55,6 +55,9 @@ struct design_sidb_gates_params
          */
         RANDOM
     };
+    /**
+     * Selected design mode.
+     */
     design_sidb_gates_mode design_mode = design_sidb_gates_mode::EXHAUSTIVE;
     /**
      * All Parameters for physical SiDB simulations.
@@ -358,7 +361,7 @@ template <typename Lyt, typename TT>
 
     detail::design_sidb_gates_impl<Lyt, TT> p{skeleton, spec, params};
 
-    if (params.design_sidb_gates_mode == design_sidb_gates_params::design_sidb_gates_mode::EXHAUSTIVE)
+    if (params.design_mode == design_sidb_gates_params::design_sidb_gates_mode::EXHAUSTIVE)
     {
         return p.run_exhaustive_design();
     }

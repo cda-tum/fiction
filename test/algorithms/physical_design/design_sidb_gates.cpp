@@ -92,7 +92,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
 
     SECTION("Random Generation")
     {
-        params.design_sidb_gates_mode = design_sidb_gates_params::design_sidb_gates_mode::RANDOM;
+        params.design_mode            = design_sidb_gates_params::design_sidb_gates_mode::RANDOM;
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
         CHECK(!found_gate_layouts.empty());
     }
