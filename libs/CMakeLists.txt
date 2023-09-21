@@ -12,7 +12,7 @@ set(MOCKTURTLE_EXPERIMENTS OFF CACHE BOOL "" FORCE)
 set(MOCKTURTLE_TEST OFF CACHE BOOL "" FORCE)
 check_if_present(mockturtle)
 add_subdirectory(mockturtle)
-target_link_libraries(libfiction INTERFACE mockturtle)
+target_link_system_libraries(libfiction INTERFACE mockturtle)
 
 # Include Catch2
 if (FICTION_TEST)
