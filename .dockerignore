@@ -1,0 +1,12 @@
+.directory
+.idea/
+cmake-build-*
+build/
+*.aux
+*.log
+*.pdf
+*.synctex.gz
+/.vs
+*.json
+__pycache__
+lcov.info
