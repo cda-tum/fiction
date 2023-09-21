@@ -1,8 +1,16 @@
 # Uses ycm (permissive BSD-3-Clause license) and ForwardArguments (permissive MIT license)
 
 function(fiction_package_project)
-    cmake_policy(SET CMP0103 NEW) # disallow multiple calls with the same NAME
-    cmake_policy(SET CMP0135 NEW) # enable new timestamp checking behavior for fetching content
+
+    # if CMake version >= 3.18
+    if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.18")
+        cmake_policy(SET CMP0103 NEW) # disallow multiple calls with the same NAME
+    endif ()
+
+    # if CMake version >= 3.23
+    if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.23")
+        cmake_policy(SET CMP0135 NEW) # enable new timestamp checking behavior for fetching content
+    endif ()
 
     set(_options ARCH_INDEPENDENT # default to false
     )
