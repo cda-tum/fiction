@@ -44,7 +44,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
     const design_sidb_gates_params params{sidb_simulation_parameters{2, -0.32},
                                           design_sidb_gates_params::design_sidb_gates_mode::EXHAUSTIVE,
-                                          {{10, 4, 0}, {10, 5, 1}},
+                                          {{10, 4, 0}, {10, 4, 0}},
                                           1,
                                           sidb_simulation_engine::QUICKEXACT};
 
@@ -134,20 +134,45 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    CHECK(lyt.get_cell_type({17, 11, 0}) == layout::technology::EMPTY);
-
-    // generate gate by placing one SiDB
     const design_sidb_gates_params params{sidb_simulation_parameters{2, -0.32},
                                           design_sidb_gates_params::design_sidb_gates_mode::EXHAUSTIVE,
                                           {{17, 11, 0}, {17, 11, 0}},
                                           1,
                                           sidb_simulation_engine::QUICKEXACT};
 
-    const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_fan_out_tt()}, params);
+    SECTION("generate original fo2")
+    {
+        CHECK(lyt.get_cell_type({17, 11, 0}) == layout::technology::EMPTY);
 
-    REQUIRE(found_gate_layouts.size() == 1);
-    CHECK(found_gate_layouts[0].num_cells() == 21);
-    CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == layout::technology::NORMAL);
+        // generate gate by placing one SiDB
+
+        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_fan_out_tt()}, params);
+
+        REQUIRE(found_gate_layouts.size() == 1);
+        CHECK(found_gate_layouts[0].num_cells() == 21);
+        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == layout::technology::NORMAL);
+    }
+
+    SECTION("replace the output perturbers by equivalent negatively charged defects")
+    {
+        sidb_defect_cell_clk_lyt_siqad defect_layout{lyt};
+        defect_layout.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::EMPTY);
+        defect_layout.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::EMPTY);
+        CHECK(defect_layout.get_cell_type({36, 19, 0}) == layout::technology::EMPTY);
+        CHECK(defect_layout.get_cell_type({2, 19, 0}) == layout::technology::EMPTY);
+
+        defect_layout.assign_sidb_defect(
+            {36, 19, 0},
+            sidb_defect{sidb_defect_type::DB, -1, params.phys_params.epsilon_r, params.phys_params.lambda_tf});
+        defect_layout.assign_sidb_defect({2, 19, 0}, sidb_defect{sidb_defect_type::DB, -1, params.phys_params.epsilon_r,
+                                                                 params.phys_params.lambda_tf});
+
+        const auto found_gate_layouts = design_sidb_gates(defect_layout, std::vector<tt>{create_fan_out_tt()}, params);
+
+        REQUIRE(found_gate_layouts.size() == 1);
+        CHECK(found_gate_layouts[0].num_cells() == 19);
+        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == layout::technology::NORMAL);
+    }
 }
 
 TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
@@ -193,5 +218,29 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
+    }
+
+    SECTION("Random Generation with defects")
+    {
+        sidb_defect_cell_clk_lyt_siqad defect_layout{lyt};
+
+        defect_layout.assign_sidb_defect(
+            {15, 10, 0},
+            sidb_defect{sidb_defect_type::DB, -1, params.phys_params.epsilon_r, params.phys_params.lambda_tf});
+        defect_layout.assign_sidb_defect(
+            {20, 12, 0},
+            sidb_defect{sidb_defect_type::DB, -1, params.phys_params.epsilon_r, params.phys_params.lambda_tf});
+
+        const auto found_gate_layouts = design_sidb_gates(defect_layout, std::vector<tt>{create_and_tt()}, params);
+        REQUIRE(!found_gate_layouts.empty());
+        CHECK(found_gate_layouts.front().num_defects() == 2);
+        CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
+
+        found_gate_layouts.front().foreach_cell(
+            [](const auto& cell)
+            {
+                CHECK(cell != siqad::coord_t{15, 10, 0});
+                CHECK(cell != siqad::coord_t{20, 12, 0});
+            });
     }
 }

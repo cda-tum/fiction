@@ -106,6 +106,18 @@ class sidb_surface<Lyt, false> : public Lyt
         assert(strg->params.ignore.count(sidb_defect_type::NONE) == 0 && "The defect type 'NONE' cannot be ignored");
     }
     /**
+     * Clones the layout returning a deep copy.
+     *
+     * @return Deep copy of the layout.
+     */
+    [[nodiscard]] sidb_surface clone() const noexcept
+    {
+        sidb_surface copy{Lyt::clone()};
+        copy.strg = std::make_shared<sidb_surface_storage>(*strg);
+
+        return copy;
+    }
+    /**
      * Assigns a given defect type to the given coordinate.
      *
      * @param c Coordinate to assign defect d to.
